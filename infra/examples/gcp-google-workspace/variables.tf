@@ -132,11 +132,11 @@ variable "custom_bulk_connectors" {
     source_kind = string
     rules = object({
       pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
-      columnsToRedact       = optional(list(string))
-      columnsToInclude      = optional(list(string))
-      columnsToPseudonymize = optional(list(string))
-      columnsToDuplicate    = optional(map(string))
-      columnsToRename       = optional(map(string))
+      columnsToRedact       = optional(list(string)) # columns to remove from CSV
+      columnsToInclude      = optional(list(string)) # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
+      columnsToPseudonymize = optional(list(string)) # columns to pseudonymize
+      columnsToDuplicate    = optional(map(string))  # columns to create copy of; name --> new name
+      columnsToRename       = optional(map(string))  # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
     })
     settings_to_provide = optional(map(string), {})
   }))
@@ -196,4 +196,44 @@ variable "example_jira_issue_id" {
   type        = string
   default     = null
   description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
+}
+
+variable "github_installation_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Github connector) InstallationId of the application in your org for authentication with the proxy instance (ex: 123456)"
+}
+
+variable "github_organization" {
+  type        = string
+  default     = null
+  description = "(Only required if using Github connector) Name of the organization to be used as part of example calls for Github (ex: Worklytics)"
+}
+
+variable "github_example_repository" {
+  type        = string
+  default     = null
+  description = "(Only required if using Github connector) Name for the repository to be used as part of example calls for Github (ex: psoxy)"
+}
+
+variable "deployment_bundle" {
+  type        = string
+  description = "path to deployment bundle to use (if not provided, will build one). Can be GCS url, eg 'gs://artifacts-bucket/psoxy-0.4.28.zip'."
+  default     = null
+
+  validation {
+    condition     = var.deployment_bundle == null || var.deployment_bundle != ""
+    error_message = "`deployment_bundle`, if non-null, must be non-empty string."
+  }
+}
+
+locals {
+  # tflint-ignore: terraform_unused_declarations
+  validate_salesforce_domain         = (var.salesforce_domain == null || var.salesforce_domain == "" || can(regex(":|\\/", try(var.salesforce_domain, "")))) && contains(var.enabled_connectors, "salesforce")
+  validate_salesforce_domain_message = "The salesforce_domain var should be populated and to be with only the domain (without protocol or query paths) itself if enabled."
+  validate_salesforce_domain_check = regex(
+    "^${local.validate_salesforce_domain_message}$",
+    (!local.validate_salesforce_domain
+      ? local.validate_salesforce_domain_message
+  : ""))
 }

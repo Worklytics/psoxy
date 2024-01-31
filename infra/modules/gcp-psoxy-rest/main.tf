@@ -76,7 +76,7 @@ resource "google_cloudfunctions_function" "function" {
     var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
     var.environment_variables,
     var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
-    var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${upper(var.instance_id)}_" },
+    var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${replace(upper(var.instance_id), "-", "_")}_" },
   )
 
   dynamic "secret_environment_variables" {
@@ -110,6 +110,14 @@ resource "google_cloudfunctions_function_iam_member" "invokers" {
 
   cloud_function = google_cloudfunctions_function.function.id
   member         = "serviceAccount:${each.value}"
+  role           = "roles/cloudfunctions.invoker"
+}
+
+resource "google_cloudfunctions_function_iam_member" "testers" {
+  for_each = toset(var.gcp_principals_authorized_to_test)
+
+  cloud_function = google_cloudfunctions_function.function.id
+  member         = each.value
   role           = "roles/cloudfunctions.invoker"
 }
 
@@ -179,7 +187,7 @@ resource "local_file" "test_script" {
   count = var.todos_as_local_files ? 1 : 0
 
   filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
-  file_permission = "0770"
+  file_permission = "755"
   content         = <<EOT
 #!/bin/bash
 API_PATH=$${1:-${try(var.example_api_calls[0], "")}}
@@ -226,8 +234,6 @@ output "cloud_function_name" {
 output "cloud_function_url" {
   value = local.proxy_endpoint_url
 }
-
-
 
 output "proxy_kind" {
   value       = "rest"

@@ -75,31 +75,30 @@ export default async function (options = {}) {
     logger.verbose(`Response headers:\n ${JSON.stringify(result.headers, null, 2)}`);
   }
 
+  let resultMessagePrefix = options.healthCheck ? 'Health Check result:' :
+  'Call result:'
+
+  if (!_.isEmpty(result.data)) {
+    try {
+      result.data = JSON.parse(result.data);
+    } catch(error) {
+      logger.verbose(`Error parsing Psoxy response: ${error.message}`);
+    }
+  }
+
   if (result.status === httpCodes.HTTP_STATUS_OK) {
-    let successMessagePrefix = options.healthCheck ? 'Health Check result:' :
-      'Call result:'
-    let jsonCallResult;
 
-    if (!_.isEmpty(result.data)) {
-
-      try {
-        jsonCallResult = JSON.parse(result.data)
-      } catch(error) {
-        logger.error(error.message);
-      }
-
-      if (options.saveToFile) {
-        const filename = getFileNameFromURL(url);
-        await saveToFile(__dirname, filename, JSON.stringify(jsonCallResult, undefined, 2));
-        logger.success(`Results saved to: ${__dirname}/${filename}`);
-      } else {
-        // Response potentially long, let's remind to check logs for complete results
-        logger.success(`Check out run log to see complete results: ${__dirname}/run.log`);
-      }
+    if (options.saveToFile) {
+      const filename = getFileNameFromURL(url);
+      await saveToFile(__dirname, filename, JSON.stringify(jsonCallResult, undefined, 2));
+      logger.success(`Results saved to: ${__dirname}/${filename}`);
+    } else {
+      // Response potentially long, let's remind to check logs for complete results
+      logger.success(`Check out run log to see complete results: ${__dirname}/run.log`);
     }
 
-    logger.success(`${successMessagePrefix} ${result.statusMessage} - ${result.status}`,
-      { additional: jsonCallResult });
+    logger.success(`${resultMessagePrefix} ${result.statusMessage} - ${result.status}`,
+      { additional: result.data });
 
   } else {
     let errorMessage = result.statusMessage || 'Unknown';
@@ -112,7 +111,7 @@ export default async function (options = {}) {
       if (psoxyError) {
         switch (psoxyError) {
           case 'BLOCKED_BY_RULES':
-            errorMessage = 'Blocked by rules error: make sure URL path is correct';
+            errorMessage = 'Blocked by rules error: make sure the URL path of the data source is correct';
             break;
           case 'CONNECTION_SETUP':
             errorMessage =
@@ -123,23 +122,24 @@ export default async function (options = {}) {
             break;
         }
       } else if (result.headers['x-amzn-errortype']) {
-        errorMessage += `: AWS ${result.headers['x-amzn-errortype']}`;
-        if (!_.isUndefined(result.data)) {
-          let extendedErrorMessage = '';
-          try {
-            extendedErrorMessage = JSON.parse(result.data)?.message ?? '';
-            errorMessage += ` ${extendedErrorMessage}`;
-          } catch(e) {logger.verbose(e.message);}
-        }
+        errorMessage += ` AWS ${result.headers['x-amzn-errortype']}`;
       } else if (result.headers['www-authenticate']) {
-        errorMessage += `: GCP ${result.headers['www-authenticate']}`
+        errorMessage += ` GCP ${result.headers['www-authenticate']}`
       }
     }
 
-    logger.error(`${chalk.bold.red(result.status)}\n${chalk.bold.red(errorMessage)}`);
+    logger.error(`${chalk.bold.red(resultMessagePrefix)} ${chalk.bold.red(errorMessage)}`, {
+      additional: result.data
+    });
+
     if ([httpCodes.HTTP_STATUS_INTERNAL_SERVER_ERROR,
       httpCodes.HTTP_STATUS_BAD_GATEWAY].includes(result.status)) {
-      logger.info('This looks like an internal error in the Proxy; please review the logs.')
+      const logsURL = isAWS ? aws.getLogsURL(options) : gcp.getLogsURL(url);
+      // In general, we could add more "trobleshooting" tips here:
+      // - Check out script logs `run.log` which store verbose output
+      // - Directly show logs from the cloud provider (GCP is feasible, AWS 
+      //  require more parameters i.e. cloudwatch log group name)
+      logger.info(`This looks like an internal error in the Proxy. Check out the logs for more details: ${logsURL}`);
     }
   }
 

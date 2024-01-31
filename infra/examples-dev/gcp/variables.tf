@@ -79,7 +79,7 @@ variable "psoxy_base_dir" {
 
 variable "deployment_bundle" {
   type        = string
-  description = "path to deployment bundle to use (if not provided, will build one)"
+  description = "path to deployment bundle to use (if not provided, will build one). Can be GCS url, eg 'gs://artifacts-bucket/psoxy-0.4.28.zip'."
   default     = null
 
   validation {
@@ -98,6 +98,12 @@ variable "install_test_tool" {
   type        = bool
   description = "whether to install the test tool (can be 'false' if Terraform not running from a machine where you intend to run tests of your Psoxy deployment)"
   default     = true
+}
+
+variable "gcp_principals_authorized_to_test" {
+  type        = list(string)
+  description = "list of GCP principals authorized to test this deployment - eg 'user:alice@acme.com', 'group:devs@acme.com'; if omitted, up to you to configure necessary perms for people to test if desired."
+  default     = []
 }
 
 variable "general_environment_variables" {
@@ -140,7 +146,7 @@ variable "gcp_secret_replica_locations" {
 
 variable "custom_artifacts_bucket_name" {
   type        = string
-  description = "name of bucket to use for custom artifacts, if you want something other than default"
+  description = "name of bucket to use for custom artifacts, if you want something other than default. Ignored if you pass gcs url for `deployment_bundle`."
   default     = null
 }
 
@@ -163,7 +169,7 @@ variable "bulk_input_expiration_days" {
 
 variable "bulk_sanitized_expiration_days" {
   type        = number
-  description = "Number of days after which objects in the bucket will expire"
+  description = "Number of days after which objects in the bucket will expire. This should match the amount of historical data you wish for Worklytics to analyze (eg, typically multiple years)."
   default     = 1805 # 5 years; intent is 'forever', but some upperbound in case bucket is forgotten
 }
 
@@ -175,18 +181,27 @@ variable "custom_api_connector_rules" {
 
 variable "custom_bulk_connectors" {
   type = map(object({
-    source_kind           = string
-    input_bucket_name     = optional(string) # allow override of default bucket name
-    sanitized_bucket_name = optional(string) # allow override of default bucket name
-    rules = object({
-      pseudonymFormat       = optional(string)
-      columnsToRedact       = optional(list(string))
-      columnsToInclude      = optional(list(string))
-      columnsToPseudonymize = optional(list(string))
-      columnsToDuplicate    = optional(map(string))
-      columnsToRename       = optional(map(string))
-    })
+    source_kind               = string
+    display_name              = optional(string, "Custom Bulk Connector")
+    input_bucket_name         = optional(string) # allow override of default bucket name
+    sanitized_bucket_name     = optional(string) # allow override of default bucket name
+    worklytics_connector_id   = optional(string, "bulk-import-psoxy")
+    worklytics_connector_name = optional(string, "Custom Bulk Data via Psoxy")
+    rules = optional(object({
+      pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
+      columnsToRedact       = optional(list(string)) # columns to remove from CSV
+      columnsToInclude      = optional(list(string)) # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
+      columnsToPseudonymize = optional(list(string)) # columns to pseudonymize
+      columnsToDuplicate    = optional(map(string))  # columns to create copy of; name --> new name
+      columnsToRename       = optional(map(string))  # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
+      fieldsToTransform = optional(map(object({
+        newName    = string
+        transforms = optional(list(map(string)), [])
+      })))
+    }))
+    rules_file          = optional(string)
     settings_to_provide = optional(map(string), {})
+    example_file        = optional(string)
   }))
   description = "specs of custom bulk connectors to create"
 
@@ -207,39 +222,44 @@ variable "custom_bulk_connectors" {
 variable "custom_bulk_connector_rules" {
   type = map(object({
     pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
-    columnsToRedact       = optional(list(string))
-    columnsToInclude      = optional(list(string))
-    columnsToPseudonymize = optional(list(string))
-    columnsToDuplicate    = optional(map(string))
-    columnsToRename       = optional(map(string))
+    columnsToRedact       = optional(list(string), []) # columns to remove from CSV
+    columnsToInclude      = optional(list(string))     # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
+    columnsToPseudonymize = optional(list(string), []) # columns to pseudonymize
+    columnsToDuplicate    = optional(map(string))      # columns to create copy of; name --> new name
+    columnsToRename       = optional(map(string))      # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
+    fieldsToTransform = optional(map(object({
+      newName    = string
+      transforms = optional(list(map(string)), [])
+    })))
   }))
 
   description = "map of connector id --> rules object"
+  default = {
+    # hris = {
+    #   columnsToRedact       = []
+    #   columnsToPseudonymize = [
+    #     "EMPLOYEE_ID",
+    #     "EMPLOYEE_EMAIL",
+    #     "MANAGER_ID",
+    #     "MANAGER_EMAIL"
+    #  ]
+    # columnsToRename = {
+    #   # original --> new
+    #   "workday_id" = "employee_id"
+    # }
+    # columnsToInclude = [
+    # ]
+  }
+}
+
+variable "custom_bulk_connector_arguments" {
+  type = map(object({
+    available_memory_mb = optional(number)
+    # what else to add here?
+  }))
+
+  description = "map of connector id --> arguments object, to override defaults for bulk connector instances"
   default     = {}
-}
-
-variable "salesforce_domain" {
-  type        = string
-  description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
-  default     = ""
-}
-
-variable "jira_server_url" {
-  type        = string
-  default     = null
-  description = "(Only required if using Jira Server connector) URL of the Jira server (ex: myjiraserver.mycompany.com)"
-}
-
-variable "jira_cloud_id" {
-  type        = string
-  default     = null
-  description = "(Only required if using Jira Cloud connector) Cloud id of the Jira Cloud to connect to (ex: 1324a887-45db-1bf4-1e99-ef0ff456d421)."
-}
-
-variable "example_jira_issue_id" {
-  type        = string
-  default     = null
-  description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }
 
 # build lookup tables to JOIN data you receive back from Worklytics with your original data.
@@ -284,4 +304,3 @@ variable "todos_as_local_files" {
   description = "whether to render TODOs as flat files"
   default     = true
 }
-

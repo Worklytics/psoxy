@@ -1,9 +1,6 @@
 package co.worklytics.psoxy.gateway.impl.oauth;
 
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.LockService;
-import co.worklytics.psoxy.gateway.RequiresConfiguration;
-import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,13 +18,13 @@ import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -67,8 +64,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
      * examples: Dropbox
      *
      * TODO: revisit whether this needs to be configured per data source
+     * Nov 23: lower this down to 1h
      */
-    public static final Duration MIN_DURATION_TO_KEEP_REFRESH_TOKEN = Duration.ofDays(7);
+    public static final Duration MIN_DURATION_TO_KEEP_REFRESH_TOKEN = Duration.ofHours(1);
 
 
     //q: should we put these as config properties? creates potential for inconsistent configs
@@ -80,6 +78,29 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         CLIENT_ID(false),
         GRANT_TYPE(false),
         ACCESS_TOKEN(true),
+
+        /**
+         * whether resulting `access_token` should be shared across all instances of connections
+         * to this source.
+         *
+         * q: what does this have to do with a token request payload?? it's semantics of tokens
+         * according to Source, right? (eg, whether they allow multiple valid token instances to
+         * be used concurrently for the same grant)
+         *
+         * q: maybe this should just *always* be true? or should be env var?
+         *
+         * TODO: rename to ACCESS_TOKEN_SINGULAR or "single active access token" or "strict token rotation"
+         *
+         * @return whether resulting `access_token` should be shared across all instances of
+         * connections to this source.
+         */
+        USE_SHARED_TOKEN(false),
+
+        //TODO: whether safe to cache access token or not
+        ACCESS_TOKEN_CACHEABLE(false),
+
+
+        TOKEN_RESPONSE_TYPE(false)
         ;
 
         private final Boolean noCache;
@@ -133,23 +154,6 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         String getGrantType();
 
         /**
-         * whether resulting `access_token` should be shared across all instances of connections
-         * to this source.
-         *
-         * q: what does this have to do with a token request payload?? it's semantics of tokens
-         * according to Source, right? (eg, whether they allow multiple valid token instances to
-         * be used concurrently for the same grant)
-         *
-         * q: maybe this should just *always* be true? or should be env var?
-         *
-         * @return whether resulting `access_token` should be shared across all instances of
-         * connections to this source.
-         */
-        default boolean useSharedToken() {
-            return false;
-        }
-
-        /**
          * @return request paylaod for token request
          */
         HttpContent buildPayload();
@@ -161,10 +165,20 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         default void addHeaders(HttpHeaders httpHeaders) {}
     }
 
+    public interface TokenResponseParser {
+        String getName();
+
+        CanonicalOAuthAccessTokenResponseDto parseTokenResponse(HttpResponse response) throws IOException;
+    }
+
+    @Singleton
     @NoArgsConstructor(onConstructor_ = @Inject)
     @Log
     public static class TokenRefreshHandlerImpl implements OAuth2CredentialsWithRefresh.OAuth2RefreshHandler,
             RequiresConfiguration {
+
+        @VisibleForTesting
+        static final int WRITE_RETRIES = 3;
 
         @Inject
         ConfigService config;
@@ -180,19 +194,46 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         RandomNumberGenerator randomNumberGenerator;
         @Inject
         LockService lockService;
+        @Inject
+        TokenResponseParser tokenResponseParser;
 
         @VisibleForTesting
-        protected final Duration MAX_PROACTIVE_TOKEN_REFRESH = Duration.ofMinutes(5L);
+        protected final Duration MIN_PROACTIVE_TOKEN_REFRESH = Duration.ofMinutes(2L);
+        @VisibleForTesting
+        protected final Duration MAX_PROACTIVE_TOKEN_REFRESH = MIN_PROACTIVE_TOKEN_REFRESH.plusMinutes(5L);
 
         // not high; better to fail fast and leave it to the caller (Worklytics) to retry than hold
         // open a lambda waiting for a lock
         private static final String TOKEN_REFRESH_LOCK_ID = "oauth_refresh_token";
         private static final int MAX_TOKEN_REFRESH_ATTEMPTS = 3;
-        private static final long WAIT_AFTER_FAILED_LOCK_ATTEMPTS = 2000L;
 
+        /**
+         * how long to allow for eventual consistency after write to config
+         */
+        private static final Duration ALLOWANCE_FOR_EVENTUAL_CONSISTENCY = Duration.ofSeconds(2);
 
+        /**
+         * how long to wait after a failed lock attempt before trying again; multiplier on the
+         * attempt.
+         *
+         * goal is that this value should be big enough to allow the process that holds the lock to
+         *  1) refresh the token it
+         *  2) write it
+         *  3) release the lock
+         *  4) have that write be visible to other processes, given eventual consistency in GCP
+         *     Secret Manager case
+         *
+         * this includes the allowance for eventual consistency, so wait should be >= that value
+         * in practice.
+         */
+        private static final Duration WAIT_AFTER_FAILED_LOCK_ATTEMPTS = ALLOWANCE_FOR_EVENTUAL_CONSISTENCY.plusSeconds(2);
 
-        private AccessToken currentToken = null;
+        /**
+         * token lock duration; should be long enough to allow for token refresh + write to config
+         */
+        private static final Duration TOKEN_LOCK_DURATION = Duration.ofMinutes(2);
+
+        private AccessToken cachedToken = null;
 
         /**
          * implements canonical oauth flow to exchange refreshToken for accessToken
@@ -202,8 +243,30 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          * @throws Error       if config values missing
          */
         @Override
-        public AccessToken refreshAccessToken() throws IOException {
+        public synchronized AccessToken refreshAccessToken() throws IOException {
             return refreshAccessToken(0);
+        }
+
+        private boolean useSharedToken() {
+            Optional<String> useSharedTokenConfig =
+                config.getConfigPropertyAsOptional(ConfigProperty.USE_SHARED_TOKEN);
+
+            //legacy behavior was that tokens shared in account_credentials grant type
+            // see: https://github.com/Worklytics/psoxy/blob/v0.4.31/java/core/src/main/java/co/worklytics/psoxy/gateway/impl/oauth/AccountCredentialsGrantTokenRequestBuilder.java#L55-L57
+            // and Zoom was the only source that used account_credentials grant type at the time
+            boolean isClientCredentialsGrantType =
+                config.getConfigPropertyAsOptional(ConfigProperty.GRANT_TYPE)
+                    .map(AccountCredentialsGrantTokenRequestBuilder.GRANT_TYPE::equals)
+                    .orElse(false);
+
+            return useSharedTokenConfig.map(Boolean::parseBoolean).orElse(isClientCredentialsGrantType);
+        }
+
+        private boolean isAccessTokenCacheable() {
+            return
+                config.getConfigPropertyAsOptional(ConfigProperty.ACCESS_TOKEN_CACHEABLE)
+                .map(Boolean::parseBoolean)
+                .orElse(!useSharedToken()); // by default, tokens cacheable unless shared
         }
 
         private AccessToken refreshAccessToken(int attempt) throws IOException {
@@ -213,43 +276,42 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             CanonicalOAuthAccessTokenResponseDto tokenResponse;
 
-            Optional<AccessToken> sharedAccessToken = getSharedAccessTokenIfSupported();
-            if (this.currentToken == null) {
-                this.currentToken = sharedAccessToken.orElse(null);
-            }
+            AccessToken token = getSharedAccessTokenIfSupported().orElse(this.cachedToken);
 
-            if (sharedAccessToken.isPresent()) {
-                // we have a token, but shared token is newer. Other instance refreshed, so use it
-                if (sharedAccessToken.get().getExpirationTime().after(this.currentToken.getExpirationTime())) {
-                    this.currentToken = sharedAccessToken.get();
-                }
-            }
-
-            if (shouldRefresh(this.currentToken, clock.instant())) {
+            if (shouldRefresh(token, clock.instant())) {
 
                 // only lock if we're using a shared token across processes
-                boolean lockNeeded = payloadBuilder.useSharedToken();
+                boolean lockNeeded = useSharedToken();
 
-                boolean acquired = !lockNeeded || lockService.acquire(TOKEN_REFRESH_LOCK_ID, Duration.ofMinutes(2));
+                boolean acquired = !lockNeeded || lockService.acquire(TOKEN_REFRESH_LOCK_ID, TOKEN_LOCK_DURATION);
 
-                if (!acquired) {
-                    //NOTE: check shared access token again, in case the instance which held the
-                    // lock refreshed the token
+                if (acquired) {
+                    tokenResponse = exchangeRefreshTokenForAccessToken();
+                    token = asAccessToken(tokenResponse);
 
-                    Uninterruptibles.sleepUninterruptibly(attempt * WAIT_AFTER_FAILED_LOCK_ATTEMPTS, TimeUnit.MILLISECONDS);
-                    refreshAccessToken(attempt + 1);
-                }
+                    storeSharedAccessTokenIfSupported(token, lockNeeded);
+                    storeRefreshTokenIfRotated(tokenResponse);
 
-                tokenResponse = exchangeRefreshTokenForAccessToken();
-                this.currentToken = asAccessToken(tokenResponse);
-                storeSharedAccessTokenIfSupported(this.currentToken);
+                    if (isAccessTokenCacheable()) {
+                        this.cachedToken = token;
+                    }
 
-                if (lockNeeded) {
-                    lockService.release(TOKEN_REFRESH_LOCK_ID);
+                    if (lockNeeded) {
+                        // hold lock extra, to try to maximize the time between token refreshes
+                        Uninterruptibles.sleepUninterruptibly(ALLOWANCE_FOR_EVENTUAL_CONSISTENCY);
+                        lockService.release(TOKEN_REFRESH_LOCK_ID);
+                    }
+                } else {
+                    //re-try recursively, w/ linear backoff
+                    Uninterruptibles.sleepUninterruptibly(WAIT_AFTER_FAILED_LOCK_ATTEMPTS
+                        .plusMillis(randomNumberGenerator.nextInt(250))
+                        .multipliedBy(attempt + 1));
+
+                    token = refreshAccessToken(attempt + 1);
                 }
             }
 
-            return this.currentToken;
+            return token;
         }
 
 
@@ -264,13 +326,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             payloadBuilder.addHeaders(tokenRequest.getHeaders());
 
             HttpResponse response = tokenRequest.execute();
-            CanonicalOAuthAccessTokenResponseDto tokenResponse =
-                objectMapper.readerFor(CanonicalOAuthAccessTokenResponseDto.class)
-                    .readValue(response.getContent());
 
-            storeRefreshTokenIfRotated(tokenResponse);
-
-            return tokenResponse;
+            return tokenResponseParser.parseTokenResponse(response);
         }
 
         /**
@@ -293,7 +350,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                         if (config.supportsWriting()) {
                             try {
                                 config.putConfigProperty(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN,
-                                    tokenResponse.getRefreshToken());
+                                    tokenResponse.getRefreshToken(), WRITE_RETRIES);
+                            } catch (WritePropertyRetriesExhaustedException e) {
+                                log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value after " + WRITE_RETRIES + " attempts; while this access_token may work, future token exchanges may fail", e);
                             } catch (Throwable e) {
                                 log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value; while this access_token may work, future token exchanges may fail", e);
                             }
@@ -332,9 +391,15 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 return true;
             }
             Instant expiresAt = accessToken.getExpirationTime().toInstant();
-            Instant thresholdToProactiveRefresh = expiresAt
-                .minusSeconds(randomNumberGenerator.nextInt((int) MAX_PROACTIVE_TOKEN_REFRESH.toSeconds()));
+            Instant thresholdToProactiveRefresh = expiresAt.minusSeconds(getProactiveGracePeriodSeconds());
             return now.isAfter(thresholdToProactiveRefresh);
+        }
+
+        @VisibleForTesting
+        protected int getProactiveGracePeriodSeconds() {
+            int maxSeconds = (int) MAX_PROACTIVE_TOKEN_REFRESH.toSeconds();
+            int minSeconds = (int) MIN_PROACTIVE_TOKEN_REFRESH.toSeconds();
+            return randomNumberGenerator.nextInt(maxSeconds - minSeconds) + minSeconds;
         }
 
         @Override
@@ -368,16 +433,19 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         @VisibleForTesting
         Optional<AccessToken> getSharedAccessTokenIfSupported() {
-            if (payloadBuilder.useSharedToken()) {
+            if (useSharedToken()) {
                 Optional<String> jsonToken = config.getConfigPropertyAsOptional(ConfigProperty.ACCESS_TOKEN);
                 if (jsonToken.isEmpty()) {
                     return Optional.empty();
                 } else {
+                    byte[] value = jsonToken.get().getBytes(StandardCharsets.UTF_8);
                     try {
-                        AccessTokenDto accessTokenDto = objectMapper.readerFor(AccessTokenDto.class).readValue(jsonToken.get().getBytes(StandardCharsets.UTF_8));
+                        AccessTokenDto accessTokenDto = objectMapper.readerFor(AccessTokenDto.class).readValue(value);
                         return Optional.ofNullable(accessTokenDto).map(AccessTokenDto::asAccessToken);
                     } catch (IOException e) {
-                        log.log(Level.SEVERE, "Could not parse contents of token into an object", e);
+                        //NOTE: not logging 'e' itself, as sometimes includes value, so if value
+                        // really is a proper token then we don't want it in the logs
+                        log.log(Level.WARNING, "Could not parse contents of token into an AccessToken object; possibly expected initially, if config has a placeholder value for token");
                         return Optional.empty();
                     }
                 }
@@ -387,17 +455,36 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         }
 
         @VisibleForTesting
-        void storeSharedAccessTokenIfSupported(@NonNull AccessToken accessToken) {
-            if (payloadBuilder.useSharedToken()) {
+        void storeSharedAccessTokenIfSupported(@NonNull AccessToken accessToken, boolean useSharedToken) {
+            if (useSharedToken) {
                 try {
                     config.putConfigProperty(ConfigProperty.ACCESS_TOKEN,
                         objectMapper.writerFor(AccessTokenDto.class)
-                            .writeValueAsString(AccessTokenDto.toAccessTokenDto(accessToken)));
+                            .writeValueAsString(AccessTokenDto.toAccessTokenDto(accessToken)), WRITE_RETRIES);
                     log.log(Level.INFO, "New token stored in config");
                 } catch (JsonProcessingException e) {
                     log.log(Level.SEVERE, "Could not serialize token into JSON", e);
+                } catch (WritePropertyRetriesExhaustedException e) {
+                    log.log(Level.SEVERE, "Could not write access token to config after " + WRITE_RETRIES + " attempts", e);
                 }
             }
+        }
+    }
+
+    @NoArgsConstructor(onConstructor_ = @Inject)
+    public static class TokenResponseParserImpl implements TokenResponseParser {
+        @Inject
+        ObjectMapper objectMapper;
+
+        @Override
+        public String getName() {
+            return "DEFAULT";
+        }
+
+        @Override
+        public CanonicalOAuthAccessTokenResponseDto parseTokenResponse(HttpResponse response) throws IOException {
+            return objectMapper.readerFor(CanonicalOAuthAccessTokenResponseDto.class)
+                    .readValue(response.getContent());
         }
     }
 

@@ -19,14 +19,11 @@ class CalendarTests extends JavaRulesTestBaseCase {
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.GCAL;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/g-workspace/calendar";
-
-    @Getter
-    final String defaultScopeId = "gapps";
-
-
-    @Getter
-    final String yamlSerializationFilepath = "google-workspace/calendar";
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("google-workspace")
+        .defaultScopeId("gapps")
+        .sourceKind("calendar")
+        .build();
 
     @SneakyThrows
     @Test

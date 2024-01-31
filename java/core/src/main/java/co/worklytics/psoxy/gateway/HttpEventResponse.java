@@ -4,9 +4,7 @@ import lombok.Builder;
 import lombok.Singular;
 import lombok.ToString;
 import lombok.Value;
-import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,14 +13,14 @@ import java.util.Map;
  *
  */
 @Value
-@Builder
+@Builder(toBuilder = true)
 @ToString
 public class HttpEventResponse {
 
     int statusCode;
 
     @Singular
-    Map<String,String> headers;
+    Map<String, String> headers;
 
     String body;
 }

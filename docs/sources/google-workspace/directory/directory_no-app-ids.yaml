@@ -1,0 +1,113 @@
+---
+endpoints:
+  - pathTemplate: "/admin/directory/v1/customer/{customerId}/domains"
+  - pathTemplate: "/admin/directory/v1/users"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.users[*].primaryEmail"
+          - "$.users[*].emails[*].address"
+          - "$.users[*].externalIds[*].value"
+          - "$.users[*].aliases[*]"
+          - "$.users[*].nonEditableAliases[*]"
+          - "$.users[*].ims[*].im"
+          - "$.users[*].phones[*].value"
+          - "$.users[*].posixAccounts[*].accountId"
+          - "$.users[*].posixAccounts[*].uid"
+          - "$.users[*].posixAccounts[*].username"
+          - "$.users[*].locations[*].deskCode"
+          - "$.users[*].relations[*].value"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$.users[*].name"
+          - "$.users[*].organizations[*].title"
+          - "$.users[*].posixAccounts[*].homeDirectory"
+          - "$.users[*].recoveryEmail"
+          - "$.users[*].recoveryPhone"
+          - "$.users[*].sshPublicKeys[*]"
+          - "$.users[*].thumbnailPhotoUrl"
+          - "$.users[*].websites[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.users[*].id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+  - pathTemplate: "/admin/directory/v1/users/{accountId}"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.primaryEmail"
+          - "$.emails[*].address"
+          - "$.aliases[*]"
+          - "$.nonEditableAliases[*]"
+          - "$.ims[*].im"
+          - "$.externalIds[*].value"
+          - "$.phones[*].value"
+          - "$.posixAccounts[*].accountId"
+          - "$.posixAccounts[*].uid"
+          - "$.posixAccounts[*].username"
+          - "$.locations[*].deskCode"
+          - "$.relations[*].value"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$.name"
+          - "$.organizations[*].title"
+          - "$.posixAccounts[*].homeDirectory"
+          - "$.recoveryEmail"
+          - "$.recoveryPhone"
+          - "$.sshPublicKeys[*]"
+          - "$.thumbnailPhotoUrl"
+          - "$.websites[*]"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+  - pathTemplate: "/admin/directory/v1/groups"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..email"
+          - "$..aliases[*]"
+          - "$..nonEditableAliases[*]"
+        includeOriginal: true
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..description"
+  - pathTemplate: "/admin/directory/v1/groups/{groupId}"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..email"
+          - "$..aliases[*]"
+          - "$..nonEditableAliases[*]"
+        includeOriginal: true
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..description"
+  - pathTemplate: "/admin/directory/v1/groups/{groupId}/members"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..email"
+          - "$..aliases[*]"
+          - "$..nonEditableAliases[*]"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.members[*].id"
+        encoding: "JSON"
+  - pathTemplate: "/admin/directory/v1/customer/{customerId}/orgunits"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..description"
+  - pathTemplate: "/admin/directory/v1/customer/{customerId}/orgunits/{orgUnitPath}"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..description"

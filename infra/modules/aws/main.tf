@@ -10,7 +10,6 @@ terraform {
 
 
 locals {
-
   aws_caller_statements = [
     for arn in var.caller_aws_arns :
     {
@@ -115,7 +114,7 @@ resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {
 
 # not really a 'password', but 'random_string' isn't "sensitive" by terraform, so
 # is output to console
-resource "random_password" "random" {
+resource "random_password" "pseudonym_salt" {
   length  = 20
   special = true
 }
@@ -145,11 +144,6 @@ module "psoxy_package" {
   force_bundle       = var.force_bundle
 }
 
-moved {
-  from = module.psoxy-package
-  to   = module.psoxy_package
-}
-
 # install test tool, if it exists in expected location
 module "test_tool" {
   count = var.install_test_tool ? 1 : 0
@@ -161,20 +155,19 @@ module "test_tool" {
   psoxy_version = module.psoxy_package.version
 }
 
-moved {
-  from = module.test_tool
-  to   = module.test_tool[0]
-}
-
 output "secrets" {
   value = {
     PSOXY_ENCRYPTION_KEY = {
-      value       = sensitive(random_password.encryption_key.result),
-      description = "secret used to generate reversible pseudonyms, if any; rotate to render all existing ones irreversible"
+      value               = sensitive(random_password.encryption_key.result),
+      description         = "secret used to generate reversible pseudonyms, if any; rotate to render all existing ones irreversible"
+      sensitive           = true
+      value_managed_by_tf = true
     },
     PSOXY_SALT = {
-      value       = sensitive(random_password.random.result),
-      description = "Salt used to build pseudonyms."
+      value               = sensitive(random_password.pseudonym_salt.result),
+      description         = "Salt used to build pseudonyms."
+      sensitive           = true
+      value_managed_by_tf = true
     }
   }
 }
@@ -197,4 +190,10 @@ output "path_to_deployment_jar" {
 
 output "filename" {
   value = module.psoxy_package.filename
+}
+
+output "pseudonym_salt" {
+  description = "Value used to salt pseudonyms (SHA-256) hashes. If migrate to new deployment, you should copy this value."
+  value       = random_password.pseudonym_salt.result
+  sensitive   = true
 }

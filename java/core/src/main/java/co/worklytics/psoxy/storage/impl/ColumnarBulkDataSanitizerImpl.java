@@ -2,11 +2,15 @@ package co.worklytics.psoxy.storage.impl;
 
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Pseudonymizer;
-import co.worklytics.psoxy.rules.CsvRules;
+import co.worklytics.psoxy.PseudonymizerImplFactory;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.avaulta.gateway.rules.BulkDataRules;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.ColumnarRules;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
+import com.avaulta.gateway.rules.transforms.FieldTransformPipeline;
+import com.avaulta.gateway.rules.transforms.FieldTransform;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
@@ -15,6 +19,8 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 import com.google.common.collect.UnmodifiableIterator;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedInject;
 import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.csv.CSVFormat;
@@ -22,17 +28,17 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.function.TriFunction;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.*;
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collector;
-import java.io.ByteArrayOutputStream;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,28 +47,36 @@ import java.util.stream.Stream;
  * CSV should have the first row with headers and being separated with commas; content should be quoted
  * if include commas or quotes inside.
  */
-@Singleton
 @Log
-@NoArgsConstructor(onConstructor_ = @Inject)
 public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Inject
     ObjectMapper objectMapper;
 
+    @Inject
+    UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder;
+    @Inject
+    Base64UrlSha256HashPseudonymEncoder base64UrlSha256HashPseudonymEncoder;
+
+    @Inject
+    PseudonymizerImplFactory pseudonymizerImplFactory;
+
     @Getter(AccessLevel.PRIVATE)
     @Setter(onMethod_ = @VisibleForTesting)
     private int recordShuffleChunkSize = 500;
 
+    @Setter(onMethod_ = @VisibleForTesting)
+    ColumnarRules rules;
+
+    @AssistedInject
+    public ColumnarBulkDataSanitizerImpl(@Assisted ColumnarRules rules) {
+        this.rules = rules;
+    }
+
     @Override
-    public byte[] sanitize(@NonNull InputStreamReader reader,
-                           @NonNull BulkDataRules bulkDataRules,
-                           @NonNull Pseudonymizer pseudonymizer) throws IOException {
-
-        if (!(bulkDataRules instanceof CsvRules)) {
-            throw new IllegalArgumentException("Rules must be of type CsvRules");
-        }
-
-        ColumnarRules rules = (ColumnarRules) bulkDataRules;
+    public void sanitize(@NonNull Reader reader,
+                         @NonNull Writer writer,
+                         @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
         CSVParser records = CSVFormat
                 .DEFAULT
@@ -76,13 +90,28 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
         Set<String> columnsToRedact = asSetWithCaseInsensitiveComparator(rules.getColumnsToRedact());
 
-        Set<String> columnsToPseudonymize = asSetWithCaseInsensitiveComparator(rules.getColumnsToPseudonymize());
+        Set<String> columnsToPseudonymize =
+            asSetWithCaseInsensitiveComparator(rules.getColumnsToPseudonymize());
+
+        Set<String> columnsToPseudonymizeIfPresent =
+            asSetWithCaseInsensitiveComparator(rules.getColumnsToPseudonymizeIfPresent());
+
+
+        Map<String, FieldTransformPipeline> columnsToTransform =
+            Optional.ofNullable(rules.getFieldsToTransform()).orElse(Collections.emptyMap())
+            .entrySet().stream()
+            .collect(Collectors.toMap(
+                entry -> entry.getKey().trim().toLowerCase(),
+                entry -> entry.getValue(),
+                (a, b) -> a,
+                () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)));
 
         Optional<Set<String>> columnsToInclude =
             Optional.ofNullable(rules.getColumnsToInclude())
                 .map(this::asSetWithCaseInsensitiveComparator);
 
-        final Map<String, String> columnsToRename = rules.getColumnsToRename()
+        final Map<String, String> columnsToRename =
+            Optional.ofNullable(rules.getColumnsToRename()).orElse(Collections.emptyMap())
             .entrySet().stream()
             .collect(Collectors.toMap(
                 entry -> entry.getKey().trim(),
@@ -90,14 +119,17 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                 (a, b) -> a,
                 () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)));
 
-        final Map<String, String> columnsToDuplicate = rules
-            .getColumnsToDuplicate()
+        final Map<String, String> columnsToDuplicate =
+            Optional.ofNullable(rules.getColumnsToDuplicate()).orElse(Collections.emptyMap())
             .entrySet().stream()
             .collect(Collectors.toMap(
                 entry -> entry.getKey().trim(),
                 entry -> entry.getValue().trim(),
                 (a, b) -> a,
                 () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)));
+
+        columnsToTransform.entrySet().stream()
+                .forEach(entry -> columnsToDuplicate.put(entry.getKey(), entry.getValue().getNewName()));
 
 
         // headers respecting insertion order
@@ -137,35 +169,59 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             .collect(Collectors.toList());
 
 
-        BiFunction<String, String, String> applyPseudonymizationIfAny = (outputColumnName, value) -> {
-            if (columnsToPseudonymize.contains(outputColumnName)) {
-                if (StringUtils.isNotBlank(value)) {
-                    try {
-                        PseudonymizedIdentity identity = pseudonymizer.pseudonymize(value);
+        TriFunction<String, String, Pseudonymizer, String> pseudonymizationFunction = buildPseudonymizationFunction(rules);
 
-                        if (identity == null) {
-                            return null;
-                        } else if (rules.getPseudonymFormat() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
-                            return identity.getHash();
-                        } else {
-                            //JSON
-                            return objectMapper.writeValueAsString(identity);
-                        }
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+        BiFunction<String, String, String> applyPseudonymizationIfAny = (outputColumnName, value) -> {
+            if (columnsToPseudonymize.contains(outputColumnName.toLowerCase())
+                || columnsToPseudonymizeIfPresent.contains(outputColumnName.toLowerCase())) {
+                return pseudonymizationFunction.apply(value, outputColumnName, pseudonymizer);
             }
             return value;
         };
 
+        Map<String, Pseudonymizer> pseudonymizers = new HashMap<>();
+        BiFunction<String, String, String> applyTransformIfAny = (originalColumnName, value) -> {
+          if (columnsToTransform.containsKey(originalColumnName.toLowerCase())) {
+              FieldTransformPipeline pipeline = columnsToTransform.get(originalColumnName.toLowerCase());
 
-        try(ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-            Writer printWriter = new PrintWriter(baos);
-            CSVPrinter printer = new CSVPrinter(printWriter, CSVFormat.DEFAULT
-                .withHeader(columnNamesForOutputFile.toArray(new String[0])))
-            ) {
+              for ( FieldTransform transform : pipeline.getTransforms()) {
+                  if (value != null) {
+                      if (transform instanceof FieldTransform.Filter) {
+                          Pattern pattern = Pattern.compile(((FieldTransform.Filter) transform).getFilter());
+                          Matcher matcher = pattern.matcher(value);
+                          if (matcher.matches()) {
+                              if (matcher.groupCount() > 0) {
+                                  value = matcher.group(1);
+                              }
+                          } else {
+                              value = null;
+                          }
+                      }
 
+                      if (transform instanceof FieldTransform.FormatString) {
+                          value = String.format(((FieldTransform.FormatString) transform).getFormatString(), value);
+                      }
+
+                      if (transform instanceof FieldTransform.PseudonymizeWithScope) {
+                          Pseudonymizer scopedPseudonymizer = pseudonymizer;
+                          if (pseudonymizer.getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
+                              scopedPseudonymizer = pseudonymizers.computeIfAbsent(
+                                  ((FieldTransform.PseudonymizeWithScope) transform).getPseudonymizeWithScope(),
+                                  scope -> pseudonymizerImplFactory.create(pseudonymizer.getOptions().withDefaultScopeId(scope)));
+                          }
+                          value = pseudonymizationFunction.apply(value, pipeline.getNewName(), scopedPseudonymizer);
+                      }
+                  }
+              }
+          }
+          return value;
+        };
+
+        CSVFormat csvFormat = CSVFormat.Builder.create()
+            .setHeader(columnNamesForOutputFile.toArray(new String[0]))
+            .build();
+
+        try (CSVPrinter printer = new CSVPrinter(writer, csvFormat)) {
             UnmodifiableIterator<List<CSVRecord>> chunks =
                 Iterators.partition(records.iterator(), this.getRecordShuffleChunkSize());
 
@@ -173,16 +229,20 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                 List<CSVRecord> chunk = new ArrayList<>(chunkIterator.next());
                 shuffleImplementation.apply(chunk).forEach(row -> {
                     Stream<Object> sanitized =
-                        headers.stream() // only iterate on allowed headers
-                            .map(column ->
-                                applyPseudonymizationIfAny.apply(
-                                    columnsToRename.getOrDefault(column, column),
-                                    row.get(column))
-                            );
+                        headers.stream() // only iterate on allowed columns (redaction implicit by omission)
+                            .map(column -> Pair.of(columnsToRename.getOrDefault(column, column).toLowerCase(), row.get(column)))
+                            .map(p -> applyPseudonymizationIfAny.apply(p.getKey(), p.getValue()));
 
+
+                    //add duplicated columns, transformed/pseudonymized as necessary
                     sanitized = Streams.concat(sanitized, columnsToDuplicate.entrySet().stream()
-                        .map(entry ->
-                            applyPseudonymizationIfAny.apply(entry.getValue(), row.get(entry.getKey()))));
+                        .map(entry -> {
+                            if (columnsToTransform.containsKey(entry.getKey().toLowerCase())) {
+                                return applyTransformIfAny.apply(entry.getKey(), row.get(entry.getKey()));
+                            } else {
+                                return applyPseudonymizationIfAny.apply(entry.getValue(), row.get(entry.getKey()));
+                            }
+                        }));
 
                     try {
                         printer.printRecord(sanitized.collect(Collectors.toList()));
@@ -191,10 +251,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                     }
                 });
             }
-
-            printWriter.flush();
-
-            return baos.toByteArray();
+            writer.flush();
         }
     }
 
@@ -218,8 +275,47 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     }
 
     Set<String> asSetWithCaseInsensitiveComparator(Collection<String> set) {
+        if (set == null) {
+            set = Collections.emptySet();
+        }
         return set.stream()
             .map(String::trim)
             .collect(Collectors.toCollection(() -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER)));
+    }
+
+    TriFunction<String, String, Pseudonymizer, String> buildPseudonymizationFunction(ColumnarRules rules) {
+        return (value, outputColumnName, localPseudonymizer) -> {
+            if (StringUtils.isBlank(value)) {
+                return value;
+            } else {
+                try {
+                    PseudonymizedIdentity identity = localPseudonymizer.pseudonymize(value);
+
+                    if (identity == null) {
+                        return null;
+                    } else if (rules.getPseudonymFormat() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
+                        if (identity.getOriginal() != null) {
+                            //this shouldn't happen, bc ColumnarRules don't support preserving original
+                            log.warning("Encoding pseudonym for column '" + outputColumnName + "' using format that will not include the 'original' value, althought transformation preserved it");
+                        }
+                        if (localPseudonymizer.getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
+                            if (identity.getReversible() != null) {
+                                throw new Error("Cannot encode legacy PseudonymizedIdentity with reversibles as URL_SAFE_TOKEN");
+                            }
+                            return urlSafeTokenPseudonymEncoder.encode(identity.fromLegacy());
+                        } else {
+                            return urlSafeTokenPseudonymEncoder.encode(identity.asPseudonym());
+                        }
+                    } else if (rules.getPseudonymFormat() == PseudonymEncoder.Implementations.URL_SAFE_HASH_ONLY) {
+                        return base64UrlSha256HashPseudonymEncoder.encode(identity.asPseudonym());
+                    } else {
+                        //JSON
+                        return objectMapper.writeValueAsString(identity);
+                    }
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
     }
 }

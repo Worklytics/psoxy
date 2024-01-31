@@ -17,11 +17,19 @@ locals {
 }
 
 resource "google_secret_manager_secret" "rules" {
+  project   = var.project_id
   secret_id = "${var.prefix}RULES"
   labels    = var.default_labels
 
   replication {
+    # as of 4.83.0, this is deprecated in favor of 'auto'; but as of v0.4.38 we allows google provider
+    # version as early as 3.74
     automatic = true # why not? nothing secret about it
+
+    # for future versions; only support for google provider >= 4.83.0
+    #auto {
+    #  # no need to encrypt with CMEK; it's actually configuration value, not "secret"
+    # }
   }
 
   lifecycle {
@@ -41,6 +49,20 @@ resource "google_secret_manager_secret_version" "rules" {
       error_message = "Rules on file ${var.file_path} are too big to store"
     }
   }
+}
+
+# so can list versions, get latest
+resource "google_secret_manager_secret_iam_member" "view" {
+  member    = "serviceAccount:${var.instance_sa_email}"
+  role      = "roles/secretmanager.viewer"
+  secret_id = google_secret_manager_secret.rules.id
+}
+
+# access versions
+resource "google_secret_manager_secret_iam_member" "access" {
+  member    = "serviceAccount:${var.instance_sa_email}"
+  role      = "roles/secretmanager.secretAccessor"
+  secret_id = google_secret_manager_secret.rules.id
 }
 
 output "rules_hash" {

@@ -13,13 +13,9 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.io.input.BOMInputStream;
 
 import javax.inject.Inject;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.io.*;
 import java.util.*;
 
 @Log
@@ -37,7 +33,6 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     public String handleRequest(S3Event s3Event, Context context) {
 
         DaggerAwsContainer.create().injectS3Handler(this);
-
 
         S3EventNotification.S3EventNotificationRecord record = s3Event.getRecords().get(0);
 
@@ -58,10 +53,12 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     @SneakyThrows
     StorageEventResponse process(String importBucket, String sourceKey, StorageHandler.ObjectTransform transform) {
         StorageEventResponse storageEventResponse;
-        S3Object s3Object = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
+
+        ObjectMetadata sourceMetadata = s3Client.getObjectMetadata(importBucket, sourceKey);
+
 
         //avoid potential npe should objectMetadata be null (if that can even happen?)
-        Map<String, String> userMetadata = Optional.ofNullable(s3Object.getObjectMetadata())
+        Map<String, String> userMetadata = Optional.ofNullable(sourceMetadata)
             .map(ObjectMetadata::getUserMetadata).orElse(Collections.emptyMap());
 
         if (storageHandler.hasBeenSanitized(userMetadata)) {
@@ -71,41 +68,49 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             return null;
         }
 
-        try (InputStream objectData = s3Object.getObjectContent();
-             BOMInputStream is = new BOMInputStream(objectData);
-             InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+        byte[] processedData = null;
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
-            StorageEventRequest request = storageHandler.buildRequest(reader, importBucket, sourceKey, transform);
+            StorageEventRequest request =
+                storageHandler.buildRequest(importBucket, sourceKey, transform, sourceMetadata.getContentEncoding());
 
-            storageEventResponse = storageHandler.handle(request, transform.getRules());
+            storageEventResponse = storageHandler.handle(request, transform, () -> {
+                S3Object sourceObject = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
+                return sourceObject.getObjectContent();
+            }, () -> outputStream);
 
-            log.info("Writing to: " + request.getDestinationBucketName() + "/" + request.getDestinationObjectPath());
+            processedData = outputStream.toByteArray();
+            log.info(String.format("Successfully pseudonymized %s/%s to buffer", importBucket, sourceKey));
         }
 
+        try (InputStream processedStream = new ByteArrayInputStream(processedData)) {
+            ObjectMetadata destinationMetadata = new ObjectMetadata();
+            //NOTE: not setting content length here causes S3 client to buffer the output stream ...
+            //   --> OK, bc we have no way to know output length apriori
+            //meta.setContentLength(storageEventResponse.getBytes().length);
 
+            // set headers iff they're non-null on source object
+            Optional.ofNullable(sourceMetadata.getContentType())
+                .ifPresent(destinationMetadata::setContentType);
+            Optional.ofNullable(sourceMetadata.getContentEncoding())
+                .ifPresent(destinationMetadata::setContentEncoding);
 
-        try (InputStream is = new ByteArrayInputStream(storageEventResponse.getBytes())) {
+            destinationMetadata.setUserMetadata(storageHandler.buildObjectMetadata(importBucket, sourceKey, transform));
 
-            ObjectMetadata meta = new ObjectMetadata();
-            meta.setContentLength(storageEventResponse.getBytes().length);
-            meta.setContentType(s3Object.getObjectMetadata().getContentType());
-
-            meta.setUserMetadata(storageHandler.buildObjectMetadata(importBucket, sourceKey, transform));
 
             s3Client.putObject(storageEventResponse.getDestinationBucketName(),
                 storageEventResponse.getDestinationObjectPath(),
-                is,
-                meta);
-        }
+                processedStream,
+                destinationMetadata);
 
-        log.info(String.format("Successfully pseudonymized %s/%s and uploaded to %s/%s",
-            importBucket,
-            sourceKey,
-            storageEventResponse.getDestinationBucketName(),
-            storageEventResponse.getDestinationObjectPath()));
+            log.info(String.format("Successfully uploaded to %s/%s",
+                importBucket,
+                sourceKey,
+                storageEventResponse.getDestinationBucketName(),
+                storageEventResponse.getDestinationObjectPath()));
+        }
 
         return storageEventResponse;
     }
-
 
 }

@@ -1,6 +1,8 @@
 package com.avaulta.gateway.rules;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.rules.transforms.FieldTransformPipeline;
+import com.avaulta.gateway.rules.transforms.FieldTransform;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import lombok.SneakyThrows;
@@ -8,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -98,6 +101,43 @@ class ColumnarRulesTest {
         assertEquals(example.getColumnsToPseudonymize(), roundtrip.getColumnsToPseudonymize());
         assertEquals(example.getColumnsToRedact(), roundtrip.getColumnsToRedact());
         assertEquals(example.getColumnsToRename(), roundtrip.getColumnsToRename());
+    }
+
+    @SneakyThrows
+    @Test
+    public void yaml_pipeline() {
+        ColumnarRules rules = ColumnarRules.builder()
+                .fieldsToTransform(Map.of("email", FieldTransformPipeline.builder()
+                        .newName("github_username")
+                        .transforms(Arrays.asList(
+                                FieldTransform.filter(".*@worklytics.co"),
+                                FieldTransform.formatString("%s_gh"),
+                                FieldTransform.pseudonymizeWithScope("github")
+                        )).build()))
+                .build();
+
+        String yaml = "---\n" +
+                "delimiter: \",\"\n" +
+                "fieldsToTransform:\n" +
+                "  email:\n" +
+                "    newName: \"github_username\"\n" +
+                "    transforms:\n" +
+                "    - filter: \".*@worklytics.co\"\n" +
+                "    - formatString: \"%s_gh\"\n" +
+                "    - pseudonymizeWithScope: \"github\"\n" +
+                "pseudonymFormat: \"JSON\"\n";
+
+        assertEquals(yaml,
+                yamlMapper.writeValueAsString(rules));
+
+        ColumnarRules fromYaml =
+            yamlMapper.readerFor(ColumnarRules.class).readValue(yaml);
+
+        assertNotNull(fromYaml.getFieldsToTransform());
+        assertNotNull(fromYaml.getColumnsToPseudonymize());
+        assertNotNull(fromYaml.getColumnsToRedact());
+        assertNotNull(fromYaml.getColumnsToRename());
+        assertNotNull(fromYaml.getColumnsToDuplicate());
     }
 
 }

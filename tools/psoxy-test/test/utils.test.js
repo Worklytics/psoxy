@@ -1,6 +1,7 @@
 import test from 'ava';
 import * as td from 'testdouble';
 import {
+  addFilenameSuffix,
   executeWithRetry,
   resolveHTTPMethod,
   resolveAWSRegion,
@@ -12,20 +13,21 @@ import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
 // Unorthodox approach: load actual JSON response examples used by Psoxy backend
-const slackResponse = require('../../../java/core/src/test/resources/api-response-examples/slack/discovery-enterprise-info.json');
-const calendarEventsResponse = require('../../../java/core/src/test/resources/api-response-examples/g-workspace/calendar/events.json');
+const slackResponse = require('../../../docs/sources/slack/example-api-responses/original/discovery-enterprise-info.json');
+const calendarEventsResponse = require('../../../docs/sources/google-workspace/calendar/example-api-responses/original/events.json');
 
 test('Transform data sources spec with API responses: param replacement', (t) => {
   const unknownSpec = spec['foo'];
-  let result = transformSpecWithResponse(unknownSpec, slackResponse);
+  let result = transformSpecWithResponse('', slackResponse, unknownSpec);
   t.deepEqual(result, {});
 
   const slackSpec = spec['slack-discovery-api'];
 
-  result = transformSpecWithResponse(slackSpec, {});
+  result = transformSpecWithResponse('Workspaces', {}, slackSpec);
   t.deepEqual(result, slackSpec);
 
-  result = transformSpecWithResponse(slackSpec, slackResponse);
+  result = transformSpecWithResponse('Workspaces', slackResponse,
+    slackSpec);
   const workspaceConversationsEndpoint = result.endpoints.find(
     (endpoint) => endpoint.name === 'Workspace Conversations'
   );
@@ -36,7 +38,8 @@ test('Transform data sources spec with API responses: param replacement', (t) =>
 
 test('Transform data sources spec with API responses: path replacement', (t) => {
   const gcalSpec = spec['gcal'];
-  const result = transformSpecWithResponse(gcalSpec, calendarEventsResponse);
+  const result = transformSpecWithResponse('Events',
+    calendarEventsResponse, gcalSpec);
 
   // [event_id] path replacement
   const eventEndpoint = result.endpoints.find((endpoint) => endpoint.name === 'Event');
@@ -105,4 +108,14 @@ test('Resolve AWS region', (t) => {
   t.is('ap-southeast-4', resolveAWSRegion(new URL('https://49eo5h5k99.execute-api.ap-southeast-4.amazonaws.com')));
   t.is('us-east-1', resolveAWSRegion(new URL('https://foo.com')));
   t.is('us-east-1', resolveAWSRegion(''));
+})
+
+test('Add filename suffix', (t) => {
+  t.is(addFilenameSuffix('foo.csv', 'bar'), 'foo-bar.csv');
+  t.is(addFilenameSuffix('folder-test-example-001.csv', 1701711533220),
+    'folder-test-example-001-1701711533220.csv');
+  t.is(addFilenameSuffix('folder/test/example-001.csv', 1701711533220),
+    'example-001-1701711533220.csv');
+  t.is(addFilenameSuffix('', 1701711533220), '');
+  t.is(addFilenameSuffix(null, 'foo'), '');
 })

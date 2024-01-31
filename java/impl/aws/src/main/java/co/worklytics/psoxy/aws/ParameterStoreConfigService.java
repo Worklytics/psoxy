@@ -3,8 +3,10 @@ package co.worklytics.psoxy.aws;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.Uninterruptibles;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
@@ -20,7 +22,9 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.logging.Level;
 
@@ -33,6 +37,15 @@ import java.util.logging.Level;
 @Log
 public class ParameterStoreConfigService implements ConfigService, LockService {
 
+
+    /**
+     * placeholder value, since SSM parameters can't have 'null' value or something
+     *
+     * @see infra/modules/aws-ssm-secrets/main.tf:12
+     */
+    @VisibleForTesting
+    static final String PLACEHOLDER_VALUE = "fill me";
+
     @Getter(onMethod_ = @VisibleForTesting)
     final String namespace;
 
@@ -41,6 +54,9 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
 
     @Inject
     EnvVarsConfigService envVarsConfig;
+
+    @Inject
+    RandomNumberGenerator randomNumberGenerator;
 
     @Inject
     Clock clock;
@@ -101,10 +117,17 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
                 .build();
             GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
 
-            if (envVarsConfig.isDevelopment()) {
-                log.info("Found SSM parameter for " + paramName);
+            Optional<T> r;
+            if (Objects.equals(parameterResponse.parameter().value(), PLACEHOLDER_VALUE)) {
+                log.warning("Found placeholder value for " + paramName + "; this is either a misconfiguration, or a value that proxy itself should later fill.");
+                r = Optional.empty();
+            } else {
+                if (envVarsConfig.isDevelopment()) {
+                    log.info("Found SSM parameter for " + paramName);
+                }
+                r = Optional.of(mapping.apply(parameterResponse));
             }
-            return Optional.of(mapping.apply(parameterResponse));
+            return r;
         } catch (ParameterNotFoundException | ParameterVersionNotFoundException ignore) {
             // does not exist, that could be OK depending on case.
             if (envVarsConfig.isDevelopment()) {
@@ -148,44 +171,58 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
         return this.namespace + "lock_" + lockId;
     }
 
+    @VisibleForTesting
+    String lockParameterValue() {
+        Instant instant = clock.instant();
+        return String.format("locked_%d", instant.toEpochMilli());
+    }
+
     @Override
     public boolean acquire(@NonNull String lockId, @NonNull Duration expires) {
         Preconditions.checkArgument(StringUtils.isNotBlank(lockId), "lockId must be non-blank");
 
         final String lockParameterName = lockParameterName(lockId);
         try {
-            client.putParameter(PutParameterRequest.builder()
+            String lockValue = lockParameterValue();
+            PutParameterResponse locked = client.putParameter(PutParameterRequest.builder()
                 .name(lockParameterName)
                 .type(ParameterType.STRING)
-                .value("locked")
+                .value(lockValue)
                 .overwrite(false)
                 .build());
-            return true;
+            // assuming two threads at the same time trying to write on a deleted parameter might
+            // not get ParameterAlreadyExistsException and last one wins.
+            Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(100).plusMillis(randomNumberGenerator.nextInt(200)));
+            // if value doesn't match what we wrote, someone else got it, race condition.
+            Parameter parameter = readParameter(lockParameterName);
+            return Objects.equals(lockValue, parameter.value());
         } catch (ParameterAlreadyExistsException e) {
             try {
-                Instant lockedAt = client.getParameter(GetParameterRequest.builder()
-                    .name(lockParameterName)
-                    .build()).parameter().lastModifiedDate();
-
+                Instant lockedAt = readParameter(lockParameterName).lastModifiedDate();
 
                 if (lockedAt.isBefore(clock.instant().minusSeconds(expires.getSeconds()))) {
                     log.warning("Lock " + lockParameterName + " is stale, removing");
 
-                    //q: add random delay here, in case multiple instances have been waiting to
-                    // acquire the lock?
+                    // release it and let the caller decide if the retry
                     release(lockId);
-
-                    return acquire(lockId);
                 }
             } catch (SsmException ssmException) {
                 log.log(Level.SEVERE, "Could not read lock " + lockParameterName, ssmException);
             }
-            return false;
         } catch (SsmException e) {
             log.log(Level.SEVERE, "Could not acquire lock " + lockParameterName, e);
-            return false;
         }
+        return false;
     }
+
+    private Parameter readParameter(String parameterName) {
+        GetParameterRequest parameterRequest = GetParameterRequest.builder()
+            .name(parameterName)
+            .build();
+        GetParameterResponse parameterResponse = client.getParameter(parameterRequest);
+        return parameterResponse.parameter();
+    }
+
 
     @Override
     public void release(@NonNull String lockId) {
@@ -199,7 +236,7 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
         } catch (ParameterNotFoundException e) {
             log.log(Level.WARNING, "Lock " + lockParameterName + " not found; OK, but may indicate a problem", e);
         } catch (SsmException e) {
-            //should go stale in this case ...
+            // should go stale in this case ...
             log.log(Level.SEVERE, "Could not release lock " + lockParameterName, e);
         }
     }

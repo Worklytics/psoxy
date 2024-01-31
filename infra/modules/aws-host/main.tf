@@ -51,35 +51,43 @@ module "instance_secrets" {
   kms_key_id = var.aws_ssm_key_id
   secrets = { for v in each.value.secured_variables :
     v.name => {
-      value       = v.value,
-      description = try(v.description, null)
+      value               = v.value,
+      description         = try(v.description, null)
+      sensitive           = try(v.sensitive, true)
+      value_managed_by_tf = try(v.value_managed_by_tf, true) # ideally, would be `value != null`, but bc value is sensitive, Terraform doesn't allow for_each over map derived from sensitive values
     }
   }
 }
+
+
+
 
 module "api_connector" {
   for_each = var.api_connectors
 
   source = "../../modules/aws-psoxy-rest"
 
-  environment_name                = var.environment_name
-  instance_id                     = each.key
-  source_kind                     = each.value.source_kind
-  path_to_function_zip            = module.psoxy.path_to_deployment_jar
-  function_zip_hash               = module.psoxy.deployment_package_hash
-  function_env_kms_key_arn        = var.function_env_kms_key_arn
-  logs_kms_key_arn                = var.logs_kms_key_arn
-  api_caller_role_arn             = module.psoxy.api_caller_role_arn
-  example_api_calls               = each.value.example_api_calls
-  aws_account_id                  = var.aws_account_id
-  region                          = data.aws_region.current.id
-  path_to_repo_root               = var.psoxy_base_dir
-  todo_step                       = var.todo_step
-  global_parameter_arns           = module.global_secrets.secret_arns
-  path_to_instance_ssm_parameters = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
-  ssm_kms_key_ids                 = local.ssm_key_ids
-  target_host                     = each.value.target_host
-  source_auth_strategy            = each.value.source_auth_strategy
+  environment_name                      = var.environment_name
+  instance_id                           = each.key
+  source_kind                           = each.value.source_kind
+  path_to_function_zip                  = module.psoxy.path_to_deployment_jar
+  function_zip_hash                     = module.psoxy.deployment_package_hash
+  function_env_kms_key_arn              = var.function_env_kms_key_arn
+  logs_kms_key_arn                      = var.logs_kms_key_arn
+  api_caller_role_arn                   = module.psoxy.api_caller_role_arn
+  example_api_calls                     = each.value.example_api_calls
+  aws_account_id                        = var.aws_account_id
+  region                                = data.aws_region.current.id
+  path_to_repo_root                     = var.psoxy_base_dir
+  todo_step                             = var.todo_step
+  global_parameter_arns                 = module.global_secrets.secret_arns
+  path_to_instance_ssm_parameters       = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
+  ssm_kms_key_ids                       = local.ssm_key_ids
+  target_host                           = each.value.target_host
+  source_auth_strategy                  = each.value.source_auth_strategy
+  oauth_scopes                          = each.value.oauth_scopes_needed
+  example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
+
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -119,11 +127,12 @@ module "bulk_connector" {
   logs_kms_key_arn                 = var.logs_kms_key_arn
   psoxy_base_dir                   = var.psoxy_base_dir
   rules                            = try(var.custom_bulk_connector_rules[each.key], each.value.rules)
+  rules_file                       = each.value.rules_file
   global_parameter_arns            = module.global_secrets.secret_arns
   path_to_instance_ssm_parameters  = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
   ssm_kms_key_ids                  = local.ssm_key_ids
   sanitized_accessor_role_names    = [module.psoxy.api_caller_role_name]
-  memory_size_mb                   = 1024
+  memory_size_mb                   = coalesce(try(var.custom_bulk_connector_arguments[each.key].memory_size_mb, null), each.value.memory_size_mb, 1024)
   sanitized_expiration_days        = var.bulk_sanitized_expiration_days
   input_expiration_days            = var.bulk_input_expiration_days
   example_file                     = each.value.example_file
@@ -191,7 +200,7 @@ locals {
 # script to test ALL connectors
 resource "local_file" "test_all_script" {
   filename        = "test-all.sh"
-  file_permission = "0770"
+  file_permission = "755"
   content         = <<EOF
 #!/bin/bash
 

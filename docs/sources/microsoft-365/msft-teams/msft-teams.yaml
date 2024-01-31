@@ -1,0 +1,293 @@
+---
+endpoints:
+  - pathTemplate: "/{apiVersion}/teams"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$filter"
+      - "$count"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..description"
+  - pathTemplate: "/{apiVersion}/teams/{teamId}/allChannels"
+    allowedQueryParams:
+      - "$select"
+      - "$filter"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..description"
+  - pathTemplate: "/{apiVersion}/users/{userId}/chats"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$filter"
+      - "$orderby"
+      - "$expand"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..topic"
+  - pathTemplate: "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$expand"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..user.displayName"
+          - "$..body.content"
+          - "$..attachments"
+          - "$..mentions[*].mentionText"
+          - "$..eventDetail.teamDescription"
+  - pathTemplate: "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages/delta"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$expand"
+      - "$deltatoken"
+      - "$filter"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..user.displayName"
+          - "$..value[*].body.content"
+          - "$..value[*].attachments"
+          - "$..value[*].mentions[*].mentionText"
+          - "$..value[*].eventDetail.teamDescription"
+  - pathTemplate: "/{apiVersion}/chats/{chatId}/messages"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$filter"
+      - "$orderby"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..user.displayName"
+          - "$..value[*].body.content"
+          - "$..value[*].attachments"
+          - "$..value[*].mentions[*].mentionText"
+          - "$..value[*].eventDetail.teamDescription"
+          - "$..value[*].eventDetail.chatDisplayName"
+  - pathTemplate: "/{apiVersion}/communications/calls/{callId}"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$expand"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+  - pathRegex: "^/(v1.0|beta)/communications/callRecords/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)(?<queryParameters>[a-zA-z0-9\\\
+    s\\$\\=\\?\\(\\)]*)"
+    allowedQueryParams:
+      - "$select"
+      - "$expand"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..user.displayName"
+          - "$..reflexiveIPAddress"
+          - "$..relayIPAddress"
+          - "$..ipAddress"
+          - "$..subnet"
+          - "$..macAddress"
+          - "$..caller.name"
+          - "$..callee.name"
+          - "$..captureDeviceName"
+          - "$..renderDeviceName"
+  - pathTemplate: "/{apiVersion}/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})"
+    allowedQueryParams:
+      - "$skip"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..value[*].userPrincipalName"
+          - "$..value[*].userDisplayName"
+          - "$..value[*].callerNumber"
+          - "$..value[*].calleeNumber"
+  - pathTemplate: "/{apiVersion}/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})"
+    allowedQueryParams:
+      - "$skip"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..value[*].userPrincipalName"
+          - "$..value[*].userDisplayName"
+          - "$..value[*].callerNumber"
+          - "$..value[*].calleeNumber"
+  - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$filter"
+      - "$orderby"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..subject"
+          - "$..joinMeetingIdSettings.isPasscodeRequired"
+          - "$..joinMeetingIdSettings.passcode"
+  - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings/{meetingId}/attendanceReports"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$filter"
+      - "$orderby"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..subject"
+          - "$..joinMeetingIdSettings.isPasscodeRequired"
+          - "$..joinMeetingIdSettings.passcode"
+  - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings/{meetingId}/attendanceReports/{reportId}"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$filter"
+      - "$orderby"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..subject"
+          - "$..joinMeetingIdSettings.isPasscodeRequired"
+          - "$..joinMeetingIdSettings.passcode"
+  - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+    transforms:
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..aboutMe"
+          - "$..mySite"
+          - "$..preferredName"
+          - "$..givenName"
+          - "$..surname"
+          - "$..mailNickname"
+          - "$..responsibilities"
+          - "$..skills"
+          - "$..faxNumber"
+          - "$..mobilePhone"
+          - "$..businessPhones[*]"
+          - "$..onPremisesExtensionAttributes"
+          - "$..onPremisesSecurityIdentifier"
+          - "$..securityIdentifier"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "JSON"

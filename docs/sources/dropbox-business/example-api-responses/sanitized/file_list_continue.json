@@ -1,0 +1,57 @@
+{
+  "cursor":"ZtkX9_EHj3x7PMkVuFIhwKYXEpwpLwyxp9vMKomUhllil9q7eWiAu",
+  "entries":[
+    {
+      ".tag":"file",
+      "client_modified":"2015-05-12T15:50:38Z",
+      "file_lock_info":{
+        "created":"2015-05-12T15:50:38Z",
+        "is_lockholder":true
+      },
+      "has_explicit_shared_members":false,
+      "id":"id:a4ayc_80_OEAAAAAAAAAXw",
+      "is_downloadable":true,
+      "property_groups":[
+        {
+          "fields":[
+            {
+              "name":"Security Policy",
+              "value":"Confidential"
+            }
+          ],
+          "template_id":"ptid:1a5n2i6d3OYEAAAAAAAAAYa"
+        }
+      ],
+      "rev":"a1c10ce0dd78",
+      "server_modified":"2015-05-12T15:50:38Z",
+      "sharing_info":{
+        "modified_by":"{\"scope\":\"dropbox\",\"hash\":\"jZhmTOhV_8tNq3E_tPSJblmnPYNERff__TX5uh6HBG8\"}",
+        "parent_shared_folder_id":"84528192421",
+        "read_only":true
+      },
+      "size":7212
+    },
+    {
+      ".tag":"folder",
+      "id":"id:a4ayc_80_OEAAAAAAAAAXz",
+      "property_groups":[
+        {
+          "fields":[
+            {
+              "name":"Security Policy",
+              "value":"Confidential"
+            }
+          ],
+          "template_id":"ptid:1a5n2i6d3OYEAAAAAAAAAYa"
+        }
+      ],
+      "sharing_info":{
+        "no_access":false,
+        "parent_shared_folder_id":"84528192421",
+        "read_only":false,
+        "traverse_only":false
+      }
+    }
+  ],
+  "has_more":false
+}

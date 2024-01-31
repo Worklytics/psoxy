@@ -2,7 +2,6 @@ package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.rules.RuleSet;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -22,13 +21,11 @@ public class GMailTests extends JavaRulesTestBaseCase {
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GMAIL;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/g-workspace/gmail";
-
-    @Getter
-    final String defaultScopeId = "gapps";
-
-    @Getter
-    final String yamlSerializationFilepath = "google-workspace/gmail";
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("google-workspace")
+        .defaultScopeId("gapps")
+        .sourceKind("gmail")
+        .build();
 
     @Test
     @SneakyThrows

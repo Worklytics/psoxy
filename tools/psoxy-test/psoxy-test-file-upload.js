@@ -1,43 +1,44 @@
 import { constants as httpCodes } from 'http2';
-import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
-import { saveToFile, parseBucketOption } from './lib/utils.js';
+import { execFileSync } from 'child_process';
+import {
+  addFilenameSuffix,
+  isGzipped,
+  parseBucketOption,
+  unzip,
+} from './lib/utils.js';
 import aws from './lib/aws.js';
-import chalk from 'chalk';
 import fs from 'fs';
 import gcp from './lib/gcp.js';
 import getLogger from './lib/logger.js';
 import path from 'path';
-import _ from 'lodash';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const TIMESTAMP = Date.now();
+const SANITIZED_FILE_SUFFIX = 'sanitized';
 
-const FILE_EXTENSION = '.csv';
 /**
  * AWS upload/download
  *
  * @param {Object} options - see default export
  * @param {Object} logger
- * @returns {string} - downloaded file contents
+ * @returns {Object} paths
+ * @returns {string} paths.original
+ * @returns {string} paths.sanitized
  */
 async function testAWS(options, logger) {
-  const filename = path.basename(options.file, FILE_EXTENSION);
-  // Add timestamp to filename to make sure download process doesn't get
-  // the wrong file
-  const filenameWithTimestamp = `${filename}-${Date.now()}${FILE_EXTENSION}`;
+  const parsedPath = path.parse(options.file);
+  const filenameWithTimestamp = addFilenameSuffix(parsedPath.base, TIMESTAMP);
 
   if (options.role) {
     logger.verbose(`Assuming role ${options.role}`);
   }
   const client = await aws.createS3Client(options.role, options.region);
 
-
   const parsedBucketInputOption = parseBucketOption(options.input);
   // not destructuring to avoid variable name collision with path module
   const inputBucket = parsedBucketInputOption.bucket;
   const inputPath = parsedBucketInputOption.path;
   const inputKey = inputPath + filenameWithTimestamp;
-  logger.info(`Uploading "${inputPath + filename}" to input bucket: ${inputBucket}`);
+  logger.info(`Uploading "${inputPath + parsedPath.base}" as "${inputKey}" to input bucket: ${inputBucket}`);
 
   const uploadResult = await aws.upload(inputBucket, inputKey, options.file, {
       role: options.role,
@@ -47,9 +48,7 @@ async function testAWS(options, logger) {
   if (uploadResult['$metadata'].httpStatusCode !== httpCodes.HTTP_STATUS_OK) {
     throw new Error('Unable to upload file', { cause: uploadResult });
   }
-
   logger.success('File uploaded');
-  logger.verbose('Upload result: ', { additional: uploadResult });
 
   const parsedBucketOutputOption = parseBucketOption(options.output)
   const outputBucket = parsedBucketOutputOption.bucket;
@@ -57,14 +56,35 @@ async function testAWS(options, logger) {
   const outputKey = outputPath + filenameWithTimestamp;
   logger.info(`Downloading sanitized file from output bucket: ${outputBucket}`);
 
-  const downloadResult = await aws.download(outputBucket, outputKey, {
+  const sanitizedFilename = addFilenameSuffix(outputKey, SANITIZED_FILE_SUFFIX);
+  const destination = `${parsedPath.dir}/${sanitizedFilename}`;
+
+  await aws.download(outputBucket, outputKey, destination, {
       role: options.role,
       region: options.region,
     }, client, logger);
-
   logger.success('File downloaded');
 
-  return downloadResult;
+  if (options.deleteSanitizedFile) {
+    logger.verbose(`Deleting sanitized file from output bucket: ${outputBucket}`);
+    try {
+      // Note:
+      // We don't use bucket versioning. The S3 client will attempt to delete
+      // the default "null" version of the object, but:
+      // > If there isn't a null version, Amazon S3 does not remove any objects
+      //   but will still respond that the command was successful.
+      await aws.deleteObject(outputBucket, outputKey, options, client);
+    } catch (error) {
+      logger.error(`Error deleting sanitized file: ${error.message}`, {
+        additional: error,
+      });
+    }
+  }
+
+  return {
+    original: options.file,
+    sanitized: destination,
+  }
 }
 
 /**
@@ -72,18 +92,23 @@ async function testAWS(options, logger) {
  *
  * @param {Object} options - see default export
  * @param {Object} logger
- * @returns {string} - downloaded file contents
+ * @returns {Object} paths
+ * @returns {string} paths.original
+ * @returns {string} paths.sanitized
  */
 async function testGCP(options, logger) {
-  const filename = path.basename(options.file, FILE_EXTENSION);
-  const filenameWithTimestamp = `${filename}-${Date.now()}${FILE_EXTENSION}`;
+  const parsedPath = path.parse(options.file);
+  // Add timestamp to filename to make sure download process doesn't get the
+  // wrong file
+  const filenameWithTimestamp = addFilenameSuffix(parsedPath.base, TIMESTAMP);
+
   const client = gcp.createStorageClient();
 
   const parsedBucketInputOption = parseBucketOption(options.input);
   const inputBucket = parsedBucketInputOption.bucket;
   const inputPath = parsedBucketInputOption.path;
   const inputKey = inputPath + filenameWithTimestamp;
-  logger.info(`Uploading "${filename}" to input bucket: ${inputBucket}`);
+  logger.info(`Uploading "${inputPath + parsedPath.base}" as "${inputKey}" to input bucket: ${inputBucket}`);
   const [, uploadResult] = await gcp.upload(inputBucket, options.file,
     client, inputKey);
 
@@ -95,14 +120,30 @@ async function testGCP(options, logger) {
   const outputPath = parsedBucketOutputOption.path;
   const outputKey = outputPath + filenameWithTimestamp;
   logger.info(`Downloading sanitized file from output bucket: ${outputBucket}`);
-  const [downloadResult] = await gcp.download(outputBucket, outputKey, client,
-    logger);
+
+  // where to save the sanitized file; the file in the output bucket will have
+  // {original filename}-{timestamp} as filename, so we save it locally as
+  // {original filename}-{timestamp}-{sanitized} to minimize the chance of
+  // modifying files in the system
+  const sanitizedFilename = addFilenameSuffix(outputKey, SANITIZED_FILE_SUFFIX);
+  const destination = `${parsedPath.dir}/${sanitizedFilename}`;
+
+  await gcp.download(outputBucket, outputKey, destination, client, logger);
   logger.success('File downloaded');
 
-  const fileContents = downloadResult.toString('utf8');
-  logger.verbose('Download result:', { additional: fileContents });
+  if (options.deleteSanitizedFile) {
+    logger.verbose(`Deleting sanitized file from output bucket: ${outputBucket}`);
+    try {
+      await gcp.deleteFile(outputBucket, outputKey, client);
+    } catch (error) {
+      logger.error(`Error deleting sanitized file: ${error.message}`);
+    }
+  }
 
-  return fileContents;
+  return {
+    original: options.file,
+    sanitized: destination,
+  }
 }
 
 /**
@@ -120,43 +161,48 @@ async function testGCP(options, logger) {
  * @param {string} options.region - AWS: buckets region
  * @param {string} options.role - AWS: role to assume (ARN format; optional)
  * @param {boolean} options.saveSanitizedFile - Whether to save sanitized file or not
+ * @param {boolean} options.deleteSanitizedFile - Whether to delete sanitized file or not (from
+ *  output bucket, after test completion)
  * @returns {string}
  */
 export default async function (options = {}) {
   const logger = getLogger(options.verbose);
 
-  let downloadResult;
-  if (options.deploy === 'AWS') {
-    downloadResult = await testAWS(options, logger);
-  } else {
-    downloadResult = await testGCP(options, logger);
+  const deploymentTypeFn = options.deploy === 'AWS' ? testAWS : testGCP;
+  const { original, sanitized } = await deploymentTypeFn(options, logger);
+
+  let originalDiffPath = original;
+  let sanitizedDiffPath = sanitized;
+  const isOriginalGzipped = await isGzipped(original);
+  if (isOriginalGzipped) {
+    // Assume sanitized file is also gzipped
+    originalDiffPath = await unzip(original);
+    sanitizedDiffPath = await unzip(sanitized);
   }
 
-  const outputFilename = `${path.parse(options.file).name}-sanitized${path.extname(options.file)}`;
-  // Always saving it to be able to easily "diff" input and output/sanitized;
-  // delete the sanitized one later
-  await saveToFile(__dirname, outputFilename, downloadResult);
-
+  let diff;
   try {
     logger.info('Comparing input and sanitized output:\n');
-    logger.info(execSync(`diff ${options.file} ${__dirname}/${outputFilename}`));
+    const diff = execFileSync('diff', [ originalDiffPath, sanitizedDiffPath ]);
+    logger.info(diff);
   } catch(error) {
     // if files are different `diff` will end with exit code 1, so print results
-    logger.info(error.stdout.toString());
+    diff = error.stdout.toString();
+    logger.info(diff);
   }
 
-  fs.unlinkSync(`${__dirname}/${outputFilename}`);
-
-  if (options.saveSanitizedFile) {
-    // save file to same location as input
-    let outputDir = path.parse(options.file).dir;
-    if (_.isEmpty(outputDir)) {
-      // fallback to current exe path
-      outputDir = process.cwd();
-    }
-    logger.info(`Sanitized file written at ${chalk.yellow(new Date().toISOString())}: ${outputDir}/${outputFilename}`);
-    await saveToFile(outputDir, outputFilename, downloadResult);
+  if (isOriginalGzipped) {
+    // delete unzipped files
+    [originalDiffPath, sanitizedDiffPath]
+      .forEach(filePath => fs.unlinkSync(filePath));
   }
 
-  return downloadResult;
+  if (!options.saveSanitizedFile) {
+    // delete sanitized file
+    fs.unlinkSync(sanitized);
+  } else {
+    logger.info(`Sanitized file saved to ${sanitized}`);
+  }
+
+  return diff;
 }

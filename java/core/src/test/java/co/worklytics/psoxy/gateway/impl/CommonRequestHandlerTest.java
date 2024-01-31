@@ -59,6 +59,8 @@ class CommonRequestHandlerTest {
 
         when(handler.config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
             .thenReturn(Optional.of("salt"));
+        when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
+            .thenReturn("gmail");
     }
 
     @Inject
@@ -129,7 +131,7 @@ class CommonRequestHandlerTest {
             Pseudonymizer.ConfigurationOptions.builder().build().getPseudonymImplementation());
 
         //prep mock request
-        HttpEventRequest request = mock(HttpEventRequest.class);
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
         when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
             .thenReturn(Optional.of(PseudonymImplementation.LEGACY.getHttpHeaderValue()));
 
@@ -148,7 +150,7 @@ class CommonRequestHandlerTest {
             Pseudonymizer.ConfigurationOptions.builder().build().getPseudonymImplementation());
 
         //prep mock request
-        HttpEventRequest request = mock(HttpEventRequest.class);
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
         when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
             .thenReturn(Optional.of(PseudonymImplementation.LEGACY.getHttpHeaderValue()));
 
@@ -180,6 +182,7 @@ class CommonRequestHandlerTest {
                         response.addHeader("X-RateLimit-Category", "ABC");
                         response.addHeader("X-RateLimit-Remaining", "25600");
                         response.addHeader("X-CustomStuff", "value123");
+                        response.addHeader("Link", "https://some-url.com/with_a?link=to_use");
                         response.setStatusCode(200);
                         response.setContentType(Json.MEDIA_TYPE);
                         response.setContent("OK");
@@ -200,8 +203,8 @@ class CommonRequestHandlerTest {
         Set<String> UNEXPECTED_HEADERS = CommonRequestHandler.normalizeHeaders(
             Set.of("Set-Cookie", org.apache.http.HttpHeaders.CONNECTION, "X-CustomStuff"));
 
-        // 7 headers + content-type
-        assertEquals(8, headersMap.size());
+        // 8 headers + content-type
+        assertEquals(9, headersMap.size());
         assertTrue(headersMap.keySet().stream().noneMatch(UNEXPECTED_HEADERS::contains));
 
         assertEquals("no-cache, no-store, max-age=0, must-revalidate", headersMap.get(CommonRequestHandler.normalizeHeader(org.apache.http.HttpHeaders.CACHE_CONTROL)));

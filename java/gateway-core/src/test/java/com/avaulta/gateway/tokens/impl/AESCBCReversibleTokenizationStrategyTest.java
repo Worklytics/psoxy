@@ -4,6 +4,7 @@ import com.avaulta.gateway.pseudonyms.impl.TestUtils;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.Token;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,9 +53,22 @@ class AESCBCReversibleTokenizationStrategyTest {
         IntStream.generate(() -> random.nextInt(1000000000)).limit(100).forEach(i -> {
             String pseudonym = new String(encoder.encode(pseudonymizationStrategy.getReversibleToken("blah" + i, Function.identity())));
             assertEquals(
-                    Pseudonym.HASH_SIZE_BYTES + 32, //hash + ciphertext
+                deterministicTokenizationStrategy.getTokenLength() + 32, //hash + ciphertext
                 pseudonym.length());
         });
+    }
+
+    @Test
+    void deterministicIsPrefixOfReversible() {
+        Token reversible = Token.builder()
+            .reversible(pseudonymizationStrategy.getReversibleToken("blah", Function.identity()))
+            .build();
+        Token deterministic = Token.builder()
+            .hash(deterministicTokenizationStrategy.getToken("blah", Function.identity()))
+            .build();
+
+        assertEquals(new String(encoder.encode(reversible.getHash())),
+            new String(encoder.encode(deterministic.getHash())));
     }
 
 }

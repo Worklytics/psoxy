@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     google = {
-      version = "~> 4.12"
+      version = ">= 3.74, <= 5.0"
     }
   }
 }
@@ -28,7 +28,7 @@ data "google_project" "project" {
 }
 
 # ensure Storage API is activated
-resource "google_project_service" "gcp-infra-api" {
+resource "google_project_service" "gcp_infra_api" {
   for_each = toset([
     "storage.googleapis.com",
   ])
@@ -54,7 +54,7 @@ locals {
 }
 
 # data input to function
-resource "google_storage_bucket" "input-bucket" {
+resource "google_storage_bucket" "input_bucket" {
   project                     = var.project_id
   name                        = coalesce(var.input_bucket_name, "${local.bucket_prefix}-input")
   location                    = var.region
@@ -79,7 +79,7 @@ resource "google_storage_bucket" "input-bucket" {
   }
 
   depends_on = [
-    google_project_service.gcp-infra-api
+    google_project_service.gcp_infra_api
   ]
 }
 
@@ -97,16 +97,9 @@ module "output_bucket" {
   bucket_labels                  = var.default_labels
 
   depends_on = [
-    google_project_service.gcp-infra-api
+    google_project_service.gcp_infra_api
   ]
 }
-
-# TODO: added in v0.4.19
-moved {
-  from = google_storage_bucket.output-bucket
-  to   = module.output_bucket.google_storage_bucket.bucket
-}
-
 
 resource "google_service_account" "service_account" {
   project      = var.project_id
@@ -115,14 +108,8 @@ resource "google_service_account" "service_account" {
   description  = "${local.function_name} runs as this service account"
 }
 
-# TODO: moved in 0.4.25; remove in 0.5
-moved {
-  from = google_service_account.service-account
-  to   = google_service_account.service_account
-}
-
 resource "google_storage_bucket_iam_member" "access_for_import_bucket" {
-  bucket = google_storage_bucket.input-bucket.name
+  bucket = google_storage_bucket.input_bucket.name
   role   = "roles/storage.objectViewer"
   member = "serviceAccount:${google_service_account.service_account.email}"
 }
@@ -134,6 +121,24 @@ resource "google_storage_bucket_iam_member" "grant_sa_read_on_processed_bucket" 
   member = "serviceAccount:${var.worklytics_sa_emails[count.index]}"
   role   = "roles/storage.objectViewer"
 }
+
+resource "google_storage_bucket_iam_member" "grant_testers_admin_on_import_bucket" {
+  for_each = toset(var.gcp_principals_authorized_to_test)
+
+  bucket = google_storage_bucket.input_bucket.name
+  role   = "roles/storage.objectAdmin"
+  member = each.value
+}
+
+resource "google_storage_bucket_iam_member" "grant_testers_admin_on_processed_bucket" {
+  for_each = toset(var.gcp_principals_authorized_to_test)
+
+  bucket = module.output_bucket.bucket_name
+  role   = "roles/storage.objectAdmin"
+  member = each.value
+}
+
+
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret" {
   for_each = var.secret_bindings
@@ -163,21 +168,22 @@ resource "google_cloudfunctions_function" "function" {
   project     = var.project_id
   region      = var.region
 
-  available_memory_mb   = var.available_memory_mb
+  available_memory_mb   = coalesce(var.available_memory_mb, 1024)
   source_archive_bucket = var.artifacts_bucket_name
   source_archive_object = var.deployment_bundle_object_name
   entry_point           = "co.worklytics.psoxy.GCSFileEvent"
   service_account_email = google_service_account.service_account.email
+  timeout               = 540 # 9 minutes, which is gen1 max allowed
   labels                = var.default_labels
 
   environment_variables = merge(tomap({
-    INPUT_BUCKET  = google_storage_bucket.input-bucket.name,
+    INPUT_BUCKET  = google_storage_bucket.input_bucket.name,
     OUTPUT_BUCKET = module.output_bucket.bucket_name,
     }),
     var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
     var.environment_variables,
     var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
-    var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${upper(local.instance_id)}_" },
+    var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${replace(upper(var.instance_id), "-", "_")}_" },
   )
 
   dynamic "secret_environment_variables" {
@@ -194,7 +200,7 @@ resource "google_cloudfunctions_function" "function" {
 
   event_trigger {
     event_type = "google.storage.object.finalize"
-    resource   = google_storage_bucket.input-bucket.name
+    resource   = google_storage_bucket.input_bucket.name
   }
 
   lifecycle {
@@ -218,7 +224,7 @@ Check that the Psoxy works as expected and it transforms the files of your input
 the rules you have defined:
 
 ```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${module.output_bucket.bucket_name}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
 ```
 EOT
 }
@@ -256,18 +262,11 @@ for a detailed description of all the different options.
 EOT
 }
 
-moved {
-  from = local_file.todo-gcp-psoxy-bulk-test
-  to   = local_file.todo_test_gcp_psoxy_bulk[0]
-}
-
-
-
 resource "local_file" "test_script" {
   count = var.todos_as_local_files ? 1 : 0
 
   filename        = "test-${trimprefix(local.instance_id, var.environment_id_prefix)}.sh"
-  file_permission = "0770"
+  file_permission = "755"
   content         = <<EOT
 #!/bin/bash
 FILE_PATH=$${1:-${try(local.example_file, "")}}
@@ -276,14 +275,9 @@ NC='\e[0m'
 
 printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"tf
 
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d GCP -i ${google_storage_bucket.input-bucket.name} -o ${module.output_bucket.bucket_name}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
 EOT
 
-}
-
-moved {
-  from = local_file.test_script
-  to   = local_file.test_script[0]
 }
 
 output "instance_id" {
@@ -303,7 +297,7 @@ output "bucket_prefix" {
 }
 
 output "input_bucket" {
-  value = google_storage_bucket.input-bucket.name
+  value = google_storage_bucket.input_bucket.name
 }
 
 output "sanitized_bucket" {

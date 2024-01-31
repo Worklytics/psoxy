@@ -3,7 +3,6 @@
 # is provisioned, and that's implicit in the provider - so we should just infer from the provider
 data "aws_region" "current" {}
 
-
 resource "random_string" "bucket_suffix" {
   length  = 8
   lower   = true
@@ -62,15 +61,6 @@ resource "aws_s3_bucket" "input" {
   }
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "input" {
-  bucket = aws_s3_bucket.input.bucket
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "aws:kms"
-    }
-  }
-}
 
 resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
   bucket = aws_s3_bucket.input.bucket
@@ -105,26 +95,6 @@ resource "aws_s3_bucket" "sanitized" {
   }
 }
 
-moved {
-  from = aws_s3_bucket.output
-  to   = aws_s3_bucket.sanitized
-}
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "sanitized" {
-  bucket = aws_s3_bucket.sanitized.bucket
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "aws:kms"
-    }
-  }
-}
-
-moved {
-  from = aws_s3_bucket_server_side_encryption_configuration.output
-  to   = aws_s3_bucket_server_side_encryption_configuration.sanitized
-}
-
 resource "aws_s3_bucket_public_access_block" "sanitized" {
   bucket = aws_s3_bucket.sanitized.bucket
 
@@ -132,11 +102,6 @@ resource "aws_s3_bucket_public_access_block" "sanitized" {
   block_public_policy     = true
   restrict_public_buckets = true
   ignore_public_acls      = true
-}
-
-moved {
-  from = aws_s3_bucket_public_access_block.output-block-public-access
-  to   = aws_s3_bucket_public_access_block.sanitized
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "expire_sanitized_files" {
@@ -150,7 +115,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "expire_sanitized_files" {
     }
   }
 }
-
 
 resource "aws_lambda_permission" "allow_input_bucket" {
   statement_id  = "AllowExecutionFromS3Bucket"
@@ -170,7 +134,6 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
   depends_on = [aws_lambda_permission.allow_input_bucket]
 }
-
 
 # the lambda function needs to get single objects from the input bucket
 resource "aws_iam_policy" "input_bucket_getObject_policy" {
@@ -229,19 +192,9 @@ resource "aws_iam_policy" "sanitized_bucket_write_policy" {
   }
 }
 
-moved {
-  from = aws_iam_policy.output_bucket_write_policy
-  to   = aws_iam_policy.sanitized_bucket_write_policy
-}
-
 resource "aws_iam_role_policy_attachment" "write_policy_for_sanitized_bucket" {
   role       = module.psoxy_lambda.iam_role_for_lambda_name
   policy_arn = aws_iam_policy.sanitized_bucket_write_policy.arn
-}
-
-moved {
-  from = aws_iam_role_policy_attachment.write_policy_for_output_bucket
-  to   = aws_iam_role_policy_attachment.write_policy_for_sanitized_bucket
 }
 
 # proxy caller (data consumer) needs to read (both get and list objects) from the output bucket
@@ -274,10 +227,7 @@ resource "aws_iam_policy" "sanitized_bucket_read" {
   }
 }
 
-moved {
-  from = aws_iam_policy.output_bucket_read
-  to   = aws_iam_policy.sanitized_bucket_read
-}
+
 
 locals {
   accessor_role_names = concat([var.api_caller_role_name], var.sanitized_accessor_role_names)
@@ -296,7 +246,7 @@ resource "aws_ssm_parameter" "rules" {
   name           = "${var.path_to_instance_ssm_parameters}RULES"
   type           = "String"
   description    = "Rules for transformation of files. NOTE: any 'RULES' env var will override this value"
-  insecure_value = yamlencode(var.rules) # NOTE: insecure_value just means shown in Terraform output
+  insecure_value = var.rules_file == null ? yamlencode(var.rules) : file(var.rules_file) # NOTE: insecure_value just means shown in Terraform output
 
   lifecycle {
     ignore_changes = [
@@ -315,7 +265,7 @@ resource "aws_iam_policy" "testing" {
     "Statement" : [
       {
         "Action" : [
-          "s3:PutObject",
+          "s3:PutObject"
         ]
         "Effect" : "Allow",
         "Resource" : [
@@ -326,7 +276,9 @@ resource "aws_iam_policy" "testing" {
       {
         "Action" : [
           "s3:GetObject",
-          "s3:ListBucket"
+          "s3:ListBucket",
+          "s3:DeleteObject",
+          "s3:DeleteObjectVersion"
         ],
         "Effect" : "Allow",
         "Resource" : [
@@ -403,7 +355,7 @@ resource "local_file" "todo-aws-psoxy-bulk-test" {
 
 resource "local_file" "test_script" {
   filename        = "test-${var.instance_id}.sh"
-  file_permission = "0770"
+  file_permission = "755"
   content         = <<EOT
 #!/bin/bash
 FILE_PATH=$${1:-${try(local.example_file, "")}}

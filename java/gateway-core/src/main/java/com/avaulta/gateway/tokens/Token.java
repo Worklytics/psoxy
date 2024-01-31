@@ -1,5 +1,6 @@
 package com.avaulta.gateway.tokens;
 
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
@@ -17,10 +18,6 @@ import java.util.Arrays;
 @EqualsAndHashCode(callSuper = false)
 @SuperBuilder(toBuilder = true)
 public class Token {
-
-    //NOTE: really a property of hash alg, which is SHA-256
-    public static final int HASH_SIZE_BYTES = 32;
-
     /**
      * potentially reversible form of this token; if passed back to TokenizationStrategy
      * instance that created it, that instance may, based on its configuration(rules) be able to
@@ -30,26 +27,26 @@ public class Token {
      * expected to be cryptographically secure encryption - we make no such claim, although in
      * practice strive to implement it as such)
      *
-     * prefix of this, of length HASH_SIZE_BYTES, MUST be equivalent to `hash` value for
-     * token.
+     * prefix of this MUST be equivalent to `hash` value for token.
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("r")
     byte[] reversible;
 
     /**
-     * SHA-256 hash of canonicalized token
+     * hash of canonicalized token; usually SHA-256
      */
+    //TODO: make this @NonNull??
     @JsonProperty("h")
     byte[] hash;
 
     public byte[] getHash() {
-        if (reversible == null) {
-            return hash;
+        if (this.hash == null) {
+            //legacy case; in general, we should try to fill 'hash' explicitly not rely on this
+            // magic, which presumes hash is 256-bit
+            return Arrays.copyOfRange(this.getReversible(), 0, Sha256DeterministicTokenizationStrategy.HASH_SIZE_BYTES);
         } else {
-            //kinda hacky; puts restriction on implementations of TokenizationStrategy (reversibles
-            // MUST use SHA-256 as prefix of their results)
-            return Arrays.copyOfRange(reversible, 0, HASH_SIZE_BYTES);
+            return this.hash;
         }
     }
 }

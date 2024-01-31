@@ -140,6 +140,12 @@ variable "available_memory_mb" {
   default     = 1024
 }
 
+variable "gcp_principals_authorized_to_test" {
+  type        = list(string)
+  description = "list of GCP principals authorized to test this deployment - eg 'user:alice@acme.com', 'group:devs@acme.com'; if omitted, up to you to configure necessary perms for people to test if desired."
+  default     = []
+}
+
 variable "todos_as_local_files" {
   type        = bool
   description = "whether to render TODOs as flat files"
@@ -151,4 +157,3 @@ variable "todo_step" {
   description = "of all todos, where does this one logically fall in sequence"
   default     = 1
 }
-

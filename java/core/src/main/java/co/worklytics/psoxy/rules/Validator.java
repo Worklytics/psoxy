@@ -1,56 +1,110 @@
 package co.worklytics.psoxy.rules;
 
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.*;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.JsonPath;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.extern.java.Log;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+
+@Singleton
+@NoArgsConstructor(onConstructor_ = @Inject)
+@Log
 public class Validator {
 
-    static public void validate(@NonNull RuleSet rules) {
-        if (rules instanceof CsvRules) {
-            validate((CsvRules) rules);
+    public void validate(@NonNull com.avaulta.gateway.rules.RuleSet rules) {
+        if (rules instanceof ColumnarRules) {
+            validate((ColumnarRules) rules);
         } else if (rules instanceof Rules2) {
             validate((Rules2) rules);
+        } else if (rules instanceof MultiTypeBulkDataRules) {
+            validate((MultiTypeBulkDataRules) rules);
+        } else if (rules instanceof RecordRules) {
+            validate((RecordRules) rules);
         } else {
           throw new NotImplementedException("Set not supported: " + rules.getClass().getSimpleName());
         }
     }
 
-    static public void validate(@NonNull CsvRules rules) {
+    public void validate(@NonNull ColumnarRules rules) {
         Preconditions.checkNotNull(rules.getColumnsToPseudonymize());
         Preconditions.checkNotNull(rules.getColumnsToRedact());
 
         //check for nonsensical rules
-        Preconditions.checkArgument(Collections.disjoint(rules.getColumnsToRedact(), rules.getColumnsToDuplicate().values()),
-            "Redacting column produced through duplication is non-sensical");
-
-
-        //columns to pseudonymize should NOT contain any value
+        if (!isEmpty(rules.getColumnsToRedact()) && !isEmpty(rules.getColumnsToPseudonymize()) &&
+            !Collections.disjoint(rules.getColumnsToRedact(), rules.getColumnsToDuplicate().values())) {
+            log.log(Level.WARNING, "Replacing columns produced via columnsToDuplicate is nonsensical");
+        }
     }
 
-    static public void validate(@NonNull Rules2 rules) {
-        rules.getEndpoints().forEach(Validator::validate);
+    public void validate(@NonNull RecordRules rules) {
+        Preconditions.checkNotNull(rules.getFormat());
     }
-    static void validate(@NonNull Endpoint endpoint) {
+
+    public void validate(@NonNull MultiTypeBulkDataRules rules) {
+        Preconditions.checkArgument(rules.getFileRules().size() > 0, "Must have at least one file rule");
+
+        List<String> templatesNotPrefixedWithSlash = rules.getFileRules().keySet().stream()
+            .filter(k -> !k.startsWith("/"))
+            .collect(Collectors.toList());
+
+        //not invalid per se, but likely to be a mistake
+        if (!templatesNotPrefixedWithSlash.isEmpty()) {
+            log.warning("The following path templates do not start with '/'; for readability, we recommend that they do:\n " + templatesNotPrefixedWithSlash.stream().collect(Collectors.joining("\n")));
+        }
+
+        List<Map.Entry<String, BulkDataRules>> nested =
+            rules.getFileRules().entrySet().stream()
+                .filter(firstLevel -> firstLevel instanceof MultiTypeBulkDataRules
+                        && ((MultiTypeBulkDataRules) firstLevel).getFileRules().values().stream().anyMatch(secondLevel -> secondLevel instanceof MultiTypeBulkDataRules))
+                .collect(Collectors.toList());
+
+        if (!nested.isEmpty()) {
+            throw new IllegalArgumentException("More than 1 level of nested MultiTypeBulkDataRules are not supported. Found: " + nested.stream().map(Map.Entry::getKey).collect(Collectors.joining(", ")));
+        }
+
+
+        rules.getFileRules().values().forEach(this::validate);
+    }
+
+    public void validate(@NonNull Rules2 rules) {
+        rules.getEndpoints().forEach(this::validate);
+    }
+
+    void validate(@NonNull Endpoint endpoint) {
         if (StringUtils.isBlank(endpoint.getPathTemplate())) {
             if (StringUtils.isBlank(endpoint.getPathRegex())) {
                 throw new Error("Endpoint must have either pathTemplate or pathRegex. pass `/` as pathTemplate if you want base path.");
             }
             Pattern.compile(endpoint.getPathRegex());
+
+            //TODO: validate parameter names are ALL valid java capturing group identifiers
+            // eg start w letter, contain only alphanumeric
+        } else {
+            if (!endpoint.getPathTemplate().startsWith("/")) {
+                log.warning("Path template " + endpoint.getPathTemplate() + " does not start with '/'; this is likely to be a mistake");
+            }
         }
 
-        endpoint.getTransforms().forEach(Validator::validate);
+        endpoint.getTransforms().forEach(this::validate);
     }
 
-    static void validate(@NonNull Transform transform) {
+    void validate(@NonNull Transform transform) {
         transform.getJsonPaths().forEach(p -> {
             try {
                 JsonPath.compile(p);

@@ -5,7 +5,7 @@
 #  ../../../tools/update-bundle.sh ~/code/psoxy/ terraform.tfvars aws
 #  ../../../tools/update-bundle.sh ~/code/psoxy/ terraform.tfvars aws s3://my-artifact-bucket/psoxy-project
 
-PSOXY_BASE_DIR=$1
+CLONE_BASE_DIR=$1
 TFVARS_FILE=$2
 HOST_PLATFORM=$3
 BUCKET_PATH=$4
@@ -15,24 +15,64 @@ RED='\e[0;31m'
 BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
-RELEASE_VERSION=$(sed -n -e 's/.*<revision>\(.*\)<\/revision>.*/\1/p' "${PSOXY_BASE_DIR}java/pom.xml")
+if [[ -z "$CLONE_BASE_DIR" ]]; then
+  printf "${RED}Error: Missing required argument: CLONE_BASE_DIR${NC}\n"
+  printf "Usage: update-bundle.sh <CLONE_BASE_DIR> <TFVARS_FILE> <HOST_PLATFORM> [BUCKET_PATH]\n"
+  exit 1
+fi
 
-printf "Building psoxy bundle from code checkout at ${BLUE}${PSOXY_BASE_DIR}${NC} for ${BLUE}${HOST_PLATFORM}${NC}; this will take a few minutes ...\n"
+if [[ ! -d "$CLONE_BASE_DIR" ]]; then
+  printf "${RED}Error: ${CLONE_BASE_DIR} directory does not exist.${NC}\n"
+  exit 1
+fi
 
-${PSOXY_BASE_DIR}tools/build.sh -q ${HOST_PLATFORM} ${PSOXY_BASE_DIR}java
+if [[ -z "$TFVARS_FILE" ]]; then
+  printf "${RED}Error: Missing required argument: TFVARS_FILE${NC}\n"
+  printf "Usage: update-bundle.sh <CLONE_BASE_DIR> <TFVARS_FILE> <HOST_PLATFORM> [BUCKET_PATH]\n"
+  exit 1
+fi
 
-cp ${PSOXY_BASE_DIR}java/impl/${HOST_PLATFORM}/target/psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar .
+if [[ ! -f "$TFVARS_FILE" ]]; then
+  printf "${RED}Error: ${TFVARS_FILE} does not exist.${NC}\n"
+  exit 1
+fi
+
+if [[ "$HOST_PLATFORM" != "aws" && "$HOST_PLATFORM" != "gcp" ]]; then
+    echo "Error: HOST_PLATFORM value '${HOST_PLATFORM}' must be 'aws' or 'gcp'."
+    exit 1
+fi
+
+RELEASE_VERSION=$(sed -n -e 's/.*<revision>\(.*\)<\/revision>.*/\1/p' "${CLONE_BASE_DIR}java/pom.xml")
+
+printf "Building proxy deployment bundle from code checkout at ${BLUE}${CLONE_BASE_DIR}${NC} for ${BLUE}${HOST_PLATFORM}${NC}; this will take a few minutes ...\n"
+
+${CLONE_BASE_DIR}tools/build.sh -q ${HOST_PLATFORM} ${CLONE_BASE_DIR}java
+
+cp ${CLONE_BASE_DIR}java/impl/${HOST_PLATFORM}/target/psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar .
 
 
 if [ "$HOST_PLATFORM" == "gcp" ]; then
   zip psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.zip psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar
   rm psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar
   DEPLOYMENT_BUNDLE="psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.zip"
-else
+  BUCKET_PATH_EXAMPLE="gs://my-artifact-bucket/"
+elif [ "$HOST_PLATFORM" == "aws" ]; then
   DEPLOYMENT_BUNDLE="psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar"
+  BUCKET_PATH_EXAMPLE="s3://my-artifact-bucket/"
+else
+  printf "${RED}Unsupported host platform: ${HOST_PLATFORM}${NC}\n"
+  exit 1
 fi
 
-# support building bundle and uploading it into an artitfacts bucket
+# support building bundle and uploading it into an artifacts bucket
+
+if [ -z "$BUCKET_PATH" ]; then
+  echo "If you want to upload deployment bundle to a remote storage location, enter the desired bucket url:"
+  printf "  example: ${BLUE}${BUCKET_PATH_EXAMPLE}${NC}\n"
+  echo "  leave blank to skip uploading bundle"
+  read -p "Enter the bucket url: (or leave blank for none) " BUCKET_PATH
+fi
+
 if [ ! -z "$BUCKET_PATH" ]; then
   # if BUCKET_PATH doesn't end with slash, append it
   if [[ ! "$BUCKET_PATH" == */ ]]; then
@@ -41,7 +81,7 @@ if [ ! -z "$BUCKET_PATH" ]; then
 
   if [ "$HOST_PLATFORM" == "gcp" ]; then
     prefix="gs://"
-    copy_cmd=("gsutil", "cp")
+    copy_cmd=("gsutil" "cp")
     gsutil_version=$(gsutil version 2>&1)
 
     # If the previous command was not successful (gsutil is not installed)
@@ -74,6 +114,11 @@ if [ ! -z "$BUCKET_PATH" ]; then
 
   printf "Copying deployment bundle from ${BLUE}${DEPLOYMENT_BUNDLE}${NC} to ${BLUE}${BUCKET_PATH}${NC} ...\n"
   "${copy_cmd[@]}" "${DEPLOYMENT_BUNDLE}" "${BUCKET_PATH}${DEPLOYMENT_BUNDLE}"
+
+  if [[ $? -ne 0 ]]; then
+    printf "${RED}Error: Failed to upload deployment bundle to ${BUCKET_PATH}${DEPLOYMENT_BUNDLE}${NC}\n"
+    exit 1
+  fi
 
   DEPLOYMENT_BUNDLE="${BUCKET_PATH}${DEPLOYMENT_BUNDLE}"
   printf "Deployment bundle uploaded to ${BLUE}${DEPLOYMENT_BUNDLE}${NC}.\n"

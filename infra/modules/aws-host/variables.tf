@@ -54,12 +54,16 @@ variable "caller_aws_arns" {
   description = "ARNs of AWS accounts allowed to send requests to the proxy (eg, arn:aws:iam::914358739851:root)"
   default     = []
 
-  validation {
-    condition = alltrue([
-      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:((role|user)\\/)?\\w+$", i)) > 0)
-    ])
-    error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::914358739851:root'."
-  }
+  # in theory, can/should enforce validation here, but is less flexible; if it's WRONG, customer
+  # must wait for next release of module to have it corrected
+  #  validation {
+  #    condition = alltrue([
+  #      # see https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-quotas.html
+  #      # sources suggest limit of 64 chars for role names, but not clear if that includes paths so not checking it
+  #      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:((role|user)\\/)?[A-Za-z0-9/=,.@_-]+$", i)) > 0)
+  #    ])
+  #    error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::123123123123:root', 'arn:aws:iam::123123123123:user/ExampleUser', 'arn:aws:iam:123123123123:role/TestRole'", # for testing; can remove once prod-ready
+  #  }
 }
 
 variable "environment_name" {
@@ -139,13 +143,16 @@ variable "api_connectors" {
     example_api_calls                     = optional(list(string), [])
     example_api_calls_user_to_impersonate = optional(string)
     secured_variables = optional(list(object({
-      name     = string
-      value    = optional(string)
-      writable = optional(bool, false)
-      lockable = optional(bool, false)
+      name                = string
+      value               = optional(string)
+      writable            = optional(bool, false)
+      lockable            = optional(bool, false)
+      sensitive           = optional(bool, true)
+      description         = optional(string)
+      value_managed_by_tf = optional(bool, true)
       })),
     [])
-
+    settings_to_provide = optional(map(string), {})
   }))
 
   description = "map of API connectors to provision"
@@ -168,15 +175,21 @@ variable "bulk_connectors" {
     source_kind           = string
     input_bucket_name     = optional(string) # allow override of default bucket name
     sanitized_bucket_name = optional(string) # allow override of default bucket name
-    rules = object({
+    rules = optional(object({
       pseudonymFormat       = optional(string)
       columnsToRedact       = optional(list(string), [])
       columnsToInclude      = optional(list(string), null)
       columnsToPseudonymize = optional(list(string), [])
       columnsToDuplicate    = optional(map(string), {})
       columnsToRename       = optional(map(string), {})
-    })
+      fieldsToTransform = optional(map(object({
+        newName    = string
+        transforms = optional(list(map(string)), [])
+      })))
+    }))
+    rules_file          = optional(string)
     example_file        = optional(string)
+    memory_size_mb      = optional(number)
     settings_to_provide = optional(map(string), {})
   }))
 
@@ -203,9 +216,22 @@ variable "custom_bulk_connector_rules" {
     columnsToPseudonymize = optional(list(string))
     columnsToDuplicate    = optional(map(string))
     columnsToRename       = optional(map(string))
+    fieldsToTransform = optional(map(object({
+      newName    = string
+      transforms = optional(list(map(string)), [])
+    })), {})
   }))
 
   description = "map of connector id --> rules object"
+  default     = {}
+}
+
+variable "custom_bulk_connector_arguments" {
+  type = map(object({
+    memory_size_mb = optional(number)
+  }))
+
+  description = "map of connector id --> arguments object"
   default     = {}
 }
 

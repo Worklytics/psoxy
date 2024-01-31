@@ -5,8 +5,9 @@
 TFVARS_FILE=$1
 PSOXY_BASE_DIR=$2
 DEPLOYMENT_ENV=${3:-"local"}
+HOST_PLATFORM=${4:-"aws"}
 
-SCRIPT_VERSION="v0.4.28"
+SCRIPT_VERSION="rc-v0.4.46"
 
 if [ -z "$PSOXY_BASE_DIR" ]; then
   printf "Usage: init-tfvars.sh <path-to-terraform.tfvars> <path-to-psoxy-base-directory> [DEPLOYMENT_ENV]\n"
@@ -18,6 +19,60 @@ RED='\e[0;31m'
 BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
+prompt_user_Yn() {
+  local prompt_message="$1"
+  printf "$prompt_message"
+  read -p "(Y/n): " yn
+
+  # Default to 'Yes' if the input is empty
+  if [ -z "$yn" ]; then
+    yn="y"
+  fi
+
+  # Convert input to lowercase to be case insensitive
+  yn=$(echo "$yn" | tr '[:upper:]' '[:lower:]')
+
+  # Set result based on user input, defaulting to 'no' for any input other than 'y' or 'yes'
+  result=0
+  if [[ $yn == "y" || $yn == "yes" ]]; then
+      result=1
+  fi
+
+  # Return the result
+  return $result
+}
+
+prompt_confirm_variable_setting() {
+  local setting_name="$1"
+  local default_value="$2"
+
+  # redirect output to stderr; let us capture stdout as a return value
+  >&2 printf "Do you want to set ${BLUE}${setting_name}${NC} to ${BLUE}${default_value}${NC}"
+  >&2 read -p "? (Y/n) " yn
+
+  # Default to 'Yes' if the input is empty
+  if [ -z "$yn" ]; then
+    yn="y"
+  fi
+
+
+
+  # Convert input to lowercase to be case insensitive
+  yn=$(echo "$yn" | tr '[:upper:]' '[:lower:]')
+
+  # Set result based on user input, defaulting to 'no' for any input other than 'y' or 'yes'
+  if [[ $yn == "y" || $yn == "yes" ]]; then
+    result="$default_value"
+  else
+    >&2 printf "Enter value for ${BLUE}${setting_name}${NC}: "
+    >&2 read -p " " user_provided_value
+    result="$user_provided_value"
+  fi
+
+  echo "$result"
+}
+
+
 printf "# terraform.tfvars\n" >> $TFVARS_FILE
 printf "# this file sets the values of variables for your Terraform configuration. You should manage it under \n" >> $TFVARS_FILE
 printf "# version control. anyone working with the infrastructure created by this Terraform configuration will need it\n" >> $TFVARS_FILE
@@ -27,7 +82,7 @@ echo "# root directory of a clone of the psoxy repo " >> $TFVARS_FILE
 echo "#  - by default, it points to .terraform, where terraform clones the main psoxy repo" >> $TFVARS_FILE
 echo "#  - if you have a local clone of the psoxy repo you prefer to use, change this to point there" >> $TFVARS_FILE
 printf "psoxy_base_dir = \"${PSOXY_BASE_DIR}\"\n" >> $TFVARS_FILE
-printf "provision_testing_infra = true\n" >> $TFVARS_FILE
+
 printf "\n" >> $TFVARS_FILE
 
 # pattern used to grep for provider at top-level of Terraform configuration
@@ -37,20 +92,35 @@ AWS_PROVIDER_COUNT=$(terraform providers | grep "${TOP_LEVEL_PROVIDER_PATTERN}/a
 
 if test $AWS_PROVIDER_COUNT -ne 0; then
   printf "AWS provider in Terraform configuration. Initializing variables it requires ...\n"
-  HOST_PLATFORM="aws"
   if aws --version &> /dev/null; then
 
     AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-    printf "# AWS account in which your Psoxy instances will be deployed\n" >> $TFVARS_FILE
-    printf "aws_account_id=\"${AWS_ACCOUNT_ID}\"\n\n" >> $TFVARS_FILE
-    printf "\taws_account_id=${BLUE}\"${AWS_ACCOUNT_ID}\"${NC}\n"
+    if [ $? -eq 0 ] && [ -n "$AWS_ACCOUNT_ID" ]; then
+      printf "# AWS account in which your Psoxy instances will be deployed\n" >> $TFVARS_FILE
+
+      user_value=$(prompt_confirm_variable_setting "aws_account_id" "$AWS_ACCOUNT_ID")
+      printf "aws_account_id=\"${user_value}\"\n\n" >> $TFVARS_FILE
+      printf "\taws_account_id=${BLUE}\"${user_value}\"${NC}\n"
+    else
+      printf "${RED}Failed to determine AWS account ID from your aws CLI configuration. You MUST fill ${BLUE}aws_account_id${NC} in your terraform.tfvars file yourself.${NC}\n"
+      exit 1
+    fi
 
     AWS_REGION=$(aws configure get region)
-    printf "# AWS region in which your Psoxy infrastructure will be deployed\n" >> $TFVARS_FILE
-    printf "aws_region=\"${AWS_REGION}\"\n\n" >> $TFVARS_FILE
-    printf "\taws_region=${BLUE}\"${AWS_REGION}\"${NC}\n"
+    if [ $? -eq 0 ] && [ -n "$AWS_REGION" ]; then
+      printf "# AWS region in which your Psoxy infrastructure will be deployed\n" >> $TFVARS_FILE
+      printf "aws_region=\"${AWS_REGION}\"\n\n" >> $TFVARS_FILE
+      printf "\taws_region=${BLUE}\"${AWS_REGION}\"${NC}\n"
+    fi
+
 
     AWS_ARN=$(aws sts get-caller-identity --query Arn --output text)
+    if [ -z "$AWS_ARN" ]; then
+      AWS_ARN="{{ARN_OF_AWS_ROLE_TERRAFORM_SHOULD_ASSUME}}"
+      TEST_AWS_ARN=" # add ARN of AWS principals you want to be able to invoke your proxy instances for testing purposes\n"
+    else
+      TEST_AWS_ARN="\"${AWS_ARN}\" # for testing; can remove once ready for production\n"
+    fi
     printf "# AWS IAM role to assume when deploying your Psoxy infrastructure via Terraform, if needed\n" >> $TFVARS_FILE
     printf "# - this variable is used when you are authenticated as an AWS user which can assume the AWS role which actually has the requisite permissions to provision your infrastructure\n" >> $TFVARS_FILE
     printf "#   (this is approach is good practice, as minimizes the privileges of the AWS user you habitually use and easily supports multi-account scenarios) \n" >> $TFVARS_FILE
@@ -61,7 +131,7 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
 
     printf "# AWS principals in the following list will be explicitly authorized to invoke your proxy instances\n" >> $TFVARS_FILE
     printf "#  - this is for initial testing/development; it can (and should) be empty for production-use\n" >> $TFVARS_FILE
-    printf "caller_aws_arns = [\n  \"${AWS_ARN}\" # for testing; can remove once prod-ready\n]\n\n" >> $TFVARS_FILE
+    printf "caller_aws_arns = [\n  ${TEST_AWS_ARN}]\n\n" >> $TFVARS_FILE
 
     printf "# GCP service accounts with ids in the list below will be allowed to invoke your proxy instances\n" >> $TFVARS_FILE
     printf "#  - for initial testing/deployment, it can be empty list; it needs to be filled only once you're ready to authorize Worklytics to access your data\n" >> $TFVARS_FILE
@@ -72,68 +142,96 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
     printf "${RED}AWS CLI not available${NC}\n"
   fi
 else
-  HOST_PLATFORM="gcp"
-  printf "No AWS provider found in top-level of Terraform configuration. AWS CLI not required.\n"
+  if [[ "$HOST_PLATFORM" == "aws" ]]; then
+    printf "${RED}HOST_PLATFORM set as 'aws', but no aws provider in Terraform configuration${NC}\n"
+  else
+    printf "No AWS provider found in top-level of Terraform configuration. AWS CLI not required.\n"
+  fi
 fi
 
 
 # GCP / Google Workspace (google provider used for both)
+remove_google_workspace() {
+
+  if [[ -f google-workspace-variables.tf ]]; then
+    rm google-workspace-variables.tf
+  fi
+
+  if [[ -f google-workspace.tf ]]; then
+    rm google-workspace.tf
+  fi
+
+  sed -i '' '/^[[:space:]]*module\.worklytics_connectors_google_workspace\.enabled_api_connectors,[[:space:]]*$/d' main.tf
+
+  sed -i '' '/^[[:space:]]*module\.worklytics_connectors_google_workspace\.todos,[[:space:]]*$/d' main.tf
+
+  sed -i '' '/^[[:space:]]*module\.worklytics_connectors_google_workspace\.next_todo_step,[[:space:]]*$/d' main.tf
+}
+
+
 GOOGLE_PROVIDER_COUNT=$(terraform providers | grep "${TOP_LEVEL_PROVIDER_PATTERN}/google" | wc -l)
 if test $GOOGLE_PROVIDER_COUNT -ne 0; then
-  printf "Google provider in Terraform configuration. Initializing variables it requires ...\n"
   if gcloud --version &> /dev/null ; then
 
     # project
 
     GCP_PROJECT_ID=$(gcloud config get project)
 
-    [[ -f variables.tf ]] && grep -q '^variable "gcp_project_id"' variables.tf
-    if [[ $? -eq 0 ]]; then
-      printf "# GCP project in which required infrastructure will be provisioned\n" >> $TFVARS_FILE
-      printf "gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
-      printf "\tgcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
+    if [[ "$HOST_PLATFORM" == "gcp" ]]; then
+      [[ -f variables.tf ]] && grep -q '^variable "gcp_project_id"' variables.tf
+      if [[ $? -eq 0 ]]; then
+        printf "# GCP project in which required infrastructure will be provisioned\n" >> $TFVARS_FILE
+        printf "gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
+        printf "\tgcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
+      fi
+
+      # tenant SA emails
+      [[ -f variables.tf ]] && grep -q '^variable "worklytics_sa_emails"' variables.tf
+      if [[ $? -eq 0 ]]; then
+        printf "# GCP service account emails in the list below will be allowed to invoke your proxy instances\n" >> $TFVARS_FILE
+        printf "#  - NOTE: this value only applies to GCP deployments\n" >> $TFVARS_FILE
+        printf "#  - for initial testing/deployment, it can be empty list; it needs to be filled only once you're ready to authorize Worklytics to access your data\n" >> $TFVARS_FILE
+        printf "worklytics_sa_emails=[\n" >> $TFVARS_FILE
+        printf "  # put 'Service Account Email' value here, which you can obtain from Worklytics ( https://intl.worklytics.co/analytics/integrations/configuration )\n" >> $TFVARS_FILE
+        printf "]\n\n" >> $TFVARS_FILE
+      fi
     fi
 
-    # tenant SA emails
-    [[ -f variables.tf ]] && grep -q '^variable "worklytics_sa_emails"' variables.tf
-    if [[ $? -eq 0 ]]; then
-      printf "# GCP service account emails in the list below will be allowed to invoke your proxy instances\n" >> $TFVARS_FILE
-      printf "#  - NOTE: this value only applies to GCP deployments\n" >> $TFVARS_FILE
-      printf "#  - for initial testing/deployment, it can be empty list; it needs to be filled only once you're ready to authorize Worklytics to access your data\n" >> $TFVARS_FILE
-      printf "worklytics_sa_emails=[\n" >> $TFVARS_FILE
-      printf "  # put 'Service Account Email' value here, which you can obtain from Worklytics ( https://intl.worklytics.co/analytics/integrations/configuration )\n" >> $TFVARS_FILE
-      printf "]\n\n" >> $TFVARS_FILE
-    fi
+    prompt_user_Yn "Do you want to use ${BLUE}Google Workspace${NC} as a data source for your proxy instances?"
 
-    # init google workspace variables if file exists OR the variables are in the main variables.tf file
-    # (google_workspace_gcp_project_id not in all legacy examples)
-    [[ -f google-workspace-variables.tf ]] || grep -q '^variable "google_workspace_gcp_project_id"' variables.tf
-    if [[ $? -eq 0 ]]; then
-      printf "# GCP project in which OAuth clients for Google Workspace connectors will be provisioned\n" >> $TFVARS_FILE
-      printf "#  - if you're not connecting to Google Workspace data sources, you can omit this value\n" >> $TFVARS_FILE
-      printf "google_workspace_gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
-      printf "\tgoogle_workspace_gcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
-    fi
+    if [[ $? -eq 1 ]]; then
+      # init google workspace variables if file exists OR the variables are in the main variables.tf file
+      # (google_workspace_gcp_project_id not in all legacy examples)
+      [[ -f google-workspace-variables.tf ]] || grep -q '^variable "google_workspace_gcp_project_id"' variables.tf
+      if [[ $? -eq 0 ]]; then
+        printf "# GCP project in which OAuth clients for Google Workspace connectors will be provisioned\n" >> $TFVARS_FILE
+        printf "#  - if you're not connecting to Google Workspace data sources, you can omit this value\n" >> $TFVARS_FILE
+        printf "google_workspace_gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
+        printf "\tgoogle_workspace_gcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
+      fi
 
-    # init google workspace variables if file exists OR the variables are in the main variables.tf file
-    [[ -f google-workspace-variables.tf ]] || grep -q '^variable "google_workspace_example_user"' variables.tf
-    if [[ $? -eq 0 ]]; then
-      # example user for Google Workspace
-      printf "# Google Workspace example user \n" >> $TFVARS_FILE
-      printf "#  - this is used to aid testing of Google Workspace connectors against a real account (eg, your own); if you're not using those, it can be omitted\n" >> $TFVARS_FILE
-      GOOGLE_WORKSPACE_EXAMPLE_USER=$(gcloud config get account)
-      printf "google_workspace_example_user=\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"\n\n" >> $TFVARS_FILE
-      printf "\tgoogle_workspace_example_user=${BLUE}\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"${NC}\n"
+      # init google workspace variables if file exists OR the variables are in the main variables.tf file
+      [[ -f google-workspace-variables.tf ]] || grep -q '^variable "google_workspace_example_user"' variables.tf
+      if [[ $? -eq 0 ]]; then
+        # example user for Google Workspace
+        printf "# Google Workspace example user \n" >> $TFVARS_FILE
+        printf "#  - this is used to aid testing of Google Workspace connectors against a real account (eg, your own); if you're not using those, it can be omitted\n" >> $TFVARS_FILE
+        GOOGLE_WORKSPACE_EXAMPLE_USER=$(gcloud config get account)
+        printf "google_workspace_example_user=\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"\n\n" >> $TFVARS_FILE
+        printf "\tgoogle_workspace_example_user=${BLUE}\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"${NC}\n"
 
-      # example admin for Google Workspace
-      printf "# Google Workspace example admin \n" >> $TFVARS_FILE
-      printf "#  - this is used to aid testing of Google Workspace connectors against a real account, in cases where an admin is explicitly required\n" >> $TFVARS_FILE
-      GOOGLE_WORKSPACE_EXAMPLE_USER=$(gcloud config get account)
-      printf "google_workspace_example_admin=\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"\n\n" >> $TFVARS_FILE
-      printf "\tgoogle_workspace_example_admin=${BLUE}\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"${NC}\n"
+        # example admin for Google Workspace
+        printf "# Google Workspace example admin \n" >> $TFVARS_FILE
+        printf "#  - this is used to aid testing of Google Workspace connectors against a real account, in cases where an admin is explicitly required\n" >> $TFVARS_FILE
+        GOOGLE_WORKSPACE_EXAMPLE_USER=$(gcloud config get account)
+        printf "google_workspace_example_admin=\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"\n\n" >> $TFVARS_FILE
+        printf "\tgoogle_workspace_example_admin=${BLUE}\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"${NC}\n"
+      fi
+    else
+      remove_google_workspace
     fi
   else
-    printf "${RED}gcloud not available${NC}\n"
+    printf "${RED}gcloud not available. Your configuration will likely not run. ${NC}\n"
   fi
 else
   printf "No Google provider found in top-level of Terraform configuration. No gcloud initialization required.\n"
@@ -143,37 +241,58 @@ else
   fi
 fi
 
+remove_msft() {
+  if [[ -f msft-365-variables.tf ]]; then
+    rm msft-365-variables.tf
+  fi
+
+  if [[ -f msft-365.tf ]]; then
+    rm msft-365.tf
+  fi
+
+  sed -i '' '/^[[:space:]]*local\.msft_api_connectors_with_auth,[[:space:]]*$/d' main.tf
+
+  sed -i '' '/^[[:space:]]*module\.worklytics_connectors_msft_365\.todos,[[:space:]]*$/d' main.tf
+
+  sed -i '' '/^[[:space:]]*module\.worklytics_connectors_msft_365\.next_todo_step,[[:space:]]*$/d' main.tf
+}
+
 # Microsoft 365
 AZUREAD_PROVIDER_COUNT=$(terraform providers | grep "${TOP_LEVEL_PROVIDER_PATTERN}/azuread" | wc -l)
 if test $AZUREAD_PROVIDER_COUNT -ne 0; then
-  printf "AzureAD provider in Terraform configuration. Initializing variables it requires ...\n"
-  if az --version &> /dev/null ; then
+  printf "AzureAD provider in Terraform configuration.\n"
+  MSFT_VARIABLES_DEFINED=$( [[ -f msft-365-variables.tf ]] || grep -q '^variable "msft_tenant_id"' variables.tf)
 
-    # init msft 365 variables if file exists OR the variables are in the main variables.tf file
-    [[ -f msft-365-variables.tf ]] || grep -q '^variable "msft_tenant_id"' variables.tf
-    if [[ $? -eq 0 ]]; then
-      printf "# Azure AD Apps (Microsoft API Clients) will be provisioned in the following tenant to access your Microsoft 365 data\n" >> $TFVARS_FILE
-      printf "#  - this should be the ID of your Microsoft 365 organization (tenant)\n" >> $TFVARS_FILE
-      printf "#  - if you're not connecting to Microsoft 365 data sources, you can omit this value\n" >> $TFVARS_FILE
-      MSFT_TENANT_ID=$(az account show --query tenantId --output tsv)
-      printf "msft_tenant_id=\"${MSFT_TENANT_ID}\"\n\n" >> $TFVARS_FILE
-      printf "\tmsft_tenant_id=${BLUE}\"${MSFT_TENANT_ID}\"${NC}\n"
+  if $MSFT_VARIABLES_DEFINED; then
+    prompt_user_Yn "Do you want to use ${BLUE}Microsoft 365${NC} as a data source for your proxy instances?"
 
-      MSFT_USER_EMAIL=$(az account show --query user.name --output tsv)
-      printf "# users in the following list will be set as the 'owners' of the Azure AD Apps (API clients) provisioned to access your Microsoft 365 data\n" >> $TFVARS_FILE
-      printf "#  - if you're not connecting to Microsoft 365 data sources, you can omit this value\n" >> $TFVARS_FILE
-      printf "msft_owners_email=[\n  \"${MSFT_USER_EMAIL}\"\n]\n\n" >> $TFVARS_FILE
-      printf "\tmsft_owners_email=${BLUE}[ \"${MSFT_USER_EMAIL}\" ]${NC}\n"
+    if [[ $? -eq 1 ]]; then
+      if az --version &> /dev/null ; then
+        printf "Azure CLI already installed.\n"
+
+        printf "# Azure AD Apps (Microsoft API Clients) will be provisioned in the following tenant to access your Microsoft 365 data\n" >> $TFVARS_FILE
+        printf "#  - this should be the ID of your Microsoft 365 organization (tenant)\n" >> $TFVARS_FILE
+        printf "#  - if you're not connecting to Microsoft 365 data sources, you can omit this value\n" >> $TFVARS_FILE
+        MSFT_TENANT_ID=$(az account show --query tenantId --output tsv)
+        printf "msft_tenant_id=\"${MSFT_TENANT_ID}\"\n\n" >> $TFVARS_FILE
+        printf "\tmsft_tenant_id=${BLUE}\"${MSFT_TENANT_ID}\"${NC}\n"
+
+        MSFT_USER_EMAIL=$(az account show --query user.name --output tsv)
+        printf "# users in the following list will be set as the 'owners' of the Azure AD Apps (API clients) provisioned to access your Microsoft 365 data\n" >> $TFVARS_FILE
+        printf "#  - if you're not connecting to Microsoft 365 data sources, you can omit this value\n" >> $TFVARS_FILE
+        printf "msft_owners_email=[\n  \"${MSFT_USER_EMAIL}\"\n]\n\n" >> $TFVARS_FILE
+        printf "\tmsft_owners_email=${BLUE}[ \"${MSFT_USER_EMAIL}\" ]${NC}\n"
+      else
+        printf "${RED}az not available${NC}. Microsoft 365 variables cannot be initialized.\n"
+      fi
+    else
+      remove_msft
     fi
   else
-    printf "${RED}az not available${NC}\n"
+    printf "No Microsoft 365 variables defined in configuration.\n"
   fi
 else
   printf "No Azure provider found in top-level of Terraform configuration. No Azure CLI initialization needed.\n"
-
-  if [ -f msft-365.tf ]; then
-    printf "If you don't intend to use Microsoft 365 as a data source in future, you can ${BLUE}rm msft-365.tf${NC} and ${BLUE}rm msft-365-variables.tf${NC} \n"
-  fi
 fi
 
 # initialize `enabled_connectors` variable
@@ -185,6 +304,13 @@ printf "# review following list of connectors to enable, and comment out what yo
 printf "enabled_connectors = ${AVAILABLE_CONNECTORS}\n\n" >> $TFVARS_FILE
 
 printf "\n"
+
+if [ "$HOST_PLATFORM" == "aws" ]; then
+  # AWS testing requires provisioning to IAM perms, for which GCP case doesn't support equivalent
+  # atm
+  printf "provision_testing_infra = true\n" >> $TFVARS_FILE
+fi
+
 
 if [ "$DEPLOYMENT_ENV" != "local" ]; then
   printf "Setting ${BLUE}install_test_tool=false${NC} and ${BLUE}todos_as_outputs=true${NC}, because your ${BLUE}terraform apply${NC} will run remotely.\n\n"

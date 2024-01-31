@@ -1,6 +1,9 @@
 # CHANGELOG
 
-Working tracking of changes, updated as work done prior to release.  Please review [releases](https://github.com/Worklytics/psoxy/releases) for ultimate versions.
+Please review [releases](https://github.com/Worklytics/psoxy/releases) for full details of changes
+in each release's notes.
+
+Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
@@ -17,6 +20,68 @@ Working tracking of changes, updated as work done prior to release.  Please revi
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## [0.4.46](https://github.com/Worklytics/psoxy/release/tag/v0.4.46)
+  - you'll see several `timestamp_static` resources provisioned by terraform; these are simply
+    timestamps persisted into state. various example API calls in TODOs/tests are derived from these.
+    using persistent value avoids showing changes on every plan/apply.
+  - AWS:
+    - you'll see encryption config for buckets created by the proxy DESTROYED in your plan. This is
+      actually a no-op, as these were actually just setting default encryption; per Terraform docs,
+      destroying an `aws_s3_bucket_server_side_encryption_configuration` resource resets the bucket
+      to Amazon S3 default encryption. See: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration
+    - this change enables configuration of more sophisticated encryption scenarios via composition.
+      see [docs/aws/encryption-keys.md](docs/aws/encryption-keys.md) for more details.
+
+
+## [0.4.44](https://github.com/Worklytics/psoxy/release/tag/v0.4.44)
+* Microsoft 365 - Outlook calendar: new scopes for fetching Online Meetings have been added to the Entra ID Application
+  used for Microsoft 365 Outlook Calendar and the proxy connector.
+  A Microsoft 365 with admin rights for Entra ID will need to grant admin consent
+  for `OnlineMeetings.Read.All` and `OnlineMeetingArtifact.Read.All` permissions.
+
+* GitHub Enterprise Server: variable `github_api_host` is marked as deprecated and will be removed
+  in next major version. Use `github_enterprise_server_host` instead.
+
+
+## [0.4.43](https://github.com/Worklytics/psoxy/release/tag/v0.4.43)
+ * if you're using the NodeJS test tool, it will be re-installed on your next `terraform apply` due
+   to a dependency change.
+
+## [0.4.41](https://github.com/Worklytics/psoxy/release/tag/v0.4.41)
+  * GCP only : Compute Engine API will be enabled in the project. Newer versions of GCP terraform
+    provider seem to require this. You may see this in your next `terraform plan`, although it may
+    also be a no-op if you already have the API enabled.
+
+## [0.4.36](https://github.com/Worklytics/psoxy/release/tag/v0.4.36)
+  * Microsoft 365 - Azure AD Directory - default rules change to return `proxyAddresses` field for
+    users, pseudonymized; needed to match user's past email addresses against other data sources
+
+## [0.4.34](https://github.com/Worklytics/psoxy/release/tag/v0.4.34)
+  * AWS Only: you may see System Manager Parameter description changes; these have no functional
+    purpose, just helping provide guidance on function of different secrets.
+
+## [0.4.33](https://github.com/Worklytics/psoxy/release/tag/v0.4.33)
+Changes that may appear in Terraform plans:
+ * GCP only: secrets that are managed outside of Terraform will no longer be bound as part of the
+   cloud function's environment variables. You will see env changes in some cases, as well as 'moves'
+   of the associated IAM grants to make those secrets accessible to the cloud function, as this moves
+   up one level in module hierarchy
+ * AWS only: removing CORS from lambda urls - not necessary
+
+## [0.4.31](https://github.com/Worklytics/psoxy/release/tag/v0.4.31)
+
+Changes:
+  * due to split of Terraform vs externally-managed secret values. expect:
+    - AWS hosted: many moves of AWS Systems Manager Parameter Store parameters. No parameters
+      should be created or destroyed.
+    - GCP hosted: destruction of GCP Secret versions for externally managed secrets;
+      behavior is now that *no* version for such secret will be provisioned by Terraform,
+      instead of one with a placeholder value
+    - see https://github.com/Worklytics/psoxy/pull/419
+  * changes to GCP secret permissions for "writable" secrets. Psoxy instances will need to disable
+    old versions of secrets as they rotate, so no require `secretVersionManager` role instead of
+    `secretVersionAdder` role granted previously. See https://github.com/Worklytics/psoxy/pull/447
+
 ## [0.4.25](https://github.com/Worklytics/psoxy/releases/tag/v0.4.25)
 
 
@@ -26,7 +91,7 @@ Changes:
     been updated to expect it
   * due to refactoring of IAM policy/role names, you may see MANY replacements of these resources in
     AWS; these are just name changes to better group your infrastructure, so should be no-ops
-  * 
+  *
 
 
 ## [0.4.20](https://github.com/Worklytics/psoxy/releases/tag/v0.4.20)

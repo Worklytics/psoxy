@@ -5,10 +5,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.impl.BlindlyOptimisticLockService;
-import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
-import co.worklytics.psoxy.gateway.impl.VaultConfigService;
+import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import com.bettercloud.vault.Vault;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -21,6 +18,7 @@ import dagger.multibindings.IntoSet;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.time.Duration;
 
 /**
  * defines how to fulfill dependencies that need platform-specific implementations for GCP platform
@@ -69,6 +67,12 @@ public interface GcpModule {
      *
      * @see "https://cloud.google.com/functions/docs/configuring/env-var"
      * @see "https://cloud.google.com/functions/docs/configuring/secrets"
+     *
+     * but using env vars is problematic because it's bound at boot-time for two reasons:
+     *  - even if reference 'latest' version of secret, it won't be updated until next boot
+     *  - if an enabled, accessible version of the secret doesn't exist at boot-time, cloud function
+     *    fails to boot (or even deploy from Terraform - it just times out)
+     *
      */
     @Provides @Named("Native") @Singleton
     static ConfigService nativeConfigService(EnvVarsConfigService envVarsConfigService,
@@ -79,10 +83,15 @@ public interface GcpModule {
                     // Default is considered as empty; otherwise it will fail due a NPE
                 .orElse("");
 
+
+        SecretManagerConfigService shared = secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToSharedConfig);
+
+        Duration proxyInstanceConfigCacheTtl = Duration.ofMinutes(5);
+        Duration sharedConfigCacheTtl = Duration.ofMinutes(20);
         return CompositeConfigService.builder()
-                .preferred(instanceConfigService)
-                .fallback(secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToSharedConfig))
-                .build();
+            .preferred(new CachingConfigServiceDecorator(instanceConfigService, proxyInstanceConfigCacheTtl))
+            .fallback(new CachingConfigServiceDecorator(shared, sharedConfigCacheTtl))
+            .build();
     }
 
     @Provides @Singleton

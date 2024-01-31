@@ -2,6 +2,7 @@ import {
   executeWithRetry,
   getAWSCredentials,
   getCommonHTTPHeaders,
+  isGzipped,
   request,
   resolveHTTPMethod,
   resolveAWSRegion,
@@ -10,6 +11,7 @@ import {
 import {
   S3Client,
   GetObjectCommand,
+  DeleteObjectCommand,
   PutObjectCommand,
   ListBucketsCommand,
   ListObjectsV2Command
@@ -48,10 +50,6 @@ async function call(options = {}) {
   const logger = getLogger(options.verbose);
   const url = new URL(options.url);
   const method = options.method || resolveHTTPMethod(url.pathname);
-
-  if (!_.isEmpty(options.role)) {
-    logger.verbose(`Assuming role ${options.role}`);
-  }
 
   if (_.isEmpty(options.region)) {
     options.region = resolveAWSRegion(url);
@@ -150,6 +148,16 @@ async function getLogEvents(options, client) {
 }
 
 /**
+ * Get CloudWatch logs Home URL
+ * (lamdba name, nor log group name are available)
+ * @param {object} options
+ * @returns {string} URL
+ */
+function getLogsURL(options) {
+  return `https://${options.region}.console.aws.amazon.com/cloudwatch/home`
+}
+
+/**
  * Parse CloudWatch log events and return a simpler format focused on
  * our use-case: display results via shell
  *
@@ -209,7 +217,7 @@ async function listObjects(bucket, options) {
 
 /**
  * Upload file to S3
- * Ref: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/classes/putobjectcommand.html
+ * Ref: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3/command/PutObjectCommand/
  * Reqs: "s3:PutObject" permissions
  *
  * @param {string} bucket
@@ -226,16 +234,22 @@ async function upload(bucket, key, file, options, client) {
     client = await createS3Client(options.role, options.region);
   }
 
-  return await client.send(new PutObjectCommand({
+  const commandOptions = {
     Bucket: bucket,
     Key: key,
     Body: fs.createReadStream(file),
-  }));
+  }
+
+  if (await isGzipped(file)) {
+    commandOptions.ContentEncoding = 'gzip';
+  }
+
+  return await client.send(new PutObjectCommand(commandOptions));
 }
 
 /**
  * Only for standard S3 storage (others such as Glacier need to restore object first)
- * Ref: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/classes/getobjectcommand.html
+ * Ref: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3/command/GetObjectCommand/
  * Reqs: "s3:ListBucket" (404 if request object doesn't exit, 403 if no perms)
  *
  * This will retry the download if we get a 404; use-case: Psoxy hasn't
@@ -246,6 +260,7 @@ async function upload(bucket, key, file, options, client) {
  *
  * @param {string} bucket
  * @param {string} key - Object's key (filename in S3)
+ * @param {string} destination - local path and filename
  * @param {Object} options
  * @param {string} options.role
  * @param {string} options.region
@@ -253,9 +268,8 @@ async function upload(bucket, key, file, options, client) {
  * @param {number} options.attempts - max number of download attempts
  * @param {S3Client} client
  * @param {Object} logger - winston instance
- * @returns {Promise} resolves with contents of file
  */
-async function download(bucket, key, options, client, logger) {
+async function download(bucket, key, destination, options, client, logger) {
   if (!client) {
     client = await createS3Client(options.role, options.region);
   }
@@ -274,16 +288,46 @@ async function download(bucket, key, options, client, logger) {
   if (downloadResponse === undefined) {
     throw new Error(`${key} not found after multiple attempts`);
   }
-  return downloadResponse.Body.transformToString();
+
+  // save file locally
+  await new Promise((resolve, reject) => {
+    downloadResponse.Body.pipe(fs.createWriteStream(destination))
+      .on('error', err => reject(err))
+      .on('close', () => resolve())
+  })
+}
+
+/**
+ * Delete object from S3;
+ * ref: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/classes/deleteobjectcommand.html
+ * @param {string} bucket
+ * @param {string} key - Object's key (filename in S3)
+ * @param {object} options
+ * @param {string} options.role - role to assume
+ * @param {string} options.region - region to use
+ * @param {S3Client} client - optional
+ * @returns {Promise}
+ */
+async function deleteObject(bucket, key, options, client) {
+  if (!client) {
+    client = await createS3Client(options.role, options.region);
+  }
+  return await client.send(new DeleteObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    // BypassGovernanceRetention: true,
+  }));
 }
 
 export default {
   call,
   createCloudWatchClient,
   createS3Client,
+  deleteObject,
   download,
   getLogEvents,
   getLogStreams,
+  getLogsURL,
   isValidURL,
   listBuckets,
   listObjects,

@@ -2,7 +2,6 @@ package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.rules.RuleSet;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -16,7 +15,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DirectoryTests extends JavaRulesTestBaseCase {
 
@@ -24,17 +22,11 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GDIRECTORY;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/g-workspace/directory";
-
-
-
-    @Getter
-    final String defaultScopeId = "gapps";
-
-
-    @Getter
-    final String yamlSerializationFilepath = "google-workspace/directory";
-
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("google-workspace")
+        .sourceKind("directory")
+        .defaultScopeId("gapps")
+        .build();
 
     @SneakyThrows
     @Test
@@ -194,20 +186,6 @@ public class DirectoryTests extends JavaRulesTestBaseCase {
         // with Rules2 format this doesn't make sense; rules are based on the matched endpoint, so
         // if no rules ALLOW thumbnails, by definition no rules will REDACT its content either
     }
-
-    @SneakyThrows
-    @Test
-    public void roles() {
-        String jsonString = asJson("roles.json");
-
-        String endpoint = "https://admin.googleapis.com/admin/directory/v1/customer/my_customer/roles";
-        assertNotSanitized(jsonString, "Google Apps Administrator Seed Role");
-
-        String sanitized = this.sanitize(endpoint, jsonString);
-
-        assertRedacted(sanitized, "Google Apps Administrator Seed Role");
-    }
-
 
     @ValueSource(strings = {
         "https://admin.googleapis.com/admin/directory/v1/customer/my_customer/domains",

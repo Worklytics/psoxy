@@ -2,21 +2,29 @@ package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.test.TestModules;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.Rules2;
-import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
+import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.transforms.EncryptIp;
+import com.avaulta.gateway.rules.transforms.HashIp;
 import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.MapFunction;
 import dagger.Component;
+import dagger.Module;
+import dagger.Provides;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,14 +36,15 @@ import org.junit.jupiter.params.provider.ValueSource;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.net.URL;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static co.worklytics.test.TestModules.withMockEncryptionKey;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class RESTApiSanitizerImplTest {
 
@@ -62,10 +71,26 @@ class RESTApiSanitizerImplTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
-        MockModules.ForConfigService.class,
+        ForConfigService.class,
     })
     public interface Container {
         void inject(RESTApiSanitizerImplTest test);
+    }
+
+    @Module
+    public interface ForConfigService {
+        @Provides
+        @Singleton
+        static ConfigService configService() {
+            ConfigService mock = MockModules.provideMock(ConfigService.class);
+            TestModules.withMockEncryptionKey(mock);
+            when(mock.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
+                .thenReturn("gmail");
+            when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.TARGET_HOST)))
+                .thenReturn(Optional.of("gmail.googleapis.com"));
+
+            return mock;
+        }
     }
 
     @BeforeEach
@@ -94,7 +119,7 @@ class RESTApiSanitizerImplTest {
             "        \"value\": \"ops@worklytics.co\"\n" +
             "      }";
 
-        String jsonString = new String(TestUtils.getData("api-response-examples/g-workspace/gmail/message.json"));
+        String jsonString = new String(TestUtils.getData("sources/google-workspace/gmail/example-api-responses/original/message.json"));
 
         //verify precondition that example actually contains something we need to pseudonymize
         assertTrue(jsonString.contains(jsonPart));
@@ -247,7 +272,7 @@ class RESTApiSanitizerImplTest {
     void pseudonymizeWithReversalKey() {
         MapFunction f = sanitizer.getPseudonymize(Transform.Pseudonymize.builder().includeReversible(true).build());
 
-        assertEquals("{\"scope\":\"scope\",\"hash\":\"Htt5DmAnE8xaCjfYnLm83_xR8.hhEJE2f_bkFP2yljg\",\"reversible\":\"p~Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0MzTTbTCc7BcR53imT1qZgI\"}",
+        assertEquals("{\"scope\":\"scope\",\"hash\":\"Htt5DmAnE8xaCjfYnLm83_xR8.hhEJE2f_bkFP2yljg\",\"h_4\":\"Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0M\",\"reversible\":\"p~Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0MzTTbTCc7BcR53imT1qZgI\"}",
             f.map("asfa", sanitizer.getJsonConfiguration()));
     }
 
@@ -319,7 +344,7 @@ class RESTApiSanitizerImplTest {
     @SneakyThrows
     @Test
     public void schema_poc() {
-        String jsonString = new String(TestUtils.getData("api-response-examples/g-workspace/gmail/message.json"));
+        String jsonString = new String(TestUtils.getData("sources/google-workspace/gmail/example-api-responses/original/message.json"));
 
 
         final URL EXAMPLE_URL = new URL("https://gmail.googleapis.com/gmail/v1/users/me/messages");
@@ -328,47 +353,47 @@ class RESTApiSanitizerImplTest {
 
         assertTrue(sanitized.contains("historyId"));
 
-        JsonSchemaFilterUtils.JsonSchemaFilter jsonSchemaFilter = JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+        JsonSchemaFilter jsonSchemaFilter = JsonSchemaFilter.builder()
             .type("object")
-            .properties(Map.<String, JsonSchemaFilterUtils.JsonSchemaFilter>of(
-                "id", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+            .properties(Map.<String, JsonSchemaFilter>of(
+                "id", JsonSchemaFilter.builder()
                     .type("string")
                     .build(),
-                "threadId", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                "threadId", JsonSchemaFilter.builder()
                     .type("string")
                     .build(),
-                "labelIds", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                "labelIds", JsonSchemaFilter.builder()
                     .type("array")
-                    .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    .items(JsonSchemaFilter.builder()
                         .type("string")
                         .build())
                     .build(),
-                "payload", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                "payload", JsonSchemaFilter.builder()
                     .type("object")
-                    .properties(Map.<String, JsonSchemaFilterUtils.JsonSchemaFilter>of(
-                        "headers", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                    .properties(Map.<String, JsonSchemaFilter>of(
+                        "headers", JsonSchemaFilter.builder()
                             .type("array")
-                            .items(JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                            .items(JsonSchemaFilter.builder()
                                 .type("object")
-                                .properties(Map.<String, JsonSchemaFilterUtils.JsonSchemaFilter>of(
-                                    "name", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                                .properties(Map.<String, JsonSchemaFilter>of(
+                                    "name", JsonSchemaFilter.builder()
                                         .type("string")
                                         .build(),
-                                    "value", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                                    "value", JsonSchemaFilter.builder()
                                         .type("string")
                                         .build()
                                 ))
                                 .build())
                             .build(),
-                        "partId", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                        "partId", JsonSchemaFilter.builder()
                             .type("string")
                             .build()
                     ))
                     .build(),
-                "sizeEstimate", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                "sizeEstimate", JsonSchemaFilter.builder()
                     .type("integer")
                     .build(),
-                "internalDate", JsonSchemaFilterUtils.JsonSchemaFilter.builder()
+                "internalDate", JsonSchemaFilter.builder()
                     .type("string")
                     .build()
                 ))
@@ -406,14 +431,35 @@ class RESTApiSanitizerImplTest {
 
     @CsvSource(
         value = {
-            "test,false,URL_SAFE_TOKEN,vja8bQGC4pq5kPnJR9D5JFG.WY2S0CX9y5bNT1KmutM",
-            "test,true,URL_SAFE_TOKEN,p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ",
-            "alice@acme.com,true,URL_SAFE_TOKEN,p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com",
-            "alice@acme.com,false,URL_SAFE_TOKEN,BlFx65qHrkRrhMsuq7lg4bCpwsbXgpLhVZnZ6VBMqoY"
+            "LEGACY,test,false,URL_SAFE_TOKEN,vja8bQGC4pq5kPnJR9D5JFG.WY2S0CX9y5bNT1KmutM",
+            "LEGACY,alice@acme.com,false,URL_SAFE_TOKEN,BlFx65qHrkRrhMsuq7lg4bCpwsbXgpLhVZnZ6VBMqoY",
+            //legacy w reversible fail to JSON format!!
+            "LEGACY,test,true,URL_SAFE_TOKEN,'{\"scope\":\"scope\",\"hash\":\"vja8bQGC4pq5kPnJR9D5JFG.WY2S0CX9y5bNT1KmutM\",\"h_4\":\"Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDI\",\"reversible\":\"p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ\"}'",
+            "LEGACY,alice@acme.com,true,URL_SAFE_TOKEN,'{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"BlFx65qHrkRrhMsuq7lg4bCpwsbXgpLhVZnZ6VBMqoY\",\"h_4\":\"UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk\",\"reversible\":\"p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com\"}'",
+
+            // pseudonyms build with DEFAULT implementation always support URL_SAFE_TOKEN encoding
+            "DEFAULT,test,false,URL_SAFE_TOKEN,Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDI",
+            "DEFAULT,test,true,URL_SAFE_TOKEN,p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ",
+            "DEFAULT,alice@acme.com,true,URL_SAFE_TOKEN,p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com",
+            "DEFAULT,alice@acme.com,false,URL_SAFE_TOKEN,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
+            "DEFAULT,alice@acme.com,true,URL_SAFE_HASH_ONLY,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
+            "DEFAULT,alice@acme.com,false,URL_SAFE_HASH_ONLY,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
+            //TODO: add an interesting case where base64 and base64-url encodings differ
+            //"DEFAULT,blahBlahBlah,false,URL_SAFE_HASH_ONLY,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
         }
     )
     @ParameterizedTest
-    public void getPseudonymize_URL_SAFE_TOKEN(String value, Boolean includeReversible, String encoding, String expected) {
+    public void getPseudonymize_URL_SAFE_TOKEN(PseudonymImplementation implementation, String value, Boolean includeReversible, String encoding, String expected) {
+
+        Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+            .pseudonymizationSalt("an irrelevant per org secret")
+            .defaultScopeId("scope")
+            .pseudonymImplementation(implementation)
+            .build());
+
+
+        sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"), pseudonymizer);
+
         String r = (String) sanitizer.getPseudonymize(Transform.Pseudonymize.builder()
                 //includeOriginal must be 'false' for URL_SAFE_TOKEN
                 .includeReversible(includeReversible)
@@ -427,8 +473,8 @@ class RESTApiSanitizerImplTest {
         value = {
             "/,^/$",
             "/api/v1/users,^/api/v1/users$",
-            "/api/v1/users/{id},^/api/v1/users/[^/]+$",
-            "/api/v1/mail/{accountId}/messages/{id},^/api/v1/mail/[^/]+/messages/[^/]+$",
+            "/api/v1/users/{id},^/api/v1/users/(?<id>[^/]+)$",
+            "/api/v1/mail/{accountId}/messages/{id},^/api/v1/mail/(?<accountId>[^/]+)/messages/(?<id>[^/]+)$",
             "/enterprise.info,^/enterprise\\.info$",
             "/enterprise$something,^/enterprise\\$something$",
             "/enterprise-info,^/enterprise\\-info$",
@@ -493,4 +539,154 @@ class RESTApiSanitizerImplTest {
 
         assertEquals(expected, sanitizer.getHasPathTemplateMatchingUrl(new URL(url)).test(entry));
     }
+
+
+    @SneakyThrows
+    @CsvSource(value = {
+        "something",
+    })
+    @ParameterizedTest
+    void pseudonymizeWithRegexMatches(String input) {
+
+        Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+            .pseudonymizationSalt("an irrelevant per org secret")
+            .defaultScopeId("scope")
+            .pseudonymImplementation(PseudonymImplementation.DEFAULT)
+            .build());
+
+
+        sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"), pseudonymizer);
+
+        List<MapFunction> transforms = Arrays.asList(
+            sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder()
+                .regex(".*")
+                .includeReversible(true)
+                .build()),
+            sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder()
+                .regex(".*")
+                .includeReversible(false)
+                .build()),
+            sanitizer.getPseudonymize(Transform.Pseudonymize.builder()
+                .includeReversible(true)
+                .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+                .build()),
+            sanitizer.getPseudonymize(Transform.Pseudonymize.builder()
+                .includeReversible(false)
+                .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+                .build())
+        );
+
+        List<String> pseudonymized = transforms.stream()
+            .map(f -> (String) f.map(input, sanitizer.getJsonConfiguration()))
+            .collect(Collectors.toList());
+
+        UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();
+
+        List<Pseudonym> pseudonyms = pseudonymized.stream()
+            .map(s -> {
+                try {
+                    return encoder.decode(s);
+                } catch (Exception e) {
+                    return encoder.decode(StringUtils.replaceChars(s, ".+/", "--_"));
+                }
+            })
+            .collect(Collectors.toList());
+
+        List<String> hashes = pseudonyms.stream()
+            .map(Pseudonym::getHash)
+            .map(Base64.getEncoder()::encode)
+            .map(String::new)
+            .collect(Collectors.toList());
+
+        assertTrue(hashes.stream().allMatch(p -> Objects.equals(hashes.get(0), p)));
+
+    }
+
+
+
+    @CsvSource(value = {
+        "something,.*,t~wUW4bkpTjD6c.BIQaE_oLQxN4nD5vbnf5HBVz7gxck8",
+        "something,blah:.*thing,", // no match, should redact
+        "blah:something,blah:.*thing,t~iWybsRb4SscO_Z6v2gpnMTjPujG2E4FtxgYkjWc5HXQ",
+        "blah:something,blah:(.*),blah:t~wUW4bkpTjD6c.BIQaE_oLQxN4nD5vbnf5HBVz7gxck8",
+    })
+    @ParameterizedTest
+    public void pseudonymizeWithRegexMatches_nonMatchingRedacted(String input, String regex, String expected) {
+        MapFunction transform = sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder()
+            .regex(regex)
+            .includeReversible(false)
+            .build());
+
+        assertEquals(StringUtils.trimToNull(expected),
+            transform.map(input, sanitizer.getJsonConfiguration()));
+    }
+
+    @CsvSource(value = {
+        "123.234.252.12,t~7USliSM4GiS0Xfk1DXIAH-4nK-UkLJlSAA_5ZqQh_CI",
+        "10.0.0.1,t~3BU4goNN07w3ofq8v5ig2enxSWj9xnAnPOThel4mHTk",
+        ",",
+        "not an ip," // redact
+    })
+    @ParameterizedTest
+    public void hashIp(String input, String expected) {
+        MapFunction transform = sanitizer.getHashIp(HashIp.builder().build());
+
+        assertEquals(StringUtils.trimToNull(expected),
+            transform.map(input, sanitizer.getJsonConfiguration()));
+    }
+
+    @SneakyThrows
+    @CsvSource(value = {
+        "123.234.252.12,p~7USliSM4GiS0Xfk1DXIAH-4nK-UkLJlSAA_5ZqQh_CJStJlrfaIPHLZUvx-dHHQp",
+        "10.0.0.1,p~3BU4goNN07w3ofq8v5ig2enxSWj9xnAnPOThel4mHTmrZBJVaY3CjxNEDJYfGEk_",
+        ",",
+        "not an ip," // redact
+    })
+    @ParameterizedTest
+    public void encryptIp(String input, String expected) {
+        MapFunction transform = sanitizer.getEncryptIp(EncryptIp.builder().build());
+
+
+        String encrypted = (String) transform.map(input, sanitizer.getJsonConfiguration());
+
+
+        assertEquals(StringUtils.trimToNull(expected),
+            encrypted);
+
+
+        if (StringUtils.isNotBlank(expected)) {
+            MapFunction hashTransform = sanitizer.getHashIp(HashIp.builder().build());
+            String formattedHash = (String) hashTransform.map(input, sanitizer.getJsonConfiguration());
+
+            byte[] hash = pseudonymEncoder.decode(formattedHash).getHash();
+
+            Base64.Encoder base64encoder = Base64.getUrlEncoder().withoutPadding();
+            String withoutPrefix = encrypted.substring(UrlSafeTokenPseudonymEncoder.REVERSIBLE_PREFIX.length());
+            byte[] decoded = Base64.getUrlDecoder().decode(withoutPrefix.getBytes());
+
+
+            assertEquals(
+                base64encoder.encodeToString(hash),
+                base64encoder.encodeToString(Arrays.copyOfRange(decoded, 0, Sha256DeterministicTokenizationStrategy.HASH_SIZE_BYTES))
+            );
+
+            UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();
+            assertTrue(encoder.canBeDecoded(encrypted));
+            Pseudonym decodedPseudonym = encoder.decode(encrypted);
+            assertEquals(Base64.getUrlEncoder().withoutPadding().encodeToString(decodedPseudonym.getHash()),
+            Base64.getUrlEncoder().withoutPadding().encodeToString(hash));
+        }
+    }
+
+    @Test
+    public void stripTargetHostPath() {
+       assertEquals("/path", sanitizer.stripTargetHostPath("/path"));
+       sanitizer.targetHostPath = "/api/v1";
+       assertEquals("/path", sanitizer.stripTargetHostPath("/api/v1/path"));
+
+       //only at beginning of path
+       assertEquals("/path/api/v1", sanitizer.stripTargetHostPath("/api/v1/path/api/v1"));
+       assertEquals("/path/api/v1", sanitizer.stripTargetHostPath("/path/api/v1"));
+    }
+
 }

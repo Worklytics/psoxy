@@ -2,7 +2,6 @@ package co.worklytics.psoxy.rules.asana;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.rules.RuleSet;
 import lombok.Getter;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -17,13 +16,9 @@ public class AsanaTests extends JavaRulesTestBaseCase {
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.ASANA;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/asana";
-
-    @Getter
-    final String defaultScopeId = "asana";
-
-    @Getter
-    final String yamlSerializationFilepath = "asana/asana";
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceKind("asana")
+        .build();
 
     @Disabled // not reliable; seems to have different value via IntelliJ/AWS deployment and my
     // laptop's maven, which doesn't make any sense, given that binary deployed to AWS was built via
@@ -36,17 +31,18 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
     @Test
     void workspaces() {
-        //String jsonString = asJson(exampleDirectoryPath, "users.json");
-
         String endpoint = "https://app.asana.com/api/1.0/workspaces";
         assertUrlAllowed(endpoint);
+        assertUrlAllowed(endpoint + "?limit=75&opt_fields=gid");
+
+        //misleading - some query params are allowed
         assertUrlWithQueryParamsBlocked(endpoint);
         //nothing sanitized from this for now
     }
 
     @Test
     void users() {
-        String jsonString = asJson(exampleDirectoryPath, "users.json");
+        String jsonString = asJson("users.json");
 
         //no single-user case
         assertUrlBlocked("https://app.asana.com/api/1.0/users/123123");
@@ -68,7 +64,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
     @Test
     void teams() {
-        String jsonString = asJson(exampleDirectoryPath, "teams.json");
+        String jsonString = asJson("teams.json");
 
         String endpoint = "https://app.asana.com/api/1.0/workspaces/123123/teams";
 
@@ -82,7 +78,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
     @Test
     void projects() {
-        String jsonString = asJson(exampleDirectoryPath, "projects.json");
+        String jsonString = asJson("projects.json");
 
         String endpoint = "https://app.asana.com/api/1.0/teams/123123/projects";
 
@@ -98,7 +94,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
     @Test
     void tasks() {
-        String jsonString = asJson(exampleDirectoryPath, "tasks.json");
+        String jsonString = asJson("tasks.json");
 
         String endpoint = "https://app.asana.com/api/1.0/tasks?project=fake";
 
@@ -112,7 +108,7 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
     @Test
     void stories() {
-        String jsonString = asJson(exampleDirectoryPath, "stories.json");
+        String jsonString = asJson("stories.json");
 
         String endpoint = "https://app.asana.com/api/1.0/tasks/123123/stories";
 
@@ -127,7 +123,11 @@ public class AsanaTests extends JavaRulesTestBaseCase {
 
     @Override
     public Stream<InvocationExample> getExamples() {
-        return Stream.of(InvocationExample.of("https://app.asana.com/api/1.0/users", "users.json"),
+        return Stream.of(
+                InvocationExample.of("https://app.asana.com/api/1.0/workspaces?limit=75&opt_fields=gid", "workspaces.json"),
+                InvocationExample.of("https://app.asana.com/api/1.0/workspaces", "workspaces.json"),
+
+                InvocationExample.of("https://app.asana.com/api/1.0/users", "users.json"),
 
                 InvocationExample.of("https://app.asana.com/api/1.0/workspaces/123/teams", "teams.json"),
 

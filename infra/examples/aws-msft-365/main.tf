@@ -50,8 +50,8 @@ provider "azuread" {
 }
 
 module "psoxy" {
-  #  source = "../../modular-examples/aws-msft-365"
-  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=v0.4.28"
+  # source = "../../modular-examples/aws-msft-365"
+  source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws-msft-365?ref=rc-v0.4.46"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
@@ -78,6 +78,9 @@ module "psoxy" {
   jira_server_url                = var.jira_server_url
   jira_cloud_id                  = var.jira_cloud_id
   example_jira_issue_id          = var.example_jira_issue_id
+  github_installation_id         = var.github_installation_id
+  github_organization            = var.github_organization
+  github_example_repository      = var.github_example_repository
 }
 
 moved {

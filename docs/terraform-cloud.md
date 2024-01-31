@@ -19,8 +19,10 @@ After authenticating your terraform CLI to Terraform Cloud/enterprise, you'll ne
   2. Clone one of our example repos and run the `./init` script to initialize your `terraform.tfvars`
      for Terraform Cloud. This will also put a bunch of useful tooling on your machine.
 ```shell
-./init terraform_cloud
+./init
 ```
+    Follow prompts to select that you don't wish to run `terraform apply` locally, and
+    that you wish to use Terraform Cloud.
 
   3. Commit the bundle that was output by the `./init` script to your repo:
 ```shell

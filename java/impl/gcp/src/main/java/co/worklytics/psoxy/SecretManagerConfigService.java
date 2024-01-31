@@ -3,6 +3,7 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import com.google.api.gax.rpc.PermissionDeniedException;
 import com.google.cloud.secretmanager.v1.*;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
@@ -25,7 +26,9 @@ import java.util.logging.Level;
 @Log
 public class SecretManagerConfigService implements ConfigService, LockService {
 
-    static final String LOCK_LABEL = "locked";
+    private static final String LOCK_LABEL = "locked";
+    private static final String VERSION_LABEL = "latest-version";
+    private static final int NUMBER_OF_VERSIONS_TO_RETRIEVE = 20;
 
     @Inject
     EnvVarsConfigService envVarsConfigService;
@@ -69,8 +72,12 @@ public class SecretManagerConfigService implements ConfigService, LockService {
 
                 // Add the secret version.
                 SecretVersion version = client.addSecretVersion(secretName, payload);
-
+                SecretVersionName secretVersionName = SecretVersionName.parse(version.getName());
                 log.info(String.format("Property: %s, stored version %s", secretName, version.getName()));
+
+                updateLabelFromSecret(client, secretName, VERSION_LABEL, secretVersionName.getSecretVersion());
+
+                disableOldSecretVersions(client, secretName, version);
             }
         } catch (IOException e) {
             log.log(Level.SEVERE, "Could not store property " + secretName, e);
@@ -87,8 +94,30 @@ public class SecretManagerConfigService implements ConfigService, LockService {
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
         String paramName = parameterName(property);
+
+        SecretName secretName = SecretName.of(projectId, paramName);
+
         try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
-            SecretVersionName secretVersionName = SecretVersionName.of(projectId, paramName, "latest");
+
+            String versionName = "latest";
+            try {
+                Secret secret = client.getSecret(secretName);
+
+                String versionLabelValue = secret.getLabelsMap() != null ? secret.getLabelsMap().get(VERSION_LABEL) : null;
+
+                if (!StringUtils.isBlank(versionLabelValue)) {
+                    versionName = versionLabelValue;
+                }
+            } catch (PermissionDeniedException e) {
+                // can happen in read-only case, where Cloud Function's SA has only Secret Manager Secret Accessor role
+                // see: https://cloud.google.com/secret-manager/docs/access-control#secretmanager.secretAccessor
+                if (envVarsConfigService.isDevelopment()) {
+                    log.log(Level.INFO, "PermissionDeniedException getting secret " + paramName + "; will try to get 'latest' version directly");
+                }
+            }
+
+            SecretVersionName secretVersionName =
+                SecretVersionName.of(projectId, secretName.getSecret(), versionName);
 
             // Access the secret version.
             AccessSecretVersionResponse response = client.accessSecretVersion(secretVersionName);
@@ -130,17 +159,7 @@ public class SecretManagerConfigService implements ConfigService, LockService {
             if (lockedAt.isBefore(clock.instant().minusSeconds(expires.getSeconds()))) {
                 log.warning("Lock " + lockId + " is stale or unset; will try to acquire it");
 
-                Secret updated = client.updateSecret(UpdateSecretRequest.newBuilder()
-                        .setSecret(Secret.newBuilder(lockSecret)
-                                // Label format is https://cloud.google.com/compute/docs/labeling-resources#requirements
-                                // which an ISO-8601 cannot be added there (just like 2023-01-01T23:50:00Z)
-                                // Instead, just using epoch in millis
-                                .putLabels(LOCK_LABEL, Long.toString(Instant.now(clock).toEpochMilli()))
-                                .build())
-                        .setUpdateMask(FieldMask.newBuilder()
-                                .addPaths("labels")
-                                .build())
-                        .build());
+                updateLabelFromSecret(client, lockSecretName, LOCK_LABEL, Long.toString(Instant.now(clock).toEpochMilli()));
                 //due to etag, update should have FAILED if was modified since our read
                 return true;
             } else {
@@ -171,6 +190,50 @@ public class SecretManagerConfigService implements ConfigService, LockService {
             // something
         } catch (Exception e) {
             log.log(Level.SEVERE, "Could not release lock " + lockId, e);
+        }
+    }
+
+    private static void updateLabelFromSecret(SecretManagerServiceClient client, SecretName secretName, String label, String labelValue) {
+        try {
+            client.updateSecret(UpdateSecretRequest.newBuilder()
+                    .setSecret(Secret.newBuilder()
+                            .setName(secretName.toString())
+                            // Label format is https://cloud.google.com/compute/docs/labeling-resources#requirements
+                            .putLabels(label, labelValue)
+                            .build())
+                    .setUpdateMask(FieldMask.newBuilder()
+                            .addPaths("labels")
+                            .build())
+                    .build());
+        } catch (Exception e) {
+            log.log(Level.SEVERE, String.format("Cannot put the label of the version on the secret %s", secretName.toString()), e);
+            throw e;
+        }
+    }
+
+    private static void disableOldSecretVersions(SecretManagerServiceClient client, SecretName secretName, SecretVersion exceptVersion) {
+        try {
+            SecretManagerServiceClient.ListSecretVersionsPage enabledVersions = client.listSecretVersions(ListSecretVersionsRequest.newBuilder()
+                            .setFilter("state:ENABLED")
+                            .setParent(secretName.toString())
+                            // Reduce the page, as each version will be disabled one by one
+                            .setPageSize(NUMBER_OF_VERSIONS_TO_RETRIEVE)
+                            .build())
+                    .getPage();
+
+            // Disable secret version, just the first page
+            enabledVersions.getValues().forEach(i -> {
+                if (!i.getName().equals(exceptVersion.getName())) {
+                    client.disableSecretVersion(DisableSecretVersionRequest.newBuilder()
+                            .setName(i.getName())
+                            .build());
+
+                    log.info(String.format("Property: %s, disabled version %s", secretName, i.getName()));
+                }
+            });
+        } catch (Exception e) {
+            log.log(Level.SEVERE, String.format("Cannot disable old versions from secret %s", secretName.toString()), e);
+            throw e;
         }
     }
 

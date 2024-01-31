@@ -13,16 +13,12 @@ public class Mail_NoAppIds_Tests extends MailTests {
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.OUTLOOK_MAIL_NO_APP_IDS;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/microsoft-365/outlook-mail";
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("microsoft-365")
+        .defaultScopeId("azure-ad")
+        .sourceKind("outlook-mail")
+        .rulesFile("outlook-mail_no-app-ids")
+        .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids/")
+        .build();
 
-    @Getter
-    final String defaultScopeId = "azure-ad";
-
-    @BeforeEach
-    public void setTestSpec() {
-        this.setTestSpec(RulesTestSpec.builder()
-            .yamlSerializationFilePath("microsoft-365/outlook-mail_no-app-ids")
-            .sanitizedExamplesDirectoryPath("api-response-examples/microsoft-365/outlook-mail/sanitized-no-app-ids")
-            .build());
-    }
 }

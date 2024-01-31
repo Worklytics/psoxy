@@ -3,26 +3,21 @@ package co.worklytics.psoxy.gateway;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
-
-import java.io.InputStreamReader;
+import lombok.With;
 
 /**
  * Request received when a change is done in some storage service, such as "new" object created or "updated" object
  */
+@With
 @Builder
 @Getter
 public class StorageEventRequest {
-    /**
-     * Stream where the object can be read
-     */
 
-    @NonNull
-    InputStreamReader readerStream;
+    // REST OF THIS IS INFORMATION FOR SANITIZER TO INFORM SANITIZATION LOGIC BASED ON SOURCE/DESTINATION
 
     /**
      * Name of the bucket where the object is. Example: "mybucket"
      */
-
     @NonNull
     String sourceBucketName;
 
@@ -44,6 +39,18 @@ public class StorageEventRequest {
      */
     @NonNull
     String destinationObjectPath;
+
+    /**
+     * whether to decompress (gunzip) input
+     */
+    @Builder.Default
+    Boolean decompressInput = false;
+
+    /**
+     * whether to compress (gzip) output
+     */
+    @Builder.Default
+    Boolean compressOutput = false;
 
 
 }

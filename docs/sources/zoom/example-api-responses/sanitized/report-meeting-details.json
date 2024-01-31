@@ -1,0 +1,12 @@
+{
+  "dept":"HR",
+  "duration":2,
+  "end_time":"2022-03-15T07:42:22Z",
+  "id":3927350525,
+  "participants_count":2,
+  "start_time":"2022-03-15T07:40:46Z",
+  "total_minutes":3,
+  "type":2,
+  "user_email":"{\"scope\":\"email\",\"domain\":\"example.com\",\"hash\":\"cT4rXK7pXh_praaHEyRWzkSHVY6wBNEwngSXsuQ7fTQ\"}",
+  "uuid":"iOTQZPmhTUq5a232ETb9eg=="
+}

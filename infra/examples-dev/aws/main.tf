@@ -57,7 +57,7 @@ provider "azuread" {
 
 module "psoxy" {
   source = "../../modular-examples/aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws?ref=v0.4.28"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modular-examples/aws?ref=rc-v0.4.46"
 
   aws_account_id                 = var.aws_account_id
   aws_assume_role_arn            = var.aws_assume_role_arn # role that can test the instances (lambdas)
@@ -83,6 +83,9 @@ module "psoxy" {
   jira_server_url                = var.jira_server_url
   jira_cloud_id                  = var.jira_cloud_id
   example_jira_issue_id          = var.example_jira_issue_id
+  github_installation_id         = var.github_installation_id
+  github_organization            = var.github_organization
+  github_example_repository      = var.github_example_repository
   gcp_project_id                 = var.gcp_project_id
   google_workspace_example_admin = var.google_workspace_example_admin
   google_workspace_example_user  = var.google_workspace_example_user

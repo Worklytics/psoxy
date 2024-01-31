@@ -1,9 +1,10 @@
 variable "environment_name" {
   type        = string
   description = "friendly qualifier to distinguish resources created by this terraform configuration other Terraform deployments, (eg, 'prod', 'dev', etc)"
+  default     = "psoxy"
 
   validation {
-    condition     = can(regex("^[a-zA-Z][a-zA-Z0-9-_ ]*[a-zA-Z0-9]$", var.environment_name))
+    condition     = can(regex("^[a-zA-Z][a-zA-Z0-9-_ ]*$", var.environment_name))
     error_message = "The `environment_name` must start with a letter, can contain alphanumeric characters, hyphens, underscores, and spaces, and must end with a letter or number."
   }
 
@@ -33,6 +34,12 @@ variable "aws_region" {
   type        = string
   description = "default region in which to provision your AWS infra"
   default     = "us-east-1"
+}
+
+variable "default_tags" {
+  type        = map(string)
+  description = "Tags to apply to all resources created by this configuration. See https://registry.terraform.io/providers/hashicorp/aws/latest/docs#default_tags for more info."
+  default     = {}
 }
 
 variable "aws_ssm_param_root_path" {
@@ -81,37 +88,17 @@ variable "caller_aws_arns" {
   description = "ARNs of AWS accounts allowed to send requests to the proxy (eg, arn:aws:iam::914358739851:root)"
   default     = []
 
+
   validation {
     condition = alltrue([
-      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:((role|user)\\/)?\\w+$", i)) > 0)
+      # see https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-quotas.html
+      # sources suggest limit of 64 chars for role names, but not clear if that includes paths so not checking it
+      for i in var.caller_aws_arns : (length(regexall("^arn:aws:iam::\\d{12}:((role|user)\\/)?[A-Za-z0-9/=,.@_-]+$", i)) > 0)
     ])
-    error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::123123123123:root'."
+    error_message = "The values of caller_aws_arns should be AWS Resource Names, something like 'arn:aws:iam::123123123123:root', 'arn:aws:iam::123123123123:user/ExampleUser', 'arn:aws:iam:123123123123:role/TestRole'" # for testing; can remove once prod-ready
   }
 }
 
-variable "salesforce_domain" {
-  type        = string
-  description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
-  default     = ""
-}
-
-variable "jira_server_url" {
-  type        = string
-  default     = null
-  description = "(Only required if using Jira Server connector) URL of the Jira server (ex: myjiraserver.mycompany.com)"
-}
-
-variable "jira_cloud_id" {
-  type        = string
-  default     = null
-  description = "(Only required if using Jira Cloud connector) Cloud id of the Jira Cloud to connect to (ex: 1324a887-45db-1bf4-1e99-ef0ff456d421)."
-}
-
-variable "example_jira_issue_id" {
-  type        = string
-  default     = null
-  description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
-}
 
 variable "connector_display_name_suffix" {
   type        = string
@@ -189,7 +176,7 @@ variable "bulk_input_expiration_days" {
 
 variable "bulk_sanitized_expiration_days" {
   type        = number
-  description = "Number of days after which objects in the bucket will expire. In practice, Worklytics syncs data ~weekly, so 30 day minimum for this value."
+  description = "Number of days after which objects in the bucket will expire. This should match the amount of historical data you wish for Worklytics to analyze (eg, typically multiple years)."
   default     = 1805 # 5 years; intent is 'forever', but some upperbound in case bucket is forgotten
 }
 
@@ -199,18 +186,29 @@ variable "custom_api_connector_rules" {
   default     = {}
 }
 
+
 variable "custom_bulk_connectors" {
   type = map(object({
-    source_kind = string
-    rules = object({
+    source_kind               = string
+    display_name              = optional(string, "Custom Bulk Connector")
+    worklytics_connector_id   = optional(string, "bulk-import-psoxy")
+    worklytics_connector_name = optional(string, "Custom Bulk Data via Psoxy")
+    rules_file                = optional(string)
+    rules = optional(object({
       pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
-      columnsToRedact       = optional(list(string))
-      columnsToInclude      = optional(list(string))
-      columnsToPseudonymize = optional(list(string))
-      columnsToDuplicate    = optional(map(string))
-      columnsToRename       = optional(map(string))
-    })
+      columnsToRedact       = optional(list(string)) # columns to remove from CSV
+      columnsToInclude      = optional(list(string)) # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
+      columnsToPseudonymize = optional(list(string)) # columns to pseudonymize
+      columnsToDuplicate    = optional(map(string))  # columns to create copy of; name --> new name
+      columnsToRename       = optional(map(string))  # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
+      fieldsToTransform = optional(map(object({
+        newName    = string
+        transforms = optional(list(map(string)), [])
+      })), {})
+    }))
+    memory_size_mb      = optional(number, null)
     settings_to_provide = optional(map(string), {})
+    example_file        = optional(string)
   }))
   description = "specs of custom bulk connectors to create"
 
@@ -231,14 +229,42 @@ variable "custom_bulk_connectors" {
 variable "custom_bulk_connector_rules" {
   type = map(object({
     pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
-    columnsToRedact       = optional(list(string))
-    columnsToInclude      = optional(list(string))
-    columnsToPseudonymize = optional(list(string))
-    columnsToDuplicate    = optional(map(string))
-    columnsToRename       = optional(map(string))
+    columnsToRedact       = optional(list(string), []) # columns to remove from CSV
+    columnsToInclude      = optional(list(string))     # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
+    columnsToPseudonymize = optional(list(string), []) # columns to pseudonymize
+    columnsToDuplicate    = optional(map(string))      # columns to create copy of; name --> new name
+    columnsToRename       = optional(map(string))      # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
+    fieldsToTransform = optional(map(object({
+      newName    = string
+      transforms = optional(list(map(string)), [])
+    })))
   }))
 
   description = "map of connector id --> rules object"
+  default = {
+    # hris = {
+    #   columnsToRedact       = []
+    #   columnsToPseudonymize = [
+    #     "EMPLOYEE_ID",
+    #     "EMPLOYEE_EMAIL",
+    #     "MANAGER_ID",
+    #     "MANAGER_EMAIL"
+    #  ]
+    # columnsToRename = {
+    #   # original --> new
+    #   "workday_id" = "employee_id"
+    # }
+    # columnsToInclude = [
+    # ]
+  }
+}
+
+variable "custom_bulk_connector_arguments" {
+  type = map(object({
+    memory_size_mb = optional(number)
+  }))
+
+  description = "map of connector id --> arguments object, to override defaults for bulk connector instances"
   default     = {}
 }
 
@@ -249,9 +275,9 @@ variable "lookup_table_builders" {
     sanitized_accessor_role_names = list(string)
     rules = object({
       pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
-      columnsToRedact       = optional(list(string))
+      columnsToRedact       = optional(list(string), [])
       columnsToInclude      = optional(list(string))
-      columnsToPseudonymize = optional(list(string))
+      columnsToPseudonymize = optional(list(string), [])
       columnsToDuplicate    = optional(map(string))
       columnsToRename       = optional(map(string))
     })

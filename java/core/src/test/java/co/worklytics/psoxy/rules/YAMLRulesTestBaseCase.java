@@ -12,9 +12,8 @@ public abstract class YAMLRulesTestBaseCase extends RulesBaseTestCase {
     @SneakyThrows
     @Override
     public Rules2 getRulesUnderTest() {
-        String path = "/rules/" + getYamlSerializationFilepath() + ".yaml";
 
         return yamlMapper.readerFor(Rules2.class)
-            .readValue(PrebuiltSanitizerRules.class.getResource(path));
+            .readValue(PrebuiltSanitizerRules.class.getResource(getRulesTestSpec().getRulesFilePathFull()));
     }
 }

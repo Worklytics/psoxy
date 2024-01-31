@@ -1,0 +1,44 @@
+{
+  "data": {
+    "organization": {
+      "membersWithRole": {
+        "edges": [
+          {
+            "node": {
+              "email": "fake1@contoso.com",
+              "login": "fake1",
+              "organizationVerifiedDomainEmails": [
+                "fake1@verified.contoso.com"
+              ]
+            }
+          },
+          {
+            "node": {
+              "email": "fake2@contoso.com",
+              "login": "fake2",
+              "organizationVerifiedDomainEmails": []
+            }
+          },
+          {
+            "node": {
+              "email": "",
+              "login": "fake3",
+              "organizationVerifiedDomainEmails": []
+            }
+          },
+          {
+            "node": {
+              "email": null,
+              "login": "fake4",
+              "organizationVerifiedDomainEmails": []
+            }
+          }
+        ],
+        "pageInfo": {
+          "hasNextPage": true,
+          "endCursor": "Y3Vyc29yOnYyOpHOANUliA=="
+        }
+      }
+    }
+  }
+}

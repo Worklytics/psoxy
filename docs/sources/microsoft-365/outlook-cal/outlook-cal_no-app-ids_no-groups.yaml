@@ -1,0 +1,113 @@
+---
+endpoints:
+  - pathRegex: "^/(v1.0|beta)/users(/p~[a-zA-Z0-9_-]+?)?[^/]*"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+    transforms:
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..aboutMe"
+          - "$..mySite"
+          - "$..preferredName"
+          - "$..givenName"
+          - "$..surname"
+          - "$..mailNickname"
+          - "$..responsibilities"
+          - "$..skills"
+          - "$..faxNumber"
+          - "$..mobilePhone"
+          - "$..businessPhones[*]"
+          - "$..onPremisesExtensionAttributes"
+          - "$..onPremisesSecurityIdentifier"
+          - "$..securityIdentifier"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+  - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..internalReplyMessage"
+          - "$..externalReplyMessage"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+  - pathRegex: "^/(v1.0|beta)/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))"
+    transforms:
+      - !<redactExceptSubstringsMatchingRegexes>
+        jsonPaths:
+          - "$..subject"
+        exceptions:
+          - "(?i)(\\QFocus Time Block\\E|\\QFocus Time\\E|\\QFocus:\\E|\\QNo Meeting Block\\\
+      E|\\QNo Meetings Block\\E|\\QNo Meetings\\E|\\QNo Meeting\\E)"
+          - "(?i)(\\QPrep Time Block\\E|\\QPrep Time\\E|\\QPrep:\\E|\\QPrep \\E|\\QPrepare\
+      \ \\E)"
+      - !<redact>
+        jsonPaths:
+          - "$..emailAddress.name"
+          - "$..extensions"
+          - "$..multiValueExtendedProperties"
+          - "$..singleValueExtendedProperties"
+          - "$..location.coordinates"
+          - "$..locations[*].coordinates"
+          - "$..location.address"
+          - "$..locations[*].address"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress.address"
+        encoding: "JSON"
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$..location.uniqueId"
+          - "$..locations[*].uniqueId"
+          - "$..location.displayName"
+          - "$..locations[*].displayName"
+          - "$..location.locationUri"
+          - "$..locations[*].locationUri"
+          - "$..onlineMeeting.joinUrl"
+          - "$..onlineMeetingUrl"
+          - "$..body.content"
+          - "$..bodyPreview"
+        redactions:
+          - "(?i)pwd=[^&]*"
+      - !<filterTokenByRegex>
+        jsonPaths:
+          - "$..body.content"
+          - "$..bodyPreview"
+        delimiter: "\\s+"
+        filters:
+          - "https://[^.]+\\.zoom\\.us/.*"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink']"
+        regex: "^https://graph.microsoft.com/(.*)$"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['calendar@odata.associationLink', 'calendar@odata.navigationLink']"

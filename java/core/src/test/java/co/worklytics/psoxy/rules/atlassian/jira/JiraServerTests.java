@@ -19,13 +19,12 @@ public class JiraServerTests extends JavaRulesTestBaseCase {
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.JIRA_SERVER;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/atlassian/jira";
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("atlassian")
+        .sourceKind("jira")
+        .rulesFile("jira-server")
+        .build();
 
-    @Getter
-    final String defaultScopeId = "jira";
-
-    @Getter
-    final String yamlSerializationFilepath = "atlassian/jira/jira-server";
 
     @Disabled // not reliable; seems to have different value via IntelliJ/AWS deployment and my
     // laptop's maven, which doesn't make any sense, given that binary deployed to AWS was built via
@@ -46,7 +45,7 @@ public class JiraServerTests extends JavaRulesTestBaseCase {
     @ParameterizedTest
     @ValueSource(strings = {"2", "latest"})
     void server_issues_by_jql_v2(String version) {
-        String jsonString = asJson(exampleDirectoryPath, "server_issues_by_jql_v2.json");
+        String jsonString = asJson("server_issues_by_jql_v2.json");
 
         String endpoint = String.format("https://myjiraserver.com/rest/api/%s/search?jql=something&startAt=50", version);
 
@@ -66,7 +65,7 @@ public class JiraServerTests extends JavaRulesTestBaseCase {
     @ParameterizedTest
     @ValueSource(strings = {"2", "latest"})
     void server_issue_comments_v2(String version) {
-        String jsonString = asJson(exampleDirectoryPath, "server_issue_comment_v2.json");
+        String jsonString = asJson("server_issue_comment_v2.json");
 
         String endpoint = String.format("https://myjiraserver.com/rest/api/%s/issue/fake/comment?&startAt=50", version);
 
@@ -86,7 +85,7 @@ public class JiraServerTests extends JavaRulesTestBaseCase {
     @ParameterizedTest
     @ValueSource(strings = {"2", "latest"})
     void server_issue_worklog_v2(String version) {
-        String jsonString = asJson(exampleDirectoryPath, "server_issue_worklog_v2.json");
+        String jsonString = asJson("server_issue_worklog_v2.json");
 
         String endpoint = String.format("https://myjiraserver.com/rest/api/%s/issue/fake/worklog?&startAt=50", version);
 
@@ -106,7 +105,7 @@ public class JiraServerTests extends JavaRulesTestBaseCase {
     @ParameterizedTest
     @ValueSource(strings = {"2", "latest"})
     void issue(String version) {
-        String jsonString = asJson(exampleDirectoryPath, "server_issue.json");
+        String jsonString = asJson("server_issue.json");
 
         String endpoint = String.format("https://myjiraserver.com/rest/api/%s/issue/ISSUE&startAt=50", version);
 
@@ -122,6 +121,8 @@ public class JiraServerTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://myjiraserver.com/rest/api/2/issue/ISSUE&startAt=50", "server_issue.json"),
                 InvocationExample.of("https://myjiraserver.com/rest/api/2/search?jql=something&startAt=50", "server_issues_by_jql_v2.json"),
                 InvocationExample.of("https://myjiraserver.com/rest/api/latest/search?jql=something&startAt=50", "server_issues_by_jql_v2.json"),
+                InvocationExample.of("https://myjiraserver.com/rest/api/2/search?startAt=0&maxResults=50&jql=updated%20%3E%3D%20'2021/12/27%2008:00'%20AND%20updated%20%3C%20'2023/08/09%2017:48'%20ORDER%20BY%20updated%20DESC&fields=*all,-comment,-worklog",
+                        "server_issues_by_jql_v2.json"),
                 InvocationExample.of("https://myjiraserver.com/rest/api/2/issue/fake/comment?&startAt=50", "server_issue_comment_v2.json"),
                 InvocationExample.of("https://myjiraserver.com/rest/api/latest/issue/fake/comment?&startAt=50", "server_issue_comment_v2.json"),
                 InvocationExample.of("https://myjiraserver.com/rest/api/2/issue/fake/worklog?&startAt=50", "server_issue_worklog_v2.json"),

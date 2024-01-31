@@ -2,7 +2,6 @@ package co.worklytics.psoxy.rules.dropbox;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.rules.RuleSet;
 import lombok.Getter;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -17,13 +16,10 @@ public class DropboxTests extends JavaRulesTestBaseCase {
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.DROPBOX_ENDPOINTS;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/dropbox";
-
-    @Getter
-    final String defaultScopeId = "dropbox";
-
-    @Getter
-    final String yamlSerializationFilepath = "dropbox-business/dropbox-business";
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceKind("dropbox-business")
+        .defaultScopeId("dropbox")
+        .build();
 
     @Disabled // not reliable; seems to have different value via IntelliJ/AWS deployment and my
     // laptop's maven, which doesn't make any sense, given that binary deployed to AWS was built via
@@ -36,7 +32,7 @@ public class DropboxTests extends JavaRulesTestBaseCase {
 
     @Test
     void eventList() {
-        String jsonString = asJson(exampleDirectoryPath, "events.json");
+        String jsonString = asJson("events.json");
 
         String endpoint = "https://api.dropboxapi.com/2/team_log/get_events";
 
@@ -66,7 +62,7 @@ public class DropboxTests extends JavaRulesTestBaseCase {
 
     @Test
     void eventListContinue() {
-        String jsonString = asJson(exampleDirectoryPath, "events_continue.json");
+        String jsonString = asJson("events_continue.json");
 
         String endpoint = "https://api.dropboxapi.com/2/team_log/get_events/continue";
 
@@ -96,7 +92,7 @@ public class DropboxTests extends JavaRulesTestBaseCase {
 
     @Test
     void fileList() {
-        String jsonString = asJson(exampleDirectoryPath, "file_list.json");
+        String jsonString = asJson("file_list.json");
 
         String endpoint = "https://api.dropboxapi.com/2/files/list_folder";
 
@@ -122,7 +118,7 @@ public class DropboxTests extends JavaRulesTestBaseCase {
 
     @Test
     void fileListContinue() {
-        String jsonString = asJson(exampleDirectoryPath, "file_list_continue.json");
+        String jsonString = asJson("file_list_continue.json");
 
         String endpoint = "https://api.dropboxapi.com/2/files/list_folder/continue";
 
@@ -148,7 +144,7 @@ public class DropboxTests extends JavaRulesTestBaseCase {
 
     @Test
     void fileRevision() {
-        String jsonString = asJson(exampleDirectoryPath, "file_list_revision.json");
+        String jsonString = asJson("file_list_revision.json");
 
         String endpoint = "https://api.dropboxapi.com/2/files/list_revisions";
 
@@ -174,7 +170,7 @@ public class DropboxTests extends JavaRulesTestBaseCase {
 
     @Test
     void memberList() {
-        String jsonString = asJson(exampleDirectoryPath, "member_list.json");
+        String jsonString = asJson("member_list.json");
 
         String endpoint = "https://api.dropboxapi.com/2/team/members/list_v2";
 
@@ -210,7 +206,7 @@ public class DropboxTests extends JavaRulesTestBaseCase {
 
     @Test
     void memberListContinue() {
-        String jsonString = asJson(exampleDirectoryPath, "member_list_continue.json");
+        String jsonString = asJson("member_list_continue.json");
 
         String endpoint = "https://api.dropboxapi.com/2/team/members/list/continue_v2";
 

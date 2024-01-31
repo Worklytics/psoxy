@@ -1,0 +1,6 @@
+format: NDJSON
+transforms:
+  - redact: "$.summary"
+  - redact: "$.summary"
+  - pseudonymize: "$.email"
+  - pseudonymize: "$.email"

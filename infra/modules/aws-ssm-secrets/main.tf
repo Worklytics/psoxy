@@ -9,16 +9,22 @@ locals {
   non_empty_path           = length(var.path) > 0
   non_fully_qualified_path = length(regexall("/", var.path)) > 0 && !startswith(var.path, "/")
   path_prefix              = local.non_empty_path && local.non_fully_qualified_path ? "/${var.path}" : var.path
+  PLACEHOLDER_VALUE        = "fill me"
+
+  externally_managed_secrets = { for k, spec in var.secrets : k => spec if !(spec.value_managed_by_tf) }
+  terraform_managed_secrets  = { for k, spec in var.secrets : k => spec if spec.value_managed_by_tf }
+
+  tf_management_description_appendix = "Value managed by a Terraform configuration; changes outside Terraform may be overwritten by subsequent 'terraform apply' runs"
 }
 
 # see: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter
 resource "aws_ssm_parameter" "secret" {
-  for_each = var.secrets
+  for_each = local.terraform_managed_secrets
 
   name        = "${local.path_prefix}${each.key}"
   type        = "SecureString"
   description = each.value.description
-  value       = sensitive(coalesce(each.value.value, "fill me"))
+  value       = sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE))
   key_id      = coalesce(var.kms_key_id, "alias/aws/ssm")
 
   lifecycle {
@@ -30,14 +36,39 @@ resource "aws_ssm_parameter" "secret" {
   }
 }
 
+resource "aws_ssm_parameter" "secret_with_externally_managed_value" {
+  for_each = local.externally_managed_secrets
+
+  name = "${local.path_prefix}${each.key}"
+  # Due https://github.com/hashicorp/terraform-provider-aws/issues/31267
+  # all are added as secureString
+  type        = "SecureString"
+  description = each.value.description
+  value       = sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE))
+  key_id      = coalesce(var.kms_key_id, "alias/aws/ssm")
+
+  lifecycle {
+    ignore_changes = [
+      value, # key difference here; we don't want to overwrite values filled by the external process
+      tags
+    ]
+  }
+}
+
 # for use in explicit IAM policy grants?
 # q: good idea? breaks notion of AWS SSM parameters secrets being an implementation of a generic
 # secrets-store interface
 # q: is to ALSO pass in some notion of access? except very different per implementation
 output "secret_ids" {
-  value = { for k, v in var.secrets : k => aws_ssm_parameter.secret[k].id }
+  value = merge(
+    { for k, v in local.terraform_managed_secrets : k => aws_ssm_parameter.secret[k].id },
+    { for k, v in local.externally_managed_secrets : k => aws_ssm_parameter.secret_with_externally_managed_value[k].id }
+  )
 }
 
 output "secret_arns" {
-  value = [for k, v in var.secrets : aws_ssm_parameter.secret[k].arn]
+  value = concat(
+    [for k, v in local.terraform_managed_secrets : aws_ssm_parameter.secret[k].arn],
+    [for k, v in local.externally_managed_secrets : aws_ssm_parameter.secret_with_externally_managed_value[k].arn]
+  )
 }

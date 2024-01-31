@@ -2,7 +2,7 @@ package co.worklytics.psoxy.rules;
 
 
 import com.avaulta.gateway.rules.Endpoint;
-import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
+import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -45,7 +45,19 @@ public class Rules2 implements RESTRules {
 
 
 
-    Map<String, JsonSchemaFilterUtils.JsonSchemaFilter> definitions;
+    Map<String, JsonSchemaFilter> definitions;
+
+    /**
+     * root definitions, to be in scope across all endpoints
+     *
+     * @return definitions, in a TreeMap so that serialization is deterministic
+     */
+    public Map<String, JsonSchemaFilter> getDefinitions() {
+        if (definitions != null && !(definitions instanceof TreeMap)) {
+            definitions = new TreeMap<>(definitions);
+        }
+        return definitions;
+    }
 
 
     /**

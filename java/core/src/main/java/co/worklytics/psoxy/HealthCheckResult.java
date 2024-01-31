@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -18,15 +19,15 @@ import java.util.regex.Pattern;
 @AllArgsConstructor
 public class HealthCheckResult {
 
-    @Builder.Default
-    String version = "v0.4.28";
+    String javaSourceCodeVersion;
+
 
     //q: terraform module version?? (eg, have terraform deployment set its version number as ENV
     // variable, and then psoxy can read it and report it here)
 
     public String getVersion() {
         if (bundleFilename == null) {
-            return version;
+            return javaSourceCodeVersion;
         } else {
             return Pattern.compile("psoxy-[^-]*-(.*).jar").matcher(bundleFilename)
                 .replaceAll("$1");
@@ -34,12 +35,14 @@ public class HealthCheckResult {
     }
 
     public void setVersion(String version) {
-        //no-op, in case trying to parse JSON from old deployment version
+        //no-op, for jackson
     }
 
     String bundleFilename;
 
     String configuredSource;
+
+    String configuredHost;
 
     /**
      * from config, if any. (if null, the computed logically)
@@ -59,6 +62,11 @@ public class HealthCheckResult {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String rules;
 
+    /**
+     * value of PSEUDONYMIZE_APP_IDS config property, if any
+     * @see ProxyConfigProperty#PSEUDONYMIZE_APP_IDS
+     */
+    Boolean pseudonymizeAppIds;
 
     public boolean passed() {
         return getConfiguredSource() != null

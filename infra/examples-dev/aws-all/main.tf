@@ -7,22 +7,9 @@ terraform {
     }
   }
 
-  # we recommend you use a secure location for your Terraform state (such as S3 bucket), as it
-  # may contain sensitive values (such as API keys) depending on which data sources you configure.
-  #
-  # local may be safe for production-use IFF you are executing Terraform from a secure location
-  #
-  # Please review and seek guidance from your Security team if in doubt.
-  backend "local" {
-  }
-
-  # example remove backend (this S3 bucket must already be provisioned, and AWS role executing
-  # terraform must be able to read/write to it - and use encryption key, if any)
-  #  backend "s3" {
-  #    bucket = "terraform_state_bucket" # fill with S3 bucket where you want the statefile to be
-  #    key    = "prod_state" # fill with path where you want state file to be stored
-  #    region = "us-east-1" # cannot be a variable
-  #  }
+  # NOTE: Terraform backend block is configured in a separate 'backend.tf' file, as expect everyone
+  # to customize it for their own use; whereas `main.tf` should be largely consistent across
+  # deployments
 }
 
 
@@ -32,13 +19,20 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.28"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.4.46"
 
-  enabled_connectors    = var.enabled_connectors
-  example_jira_issue_id = var.example_jira_issue_id
-  jira_cloud_id         = var.jira_cloud_id
-  jira_server_url       = var.jira_server_url
-  salesforce_domain     = var.salesforce_domain
+  enabled_connectors               = var.enabled_connectors
+  jira_cloud_id                    = var.jira_cloud_id
+  jira_server_url                  = var.jira_server_url
+  jira_example_issue_id            = var.jira_example_issue_id
+  salesforce_domain                = var.salesforce_domain
+  github_api_host                  = var.github_api_host
+  github_enterprise_server_host    = var.github_enterprise_server_host
+  github_enterprise_server_version = var.github_enterprise_server_version
+  github_installation_id           = var.github_installation_id
+  github_organization              = var.github_organization
+  github_example_repository        = var.github_example_repository
+  salesforce_example_account_id    = var.salesforce_example_account_id
 }
 
 # sources which require additional dependencies are split into distinct Terraform files, following
@@ -89,6 +83,10 @@ provider "aws" {
     role_arn = var.aws_assume_role_arn
   }
 
+  default_tags {
+    tags = var.default_tags
+  }
+
   allowed_account_ids = [
     var.aws_account_id
   ]
@@ -100,31 +98,32 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.4.28"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=rc-v0.4.46"
 
-  environment_name               = var.environment_name
-  aws_account_id                 = var.aws_account_id
-  aws_ssm_param_root_path        = var.aws_ssm_param_root_path
-  psoxy_base_dir                 = var.psoxy_base_dir
-  deployment_bundle              = var.deployment_bundle
-  install_test_tool              = var.install_test_tool
-  provision_testing_infra        = var.provision_testing_infra
-  force_bundle                   = var.force_bundle
-  caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
-  caller_aws_arns                = var.caller_aws_arns
-  non_production_connectors      = var.non_production_connectors
-  custom_api_connector_rules     = var.custom_api_connector_rules
-  lookup_table_builders          = var.lookup_table_builders
-  general_environment_variables  = var.general_environment_variables
-  function_env_kms_key_arn       = var.project_aws_kms_key_arn
-  logs_kms_key_arn               = var.project_aws_kms_key_arn
-  aws_ssm_key_id                 = var.project_aws_kms_key_arn
-  bulk_sanitized_expiration_days = var.bulk_sanitized_expiration_days
-  bulk_input_expiration_days     = var.bulk_input_expiration_days
-  api_connectors                 = local.api_connectors
-  bulk_connectors                = local.bulk_connectors
-  custom_bulk_connector_rules    = var.custom_bulk_connector_rules
-  todo_step                      = local.max_auth_todo_step
+  environment_name                = var.environment_name
+  aws_account_id                  = var.aws_account_id
+  aws_ssm_param_root_path         = var.aws_ssm_param_root_path
+  psoxy_base_dir                  = var.psoxy_base_dir
+  deployment_bundle               = var.deployment_bundle
+  install_test_tool               = var.install_test_tool
+  provision_testing_infra         = var.provision_testing_infra
+  force_bundle                    = var.force_bundle
+  caller_gcp_service_account_ids  = var.caller_gcp_service_account_ids
+  caller_aws_arns                 = var.caller_aws_arns
+  non_production_connectors       = var.non_production_connectors
+  custom_api_connector_rules      = var.custom_api_connector_rules
+  lookup_table_builders           = var.lookup_table_builders
+  general_environment_variables   = var.general_environment_variables
+  function_env_kms_key_arn        = var.project_aws_kms_key_arn
+  logs_kms_key_arn                = var.project_aws_kms_key_arn
+  aws_ssm_key_id                  = var.project_aws_kms_key_arn
+  bulk_sanitized_expiration_days  = var.bulk_sanitized_expiration_days
+  bulk_input_expiration_days      = var.bulk_input_expiration_days
+  api_connectors                  = local.api_connectors
+  bulk_connectors                 = local.bulk_connectors
+  custom_bulk_connector_rules     = var.custom_bulk_connector_rules
+  custom_bulk_connector_arguments = var.custom_bulk_connector_arguments
+  todo_step                       = local.max_auth_todo_step
 }
 
 ## Worklytics connection configuration
@@ -139,26 +138,21 @@ locals {
 module "connection_in_worklytics" {
   for_each = local.all_instances
 
-  source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.4.28"
+  source = "../../modules/worklytics-psoxy-connection-aws"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=rc-v0.4.46"
 
-  psoxy_host_platform_id = local.host_platform_id
-  psoxy_instance_id      = each.key
-  worklytics_host        = var.worklytics_host
-  connector_id           = try(local.all_connectors[each.key].worklytics_connector_id, "")
-  display_name           = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
-  todo_step              = module.psoxy.next_todo_step
+  psoxy_instance_id  = each.key
+  worklytics_host    = var.worklytics_host
+  aws_region         = var.aws_region
+  aws_role_arn       = module.psoxy.caller_role_arn
+  psoxy_endpoint_url = try(each.value.endpoint_url, null)
+  bucket_name        = try(each.value.sanitized_bucket, null)
+  connector_id       = try(local.all_connectors[each.key].worklytics_connector_id, "")
+  display_name       = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
+  todo_step          = module.psoxy.next_todo_step
 
-  settings_to_provide = merge(
-    # Source API case
-    try({
-      "Psoxy Base URL" = each.value.endpoint_url
-    }, {}),
-    # Source Bucket (file) case
-    try({
-      "Bucket Name" = each.value.sanitized_bucket_name
-    }, {}),
-  try(each.value.settings_to_provide, {}))
+  connector_settings_to_provide = try(each.value.settings_to_provide, {})
+
 }
 
 output "path_to_deployment_jar" {
@@ -180,3 +174,12 @@ output "todos_3" {
   description = "List of todo steps to complete 3rd, in markdown format."
   value       = var.todos_as_outputs ? join("\n", values(module.connection_in_worklytics)[*].todo) : null
 }
+
+# although should be sensitive such that Terraform won't echo it to command line or expose it, leave
+# commented out in example until needed
+# if you uncomment it, you will then be able to obtain the value through `terraform output --raw pseudonym_salt`
+#output "pseudonym_salt" {
+#  description = "Value used to salt pseudonyms (SHA-256) hashes. If migrate to new deployment, you should copy this value."
+#  value       = module.psoxy.pseudonym_salt
+#  sensitive   = true
+#}

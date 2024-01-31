@@ -26,13 +26,18 @@ import java.util.TreeMap;
 public abstract class WorkloadIdentityFederationGrantTokenRequestBuilder
         implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
+
     protected enum ConfigProperty implements ConfigService.ConfigProperty {
         CLIENT_ID,
         TOKEN_SCOPE
     }
 
-    // 'client_credentials' is MSFT
-    //for Google, this is "urn:ietf:params:oauth:grant-type:jwt-bearer"
+    // as far as what's actually sent in the OAuth 2.0 'grant_type' param:
+    //  - 'client_credentials' is MSFT
+    //  - for Google, this is "urn:ietf:params:oauth:grant-type:jwt-bearer"
+    // imho, I see the argument for both cases of that.
+    // arguably we should make this `grantType` value a strategy, and separately configure an
+    // the OAuth 2.0 grant_type value per env vars
     @Getter(onMethod_ = @Override)
     private final String grantType = "workload_identity_federation";
 

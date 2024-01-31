@@ -1,7 +1,8 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.rules.CsvRules;
+import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
+import com.avaulta.gateway.rules.ColumnarRules;
 import com.google.api.client.util.Lists;
 import com.google.cloud.secretmanager.v1.AccessSecretVersionResponse;
 import com.google.cloud.secretmanager.v1.SecretManagerServiceClient;
@@ -9,8 +10,7 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 
 import javax.inject.Inject;
-import java.io.File;
-import java.io.FileReader;
+import java.io.*;
 
 //@NoArgsConstructor(onConstructor_ = @Inject) //q: compile complaints - lombok annotation processing not reliable??
 public class Handler {
@@ -21,15 +21,13 @@ public class Handler {
     }
 
     @Inject
-    RESTApiSanitizerFactory sanitizerFactory;
-    @Inject
     BulkDataSanitizerFactory fileHandlerStrategy;
     @Inject
     PseudonymizerImplFactory pseudonymizerImplFactory;
 
 
     //visible for testing
-    CsvRules defaultRules = CsvRules.builder().build();
+    ColumnarRules defaultRules = ColumnarRules.builder().build();
 
     @SneakyThrows
     public void sanitize(@NonNull Config config,
@@ -52,16 +50,41 @@ public class Handler {
             options.pseudonymizationSalt(config.getPseudonymizationSalt());
         }
 
-        CsvRules rules = defaultRules.toBuilder()
+        ColumnarRules rules = defaultRules.toBuilder()
                 .columnsToPseudonymize(Lists.newArrayList(config.getColumnsToPseudonymize()))
                 .columnsToRedact(Lists.newArrayList(config.getColumnsToRedact()))
                 .build();
 
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(options.build());
+        BulkDataSanitizer sanitizer = fileHandlerStrategy.get(rules);
 
-        try (FileReader in = new FileReader(inputFile)) {
-            out.append(new String(fileHandlerStrategy.get(inputFile.getName()).sanitize(in, rules, pseudonymizer)));
+        try (FileReader in = new FileReader(inputFile);
+             Writer writer = new AppendableWriter(out)) {
+            sanitizer.sanitize(in, writer, pseudonymizer);
+        }
+    }
+
+    static class AppendableWriter extends java.io.Writer {
+        private final Appendable appendable;
+
+        public AppendableWriter(Appendable appendable) {
+            this.appendable = appendable;
+        }
+
+        @Override
+        public void write(char[] cbuf, int off, int len) throws IOException {
+            appendable.append(new String(cbuf, off, len));
+        }
+
+        @Override
+        public void flush() throws IOException {
+            // No need to flush for Appendable
+        }
+
+        @Override
+        public void close() throws IOException {
+            // No need to close for Appendable
         }
     }
 }

@@ -1,5 +1,9 @@
 package com.avaulta.gateway.rules;
 
+
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 /**
  * rules that define how to sanitize bulk (file) data
  *
@@ -7,6 +11,12 @@ package com.avaulta.gateway.rules;
  *
  *
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = RecordRules.class),
+    @JsonSubTypes.Type(value = ColumnarRules.class),
+    @JsonSubTypes.Type(value = MultiTypeBulkDataRules.class),
+})
 public interface BulkDataRules extends RuleSet {
 
 }

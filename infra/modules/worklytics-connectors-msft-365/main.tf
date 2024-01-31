@@ -1,7 +1,3 @@
-# NOTE: region used to be passed in as a variable; put it MUST match the region in which the lambda
-# is provisioned, and that's implicit in the provider - so we should just infer from the provider
-data "aws_region" "current" {}
-
 locals {
   environment_id_prefix                 = "${var.environment_id}${length(var.environment_id) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_id) > 0 ? " ${var.environment_id} " : ""
@@ -11,9 +7,14 @@ locals {
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
-  enabled_connectors     = var.enabled_connectors
-  msft_tenant_id         = var.msft_tenant_id
-  example_msft_user_guid = var.example_msft_user_guid
+  enabled_connectors                  = var.enabled_connectors
+  msft_tenant_id                      = var.msft_tenant_id
+  example_msft_user_guid              = var.example_msft_user_guid
+  msft_teams_example_team_guid        = var.msft_teams_example_team_guid
+  msft_teams_example_channel_guid     = var.msft_teams_example_channel_guid
+  msft_teams_example_chat_guid        = var.msft_teams_example_chat_guid
+  msft_teams_example_call_guid        = var.msft_teams_example_call_guid
+  msft_teams_example_call_record_guid = var.msft_teams_example_call_record_guid
 }
 
 data "azuread_client_config" "current" {
@@ -33,7 +34,9 @@ module "msft_connection" {
   tenant_id                         = var.msft_tenant_id
   required_app_roles                = each.value.required_app_roles
   required_oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
-  owners                            = toset(concat(data.azuread_users.owners.object_ids, [data.azuread_client_config.current.object_id]))
+  owners = toset(concat(data.azuread_users.owners.object_ids, [
+    data.azuread_client_config.current.object_id
+  ]))
 }
 
 # grant required permissions to connectors via Azure AD

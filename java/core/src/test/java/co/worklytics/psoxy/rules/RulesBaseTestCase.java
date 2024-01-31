@@ -6,9 +6,8 @@ import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.transforms.Transform;
-import com.fasterxml.jackson.core.util.DefaultIndenter;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.MapFunction;
 import dagger.Component;
@@ -22,8 +21,10 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static co.worklytics.test.TestUtils.prettyPrintJson;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -47,21 +48,85 @@ abstract public class RulesBaseTestCase {
     protected PseudonymizerImplFactory pseudonymizerFactory;
     @Inject
     protected RulesUtils rulesUtils;
-    @Getter @Setter
-    RulesTestSpec testSpec = RulesTestSpec.builder().build();
+    @Inject
+    protected Validator validator;
 
+    @Inject
+    protected UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder;
+
+    public abstract RESTRules getRulesUnderTest();
+
+    public abstract RulesTestSpec getRulesTestSpec();
+
+
+    @With
     @Builder
     public static class RulesTestSpec {
 
-        String sanitizedExamplesDirectoryPath;
-        Optional<String> getSanitizedExamplesDirectoryPath() {
-            return Optional.ofNullable(this.sanitizedExamplesDirectoryPath);
+        String sourceFamily; //eg, google-workspace
+
+        @NonNull
+        String sourceKind; //eg, gdrive
+
+        /**
+         * path within sourceDocsRoot to directory containing example API response for this test
+         * case, including trailing '/'
+         * (null if no example responses)
+         */
+        @Builder.Default
+        String exampleApiResponsesDirectoryPath = "example-api-responses/original/";
+
+        String exampleApiResponsesDirectoryPathFull;
+
+
+        public String getExampleApiResponsesDirectoryPathFull() {
+            return Optional.ofNullable(exampleApiResponsesDirectoryPathFull)
+                .orElse(sourceDocsRoot() + exampleApiResponsesDirectoryPath);
         }
 
-        String yamlSerializationFilePath;
+        /**
+         * path within sourceDocsRoot to directory containing example API response for this test
+         * case, including trailing '/'
+         *
+         */
+        @Builder.Default
+        String exampleSanitizedApiResponsesPath = "example-api-responses/sanitized/";
 
-        Optional<String> getYamlSerializationFilePath() {
-            return Optional.ofNullable(this.yamlSerializationFilePath);
+        String exampleSanitizedApiResponsesPathFull;
+
+        public String getExampleSanitizedApiResponsesPathFull() {
+            return Optional.ofNullable(exampleSanitizedApiResponsesPathFull)
+                .orElse(sourceDocsRoot() + exampleSanitizedApiResponsesPath);
+        }
+
+        String rulesFile;
+
+        String getRulesFile() {
+            return Optional.ofNullable(rulesFile).orElse(sourceKind);
+        }
+        public String getRulesFilePathFull() {
+            return sourceDocsRoot() + getRulesFile() + ".yaml";
+        }
+
+        /**
+         * @return path to root, with trailing '/'
+         */
+        private String sourceDocsRoot() {
+            return "sources/" +
+                Arrays.asList(
+                        sourceFamily,
+                        sourceKind // never null
+                    ).stream()
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.joining("/"))
+                + "/";
+        }
+
+
+        String defaultScopeId;
+
+        String getDefaultScopeId() {
+            return Optional.ofNullable(defaultScopeId).orElse(sourceKind);
         }
     }
 
@@ -100,10 +165,8 @@ abstract public class RulesBaseTestCase {
 
         sanitizer = sanitizerFactory.create(getRulesUnderTest(),
             pseudonymizerFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-
-            .defaultScopeId(getDefaultScopeId())
-            //TODO: existing test cases presume this
-            .pseudonymImplementation(PseudonymImplementation.LEGACY)
+            .defaultScopeId(getRulesTestSpec().getDefaultScopeId())
+            .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build()));
 
         //q: good way to also batch test sanitizers from yaml/json formats of rules, to ensure
@@ -112,13 +175,13 @@ abstract public class RulesBaseTestCase {
 
     @Test
     void validate() {
-        Validator.validate(getRulesUnderTest());
+        validator.validate(getRulesUnderTest());
     }
 
     @SneakyThrows
     @Test
     void validateYaml() {
-        Validator.validate(yamlRoundtrip(getRulesUnderTest()));
+        validator.validate(yamlRoundtrip(getRulesUnderTest()));
     }
 
     // regular param --> 4096
@@ -143,7 +206,7 @@ abstract public class RulesBaseTestCase {
     @SneakyThrows
     @Test
     void validateJSON() {
-        Validator.validate(jsonRoundtrip(getRulesUnderTest()));
+        validator.validate(jsonRoundtrip(getRulesUnderTest()));
     }
 
     @SneakyThrows
@@ -152,13 +215,13 @@ abstract public class RulesBaseTestCase {
         getExamples()
             .forEach(example -> {
                 String original =
-                    new String(TestUtils.getData(getExampleDirectoryPath() + "/" + example.getPlainExampleFile()));
+                    new String(TestUtils.getData(getRulesTestSpec().getExampleApiResponsesDirectoryPathFull() + example.getPlainExampleFile()));
                 String sanitized = sanitize(example.getRequestUrl(), original);
 
-                String sanitizedFilepath = testSpec.getSanitizedExamplesDirectoryPath()
-                    .orElse(getExampleDirectoryPath() + "/sanitized") + "/" + example.getPlainExampleFile();
+                String sanitizedFilepath = getRulesTestSpec().getExampleSanitizedApiResponsesPathFull() + example.getPlainExampleFile();
 
-                String expected = StringUtils.trim(new String(TestUtils.getData(sanitizedFilepath )));
+
+                String expected = StringUtils.trim(new String(TestUtils.getData(sanitizedFilepath)));
 
                 assertEquals(expected,
                     StringUtils.trim(prettyPrintJson(sanitized)), sanitizedFilepath + " does not match output");
@@ -168,41 +231,30 @@ abstract public class RulesBaseTestCase {
 
 
     @SneakyThrows
-    RuleSet yamlRoundtrip(RuleSet rules) {
+    com.avaulta.gateway.rules.RuleSet yamlRoundtrip(com.avaulta.gateway.rules.RuleSet rules) {
         String yaml = yamlMapper.writeValueAsString(rules).replace("---\n", "");
         return yamlMapper.readerFor(rules.getClass()).readValue(yaml);
     }
 
     @SneakyThrows
-    RuleSet jsonRoundtrip(RuleSet rules) {
+    com.avaulta.gateway.rules.RuleSet jsonRoundtrip(com.avaulta.gateway.rules.RuleSet rules) {
         String json = jsonMapper.writeValueAsString(rules);
         return jsonMapper.readerFor(rules.getClass()).readValue(json);
     }
-
-
-
-    public abstract String getDefaultScopeId();
-
-    public abstract RESTRules getRulesUnderTest();
-
-    /**
-     * eg 'google-workspace/gdrive'
-     */
-    public abstract String getYamlSerializationFilepath();
-
-    public abstract String getExampleDirectoryPath();
-
-
 
     public Stream<InvocationExample> getExamples() {
         return Stream.empty();
     }
 
     protected String asJson(String filePathWithinExampleDirectory) {
-        return asJson(getExampleDirectoryPath(), filePathWithinExampleDirectory);
+        return asJson(getRulesTestSpec().getExampleApiResponsesDirectoryPathFull(), filePathWithinExampleDirectory);
     }
     protected String asJson(String directoryPath, String filePathWithinExampleDirectory) {
-        return new String(TestUtils.getData(directoryPath + "/" + filePathWithinExampleDirectory));
+        if (!directoryPath.endsWith("/")) {
+            directoryPath = directoryPath + "/";
+        }
+
+        return new String(TestUtils.getData(directoryPath + filePathWithinExampleDirectory));
     }
 
     @SneakyThrows
@@ -245,10 +297,31 @@ abstract public class RulesBaseTestCase {
         assertPseudonymized(content, List.of(shouldBePseudonymized));
     }
 
+    static Transform.PseudonymizationTransform NO_ORIG_INCLUDE_REVERSIBLE = new Transform.PseudonymizationTransform() {
+        @Override
+        public Boolean getIncludeOriginal() {
+            return false;
+        }
+
+        @Override
+        public Boolean getIncludeReversible() {
+            return true;
+        }
+    };
+
     protected void assertPseudonymized(String content, Collection<String> shouldBePseudonymized) {
         shouldBePseudonymized
             .forEach(s ->
                 assertFalse(content.contains(s), () -> String.format("Sanitized content still contains unpseudonymized: %s at %s", s, this.context(content, s))));
+
+        List<MapFunction> possiblePseudonymizations = Arrays.asList(
+            sanitizer.getPseudonymize(Transform.Pseudonymize.builder().encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).build()),
+            sanitizer.getPseudonymize(Transform.Pseudonymize.builder().encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).includeReversible(true).build()),
+            sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder().regex(".*").includeReversible(false).build()),
+            sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder().regex(".*").includeReversible(true).build())
+        );
+
+
 
         shouldBePseudonymized
             .forEach(s -> {
@@ -256,25 +329,20 @@ abstract public class RulesBaseTestCase {
                 String doubleJsonEncodedPseudonym =
                     sanitizer.getJsonConfiguration().jsonProvider().toJson(sanitizer.pseudonymizeToJson(s, sanitizer.getJsonConfiguration()));
 
-                //URLSafe
-                String urlSafe =
-                    (String) sanitizer.getPseudonymize(Transform.Pseudonymize.builder().encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).build()).map(s, sanitizer.getJsonConfiguration());
-                //URLSafe with reversible
-                String urlSafeWithReversible =
-                    (String) sanitizer.getPseudonymize(Transform.Pseudonymize.builder().encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).includeReversible(true).build()).map(s, sanitizer.getJsonConfiguration());
+                List<String> serializedPseudonyms =
+                    possiblePseudonymizations.stream()
+                        .map(f -> (String) f.map(s, sanitizer.getJsonConfiguration()))
+                        .collect(Collectors.toList());
 
+                if (serializedPseudonyms.stream().anyMatch(serialized -> serialized.length() < 20)) {
+                    throw new IllegalArgumentException("Pseudonymization of " + s + " is too short: " + serializedPseudonyms);
+                }
 
-                // sanity check these, so not testing with empty strings or 'null' or something
-                if (urlSafeWithReversible.length() < 40) {
-                    throw new Error("URLSafe with reversible is too short: " + urlSafeWithReversible);
-                }
-                if (urlSafe.length() < 40) {
-                    throw new Error("URLSafe is too short: " + urlSafe);
-                }
 
                 // remove wrapping
                 doubleJsonEncodedPseudonym = StringUtils.unwrap(doubleJsonEncodedPseudonym, "\"");
-                assertTrue(content.contains(doubleJsonEncodedPseudonym) || content.contains(urlSafe) || content.contains(urlSafeWithReversible),
+                assertTrue(content.contains(doubleJsonEncodedPseudonym)
+                        || serializedPseudonyms.stream().anyMatch(content::contains),
                     String.format("Sanitized does not contain %s, pseudonymized equivalent of %s", doubleJsonEncodedPseudonym, s));
             });
     }
@@ -352,46 +420,8 @@ abstract public class RulesBaseTestCase {
         assertFalse(sanitizer.isAllowed("GET", new URL(url)), "rules allowed url that should be blocked: " + url);
     }
 
-    /**
-     * Utility method to print out formatted JSON for debug easily
-     *
-     *
-     *
-     *
-     * @param json
-     * @return
-     */
-    @SneakyThrows
-    @SuppressWarnings("unused")
-    protected String prettyPrintJson(String json) {
-
-        DefaultPrettyPrinter printer = new DefaultPrettyPrinter()
-            .withoutSpacesInObjectEntries();
-        printer.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
-
-
-        return jsonMapper
-            .writer()
-            .with(printer)
-            .writeValueAsString(jsonMapper.readerFor(Object.class).readValue(json));
-
-        //NOTE: Gson seems to URL-encode embedded strings!?!?!
-        //  eg "64123avdfsMVA==" --> "64123avdfsMVA\u0030\0030"
-        // Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        // return gson.toJson(JsonParser.parseString(json));
-    }
-
-    /**
-     * asserts equivalence of two strings after round-trips through Jackson, so any failure is more
-     * readable than comparing non-pretty JSON, and any differences in original formatting (rather
-     * than actual JSON structure/content) are ignored. eg, expected/actual can have different
-     * "pretty" formatting, or one may not have "pretty" formatting at all.
-     *
-     * @param expected output value of test
-     * @param actual output value of test
-     */
+    @Deprecated // used TestUtils::assertJsonEquals directly
     protected void assertJsonEquals(String expected, String actual) {
-        assertEquals(prettyPrintJson(expected), prettyPrintJson(actual));
+        TestUtils.assertJsonEquals(expected, actual);
     }
-
 }

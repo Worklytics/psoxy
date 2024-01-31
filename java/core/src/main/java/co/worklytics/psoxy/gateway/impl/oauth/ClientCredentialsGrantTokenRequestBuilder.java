@@ -43,6 +43,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ClientCredentialsGrantTokenRequestBuilder
         implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
+    public static final String GRANT_TYPE = "client_credentials";
+
     enum ConfigProperty implements ConfigService.ConfigProperty {
         PRIVATE_KEY_ID,
         PRIVATE_KEY,
@@ -63,7 +65,7 @@ public class ClientCredentialsGrantTokenRequestBuilder
     // 'client_credentials' is MSFT
     //for Google, this is "urn:ietf:params:oauth:grant-type:jwt-bearer"
     @Getter(onMethod_ = @Override)
-    private final String grantType = "client_credentials";
+    private final String grantType = GRANT_TYPE;
 
     //for Google, this is "assertion"
     // see: https://datatracker.ietf.org/doc/html/rfc7521#section-4.2
@@ -124,6 +126,32 @@ public class ClientCredentialsGrantTokenRequestBuilder
         return new UrlEncodedContent(data);
     }
 
+    /**
+     * build JWT assertion to authenticate client based on config
+     *
+     * @param clientId both subject + issuer of token
+     * @param audience for the token (the endpoint/service being called)
+     * @return JWT assertion as a string
+     */
+    @SneakyThrows
+    protected String buildJwtAssertion(String clientId, String audience) {
+        //https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials
+        JsonWebSignature.Header header = new JsonWebSignature.Header();
+        header.setType("JWT");
+        header.setAlgorithm("RS256");
+
+        setJWTCustomHeaders(header);
+
+        JsonWebToken.Payload payload = buildPayload(clientId, audience);
+
+        return JsonWebSignature.signUsingRsaSha256(
+                getServiceAccountPrivateKey(), jsonFactory, header, payload);
+    }
+
+    protected void setJWTCustomHeaders(JsonWebSignature.Header header) {
+        header.setX509Thumbprint(encodeKeyId(config.getConfigPropertyOrError(ConfigProperty.PRIVATE_KEY_ID)));
+    }
+
     private Map<String, String> buildClientSecretPayload() {
         Map<String, String> data = new HashMap<>();
 
@@ -156,23 +184,7 @@ public class ClientCredentialsGrantTokenRequestBuilder
         return data;
     }
 
-    /**
-     * build JWT assertion to authenticate client based on config
-     *
-     * @param clientId both subject + issuer of token
-     * @param audience for the token (the endpoint/service being called)
-     * @return JWT assertion as a string
-     */
-    @SneakyThrows
-    private String buildJwtAssertion(String clientId, String audience) {
-
-        //https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-certificate-credentials
-        JsonWebSignature.Header header = new JsonWebSignature.Header();
-        header.setType("JWT");
-        header.setAlgorithm("RS256");
-        header.setX509Thumbprint(encodeKeyId(config.getConfigPropertyOrError(ConfigProperty.PRIVATE_KEY_ID)));
-
-
+    private JsonWebToken.Payload buildPayload(String clientId, String audience) {
         JsonWebToken.Payload payload = new JsonWebToken.Payload();
         Instant currentTime = clock.instant();
 
@@ -185,9 +197,7 @@ public class ClientCredentialsGrantTokenRequestBuilder
 
         payload.setIssuedAtTimeSeconds(currentTime.getEpochSecond());
         payload.setExpirationTimeSeconds(currentTime.plus(DEFAULT_EXPIRATION_DURATION).getEpochSecond());
-
-        return JsonWebSignature.signUsingRsaSha256(
-                getServiceAccountPrivateKey(), jsonFactory, header, payload);
+        return payload;
     }
 
     //implements encoding X.509 certificate hash (also known as the cert's SHA-1 thumbprint) as a

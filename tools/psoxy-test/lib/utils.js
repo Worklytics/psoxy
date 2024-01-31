@@ -1,16 +1,20 @@
+import { createReadStream, createWriteStream } from 'fs';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
-import { promises as fs } from 'fs';
+import { pipeline } from 'node:stream/promises';
 import {
   fromNodeProviderChain,
   fromTemporaryCredentials
 } from "@aws-sdk/credential-providers";
-import aws4 from 'aws4';
-import https from 'https';
-import path from 'path';
 import _ from 'lodash';
-import spec from '../data-sources/spec.js';
+import aws4 from 'aws4';
+import fs from 'node:fs/promises';
 import getLogger from './logger.js';
+import https from 'https';
+import isgzipBuffer from '@stdlib/assert-is-gzip-buffer';
+import path from 'path';
+import spec from '../data-sources/spec.js';
+import zlib from 'node:zlib';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // In case Psoxy is slow to respond (Lambda can take up to 20s+ to bootstrap),
@@ -64,8 +68,9 @@ function getFileNameFromURL(url, timestamp = true, extension = '.json') {
  */
 function getCommonHTTPHeaders(options = {}) {
   const headers = {
-    'Accept-Encoding': options.gzip ? 'gzip' : '*',
+    'Accept-Encoding': options.gzip ? 'gzip,deflate' : '*',
     'X-Psoxy-Skip-Sanitizer': options.skip?.toString() || 'false',
+    'User-Agent': 'psoxy-test (gzip)', // w/o (gzip) here, GCP Cloud functions don't compress response
   };
   if (options.impersonate) {
     headers['X-Psoxy-User-To-Impersonate'] = options.impersonate;
@@ -90,7 +95,7 @@ function getCommonHTTPHeaders(options = {}) {
 function requestWrapper(url, method = 'GET', headers) {
   url = typeof url === 'string' ? new URL(url) : url;
   const params = url.searchParams.toString();
-  let responseData = '';
+  const responseBody = [];
   return new Promise((resolve, reject) => {
     const req = https.request(
       {
@@ -102,20 +107,44 @@ function requestWrapper(url, method = 'GET', headers) {
         timeout: REQUEST_TIMEOUT_MS,
       },
       (res) => {
-        res.on('data', (data) => (responseData += data));
+        res.on('data', (data) => {
+          responseBody.push(data);
+        });
         res.on('end', () => {
-          resolve({
-            status: res.statusCode,
-            statusMessage: res.statusMessage,
-            headers: res.headers,
-            data: responseData,
-          });
+          const contentEncoding = res.headers['content-encoding'];
+          if (['gzip', 'deflate'].includes(contentEncoding)) {
+            const data = Buffer.concat(responseBody);
+            const callback = (error, decompressed) => {
+              if (error) {
+                reject({ statusMessage: 'Unable to decompress Psoxy response' });
+              } else {
+                resolve({
+                  status: res.statusCode,
+                  statusMessage: res.statusMessage,
+                  headers: res.headers,
+                  data: decompressed.toString(),
+                });
+              }
+            }
+            if (contentEncoding === 'gzip') {
+              zlib.gunzip(data, callback);
+            } else {
+              zlib.inflate(data, callback);
+            }
+          } else {
+            resolve({
+              status: res.statusCode,
+              statusMessage: res.statusMessage,
+              headers: res.headers,
+              data: responseBody.join(''),
+            });
+          }
         });
       }
     );
     req.on('timeout', () => {
       req.destroy();
-      reject({ statusMessage: 'Psoxy is taking too long to respond'});
+      reject({ statusMessage: 'Psoxy is taking too long to respond' });
     });
     req.on('error', (error) => {
       reject({ status: error.code, statusMessage: error.message });
@@ -126,9 +155,9 @@ function requestWrapper(url, method = 'GET', headers) {
 
 /**
  * Simple wrapper around `aws4` to ease testing.
- * 
- * TODO aws4 is not able to resolve region nor service (see how we try to 
- *  resolve the "service" here)from the URL for our use cases, so we need to 
+ *
+ * TODO aws4 is not able to resolve region nor service (see how we try to
+ *  resolve the "service" here)from the URL for our use cases, so we need to
  *  improve the resolution of those values
  *
  * Ref: https://github.com/mhart/aws4#api
@@ -176,33 +205,35 @@ function executeCommand(command) {
 /**
  * Transform endpoint's path and params based on previous calls responses
  *
- * @param {Object} spec - see `../data-sources/spec.js`
- * @param {Object} res - data source API response
+ * @param {string} endpointName - name of the endpoint
+ * @param {object} sourceData - endpoint's data source API response
+ * @param {object} spec - see `../data-sources/spec.js` (filtered by source)
  * @returns
  */
-function transformSpecWithResponse(spec = {}, res = {}) {
-  (spec?.endpoints || [])
-    .filter((endpoint) => endpoint.refs !== undefined)
-    .forEach((endpoint) => {
-      endpoint.refs.forEach((ref) => {
-        const target = spec.endpoints.find((endpoint) => endpoint.name === ref.name);
+function transformSpecWithResponse(endpointName = '', sourceData = {}, spec = {}) {
 
-        if (target && ref.accessor) {
-          const valueReplacement = _.get(res, ref.accessor);
+  const refs = (spec?.endpoints ?? [])
+    .find(endpoint => endpoint.name === endpointName)?.refs ?? [];
 
-          if (valueReplacement) {
-            // 2 possible replacements: path or param
-            if (ref.pathReplacement) {
-              target.path = target.path.replace(ref.pathReplacement, valueReplacement);
-            }
+  refs.forEach((ref) => {
+    const target = spec.endpoints.find((endpoint) => endpoint.name === ref.name);
 
-            if (ref.paramReplacement) {
-              target.params[ref.paramReplacement] = valueReplacement;
-            }
-          }
+    if (target && ref.accessor) {
+      const valueReplacement = _.get(sourceData, ref.accessor);
+
+      if (valueReplacement) {
+        // 2 possible replacements: path or param
+        if (ref.pathReplacement) {
+          target.path = target.path.replace(ref.pathReplacement, valueReplacement);
         }
-      });
-    });
+
+        if (ref.paramReplacement) {
+          target.params[ref.paramReplacement] = valueReplacement;
+        }
+      }
+    }
+  })
+
   return spec;
 }
 
@@ -249,6 +280,7 @@ function resolveAWSRegion(url) {
 async function executeWithRetry(fn, onErrorStop, logger, maxAttempts = 60,
   delay = 5000, progressMessage = 'Waiting for sanitized output...') {
 
+  const start = Date.now();
   let result;
   let attempts = 0;
   while(_.isUndefined(result) && attempts <= maxAttempts) {
@@ -268,7 +300,13 @@ async function executeWithRetry(fn, onErrorStop, logger, maxAttempts = 60,
       clearTimeout(await new Promise(resolve => setTimeout(resolve, delay)));
 
       if (logger) {
-        logger.info(progressMessage);
+        const elapsedMs = Date.now() - start;
+        const elapsedSeconds = Math.floor(elapsedMs / 1000);
+        const elapsedMinutes = Math.floor(elapsedSeconds / 60);
+        const elapsed = elapsedMinutes > 0 ?
+          `${elapsedMinutes}m${elapsedSeconds % 60}s` :
+          `${elapsedSeconds}s`;
+        logger.info(`${progressMessage} [${elapsed} elapsed]`);
       }
     }
   }
@@ -322,8 +360,10 @@ async function getAWSCredentials(role, region) {
   const logger = getLogger();
   let credentials;
   let credentialsProvider;
+  let callerIdentity;
 
   if (!_.isEmpty(role)) {
+    logger.verbose(`Assuming role ${role}`);
     const temporaryCredentialsOptions = {
       params: {
         RoleArn: role,
@@ -336,10 +376,19 @@ async function getAWSCredentials(role, region) {
     }
     credentialsProvider = fromTemporaryCredentials(temporaryCredentialsOptions);
 
-    credentials = await credentialsProvider();
+    try {
+      credentials = await credentialsProvider();
+    } catch (e) {
+      throw new Error(`Unable to get AWS credentials: ${e.message}\nMake sure your AWS CLI is configured correctly: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-authentication.html`);
+    }
 
-    const callerIdentity = JSON.parse(
-      executeCommand('aws sts get-caller-identity').trim());
+    try {
+      callerIdentity = JSON.parse(
+        executeCommand('aws sts get-caller-identity').trim());
+    } catch (e) {
+      // It shouldn't happen if credentials are valid
+      logger.verbose(`Unable to get caller identity: ${e.message}`);
+    }
 
     logger.info(`Using temporary credentials: ${callerIdentity.Arn},
       access key ID -> ${credentials.accessKeyId}`);
@@ -355,17 +404,59 @@ async function getAWSCredentials(role, region) {
   return credentials;
 }
 
+/**
+ * Append suffix to filename (before extension)
+ * @param {string} filename
+ * @param {string} suffix
+ * @returns {string} {filename}-{suffix}{extension}
+ */
+function addFilenameSuffix(filename, suffix) {
+  let result = '';
+  if (!_.isEmpty(filename)) {
+    const { name, ext } = path.parse(filename);
+    result = `${name}-${suffix}${ext}`;
+  }
+  return result;
+}
+
+/**
+ * Unzip file
+ * @param {string} filePath
+ * @returns {string} unzipped file path
+ */
+async function unzip(filePath) {
+  const unzip = zlib.createUnzip();
+  const input = createReadStream(filePath);
+  const outputPath = `${filePath}.${Date.now()}.raw`
+  const output = createWriteStream(outputPath);
+
+  await pipeline(input, unzip, output);
+  return outputPath
+}
+
+/**
+ * Check if file is gzipped
+ * @param {string} filePath
+ * @returns {boolean}
+ */
+async function isGzipped(filePath) {
+  return isgzipBuffer(await fs.readFile(filePath));
+}
+
 export {
+  addFilenameSuffix,
+  unzip,
   executeCommand,
   executeWithRetry,
   getAWSCredentials,
   getCommonHTTPHeaders,
   getFileNameFromURL,
+  isGzipped,
   parseBucketOption,
   requestWrapper as request,
+  resolveAWSRegion,
+  resolveHTTPMethod,
   saveToFile,
   signAWSRequestURL,
-  resolveHTTPMethod,
-  resolveAWSRegion,
   transformSpecWithResponse,
 };

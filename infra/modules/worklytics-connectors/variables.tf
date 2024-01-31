@@ -21,10 +21,60 @@ variable "jira_cloud_id" {
   description = "(Only required if using Jira Cloud connector) Cloud id of the Jira Cloud to connect to (ex: 1324a887-45db-1bf4-1e99-ef0ff456d421)."
 }
 
+#DEPRECATED
 variable "example_jira_issue_id" {
   type        = string
   default     = null
-  description = "(Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
+  description = "Deprecated; use `jira_example_issued_id`. (Only required if using Jira Server/Cloud connector) Id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
+}
+
+variable "jira_example_issue_id" {
+  type        = string
+  default     = null
+  description = "If using Jira Server/Cloud connector, provide id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
+}
+
+# DEPRECATED
+variable "github_api_host" {
+  type        = string
+  default     = null
+  description = "DEPRECATED; use `github_enterprise_server_host`. (Only required if using Github connector for on premises) Host of the Github instance (ex: github.mycompany.com)."
+}
+
+variable "github_enterprise_server_host" {
+  type        = string
+  default     = ""
+  description = "(Only required if using Github Enterprise Server connector) Host of the Github instance (ex: github.mycompany.com)."
+}
+
+variable "github_enterprise_server_version" {
+  type        = string
+  default     = "v3"
+  description = "(Only required if using Github Enterprise Server connector) Version of the server to use (ex: v3). By default, v3"
+}
+
+variable "github_installation_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Github connector) InstallationId of the application in your org for authentication with the proxy instance (ex: 123456)"
+}
+
+variable "github_organization" {
+  type        = string
+  default     = null
+  description = "(Only required if using Github connector) Name of the organization to be used as part of example calls for Github (ex: Worklytics). NOTE: If using Enterprise Server, this can be a list of organizations split by commas (ex: Worklytics,Worklytics2)"
+}
+
+variable "github_example_repository" {
+  type        = string
+  default     = null
+  description = "(Only required if using Github connector) Name for the repository to be used as part of example calls for Github (ex: psoxy)"
+}
+
+variable "salesforce_example_account_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Salesforce connector) Id of the account id for usign as an example calls for Salesforce (ex: 0015Y00002c7g95QAA)"
 }
 
 variable "todo_step" {

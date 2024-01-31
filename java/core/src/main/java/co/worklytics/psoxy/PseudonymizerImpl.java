@@ -13,11 +13,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressCriteria;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressParser;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressValidator;
 
 import javax.inject.Inject;
+import java.util.Base64;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -34,6 +36,8 @@ public class PseudonymizerImpl implements Pseudonymizer {
     DeterministicTokenizationStrategy deterministicTokenizationStrategy;
     @Inject
     UrlSafeTokenPseudonymEncoder urlSafePseudonymEncoder;
+
+    Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
 
     @Getter
     ConfigurationOptions options;
@@ -60,13 +64,18 @@ public class PseudonymizerImpl implements Pseudonymizer {
     }
 
     @Override
-    public PseudonymizedIdentity pseudonymize(Object value, Transform.Pseudonymize transformOptions) {
+    public PseudonymizedIdentity pseudonymize(Object value, Transform.PseudonymizationTransform transformOptions) {
         if (value == null) {
             return null;
         }
 
         Preconditions.checkArgument(value instanceof String || value instanceof Number,
             "Value must be some basic type (eg JSON leaf, not node)");
+
+        // Base case; empty/blank string
+        if (value instanceof String && StringUtils.isBlank((String)value)) {
+            return null;
+        }
 
         PseudonymizedIdentity.PseudonymizedIdentityBuilder builder = PseudonymizedIdentity.builder();
 
@@ -93,24 +102,30 @@ public class PseudonymizerImpl implements Pseudonymizer {
             scope = getOptions().getDefaultScopeId();
         }
 
-        builder.scope(scope);
+        builder.scope(StringUtils.trimToNull(scope));
+
+
+        byte[] hashWithDefaultImpl =
+            deterministicTokenizationStrategy.getToken(value.toString(), canonicalization);
+
+        // encoded hash will be filled based on customer's config; may NOT simply be encoding of
+        // hashWithDefaultImpl
+        String encodedHash;
         if (getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
-            builder.hash(hashUtils.hash(canonicalization.apply(value.toString()),
-                getOptions().getPseudonymizationSalt(), asLegacyScope(scope)));
+            encodedHash = hashUtils.hash(canonicalization.apply(value.toString()),
+                getOptions().getPseudonymizationSalt(), asLegacyScope(scope));
         } else if (getOptions().getPseudonymImplementation() == PseudonymImplementation.DEFAULT) {
-
-            builder.hash(urlSafePseudonymEncoder.encode(
-                Pseudonym.builder()
-                    .hash(deterministicTokenizationStrategy.getToken(value.toString(), canonicalization))
-                    .build()));
-
+            encodedHash = encoder.encodeToString(hashWithDefaultImpl);
         } else {
             throw new RuntimeException("Unsupported pseudonym implementation: " + getOptions().getPseudonymImplementation());
         }
 
+        builder.hash(encodedHash);
+
         if (transformOptions.getIncludeReversible()) {
             builder.reversible(urlSafePseudonymEncoder.encode(
                 Pseudonym.builder()
+                    .hash(hashWithDefaultImpl) //reversibles have ALWAYS relied on the v4 default impl
                     .reversible(reversibleTokenizationStrategy.getReversibleToken(value.toString(), canonicalization))
                     .domain(domain)
                     .build()));
@@ -118,6 +133,12 @@ public class PseudonymizerImpl implements Pseudonymizer {
 
         if (transformOptions.getIncludeOriginal()) {
             builder.original(Objects.toString(value));
+        }
+
+        // for LEGACY case, fill DEFAULT pseudonym in h_4, to enable future migration by client
+        // (eg, send both DEFAULT + LEGACY)
+        if (getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
+            builder.h_4(encoder.encodeToString(hashWithDefaultImpl));
         }
 
         return builder.build();

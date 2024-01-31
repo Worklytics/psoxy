@@ -70,6 +70,12 @@ variable "install_test_tool" {
   default     = true
 }
 
+variable "gcp_principals_authorized_to_test" {
+  type        = list(string)
+  description = "list of GCP principals authorized to test this deployment - eg 'user:alice@acme.com', 'group:devs@acme.com'; if omitted, up to you to configure necessary perms for people to test if desired."
+  default     = []
+}
+
 variable "general_environment_variables" {
   type        = map(string)
   description = "environment variables to add for all connectors"
@@ -119,13 +125,16 @@ variable "api_connectors" {
     example_api_calls                     = optional(list(string), [])
     example_api_calls_user_to_impersonate = optional(string)
     secured_variables = optional(list(object({
-      name     = string
-      value    = optional(string)
-      writable = optional(bool, false)
-      lockable = optional(bool, false)
+      name                = string
+      value               = optional(string)
+      writable            = optional(bool, false)
+      lockable            = optional(bool, false)
+      sensitive           = optional(bool, true)
+      value_managed_by_tf = optional(bool, true)
+      description         = optional(string)
       })),
     [])
-
+    settings_to_provide = optional(map(string), {})
   }))
 
   description = "map of API connectors to provision"
@@ -143,16 +152,22 @@ variable "bulk_connectors" {
     source_kind           = string
     input_bucket_name     = optional(string) # allow override of default bucket name
     sanitized_bucket_name = optional(string) # allow override of default bucket name
-    rules = object({
+    rules = optional(object({
       pseudonymFormat       = optional(string)
       columnsToRedact       = optional(list(string), [])
       columnsToInclude      = optional(list(string), null)
       columnsToPseudonymize = optional(list(string), [])
       columnsToDuplicate    = optional(map(string), {})
       columnsToRename       = optional(map(string), {})
-    })
+      fieldsToTransform = optional(map(object({
+        newName    = string
+        transforms = optional(list(map(string)), [])
+      })))
+    }))
+    rules_file          = optional(string)
     example_file        = optional(string)
     settings_to_provide = optional(map(string), {})
+    available_memory_mb = optional(number)
   }))
 
   description = "map of connector id  => bulk connectors to provision"
@@ -176,17 +191,32 @@ variable "bulk_sanitized_expiration_days" {
   default     = 720
 }
 
+# q: move this into custom_bulk_connector_args
 variable "custom_bulk_connector_rules" {
   type = map(object({
     pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
-    columnsToRedact       = optional(list(string))
+    columnsToRedact       = optional(list(string), [])
     columnsToInclude      = optional(list(string))
-    columnsToPseudonymize = optional(list(string))
+    columnsToPseudonymize = optional(list(string), [])
     columnsToDuplicate    = optional(map(string))
     columnsToRename       = optional(map(string))
+    fieldsToTransform = optional(map(object({
+      newName    = string
+      transforms = optional(list(map(string)), [])
+    })))
   }))
 
   description = "map of connector id --> rules object"
+  default     = {}
+}
+
+variable "custom_bulk_connector_arguments" {
+  type = map(object({
+    available_memory_mb = optional(number)
+    # what else to add here?
+  }))
+
+  description = "map of connector id --> settings object"
   default     = {}
 }
 

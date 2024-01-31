@@ -21,7 +21,6 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class AESReversibleTokenizationStrategy implements ReversibleTokenizationStrategy {
 
-
     private static final int GCM_IV_LENGTH = 12;
     private static final int GCM_TAG_LENGTH = 16;
 

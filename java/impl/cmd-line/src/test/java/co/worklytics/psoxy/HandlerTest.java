@@ -1,8 +1,15 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.storage.BulkDataSanitizer;
+import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.ColumnarBulkDataSanitizerImpl;
+import co.worklytics.psoxy.storage.impl.ColumnarBulkDataSanitizerImplFactory;
 import co.worklytics.test.TestModules;
+import com.avaulta.gateway.rules.BulkDataRules;
+import com.avaulta.gateway.rules.ColumnarRules;
 import dagger.Component;
+import dagger.Module;
+import dagger.Provides;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +21,9 @@ import java.util.Collections;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class HandlerTest {
 
@@ -21,6 +31,7 @@ public class HandlerTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        ForPlaceholderRules.class,
         TestModules.ForConfigService.class,
     })
     public interface Container {
@@ -31,15 +42,31 @@ public class HandlerTest {
     @Inject
     Handler handler;
 
+    @Module
+    public interface ForPlaceholderRules {
+        @Provides
+        @Singleton
+        static ColumnarRules ruleSet() {
+            return mock(ColumnarRules.class);
+        }
+    }
+
     @BeforeEach
     public void setup() {
         Container container = DaggerHandlerTest_Container.create();
         container.inject(this);
 
+        ColumnarRules csvRules = ColumnarRules.builder()
+            .build();
+
         //make this deterministic for testing
-        ColumnarBulkDataSanitizerImpl bulkDataSanitizer =
-            (ColumnarBulkDataSanitizerImpl) handler.fileHandlerStrategy.get(".csv");
-        bulkDataSanitizer.setRecordShuffleChunkSize(1);
+        ColumnarBulkDataSanitizerImpl example = (ColumnarBulkDataSanitizerImpl) handler.fileHandlerStrategy.get(csvRules);
+        handler.fileHandlerStrategy = mock(BulkDataSanitizerFactory.class);
+        when(handler.fileHandlerStrategy.get(any())).then(invocation -> {
+            example.setRules(invocation.getArgument(0));
+            example.setRecordShuffleChunkSize(1);
+            return example;
+        });
     }
 
     @Test

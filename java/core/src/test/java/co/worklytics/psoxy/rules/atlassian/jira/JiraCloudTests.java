@@ -18,13 +18,11 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.JIRA_CLOUD;
 
     @Getter
-    final String exampleDirectoryPath = "api-response-examples/atlassian/jira";
-
-    @Getter
-    final String defaultScopeId = "jira";
-
-    @Getter
-    final String yamlSerializationFilepath = "atlassian/jira/jira-cloud";
+    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
+        .sourceFamily("atlassian")
+        .sourceKind("jira")
+        .rulesFile("jira-cloud")
+        .build();
 
     @Disabled // not reliable; seems to have different value via IntelliJ/AWS deployment and my
     // laptop's maven, which doesn't make any sense, given that binary deployed to AWS was built via
@@ -44,7 +42,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
 
     @Test
     void users() {
-        String jsonString = asJson(exampleDirectoryPath, "users.json");
+        String jsonString = asJson("users.json");
 
         //no single-user case
         assertUrlBlocked("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/users?accountId=5b10ac8d82e05b22cc7d4ef5'");
@@ -69,7 +67,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
 
     @Test
     void groups_bulk() {
-        String jsonString = asJson(exampleDirectoryPath, "groups.json");
+        String jsonString = asJson("groups.json");
 
         //no single-user case
         assertUrlBlocked("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/group/bulk?groupId=5b10ac8d82e05b22cc7d4ef5");
@@ -83,7 +81,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
 
     @Test
     void group_member() {
-        String jsonString = asJson(exampleDirectoryPath, "group_member.json");
+        String jsonString = asJson("group_member.json");
 
         String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/group/member?groupId=5b10ac8d82e05b22cc7d4ef5";
 
@@ -103,7 +101,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
 
     @Test
     void issues_by_jql() {
-        String jsonString = asJson(exampleDirectoryPath, "issues_by_jql.json");
+        String jsonString = asJson("issues_by_jql.json");
 
         String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/search?jql=something&startAt=50";
 
@@ -124,7 +122,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
 
     @Test
     void issue() {
-        String jsonString = asJson(exampleDirectoryPath, "issue.json");
+        String jsonString = asJson("issue.json");
 
         String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/ISSUE?startAt=50";
 
@@ -136,7 +134,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
 
     @Test
     void issue_changelog() {
-        String jsonString = asJson(exampleDirectoryPath, "issue_changelog.json");
+        String jsonString = asJson("issue_changelog.json");
 
         String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/changelog?&startAt=50";
 
@@ -155,7 +153,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
 
     @Test
     void issue_comments_v2() {
-        String jsonString = asJson(exampleDirectoryPath, "issue_comment_v2.json");
+        String jsonString = asJson("issue_comment_v2.json");
 
         String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/comment?&startAt=50";
 
@@ -175,7 +173,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
 
     @Test
     void issue_comments_v3() {
-        String jsonString = asJson(exampleDirectoryPath, "issue_comment_v3.json");
+        String jsonString = asJson("issue_comment_v3.json");
 
         String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/comment?&startAt=50";
 
@@ -194,7 +192,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
 
     @Test
     void issue_worklog_v2() {
-        String jsonString = asJson(exampleDirectoryPath, "issue_worklog_v2.json");
+        String jsonString = asJson("issue_worklog_v2.json");
 
         String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/worklog?&startAt=50";
 
@@ -214,7 +212,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
 
     @Test
     void issue_worklog_v3() {
-        String jsonString = asJson(exampleDirectoryPath, "issue_worklog_v3.json");
+        String jsonString = asJson("issue_worklog_v3.json");
 
         String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/worklog?&startAt=50";
 
@@ -233,7 +231,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
 
     @Test
     void projects() {
-        String jsonString = asJson(exampleDirectoryPath, "projects.json");
+        String jsonString = asJson("projects.json");
 
         String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/project/search?startAt=0&maxResults=25";
         String sanitized = this.sanitize(endpoint, jsonString);
@@ -249,7 +247,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
 
     @Test
     void accessible_resources() {
-        String jsonString = asJson(exampleDirectoryPath, "accessible_resources.json");
+        String jsonString = asJson("accessible_resources.json");
 
         String endpoint = "https://api.atlassian.com/oauth/token/accessible-resources";
         String sanitized = this.sanitize(endpoint, jsonString);
@@ -272,6 +270,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/comment?&startAt=50", "issue_comment_v2.json"),
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/comment?&startAt=50", "issue_comment_v3.json"),
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/worklog?&startAt=50", "issue_worklog_v2.json"),
-                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/worklog?&startAt=50", "issue_worklog_v3.json"));
+                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/worklog?&startAt=50", "issue_worklog_v3.json"),
+                InvocationExample.of("https://api.atlassian.com/ex/jira/e9224a3c-0479-4ebc-9e5f-340c81d142c1/rest/api/3/issue/247393/worklog?startAt=0&maxResults=50", "issue_worklog_v3.json"));
     }
 }
