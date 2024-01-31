@@ -61,9 +61,9 @@ async function call(options = {}) {
   logger.verbose('Request Headers:', { additional: headers });
 
   const url = new URL(options.url);
-  const method = options.method || resolveHTTPMethod(url.pathname);
+  const method = options.method || resolveHTTPMethod(url.pathname, options);
 
-  return await request(url, method, headers);
+  return await request(url, method, headers, options.body);
 }
 
 /**

@@ -33,6 +33,7 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
     .option('-v, --verbose', 'Verbose output', false)
     .option('-z, --gzip [type]', 'Add gzip compression header (default: true, "-z false" to remove)', true)
     .option('--health-check', 'Health Check call: check Psoxy deploy is running')
+    .option('-b, --body <body>', 'Body to send in request (it expects a JSON string)')
     .addOption(new Option('-d, --data-source <name>',
       'Data source to test all available endpoints').choices([
         'asana',

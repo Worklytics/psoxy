@@ -49,7 +49,7 @@ function isValidURL(url) {
 async function call(options = {}) {
   const logger = getLogger(options.verbose);
   const url = new URL(options.url);
-  const method = options.method || resolveHTTPMethod(url.pathname);
+  const method = options.method || resolveHTTPMethod(url.pathname, options);
 
   if (_.isEmpty(options.region)) {
     options.region = resolveAWSRegion(url);
@@ -59,7 +59,8 @@ async function call(options = {}) {
 
   logger.verbose('Signing request');
 
-  const signed = signAWSRequestURL(url, method, credentials, options.region);
+  const signed = signAWSRequestURL(url, method, options.body, credentials,
+     options.region);
   const headers = {
     ...getCommonHTTPHeaders(options),
     ...signed.headers,
@@ -67,9 +68,9 @@ async function call(options = {}) {
 
   logger.info(`Calling Psoxy and waiting response: ${options.url.toString()}`);
   logger.verbose('Request Options:', { additional: options });
-  logger.verbose('Request Headers: ', { additional: headers })
+  logger.verbose('Request Headers: ', { additional: headers });
 
-  return await request(url, method, headers);
+  return await request(url, method, headers, options.body);
 }
 
 /**
