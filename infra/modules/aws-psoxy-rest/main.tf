@@ -117,7 +117,7 @@ ${local.command_cli_call} -u ${local.proxy_endpoint_url} --health-check
 Then, based on your configuration, these are some example test calls you can try (YMMV):
 
 ```shell
-${oin("\n", local.command_test_calls)}
+${join("\n", local.command_test_calls)}
 ```
 
 Feel free to try the above calls, and reference to the source's API docs for other parameters /
