@@ -27,13 +27,26 @@ A ruleset is a list of API endpoints that are permitted to be invoked through th
 endpoint in this list will be rejected with a `403` response.
 
 ### Endpoint Specification
-`<endpoint> ::= <path-template> <path-parameter-schemas> <response-schema> <transforms>`
+`<endpoint> ::= <path-template> <allowed-methods> <path-parameter-schemas> <query-parameter-schemas> <response-schema> <transforms>`
 
 `<path-template> ::= "- pathTemplate: " <string>`
 Each endpoint is specified by a path template, based on OpenAPI Spec v3.0.0 Path Template syntax.  Variable path
 segments are enclosed in curly braces (`{}`) and are matched by any value that does not contain an `/` character.
 
 See: https://swagger.io/docs/specification/paths-and-operations/
+
+### Allowed Methods
+`<allowed-methods> ::= "- allowedMethods: " <method-list>`
+`<method-list> ::= <method> | <method> <method-list>`
+
+`<method> ::= "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD"`
+
+If provided, only HTTP methods included in this list will be permitted for the endpoint. Given
+semantics of RESTful APIs, this allows an additional point to enforce "read-only" data access, in
+addition to OAuth scopes/etc.
+
+NOTE: for AWS-hosted deployments using API Gateway, IAM policies and routes may also be used to
+restrict HTTP methods. See [aws/guides/api-gateway.md](aws/guides/api-gateway.md) for more details.
 
 #### Path / Query Parameter Schemas
 `<path-parameter-schemas> ::= "- pathParameterSchemas: " <parameter-schema>`

@@ -275,6 +275,22 @@ variable "lookup_table_builders" {
   }
 }
 
+variable "use_api_gateway_v2" {
+  type        = bool
+  description = "**alpha**. whether to use API Gateway, or not. Only v2 supported atm. Ignored if `vpc_config` is provided, bc that's incompatible with function URLs."
+  default     = false
+}
+
+variable "vpc_config" {
+  type = object({
+    # ipv6_allowed_for_dual_stack = optional(bool, false)
+    subnet_ids         = list(string)
+    security_group_ids = list(string)
+  })
+  description = "**alpha** VPC configuration for lambda; if not provided, lambda will not be deployed in a VPC. see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#vpc_config"
+  default     = null
+}
+
 variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"

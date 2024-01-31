@@ -186,6 +186,11 @@ variable "custom_api_connector_rules" {
   default     = {}
 }
 
+variable "use_api_gateway_v2" {
+  type        = bool
+  description = "**alpha** whether to use API Gateway (v2); if not lambdas exposed via function URLs, unless VPC is configured."
+  default     = false
+}
 
 variable "custom_bulk_connectors" {
   type = map(object({

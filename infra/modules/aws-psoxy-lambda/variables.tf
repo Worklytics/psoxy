@@ -139,3 +139,14 @@ variable "function_parameters" {
   default     = []
 }
 
+
+variable "vpc_config" {
+  type = object({
+    # ipv6_allowed_for_dual_stack = optional(bool, false)
+    subnet_ids         = list(string)
+    security_group_ids = list(string)
+  })
+  description = "**alpha** VPC configuration for lambda; if not provided, lambda will not be deployed in a VPC. see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#vpc_config"
+  default     = null
+}
+

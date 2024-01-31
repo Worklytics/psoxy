@@ -25,6 +25,9 @@ locals {
   }
 
   arn_for_test_calls = var.api_caller_role_arn
+
+  # helper to clarify conditionals throughout
+  use_api_gateway = var.api_gateway_v2 != null
 }
 
 module "psoxy_lambda" {
@@ -47,6 +50,7 @@ module "psoxy_lambda" {
   global_parameter_arns           = var.global_parameter_arns
   ssm_kms_key_ids                 = var.ssm_kms_key_ids
   log_retention_in_days           = var.log_retention_days
+  vpc_config                      = var.vpc_config
 
   environment_variables = merge(
     var.environment_variables,
@@ -54,7 +58,10 @@ module "psoxy_lambda" {
   )
 }
 
+# lambda function URL (only if NOT using API Gateway)
 resource "aws_lambda_function_url" "lambda_url" {
+  count = local.use_api_gateway ? 0 : 1
+
   function_name      = module.psoxy_lambda.function_name
   authorization_type = "AWS_IAM"
 
@@ -63,9 +70,52 @@ resource "aws_lambda_function_url" "lambda_url" {
   ]
 }
 
+# API Gateway (only if NOT using lambda function URL)
+resource "aws_apigatewayv2_integration" "map" {
+  count = local.use_api_gateway ? 1 : 0
+
+  api_id                 = var.api_gateway_v2.id
+  integration_type       = "AWS_PROXY"
+  connection_type        = "INTERNET"
+  integration_method     = "POST"
+  integration_uri        = module.psoxy_lambda.function_arn
+  payload_format_version = "2.0"
+  timeout_milliseconds   = 30000 # ideally would be 55 or 60, but docs say limit is 30s
+}
+
+resource "aws_apigatewayv2_route" "methods" {
+  for_each = toset(local.use_api_gateway ? var.http_methods : [])
+
+  api_id             = var.api_gateway_v2.id
+  route_key          = "${each.key} /${module.psoxy_lambda.function_name}/{proxy+}"
+  authorization_type = "AWS_IAM"
+  target             = "integrations/${aws_apigatewayv2_integration.map[0].id}"
+}
+
+resource "aws_lambda_permission" "api_gateway" {
+  count = local.use_api_gateway ? 1 : 0
+
+  statement_id  = "Allow${module.psoxy_lambda.function_name}Invoke"
+  action        = "lambda:InvokeFunction"
+  function_name = module.psoxy_lambda.function_name
+  principal     = "apigateway.amazonaws.com"
+
+
+  # The /*/*/ part allows invocation from any stage, method and resource path
+  # within API Gateway REST API.
+  # TODO: limit by http method here too?
+  source_arn = "${var.api_gateway_v2.execution_arn}/*/*/${module.psoxy_lambda.function_name}/{proxy+}"
+}
+
+
 locals {
+  api_gateway_url = local.use_api_gateway ? "${var.api_gateway_v2.stage_invoke_url}/${module.psoxy_lambda.function_name}" : null
+
   # lambda_url has trailing /, but our example_api_calls already have preceding /
-  proxy_endpoint_url  = substr(aws_lambda_function_url.lambda_url.function_url, 0, length(aws_lambda_function_url.lambda_url.function_url) - 1)
+  function_url = local.use_api_gateway ? null : substr(aws_lambda_function_url.lambda_url[0].function_url, 0, length(aws_lambda_function_url.lambda_url[0].function_url) - 1)
+
+  proxy_endpoint_url = coalesce(local.api_gateway_url, local.function_url)
+
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
 
   # don't want to *require* assumption of a role for testing; while we expect it in usual case
@@ -162,7 +212,7 @@ resource "local_file" "test_script" {
 API_PATH=$${1:-${try(var.example_api_calls[0], "")}}
 echo "Quick test of ${module.psoxy_lambda.function_name} ..."
 
-${local.command_cli_call} -u "${local.proxy_endpoint_url}" --health-check
+${local.command_cli_call} -u "${local.proxy_endpoint_url}/" --health-check
 
 ${local.command_cli_call} -u "${local.proxy_endpoint_url}$API_PATH" ${local.impersonation_param}
 
@@ -173,7 +223,7 @@ EOT
 
 
 output "endpoint_url" {
-  value = aws_lambda_function_url.lambda_url.function_url
+  value = "${local.proxy_endpoint_url}/"
 }
 
 output "function_arn" {
