@@ -46,6 +46,7 @@ test.beforeEach(async (t) => {
     t.context.utils.signAWSRequestURL(
       td.matchers.isA(URL),
       td.matchers.contains('GET'),
+      td.matchers.anything(),
       credentials,
       options.region,
     )
@@ -113,7 +114,8 @@ test.serial('Psoxy call: works as expected', async (t) => {
     utils.request(
       td.matchers.isA(URL),
       td.matchers.contains('GET'),
-      td.matchers.contains(signedRequest.headers)
+      td.matchers.contains(signedRequest.headers),
+      td.matchers.anything()
     )
   ).thenReturn({ status: httpCodes.HTTP_STATUS_OK });
 
@@ -131,7 +133,8 @@ test.serial('Psoxy call: pathless URL results 500', async (t) => {
     utils.request(
       td.matchers.isA(URL),
       td.matchers.contains('GET'),
-      td.matchers.contains(signedRequest.headers)
+      td.matchers.contains(signedRequest.headers),
+      td.matchers.anything(),
     )
   ).thenReturn({
     status: 500,

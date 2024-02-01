@@ -18,16 +18,6 @@ resource "aws_s3_bucket" "output" {
   }
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "sanitized" {
-  bucket = aws_s3_bucket.output.bucket
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "aws:kms"
-    }
-  }
-}
-
 resource "aws_s3_bucket_public_access_block" "sanitized" {
   bucket = aws_s3_bucket.output.bucket
 

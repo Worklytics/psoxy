@@ -172,10 +172,14 @@ variable "function_parameters" {
   default     = []
 }
 
-variable "todo_step" {
-  type        = number
-  description = "of all todos, where does this one logically fall in sequence"
-  default     = 2
+variable "vpc_config" {
+  type = object({
+    # ipv6_allowed_for_dual_stack = optional(bool, false)
+    subnet_ids         = list(string)
+    security_group_ids = list(string)
+  })
+  description = "**alpha** VPC configuration for lambda; if not provided, lambda will not be deployed in a VPC. see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#vpc_config"
+  default     = null
 }
 
 variable "memory_size_mb" {
@@ -184,3 +188,30 @@ variable "memory_size_mb" {
   description = "Amount of memory in MB your Lambda Function can use at runtime. Defaults to 512"
   default     = 512
 }
+
+
+variable "api_gateway_v2" {
+  type = object({
+    name             = string
+    id               = string
+    execution_arn    = string
+    api_endpoint     = string
+    stage_invoke_url = string # augmentation to apigatewayv2 resource; adding the invoke url from the stage
+  })
+  description = "the API Gateway v2 instance via which to expose this instance, if any (leave `null` for none)"
+  default     = null
+}
+
+variable "http_methods" {
+  type        = list(string)
+  description = "HTTP methods to expose; has no effect unless api_gateway is also provided"
+  default     = ["HEAD", "GET", "POST"]
+}
+
+
+variable "todo_step" {
+  type        = number
+  description = "of all todos, where does this one logically fall in sequence"
+  default     = 2
+}
+

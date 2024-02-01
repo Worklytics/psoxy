@@ -40,6 +40,11 @@ output "pseudonym_salt" {
   value       = module.psoxy.pseudonym_salt
 }
 
+output "api_gateway_v2" {
+  description = "the API Gateway V2 created, if any."
+  value       = module.psoxy.api_gateway_v2
+}
+
 output "todos" {
   description = "List of todo steps to complete, in markdown format."
   value       = values(module.api_connector)[*].todo

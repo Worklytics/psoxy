@@ -17,6 +17,7 @@ module "psoxy_lambda" {
   function_env_kms_key_arn        = var.function_env_kms_key_arn
   logs_kms_key_arn                = var.logs_kms_key_arn
   ssm_kms_key_ids                 = var.ssm_kms_key_ids
+  vpc_config                      = var.vpc_config
 
   environment_variables = merge(
     var.environment_variables,

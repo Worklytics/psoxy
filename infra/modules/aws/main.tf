@@ -79,6 +79,8 @@ locals {
 }
 
 resource "aws_iam_policy" "execution_lambda_to_caller" {
+  count = var.use_api_gateway_v2 ? 0 : 1
+
   name        = "${var.deployment_id}ExecuteLambdas"
   description = "Allow caller role to execute the lambda url directly"
 
@@ -107,8 +109,10 @@ resource "aws_iam_role_policy_attachment" "invoker_lambda_execution" {
 }
 
 resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {
+  count = var.use_api_gateway_v2 ? 0 : 1
+
   role       = aws_iam_role.api-caller.name
-  policy_arn = aws_iam_policy.execution_lambda_to_caller.arn
+  policy_arn = aws_iam_policy.execution_lambda_to_caller[0].arn
 }
 
 
@@ -142,6 +146,72 @@ module "psoxy_package" {
   deployment_bundle  = var.deployment_bundle
   psoxy_version      = var.psoxy_version
   force_bundle       = var.force_bundle
+}
+
+resource "aws_apigatewayv2_api" "proxy_api" {
+  count = var.use_api_gateway_v2 ? 1 : 0
+
+  name          = "${var.deployment_id}-api"
+  protocol_type = "HTTP"
+  description   = "API to expose ${var.deployment_id} psoxy instances"
+}
+
+# must have a stage deployed
+resource "aws_apigatewayv2_stage" "live" {
+  count = var.use_api_gateway_v2 ? 1 : 0
+
+  api_id      = aws_apigatewayv2_api.proxy_api[0].id
+  name        = "live" # q: what name?
+  auto_deploy = true
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_gatewayv2_log[0].arn
+    format          = "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] \"$context.httpMethod $context.path $context.protocol\" $context.status $context.responseLength $context.requestId $context.extendedRequestId $context.error.messageString $context.integrationErrorMessage"
+  }
+}
+
+# TODO: it would maximize granularity of policy to push this into `aws-psoxy-rest` module, and
+# do the statements based on configured list of http methods; but cost of that is policy + attachment
+# for each instance, instead of one per deployment
+resource "aws_iam_policy" "invoke_api" {
+  count = var.use_api_gateway_v2 ? 1 : 0
+
+  name_prefix = "${var.deployment_id}InvokeAPI"
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : "execute-api:Invoke",
+        "Resource" : "arn:aws:execute-api:*:${var.aws_account_id}:${aws_apigatewayv2_api.proxy_api[0].id}/*/GET/*",
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : "execute-api:Invoke",
+        "Resource" : "arn:aws:execute-api:*:${var.aws_account_id}:${aws_apigatewayv2_api.proxy_api[0].id}/*/HEAD/*",
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : "execute-api:Invoke",
+        "Resource" : "arn:aws:execute-api:*:${var.aws_account_id}:${aws_apigatewayv2_api.proxy_api[0].id}/*/POST/*",
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "invoke_api_policy_to_role" {
+  count = var.use_api_gateway_v2 ? 1 : 0
+
+  role       = aws_iam_role.api-caller.name
+  policy_arn = aws_iam_policy.invoke_api[0].arn
+}
+
+resource "aws_cloudwatch_log_group" "api_gatewayv2_log" {
+  count = var.use_api_gateway_v2 ? 1 : 0
+
+  name              = aws_apigatewayv2_api.proxy_api[0].name
+  retention_in_days = 7
+  kms_key_id        = var.logs_kms_key_arn
 }
 
 # install test tool, if it exists in expected location
@@ -196,4 +266,15 @@ output "pseudonym_salt" {
   description = "Value used to salt pseudonyms (SHA-256) hashes. If migrate to new deployment, you should copy this value."
   value       = random_password.pseudonym_salt.result
   sensitive   = true
+}
+
+output "api_gateway_v2" {
+  # NOTE: filled based on `var.use_api_gateway_v2`, which is sufficient for Terraform to understand
+  # pre-apply that it's going to have a non-null value
+  value = var.use_api_gateway_v2 ? merge(
+    {
+      stage_invoke_url = aws_apigatewayv2_stage.live[0].invoke_url
+    },
+    aws_apigatewayv2_api.proxy_api[0]
+  ) : null
 }
