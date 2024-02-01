@@ -215,6 +215,12 @@ variable "vpc_config" {
   default     = null
 }
 
+variable "secrets_store_implementation" {
+  type        = string
+  description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
+  default     = "aws_ssm_parameter_store"
+}
+
 variable "example_file" {
   type        = string
   description = "path to example file to use for testing, from psoxy_base_dir"

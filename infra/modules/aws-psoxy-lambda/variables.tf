@@ -157,3 +157,8 @@ variable "vpc_config" {
   default     = null
 }
 
+variable "secrets_store_implementation" {
+  type        = string
+  description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
+  default     = "aws_ssm_parameter_store"
+}

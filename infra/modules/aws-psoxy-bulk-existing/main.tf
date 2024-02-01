@@ -13,13 +13,13 @@ module "psoxy_lambda" {
   path_to_function_zip            = var.path_to_function_zip
   function_zip_hash               = var.function_zip_hash
   global_parameter_arns           = var.global_parameter_arns
-
   global_secrets_manager_secrets_arns = var.global_secrets_manager_secrets_arns
   path_to_instance_ssm_parameters = var.path_to_instance_ssm_parameters
   function_env_kms_key_arn        = var.function_env_kms_key_arn
   logs_kms_key_arn                = var.logs_kms_key_arn
   ssm_kms_key_ids                 = var.ssm_kms_key_ids
   vpc_config                      = var.vpc_config
+  secrets_store_implementation    = var.secrets_store_implementation
 
   environment_variables = merge(
     var.environment_variables,

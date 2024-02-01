@@ -52,6 +52,7 @@ module "psoxy_lambda" {
   ssm_kms_key_ids                 = var.ssm_kms_key_ids
   log_retention_in_days           = var.log_retention_days
   vpc_config                      = var.vpc_config
+  secrets_store_implementation    = var.secrets_store_implementation
 
   environment_variables = merge(
     var.environment_variables,

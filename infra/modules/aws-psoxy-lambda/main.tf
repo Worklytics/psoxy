@@ -180,8 +180,7 @@ locals {
     ]
   }]
 
-  # TODO: condition on whether secrets manager even being used
-  local_secrets_manager_statements = [{
+  local_secrets_manager_statements = var.secrets_store_implementation == "aws_secrets_manager" ? [ {
     Sid = "ReadWriteInstanceSecretsManagerSecrets"
     Action = [
       "secretsmanager:GetSecretValue",
@@ -193,8 +192,7 @@ locals {
     Resource = [
       "${local.secret_arn_prefix}*" # wildcard to match all secrets corresponding to this function
     ]
-  }]
-
+  }] : []
 
   global_ssm_param_statements = length(var.global_parameter_arns) == 0 ? [] : [{
     Sid = "ReadSharedSSMParameters"
