@@ -85,3 +85,6 @@ if git rev-parse "$rc_branch" >/dev/null 2>&1; then
       ;;
   esac
 fi
+
+printf "Opening release ${BLUE}${RELEASE}${NC} in browser; review / update notes and then publish as latest ...\n"
+gh release view $RELEASE --web
