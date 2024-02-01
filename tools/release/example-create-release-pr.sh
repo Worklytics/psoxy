@@ -58,6 +58,7 @@ if gh pr list --state open; then
   REPO_NAME=$(gh repo view --json nameWithOwner -q .nameWithOwner)
   printf "${RED}There are open PRs in the ${BLUE}${REPO_NAME}${NC}. Please close them before continuing.${NC}\n"
   gh pr list --web
+  cd -
   exit 1
 fi
 
@@ -87,12 +88,14 @@ dev_example_path="${PATH_TO_REPO}infra/examples-dev/${EXAMPLE}"
 if [ ! -d "$dev_example_path" ]; then
   printf "Directory provided for EXAMPLE, ${RED}'${EXAMPLE}'${NC} not found at ${dev_example_path}, where it's expected to be.\n"
   display_usage
+  cd -
   exit 1
 fi
 
 if [ ! -d "$EXAMPLE_TEMPLATE_REPO" ]; then
   printf "Directory provided for EXAMPLE_TEMPLATE_REPO, ${RED}'${EXAMPLE_TEMPLATE_REPO}'${NC}, does not exist.\n"
   display_usage
+  cd -
   exit 1
 fi
 
