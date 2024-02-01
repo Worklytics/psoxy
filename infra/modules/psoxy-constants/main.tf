@@ -32,8 +32,8 @@ locals {
         ],
         "Resource" : "*"
       }
-  ]
-
+    ]
+  }
 
 
   # TODO: create IAM policy document, which installer could use to create their own policy as

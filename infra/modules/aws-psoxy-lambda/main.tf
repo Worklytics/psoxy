@@ -180,7 +180,7 @@ locals {
     ]
   }]
 
-  local_secrets_manager_statements = var.secrets_store_implementation == "aws_secrets_manager" ? [ {
+  local_secrets_manager_statements = var.secrets_store_implementation == "aws_secrets_manager" ? [{
     Sid = "ReadWriteInstanceSecretsManagerSecrets"
     Action = [
       "secretsmanager:GetSecretValue",

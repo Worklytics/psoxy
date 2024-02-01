@@ -12,7 +12,7 @@ locals {
   PLACEHOLDER_VALUE        = "fill me"
 
   # externally_managed_secrets = { for k, spec in var.secrets : k => spec if !(spec.value_managed_by_tf) }
-  terraform_managed_secrets  = { for k, spec in var.secrets : k => spec if spec.value_managed_by_tf }
+  terraform_managed_secrets = { for k, spec in var.secrets : k => spec if spec.value_managed_by_tf }
 
   tf_management_description_appendix = "Value managed by a Terraform configuration; changes outside Terraform may be overwritten by subsequent 'terraform apply' runs"
 }
