@@ -88,3 +88,7 @@ fi
 
 printf "Opening release ${BLUE}${RELEASE}${NC} in browser; review / update notes and then publish as latest ...\n"
 gh release view $RELEASE --web
+
+printf "  Then update example templates to point to it:\n"
+printf "    ${BLUE}./tools/release/example-create-release-pr.sh . aws-all ~/psoxy-example-aws${NC}\n"
+printf "    ${BLUE}./tools/release/example-create-release-pr.sh . gcp ~/psoxy-example-gcp${NC}\n"
