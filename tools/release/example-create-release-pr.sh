@@ -52,6 +52,16 @@ if [ ! -f "${PATH_TO_REPO}java/pom.xml" ]; then
 fi
 
 cd $PATH_TO_REPO
+
+# check if any open prs in github
+if gh pr list --state open; then
+  REPO_NAME=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+  printf "${RED}There are open PRs in the ${BLUE}${REPO_NAME}${NC}. Please close them before continuing.${NC}\n"
+  gh pr list --web
+  exit 1
+fi
+
+# ensure on `main`
 CURRENT_SOURCE_BRANCH=$(git branch --show-current)
 if [ "$CURRENT_SOURCE_BRANCH" != "main" ]; then
   printf "Current branch for ${BLUE}$PATH_TO_REPO${NC} is not ${BLUE}main${NC}. Do you want to switch to main? "
