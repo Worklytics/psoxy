@@ -127,6 +127,12 @@ variable "global_parameter_arns" {
   default     = []
 }
 
+variable "global_secrets_manager_secrets_arns" {
+  type        = list(string)
+  description = "Secrets Manager Secrets ARNS to expose to proxy instance, expected to contain global shared secrets, like salt or encryption keys"
+  default     = []
+}
+
 variable "memory_size_mb" {
   # See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#memory_size
   type        = number

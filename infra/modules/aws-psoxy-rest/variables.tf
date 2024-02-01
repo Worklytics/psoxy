@@ -162,6 +162,12 @@ variable "global_parameter_arns" {
   default     = []
 }
 
+variable "global_secrets_manager_secret_arns" {
+  type        = list(string)
+  description = "Secrets Manager Secrets ARNS to expose to proxy instance, expected to contain global shared secrets, like salt or encryption keys"
+  default     = []
+}
+
 # remove after v0.4.x
 variable "function_parameters" {
   type = list(object({

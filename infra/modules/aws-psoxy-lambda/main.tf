@@ -157,6 +157,8 @@ data "aws_kms_key" "keys_to_allow" {
 locals {
   param_arn_prefix = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${local.instance_ssm_prefix_with_slash}"
 
+  secret_arn_prefix = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret${local.instance_ssm_prefix_with_slash}"
+
   kms_keys_to_allow_arns = distinct(concat(
     [for k in data.aws_kms_key.keys_to_allow : k.arn],
     var.function_env_kms_key_arn == null ? [] : [var.function_env_kms_key_arn]
@@ -178,7 +180,23 @@ locals {
     ]
   }]
 
-  global_ssm_param_statements = [{
+  # TODO: condition on whether secrets manager even being used
+  local_secrets_manager_statements = [{
+    Sid = "ReadWriteInstanceSecretsManagerSecrets"
+    Action = [
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:DescribeSecret",
+      "secretsmanager:PutSecretValue",
+      "secretsmanager:DeleteSecret", # is this version, rather than 'secret'?
+    ]
+    Effect = "Allow"
+    Resource = [
+      "${local.secret_arn_prefix}*" # wildcard to match all secrets corresponding to this function
+    ]
+  }]
+
+
+  global_ssm_param_statements = length(var.global_parameter_arns) == 0 ? [] : [{
     Sid = "ReadSharedSSMParameters"
     Action = [
       "ssm:GetParameter",
@@ -188,6 +206,16 @@ locals {
     ]
     Effect   = "Allow"
     Resource = var.global_parameter_arns
+  }]
+
+  global_secretsmanager_statements = length(var.global_secrets_manager_secret_arns) == 0 ? [] : [{
+    Sid = "ReadSharedSecrets"
+    Action = [
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:DescribeSecret",
+    ]
+    Effect   = "Allow"
+    Resource = var.global_secrets_manager_secret_arns
   }]
 
   key_statements = length(local.kms_key_ids_to_allow) > 0 ? [{
@@ -202,7 +230,9 @@ locals {
 
   policy_statements = concat(
     local.global_ssm_param_statements,
+    local.global_secretsmanager_statements,
     local.local_ssm_param_statements,
+    local.local_secrets_manager_statements,
     local.key_statements
   )
 }
