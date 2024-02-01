@@ -72,7 +72,7 @@ gh release edit $RELEASE -n "$modified_notes"
 # check if rc branch exists, and offer to delete if so
 rc_branch="rc-$RELEASE"
 if git rev-parse "$rc_branch" >/dev/null 2>&1; then
-  printf "Delete ${BLUE}rc-${RELEASE}${NC} tag?\n"
+  printf "Delete the ${BLUE}rc-${RELEASE}${NC} branch?\n"
   read -p "(Y/n) " -n 1 -r
   REPLY=${REPLY:-Y}
   echo    # Move to a new line
