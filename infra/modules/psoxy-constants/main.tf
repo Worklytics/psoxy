@@ -4,7 +4,7 @@ locals {
   # see: https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html#aws-managed-policies
   required_aws_roles_to_provision_host = {
     "arn:aws:iam::aws:policy/IAMFullAccess"        = "IAMFullAccess"
-    "arn:aws:iam::aws:policy/AmazonS3FullAccess"   = "AmazonS3FullAccess"
+    "arn:aws:iam::aws:policy/AmazonS3FullAccess"   = "AmazonS3FullAccess" # only if using bulk sources, although 95% do
     "arn:aws:iam::aws:policy/CloudWatchFullAccess" = "CloudWatchFullAccess"
     "arn:aws:iam::aws:policy/AmazonSSMFullAccess"  = "AmazonSSMFullAccess"
     "arn:aws:iam::aws:policy/AWSLambda_FullAccess" = "AWSLambda_FullAccess"
@@ -14,6 +14,27 @@ locals {
   required_aws_managed_policies_to_consume_msft_365_source = {
     "arn:aws:iam::aws:policy/AmazonCognitoPowerUser" = "AmazonCognitoPowerUser"
   }
+
+  # subset of https://docs.aws.amazon.com/aws-managed-policy/latest/reference/SecretsManagerReadWrite.html
+  # as that seems like overkill
+  #  - if you're going to use KMS to encrypt the secrets, then you'll need to add the KMS permissions
+  #    on the key you intend to use.
+  #  - you can/should modify the Resource part of this to limit to a subset of secrets, if this
+  #    is being deployed to an AWS account that's used for purposes beyond this proxy deployment
+  required_aws_policy_to_use_secrets_manager = {
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "secretsmanager:*",
+          "tag:GetResources"
+        ],
+        "Resource" : "*"
+      }
+  ]
+
+
 
   # TODO: create IAM policy document, which installer could use to create their own policy as
   # alternative to using AWS Managed policies
