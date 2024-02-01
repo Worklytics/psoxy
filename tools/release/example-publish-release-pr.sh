@@ -13,7 +13,7 @@ PR_NUMBER=$2
 
 display_usage() {
   printf "Merges release PR to main branch for example repo and creates a release, with name sync'd to that of main repo\n"
-  prinf "\n"
+  printf "\n"
   printf "Usage:\n"
   printf "  %s <path-to-example-template-repo> <PR-number>\n" $SCRIPT_NAME
 }
@@ -27,6 +27,7 @@ if [ "$#" -ne 2 ]; then
   display_usage
   exit 1
 fi
+
 if [ ! -d "$PATH_TO_REPO" ]; then
   printf "Directory provided for PATH_TO_REPO, ${RED}'${PATH_TO_REPO}'${NC}, does not exist.\n"
   display_usage
