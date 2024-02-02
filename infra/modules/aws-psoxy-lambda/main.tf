@@ -151,7 +151,7 @@ data "aws_kms_key" "keys_to_allow" {
 locals {
   param_arn_prefix = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${local.instance_ssm_prefix_with_slash}"
 
-  secret_arn_prefix = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret${local.instance_ssm_prefix_with_slash}"
+  secret_arn_prefix = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:${local.instance_ssm_prefix}"
 
   kms_keys_to_allow_arns = distinct(concat(
     [for k in data.aws_kms_key.keys_to_allow : k.arn],
@@ -179,8 +179,10 @@ locals {
     Action = [
       "secretsmanager:GetSecretValue",
       "secretsmanager:DescribeSecret",
+      "secretsmanager:GetResourcePolicy",
+      "secretsmanager:ListSecretVersionIds",
       "secretsmanager:PutSecretValue",
-      "secretsmanager:DeleteSecret", # is this version, rather than 'secret'?
+      "secretsmanager:DeleteSecret",
     ]
     Effect = "Allow"
     Resource = [
@@ -205,6 +207,8 @@ locals {
     Action = [
       "secretsmanager:GetSecretValue",
       "secretsmanager:DescribeSecret",
+      "secretsmanager:GetResourcePolicy",
+      "secretsmanager:ListSecretVersionIds"
     ]
     Effect   = "Allow"
     Resource = values(var.global_secrets_manager_secret_arns)
@@ -225,12 +229,14 @@ locals {
     local.global_secretsmanager_statements,
     local.local_ssm_param_statements,
     local.local_secrets_manager_statements,
-    local.key_statements
+    local.key_statements,
   )
 }
 
 resource "aws_iam_policy" "ssm_param_policy" {
   name        = "${local.function_name}_ssmParameters"
+
+  # description here not accurate any more, but changing it will destroy and re-create the policy
   description = "Allow SSM parameter access needed by ${local.function_name}"
 
   policy = jsonencode(

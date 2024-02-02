@@ -99,12 +99,12 @@ public class SecretsManagerConfigService implements ConfigService {
             GetSecretValueResponse response = client.getSecretValue(request);
             return Optional.ofNullable(mapping.apply(response));
         } catch (DecryptionFailureException e ) {
-            log.log(Level.SEVERE, "failed to read secret due to decryption error; check lambda's exec role perms for secret " + id, e);
+            log.log(Level.SEVERE, "failed to read secret due to decryption error; check lambda's exec role perms for secret " + id);
             return Optional.empty();
         } catch (ResourceNotFoundException e) {
             // does not exist, that could be OK depending on case.
             if (envVarsConfig.isDevelopment()) {
-                log.log(Level.INFO, "secret not found; may be expected; if not, check lambda's exec role perms for secret " + id, e);
+                log.log(Level.INFO, "secret not found; may be expected; if not, check lambda's exec role perms for secret " + id);
             }
             return Optional.empty();
         } catch (SecretsManagerException e) {
@@ -114,7 +114,7 @@ public class SecretsManagerConfigService implements ConfigService {
             if (e.isThrottlingException()) {
                 log.log(Level.SEVERE, String.format("Throttling issues for Secrets Manager Secret %s, rate limit reached most likely despite retries", id), e);
             }
-            throw new IllegalStateException(String.format("failed to get config value: %s", id), e);
+            throw new IllegalStateException(String.format("failed to get config value: %s", id));
         }
     }
 }

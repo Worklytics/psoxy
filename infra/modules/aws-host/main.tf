@@ -115,6 +115,7 @@ module "api_connector" {
   region                                = data.aws_region.current.id
   path_to_repo_root                     = var.psoxy_base_dir
   todo_step                             = var.todo_step
+  secrets_store_implementation          = var.secrets_store_implementation
   global_parameter_arns                 = try(module.global_secrets_ssm[0].secret_arns, [])
   global_secrets_manager_secret_arns    = try(module.global_secrets_secrets_manager[0].secret_arns, {})
   path_to_instance_ssm_parameters       = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
@@ -169,6 +170,7 @@ module "bulk_connector" {
   psoxy_base_dir                     = var.psoxy_base_dir
   rules                              = try(var.custom_bulk_connector_rules[each.key], each.value.rules)
   rules_file                         = each.value.rules_file
+  secrets_store_implementation       = var.secrets_store_implementation
   global_parameter_arns              = try(module.global_secrets_ssm[0].secret_arns, [])
   global_secrets_manager_secret_arns = try(module.global_secrets_secrets_manager[0].secret_arns, [])
   path_to_instance_ssm_parameters    = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
