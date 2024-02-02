@@ -16,6 +16,7 @@ import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.ColumnarRules;
 import com.avaulta.gateway.rules.transforms.FieldTransformPipeline;
 import com.avaulta.gateway.rules.transforms.FieldTransform;
+import com.avaulta.gateway.rules.transforms.Transform;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +27,10 @@ import dagger.Module;
 import dagger.Provides;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,6 +41,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.*;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -527,12 +533,82 @@ public class BulkDataSanitizerImplTest {
         }
     }
 
+    @SneakyThrows
+    @Test
+    void transform_complex_ghusername() {
+
+        final String LF  = "\n";
+
+        final String CRLF  = "\r\n";
+
+        final String INITIAL = "EMPLOYEE_ID,EMPLOYEE_EMAIL" + LF +
+            "1,alice@worklytics.co" + LF +
+            "2,bob.smith@worklytics.co" + LF +
+            "3,charles.dickens@worklytics.co" + LF +
+            "4,";
+
+        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,GITHUB_USERNAME" + CRLF +
+            "2,bob.smith@worklytics.co,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"vm45r.JHXUgXcP6.mzVLxKX4uyFbgqTIecTPqs_ibdI\"\",\"\"h_4\"\":\"\"3tfnePQDgDoBZxb6c04tqlmpKSfGyOPsUANSLMUEuYU\"\"}\"" + CRLF +
+            "1,alice@worklytics.co,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"fEFRnzBKYdSKBRoK_I6P4U58TEw79SNGl8lS4Dh4ANY\"\",\"\"h_4\"\":\"\"3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4\"\"}\"" + CRLF +
+            "4,," + CRLF +
+            "3,charles.dickens@worklytics.co,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"LbiVG96eyVeyac3b4CQ1KviNHVK3UQtjS6spDcySBzg\"\",\"\"h_4\"\":\"\"fTYkjBMftiSOMolXYIZISI2w__u5mJ7TZrTQtifAD-Q\"\"}\"" + CRLF;
+
+        ColumnarRules rules = ColumnarRules.builder()
+            .fieldsToTransform(Map.of("EMPLOYEE_EMAIL", FieldTransformPipeline.builder()
+                .newName("GITHUB_USERNAME")
+                .transforms(Arrays.asList(
+                    FieldTransform.javaRegExpReplace("(.*)@.*" + FieldTransform.JavaRegExpReplace.SEPARATOR + "$1"),
+                    FieldTransform.javaRegExpReplace("([^\\.].*)\\.([^\\.].*)" + FieldTransform.JavaRegExpReplace.SEPARATOR + "$1-$2"),
+                    FieldTransform.pseudonymizeWithScope("github")
+                )).build()))
+            .build();
+        columnarFileSanitizerImpl.setRules(rules);
+
+        // replace shuffler implementation with one that reverses the list, so deterministic
+        columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
+        columnarFileSanitizerImpl.makeShuffleDeterministic();
+
+
+        String resultString;
+        try (StringReader in = new StringReader(INITIAL);
+             StringWriter out = new StringWriter()) {
+            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+
+            resultString = out.toString();
+            assertEquals(EXPECTED, resultString);
+
+            PseudonymizerImpl githubPseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+                .pseudonymImplementation(PseudonymImplementation.LEGACY)
+                .pseudonymizationSalt(pseudonymizer.getOptions().getPseudonymizationSalt())
+                .defaultScopeId("github")
+                .build());
+
+            // plain 'usernames' hash shouldn't be there either
+            assertFalse(resultString.contains(pseudonymizer.pseudonymize("alice").getHash()));
+            assertFalse(resultString.contains(pseudonymizer.pseudonymize("bob-smith").getHash()));
+            assertFalse(resultString.contains(pseudonymizer.pseudonymize("bob.smith").getHash()));
+            assertFalse(resultString.contains(pseudonymizer.pseudonymize("charles-dickens").getHash()));
+            assertFalse(resultString.contains(pseudonymizer.pseudonymize("charles.dickens").getHash()));
+
+            try (CSVParser parser = CSVParser.parse(resultString, CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
+                List<CSVRecord> records = parser.getRecords();
+                assertTrue(records.get(0).get("GITHUB_USERNAME").contains(githubPseudonymizer.pseudonymize("bob-smith").getHash()));
+                assertTrue(records.get(1).get("GITHUB_USERNAME").contains(githubPseudonymizer.pseudonymize("alice").getHash()));
+                assertTrue(StringUtils.isBlank(records.get(2).get("GITHUB_USERNAME")));
+                assertTrue(records.get(3).get("GITHUB_USERNAME").contains(githubPseudonymizer.pseudonymize("charles-dickens").getHash()));
+            }
+
+        }
+
+
+    }
+
 
     @SneakyThrows
     @Test
-    void transform_fromYaml() {
+    void transform_fromYamlComplex() {
 
-        ColumnarRules rules = yamlMapper.readValue(getClass().getResource("/rules/csv-pipeline.yaml"), ColumnarRules.class);
+        ColumnarRules rules = yamlMapper.readValue(getClass().getResource("/rules/csv-pipeline-complex-transformations.yaml"), ColumnarRules.class);
         columnarFileSanitizerImpl.setRules(rules);
 
         final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,GITHUB_USERNAME\r\n" +
@@ -550,5 +626,55 @@ public class BulkDataSanitizerImplTest {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
+    }
+
+    @SneakyThrows
+    @Test
+    void transform_fromYamlWithRegExp() {
+
+        ColumnarRules rules = yamlMapper.readValue(getClass().getResource("/rules/csv-pipeline.yaml"), ColumnarRules.class);
+        columnarFileSanitizerImpl.setRules(rules);
+
+        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,GITHUB_USERNAME\n" +
+            "\"{\"\"hash\"\":\"\"2_hashed\"\"}\",\"{\"\"hash\"\":\"\"bob@workltyics.co_hashed\"\"}\",Sales,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2020-01-01,,\"{\"\"hash\"\":\"\"bob_acme_hashed\"\"}\"\n" +
+            "\"{\"\"hash\"\":\"\"1_hashed\"\"}\",\"{\"\"hash\"\":\"\"alice@worklytics.co_hashed\"\"}\",Engineering,2023-01-06,,2019-11-11,,\"{\"\"hash\"\":\"\"alice_acme_hashed\"\"}\"\n" +
+            "\"{\"\"hash\"\":\"\"4_hashed\"\"}\",,Engineering,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2018-06-03,,\n" +
+            "\"{\"\"hash\"\":\"\"3_hashed\"\"}\",\"{\"\"hash\"\":\"\"charles@workltycis.co_hashed\"\"}\",Engineering,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2019-10-06,2022-12-08,\"{\"\"hash\"\":\"\"charles_acme_hashed\"\"}\"\n";
+        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
+
+        columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
+        columnarFileSanitizerImpl.makeShuffleDeterministic();
+
+        Pseudonymizer pseudonymizer = new StubPseudonymizer();
+
+        try (FileReader in = new FileReader(inputFile);
+             StringWriter out = new StringWriter()) {
+            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            assertEquals(EXPECTED, out.toString());
+        }
+    }
+
+
+    class StubPseudonymizer implements Pseudonymizer {
+
+        @Override
+        public PseudonymizedIdentity pseudonymize(Object identifier) {
+            return PseudonymizedIdentity.builder()
+                .hash(identifier + "_hashed")
+                .build();
+        }
+
+        @Override
+        public PseudonymizedIdentity pseudonymize(Object identifier, Transform.PseudonymizationTransform transform) {
+            return PseudonymizedIdentity.builder()
+                .hash(identifier + "_hashed")
+                .build();
+        }
+
+        @Override
+        public ConfigurationOptions getOptions() {
+            return ConfigurationOptions.builder().defaultScopeId("hris").build();
+        }
+
     }
 }

@@ -211,6 +211,12 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                           }
                           value = pseudonymizationFunction.apply(value, pipeline.getNewName(), scopedPseudonymizer);
                       }
+
+                      if (transform instanceof FieldTransform.JavaRegExpReplace) {
+                          Pattern pattern = Pattern.compile(((FieldTransform.JavaRegExpReplace) transform).getRegExp());
+                          Matcher matcher = pattern.matcher(value);
+                          value = matcher.replaceAll(((FieldTransform.JavaRegExpReplace) transform).getReplaceString());
+                      }
                   }
               }
           }

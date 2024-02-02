@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -24,6 +25,7 @@ import java.util.regex.PatternSyntaxException;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = FieldTransform.Filter.class),
     @JsonSubTypes.Type(value = FieldTransform.FormatString.class),
+    @JsonSubTypes.Type(value = FieldTransform.JavaRegExpReplace.class),
     @JsonSubTypes.Type(value = FieldTransform.PseudonymizeWithScope.class),
 })
 public interface FieldTransform {
@@ -42,6 +44,11 @@ public interface FieldTransform {
     static FieldTransform formatString(String template) {
         return FormatString.builder().formatString(template).build();
     }
+
+    static FieldTransform javaRegExpReplace(String regExpReplaceString) {
+        return JavaRegExpReplace.builder().regExp_replaceString(regExpReplaceString).build();
+    }
+
 
     /**
      * if provided, value will be written using provided template
@@ -68,6 +75,44 @@ public interface FieldTransform {
             }
             if (Pattern.compile("%s").matcher(formatString).results().count() > 1) {
                 log.warning("formatString must contain exactly one '%s' token: " + formatString);
+                return false;
+            }
+            return true;
+        }
+    }
+
+    /**
+     * if provided, value will be replaced using provided regex
+     */
+    @JsonTypeName("javaRegExpReplace")
+    @NoArgsConstructor
+    @SuperBuilder(toBuilder = true)
+    @Data
+    @Log
+    class JavaRegExpReplace implements FieldTransform {
+
+        public static final String SEPARATOR = "____";
+
+        @NonNull
+        String regExp_replaceString;
+
+        @JsonIgnore
+        public String getRegExp() {
+            return regExp_replaceString.split(SEPARATOR)[0];
+        }
+
+        @JsonIgnore
+        public String getReplaceString() {
+            return regExp_replaceString.split(SEPARATOR)[1];
+        }
+
+        @Override
+        public boolean isValid() {
+            String regExp = getRegExp();
+            try {
+                Pattern pattern = Pattern.compile(regExp);
+            } catch (PatternSyntaxException e) {
+                log.warning("invalid regex: " + regExp);
                 return false;
             }
             return true;
