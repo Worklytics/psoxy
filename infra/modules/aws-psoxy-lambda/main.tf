@@ -207,7 +207,7 @@ locals {
       "secretsmanager:DescribeSecret",
     ]
     Effect   = "Allow"
-    Resource = var.global_secrets_manager_secret_arns
+    Resource = values(var.global_secrets_manager_secret_arns)
   }]
 
   key_statements = length(local.kms_key_ids_to_allow) > 0 ? [{
