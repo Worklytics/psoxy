@@ -93,6 +93,7 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
             log.info(String.format("Property: %s, stored version %d", key, parameterResponse.version()));
         } catch (SsmException e) {
             log.log(Level.SEVERE, "Could not store property " + key, e);
+            //q: should we be re-throwing here? caller will be unaware of failure
         }
     }
 

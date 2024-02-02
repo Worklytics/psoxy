@@ -133,11 +133,13 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>cognitoidentity</artifactId>
         </dependency>
-
-
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>ssm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>secretsmanager</artifactId>
         </dependency>
 
         <!-- support Hashicorp Vault as a secret store-->

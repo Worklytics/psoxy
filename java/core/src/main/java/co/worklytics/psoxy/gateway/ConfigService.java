@@ -21,9 +21,8 @@ public interface ConfigService {
         // shared? (across multiple instances?)
         // local? (per-instance secrets)
 
-        //sensitive? (eg, value should not be exposed to 3rd parties)
-
-        //secret? (eg, value should be handled as a secret; obscured/acl even internally; avoid in logs, etc)
+        // sensitive? (eg, value should not be exposed to 3rd parties)
+        // secret? (eg, value should be handled as a secret; obscured/acl even internally; avoid in logs, etc)
 
         /**
          * @return whether cached value for property must be revalidated with origin before re-use

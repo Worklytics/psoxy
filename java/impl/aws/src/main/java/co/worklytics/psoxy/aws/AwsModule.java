@@ -26,6 +26,7 @@ import software.amazon.awssdk.core.retry.RetryPolicy;
 import software.amazon.awssdk.core.retry.backoff.BackoffStrategy;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cognitoidentity.CognitoIdentityClient;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
 import javax.inject.Named;
@@ -66,6 +67,7 @@ public interface AwsModule {
                 .build();
     }
 
+    //NOTE: also used in SecretsManager case for simplicity
     static String asParameterStoreNamespace(String functionName) {
         return functionName.toUpperCase().replace("-", "_");
     }
@@ -86,20 +88,53 @@ public interface AwsModule {
     static ConfigService nativeConfigService(HostEnvironment hostEnvironment,
                                              EnvVarsConfigService envVarsConfigService,
                                              ParameterStoreConfigServiceFactory parameterStoreConfigServiceFactory,
-                                             @Named("instance") ParameterStoreConfigService instanceScopedConfigService) {
+                                             @Named("instance") ParameterStoreConfigService instanceScopedParameterConfigService,
+                                             SecretsManagerConfigServiceFactory secretsManagerConfigServiceFactory,
+                                             @Named("instance") SecretsManagerConfigService instanceScopedSecretsManagerConfigService) {
 
         String pathToSharedConfig =
                 envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
                         .orElse(null);
 
-        ParameterStoreConfigService sharedConfigService =
+        ParameterStoreConfigService sharedParameterConfigService =
                 parameterStoreConfigServiceFactory.create(pathToSharedConfig);
 
+        AwsEnvironment.SecretStoreImplementations secretStoreImpl = envVarsConfigService.getConfigPropertyAsOptional(AwsEnvironment.AwsConfigProperty.SECRETS_STORE)
+            .map(AwsEnvironment.SecretStoreImplementations::valueOf)
+            .orElse(AwsEnvironment.SecretStoreImplementations.AWS_SSM_PARAMETER_STORE);
+
+        ConfigService sharedConfigService;
+        ConfigService instanceConfigService;
+        if (secretStoreImpl == AwsEnvironment.SecretStoreImplementations.AWS_SECRETS_MANAGER) {
+            instanceConfigService = CompositeConfigService.builder()
+                .preferred(instanceScopedSecretsManagerConfigService)
+                .fallback(instanceScopedParameterConfigService)
+                .build();
+            sharedConfigService = CompositeConfigService.builder()
+                .preferred(secretsManagerConfigServiceFactory.create(pathToSharedConfig))
+                .fallback(sharedParameterConfigService)
+                .build();
+        } else if (secretStoreImpl == AwsEnvironment.SecretStoreImplementations.AWS_SSM_PARAMETER_STORE
+                || secretStoreImpl == AwsEnvironment.SecretStoreImplementations.HASHICORP_VAULT) {
+            /**
+             * Vault is wrapped over the 'Native' secrets manager in FunctionRuntimeModule
+             *
+             * TODO: probably consolidate this all in v0.5, when we eliminate fallback configs
+             * (where values in env vars take precedence over those in remote config stores;
+             *  and remote config store may be composite of parameter store + secrets manager)
+             *
+             * @see co.worklytics.psoxy.FunctionRuntimeModule
+             */
+            instanceConfigService = instanceScopedParameterConfigService;
+            sharedConfigService = sharedParameterConfigService;
+        } else {
+            throw new IllegalStateException("Unknown secret store implementation: " + secretStoreImpl);
+        }
 
         Duration proxyInstanceConfigCacheTtl = Duration.ofMinutes(5);
         Duration sharedConfigCacheTtl = Duration.ofMinutes(20);
         return CompositeConfigService.builder()
-                .preferred(new CachingConfigServiceDecorator(instanceScopedConfigService, proxyInstanceConfigCacheTtl))
+                .preferred(new CachingConfigServiceDecorator(instanceConfigService, proxyInstanceConfigCacheTtl))
                 .fallback(new CachingConfigServiceDecorator(sharedConfigService, sharedConfigCacheTtl))
                 .build();
     }
@@ -117,6 +152,19 @@ public interface AwsModule {
         return parameterStoreConfigServiceFactory.create(pathToInstanceConfig);
     }
 
+    @Provides
+    @Named("instance")
+    static SecretsManagerConfigService instanceSecretsManagerConfigService(HostEnvironment hostEnvironment,
+                                                                            EnvVarsConfigService envVarsConfigService,
+                                                             SecretsManagerConfigServiceFactory secretsManagerConfigServiceFactory) {
+
+        String pathToInstanceConfig =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
+                .orElseGet(() -> asParameterStoreNamespace(hostEnvironment.getInstanceId()) + "_");
+
+        return secretsManagerConfigServiceFactory.create(pathToInstanceConfig);
+    }
+
     @Provides @Singleton
     static LockService lockService(@Named("instance") ParameterStoreConfigService parameterStoreConfigService) {
         return parameterStoreConfigService;
@@ -125,6 +173,19 @@ public interface AwsModule {
     @Provides
     static AmazonS3 getStorageClient() {
         return AmazonS3ClientBuilder.defaultClient();
+    }
+
+    @Provides
+    static SecretsManagerClient secretsManagerClient(AwsEnvironment awsEnvironment) {
+        return SecretsManagerClient.builder()
+                .overrideConfiguration(ClientOverrideConfiguration.builder()
+                .retryPolicy(RetryPolicy.builder()
+                    .numRetries(4)
+                    .throttlingBackoffStrategy(BackoffStrategy.defaultThrottlingStrategy())
+                    .build())
+                .build())
+                .region(Region.of(awsEnvironment.getRegion()))
+                .build();
     }
 
     @Provides

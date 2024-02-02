@@ -17,7 +17,7 @@ secret manager for Vault.
        * NOTE: must be accessible from AWS account / GCP project where you're deploying
      * `VAULT_TOKEN` - choose the appropriate token type for your use case; we recommend you use
         a periodic token that can lookup and renew itself, with period of > 8 days. With such a
-        setup, Psoxy will lookup and renew this token as needed. Otherwise, it's your responsibility
+        setup, Psoxy will look up and renew this token as needed. Otherwise, it's your responsibility
         either renew it OR replace it by updating this environment variable before expiration.
      * `VAULT_NAMESPACE` - optional, if you're using Vault Namespaces
      * `PATH_TO_SHARED_CONFIG` - eg, `secret/worklytics_deployment/PSOXY_SHARED/`

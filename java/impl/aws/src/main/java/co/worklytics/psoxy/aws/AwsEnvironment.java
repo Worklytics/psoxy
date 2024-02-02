@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.aws;
 
+import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 
 
@@ -20,6 +21,20 @@ public class AwsEnvironment implements HostEnvironment {
 
     public String getRegion() {
         return System.getenv(RuntimeEnvironmentVariables.AWS_REGION.name());
+    }
+
+
+    enum AwsConfigProperty implements ConfigService.ConfigProperty {
+        SECRETS_STORE,
+        ;
+    }
+
+
+    enum SecretStoreImplementations {
+        AWS_SSM_PARAMETER_STORE,
+        AWS_SECRETS_MANAGER,
+        HASHICORP_VAULT,
+        ;
     }
 
 
