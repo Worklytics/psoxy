@@ -33,13 +33,6 @@ locals {
   is_instance_ssm_prefix_default = local.instance_ssm_prefix == local.instance_ssm_prefix_default
   instance_ssm_prefix_with_slash = startswith(local.instance_ssm_prefix, "/") ? local.instance_ssm_prefix : "/${local.instance_ssm_prefix}"
 
-
-  # parse PATH_TO_SHARED_CONFIG in super-hacky way
-  # expect something like:
-  # arn:aws:ssm:us-east-1:123123123123:parameter/PSOXY_SALT
-  salt_arn              = [for l in var.global_parameter_arns : l if endswith(l, local.salt_parameter_name_suffix)][0]
-  path_to_shared_config = regex("arn.+parameter(/.*)${local.salt_parameter_name_suffix}", local.salt_arn)[0]
-
   bundle_from_s3  = startswith(var.path_to_function_zip, "s3://")
   s3_bucket       = local.bundle_from_s3 ? regex("s3://([^/]+)/.*", var.path_to_function_zip)[0] : null
   s3_key          = local.bundle_from_s3 ? regex("s3://[^/]+/(.*)", var.path_to_function_zip)[0] : null
@@ -83,7 +76,7 @@ resource "aws_lambda_function" "instance" {
         SECRETS_STORE   = upper(var.secrets_store_implementation)
       },
       # only set env vars for config paths if non-default values
-      length(local.path_to_shared_config) > 1 ? { PATH_TO_SHARED_CONFIG = local.path_to_shared_config } : {},
+      length(var.path_to_shared_ssm_parameters) > 1 ? { PATH_TO_SHARED_CONFIG = var.path_to_shared_ssm_parameters } : {},
       local.is_instance_ssm_prefix_default ? {} : { PATH_TO_INSTANCE_CONFIG = var.path_to_instance_ssm_parameters }
     )
   }

@@ -100,6 +100,7 @@ public interface AwsModule {
                 parameterStoreConfigServiceFactory.create(pathToSharedConfig);
 
         AwsEnvironment.SecretStoreImplementations secretStoreImpl = envVarsConfigService.getConfigPropertyAsOptional(AwsEnvironment.AwsConfigProperty.SECRETS_STORE)
+            .map(String::toUpperCase) //case-insensitive, so accept 'aws_ssm_parameter_store'
             .map(AwsEnvironment.SecretStoreImplementations::valueOf)
             .orElse(AwsEnvironment.SecretStoreImplementations.AWS_SSM_PARAMETER_STORE);
 

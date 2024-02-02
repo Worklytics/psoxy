@@ -47,6 +47,7 @@ module "psoxy_lambda" {
   source_kind                        = var.source_kind
   function_parameters                = var.function_parameters
   path_to_instance_ssm_parameters    = var.path_to_instance_ssm_parameters
+  path_to_shared_ssm_parameters      = var.path_to_shared_ssm_parameters
   global_parameter_arns              = var.global_parameter_arns
   global_secrets_manager_secret_arns = var.global_secrets_manager_secret_arns
   ssm_kms_key_ids                    = var.ssm_kms_key_ids

@@ -23,7 +23,7 @@ resource "aws_secretsmanager_secret" "secret" {
 
   name        = "${local.path_prefix}${each.key}"
   description = "${each.value.description} ${each.value.value_managed_by_tf ? local.tf_management_description_appendix : ""}"
-  kms_key_id  = coalesce(var.kms_key_id, "aws/secretsmanager")
+  kms_key_id  = var.kms_key_id
 }
 
 resource "aws_secretsmanager_secret_version" "terraform_managed" {

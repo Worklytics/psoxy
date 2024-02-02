@@ -118,6 +118,7 @@ module "api_connector" {
   global_parameter_arns                 = try(module.global_secrets_ssm[0].secret_arns, [])
   global_secrets_manager_secret_arns    = try(module.global_secrets_secrets_manager[0].secret_arns, [])
   path_to_instance_ssm_parameters       = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
+  path_to_shared_ssm_parameters         = var.aws_ssm_param_root_path
   ssm_kms_key_ids                       = local.ssm_key_ids
   target_host                           = each.value.target_host
   source_auth_strategy                  = each.value.source_auth_strategy
@@ -125,6 +126,7 @@ module "api_connector" {
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   vpc_config                            = var.vpc_config
   api_gateway_v2                        = module.psoxy.api_gateway_v2
+
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -170,6 +172,7 @@ module "bulk_connector" {
   global_parameter_arns              = try(module.global_secrets_ssm[0].secret_arns, [])
   global_secrets_manager_secret_arns = try(module.global_secrets_secrets_manager[0].secret_arns, [])
   path_to_instance_ssm_parameters    = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
+  path_to_shared_ssm_parameters      = var.aws_ssm_param_root_path
   ssm_kms_key_ids                    = local.ssm_key_ids
   sanitized_accessor_role_names      = [module.psoxy.api_caller_role_name]
   memory_size_mb                     = coalesce(try(var.custom_bulk_connector_arguments[each.key].memory_size_mb, null), each.value.memory_size_mb, 1024)
@@ -177,6 +180,7 @@ module "bulk_connector" {
   input_expiration_days              = var.bulk_input_expiration_days
   example_file                       = each.value.example_file
   vpc_config                         = var.vpc_config
+
 
   environment_variables = merge(
     var.general_environment_variables,

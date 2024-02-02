@@ -45,6 +45,12 @@ variable "path_to_instance_ssm_parameters" {
   default     = null
 }
 
+variable "path_to_shared_ssm_parameters" {
+  type        = string
+  description = "path to shared global config parameters in SSM Parameter Store"
+  default     = ""
+}
+
 variable "function_env_kms_key_arn" {
   type        = string
   description = "AWS KMS key ARN to use to encrypt lambda's environment. NOTE: Terraform must be authenticated as an AWS principal authorized to encrypt/decrypt with this key."

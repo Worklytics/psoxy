@@ -68,6 +68,12 @@ variable "path_to_instance_ssm_parameters" {
   default     = null
 }
 
+variable "path_to_shared_ssm_parameters" {
+  type        = string
+  description = "path to shared global config parameters in SSM Parameter Store"
+  default     = ""
+}
+
 variable "reserved_concurrent_executions" {
   type        = number
   description = "Max number of concurrent instances for the function"
