@@ -92,6 +92,7 @@ module "instance_secrets_secrets_manager" {
       sensitive           = try(v.sensitive, true)
       value_managed_by_tf = try(v.value_managed_by_tf, true) # ideally, would be `value != null`, but bc value is sensitive, Terraform doesn't allow for_each over map derived from sensitive values
     }
+    if try(v.sensitive, true)
   }
 }
 
