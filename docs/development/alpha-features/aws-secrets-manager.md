@@ -3,6 +3,15 @@
 With `v0.4.47`, we're adding **alpha** support for AWS Secrets Manager. This feature is not yet
 fully documented or stable.
 
+A couple notes:
+  - some connectors, in particular Zoom/Jira, rotate tokens frequently so will generate a lot of
+    versions of secrets.  AFIAK, AWS will still bill you for just one secret, as only one should be
+    staged as the 'current' version.  But you should monitor this and review the particular terms
+    and pricing model of your AWS contract.
+  - our modules will create secrets ONLY in the region into which your proxy infra is being deployed,
+    based on the value set in your `terraform.tfvars` file.
+
+
 Migration from Parameter Store: the default storage for secrets is as AWS Systems Manager Parameter
 Store SecureString parameters. If you have existing secrets in Parameter Store that *aren't* managed
 by terraform, you can copy them to a secure location to avoid needing to re-create them for every
