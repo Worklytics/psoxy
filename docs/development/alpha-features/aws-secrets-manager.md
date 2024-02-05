@@ -4,7 +4,11 @@ With `v0.4.47`, we're adding **alpha** support for AWS Secrets Manager. This fea
 fully documented or stable.
 
 Migration from Parameter Store: the default storage for secrets is as AWS Systems Manager Parameter
-Store SecureString parameters. If you have existing secrets in Parameter Store, s
+Store SecureString parameters. If you have existing secrets in Parameter Store that *aren't* managed
+by terraform, you can copy them to a secure location to avoid needing to re-create them for every
+source.
+
+
 
 ## Setup
 
@@ -23,7 +27,16 @@ secrets_store_implementation="aws_secrets_manager"
   5. Fill values of secrets in Secrets Manager that you copied from Parameter Store. If you did not
      copy the values, see the `TODO 1..` files for each connector to obtain new values.
 
+## Filling Secret Manager Secret values via AWS Console
 
+Navigate to the AWS Secrets Manager console and find the secret you need to fill. If there's not an
+option to fill the value, click 'Retrieve secret value'; it should then prompt you with option to
+fill it.
+
+IMPORTANT: Choose 'Plain Text' and remove the brackets (`{}`) that AWS prefills the input with!
+
+Then copy-paste the value EXACTLY as-is. Ensure no leading/trailing whitespace or newlines, and no
+encoding problems.
 
 ## NOTES
   - AWS Secret Manager secrets will be stored/accessed with same path as SSM parameters. Eg, at value of
