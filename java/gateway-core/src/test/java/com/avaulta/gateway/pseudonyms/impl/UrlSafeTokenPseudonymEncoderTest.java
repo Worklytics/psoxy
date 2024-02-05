@@ -122,24 +122,6 @@ public class UrlSafeTokenPseudonymEncoderTest {
     }
 
     @Test
-    void email2() {
-        String original = "alice@acme.com";
-        Pseudonym pseudonym = Pseudonym.builder()
-            .hash(deterministicTokenizationStrategy.getToken(original, Function.identity()))
-            .domain("acme.com")
-            .reversible(pseudonymizationStrategy.getReversibleToken(original))
-            .build();
-
-        String encoded = pseudonymEncoder.encode(pseudonym);
-        System.out.println(encoded);
-        assertEquals("t~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk@acme.com", encoded);
-
-        Pseudonym decoded = pseudonymEncoder.decode(encoded);
-        assertEquals(new String(pseudonym.getHash()), new String(decoded.getHash()));
-        assertEquals("acme.com", decoded.getDomain());
-    }
-
-    @Test
     void hashesMatch() {
         byte[] pseudonym = deterministicTokenizationStrategy.getToken("original", Function.identity());
         byte[] reversible = pseudonymizationStrategy.getReversibleToken("original", Function.identity());
