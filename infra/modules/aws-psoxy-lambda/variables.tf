@@ -68,6 +68,12 @@ variable "path_to_instance_ssm_parameters" {
   default     = null
 }
 
+variable "path_to_shared_ssm_parameters" {
+  type        = string
+  description = "path to shared global config parameters in SSM Parameter Store"
+  default     = ""
+}
+
 variable "reserved_concurrent_executions" {
   type        = number
   description = "Max number of concurrent instances for the function"
@@ -125,7 +131,14 @@ variable "log_retention_in_days" {
 variable "global_parameter_arns" {
   # see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter#attributes-reference
   type        = list(string)
-  description = "System Manager Parameters ARNS to expose to psoxy instance, expected to contain global shared parameters, like salt or encryption keys"
+  description = "System Manager Parameters ARNS to expose to proxy instance, expected to contain global shared parameters, like salt or encryption keys"
+  default     = []
+}
+
+variable "global_secrets_manager_secret_arns" {
+  type        = map(string)
+  description = "Secrets Manager Secrets ARNs to expose to proxy instance, expected to contain global shared secrets, like salt or encryption keys"
+  default     = {}
 }
 
 
@@ -150,3 +163,8 @@ variable "vpc_config" {
   default     = null
 }
 
+variable "secrets_store_implementation" {
+  type        = string
+  description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
+  default     = "aws_ssm_parameter_store"
+}
