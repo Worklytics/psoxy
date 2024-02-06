@@ -67,8 +67,14 @@ public interface AwsModule {
                 .build();
     }
 
-    //NOTE: also used in SecretsManager case for simplicity
-    static String asParameterStoreNamespace(String functionName) {
+    /**
+     * used to prefix function's "local" config in a way that is compliant with AWS roles for
+     * SSM parameter paths and Secrets Manager secret names
+     *
+     * @param functionName
+     * @return function name formated for use as AWS ssm parameter path or secrets manager secret prefix
+     */
+    static String asAwsCompliantNamespace(String functionName) {
         return functionName.toUpperCase().replace("-", "_");
     }
 
@@ -148,7 +154,7 @@ public interface AwsModule {
 
         String pathToInstanceConfig =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
-                .orElseGet(() -> asParameterStoreNamespace(hostEnvironment.getInstanceId()) + "_");
+                .orElseGet(() -> asAwsCompliantNamespace(hostEnvironment.getInstanceId()) + "_");
 
         return parameterStoreConfigServiceFactory.create(pathToInstanceConfig);
     }
@@ -161,7 +167,7 @@ public interface AwsModule {
 
         String pathToInstanceConfig =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
-                .orElseGet(() -> asParameterStoreNamespace(hostEnvironment.getInstanceId()) + "_");
+                .orElseGet(() -> asAwsCompliantNamespace(hostEnvironment.getInstanceId()) + "_");
 
         return secretsManagerConfigServiceFactory.create(pathToInstanceConfig);
     }
