@@ -72,6 +72,8 @@ class RecordBulkDataSanitizerImplTest {
                 ConfigService mock = MockModules.provideMock(ConfigService.class);
                 when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
                     .thenReturn(Optional.of(rawRules));
+                when(mock.getConfigPropertyOrError(eq(ProxyConfigProperty.PSOXY_SALT)))
+                    .thenReturn("salt");
                 when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
                     .thenReturn(Optional.of("salt"));
 
