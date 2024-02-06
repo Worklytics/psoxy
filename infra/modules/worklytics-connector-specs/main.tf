@@ -93,7 +93,7 @@ locals {
       ],
       environment_variables : {},
       example_api_calls : [
-        "/gmail/v1/users/me/messages?maxResults=10",
+        "/gmail/v1/users/me/messages?maxResults=5&labelIds=SENT",
         "/gmail/v1/users/me/messages/{MESSAGE_ID}?format=metadata"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_user
