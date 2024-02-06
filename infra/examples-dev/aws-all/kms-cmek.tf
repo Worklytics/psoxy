@@ -102,15 +102,16 @@
 ## concisely set S3 encryption for all buckets
 #resource "aws_s3_bucket_server_side_encryption_configuration" "bulk_buckets" {
 #  for_each = merge(
-#    { for k, v in module.psoxy.bulk_connector_instances: k => v.input_bucket } ,
-#    { for k, v in module.psoxy.bulk_connector_instances: k => v.sanitized_bucket } ,
+#    { for k, v in module.psoxy.bulk_connector_instances: "${k}_input" => v.input_bucket } ,
+#    { for k, v in module.psoxy.bulk_connector_instances: "${k}_sanitized" => v.sanitized_bucket } ,
+#    module.psoxy.lookup_output_buckets,
 #  )
 #
 #  bucket = each.value
 #
 #  rule {
 #    apply_server_side_encryption_by_default {
-#      kms_master_key_id = local.key_arn
+#      kms_master_key_id = aws_kms_key.example_key.id
 #      sse_algorithm     = "aws:kms"
 #    }
 #  }
