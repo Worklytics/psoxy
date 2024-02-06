@@ -64,7 +64,7 @@ public class SecretsManagerConfigService implements ConfigService {
             log.info(String.format("Property: %s, stored version %d", id, response.versionId()));
         } catch (SecretsManagerException e) {
             log.log(Level.SEVERE, "failed to write secret", e);
-            //q: re-throw??
+            throw e;
         }
     }
 
