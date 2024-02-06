@@ -117,7 +117,7 @@ class RecordBulkDataSanitizerImplTest {
         assertEquals(encodedHashSalt2,
             encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("2" + "salt")).build()));
         assertEquals(encodedHashSalt5,
-            encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("2" + "salt")).build()));
+            encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("5" + "salt")).build()));
 
         assertTrue(output.contains(encodedHashSalt2));
         assertTrue(output.contains(encodedHashSalt5));
