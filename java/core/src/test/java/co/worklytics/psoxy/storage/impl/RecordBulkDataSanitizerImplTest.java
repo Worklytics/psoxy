@@ -5,6 +5,7 @@ import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.rules.slack.DaggerSlackDiscoveryBulkTests_Container;
 import co.worklytics.psoxy.rules.slack.SlackDiscoveryBulkTests;
 import co.worklytics.psoxy.storage.BulkDataTestUtils;
@@ -58,7 +59,9 @@ class RecordBulkDataSanitizerImplTest {
     @Component(modules = {
         PsoxyModule.class,
         ConfigRulesModule.class,
-        Container.ForConfigService.class
+        Container.ForConfigService.class,
+        MockModules.ForSecretStore.class,
+        MockModules.ForHostEnvironment.class,
     })
     public interface Container {
 
@@ -72,15 +75,7 @@ class RecordBulkDataSanitizerImplTest {
                 ConfigService mock = MockModules.provideMock(ConfigService.class);
                 when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
                     .thenReturn(Optional.of(rawRules));
-                when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
-                    .thenReturn(Optional.of("salt"));
-
                 return mock;
-            }
-
-            @Provides @Singleton
-            static HostEnvironment hostEnvironment() {
-                return MockModules.provideMock(HostEnvironment.class);
             }
         }
 
@@ -106,6 +101,17 @@ class RecordBulkDataSanitizerImplTest {
 
         String output = new String(outputStream.toByteArray());
         assertEquals(new String(TestUtils.getData(pathToSanitized)), output);
+
+        //TODO: fix failing test
+
+        // encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("5" + "salt")).build()) --> t~cMWVVout6L1o-OKqU9a0Z1Sfqqg_i5J_zzU0M2EfDJg
+        // encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("2" + "salt")).build()) --> t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI
+
+        //failing bc -sanitized has values OTHER than those:
+        //"t~bRA7u8gkRFVS4a7u1BzBPsFttCTbbW7ICsUN2N9CVso"
+        //"t~JoRciV9pgnaBd-s4kJk8yF2WsYtl8l8a3Gi4fTOnpw0"
+
+        // why???
     }
 
 

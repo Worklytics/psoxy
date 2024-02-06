@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.common.annotations.VisibleForTesting;
 import dagger.assisted.Assisted;
@@ -25,7 +26,7 @@ import java.util.logging.Level;
  *
  */
 @Log
-public class SecretsManagerConfigService implements ConfigService {
+public class SecretsManagerConfigService implements SecretStore {
 
     @Getter(onMethod_ = @VisibleForTesting)
     final String namespace;
@@ -44,11 +45,6 @@ public class SecretsManagerConfigService implements ConfigService {
             namespace = "/" + namespace;
         }
         this.namespace = namespace;
-    }
-
-    @Override
-    public boolean supportsWriting() {
-        return true;
     }
 
     @Override

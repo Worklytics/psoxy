@@ -1,5 +1,7 @@
 package co.worklytics.psoxy.gateway.impl;
 
+import co.worklytics.psoxy.gateway.HostEnvironment;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import dagger.assisted.AssistedFactory;
 
 //see https://dagger.dev/dev-guide/assisted-injection.html
@@ -14,5 +16,18 @@ public interface VaultConfigServiceFactory {
         return envVarsConfigService
             .getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_ADDR)
             .isPresent();
+    }
+
+    static String pathForSharedVault(HostEnvironment hostEnvironment, EnvVarsConfigService envVarsConfigService) {
+        return envVarsConfigService
+            .getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
+            .orElse("secret/PSOXY_GLOBAL/");
+    }
+
+    static String pathForInstanceVault(HostEnvironment hostEnvironment, EnvVarsConfigService envVarsConfigService) {
+        String instanceIdAsPathFragment = hostEnvironment.getInstanceId().toUpperCase().replace("-", "_");
+        return envVarsConfigService
+            .getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
+            .orElse("secret/PSOXY_LOCAL/" + instanceIdAsPathFragment + "/");
     }
 }

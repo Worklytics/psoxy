@@ -2,6 +2,8 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.WritableConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.api.gax.rpc.PermissionDeniedException;
 import com.google.cloud.secretmanager.v1.*;
@@ -24,7 +26,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 
 @Log
-public class SecretManagerConfigService implements ConfigService, LockService {
+public class SecretManagerConfigService implements WritableConfigService, LockService, SecretStore {
 
     private static final String LOCK_LABEL = "locked";
     private static final String VERSION_LABEL = "latest-version";
@@ -54,10 +56,6 @@ public class SecretManagerConfigService implements ConfigService, LockService {
         this.namespace = namespace;
     }
 
-    @Override
-    public boolean supportsWriting() {
-        return true;
-    }
 
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {

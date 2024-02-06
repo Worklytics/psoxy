@@ -70,6 +70,7 @@ public class BulkDataSanitizerImplTest {
         TestModules.ForFixedClock.class,
         TestModules.ForFixedUUID.class,
         MockModules.ForConfigService.class,
+        MockModules.ForSecretStore.class,
         ForPlaceholderRules.class,
     })
     public interface Container {

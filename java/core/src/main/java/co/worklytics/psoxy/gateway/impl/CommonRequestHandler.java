@@ -53,6 +53,9 @@ public class CommonRequestHandler {
     EnvVarsConfigService envVarsConfigService;
     @Inject
     ConfigService config;
+
+    @Inject
+    SecretStore secretStore;
     @Inject
     RulesUtils rulesUtils;
     @Inject
@@ -120,7 +123,7 @@ public class CommonRequestHandler {
                         .orElseGet(() -> rulesUtils.getDefaultScopeIdFromSource(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE)));
 
                     Pseudonymizer.ConfigurationOptions options =
-                        pseudonymizerImplFactory.buildOptions(config, defaultScopeId);
+                        pseudonymizerImplFactory.buildOptions(config, secretStore, defaultScopeId);
                     this.sanitizer = sanitizerFactory.create(rules, pseudonymizerImplFactory.create(options));
                 }
             }

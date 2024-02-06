@@ -1,13 +1,7 @@
 package co.worklytics.psoxy.aws;
 
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.HostEnvironment;
-import co.worklytics.psoxy.gateway.LockService;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.impl.CachingConfigServiceDecorator;
-import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
-import co.worklytics.psoxy.gateway.impl.VaultConfigService;
+import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
@@ -89,60 +83,84 @@ public interface AwsModule {
     }
 
     @Provides
-    @Named("Native")
-    @Singleton
-    static ConfigService nativeConfigService(HostEnvironment hostEnvironment,
-                                             EnvVarsConfigService envVarsConfigService,
-                                             ParameterStoreConfigServiceFactory parameterStoreConfigServiceFactory,
-                                             @Named("instance") ParameterStoreConfigService instanceScopedParameterConfigService,
-                                             SecretsManagerConfigServiceFactory secretsManagerConfigServiceFactory,
-                                             @Named("instance") SecretsManagerConfigService instanceScopedSecretsManagerConfigService) {
+    static SecretStore secretStore(HostEnvironment hostEnvironment,
+                                   EnvVarsConfigService envVarsConfigService,
+                                   ParameterStoreConfigServiceFactory parameterStoreConfigServiceFactory,
+                                   @Named("instance") ParameterStoreConfigService instanceScopedParameterConfigService,
+                                   SecretsManagerConfigServiceFactory secretsManagerConfigServiceFactory,
+                                   @Named("instance") SecretsManagerConfigService instanceScopedSecretsManagerConfigService,
+                                   VaultConfigServiceFactory vaultConfigServiceFactory) {
 
         String pathToSharedConfig =
-                envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
-                        .orElse(null);
-
-        ParameterStoreConfigService sharedParameterConfigService =
-                parameterStoreConfigServiceFactory.create(pathToSharedConfig);
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
+                .orElse(null);
 
         AwsEnvironment.SecretStoreImplementations secretStoreImpl = envVarsConfigService.getConfigPropertyAsOptional(AwsEnvironment.AwsConfigProperty.SECRETS_STORE)
             .map(String::toUpperCase) //case-insensitive, so accept 'aws_ssm_parameter_store'
             .map(AwsEnvironment.SecretStoreImplementations::valueOf)
             .orElse(AwsEnvironment.SecretStoreImplementations.AWS_SSM_PARAMETER_STORE);
 
-        ConfigService sharedConfigService;
-        ConfigService instanceConfigService;
+        SecretStore sharedConfigService;
+        SecretStore instanceConfigService;
         if (secretStoreImpl == AwsEnvironment.SecretStoreImplementations.AWS_SECRETS_MANAGER) {
-            instanceConfigService = CompositeConfigService.builder()
-                .preferred(instanceScopedSecretsManagerConfigService)
-                .fallback(instanceScopedParameterConfigService)
-                .build();
-            sharedConfigService = CompositeConfigService.builder()
-                .preferred(secretsManagerConfigServiceFactory.create(pathToSharedConfig))
-                .fallback(sharedParameterConfigService)
-                .build();
-        } else if (secretStoreImpl == AwsEnvironment.SecretStoreImplementations.AWS_SSM_PARAMETER_STORE
-                || secretStoreImpl == AwsEnvironment.SecretStoreImplementations.HASHICORP_VAULT) {
-            /**
-             * Vault is wrapped over the 'Native' secrets manager in FunctionRuntimeModule
-             *
-             * TODO: probably consolidate this all in v0.5, when we eliminate fallback configs
-             * (where values in env vars take precedence over those in remote config stores;
-             *  and remote config store may be composite of parameter store + secrets manager)
-             *
-             * @see co.worklytics.psoxy.FunctionRuntimeModule
-             */
+            instanceConfigService = instanceScopedSecretsManagerConfigService;
+            sharedConfigService = secretsManagerConfigServiceFactory.create(pathToSharedConfig);
+        } else if (secretStoreImpl == AwsEnvironment.SecretStoreImplementations.AWS_SSM_PARAMETER_STORE) {
             instanceConfigService = instanceScopedParameterConfigService;
-            sharedConfigService = sharedParameterConfigService;
+            sharedConfigService = parameterStoreConfigServiceFactory.create(pathToSharedConfig);
+        } else if (secretStoreImpl == AwsEnvironment.SecretStoreImplementations.HASHICORP_VAULT) {
+            if (!vaultConfigServiceFactory.isVaultConfigured(envVarsConfigService)) {
+                throw new IllegalStateException("Vault is not configured, but HASHICORP_VAULT secret store implementation was requested");
+            }
+            VaultConfigService sharedVault =
+                vaultConfigServiceFactory.create(VaultConfigServiceFactory.pathForSharedVault(hostEnvironment, envVarsConfigService));
+
+            VaultConfigService connectorVault =
+                vaultConfigServiceFactory.create(VaultConfigServiceFactory.pathForInstanceVault(hostEnvironment, envVarsConfigService));
+
+            //initialize vaults (q: right place for this??)
+            // alternatives:
+            //   - in the VaultConfigServiceFactory (but hard to make it generated by Dagger then)
+            //   - generically expose init() in ConfigService interface, and call it later before
+            //     use (but nothing but vault needs it atm
+            sharedVault.init();
+            connectorVault.init();
+
+            instanceConfigService = connectorVault;
+            sharedConfigService = sharedVault;
         } else {
             throw new IllegalStateException("Unknown secret store implementation: " + secretStoreImpl);
         }
 
         Duration proxyInstanceConfigCacheTtl = Duration.ofMinutes(5);
         Duration sharedConfigCacheTtl = Duration.ofMinutes(20);
+
+        return CompositeSecretStore.builder()
+            .preferred(new CachingConfigServiceDecorator(instanceConfigService, proxyInstanceConfigCacheTtl))
+            .fallback(new CachingConfigServiceDecorator(sharedConfigService, sharedConfigCacheTtl))
+            .build();
+    }
+
+    @Provides
+    @Named("Native")
+    @Singleton
+    static ConfigService nativeConfigService(EnvVarsConfigService envVarsConfigService,
+                                             ParameterStoreConfigServiceFactory parameterStoreConfigServiceFactory,
+                                             @Named("instance") ParameterStoreConfigService instanceScopedParameterConfigService) {
+
+        String pathToSharedConfig =
+                envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
+                        .orElse(null);
+        parameterStoreConfigServiceFactory.create(pathToSharedConfig);
+
+        ParameterStoreConfigService sharedParameterConfigService =
+                parameterStoreConfigServiceFactory.create(pathToSharedConfig);
+
+        Duration proxyInstanceConfigCacheTtl = Duration.ofMinutes(5);
+        Duration sharedConfigCacheTtl = Duration.ofMinutes(20);
         return CompositeConfigService.builder()
-                .preferred(new CachingConfigServiceDecorator(instanceConfigService, proxyInstanceConfigCacheTtl))
-                .fallback(new CachingConfigServiceDecorator(sharedConfigService, sharedConfigCacheTtl))
+                .preferred(new CachingConfigServiceDecorator(instanceScopedParameterConfigService, proxyInstanceConfigCacheTtl))
+                .fallback(new CachingConfigServiceDecorator(sharedParameterConfigService, sharedConfigCacheTtl))
                 .build();
     }
 

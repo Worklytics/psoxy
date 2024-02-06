@@ -3,6 +3,7 @@ package co.worklytics.psoxy.impl;
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.test.TestModules;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
@@ -66,12 +67,15 @@ class RESTApiSanitizerImplTest {
 
     @Inject
     ConfigService config;
+    @Inject
+    SecretStore secretStore;
 
 
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
         ForConfigService.class,
+        TestModules.ForSecretStore.class,
     })
     public interface Container {
         void inject(RESTApiSanitizerImplTest test);
@@ -83,7 +87,6 @@ class RESTApiSanitizerImplTest {
         @Singleton
         static ConfigService configService() {
             ConfigService mock = MockModules.provideMock(ConfigService.class);
-            TestModules.withMockEncryptionKey(mock);
             when(mock.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
                 .thenReturn("gmail");
             when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.TARGET_HOST)))
@@ -107,7 +110,7 @@ class RESTApiSanitizerImplTest {
 
         sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"), pseudonymizer);
 
-        withMockEncryptionKey(config);
+        withMockEncryptionKey(secretStore);
     }
 
     @SneakyThrows

@@ -183,6 +183,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @Inject
         ConfigService config;
         @Inject
+        SecretStore secretStore;
+        @Inject
         ObjectMapper objectMapper;
         @Inject
         HttpRequestFactory httpRequestFactory;
@@ -341,23 +343,19 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         void storeRefreshTokenIfRotated(CanonicalOAuthAccessTokenResponseDto tokenResponse) {
             if (!StringUtils.isBlank(tokenResponse.getRefreshToken())) {
                 //if a refresh_token came back from server, potentially update it
-                config.getConfigPropertyWithMetadata(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN)
+                secretStore.getConfigPropertyWithMetadata(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN)
                     .filter(storedToken -> !Objects.equals(storedToken.getValue(), tokenResponse.getRefreshToken()))
                     .filter(storedToken -> storedToken.getLastModifiedDate().isEmpty()
                         || storedToken.getLastModifiedDate().get()
                                 .isBefore(Instant.now().minus(MIN_DURATION_TO_KEEP_REFRESH_TOKEN)))
                     .ifPresent(storedTokenToRotate -> {
-                        if (config.supportsWriting()) {
-                            try {
-                                config.putConfigProperty(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN,
+                        try {
+                            secretStore.putConfigProperty(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN,
                                     tokenResponse.getRefreshToken(), WRITE_RETRIES);
-                            } catch (WritePropertyRetriesExhaustedException e) {
-                                log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value after " + WRITE_RETRIES + " attempts; while this access_token may work, future token exchanges may fail", e);
-                            } catch (Throwable e) {
-                                log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value; while this access_token may work, future token exchanges may fail", e);
-                            }
-                        } else {
-                            log.log(Level.SEVERE, "refresh_token rotated, but config service does not support writing; while this access_token may work, future token exchanges may fail");
+                        } catch (WritePropertyRetriesExhaustedException e) {
+                            log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value after " + WRITE_RETRIES + " attempts; while this access_token may work, future token exchanges may fail", e);
+                        } catch (Throwable e) {
+                            log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value; while this access_token may work, future token exchanges may fail", e);
                         }
                     });
             }
@@ -434,7 +432,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @VisibleForTesting
         Optional<AccessToken> getSharedAccessTokenIfSupported() {
             if (useSharedToken()) {
-                Optional<String> jsonToken = config.getConfigPropertyAsOptional(ConfigProperty.ACCESS_TOKEN);
+                Optional<String> jsonToken = secretStore.getConfigPropertyAsOptional(ConfigProperty.ACCESS_TOKEN);
                 if (jsonToken.isEmpty()) {
                     return Optional.empty();
                 } else {
@@ -458,7 +456,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         void storeSharedAccessTokenIfSupported(@NonNull AccessToken accessToken, boolean useSharedToken) {
             if (useSharedToken) {
                 try {
-                    config.putConfigProperty(ConfigProperty.ACCESS_TOKEN,
+                    secretStore.putConfigProperty(ConfigProperty.ACCESS_TOKEN,
                         objectMapper.writerFor(AccessTokenDto.class)
                             .writeValueAsString(AccessTokenDto.toAccessTokenDto(accessToken)), WRITE_RETRIES);
                     log.log(Level.INFO, "New token stored in config");

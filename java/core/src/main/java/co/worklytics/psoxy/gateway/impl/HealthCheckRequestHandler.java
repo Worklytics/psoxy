@@ -37,6 +37,8 @@ public class HealthCheckRequestHandler {
     @Inject
     ConfigService config;
     @Inject
+    SecretStore secretStore;
+    @Inject
     SourceAuthStrategy sourceAuthStrategy;
     @Inject
     ObjectMapper objectMapper;
@@ -81,7 +83,7 @@ public class HealthCheckRequestHandler {
                 .javaSourceCodeVersion(JAVA_SOURCE_CODE_VERSION)
                 .configuredSource(config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
                 .configuredHost(config.getConfigPropertyAsOptional(ProxyConfigProperty.TARGET_HOST).orElse(null))
-                .nonDefaultSalt(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
+                .nonDefaultSalt(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
                 .pseudonymImplementation(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION).orElse(null))
                 .missingConfigProperties(missing);
 
@@ -95,7 +97,14 @@ public class HealthCheckRequestHandler {
 
         try {
             healthCheckResult.configPropertiesLastModified(sourceAuthStrategy.getAllConfigProperties().stream()
-                    .map(param -> Pair.of(param, config.getConfigPropertyWithMetadata(param)))
+                    .map(param -> {
+                        Optional<ConfigService.ConfigValueWithMetadata> fromConfig = config.getConfigPropertyWithMetadata(param);
+                        if (fromConfig.isEmpty()) {
+                            fromConfig = secretStore.getConfigPropertyWithMetadata(param);
+                        }
+
+                        return Pair.of(param, fromConfig);
+                    })
                     .collect(Collectors.toMap(p -> p.getKey().name(),
                             p -> p.getValue()
                                     .map(metadata -> metadata.getLastModifiedDate().orElse(null))

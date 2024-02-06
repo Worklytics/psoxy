@@ -1,11 +1,8 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.ColumnarBulkDataSanitizerImpl;
-import co.worklytics.psoxy.storage.impl.ColumnarBulkDataSanitizerImplFactory;
 import co.worklytics.test.TestModules;
-import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.ColumnarRules;
 import dagger.Component;
 import dagger.Module;
@@ -33,6 +30,7 @@ public class HandlerTest {
         PsoxyModule.class,
         ForPlaceholderRules.class,
         TestModules.ForConfigService.class,
+        TestModules.ForSecretStore.class,
     })
     public interface Container {
         void inject(HandlerTest test);
