@@ -1,4 +1,4 @@
-# stores secrets as AWS Secret Manager SEcrets
+# stores secrets as AWS Secret Manager Secrets
 # NOTE: value of this module is a consistent interface across potential Secret store implementations
 #   eg, GCP Secret Manager, AWS SSM Parameter Store, Hashicorp Vault, AWS Secrets Manager, etc.
 #  but is this good Terraform style? clearly in AWS case, this module doesn't do much ...
