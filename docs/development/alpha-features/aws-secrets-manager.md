@@ -5,7 +5,7 @@ fully documented or stable.
 
 A couple notes:
   - some connectors, in particular Zoom/Jira, rotate tokens frequently so will generate a lot of
-    versions of secrets.  AFIAK, AWS will still bill you for just one secret, as only one should be
+    versions of secrets.  AFAIK, AWS will still bill you for just one secret, as only one should be
     staged as the 'current' version.  But you should monitor this and review the particular terms
     and pricing model of your AWS contract.
   - our modules will create secrets ONLY in the region into which your proxy infra is being deployed,
