@@ -84,6 +84,8 @@ public class SlackDiscoveryBulkTests {
                     .thenReturn(Optional.of(new String(TestUtils.getData(rulesPath))));
                 when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
                     .thenReturn(Optional.of("salt"));
+                when(mock.getConfigPropertyOrError(eq(ProxyConfigProperty.PSOXY_SALT)))
+                    .thenReturn("salt");
 
                 return mock;
             }
