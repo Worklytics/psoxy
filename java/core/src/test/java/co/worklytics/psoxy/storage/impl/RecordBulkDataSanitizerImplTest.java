@@ -12,11 +12,14 @@ import co.worklytics.psoxy.storage.BulkDataTestUtils;
 import co.worklytics.psoxy.storage.StorageHandler;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.RuleSet;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import lombok.SneakyThrows;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
@@ -38,6 +41,9 @@ class RecordBulkDataSanitizerImplTest {
 
     @Inject
     StorageHandler storageHandler;
+
+    @Inject
+    UrlSafeTokenPseudonymEncoder encoder;
 
     java.util.function.Supplier<OutputStream> outputStreamSupplier;
 
@@ -102,16 +108,20 @@ class RecordBulkDataSanitizerImplTest {
         String output = new String(outputStream.toByteArray());
         assertEquals(new String(TestUtils.getData(pathToSanitized)), output);
 
-        //TODO: fix failing test
+        //as of 0.4.46, test was bad on main-line, so some extra verification that the correct
+        // things are happening:
 
-        // encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("5" + "salt")).build()) --> t~cMWVVout6L1o-OKqU9a0Z1Sfqqg_i5J_zzU0M2EfDJg
-        // encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("2" + "salt")).build()) --> t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI
+        String encodedHashSalt2 = "t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI";
+        String encodedHashSalt5 = "t~cMWVVout6L1o-OKqU9a0Z1Sfqqg_i5J_zzU0M2EfDJg";
 
-        //failing bc -sanitized has values OTHER than those:
-        //"t~bRA7u8gkRFVS4a7u1BzBPsFttCTbbW7ICsUN2N9CVso"
-        //"t~JoRciV9pgnaBd-s4kJk8yF2WsYtl8l8a3Gi4fTOnpw0"
+        assertEquals(encodedHashSalt2,
+            encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("2" + "salt")).build()));
+        assertEquals(encodedHashSalt5,
+            encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("2" + "salt")).build()));
 
-        // why???
+        assertTrue(output.contains(encodedHashSalt2));
+        assertTrue(output.contains(encodedHashSalt5));
+
     }
 
 
