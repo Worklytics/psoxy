@@ -7,5 +7,6 @@ fieldsToTransform:
     newName: GITHUB_USERNAME
     transforms:
       - javaRegExpReplace: "(.*)@.*____$1"
-      - javaRegExpReplace: "([^\\.].*)\\.([^\\.].*)____$1-$2"
+      - javaRegExpReplace: "^([a-z]{3})(.+)$____$1_$2_ghsuffix"
+      - javaRegExpReplace: "^([a-z]{3})$____$1_ghsuffix"
       - pseudonymizeWithScope: "github"

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -45,8 +44,8 @@ public interface FieldTransform {
         return FormatString.builder().formatString(template).build();
     }
 
-    static FieldTransform javaRegExpReplace(String regExpReplaceString) {
-        return JavaRegExpReplace.builder().regExp_replaceString(regExpReplaceString).build();
+    static FieldTransform javaRegExpReplace(String reReplacePair) {
+        return JavaRegExpReplace.builder().javaRegExpReplace(reReplacePair).build();
     }
 
 
@@ -83,6 +82,7 @@ public interface FieldTransform {
 
     /**
      * if provided, value will be replaced using provided regex
+     * Note: the parameter name must match the name of the class otherwise it will not be deserialized
      */
     @JsonTypeName("javaRegExpReplace")
     @NoArgsConstructor
@@ -94,16 +94,16 @@ public interface FieldTransform {
         public static final String SEPARATOR = "____";
 
         @NonNull
-        String regExp_replaceString;
+        String javaRegExpReplace;
 
         @JsonIgnore
         public String getRegExp() {
-            return regExp_replaceString.split(SEPARATOR)[0];
+            return javaRegExpReplace.split(SEPARATOR)[0];
         }
 
         @JsonIgnore
         public String getReplaceString() {
-            return regExp_replaceString.split(SEPARATOR)[1];
+            return javaRegExpReplace.split(SEPARATOR)[1];
         }
 
         @Override

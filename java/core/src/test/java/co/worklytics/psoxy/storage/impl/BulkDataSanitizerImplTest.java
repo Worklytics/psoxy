@@ -612,19 +612,30 @@ public class BulkDataSanitizerImplTest {
         columnarFileSanitizerImpl.setRules(rules);
 
         final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,GITHUB_USERNAME\r\n" +
-            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI\"\",\"\"h_4\"\":\"\"-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\",\"\"h_4\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",Sales,2023-01-06,\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\",\"\"h_4\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",2020-01-01,,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"e_xmOtKElP3GOsE3lI1zpQWfkRPEwv1C4pKeEXsjLQk\"\",\"\"h_4\"\":\"\"_z_IZBcAMVKOc-efo2OBtIbvX-V9QXfHNXvAS6gmnn8\"\"}\"\r\n" +
-            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\",\"\"h_4\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\",\"\"h_4\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering,2023-01-06,,2019-11-11,,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"JSDxj8fD9JR9uRsObds.ZVFDYdVRMeoF.o8uKmwzqF8\"\",\"\"h_4\"\":\"\"ukIbckhVcsB3YT0PbkMx_4GejkGKZJzjAne31sjdDRU\"\"}\"\r\n" +
-            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\".fs1T64Micz8SkbILrABgEv4kSg.tFhvhP35HGSLdOo\"\",\"\"h_4\"\":\"\"BOg00PLoiEEKyGzije3FJlKBzM6_Vjk87VJI9lTIA2o\"\"}\",,Engineering,2023-01-06,\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\",\"\"h_4\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",2018-06-03,,\r\n" +
-            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\".ZdDGUuOMK.Oy7_PJ3pf9SYX12.3tKPdLHfYbjVGcGk\"\",\"\"h_4\"\":\"\"4W7Sl-LI6iMzNNngivs5dLMiVw-7ob3Cyr3jn8NureY\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\",\"\"h_4\"\":\"\"BlQB8Vk0VwdbdWTGAzBF-ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2023-01-06,\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\",\"\"h_4\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",2019-10-06,2022-12-08,\"{\"\"scope\"\":\"\"github\"\",\"\"hash\"\":\"\"O7GiAV8QkjmgJSeua2T1oUsggrFUr35ZPWtpFPni6mI\"\",\"\"h_4\"\":\"\"1dnWjpuuqx_P6TEEABTf9lwzUs9GWfEo_kv0Mk5TD3Y\"\"}\"\r\n";
+            "\"{\"\"hash\"\":\"\"2_hashed\"\"}\",\"{\"\"hash\"\":\"\"bob@workltyics.co_hashed\"\"}\",Sales,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2020-01-01,,\"{\"\"hash\"\":\"\"bob_ghsuffix_hashed\"\"}\"\r\n" +
+            "\"{\"\"hash\"\":\"\"1_hashed\"\"}\",\"{\"\"hash\"\":\"\"alice@worklytics.co_hashed\"\"}\",Engineering,2023-01-06,,2019-11-11,,\"{\"\"hash\"\":\"\"ali_ce_ghsuffix_hashed\"\"}\"\r\n" +
+            "\"{\"\"hash\"\":\"\"4_hashed\"\"}\",,Engineering,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2018-06-03,,\r\n" +
+            "\"{\"\"hash\"\":\"\"3_hashed\"\"}\",\"{\"\"hash\"\":\"\"charles@workltycis.co_hashed\"\"}\",Engineering,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2019-10-06,2022-12-08,\"{\"\"hash\"\":\"\"cha_rles_ghsuffix_hashed\"\"}\"\r\n";
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
         columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
         columnarFileSanitizerImpl.makeShuffleDeterministic();
 
+        // use stub for easy check on values
+        Pseudonymizer pseudonymizer = new StubPseudonymizer();
+
         try (FileReader in = new FileReader(inputFile);
-             StringWriter out = new StringWriter()) {
+            StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
+
+            try (CSVParser parser = CSVParser.parse(out.toString(), CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
+                List<CSVRecord> records = parser.getRecords();
+                assertTrue(records.get(0).get("GITHUB_USERNAME").contains(pseudonymizer.pseudonymize("bob_ghsuffix").getHash()));
+                assertTrue(records.get(1).get("GITHUB_USERNAME").contains(pseudonymizer.pseudonymize("ali_ce_ghsuffix").getHash()));
+                assertTrue(StringUtils.isBlank(records.get(2).get("GITHUB_USERNAME")));
+                assertTrue(records.get(3).get("GITHUB_USERNAME").contains(pseudonymizer.pseudonymize("cha_rles_ghsuffix").getHash()));
+            }
         }
     }
 

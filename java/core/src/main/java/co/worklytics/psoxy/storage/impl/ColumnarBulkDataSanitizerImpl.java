@@ -215,7 +215,9 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                       if (transform instanceof FieldTransform.JavaRegExpReplace) {
                           Pattern pattern = Pattern.compile(((FieldTransform.JavaRegExpReplace) transform).getRegExp());
                           Matcher matcher = pattern.matcher(value);
-                          value = matcher.replaceAll(((FieldTransform.JavaRegExpReplace) transform).getReplaceString());
+                          if (matcher.matches()) {
+                              value = matcher.replaceAll(((FieldTransform.JavaRegExpReplace) transform).getReplaceString());
+                          }
                       }
                   }
               }
