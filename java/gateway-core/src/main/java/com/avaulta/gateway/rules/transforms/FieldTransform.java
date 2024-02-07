@@ -1,12 +1,7 @@
 package com.avaulta.gateway.rules.transforms;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import com.fasterxml.jackson.annotation.*;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
@@ -18,16 +13,15 @@ import java.util.regex.PatternSyntaxException;
  * a transform to operate on a single field value
  */
 @JsonTypeInfo(
-    use = JsonTypeInfo.Id.DEDUCTION,
-    defaultImpl = FieldTransform.class
+    use = JsonTypeInfo.Id.DEDUCTION
+    //defaultImpl = FieldTransform.class
 )
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = FieldTransform.Filter.class),
-    @JsonSubTypes.Type(value = FieldTransform.FormatString.class),
-    @JsonSubTypes.Type(value = FieldTransform.JavaRegExpReplace.class),
-    @JsonSubTypes.Type(value = FieldTransform.PseudonymizeWithScope.class),
-    @JsonSubTypes.Type(value = FieldTransform.Pseudonymize.class),
-})
+    @JsonSubTypes.Type(FieldTransform.JavaRegExpReplace.class),
+    @JsonSubTypes.Type(FieldTransform.Filter.class),
+    @JsonSubTypes.Type(FieldTransform.FormatString.class),
+    @JsonSubTypes.Type(FieldTransform.PseudonymizeWithScope.class),
+    @JsonSubTypes.Type(FieldTransform.Pseudonymize.class) })
 public interface FieldTransform {
 
     @JsonIgnore
@@ -45,8 +39,9 @@ public interface FieldTransform {
         return FormatString.builder().formatString(template).build();
     }
 
-    static FieldTransform javaRegExpReplace(String reReplacePair) {
-        return JavaRegExpReplace.builder().javaRegExpReplace(reReplacePair).build();
+    static FieldTransform javaRegExpReplace(String re, String replace) {
+        JavaRegExpReplace.Config config = JavaRegExpReplace.Config.builder().regExp(re).replace(replace).build();
+        return JavaRegExpReplace.builder().javaRegExpReplace(config).build();
     }
 
     static FieldTransform pseudonymize(boolean pseudonymize) {
@@ -90,24 +85,39 @@ public interface FieldTransform {
      */
     @JsonTypeName("javaRegExpReplace")
     @NoArgsConstructor
+    @AllArgsConstructor
     @SuperBuilder(toBuilder = true)
     @Data
     @Log
     class JavaRegExpReplace implements FieldTransform {
 
+        @Data
+        @Builder
+        @AllArgsConstructor
+        @NoArgsConstructor
+        static class Config {
+            @NonNull
+            @JsonProperty("regExp")
+            String regExp;
+            @NonNull
+            @JsonProperty("replace")
+            String replace;
+        }
+
+        Config javaRegExpReplace;
+
         public static final String SEPARATOR = "____";
 
-        @NonNull
-        String javaRegExpReplace;
+
 
         @JsonIgnore
         public String getRegExp() {
-            return javaRegExpReplace.split(SEPARATOR)[0];
+            return javaRegExpReplace.getRegExp();
         }
 
         @JsonIgnore
         public String getReplaceString() {
-            return javaRegExpReplace.split(SEPARATOR)[1];
+            return javaRegExpReplace.getReplace();
         }
 
         @Override

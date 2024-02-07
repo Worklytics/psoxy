@@ -557,8 +557,10 @@ public class BulkDataSanitizerImplTest {
             .fieldsToTransform(Map.of("EMPLOYEE_EMAIL", FieldTransformPipeline.builder()
                 .newName("GITHUB_USERNAME")
                 .transforms(Arrays.asList(
-                    FieldTransform.javaRegExpReplace("(.*)@.*" + FieldTransform.JavaRegExpReplace.SEPARATOR + "$1"),
-                    FieldTransform.javaRegExpReplace("([^\\.].*)\\.([^\\.].*)" + FieldTransform.JavaRegExpReplace.SEPARATOR + "$1-$2"),
+                    FieldTransform.javaRegExpReplace("(.*)@.*", "$1"),
+                    //FieldTransform.javaRegExpReplace("(.*)@.*" + FieldTransform.JavaRegExpReplace.SEPARATOR + "$1"),
+                    FieldTransform.javaRegExpReplace("([^\\.].*)\\.([^\\.].*)","$1-$2"),
+                    //FieldTransform.javaRegExpReplace("([^\\.].*)\\.([^\\.].*)" + FieldTransform.JavaRegExpReplace.SEPARATOR + "$1-$2"),
                     FieldTransform.pseudonymizeWithScope("github")
                 )).build()))
             .build();
