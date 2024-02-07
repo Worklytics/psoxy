@@ -20,10 +20,7 @@ public class CompositeSecretStore implements SecretStore {    //open to feedback
 
     @Override
     public String getConfigPropertyOrError(ConfigService.ConfigProperty property) {
-        return preferred.getConfigPropertyAsOptional(property)
-            .orElseGet(() ->
-                fallback.getConfigPropertyAsOptional(property)
-                    .orElseThrow(() -> new NoSuchElementException("Missing config. no value for " + property))
+        return getConfigPropertyAsOptional(property).orElseThrow(() -> new NoSuchElementException("Missing config. no value for " + property))
             );
     }
 
