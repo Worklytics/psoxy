@@ -26,6 +26,7 @@ import java.util.regex.PatternSyntaxException;
     @JsonSubTypes.Type(value = FieldTransform.FormatString.class),
     @JsonSubTypes.Type(value = FieldTransform.JavaRegExpReplace.class),
     @JsonSubTypes.Type(value = FieldTransform.PseudonymizeWithScope.class),
+    @JsonSubTypes.Type(value = FieldTransform.Pseudonymize.class),
 })
 public interface FieldTransform {
 
@@ -48,6 +49,9 @@ public interface FieldTransform {
         return JavaRegExpReplace.builder().javaRegExpReplace(reReplacePair).build();
     }
 
+    static FieldTransform pseudonymize(boolean pseudonymize) {
+        return Pseudonymize.builder().pseudonymize(pseudonymize).build();
+    }
 
     /**
      * if provided, value will be written using provided template
@@ -115,6 +119,26 @@ public interface FieldTransform {
                 log.warning("invalid regex: " + regExp);
                 return false;
             }
+            return true;
+        }
+    }
+
+    /**
+     * if provided, value will be replaced using provided regex
+     * Note: the parameter name must match the name of the class otherwise it will not be deserialized
+     */
+    @JsonTypeName("pseudonymize")
+    @NoArgsConstructor
+    @SuperBuilder(toBuilder = true)
+    @Data
+    @Log
+    class Pseudonymize implements FieldTransform {
+
+        @NonNull
+        boolean pseudonymize;
+
+        @Override
+        public boolean isValid() {
             return true;
         }
     }

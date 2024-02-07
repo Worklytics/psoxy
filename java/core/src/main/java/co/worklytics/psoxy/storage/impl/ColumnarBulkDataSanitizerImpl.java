@@ -224,6 +224,12 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                           value = matcher.replaceAll(((FieldTransform.JavaRegExpReplace) transform).getReplaceString());
                       }
                   }
+
+                  if (transform instanceof FieldTransform.Pseudonymize) {
+                      if (((FieldTransform.Pseudonymize) transform).isPseudonymize()) {
+                          value = pseudonymizationFunction.apply(value, pipeline.getNewName(), pseudonymizer);
+                      }
+                  }
               }
           }
           return value;
@@ -280,6 +286,14 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             .setHeader(columnNamesForOutputFile.toArray(new String[0]))
             .build();
 
+        // immutable map uses insertion order
+        // create an empty record to fill with the transformed values, ensuring all rows have
+        // the same columns
+        ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+        columnNamesForOutputFile.forEach(h -> builder.put(h, ""));
+        ImmutableMap<String,String> emptyRow = builder.build();
+
+        System.out.println(transformTable);
         try (CSVPrinter printer = new CSVPrinter(writer, csvFormat)) {
             UnmodifiableIterator<List<CSVRecord>> chunks =
                 Iterators.partition(records.iterator(), this.getRecordShuffleChunkSize());
@@ -287,24 +301,25 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             for (UnmodifiableIterator<List<CSVRecord>> chunkIterator = chunks; chunkIterator.hasNext(); ) {
                 List<CSVRecord> chunk = new ArrayList<>(chunkIterator.next());
 
-                List<String> finalColumnNamesForOutputFile = columnNamesForOutputFile;
                 shuffleImplementation.apply(chunk).forEach(record -> {
 
-                    List<Object> sanitized = new ArrayList<>();
-
-                    finalColumnNamesForOutputFile.forEach(h -> {
-                        transformTable.cellSet().stream().filter( c -> c.getRowKey().equalsIgnoreCase(h)).findFirst().ifPresent( c -> {
+                    LinkedHashMap<String, String> newRecord = new LinkedHashMap<>(emptyRow);
+                    newRecord.keySet().forEach(h -> {
+                        transformTable
+                            .row(h)
+                            .entrySet()
+                            .stream()
                             // if the column is not present, it will be null, skip always
-                            if (record.isMapped(c.getValue())) {
-                                String columnValue = record.get(c.getValue());
-                                sanitized.add(c.getColumnKey().apply(columnValue).orElse(""));
-                            }
+                            .filter(e -> record.isMapped(e.getValue()))
+                            .findFirst()
+                            .ifPresent(e -> {
+                                String columnValue = record.get(e.getValue());
+                                newRecord.put(h, e.getKey().apply(columnValue).orElse(""));
                         });
 
                     });
-
                     try {
-                        printer.printRecord(sanitized);
+                        printer.printRecord(newRecord.values());
                     } catch (Throwable e) {
                         throw new RuntimeException("Failed to write row", e);
                     }

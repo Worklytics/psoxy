@@ -9,7 +9,7 @@ fieldsToTransform:
       - javaRegExpReplace: "(.*)@.*____$1"
       - javaRegExpReplace: "^([a-z]{3})(.+)$____$1_$2_ghsuffix"
       - javaRegExpReplace: "^([a-z]{3})$____$1_ghsuffix"
-      - pseudonymizeWithScope: "github"
+      - pseudonymize: true
   EMPLOYEE_EMAIL_TO_GH_ALTERNATIVE:
     sourceColumn: EMPLOYEE_EMAIL
     newName: GITHUB_USERNAME_ALTERNATIVE
@@ -17,4 +17,12 @@ fieldsToTransform:
       - javaRegExpReplace: "(.*)@.*____$1"
       - javaRegExpReplace: "^([a-z]{3})(.+)$____$1_$2_ghsuffix_company"
       - javaRegExpReplace: "^([a-z]{3})$____$1_ghsuffix_company"
-      - pseudonymizeWithScope: "github"
+      - pseudonymize: true
+  EMPLOYEE_EMAIL_TO_GH_SKIP_PSEUDONYMIZE:
+    sourceColumn: EMPLOYEE_EMAIL
+    newName: GITHUB_USERNAME_CLEARTEXT
+    transforms:
+      - javaRegExpReplace: "(.*)@.*____$1"
+      - javaRegExpReplace: "^([a-z]{3})(.+)$____$1_$2_ghsuffix"
+      - javaRegExpReplace: "^([a-z]{3})$____$1_ghsuffix"
+      - pseudonymize: false
