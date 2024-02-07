@@ -613,12 +613,13 @@ public class BulkDataSanitizerImplTest {
         ColumnarRules rules = yamlMapper.readValue(getClass().getResource("/rules/csv-pipeline-complex-transformations.yaml"), ColumnarRules.class);
         columnarFileSanitizerImpl.setRules(rules);
 
-        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,GITHUB_USERNAME,GITHUB_USERNAME_ALTERNATIVE\r\n" +
-            "\"{\"\"hash\"\":\"\"2_hashed\"\"}\",\"{\"\"hash\"\":\"\"bob@workltyics.co_hashed\"\"}\",Sales,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2020-01-01,,\"{\"\"hash\"\":\"\"bob_ghsuffix_hashed\"\"}\",\"{\"\"hash\"\":\"\"bob_ghsuffix_company_hashed\"\"}\"\r\n" +
-            "\"{\"\"hash\"\":\"\"1_hashed\"\"}\",\"{\"\"hash\"\":\"\"alice@worklytics.co_hashed\"\"}\",Engineering,2023-01-06,,2019-11-11,,\"{\"\"hash\"\":\"\"ali_ce_ghsuffix_hashed\"\"}\",\"{\"\"hash\"\":\"\"ali_ce_ghsuffix_company_hashed\"\"}\"\r\n" +
-            "\"{\"\"hash\"\":\"\"4_hashed\"\"}\",,Engineering,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2018-06-03,,,\r\n" +
-            "\"{\"\"hash\"\":\"\"3_hashed\"\"}\",\"{\"\"hash\"\":\"\"charles@workltycis.co_hashed\"\"}\",Engineering,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2019-10-06,2022-12-08,\"{\"\"hash\"\":\"\"cha_rles_ghsuffix_hashed\"\"}\",\"{\"\"hash\"\":\"\"cha_rles_ghsuffix_company_hashed\"\"}\"\r\n";
-        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
+        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,GITHUB_USERNAME,GITHUB_USERNAME_ALTERNATIVE,GITHUB_USERNAME_CLEARTEXT\r\n" +
+            "\"{\"\"hash\"\":\"\"2_hashed\"\"}\",\"{\"\"hash\"\":\"\"bob.brooks@workltyics.co_hashed\"\"}\",Sales,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2020-01-01,,\"{\"\"hash\"\":\"\"bob_brooks_hashed\"\"}\",\"{\"\"hash\"\":\"\"bob_brooks_alternate_hashed\"\"}\",bob_brooks\r\n" +
+            "\"{\"\"hash\"\":\"\"1_hashed\"\"}\",\"{\"\"hash\"\":\"\"alice.allen@worklytics.co_hashed\"\"}\",Engineering,2023-01-06,,2019-11-11,,\"{\"\"hash\"\":\"\"alice_allen_hashed\"\"}\",\"{\"\"hash\"\":\"\"alice_allen_alternate_hashed\"\"}\",alice_allen\r\n" +
+            "\"{\"\"hash\"\":\"\"4_hashed\"\"}\",\"{\"\"hash\"\":\"\"dave@worklytics.co_hashed\"\"}\",Engineering,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2018-06-03,,\"{\"\"hash\"\":\"\"dave_hashed\"\"}\",\"{\"\"hash\"\":\"\"dave_alternate_hashed\"\"}\",dave\r\n" +
+            "\"{\"\"hash\"\":\"\"3_hashed\"\"}\",\"{\"\"hash\"\":\"\"charles.clark@workltycis.co_hashed\"\"}\",Engineering,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2019-10-06,2022-12-08,\"{\"\"hash\"\":\"\"charles_clark_hashed\"\"}\",\"{\"\"hash\"\":\"\"charles_clark_alternate_hashed\"\"}\",charles_clark\r\n";
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example-split-email-usernames.csv").getFile());
 
         columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
         columnarFileSanitizerImpl.makeShuffleDeterministic();
@@ -633,10 +634,15 @@ public class BulkDataSanitizerImplTest {
 
             try (CSVParser parser = CSVParser.parse(out.toString(), CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
                 List<CSVRecord> records = parser.getRecords();
-                assertTrue(records.get(0).get("GITHUB_USERNAME").contains(pseudonymizer.pseudonymize("bob_ghsuffix").getHash()));
-                assertTrue(records.get(1).get("GITHUB_USERNAME").contains(pseudonymizer.pseudonymize("ali_ce_ghsuffix").getHash()));
-                assertTrue(StringUtils.isBlank(records.get(2).get("GITHUB_USERNAME")));
-                assertTrue(records.get(3).get("GITHUB_USERNAME").contains(pseudonymizer.pseudonymize("cha_rles_ghsuffix").getHash()));
+                assertTrue(records.get(0).get("GITHUB_USERNAME").contains(pseudonymizer.pseudonymize("bob_brooks").getHash()));
+                assertTrue(records.get(0).get("GITHUB_USERNAME_ALTERNATIVE").contains(pseudonymizer.pseudonymize("bob_brooks_alternate").getHash()));
+                assertTrue(records.get(1).get("GITHUB_USERNAME").contains(pseudonymizer.pseudonymize("alice_allen").getHash()));
+                assertTrue(records.get(1).get("GITHUB_USERNAME_ALTERNATIVE").contains(pseudonymizer.pseudonymize("alice_allen_alternate").getHash()));
+                assertTrue(records.get(2).get("GITHUB_USERNAME").contains(pseudonymizer.pseudonymize("dave").getHash()));
+                assertTrue(records.get(2).get("GITHUB_USERNAME_ALTERNATIVE").contains(pseudonymizer.pseudonymize("dave_alternate").getHash()));
+                assertTrue(records.get(3).get("GITHUB_USERNAME").contains(pseudonymizer.pseudonymize("charles_clark").getHash()));
+                assertTrue(records.get(3).get("GITHUB_USERNAME_ALTERNATIVE").contains(pseudonymizer.pseudonymize("charles_clark_alternate").getHash()));
+
             }
         }
     }

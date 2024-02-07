@@ -7,40 +7,34 @@ fieldsToTransform:
     newName: GITHUB_USERNAME
     transforms:
       - javaRegExpReplace:
-          regExp: "(.*)@.*____$1"
+          regExp: "^(.*)@.*$"
           replace: "$1"
       - javaRegExpReplace:
-          regExp: "^([a-z]{3})(.+)$"
-          replace: "$1_$2_ghsuffix"
-      - javaRegExpReplace:
-          regExp: "^([a-z]{3})$"
-          replace: "$1_ghsuffix"
+          regExp: "^([a-z]+)\\.(.+)$"
+          replace: "$1_$2"
       - pseudonymize: true
   EMPLOYEE_EMAIL_TO_GH_ALTERNATIVE:
     sourceColumn: EMPLOYEE_EMAIL
     newName: GITHUB_USERNAME_ALTERNATIVE
     transforms:
       - javaRegExpReplace:
-          regExp: "(.*)@.*____$1"
+          regExp: "^(.*)@.*$"
           replace: "$1"
       - javaRegExpReplace:
-          regExp: "^([a-z]{3})(.+)$"
-          replace: "$1_$2_ghsuffix"
+          regExp: "^([a-z]+)\\.(.+)$"
+          replace: "$1_$2"
       - javaRegExpReplace:
-          regExp: "^([a-z]{3})$"
-          replace: "$1_ghsuffix"
+          regExp: "^(.*)$"
+          replace: "$1_alternate"
       - pseudonymize: true
   EMPLOYEE_EMAIL_TO_GH_SKIP_PSEUDONYMIZE:
     sourceColumn: EMPLOYEE_EMAIL
     newName: GITHUB_USERNAME_CLEARTEXT
     transforms:
       - javaRegExpReplace:
-          regExp: "(.*)@.*"
+          regExp: "^(.*)@.*$"
           replace: "$1"
       - javaRegExpReplace:
-          regExp: "^([a-z]{3})(.+)$"
-          replace: "$1_$2_ghsuffix"
-      - javaRegExpReplace:
-          regExp: "^([a-z]{3})$"
-          replace: "$1_ghsuffix"
+          regExp: "^([a-z]+)\\.(.+)$"
+          replace: "$1_$2"
       - pseudonymize: false

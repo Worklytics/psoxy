@@ -293,7 +293,6 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         columnNamesForOutputFile.forEach(h -> builder.put(h, ""));
         ImmutableMap<String,String> emptyRow = builder.build();
 
-        System.out.println(transformTable);
         try (CSVPrinter printer = new CSVPrinter(writer, csvFormat)) {
             UnmodifiableIterator<List<CSVRecord>> chunks =
                 Iterators.partition(records.iterator(), this.getRecordShuffleChunkSize());
