@@ -7,15 +7,12 @@ import co.worklytics.psoxy.storage.BulkDataTestUtils;
 import co.worklytics.psoxy.storage.StorageHandler;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
-import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
 import com.avaulta.gateway.rules.RuleSet;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -81,8 +78,6 @@ public class SlackDiscoveryBulkTests {
                 ConfigService mock = MockModules.provideMock(ConfigService.class);
                 when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
                     .thenReturn(Optional.of(new String(TestUtils.getData(rulesPath))));
-
-
                 return mock;
             }
         }
