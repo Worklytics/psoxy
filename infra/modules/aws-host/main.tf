@@ -13,6 +13,9 @@ locals {
   host_platform_id    = "AWS"
   ssm_key_ids         = var.aws_ssm_key_id == null ? {} : { 0 : var.aws_ssm_key_id }
   instance_ssm_prefix = "${var.aws_ssm_param_root_path}${upper(module.env_id.id)}_"
+
+  # VPC *requires* API Gateway v2, or calls just timeout
+  use_api_gateway_v2 = var.vpc_config != null || var.use_api_gateway_v2
 }
 
 module "psoxy" {
@@ -28,6 +31,8 @@ module "psoxy" {
   install_test_tool              = var.install_test_tool
   deployment_id                  = module.env_id.id
   api_function_name_prefix       = "${lower(module.env_id.id)}-"
+  use_api_gateway_v2             = local.use_api_gateway_v2
+  logs_kms_key_arn               = var.logs_kms_key_arn
 }
 
 
@@ -87,6 +92,8 @@ module "api_connector" {
   source_auth_strategy                  = each.value.source_auth_strategy
   oauth_scopes                          = each.value.oauth_scopes_needed
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
+  vpc_config                            = var.vpc_config
+  api_gateway_v2                        = module.psoxy.api_gateway_v2
 
 
   environment_variables = merge(
@@ -136,6 +143,7 @@ module "bulk_connector" {
   sanitized_expiration_days        = var.bulk_sanitized_expiration_days
   input_expiration_days            = var.bulk_input_expiration_days
   example_file                     = each.value.example_file
+  vpc_config                       = var.vpc_config
 
   environment_variables = merge(
     var.general_environment_variables,

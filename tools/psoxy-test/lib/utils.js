@@ -90,22 +90,24 @@ function getCommonHTTPHeaders(options = {}) {
  * @param {String|URL} url
  * @param {Object} headers
  * @param {String} method
+ * @param {Object} body
  * @return {Promise}
  */
-function requestWrapper(url, method = 'GET', headers) {
+function requestWrapper(url, method = 'GET', headers, body = {}) {
   url = typeof url === 'string' ? new URL(url) : url;
   const params = url.searchParams.toString();
   const responseBody = [];
+  const requestOptions = {
+    hostname: url.host,
+    port: 443,
+    path: url.pathname + (params !== '' ? `?${params}` : ''),
+    method: method,
+    headers: headers,
+    timeout: REQUEST_TIMEOUT_MS,
+  }
+
   return new Promise((resolve, reject) => {
-    const req = https.request(
-      {
-        hostname: url.host,
-        port: 443,
-        path: url.pathname + (params !== '' ? `?${params}` : ''),
-        method: method,
-        headers: headers,
-        timeout: REQUEST_TIMEOUT_MS,
-      },
+    const req = https.request(requestOptions,
       (res) => {
         res.on('data', (data) => {
           responseBody.push(data);
@@ -142,6 +144,10 @@ function requestWrapper(url, method = 'GET', headers) {
         });
       }
     );
+    if (!_.isEmpty(body)) {
+      req.write(JSON.stringify(body));
+    }
+
     req.on('timeout', () => {
       req.destroy();
       reject({ statusMessage: 'Psoxy is taking too long to respond' });
@@ -157,18 +163,19 @@ function requestWrapper(url, method = 'GET', headers) {
  * Simple wrapper around `aws4` to ease testing.
  *
  * TODO aws4 is not able to resolve region nor service (see how we try to
- *  resolve the "service" here)from the URL for our use cases, so we need to
+ *  resolve the "service" here) from the URL for our use cases, so we need to
  *  improve the resolution of those values
  *
  * Ref: https://github.com/mhart/aws4#api
  *
  * @param {URL} url
  * @param {String} method
+ * @param {Object} body
  * @param {Object} credentials
  * @param {String} region
  * @return {Object}
  */
-function signAWSRequestURL(url, method = 'GET', credentials, region) {
+function signAWSRequestURL(url, method = 'GET', body = {}, credentials, region) {
   // According to aws4 docs, search params should be part of the "path"
   const params = url.searchParams.toString();
 
@@ -178,6 +185,14 @@ function signAWSRequestURL(url, method = 'GET', credentials, region) {
     method: method,
     region: region,
   };
+
+  if (method === 'POST' && !_.isEmpty(body)) {
+    requestOptions.body = JSON.stringify(body);
+    // `aws4` will infer the rest
+    requestOptions.headers = {
+      'content-type': 'application/json',
+    }
+  }
 
   // Closer look at aws4 source code: region and service are calculated from
   // URL's host, but for Lambda functions it doesn't translate the URL part
@@ -241,13 +256,21 @@ function transformSpecWithResponse(endpointName = '', sourceData = {}, spec = {}
  * Resolve HTTP method based on known API paths (defined in spec module)
  *
  * @param {string} path - path to inspect
+ * @param {object} options - see `../index.js`
  * @returns {string}
  */
-function resolveHTTPMethod(path = '') {
-  const endpointMatch = Object.values(spec)
+function resolveHTTPMethod(path = '', options = {}) {
+  let method = 'GET';
+  if (!_.isEmpty(options.body)) {
+    method = 'POST';
+  } else {
+    const endpointMatch = Object.values(spec)
     .reduce((acc, value) => acc.concat(value.endpoints), [])
     .find(endpoint => endpoint.path === path);
-  return endpointMatch?.method || 'GET';
+    method = endpointMatch?.method || method;
+  }
+
+  return method;
 }
 
 /**
@@ -360,8 +383,10 @@ async function getAWSCredentials(role, region) {
   const logger = getLogger();
   let credentials;
   let credentialsProvider;
+  let callerIdentity;
 
   if (!_.isEmpty(role)) {
+    logger.verbose(`Assuming role ${role}`);
     const temporaryCredentialsOptions = {
       params: {
         RoleArn: role,
@@ -374,10 +399,19 @@ async function getAWSCredentials(role, region) {
     }
     credentialsProvider = fromTemporaryCredentials(temporaryCredentialsOptions);
 
-    credentials = await credentialsProvider();
+    try {
+      credentials = await credentialsProvider();
+    } catch (e) {
+      throw new Error(`Unable to get AWS credentials: ${e.message}\nMake sure your AWS CLI is configured correctly: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-authentication.html`);
+    }
 
-    const callerIdentity = JSON.parse(
-      executeCommand('aws sts get-caller-identity').trim());
+    try {
+      callerIdentity = JSON.parse(
+        executeCommand('aws sts get-caller-identity').trim());
+    } catch (e) {
+      // It shouldn't happen if credentials are valid
+      logger.verbose(`Unable to get caller identity: ${e.message}`);
+    }
 
     logger.info(`Using temporary credentials: ${callerIdentity.Arn},
       access key ID -> ${credentials.accessKeyId}`);

@@ -20,6 +20,19 @@ Changes to be including in future/planned release notes will be added here.
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## [0.4.46](https://github.com/Worklytics/psoxy/release/tag/v0.4.46)
+  - you'll see several `timestamp_static` resources provisioned by terraform; these are simply
+    timestamps persisted into state. various example API calls in TODOs/tests are derived from these.
+    using persistent value avoids showing changes on every plan/apply.
+  - AWS:
+    - you'll see encryption config for buckets created by the proxy DESTROYED in your plan. This is
+      actually a no-op, as these were actually just setting default encryption; per Terraform docs,
+      destroying an `aws_s3_bucket_server_side_encryption_configuration` resource resets the bucket
+      to Amazon S3 default encryption. See: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration
+    - this change enables configuration of more sophisticated encryption scenarios via composition.
+      see [docs/aws/encryption-keys.md](docs/aws/encryption-keys.md) for more details.
+
+
 ## [0.4.44](https://github.com/Worklytics/psoxy/release/tag/v0.4.44)
 * Microsoft 365 - Outlook calendar: new scopes for fetching Online Meetings have been added to the Entra ID Application
   used for Microsoft 365 Outlook Calendar and the proxy connector.
@@ -27,7 +40,7 @@ Changes to be including in future/planned release notes will be added here.
   for `OnlineMeetings.Read.All` and `OnlineMeetingArtifact.Read.All` permissions.
 
 * GitHub Enterprise Server: variable `github_api_host` is marked as deprecated and will be removed
-  in next major version. Use `github_enterprise_server_host` instead. 
+  in next major version. Use `github_enterprise_server_host` instead.
 
 
 ## [0.4.43](https://github.com/Worklytics/psoxy/release/tag/v0.4.43)

@@ -3,7 +3,6 @@
 # is provisioned, and that's implicit in the provider - so we should just infer from the provider
 data "aws_region" "current" {}
 
-
 resource "random_string" "bucket_suffix" {
   length  = 8
   lower   = true
@@ -42,6 +41,7 @@ module "psoxy_lambda" {
   path_to_instance_ssm_parameters = var.path_to_instance_ssm_parameters
   ssm_kms_key_ids                 = var.ssm_kms_key_ids
   log_retention_in_days           = var.log_retention_days
+  vpc_config                      = var.vpc_config
 
   environment_variables = merge(
     var.environment_variables,
@@ -62,15 +62,6 @@ resource "aws_s3_bucket" "input" {
   }
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "input" {
-  bucket = aws_s3_bucket.input.bucket
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "aws:kms"
-    }
-  }
-}
 
 resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
   bucket = aws_s3_bucket.input.bucket
@@ -105,26 +96,6 @@ resource "aws_s3_bucket" "sanitized" {
   }
 }
 
-moved {
-  from = aws_s3_bucket.output
-  to   = aws_s3_bucket.sanitized
-}
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "sanitized" {
-  bucket = aws_s3_bucket.sanitized.bucket
-
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "aws:kms"
-    }
-  }
-}
-
-moved {
-  from = aws_s3_bucket_server_side_encryption_configuration.output
-  to   = aws_s3_bucket_server_side_encryption_configuration.sanitized
-}
-
 resource "aws_s3_bucket_public_access_block" "sanitized" {
   bucket = aws_s3_bucket.sanitized.bucket
 
@@ -132,11 +103,6 @@ resource "aws_s3_bucket_public_access_block" "sanitized" {
   block_public_policy     = true
   restrict_public_buckets = true
   ignore_public_acls      = true
-}
-
-moved {
-  from = aws_s3_bucket_public_access_block.output-block-public-access
-  to   = aws_s3_bucket_public_access_block.sanitized
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "expire_sanitized_files" {
@@ -150,7 +116,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "expire_sanitized_files" {
     }
   }
 }
-
 
 resource "aws_lambda_permission" "allow_input_bucket" {
   statement_id  = "AllowExecutionFromS3Bucket"
@@ -170,7 +135,6 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
   depends_on = [aws_lambda_permission.allow_input_bucket]
 }
-
 
 # the lambda function needs to get single objects from the input bucket
 resource "aws_iam_policy" "input_bucket_getObject_policy" {
@@ -229,19 +193,9 @@ resource "aws_iam_policy" "sanitized_bucket_write_policy" {
   }
 }
 
-moved {
-  from = aws_iam_policy.output_bucket_write_policy
-  to   = aws_iam_policy.sanitized_bucket_write_policy
-}
-
 resource "aws_iam_role_policy_attachment" "write_policy_for_sanitized_bucket" {
   role       = module.psoxy_lambda.iam_role_for_lambda_name
   policy_arn = aws_iam_policy.sanitized_bucket_write_policy.arn
-}
-
-moved {
-  from = aws_iam_role_policy_attachment.write_policy_for_output_bucket
-  to   = aws_iam_role_policy_attachment.write_policy_for_sanitized_bucket
 }
 
 # proxy caller (data consumer) needs to read (both get and list objects) from the output bucket
@@ -274,10 +228,7 @@ resource "aws_iam_policy" "sanitized_bucket_read" {
   }
 }
 
-moved {
-  from = aws_iam_policy.output_bucket_read
-  to   = aws_iam_policy.sanitized_bucket_read
-}
+
 
 locals {
   accessor_role_names = concat([var.api_caller_role_name], var.sanitized_accessor_role_names)
@@ -356,13 +307,12 @@ locals {
   role_option_for_tests = var.aws_role_to_assume_when_testing == null ? "" : "-r ${var.aws_role_to_assume_when_testing}"
   todo_brief            = <<EOT
 ## Test ${var.instance_id}
-Check that the Psoxy works as expected and it transforms the files of your input bucket following
+Check that the Psoxy works as expected, and it transforms the files of your input bucket following
 the rules you have defined:
 
 ```shell
 node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} ${local.role_option_for_tests} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} -re ${data.aws_region.current.id}
 ```
-
 EOT
 
   todo_content = <<EOT
@@ -382,10 +332,8 @@ ${local.command_npm_install}
 
 ${local.todo_brief}
 
-Check that the Psoxy works as expected and it transforms the files of your input bucket
-following the rules you have defined.
-
-Notice that the rest of the options should match your Psoxy configuration.
+Notice that the rest of the options passed as argument to the script should match your Psoxy
+configuration.
 
 (*) Check supported formats in [Bulk Data Imports Docs](https://app.worklytics.co/docs/hris-import)
 
