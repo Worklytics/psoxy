@@ -15,10 +15,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Streams;
-import com.google.common.collect.UnmodifiableIterator;
+import com.google.common.collect.*;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.*;
@@ -27,6 +24,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.TriFunction;
 import org.apache.commons.lang3.tuple.Pair;
@@ -35,6 +33,7 @@ import javax.inject.Inject;
 import java.io.*;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import java.util.regex.Matcher;
@@ -88,6 +87,14 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
         Preconditions.checkArgument(records.getHeaderMap() != null, "Failed to parse header from file");
 
+        /*
+         * Table to store the transformation to be applied to each column
+         * K = new column name
+         * C = function to apply to the original column
+         * V = original column name
+         */
+        Table<String, Function<String, Optional<String>>, String> transformTable = TreeBasedTable.create(String.CASE_INSENSITIVE_ORDER, Comparator.comparingInt(Object::hashCode));
+
         Set<String> columnsToRedact = asSetWithCaseInsensitiveComparator(rules.getColumnsToRedact());
 
         Set<String> columnsToPseudonymize =
@@ -97,13 +104,16 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             asSetWithCaseInsensitiveComparator(rules.getColumnsToPseudonymizeIfPresent());
 
 
-        Map<String, FieldTransformPipeline> columnsToTransform =
+        Map<String, List<FieldTransformPipeline>> columnsToTransform =
             Optional.ofNullable(rules.getFieldsToTransform()).orElse(Collections.emptyMap())
             .entrySet().stream()
             .collect(Collectors.toMap(
-                entry -> entry.getKey().trim().toLowerCase(),
-                entry -> entry.getValue(),
-                (a, b) -> a,
+                entry -> ObjectUtils.firstNonNull(entry.getValue().getSourceColumn(), entry.getKey()).trim().toLowerCase(),
+                entry -> Lists.newArrayList(entry.getValue()),
+                (a, b) -> {
+                    a.addAll(b);
+                    return a;
+                },
                 () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)));
 
         Optional<Set<String>> columnsToInclude =
@@ -119,6 +129,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                 (a, b) -> a,
                 () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)));
 
+        Set<String> newColumnNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+
         final Map<String, String> columnsToDuplicate =
             Optional.ofNullable(rules.getColumnsToDuplicate()).orElse(Collections.emptyMap())
             .entrySet().stream()
@@ -128,8 +140,18 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                 (a, b) -> a,
                 () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)));
 
-        columnsToTransform.entrySet().stream()
-                .forEach(entry -> columnsToDuplicate.put(entry.getKey(), entry.getValue().getNewName()));
+        newColumnNames.addAll(columnsToDuplicate.values());
+
+        columnsToTransform.entrySet()
+                .stream()
+                .forEach(entry -> {
+                    entry.getValue().stream().forEach(pipeline -> {
+                        if (pipeline.getNewName() == null) {
+                            throw new IllegalArgumentException("FieldTransformPipeline must have a newName");
+                        }
+                        newColumnNames.add(pipeline.getNewName().trim());
+                    });
+                });
 
 
         // headers respecting insertion order
@@ -162,68 +184,97 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                 "\"" + String.join("\",\"", headersCI) + "\""));
         }
 
-
-        List<String> columnNamesForOutputFile = Streams.concat(
-            applyReplacements(headers, columnsToRename).stream(),
-            columnsToDuplicate.values().stream())
-            .collect(Collectors.toList());
-
-
         TriFunction<String, String, Pseudonymizer, String> pseudonymizationFunction = buildPseudonymizationFunction(rules);
 
-        BiFunction<String, String, String> applyPseudonymizationIfAny = (outputColumnName, value) -> {
-            if (columnsToPseudonymize.contains(outputColumnName.toLowerCase())
-                || columnsToPseudonymizeIfPresent.contains(outputColumnName.toLowerCase())) {
-                return pseudonymizationFunction.apply(value, outputColumnName, pseudonymizer);
-            }
-            return value;
-        };
-
         Map<String, Pseudonymizer> pseudonymizers = new HashMap<>();
-        BiFunction<String, String, String> applyTransformIfAny = (originalColumnName, value) -> {
-          if (columnsToTransform.containsKey(originalColumnName.toLowerCase())) {
-              FieldTransformPipeline pipeline = columnsToTransform.get(originalColumnName.toLowerCase());
-
-              for ( FieldTransform transform : pipeline.getTransforms()) {
-                  if (value != null) {
-                      if (transform instanceof FieldTransform.Filter) {
-                          Pattern pattern = Pattern.compile(((FieldTransform.Filter) transform).getFilter());
-                          Matcher matcher = pattern.matcher(value);
-                          if (matcher.matches()) {
-                              if (matcher.groupCount() > 0) {
-                                  value = matcher.group(1);
-                              }
-                          } else {
-                              value = null;
+        BiFunction<String, FieldTransformPipeline, String> applyTransform = (originalValue, pipeline) -> {
+          String value = originalValue;
+          for ( FieldTransform transform : pipeline.getTransforms()) {
+              if (value != null) {
+                  if (transform instanceof FieldTransform.Filter) {
+                      Pattern pattern = Pattern.compile(((FieldTransform.Filter) transform).getFilter());
+                      Matcher matcher = pattern.matcher(value);
+                      if (matcher.matches()) {
+                          if (matcher.groupCount() > 0) {
+                              value = matcher.group(1);
                           }
+                      } else {
+                          value = null;
                       }
+                  }
 
-                      if (transform instanceof FieldTransform.FormatString) {
-                          value = String.format(((FieldTransform.FormatString) transform).getFormatString(), value);
+                  if (transform instanceof FieldTransform.FormatString) {
+                      value = String.format(((FieldTransform.FormatString) transform).getFormatString(), value);
+                  }
+
+                  if (transform instanceof FieldTransform.PseudonymizeWithScope) {
+                      Pseudonymizer scopedPseudonymizer = pseudonymizer;
+                      if (pseudonymizer.getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
+                          scopedPseudonymizer = pseudonymizers.computeIfAbsent(
+                              ((FieldTransform.PseudonymizeWithScope) transform).getPseudonymizeWithScope(),
+                              scope -> pseudonymizerImplFactory.create(pseudonymizer.getOptions().withDefaultScopeId(scope)));
                       }
+                      value = pseudonymizationFunction.apply(value, pipeline.getNewName(), scopedPseudonymizer);
+                  }
 
-                      if (transform instanceof FieldTransform.PseudonymizeWithScope) {
-                          Pseudonymizer scopedPseudonymizer = pseudonymizer;
-                          if (pseudonymizer.getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
-                              scopedPseudonymizer = pseudonymizers.computeIfAbsent(
-                                  ((FieldTransform.PseudonymizeWithScope) transform).getPseudonymizeWithScope(),
-                                  scope -> pseudonymizerImplFactory.create(pseudonymizer.getOptions().withDefaultScopeId(scope)));
-                          }
-                          value = pseudonymizationFunction.apply(value, pipeline.getNewName(), scopedPseudonymizer);
-                      }
-
-                      if (transform instanceof FieldTransform.JavaRegExpReplace) {
-                          Pattern pattern = Pattern.compile(((FieldTransform.JavaRegExpReplace) transform).getRegExp());
-                          Matcher matcher = pattern.matcher(value);
-                          if (matcher.matches()) {
-                              value = matcher.replaceAll(((FieldTransform.JavaRegExpReplace) transform).getReplaceString());
-                          }
+                  if (transform instanceof FieldTransform.JavaRegExpReplace) {
+                      Pattern pattern = Pattern.compile(((FieldTransform.JavaRegExpReplace) transform).getRegExp());
+                      Matcher matcher = pattern.matcher(value);
+                      if (matcher.matches()) {
+                          value = matcher.replaceAll(((FieldTransform.JavaRegExpReplace) transform).getReplaceString());
                       }
                   }
               }
           }
           return value;
         };
+
+
+        // The table holds the transformation to be applied to each original column to produce the new column
+        // we apply pseudonymization in the renamed columns
+        columnsToRename.forEach((original, renamed) -> {
+            transformTable.put(renamed, (s) -> Optional.of(pseudonymizationFunction.apply(s, original, pseudonymizer)), original);
+        });
+        // we apply pseudonymization in the pseudonymized columns
+        columnsToPseudonymize.forEach(column -> {
+            transformTable.put(column, (s) -> Optional.of(pseudonymizationFunction.apply(s, column, pseudonymizer)), column);
+        });
+        // we apply pseudonymization in the pseudonymized columns, only if present
+        columnsToPseudonymizeIfPresent.forEach(column -> {
+            if (headers.contains(column)) {
+                transformTable.put(column, (s) -> Optional.of(pseudonymizationFunction.apply(s, column, pseudonymizer)), column);
+            }
+        });
+        // duplicated just copy the original value
+        columnsToDuplicate.forEach((original, duplicated) -> transformTable.put(duplicated, Optional::ofNullable, original));
+        // we apply the pipeline defined for each new column
+        columnsToTransform.forEach((sourceColumn, pipelineSpec) -> pipelineSpec.forEach(pipeline -> {
+            transformTable.put(pipeline.getNewName(), (s) -> Optional.ofNullable(applyTransform.apply(s, pipeline)), sourceColumn);
+        }));
+        // all headers that are not in the table are copied as is
+        headers.forEach(header -> {
+            if (!transformTable.rowKeySet().contains(header) && !columnsToRename.containsKey(header)) {
+                // add it as is, no transformation, unless is a rename, we don't want the original
+                transformTable.put(header, Optional::ofNullable, header);
+            }
+        });
+
+        // we need to sort the columns in the order they appear in the file,
+        // leave the headers with the original case (not sure why we would want to do this, but respect tests)
+        // and new transformed columns after, in natural order to be consistent
+        Comparator<String> originalHeadersOrRenamedFirst = Comparator.comparingInt(a -> ObjectUtils.min(
+            records.getHeaderMap().getOrDefault(a, Integer.MAX_VALUE),
+            columnsToRename.entrySet().stream().filter(e -> e.getValue().equalsIgnoreCase(a)).findFirst().map(e -> records.getHeaderMap().getOrDefault(e.getKey(), Integer.MAX_VALUE)).orElse(Integer.MAX_VALUE)));
+        Comparator<String> byColumnName = Comparator.naturalOrder();
+
+        List<String> columnNamesForOutputFile = transformTable.rowKeySet()
+            .stream()
+            .sorted(originalHeadersOrRenamedFirst.thenComparing(byColumnName))
+            .collect(Collectors.toList())
+            .stream()
+            // leave original casing for headers
+            .map( h -> headers.stream().filter( o -> h.equalsIgnoreCase(o)).findFirst().orElse(h))
+            .collect(Collectors.toList());
 
         CSVFormat csvFormat = CSVFormat.Builder.create()
             .setHeader(columnNamesForOutputFile.toArray(new String[0]))
@@ -235,29 +286,30 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
             for (UnmodifiableIterator<List<CSVRecord>> chunkIterator = chunks; chunkIterator.hasNext(); ) {
                 List<CSVRecord> chunk = new ArrayList<>(chunkIterator.next());
-                shuffleImplementation.apply(chunk).forEach(row -> {
-                    Stream<Object> sanitized =
-                        headers.stream() // only iterate on allowed columns (redaction implicit by omission)
-                            .map(column -> Pair.of(columnsToRename.getOrDefault(column, column).toLowerCase(), row.get(column)))
-                            .map(p -> applyPseudonymizationIfAny.apply(p.getKey(), p.getValue()));
 
+                List<String> finalColumnNamesForOutputFile = columnNamesForOutputFile;
+                shuffleImplementation.apply(chunk).forEach(record -> {
 
-                    //add duplicated columns, transformed/pseudonymized as necessary
-                    sanitized = Streams.concat(sanitized, columnsToDuplicate.entrySet().stream()
-                        .map(entry -> {
-                            if (columnsToTransform.containsKey(entry.getKey().toLowerCase())) {
-                                return applyTransformIfAny.apply(entry.getKey(), row.get(entry.getKey()));
-                            } else {
-                                return applyPseudonymizationIfAny.apply(entry.getValue(), row.get(entry.getKey()));
+                    List<Object> sanitized = new ArrayList<>();
+
+                    finalColumnNamesForOutputFile.forEach(h -> {
+                        transformTable.cellSet().stream().filter( c -> c.getRowKey().equalsIgnoreCase(h)).findFirst().ifPresent( c -> {
+                            // if the column is not present, it will be null, skip always
+                            if (record.isMapped(c.getValue())) {
+                                String columnValue = record.get(c.getValue());
+                                sanitized.add(c.getColumnKey().apply(columnValue).orElse(""));
                             }
-                        }));
+                        });
+
+                    });
 
                     try {
-                        printer.printRecord(sanitized.collect(Collectors.toList()));
+                        printer.printRecord(sanitized);
                     } catch (Throwable e) {
                         throw new RuntimeException("Failed to write row", e);
                     }
                 });
+
             }
             writer.flush();
         }

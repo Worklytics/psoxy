@@ -611,11 +611,11 @@ public class BulkDataSanitizerImplTest {
         ColumnarRules rules = yamlMapper.readValue(getClass().getResource("/rules/csv-pipeline-complex-transformations.yaml"), ColumnarRules.class);
         columnarFileSanitizerImpl.setRules(rules);
 
-        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,GITHUB_USERNAME\r\n" +
-            "\"{\"\"hash\"\":\"\"2_hashed\"\"}\",\"{\"\"hash\"\":\"\"bob@workltyics.co_hashed\"\"}\",Sales,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2020-01-01,,\"{\"\"hash\"\":\"\"bob_ghsuffix_hashed\"\"}\"\r\n" +
-            "\"{\"\"hash\"\":\"\"1_hashed\"\"}\",\"{\"\"hash\"\":\"\"alice@worklytics.co_hashed\"\"}\",Engineering,2023-01-06,,2019-11-11,,\"{\"\"hash\"\":\"\"ali_ce_ghsuffix_hashed\"\"}\"\r\n" +
-            "\"{\"\"hash\"\":\"\"4_hashed\"\"}\",,Engineering,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2018-06-03,,\r\n" +
-            "\"{\"\"hash\"\":\"\"3_hashed\"\"}\",\"{\"\"hash\"\":\"\"charles@workltycis.co_hashed\"\"}\",Engineering,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2019-10-06,2022-12-08,\"{\"\"hash\"\":\"\"cha_rles_ghsuffix_hashed\"\"}\"\r\n";
+        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,GITHUB_USERNAME,GITHUB_USERNAME_ALTERNATIVE\r\n" +
+            "\"{\"\"hash\"\":\"\"2_hashed\"\"}\",\"{\"\"hash\"\":\"\"bob@workltyics.co_hashed\"\"}\",Sales,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2020-01-01,,\"{\"\"hash\"\":\"\"bob_ghsuffix_hashed\"\"}\",\"{\"\"hash\"\":\"\"bob_ghsuffix_company_hashed\"\"}\"\r\n" +
+            "\"{\"\"hash\"\":\"\"1_hashed\"\"}\",\"{\"\"hash\"\":\"\"alice@worklytics.co_hashed\"\"}\",Engineering,2023-01-06,,2019-11-11,,\"{\"\"hash\"\":\"\"ali_ce_ghsuffix_hashed\"\"}\",\"{\"\"hash\"\":\"\"ali_ce_ghsuffix_company_hashed\"\"}\"\r\n" +
+            "\"{\"\"hash\"\":\"\"4_hashed\"\"}\",,Engineering,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2018-06-03,,,\r\n" +
+            "\"{\"\"hash\"\":\"\"3_hashed\"\"}\",\"{\"\"hash\"\":\"\"charles@workltycis.co_hashed\"\"}\",Engineering,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2019-10-06,2022-12-08,\"{\"\"hash\"\":\"\"cha_rles_ghsuffix_hashed\"\"}\",\"{\"\"hash\"\":\"\"cha_rles_ghsuffix_company_hashed\"\"}\"\r\n";
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
         columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
