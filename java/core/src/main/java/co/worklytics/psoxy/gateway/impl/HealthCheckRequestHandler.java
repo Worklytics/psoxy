@@ -18,6 +18,7 @@ import org.apache.http.entity.ContentType;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
@@ -36,6 +37,8 @@ public class HealthCheckRequestHandler {
     EnvVarsConfigService envVarsConfigService;
     @Inject
     ConfigService config;
+    @Inject
+    SecretStore secretStore;
     @Inject
     SourceAuthStrategy sourceAuthStrategy;
     @Inject
@@ -64,6 +67,7 @@ public class HealthCheckRequestHandler {
         Set<String> missing =
                 sourceAuthStrategy.getRequiredConfigProperties().stream()
                         .filter(configProperty -> config.getConfigPropertyAsOptional(configProperty).isEmpty())
+                        .filter(configProperty -> secretStore.getConfigPropertyAsOptional(configProperty).isEmpty())
                         .map(ConfigService.ConfigProperty::name)
                         .collect(Collectors.toSet());
 
@@ -81,7 +85,7 @@ public class HealthCheckRequestHandler {
                 .javaSourceCodeVersion(JAVA_SOURCE_CODE_VERSION)
                 .configuredSource(config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
                 .configuredHost(config.getConfigPropertyAsOptional(ProxyConfigProperty.TARGET_HOST).orElse(null))
-                .nonDefaultSalt(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
+                .nonDefaultSalt(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
                 .pseudonymImplementation(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION).orElse(null))
                 .missingConfigProperties(missing);
 
@@ -94,12 +98,24 @@ public class HealthCheckRequestHandler {
         }
 
         try {
+            //collect toMap doesn't like null values; presumably people who see Unix-epoch will
+            // recognize it means unknown/unknowable; in practice, won't be used due to filter atm
+            final Instant PLACEHOLDER_FOR_NULL_LAST_MODIFIED = Instant.ofEpochMilli(0);
             healthCheckResult.configPropertiesLastModified(sourceAuthStrategy.getAllConfigProperties().stream()
-                    .map(param -> Pair.of(param, config.getConfigPropertyWithMetadata(param)))
+                    .map(param -> {
+                        Optional<ConfigService.ConfigValueWithMetadata> fromConfig = config.getConfigPropertyWithMetadata(param);
+                        if (fromConfig.isEmpty()) {
+                            fromConfig = secretStore.getConfigPropertyWithMetadata(param);
+                        }
+
+                        return Pair.of(param, fromConfig);
+                    })
+                    .filter(p -> p.getValue().isPresent()) // only values found
+                    .filter(p -> p.getValue().get().getLastModifiedDate().isPresent()) // only values with last modified date, as others pointless
                     .collect(Collectors.toMap(p -> p.getKey().name(),
                             p -> p.getValue()
-                                    .map(metadata -> metadata.getLastModifiedDate().orElse(null))
-                                    .orElse(null))));
+                                    .map(metadata -> metadata.getLastModifiedDate().orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED))
+                                .orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED))));
         } catch (Throwable e) {
             logInDev("Failed to add config debug info to health check", e);
         }

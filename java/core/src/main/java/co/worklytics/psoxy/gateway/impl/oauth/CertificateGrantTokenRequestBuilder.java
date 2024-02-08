@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.impl.oauth;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.UrlEncodedContent;
@@ -38,6 +39,8 @@ public class CertificateGrantTokenRequestBuilder
 
     @Inject
     ConfigService config;
+    @Inject
+    SecretStore secretStore;
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
@@ -49,9 +52,10 @@ public class CertificateGrantTokenRequestBuilder
 
     @Override
     public void addHeaders(HttpHeaders httpHeaders) {
-        String oauthClientId = config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID);
+        String oauthClientId =
+            secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID);
         String tokenEndpoint =
-                config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
+            config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
 
         httpHeaders.setAuthorization("Bearer " + buildJwtAssertion(oauthClientId, tokenEndpoint));
     }

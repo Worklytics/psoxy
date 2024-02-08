@@ -3,6 +3,7 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
@@ -26,7 +27,6 @@ import java.util.Base64;
 import static co.worklytics.test.TestModules.withMockEncryptionKey;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class PseudonymizedIdentityTest {
@@ -35,6 +35,7 @@ class PseudonymizedIdentityTest {
     @Component(modules = {
             PsoxyModule.class,
             MockModules.ForConfigService.class,
+            MockModules.ForSecretStore.class,
             MockModules.ForRules.class,
     })
     public interface Container {
@@ -46,13 +47,14 @@ class PseudonymizedIdentityTest {
         PseudonymizedIdentityTest.Container container = DaggerPseudonymizedIdentityTest_Container.create();
         container.inject(this);
 
-        withMockEncryptionKey(config);
+        withMockEncryptionKey(secretStore);
         when(config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
             .thenReturn("gmail");
     }
 
 
     @Inject ConfigService config;
+    @Inject SecretStore secretStore;
     @Inject Pseudonymizer pseudonymizer;
     @Inject PseudonymizerImplFactory pseudonymizerImplFactory;
 

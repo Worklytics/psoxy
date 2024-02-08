@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
 import com.bettercloud.vault.SslConfig;
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
@@ -24,7 +25,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 
 @Log
-public class VaultConfigService implements ConfigService {
+public class VaultConfigService implements SecretStore {
 
     //these config values must be provided as ENV_VARs to use vault as secret store
     public enum VaultConfigProperty implements ConfigProperty {
@@ -94,10 +95,12 @@ public class VaultConfigService implements ConfigService {
     }
 
 
-
-
+    /**
+     * initializes for use
+     * @return itself, for chaining
+     */
     @SneakyThrows
-    public void init() {
+    public VaultConfigService init() {
         LookupResponse initialAuth = this.vault.auth().lookupSelf();
 
         log.info("Token: " + (new ObjectMapper()).writeValueAsString(initialAuth));
@@ -117,12 +120,7 @@ public class VaultConfigService implements ConfigService {
                 log.log(Level.WARNING, "Failed to renew Vault token. ", e);
             }
         }
-    }
-
-
-    @Override
-    public boolean supportsWriting() {
-        return true;
+        return this;
     }
 
     @SneakyThrows

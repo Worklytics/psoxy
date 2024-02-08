@@ -2,6 +2,7 @@ package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.SecretStore;
 import dagger.Module;
 import dagger.Provides;
 import lombok.SneakyThrows;
@@ -19,6 +20,7 @@ import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -46,11 +48,10 @@ public class TestModules {
         }
     }
 
-
     //TODO: probably better to just inject filled AESReversibleEncryptionStrategy, rather than
     // mocking ConfigService sufficiently such that regular provider can build one
     @SneakyThrows
-    public static void withMockEncryptionKey(ConfigService config) {
+    public static void withMockEncryptionKey(SecretStore secretStore) {
 
         //SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
         //KeySpec spec = new PBEKeySpec("secret".toCharArray(), "salt".getBytes(), 65536, 256);
@@ -70,11 +71,13 @@ public class TestModules {
 
         //String key = new String(Base64.getEncoder().encode(tmp.getEncoded()));
 
-        when(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY))
+        when(secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY)))
             .thenReturn(Optional.of("secret"));
-        when(config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT))
+        when(secretStore.getConfigPropertyOrError(eq(ProxyConfigProperty.PSOXY_SALT)))
             .thenReturn("salt");
-        when(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT))
+        when(secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
             .thenReturn(Optional.of("salt"));
+       // when(secretStore.getConfigPropertyAsOptional(eq(roxyConfigProperty.PSOXY_SALT)))
+       //     .thenReturn(Optional.of("salt"));
     }
 }

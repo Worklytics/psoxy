@@ -1,6 +1,8 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.WritableConfigService;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.NonNull;
@@ -20,7 +22,7 @@ import java.util.Optional;
  */
 @Builder
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class CompositeConfigService implements ConfigService {
+public class CompositeConfigService implements ConfigService, SecretStore {
 
     //open to feedback on these names;
     @NonNull
@@ -28,23 +30,6 @@ public class CompositeConfigService implements ConfigService {
     @NonNull
     final ConfigService fallback;
 
-    @Override
-    public boolean supportsWriting() {
-        return preferred.supportsWriting() || fallback.supportsWriting();
-    }
-
-    @Override
-    public void putConfigProperty(ConfigProperty property, String value) {
-        //TODO: this is ill-defined and probably a bad idea; should revisit (eliminating this config
-        // service entirely; or just moving things that need to be written out of it entirely)
-
-        if (preferred.supportsWriting()) {
-            preferred.putConfigProperty(property, value);
-        } else if (fallback.supportsWriting()) {
-            //not point to writing in both
-            fallback.putConfigProperty(property, value);
-        }
-    }
 
     @Override
     public String getConfigPropertyOrError(ConfigProperty property) {
@@ -64,5 +49,14 @@ public class CompositeConfigService implements ConfigService {
     public Optional<ConfigValueWithMetadata> getConfigPropertyWithMetadata(ConfigProperty configProperty) {
         return preferred.getConfigPropertyWithMetadata(configProperty)
             .or(() -> fallback.getConfigPropertyWithMetadata(configProperty));
+    }
+
+    @Override
+    public void putConfigProperty(ConfigProperty property, String value) {
+        if (preferred instanceof WritableConfigService) {
+            ((WritableConfigService) preferred).putConfigProperty(property, value);
+        } else {
+            throw new UnsupportedOperationException("preferred ConfigService is not writable");
+        }
     }
 }

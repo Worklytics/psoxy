@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.RequiresConfiguration;
+import co.worklytics.psoxy.gateway.SecretStore;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.UrlEncodedContent;
@@ -29,6 +30,8 @@ public class RefreshTokenTokenRequestBuilder
 
     @Inject
     ConfigService config;
+    @Inject
+    SecretStore secretStore;
 
     @Getter(onMethod_ = @Override)
     private final String grantType = "refresh_token";
@@ -45,9 +48,9 @@ public class RefreshTokenTokenRequestBuilder
         Map<String, String> data = new HashMap<>();
 
         data.put("grant_type", getGrantType());
-        data.put("refresh_token", config.getConfigPropertyOrError(ConfigProperty.REFRESH_TOKEN));
-        data.put("client_id", config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
-        data.put("client_secret", config.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET));
+        data.put("refresh_token", secretStore.getConfigPropertyOrError(ConfigProperty.REFRESH_TOKEN));
+        data.put("client_id", secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
+        data.put("client_secret", secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET));
 
         return new UrlEncodedContent(data);
 

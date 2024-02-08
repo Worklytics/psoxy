@@ -1,6 +1,7 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.test.MockModules;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
@@ -29,6 +30,8 @@ class PseudonymizerImplTest {
     @Inject
     ConfigService config;
     @Inject
+    SecretStore secretStore;
+    @Inject
     PseudonymizerImplFactory pseudonymizerImplFactory;
 
 
@@ -39,6 +42,7 @@ class PseudonymizerImplTest {
     @Component(modules = {
         PsoxyModule.class,
         MockModules.ForConfigService.class,
+        MockModules.ForSecretStore.class
     })
     public interface Container {
         void inject(PseudonymizerImplTest test);
@@ -55,7 +59,7 @@ class PseudonymizerImplTest {
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build());
 
-        withMockEncryptionKey(config);
+        withMockEncryptionKey(secretStore);
     }
 
     @ValueSource(strings = {

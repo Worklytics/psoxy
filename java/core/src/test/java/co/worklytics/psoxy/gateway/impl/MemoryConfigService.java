@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.gateway.impl;
 
-import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.WritableConfigService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -12,14 +12,9 @@ import java.util.Optional;
  *
  */
 @RequiredArgsConstructor
-public class MemoryConfigService implements ConfigService {
+public class MemoryConfigService implements WritableConfigService {
 
     final Map<String, String> map;
-
-    @Override
-    public boolean supportsWriting() {
-        return true;
-    }
 
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {

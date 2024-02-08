@@ -34,7 +34,6 @@ public class GitHubEnterpriseServerTests extends JavaRulesTestBaseCase {
         this.assertSha("7869e465607b7a00b4bd75a832a9ed1f811ce7f2");
     }
 
-    @SneakyThrows
     @Test
     @Override
     public void yamlLength() {

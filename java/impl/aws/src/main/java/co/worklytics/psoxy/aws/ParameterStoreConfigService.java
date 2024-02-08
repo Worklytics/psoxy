@@ -2,6 +2,7 @@ package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
+import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.google.common.annotations.VisibleForTesting;
@@ -35,7 +36,7 @@ import java.util.logging.Level;
  *
  */
 @Log
-public class ParameterStoreConfigService implements ConfigService, LockService {
+public class ParameterStoreConfigService implements SecretStore, LockService {
 
 
     /**
@@ -68,12 +69,6 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
             namespace = "/" + namespace;
         }
         this.namespace = namespace;
-    }
-
-
-    @Override
-    public boolean supportsWriting() {
-        return true;
     }
 
     @Override
