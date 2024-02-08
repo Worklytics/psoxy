@@ -18,6 +18,7 @@ import org.apache.http.entity.ContentType;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
@@ -96,6 +97,9 @@ public class HealthCheckRequestHandler {
         }
 
         try {
+            //collect toMap doesn't like null values; presumably people who see Unix-epoch will
+            // recognize it means unknown/unknwoablw.
+            final Instant PLACEHOLDER_FOR_NULL_LAST_MODIFIED = Instant.ofEpochMilli(0);
             healthCheckResult.configPropertiesLastModified(sourceAuthStrategy.getAllConfigProperties().stream()
                     .map(param -> {
                         Optional<ConfigService.ConfigValueWithMetadata> fromConfig = config.getConfigPropertyWithMetadata(param);
@@ -105,10 +109,11 @@ public class HealthCheckRequestHandler {
 
                         return Pair.of(param, fromConfig);
                     })
+                    .filter(p -> p.getValue().isPresent()) // only values found
                     .collect(Collectors.toMap(p -> p.getKey().name(),
                             p -> p.getValue()
-                                    .map(metadata -> metadata.getLastModifiedDate().orElse(null))
-                                    .orElse(null))));
+                                    .map(metadata -> metadata.getLastModifiedDate().orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED))
+                                    .orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED))));
         } catch (Throwable e) {
             logInDev("Failed to add config debug info to health check", e);
         }
