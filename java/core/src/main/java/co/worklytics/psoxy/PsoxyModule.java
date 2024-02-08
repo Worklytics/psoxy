@@ -56,13 +56,17 @@ public class PsoxyModule {
     @Singleton
         //should be thread-safe
     ObjectMapper providesObjectMapper() {
-        return new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        return objectMapper;
     }
 
     @Provides @Singleton
     @Named("ForYAML")
     ObjectMapper providesYAMLObjectMapper() {
-        return new ObjectMapper(new YAMLFactory());
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        mapper.registerModule(new JavaTimeModule());
+        return mapper;
     }
 
     @Provides
