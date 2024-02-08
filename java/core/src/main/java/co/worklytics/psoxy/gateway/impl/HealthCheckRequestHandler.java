@@ -115,8 +115,7 @@ public class HealthCheckRequestHandler {
                     .collect(Collectors.toMap(p -> p.getKey().name(),
                             p -> p.getValue()
                                     .map(metadata -> metadata.getLastModifiedDate().orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED))
-                                .orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED)));
-            );
+                                .orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED))));
         } catch (Throwable e) {
             logInDev("Failed to add config debug info to health check", e);
         }
