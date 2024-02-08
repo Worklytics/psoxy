@@ -95,10 +95,12 @@ public class VaultConfigService implements SecretStore {
     }
 
 
-
-
+    /**
+     * initializes for use
+     * @return itself, for chaining
+     */
     @SneakyThrows
-    public void init() {
+    public VaultConfigService init() {
         LookupResponse initialAuth = this.vault.auth().lookupSelf();
 
         log.info("Token: " + (new ObjectMapper()).writeValueAsString(initialAuth));
@@ -118,6 +120,7 @@ public class VaultConfigService implements SecretStore {
                 log.log(Level.WARNING, "Failed to renew Vault token. ", e);
             }
         }
+        return this;
     }
 
     @SneakyThrows

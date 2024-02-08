@@ -1,6 +1,5 @@
 package co.worklytics.psoxy.aws;
 
-import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.common.annotations.VisibleForTesting;
@@ -20,13 +19,13 @@ import java.util.function.Function;
 import java.util.logging.Level;
 
 /**
- * implementation of ConfigService backed by AWS Secrets Manager
+ * implementation of SecretStore backed by AWS Secrets Manager
  *
  * @see co.worklytics.psoxy.aws.ParameterStoreConfigService - model for this
  *
  */
 @Log
-public class SecretsManagerConfigService implements SecretStore {
+public class SecretsManagerSecretStore implements SecretStore {
 
     @Getter(onMethod_ = @VisibleForTesting)
     final String namespace;
@@ -38,7 +37,7 @@ public class SecretsManagerConfigService implements SecretStore {
     EnvVarsConfigService envVarsConfig;
 
     @AssistedInject
-    SecretsManagerConfigService(@Assisted String namespace) {
+    SecretsManagerSecretStore(@Assisted String namespace) {
         //SSM parameter stores must be "fully qualified" if contain a "/"
         //q: is this true for Secrets Manager paths?
         if (StringUtils.isNotBlank(namespace) && namespace.contains("/") && !namespace.startsWith("/")) {

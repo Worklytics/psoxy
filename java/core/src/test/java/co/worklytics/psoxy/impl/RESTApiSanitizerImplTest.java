@@ -4,7 +4,6 @@ import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.test.TestModules;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
@@ -75,7 +74,8 @@ class RESTApiSanitizerImplTest {
     @Component(modules = {
         PsoxyModule.class,
         ForConfigService.class,
-        TestModules.ForSecretStore.class,
+        MockModules.ForSecretStore.class,
+        //TestModules.ForSecretStore.class,
     })
     public interface Container {
         void inject(RESTApiSanitizerImplTest test);
@@ -107,10 +107,7 @@ class RESTApiSanitizerImplTest {
             .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
 
-
         sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"), pseudonymizer);
-
-        withMockEncryptionKey(secretStore);
     }
 
     @SneakyThrows

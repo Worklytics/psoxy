@@ -8,6 +8,13 @@ import dagger.assisted.AssistedFactory;
 @AssistedFactory
 public interface VaultConfigServiceFactory {
 
+    /**
+     * creates a new VaultConfigService instance;
+     * @see VaultConfigServiceFactory::createInitialized, which is preferred for others to use
+     *
+     * @param path
+     * @return
+     */
     VaultConfigService create(String path);
 
     default boolean isVaultConfigured(EnvVarsConfigService envVarsConfigService) {
@@ -18,16 +25,24 @@ public interface VaultConfigServiceFactory {
             .isPresent();
     }
 
-    static String pathForSharedVault(HostEnvironment hostEnvironment, EnvVarsConfigService envVarsConfigService) {
+    default String pathForSharedVault(HostEnvironment hostEnvironment, EnvVarsConfigService envVarsConfigService) {
         return envVarsConfigService
             .getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
             .orElse("secret/PSOXY_GLOBAL/");
     }
 
-    static String pathForInstanceVault(HostEnvironment hostEnvironment, EnvVarsConfigService envVarsConfigService) {
+    default String pathForInstanceVault(HostEnvironment hostEnvironment, EnvVarsConfigService envVarsConfigService) {
+        if (!isVaultConfigured(envVarsConfigService)) {
+            throw new IllegalStateException("Vault is not configured, but HASHICORP_VAULT secret store implementation was requested");
+        }
+
         String instanceIdAsPathFragment = hostEnvironment.getInstanceId().toUpperCase().replace("-", "_");
         return envVarsConfigService
             .getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
             .orElse("secret/PSOXY_LOCAL/" + instanceIdAsPathFragment + "/");
+    }
+
+    default VaultConfigService createInitialized(String path) {
+        return this.create(path).init();
     }
 }

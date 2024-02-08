@@ -48,18 +48,6 @@ public class TestModules {
         }
     }
 
-    @Module
-    public interface ForSecretStore {
-
-        @Provides @Singleton
-        static SecretStore secretStore() {
-            SecretStore secretStore = mock(SecretStore.class);
-            withMockEncryptionKey(secretStore);
-            return secretStore;
-        }
-    }
-
-
     //TODO: probably better to just inject filled AESReversibleEncryptionStrategy, rather than
     // mocking ConfigService sufficiently such that regular provider can build one
     @SneakyThrows
@@ -83,9 +71,9 @@ public class TestModules {
 
         //String key = new String(Base64.getEncoder().encode(tmp.getEncoded()));
 
-        when(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY))
+        when(secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY)))
             .thenReturn(Optional.of("secret"));
-        when(secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT))
+        when(secretStore.getConfigPropertyOrError(eq(ProxyConfigProperty.PSOXY_SALT)))
             .thenReturn("salt");
         when(secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
             .thenReturn(Optional.of("salt"));
