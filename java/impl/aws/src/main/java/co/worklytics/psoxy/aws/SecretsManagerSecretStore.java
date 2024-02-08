@@ -74,6 +74,7 @@ public class SecretsManagerSecretStore implements SecretStore {
     @Override
     public String getConfigPropertyOrError(ConfigProperty property) {
         return getConfigPropertyAsOptional(property)
+            //q: would it be better to have this throw the REAL error
             .orElseThrow(() -> new NoSuchElementException("Proxy misconfigured; no value for " + property));
     }
 
@@ -103,7 +104,14 @@ public class SecretsManagerSecretStore implements SecretStore {
             }
             return Optional.empty();
         } catch (SecretsManagerException e) {
-            log.log(Level.SEVERE, "failed to read secret: " + id, e);
+            //permissions error hits this case ... could still be expected for optional secrets, as
+            // explicit IAM grant made for each one that exists
+            //eg
+            // software.amazon.awssdk.services.secretsmanager.model.SecretsManagerException:
+            // User: arn:aws:sts::{{SOME_ACCOUNT_ID}}}:assumed-role/{{LAMBDAS_EXEC_ROLE}}/{{SESSION_NAME}} is not authorized to perform: secretsmanager:GetSecretValue on resource: {{SECRET_ID}} because no identity-based policy allows the secretsmanager:GetSecretValue action (Service: SecretsManager, Status Code: 400, Request ID: ---, Extended Request ID: null)
+            if (envVarsConfig.isDevelopment()) {
+                log.log(Level.WARNING, "failed to read secret " + id, e);
+            }
             return Optional.empty();
         } catch (AwsServiceException e) {
             if (e.isThrottlingException()) {
