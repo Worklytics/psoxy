@@ -67,6 +67,7 @@ public class HealthCheckRequestHandler {
         Set<String> missing =
                 sourceAuthStrategy.getRequiredConfigProperties().stream()
                         .filter(configProperty -> config.getConfigPropertyAsOptional(configProperty).isEmpty())
+                        .filter(configProperty -> secretStore.getConfigPropertyAsOptional(configProperty).isEmpty())
                         .map(ConfigService.ConfigProperty::name)
                         .collect(Collectors.toSet());
 
@@ -98,7 +99,7 @@ public class HealthCheckRequestHandler {
 
         try {
             //collect toMap doesn't like null values; presumably people who see Unix-epoch will
-            // recognize it means unknown/unknwoablw.
+            // recognize it means unknown/unknowable; in practice, won't be used due to filter atm
             final Instant PLACEHOLDER_FOR_NULL_LAST_MODIFIED = Instant.ofEpochMilli(0);
             healthCheckResult.configPropertiesLastModified(sourceAuthStrategy.getAllConfigProperties().stream()
                     .map(param -> {
@@ -110,10 +111,12 @@ public class HealthCheckRequestHandler {
                         return Pair.of(param, fromConfig);
                     })
                     .filter(p -> p.getValue().isPresent()) // only values found
+                    .filter(p -> p.getValue().get().getLastModifiedDate().isPresent()) // only values with last modified date, as others pointless
                     .collect(Collectors.toMap(p -> p.getKey().name(),
                             p -> p.getValue()
                                     .map(metadata -> metadata.getLastModifiedDate().orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED))
-                                    .orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED))));
+                                .orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED)));
+            );
         } catch (Throwable e) {
             logInDev("Failed to add config debug info to health check", e);
         }
