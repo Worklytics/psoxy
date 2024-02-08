@@ -107,6 +107,9 @@ public interface FieldTransform {
         Config javaRegExpReplace;
 
         @JsonIgnore
+        private Pattern compiledPattern;
+
+        @JsonIgnore
         public String getRegExp() {
             return javaRegExpReplace.getRegExp();
         }
@@ -116,13 +119,20 @@ public interface FieldTransform {
             return javaRegExpReplace.getReplace();
         }
 
+        @JsonIgnore
+        public synchronized Pattern getCompiledPattern() {
+            if (compiledPattern == null) {
+                compiledPattern = Pattern.compile(getRegExp());
+            }
+            return compiledPattern;
+        }
+
         @Override
         public boolean isValid() {
-            String regExp = getRegExp();
             try {
-                Pattern pattern = Pattern.compile(regExp);
+                getCompiledPattern();
             } catch (PatternSyntaxException e) {
-                log.warning("invalid regex: " + regExp);
+                log.warning("invalid regex: " + getRegExp());
                 return false;
             }
             return true;
@@ -168,12 +178,22 @@ public interface FieldTransform {
         @NonNull
         String filter;
 
+        @JsonIgnore
+        private Pattern compiledPattern;
+        @JsonIgnore
+        public synchronized Pattern getCompiledPattern() {
+            if (compiledPattern == null) {
+                compiledPattern = Pattern.compile(getFilter());
+            }
+            return compiledPattern;
+        }
+
         @Override
         public boolean isValid() {
             try {
-                Pattern pattern = Pattern.compile(filter);
+                getCompiledPattern();
             } catch (PatternSyntaxException e) {
-                log.warning("invalid regex: " + filter);
+                log.warning("invalid regex: " + getFilter());
                 return false;
             }
 

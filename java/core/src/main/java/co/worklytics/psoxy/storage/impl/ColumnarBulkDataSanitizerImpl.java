@@ -194,8 +194,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
           for ( FieldTransform transform : pipeline.getTransforms()) {
               if (value != null) {
                   if (transform instanceof FieldTransform.Filter) {
-                      Pattern pattern = Pattern.compile(((FieldTransform.Filter) transform).getFilter());
-                      Matcher matcher = pattern.matcher(value);
+                      Matcher matcher = ((FieldTransform.Filter) transform).getCompiledPattern().matcher(value);
                       if (matcher.matches()) {
                           if (matcher.groupCount() > 0) {
                               value = matcher.group(1);
@@ -220,8 +219,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                   }
 
                   if (transform instanceof FieldTransform.JavaRegExpReplace) {
-                      Pattern pattern = Pattern.compile(((FieldTransform.JavaRegExpReplace) transform).getRegExp());
-                      Matcher matcher = pattern.matcher(value);
+                      Matcher matcher = ((FieldTransform.JavaRegExpReplace) transform).getCompiledPattern().matcher(value);
                       if (matcher.matches()) {
                           value = matcher.replaceAll(((FieldTransform.JavaRegExpReplace) transform).getReplaceString());
                       }
