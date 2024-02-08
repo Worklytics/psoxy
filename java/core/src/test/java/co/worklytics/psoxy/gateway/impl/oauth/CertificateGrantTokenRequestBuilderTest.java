@@ -57,6 +57,8 @@ class CertificateGrantTokenRequestBuilderTest {
             "-----END PRIVATE KEY-----";
 
     @Inject
+    ConfigService configService;
+    @Inject
     SecretStore secretStore;
 
     @Inject
@@ -91,7 +93,7 @@ class CertificateGrantTokenRequestBuilderTest {
 
         when(secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID))
                 .thenReturn(clientId);
-        when(secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT))
+        when(configService.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT))
                 .thenReturn(tokenEndpoint);
     }
 
