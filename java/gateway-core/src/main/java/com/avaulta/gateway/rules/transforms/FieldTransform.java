@@ -106,10 +106,6 @@ public interface FieldTransform {
 
         Config javaRegExpReplace;
 
-        public static final String SEPARATOR = "____";
-
-
-
         @JsonIgnore
         public String getRegExp() {
             return javaRegExpReplace.getRegExp();

@@ -3,14 +3,14 @@ package co.worklytics.psoxy.storage.impl;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.PseudonymizerImplFactory;
+import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.ColumnarRules;
-import co.worklytics.psoxy.storage.BulkDataSanitizer;
-import com.avaulta.gateway.rules.transforms.FieldTransformPipeline;
 import com.avaulta.gateway.rules.transforms.FieldTransform;
+import com.avaulta.gateway.rules.transforms.FieldTransformPipeline;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
@@ -18,7 +18,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 import lombok.extern.java.Log;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -27,19 +30,18 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.TriFunction;
-import org.apache.commons.lang3.tuple.Pair;
 
 import javax.inject.Inject;
-import java.io.*;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Handles a CSV file to apply the rules pseudonymize the content.
@@ -286,12 +288,12 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             .setHeader(columnNamesForOutputFile.toArray(new String[0]))
             .build();
 
-        // immutable map uses insertion order
         // create an empty record to fill with the transformed values, ensuring all rows have
         // the same columns
-        ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-        columnNamesForOutputFile.forEach(h -> builder.put(h, ""));
-        ImmutableMap<String,String> emptyRow = builder.build();
+        // linked hash map: need predictable iteration order and null values
+
+        LinkedHashMap<String, String> newRecord = new LinkedHashMap<>();
+        columnNamesForOutputFile.forEach(h -> newRecord.put(h, null));
 
         try (CSVPrinter printer = new CSVPrinter(writer, csvFormat)) {
             UnmodifiableIterator<List<CSVRecord>> chunks =
@@ -302,7 +304,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
                 shuffleImplementation.apply(chunk).forEach(record -> {
 
-                    LinkedHashMap<String, String> newRecord = new LinkedHashMap<>(emptyRow);
+                    // clean up the record prior to use
+                    newRecord.replaceAll((k, v) -> null);
                     newRecord.keySet().forEach(h -> {
                         transformTable
                             .row(h)
