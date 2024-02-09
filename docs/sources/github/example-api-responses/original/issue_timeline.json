@@ -5,8 +5,8 @@
     "url": "https://api.github.com/repos/khnum-heket/test2/git/commits/66249c83914e7ad8e9976eededda069b936ee426",
     "html_url": "https://github.com/khnum-heket/test2/commit/66249c83914e7ad8e9976eededda069b936ee426",
     "author": {
-      "name": "Octocat",
-      "email": "octocat@some-domain.com",
+      "name": "AuthorUser",
+      "email": "authorUser@some-domain.com",
       "date": "2023-09-18T10:46:54Z"
     },
     "committer": {
