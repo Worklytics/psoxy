@@ -781,10 +781,6 @@ endpoints:
           - "$..files"
           - "$..signature"
           - "$..payload"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.commit..email"
-        encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..['author','committer'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"

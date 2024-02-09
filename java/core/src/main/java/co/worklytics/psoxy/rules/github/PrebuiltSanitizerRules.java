@@ -457,9 +457,6 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..signature")
                     .jsonPath("$..payload")
                     .build())
-            .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$.commit..email")
-                    .build())
             .transforms(generateUserTransformations("..", Arrays.asList("author", "committer")))
             .build();
 
