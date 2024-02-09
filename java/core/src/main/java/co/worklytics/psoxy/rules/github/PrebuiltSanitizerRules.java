@@ -282,9 +282,6 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..payload")
                     .jsonPath("$..dismissalMessage")
                     .build())
-            .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$..email")
-                    .build())
             .transforms(generateUserTransformations("..", Arrays.asList(
                     // Owner can be a user or an organization user
                     "owner",
