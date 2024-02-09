@@ -59,7 +59,7 @@ public interface GcpModule {
     }
 
     @Provides @Singleton
-    static SecretStore secretStore(@Named("instance") SecretManagerConfigService instanceConfigService,
+    static SecretStore secretStore(@Named("Native") SecretStore nativeSecretStore,
                                    HostEnvironment hostEnvironment,
                                    VaultConfigServiceFactory vaultConfigServiceFactory,
                                    EnvVarsConfigService envVarsConfigService) {
@@ -77,7 +77,7 @@ public interface GcpModule {
                 .fallback(sharedVault)
                 .build();
         } else {
-            return instanceConfigService;
+            return nativeSecretStore;
         }
     }
 
