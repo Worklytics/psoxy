@@ -364,7 +364,6 @@ public class GitHubEnterpriseServerTests extends JavaRulesTestBaseCase {
 
         Collection<String> PII = Arrays.asList(
                 "9919",
-                "octocat",
                 "67656570",
                 "94867353"
         );
@@ -374,6 +373,7 @@ public class GitHubEnterpriseServerTests extends JavaRulesTestBaseCase {
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "octocat");
+        assertPseudonymized(sanitized, "octocat@some-domain.com");
         assertPseudonymized(sanitized, "9919");
         assertPseudonymized(sanitized, "67656570");
         assertPseudonymized(sanitized, "94867353");
