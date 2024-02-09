@@ -7,11 +7,11 @@
   "commit":{
     "url":"https://api.github.com/repos/org/Hello-World/git/commits/6dcb09b5b57875f334f61aebed695e2e4193db5e",
     "author":{
-      "email":"{\"scope\":\"github\",\"hash\":\"T-sBXXi6k0bWw-zNtcdQenxAuqN5C51_ehZ5lJDWeqw\"}",
+      "email":"{\"scope\":\"email\",\"domain\":\"github.com\",\"hash\":\"39uRnKxs0PYIueRoGGc7fyyp-hSTtamEhvB6YywFNVM\"}",
       "date":"2011-04-14T16:00:49Z"
     },
     "committer":{
-      "email":"{\"scope\":\"github\",\"hash\":\"T-sBXXi6k0bWw-zNtcdQenxAuqN5C51_ehZ5lJDWeqw\"}",
+      "email":"{\"scope\":\"email\",\"domain\":\"github.com\",\"hash\":\"39uRnKxs0PYIueRoGGc7fyyp-hSTtamEhvB6YywFNVM\"}",
       "date":"2011-04-14T16:00:49Z"
     },
     "tree":{
