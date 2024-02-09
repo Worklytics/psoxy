@@ -362,9 +362,11 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
         Collection<String> PII = Arrays.asList(
                 "9919",
-                "octocat",
                 "67656570",
-                "94867353"
+                "94867353",
+                "octocat",
+                "authorUser@some-domain.com",
+                "noreply@github.com"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -372,6 +374,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "octocat");
+        assertPseudonymized(sanitized, "authorUser@some-domain.com");
+        assertPseudonymized(sanitized, "noreply@github.com");
         assertPseudonymized(sanitized, "9919");
         assertPseudonymized(sanitized, "67656570");
         assertPseudonymized(sanitized, "94867353");
