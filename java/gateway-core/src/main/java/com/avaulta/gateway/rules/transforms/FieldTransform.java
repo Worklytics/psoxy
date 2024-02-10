@@ -31,6 +31,7 @@ public interface FieldTransform {
         return Filter.builder().filter(filter).build();
     }
 
+    @Deprecated // only relevant for legacy case
     static FieldTransform pseudonymizeWithScope(String scope) {
         return PseudonymizeWithScope.builder().pseudonymizeWithScope(scope).build();
     }

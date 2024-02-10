@@ -53,6 +53,12 @@ variable "path_to_instance_ssm_parameters" {
   default     = null
 }
 
+variable "path_to_shared_ssm_parameters" {
+  type        = string
+  description = "path to shared global config parameters in SSM Parameter Store"
+  default     = ""
+}
+
 variable "function_env_kms_key_arn" {
   type        = string
   description = "AWS KMS key ARN to use to encrypt lambda's environment. NOTE: Terraform must be authenticated as an AWS principal authorized to encrypt/decrypt with this key."
@@ -180,6 +186,12 @@ variable "global_parameter_arns" {
   default     = []
 }
 
+variable "global_secrets_manager_secret_arns" {
+  type        = map(string)
+  description = "Secrets Manager Secrets ARNs to expose to proxy instance, expected to contain global shared secrets, like salt or encryption keys"
+  default     = {}
+}
+
 variable "memory_size_mb" {
   # See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#memory_size
   type        = number
@@ -207,6 +219,12 @@ variable "vpc_config" {
   })
   description = "**alpha** VPC configuration for lambda; if not provided, lambda will not be deployed in a VPC. see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#vpc_config"
   default     = null
+}
+
+variable "secrets_store_implementation" {
+  type        = string
+  description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
+  default     = "aws_ssm_parameter_store"
 }
 
 variable "example_file" {

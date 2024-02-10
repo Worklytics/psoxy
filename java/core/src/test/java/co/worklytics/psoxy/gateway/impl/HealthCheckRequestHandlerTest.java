@@ -28,8 +28,10 @@ public class HealthCheckRequestHandlerTest {
     @Component(modules = {
             PsoxyModule.class,
             MockModules.ForConfigService.class,
+            MockModules.ForSecretStore.class,
             MockModules.ForRules.class,
             MockModules.ForSourceAuthStrategySet.class,
+
     })
     public interface Container {
         void inject(HealthCheckRequestHandlerTest test);
@@ -40,7 +42,7 @@ public class HealthCheckRequestHandlerTest {
         HealthCheckRequestHandlerTest.Container container = DaggerHealthCheckRequestHandlerTest_Container.create();
         container.inject(this);
 
-        when(handler.config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
+        when(handler.secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
                 .thenReturn(Optional.of("salt"));
 
         when(handler.config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE))

@@ -53,6 +53,12 @@ variable "aws_ssm_param_root_path" {
   }
 }
 
+variable "secrets_store_implementation" {
+  type        = string
+  description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
+  default     = "aws_ssm_parameter_store"
+}
+
 variable "project_aws_kms_key_arn" {
   type        = string
   description = "AWS KMS key ARN to use to encrypt all AWS components created by this Terraform configuration that support CMEKs. NOTE: Terraform must be authenticated as an AWS principal authorized to encrypt/decrypt with this key."

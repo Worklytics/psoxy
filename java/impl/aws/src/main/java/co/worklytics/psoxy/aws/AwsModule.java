@@ -1,13 +1,7 @@
 package co.worklytics.psoxy.aws;
 
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.HostEnvironment;
-import co.worklytics.psoxy.gateway.LockService;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.impl.CachingConfigServiceDecorator;
-import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
-import co.worklytics.psoxy.gateway.impl.VaultConfigService;
+import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
@@ -26,6 +20,7 @@ import software.amazon.awssdk.core.retry.RetryPolicy;
 import software.amazon.awssdk.core.retry.backoff.BackoffStrategy;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cognitoidentity.CognitoIdentityClient;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
 import javax.inject.Named;
@@ -66,7 +61,14 @@ public interface AwsModule {
                 .build();
     }
 
-    static String asParameterStoreNamespace(String functionName) {
+    /**
+     * used to prefix function's "local" config in a way that is compliant with AWS roles for
+     * SSM parameter paths and Secrets Manager secret names
+     *
+     * @param functionName
+     * @return function name formated for use as AWS ssm parameter path or secrets manager secret prefix
+     */
+    static String asAwsCompliantNamespace(String functionName) {
         return functionName.toUpperCase().replace("-", "_");
     }
 
@@ -81,26 +83,73 @@ public interface AwsModule {
     }
 
     @Provides
+    static SecretStore secretStore(HostEnvironment hostEnvironment,
+                                   EnvVarsConfigService envVarsConfigService,
+                                   ParameterStoreConfigServiceFactory parameterStoreConfigServiceFactory,
+                                   @Named("instance") ParameterStoreConfigService instanceScopedParameterConfigService,
+                                   SecretsManagerSecretStoreFactory secretsManagerSecretStoreFactory,
+                                   VaultConfigServiceFactory vaultSecretStoreFactory) {
+
+        String pathToSharedConfig =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
+                .orElse(null);
+
+        String pathToInstanceConfig =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
+                .orElseGet(() -> asAwsCompliantNamespace(hostEnvironment.getInstanceId()) + "_");
+
+
+        AwsEnvironment.SecretStoreImplementations secretStoreImpl = envVarsConfigService.getConfigPropertyAsOptional(AwsEnvironment.AwsConfigProperty.SECRETS_STORE)
+            .map(String::toUpperCase) //case-insensitive, so accept 'aws_ssm_parameter_store'
+            .map(AwsEnvironment.SecretStoreImplementations::valueOf)
+            .orElse(AwsEnvironment.SecretStoreImplementations.AWS_SSM_PARAMETER_STORE);
+
+        SecretStore sharedConfigService;
+        SecretStore instanceConfigService;
+        if (secretStoreImpl == AwsEnvironment.SecretStoreImplementations.AWS_SECRETS_MANAGER) {
+            instanceConfigService = secretsManagerSecretStoreFactory.create(pathToInstanceConfig);
+            sharedConfigService = secretsManagerSecretStoreFactory.create(pathToSharedConfig);
+        } else if (secretStoreImpl == AwsEnvironment.SecretStoreImplementations.AWS_SSM_PARAMETER_STORE) {
+            instanceConfigService = instanceScopedParameterConfigService;
+            sharedConfigService = parameterStoreConfigServiceFactory.create(pathToSharedConfig);
+        } else if (secretStoreImpl == AwsEnvironment.SecretStoreImplementations.HASHICORP_VAULT) {
+            sharedConfigService =
+                vaultSecretStoreFactory.createInitialized(vaultSecretStoreFactory.pathForSharedVault(hostEnvironment, envVarsConfigService));
+            instanceConfigService =
+                vaultSecretStoreFactory.createInitialized(vaultSecretStoreFactory.pathForInstanceVault(hostEnvironment, envVarsConfigService));
+        } else {
+            throw new IllegalStateException("Unknown secret store implementation: " + secretStoreImpl);
+        }
+
+        Duration proxyInstanceConfigCacheTtl = Duration.ofMinutes(5);
+        Duration sharedConfigCacheTtl = Duration.ofMinutes(20);
+
+        return CompositeSecretStore.builder()
+            .preferred(new CachingConfigServiceDecorator(instanceConfigService, proxyInstanceConfigCacheTtl))
+            .fallback(new CachingConfigServiceDecorator(sharedConfigService, sharedConfigCacheTtl))
+            .build();
+    }
+
+    @Provides
     @Named("Native")
     @Singleton
-    static ConfigService nativeConfigService(HostEnvironment hostEnvironment,
-                                             EnvVarsConfigService envVarsConfigService,
+    static ConfigService nativeConfigService(EnvVarsConfigService envVarsConfigService,
                                              ParameterStoreConfigServiceFactory parameterStoreConfigServiceFactory,
-                                             @Named("instance") ParameterStoreConfigService instanceScopedConfigService) {
+                                             @Named("instance") ParameterStoreConfigService instanceScopedParameterConfigService) {
 
         String pathToSharedConfig =
                 envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
                         .orElse(null);
+        parameterStoreConfigServiceFactory.create(pathToSharedConfig);
 
-        ParameterStoreConfigService sharedConfigService =
+        ParameterStoreConfigService sharedParameterConfigService =
                 parameterStoreConfigServiceFactory.create(pathToSharedConfig);
-
 
         Duration proxyInstanceConfigCacheTtl = Duration.ofMinutes(5);
         Duration sharedConfigCacheTtl = Duration.ofMinutes(20);
         return CompositeConfigService.builder()
-                .preferred(new CachingConfigServiceDecorator(instanceScopedConfigService, proxyInstanceConfigCacheTtl))
-                .fallback(new CachingConfigServiceDecorator(sharedConfigService, sharedConfigCacheTtl))
+                .preferred(new CachingConfigServiceDecorator(instanceScopedParameterConfigService, proxyInstanceConfigCacheTtl))
+                .fallback(new CachingConfigServiceDecorator(sharedParameterConfigService, sharedConfigCacheTtl))
                 .build();
     }
 
@@ -112,7 +161,7 @@ public interface AwsModule {
 
         String pathToInstanceConfig =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
-                .orElseGet(() -> asParameterStoreNamespace(hostEnvironment.getInstanceId()) + "_");
+                .orElseGet(() -> asAwsCompliantNamespace(hostEnvironment.getInstanceId()) + "_");
 
         return parameterStoreConfigServiceFactory.create(pathToInstanceConfig);
     }
@@ -125,6 +174,19 @@ public interface AwsModule {
     @Provides
     static AmazonS3 getStorageClient() {
         return AmazonS3ClientBuilder.defaultClient();
+    }
+
+    @Provides
+    static SecretsManagerClient secretsManagerClient(AwsEnvironment awsEnvironment) {
+        return SecretsManagerClient.builder()
+                .overrideConfiguration(ClientOverrideConfiguration.builder()
+                .retryPolicy(RetryPolicy.builder()
+                    .numRetries(4)
+                    .throttlingBackoffStrategy(BackoffStrategy.defaultThrottlingStrategy())
+                    .build())
+                .build())
+                .region(Region.of(awsEnvironment.getRegion()))
+                .build();
     }
 
     @Provides

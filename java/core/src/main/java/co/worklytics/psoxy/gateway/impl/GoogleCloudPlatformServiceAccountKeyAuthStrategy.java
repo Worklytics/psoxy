@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpTransport;
@@ -47,6 +48,7 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
     }
 
     @Inject ConfigService config;
+    @Inject SecretStore secretStore;
     @Inject HttpTransportFactory httpTransportFactory;
 
 
@@ -91,7 +93,7 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
     @SneakyThrows
     synchronized GoogleCredentials getBaseCredentials() {
         if (baseCredentials == null) {
-            Optional<String> key = config.getConfigPropertyAsOptional(ConfigProperty.SERVICE_ACCOUNT_KEY);
+            Optional<String> key = secretStore.getConfigPropertyAsOptional(ConfigProperty.SERVICE_ACCOUNT_KEY);
 
             GoogleCredentials provisional;
 

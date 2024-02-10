@@ -2,23 +2,17 @@ package co.worklytics.psoxy.rules.slack;
 
 import co.worklytics.psoxy.ConfigRulesModule;
 import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.HostEnvironment;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.StorageEventRequest;
+import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.storage.BulkDataTestUtils;
 import co.worklytics.psoxy.storage.StorageHandler;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
-import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
 import com.avaulta.gateway.rules.RuleSet;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -68,7 +62,9 @@ public class SlackDiscoveryBulkTests {
     @Component(modules = {
         PsoxyModule.class,
         ConfigRulesModule.class,
-        Container.ForConfigService.class
+        Container.ForConfigService.class,
+        MockModules.ForSecretStore.class,
+        MockModules.ForHostEnvironment.class,
     })
     public interface Container {
         void inject(SlackDiscoveryBulkTests test);
@@ -82,15 +78,7 @@ public class SlackDiscoveryBulkTests {
                 ConfigService mock = MockModules.provideMock(ConfigService.class);
                 when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
                     .thenReturn(Optional.of(new String(TestUtils.getData(rulesPath))));
-                when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
-                    .thenReturn(Optional.of("salt"));
-
                 return mock;
-            }
-
-            @Provides @Singleton
-            static HostEnvironment hostEnvironment() {
-                return MockModules.provideMock(HostEnvironment.class);
             }
         }
     }

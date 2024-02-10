@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.RequiresConfiguration;
+import co.worklytics.psoxy.gateway.SecretStore;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.json.JsonFactory;
@@ -85,6 +86,8 @@ public class ClientCredentialsGrantTokenRequestBuilder
     @Inject
     ConfigService config;
     @Inject
+    SecretStore secretStore;
+    @Inject
     JsonFactory jsonFactory;
     @Inject
     Clock clock;
@@ -149,15 +152,17 @@ public class ClientCredentialsGrantTokenRequestBuilder
     }
 
     protected void setJWTCustomHeaders(JsonWebSignature.Header header) {
-        header.setX509Thumbprint(encodeKeyId(config.getConfigPropertyOrError(ConfigProperty.PRIVATE_KEY_ID)));
+        header.setX509Thumbprint(encodeKeyId(secretStore.getConfigPropertyOrError(ConfigProperty.PRIVATE_KEY_ID)));
     }
 
     private Map<String, String> buildClientSecretPayload() {
         Map<String, String> data = new HashMap<>();
 
         data.put("grant_type", getGrantType());
-        data.put("client_id", config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
-        data.put("client_secret", config.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET));
+        data.put("client_id",
+            secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
+        data.put("client_secret",
+            secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET));
 
         return data;
     }
@@ -166,9 +171,10 @@ public class ClientCredentialsGrantTokenRequestBuilder
         //implementation of:
         // https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow#get-a-token
 
-        String oauthClientId = config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID);
+        String oauthClientId =
+            secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID);
         String tokenEndpoint =
-                config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
+            config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
 
         Map<String, String> data = new TreeMap<>();
         //https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2
@@ -211,7 +217,7 @@ public class ClientCredentialsGrantTokenRequestBuilder
     }
 
     private PrivateKey getServiceAccountPrivateKey() throws IOException {
-        String privateKeyPem = config.getConfigPropertyOrError(ConfigProperty.PRIVATE_KEY);
+        String privateKeyPem = secretStore.getConfigPropertyOrError(ConfigProperty.PRIVATE_KEY);
         Reader reader = new StringReader(privateKeyPem);
         PemReader.Section section = PemReader.readFirstSectionAndClose(reader, "PRIVATE KEY");
         if (section == null) {

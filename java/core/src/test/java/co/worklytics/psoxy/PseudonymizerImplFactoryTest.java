@@ -2,6 +2,7 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.test.MockModules;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import org.apache.commons.lang3.StringUtils;
@@ -19,11 +20,13 @@ import static org.mockito.Mockito.when;
 class PseudonymizerImplFactoryTest {
 
     ConfigService configService;
+    SecretStore secretStore;
     PseudonymizerImplFactory factory;
     @BeforeEach
     public void setup() {
         configService = MockModules.provideMock(ConfigService.class);
-        when(configService.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)).thenReturn(Optional.of("salt"));
+        secretStore = MockModules.provideMock(SecretStore.class);
+        when(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)).thenReturn(Optional.of("salt"));
 
         //interested in API case, when this is not set (expect legacy pseudonyms requested w header)
         when(configService.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION))
@@ -53,7 +56,7 @@ class PseudonymizerImplFactoryTest {
             .thenReturn(Optional.of("from-config"));
 
         Pseudonymizer.ConfigurationOptions options =
-            factory.buildOptions(configService, StringUtils.trimToNull(valueFromRules));
+            factory.buildOptions(configService, secretStore, StringUtils.trimToNull(valueFromRules));
 
 
         assertEquals("from-config", options.getDefaultScopeId());

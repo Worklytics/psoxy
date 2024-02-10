@@ -28,7 +28,8 @@ class GoogleCloudPlatformServiceAccountKeyAuthStrategyTest {
     @Component(modules = {
         PsoxyModule.class,
         MockModules.ForConfigService.class,
-        MockModules.ForHttpTransportFactory.class
+        MockModules.ForHttpTransportFactory.class,
+        MockModules.ForSecretStore.class,
     })
     public interface Container {
         void inject(GoogleCloudPlatformServiceAccountKeyAuthStrategyTest test);
@@ -79,7 +80,7 @@ class GoogleCloudPlatformServiceAccountKeyAuthStrategyTest {
 
         when(authStrategy.config.getConfigPropertyOrError(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.OAUTH_SCOPES))
             .thenReturn(oauthScopes);
-        when(authStrategy.config.getConfigPropertyAsOptional(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.SERVICE_ACCOUNT_KEY))
+        when(authStrategy.secretStore.getConfigPropertyAsOptional(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.SERVICE_ACCOUNT_KEY))
             .thenReturn(Optional.of(new String(Base64.getEncoder().encode(KEY.getBytes()))));
 
 

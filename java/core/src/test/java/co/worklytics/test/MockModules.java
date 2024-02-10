@@ -2,6 +2,7 @@ package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
+import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
@@ -51,6 +52,15 @@ public class MockModules {
         @Provides @Singleton
         static ConfigService configService() {
             ConfigService mock = provideMock(ConfigService.class);
+            return mock;
+        }
+    }
+
+    @Module
+    public interface ForSecretStore {
+        @Provides @Singleton
+        static SecretStore secretStore() {
+            SecretStore mock = provideMock(SecretStore.class);
             TestModules.withMockEncryptionKey(mock);
             return mock;
         }

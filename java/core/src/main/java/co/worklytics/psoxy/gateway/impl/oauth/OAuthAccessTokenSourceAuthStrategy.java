@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.impl.oauth;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
@@ -40,12 +41,12 @@ public class OAuthAccessTokenSourceAuthStrategy implements SourceAuthStrategy {
     enum ConfigProperty implements ConfigService.ConfigProperty {
         ACCESS_TOKEN,
     }
-
-    @Inject ConfigService config;
+    @Inject
+    SecretStore secretStore;
 
     @Override
     public Credentials getCredentials(Optional<String> userToImpersonateIgnored) {
-        String token = config.getConfigPropertyOrError(ConfigProperty.ACCESS_TOKEN);
+        String token = secretStore.getConfigPropertyOrError(ConfigProperty.ACCESS_TOKEN);
         // Some date into far future. Expiration is required
         Instant expire = clock.instant().plus(365L, ChronoUnit.DAYS);
         AccessToken accessToken = new AccessToken(token, Date.from(expire));

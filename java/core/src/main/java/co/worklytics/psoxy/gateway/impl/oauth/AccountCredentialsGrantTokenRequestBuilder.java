@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.RequiresConfiguration;
+import co.worklytics.psoxy.gateway.SecretStore;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.UrlEncodedContent;
@@ -28,6 +29,8 @@ public class AccountCredentialsGrantTokenRequestBuilder implements OAuthRefreshT
 
     @Inject
     ConfigService config;
+    @Inject
+    SecretStore secretStore;
 
     private static final String PARAM_ACCOUNT_ID = "account_id";
 
@@ -58,14 +61,14 @@ public class AccountCredentialsGrantTokenRequestBuilder implements OAuthRefreshT
         // Tested manually and, for the moment, it is accepted as POST data
         Map<String, String> data = new TreeMap<>();
         data.put(PARAM_GRANT_TYPE, getGrantType());
-        data.put(PARAM_ACCOUNT_ID, config.getConfigPropertyOrError(ConfigProperty.ACCOUNT_ID));
+        data.put(PARAM_ACCOUNT_ID, secretStore.getConfigPropertyOrError(ConfigProperty.ACCOUNT_ID));
         return new UrlEncodedContent(data);
     }
 
     @Override
     public void addHeaders(HttpHeaders httpHeaders) {
-        String clientId = config.getConfigPropertyOrError(ConfigProperty.CLIENT_ID);
-        String clientSecret = config.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET);
+        String clientId = secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_ID);
+        String clientSecret = secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET);
         String token = Base64.getEncoder()
             .encodeToString(String.join(":", clientId, clientSecret).getBytes(StandardCharsets.UTF_8));
         httpHeaders.setAuthorization("Basic " + token);

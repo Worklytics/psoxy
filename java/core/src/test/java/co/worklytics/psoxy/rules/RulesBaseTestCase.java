@@ -149,6 +149,7 @@ abstract public class RulesBaseTestCase {
     @Component(modules = {
         PsoxyModule.class,
         MockModules.ForConfigService.class,
+        MockModules.ForSecretStore.class,
     })
     public interface Container {
         void inject(RulesBaseTestCase test);
