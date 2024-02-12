@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.SourceAuthModule;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.test.MockModules;
 import com.google.api.client.http.HttpContent;
 import dagger.Component;
@@ -20,7 +21,7 @@ import static org.mockito.Mockito.when;
 class RefreshTokenTokenRequestBuilderTest {
 
     @Inject
-    ConfigService configService;
+    SecretStore secretStore;
 
     @Inject
     RefreshTokenTokenRequestBuilder refreshTokenPayloadBuilder;
@@ -30,6 +31,7 @@ class RefreshTokenTokenRequestBuilderTest {
         PsoxyModule.class,
         SourceAuthModule.class,
         MockModules.ForConfigService.class,
+        MockModules.ForSecretStore.class
     })
     public interface Container {
         void inject(RefreshTokenTokenRequestBuilderTest test);
@@ -47,11 +49,11 @@ class RefreshTokenTokenRequestBuilderTest {
     @Test
     public void tokenRequestPayload() {
 
-        when(configService.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID))
+        when(secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID))
             .thenReturn("1");
-        when(configService.getConfigPropertyOrError(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN))
+        when(secretStore.getConfigPropertyOrError(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN))
             .thenReturn("tokenValue");
-        when(configService.getConfigPropertyOrError(RefreshTokenTokenRequestBuilder.ConfigProperty.CLIENT_SECRET))
+        when(secretStore.getConfigPropertyOrError(RefreshTokenTokenRequestBuilder.ConfigProperty.CLIENT_SECRET))
             .thenReturn("secretValue");
 
         HttpContent payload = refreshTokenPayloadBuilder.buildPayload();

@@ -1,0 +1,5 @@
+EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE
+1,alice.allen@worklytics.co,Engineering,2023-01-06,,2019-11-11,
+2,bob.brooks@workltyics.co,Sales,2023-01-06,1,2020-01-01,
+3,charles.clark@workltycis.co,Engineering,2023-01-06,1,2019-10-06,2022-12-08
+4,dave@worklytics.co,Engineering,2023-01-06,1,2018-06-03,

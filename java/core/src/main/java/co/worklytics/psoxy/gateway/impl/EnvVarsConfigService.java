@@ -11,16 +11,6 @@ import java.util.Optional;
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class EnvVarsConfigService implements ConfigService {
 
-    @Override
-    public boolean supportsWriting() {
-        return false;
-    }
-
-    @Override
-    public void putConfigProperty(ConfigProperty property, String value) {
-        throw new UnsupportedOperationException();
-    }
-
     public String getConfigPropertyOrError(ConfigProperty property) {
         String value = System.getenv(property.name());
         if (value == null) {

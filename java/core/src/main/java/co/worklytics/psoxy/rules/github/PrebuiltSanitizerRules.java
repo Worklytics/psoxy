@@ -184,9 +184,6 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..signature")
                     .jsonPath("$..payload")
                     .build())
-            .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$.commit..email")
-                    .build())
             .transforms(generateUserTransformations("..", Arrays.asList("author", "committer")))
             .build();
 
@@ -249,9 +246,6 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..payload")
                     .jsonPath("$..dismissalMessage")
                     .build())
-            .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$..email")
-                    .build())
             .transforms(generateUserTransformations("..", Arrays.asList(
                     // Owner can be a user or an organization user
                     "owner",
@@ -281,9 +275,6 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..signature")
                     .jsonPath("$..payload")
                     .jsonPath("$..dismissalMessage")
-                    .build())
-            .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$..email")
                     .build())
             .transforms(generateUserTransformations("..", Arrays.asList(
                     // Owner can be a user or an organization user
@@ -448,9 +439,6 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..signature")
                     .jsonPath("$..payload")
                     .build())
-            .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$.commit..email")
-                    .build())
             .transforms(generateUserTransformations("..", Arrays.asList("author", "committer")))
             .build();
 
@@ -468,9 +456,6 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..files")
                     .jsonPath("$..signature")
                     .jsonPath("$..payload")
-                    .build())
-            .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$.commit..email")
                     .build())
             .transforms(generateUserTransformations("..", Arrays.asList("author", "committer")))
             .build();

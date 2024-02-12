@@ -37,7 +37,9 @@ module "psoxy" {
 
 
 # secrets shared across all instances
-module "global_secrets" {
+module "global_secrets_ssm" {
+  count = var.secrets_store_implementation == "aws_ssm_parameter_store" ? 1 : 0
+
   source = "../../modules/aws-ssm-secrets"
 
   path       = var.aws_ssm_param_root_path
@@ -45,7 +47,18 @@ module "global_secrets" {
   secrets    = module.psoxy.secrets
 }
 
-module "instance_secrets" {
+module "global_secrets_secrets_manager" {
+  count = var.secrets_store_implementation == "aws_secrets_manager" ? 1 : 0
+
+  source = "../../modules/aws-secretsmanager-secrets"
+
+  path       = var.aws_ssm_param_root_path
+  kms_key_id = var.aws_ssm_key_id
+  secrets    = module.psoxy.secrets
+}
+
+
+module "instance_ssm_parameters" {
   for_each = var.api_connectors
 
   source = "../../modules/aws-ssm-secrets"
@@ -61,12 +74,30 @@ module "instance_secrets" {
       sensitive           = try(v.sensitive, true)
       value_managed_by_tf = try(v.value_managed_by_tf, true) # ideally, would be `value != null`, but bc value is sensitive, Terraform doesn't allow for_each over map derived from sensitive values
     }
+    if !(try(v.sensitive, true)) || var.secrets_store_implementation == "aws_ssm_parameter_store"
   }
 }
 
+module "instance_secrets_secrets_manager" {
+  source = "../../modules/aws-secretsmanager-secrets"
 
+  for_each = var.secrets_store_implementation == "aws_secrets_manager" ? var.api_connectors : {}
 
+  path       = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
+  kms_key_id = var.aws_ssm_key_id
+  secrets = { for v in each.value.secured_variables :
+    v.name => {
+      value               = v.value,
+      description         = try(v.description, null)
+      sensitive           = try(v.sensitive, true)
+      value_managed_by_tf = try(v.value_managed_by_tf, true) # ideally, would be `value != null`, but bc value is sensitive, Terraform doesn't allow for_each over map derived from sensitive values
+    }
+    if try(v.sensitive, true)
+  }
+}
 
+# NOTE: parameter / secret ARNs passed into lambda modules, so that can write ONE policy for the
+# exec role - instead of one for parameters, one for secrets, etc.
 module "api_connector" {
   for_each = var.api_connectors
 
@@ -85,8 +116,11 @@ module "api_connector" {
   region                                = data.aws_region.current.id
   path_to_repo_root                     = var.psoxy_base_dir
   todo_step                             = var.todo_step
-  global_parameter_arns                 = module.global_secrets.secret_arns
+  secrets_store_implementation          = var.secrets_store_implementation
+  global_parameter_arns                 = try(module.global_secrets_ssm[0].secret_arns, [])
+  global_secrets_manager_secret_arns    = try(module.global_secrets_secrets_manager[0].secret_arns, {})
   path_to_instance_ssm_parameters       = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
+  path_to_shared_ssm_parameters         = var.aws_ssm_param_root_path
   ssm_kms_key_ids                       = local.ssm_key_ids
   target_host                           = each.value.target_host
   source_auth_strategy                  = each.value.source_auth_strategy
@@ -107,6 +141,8 @@ module "api_connector" {
   )
 }
 
+
+
 module "custom_api_connector_rules" {
   source = "../../modules/aws-ssm-rules"
 
@@ -121,29 +157,33 @@ module "bulk_connector" {
 
   source = "../../modules/aws-psoxy-bulk"
 
-  aws_account_id                   = var.aws_account_id
-  provision_iam_policy_for_testing = var.provision_testing_infra
-  aws_role_to_assume_when_testing  = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
-  environment_name                 = var.environment_name
-  instance_id                      = each.key
-  source_kind                      = each.value.source_kind
-  aws_region                       = data.aws_region.current.id
-  path_to_function_zip             = module.psoxy.path_to_deployment_jar
-  function_zip_hash                = module.psoxy.deployment_package_hash
-  function_env_kms_key_arn         = var.function_env_kms_key_arn
-  logs_kms_key_arn                 = var.logs_kms_key_arn
-  psoxy_base_dir                   = var.psoxy_base_dir
-  rules                            = try(var.custom_bulk_connector_rules[each.key], each.value.rules)
-  rules_file                       = each.value.rules_file
-  global_parameter_arns            = module.global_secrets.secret_arns
-  path_to_instance_ssm_parameters  = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
-  ssm_kms_key_ids                  = local.ssm_key_ids
-  sanitized_accessor_role_names    = [module.psoxy.api_caller_role_name]
-  memory_size_mb                   = coalesce(try(var.custom_bulk_connector_arguments[each.key].memory_size_mb, null), each.value.memory_size_mb, 1024)
-  sanitized_expiration_days        = var.bulk_sanitized_expiration_days
-  input_expiration_days            = var.bulk_input_expiration_days
-  example_file                     = each.value.example_file
-  vpc_config                       = var.vpc_config
+  aws_account_id                     = var.aws_account_id
+  provision_iam_policy_for_testing   = var.provision_testing_infra
+  aws_role_to_assume_when_testing    = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
+  environment_name                   = var.environment_name
+  instance_id                        = each.key
+  source_kind                        = each.value.source_kind
+  aws_region                         = data.aws_region.current.id
+  path_to_function_zip               = module.psoxy.path_to_deployment_jar
+  function_zip_hash                  = module.psoxy.deployment_package_hash
+  function_env_kms_key_arn           = var.function_env_kms_key_arn
+  logs_kms_key_arn                   = var.logs_kms_key_arn
+  psoxy_base_dir                     = var.psoxy_base_dir
+  rules                              = try(var.custom_bulk_connector_rules[each.key], each.value.rules)
+  rules_file                         = each.value.rules_file
+  secrets_store_implementation       = var.secrets_store_implementation
+  global_parameter_arns              = try(module.global_secrets_ssm[0].secret_arns, [])
+  global_secrets_manager_secret_arns = try(module.global_secrets_secrets_manager[0].secret_arns, [])
+  path_to_instance_ssm_parameters    = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
+  path_to_shared_ssm_parameters      = var.aws_ssm_param_root_path
+  ssm_kms_key_ids                    = local.ssm_key_ids
+  sanitized_accessor_role_names      = [module.psoxy.api_caller_role_name]
+  memory_size_mb                     = coalesce(try(var.custom_bulk_connector_arguments[each.key].memory_size_mb, null), each.value.memory_size_mb, 1024)
+  sanitized_expiration_days          = var.bulk_sanitized_expiration_days
+  input_expiration_days              = var.bulk_input_expiration_days
+  example_file                       = each.value.example_file
+  vpc_config                         = var.vpc_config
+
 
   environment_variables = merge(
     var.general_environment_variables,

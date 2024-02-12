@@ -18,6 +18,7 @@ variable "aws_ssm_param_root_path" {
   }
 }
 
+# TODO: generalize to 'secrets', regardless of store (AWS SSM, AWS Secrets Manager, etc)
 variable "aws_ssm_key_id" {
   type        = string
   description = "KMS key id to use for encrypting SSM SecureString parameters created by this module, in any. (by default, will encrypt with AWS-managed keys)"
@@ -289,6 +290,12 @@ variable "vpc_config" {
   })
   description = "**alpha** VPC configuration for lambda; if not provided, lambda will not be deployed in a VPC. see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#vpc_config"
   default     = null
+}
+
+variable "secrets_store_implementation" {
+  type        = string
+  description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
+  default     = "aws_ssm_parameter_store"
 }
 
 variable "todo_step" {

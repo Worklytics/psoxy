@@ -2,6 +2,7 @@ package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
+import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.google.common.annotations.VisibleForTesting;
@@ -35,7 +36,7 @@ import java.util.logging.Level;
  *
  */
 @Log
-public class ParameterStoreConfigService implements ConfigService, LockService {
+public class ParameterStoreConfigService implements SecretStore, LockService {
 
 
     /**
@@ -70,12 +71,6 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
         this.namespace = namespace;
     }
 
-
-    @Override
-    public boolean supportsWriting() {
-        return true;
-    }
-
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {
         String key = parameterName(property);
@@ -93,6 +88,7 @@ public class ParameterStoreConfigService implements ConfigService, LockService {
             log.info(String.format("Property: %s, stored version %d", key, parameterResponse.version()));
         } catch (SsmException e) {
             log.log(Level.SEVERE, "Could not store property " + key, e);
+            throw e;
         }
     }
 

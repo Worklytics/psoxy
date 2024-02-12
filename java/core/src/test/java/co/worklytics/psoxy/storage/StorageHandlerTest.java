@@ -44,6 +44,7 @@ class StorageHandlerTest {
         ForRules.class,
         MockModules.ForConfigService.class,
         MockModules.ForHostEnvironment.class,
+        MockModules.ForSecretStore.class,
     })
     public interface Container {
         void inject( StorageHandlerTest test);
