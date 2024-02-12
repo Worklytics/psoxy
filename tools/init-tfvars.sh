@@ -300,8 +300,13 @@ fi
 # examples to cover ALL connectors, and just vary by host platform, we'll just initialize all for
 # now and expect customers to remove them as needed
 AVAILABLE_CONNECTORS=$(echo "local.available_connector_ids" | terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" console)
-printf "# review following list of connectors to enable, and comment out what you don't want\n" >> $TFVARS_FILE
-printf "enabled_connectors = ${AVAILABLE_CONNECTORS}\n\n" >> $TFVARS_FILE
+
+if [ -z $AVAILABLE_CONNECTORS ] then
+  printf "${RED}Failed to generate list of enabled_connectors${NC}; you will need to add an variable assigned for ${BLUE}enabled_connectors${NC} to your ${BLUE}terraform.tfvars${NC} as a list of connector ID strings. Contact support for assistance.\n"
+else
+  printf "# review following list of connectors to enable, and comment out what you don't want\n" >> $TFVARS_FILE
+  printf "enabled_connectors = ${AVAILABLE_CONNECTORS}\n\n" >> $TFVARS_FILE
+fi
 
 printf "\n"
 
