@@ -104,7 +104,8 @@ if [[ "${EXAMPLE_TEMPLATE_REPO: -1}" != "/" ]]; then
     EXAMPLE_TEMPLATE_REPO="$EXAMPLE_TEMPLATE_REPO/"
 fi
 
-FILES_TO_COPY=("main.tf" "variables.tf" "backend.tf" "google-workspace.tf" "google-workspace-variables.tf" "msft-365.tf" "msft-365-variables.tf" "misc-data-source-variables.tf")
+# files to copy - everything in the example directory ending in .tf
+FILES_TO_COPY=( *.tf )
 
 cd "$EXAMPLE_TEMPLATE_REPO"
 CURRENT_BRANCH=$(git branch --show-current)
