@@ -299,7 +299,15 @@ fi
 # NOTE: could be conditional based on google workspace, azure, etc - but as we expect future
 # examples to cover ALL connectors, and just vary by host platform, we'll just initialize all for
 # now and expect customers to remove them as needed
+
+# init worklytics-connector-specs module as if it's a terraform config, so subsequent 'console' call
+# will work
+terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" init >> /dev/null
 AVAILABLE_CONNECTORS=$(echo "local.available_connector_ids" | terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" console)
+
+# clean up what the init did above
+rm -rf "${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs/.terraform" 2> /dev/null
+rm "${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs/.terraform.lock.hcl" 2> /dev/null
 
 if [ -z $AVAILABLE_CONNECTORS ] then
   printf "${RED}Failed to generate list of enabled_connectors${NC}; you will need to add an variable assigned for ${BLUE}enabled_connectors${NC} to your ${BLUE}terraform.tfvars${NC} as a list of connector ID strings. Contact support for assistance.\n"
