@@ -234,7 +234,7 @@ locals {
 }
 
 resource "aws_iam_policy" "ssm_param_policy" {
-  name        = "${local.function_name}_ssmParameters"
+  name = "${local.function_name}_ssmParameters"
 
   # description here not accurate any more, but changing it will destroy and re-create the policy
   description = "Allow SSM parameter access needed by ${local.function_name}"

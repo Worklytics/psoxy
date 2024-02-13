@@ -21,7 +21,7 @@ locals {
 resource "aws_ssm_parameter" "secret" {
   for_each = local.terraform_managed_secrets
 
-  name        = "${local.path_prefix}${each.key}"
+  name = "${local.path_prefix}${each.key}"
   # Due https://github.com/hashicorp/terraform-provider-aws/issues/31267
   # all are added as secureString
   type        = "SecureString"

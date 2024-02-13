@@ -1108,7 +1108,7 @@ EOT
         {
           name : "OAUTH_REFRESH_TOKEN"
           writable : true
-          lockable : true # nonsensical; this parameter/secret IS the lock. it's really the tokens that should have lockable:true
+          lockable : true   # nonsensical; this parameter/secret IS the lock. it's really the tokens that should have lockable:true
           sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself
           value_managed_by_tf : false
         },
