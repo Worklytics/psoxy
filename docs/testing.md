@@ -7,40 +7,38 @@ Full documentation of the test tool is available [here](../tools/psoxy-test/READ
 
 ### Testing Pre-requisities
 
-Wherever you run this test tool from, your AWS or GCloud CLI *must* be authenticated as
-an entity with permissions to invoke the Lambda functions / Cloud functions that you deployed for
-Psoxy.
+Wherever you run this test tool from, your AWS or GCloud CLI _must_ be authenticated as an entity
+with permissions to invoke the Lambda functions / Cloud functions that you deployed for Psoxy.
 
-If you're testing the bulk cases, the entity must be able to read/write to the cloud storage
-buckets created for each of those bulk examples.
-
+If you're testing the bulk cases, the entity must be able to read/write to the cloud storage buckets
+created for each of those bulk examples.
 
 ### Testing Locally when Terraform ran remotely (eg, Terraform Cloud, GitHub Actions, etc)
 
-If you're running the Terraform examples in a different location from where
-you wish to run tests, then you can install the tool alone:
+If you're running the Terraform examples in a different location from where you wish to run tests,
+then you can install the tool alone:
 
-  1. Clone the Psoxy repo to your local machine:
+1. Clone the Psoxy repo to your local machine:
 
 ```shell
 git clone https://github.com/Worklytics/psoxy.git
 ```
 
-  2. From within that clone, install the test tool:
+2. From within that clone, install the test tool:
 
 ```shell
 ./tools/install-test-tool.sh
 ```
 
-   3. Get specific test commands for your deployment
-      - If you set the `todos_as_outputs` variable to `true`, your Terraform apply run should
-        contain `todo2` output variable with testing instructions.
-      - If you set `todos_as_local_files` variable to `true`, your Terraform apply run should
-        contain local files named `TODO 2 ...` with testing instructions.
+3.  Get specific test commands for your deployment
 
-      In both cases, you will need to replace the test tool path included there with the path to your
-      installation.
+    - If you set the `todos_as_outputs` variable to `true`, your Terraform apply run should contain
+      `todo2` output variable with testing instructions.
+    - If you set `todos_as_local_files` variable to `true`, your Terraform apply run should contain
+      local files named `TODO 2 ...` with testing instructions.
 
+    In both cases, you will need to replace the test tool path included there with the path to your
+    installation.
 
 ### Testing Deployments made without Terraform
 
