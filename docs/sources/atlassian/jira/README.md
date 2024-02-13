@@ -38,7 +38,7 @@ Linux, an AWS CLoud Shell, [Windows Subsystem for Linux](https://learn.microsoft
     - `read:avatar:jira`
     - `read:user:jira`
       ![Granular Scopes for Jira API](./img/jira-cloud-jira-api-scope-granular-permissions.png)
-   
+
    Then go back to "Permissions" and click on "Add" for `User Identity API`, only selecting following scopes:
     - `read:account`
    ![Classic Scopes for User Identity API](./img/jira-cloud-user-api-scope-permissions.png)
@@ -67,7 +67,7 @@ Linux, an AWS CLoud Shell, [Windows Subsystem for Linux](https://learn.microsoft
 
      Copy the value of the `code` parameter from that URI. It is the "authorization code" required
      for next step.
-    
+
     ![Authorization Code](./img/jira-cloud-authorization-code.png)
 
      **NOTE** This "Authorization Code" is single-use; if it expires or is used, you will need to obtain
@@ -117,3 +117,9 @@ And its response will be something like:
 Add the `id` value from that JSON response as the value of the `jira_cloud_id` variable in the
 `terraform.tfvars` file of your Terraform configuration. This will generate all the test URLs with
 a proper value and it will populate the right value for setting up the configuration.
+
+
+NOTE: A "token family" includes the initial access/refresh tokens generated above as well as all
+subsequent access/refresh tokens that Jira returns to any future token refresh requests. By default,
+Jira enforces a maximum lifetime of 1 year for each **token family**. So you MUST repeat steps 5-9
+at least annually or your proxy instance will stop working when the token family expires.

@@ -72,7 +72,7 @@ gh release edit $RELEASE -n "$modified_notes"
 # check if rc branch exists, and offer to delete if so
 rc_branch="rc-$RELEASE"
 if git rev-parse "$rc_branch" >/dev/null 2>&1; then
-  printf "Delete ${BLUE}rc-${RELEASE}${NC} tag?\n"
+  printf "Delete the ${BLUE}rc-${RELEASE}${NC} branch?\n"
   read -p "(Y/n) " -n 1 -r
   REPLY=${REPLY:-Y}
   echo    # Move to a new line
@@ -85,3 +85,10 @@ if git rev-parse "$rc_branch" >/dev/null 2>&1; then
       ;;
   esac
 fi
+
+printf "Opening release ${BLUE}${RELEASE}${NC} in browser; review / update notes and then publish as latest ...\n"
+gh release view $RELEASE --web
+
+printf "  Then update example templates to point to it:\n"
+printf "    ${BLUE}./tools/release/example-create-release-pr.sh . aws-all ~/psoxy-example-aws${NC}\n"
+printf "    ${BLUE}./tools/release/example-create-release-pr.sh . gcp ~/psoxy-example-gcp${NC}\n"
