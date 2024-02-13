@@ -22,8 +22,10 @@ If above doesn't happen seem to work as expected, some ideas in the next section
 ## Your AWS Organization uses SSO via Okta or some similar provider
 
 Options:
-  1. execute terraform via [AWS Cloud Shell](cloud-shell.md)
-  2. find credentials output by your SSO helper (eg, `aws-okta`) then fill the AWS CLI env variables yourself:
+
+1. execute terraform via [AWS Cloud Shell](cloud-shell.md)
+2. find credentials output by your SSO helper (eg, `aws-okta`) then fill the AWS CLI env variables
+   yourself:
 
 ```shell
 ls ~/.aws/cli/cached/
@@ -36,8 +38,9 @@ export AWS_SECRET_ACCESS_KEY="xxxxxxxxxxxxxxx"
 export AWS_SESSION_TOKEN="xxxxxxxxxxxxxxx"
 ```
 
-  3. if your SSO helper fills default AWS credentials file but simply doesn't set the env vars, you
- may be able to export the profile to `AWS_PROFILE`, eg
+3. if your SSO helper fills default AWS credentials file but simply doesn't set the env vars, you
+   may be able to export the profile to `AWS_PROFILE`, eg
+
 ```shell
 
 export AWS_PROFILE="production"
@@ -51,26 +54,24 @@ AWS_PROFILE="production" terraform plan
 References:
 https://discuss.hashicorp.com/t/using-credential-created-by-aws-sso-for-terraform/23075/7
 
-
 ## Your AWS User has MFA
 
 Options:
-  - execute terraform via [AWS Cloud Shell](cloud-shell.md)
-  - use a script such as [aws-mfa](https://github.com/broamski/aws-mfa) to get short-lived key+secret for your user.
+
+- execute terraform via [AWS Cloud Shell](cloud-shell.md)
+- use a script such as [aws-mfa](https://github.com/broamski/aws-mfa) to get short-lived key+secret
+  for your user.
 
 ## Logs via Cloud Watch
 
 ### via Web Console
 
-  1. Log into AWS web console
-  2. navigate to the AWS account that hosts your proxy instance (you may need to assume a
-     role in that account)
-  3. then the region in that account in which your proxy instance is deployed.
-     (default `us-east-1`)
-  4. then search or navigate to the `AWS Lambda`s feature, and find the specific one you
-     wish to debug
-  5. find the tabs for `Monitoring` then within that, `Logging`, then click "go to Cloud Watch"
-
+1. Log into AWS web console
+2. navigate to the AWS account that hosts your proxy instance (you may need to assume a role in that
+   account)
+3. then the region in that account in which your proxy instance is deployed. (default `us-east-1`)
+4. then search or navigate to the `AWS Lambda`s feature, and find the specific one you wish to debug
+5. find the tabs for `Monitoring` then within that, `Logging`, then click "go to Cloud Watch"
 
 ### via CLI
 
@@ -85,9 +86,10 @@ $(aws sts assume-role \
 --role-session-name MySessionName \
 --query "Credentials.[AccessKeyId,SecretAccessKey,SessionToken]" \
 --output text))
-````
+```
 
 Then, you can do a series of commands as follows:
+
 ```shell
 aws logs describe-log-streams --log-group-name /aws/lambda/psoxy-azure-ad
 aws logs get-log events --log-group-name /aws/lambda/psoxy-azure-ad --log-stream-name [VALUE_FROM_LAST_COMMAND]
@@ -98,6 +100,7 @@ aws logs get-log events --log-group-name /aws/lambda/psoxy-azure-ad --log-stream
 ### error creating Lambda Function URL
 
 Something like the following:
+
 ```
 Error: error creating Lambda Function URL (psoxy-outlook-mail): ResourceConflictException: Failed to create function url config for [functionArn = arn:aws:lambda:us-east-1:123456789012:function:psoxy-outlook-mail]. Error message:  FunctionUrlConfig exists for this Lambda function
 │ {
@@ -128,19 +131,22 @@ NOTE: you likely need to change `outlook-mail` if your error is with a different
 ### error reading SSM Parameters
 
 Something like the following:
+
 ```
 Error loading class co.worklytics.psoxy.Handler: missing config. no value for PSOXY_SALT: java.lang.Error
 java.lang.Error: missing config. no value for PSOXY_SALT
 ```
 
 Check:
-  - the SSM parameter exists in the AWS account
-  - the SSM parameter can be read by the lambda's execution rule (eg, has an attached IAM policy
-    that allows the SSM parameter to be read; can test this with the [AWS Policy Simulator](https://policysim.aws.amazon.com/home/index.jsp),
-    setting 'Role' to your lambda's execution role, 'Service' to 'AWS Systems Manager', 'Action' to
-    'Get Parameter'  and 'Resource' to the SSM parameter's ARN.
-  - the SSM parameter can be decrypted by the lambda's execution role (if it's encrypted with a KMS
-    key)
+
+- the SSM parameter exists in the AWS account
+- the SSM parameter can be read by the lambda's execution rule (eg, has an attached IAM policy that
+  allows the SSM parameter to be read; can test this with the
+  [AWS Policy Simulator](https://policysim.aws.amazon.com/home/index.jsp), setting 'Role' to your
+  lambda's execution role, 'Service' to 'AWS Systems Manager', 'Action' to 'Get Parameter' and
+  'Resource' to the SSM parameter's ARN.
+- the SSM parameter can be decrypted by the lambda's execution role (if it's encrypted with a KMS
+  key)
 
 Setting `IS_DEVELOPMENT_MODE` to "true" in the Lambda's Env Vars via the console can enable some
 additional logging with detailed SSM error messages that will be helpful; but note that some of
@@ -149,7 +155,6 @@ these errors will be expected in certain configurations.
 Our Terraform examples should provide both of the above for you, but worth double-checking.
 
 If those are present, yet the error persists, it's possible that you have some org-level security
-constraint/policy preventing SSM parameters from being used / read. For example, you have a
-"default deny" policy set for SSM GET actions/etc.  In such a case, you need to add the execute
-roles for each lambda as exceptions to such policies (find these under AWS --> IAM --> Roles).
-
+constraint/policy preventing SSM parameters from being used / read. For example, you have a "default
+deny" policy set for SSM GET actions/etc. In such a case, you need to add the execute roles for each
+lambda as exceptions to such policies (find these under AWS --> IAM --> Roles).

@@ -1,7 +1,7 @@
 # Lookup Tables with AWS
 
 If you use psoxy to send pseudonymized data to Worklytics and later wish to re-identify the data
-that  you export from Worklytics on your premises, you'll need a lookup table in your data warehouse
+that you export from Worklytics on your premises, you'll need a lookup table in your data warehouse
 to JOIN to data exported from Worklytics.
 
 ![AWS data flow](./lookup-table-data-flow.png)
@@ -22,4 +22,3 @@ lookup_tables = {
 ```
 
 Use the bucket name shown in your output to build import pipeline to your data warehouse.
-
