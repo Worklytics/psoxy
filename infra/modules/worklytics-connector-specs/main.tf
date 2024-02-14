@@ -504,29 +504,34 @@ EOT
           value_managed_by_tf : false
         },
         {
-          name : "PRIVATE_KEY"
-          writable : false
-          sensitive : true
-          value_managed_by_tf : false
-        },
-        {
-          name : "CLIENT_ID"
-          writable : false
+          name : "REFRESH_TOKEN"
+          writable : true
           sensitive : true
           value_managed_by_tf : false
         },
         {
           name : "OAUTH_REFRESH_TOKEN"
           writable : true
-          lockable : true
+          lockable : true   # nonsensical; this parameter/secret IS the lock. it's really the tokens that should have lockable:true
+          sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_ID"
+          writable : false
+          sensitive : true # not really, but simpler this way; and some may want it treated as sensitive, since would be req'd to brute-force app tokens or something
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_SECRET"
+          writable : false
           sensitive : true
           value_managed_by_tf : false
-        }
+        },
       ],
       environment_variables : {
-        GRANT_TYPE : "certificate_credentials"
-        TOKEN_RESPONSE_TYPE : "GITHUB_ACCESS_TOKEN"
-        REFRESH_ENDPOINT : "https://${local.github_enterprise_server_host}/api/${local.github_enterprise_server_version}/app/installations/${local.github_installation_id}/access_tokens"
+        GRANT_TYPE : "refresh_token"
+        REFRESH_ENDPOINT : "https://github.com/login/oauth/access_token"
         USE_SHARED_TOKEN : "TRUE"
       }
       settings_to_provide = {
