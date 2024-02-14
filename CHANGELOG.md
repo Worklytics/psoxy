@@ -20,6 +20,11 @@ Changes to be including in future/planned release notes will be added here.
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## [0.4.48](https://github.com/Worklytics/psoxy/release/tag/v0.4.48)
+  - GitHub Enterprise Server: since this version is using `refresh_token` oauth flow and the connector 
+    should be reinstalled in order to create the new variables, permissions and the new documentation
+    that will help you to configure the right values for the variables.
+
 ## [0.4.47](https://github.com/Worklytics/psoxy/release/tag/v0.4.47)
   - AWS: some moved resources due to refactoring to accommodate option to use AWS Secrets Manager
 
