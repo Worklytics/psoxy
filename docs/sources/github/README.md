@@ -142,7 +142,7 @@ curl --location --request POST 'https://your-github-host/login/oauth/access_toke
 The response will be something like:
 
 ```
-access_token=ghu_jTL7Utf7hZUnGxsVmuItnyGFU2gBfB1JzEXS&expires_in=28800&refresh_token=ghr_6Qof66CCCZyMX4O5c5Jf1Ri02uBwI06zg1MV0yTFziM8xJowaarYRtnDoyoRng2da743oO3WEhXZ&refresh_token_expires_in=15724800&scope=&token_type=bearer
+access_token=...&expires_in=28800&refresh_token=...&refresh_token_expires_in=15724800&scope=&token_type=bearer
 ```
 You will need to copy the value of the `refresh_token`.
 
