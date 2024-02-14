@@ -531,7 +531,8 @@ EOT
       ],
       environment_variables : {
         GRANT_TYPE : "refresh_token"
-        REFRESH_ENDPOINT : "https://github.com/login/oauth/access_token"
+        TOKEN_RESPONSE_TYPE : "GITHUB_ACCESS_TOKEN"
+        REFRESH_ENDPOINT : "https://${local.github_enterprise_server_host}/login/oauth/access_token"
         USE_SHARED_TOKEN : "TRUE"
       }
       settings_to_provide = {
