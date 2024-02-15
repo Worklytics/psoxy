@@ -13,7 +13,7 @@ There are several connectors available for GitHub:
 ## Authentication workflow
 
 The connector uses a GitHub App to authenticate and access the data. 
-- For Enterprise Server, it uses App with a user token generation [based on the application](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app#generating-a-user-access-token-when-a-user-installs-your-app).
+- For Enterprise Server, it uses App with a user token generation [based on the application](https://docs.github.com/en/enterprise-server@3.11/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app#generating-a-user-access-token-when-a-user-installs-your-app).
 - For non enterprise, it uses [installation tokens](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app) for authentication.
 
 ## Examples
