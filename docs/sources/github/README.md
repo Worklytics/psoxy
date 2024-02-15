@@ -4,17 +4,17 @@ Availability: **BETA**
 
 There are several connectors available for GitHub:
 
-- [Github Free/Pro/Teams] - for non-Enterprise GitHub organization hosted in github.com.
-- [Github Enterprise Cloud] - GitHub Enterprise instances hosted by github.com on behalf of your
+- [GitHub Free/Pro/Teams] - for non-Enterprise GitHub organization hosted in github.com.
+- [GitHub Enterprise Cloud] - GitHub Enterprise instances hosted by github.com on behalf of your
   organization.
-- [Github Enterprise Server] - similar to 'Cloud', but you must customize rules and API host;
+- [GitHub Enterprise Server] - similar to 'Cloud', but you must customize rules and API host;
   contact Worklytics for assistance.
 
 ## Authentication workflow
 
-The connector uses a GitHub App to authenticate and access the data. 
-- For Enterprise Server, it uses App with a user token generation [based on the application](https://docs.github.com/en/enterprise-server@3.11/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app#generating-a-user-access-token-when-a-user-installs-your-app).
-- For non enterprise, it uses [installation tokens](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app) for authentication.
+The connector uses a GitHub App to authenticate and access the data.
+- For Enterprise Server, you must generate a [user access token](https://docs.github.com/en/enterprise-server@3.11/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app#generating-a-user-access-token-when-a-user-installs-your-app).
+- For Cloud, including Free/Pro/Teams/Enterprise, you must provide an [installation token](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app) for authentication.
 
 ## Examples
 
@@ -22,7 +22,7 @@ The connector uses a GitHub App to authenticate and access the data.
 - Example Data : [original](example-api-responses/original) |
   [sanitized](example-api-responses/sanitized)
 
-## Github Cloud instances (Free, Teams, Professional, Enterprise): Steps to Connect
+## GitHub Cloud (Free, Teams, Professional, Enterprise): Steps to Connect
 
 Both share the same configuration and setup instructions except Administration permission for Audit
 Log events.
@@ -105,27 +105,30 @@ Terraform. You will need to redeploy the proxy again if that value was not popul
 
 ## GitHub Enteprise Server: Steps to connect
 
-You can use a [guided script](../../../tools/github-enterprise-server-auth.sh) to setup the connector. In any case, you can follow here the manual steps that needs to be done.
+We provide a [helper script](../../../tools/github-enterprise-server-auth.sh) to set up the connector, which will guide you through the steps
+below and automate some of them. Alternatively, you can follow the steps below directly:
 
 1. You have to populate:
-    - `github_enterprise_server_host` variable in Terraform with the hostname of your Github Enterprise Server (example: `github.your-company.com`).
-      This host should be accessible from the psoxy function, as the connector will need to reach it.
-    - `github_organization` variable in Terraform with the name of your organization in Github Enterprise Server. You can put more than one, just split them in commas (example: `org1,org2`).
+    - `github_enterprise_server_host` variable in Terraform with the hostname of your GitHub
+      Enterprise Server (example: `github.your-company.com`). This host should be accessible from
+      the proxy instance function, as the connector will need to reach it.
+    - `github_organization` variable in Terraform with the name of your organization in GitHub
+      Enterprise Server. You can put more than one, just split them in commas (example: `org1,org2`).
 2. From your organization, register a [GitHub App](https://docs.github.com/en/enterprise-server@3.11/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
    with following permissions with **Read Only**:
-   - Repository:
-    - Contents: for reading commits and comments
-    - Issues: for listing issues, comments, assignees, etc.
-    - Metadata: for listing repositories and branches
-    - Pull requests: for listing pull requests, reviews, comments and commits
-      - Organization
-    - Administration: for listing events from audit log
-    - Members: for listing teams and their members
+    - Repository:
+      - Contents: for reading commits and comments
+      - Issues: for listing issues, comments, assignees, etc.
+      - Metadata: for listing repositories and branches
+      - Pull requests: for listing pull requests, reviews, comments and commits
+    - Organization
+      - Administration: for listing events from audit log
+      - Members: for listing teams and their members
 
 NOTES:
 - We assume that ALL the repositories are going to be listed **should be owned by the organization, not the users**.
 
-Apart from Github instructions please review the following:
+Apart from GitHub instructions please review the following:
 - "Homepage URL" can be anything, not required in this flow but required by GitHub.
 - "Callback URL" can be anything, but we recommend something like `http://localhost` as we will need it for the redirect as part of the authentication.
 - Webhooks check can be disabled as this connector is not using them
