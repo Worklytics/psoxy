@@ -504,29 +504,34 @@ EOT
           value_managed_by_tf : false
         },
         {
-          name : "PRIVATE_KEY"
-          writable : false
-          sensitive : true
-          value_managed_by_tf : false
-        },
-        {
-          name : "CLIENT_ID"
-          writable : false
+          name : "REFRESH_TOKEN"
+          writable : true
           sensitive : true
           value_managed_by_tf : false
         },
         {
           name : "OAUTH_REFRESH_TOKEN"
           writable : true
-          lockable : true
+          lockable : true   # nonsensical; this parameter/secret IS the lock. it's really the tokens that should have lockable:true
+          sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_ID"
+          writable : false
+          sensitive : true # not really, but simpler this way; and some may want it treated as sensitive, since would be req'd to brute-force app tokens or something
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_SECRET"
+          writable : false
           sensitive : true
           value_managed_by_tf : false
-        }
+        },
       ],
       environment_variables : {
-        GRANT_TYPE : "certificate_credentials"
-        TOKEN_RESPONSE_TYPE : "GITHUB_ACCESS_TOKEN"
-        REFRESH_ENDPOINT : "https://${local.github_enterprise_server_host}/api/${local.github_enterprise_server_version}/app/installations/${local.github_installation_id}/access_tokens"
+        GRANT_TYPE : "refresh_token"
+        REFRESH_ENDPOINT : "https://${local.github_enterprise_server_host}/login/oauth/access_token"
         USE_SHARED_TOKEN : "TRUE"
       }
       settings_to_provide = {
@@ -545,8 +550,11 @@ EOT
         "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/pulls",
       ]
       external_token_todo : <<EOT
+You can use a [guided script](../../../tools/github-enterprise-server-auth.sh) to setup the connector. In any case, you can follow here the manual steps that needs to be done.
+
   1. You have to populate:
      - `github_enterprise_server_host` variable in Terraform with the hostname of your Github Enterprise Server (example: `github.your-company.com`).
+This host should be accessible from the psoxy function, as the connector will need to reach it.
      - `github_organization` variable in Terraform with the name of your organization in Github Enterprise Server. You can put more than one, just split them in commas (example: `org1,org2`).
   2. From your organization, register a [GitHub App](https://docs.github.com/en/enterprise-server@3.11/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
     with following permissions with **Read Only**:
@@ -561,39 +569,44 @@ EOT
 
   NOTES:
     - We assume that ALL the repositories are going to be listed **should be owned by the organization, not the users**.
-    - Enterprise Cloud is required for this connector.
 
   Apart from Github instructions please review the following:
   - "Homepage URL" can be anything, not required in this flow but required by GitHub.
+  - "Callback URL" can be anything, but we recommend something like `http://localhost` as we will need it for the redirect as part of the authentication.
   - Webhooks check can be disabled as this connector is not using them
   - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
-  3. Once is created please generate a new `Private Key`.
-  4. It is required to convert the format of the certificate downloaded from PKCS#1 in previous step to PKCS#8. Please run following command:
-```shell
-openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out gh_pk_pkcs8.pem -nocrypt
+  3. Once is created please generate a new `Client Secret`.
+  4. Copy the `Client ID` and copy in your browser following URL, replacing the `CLIENT_ID` with the value you have just copied:
 ```
+https://${local.github_enterprise_server_host}/login/oauth/authorize?client_id={YOUR CLIENT ID}
+```
+  5. The browser will ask you to accept permissions and then it will redirect you with to the previous `Callback URL` set as part of the application.
+The URL should look like this: `https://localhost/?code=69d0f5bd0d82282b9a11`.
+  6. Copy the value of `code` and run the following URL replacing in the placeholders the values of `Client ID` and `Client Secret`:
+```
+curl --location --request POST 'https://${local.github_enterprise_server_host}/login/oauth/access_token?client_id={YOUR CLIENT ID}&client_secret={YOUR CLIENT SECRET}&code={YOUR CODE}' --header 'Content-Type: application/json' --header 'Accept: application/json'
+```
+The response will be something like:
+
+```json
+{
+  "access_token":"ghu_...",
+  "expires_in":28800,
+  "refresh_token":"ghr_...",
+  "refresh_token_expires_in":15724800,
+  "token_type":"bearer",
+  "scope":""
+}
+```
+You will need to copy the value of the `refresh_token`.
 
 **NOTES**:
- - If the certificate is not converted to PKCS#8 connector will NOT work. You might see in logs a Java error `Invalid PKCS8 data.` if the format is not correct.
- - Command proposed has been successfully tested on Ubuntu; it may differ for other operating systems.
+ - `Code` can be used once, so if you need to repeat the process you will need to generate a new one.
 
-  5. Install the application in your organization.
-     Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "Github App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
-  6. Once installed, the `installationId` is required as it needs to be provided in the proxy as parameter for the connector in your Terraform module. You can go to your organization settings and
-click on `Third Party Access`. Click on `Configure` the application you have installed in previous step and you will find the `installationId` at the URL of the browser:
-```
-https://{YOUR GITHUB HOST}/organizations/{YOUR ORG}/settings/installations/{INSTALLATION_ID}
-```
-  Copy the value of `installationId` and assign it to the `github_installation_id` variable in Terraform. You will need to redeploy the proxy again if that value was not populated before.
-
-**NOTE**:
- - If `github_installation_id` is not set, authentication URL will not be properly formatted and you will see *401: Unauthorized* when trying to get an access token.
- - If you see *404: Not found* in logs please review the *IP restriction policies* that your organization might have; that could cause connections from psoxy AWS Lambda/GCP Cloud Functions be rejected.
-
-  6. Update the variables with values obtained in previous step:
-     - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
-     - `PSOXY_GITHUB_PRIVATE_KEY` with content of the `gh_pk_pkcs8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content *as-is* into this variable.
-  7. Once the certificate has been uploaded, please remove {YOUR DOWNLOADED CERTIFICATE FILE} and `gh_pk_pkcs8.pem` from your computer or store it in a safe place.
+  7. Update the variables with values obtained in previous step:
+     - `psoxy_GITHUB_ENTERPRISE_SERVER_CLIENT_ID` with `Client Id` value.
+     - `psoxy_GITHUB_ENTERPRISE_SERVER_CLIENT_SECRET` with `Client Secret` value.
+     - `psoxy_GITHUB_ENTERPRISE_SERVER_REFRESH_TOKEN` with the `refresh_token`.
 
 EOT
     }

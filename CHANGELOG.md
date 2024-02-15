@@ -20,6 +20,12 @@ Changes to be including in future/planned release notes will be added here.
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## [0.4.48](https://github.com/Worklytics/psoxy/release/tag/v0.4.48)
+  - BREAKING - GitHub Enterprise Server: authentication strategy has changed; you will see creation
+    and destruction of some secrets that are used for authentication; you MUST generate new auth
+    credentials for your proxy instance. see [`docs/sources/github/README.md`](docs/sources/github/README.md)
+    or contact support for assistance.
+
 ## [0.4.47](https://github.com/Worklytics/psoxy/release/tag/v0.4.47)
   - AWS: some moved resources due to refactoring to accommodate option to use AWS Secrets Manager
 
