@@ -550,6 +550,8 @@ EOT
         "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/pulls",
       ]
       external_token_todo : <<EOT
+You can use a [guided script](../../../tools/github-enterprise-server-auth.sh) to setup the connector. In any case, you can follow here the manual steps that needs to be done.
+
   1. You have to populate:
      - `github_enterprise_server_host` variable in Terraform with the hostname of your Github Enterprise Server (example: `github.your-company.com`).
 This host should be accessible from the psoxy function, as the connector will need to reach it.
