@@ -139,12 +139,19 @@ https://your-github-host/login/oauth/authorize?client_id={YOUR CLIENT ID}
    The URL should look like this: `https://localhost/?code=69d0f5bd0d82282b9a11`.
 6. Copy the value of `code` and run the following URL replacing in the placeholders the values of `Client ID` and `Client Secret`:
 ```
-curl --location --request POST 'https://your-github-host/login/oauth/access_token?client_id={YOUR CLIENT ID}&client_secret={YOUR CLIENT SECRET}&code={YOUR CODE}'
+curl --location --request POST 'https://your-github-host/login/oauth/access_token?client_id={YOUR CLIENT ID}&client_secret={YOUR CLIENT SECRET}&code={YOUR CODE}' --header 'Content-Type: application/json' --header 'Accept: application/json'
 ```
 The response will be something like:
 
-```
-access_token=...&expires_in=28800&refresh_token=...&refresh_token_expires_in=15724800&scope=&token_type=bearer
+```json
+{
+  "access_token":"ghu_...",
+  "expires_in":28800,
+  "refresh_token":"ghr_...",
+  "refresh_token_expires_in":15724800,
+  "token_type":"bearer",
+  "scope":""
+}
 ```
 You will need to copy the value of the `refresh_token`.
 
