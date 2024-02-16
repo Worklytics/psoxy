@@ -212,7 +212,7 @@ As of Feb 2023, Psoxy is implemented with Java 11 and built via Maven. The proxy
 provisioned and the Psoxy code deployed using Terraform, relying on Azure, Google Cloud, and/or AWS
 command line tools.
 
-You will need all of the following in your deployment environment (eg, your laptop):
+You will need all the following in your deployment environment (eg, your laptop):
 
 | Tool                                            | Version                | Test Command              |
 |-------------------------------------------------|------------------------|---------------------------|
