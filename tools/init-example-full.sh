@@ -137,7 +137,7 @@ if [ -f "${TF_CONFIG_ROOT}/backend.tf" ]; then
 fi
 
 printf "\n${GREEN}Initialization complete.${NC}"
-printf "If you wish to remove files created by this initalization, run ${BLUE}${REPO_CLONE_BASE_DIR}tools/reset-example.sh${NC}.\n"
+printf "If you wish to remove files created by this initialization, run ${BLUE}${REPO_CLONE_BASE_DIR}tools/reset-example.sh${NC}.\n"
 
 
 

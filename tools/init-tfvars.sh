@@ -7,7 +7,7 @@ PSOXY_BASE_DIR=$2
 DEPLOYMENT_ENV=${3:-"local"}
 HOST_PLATFORM=${4:-"aws"}
 
-SCRIPT_VERSION="v0.4.47"
+SCRIPT_VERSION="v0.4.48"
 
 if [ -z "$PSOXY_BASE_DIR" ]; then
   printf "Usage: init-tfvars.sh <path-to-terraform.tfvars> <path-to-psoxy-base-directory> [DEPLOYMENT_ENV]\n"
@@ -299,9 +299,22 @@ fi
 # NOTE: could be conditional based on google workspace, azure, etc - but as we expect future
 # examples to cover ALL connectors, and just vary by host platform, we'll just initialize all for
 # now and expect customers to remove them as needed
+
+# init worklytics-connector-specs module as if it's a terraform config, so subsequent 'console' call
+# will work
+terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" init >> /dev/null
 AVAILABLE_CONNECTORS=$(echo "local.available_connector_ids" | terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" console)
-printf "# review following list of connectors to enable, and comment out what you don't want\n" >> $TFVARS_FILE
-printf "enabled_connectors = ${AVAILABLE_CONNECTORS}\n\n" >> $TFVARS_FILE
+
+# clean up what the init did above
+rm -rf "${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs/.terraform" 2> /dev/null
+rm "${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs/.terraform.lock.hcl" 2> /dev/null
+
+if [ -z $AVAILABLE_CONNECTORS ]; then
+  printf "${RED}Failed to generate list of enabled_connectors${NC}; you will need to add an variable assigned for ${BLUE}enabled_connectors${NC} to your ${BLUE}terraform.tfvars${NC} as a list of connector ID strings. Contact support for assistance.\n"
+else
+  printf "# review following list of connectors to enable, and comment out what you don't want\n" >> $TFVARS_FILE
+  printf "enabled_connectors = ${AVAILABLE_CONNECTORS}\n\n" >> $TFVARS_FILE
+fi
 
 printf "\n"
 

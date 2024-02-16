@@ -11,17 +11,17 @@ result to a corresponding `-sanitized` bucket.
 
 You should limit the size of files processed by proxy to 200k rows or less, to ensure processing of
 any single file finishes within the run time limitations of the host platform (AWS, GCP). There is
-some flexibility here based on the complexity of your rules and file schema, but we've found 200k
-to be a conservative target.
+some flexibility here based on the complexity of your rules and file schema, but we've found 200k to
+be a conservative target.
 
 ### Compression
 
 To improve performance and reduce storage costs, you should compress (gzip) the files you write to
-the `-input` bucket. Psoxy will decompress gzip files before processing and then compress the
-result before writing to the `-sanitized` bucket. Ensure that you set `Content-Encoding: gzip` on
-all files in your `-input` bucket to enable this behavior. Note that if you are uploading files via
-the web UI in GCP/AWS, it is not possible to set this metadata in the initial upload - so you cannot
-use compression in such a scenario.
+the `-input` bucket. Psoxy will decompress gzip files before processing and then compress the result
+before writing to the `-sanitized` bucket. Ensure that you set `Content-Encoding: gzip` on all files
+in your `-input` bucket to enable this behavior. Note that if you are uploading files via the web UI
+in GCP/AWS, it is not possible to set this metadata in the initial upload - so you cannot use
+compression in such a scenario.
 
 ## Sanitization Rules
 
@@ -37,6 +37,7 @@ If your use-case is record oriented (eg, `NDJSON`, etc), with nested or repeated
 will likely need `RecordRules` as an alternative.
 
 #### Pseudonymization
+
 The core function of the Proxy is to pseudonymize PII in your data. To pseudonymize a column, add it
 to `columnsToPseudonymize`.
 
@@ -59,7 +60,7 @@ modifying your existing data export pipelines.
 
 ##### Redaction
 
-To redact a column, add it to `columnsToRedact`.  By default, all columns present in the input data
+To redact a column, add it to `columnsToRedact`. By default, all columns present in the input data
 will be included in the output data, unless explicitly redacted.
 
 ```yaml
@@ -68,6 +69,7 @@ columnsToRedact:
 ```
 
 ##### Inclusion
+
 Alternatively to redacting columns, you can specify `columnsToInclude`. If specified, only columns
 explicitly included will be included in the output data.
 
@@ -92,12 +94,14 @@ columnsToRename:
 
 This feature supports simple adaptation of existing data pipelines for use in Worklytics.
 
-
 #### See Also
- - Rule structure is specified in [`ColumnarRules`](java/gateway-core/src/main/java/com/avaulta/gateway/rules/ColumnarRules.java).
+
+- Rule structure is specified in
+  [`ColumnarRules`](java/gateway-core/src/main/java/com/avaulta/gateway/rules/ColumnarRules.java).
 
 ### Record-Oriented Formats (RecordRules) **alpha**
-*As of Oct 2023, this is an alpha feature*
+
+_As of Oct 2023, this is an alpha feature_
 
 `RecordRules` parses files as records, presuming the specified format. It performs transforms in
 order on each record to sanitize your data, and serializes the result back to the specified format.
@@ -107,28 +111,30 @@ eg.
 ```yaml
 format: NDJSON
 transforms:
-- redact: "$.summary"
-- pseudonymize: "$.email"
+  - redact: "$.summary"
+  - pseudonymize: "$.email"
 ```
 
 Each `transform` is a map from transform type --> to a JSONPath to which the transform should be
-applied.  The JSONPath is evaluated from the root of each record in the file.
+applied. The JSONPath is evaluated from the root of each record in the file.
 
 The above example rules applies two transforms. First, it redacts `$.summary` - the `summary` field
-at the root at of the record object.  Second, it pseudonymizes `$.email` - the `email` field at the
+at the root at of the record object. Second, it pseudonymizes `$.email` - the `email` field at the
 root of the record object.
 
 `transforms` itself is an ordered-list of transforms. The transforms should be applied in order.
 
-
 #### See Also
-- Rule structure is specified in [`RecordRules`](java/gateway-core/src/main/java/com/avaulta/gateway/rules/RecordRules.java).
 
+- Rule structure is specified in
+  [`RecordRules`](java/gateway-core/src/main/java/com/avaulta/gateway/rules/RecordRules.java).
 
 ### Mixing File Formats **alpha**
-*As of Oct 2023, this feature is in alpha and may change in backwards incompatible ways*
 
-You can process multiple file formats through a single proxy instance using `MultiTypeBulkDataRules`.
+_As of Oct 2023, this feature is in alpha and may change in backwards incompatible ways_
+
+You can process multiple file formats through a single proxy instance using
+`MultiTypeBulkDataRules`.
 
 These rules are structured with a field `fileRules`, which is a map from parameterized path template
 within the "input" bucket to one of the above rule types (`RecordRules`,`ColumnarRules`) to be
@@ -151,7 +157,6 @@ fileRules:
 Path templates are evaluated against the incoming file (object) path in order, and the first match
 is applied to the file. If no templates match the incoming file, it will not be processed.
 
-
 ## Configuration
 
 Worklytics' provided Terraform modules include default rules for expected formats for `hris`,
@@ -160,19 +165,19 @@ Worklytics' provided Terraform modules include default rules for expected format
 If your input data does not match the expected formats, you can customize the rules in one of the
 following ways.
 
-*NOTE: The configuration approaches described below utilized Terraform variables as provided by our
-gcp and aws template examples.  Other examples may not support these variables; please consult the
-`variables.tf` at the root of your configuration.  If you are directly using Worklytics' Terraform
+_NOTE: The configuration approaches described below utilized Terraform variables as provided by our
+gcp and aws template examples. Other examples may not support these variables; please consult the
+`variables.tf` at the root of your configuration. If you are directly using Worklytics' Terraform
 modules, you can consult the `variables.tf` in the module directory to see if these variables are
-exposed.*
-
+exposed._
 
 ### Custom Rules of Predefined Bulk Connector (preferred)
+
 You can override the rules used by the predefined bulk connectors (eg `hris`, `survey`, `badge`) by
 filling the `custom_bulk_connector_rules` variable in your Terraform configuration.
 
 This variable is a map from connector ID --> rules, with the rules encoded in HCL format (rather
-than YAML as shown above).  An illustrative example:
+than YAML as shown above). An illustrative example:
 
 ```hcl
 custom_bulk_connector_rules = {
@@ -197,8 +202,9 @@ This approach ONLY supports `ColumnarRules`
 
 ### Custom Bulk Connector
 
-Rather than enabling one of the predefined bulk connectors providing in the `worklytics-connector-specs`
-Terraform module, you can specify a custom connector from scratch, including your own rules.
+Rather than enabling one of the predefined bulk connectors providing in the
+`worklytics-connector-specs` Terraform module, you can specify a custom connector from scratch,
+including your own rules.
 
 This approach is less convenient than the previous one, as TODO documentation and deep-links for
 connecting your data to Worklytics will not be generated.
@@ -230,17 +236,16 @@ custom_bulk_connectors = {
 
 The above example is for `ColumnarRules`.
 
-
 ### Direct Configuration of RULES
 
 You can directly modify the `RULES` environment variable on the Psoxy instance, by directly editing
-your instance's environment via your hosting provider's console or CLI.  In this case, the rules
+your instance's environment via your hosting provider's console or CLI. In this case, the rules
 should be encoded in YAML format, such as:
 
 ```yaml
 pseudonymFormat: URL_SAFE_TOKEN
 columnsToRename:
-    termination_date: leave_date
+  termination_date: leave_date
 columnsToPseudonymize:
   - employee_id
   - employee_email
@@ -255,8 +260,3 @@ Alternatively, you can remove the environment variable from your instance, and i
 
 This approach is useful for testing, but note that if you later run `terraform apply` again, any
 changes you make to the environment variable may be overwritten by Terraform.
-
-
-
-
-

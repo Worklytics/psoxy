@@ -5,8 +5,8 @@ This page provides an overview of how proxy authenticates and confirms authoriza
 
 ## Authentication
 
-Each Worklytics tenant operates as a unique GCP service account within Google Cloud.  GCP issues
-an identity token for this service account to processes running in the tenant, which the tenant then
+Each Worklytics tenant operates as a unique GCP service account within Google Cloud. GCP issues an
+identity token for this service account to processes running in the tenant, which the tenant then
 uses to authenticate against AWS.
 
 This is [OIDC](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_oidc.html) based
@@ -24,19 +24,20 @@ portal) to assume the role.
 
 This assumption policy will have a statement similar to the following, where the value of the `aud`
 claim is the numeric ID of your Worklytics tenant's GCP Service Account:
+
 ```json
-        {
-            "Effect": "Allow",
-            "Principal": {
-                "Federated": "accounts.google.com"
-            },
-            "Action": "sts:AssumeRoleWithWebIdentity",
-            "Condition": {
-                "StringEquals": {
-                    "accounts.google.com:aud": "12345678901234567890123456789"
-                }
-            }
-        }
+{
+	"Effect": "Allow",
+	"Principal": {
+		"Federated": "accounts.google.com"
+	},
+	"Action": "sts:AssumeRoleWithWebIdentity",
+	"Condition": {
+		"StringEquals": {
+			"accounts.google.com:aud": "12345678901234567890123456789"
+		}
+	}
+}
 ```
 
 Colloquially, this allows a web identity federated from `accounts.google.com` where Google has
