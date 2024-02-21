@@ -171,6 +171,7 @@ resource "google_cloudfunctions_function" "function" {
   available_memory_mb   = coalesce(var.available_memory_mb, 1024)
   source_archive_bucket = var.artifacts_bucket_name
   source_archive_object = var.deployment_bundle_object_name
+  docker_repository = var.artifact_repository_id
   entry_point           = "co.worklytics.psoxy.GCSFileEvent"
   service_account_email = google_service_account.service_account.email
   timeout               = 540 # 9 minutes, which is gen1 max allowed

@@ -204,6 +204,7 @@ module "bulk_connector" {
   config_parameter_prefix           = local.config_parameter_prefix
   source_kind                       = each.value.source_kind
   artifacts_bucket_name             = module.psoxy.artifacts_bucket_name
+  artifact_repository_id = module.psoxy.artifact_repository
   deployment_bundle_object_name     = module.psoxy.deployment_bundle_object_name
   psoxy_base_dir                    = var.psoxy_base_dir
   bucket_write_role_id              = module.psoxy.bucket_write_role_id
