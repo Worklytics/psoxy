@@ -20,6 +20,13 @@ Changes to be including in future/planned release notes will be added here.
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## [0.4.49](https://github.com/Worklytics/psoxy/release/tag/v0.4.49)
+- GCP:
+  - Existing GCP functions are using *Container Registry* for building their internal docker image where the psoxy code is deployed. However,
+    this is [deprecated since May 2023 and starting Feb 2024](https://cloud.google.com/container-registry/docs/deprecations/container-registry-deprecation) it
+    is required that functions use *Artifact Registry* instead. All deployments made since this version will use *Artifact Registry*
+    with a specific repository created for storing all psoxy images. Any previous version before this version will work without any issue.
+  
 ## [0.4.48](https://github.com/Worklytics/psoxy/release/tag/v0.4.48)
   - BREAKING - GitHub Enterprise Server: authentication strategy has changed; you will see creation
     and destruction of some secrets that are used for authentication; you MUST generate new auth
