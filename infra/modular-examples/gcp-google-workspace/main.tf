@@ -123,6 +123,7 @@ module "psoxy-google-workspace-connector" {
   instance_id                           = "psoxy-${each.key}"
   service_account_email                 = module.google-workspace-connection[each.key].service_account_email
   artifacts_bucket_name                 = module.psoxy-gcp.artifacts_bucket_name
+  artifact_repository_id                = module.psoxy-gcp.artifact_repository
   deployment_bundle_object_name         = module.psoxy-gcp.deployment_bundle_object_name
   path_to_config                        = null
   path_to_repo_root                     = var.psoxy_base_dir
@@ -242,6 +243,7 @@ module "connector-long-auth-function" {
   instance_id                   = each.key
   service_account_email         = google_service_account.long_auth_connector_sa[each.key].email
   artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
+  artifact_repository_id        = module.psoxy-gcp.artifact_repository
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
   path_to_config                = null
   path_to_repo_root             = var.psoxy_base_dir
@@ -304,6 +306,7 @@ module "psoxy-gcp-bulk" {
   region                        = var.gcp_region
   source_kind                   = each.value.source_kind
   artifacts_bucket_name         = module.psoxy-gcp.artifacts_bucket_name
+  artifact_repository_id        = module.psoxy-gcp.artifact_repository
   deployment_bundle_object_name = module.psoxy-gcp.deployment_bundle_object_name
   psoxy_base_dir                = var.psoxy_base_dir
   bucket_write_role_id          = module.psoxy-gcp.bucket_write_role_id
