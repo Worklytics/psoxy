@@ -143,6 +143,7 @@ module "api_connector" {
   service_account_email                 = google_service_account.api_connectors[each.key].email
   artifacts_bucket_name                 = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name         = module.psoxy.deployment_bundle_object_name
+  artifact_repository_id = module.psoxy.artifact_repository
   path_to_config                        = null
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
@@ -156,6 +157,7 @@ module "api_connector" {
   default_labels                        = var.default_labels
   gcp_principals_authorized_to_test     = var.gcp_principals_authorized_to_test
   todos_as_local_files                  = var.todos_as_local_files
+
 
   environment_variables = merge(
     var.general_environment_variables,

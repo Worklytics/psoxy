@@ -56,6 +56,11 @@ variable "deployment_bundle_object_name" {
   description = "Name of the object containing the deployment bundle"
 }
 
+variable "artifact_repository_id" {
+  type = string
+    description = "ID of the artifact repository"
+}
+
 variable "path_to_repo_root" {
   type        = string
   description = "the path where your psoxy repo resides"

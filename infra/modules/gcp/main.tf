@@ -27,6 +27,36 @@ resource "google_project_service" "gcp_infra_api" {
   disable_on_destroy         = false # disabling on destroy has potential to conflict with other uses of the project
 }
 
+resource "google_artifact_registry_repository" "psoxy-functions-repo" {
+  location      = var.bucket_location
+  project = var.project_id
+  repository_id = "psoxy-functions"
+  description   = "Docker repository used on the cloud functions"
+  format        = "DOCKER"
+
+  ## Not supported in current google providers, needs 5.14 as there it is GA
+  # See https://github.com/hashicorp/terraform-provider-google/blob/main/CHANGELOG.md#5140-jan-29-2024
+  # but even is present in the documentation (https://registry.terraform.io/providers/hashicorp/google/4.80.0/docs/resources/artifact_registry_repository#argument-reference)
+  # when applied it throws an error with the message: "An argument named "cleanup_policy_dry_run" is not expected here"
+  # and "no block for cleanup_policies" is expected
+  /*cleanup_policy_dry_run = false
+
+  # https://cloud.google.com/artifact-registry/docs/repositories/cleanup-policy#json_2
+  # https://registry.terraform.io/providers/hashicorp/google/4.80.0/docs/resources/artifact_registry_repository#argument-reference
+  cleanup_policies {
+    id     = "keep-most-recent-versions"
+    action = "KEEP"
+
+    most_recent_versions {
+      keep_count = 3
+    }
+  }*/
+
+  depends_on = [
+    google_project_service.gcp_infra_api
+  ]
+}
+
 # pseudo secret
 resource "google_secret_manager_secret" "pseudonym_salt" {
   project   = var.project_id
@@ -312,4 +342,8 @@ output "pseudonym_salt" {
   description = "Value used to salt pseudonyms (SHA-256) hashes. If migrate to new deployment, you should copy this value."
   value       = random_password.pseudonym_salt.result
   sensitive   = true
+}
+
+output "artifact_repository" {
+  value = google_artifact_registry_repository.psoxy-functions-repo.id
 }
