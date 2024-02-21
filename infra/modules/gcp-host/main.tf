@@ -143,7 +143,7 @@ module "api_connector" {
   service_account_email                 = google_service_account.api_connectors[each.key].email
   artifacts_bucket_name                 = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name         = module.psoxy.deployment_bundle_object_name
-  artifact_repository_id = module.psoxy.artifact_repository
+  artifact_repository_id                = module.psoxy.artifact_repository
   path_to_config                        = null
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
@@ -204,7 +204,7 @@ module "bulk_connector" {
   config_parameter_prefix           = local.config_parameter_prefix
   source_kind                       = each.value.source_kind
   artifacts_bucket_name             = module.psoxy.artifacts_bucket_name
-  artifact_repository_id = module.psoxy.artifact_repository
+  artifact_repository_id            = module.psoxy.artifact_repository
   deployment_bundle_object_name     = module.psoxy.deployment_bundle_object_name
   psoxy_base_dir                    = var.psoxy_base_dir
   bucket_write_role_id              = module.psoxy.bucket_write_role_id

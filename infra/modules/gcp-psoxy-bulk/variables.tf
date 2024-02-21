@@ -53,7 +53,7 @@ variable "artifacts_bucket_name" {
 }
 
 variable "artifact_repository_id" {
-  type = string
+  type        = string
   description = "ID of the artifact repository"
 }
 

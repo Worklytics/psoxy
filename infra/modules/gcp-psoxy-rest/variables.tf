@@ -57,8 +57,8 @@ variable "deployment_bundle_object_name" {
 }
 
 variable "artifact_repository_id" {
-  type = string
-    description = "ID of the artifact repository"
+  type        = string
+  description = "ID of the artifact repository"
 }
 
 variable "path_to_repo_root" {
