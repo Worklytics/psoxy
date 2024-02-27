@@ -98,10 +98,14 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
          * V = Pair<String, List<F(String)>> = original column + all functions to apply to its value
          * Note, can't use Guava Table as order of the transformations to apply is not deterministic.
          * Using LinkedHashMap will use insertion order
+         * Note: insertion order is important, the first value MUST contain the SOURCE COLUMN for the
+         * new column, subsequent inserts ignore the column.
+         * Order is columns to duplicate, rename, then transforms
+         *
          */
         Map<String, Pair<String, List<Function<String, Optional<String>>>>> columnTransforms = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-        // just for make the code more readable, consumer that fills the table
+        // just for make the code more readable, consumer that fills the transforms
         TriConsumer<String, String, Function<String, Optional<String>>> addColumnTransform = (newColumn, sourceColumn, transform) ->
             columnTransforms.computeIfAbsent(newColumn, (s) -> Pair.of(sourceColumn, new ArrayList<>())).getValue().add(transform);
 
