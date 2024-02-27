@@ -31,6 +31,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.TriConsumer;
 import org.apache.commons.lang3.function.TriFunction;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
 import javax.inject.Inject;
@@ -94,16 +95,15 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         /*
          * Table to store the transformation to be applied to each column
          * K = new column name
-         * C = function to apply to the original column
-         * V = original column name
+         * V = Pair<String, List<F(String)>> = original column + all functions to apply to its value
          * Note, can't use Guava Table as order of the transformations to apply is not deterministic.
          * Using LinkedHashMap will use insertion order
          */
-        Map<String, Map<Function<String, Optional<String>>, String>> columnTransforms = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        Map<String, Pair<String, List<Function<String, Optional<String>>>>> columnTransforms = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
         // just for make the code more readable, consumer that fills the table
-        TriConsumer<String, Function<String, Optional<String>>, String> addColumnTransform = (newColumn, transform, sourceColumn) ->
-            columnTransforms.computeIfAbsent(newColumn, s -> new LinkedHashMap<>()).put(transform, sourceColumn);
+        TriConsumer<String, String, Function<String, Optional<String>>> addColumnTransform = (newColumn, sourceColumn, transform) ->
+            columnTransforms.computeIfAbsent(newColumn, (s) -> Pair.of(sourceColumn, new ArrayList<>())).getValue().add(transform);
 
         Set<String> columnsToRedact = asSetWithCaseInsensitiveComparator(rules.getColumnsToRedact());
 
@@ -246,31 +246,31 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
 
         // duplicated just copy the original value
-        columnsToDuplicate.forEach((original, duplicated) -> addColumnTransform.accept(duplicated, Optional::ofNullable, original));
+        columnsToDuplicate.forEach((original, duplicated) -> addColumnTransform.accept(duplicated, original, Optional::ofNullable));
         // The table holds the transformation to be applied to each original column to produce the new column
         // we apply pseudonymization in the renamed columns
         columnsToRename.forEach((original, renamed) -> {
-            addColumnTransform.accept(renamed, Optional::ofNullable, original);
+            addColumnTransform.accept(renamed, original, Optional::ofNullable);
         });
         // we apply the pipeline defined for each new column
         columnsToTransform.forEach((sourceColumn, pipelineSpec) -> pipelineSpec.forEach(pipeline -> {
-            addColumnTransform.accept(pipeline.getNewName(), (s) -> Optional.ofNullable(applyTransform.apply(s, pipeline)), sourceColumn);
+            addColumnTransform.accept(pipeline.getNewName(), sourceColumn, (s) -> Optional.ofNullable(applyTransform.apply(s, pipeline)));
         }));
         // we apply pseudonymization in the pseudonymized columns
         columnsToPseudonymize.forEach(column -> {
-            addColumnTransform.accept(column, (s) -> Optional.of(pseudonymizationFunction.apply(s, column, pseudonymizer)), column);
+            addColumnTransform.accept(column, column, (s) -> Optional.of(pseudonymizationFunction.apply(s, column, pseudonymizer)));
         });
         // we apply pseudonymization in the pseudonymized columns, only if present
         columnsToPseudonymizeIfPresent.forEach(column -> {
             if (headers.contains(column)) {
-                addColumnTransform.accept(column, (s) -> Optional.of(pseudonymizationFunction.apply(s, column, pseudonymizer)), column);
+                addColumnTransform.accept(column, column, (s) -> Optional.of(pseudonymizationFunction.apply(s, column, pseudonymizer)));
             }
         });
         // all headers that are not in the table are copied as is
         headers.forEach(header -> {
             if (!columnTransforms.containsKey(header) && !columnsToRename.containsKey(header)) {
                 // add it as is, no transformation, unless is a rename, we don't want the original
-                addColumnTransform.accept(header, Optional::ofNullable, header);
+                addColumnTransform.accept(header, header, Optional::ofNullable);
             }
         });
 
@@ -315,14 +315,15 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                     newRecord.replaceAll((k, v) -> null);
                     newRecord.keySet().forEach(h -> {
 
-                        Map<Function<String, Optional<String>>, String> transforms = columnTransforms.getOrDefault(h, Collections.emptyMap());
-                        if (transforms.isEmpty()) {
+                        Pair<String, List<Function<String, Optional<String>>>> transforms = columnTransforms.getOrDefault(h, null);
+                        if (transforms == null) {
                             newRecord.put(h, "");
                         } else {
                             // apply all transformations in insertion order
-                            String v = record.get(transforms.values().iterator().next());
-                            for (Map.Entry<Function<String, Optional<String>>, String> e : transforms.entrySet()) {
-                                v = e.getKey().apply(v).orElse("");
+                            // key holds the original column
+                            String v = record.get(transforms.getKey());
+                            for (Function<String, Optional<String>> transform : transforms.getValue()) {
+                                v = transform.apply(v).orElse(v);
                             }
                             newRecord.put(h, v);
                         }
