@@ -53,15 +53,6 @@ fi
 
 cd $PATH_TO_REPO
 
-# check if any open prs in github
-if gh pr list --state open; then
-  REPO_NAME=$(gh repo view --json nameWithOwner -q .nameWithOwner)
-  printf "${RED}There are open PRs in the ${BLUE}${REPO_NAME}${NC}. Please close them before continuing.${NC}\n"
-  gh pr list --web
-  cd -
-  exit 1
-fi
-
 # ensure on `main`
 CURRENT_SOURCE_BRANCH=$(git branch --show-current)
 if [ "$CURRENT_SOURCE_BRANCH" != "main" ]; then
@@ -104,10 +95,20 @@ if [[ "${EXAMPLE_TEMPLATE_REPO: -1}" != "/" ]]; then
     EXAMPLE_TEMPLATE_REPO="$EXAMPLE_TEMPLATE_REPO/"
 fi
 
+cd "$EXAMPLE_TEMPLATE_REPO"
+
 # files to copy - everything in the example directory ending in .tf
 FILES_TO_COPY=( *.tf )
 
-cd "$EXAMPLE_TEMPLATE_REPO"
+# check if any open prs in github
+if gh pr list --state open | grep -q . ; then
+  REPO_NAME=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+  printf "${RED}There are open PRs in the ${BLUE}${REPO_NAME}${NC}. Please close them before continuing.${NC}\n"
+  gh pr list --web
+  cd -
+  exit 1
+fi
+
 CURRENT_BRANCH=$(git branch --show-current)
 if [ "$CURRENT_BRANCH" != "main" ]; then
   printf "${RED}Current branch in checkout of $EXAMPLE_TEMPLATE_REPO is not main. Please checkout main branch and try again.${NC}\n"
