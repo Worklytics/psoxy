@@ -753,6 +753,46 @@ public class BulkDataSanitizerImplTest {
         }
     }
 
+    @Test
+    @SneakyThrows
+    void handle_null_transformations() {
+        Pseudonymizer defaultPseudonymizer =
+            pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+                .pseudonymizationSalt("salt")
+                .defaultScopeId("hris")
+                .pseudonymImplementation(PseudonymImplementation.LEGACY)
+                .build());
+
+
+        // this is a lookup-table use case (for customers to use in own data warehouse)
+        // First row has empty employee id and team, both duplicated and renamed later
+        final String SOURCE = "EMPLOYEE_ID,TEAM,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE\r\n" +
+            ",,2023-01-06,,2019-11-11,,\r\n" +
+            "2,Sales,2023-01-06,1,2020-01-01,\r\n";
+
+        final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,EMPLOYEE_ID_ORIG\r\n" +
+            ",,2023-01-06,,2019-11-11,,\r\n" +
+            "t~mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI,Sales,2023-01-06,t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,2020-01-01,,2\r\n";
+
+        ColumnarRules rules = ColumnarRules.builder()
+            .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+            .columnToPseudonymize("EMPLOYEE_ID")
+            .columnsToRename(ImmutableMap.of("TEAM", "DEPARTMENT"))
+            .columnToRedact("EMPLOYEE_EMAIL")
+            .columnToPseudonymize("MANAGER_ID")
+            .columnsToDuplicate(Map.of("EMPLOYEE_ID", "EMPLOYEE_ID_ORIG"))
+            .build();
+        columnarFileSanitizerImpl.setRules(rules);
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
+
+        try (StringReader in = new StringReader(SOURCE);
+             StringWriter out = new StringWriter()) {
+            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            assertEquals(EXPECTED, out.toString());
+        }
+    }
+
 
     class StubPseudonymizer implements Pseudonymizer {
 
