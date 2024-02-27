@@ -29,7 +29,9 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.function.TriConsumer;
 import org.apache.commons.lang3.function.TriFunction;
+import org.apache.commons.lang3.tuple.Triple;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -94,8 +96,14 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
          * K = new column name
          * C = function to apply to the original column
          * V = original column name
+         * Note, can't use Guava Table as order of the transformations to apply is not deterministic.
+         * Using LinkedHashMap will use insertion order
          */
-        Table<String, Function<String, Optional<String>>, String> transformTable = TreeBasedTable.create(String.CASE_INSENSITIVE_ORDER, Comparator.comparingInt(Object::hashCode));
+        Map<String, Map<Function<String, Optional<String>>, String>> columnTransforms = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
+        // just for make the code more readable, consumer that fills the table
+        TriConsumer<String, Function<String, Optional<String>>, String> addColumnTransform = (newColumn, transform, sourceColumn) ->
+            columnTransforms.computeIfAbsent(newColumn, s -> new LinkedHashMap<>()).put(transform, sourceColumn);
 
         Set<String> columnsToRedact = asSetWithCaseInsensitiveComparator(rules.getColumnsToRedact());
 
@@ -192,6 +200,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         BiFunction<String, FieldTransformPipeline, String> applyTransform = (originalValue, pipeline) -> {
           String value = originalValue;
           for ( FieldTransform transform : pipeline.getTransforms()) {
+
               if (value != null) {
                   if (transform instanceof FieldTransform.Filter) {
                       Matcher matcher = ((FieldTransform.Filter) transform).getCompiledPattern().matcher(value);
@@ -236,32 +245,32 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         };
 
 
+        // duplicated just copy the original value
+        columnsToDuplicate.forEach((original, duplicated) -> addColumnTransform.accept(duplicated, Optional::ofNullable, original));
         // The table holds the transformation to be applied to each original column to produce the new column
         // we apply pseudonymization in the renamed columns
         columnsToRename.forEach((original, renamed) -> {
-            transformTable.put(renamed, (s) -> Optional.of(pseudonymizationFunction.apply(s, original, pseudonymizer)), original);
+            addColumnTransform.accept(renamed, Optional::ofNullable, original);
         });
+        // we apply the pipeline defined for each new column
+        columnsToTransform.forEach((sourceColumn, pipelineSpec) -> pipelineSpec.forEach(pipeline -> {
+            addColumnTransform.accept(pipeline.getNewName(), (s) -> Optional.ofNullable(applyTransform.apply(s, pipeline)), sourceColumn);
+        }));
         // we apply pseudonymization in the pseudonymized columns
         columnsToPseudonymize.forEach(column -> {
-            transformTable.put(column, (s) -> Optional.of(pseudonymizationFunction.apply(s, column, pseudonymizer)), column);
+            addColumnTransform.accept(column, (s) -> Optional.of(pseudonymizationFunction.apply(s, column, pseudonymizer)), column);
         });
         // we apply pseudonymization in the pseudonymized columns, only if present
         columnsToPseudonymizeIfPresent.forEach(column -> {
             if (headers.contains(column)) {
-                transformTable.put(column, (s) -> Optional.of(pseudonymizationFunction.apply(s, column, pseudonymizer)), column);
+                addColumnTransform.accept(column, (s) -> Optional.of(pseudonymizationFunction.apply(s, column, pseudonymizer)), column);
             }
         });
-        // duplicated just copy the original value
-        columnsToDuplicate.forEach((original, duplicated) -> transformTable.put(duplicated, Optional::ofNullable, original));
-        // we apply the pipeline defined for each new column
-        columnsToTransform.forEach((sourceColumn, pipelineSpec) -> pipelineSpec.forEach(pipeline -> {
-            transformTable.put(pipeline.getNewName(), (s) -> Optional.ofNullable(applyTransform.apply(s, pipeline)), sourceColumn);
-        }));
         // all headers that are not in the table are copied as is
         headers.forEach(header -> {
-            if (!transformTable.rowKeySet().contains(header) && !columnsToRename.containsKey(header)) {
+            if (!columnTransforms.containsKey(header) && !columnsToRename.containsKey(header)) {
                 // add it as is, no transformation, unless is a rename, we don't want the original
-                transformTable.put(header, Optional::ofNullable, header);
+                addColumnTransform.accept(header, Optional::ofNullable, header);
             }
         });
 
@@ -273,13 +282,13 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             columnsToRename.entrySet().stream().filter(e -> e.getValue().equalsIgnoreCase(a)).findFirst().map(e -> records.getHeaderMap().getOrDefault(e.getKey(), Integer.MAX_VALUE)).orElse(Integer.MAX_VALUE)));
         Comparator<String> byColumnName = Comparator.naturalOrder();
 
-        List<String> columnNamesForOutputFile = transformTable.rowKeySet()
+        List<String> columnNamesForOutputFile = columnTransforms.keySet()
             .stream()
             .sorted(originalHeadersOrRenamedFirst.thenComparing(byColumnName))
             .collect(Collectors.toList())
             .stream()
             // leave original casing for headers
-            .map( h -> headers.stream().filter( o -> h.equalsIgnoreCase(o)).findFirst().orElse(h))
+            .map( h -> headers.stream().filter(h::equalsIgnoreCase).findFirst().orElse(h))
             .collect(Collectors.toList());
 
         CSVFormat csvFormat = CSVFormat.Builder.create()
@@ -305,19 +314,21 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                     // clean up the record prior to use
                     newRecord.replaceAll((k, v) -> null);
                     newRecord.keySet().forEach(h -> {
-                        transformTable
-                            .row(h)
-                            .entrySet()
-                            .stream()
-                            // if the column is not present, it will be null, skip always
-                            .filter(e -> record.isMapped(e.getValue()))
-                            .findFirst()
-                            .ifPresent(e -> {
-                                String columnValue = record.get(e.getValue());
-                                newRecord.put(h, e.getKey().apply(columnValue).orElse(""));
-                        });
+
+                        Map<Function<String, Optional<String>>, String> transforms = columnTransforms.getOrDefault(h, Collections.emptyMap());
+                        if (transforms.isEmpty()) {
+                            newRecord.put(h, "");
+                        } else {
+                            // apply all transformations in insertion order
+                            String v = record.get(transforms.values().iterator().next());
+                            for (Map.Entry<Function<String, Optional<String>>, String> e : transforms.entrySet()) {
+                                v = e.getKey().apply(v).orElse("");
+                            }
+                            newRecord.put(h, v);
+                        }
 
                     });
+
                     try {
                         printer.printRecord(newRecord.values());
                     } catch (Throwable e) {
@@ -393,4 +404,5 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             }
         };
     }
+
 }
