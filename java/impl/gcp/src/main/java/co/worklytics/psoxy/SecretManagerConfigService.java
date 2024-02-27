@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -115,7 +117,7 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
             }
 
             SecretVersionName secretVersionName =
-                SecretVersionName.of(projectId, secretName.getSecret(), versionName);
+                    SecretVersionName.of(projectId, secretName.getSecret(), versionName);
 
             // Access the secret version.
             AccessSecretVersionResponse response = client.accessSecretVersion(secretVersionName);
@@ -214,13 +216,13 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
         // 1. destroy up to ONE page of ENABLED secret versions (max 20)
         try {
             SecretManagerServiceClient.ListSecretVersionsPage enabledVersions =
-                client.listSecretVersions(ListSecretVersionsRequest.newBuilder()
-                            .setFilter("state:ENABLED")
-                            .setParent(secretName.toString())
-                            // Reduce the page, as each version will be disabled one by one
-                            .setPageSize(NUMBER_OF_VERSIONS_TO_RETRIEVE)
-                            .build())
-                    .getPage();
+                    client.listSecretVersions(ListSecretVersionsRequest.newBuilder()
+                                    .setFilter("state:ENABLED")
+                                    .setParent(secretName.toString())
+                                    // Reduce the page, as each version will be disabled one by one
+                                    .setPageSize(NUMBER_OF_VERSIONS_TO_RETRIEVE)
+                                    .build())
+                            .getPage();
 
             enabledVersions.getValues().forEach(i -> {
                 if (!i.getName().equals(exceptVersion.getName())) {
@@ -241,18 +243,25 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
         // still bills for these - "0.06 per version per location per month for 'Active secret versions'"
         // in Notes section of their pricing paging,
         // "1. A secret version is 'active' when it's in any of these states: ENABLED, DISABLED"
-       // so we need to DESTROY any versions of these secrets that are merely DISABLED
-        try  {
+        // so we need to DESTROY any versions of these secrets that are merely DISABLED
+        try {
             Instant until = Instant.ofEpochSecond(exceptVersion.getCreateTime().getSeconds())
-                .minus(Duration.ofDays(7));
+                    .minus(Duration.ofDays(7));
 
             SecretManagerServiceClient.ListSecretVersionsPage disabledVersions =
-                client.listSecretVersions(ListSecretVersionsRequest.newBuilder()
-                    .setFilter("state:DISABLED AND create_time < " + until.getEpochSecond() + "s")
-                    .setParent(secretName.toString())
-                    .setPageSize(NUMBER_OF_VERSIONS_TO_RETRIEVE)
-                    .build())
-                .getPage();
+                    client.listSecretVersions(ListSecretVersionsRequest.newBuilder()
+                                    // From docs, https://cloud.google.com/secret-manager/docs/filtering#filter
+                                    // when comparing time we need to use RFC3399 (2020-10-15T01:30:15Z)
+                                    // but filter returns an invalid token error on that value when parsing the ":" of the date
+                                    // Tried several ways but none working, so let's use
+                                    // just the
+                                    .setFilter("state:DISABLED AND create_time < " + DateTimeFormatter.ISO_LOCAL_DATE
+                                            .withZone(ZoneOffset.UTC)
+                                            .format(until))
+                                    .setParent(secretName.toString())
+                                    .setPageSize(NUMBER_OF_VERSIONS_TO_RETRIEVE)
+                                    .build())
+                            .getPage();
 
             //destroy all
             disabledVersions.getValues().forEach(i -> {
