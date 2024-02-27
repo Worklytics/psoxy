@@ -317,15 +317,19 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
                         Pair<String, List<Function<String, Optional<String>>>> transforms = columnTransforms.getOrDefault(h, null);
                         if (transforms == null) {
-                            newRecord.put(h, "");
+                            newRecord.put(h, null);
                         } else {
                             // apply all transformations in insertion order
                             // key holds the original column
                             String v = record.get(transforms.getKey());
-                            for (Function<String, Optional<String>> transform : transforms.getValue()) {
-                                v = transform.apply(v).orElse(v);
+                            if (StringUtils.isNotBlank(v)) {
+                                for (Function<String, Optional<String>> transform : transforms.getValue()) {
+                                    v = transform.apply(v).orElse(null);
+                                }
+                                newRecord.put(h, v);
+                            } else {
+                                newRecord.put(h, null);
                             }
-                            newRecord.put(h, v);
                         }
 
                     });
