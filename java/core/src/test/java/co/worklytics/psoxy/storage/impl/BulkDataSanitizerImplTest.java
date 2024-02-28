@@ -360,6 +360,85 @@ public class BulkDataSanitizerImplTest {
     }
 
 
+    @Test
+    @SneakyThrows
+    void handle_duplicates_lookup_table_via_transforms() {
+        Pseudonymizer defaultPseudonymizer =
+            pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+                .pseudonymizationSalt("salt")
+                .defaultScopeId("hris")
+                .build());
+
+
+        //this is a lookup-table use case (for customers to use in own data warehouse)
+        final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,EMPLOYEE_ID_TRANSFORMED\r\n" +
+            "1,Engineering,2023-01-06,,2019-11-11,,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\r\n" +
+            "2,Sales,2023-01-06,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,2020-01-01,,t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\r\n" +
+            "3,Engineering,2023-01-06,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,2019-10-06,2022-12-08,t~4W7Sl-LI6iMzNNngivs5dLMiVw-7ob3Cyr3jn8NureY\r\n" +
+            "4,Engineering,2023-01-06,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,2018-06-03,,t~BOg00PLoiEEKyGzije3FJlKBzM6_Vjk87VJI9lTIA2o\r\n";
+
+        ColumnarRules rules = ColumnarRules.builder()
+            .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+            .columnToPseudonymize("MANAGER_ID")
+            .columnToRedact("EMPLOYEE_EMAIL")
+            .columnToRedact("EFFECTIVE_ISOWEEK")
+            .fieldsToTransform(Map.of("LOOKUP_RULE", FieldTransformPipeline.builder()
+                .newName("EMPLOYEE_ID_TRANSFORMED")
+                .sourceColumn("EMPLOYEE_ID")
+                .transforms(Arrays.asList(
+                    FieldTransform.pseudonymize(true)
+                )).build()))
+            .build();
+        columnarFileSanitizerImpl.setRules(rules);
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
+
+        try (FileReader in = new FileReader(inputFile);
+             StringWriter out = new StringWriter()) {
+            columnarFileSanitizerImpl.sanitize(in, out, defaultPseudonymizer);
+            String output = out.toString();
+            assertEquals(EXPECTED, output);
+        }
+    }
+
+    @Test
+    @SneakyThrows
+    void handle_duplicates_lookup_table_pre_0_4_48() {
+        Pseudonymizer defaultPseudonymizer =
+            pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+                .pseudonymizationSalt("salt")
+                .defaultScopeId("hris")
+                .build());
+
+
+        //this is a lookup-table use case (for customers to use in own data warehouse)
+        final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,EMPLOYEE_ID_TRANSFORMED\r\n" +
+            "1,Engineering,2023-01-06,,2019-11-11,,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\r\n" +
+            "2,Sales,2023-01-06,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,2020-01-01,,t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\r\n" +
+            "3,Engineering,2023-01-06,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,2019-10-06,2022-12-08,t~4W7Sl-LI6iMzNNngivs5dLMiVw-7ob3Cyr3jn8NureY\r\n" +
+            "4,Engineering,2023-01-06,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,2018-06-03,,t~BOg00PLoiEEKyGzije3FJlKBzM6_Vjk87VJI9lTIA2o\r\n";
+
+        ColumnarRules rules = ColumnarRules.builder()
+            .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+            .columnToPseudonymize("EMPLOYEE_ID_TRANSFORMED")
+            .columnToPseudonymize("MANAGER_ID")
+            .columnToRedact("EMPLOYEE_EMAIL")
+            .columnToRedact("EFFECTIVE_ISOWEEK")
+            .columnsToDuplicate(Map.of("EMPLOYEE_ID", "EMPLOYEE_ID_TRANSFORMED"))
+            .build();
+        columnarFileSanitizerImpl.setRules(rules);
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
+
+        try (FileReader in = new FileReader(inputFile);
+             StringWriter out = new StringWriter()) {
+            columnarFileSanitizerImpl.sanitize(in, out, defaultPseudonymizer);
+            String output = out.toString();
+            assertEquals(EXPECTED, output);
+        }
+    }
+
+
     @SneakyThrows
     @Test
     void acmeExample() {
@@ -668,6 +747,46 @@ public class BulkDataSanitizerImplTest {
         Pseudonymizer pseudonymizer = new StubPseudonymizer();
 
         try (FileReader in = new FileReader(inputFile);
+             StringWriter out = new StringWriter()) {
+            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            assertEquals(EXPECTED, out.toString());
+        }
+    }
+
+    @Test
+    @SneakyThrows
+    void handle_null_transformations() {
+        Pseudonymizer defaultPseudonymizer =
+            pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+                .pseudonymizationSalt("salt")
+                .defaultScopeId("hris")
+                .pseudonymImplementation(PseudonymImplementation.LEGACY)
+                .build());
+
+
+        // this is a lookup-table use case (for customers to use in own data warehouse)
+        // First row has empty employee id and team, both duplicated and renamed later
+        final String SOURCE = "EMPLOYEE_ID,TEAM,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE\r\n" +
+            ",,2023-01-06,,2019-11-11,,\r\n" +
+            "2,Sales,2023-01-06,1,2020-01-01,\r\n";
+
+        final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,EMPLOYEE_ID_ORIG\r\n" +
+            ",,2023-01-06,,2019-11-11,,\r\n" +
+            "t~mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI,Sales,2023-01-06,t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,2020-01-01,,2\r\n";
+
+        ColumnarRules rules = ColumnarRules.builder()
+            .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+            .columnToPseudonymize("EMPLOYEE_ID")
+            .columnsToRename(ImmutableMap.of("TEAM", "DEPARTMENT"))
+            .columnToRedact("EMPLOYEE_EMAIL")
+            .columnToPseudonymize("MANAGER_ID")
+            .columnsToDuplicate(Map.of("EMPLOYEE_ID", "EMPLOYEE_ID_ORIG"))
+            .build();
+        columnarFileSanitizerImpl.setRules(rules);
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
+
+        try (StringReader in = new StringReader(SOURCE);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
