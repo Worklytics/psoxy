@@ -90,9 +90,8 @@ if [ ! -d "$EXAMPLE_TEMPLATE_REPO" ]; then
   exit 1
 fi
 
-cd "$dev_example_path"
-# files to copy - everything in the example directory ending in .tf
-FILES_TO_COPY=( *.tf )
+$PATH_TO_REPO/tools/release/example-copy.sh $dev_example_path $EXAMPLE_TEMPLATE_REPO
+
 
 # append / if needed
 if [[ "${EXAMPLE_TEMPLATE_REPO: -1}" != "/" ]]; then
@@ -154,28 +153,6 @@ if git fetch origin main --dry-run | grep -q 'up to date'; then
 fi
 
 set -e
-
-cd -
-for file in "${FILES_TO_COPY[@]}"
-do
-  if [ -f ${dev_example_path}/${file} ]; then
-     echo "copying ${dev_example_path}/${file} to ${EXAMPLE_TEMPLATE_REPO}${file}"
-     cp -f ${dev_example_path}/${file} ${EXAMPLE_TEMPLATE_REPO}${file}
-
-     # uncomment Terraform module remotes
-     sed -i .bck 's/^\(.*\)# source = "git::\(.*\)"/\1source = "git::\2"/' "${EXAMPLE_TEMPLATE_REPO}${file}"
-
-     # remove references to local modules
-     sed -i .bck '/source = "..\/..\/modules\/[^"]*"/d' "${EXAMPLE_TEMPLATE_REPO}${file}"
-  fi
-done
-
-rm ${EXAMPLE_TEMPLATE_REPO}/*.bck
-
-cp -f ${PATH_TO_REPO}tools/init-example.sh ${EXAMPLE_TEMPLATE_REPO}init
-cp -f ${PATH_TO_REPO}tools/check-prereqs.sh ${EXAMPLE_TEMPLATE_REPO}check-prereqs
-chmod +x ${EXAMPLE_TEMPLATE_REPO}init
-chmod +x ${EXAMPLE_TEMPLATE_REPO}check-prereqs
 
 cd "$EXAMPLE_TEMPLATE_REPO"
 git checkout -b "rc-${RELEASE_TAG}"
