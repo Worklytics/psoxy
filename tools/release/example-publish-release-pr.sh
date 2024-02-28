@@ -10,6 +10,9 @@ NC='\e[0m' # No Color
 SCRIPT_NAME=$0
 EXAMPLE_TEMPLATE_REPO=$1
 PR_NUMBER=$2
+# value of 3 or default to current directory
+PATH_TO_REPO=${3:-"./"}
+
 
 display_usage() {
   printf "Merges release PR to main branch for example repo and creates a release, with name sync'd to that of main repo\n"
@@ -89,17 +92,17 @@ if [ "$PR_MERGEABLE" != "MERGEABLE" ]; then
 fi
 
 # confirm all status checks succeeded
-PR_CHECKS_PASSED=$(gh pr view 602 --json statusCheckRollup | jq 'all(.statusCheckRollup[]; .conclusion == "SUCCESS")')
+PR_CHECKS_PASSED=$(gh pr view $PR_NUMBER --json statusCheckRollup | jq 'all(.statusCheckRollup[]; .conclusion == "SUCCESS")')
 if [ "$PR_CHECKS_PASSED" != "true" ]; then
   printf "${RED}PR ${PR_NUMBER} does not have all status checks passing. Exiting.${NC}\n"
   printf "Here are the status checks that failed:\n"
-  gh pr view 602 --json statusCheckRollup | jq '.statusCheckRollup[] | select(.conclusion == "FAILURE")'
+  gh pr view $PR_NUMBER --json statusCheckRollup | jq '.statusCheckRollup[] | select(.conclusion == "FAILURE")'
   exit 1
 fi
 
 # merge the PR to main
 printf "Merging PR ${BLUE}${PR_NUMBER}${NC} to main ...\n"
-gh pr merge $PR_NUMBER --merge --delete-branch --squash
+gh pr merge $PR_NUMBER --delete-branch --squash
 
 # ensure `main` up-to-date with origin
 printf "Ensuring local main branch is up-to-date with origin ...\n"
@@ -121,7 +124,7 @@ git tag $RELEASE_NUMBER
 git push origin $RELEASE_NUMBER
 
 printf "Creating release ${BLUE}${RELEASE_NUMBER}${NC} in GitHub ...\n"
-PSOXY_RELEASE_URL=$(gh release view v0.4.43 --repo Worklytics/psoxy --json url | jq -r ".url")
+PSOXY_RELEASE_URL=$(gh release view v${RELEASE_NUMBER}--repo Worklytics/psoxy --json url | jq -r ".url")
 gh release create $RELEASE_NUMBER --title $RELEASE_NUMBER --notes "Update example to psoxy release ${RELEASE_NUMBER}\nSee: ${PSOXY_RELEASE_URL}"
 
 
