@@ -175,6 +175,7 @@ resource "google_cloudfunctions_function" "function" {
   service_account_email = google_service_account.service_account.email
   timeout               = 540 # 9 minutes, which is gen1 max allowed
   labels                = var.default_labels
+  docker_registry       = "CONTAINER_REGISTRY"
 
   environment_variables = merge(tomap({
     INPUT_BUCKET  = google_storage_bucket.input_bucket.name,
