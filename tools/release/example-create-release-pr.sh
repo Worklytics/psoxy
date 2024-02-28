@@ -90,15 +90,16 @@ if [ ! -d "$EXAMPLE_TEMPLATE_REPO" ]; then
   exit 1
 fi
 
+cd "$dev_example_path"
+# files to copy - everything in the example directory ending in .tf
+FILES_TO_COPY=( *.tf )
+
 # append / if needed
 if [[ "${EXAMPLE_TEMPLATE_REPO: -1}" != "/" ]]; then
     EXAMPLE_TEMPLATE_REPO="$EXAMPLE_TEMPLATE_REPO/"
 fi
 
 cd "$EXAMPLE_TEMPLATE_REPO"
-
-# files to copy - everything in the example directory ending in .tf
-FILES_TO_COPY=( *.tf )
 
 # check if any open prs in github
 if gh pr list --state open | grep -q . ; then
