@@ -14,6 +14,9 @@ PR_NUMBER=$2
 PATH_TO_REPO=${3:-"./"}
 
 
+REMOTE_MAIN_REPO_NAME="Worklytics/psoxy"
+
+
 display_usage() {
   printf "Merges release PR to main branch for example repo and creates a release, with name sync'd to that of main repo\n"
   printf "\n"
@@ -124,7 +127,7 @@ git tag $RELEASE_NUMBER
 git push origin $RELEASE_NUMBER
 
 printf "Creating release ${BLUE}${RELEASE_NUMBER}${NC} in GitHub ...\n"
-PSOXY_RELEASE_URL=$(gh release view v${RELEASE_NUMBER}--repo Worklytics/psoxy --json url | jq -r ".url")
+PSOXY_RELEASE_URL=$(gh release view v${RELEASE_NUMBER} --repo ${REMOTE_MAIN_REPO_NAME} --json url | jq -r ".url")
 gh release create $RELEASE_NUMBER --title $RELEASE_NUMBER --notes "Update example to psoxy release ${RELEASE_NUMBER}\nSee: ${PSOXY_RELEASE_URL}"
 
 
