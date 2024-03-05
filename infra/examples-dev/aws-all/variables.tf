@@ -70,6 +70,12 @@ variable "project_aws_kms_key_arn" {
   }
 }
 
+variable "aws_lambda_execution_role_policy_arn" {
+  type        = string
+  description = "*beta* The ARN of policy to attach to the lambda execution role, if you want one other than the default. (usually, AWSLambdaBasicExecutionRole)."
+  default     = null
+}
+
 variable "worklytics_host" {
   type        = string
   description = "host of worklytics instance where tenant resides. (e.g. intl.worklytics.co for prod; but may differ for dev/staging)"

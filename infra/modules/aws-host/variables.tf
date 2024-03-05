@@ -37,6 +37,13 @@ variable "logs_kms_key_arn" {
   default     = null
 }
 
+variable "aws_lambda_execution_role_policy_arn" {
+  type        = string
+  description = "*beta* The ARN of policy to attach to the lambda execution role, if you want one other than the default. (usually, AWSLambdaBasicExecutionRole)."
+  default     = null
+}
+
+
 variable "caller_gcp_service_account_ids" {
   type        = list(string)
   description = "ids of GCP service accounts allowed to send requests to the proxy (eg, unique ID of the SA of your Worklytics instance)"
