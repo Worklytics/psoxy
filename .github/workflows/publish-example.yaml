@@ -34,10 +34,10 @@ jobs:
           repository: ${{ inputs.example-repo }}
           ref: 'main'
           token: ${{ inputs.example-repo-token }}
-      - name: Copy Example
+      - name: Copy Example from examples-dev/ to example repo
         run: |
           proxy/tools/release/example-copy.sh proxy/${{ inputs.example-to-copy }} example
-      - name: Commit changes to example
+      - name: Commit changes to example repo
         working-directory: example
         uses: planetscale/ghcommit-action@v0.1.6
           with:
@@ -45,8 +45,8 @@ jobs:
             repo: ${{ inputs.example-repo }}
             branch: rc-${{ inputs.release }}
           env:
-            GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      - name: Open PR to merge back to main
+            GITHUB_TOKEN: ${{ inputs.example-repo-token }}
+      - name: Open PR in example repo to merge update back to its mainline
         env:
           GH_TOKEN: ${{ inputs.example-repo-token }}
         run: |
