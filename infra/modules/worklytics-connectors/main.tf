@@ -25,7 +25,9 @@ module "source_token_external_todo" {
 
   source_id                         = each.key
   connector_specific_external_steps = each.value.external_token_todo
+  todos_as_local_files              = var.todos_as_local_files
   todo_step                         = var.todo_step
+
 }
 
 locals {

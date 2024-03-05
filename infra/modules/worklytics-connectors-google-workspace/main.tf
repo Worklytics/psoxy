@@ -17,7 +17,7 @@ module "worklytics_connector_specs" {
 
   enabled_connectors             = var.enabled_connectors
   google_workspace_example_admin = var.google_workspace_example_admin
-  google_workspace_example_user  = var.google_workspace_example_user
+  google_workspace_example_user  = var.google_workspace_example_user'
 }
 
 module "google_workspace_connection" {
@@ -32,6 +32,7 @@ module "google_workspace_connection" {
   description                  = "Google API OAuth Client for ${each.value.display_name}"
   apis_consumed                = each.value.apis_consumed
   oauth_scopes_needed          = each.value.oauth_scopes_needed
+  todos_as_local_files         = var.todos_as_local_files
   todo_step                    = var.todo_step
 }
 
