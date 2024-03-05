@@ -20,7 +20,7 @@ variable "aws_ssm_param_root_path" {
 
 variable "aws_secrets_manager_path" {
   type        = string
-  description = "root to path under which Secrets Manager secrets created by this module will be created"
+  description = "**beta** path under which Secrets Manager secrets created by this module will be created"
   default     = null
 
   validation {

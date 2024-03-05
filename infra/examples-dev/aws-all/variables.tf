@@ -44,7 +44,7 @@ variable "default_tags" {
 
 variable "aws_ssm_param_root_path" {
   type        = string
-  description = "root to path under which SSM parameters created by this module will be created; NOTE: shouldn't be necessary to use this is you're following recommended approach of using dedicated AWS account for deployment"
+  description = "path under which SSM parameters created by this module will be created; NOTE: shouldn't be necessary to use this is you're following recommended approach of using dedicated AWS account for deployment"
   default     = ""
 
   validation {
@@ -55,7 +55,7 @@ variable "aws_ssm_param_root_path" {
 
 variable "aws_secrets_manager_path" {
   type        = string
-  description = "root to path under which Secrets Manager secrets created by this module will be created"
+  description = "**beta** path under which Secrets Manager secrets will be created"
   default     = ""
 
   validation {
