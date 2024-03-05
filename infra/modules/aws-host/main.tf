@@ -1,3 +1,12 @@
+terraform {
+  required_version = ">= 1.3, < 1.6"
+  required_providers {
+    aws = {
+      version = ">= 4.12, < 5.0"
+    }
+  }
+}
+
 # NOTE: region used to be passed in as a variable; put it MUST match the region in which the lambda
 # is provisioned, and that's implicit in the provider - so we should just infer from the provider
 data "aws_region" "current" {}
