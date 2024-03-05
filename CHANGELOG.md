@@ -20,6 +20,12 @@ Changes to be including in future/planned release notes will be added here.
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## [0.4.50](https://github.com/Worklytics/psoxy/release/tag/v0.4.50)
+  - `todos_as_local_files` properly respected now; if you had it as `false`, you may see some local
+    files deleted on your next `terraform apply`.
+  - to accommodate this fix, many people will see moves of local_file resources, to append `[0]` to
+    the resource ids
+
 ## [0.4.48](https://github.com/Worklytics/psoxy/release/tag/v0.4.48)
   - BREAKING - GitHub Enterprise Server: authentication strategy has changed; you will see creation
     and destruction of some secrets that are used for authentication; you MUST generate new auth
