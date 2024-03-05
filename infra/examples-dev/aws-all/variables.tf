@@ -53,6 +53,18 @@ variable "aws_ssm_param_root_path" {
   }
 }
 
+variable "aws_secrets_manager_path" {
+  type        = string
+  description = "root to path under which Secrets Manager secrets created by this module will be created"
+  default     = ""
+
+  validation {
+    condition     = length(var.aws_secrets_manager_path) == 0 || length(regexall("/", var.aws_secrets_manager_path)) == 0 || startswith(var.aws_secrets_manager_path, "/")
+    error_message = "The `aws_secrets_manager_path` value must be fully qualified (begin with `/`) if it contains any `/` characters."
+  }
+}
+
+
 variable "secrets_store_implementation" {
   type        = string
   description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
