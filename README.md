@@ -1,4 +1,4 @@
-# psoxy - a pseudonymizing DLP layer between Worklytics and your data
+# PSOXY - A pseudonymizing DLP layer between Worklytics and your data
 
 [![Latest Release](https://img.shields.io/github/v/release/Worklytics/psoxy)](https://github.com/Worklytics/psoxy/releases/latest)
 ![java build](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-java.yaml?label=java)
