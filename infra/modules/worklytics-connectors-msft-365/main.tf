@@ -1,3 +1,7 @@
+terraform {
+  required_version = ">= 1.3, < 1.6"
+}
+
 locals {
   environment_id_prefix                 = "${var.environment_id}${length(var.environment_id) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_id) > 0 ? " ${var.environment_id} " : ""

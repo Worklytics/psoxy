@@ -25,6 +25,8 @@ Changes to be including in future/planned release notes will be added here.
     files deleted on your next `terraform apply`.
   - to accommodate this fix, many people will see moves of local_file resources, to append `[0]` to
     the resource ids
+  - BREAKING - for AWS Secrets Manager (released in 0.4.47 as 'alpha' feature), these will now
+    be prefixed by default with the environment ID, unless a `aws_secrets_manager_path` is set.
 
 ## [0.4.48](https://github.com/Worklytics/psoxy/release/tag/v0.4.48)
   - BREAKING - GitHub Enterprise Server: authentication strategy has changed; you will see creation

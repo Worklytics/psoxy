@@ -1,3 +1,7 @@
+terraform {
+  required_version = ">= 1.3, < 1.6"
+}
+
 locals {
   default_config_parameter_prefix       = length(var.environment_name) == 0 ? "psoxy_" : "${var.environment_name}_"
   config_parameter_prefix               = var.config_parameter_prefix == "" ? local.default_config_parameter_prefix : var.config_parameter_prefix

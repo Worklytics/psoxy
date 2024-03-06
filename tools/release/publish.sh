@@ -89,6 +89,19 @@ fi
 printf "Opening release ${BLUE}${RELEASE}${NC} in browser; review / update notes and then publish as latest ...\n"
 gh release view $RELEASE --web
 
+
 printf "  Then update example templates to point to it:\n"
-printf "    ${BLUE}./tools/release/example-create-release-pr.sh . aws-all ~/psoxy-example-aws${NC}\n"
-printf "    ${BLUE}./tools/release/example-create-release-pr.sh . gcp ~/psoxy-example-gcp${NC}\n"
+if [ -d ~/code/psoxy-example-aws/ ]; then
+  AWS_EXAMPLE_DIR="~/code/psoxy-example-aws"
+else
+  AWS_EXAMPLE_DIR="~/psoxy-example-aws"
+fi
+
+if [ -d ~/code/psoxy-example-gcp/ ]; then
+  GCP_EXAMPLE_DIR="~/code/psoxy-example-gcp"
+else
+  GCP_EXAMPLE_DIR="~/psoxy-example-gcp"
+fi
+
+printf "    ${BLUE}./tools/release/example-create-release-pr.sh . aws-all ${AWS_EXAMPLE_DIR}${NC}\n"
+printf "    ${BLUE}./tools/release/example-create-release-pr.sh . gcp ${GCP_EXAMPLE_DIR}${NC}\n"

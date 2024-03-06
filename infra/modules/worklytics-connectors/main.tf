@@ -1,3 +1,6 @@
+terraform {
+  required_version = ">= 1.3, < 1.6"
+}
 
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
