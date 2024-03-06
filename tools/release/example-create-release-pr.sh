@@ -90,15 +90,15 @@ if [ ! -d "$EXAMPLE_TEMPLATE_REPO" ]; then
   exit 1
 fi
 
+$PATH_TO_REPO/tools/release/example-copy.sh $dev_example_path $EXAMPLE_TEMPLATE_REPO
+
+
 # append / if needed
 if [[ "${EXAMPLE_TEMPLATE_REPO: -1}" != "/" ]]; then
     EXAMPLE_TEMPLATE_REPO="$EXAMPLE_TEMPLATE_REPO/"
 fi
 
 cd "$EXAMPLE_TEMPLATE_REPO"
-
-# files to copy - everything in the example directory ending in .tf
-FILES_TO_COPY=( *.tf )
 
 # check if any open prs in github
 if gh pr list --state open | grep -q . ; then
@@ -154,28 +154,6 @@ fi
 
 set -e
 
-cd -
-for file in "${FILES_TO_COPY[@]}"
-do
-  if [ -f ${dev_example_path}/${file} ]; then
-     echo "copying ${dev_example_path}/${file} to ${EXAMPLE_TEMPLATE_REPO}${file}"
-     cp -f ${dev_example_path}/${file} ${EXAMPLE_TEMPLATE_REPO}${file}
-
-     # uncomment Terraform module remotes
-     sed -i .bck 's/^\(.*\)# source = "git::\(.*\)"/\1source = "git::\2"/' "${EXAMPLE_TEMPLATE_REPO}${file}"
-
-     # remove references to local modules
-     sed -i .bck '/source = "..\/..\/modules\/[^"]*"/d' "${EXAMPLE_TEMPLATE_REPO}${file}"
-  fi
-done
-
-rm ${EXAMPLE_TEMPLATE_REPO}/*.bck
-
-cp -f ${PATH_TO_REPO}tools/init-example.sh ${EXAMPLE_TEMPLATE_REPO}init
-cp -f ${PATH_TO_REPO}tools/check-prereqs.sh ${EXAMPLE_TEMPLATE_REPO}check-prereqs
-chmod +x ${EXAMPLE_TEMPLATE_REPO}init
-chmod +x ${EXAMPLE_TEMPLATE_REPO}check-prereqs
-
 cd "$EXAMPLE_TEMPLATE_REPO"
 git checkout -b "rc-${RELEASE_TAG}"
 
@@ -188,7 +166,7 @@ git commit -a -m "Update example to ${RELEASE_TAG}"
 git push origin
 
 if command -v gh &> /dev/null; then
-  PR_URL=$(gh pr create --title "update to ${RELEASE_TAG}" --body "update example to ${RELEASE_TAG}" --assignee "@me")
+  PR_URL=$(gh pr create --title "update to ${RELEASE_TAG}" --body "update to proxy release ${RELEASE_TAG}" --assignee "@me")
   printf "created PR ${BLUE}${PR_URL}${NC}\n"
   PR_NUMBER=$(gh pr view $PR_URL --json number | jq -r ".number")
   gh pr comment $PR_NUMBER --body "when ready, from your Psoxy checkout, run \`./tools/release/example-publish-release-pr.sh $EXAMPLE_TEMPLATE_REPO $PR_NUMBER\`"

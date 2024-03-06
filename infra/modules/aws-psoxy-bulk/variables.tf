@@ -77,6 +77,12 @@ variable "ssm_kms_key_ids" {
   default     = {}
 }
 
+variable "aws_lambda_execution_role_policy_arn" {
+  type        = string
+  description = "*beta* The ARN of policy to attach to the lambda execution role, if you want one other than the default. (usually, AWSLambdaBasicExecutionRole)."
+  default     = null
+}
+
 variable "log_retention_days" {
   type        = number
   description = "number of days to retain logs in CloudWatch for this psoxy instance"
@@ -231,6 +237,12 @@ variable "example_file" {
   type        = string
   description = "path to example file to use for testing, from psoxy_base_dir"
   default     = null
+}
+
+variable "todos_as_local_files" {
+  type        = bool
+  description = "whether to render TODOs as flat files"
+  default     = true
 }
 
 variable "todo_step" {

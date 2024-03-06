@@ -27,24 +27,25 @@ locals {
 module "psoxy_lambda" {
   source = "../aws-psoxy-lambda"
 
-  environment_name                   = var.environment_name
-  instance_id                        = var.instance_id
-  handler_class                      = "co.worklytics.psoxy.S3Handler"
-  timeout_seconds                    = 600 # 10 minutes
-  memory_size_mb                     = var.memory_size_mb
-  source_kind                        = var.source_kind
-  path_to_function_zip               = var.path_to_function_zip
-  function_zip_hash                  = var.function_zip_hash
-  function_env_kms_key_arn           = var.function_env_kms_key_arn
-  logs_kms_key_arn                   = var.logs_kms_key_arn
-  global_parameter_arns              = var.global_parameter_arns
-  global_secrets_manager_secret_arns = var.global_secrets_manager_secret_arns
-  secrets_store_implementation       = var.secrets_store_implementation
-  path_to_instance_ssm_parameters    = var.path_to_instance_ssm_parameters
-  path_to_shared_ssm_parameters      = var.path_to_shared_ssm_parameters
-  ssm_kms_key_ids                    = var.ssm_kms_key_ids
-  log_retention_in_days              = var.log_retention_days
-  vpc_config                         = var.vpc_config
+  environment_name                     = var.environment_name
+  instance_id                          = var.instance_id
+  handler_class                        = "co.worklytics.psoxy.S3Handler"
+  timeout_seconds                      = 600 # 10 minutes
+  memory_size_mb                       = var.memory_size_mb
+  source_kind                          = var.source_kind
+  path_to_function_zip                 = var.path_to_function_zip
+  function_zip_hash                    = var.function_zip_hash
+  function_env_kms_key_arn             = var.function_env_kms_key_arn
+  logs_kms_key_arn                     = var.logs_kms_key_arn
+  global_parameter_arns                = var.global_parameter_arns
+  global_secrets_manager_secret_arns   = var.global_secrets_manager_secret_arns
+  secrets_store_implementation         = var.secrets_store_implementation
+  path_to_instance_ssm_parameters      = var.path_to_instance_ssm_parameters
+  path_to_shared_ssm_parameters        = var.path_to_shared_ssm_parameters
+  ssm_kms_key_ids                      = var.ssm_kms_key_ids
+  log_retention_in_days                = var.log_retention_days
+  vpc_config                           = var.vpc_config
+  aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
 
   environment_variables = merge(
     var.environment_variables,
@@ -349,15 +350,15 @@ EOT
 }
 
 
-resource "local_file" "todo-aws-psoxy-bulk-test" {
+resource "local_file" "todo_test" {
+  count = var.todos_as_local_files ? 1 : 0
+
   filename = "TODO ${var.todo_step} - test ${var.instance_id}.md"
   content  = local.todo_content
 }
 
-resource "local_file" "test_script" {
-  filename        = "test-${var.instance_id}.sh"
-  file_permission = "755"
-  content         = <<EOT
+locals {
+  test_script = <<EOT
 #!/bin/bash
 FILE_PATH=$${1:-${try(local.example_file, "")}}
 BLUE='\e[0;34m'
@@ -367,7 +368,14 @@ printf "Quick test of $${BLUE}${var.instance_id}$${NC} ...\n"
 
 node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} ${local.role_option_for_tests} -re ${var.aws_region}
 EOT
+}
 
+resource "local_file" "test_script" {
+  count = var.todos_as_local_files ? 1 : 0
+
+  filename        = "test-${var.instance_id}.sh"
+  file_permission = "755"
+  content         = local.test_script
 }
 
 # to facilitate composition of ingestion pipeline
@@ -409,7 +417,11 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = local_file.test_script.filename
+  value = try(local_file.test_script[0].filename, null)
+}
+
+output "test_script_content" {
+  value = local.test_script
 }
 
 output "todo" {

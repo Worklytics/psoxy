@@ -3,10 +3,11 @@
 terraform {
   required_providers {
     aws = {
-      version = "~> 4.12"
+      version = ">= 4.12, < 5.0"
     }
   }
 }
+
 
 # NOTE: region used to be passed in as a variable; put it MUST match the region in which the lambda
 # is provisioned, and that's implicit in the provider - so we should just infer from the provider
@@ -33,27 +34,28 @@ locals {
 module "psoxy_lambda" {
   source = "../aws-psoxy-lambda"
 
-  environment_name                   = var.environment_name
-  instance_id                        = var.instance_id
-  handler_class                      = "co.worklytics.psoxy.Handler"
-  path_to_function_zip               = var.path_to_function_zip
-  function_zip_hash                  = var.function_zip_hash
-  function_env_kms_key_arn           = var.function_env_kms_key_arn
-  logs_kms_key_arn                   = var.logs_kms_key_arn
-  memory_size_mb                     = var.memory_size_mb
-  timeout_seconds                    = 55
-  reserved_concurrent_executions     = var.reserved_concurrent_executions
-  path_to_config                     = var.path_to_config
-  source_kind                        = var.source_kind
-  function_parameters                = var.function_parameters
-  path_to_instance_ssm_parameters    = var.path_to_instance_ssm_parameters
-  path_to_shared_ssm_parameters      = var.path_to_shared_ssm_parameters
-  global_parameter_arns              = var.global_parameter_arns
-  global_secrets_manager_secret_arns = var.global_secrets_manager_secret_arns
-  ssm_kms_key_ids                    = var.ssm_kms_key_ids
-  log_retention_in_days              = var.log_retention_days
-  vpc_config                         = var.vpc_config
-  secrets_store_implementation       = var.secrets_store_implementation
+  environment_name                     = var.environment_name
+  instance_id                          = var.instance_id
+  handler_class                        = "co.worklytics.psoxy.Handler"
+  path_to_function_zip                 = var.path_to_function_zip
+  function_zip_hash                    = var.function_zip_hash
+  function_env_kms_key_arn             = var.function_env_kms_key_arn
+  logs_kms_key_arn                     = var.logs_kms_key_arn
+  memory_size_mb                       = var.memory_size_mb
+  timeout_seconds                      = 55
+  reserved_concurrent_executions       = var.reserved_concurrent_executions
+  path_to_config                       = var.path_to_config
+  source_kind                          = var.source_kind
+  function_parameters                  = var.function_parameters
+  path_to_instance_ssm_parameters      = var.path_to_instance_ssm_parameters
+  path_to_shared_ssm_parameters        = var.path_to_shared_ssm_parameters
+  global_parameter_arns                = var.global_parameter_arns
+  global_secrets_manager_secret_arns   = var.global_secrets_manager_secret_arns
+  ssm_kms_key_ids                      = var.ssm_kms_key_ids
+  log_retention_in_days                = var.log_retention_days
+  vpc_config                           = var.vpc_config
+  secrets_store_implementation         = var.secrets_store_implementation
+  aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
 
   environment_variables = merge(
     var.environment_variables,
@@ -203,14 +205,14 @@ EOT
 }
 
 resource "local_file" "todo" {
+  count = var.todos_as_local_files ? 1 : 0
+
   filename = "TODO ${var.todo_step} - test ${var.instance_id}.md"
   content  = local.todo_content
 }
 
-resource "local_file" "test_script" {
-  filename        = "test-${var.instance_id}.sh"
-  file_permission = "755"
-  content         = <<EOT
+locals {
+  test_script = <<EOT
 #!/bin/bash
 API_PATH=$${1:-${try(var.example_api_calls[0], "")}}
 echo "Quick test of ${module.psoxy_lambda.function_name} ..."
@@ -221,7 +223,14 @@ ${local.command_cli_call} -u "${local.proxy_endpoint_url}$API_PATH" ${local.impe
 
 echo "Invoke this script with any of the following as arguments to test other endpoints:${"\r\n\t"}${join("\r\n\t", var.example_api_calls)}"
 EOT
+}
 
+resource "local_file" "test_script" {
+  count = var.todos_as_local_files ? 1 : 0
+
+  filename        = "test-${var.instance_id}.sh"
+  file_permission = "755"
+  content         = local.test_script
 }
 
 
@@ -257,7 +266,11 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = local_file.test_script.filename
+  value = try(local_file.test_script[0].filename, null)
+}
+
+output "test_script_content" {
+  value = local.test_script
 }
 
 output "todo" {

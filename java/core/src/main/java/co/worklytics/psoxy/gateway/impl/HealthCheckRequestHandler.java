@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @Log
 public class HealthCheckRequestHandler {
 
-    static final String JAVA_SOURCE_CODE_VERSION = "v0.4.49";
+    static final String JAVA_SOURCE_CODE_VERSION = "v0.4.50";
 
     @Inject
     EnvVarsConfigService envVarsConfigService;

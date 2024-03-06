@@ -3,7 +3,7 @@
 terraform {
   required_providers {
     aws = {
-      version = "~> 4.12"
+      version = ">= 4.12, < 5.0"
     }
   }
 }
@@ -126,12 +126,18 @@ resource "aws_iam_role" "iam_for_lambda" {
   }
 }
 
-# which policy we attach depends on lambda's need
-# - AWSLambdaBasicExecutionRole usually sufficient
-# - AWSLambdaVPCAccessExecutionRole if lambda is configured to be on a VPC (if lacks this, deploy fails bc exec role can't create network interface)
+locals {
+  # which policy we attach depends on lambda's need
+  # - AWSLambdaBasicExecutionRole usually sufficient
+  # - AWSLambdaVPCAccessExecutionRole if lambda is configured to be on a VPC (if lacks this, deploy fails bc exec role can't create network interface)
+  lambda_execution_role_aws_managed_policy = var.vpc_config == null ? "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" : "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
+
+
 resource "aws_iam_role_policy_attachment" "basic" {
   role       = aws_iam_role.iam_for_lambda.name
-  policy_arn = var.vpc_config == null ? "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" : "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+  policy_arn = coalesce(var.aws_lambda_execution_role_policy_arn, local.lambda_execution_role_aws_managed_policy)
 }
 
 

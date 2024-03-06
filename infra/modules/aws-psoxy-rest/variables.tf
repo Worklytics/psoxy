@@ -201,6 +201,11 @@ variable "memory_size_mb" {
   default     = 512
 }
 
+variable "aws_lambda_execution_role_policy_arn" {
+  type        = string
+  description = "**beta** The ARN of policy to attach to the lambda execution role, if you want one other than the default. (usually, AWSLambdaBasicExecutionRole)."
+  default     = null
+}
 
 variable "api_gateway_v2" {
   type = object({
@@ -224,6 +229,12 @@ variable "secrets_store_implementation" {
   type        = string
   description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
   default     = "aws_ssm_parameter_store"
+}
+
+variable "todos_as_local_files" {
+  type        = bool
+  description = "whether to render TODOs as flat files"
+  default     = true
 }
 
 variable "todo_step" {

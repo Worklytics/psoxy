@@ -16,6 +16,17 @@ No secrets or keys need to be exchanged between Worklytics and your AWS instance
 the authentication is provided by the signature of the identity token provided by GCP, which AWS
 verifies against Google's public certificates.
 
+AWS provides an overview of the specific GCP Case:
+[Access AWS using a Google Cloud Platform native workload identity](https://aws.amazon.com/blogs/security/access-aws-using-a-google-cloud-platform-native-workload-identity/)
+
+
+Annotating the diagram for the above case, with specific components for Worklytics-->Proxy case:
+
+![gcp-to-aws-workload-identity.png](gcp-to-aws-workload-identity.png)
+
+In the above, the AWS resource you're allowing access to is AWS IAM role, which your Worklytics tenant
+assumes and then can access S3 or invoke Lambda function.
+
 ## Authorization
 
 Within your AWS account, you create an IAM role, with a role assumption policy that allows your
