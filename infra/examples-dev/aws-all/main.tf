@@ -129,11 +129,11 @@ module "psoxy" {
   todo_step                            = local.max_auth_todo_step
 
 
-  #  vpc_config = {
-  #    vpc_id             = aws_vpc.main.id
-  #    security_group_ids = [aws_security_group.main.id]
-  #    subnet_ids         = [aws_subnet.main.id]
-  #  }
+#  vpc_config = {
+#    vpc_id             = aws_default_vpc.default.id
+#    security_group_ids = [aws_security_group.default.id]
+#    subnet_ids         = [aws_default_subnet.default.id]
+#  }
 }
 
 ## Worklytics connection configuration
