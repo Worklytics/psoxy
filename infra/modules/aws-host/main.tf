@@ -182,7 +182,7 @@ module "bulk_connector" {
   rules_file                         = each.value.rules_file
   secrets_store_implementation       = var.secrets_store_implementation
   global_parameter_arns              = try(module.global_secrets_ssm[0].secret_arns, [])
-  global_secrets_manager_secret_arns = try(module.global_secrets_secrets_manager[0].secret_arns, [])
+  global_secrets_manager_secret_arns = try(module.global_secrets_secrets_manager[0].secret_arns, {})
   path_to_instance_ssm_parameters    = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
   path_to_shared_ssm_parameters      = var.aws_ssm_param_root_path
   ssm_kms_key_ids                    = local.ssm_key_ids
