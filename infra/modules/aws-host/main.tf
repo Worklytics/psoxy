@@ -61,7 +61,7 @@ module "global_secrets_secrets_manager" {
 
   source = "../../modules/aws-secretsmanager-secrets"
 
-  path       = var.aws_ssm_param_root_path
+  path       = coalesce(var.aws_secrets_manager_path, module.env_id.id)
   kms_key_id = var.aws_ssm_key_id
   secrets    = module.psoxy.secrets
 }
