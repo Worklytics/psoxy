@@ -124,6 +124,7 @@ module "api_connector" {
   aws_account_id                        = var.aws_account_id
   region                                = data.aws_region.current.id
   path_to_repo_root                     = var.psoxy_base_dir
+  todos_as_local_files                  = var.todos_as_local_files
   todo_step                             = var.todo_step
   secrets_store_implementation          = var.secrets_store_implementation
   global_parameter_arns                 = try(module.global_secrets_ssm[0].secret_arns, [])
@@ -137,7 +138,6 @@ module "api_connector" {
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   vpc_config                            = var.vpc_config
   api_gateway_v2                        = module.psoxy.api_gateway_v2
-
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -192,6 +192,7 @@ module "bulk_connector" {
   input_expiration_days              = var.bulk_input_expiration_days
   example_file                       = each.value.example_file
   vpc_config                         = var.vpc_config
+  todos_as_local_files               = var.todos_as_local_files
 
 
   environment_variables = merge(
@@ -256,6 +257,8 @@ locals {
 
 # script to test ALL connectors
 resource "local_file" "test_all_script" {
+  count = var.todos_as_local_files ? 1 : 0
+
   filename        = "test-all.sh"
   file_permission = "755"
   content         = <<EOF
@@ -263,14 +266,14 @@ resource "local_file" "test_all_script" {
 
 echo "Testing API Connectors ..."
 
-%{for test_script in values(module.api_connector)[*].test_script~}
-./${test_script}
+%{for test_script in values(module.api_connector)[*].test_script ~}
+%{if test_script != null}./${test_script}%{endif}
 %{endfor}
 
 echo "Testing Bulk Connectors ..."
 
-%{for test_script in values(module.bulk_connector)[*].test_script~}
-./${test_script}
+%{for test_script in values(module.bulk_connector)[*].test_script ~}
+%{if test_script != null}./${test_script}%{endif}
 %{endfor}
 EOF
 }

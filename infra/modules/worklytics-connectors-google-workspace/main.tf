@@ -36,6 +36,7 @@ module "google_workspace_connection" {
   description                  = "Google API OAuth Client for ${each.value.display_name}"
   apis_consumed                = each.value.apis_consumed
   oauth_scopes_needed          = each.value.oauth_scopes_needed
+  todos_as_local_files         = var.todos_as_local_files
   todo_step                    = var.todo_step
 }
 
