@@ -124,7 +124,6 @@ module "api_connector" {
   aws_account_id                        = var.aws_account_id
   region                                = data.aws_region.current.id
   path_to_repo_root                     = var.psoxy_base_dir
-  todo_step                             = var.todo_step
   secrets_store_implementation          = var.secrets_store_implementation
   global_parameter_arns                 = try(module.global_secrets_ssm[0].secret_arns, [])
   global_secrets_manager_secret_arns    = try(module.global_secrets_secrets_manager[0].secret_arns, {})
@@ -138,7 +137,8 @@ module "api_connector" {
   vpc_config                            = var.vpc_config
   api_gateway_v2                        = module.psoxy.api_gateway_v2
   aws_lambda_execution_role_policy_arn  = var.aws_lambda_execution_role_policy_arn
-
+  todos_as_local_files                  = var.todos_as_local_files
+  todo_step                             = var.todo_step
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -183,7 +183,7 @@ module "bulk_connector" {
   rules_file                           = each.value.rules_file
   secrets_store_implementation         = var.secrets_store_implementation
   global_parameter_arns                = try(module.global_secrets_ssm[0].secret_arns, [])
-  global_secrets_manager_secret_arns   = try(module.global_secrets_secrets_manager[0].secret_arns, [])
+  global_secrets_manager_secret_arns   = try(module.global_secrets_secrets_manager[0].secret_arns, {})
   path_to_instance_ssm_parameters      = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
   path_to_shared_ssm_parameters        = var.aws_ssm_param_root_path
   ssm_kms_key_ids                      = local.ssm_key_ids
@@ -194,6 +194,7 @@ module "bulk_connector" {
   example_file                         = each.value.example_file
   vpc_config                           = var.vpc_config
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
+  todos_as_local_files                 = var.todos_as_local_files
 
 
   environment_variables = merge(
@@ -258,6 +259,8 @@ locals {
 
 # script to test ALL connectors
 resource "local_file" "test_all_script" {
+  count = var.todos_as_local_files ? 1 : 0
+
   filename        = "test-all.sh"
   file_permission = "755"
   content         = <<EOF
@@ -265,14 +268,14 @@ resource "local_file" "test_all_script" {
 
 echo "Testing API Connectors ..."
 
-%{for test_script in values(module.api_connector)[*].test_script~}
-./${test_script}
+%{for test_script in values(module.api_connector)[*].test_script ~}
+%{if test_script != null}./${test_script}%{endif}
 %{endfor}
 
 echo "Testing Bulk Connectors ..."
 
-%{for test_script in values(module.bulk_connector)[*].test_script~}
-./${test_script}
+%{for test_script in values(module.bulk_connector)[*].test_script ~}
+%{if test_script != null}./${test_script}%{endif}
 %{endfor}
 EOF
 }

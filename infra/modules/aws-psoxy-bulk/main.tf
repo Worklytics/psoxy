@@ -350,15 +350,15 @@ EOT
 }
 
 
-resource "local_file" "todo-aws-psoxy-bulk-test" {
+resource "local_file" "todo_test" {
+  count = var.todos_as_local_files ? 1 : 0
+
   filename = "TODO ${var.todo_step} - test ${var.instance_id}.md"
   content  = local.todo_content
 }
 
-resource "local_file" "test_script" {
-  filename        = "test-${var.instance_id}.sh"
-  file_permission = "755"
-  content         = <<EOT
+locals {
+  test_script = <<EOT
 #!/bin/bash
 FILE_PATH=$${1:-${try(local.example_file, "")}}
 BLUE='\e[0;34m'
@@ -368,7 +368,14 @@ printf "Quick test of $${BLUE}${var.instance_id}$${NC} ...\n"
 
 node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} ${local.role_option_for_tests} -re ${var.aws_region}
 EOT
+}
 
+resource "local_file" "test_script" {
+  count = var.todos_as_local_files ? 1 : 0
+
+  filename        = "test-${var.instance_id}.sh"
+  file_permission = "755"
+  content         = local.test_script
 }
 
 # to facilitate composition of ingestion pipeline
@@ -410,7 +417,11 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = local_file.test_script.filename
+  value = try(local_file.test_script[0].filename, null)
+}
+
+output "test_script_content" {
+  value = local.test_script
 }
 
 output "todo" {

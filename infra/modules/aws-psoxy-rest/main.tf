@@ -205,14 +205,14 @@ EOT
 }
 
 resource "local_file" "todo" {
+  count = var.todos_as_local_files ? 1 : 0
+
   filename = "TODO ${var.todo_step} - test ${var.instance_id}.md"
   content  = local.todo_content
 }
 
-resource "local_file" "test_script" {
-  filename        = "test-${var.instance_id}.sh"
-  file_permission = "755"
-  content         = <<EOT
+locals {
+  test_script = <<EOT
 #!/bin/bash
 API_PATH=$${1:-${try(var.example_api_calls[0], "")}}
 echo "Quick test of ${module.psoxy_lambda.function_name} ..."
@@ -223,7 +223,14 @@ ${local.command_cli_call} -u "${local.proxy_endpoint_url}$API_PATH" ${local.impe
 
 echo "Invoke this script with any of the following as arguments to test other endpoints:${"\r\n\t"}${join("\r\n\t", var.example_api_calls)}"
 EOT
+}
 
+resource "local_file" "test_script" {
+  count = var.todos_as_local_files ? 1 : 0
+
+  filename        = "test-${var.instance_id}.sh"
+  file_permission = "755"
+  content         = local.test_script
 }
 
 
@@ -259,7 +266,11 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = local_file.test_script.filename
+  value = try(local_file.test_script[0].filename, null)
+}
+
+output "test_script_content" {
+  value = local.test_script
 }
 
 output "todo" {

@@ -21,6 +21,10 @@ Changes to be including in future/planned release notes will be added here.
   - keys/salts per value kind (PII, item id, etc)
 
 ## [0.4.50](https://github.com/Worklytics/psoxy/release/tag/v0.4.50)
+  - `todos_as_local_files` properly respected now; if you had it as `false`, you may see some local
+    files deleted on your next `terraform apply`.
+  - to accommodate this fix, many people will see moves of local_file resources, to append `[0]` to
+    the resource ids
   - BREAKING - for AWS Secrets Manager (released in 0.4.47 as 'alpha' feature), these will now
     be prefixed by default with the environment ID, unless a `aws_secrets_manager_path` is set.
 

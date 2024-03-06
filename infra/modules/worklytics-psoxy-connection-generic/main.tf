@@ -68,7 +68,9 @@ EOT
 
 }
 
-resource "local_file" "todo-worklytics-connection" {
+resource "local_file" "todo_worklytics_connection" {
+  count = var.todos_as_local_files ? 1 : 0
+
   filename = "TODO ${var.todo_step} - connect ${local.instance_id} in Worklytics.md"
   content  = local.todo_content
 }
