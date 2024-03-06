@@ -3,7 +3,7 @@ terraform {
     # for the infra that will host Psoxy instances
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.12"
+      version = "~> 4.22"
     }
   }
 
@@ -102,6 +102,7 @@ module "psoxy" {
   environment_name                     = var.environment_name
   aws_account_id                       = var.aws_account_id
   aws_ssm_param_root_path              = var.aws_ssm_param_root_path
+  aws_secrets_manager_path             = var.aws_secrets_manager_path
   psoxy_base_dir                       = var.psoxy_base_dir
   deployment_bundle                    = var.deployment_bundle
   install_test_tool                    = var.install_test_tool
@@ -126,6 +127,7 @@ module "psoxy" {
   custom_bulk_connector_rules          = var.custom_bulk_connector_rules
   custom_bulk_connector_arguments      = var.custom_bulk_connector_arguments
   todo_step                            = local.max_auth_todo_step
+
 
   #  vpc_config = {
   #    vpc_id             = aws_vpc.main.id

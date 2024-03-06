@@ -53,6 +53,7 @@ output "todos" {
 output "next_todo_step" {
   value = max(concat(
     values(module.api_connector)[*].next_todo_step,
-    values(module.bulk_connector)[*].next_todo_step
+    values(module.bulk_connector)[*].next_todo_step,
+    [1]
   )...)
 }

@@ -1,3 +1,12 @@
+terraform {
+  required_version = ">= 1.3, < 1.6"
+  required_providers {
+    aws = {
+      version = ">= 4.22, < 5.0"
+    }
+  }
+}
+
 # NOTE: region used to be passed in as a variable; put it MUST match the region in which the lambda
 # is provisioned, and that's implicit in the provider - so we should just infer from the provider
 data "aws_region" "current" {}
@@ -52,7 +61,7 @@ module "global_secrets_secrets_manager" {
 
   source = "../../modules/aws-secretsmanager-secrets"
 
-  path       = var.aws_ssm_param_root_path
+  path       = coalesce(var.aws_secrets_manager_path, module.env_id.id)
   kms_key_id = var.aws_ssm_key_id
   secrets    = module.psoxy.secrets
 }
