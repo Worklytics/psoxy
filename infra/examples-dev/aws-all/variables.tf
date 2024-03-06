@@ -291,7 +291,6 @@ variable "custom_bulk_connector_arguments" {
   default     = {}
 }
 
-# TODO: rethink this schema before we publish this
 variable "lookup_table_builders" {
   type = map(object({
     input_connector_id            = string
