@@ -1,57 +1,66 @@
 ##
 ### locals that function like variables, but without tedium of declaring them in a separate file
 #locals {
-#
-#  cidr_block = "10.0.0.0/16"
-#
 #  # must pick one that supports arm64 lambdas (which apparently is not all of them)
 #  availability_zone = "us-east-1a"
 #}
-#
-#
-### actual logic
-#resource "aws_vpc" "main" {
-#  cidr_block = local.cidr_block
-#
-#  tags = {
-#    environment_name = var.environment_name
-#  }
+
+# these will pick up default VPC/subnet/security group for your AWS Account
+# you can override these with your own VPC/subnet/security group if you want; if you do, you must
+# ensure they are configured to provide connectivity to the AWS services on which your proxy setup
+# depends (at minimum: S3, SSM, CloudWatch)
+
+# alternatively, can use aws_vpc resource to create a new VPC; in such case, will likely need
+# to create a gateway for it, route table, etc - to provide connectivity to AWS services and
+# the data source APIS to which you intend to connect (usually on the public internet)
+#resource "aws_default_vpc" "default" {
 #}
 #
-#resource "aws_subnet" "main" {
-#  vpc_id            = aws_vpc.main.id
-#  cidr_block        = local.cidr_block
+#
+#
+## alternatively, can use 'aws_subnet' resource to create a new subnet
+#resource "aws_default_subnet" "default" {
 #  availability_zone = local.availability_zone
-#
-#  tags = {
-#    environment_name = var.environment_name
-#  }
 #}
 #
+## if you have a default security group, could use this as below:
+##resource "aws_default_security_group" "default" {
+##}
 #
-#resource "aws_security_group" "main" {
-#  name        = "${var.environment_name}"
-#  description = "Security group for ${var.environment_name} deployment of Psoxy"
-#  vpc_id      = aws_vpc.main.id
+#resource "aws_vpc_endpoint" "aws_services" {
+#  for_each = toset([
+#    #"s3", # doesn't play nice with this for some reason; always 'Error: updating EC2 VPC Endpoint (vpce---): InvalidParameter: To set PrivateDnsOnlyForInboundResolverEndpoint to true, the VPC vpc--- must have a Gateway endpoint for the service.'
+#    "secretsmanager",
+#    "ssm"
+#  ])
 #
-#  # allow HTTPS inbound from any source
-#  ingress {
-#    description = "HTTPS"
-#    from_port   = 443
-#    to_port     = 443
-#    protocol    = "tcp"
-#    cidr_blocks = [
-#      local.cidr_block
-#    ]
-#  }
+#  vpc_id       = aws_default_vpc.default.id
+#  service_name = "com.amazonaws.${var.aws_region}.${each.key}"
+#  vpc_endpoint_type = "Interface" # via AWS console, seems to be this
+#  security_group_ids = [
+#    aws_security_group.default.id
+#  ]
 #
-#  # Allow HTTPS outbound to any destination
-#  egress {
-#    from_port = 443
-#    to_port   = 443
-#    protocol  = "tcp"
-#    cidr_blocks = [
-#      "0.0.0.0/0" # any destination
-#    ]
-#  }
+#  # DNS seems to resolve it ... but is it correct?
+#  private_dns_enabled = true
+#
+#  # unless you specify a subnet, it doesn't seem to get an IP address
+#  subnet_ids = [
+#    aws_default_subnet.default.id
+#  ]
+#}
+#
+#resource "aws_security_group" "default" {
+#  vpc_id = aws_default_vpc.default.id
+#}
+#
+#resource "aws_security_group_rule" "aws_services_https" {
+#  description = "allow HTTPS out to AWS services"
+#  from_port         = 0
+#  protocol          = "tcp"
+#  security_group_id = aws_security_group.default.id
+#  to_port           = 0
+#  type              = "egress"
+#  cidr_blocks       = [ "0.0.0.0/0" ]
+#  #cidr_blocks = concat(aws_vpc_endpoint.aws_services[*].cidr_blocks)
 #}
