@@ -3,9 +3,9 @@
 By default, the Terraform examples provided by Worklytics install a NodeJS-based tool for testing
 your proxy deployments.
 
-Full documentation of the test tool is available [here](../tools/psoxy-test/README.md).
+Full documentation of the test tool is available [here](../../tools/psoxy-test/README.md).
 
-### Testing Pre-requisities
+### Testing Pre-requisites
 
 Wherever you run this test tool from, your AWS or GCloud CLI _must_ be authenticated as an entity
 with permissions to invoke the Lambda functions / Cloud functions that you deployed for Psoxy.
