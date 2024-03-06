@@ -34,27 +34,28 @@ locals {
 module "psoxy_lambda" {
   source = "../aws-psoxy-lambda"
 
-  environment_name                   = var.environment_name
-  instance_id                        = var.instance_id
-  handler_class                      = "co.worklytics.psoxy.Handler"
-  path_to_function_zip               = var.path_to_function_zip
-  function_zip_hash                  = var.function_zip_hash
-  function_env_kms_key_arn           = var.function_env_kms_key_arn
-  logs_kms_key_arn                   = var.logs_kms_key_arn
-  memory_size_mb                     = var.memory_size_mb
-  timeout_seconds                    = 55
-  reserved_concurrent_executions     = var.reserved_concurrent_executions
-  path_to_config                     = var.path_to_config
-  source_kind                        = var.source_kind
-  function_parameters                = var.function_parameters
-  path_to_instance_ssm_parameters    = var.path_to_instance_ssm_parameters
-  path_to_shared_ssm_parameters      = var.path_to_shared_ssm_parameters
-  global_parameter_arns              = var.global_parameter_arns
-  global_secrets_manager_secret_arns = var.global_secrets_manager_secret_arns
-  ssm_kms_key_ids                    = var.ssm_kms_key_ids
-  log_retention_in_days              = var.log_retention_days
-  vpc_config                         = var.vpc_config
-  secrets_store_implementation       = var.secrets_store_implementation
+  environment_name                     = var.environment_name
+  instance_id                          = var.instance_id
+  handler_class                        = "co.worklytics.psoxy.Handler"
+  path_to_function_zip                 = var.path_to_function_zip
+  function_zip_hash                    = var.function_zip_hash
+  function_env_kms_key_arn             = var.function_env_kms_key_arn
+  logs_kms_key_arn                     = var.logs_kms_key_arn
+  memory_size_mb                       = var.memory_size_mb
+  timeout_seconds                      = 55
+  reserved_concurrent_executions       = var.reserved_concurrent_executions
+  path_to_config                       = var.path_to_config
+  source_kind                          = var.source_kind
+  function_parameters                  = var.function_parameters
+  path_to_instance_ssm_parameters      = var.path_to_instance_ssm_parameters
+  path_to_shared_ssm_parameters        = var.path_to_shared_ssm_parameters
+  global_parameter_arns                = var.global_parameter_arns
+  global_secrets_manager_secret_arns   = var.global_secrets_manager_secret_arns
+  ssm_kms_key_ids                      = var.ssm_kms_key_ids
+  log_retention_in_days                = var.log_retention_days
+  vpc_config                           = var.vpc_config
+  secrets_store_implementation         = var.secrets_store_implementation
+  aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
 
   environment_variables = merge(
     var.environment_variables,

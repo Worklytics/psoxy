@@ -124,8 +124,6 @@ module "api_connector" {
   aws_account_id                        = var.aws_account_id
   region                                = data.aws_region.current.id
   path_to_repo_root                     = var.psoxy_base_dir
-  todos_as_local_files                  = var.todos_as_local_files
-  todo_step                             = var.todo_step
   secrets_store_implementation          = var.secrets_store_implementation
   global_parameter_arns                 = try(module.global_secrets_ssm[0].secret_arns, [])
   global_secrets_manager_secret_arns    = try(module.global_secrets_secrets_manager[0].secret_arns, {})
@@ -138,6 +136,9 @@ module "api_connector" {
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   vpc_config                            = var.vpc_config
   api_gateway_v2                        = module.psoxy.api_gateway_v2
+  aws_lambda_execution_role_policy_arn  = var.aws_lambda_execution_role_policy_arn
+  todos_as_local_files                  = var.todos_as_local_files
+  todo_step                             = var.todo_step
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -166,33 +167,35 @@ module "bulk_connector" {
 
   source = "../../modules/aws-psoxy-bulk"
 
-  aws_account_id                     = var.aws_account_id
-  provision_iam_policy_for_testing   = var.provision_testing_infra
-  aws_role_to_assume_when_testing    = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
-  environment_name                   = var.environment_name
-  instance_id                        = each.key
-  source_kind                        = each.value.source_kind
-  aws_region                         = data.aws_region.current.id
-  path_to_function_zip               = module.psoxy.path_to_deployment_jar
-  function_zip_hash                  = module.psoxy.deployment_package_hash
-  function_env_kms_key_arn           = var.function_env_kms_key_arn
-  logs_kms_key_arn                   = var.logs_kms_key_arn
-  psoxy_base_dir                     = var.psoxy_base_dir
-  rules                              = try(var.custom_bulk_connector_rules[each.key], each.value.rules)
-  rules_file                         = each.value.rules_file
-  secrets_store_implementation       = var.secrets_store_implementation
-  global_parameter_arns              = try(module.global_secrets_ssm[0].secret_arns, [])
-  global_secrets_manager_secret_arns = try(module.global_secrets_secrets_manager[0].secret_arns, {})
-  path_to_instance_ssm_parameters    = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
-  path_to_shared_ssm_parameters      = var.aws_ssm_param_root_path
-  ssm_kms_key_ids                    = local.ssm_key_ids
-  sanitized_accessor_role_names      = [module.psoxy.api_caller_role_name]
-  memory_size_mb                     = coalesce(try(var.custom_bulk_connector_arguments[each.key].memory_size_mb, null), each.value.memory_size_mb, 1024)
-  sanitized_expiration_days          = var.bulk_sanitized_expiration_days
-  input_expiration_days              = var.bulk_input_expiration_days
-  example_file                       = each.value.example_file
-  vpc_config                         = var.vpc_config
-  todos_as_local_files               = var.todos_as_local_files
+  aws_account_id                       = var.aws_account_id
+  provision_iam_policy_for_testing     = var.provision_testing_infra
+  aws_role_to_assume_when_testing      = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
+  environment_name                     = var.environment_name
+  instance_id                          = each.key
+  source_kind                          = each.value.source_kind
+  aws_region                           = data.aws_region.current.id
+  path_to_function_zip                 = module.psoxy.path_to_deployment_jar
+  function_zip_hash                    = module.psoxy.deployment_package_hash
+  function_env_kms_key_arn             = var.function_env_kms_key_arn
+  logs_kms_key_arn                     = var.logs_kms_key_arn
+  psoxy_base_dir                       = var.psoxy_base_dir
+  rules                                = try(var.custom_bulk_connector_rules[each.key], each.value.rules)
+  rules_file                           = each.value.rules_file
+  secrets_store_implementation         = var.secrets_store_implementation
+  global_parameter_arns                = try(module.global_secrets_ssm[0].secret_arns, [])
+  global_secrets_manager_secret_arns   = try(module.global_secrets_secrets_manager[0].secret_arns, {})
+  path_to_instance_ssm_parameters      = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
+  path_to_shared_ssm_parameters        = var.aws_ssm_param_root_path
+  ssm_kms_key_ids                      = local.ssm_key_ids
+  sanitized_accessor_role_names        = [module.psoxy.api_caller_role_name]
+  memory_size_mb                       = coalesce(try(var.custom_bulk_connector_arguments[each.key].memory_size_mb, null), each.value.memory_size_mb, 1024)
+  sanitized_expiration_days            = var.bulk_sanitized_expiration_days
+  input_expiration_days                = var.bulk_input_expiration_days
+  example_file                         = each.value.example_file
+  vpc_config                           = var.vpc_config
+  aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
+  todos_as_local_files                 = var.todos_as_local_files
+
 
 
   environment_variables = merge(
