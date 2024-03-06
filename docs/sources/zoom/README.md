@@ -27,7 +27,7 @@ The Zoom connector through Psoxy requires a Custom Managed App on the Zoom Marke
 be left in development mode; it does not need to be published.
 
 1. Go to https://marketplace.zoom.us/develop/create and create an app of type "Server to Server
-   OAuth"
+   OAuth" for creating a server-to-server app.
 2. After creation, it will show the App Credentials.
 
    Copy the following values:
@@ -52,13 +52,15 @@ be left in development mode; it does not need to be published.
 
 3. Fill the information section
 
-4. Fill the scopes section, enabling the following:
+4. Fill the scopes section clicking on `+ Add Scopes` and adding the following:
+   - User:
+       - View all user information: `user:read:admin`. This is to be able to gather information about the zoom users.
+   - Meeting:
+       - View all user meetings: `meeting:read:admin`. That allows us to list all user meeting
+   - Report:
+       - View report data: `report:read:admin`. This is for getting last 6 months view for user meetings
+         Once the scopes are added, click on `Done` and then `Continue`.
 
-   - Users / View all user information / `user:read:admin`
-     - List information about the Zoom user accounts, for enumeration / linking across sources
-   - Meetings / View all user meetings / `meeting:read:admin`
-     - Listing all user meetings (work events / items)
-   - Report / View report data / `report:read:admin`
-     - List historical (previous 6 months) user meetings (work events / items)
+       - ![Scopes](scopes.png)
 
 5. Activate the app
