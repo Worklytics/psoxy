@@ -37,6 +37,12 @@ variable "display_name" {
   description = "display name of connector in Worklytics."
 }
 
+variable "todos_as_local_files" {
+  type        = bool
+  description = "whether to render TODOs as flat files"
+  default     = true
+}
+
 variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"

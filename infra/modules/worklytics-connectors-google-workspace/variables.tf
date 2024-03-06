@@ -31,6 +31,12 @@ variable "google_workspace_example_admin" {
   default     = null # will failover to user
 }
 
+variable "todos_as_local_files" {
+  type        = bool
+  description = "whether to render TODOs as flat files"
+  default     = true
+}
+
 variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"

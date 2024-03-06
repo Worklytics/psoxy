@@ -11,6 +11,7 @@ module "generic" {
   todo_step              = var.todo_step
   display_name           = var.display_name
   worklytics_host        = var.worklytics_host
+  todos_as_local_files   = var.todos_as_local_files
   connector_id           = var.connector_id
 
 

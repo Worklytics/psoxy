@@ -56,6 +56,7 @@ module "msft_365_grants" {
   oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
   app_roles                = each.value.required_app_roles
   application_name         = each.key
+  todos_as_local_files     = var.todos_as_local_files
   todo_step                = var.todo_step
 }
 
