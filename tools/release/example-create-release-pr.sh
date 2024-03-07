@@ -90,7 +90,7 @@ if [ ! -d "$EXAMPLE_TEMPLATE_REPO" ]; then
   exit 1
 fi
 
-${PATH_TO_REPO}tools/release/example-copy.sh $dev_example_path $EXAMPLE_TEMPLATE_REPO
+${PATH_TO_REPO}tools/release/example-copy.sh $dev_example_path $EXAMPLE_TEMPLATE_REPO $PATH_TO_REPO
 
 
 # append / if needed
