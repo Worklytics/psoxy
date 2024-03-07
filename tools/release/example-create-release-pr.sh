@@ -52,6 +52,7 @@ if [ ! -f "${PATH_TO_REPO}java/pom.xml" ]; then
 fi
 
 cd $PATH_TO_REPO
+PATH_TO_REPO="$(pwd)/" # get full path
 
 # ensure on `main`
 CURRENT_SOURCE_BRANCH=$(git branch --show-current)
@@ -65,7 +66,7 @@ if [ "$CURRENT_SOURCE_BRANCH" != "main" ]; then
       git checkout main
       ;;
     *)
-      printf "Did not switch to main. Example will be published from ${BLUE}${CURRENT_BRANCH}${NC}.\n"
+      printf "Did not switch to main. Example will be published from ${BLUE}${CURRENT_SOURCE_BRANCH}${NC}.\n"
       ;;
   esac
 fi
@@ -90,13 +91,11 @@ if [ ! -d "$EXAMPLE_TEMPLATE_REPO" ]; then
   exit 1
 fi
 
-${PATH_TO_REPO}tools/release/example-copy.sh $dev_example_path $EXAMPLE_TEMPLATE_REPO $PATH_TO_REPO
-
-
 # append / if needed
 if [[ "${EXAMPLE_TEMPLATE_REPO: -1}" != "/" ]]; then
     EXAMPLE_TEMPLATE_REPO="$EXAMPLE_TEMPLATE_REPO/"
 fi
+
 
 cd "$EXAMPLE_TEMPLATE_REPO"
 
@@ -162,11 +161,13 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+${PATH_TO_REPO}tools/release/example-copy.sh $dev_example_path $EXAMPLE_TEMPLATE_REPO $PATH_TO_REPO
+
 git commit -a -m "Update example to ${RELEASE_TAG}"
 git push origin
 
 if command -v gh &> /dev/null; then
-  PR_URL=$(gh pr create --title "update to ${RELEASE_TAG}" --body "update to proxy release ${RELEASE_TAG}" --assignee "@me")
+  PR_URL=$(gh pr create --title "update to \`${RELEASE_TAG}\`" --body "update to proxy release https://github.com/Worklytics/psoxy/releases/tag/${RELEASE_TAG}" --assignee "@me")
   printf "created PR ${BLUE}${PR_URL}${NC}\n"
   PR_NUMBER=$(gh pr view $PR_URL --json number | jq -r ".number")
   gh pr comment $PR_NUMBER --body "when ready, from your Psoxy checkout, run \`./tools/release/example-publish-release-pr.sh $EXAMPLE_TEMPLATE_REPO $PR_NUMBER\`"
