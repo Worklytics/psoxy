@@ -214,17 +214,6 @@ resource "aws_cloudwatch_log_group" "api_gatewayv2_log" {
   kms_key_id        = var.logs_kms_key_arn
 }
 
-# install test tool, if it exists in expected location
-module "test_tool" {
-  count = var.install_test_tool ? 1 : 0
-
-  source = "../psoxy-test-tool"
-
-  path_to_tools = "${var.psoxy_base_dir}tools"
-  # TODO: take version from somewhere else here; this isn't *necessary* the version if local build or remote artifact
-  psoxy_version = module.psoxy_package.version
-}
-
 output "secrets" {
   value = {
     PSOXY_ENCRYPTION_KEY = {
