@@ -21,7 +21,7 @@ variable "aws_ssm_param_root_path" {
 variable "aws_secrets_manager_path" {
   type        = string
   description = "**beta** path under which Secrets Manager secrets created by this module will be created"
-  default     = null
+  default     = ""
 
   validation {
     condition     = var.aws_secrets_manager_path == null || length(var.aws_secrets_manager_path) == 0 || length(regexall("/", var.aws_secrets_manager_path)) == 0 || startswith(var.aws_secrets_manager_path, "/")
