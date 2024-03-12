@@ -13,7 +13,7 @@ module "psoxy_lambda" {
   path_to_function_zip                 = var.path_to_function_zip
   function_zip_hash                    = var.function_zip_hash
   global_parameter_arns                = var.global_parameter_arns
-  global_secrets_manager_secrets_arns  = var.global_secrets_manager_secrets_arns
+  global_secrets_manager_secrets_arns  = var.global_secrets_manager_secret_arns
   path_to_instance_ssm_parameters      = var.path_to_instance_ssm_parameters
   path_to_shared_ssm_parameters        = var.path_to_shared_ssm_parameters
   function_env_kms_key_arn             = var.function_env_kms_key_arn
