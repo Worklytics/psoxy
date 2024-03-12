@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import lombok.extern.java.Log;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 
@@ -32,8 +33,11 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 
 /**
  * implementation of an Access Token Request (per RFC6749 4.4.2) authenticated by an assertion (RFC 7521)
@@ -43,6 +47,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * - <a href="https://datatracker.ietf.org/doc/html/rfc7521">...</a>
  * - <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2">...</a>
  */
+@Log
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class ClientCredentialsGrantTokenRequestBuilder
         implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
@@ -233,8 +238,17 @@ public class ClientCredentialsGrantTokenRequestBuilder
     }
 
     private PrivateKey getServiceAccountPrivateKey() throws IOException {
-        String privateKeyPem = secretStore.getConfigPropertyOrError(ConfigProperty.PRIVATE_KEY);
-        Reader reader = new StringReader(privateKeyPem);
+
+        ConfigService.ConfigValueWithMetadata value = secretStore.getConfigPropertyWithMetadata(ConfigProperty.PRIVATE_KEY)
+            .orElseThrow(() -> new NoSuchElementException("No PRIVATE_KEY found in secret store"));
+
+        value.getLastModifiedDate().ifPresent(lastModified -> {
+            if (lastModified.isBefore(clock.instant().minus(180, ChronoUnit.DAYS))) {
+                log.log(Level.WARNING, "Private key last modified in secret store more than 180 days ago, may be expired");
+            }
+        });
+
+        Reader reader = new StringReader(value.getValue());
         PemReader.Section section = PemReader.readFirstSectionAndClose(reader, "PRIVATE KEY");
         if (section == null) {
             throw new IOException("Invalid PKCS8 data.");
