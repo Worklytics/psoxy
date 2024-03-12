@@ -42,10 +42,6 @@ moved {
   to   = module.sanitized_output_bucket.aws_s3_bucket_server_side_encryption_configuration.sanitized
 }
 
-moved {
-  from = aws_s3_bucket_public_access_block.sanitized
-  to   = module.sanitized_output_bucket.aws_s3_bucket_public_access_block.sanitized
-}
 
 data "aws_s3_bucket" "input" {
   bucket = var.input_bucket

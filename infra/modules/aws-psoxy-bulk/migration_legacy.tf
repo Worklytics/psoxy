@@ -19,7 +19,3 @@ moved {
   to   = aws_s3_bucket.sanitized
 }
 
-moved {
-  from = aws_s3_bucket_public_access_block.output-block-public-access
-  to   = aws_s3_bucket_public_access_block.sanitized
-}

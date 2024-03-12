@@ -66,17 +66,6 @@ resource "aws_s3_bucket" "input" {
   }
 }
 
-
-resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
-  bucket = aws_s3_bucket.input.bucket
-
-  block_public_acls       = true
-  block_public_policy     = true
-  restrict_public_buckets = true
-  ignore_public_acls      = true
-}
-
-
 resource "aws_s3_bucket_lifecycle_configuration" "expire_input_files" {
   bucket = aws_s3_bucket.input.bucket
 
@@ -98,15 +87,6 @@ resource "aws_s3_bucket" "sanitized" {
       tags
     ]
   }
-}
-
-resource "aws_s3_bucket_public_access_block" "sanitized" {
-  bucket = aws_s3_bucket.sanitized.bucket
-
-  block_public_acls       = true
-  block_public_policy     = true
-  restrict_public_buckets = true
-  ignore_public_acls      = true
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "expire_sanitized_files" {
