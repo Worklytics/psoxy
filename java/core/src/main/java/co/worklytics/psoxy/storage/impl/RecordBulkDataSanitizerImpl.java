@@ -83,8 +83,6 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                      @NonNull Writer writer,
                      @NonNull List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms) throws IOException {
 
-
-
         try (CSVParser records = CSVFormat.DEFAULT
                 .withFirstRecordAsHeader()
                 .withIgnoreHeaderCase()
@@ -92,6 +90,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                 .parse(reader);
              CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.builder()
                         .setHeader(records.getHeaderNames().toArray(new String[0]))
+                        .setRecordSeparator(records.getFirstEndOfLine()) //match source
                         .build())) {
             Iterator<CSVRecord> iter = records.iterator();
 
