@@ -239,6 +239,12 @@ variable "example_file" {
   default     = null
 }
 
+variable "provision_bucket_public_access_block" {
+  type        = bool
+  description = "Whether to provision public_access_block resources on all buckets; defaults to 'true', but can be 'false' if you have organizational control policies that do this at a higher level."
+  default     = true
+}
+
 variable "todos_as_local_files" {
   type        = bool
   description = "whether to render TODOs as flat files"

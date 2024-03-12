@@ -27,7 +27,7 @@ module "psoxy_lambda" {
     var.environment_variables,
     {
       INPUT_BUCKET  = var.input_bucket
-      OUTPUT_BUCKET = aws_s3_bucket.output.bucket,
+      OUTPUT_BUCKET = module.sanitized_output_bucket.output_bucket
     }
   )
 }
@@ -91,9 +91,10 @@ resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
 module "sanitized_output_bucket" {
   source = "../aws-psoxy-output-bucket"
 
-  instance_id                   = var.instance_id
-  iam_role_for_lambda_name      = module.psoxy_lambda.iam_role_for_lambda_name
-  sanitized_accessor_role_names = var.sanitized_accessor_role_names
+  instance_id                          = var.instance_id
+  iam_role_for_lambda_name             = module.psoxy_lambda.iam_role_for_lambda_name
+  sanitized_accessor_role_names        = var.sanitized_accessor_role_names
+  provision_bucket_public_access_block = var.provision_bucket_public_access_block
 }
 
 
