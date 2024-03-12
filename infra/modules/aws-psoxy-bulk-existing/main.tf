@@ -88,27 +88,6 @@ resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
   policy_arn = aws_iam_policy.input_bucket_getObject_policy.arn
 }
 
-
-moved {
-  from = aws_iam_policy.sanitized_bucket_write_policy
-  to   = module.sanitized_output_bucket.aws_iam_policy.sanitized_bucket_write_policy
-}
-
-moved {
-  from = aws_iam_role_policy_attachment.write_policy_for_sanitized_bucket
-  to   = module.sanitized_output_bucket.aws_iam_role_policy_attachment.write_policy_for_sanitized_bucket
-}
-
-moved {
-  from = aws_iam_policy.sanitized_bucket_read
-  to   = module.sanitized_output_bucket.aws_iam_policy.sanitized_bucket_read
-}
-
-moved {
-  from = aws_iam_role_policy_attachment.reader_policy_to_accessor_role
-  to   = module.sanitized_output_bucket.aws_iam_role_policy_attachment.reader_policy_to_accessor_role
-}
-
 module "sanitized_output_bucket" {
   source = "../aws-psoxy-output-bucket"
 
