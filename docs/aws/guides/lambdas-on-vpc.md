@@ -63,16 +63,16 @@ See the following terraform resources that you'll likely need:
 
 ## Troubleshooting
 
-Check your Cloud Watch logs for the lambda. Proxy lambda will timeout in INIT phase if SSM Parameter
-Store *or* your secret store implementation (AWS Secrets Manager, Vault) is not reachable.
+Check your Cloud Watch logs for the lambda. Proxy lambda will time out in INIT phase if SSM
+Parameter Store *or* your secret store implementation (AWS Secrets Manager, Vault) is not reachable.
 
 Some potential causes of this:
-  - DNS failure - it's going got look up the SSM service by domain; if the DNS zone for the SSM
+  - DNS failure - it's going to look up the SSM service by domain; if the DNS zone for the SSM
     endpoint you've provisioned is not published on the VPC, this will fail; similarly, if the
     endpoint wasn't configured on a subnet - then it won't have an IP to be resolved.
   - if the IP is resolved, you should see failure to connect to it in the logs (timeouts); check
-    that your security groups for lambda/subnet/endpoint allow bidirectional traffic necessary to
-    for your lambda to retrieve data from SSM via the REST API.
+    that your security groups for lambda/subnet/endpoint allow bidirectional traffic necessary for
+    your lambda to retrieve data from SSM via the REST API.
 
 ## Switching back from using a VPC
 
