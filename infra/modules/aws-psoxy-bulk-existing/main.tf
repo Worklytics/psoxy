@@ -27,7 +27,7 @@ module "psoxy_lambda" {
     var.environment_variables,
     {
       INPUT_BUCKET  = var.input_bucket
-      OUTPUT_BUCKET = aws_s3_bucket.output.bucket,
+      OUTPUT_BUCKET = module.sanitized_output_bucket.output_bucket
     }
   )
 }
