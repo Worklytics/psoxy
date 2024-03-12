@@ -142,4 +142,28 @@ class RecordBulkDataSanitizerImplTest {
         assertEquals(EXPECTED, output);
     }
 
+    @Test
+    void csv() {
+        this.setUpWithRules("---\n" +
+            "format: \"CSV\"\n" +
+            "transforms:\n" +
+            "- redact: \"foo\"\n" +
+            "- pseudonymize: \"bar\"\n");
+
+        final String objectPath = "export-20231128/file.ndjson";
+        final String pathToOriginal = "bulk/example.csv";
+        storageHandler.handle(BulkDataTestUtils.request(objectPath),
+            BulkDataTestUtils.transform(rules),
+            BulkDataTestUtils.inputStreamSupplier(pathToOriginal),
+            outputStreamSupplier);
+
+
+        String output = new String(outputStream.toByteArray());
+
+        final String EXPECTED = "foo,bar\r\n" +
+            ",t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\r\n" +
+            ",t~0E6I_002nK2IJjv_KCUeFzIUo5rfuISgx7_g-EhfCxE@company.com\r\n";
+        assertEquals(EXPECTED, output);
+    }
+
 }
