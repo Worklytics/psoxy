@@ -99,9 +99,9 @@ This feature supports simple adaptation of existing data pipelines for use in Wo
 - Rule structure is specified in
   [`ColumnarRules`](java/gateway-core/src/main/java/com/avaulta/gateway/rules/ColumnarRules.java).
 
-### Record-Oriented Formats (RecordRules) **alpha**
+### Record-Oriented Formats (RecordRules)
 
-_As of Oct 2023, this is an alpha feature_
+_As of Oct 2023, this is a **beta** feature_
 
 `RecordRules` parses files as records, presuming the specified format. It performs transforms in
 order on each record to sanitize your data, and serializes the result back to the specified format.
@@ -124,14 +124,18 @@ root of the record object.
 
 `transforms` itself is an ordered-list of transforms. The transforms should be applied in order.
 
+CSV format is also supported, but in effect is converted to a simple JSON object before rules are
+applied; so JSON paths in transforms should all be single-level; eg, `$.email` to refer to the
+`email` column in the CSV.
+
 #### See Also
 
 - Rule structure is specified in
   [`RecordRules`](java/gateway-core/src/main/java/com/avaulta/gateway/rules/RecordRules.java).
 
-### Mixing File Formats **alpha**
+### Mixing File Formats
 
-_As of Oct 2023, this feature is in alpha and may change in backwards incompatible ways_
+_As of Oct 2023, this feature is in **beta** and may change in backwards incompatible ways_
 
 You can process multiple file formats through a single proxy instance using
 `MultiTypeBulkDataRules`.
