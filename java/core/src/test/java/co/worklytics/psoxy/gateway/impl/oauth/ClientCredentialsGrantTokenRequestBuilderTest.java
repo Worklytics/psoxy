@@ -205,6 +205,17 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
         assertNotNull(tokenResponse.getExpiresIn());
     }
 
+    @Test
+    public void trimPrefixIfPresent() {
+
+        String trimmed =
+            payloadBuilder.trimPrefixIfPresent("sha1 Fingerprint=6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B", "sha1 Fingerprint=");
+
+        assertEquals("6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B", trimmed);
+
+        assertEquals("6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B",
+            payloadBuilder.trimPrefixIfPresent("6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B", "sha1 Fingerprint="));
+    }
 
 
 
