@@ -212,7 +212,9 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
         "6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B",
         "  6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B  ",
         "sha1 Fingerprint=6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B",
-        "  sha1 Fingerprint=6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B  "
+        "  sha1 Fingerprint=6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B  ",
+        "6F:CC:8E:28:F6:A6:3B:4E:99:4E:D6:2F:52:BD:F3:C3:B0:B7:E8:8B",
+        "6fcc8e28f6a63b4e994ed62f52bdf3c3b0b7e88b",
     })
     @ParameterizedTest
     public void setJWTCustomHeaders(String configuredPrivateKeyId) {
