@@ -250,6 +250,8 @@ For testing your psoxy instance, you will need:
 | [Node.js](https://nodejs.org/en/)                                  | 16+     | `node --version`  |
 | [npm](https://www.npmjs.com/package/npm) (should come with `node`) | 8+      | `npm --version`   |
 
+NOTE: NodeJS 16 is unmaintained since Oct 2023, so we recommend newer version; but in theory should
+work.
 
 We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](tools/check-prereqs.sh).
 That script has no dependencies itself, so should be able to run on any plain POSIX-compliant shell
