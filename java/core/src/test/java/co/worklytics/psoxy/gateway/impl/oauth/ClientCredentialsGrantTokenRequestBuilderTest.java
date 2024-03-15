@@ -9,11 +9,14 @@ import co.worklytics.test.TestModules;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.webtoken.JsonWebSignature;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,7 +26,7 @@ import java.time.Clock;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class ClientCredentialsGrantTokenRequestBuilderTest {
 
@@ -205,17 +208,23 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
         assertNotNull(tokenResponse.getExpiresIn());
     }
 
-    @Test
-    public void trimPrefixIfPresent() {
+    @ValueSource(strings = {
+        "6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B",
+        "  6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B  ",
+        "sha1 Fingerprint=6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B",
+        "  sha1 Fingerprint=6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B  "
+    })
+    @ParameterizedTest
+    public void setJWTCustomHeaders(String configuredPrivateKeyId) {
+        JsonWebSignature.Header header = mock(JsonWebSignature.Header.class);
 
-        String trimmed =
-            payloadBuilder.trimPrefixIfPresent("sha1 Fingerprint=6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B", "sha1 Fingerprint=");
-
-        assertEquals("6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B", trimmed);
-
-        assertEquals("6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B",
-            payloadBuilder.trimPrefixIfPresent("6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B", "sha1 Fingerprint="));
+        when(secretStore.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY_ID))
+            .thenReturn(configuredPrivateKeyId);
+        payloadBuilder.setJWTCustomHeaders(header);
+        verify(header, times(1))
+            .setX509Thumbprint(eq(payloadBuilder.encodeKeyId("6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B")));
     }
+
 
 
 
