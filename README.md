@@ -245,10 +245,10 @@ Depending on your Cloud Host / Data Sources, you will need:
 
 For testing your psoxy instance, you will need:
 
-| Tool                                                               | Version | Test Command      |
-|--------------------------------------------------------------------|---------|-------------------|
-| [Node.js](https://nodejs.org/en/)                                  | 16+     | `node --version`  |
-| [npm](https://www.npmjs.com/package/npm) (should come with `node`) | 8+      | `npm --version`   |
+| Tool                                                               | Version                       | Test Command      |
+|--------------------------------------------------------------------|-------------------------------|-------------------|
+| [Node.js](https://nodejs.org/en/)                                  | 16+ (ideally, an LTS version) | `node --version`  |
+| [npm](https://www.npmjs.com/package/npm) (should come with `node`) | 8+                            | `npm --version`   |
 
 NOTE: NodeJS 16 is unmaintained since Oct 2023, so we recommend newer version; but in theory should
 work.
