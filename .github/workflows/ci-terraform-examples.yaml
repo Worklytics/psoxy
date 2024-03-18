@@ -9,7 +9,7 @@ on:
 
 jobs:
   validate_tf_examples:
-    name: 'validate tf examples'
+    name: 'validate tf examples (${{ matrix.example_path }}, ${{ matrix.terraform_version }})'
     strategy:
       matrix:
         example_path: [
