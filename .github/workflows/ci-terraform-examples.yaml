@@ -1,4 +1,8 @@
-name: 'validate Terraform Examples - Dev'
+
+# NOTE: including pretty name here just makes status check in GH UX really long, as well as more
+# verbose to refer to it in branch protection rules / etc
+
+#name: 'validate Terraform Examples - Dev'
 
 # run everywhere; should be internally consistent
 
