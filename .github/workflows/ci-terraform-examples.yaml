@@ -9,7 +9,6 @@ on:
 
 jobs:
   validate_tf_examples:
-    name: 'validate tf examples (${{ matrix.example_path }}, ${{ matrix.terraform_version }})'
     strategy:
       matrix:
         example_path: [
@@ -24,4 +23,4 @@ jobs:
     uses: ./.github/workflows/ci-terraform-example.yaml
     with:
       terraform_version: ${{ matrix.terraform_version }}
-      example_path: ${{ matrix.example_path }} 
+      example_path: ${{ matrix.example_path }}
