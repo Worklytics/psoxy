@@ -13,8 +13,7 @@ on:
         default: '~1.6.0'
 
 jobs:
-  validate_tf_example:
-    # name: 'validate tf example - ${{ inputs.example_path }} - tf ${{ inputs.terraform_version }}'
+  validate:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
