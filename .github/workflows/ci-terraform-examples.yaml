@@ -1,7 +1,3 @@
-
-# NOTE: including pretty name here just makes status check in GH UX really long, as well as more
-# verbose to refer to it in branch protection rules / etc
-
 name: 'validate tf examples'
 
 # run everywhere; should be internally consistent
@@ -28,4 +24,4 @@ jobs:
     uses: ./.github/workflows/ci-terraform-example.yaml
     with:
       terraform_version: ${{ matrix.terraform_version }}
-      example_path: ${{ matrix.example_path }}
+      example_path: ${{ matrix.example_path }} 
