@@ -61,6 +61,19 @@ See the following terraform resources that you'll likely need:
 - [aws_internet_gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway)
 
 
+## Troubleshooting
+
+Check your Cloud Watch logs for the lambda. Proxy lambda will time out in INIT phase if SSM
+Parameter Store *or* your secret store implementation (AWS Secrets Manager, Vault) is not reachable.
+
+Some potential causes of this:
+  - DNS failure - it's going to look up the SSM service by domain; if the DNS zone for the SSM
+    endpoint you've provisioned is not published on the VPC, this will fail; similarly, if the
+    endpoint wasn't configured on a subnet - then it won't have an IP to be resolved.
+  - if the IP is resolved, you should see failure to connect to it in the logs (timeouts); check
+    that your security groups for lambda/subnet/endpoint allow bidirectional traffic necessary for
+    your lambda to retrieve data from SSM via the REST API.
+
 ## Switching back from using a VPC
 
 Terraform with aws provider doesn't seem to play nice with lambdas/subnets; the subnet can't be
@@ -71,6 +84,7 @@ So:
 1. destroy all your lambdas (`terraform state list | grep aws_lambda_function`; then
    `terraform destroy --target=` for each, remember '' as needed)
 2. destroy the subnet `terraform destroy --target=aws_subnet.main`
+
 
 
 ## References
