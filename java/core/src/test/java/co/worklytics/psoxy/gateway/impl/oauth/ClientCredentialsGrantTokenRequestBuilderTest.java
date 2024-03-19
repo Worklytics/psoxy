@@ -107,6 +107,8 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
     public void tokenRequestPayload_with_jwt() {
         when(secretStore.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
             .thenReturn(EXAMPLE_PRIVATE_KEY);
+        when(secretStore.getConfigPropertyWithMetadata(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
+            .thenReturn(Optional.of(ConfigService.ConfigValueWithMetadata.builder().value(EXAMPLE_PRIVATE_KEY).build()));
         when(secretStore.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY_ID))
             .thenReturn("F4194D924E8471C804F65E77BCF90418CEEB0DA2");
 
