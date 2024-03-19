@@ -1,4 +1,4 @@
-name: 'validate Terraform Examples - Dev'
+name: 'validate tf'
 
 # run everywhere; should be internally consistent
 
@@ -8,7 +8,7 @@ on:
       - '**'
 
 jobs:
-  validate_tf_examples:
+  validate_tf_example_dev:
     strategy:
       matrix:
         example_path: [
@@ -19,6 +19,8 @@ jobs:
                         'examples-dev/gcp',
                         'examples-dev/gcp-google-workspace',
         ]
+        terraform_version: [ '~1.4.0', '~1.5.0', '~1.6.0' ]
     uses: ./.github/workflows/ci-terraform-example.yaml
     with:
+      terraform_version: ${{ matrix.terraform_version }}
       example_path: ${{ matrix.example_path }}

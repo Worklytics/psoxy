@@ -168,6 +168,12 @@ variable "secrets_store_implementation" {
   default     = "aws_ssm_parameter_store"
 }
 
+variable "provision_bucket_public_access_block" {
+  type        = bool
+  description = "Whether to provision public_access_block resources on all buckets; defaults to 'true', but can be 'false' if you have organizational control policies that do this at a higher level."
+  default     = true
+}
+
 variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"
