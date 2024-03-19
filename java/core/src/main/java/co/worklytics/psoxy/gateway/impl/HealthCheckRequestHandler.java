@@ -117,7 +117,7 @@ public class HealthCheckRequestHandler {
                                     .map(metadata -> metadata.getLastModifiedDate().orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED))
                                 .orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED))));
         } catch (Throwable e) {
-            logInDev("Failed to fill 'configPropertiesLastModified` on health check", e);
+            logInDev("Failed to fill 'configPropertiesLastModified' on health check", e);
         }
 
         try {
