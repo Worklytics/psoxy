@@ -149,7 +149,7 @@ class RecordBulkDataSanitizerImplTest {
             "format: \"NDJSON\"\n" +
             "transforms:\n" +
             "- redact: \"team_id\"\n" +
-            "- pseudonymize: \"$.email\"\n");
+            "- pseudonymize: \"$.profile.email\"\n");
 
         final String pathToOriginal = "bulk/users.json.gz";
         storageHandler.handle(BulkDataTestUtils.request(pathToOriginal).withDecompressInput(true).withCompressOutput(true),
