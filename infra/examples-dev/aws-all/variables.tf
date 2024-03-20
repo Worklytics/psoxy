@@ -216,6 +216,12 @@ variable "use_api_gateway_v2" {
   default     = false
 }
 
+variable "log_retention_days" {
+  type        = number
+  description = "Number of days to retain logs in CloudWatch."
+  default     = 7
+}
+
 variable "provision_bucket_public_access_block" {
   type        = bool
   description = "Whether to provision public_access_block resources on all buckets; defaults to 'true', but can be 'false' if you have organizational control policies that do this at a higher level."

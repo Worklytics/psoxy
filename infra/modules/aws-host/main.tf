@@ -119,6 +119,7 @@ module "api_connector" {
   function_zip_hash                     = module.psoxy.deployment_package_hash
   function_env_kms_key_arn              = var.function_env_kms_key_arn
   logs_kms_key_arn                      = var.logs_kms_key_arn
+  log_retention_days                    = var.log_retention_days
   api_caller_role_arn                   = module.psoxy.api_caller_role_arn
   example_api_calls                     = each.value.example_api_calls
   aws_account_id                        = var.aws_account_id
@@ -178,6 +179,7 @@ module "bulk_connector" {
   function_zip_hash                    = module.psoxy.deployment_package_hash
   function_env_kms_key_arn             = var.function_env_kms_key_arn
   logs_kms_key_arn                     = var.logs_kms_key_arn
+  log_retention_days                   = var.log_retention_days
   psoxy_base_dir                       = var.psoxy_base_dir
   rules                                = try(var.custom_bulk_connector_rules[each.key], each.value.rules)
   rules_file                           = each.value.rules_file
