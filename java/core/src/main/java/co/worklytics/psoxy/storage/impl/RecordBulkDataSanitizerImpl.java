@@ -20,11 +20,14 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 
 import javax.inject.Inject;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,7 +71,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
         try (BufferedReader bufferedReader = new BufferedReader(reader)) {
             String line;
-            while ((line = bufferedReader.readLine()) != null) {
+            while ((line = StringUtils.trimToNull(bufferedReader.readLine())) != null) {
 
                 Object document = jsonConfiguration.jsonProvider().parse(line);
 
