@@ -158,8 +158,7 @@ public class StorageHandler {
         List<StorageHandler.ObjectTransform> transforms = new ArrayList<>();
         transforms.add(buildDefaultTransform());
 
-        rulesUtils.parseAdditionalTransforms(config)
-            .forEach(transforms::add);
+        transforms.addAll(rulesUtils.parseAdditionalTransforms(config));
 
         return transforms;
     }
@@ -307,18 +306,15 @@ public class StorageHandler {
             OutputStream out = new ByteArrayOutputStream()
         ) {
 
-            StringBuffer firstLines = new StringBuffer();
-            for (int lineCount = 0; lineCount < LINES_TO_VALIDATE ; lineCount++) {
-                String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
-                firstLines.append(line + "\n");
-            }
+            String firstLines = reader.lines()
+                .filter(Objects::nonNull)
+                .limit(LINES_TO_VALIDATE)
+                .collect(Collectors.joining("\n"));
 
-            Supplier<InputStream> firstLinesSupplier = () -> new ByteArrayInputStream(firstLines.toString().getBytes());
+            Supplier<InputStream> firstLinesSupplier = () -> new ByteArrayInputStream(firstLines.getBytes());
 
-            this.process(request, transform, firstLinesSupplier, () -> out);
+            // content is already decompressed, so don't try to decompress again
+            this.process(request.withDecompressInput(false), transform, firstLinesSupplier, () -> out);
         }
     }
 

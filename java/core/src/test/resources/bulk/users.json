@@ -1,0 +1,5 @@
+{"profile": {"email": "null"}, "team_id": "TEAM1", "is_bot": "true", "id": "USER00000"}
+{"profile": {"email": "bob@example.com"}, "team_id": "TEAM2", "is_bot": "false", "id": "USER00001"}
+{"profile": {"email": "alice@example.com"}, "team_id": "TEAM2", "is_bot": "false", "id": "USER00002"}
+{"profile": {"email": "karen@example.com"}, "team_id": "TEAM2", "is_bot": "false", "id": "USER00003"}
+{"profile": {"email": "john@example.com"}, "team_id": "TEAM2", "is_bot": "false", "id": "USER00004"}
