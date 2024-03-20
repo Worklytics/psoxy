@@ -311,6 +311,7 @@ public class StorageHandler {
         ) {
 
             String firstLines = reader.lines()
+                .map(StringUtils::trimToNull)
                 .filter(Objects::nonNull)
                 .limit(LINES_TO_VALIDATE)
                 .collect(Collectors.joining("\n"));
