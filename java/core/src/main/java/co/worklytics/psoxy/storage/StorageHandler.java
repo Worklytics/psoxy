@@ -140,12 +140,16 @@ public class StorageHandler {
                 .map(inputBasePath -> sourceObjectPath.replace(inputBasePath, ""))
                 .orElse(sourceObjectPath);
 
+        boolean compressedInput = compressedSource(sourceObjectPath, sourceContentEncoding);
 
         StorageEventRequest request = StorageEventRequest.builder()
             .sourceBucketName(sourceBucketName)
             .sourceObjectPath(sourceObjectPath)
             .destinationBucketName(transform.getDestinationBucketName())
             .destinationObjectPath(transform.getPathWithinBucket() + sourceObjectPathWithinBase)
+            .decompressInput(compressedInput)
+            //TODO: specify compressOutput as part of the rule. For now, follow the input
+            .compressOutput(compressedInput)
             .build();
 
         warnIfEncodingDoesNotMatchFilename(request, sourceContentEncoding);
@@ -359,12 +363,15 @@ public class StorageHandler {
 
     }
 
+    boolean compressedSource(String fileName, String contentEncoding) {
+        return StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP) || fileName.endsWith(".gz");
+    }
 
     Map<String, BulkDataRules> effectiveTemplates(Map<String, BulkDataRules> original) {
         return original.entrySet().stream()
             .collect(Collectors.toMap(
                 entry -> entry.getKey().startsWith("/") ? entry.getKey().substring(1) : entry.getKey(),
-                entry -> entry.getValue(),
+                Map.Entry::getValue,
                 (a, b) -> a,
                 LinkedHashMap::new //preserve order
             ));
@@ -377,13 +384,13 @@ public class StorageHandler {
      */
     Optional<String> inputBasePath() {
         return config.getConfigPropertyAsOptional(BulkModeConfigProperty.INPUT_BASE_PATH)
-            .filter(inputBasePath -> StringUtils.isNotBlank(inputBasePath));
+            .filter(StringUtils::isNotBlank);
             //.map(inputBasePath -> inputBasePath.startsWith("/") ? inputBasePath : "/" + inputBasePath);
     }
 
     Optional<String> outputBasePath() {
         return config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH)
-            .filter(outputBasePath -> StringUtils.isNotBlank(outputBasePath));
+            .filter(StringUtils::isNotBlank);
             //.map(outputBasePath -> outputBasePath.startsWith("/") ? outputBasePath : "/" + outputBasePath);
     }
 
