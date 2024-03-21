@@ -20,11 +20,15 @@ import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -140,6 +144,55 @@ class RecordBulkDataSanitizerImplTest {
 
         final String EXPECTED = "{\"foo\":1,\"bar\":2,\"other\":\"three\"}\n" +
             "{\"foo\":4,\"bar\":5,\"other\":\"six\"}\n";
+        assertEquals(EXPECTED, output);
+    }
+
+    @Test
+    void csv() {
+        this.setUpWithRules("---\n" +
+            "format: \"CSV\"\n" +
+            "transforms:\n" +
+            "- redact: \"foo\"\n" +
+            "- pseudonymize: \"bar\"\n");
+
+        final String objectPath = "export-20231128/file.ndjson";
+        final String pathToOriginal = "bulk/example.csv";
+        storageHandler.handle(BulkDataTestUtils.request(objectPath),
+            BulkDataTestUtils.transform(rules),
+            BulkDataTestUtils.inputStreamSupplier(pathToOriginal),
+            outputStreamSupplier);
+
+
+        String output = new String(outputStream.toByteArray());
+
+        final String EXPECTED = "foo,bar\n" +
+            ",t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\n" +
+            ",t~0E6I_002nK2IJjv_KCUeFzIUo5rfuISgx7_g-EhfCxE@company.com\n";
+        assertEquals(EXPECTED, output);
+    }
+
+    //as above, but preserving CRLF
+    @Test
+    void csv_crlf() {
+        this.setUpWithRules("---\n" +
+            "format: \"CSV\"\n" +
+            "transforms:\n" +
+            "- redact: \"foo\"\n" +
+            "- pseudonymize: \"bar\"\n");
+
+        final String objectPath = "export-20231128/file.ndjson";
+        final String pathToOriginal = "bulk/example-crlf.csv";
+        storageHandler.handle(BulkDataTestUtils.request(objectPath),
+            BulkDataTestUtils.transform(rules),
+            BulkDataTestUtils.inputStreamSupplier(pathToOriginal),
+            outputStreamSupplier);
+
+
+        String output = new String(outputStream.toByteArray());
+
+        final String EXPECTED = "foo,bar\r\n" +
+            ",t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\r\n" +
+            ",t~0E6I_002nK2IJjv_KCUeFzIUo5rfuISgx7_g-EhfCxE@company.com\r\n";
         assertEquals(EXPECTED, output);
     }
 

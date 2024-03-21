@@ -293,6 +293,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
         CSVFormat csvFormat = CSVFormat.Builder.create()
             .setHeader(columnNamesForOutputFile.toArray(new String[0]))
+            .setRecordSeparator(records.getFirstEndOfLine())
             .build();
 
         // create an empty record to fill with the transformed values, ensuring all rows have

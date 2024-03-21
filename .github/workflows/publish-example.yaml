@@ -23,12 +23,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Proxy Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: 'proxy'
           ref: 'main'
       - name: Checkout Target Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: 'example'
           repository: ${{ inputs.example-repo }}

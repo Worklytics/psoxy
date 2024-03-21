@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.3, < 1.6"
+  required_version = ">= 1.3, < 1.7"
   required_providers {
     aws = {
       version = ">= 4.22, < 5.0"
@@ -194,6 +194,7 @@ module "bulk_connector" {
   example_file                         = each.value.example_file
   vpc_config                           = var.vpc_config
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
+  provision_bucket_public_access_block = var.provision_bucket_public_access_block
   todos_as_local_files                 = var.todos_as_local_files
 
 

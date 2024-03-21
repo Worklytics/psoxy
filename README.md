@@ -218,7 +218,7 @@ You will need all the following in your deployment environment (eg, your laptop)
 | [git](https://git-scm.com/)                     | 2.17+                  | `git --version`           |
 | [Maven](https://maven.apache.org/)              | 3.6+                   | `mvn -v`                 |
 | [Java JDK 11+](https://openjdk.org/install/) | 11, 17, 21 (see notes) | `mvn -v &#124; grep Java` |
-| [Terraform](https://www.terraform.io/)          | 1.3.x, <= 1.5          | `terraform version`       |
+| [Terraform](https://www.terraform.io/)          | 1.3.x, <= 1.6          | `terraform version`       |
 
 NOTE: we will support Java versions for duration of official support windows, in particular the
 LTS versions. As of Nov 2023, we  still support java 11 but may end this at any time. Minor
@@ -245,11 +245,13 @@ Depending on your Cloud Host / Data Sources, you will need:
 
 For testing your psoxy instance, you will need:
 
-| Tool                                                               | Version | Test Command      |
-|--------------------------------------------------------------------|---------|-------------------|
-| [Node.js](https://nodejs.org/en/)                                  | 16+     | `node --version`  |
-| [npm](https://www.npmjs.com/package/npm) (should come with `node`) | 8+      | `npm --version`   |
+| Tool                                                               | Version                       | Test Command      |
+|--------------------------------------------------------------------|-------------------------------|-------------------|
+| [Node.js](https://nodejs.org/en/)                                  | 16+ (ideally, an LTS version) | `node --version`  |
+| [npm](https://www.npmjs.com/package/npm) (should come with `node`) | 8+                            | `npm --version`   |
 
+NOTE: NodeJS 16 is unmaintained since Oct 2023, so we recommend newer version; but in theory should
+work.
 
 We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](tools/check-prereqs.sh).
 That script has no dependencies itself, so should be able to run on any plain POSIX-compliant shell

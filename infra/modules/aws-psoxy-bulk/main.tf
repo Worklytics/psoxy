@@ -68,6 +68,8 @@ resource "aws_s3_bucket" "input" {
 
 
 resource "aws_s3_bucket_public_access_block" "input-block-public-access" {
+  count = var.provision_bucket_public_access_block ? 1 : 0
+
   bucket = aws_s3_bucket.input.bucket
 
   block_public_acls       = true
@@ -101,6 +103,8 @@ resource "aws_s3_bucket" "sanitized" {
 }
 
 resource "aws_s3_bucket_public_access_block" "sanitized" {
+  count = var.provision_bucket_public_access_block ? 1 : 0
+
   bucket = aws_s3_bucket.sanitized.bucket
 
   block_public_acls       = true

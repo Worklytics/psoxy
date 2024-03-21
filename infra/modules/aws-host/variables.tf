@@ -21,7 +21,7 @@ variable "aws_ssm_param_root_path" {
 variable "aws_secrets_manager_path" {
   type        = string
   description = "**beta** path under which Secrets Manager secrets created by this module will be created"
-  default     = null
+  default     = ""
 
   validation {
     condition     = var.aws_secrets_manager_path == null || length(var.aws_secrets_manager_path) == 0 || length(regexall("/", var.aws_secrets_manager_path)) == 0 || startswith(var.aws_secrets_manager_path, "/")
@@ -315,6 +315,12 @@ variable "secrets_store_implementation" {
   type        = string
   description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
   default     = "aws_ssm_parameter_store"
+}
+
+variable "provision_bucket_public_access_block" {
+  type        = bool
+  description = "Whether to provision public_access_block resources on all buckets; defaults to 'true', but can be 'false' if you have organizational control policies that do this at a higher level."
+  default     = true
 }
 
 variable "todos_as_local_files" {
