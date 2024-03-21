@@ -76,7 +76,8 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
                     .setContentEncoding(sourceBlobInfo.getContentEncoding())
                     .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
                     .build();
-                WriteChannel writeChannel = storage.writer(destBlobInfo);
+                //NOTE: disableGzipContent() is important to avoid double compression
+                WriteChannel writeChannel = storage.writer(destBlobInfo, Storage.BlobWriteOption.disableGzipContent());
                 //NOTE: when close() called on the stream, close is called on channel, so should be OK
                 return Channels.newOutputStream(writeChannel);
             };
