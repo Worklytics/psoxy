@@ -33,7 +33,7 @@ import java.util.zip.GZIPOutputStream;
 public class StorageHandler {
 
     // as writing to remote storage, err on size of larger buffer
-    private static final int DEFAULT_BUFFER_SIZE = 65_536; //64 KB
+    private static final int DEFAULT_BUFFER_SIZE = 1_048_576; //1 MB
 
     private static final String CONTENT_ENCODING_GZIP = "gzip";
 
@@ -140,16 +140,16 @@ public class StorageHandler {
                 .map(inputBasePath -> sourceObjectPath.replace(inputBasePath, ""))
                 .orElse(sourceObjectPath);
 
-        boolean compressedInput = compressedSource(sourceObjectPath, sourceContentEncoding);
+        boolean isSourceCompressed = isSourceCompressed(sourceContentEncoding);
 
         StorageEventRequest request = StorageEventRequest.builder()
             .sourceBucketName(sourceBucketName)
             .sourceObjectPath(sourceObjectPath)
             .destinationBucketName(transform.getDestinationBucketName())
             .destinationObjectPath(transform.getPathWithinBucket() + sourceObjectPathWithinBase)
-            .decompressInput(compressedInput)
+            .decompressInput(isSourceCompressed)
             //TODO: specify compressOutput as part of the rule. For now, follow the input
-            .compressOutput(compressedInput)
+            .compressOutput(isSourceCompressed)
             .build();
 
         warnIfEncodingDoesNotMatchFilename(request, sourceContentEncoding);
@@ -305,8 +305,8 @@ public class StorageHandler {
                   Supplier<InputStream> inputStreamSupplier) {
         int bufferSize = getBufferSize();
         try (
-            InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8), bufferSize);
+            InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8), bufferSize);
             OutputStream out = new ByteArrayOutputStream()
         ) {
 
@@ -344,9 +344,9 @@ public class StorageHandler {
         int bufferSize = getBufferSize();
 
         try (
-            InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
-            Reader reader = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8), bufferSize);
-            OutputStream outputStream = request.getCompressOutput() ? new GZIPOutputStream(outputStreamSupplier.get(), bufferSize) : outputStreamSupplier.get();
+            InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
+            Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8), bufferSize);
+            OutputStream outputStream = writeOutputStream(request, bufferSize, outputStreamSupplier);
             OutputStreamWriter writer = new OutputStreamWriter(outputStream)
         ) {
 
@@ -364,8 +364,37 @@ public class StorageHandler {
 
     }
 
-    boolean compressedSource(String fileName, String contentEncoding) {
-        return StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP) || fileName.endsWith(".gz");
+    /**
+     * Reads an input stream, decompressing if necessary
+     * @param request
+     * @param bufferSize
+     * @param inputStreamSupplier
+     * @return
+     * @throws IOException
+     */
+    private InputStream readInputStream(StorageEventRequest request, int bufferSize, Supplier<InputStream> inputStreamSupplier) throws IOException {
+        return request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
+    }
+
+    /**
+     * Writes an output stream, compressing if necessary
+     * @param request
+     * @param bufferSize
+     * @param outputStreamSupplier
+     * @return
+     * @throws IOException
+     */
+    private OutputStream writeOutputStream(StorageEventRequest request, int bufferSize, Supplier<OutputStream> outputStreamSupplier) throws IOException {
+        return request.getCompressOutput() ? new GZIPOutputStream(outputStreamSupplier.get(), bufferSize) : outputStreamSupplier.get();
+    }
+
+    /**
+     * Check if the source content is compressed based on file's content encoding
+     * @param contentEncoding
+     * @return
+     */
+    boolean isSourceCompressed(String contentEncoding) {
+        return StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP);
     }
 
     Map<String, BulkDataRules> effectiveTemplates(Map<String, BulkDataRules> original) {
