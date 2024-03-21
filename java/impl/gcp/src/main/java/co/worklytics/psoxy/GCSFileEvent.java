@@ -73,6 +73,7 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
             Supplier<OutputStream> outputStreamSupplier = () -> {
                 BlobInfo destBlobInfo = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
                     .setContentType(sourceBlobInfo.getContentType())
+                    .setContentEncoding(sourceBlobInfo.getContentEncoding())
                     .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
                     .build();
                 WriteChannel writeChannel = storage.writer(destBlobInfo);
