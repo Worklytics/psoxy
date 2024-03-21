@@ -151,7 +151,7 @@ class RecordBulkDataSanitizerImplTest {
             "- redact: \"team_id\"\n" +
             "- pseudonymize: \"$.profile.email\"\n");
 
-        final String pathToOriginal = "bulk/users.json.gz";
+        final String pathToOriginal = "bulk/users.ndjson.gz";
         storageHandler.handle(BulkDataTestUtils.request(pathToOriginal).withDecompressInput(true).withCompressOutput(true),
             BulkDataTestUtils.transform(rules),
             () -> TestUtils.class.getClassLoader().getResourceAsStream(pathToOriginal),
@@ -168,7 +168,7 @@ class RecordBulkDataSanitizerImplTest {
         }
         String output = decompressed.toString();
 
-        String SANITIZED_FILE = new String(TestUtils.getData("bulk/users-sanitized.json"));
+        String SANITIZED_FILE = new String(TestUtils.getData("bulk/users-sanitized.ndjson"));
 
         assertEquals(SANITIZED_FILE, output);
     }
