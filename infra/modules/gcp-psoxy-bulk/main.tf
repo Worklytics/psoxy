@@ -278,13 +278,17 @@ printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"tf
 
 node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
 
-# extract the file name from the path
-TEST_FILE_NAME=./$(basename $FILE_PATH)
+if gzip -t "$FILE_PATH"; then
+  printf "test file was compressed, so not testing compression as a separate case\n"
+else
+  printf "testing with compressed input file ... \n"
+  # extract the file name from the path
+  TEST_FILE_NAME=./$(basename $FILE_PATH)
 
-printf "testing with compressed input file ... \n"
-gzip -c $FILE_PATH > $TEST_FILE_NAME
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $TEST_FILE_NAME -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
-rm $TEST_FILE_NAME
+  gzip -c $FILE_PATH > $TEST_FILE_NAME
+  node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $TEST_FILE_NAME -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
+  rm $TEST_FILE_NAME
+fi
 
 EOT
 
