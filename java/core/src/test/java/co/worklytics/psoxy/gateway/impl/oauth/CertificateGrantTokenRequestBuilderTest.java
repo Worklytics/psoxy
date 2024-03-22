@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.time.Clock;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -100,8 +101,8 @@ class CertificateGrantTokenRequestBuilderTest {
     @SneakyThrows
     @Test
     public void tokenRequestPayload_with_jwt() {
-        when(secretStore.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
-                .thenReturn(EXAMPLE_PRIVATE_KEY);
+        when(secretStore.getConfigPropertyWithMetadata(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
+                .thenReturn(Optional.of(ConfigService.ConfigValueWithMetadata.builder().value(EXAMPLE_PRIVATE_KEY).build()));
 
         final String EXPECTED_ASSERTION = "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwczovL2FwaS5naXRodWIuY29tL2FwcC9pbnN0YWxsYXRpb25zLzM5NDk0MzMxL2FjY2Vzc190b2tlbnMiLCJleHAiOjE2Mzk1MjY3MDAsImlhdCI6MTYzOTUyNjQwMCwiaXNzIjoiMzU5MDUwIiwianRpIjoiODg2Y2QyZDEtMmExZC00M2U5LTkxZDQtNmEyYjE2NmRmZjllIiwic3ViIjoiMzU5MDUwIn0.KErZcIn-BE618TfVpvLOcgE6lFfE8E6oCF-1IY6PsMd5Zf1QID12299Uv1ehFj-vO61IMyzWREcsB7AN81jDxmmG5bnx1-WZjsJ5d22bXCgY5CtVf17HMSx3l34kXL2LN2IqHUms21ks2bWxZ8YyjKONHHhxrVNoodQSoEw_fOhTDGkZ2_aGDg9W_gIhKqv38XM1utAErZWbNhh0eLNRDawtg88wa5nZSjmH74qty8xlxXmLIBJlaByGD-6ZfsI6AfUjJnLT7iK_Eu_fUbpQdVpfJl8GmeuGioWkGAL0cQZQ8p96yaWNdwVK2dMne8-XEbXvmcLc2UK0sPvoZm1LcQ";
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -145,8 +146,8 @@ class CertificateGrantTokenRequestBuilderTest {
                 "OyXKYedmRjmsqT0Nje5lKac9Rw==\n" +
                 "-----END PRIVATE KEY-----\n";
 
-        when(secretStore.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
-                .thenReturn(PRIVATE_KEY_FOR_INTEGRATION);
+        when(secretStore.getConfigPropertyWithMetadata(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
+                .thenReturn(Optional.of(ConfigService.ConfigValueWithMetadata.builder().value(PRIVATE_KEY_FOR_INTEGRATION).build()));
 
         HttpRequestFactory requestFactory = (new NetHttpTransport()).createRequestFactory();
 
