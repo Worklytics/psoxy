@@ -309,6 +309,20 @@ class StorageHandlerTest {
             ((ColumnarRules) handler.getApplicableRules(reversedRules, "directory/file.ndjson").get()).getColumnsToPseudonymize().get(0));
     }
 
+    @ParameterizedTest
+    @CsvSource({
+        "directory/file.csv,gzip,true",         // honor content-encoding
+        "directory/file.csv.gz,gzip,true",      // honor content-encoding/extension
+        "directory/file.json.gz,deflate,true",  // honor extension
+        "directory/file.json.gz,,true",         // honor extension - null encoding
+        "directory/file.json,deflate,false"     // deflate is not supported
+    })
+    public void handlesCompressedContent(String filename, String contentEncoding, boolean expected) {
+        StorageEventRequest request = handler.buildRequest("bucket", filename, handler.buildDefaultTransform(), contentEncoding);
+        assertEquals(expected, request.getDecompressInput());
+        assertEquals(expected, request.getCompressOutput());
+    }
+
     @SneakyThrows
     byte[] compress(byte[] content) {
         if (content == null || content.length == 0) {
