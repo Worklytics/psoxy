@@ -24,15 +24,17 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 
 import javax.inject.Inject;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Log
@@ -122,7 +124,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                         @NonNull List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms) throws IOException {
         try (BufferedReader bufferedReader = new BufferedReader(reader)) {
             String line;
-            while ((line = bufferedReader.readLine()) != null) {
+            while ((line = StringUtils.trimToNull(bufferedReader.readLine())) != null) {
 
                 Object document = jsonConfiguration.jsonProvider().parse(line);
 

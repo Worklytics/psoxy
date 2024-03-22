@@ -33,7 +33,7 @@ import java.util.zip.GZIPOutputStream;
 public class StorageHandler {
 
     // as writing to remote storage, err on size of larger buffer
-    private static final int DEFAULT_BUFFER_SIZE = 65_536; //64 KB
+    private static final int DEFAULT_BUFFER_SIZE = 1_048_576; //1 MB
 
     private static final String CONTENT_ENCODING_GZIP = "gzip";
 
@@ -140,12 +140,16 @@ public class StorageHandler {
                 .map(inputBasePath -> sourceObjectPath.replace(inputBasePath, ""))
                 .orElse(sourceObjectPath);
 
+        boolean isSourceCompressed = isSourceCompressed(sourceContentEncoding);
 
         StorageEventRequest request = StorageEventRequest.builder()
             .sourceBucketName(sourceBucketName)
             .sourceObjectPath(sourceObjectPath)
             .destinationBucketName(transform.getDestinationBucketName())
             .destinationObjectPath(transform.getPathWithinBucket() + sourceObjectPathWithinBase)
+            .decompressInput(isSourceCompressed)
+            //TODO: specify compressOutput as part of the rule. For now, follow the input
+            .compressOutput(isSourceCompressed)
             .build();
 
         warnIfEncodingDoesNotMatchFilename(request, sourceContentEncoding);
@@ -158,8 +162,7 @@ public class StorageHandler {
         List<StorageHandler.ObjectTransform> transforms = new ArrayList<>();
         transforms.add(buildDefaultTransform());
 
-        rulesUtils.parseAdditionalTransforms(config)
-            .forEach(transforms::add);
+        transforms.addAll(rulesUtils.parseAdditionalTransforms(config));
 
         return transforms;
     }
@@ -302,23 +305,21 @@ public class StorageHandler {
                   Supplier<InputStream> inputStreamSupplier) {
         int bufferSize = getBufferSize();
         try (
-            InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8), bufferSize);
+            InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8), bufferSize);
             OutputStream out = new ByteArrayOutputStream()
         ) {
 
-            StringBuffer firstLines = new StringBuffer();
-            for (int lineCount = 0; lineCount < LINES_TO_VALIDATE ; lineCount++) {
-                String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
-                firstLines.append(line + "\n");
-            }
+            String firstLines = reader.lines()
+                .map(StringUtils::trimToNull)
+                .filter(Objects::nonNull)
+                .limit(LINES_TO_VALIDATE)
+                .collect(Collectors.joining("\n"));
 
-            Supplier<InputStream> firstLinesSupplier = () -> new ByteArrayInputStream(firstLines.toString().getBytes());
+            Supplier<InputStream> firstLinesSupplier = () -> new ByteArrayInputStream(firstLines.getBytes());
 
-            this.process(request, transform, firstLinesSupplier, () -> out);
+            // content is already decompressed, so don't try to decompress again
+            this.process(request.withDecompressInput(false), transform, firstLinesSupplier, () -> out);
         }
     }
 
@@ -343,9 +344,9 @@ public class StorageHandler {
         int bufferSize = getBufferSize();
 
         try (
-            InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
-            Reader reader = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8), bufferSize);
-            OutputStream outputStream = request.getCompressOutput() ? new GZIPOutputStream(outputStreamSupplier.get(), bufferSize) : outputStreamSupplier.get();
+            InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
+            Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8), bufferSize);
+            OutputStream outputStream = writeOutputStream(request, bufferSize, outputStreamSupplier);
             OutputStreamWriter writer = new OutputStreamWriter(outputStream)
         ) {
 
@@ -363,12 +364,44 @@ public class StorageHandler {
 
     }
 
+    /**
+     * Reads an input stream, decompressing if necessary
+     * @param request
+     * @param bufferSize
+     * @param inputStreamSupplier
+     * @return
+     * @throws IOException
+     */
+    private InputStream readInputStream(StorageEventRequest request, int bufferSize, Supplier<InputStream> inputStreamSupplier) throws IOException {
+        return request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
+    }
+
+    /**
+     * Writes an output stream, compressing if necessary
+     * @param request
+     * @param bufferSize
+     * @param outputStreamSupplier
+     * @return
+     * @throws IOException
+     */
+    private OutputStream writeOutputStream(StorageEventRequest request, int bufferSize, Supplier<OutputStream> outputStreamSupplier) throws IOException {
+        return request.getCompressOutput() ? new GZIPOutputStream(outputStreamSupplier.get(), bufferSize) : outputStreamSupplier.get();
+    }
+
+    /**
+     * Check if the source content is compressed based on file's content encoding
+     * @param contentEncoding
+     * @return
+     */
+    boolean isSourceCompressed(String contentEncoding) {
+        return StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP);
+    }
 
     Map<String, BulkDataRules> effectiveTemplates(Map<String, BulkDataRules> original) {
         return original.entrySet().stream()
             .collect(Collectors.toMap(
                 entry -> entry.getKey().startsWith("/") ? entry.getKey().substring(1) : entry.getKey(),
-                entry -> entry.getValue(),
+                Map.Entry::getValue,
                 (a, b) -> a,
                 LinkedHashMap::new //preserve order
             ));
@@ -381,13 +414,13 @@ public class StorageHandler {
      */
     Optional<String> inputBasePath() {
         return config.getConfigPropertyAsOptional(BulkModeConfigProperty.INPUT_BASE_PATH)
-            .filter(inputBasePath -> StringUtils.isNotBlank(inputBasePath));
+            .filter(StringUtils::isNotBlank);
             //.map(inputBasePath -> inputBasePath.startsWith("/") ? inputBasePath : "/" + inputBasePath);
     }
 
     Optional<String> outputBasePath() {
         return config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH)
-            .filter(outputBasePath -> StringUtils.isNotBlank(outputBasePath));
+            .filter(StringUtils::isNotBlank);
             //.map(outputBasePath -> outputBasePath.startsWith("/") ? outputBasePath : "/" + outputBasePath);
     }
 

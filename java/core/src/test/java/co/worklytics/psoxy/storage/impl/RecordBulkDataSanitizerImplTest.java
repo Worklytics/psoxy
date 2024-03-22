@@ -20,10 +20,15 @@ import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Optional;
+import java.util.zip.GZIPInputStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -189,6 +194,36 @@ class RecordBulkDataSanitizerImplTest {
             ",t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\r\n" +
             ",t~0E6I_002nK2IJjv_KCUeFzIUo5rfuISgx7_g-EhfCxE@company.com\r\n";
         assertEquals(EXPECTED, output);
+    }
+
+    @Test
+    void gzippedContent() throws IOException {
+        this.setUpWithRules("---\n" +
+            "format: \"NDJSON\"\n" +
+            "transforms:\n" +
+            "- redact: \"team_id\"\n" +
+            "- pseudonymize: \"$.profile.email\"\n");
+
+        final String pathToOriginal = "bulk/users.ndjson.gz";
+        storageHandler.handle(BulkDataTestUtils.request(pathToOriginal).withDecompressInput(true).withCompressOutput(true),
+            BulkDataTestUtils.transform(rules),
+            () -> TestUtils.class.getClassLoader().getResourceAsStream(pathToOriginal),
+            outputStreamSupplier);
+
+        // output is compressed, so we need to decompress it to compare
+        ByteArrayOutputStream decompressed = new ByteArrayOutputStream();
+        try (GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(outputStream.toByteArray()))) {
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = gzipInputStream.read(buffer)) > 0) {
+                decompressed.write(buffer, 0, len);
+            }
+        }
+        String output = decompressed.toString();
+
+        String SANITIZED_FILE = new String(TestUtils.getData("bulk/users-sanitized.ndjson"));
+
+        assertEquals(SANITIZED_FILE, output);
     }
 
 }
