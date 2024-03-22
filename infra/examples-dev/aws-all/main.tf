@@ -116,6 +116,7 @@ module "psoxy" {
   general_environment_variables        = var.general_environment_variables
   function_env_kms_key_arn             = var.project_aws_kms_key_arn
   logs_kms_key_arn                     = var.project_aws_kms_key_arn
+  log_retention_days                   = var.log_retention_days
   aws_ssm_key_id                       = var.project_aws_kms_key_arn
   use_api_gateway_v2                   = var.use_api_gateway_v2
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
