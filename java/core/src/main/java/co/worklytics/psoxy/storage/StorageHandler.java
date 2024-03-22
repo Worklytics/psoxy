@@ -36,6 +36,7 @@ public class StorageHandler {
     private static final int DEFAULT_BUFFER_SIZE = 1_048_576; //1 MB
 
     private static final String CONTENT_ENCODING_GZIP = "gzip";
+    public static final String EXTENSION_GZIP = ".gz";
 
     /**
      * how many lines to process as a 'validation' of the file/transform/etc; if fails, then we abort
@@ -66,7 +67,7 @@ public class StorageHandler {
     PathTemplateUtils pathTemplateUtils;
 
     static void warnIfEncodingDoesNotMatchFilename(@NonNull StorageEventRequest request, @Nullable String contentEncoding) {
-        if (request.getSourceObjectPath().endsWith(".gz")
+        if (request.getSourceObjectPath().endsWith(EXTENSION_GZIP)
             && !StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP)) {
             log.warning("Input filename ends with .gz, but 'Content-Encoding' metadata is not 'gzip'; is this correct? Decompression is based on object's 'Content-Encoding'");
         }
@@ -140,7 +141,7 @@ public class StorageHandler {
                 .map(inputBasePath -> sourceObjectPath.replace(inputBasePath, ""))
                 .orElse(sourceObjectPath);
 
-        boolean isSourceCompressed = isSourceCompressed(sourceContentEncoding);
+        boolean isSourceCompressed = isSourceCompressed(sourceContentEncoding, sourceObjectPath);
 
         StorageEventRequest request = StorageEventRequest.builder()
             .sourceBucketName(sourceBucketName)
@@ -389,12 +390,13 @@ public class StorageHandler {
     }
 
     /**
-     * Check if the source content is compressed based on file's content encoding
+     * Check if the source content is compressed based on file's content encoding or assuming it's
+     * encoded if extension is .gz
      * @param contentEncoding
      * @return
      */
-    boolean isSourceCompressed(String contentEncoding) {
-        return StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP);
+    boolean isSourceCompressed(String contentEncoding, String sourceObjectPath) {
+        return StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP) || sourceObjectPath.endsWith(EXTENSION_GZIP);
     }
 
     Map<String, BulkDataRules> effectiveTemplates(Map<String, BulkDataRules> original) {
