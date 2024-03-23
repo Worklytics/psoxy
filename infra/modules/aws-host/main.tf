@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.3, < 1.6"
+  required_version = ">= 1.3, < 1.7"
   required_providers {
     aws = {
       version = ">= 4.22, < 5.0"
@@ -61,7 +61,7 @@ module "global_secrets_secrets_manager" {
 
   source = "../../modules/aws-secretsmanager-secrets"
 
-  path       = coalesce(var.aws_secrets_manager_path, module.env_id.id)
+  path       = var.aws_secrets_manager_path == null ? module.env_id.id : var.aws_secrets_manager_path
   kms_key_id = var.aws_ssm_key_id
   secrets    = module.psoxy.secrets
 }
@@ -119,6 +119,7 @@ module "api_connector" {
   function_zip_hash                     = module.psoxy.deployment_package_hash
   function_env_kms_key_arn              = var.function_env_kms_key_arn
   logs_kms_key_arn                      = var.logs_kms_key_arn
+  log_retention_days                    = var.log_retention_days
   api_caller_role_arn                   = module.psoxy.api_caller_role_arn
   example_api_calls                     = each.value.example_api_calls
   aws_account_id                        = var.aws_account_id
@@ -178,6 +179,7 @@ module "bulk_connector" {
   function_zip_hash                    = module.psoxy.deployment_package_hash
   function_env_kms_key_arn             = var.function_env_kms_key_arn
   logs_kms_key_arn                     = var.logs_kms_key_arn
+  log_retention_days                   = var.log_retention_days
   psoxy_base_dir                       = var.psoxy_base_dir
   rules                                = try(var.custom_bulk_connector_rules[each.key], each.value.rules)
   rules_file                           = each.value.rules_file
@@ -194,6 +196,7 @@ module "bulk_connector" {
   example_file                         = each.value.example_file
   vpc_config                           = var.vpc_config
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
+  provision_bucket_public_access_block = var.provision_bucket_public_access_block
   todos_as_local_files                 = var.todos_as_local_files
 
 

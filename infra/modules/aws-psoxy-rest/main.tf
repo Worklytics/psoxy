@@ -166,7 +166,7 @@ ${local.command_npm_install}
 First, run an initial "Health Check" call to make sure the Psoxy instance is up and running:
 
 ```shell
-${local.command_cli_call} -u ${local.proxy_endpoint_url} --health-check
+${local.command_cli_call} -u ${local.proxy_endpoint_url}/ --health-check
 ```
 
 Then, based on your configuration, these are some example test calls you can try (YMMV):

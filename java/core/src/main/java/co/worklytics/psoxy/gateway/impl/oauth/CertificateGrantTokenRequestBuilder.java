@@ -6,6 +6,7 @@ import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.json.webtoken.JsonWebSignature;
+import com.google.common.collect.Collections2;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -62,7 +63,7 @@ public class CertificateGrantTokenRequestBuilder
 
     @Override
     public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
-        return Set.of(ConfigProperty.values());
+        return getRequiredConfigProperties();
     }
 
     @SneakyThrows

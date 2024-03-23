@@ -185,7 +185,7 @@ export default async function (options = {}) {
     logger.info('Comparing input and sanitized output:\n');
     const diff = execFileSync('diff', [ originalDiffPath, sanitizedDiffPath ]);
     logger.info(diff);
-  } catch(error) {
+  } catch (error) {
     // if files are different `diff` will end with exit code 1, so print results
     diff = error.stdout.toString();
     logger.info(diff);

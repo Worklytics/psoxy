@@ -21,7 +21,7 @@ variable "aws_ssm_param_root_path" {
 variable "aws_secrets_manager_path" {
   type        = string
   description = "**beta** path under which Secrets Manager secrets created by this module will be created"
-  default     = null
+  default     = ""
 
   validation {
     condition     = var.aws_secrets_manager_path == null || length(var.aws_secrets_manager_path) == 0 || length(regexall("/", var.aws_secrets_manager_path)) == 0 || startswith(var.aws_secrets_manager_path, "/")
@@ -47,6 +47,12 @@ variable "logs_kms_key_arn" {
   type        = string
   description = "AWS KMS key ARN to use to encrypt lambdas' logs. NOTE: ensure CloudWatch is setup to use this key (cloudwatch principal has perms, log group in same region as key, etc) - see https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html ."
   default     = null
+}
+
+variable "log_retention_days" {
+  type        = number
+  description = "Number of days to retain logs in CloudWatch."
+  default     = 7
 }
 
 variable "aws_lambda_execution_role_policy_arn" {
@@ -315,6 +321,12 @@ variable "secrets_store_implementation" {
   type        = string
   description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
   default     = "aws_ssm_parameter_store"
+}
+
+variable "provision_bucket_public_access_block" {
+  type        = bool
+  description = "Whether to provision public_access_block resources on all buckets; defaults to 'true', but can be 'false' if you have organizational control policies that do this at a higher level."
+  default     = true
 }
 
 variable "todos_as_local_files" {
