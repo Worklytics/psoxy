@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.3, <= 1.7"
+  required_version = ">= 1.3, < 1.8"
 }
 
 module "worklytics_connector_specs" {
