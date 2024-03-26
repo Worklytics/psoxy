@@ -20,6 +20,13 @@ Changes to be including in future/planned release notes will be added here.
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## [0.4.51](https://github.com/Worklytics/psoxy/release/tag/v0.4.51)
+ - GCP: non-breaking, but noticeable in Terraform plan: `title` attribute of GCP Custom Project
+   roles created by our modules are changing to more closely follow conventions GCP uses for its
+   built-in roles; as well as prefixing them with your environment ID to group them together
+   alphabetically and differentiate in shared project.
+
+
 ## [0.4.50](https://github.com/Worklytics/psoxy/release/tag/v0.4.50)
   - `todos_as_local_files` properly respected now; if you had it as `false`, you may see some local
     files deleted on your next `terraform apply`.
