@@ -89,3 +89,6 @@ eg
 ```shell
 terraform import module.psoxy-msft-connector\[\"outlook-cal\"\].aws_lambda_function_url.lambda_url psoxy-outlook-cal
 ```
+
+### Unsupported Terraform versions
+
