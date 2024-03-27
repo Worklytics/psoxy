@@ -218,7 +218,7 @@ You will need all the following in your deployment environment (eg, your laptop)
 | [git](https://git-scm.com/)                     | 2.17+                  | `git --version`           |
 | [Maven](https://maven.apache.org/)              | 3.6+                   | `mvn -v`                 |
 | [Java JDK 11+](https://openjdk.org/install/) | 11, 17, 21 (see notes) | `mvn -v &#124; grep Java` |
-| [Terraform](https://www.terraform.io/)          | 1.3.x, <= 1.7          | `terraform version`       |
+| [Terraform](https://www.terraform.io/)          | 1.3.x, <= 1.7.x          | `terraform version`       |
 
 NOTE: we will support Java versions for duration of official support windows, in particular the
 LTS versions. As of Nov 2023, we  still support java 11 but may end this at any time. Minor
