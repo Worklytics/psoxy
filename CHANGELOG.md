@@ -20,6 +20,20 @@ Changes to be including in future/planned release notes will be added here.
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## [0.4.52](https://github.com/Worklytics/psoxy/release/tag/v0.4.52)
+  - BREAKING: default behavior for sub-addressing aka "plus addressing" of emails has changed; the
+    proxy previously considered these canonically distinct. Now, the proxy will consider these
+    canonically equivalent. As we don't expect plus addressing to be used hris or directory data,
+    this should have little impact.  Changes will most likely be in a few edge cases, such as
+    emails or calendar invites sent to a sub-address - sender unlikely to be a subaddress, but
+    recipient could be.  In such cases, behavior prior to 0.4.52 would cause recipient to appear
+    as a distinct mailbox; from 0.4.52 onward, they will be considered the same mailbox; we expect
+    this to be behavior that is more in line with user expectations, so although technically
+    breaking, we're introducing it without a major version bump.
+  - there new option to enable less strict email canonicalization; we strongly recommend new
+    customers to enable it, although it is not enabled by default to avoid a breaking change. Set
+    `email_canonicalization` to `IGNORE_DOTS` to enable this feature.
+
 ## [0.4.51](https://github.com/Worklytics/psoxy/release/tag/v0.4.51)
  - GCP: non-breaking, but noticeable in Terraform plan: `title` attribute of GCP Custom Project
    roles created by our modules are changing to more closely follow conventions GCP uses for its

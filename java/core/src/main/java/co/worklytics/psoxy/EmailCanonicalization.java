@@ -36,6 +36,8 @@ public enum EmailCanonicalization {
      * Likely to become the default in future versions, because very weird that someone would
      * intentionally issue email addresses that differ only in dots.
      *
+     * q: better name? non-obvious to someone seeing the env var or anywhere else absent this
+     * documentation that 'IGNORE_DOTS' is really the recommended value here
      */
     IGNORE_DOTS,
     ;
