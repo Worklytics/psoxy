@@ -58,6 +58,12 @@ as an external identity provider of those credentials.
 Neither your proxy instances nor Worklytics ever hold any API key or certificate for your Microsoft
 365 tenant.
 
+See [Microsoft Workload Identity Federation](https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation)
+docs for details. Specifically, the relevant scenario is workload running in either GCP or AWS (your
+proxy host platform)
+
+![Microsoft Workload Identity Federation Scenarios](msft-workload-identity-federation-scenarios.png)
+
 ### Authorization and Scopes
 
 The following Scopes are required for each connector. Note that they are all READ-only scopes.

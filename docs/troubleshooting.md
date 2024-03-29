@@ -89,3 +89,27 @@ eg
 ```shell
 terraform import module.psoxy-msft-connector\[\"outlook-cal\"\].aws_lambda_function_url.lambda_url psoxy-outlook-cal
 ```
+
+### Unsupported Terraform versions
+
+Errors such as the following on `terraform plan`?
+```shell
+Module module.psoxy (from git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.4.51) does not support Terraform version 1.8.1. To proceed, either choose another supported Terraform version or update
+│ this version constraint. Version constraints are normally set for good reason, so updating the constraint may lead to other errors or unexpected behavior.
+```
+
+The solution is to downgrade your Terraform version to one that's supported by our modules
+(>= 1.3.x, <= 1.7.x as of March 2024).
+
+_If you're running Terraform in cloud/CI environment,_ including Terraform Cloud, GitHub Actions, etc,
+you can likely explicitly set the desired Terraform version in your workspace settings / terraform
+setup action.
+
+_If you're running Terraform on your laptop or in a VM,_ use your package manager to downgrade or
+something like [`tfenv`](https://github.com/tfutils/tfenv) to concurrently use distinct Terraform
+versions on the machine. (set version <= 1.7.x in `.terraform-version` file in the root of your
+Terraform configuration for the proxy).
+
+
+
+

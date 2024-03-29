@@ -1,9 +1,11 @@
 terraform {
+  required_version = ">= 1.3, < 1.8"
+
   required_providers {
     # for the infra that will host Psoxy instances
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.12"
+      version = "~> 4.22"
     }
   }
 
@@ -19,7 +21,7 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.48"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.4.52"
 
   enabled_connectors               = var.enabled_connectors
   jira_cloud_id                    = var.jira_cloud_id
@@ -97,40 +99,45 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.4.48"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=rc-v0.4.52"
 
-  environment_name                = var.environment_name
-  aws_account_id                  = var.aws_account_id
-  aws_ssm_param_root_path         = var.aws_ssm_param_root_path
-  psoxy_base_dir                  = var.psoxy_base_dir
-  deployment_bundle               = var.deployment_bundle
-  install_test_tool               = var.install_test_tool
-  provision_testing_infra         = var.provision_testing_infra
-  force_bundle                    = var.force_bundle
-  caller_gcp_service_account_ids  = var.caller_gcp_service_account_ids
-  caller_aws_arns                 = var.caller_aws_arns
-  non_production_connectors       = var.non_production_connectors
-  custom_api_connector_rules      = var.custom_api_connector_rules
-  lookup_table_builders           = var.lookup_table_builders
-  general_environment_variables   = var.general_environment_variables
-  function_env_kms_key_arn        = var.project_aws_kms_key_arn
-  logs_kms_key_arn                = var.project_aws_kms_key_arn
-  aws_ssm_key_id                  = var.project_aws_kms_key_arn
-  use_api_gateway_v2              = var.use_api_gateway_v2
-  secrets_store_implementation    = var.secrets_store_implementation
-  bulk_sanitized_expiration_days  = var.bulk_sanitized_expiration_days
-  bulk_input_expiration_days      = var.bulk_input_expiration_days
-  api_connectors                  = local.api_connectors
-  bulk_connectors                 = local.bulk_connectors
-  custom_bulk_connector_rules     = var.custom_bulk_connector_rules
-  custom_bulk_connector_arguments = var.custom_bulk_connector_arguments
-  todo_step                       = local.max_auth_todo_step
+  environment_name                     = var.environment_name
+  aws_account_id                       = var.aws_account_id
+  aws_ssm_param_root_path              = var.aws_ssm_param_root_path
+  aws_secrets_manager_path             = var.aws_secrets_manager_path
+  psoxy_base_dir                       = var.psoxy_base_dir
+  deployment_bundle                    = var.deployment_bundle
+  install_test_tool                    = var.install_test_tool
+  provision_testing_infra              = var.provision_testing_infra
+  force_bundle                         = var.force_bundle
+  caller_gcp_service_account_ids       = var.caller_gcp_service_account_ids
+  caller_aws_arns                      = var.caller_aws_arns
+  non_production_connectors            = var.non_production_connectors
+  custom_api_connector_rules           = var.custom_api_connector_rules
+  lookup_table_builders                = var.lookup_table_builders
+  general_environment_variables        = var.general_environment_variables
+  function_env_kms_key_arn             = var.project_aws_kms_key_arn
+  logs_kms_key_arn                     = var.project_aws_kms_key_arn
+  log_retention_days                   = var.log_retention_days
+  aws_ssm_key_id                       = var.project_aws_kms_key_arn
+  use_api_gateway_v2                   = var.use_api_gateway_v2
+  aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
+  secrets_store_implementation         = var.secrets_store_implementation
+  bulk_sanitized_expiration_days       = var.bulk_sanitized_expiration_days
+  bulk_input_expiration_days           = var.bulk_input_expiration_days
+  api_connectors                       = local.api_connectors
+  bulk_connectors                      = local.bulk_connectors
+  provision_bucket_public_access_block = var.provision_bucket_public_access_block
+  custom_bulk_connector_rules          = var.custom_bulk_connector_rules
+  custom_bulk_connector_arguments      = var.custom_bulk_connector_arguments
+  todo_step                            = local.max_auth_todo_step
 
-  #  vpc_config = {
-  #    vpc_id             = aws_vpc.main.id
-  #    security_group_ids = [aws_security_group.main.id]
-  #    subnet_ids         = [aws_subnet.main.id]
-  #  }
+
+#  vpc_config = {
+#    vpc_id             = aws_default_vpc.default.id
+#    security_group_ids = [aws_security_group.default.id]
+#    subnet_ids         = [aws_default_subnet.default.id]
+#  }
 }
 
 ## Worklytics connection configuration
@@ -146,7 +153,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.48"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=rc-v0.4.52"
 
   psoxy_instance_id  = each.key
   worklytics_host    = var.worklytics_host

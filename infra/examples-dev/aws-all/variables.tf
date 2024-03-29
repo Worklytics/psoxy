@@ -44,7 +44,7 @@ variable "default_tags" {
 
 variable "aws_ssm_param_root_path" {
   type        = string
-  description = "root to path under which SSM parameters created by this module will be created; NOTE: shouldn't be necessary to use this is you're following recommended approach of using dedicated AWS account for deployment"
+  description = "path under which SSM parameters created by this module will be created; NOTE: shouldn't be necessary to use this is you're following recommended approach of using dedicated AWS account for deployment"
   default     = ""
 
   validation {
@@ -52,6 +52,18 @@ variable "aws_ssm_param_root_path" {
     error_message = "The aws_ssm_param_root_path value must be fully qualified (begin with `/`) if it contains any `/` characters."
   }
 }
+
+variable "aws_secrets_manager_path" {
+  type        = string
+  description = "**beta** path under which Secrets Manager secrets will be created"
+  default     = ""
+
+  validation {
+    condition     = length(var.aws_secrets_manager_path) == 0 || length(regexall("/", var.aws_secrets_manager_path)) == 0 || startswith(var.aws_secrets_manager_path, "/")
+    error_message = "The `aws_secrets_manager_path` value must be fully qualified (begin with `/`) if it contains any `/` characters."
+  }
+}
+
 
 variable "secrets_store_implementation" {
   type        = string
@@ -68,6 +80,12 @@ variable "project_aws_kms_key_arn" {
     condition     = var.project_aws_kms_key_arn == null || can(regex("^arn:aws:kms:.*:\\d{12}:key\\/.*$", var.project_aws_kms_key_arn))
     error_message = "The project_aws_kms_key_arn value should be null or a valid an AWS KMS key ARN."
   }
+}
+
+variable "aws_lambda_execution_role_policy_arn" {
+  type        = string
+  description = "*beta* The ARN of policy to attach to the lambda execution role, if you want one other than the default. (usually, AWSLambdaBasicExecutionRole)."
+  default     = null
 }
 
 variable "worklytics_host" {
@@ -198,6 +216,18 @@ variable "use_api_gateway_v2" {
   default     = false
 }
 
+variable "log_retention_days" {
+  type        = number
+  description = "Number of days to retain logs in CloudWatch."
+  default     = 7
+}
+
+variable "provision_bucket_public_access_block" {
+  type        = bool
+  description = "Whether to provision public_access_block resources on all buckets; defaults to 'true', but can be 'false' if you have organizational control policies that do this at a higher level."
+  default     = true
+}
+
 variable "custom_bulk_connectors" {
   type = map(object({
     source_kind               = string
@@ -279,7 +309,6 @@ variable "custom_bulk_connector_arguments" {
   default     = {}
 }
 
-# TODO: rethink this schema before we publish this
 variable "lookup_table_builders" {
   type = map(object({
     input_connector_id            = string

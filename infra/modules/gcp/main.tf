@@ -1,7 +1,10 @@
 
 locals {
   # a prefix legal for GCP Roles
-  environment_id_role_prefix = replace(var.environment_id_prefix, "-", "_")
+  environment_id_role_prefix   = replace(var.environment_id_prefix, "-", "_")
+
+  # version of environment_id_prefix with trailing space, presuming it's a hyphen or a underscore
+  environment_id_prefix_display = length(var.environment_id_prefix) > 0 ? "${substr(var.environment_id_prefix, 0, length(var.environment_id_prefix) - 1)} " : ""
 }
 
 
@@ -250,7 +253,7 @@ module "test_tool" {
 resource "google_project_iam_custom_role" "bucket_write" {
   project     = var.project_id
   role_id     = "${local.environment_id_role_prefix}writeAccess"
-  title       = "Access for writing and update objects in bucket"
+  title       = "${local.environment_id_prefix_display}Bucket Object Write/Update"
   description = "Write and update support, because storage.objectCreator role only support creation - not update"
 
   permissions = [
@@ -263,7 +266,7 @@ resource "google_project_iam_custom_role" "bucket_write" {
 resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
   project     = var.project_id
   role_id     = "${local.environment_id_role_prefix}PsoxyInstanceSecretHandler"
-  title       = "Access for updating and reading secrets"
+  title       = "${local.environment_id_prefix_display}Instance Secret Handler"
   description = "Role to grant on secret that is to be managed by a Psoxy instance (cloud function); subset of roles/secretmanager.admin, to support reading/updating the secret and managing their versions"
 
   permissions = [

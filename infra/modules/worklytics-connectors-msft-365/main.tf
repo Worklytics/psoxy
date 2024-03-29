@@ -1,3 +1,7 @@
+terraform {
+  required_version = ">= 1.3, < 1.8"
+}
+
 locals {
   environment_id_prefix                 = "${var.environment_id}${length(var.environment_id) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_id) > 0 ? " ${var.environment_id} " : ""
@@ -52,6 +56,7 @@ module "msft_365_grants" {
   oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
   app_roles                = each.value.required_app_roles
   application_name         = each.key
+  todos_as_local_files     = var.todos_as_local_files
   todo_step                = var.todo_step
 }
 

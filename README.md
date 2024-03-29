@@ -1,11 +1,10 @@
-# psoxy
+# PSOXY - A pseudonymizing DLP layer between Worklytics and your data
 
 [![Latest Release](https://img.shields.io/github/v/release/Worklytics/psoxy)](https://github.com/Worklytics/psoxy/releases/latest)
 ![java build](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-java.yaml?label=java)
 ![terraform examples build](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform-examples.yaml?label=terraform%20examples)
 
-A serverless, pseudonymizing proxy to sit between Worklytics and the REST API of a 3rd-party data
-source.
+A serverless, pseudonymizing, DLP layer between Worklytics and the REST API of your data sources.
 
 Psoxy replaces PII in your organization's data with hash tokens to enable Worklytics's analysis to
 be performed on anonymized data which we cannot map back to any identifiable individual.
@@ -219,7 +218,7 @@ You will need all the following in your deployment environment (eg, your laptop)
 | [git](https://git-scm.com/)                     | 2.17+                  | `git --version`           |
 | [Maven](https://maven.apache.org/)              | 3.6+                   | `mvn -v`                 |
 | [Java JDK 11+](https://openjdk.org/install/) | 11, 17, 21 (see notes) | `mvn -v &#124; grep Java` |
-| [Terraform](https://www.terraform.io/)          | 1.3.x, <= 1.5          | `terraform version`       |
+| [Terraform](https://www.terraform.io/)          | 1.3.x, <= 1.7.x          | `terraform version`       |
 
 NOTE: we will support Java versions for duration of official support windows, in particular the
 LTS versions. As of Nov 2023, we  still support java 11 but may end this at any time. Minor
@@ -234,6 +233,11 @@ tool, but we don't offer documentation or support in doing so.  Adapting one of 
 
 NOTE: Refrain to use Terraform versions 1.4.x that are < v1.4.3. We've seen bugs.
 
+NOTE: As of proxy version 0.4.x, we're constraining our Terraform modules/examples to 1.3.x features,
+and will automate testing against latest release of each minor version from there forwards to 2.0,
+as we add support for each. Once we introduce testing of newer versions, we will update version
+constraint above and in our modules to reflect support for newer versions.
+
 Depending on your Cloud Host / Data Sources, you will need:
 
 | Condition                         | Tool                                                                                       | Version | Test Command     | Roles / Permissions (Examples, YMMV)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
@@ -246,11 +250,13 @@ Depending on your Cloud Host / Data Sources, you will need:
 
 For testing your psoxy instance, you will need:
 
-| Tool                                                               | Version | Test Command      |
-|--------------------------------------------------------------------|---------|-------------------|
-| [Node.js](https://nodejs.org/en/)                                  | 16+     | `node --version`  |
-| [npm](https://www.npmjs.com/package/npm) (should come with `node`) | 8+      | `npm --version`   |
+| Tool                                                               | Version                       | Test Command      |
+|--------------------------------------------------------------------|-------------------------------|-------------------|
+| [Node.js](https://nodejs.org/en/)                                  | 16+ (ideally, an LTS version) | `node --version`  |
+| [npm](https://www.npmjs.com/package/npm) (should come with `node`) | 8+                            | `npm --version`   |
 
+NOTE: NodeJS 16 is unmaintained since Oct 2023, so we recommend newer version; but in theory should
+work.
 
 We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](tools/check-prereqs.sh).
 That script has no dependencies itself, so should be able to run on any plain POSIX-compliant shell

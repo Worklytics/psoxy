@@ -9,7 +9,7 @@ variable "aws_account_id" {
 
 variable "aws_ssm_param_root_path" {
   type        = string
-  description = "root to path under which SSM parameters created by this module will be created"
+  description = "path under which SSM parameters created by this module will be created"
   default     = ""
 
   validation {
@@ -17,6 +17,18 @@ variable "aws_ssm_param_root_path" {
     error_message = "The aws_ssm_param_root_path value must be fully qualified (begin with `/`) if it contains any `/` characters."
   }
 }
+
+variable "aws_secrets_manager_path" {
+  type        = string
+  description = "**beta** path under which Secrets Manager secrets created by this module will be created"
+  default     = ""
+
+  validation {
+    condition     = var.aws_secrets_manager_path == null || length(var.aws_secrets_manager_path) == 0 || length(regexall("/", var.aws_secrets_manager_path)) == 0 || startswith(var.aws_secrets_manager_path, "/")
+    error_message = "The `aws_secrets_manager_path` value must be fully qualified (begin with `/`) if it contains any `/` characters."
+  }
+}
+
 
 # TODO: generalize to 'secrets', regardless of store (AWS SSM, AWS Secrets Manager, etc)
 variable "aws_ssm_key_id" {
@@ -36,6 +48,19 @@ variable "logs_kms_key_arn" {
   description = "AWS KMS key ARN to use to encrypt lambdas' logs. NOTE: ensure CloudWatch is setup to use this key (cloudwatch principal has perms, log group in same region as key, etc) - see https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html ."
   default     = null
 }
+
+variable "log_retention_days" {
+  type        = number
+  description = "Number of days to retain logs in CloudWatch."
+  default     = 7
+}
+
+variable "aws_lambda_execution_role_policy_arn" {
+  type        = string
+  description = "*beta* The ARN of policy to attach to the lambda execution role, if you want one other than the default. (usually, AWSLambdaBasicExecutionRole)."
+  default     = null
+}
+
 
 variable "caller_gcp_service_account_ids" {
   type        = list(string)
@@ -296,6 +321,18 @@ variable "secrets_store_implementation" {
   type        = string
   description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
   default     = "aws_ssm_parameter_store"
+}
+
+variable "provision_bucket_public_access_block" {
+  type        = bool
+  description = "Whether to provision public_access_block resources on all buckets; defaults to 'true', but can be 'false' if you have organizational control policies that do this at a higher level."
+  default     = true
+}
+
+variable "todos_as_local_files" {
+  type        = bool
+  description = "whether to render TODOs as flat files"
+  default     = true
 }
 
 variable "todo_step" {

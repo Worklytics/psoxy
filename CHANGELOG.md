@@ -20,13 +20,27 @@ Changes to be including in future/planned release notes will be added here.
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
-## [0.4.49](https://github.com/Worklytics/psoxy/release/tag/v0.4.49)
+## [0.4.52](https://github.com/Worklytics/psoxy/release/tag/v0.4.49)
 - GCP:
-  - Existing GCP functions are using *Container Registry* for building their internal docker image where the psoxy code is deployed. However,
-    this is [deprecated since May 2023 and starting Feb 2024](https://cloud.google.com/container-registry/docs/deprecations/container-registry-deprecation) it
-    is required that functions use *Artifact Registry* instead. All deployments made since this version will use *Artifact Registry*
-    with a specific repository created for storing all psoxy images. Any previous version before this version will work without any issue.
-  
+    - Existing GCP functions are using *Container Registry* for building their internal docker image where the psoxy code is deployed. However,
+      this is [deprecated since May 2023 and starting Feb 2024](https://cloud.google.com/container-registry/docs/deprecations/container-registry-deprecation) it
+      is required that functions use *Artifact Registry* instead. All deployments made since this version will use *Artifact Registry*
+      with a specific repository created for storing all psoxy images. Any previous version before this version will work without any issue.
+
+## [0.4.51](https://github.com/Worklytics/psoxy/release/tag/v0.4.51)
+ - GCP: non-breaking, but noticeable in Terraform plan: `title` attribute of GCP Custom Project
+   roles created by our modules are changing to more closely follow conventions GCP uses for its
+   built-in roles; as well as prefixing them with your environment ID to group them together
+   alphabetically and differentiate in shared project.
+
+## [0.4.50](https://github.com/Worklytics/psoxy/release/tag/v0.4.50)
+  - `todos_as_local_files` properly respected now; if you had it as `false`, you may see some local
+    files deleted on your next `terraform apply`.
+  - to accommodate this fix, many people will see moves of local_file resources, to append `[0]` to
+    the resource ids
+  - BREAKING - for AWS Secrets Manager (released in 0.4.47 as 'alpha' feature), these will now
+    be prefixed by default with the environment ID, unless a `aws_secrets_manager_path` is set.
+ 
 ## [0.4.48](https://github.com/Worklytics/psoxy/release/tag/v0.4.48)
   - BREAKING - GitHub Enterprise Server: authentication strategy has changed; you will see creation
     and destruction of some secrets that are used for authentication; you MUST generate new auth

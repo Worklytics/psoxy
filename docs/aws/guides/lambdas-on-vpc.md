@@ -11,9 +11,15 @@ Some caveats:
 
 - API connectors on a VPC must be exposed via [API Gateway](https://aws.amazon.com/api-gateway/)
   rather than [Function URLs](https://docs.aws.amazon.com/lambda/latest/dg/lambda-urls.html)
-- as of v0.4.46, we've seen requests to lambdas on VPCs timing out for some time after initial
-  deployment; we've seen this apparently resolve on its own after a few minutes, but it's not what's
-  happening.
+- VPC *must* be configured such that your lambda has connectivity to AWS services including S3, SSM,
+  and CloudWatch Logs; this is typically done by adding a [VPC Endpoint](https://docs.aws.amazon.com/vpc/latest/userguide/vpce-gateway.html)
+  for each service.
+- VPC *must* allow any API connector to connect to data source APIs via HTTPS (eg 443); usually
+  these APIs are on the public internet, so this means egress to public internet.
+- VPC *must* allow your API gateway to connect to your lambdas.
+
+The requirements above MAY require you to modify your VPC configuration, and/or the security groups
+to support proxy deployment.
 
 ## Usage - with `vpc.tf`
 
@@ -33,15 +39,40 @@ module "psoxy" {
   # lines above omitted ...
 
   vpc_config = {
-    vpc_id             = aws_vpc.main.id
-    security_group_ids = [ aws_security_group.main.id ]
-    subnet_ids         = [ aws_subnet.main.id ]
+      vpc_id             = aws_default_vpc.default.id
+      security_group_ids = [aws_default_security_group.default.id]
+      subnet_ids         = [aws_default_subnet.default.id]
   }
 }
 ```
 
 Uncomment the relevant lines in `vpc.tf` in the same directory, and modify as you wish. This file
-provisions a VPC, subnet, and security group for use by the lambdas.
+pulls the default VPC/subnet/security group for your AWS account under terraform.
+
+Alternatively, you modify `vpc.tf` to use a provision non-default VPC/subnet/security group, and
+reference those from your `main.tf` - subject to the caveats above.
+
+See the following terraform resources that you'll likely need:
+- [aws_vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc)
+- [aws_subnet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet)
+- [aws_security_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group)
+- [aws_vpc_endpoint](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint)
+- [aws_route_table](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table)
+- [aws_internet_gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway)
+
+
+## Troubleshooting
+
+Check your Cloud Watch logs for the lambda. Proxy lambda will time out in INIT phase if SSM
+Parameter Store *or* your secret store implementation (AWS Secrets Manager, Vault) is not reachable.
+
+Some potential causes of this:
+  - DNS failure - it's going to look up the SSM service by domain; if the DNS zone for the SSM
+    endpoint you've provisioned is not published on the VPC, this will fail; similarly, if the
+    endpoint wasn't configured on a subnet - then it won't have an IP to be resolved.
+  - if the IP is resolved, you should see failure to connect to it in the logs (timeouts); check
+    that your security groups for lambda/subnet/endpoint allow bidirectional traffic necessary for
+    your lambda to retrieve data from SSM via the REST API.
 
 ## Switching back from using a VPC
 
@@ -53,3 +84,9 @@ So:
 1. destroy all your lambdas (`terraform state list | grep aws_lambda_function`; then
    `terraform destroy --target=` for each, remember '' as needed)
 2. destroy the subnet `terraform destroy --target=aws_subnet.main`
+
+
+
+## References
+ - https://docs.aws.amazon.com/lambda/latest/dg/foundation-networking.html
+ - https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html

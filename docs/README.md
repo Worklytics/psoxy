@@ -17,18 +17,18 @@ of locations:
 - local machine (macOS or a Linux such as Ubuntu likely to be most straightforward options)
 - remote VM/container (eg, EC2 instance)
 - CI/CD, such as GitHub Actions, Atlassian Bamboo, etc.
-- [Terraform Cloud / Terraform Enterprise](terraform-cloud.md)
+- [Terraform Cloud / Terraform Enterprise](guides/terraform-cloud.md)
 - Cloud Shell: [aws](aws/cloud-shell.md) (not recommended due to disk size limitation) /
   [gcp](gcp/cloud-shell.md)
 
 ## Guides
 
-- [Testing](testing.md) - details about how to test your deployment using our NodeJS-based test
+- [Testing](guides/testing.md) - details about how to test your deployment using our NodeJS-based test
   tooling.
 - [Troubleshooting](troubleshooting.md) - some general troubleshooting tips for common issues.
   - [AWS-specific](aws/troubleshooting.md)
   - [GCP-specific](gcp/troubleshooting.md)
-- [Cleaning Up](cleaning-up.md) - use Terraform to clean up (destroy) your deployment when you're
+- [Cleaning Up](guides/cleaning-up.md) - use Terraform to clean up (destroy) your deployment when you're
   done with it.
 
 ### Data Sources
@@ -45,7 +45,7 @@ of locations:
 If you find yourself needing to migrate a psoxy deployment from one environment to another, such as
 from a shared AWS account to a dedicated one, or from AWS--> GCP, etc:
 
-- [Deployment Migration](deployment-migration.md)
+- [Deployment Migration](guides/deployment-migration.md)
 
 Given the complexity and potential pitfalls, we highly recommend you reach out to us for assistance.
 

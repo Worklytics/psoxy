@@ -20,11 +20,20 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 
 import javax.inject.Inject;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,47 +56,80 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
     }
 
 
+
     @Override
     public void sanitize(@NonNull Reader reader,
                          @NonNull Writer writer,
                          @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
-        if (rules.getFormat() != RecordRules.Format.NDJSON) {
-            throw new IllegalArgumentException("Only NDJSON format is supported");
-        }
-
         List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms =
             rules.getTransforms().stream()
-            .map(transform -> Triple.of(
-                JsonPath.compile(transform.getPath()),
-                transform,
-                getMapFunction(transform, pseudonymizer, encoder)
-            ))
-            .collect(Collectors.toList());
+                .map(transform -> Triple.of(
+                    JsonPath.compile(transform.getPath()),
+                    transform,
+                    getMapFunction(transform, pseudonymizer, encoder)
+                ))
+                .collect(Collectors.toList());
 
+        if (rules.getFormat() == RecordRules.Format.NDJSON) {
+            sanitizeNdjson(reader, writer, compiledTransforms);
+        } else if (rules.getFormat() == RecordRules.Format.CSV) {
+            sanitizeCsv(reader, writer, compiledTransforms);
+        } else {
+            throw new IllegalArgumentException("Unsupported format: " + rules.getFormat());
+        }
+    }
 
+    @VisibleForTesting
+    void sanitizeCsv(@NonNull Reader reader,
+                     @NonNull Writer writer,
+                     @NonNull List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms) throws IOException {
+
+        try (CSVParser records = CSVFormat.DEFAULT
+                .withFirstRecordAsHeader()
+                .withIgnoreHeaderCase()
+                .withTrim()
+                .parse(reader);
+             CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.builder()
+                        .setHeader(records.getHeaderNames().toArray(new String[0]))
+                        .setRecordSeparator(records.getFirstEndOfLine()) //match source
+                        .build())) {
+            Iterator<CSVRecord> iter = records.iterator();
+
+            while(iter.hasNext()) {
+                CSVRecord record = iter.next();
+                try {
+                    LinkedHashMap result = applyTransforms(record.toMap(), compiledTransforms);
+
+                    records.getHeaderNames()
+                        .forEach(header -> {
+                            try {
+                                printer.print(result.get(header));
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+
+                    printer.println();
+                } catch (UnmatchedPseudonymization e) {
+                    log.warning("Skipped record due to UnmatchedPseudonymization: " + e.getPath());
+                }
+            }
+        }
+    }
+
+    @VisibleForTesting
+    void sanitizeNdjson(@NonNull Reader reader,
+                        @NonNull Writer writer,
+                        @NonNull List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms) throws IOException {
         try (BufferedReader bufferedReader = new BufferedReader(reader)) {
             String line;
-            while ((line = bufferedReader.readLine()) != null) {
+            while ((line = StringUtils.trimToNull(bufferedReader.readLine())) != null) {
 
                 Object document = jsonConfiguration.jsonProvider().parse(line);
 
-
                 try {
-                    for (Triple<JsonPath, RecordTransform, MapFunction> compiledTransform : compiledTransforms) {
-                        if (compiledTransform.getMiddle() instanceof RecordTransform.Pseudonymize) {
-                            Object matches = compiledTransform.getLeft().read(document);
-                            if (matches == null) {
-                                throw new UnmatchedPseudonymization(compiledTransform.getMiddle().getPath());
-                            }
-                        }
-
-                        try {
-                            compiledTransform.getLeft().map(document, compiledTransform.getRight(), jsonConfiguration);
-                        } catch (JsonPathException e) {
-                            //rule for transform doesn't match anything in document; suppress this
-                        }
-                    }
+                    document = applyTransforms(document, compiledTransforms);
                     writer.append(jsonConfiguration.jsonProvider().toJson(document));
                     writer.append('\n'); // NDJSON uses newlines between records
                     writer.flush(); //after each line
@@ -96,6 +138,36 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                 }
             }
         }
+    }
+
+
+    /**
+     * Apply the compiled transforms to the document
+     *
+     * @param document JSON "document object"
+     * @param compiledTransforms ordered list of compiled transforms
+     * @return the transformed document
+     * @throws UnmatchedPseudonymization if a pseudonymization transform should be applied, but nothing matches the path
+     */
+    LinkedHashMap applyTransforms(Object document, List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
+            throws UnmatchedPseudonymization {
+        for (Triple<JsonPath, RecordTransform, MapFunction> compiledTransform : compiledTransforms) {
+            if (compiledTransform.getMiddle() instanceof RecordTransform.Pseudonymize) {
+                Object matches = compiledTransform.getLeft().read(document);
+                if (matches == null) {
+                    throw new UnmatchedPseudonymization(compiledTransform.getMiddle().getPath());
+                }
+            }
+
+            try {
+                compiledTransform.getLeft().map(document, compiledTransform.getRight(), jsonConfiguration);
+            } catch (JsonPathException e) {
+                //rule for transform doesn't match anything in document; suppress this
+            }
+        }
+
+        //abusing implementation detail of the JSONPath library
+        return (LinkedHashMap) document;
     }
 
     private MapFunction getMapFunction(RecordTransform transform,

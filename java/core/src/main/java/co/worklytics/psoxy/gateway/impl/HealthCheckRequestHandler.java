@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @Log
 public class HealthCheckRequestHandler {
 
-    static final String JAVA_SOURCE_CODE_VERSION = "v0.4.48";
+    static final String JAVA_SOURCE_CODE_VERSION = "rc-v0.4.52";
 
     @Inject
     EnvVarsConfigService envVarsConfigService;
@@ -117,7 +117,7 @@ public class HealthCheckRequestHandler {
                                     .map(metadata -> metadata.getLastModifiedDate().orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED))
                                 .orElse(PLACEHOLDER_FOR_NULL_LAST_MODIFIED))));
         } catch (Throwable e) {
-            logInDev("Failed to add config debug info to health check", e);
+            logInDev("Failed to fill 'configPropertiesLastModified' on health check", e);
         }
 
         try {

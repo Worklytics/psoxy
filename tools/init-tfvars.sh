@@ -7,7 +7,7 @@ PSOXY_BASE_DIR=$2
 DEPLOYMENT_ENV=${3:-"local"}
 HOST_PLATFORM=${4:-"aws"}
 
-SCRIPT_VERSION="v0.4.48"
+SCRIPT_VERSION="rc-v0.4.52"
 
 if [ -z "$PSOXY_BASE_DIR" ]; then
   printf "Usage: init-tfvars.sh <path-to-terraform.tfvars> <path-to-psoxy-base-directory> [DEPLOYMENT_ENV]\n"
@@ -55,8 +55,6 @@ prompt_confirm_variable_setting() {
     yn="y"
   fi
 
-
-
   # Convert input to lowercase to be case insensitive
   yn=$(echo "$yn" | tr '[:upper:]' '[:lower:]')
 
@@ -94,28 +92,31 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
   printf "AWS provider in Terraform configuration. Initializing variables it requires ...\n"
   if aws --version &> /dev/null; then
 
+
+    printf "# AWS account in which your Psoxy instances will be deployed\n" >> $TFVARS_FILE
     AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
     if [ $? -eq 0 ] && [ -n "$AWS_ACCOUNT_ID" ]; then
-      printf "# AWS account in which your Psoxy instances will be deployed\n" >> $TFVARS_FILE
-
       user_value=$(prompt_confirm_variable_setting "aws_account_id" "$AWS_ACCOUNT_ID")
       printf "aws_account_id=\"${user_value}\"\n\n" >> $TFVARS_FILE
       printf "\taws_account_id=${BLUE}\"${user_value}\"${NC}\n"
     else
       printf "${RED}Failed to determine AWS account ID from your aws CLI configuration. You MUST fill ${BLUE}aws_account_id${NC} in your terraform.tfvars file yourself.${NC}\n"
-      exit 1
+      printf "aws_account_id=\"{{FILL_YOUR_VALUE}}\"\n\n" >> $TFVARS_FILE
     fi
 
+
     AWS_REGION=$(aws configure get region)
+
     if [ $? -eq 0 ] && [ -n "$AWS_REGION" ]; then
       printf "# AWS region in which your Psoxy infrastructure will be deployed\n" >> $TFVARS_FILE
       printf "aws_region=\"${AWS_REGION}\"\n\n" >> $TFVARS_FILE
       printf "\taws_region=${BLUE}\"${AWS_REGION}\"${NC}\n"
+    else
+      printf "No ${BLUE}aws_region${NC} could be determined from your AWS CLI configuration. You should fill ${BLUE}aws_region${NC} in your terraform.tfvars file if you wish to use a value other than the default.\n"
     fi
 
-
     AWS_ARN=$(aws sts get-caller-identity --query Arn --output text)
-    if [ -z "$AWS_ARN" ]; then
+    if [ $? -eq 0 ] && [ -z "$AWS_ARN" ]; then
       AWS_ARN="{{ARN_OF_AWS_ROLE_TERRAFORM_SHOULD_ASSUME}}"
       TEST_AWS_ARN=" # add ARN of AWS principals you want to be able to invoke your proxy instances for testing purposes\n"
     else

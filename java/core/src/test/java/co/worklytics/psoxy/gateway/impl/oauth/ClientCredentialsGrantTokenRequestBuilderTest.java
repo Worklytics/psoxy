@@ -9,11 +9,14 @@ import co.worklytics.test.TestModules;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.webtoken.JsonWebSignature;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,7 +26,7 @@ import java.time.Clock;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class ClientCredentialsGrantTokenRequestBuilderTest {
 
@@ -102,8 +105,8 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
     @SneakyThrows
     @Test
     public void tokenRequestPayload_with_jwt() {
-        when(secretStore.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
-            .thenReturn(EXAMPLE_PRIVATE_KEY);
+        when(secretStore.getConfigPropertyWithMetadata(eq(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY)))
+            .thenReturn(Optional.of(ConfigService.ConfigValueWithMetadata.builder().value(EXAMPLE_PRIVATE_KEY).build()));
         when(secretStore.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY_ID))
             .thenReturn("F4194D924E8471C804F65E77BCF90418CEEB0DA2");
 
@@ -203,6 +206,25 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
         assertEquals("Bearer", tokenResponse.getTokenType());
         assertNotNull(tokenResponse.getAccessToken());
         assertNotNull(tokenResponse.getExpiresIn());
+    }
+
+    @ValueSource(strings = {
+        "6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B",
+        "  6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B  ",
+        "sha1 Fingerprint=6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B",
+        "  sha1 Fingerprint=6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B  ",
+        "6F:CC:8E:28:F6:A6:3B:4E:99:4E:D6:2F:52:BD:F3:C3:B0:B7:E8:8B",
+        "6fcc8e28f6a63b4e994ed62f52bdf3c3b0b7e88b",
+    })
+    @ParameterizedTest
+    public void setJWTCustomHeaders(String configuredPrivateKeyId) {
+        JsonWebSignature.Header header = mock(JsonWebSignature.Header.class);
+
+        when(secretStore.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY_ID))
+            .thenReturn(configuredPrivateKeyId);
+        payloadBuilder.setJWTCustomHeaders(header);
+        verify(header, times(1))
+            .setX509Thumbprint(eq(payloadBuilder.encodeKeyId("6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B")));
     }
 
 

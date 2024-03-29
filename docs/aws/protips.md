@@ -91,3 +91,17 @@ Analogous approaches can be used to configure versioning, replication, etc;
 
 Note that encryption, lifecycle, public_access_block are set by the Workltyics-provided modules, so
 you may have conflicts issues if you also try to set those outside.
+
+## Lambda Execution Role
+*beta* - released from v0.4.50; YMMV, and may be subject to change.
+
+The terraform modules we provide provision execution roles for each lambda function, and attach
+by default attach the appropriate AWS Managed Policy to each.
+
+Specifically, this is [`AWSLambdaBasicExecutionRole`](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AWSLambdaBasicExecutionRole.html),
+unless you're using a VPC - in which case it is `AWSLambdaVPCAccessExecutionRole`(https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AWSLambdaVPCAccessExecutionRole.html).
+
+For organizations that don't allow use of AWS Managed Policies, you can use the
+`aws_lambda_execution_role_policy_arn` variable to pass in an alternative which will be used INSTEAD
+of the AWS Managed Policy.
+

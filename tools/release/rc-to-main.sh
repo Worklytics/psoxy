@@ -42,9 +42,6 @@ echo "$RELEASE back to main" >> rc_to_main.md
 echo "" >> rc_to_main.md
 echo "Next steps:" >> rc_to_main.md
 echo "  - Publish the release: \`./tools/release/publish.sh $RELEASE\`" >> rc_to_main.md
-echo "  - Update example templates to point to it:" >> rc_to_main.md
-echo "    - \`./tools/release/example-create-release-pr.sh . aws-all ~/psoxy-example-aws\`" >> rc_to_main.md
-echo "    - \`./tools/release/example-create-release-pr.sh . gcp ~/psoxy-example-gcp\`" >> rc_to_main.md
 
 PR_URL=$(gh pr create --title "$RELEASE" --body-file rc_to_main.md --base main --assignee "@me")
 PR_NUMBER=$(echo $PR_URL | sed -n 's/.*\/pull\/\([0-9]*\).*/\1/p')
