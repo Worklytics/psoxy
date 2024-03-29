@@ -24,6 +24,10 @@ public interface PseudonymizerImplFactory {
             .map(PseudonymImplementation::parseConfigPropertyValue)
             .ifPresent(builder::pseudonymImplementation);
 
+        config.getConfigPropertyAsOptional(ProxyConfigProperty.EMAIL_CANONICALIZATION)
+            .map(EmailCanonicalization::parseConfigPropertyValue)
+            .ifPresent(builder::emailCanonicalization);
+
 
         return builder.build();
     }
