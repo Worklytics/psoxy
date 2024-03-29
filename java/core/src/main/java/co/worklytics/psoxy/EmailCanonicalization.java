@@ -15,8 +15,12 @@ public enum EmailCanonicalization {
      * particular where dots (`.`) in local portion of address (prior to `@`) are respected.
      * eg `roger.rabbit@acme.com` != `rogerrabbit@acme.com`
      *
-     * As these support sub-addressing, a `+` in the local portion and anything after that will
-     * be trimmed off. (As of May 2022, this is the default for Microsoft)
+     * this is still NOT RFC compliant. For several reasons:
+     *   - RFC 5321 specifies that the local part of an email address is case-sensitive; this method
+     *    considers email mailbox names to be case-insensitive
+     *   - No RFC explicitly defines rules for sub-addressing "plus addressing", but this method
+     *    treats sub-addressed (mailbox suffix of `+` in the local portion and anything after) that
+     *    as canonically equivalent. (As of May 2022, this is the default for Microsoft; see below)
      *
      * see: https://learn.microsoft.com/en-us/exchange/recipients-in-exchange-online/plus-addressing-in-exchange-online
      *

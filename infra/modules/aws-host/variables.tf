@@ -153,6 +153,12 @@ variable "pseudonymize_app_ids" {
   default     = true
 }
 
+variable "email_canonicalization" {
+  type        = string
+  description = "defines how email address are processed prior to hashing, hence which are considered 'canonically equivalent'; one of 'STRICT' (default and most standard compliant) or 'IGNORE_DOTS' (probably most in line with user expectations)"
+  default     = "STRICT"
+}
+
 variable "general_environment_variables" {
   type        = map(string)
   description = "environment variables to add for all connectors"

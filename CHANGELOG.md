@@ -33,6 +33,11 @@ Changes to be including in future/planned release notes will be added here.
   - there new option to enable less strict email canonicalization; we strongly recommend new
     customers to enable it, although it is not enabled by default to avoid a breaking change. Set
     `email_canonicalization` to `IGNORE_DOTS` to enable this feature.
+  - BREAKING for examples: default value fore `email_canonicalization` in our example repos has been
+    set to `IGNORE_DOTS`; if you've previously forked an example, this is not a breaking change. but
+    if you fork an example > 0.4.52 and are attempting to migrate a proxy deployment initially built
+    with modules or examples from < 0.4.52, you should explicitly add `email_canonicalization = "STRICT"`
+    in your `terraform.tfvars`
 
 ## [0.4.51](https://github.com/Worklytics/psoxy/release/tag/v0.4.51)
  - GCP: non-breaking, but noticeable in Terraform plan: `title` attribute of GCP Custom Project

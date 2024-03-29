@@ -101,6 +101,7 @@ module "psoxy" {
   custom_api_connector_rules        = var.custom_api_connector_rules
   general_environment_variables     = var.general_environment_variables
   pseudonymize_app_ids              = var.pseudonymize_app_ids
+  email_canonicalization            = var.email_canonicalization
   bulk_input_expiration_days        = var.bulk_input_expiration_days
   bulk_sanitized_expiration_days    = var.bulk_sanitized_expiration_days
   custom_bulk_connector_rules       = var.custom_bulk_connector_rules
