@@ -15,6 +15,11 @@ public enum EmailCanonicalization {
      * particular where dots (`.`) in local portion of address (prior to `@`) are respected.
      * eg `roger.rabbit@acme.com` != `rogerrabbit@acme.com`
      *
+     * As these support sub-addressing, a `+` in the local portion and anything after that will
+     * be trimmed off. (As of May 2022, this is the default for Microsoft)
+     *
+     * see: https://learn.microsoft.com/en-us/exchange/recipients-in-exchange-online/plus-addressing-in-exchange-online
+     *
      * default as of 0.4, bc it's the most conservative/standard compliant approach. If a Microsoft
      * customer wants to have behavior where `.` is ignored, this can always be acheived by explicitly
      * adding those variants as aliases in their directory - and this should pose no problem to

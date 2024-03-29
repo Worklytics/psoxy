@@ -79,7 +79,7 @@ class PseudonymizerImplTest {
         "\"Alice Different Last name\" <alice@worklytics.co>",
         "Alice@worklytics.co",
         "AlIcE@worklytics.co",
-        //"alice+test@worklytics.co", // + suffix should be ignored
+        "alice+test@worklytics.co", // + suffix should be ignored
     })
     @ParameterizedTest
     void emailCanonicalEquivalents(String mailHeaderValue) {
@@ -94,8 +94,9 @@ class PseudonymizerImplTest {
         "\"Alice Different Last name\" <alice@worklytics.co>",
         "Alice@worklytics.co",
         "AlIcE@worklytics.co",
-        //"alice+test@worklytics.co", // + suffix should be ignored
+        "alice+test@worklytics.co", // + suffix should be ignored
         "al.ice@worklytics.co",
+        "\"Alice Different Last name\" <alice+t@worklytics.co>",
     })
     @ParameterizedTest
     void emailCanonicalEquivalents_IgnoreDots(String mailHeaderValue) {
