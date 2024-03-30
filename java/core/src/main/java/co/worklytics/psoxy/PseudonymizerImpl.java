@@ -64,6 +64,10 @@ public class PseudonymizerImpl implements Pseudonymizer {
             mailboxLowercase = mailboxLowercase.substring(0, mailboxLowercase.indexOf("+"));
         }
 
+        if (getOptions().getEmailCanonicalization() == EmailCanonicalization.IGNORE_DOTS) {
+            mailboxLowercase = mailboxLowercase.replace(".", "");
+        }
+
         return mailboxLowercase
             + "@"
             + domain.toLowerCase();
