@@ -181,6 +181,12 @@ variable "pseudonymize_app_ids" {
   default     = true
 }
 
+variable "email_canonicalization" {
+  type        = string
+  description = "defines how email address are processed prior to hashing, hence which are considered 'canonically equivalent'; one of 'STRICT' (default and most standard compliant) or 'IGNORE_DOTS' (probably most in line with user expectations)"
+  default     = "IGNORE_DOTS"
+}
+
 variable "enabled_connectors" {
   type        = list(string)
   description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"

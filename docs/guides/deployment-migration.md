@@ -45,6 +45,10 @@ What you MUST **copy**:
 - **value for `PSEUDONYMIZE_APP_IDS`.** This value, if set to `true` will have the proxy use a rule
   set that pseudonymizes identifiers issued by source applications themselves in some cases where
   these identifiers aren't inherently PII - but the association could be considered discoverable.
+- **value for `EMAIL_CANONICALIZATION`.** prior to v0.4.52, this default was in effect `STRICT`; so
+  if your original deployment was built on a version prior to this, you should explicitly set this
+  value to `STRICT` in your new configuration (likely `email_canonicalization` variable in terraform
+  modules)
 - any **custom sanitization rules** that you've set, either in your Terraform configuration or
   directly as the value of a `RULES` environment variable, SSM Parameter, or GCP Secret.
 - historical **sanitized files** for any bulk connectors, if you wish to continue to have this data

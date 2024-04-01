@@ -115,6 +115,8 @@ module "psoxy" {
   non_production_connectors            = var.non_production_connectors
   custom_api_connector_rules           = var.custom_api_connector_rules
   lookup_table_builders                = var.lookup_table_builders
+  pseudonymize_app_ids                 = var.pseudonymize_app_ids
+  email_canonicalization               = var.email_canonicalization
   general_environment_variables        = var.general_environment_variables
   function_env_kms_key_arn             = var.project_aws_kms_key_arn
   logs_kms_key_arn                     = var.project_aws_kms_key_arn
