@@ -40,7 +40,7 @@ Changes to be including in future/planned release notes will be added here.
     the resource ids
   - BREAKING - for AWS Secrets Manager (released in 0.4.47 as 'alpha' feature), these will now
     be prefixed by default with the environment ID, unless a `aws_secrets_manager_path` is set.
- 
+
 ## [0.4.48](https://github.com/Worklytics/psoxy/release/tag/v0.4.48)
   - BREAKING - GitHub Enterprise Server: authentication strategy has changed; you will see creation
     and destruction of some secrets that are used for authentication; you MUST generate new auth
