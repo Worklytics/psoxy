@@ -38,10 +38,10 @@ Changes to be including in future/planned release notes will be added here.
     if you fork an example > 0.4.52 and are attempting to migrate a proxy deployment initially built
     with modules or examples from < 0.4.52, you should explicitly add `email_canonicalization = "STRICT"`
     in your `terraform.tfvars`
-- GCP: Existing GCP functions are using *Container Registry* for building their internal docker image where the psoxy code is deployed. However,
-      this is [deprecated since May 2023 and starting Feb 2024](https://cloud.google.com/container-registry/docs/deprecations/container-registry-deprecation) it
-      is required that functions use *Artifact Registry* instead. All deployments made since this version will use *Artifact Registry*
-      with a specific repository created for storing all psoxy images. Any previous version before this version will work without any issue.
+  - GCP: Existing GCP functions are using *Container Registry* for building their internal docker image where the psoxy code is deployed. However, 
+    this is [deprecated since May 2023 and starting Feb 2024](https://cloud.google.com/container-registry/docs/deprecations/container-registry-deprecation) it 
+    is required that functions use *Artifact Registry* instead. All deployments made since this version will use *Artifact Registry*
+    default repository for storing all psoxy images. Any previous version before this version will work without any issue.
 
 ## [0.4.51](https://github.com/Worklytics/psoxy/release/tag/v0.4.51)
  - GCP: non-breaking, but noticeable in Terraform plan: `title` attribute of GCP Custom Project
