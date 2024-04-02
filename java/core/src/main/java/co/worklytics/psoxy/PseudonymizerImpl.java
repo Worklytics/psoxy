@@ -56,8 +56,19 @@ public class PseudonymizerImpl implements Pseudonymizer {
         String domain = EmailAddressParser.getDomain(original, EmailAddressCriteria.RECOMMENDED, true);
 
         //NOTE: lower-case here is NOT stipulated by RFC
-        return  EmailAddressParser.getLocalPart(original, EmailAddressCriteria.RECOMMENDED, true)
-            .toLowerCase()
+        String mailboxLowercase = EmailAddressParser.getLocalPart(original, EmailAddressCriteria.RECOMMENDED, true)
+            .toLowerCase();
+
+        //trim off any + and anything after it (sub-address)
+        if (mailboxLowercase.contains("+")) {
+            mailboxLowercase = mailboxLowercase.substring(0, mailboxLowercase.indexOf("+"));
+        }
+
+        if (getOptions().getEmailCanonicalization() == EmailCanonicalization.IGNORE_DOTS) {
+            mailboxLowercase = mailboxLowercase.replace(".", "");
+        }
+
+        return mailboxLowercase
             + "@"
             + domain.toLowerCase();
 

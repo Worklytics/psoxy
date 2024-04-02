@@ -167,10 +167,11 @@ module "api_connector" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
-      BUNDLE_FILENAME      = module.psoxy.filename
-      IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
-      PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-      CUSTOM_RULES_SHA     = try(var.custom_api_connector_rules[each.key], null) != null ? filesha1(var.custom_api_connector_rules[each.key]) : null
+      BUNDLE_FILENAME        = module.psoxy.filename
+      IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
+      PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
+      CUSTOM_RULES_SHA       = try(var.custom_api_connector_rules[each.key], null) != null ? filesha1(var.custom_api_connector_rules[each.key]) : null
+      EMAIL_CANONICALIZATION = var.email_canonicalization
     }
   )
 
@@ -227,10 +228,11 @@ module "bulk_connector" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
-      SOURCE              = each.value.source_kind
-      RULES               = each.value.rules_file == null ? yamlencode(try(var.custom_bulk_connector_rules[each.key], each.value.rules)) : file(each.value.rules_file)
-      BUNDLE_FILENAME     = module.psoxy.filename
-      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+      SOURCE                 = each.value.source_kind
+      RULES                  = each.value.rules_file == null ? yamlencode(try(var.custom_bulk_connector_rules[each.key], each.value.rules)) : file(each.value.rules_file)
+      BUNDLE_FILENAME        = module.psoxy.filename
+      IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
+      EMAIL_CANONICALIZATION = var.email_canonicalization
     }
   )
 }

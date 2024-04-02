@@ -79,9 +79,34 @@ class PseudonymizerImplTest {
         "\"Alice Different Last name\" <alice@worklytics.co>",
         "Alice@worklytics.co",
         "AlIcE@worklytics.co",
+        "alice+test@worklytics.co", // + suffix should be ignored
     })
     @ParameterizedTest
     void emailCanonicalEquivalents(String mailHeaderValue) {
+        PseudonymizedIdentity canonicalExample = pseudonymizer.pseudonymize(ALICE_CANONICAL);
+
+        assertEquals(canonicalExample.getHash(),
+            pseudonymizer.pseudonymize(mailHeaderValue).getHash());
+    }
+    @ValueSource(strings = {
+        ALICE_CANONICAL,
+        "Alice Example <alice@worklytics.co>",
+        "\"Alice Different Last name\" <alice@worklytics.co>",
+        "Alice@worklytics.co",
+        "AlIcE@worklytics.co",
+        "alice+test@worklytics.co", // + suffix should be ignored
+        "al.ice@worklytics.co",
+        "\"Alice Different Last name\" <alice+t@worklytics.co>",
+    })
+    @ParameterizedTest
+    void emailCanonicalEquivalents_IgnoreDots(String mailHeaderValue) {
+         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+            .pseudonymizationSalt("an irrelevant per org secret")
+            .defaultScopeId("scope")
+            .pseudonymImplementation(PseudonymImplementation.DEFAULT)
+            .emailCanonicalization(EmailCanonicalization.IGNORE_DOTS)
+            .build());
+
         PseudonymizedIdentity canonicalExample = pseudonymizer.pseudonymize(ALICE_CANONICAL);
 
         assertEquals(canonicalExample.getHash(),

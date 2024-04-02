@@ -145,9 +145,10 @@ module "api_connector" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
-      PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-      CUSTOM_RULES_SHA     = try(var.custom_api_connector_rules[each.key], null) != null ? filesha1(var.custom_api_connector_rules[each.key]) : null
-      IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
+      PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
+      EMAIL_CANONICALIZATION = var.email_canonicalization
+      CUSTOM_RULES_SHA       = try(var.custom_api_connector_rules[each.key], null) != null ? filesha1(var.custom_api_connector_rules[each.key]) : null
+      IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
     }
   )
 }
@@ -205,7 +206,8 @@ module "bulk_connector" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
-      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+      IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
+      EMAIL_CANONICALIZATION = var.email_canonicalization
     },
   )
 }
