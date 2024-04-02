@@ -351,4 +351,13 @@ output "pseudonym_salt" {
 output "artifact_repository" {
   #value = google_artifact_registry_repository.psoxy-functions-repo.id
   value = null # by default, GCP Artifact Registry will use "gcf-artifacts" repository
+
+  depends_on = [
+    # For ensuring the API is enabled, otherwise following error can happen:
+    # "Error while updating cloudfunction [...] Cloud Functions uses Artifact Registry to store function docker images.
+    # Artifact Registry API is not enabled in your project. To enable the API, visit [...]
+    # or use the gcloud command 'gcloud services enable artifactregistry.googleapis.com' then retry.
+    # If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry., forbidden"
+    google_project_service.gcp_infra_api
+  ]
 }

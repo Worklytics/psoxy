@@ -177,7 +177,8 @@ module "api_connector" {
 
   secret_bindings = merge(
     local.secrets_bound_as_env_vars[each.key],
-    module.psoxy.secrets
+    module.psoxy.secrets,
+    module.psoxy.artifact_repository
   )
 }
 
