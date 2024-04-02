@@ -22,7 +22,7 @@ module "worklytics_connector_specs" {
 }
 
 locals {
-  todos_to_populate = { for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors: k => v if try(v.external_token_todo != null, false) }
+  todos_to_populate = { for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors : k => v if try(v.external_token_todo != null, false) }
 }
 
 data "azuread_client_config" "current" {
@@ -65,7 +65,7 @@ module "msft_365_grants" {
 }
 
 resource "local_file" "todo-with-external-todo" {
-  for_each =  local.todos_to_populate
+  for_each = local.todos_to_populate
 
   filename = module.msft_365_grants[each.key].filename
   content  = format("%s\n## Setup\nThen, please follow next instructions for complete the setup: \n\n%s", module.msft_365_grants[each.key].todo, each.value.external_token_todo)

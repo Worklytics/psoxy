@@ -44,7 +44,7 @@ output "todo" {
 }
 
 output "filename" {
-    value = local_file.todo[0].filename
+  value = local_file.todo[0].filename
 }
 
 output "next_todo_step" {
