@@ -30,7 +30,8 @@ resource "google_project_service" "gcp_infra_api" {
   disable_on_destroy         = false # disabling on destroy has potential to conflict with other uses of the project
 }
 
-resource "google_artifact_registry_repository" "psoxy-functions-repo" {
+# TODO: This is will supported since 0.5 psoxy version, as google provider needs to be updated
+/*resource "google_artifact_registry_repository" "psoxy-functions-repo" {
   location      = var.bucket_location
   project       = var.project_id
   repository_id = "psoxy-functions"
@@ -42,7 +43,7 @@ resource "google_artifact_registry_repository" "psoxy-functions-repo" {
   # but even is present in the documentation (https://registry.terraform.io/providers/hashicorp/google/4.80.0/docs/resources/artifact_registry_repository#argument-reference)
   # when applied it throws an error with the message: "An argument named "cleanup_policy_dry_run" is not expected here"
   # and "no block for cleanup_policies" is expected
-  /*cleanup_policy_dry_run = false
+  *//*cleanup_policy_dry_run = false
 
   # https://cloud.google.com/artifact-registry/docs/repositories/cleanup-policy#json_2
   # https://registry.terraform.io/providers/hashicorp/google/4.80.0/docs/resources/artifact_registry_repository#argument-reference
@@ -53,12 +54,12 @@ resource "google_artifact_registry_repository" "psoxy-functions-repo" {
     most_recent_versions {
       keep_count = 3
     }
-  }*/
+  }*//*
 
   depends_on = [
     google_project_service.gcp_infra_api
   ]
-}
+}*/
 
 # pseudo secret
 resource "google_secret_manager_secret" "pseudonym_salt" {
@@ -348,5 +349,6 @@ output "pseudonym_salt" {
 }
 
 output "artifact_repository" {
-  value = google_artifact_registry_repository.psoxy-functions-repo.id
+  #value = google_artifact_registry_repository.psoxy-functions-repo.id
+  value = null # by default, GCP Artifact Registry will use "gcf-artifacts" repository
 }
