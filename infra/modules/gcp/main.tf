@@ -1,7 +1,7 @@
 
 locals {
   # a prefix legal for GCP Roles
-  environment_id_role_prefix   = replace(var.environment_id_prefix, "-", "_")
+  environment_id_role_prefix = replace(var.environment_id_prefix, "-", "_")
 
   # version of environment_id_prefix with trailing space, presuming it's a hyphen or a underscore
   environment_id_prefix_display = length(var.environment_id_prefix) > 0 ? "${substr(var.environment_id_prefix, 0, length(var.environment_id_prefix) - 1)} " : ""
