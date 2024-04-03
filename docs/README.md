@@ -104,7 +104,7 @@ Workspace Admin will be output for you.
 | GMail                          | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gmail/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gmail/gmail.yaml)               | `gmail.metadata`                                                                                                                                                                                          |
 | Google Meet                    | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/meet/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/meet/meet.yaml)                  | `admin.reports.audit.readonly`                                                                                                                                                                            |
 
-NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs).
+NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](https://github.com/Worklytics/psoxy/tree/main/infra/modules/worklytics-connector-specs).
 Please refer to that module for a definitive list.
 
 NOTE: 'Google Directory' connection is required prerequisite for all other Google Workspace
@@ -149,16 +149,16 @@ The API key/secret will be used to authenticate with the source's REST API and a
 
 | Source                    | Details + Examples                                                               | API Permissions / Scopes                                                                                                                      |
 |---------------------------|----------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| Asana                     | [sources/asana](https://github.com/Worklytics/psoxy/tree/main/docs/sources/asana/README.md)                               | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace)                                |
-| GitHub                    | [sources/github](https://github.com/Worklytics/psoxy/tree/main/docs/sources/github/README.md)                             | **Read Only** permissions for: <br/>Repository: Contents, Issues, Metadata, Pull requests<br/>Organization: Administration, Members           |
-| Jira Cloud                | [sources/atlassian/jira-cloud](https://github.com/Worklytics/psoxy/tree/main/docs/sources/atlassian/jira/README.md)   | "Classic Scopes": `read:jira-user` `read:jira-work` "Granular Scopes": `read:group:jira` `read:user:jira`  "User Identity API" `read:account` |
-| Jira Server / Data Center | [sources/atlassian/jira-server](https://github.com/Worklytics/psoxy/tree/main/docs/sources/atlassian/jira/jira-server.md) | Personal Acccess Token on behalf of user with access to equivalent of above scopes for entire instance                                        |
-| Salesforce                | [sources/salesforce](https://github.com/Worklytics/psoxy/tree/main/docs/sources/salesforce/README.md)                     | `api` `chatter_api` `refresh_token` `offline_access` `openid` `lightning` `content` `cdp_query_api`                                           |                                                                                                       |
-| Slack                     | [sources/slack](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/README.md)                               | `discovery:read`                                                                                                                              |
-| Zoom                      | [sources/zoom](https://github.com/Worklytics/psoxy/tree/main/docs/sources/zoom/README.md)                                 | `user:read:admin` `meeting:read:admin` `report:read:admin`                                                                                    |
+| Asana                     | [sources/asana](sources/asana/README.md)                               | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace)                                |
+| GitHub                    | [sources/github](sources/github/README.md)                             | **Read Only** permissions for: <br/>Repository: Contents, Issues, Metadata, Pull requests<br/>Organization: Administration, Members           |
+| Jira Cloud                | [sources/atlassian/jira-cloud](sources/atlassian/jira/README.md)   | "Classic Scopes": `read:jira-user` `read:jira-work` "Granular Scopes": `read:group:jira` `read:user:jira`  "User Identity API" `read:account` |
+| Jira Server / Data Center | [sources/atlassian/jira-server](sources/atlassian/jira/jira-server.md) | Personal Acccess Token on behalf of user with access to equivalent of above scopes for entire instance                                        |
+| Salesforce                | [sources/salesforce](sources/salesforce/README.md)                     | `api` `chatter_api` `refresh_token` `offline_access` `openid` `lightning` `content` `cdp_query_api`                                           |                                                                                                       |
+| Slack                     | [sources/slack](sources/slack/README.md)                               | `discovery:read`                                                                                                                              |
+| Zoom                      | [sources/zoom](sources/zoom/README.md)                                 | `user:read:admin` `meeting:read:admin` `report:read:admin`                                                                                    |
 
 
-NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs).
+NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](https://github.com/Worklytics/psoxy/tree/main/infra/modules/worklytics-connector-specs).
 Please refer to that module for a definitive list.
 
 ### Other Data Sources without REST APIs
@@ -253,7 +253,7 @@ For testing your psoxy instance, you will need:
 NOTE: NodeJS 16 is unmaintained since Oct 2023, so we recommend newer version; but in theory should
 work.
 
-We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](tools/check-prereqs.sh).
+We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](https://github.com/Worklytics/psoxy/tree/main/tools/check-prereqs.sh).
 That script has no dependencies itself, so should be able to run on any plain POSIX-compliant shell
 (eg,`bash`, `zsh`, etc) that we'd expect you to find on most Linux, MacOS, or even Windows with
 Subsystem for Linux (WSL) platforms.
