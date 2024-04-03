@@ -20,6 +20,7 @@ resource "google_project_service" "gcp_infra_api" {
     "compute.googleapis.com", # seems required w newer Google provider versions, for resources we use
     "iam.googleapis.com",     # manage IAM via terraform (as of 2023-04-17, internal dev envs didn't have this; so really needed?)
     "secretmanager.googleapis.com",
+    "artifactregistry.googleapis.com", # for GCP Artifact Registry, as required for new Cloud Functions since Feb 2024
     # "serviceusage.googleapis.com", # manage service APIs via terraform (prob already
   ])
 
@@ -28,6 +29,37 @@ resource "google_project_service" "gcp_infra_api" {
   disable_dependent_services = false
   disable_on_destroy         = false # disabling on destroy has potential to conflict with other uses of the project
 }
+
+# TODO: This is will supported since 0.5 psoxy version, as google provider needs to be updated
+/*resource "google_artifact_registry_repository" "psoxy-functions-repo" {
+  location      = var.bucket_location
+  project       = var.project_id
+  repository_id = "psoxy-functions"
+  description   = "Docker repository used on the cloud functions"
+  format        = "DOCKER"
+
+  ## Not supported in current google providers, needs 5.14 as there it is GA
+  # See https://github.com/hashicorp/terraform-provider-google/blob/main/CHANGELOG.md#5140-jan-29-2024
+  # but even is present in the documentation (https://registry.terraform.io/providers/hashicorp/google/4.80.0/docs/resources/artifact_registry_repository#argument-reference)
+  # when applied it throws an error with the message: "An argument named "cleanup_policy_dry_run" is not expected here"
+  # and "no block for cleanup_policies" is expected
+  *//*cleanup_policy_dry_run = false
+
+  # https://cloud.google.com/artifact-registry/docs/repositories/cleanup-policy#json_2
+  # https://registry.terraform.io/providers/hashicorp/google/4.80.0/docs/resources/artifact_registry_repository#argument-reference
+  cleanup_policies {
+    id     = "keep-most-recent-versions"
+    action = "KEEP"
+
+    most_recent_versions {
+      keep_count = 3
+    }
+  }*//*
+
+  depends_on = [
+    google_project_service.gcp_infra_api
+  ]
+}*/
 
 # pseudo secret
 resource "google_secret_manager_secret" "pseudonym_salt" {
@@ -314,4 +346,18 @@ output "pseudonym_salt" {
   description = "Value used to salt pseudonyms (SHA-256) hashes. If migrate to new deployment, you should copy this value."
   value       = random_password.pseudonym_salt.result
   sensitive   = true
+}
+
+output "artifact_repository" {
+  #value = google_artifact_registry_repository.psoxy-functions-repo.id
+  value = null # by default, GCP Artifact Registry will use "gcf-artifacts" repository
+
+  depends_on = [
+    # For ensuring the API is enabled, otherwise following error can happen:
+    # "Error while updating cloudfunction [...] Cloud Functions uses Artifact Registry to store function docker images.
+    # Artifact Registry API is not enabled in your project. To enable the API, visit [...]
+    # or use the gcloud command 'gcloud services enable artifactregistry.googleapis.com' then retry.
+    # If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry., forbidden"
+    google_project_service.gcp_infra_api
+  ]
 }
