@@ -97,7 +97,7 @@ This feature supports simple adaptation of existing data pipelines for use in Wo
 #### See Also
 
 - Rule structure is specified in
-  [`ColumnarRules`](java/gateway-core/src/main/java/com/avaulta/gateway/rules/ColumnarRules.java).
+  [`ColumnarRules`](../../java/gateway-core/src/main/java/com/avaulta/gateway/rules/ColumnarRules.java).
 
 ### Record-Oriented Formats (RecordRules)
 
@@ -131,7 +131,7 @@ applied; so JSON paths in transforms should all be single-level; eg, `$.email` t
 #### See Also
 
 - Rule structure is specified in
-  [`RecordRules`](java/gateway-core/src/main/java/com/avaulta/gateway/rules/RecordRules.java).
+  [`RecordRules`](../..java/gateway-core/src/main/java/com/avaulta/gateway/rules/RecordRules.java).
 
 ### Mixing File Formats
 
