@@ -22,7 +22,7 @@ module "worklytics_connector_specs" {
 }
 
 locals {
-  todos_to_populate = { for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors : k => v if try(v.external_token_todo != null, false) }
+  todos_to_populate = { for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors : k => v if try(v.external_token_todo != null, false) && var.todos_as_local_files }
 }
 
 data "azuread_client_config" "current" {
