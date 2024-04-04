@@ -33,7 +33,7 @@ of locations:
 
 ### Data Sources
 
-- [sources](sources)
+- [Data Sources](sources/README.md)
 
 ### Customizing Data Sanitization
 
@@ -52,7 +52,7 @@ Given the complexity and potential pitfalls, we highly recommend you reach out t
 ## Development
 
 Various topics relevant to anyone developing Psoxy (in Java, or the supporting Terraform
-modules/examples) is kept in [`./development`](./development).
+modules/examples) is kept in [`development`](development).
 
 ## Alpha Features
 
