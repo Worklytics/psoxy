@@ -72,7 +72,6 @@
           <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlinx/kotlinx-metadata-jvm/0.3.0/kotlinx-metadata-jvm-0.3.0.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
         </processorPath>
-        <module name="psoxy-core" />
       </profile>
       <profile name="Annotation profile for gateway-core" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -105,7 +104,6 @@
           <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlinx/kotlinx-metadata-jvm/0.3.0/kotlinx-metadata-jvm-0.3.0.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
         </processorPath>
-        <module name="gateway-core" />
       </profile>
       <profile name="Annotation profile for psoxy-aws" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -138,7 +136,6 @@
           <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlinx/kotlinx-metadata-jvm/0.3.0/kotlinx-metadata-jvm-0.3.0.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
         </processorPath>
-        <module name="psoxy-aws" />
       </profile>
       <profile name="Annotation profile for psoxy-cmd-line" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -171,7 +168,6 @@
           <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlinx/kotlinx-metadata-jvm/0.3.0/kotlinx-metadata-jvm-0.3.0.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
         </processorPath>
-        <module name="psoxy-cmd-line" />
       </profile>
       <profile name="Annotation profile for psoxy-gcp" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -204,8 +200,16 @@
           <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlinx/kotlinx-metadata-jvm/0.3.0/kotlinx-metadata-jvm-0.3.0.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
         </processorPath>
-        <module name="psoxy-gcp" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="gateway-core" target="11" />
+      <module name="impl" target="11" />
+      <module name="java" target="11" />
+      <module name="psoxy-aws" target="11" />
+      <module name="psoxy-cmd-line" target="11" />
+      <module name="psoxy-core" target="11" />
+      <module name="psoxy-gcp" target="11" />
+    </bytecodeTargetLevel>
   </component>
 </project>
