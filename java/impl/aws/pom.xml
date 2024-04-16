@@ -17,8 +17,8 @@
 
     <properties>
         <!-- dependencies local to module; if you want to re-use across more modules, move up to root pom -->
-        <dependency.aws-lambda-core.version>1.2.1</dependency.aws-lambda-core.version>
-        <dependency.aws-lambda-java-events.version>3.11.0</dependency.aws-lambda-java-events.version>
+        <dependency.aws-lambda-core.version>1.2.3</dependency.aws-lambda-core.version>
+        <dependency.aws-lambda-java-events.version>3.11.5</dependency.aws-lambda-java-events.version>
     </properties>
 
 
