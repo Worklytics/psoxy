@@ -44,7 +44,7 @@ output "todo" {
 }
 
 output "filename" {
-  value = local_file.todo[0].filename
+  value = var.todos_as_local_files ? local_file.todo[0].filename : null
 }
 
 output "next_todo_step" {
