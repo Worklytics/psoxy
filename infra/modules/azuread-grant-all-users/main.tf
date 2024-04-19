@@ -39,10 +39,12 @@ resource "local_file" "todo" {
   content = local.todo_content
 }
 
-
-
 output "todo" {
   value = local.todo_content
+}
+
+output "filename" {
+  value = var.todos_as_local_files ? local_file.todo[0].filename : null
 }
 
 output "next_todo_step" {

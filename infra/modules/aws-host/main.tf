@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.3, < 1.7"
+  required_version = ">= 1.3, < 1.8"
   required_providers {
     aws = {
       version = ">= 4.22, < 5.0"
@@ -145,9 +145,10 @@ module "api_connector" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
-      PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-      CUSTOM_RULES_SHA     = try(var.custom_api_connector_rules[each.key], null) != null ? filesha1(var.custom_api_connector_rules[each.key]) : null
-      IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
+      PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
+      EMAIL_CANONICALIZATION = var.email_canonicalization
+      CUSTOM_RULES_SHA       = try(var.custom_api_connector_rules[each.key], null) != null ? filesha1(var.custom_api_connector_rules[each.key]) : null
+      IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
     }
   )
 }
@@ -205,7 +206,8 @@ module "bulk_connector" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
-      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+      IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
+      EMAIL_CANONICALIZATION = var.email_canonicalization
     },
   )
 }
@@ -272,13 +274,13 @@ resource "local_file" "test_all_script" {
 
 echo "Testing API Connectors ..."
 
-%{for test_script in values(module.api_connector)[*].test_script ~}
+%{for test_script in values(module.api_connector)[*].test_script~}
 %{if test_script != null}./${test_script}%{endif}
 %{endfor}
 
 echo "Testing Bulk Connectors ..."
 
-%{for test_script in values(module.bulk_connector)[*].test_script ~}
+%{for test_script in values(module.bulk_connector)[*].test_script~}
 %{if test_script != null}./${test_script}%{endif}
 %{endfor}
 EOF

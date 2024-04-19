@@ -70,7 +70,8 @@ resource "google_cloudfunctions_function" "function" {
   entry_point                  = "co.worklytics.psoxy.Route"
   service_account_email        = var.service_account_email
   labels                       = var.default_labels
-  docker_registry              = "CONTAINER_REGISTRY"
+  docker_registry              = "ARTIFACT_REGISTRY"
+  docker_repository            = var.artifact_repository_id
 
   environment_variables = merge(
     local.required_env_vars,
@@ -91,8 +92,6 @@ resource "google_cloudfunctions_function" "function" {
       version    = secret_environment_variable.value.version_number
     }
   }
-
-
 
   lifecycle {
     ignore_changes = [

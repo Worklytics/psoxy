@@ -218,7 +218,7 @@ You will need all the following in your deployment environment (eg, your laptop)
 | [git](https://git-scm.com/)                     | 2.17+                  | `git --version`           |
 | [Maven](https://maven.apache.org/)              | 3.6+                   | `mvn -v`                 |
 | [Java JDK 11+](https://openjdk.org/install/) | 11, 17, 21 (see notes) | `mvn -v &#124; grep Java` |
-| [Terraform](https://www.terraform.io/)          | 1.3.x, <= 1.6          | `terraform version`       |
+| [Terraform](https://www.terraform.io/)          | 1.3.x, <= 1.7.x          | `terraform version`       |
 
 NOTE: we will support Java versions for duration of official support windows, in particular the
 LTS versions. As of Nov 2023, we  still support java 11 but may end this at any time. Minor
@@ -232,6 +232,11 @@ tool, but we don't offer documentation or support in doing so.  Adapting one of 
 [modules](infra/modules) will simplify things greatly.
 
 NOTE: Refrain to use Terraform versions 1.4.x that are < v1.4.3. We've seen bugs.
+
+NOTE: As of proxy version 0.4.x, we're constraining our Terraform modules/examples to 1.3.x features,
+and will automate testing against latest release of each minor version from there forwards to 2.0,
+as we add support for each. Once we introduce testing of newer versions, we will update version
+constraint above and in our modules to reflect support for newer versions.
 
 Depending on your Cloud Host / Data Sources, you will need:
 

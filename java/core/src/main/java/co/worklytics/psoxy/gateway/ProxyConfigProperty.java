@@ -17,6 +17,13 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     CUSTOM_RULES_SHA,
 
     /**
+     * 'STRICT', 'IGNORE_DOTS', ...
+     *
+     * OPTIONAL; default to 'STRICT'; possibly will change in next proxy version.
+     */
+    EMAIL_CANONICALIZATION,
+
+    /**
      * where to find configuration parameters that are shared across connectors
      * OPTIONAL; default to ""
      */

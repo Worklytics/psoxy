@@ -34,6 +34,9 @@ public interface Pseudonymizer {
         @Builder.Default
         PseudonymImplementation pseudonymImplementation = PseudonymImplementation.DEFAULT;
 
+        @Builder.Default
+        EmailCanonicalization emailCanonicalization = EmailCanonicalization.STRICT;
+
     }
 
     /**

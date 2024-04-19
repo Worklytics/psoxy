@@ -20,6 +20,35 @@ Changes to be including in future/planned release notes will be added here.
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## [0.4.52](https://github.com/Worklytics/psoxy/release/tag/v0.4.52)
+  - BREAKING: default behavior for sub-addressing aka "plus addressing" of emails has changed; the
+    proxy previously considered these canonically distinct. Now, the proxy will consider these
+    canonically equivalent. As we don't expect plus addressing to be used hris or directory data,
+    this should have little impact.  Changes will most likely be in a few edge cases, such as
+    emails or calendar invites sent to a sub-address - sender unlikely to be a subaddress, but
+    recipient could be.  In such cases, behavior prior to 0.4.52 would cause recipient to appear
+    as a distinct mailbox; from 0.4.52 onward, they will be considered the same mailbox; we expect
+    this to be behavior that is more in line with user expectations, so although technically
+    breaking, we're introducing it without a major version bump.
+  - there new option to enable less strict email canonicalization; we strongly recommend new
+    customers to enable it, although it is not enabled by default to avoid a breaking change. Set
+    `email_canonicalization` to `IGNORE_DOTS` to enable this feature.
+  - BREAKING for examples: default value fore `email_canonicalization` in our example repos has been
+    set to `IGNORE_DOTS`; if you've previously forked an example, this is not a breaking change. but
+    if you fork an example > 0.4.52 and are attempting to migrate a proxy deployment initially built
+    with modules or examples from < 0.4.52, you should explicitly add `email_canonicalization = "STRICT"`
+    in your `terraform.tfvars`
+  - GCP: Existing GCP functions are using *Container Registry* for building their internal docker image where the psoxy code is deployed. However, 
+    this is [deprecated since May 2023 and starting Feb 2024](https://cloud.google.com/container-registry/docs/deprecations/container-registry-deprecation) it 
+    is required that functions use *Artifact Registry* instead. All deployments made since this version will use *Artifact Registry*
+    default repository for storing all psoxy images. Any previous version before this version will work without any issue.
+
+## [0.4.51](https://github.com/Worklytics/psoxy/release/tag/v0.4.51)
+ - GCP: non-breaking, but noticeable in Terraform plan: `title` attribute of GCP Custom Project
+   roles created by our modules are changing to more closely follow conventions GCP uses for its
+   built-in roles; as well as prefixing them with your environment ID to group them together
+   alphabetically and differentiate in shared project.
+
 ## [0.4.50](https://github.com/Worklytics/psoxy/release/tag/v0.4.50)
   - `todos_as_local_files` properly respected now; if you had it as `false`, you may see some local
     files deleted on your next `terraform apply`.

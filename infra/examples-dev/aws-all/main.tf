@@ -1,4 +1,6 @@
 terraform {
+  required_version = ">= 1.3, < 1.8"
+
   required_providers {
     # for the infra that will host Psoxy instances
     aws = {
@@ -19,7 +21,7 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.51"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.52"
 
   enabled_connectors               = var.enabled_connectors
   jira_cloud_id                    = var.jira_cloud_id
@@ -97,7 +99,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.4.51"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.4.52"
 
   environment_name                     = var.environment_name
   aws_account_id                       = var.aws_account_id
@@ -113,6 +115,8 @@ module "psoxy" {
   non_production_connectors            = var.non_production_connectors
   custom_api_connector_rules           = var.custom_api_connector_rules
   lookup_table_builders                = var.lookup_table_builders
+  pseudonymize_app_ids                 = var.pseudonymize_app_ids
+  email_canonicalization               = var.email_canonicalization
   general_environment_variables        = var.general_environment_variables
   function_env_kms_key_arn             = var.project_aws_kms_key_arn
   logs_kms_key_arn                     = var.project_aws_kms_key_arn
@@ -131,11 +135,11 @@ module "psoxy" {
   todo_step                            = local.max_auth_todo_step
 
 
-#  vpc_config = {
-#    vpc_id             = aws_default_vpc.default.id
-#    security_group_ids = [aws_security_group.default.id]
-#    subnet_ids         = [aws_default_subnet.default.id]
-#  }
+  #  vpc_config = {
+  #    vpc_id             = aws_default_vpc.default.id
+  #    security_group_ids = [aws_security_group.default.id]
+  #    subnet_ids         = [aws_default_subnet.default.id]
+  #  }
 }
 
 ## Worklytics connection configuration
@@ -151,7 +155,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.51"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.52"
 
   psoxy_instance_id  = each.key
   worklytics_host    = var.worklytics_host
