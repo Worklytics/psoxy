@@ -180,8 +180,7 @@ public class ClientCredentialsGrantTokenRequestBuilder
         Map<String, String> data = new HashMap<>();
 
         data.put("grant_type", getGrantType());
-        data.put("client_id",
-            secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
+        data.put("client_id", getClientId());
         data.put("client_secret",
             secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET));
 
@@ -192,8 +191,7 @@ public class ClientCredentialsGrantTokenRequestBuilder
         //implementation of:
         // https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow#get-a-token
 
-        String oauthClientId =
-            secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID);
+        String oauthClientId = getClientId();
         String tokenEndpoint =
             config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
 
@@ -276,5 +274,10 @@ public class ClientCredentialsGrantTokenRequestBuilder
                 });
 
         return result.get();
+    }
+
+    private String getClientId() {
+        return config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID)
+            .orElseGet(() -> secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
     }
 }

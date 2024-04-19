@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -49,10 +48,16 @@ public class RefreshTokenTokenRequestBuilder
 
         data.put("grant_type", getGrantType());
         data.put("refresh_token", secretStore.getConfigPropertyOrError(ConfigProperty.REFRESH_TOKEN));
-        data.put("client_id", secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
+        data.put("client_id", getClientId());
         data.put("client_secret", secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET));
 
         return new UrlEncodedContent(data);
+
+    }
+
+    private String getClientId() {
+        return config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID)
+                .orElseGet(() -> secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
 
     }
 
