@@ -187,11 +187,6 @@ public class ClientCredentialsGrantTokenRequestBuilder
         return data;
     }
 
-    private String getClientId() {
-        return config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID)
-            .orElseGet(() -> secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
-    }
-
     private Map<String, String> buildJWTPayload() {
         //implementation of:
         // https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow#get-a-token
@@ -279,5 +274,10 @@ public class ClientCredentialsGrantTokenRequestBuilder
                 });
 
         return result.get();
+    }
+
+    private String getClientId() {
+        return config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID)
+            .orElseGet(() -> secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
     }
 }
