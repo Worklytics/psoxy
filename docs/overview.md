@@ -1,4 +1,4 @@
-# Psoxy Overview
+# Overview
 
 ## Modes
 
