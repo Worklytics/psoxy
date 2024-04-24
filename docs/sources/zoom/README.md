@@ -61,6 +61,6 @@ be left in development mode; it does not need to be published.
        - View report data: `report:read:admin`. This is for getting last 6 months view for user meetings
          Once the scopes are added, click on `Done` and then `Continue`.
 
-       - ![Scopes](scopes.png)
+    ![Scopes](scopes.png)
 
 5. Activate the app

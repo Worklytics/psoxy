@@ -41,21 +41,27 @@ AWS CLoud Shell,
 
    - `read:jira-user`
    - `read:jira-work`
-     ![Classic Scopes for Jira API](./img/jira-cloud-jira-api-scope-permissions.png) And these from
-     "Granular Scopes":
+   
+   ![Classic Scopes for Jira API](./img/jira-cloud-jira-api-scope-permissions.png) 
+
+   And these from "Granular Scopes":
    - `read:group:jira`
    - `read:avatar:jira`
    - `read:user:jira`
-     ![Granular Scopes for Jira API](./img/jira-cloud-jira-api-scope-granular-permissions.png)
+  
+  ![Granular Scopes for Jira API](./img/jira-cloud-jira-api-scope-granular-permissions.png)
 
    Then go back to "Permissions" and click on "Add" for `User Identity API`, only selecting
    following scopes:
 
    - `read:account`
-     ![Classic Scopes for User Identity API](./img/jira-cloud-user-api-scope-permissions.png)
+  
+  ![Classic Scopes for User Identity API](./img/jira-cloud-user-api-scope-permissions.png)
 
    After adding all the scopes, you should have 1 permission for `User Identity API` and 5 for
-   `Jira API`: ![Permissions](./img/jira-cloud-final-permissions.png)
+   `Jira API`: 
+
+  ![Permissions](./img/jira-cloud-final-permissions.png)
 
 4. Once Configured, go to "Settings" and copy the "Client Id" and "Secret". You will use these to
    obtain an OAuth `refresh_token`.
