@@ -45,6 +45,9 @@ and extra IAM policies to make that all work, compared to a function URL.
 That said, the payload lambdas receive when invoked via a function URL is equivalent to the payload
 of API Gateway v2, so the proxy itself is compatible with either API Gateway v2 or function urls.
 
+See [API Gateway](aws/guides/api-gateway.md) for more details on how to use Worklytics-provided
+terraform modules to enable API gateway in front of your proxy instances.
+
 ## Can I deploy a WAF in front of my Psoxy instances?
 
 Sure, but why? Psoxy is itself a rules-based layer that validates requests, authorizes them, and
@@ -62,23 +65,19 @@ Worklytics that is otherwise not exposed to the internet.
 
 ## Can I deploy Psoxy instances in a VPC?
 
-As of November 2023, that is not directly supported by the Worklytics-provided Terraform modules. If
-you have a use-case that you believe requires a VPC, please let us know.
+VPC support is available as a *beta* feature as of February 2024.
 
-The usual cases for deploying infra in a VPC is to isolate a complex, potentially insecure
-component, such as a VM with lots of packages/software/etc running on it. Proxy instances are small
-java bundles, compiled, packaged, and deployed by your team - into serverless infrastructure
-sandboxes (AWS Lambda, GCP CLoud Functions, etc). The code is source-available for your team to
-review; it undergoes full automated testing and continual vulnerability scanning.
+VPC usage *requires* an API Gateway to be deployed in front of the proxy instances.
 
-Access to proxy instances is based on Workload Identity Federation (OIDC) and IAM policies, which is
-equivalent to how internal access between your AWS/GCP cloud resources is currently secured.
+Please note that proxy instances generally use the public APIs of cloud SaaS tools, so do not require
+access to your internal network/VPN unless you are connecting to an on-prem tool (eg, GitHub
+Enterprise Server, etc).  So there is no technical reason to deploy Psoxy instances in a VPC.
 
-No workplace data is stored by proxy instances. For the connectors that sanitize bulk file data,
-this data is only persisted into GCS/S3 buckets. AWS/GCS do not support deploying such buckets "in a
-VPC". You could write an IAM policy that grants access to such buckets _from_ a VPC, but this is
-functionally equivalent to an IAM policy that grants access to such a buckets from a specific
-lambda/cloud function.
+As such, only organizations with inflexible policies requiring such infra to be in a VPC should add
+this complexity. Security is best achieved by simplicity and transparency, so deploying VPC
+and API Gateway for its own sake does not improve security.
+
+see: [VPC Support](aws/guides/lambdas-on-vpc.md)
 
 ## Is Domain-wide Delegation (DWD) for Google Workspace secure?
 
