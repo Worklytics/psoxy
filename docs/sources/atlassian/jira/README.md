@@ -1,4 +1,5 @@
-# Jira Cloud **beta**
+# Jira Cloud
+
 
 NOTE: This is for the Cloud-hosted version of Jira; for the self-hosted version, see
 [Jira Server](jira-server.md).

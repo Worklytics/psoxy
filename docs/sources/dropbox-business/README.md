@@ -1,13 +1,13 @@
-# Dropbox
+# Dropbox Business
 
-Dropbox connector through Psoxy requires a Dropbox Application created in Dropbox Console. The
-application does not require to be public, and it needs to have the following scopes to support all
-the operations for the connector:
+The Dropbox Business connector through Psoxy requires a Dropbox Application created in Dropbox
+Console. The application does not require to be public, and it needs to have the following scopes
+to support all the operations for the connector:
 
-- files.metadata.read: for file listing and revision
-- members.read: member listing
-- events.read: event listing
-- groups.read: group listing
+- `files.metadata.read` : for file listing and revision
+- `members.read` : member listing
+- `events.read` : event listing
+- `groups.read` : group listing
 
 1. Go to https://www.dropbox.com/apps and Build an App
 2. Then go https://www.dropbox.com/developers to enter in `App Console` to configure your app
