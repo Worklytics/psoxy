@@ -1,6 +1,6 @@
 # Lambdas on a VPC
 
-**beta** - This is now available for customer-use, but may still changein backwards incompatible
+**beta** - This is now available for customer-use, but may still change in backwards incompatible
 ways.
 
 Our `aws-host` module provides a `vpc_config` variable to specify the VPC configuration for the
