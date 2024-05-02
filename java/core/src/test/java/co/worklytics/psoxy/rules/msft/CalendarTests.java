@@ -1,9 +1,7 @@
 package co.worklytics.psoxy.rules.msft;
 
 import co.worklytics.psoxy.rules.Rules2;
-import com.google.common.collect.Streams;
 import lombok.Getter;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -12,7 +10,7 @@ import java.util.stream.Stream;
 
 //TODO: fix this re-use via inheritance; makes tests brittle; we should inject this rule set into
 // the directory tests, or something like that
-public class CalendarTests extends DirectoryTests {
+public class CalendarTests extends EntraIDTests {
 
     @Getter
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.OUTLOOK_CALENDAR;
