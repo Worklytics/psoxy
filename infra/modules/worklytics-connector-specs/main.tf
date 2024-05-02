@@ -1265,7 +1265,7 @@ And following granular scopes:
 
   Add the `id` value from that JSON response as the value of the `jira_cloud_id` variable in the
   `terraform.tfvars` file of your Terraform configuration. This will generate all the test URLs with
-  a proper value and it will populate the right value for setting up the configuration.
+  proper value for targeting a valid Jira Cloud instance.
 EOT
     }
   }
