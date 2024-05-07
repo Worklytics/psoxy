@@ -31,7 +31,7 @@ Objectives:
      party API and then perform minimal transformation on the response (pseudonymization, field
      redaction) to ease code review and auditing of its behavior.
 
-Psoxy may be hosted in [Google Cloud ](docs/gcp/development.md) or [AWS](docs/aws/getting-started.md).
+Psoxy may be hosted in [Google Cloud](docs/gcp/development.md) or [AWS](docs/aws/getting-started.md).
 
 ## Data Flow
 
