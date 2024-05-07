@@ -64,8 +64,8 @@ But Psoxy ensures Worklytics only sees:
 These pseudonyms leverage SHA-256 hashing / AES encryption, with salt/keys that are known only to
 your organization and never transferred to Worklytics.
 
-Psoxy enforces that Worklytics can only access API endpoints you've configured (principle of least
-privilege) using HTTP methods you allow (eg, limit to `GET` to enforce read-only for RESTful APIs).
+Psoxy enforces that Worklytics can only access API endpoints you've configured ([principle of least
+privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege)) using HTTP methods you allow (eg, limit to `GET` to enforce read-only for RESTful APIs).
 
 For data sources APIs which require keys/secrets for authentication, such values remain stored in
 your premises and are never accessible to Worklytics.
