@@ -36,7 +36,7 @@ Psoxy may be hosted in [Google Cloud](docs/gcp/development.md) or [AWS](docs/aws
 ## Data Flow
 
 A Psoxy instances reside on your premises (in the cloud) and act as an intermediary between
-Worklytics and the data source you wish to connect.  In this role, the proxy performs the
+Worklytics and the data source you wish to connect. In this role, the proxy performs the
 authentication necessary to connect to the data source's API and then any required transformation
 (such as pseudonymization or redaction) on the response.
 
