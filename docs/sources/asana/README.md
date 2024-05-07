@@ -3,8 +3,8 @@
 ## Examples
 
 - [Example Rules](asana.yaml)
-- Example Data : [original](example-api-responses/original) |
-  [sanitized](example-api-responses/sanitized)
+- Example Data : [original](example-api-responses/original/) |
+  [sanitized](example-api-responses/sanitized/)
 
 ## Steps to Connect
 

@@ -72,7 +72,7 @@ Use this steps if you intend to install in just one workspace within your org.
 
 **_beta_** As an alternative to connecting Worklytics to the Slack Discovery API via the proxy, it
 is possible to use the bulk-mode of the proxy to sanitize an export of Slack Discovery data and
-ingest the resulting sanitized data to Worklytics. Example data of this is giving in the
+ingest the resulting sanitized data to Worklytics. Example data of this is given in the
 [`example-bulk/`](example-bulk/) folder.
 
 This data can be processing using custom multi-file type rules in the proxy, of which

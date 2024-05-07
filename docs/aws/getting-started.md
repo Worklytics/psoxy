@@ -135,7 +135,7 @@ See https://developer.hashicorp.com/terraform/language/settings/backends/local
 
 ## Bootstrap
 
-The module [psoxy-constants](../../infra/modules/psoxy-constants) is a dependency-free module that
+The module [psoxy-constants](../../infra/modules/psoxy-constants/) is a dependency-free module that
 provides lists of AWS managed policies, etc needed for bootstraping a AWS account in which your
 proxy instances will reside.
 

@@ -2,9 +2,10 @@
 
 Psoxy supports specifying sanitization rule sets to use to sanitize data from an API. These can be
 configured by encoding a rule set in YAML and setting a parameter in your instance's configuration.
+See an example of rules for Zoom: [`zoom.yaml`](../sources/zoom/zoom.yaml).
 
 If such a parameter is not set, a proxy instances selects default rules based on source kind, from
-the following supported sources found in [`sources/example-rules`](sources/example-rules).
+the corresponding [supported source](../sources/).
 
 You can configure custom rule sets for a given instance via Terraform, by adding an entry to the
 `custom_api_connector_rules` map in your `terraform.tfvars` file.
