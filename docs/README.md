@@ -136,30 +136,60 @@ modules, specific instructions that you can pass to the Microsoft 365 Admin will
     <tr>
       <td>Active Directory</td>
       <td>
-        [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/directory/example-api-responses) -
-        [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/directory/directory.yaml)
+        <a href="https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/directory/example-api-responses">data</a> -
+        <a href="https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/directory/directory.yaml">rules</a>
       </td>
       <td>
-        [User.Read.All](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
-        [Group.Read.All](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall">User.Read.All</a>
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall">Group.Read.All</a>
       </td>
     </tr>
     <tr>
       <td>Calendar</td>
       <td>
-        [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/outlook-cal/example-api-responses) -
-        [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/outlook-cal/outlook-cal.yaml)
+        <a href="https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/outlook-cal/example-api-responses">data</a> -
+        <a href="https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/outlook-cal/outlook-cal.yaml">rules</a>
       </td>
       <td>
-        [User.Read.All](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
-        [Group.Read.All](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
-        [OnlineMeetings.Read.All](https://learn.microsoft.com/en-us/graph/permissions-reference#onlinemeetingsreadall)
-        [Calendars.Read](https://learn.microsoft.com/en-us/graph/permissions-reference#calendarsread)
-        [MailboxSettings.Read](https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxsettingsread)
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall">User.Read.All</a>
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall">Group.Read.All</a>
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#onlinemeetingsreadall">OnlineMeetings.Read.All</a>
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#calendarsread">Calendars.Read</a>
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxsettingsread">MailboxSettings.Read</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Mail</td>
+      <td>
+        <a href="https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/outlook-mail/example-api-responses">data</a> -
+        <a href="https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/outlook-mail/outlook-mail.yaml">rules</a>
+      </td>
+      <td>
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall">User.Read.All</a>
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall">Group.Read.All</a>
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#mailreadbasicall">Mail.ReadBasic.All</a>
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxsettingsread">MailboxSettings.Read</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Teams (<strong><em>beta</em></strong>)</td>
+      <td>
+        <a href="https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/msft-teams/example-api-responses">data</a> -
+        <a href="https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/msft-teams/msft-teams.yaml">rules</a>
+      </td>
+      <td>
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall">User.Read.All</a>
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#teamreadbasicall">Team.ReadBasic.All</a>
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#channelreadbasicall">Channel.ReadBasic.All</a>
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#chatreadall">Chat.Read.All</a>
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#channelmessagereadall">ChannelMessage.Read.All</a>
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#callrecordsreadall">CallRecords.Read.All</a>
+        <a href="https://learn.microsoft.com/en-us/graph/permissions-reference#onlinemeetingsreadall">OnlineMeetings.Read.All</a>
       </td>
     </tr>
   </tbody>
 </table>
+
 
 
 | Source&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Examples &nbsp;&nbsp;                                                                                                        | Application Scopes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
