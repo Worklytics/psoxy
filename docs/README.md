@@ -124,6 +124,44 @@ must authorize the Azure Application you provision (with [provided terraform mod
 below. This is done via the Azure Portal (Active Directory).  If you use our provided Terraform
 modules, specific instructions that you can pass to the Microsoft 365 Admin will be output for you.
 
+<table>
+  <thead>
+    <tr>
+      <th>Source</th>
+      <th>Examples</th>
+      <th>Application Scopes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Active Directory</td>
+      <td>
+        [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/directory/example-api-responses) -
+        [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/directory/directory.yaml)
+      </td>
+      <td>
+        [User.Read.All](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
+        [Group.Read.All](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
+      </td>
+    </tr>
+    <tr>
+      <td>Calendar</td>
+      <td>
+        [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/outlook-cal/example-api-responses) -
+        [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/outlook-cal/outlook-cal.yaml)
+      </td>
+      <td>
+        [User.Read.All](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
+        [Group.Read.All](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
+        [OnlineMeetings.Read.All](https://learn.microsoft.com/en-us/graph/permissions-reference#onlinemeetingsreadall)
+        [Calendars.Read](https://learn.microsoft.com/en-us/graph/permissions-reference#calendarsread)
+        [MailboxSettings.Read](https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxsettingsread)
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
 | Source&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Examples &nbsp;&nbsp;                                                                                                        | Application Scopes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 |--------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Active Directory                                                                                       | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/directory/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/directory/directory.yaml)          | [`User.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall) [`Group.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
