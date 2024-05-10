@@ -67,9 +67,7 @@ be left in development mode; it does not need to be published.
 * `report:read:list_meeting_participants:admin`
 * `report:read:meeting:admin`
 * `report:read:user:admin`
-* `user:read:pm_room:admin`
 * `user:read:user:admin`
-* `user:read:email:admin`
 * `user:read:list_users:admin`
 
     ![Scopes](scopes.png)
