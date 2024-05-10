@@ -982,24 +982,24 @@ be left in development mode; it does not need to be published.
 
 5. Fill the scopes section clicking on `+ Add Scopes` and adding the following:
 
-* `meeting:read:past_meeting:admin`
-* `meeting:read:meeting:admin`
-* `meeting:read:list_past_participants:admin`
-* `meeting:read:list_past_instances:admin`
-* `meeting:read:list_meetings:admin`
-* `meeting:read:participant:admin`
-* `report:read:list_meeting_participants:admin`
-* `report:read:meeting:admin`
-* `report:read:user:admin`
-* `user:read:pm_room:admin`
-* `user:read:user:admin`
-* `user:read:email:admin`
-* `user:read:list_users:admin`
+    * `meeting:read:past_meeting:admin`
+    * `meeting:read:meeting:admin`
+    * `meeting:read:list_past_participants:admin`
+    * `meeting:read:list_past_instances:admin`
+    * `meeting:read:list_meetings:admin`
+    * `meeting:read:participant:admin`
+    * `report:read:list_meeting_participants:admin`
+    * `report:read:meeting:admin`
+    * `report:read:user:admin`
+    * `user:read:pm_room:admin`
+    * `user:read:user:admin`
+    * `user:read:email:admin`
+    * `user:read:list_users:admin`
 
-Alternatively, the scopes: `user:read:admin`, `meeting:read:admin`, `report:read:admin` are
-sufficient, but as of May 2024 are no longer available for newly created Zoom apps.
+  Alternatively, the scopes: `user:read:admin`, `meeting:read:admin`, `report:read:admin` are
+  sufficient, but as of May 2024 are no longer available for newly created Zoom apps.
 
-Once the scopes are added, click on `Done` and then `Continue`.
+  Once the scopes are added, click on `Done` and then `Continue`.
 
 6. Activate the app
 
