@@ -28,6 +28,7 @@ be left in development mode; it does not need to be published.
 
 1. Go to https://marketplace.zoom.us/develop/create and create an app of type "Server to Server
    OAuth" for creating a server-to-server app.
+
 2. After creation, it will show the App Credentials.
 
    Copy the following values:
@@ -50,17 +51,30 @@ be left in development mode; it does not need to be published.
    _Client Secret_ should be handled according to your organization's security policies for API
    keys/secrets as, in combination with the above, allows access to your organization's data.
 
-3. Fill the information section
+3. Fill the 'Information' section. Zoom requires company name, developer name, and developer email
+   to activate the app.
 
-4. Fill the scopes section clicking on `+ Add Scopes` and adding the following:
-   - User:
-       - View all user information: `user:read:admin`. This is to be able to gather information about the zoom users.
-   - Meeting:
-       - View all user meetings: `meeting:read:admin`. That allows us to list all user meeting
-   - Report:
-       - View report data: `report:read:admin`. This is for getting last 6 months view for user meetings
-         Once the scopes are added, click on `Done` and then `Continue`.
+4. No changes are needed in the 'Features' section. Continue.
+
+5. Fill the scopes section clicking on `+ Add Scopes` and adding the following:
+
+* `meeting:read:past_meeting:admin`
+* `meeting:read:meeting:admin`
+* `meeting:read:list_past_participants:admin`
+* `meeting:read:list_past_instances:admin`
+* `meeting:read:list_meetings:admin`
+* `meeting:read:participant:admin`
+* `report:read:list_meeting_participants:admin`
+* `report:read:meeting:admin`
+* `report:read:user:admin`
+* `user:read:user:admin`
+* `user:read:list_users:admin`
 
     ![Scopes](scopes.png)
 
-5. Activate the app
+Alternatively, the scopes: `user:read:admin`, `meeting:read:admin`, `report:read:admin` are
+sufficient, but as of May 2024 are no longer available for newly created Zoom apps.
+
+Once the scopes are added, click on `Done` and then `Continue`.
+
+6. Activate the app
