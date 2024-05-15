@@ -4,12 +4,41 @@
 
 - [Microsoft 365](docs/sources/msft-365/troubleshooting.md)
 
+
+### Error: Attempted to load application default credentials (Google provider authentication failure)
+
+This is related to `gcloud` not being authenticated (or installed?) in the environment where you're
+running terraform, which the `google` terraform provider requires.
+
+If you DO NOT intend to use Google Workspace as a data source, you should do the following:
+  - remove the `google-*.tf` files from your terraform configuration
+  - remove module/local references from your `main.tf` file that referred to those files; as of
+    `v0.4.53`, there are 3 such references you must remove; you will get errors in terraform
+    commands until you remove all of them. The error messages should reference the impacted line
+    numbers.
+
+If you DO intend to use Google Workspace as a data source, you must install and authenticate the
+`gcloud` CLI and/or modify the `google` provider block in `google-workspace.tf` with your desired
+authentication details. See: [Google Terraform Provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference)
+
+
+
 ## Specific Host platforms:
 
 - [AWS](docs/aws/troubleshooting.md)
 - [GCP](docs/gcp/troubleshooting.md)
 
 ## General Tips
+
+### Verify Pre-Requisites
+
+Our example templates include a script to check for the prerequisites for running the psoxy. You
+can run this prior to `./init` to get feedback/suggestions on what prerequisites you may be missing
+and how to install them.
+
+```shell
+./check-prereqs
+```
 
 ### General Build / Packaging Failures
 
