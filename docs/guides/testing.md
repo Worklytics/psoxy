@@ -3,7 +3,7 @@
 By default, the Terraform examples provided by Worklytics install a NodeJS-based tool for testing
 your proxy deployments.
 
-Full documentation of the test tool is available [here](../../tools/psoxy-test/README.md).
+Full documentation of the test tool is available [here](psoxy-test-tool.md).
 
 ### Testing Pre-requisites
 
