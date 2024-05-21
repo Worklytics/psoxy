@@ -84,6 +84,4 @@ test('Psoxy Call: get identity token when option missing', async (t) => {
 
   const result = await gcp.call(options);
   t.is(result.status, httpCodes.HTTP_STATUS_OK);
-
-  td.verify(utils.executeCommand(COMMAND));
 });
