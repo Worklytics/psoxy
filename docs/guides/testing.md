@@ -3,7 +3,8 @@
 By default, the Terraform examples provided by Worklytics install a NodeJS-based tool for testing
 your proxy deployments.
 
-Full documentation of the test tool is available [here](../../tools/psoxy-test/README.md).
+Full documentation of the test tool is available [here](psoxy-test-tool.md). And the code is
+located in the `tools` directory of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
 ### Testing Pre-requisites
 
@@ -30,7 +31,7 @@ git clone https://github.com/Worklytics/psoxy.git
 ./tools/install-test-tool.sh
 ```
 
-3.  Get specific test commands for your deployment
+3. Get specific test commands for your deployment
 
     - If you set the `todos_as_outputs` variable to `true`, your Terraform apply run should contain
       `todo2` output variable with testing instructions.
@@ -39,6 +40,15 @@ git clone https://github.com/Worklytics/psoxy.git
 
     In both cases, you will need to replace the test tool path included there with the path to your
     installation.
+
+4. Example commands of the primary testing tool: "Psoxy Test Calls"
+
+```shell
+# GCP deployment example:
+node cli-call.js -u https://us-central1-acme.cloudfunctions.net/calendar/v3/calendars/primary -t <IDENTITY_TOKEN> -i user@acme.com
+# AWS deployment example:
+node cli-call.js -u https://acme.lambda-url.us-east-1.on.aws/v2/users -r arn:aws:iam::310635719553:role/PsoxyApiCaller
+```
 
 ### Testing Deployments made without Terraform
 

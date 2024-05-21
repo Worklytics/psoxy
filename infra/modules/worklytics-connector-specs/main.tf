@@ -182,7 +182,33 @@ locals {
     "azure-ad" : {
       worklytics_connector_id : "azure-ad-psoxy",
       source_kind : "azure-ad",
-      display_name : "Azure Directory"
+      display_name : "(Deprecated, use MSFT Entra Id instead) Azure Directory"
+      identifier_scope_id : "azure-ad"
+      source_auth_strategy : "oauth2_refresh_token"
+      target_host : "graph.microsoft.com"
+      required_oauth2_permission_scopes : [],
+      # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
+      required_app_roles : [
+        # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
+        "User.Read.All",
+        "Group.Read.All"
+      ]
+      environment_variables : {
+        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
+        REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+      },
+      example_api_calls : [
+        "/v1.0/users",
+        "/v1.0/users/${var.example_msft_user_guid}",
+        "/v1.0/groups",
+        "/v1.0/groups/{group-id}/members"
+      ]
+    },
+    "msft-entra-id" : {
+      worklytics_connector_id : "azure-ad-psoxy",
+      source_kind : "azure-ad",
+      display_name : "Microsoft Entra ID (former Azure AD)"
       identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"

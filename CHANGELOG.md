@@ -20,6 +20,11 @@ Changes to be including in future/planned release notes will be added here.
         then wildcard policy to read shared also grants read of secrets across all connectors)
   - keys/salts per value kind (PII, item id, etc)
 
+## [0.4.53]https://github.com/Worklytics/psoxy/release/tag/v0.4.53)
+  - As Microsoft Azure Active Directory has been [renamed](https://learn.microsoft.com/en-us/entra/fundamentals/new-name) 
+    to Microsoft Entra ID, there is a new connector `msft-entra-id`. Old connector `azure-ad` is deprecated and in case of 
+    new connection, the new one `msft-entra-id` should be used. 
+
 ## [0.4.52](https://github.com/Worklytics/psoxy/release/tag/v0.4.52)
   - BREAKING: default behavior for sub-addressing aka "plus addressing" of emails has changed; the
     proxy previously considered these canonically distinct. Now, the proxy will consider these
