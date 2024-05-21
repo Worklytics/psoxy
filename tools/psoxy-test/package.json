@@ -33,14 +33,12 @@
   },
   "devDependencies": {
     "ava": "^4.3.3",
-    "testdouble": "^3.16.6"
+    "testdouble": "^3.20.2"
   },
   "ava": {
     "files": [
-      "test/**/*.test.js"
-    ],
-    "nodeArguments": [
-      "--loader=testdouble"
+      "test/psoxy-test-call.test.js",
+      "test/utils.test.js"
     ]
   }
 }
