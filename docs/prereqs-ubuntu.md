@@ -1,4 +1,4 @@
-# Psoxy Prereq Install
+# Install Prerequisites
 
 These shell command examples presume Ubuntu; you may need to translate to your \*nix variant. If you
 starting with a fairly rich environment, many of these tools may already be on your machine.
@@ -83,4 +83,4 @@ gcloud auth application-default login --no-launch-browser
 
 https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
 
-You should now be ready for the general instructions in the [README.md](../../README.md).
+You should now be ready for the general instructions in the [README.md](README.md).
