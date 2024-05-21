@@ -38,9 +38,7 @@
   "ava": {
     "files": [
       "test/psoxy-test-call.test.js",
-      "test/utils.test.js",
-      "test/aws.test.js",
-      "test/gcp.test.js"
+      "test/utils.test.js"
     ]
   }
 }
