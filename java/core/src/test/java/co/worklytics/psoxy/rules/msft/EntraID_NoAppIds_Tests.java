@@ -2,7 +2,6 @@ package co.worklytics.psoxy.rules.msft;
 
 import co.worklytics.psoxy.rules.Rules2;
 import lombok.Getter;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -11,17 +10,17 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-public class Directory_NoAppIds_Tests extends DirectoryTests {
+public class EntraID_NoAppIds_Tests extends EntraIDTests {
 
     @Getter
-    final Rules2 rulesUnderTest = PrebuiltSanitizerRules.DIRECTORY_NO_MSFT_IDS;
+    final Rules2 rulesUnderTest = PrebuiltSanitizerRules.ENTRA_ID_NO_MSFT_IDS;
 
     @Getter
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
         .sourceFamily("microsoft-365")
         .defaultScopeId("azure-ad")
-        .sourceKind("directory")
-        .rulesFile("directory_no-app-ids")
+        .sourceKind("entra-id")
+        .rulesFile("entra-id_no-app-ids")
         .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-app-ids/")
         .build();
 
@@ -38,7 +37,7 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
     @Override
     @Test
     void user() {
-        String jsonString = asJson(DIRECTORY_API_EXAMPLES_PATH, "user.json");
+        String jsonString = asJson(ENTRA_ID_API_EXAMPLES_PATH, "user.json");
 
         String endpoint = "https://graph.microsoft.com/v1.0/users/p~2343adsfasdfa";
 
@@ -66,7 +65,7 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
 
     @Test
     void user_noAppIds() {
-        String jsonString = asJson(DIRECTORY_API_EXAMPLES_PATH, "user.json");
+        String jsonString = asJson(ENTRA_ID_API_EXAMPLES_PATH, "user.json");
 
         String endpoint = "https://graph.microsoft.com/v1.0/users/p~2343adsfasdfa";
 
@@ -84,7 +83,7 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
 
     @Test
     void users_noAppIds() {
-        String jsonString = asJson(DIRECTORY_API_EXAMPLES_PATH, "users.json");
+        String jsonString = asJson(ENTRA_ID_API_EXAMPLES_PATH, "users.json");
 
         String endpoint = "https://graph.microsoft.com/v1.0/users";
 
@@ -108,7 +107,7 @@ public class Directory_NoAppIds_Tests extends DirectoryTests {
     void groupMembers_noAppIds() {
         String endpoint = "https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members?$count=true";
 
-        String jsonString = asJson(DIRECTORY_API_EXAMPLES_PATH, "group-members.json");
+        String jsonString = asJson(ENTRA_ID_API_EXAMPLES_PATH, "group-members.json");
 
         Collection<String> PII = Arrays.asList(
             "87d349ed-44d7-43e1-9a83-5f2406dee5bd",
