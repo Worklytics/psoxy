@@ -126,7 +126,7 @@ variable "enabled_connectors" {
   description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
 
   default = [
-    "azure-ad",
+    "msft-entra-id",
     "dropbox-business",
     "outlook-cal",
     "outlook-mail",

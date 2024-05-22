@@ -1,6 +1,7 @@
 # Lambdas on a VPC
 
-**alpha** - this is a work in progress, and unsupported; may change in backwards incompatible ways.
+**beta** - This is now available for customer-use, but may still change in backwards incompatible
+ways.
 
 Our `aws-host` module provides a `vpc_config` variable to specify the VPC configuration for the
 lambdas that our Terraform modules will create, analogous to the
@@ -84,8 +85,6 @@ So:
 1. destroy all your lambdas (`terraform state list | grep aws_lambda_function`; then
    `terraform destroy --target=` for each, remember '' as needed)
 2. destroy the subnet `terraform destroy --target=aws_subnet.main`
-
-
 
 ## References
  - https://docs.aws.amazon.com/lambda/latest/dg/foundation-networking.html

@@ -7,7 +7,7 @@ PSOXY_BASE_DIR=$2
 DEPLOYMENT_ENV=${3:-"local"}
 HOST_PLATFORM=${4:-"aws"}
 
-SCRIPT_VERSION="v0.4.52"
+SCRIPT_VERSION="v0.4.53"
 
 if [ -z "$PSOXY_BASE_DIR" ]; then
   printf "Usage: init-tfvars.sh <path-to-terraform.tfvars> <path-to-psoxy-base-directory> [DEPLOYMENT_ENV]\n"
@@ -198,7 +198,7 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
       fi
     fi
 
-    prompt_user_Yn "Do you want to use ${BLUE}Google Workspace${NC} as a data source for your proxy instances?"
+    prompt_user_Yn "Do you want to use ${BLUE}Google Workspace${NC} as a data source? (requires ${BLUE}gcloud${NC} to be installed and authenticated in the environment from which this terraform configuration will be applied) "
 
     if [[ $? -eq 1 ]]; then
       # init google workspace variables if file exists OR the variables are in the main variables.tf file
@@ -265,7 +265,7 @@ if test $AZUREAD_PROVIDER_COUNT -ne 0; then
   MSFT_VARIABLES_DEFINED=$( [[ -f msft-365-variables.tf ]] || grep -q '^variable "msft_tenant_id"' variables.tf)
 
   if $MSFT_VARIABLES_DEFINED; then
-    prompt_user_Yn "Do you want to use ${BLUE}Microsoft 365${NC} as a data source for your proxy instances?"
+    prompt_user_Yn "Do you want to use ${BLUE}Microsoft 365${NC} as a data source? (requires ${BLUE}az${NC} CLI to be installed and authenticated in the environment from which this terraform configuration will be applied) "
 
     if [[ $? -eq 1 ]]; then
       if az --version &> /dev/null ; then

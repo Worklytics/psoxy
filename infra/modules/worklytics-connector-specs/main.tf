@@ -182,7 +182,33 @@ locals {
     "azure-ad" : {
       worklytics_connector_id : "azure-ad-psoxy",
       source_kind : "azure-ad",
-      display_name : "Azure Directory"
+      display_name : "(Deprecated, use MSFT Entra Id instead) Azure Directory"
+      identifier_scope_id : "azure-ad"
+      source_auth_strategy : "oauth2_refresh_token"
+      target_host : "graph.microsoft.com"
+      required_oauth2_permission_scopes : [],
+      # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
+      required_app_roles : [
+        # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
+        "User.Read.All",
+        "Group.Read.All"
+      ]
+      environment_variables : {
+        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
+        REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+      },
+      example_api_calls : [
+        "/v1.0/users",
+        "/v1.0/users/${var.example_msft_user_guid}",
+        "/v1.0/groups",
+        "/v1.0/groups/{group-id}/members"
+      ]
+    },
+    "msft-entra-id" : {
+      worklytics_connector_id : "azure-ad-psoxy",
+      source_kind : "azure-ad",
+      display_name : "Microsoft Entra ID (former Azure AD)"
       identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"
@@ -949,26 +975,58 @@ EOT
       ],
       external_token_todo : <<EOT
 ## Zoom Setup
-Zoom connector through Psoxy requires a custom managed app on the Zoom Marketplace (in development
-mode, no need to publish).
-1. Go to https://marketplace.zoom.us/develop/create and create an app of type "Server to Server OAuth"
-   for creating a server-to-server app.
-2. After creation it will show the App Credentials. Share them with the AWS/GCP administrator, the
-following secret values must be filled in the Secret Manager for the Proxy with the appropriate values:
-- `PSOXY_ZOOM_CLIENT_ID`
-- `PSOXY_ZOOM_ACCOUNT_ID`
-- `PSOXY_ZOOM_CLIENT_SECRET`
-Anytime the *client secret* is regenerated it needs to be updated in the Proxy too.
-3. Fill the information section
-4. Fill the scopes section clicking on `+ Add Scopes` and adding the following:
-- User:
-  - View all user information: `user:read:admin`. This is to be able to gather information about the zoom users.
-- Meeting:
-  - View all user meetings: `meeting:read:admin`. That allows us to list all user meeting
-- Report:
-  - View report data: `report:read:admin`. This is for getting last 6 months view for user meetings
-Once the scopes are added, click on `Done` and then `Continue`.
-5. Activate the app
+The Zoom connector through Psoxy requires a Custom Managed App on the Zoom Marketplace. This app may
+be left in development mode; it does not need to be published.
+
+1. Go to https://marketplace.zoom.us/develop/create and create an app of type "Server to Server
+   OAuth" for creating a server-to-server app.
+
+2. After creation, it will show the App Credentials.
+
+   Copy the following values:
+
+   - `Account ID`
+   - `Client ID`
+   - `Client Secret`
+
+   Share them with the AWS/GCP administrator, who should fill them in your host platform's secret
+   manager (AWS Systems Manager Parameter Store / GCP Secret Manager) for use by the proxy when
+   authenticating with the Zoom API:
+
+   - `Account ID` --> `PSOXY_ZOOM_ACCOUNT_ID`
+   - `Client ID` --> `PSOXY_ZOOM_CLIENT_ID`
+   - `Client Secret` --> `PSOXY_ZOOM_CLIENT_SECRET`
+
+   NOTE: Anytime the _Client Secret_ is regenerated it needs to be updated in the Proxy too. NOTE:
+   _Client Secret_ should be handled according to your organization's security policies for API
+   keys/secrets as, in combination with the above, allows access to your organization's data.
+
+3. Fill the 'Information' section. Zoom requires company name, developer name, and developer email
+   to activate the app.
+
+4. No changes are needed in the 'Features' section. Continue.
+
+5. Fill the scopes section clicking on `+ Add Scopes` and adding the following:
+
+    * `meeting:read:past_meeting:admin`
+    * `meeting:read:meeting:admin`
+    * `meeting:read:list_past_participants:admin`
+    * `meeting:read:list_past_instances:admin`
+    * `meeting:read:list_meetings:admin`
+    * `meeting:read:participant:admin`
+    * `report:read:list_meeting_participants:admin`
+    * `report:read:meeting:admin`
+    * `report:read:user:admin`
+    * `user:read:user:admin`
+    * `user:read:list_users:admin`
+
+  Alternatively, the scopes: `user:read:admin`, `meeting:read:admin`, `report:read:admin` are
+  sufficient, but as of May 2024 are no longer available for newly created Zoom apps.
+
+  Once the scopes are added, click on `Done` and then `Continue`.
+
+6. Activate the app
+
 EOT
     },
     dropbox-business = {

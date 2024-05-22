@@ -1,10 +1,10 @@
-# Using API Gateway (V2) - alpha
+# Using API Gateway (V2)
 
 Some organizations require use of API Gateway. This is not the default approach for Psoxy since AWS
 added support for Lambda Function URLs (March 2022), which are a simpler and more direct way to
 expose lambdas via HTTPS.
 
-Nonetheless, should you wish to use API Gateway we provide **alpha** support for this. It is needed
+Nonetheless, should you wish to use API Gateway we provide **beta** support for this. It is needed
 if you wish to put your Lambda functions on a VPC (See `lambdas-on-vpc.md`).
 
 In particular:
@@ -19,7 +19,7 @@ In particular:
 
 ## Usage
 
-Prequisites:
+Prerequisites:
 
 - the AWS principal (user or role) to provision API gateways. The AWS managed policy
   [`AmazonAPIGatewayAdministrator`](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AmazonAPIGatewayAdministrator.html)
