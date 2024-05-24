@@ -60,6 +60,6 @@
     * [Jira Cloud beta](sources/atlassian/jira/README.md)
       * [Jira Server / Data Center alpha](sources/atlassian/jira/jira-server.md)
 * [FAQ - Security](faq-security.md)
-
+* [Release Notes](https://github.com/Worklytics/psoxy/releases)
 
 
