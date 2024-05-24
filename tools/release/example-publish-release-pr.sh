@@ -127,8 +127,11 @@ git tag $RELEASE_NUMBER
 git push origin $RELEASE_NUMBER
 
 printf "Creating release ${BLUE}${RELEASE_NUMBER}${NC} in GitHub ...\n"
-PSOXY_RELEASE_URL=$(gh release view v${RELEASE_NUMBER} --repo ${REMOTE_MAIN_REPO_NAME} --json url | jq -r ".url")
-gh release create $RELEASE_NUMBER --title $RELEASE_NUMBER --notes "Update example to psoxy release ${RELEASE_NUMBER}\nSee: ${PSOXY_RELEASE_URL}"
+PSOXY_RELEASE_URL=$(gh release view ${RELEASE_NUMBER} --repo ${REMOTE_MAIN_REPO_NAME} --json url | jq -r ".url")
+touch /tmp/release-notes.md
+printf "Update example to psoxy release ${RELEASE_NUMBER}\nSee: ${PSOXY_RELEASE_URL}" >> /tmp/release-notes.md
+gh release create $RELEASE_NUMBER --title $RELEASE_NUMBER --notes-file /tmp/release-notes.md
+rm /tmp/release-notes.md
 
 
 
