@@ -1,5 +1,18 @@
 # Overview
 
+Psoxy is a serverless, pseudonymizing, Data Loss Prevention (DLP) layer  between Worklytics and your
+data sources. It acts as a Security / Compliance layer, which you can deploy between your data sources
+(SaaS tool APIs, Cloud storage buckets, etc) and Worklytics.
+
+Benefits include:
+  - Granular authorization on the API endpoint, parameter, and field-levels to your Sources. Eg, limit
+    Worklytics to calling ONLY an explicit subset of an APIs endpoints, with an explicit set of
+    possible parameters, and receiving ONLY a subset fields in response.
+  - no API keys for your data sources are ever sent or held by Worklytics.
+  - any PII present in your data can be pseudonymized before being sent to Worklytics
+  - sensitive data can be redacted before being sent to Worklytics
+
+
 ## Modes
 
 Psoxy can be deployed/used in 3 different modes:
