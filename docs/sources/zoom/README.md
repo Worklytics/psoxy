@@ -18,8 +18,11 @@ Accounts on unpaid plans do not have access to some methods Worklytics use like:
 ## Examples
 
 - [Example Rules](zoom.yaml)
-- Example Data : [original](example-api-responses/original) |
-  [sanitized](example-api-responses/sanitized)
+- Example Data : [original/meeting-details.json](example-api-responses/original/meeting-details.json) |
+  [sanitized/meeting-details](example-api-responses/sanitized/meeting-details.json)
+
+See more examples in the `docs/sources/zoom/example-api-responses` folder
+of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
 ## Steps to Connect
 
