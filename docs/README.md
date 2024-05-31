@@ -31,7 +31,7 @@ Objectives:
      party API and then perform minimal transformation on the response (pseudonymization, field
      redaction) to ease code review and auditing of its behavior.
 
-Psoxy may be hosted in [Google Cloud](docs/gcp/development.md) or [AWS](docs/aws/getting-started.md).
+Psoxy may be hosted in [Google Cloud](gcp/getting-started.md) or [AWS](aws/getting-started.md).
 
 ## Data Flow
 
@@ -267,8 +267,8 @@ Subsystem for Linux (WSL) platforms.
 ### Setup
 
   1. Choose the cloud platform you'll deploy to, and follow its 'Getting Started' guide:
-       - [AWS](docs/aws/getting-started.md)
-       - [Google Cloud platform](docs/gcp/getting-started.md)
+       - [AWS](aws/getting-started.md)
+       - [Google Cloud platform](gcp/getting-started.md)
 
   2. Based on that choice, pick from the example template repos below. Use your choosen option as a
      template to create a new GitHub repo, or if you're not using GitHub Cloud, create clone/fork of the choosen option in your source control
@@ -288,11 +288,11 @@ Subsystem for Linux (WSL) platforms.
         - [Google Cloud Shell](https://cloud.google.com/shell/) - if you're using GCP and/or connecting to
           Google Workspace, this is option simplifies authentication. It [includes the prereqs above](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools)
           EXCEPT aws/azure CLIs out-of-the-box.
-        - [Terraform Cloud](docs/terraform-cloud.md) - this works, but adds complexity of
+        - [Terraform Cloud](guides/terraform-cloud.md) - this works, but adds complexity of
           authenticating it with you host platform (AWS/GCP)
-        - Ubuntu Linux VM/Container - we provide some setup instructions covering [prereq installation](docs/prereqs-ubuntu.md)
+        - Ubuntu Linux VM/Container - we provide some setup instructions covering [prereq installation](prereqs-ubuntu.md)
           for Ubuntu variants of Linux, and specific authentication help for:
-          - [EC2](docs/aws/getting-started.md)
+          - [EC2](aws/getting-started.md)
 
   4. Follow the 'Setup' steps in the READMEs of those repos, ultimately running `terraform apply`
      to deploy your Psoxy instance(s).
