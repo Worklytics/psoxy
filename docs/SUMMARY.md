@@ -26,6 +26,7 @@
   * [Deployment Migration](guides/deployment-migration.md)
   * [Terraform Cloud / Enterprise](guides/terraform-cloud.md)
   * [Testing](guides/testing.md)
+  * [Upgrade Proxy Versions](guides/upgrading-versions.md)
 * [General Troubleshooting](troubleshooting.md)
 * [Configuration](configuration/README.md)
   * [API Data Sanitization](configuration/api-data-sanitization.md)
@@ -68,7 +69,7 @@
   * [Atlassian](sources/atlassian/README.md)
     * [Jira Cloud beta](sources/atlassian/jira/README.md)
       * [Jira Server / Data Center alpha](sources/atlassian/jira/jira-server.md)
-* [FAQ - Security](faq-security.md)
-* [Upgrade Proxy Versions](upgrading-versions.md)
+* [FAQ](faq-security.md)
+* [Release Notes](https://github.com/Worklytics/psoxy/releases)
 
 

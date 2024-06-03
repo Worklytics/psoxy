@@ -9,7 +9,7 @@ If you have doubts, review
 [`CHANGELOG.md`](https://github.com/Worklytics/psoxy/blob/main/CHANGELOG.md) for highlights of
 significant changes in each version; and detailed release notes for each release:
 
-https://github.com/Worklytics/psoxy/releases
+[https://github.com/Worklytics/psoxy/releases](https://github.com/Worklytics/psoxy/releases)
 
 ## Using `upgrade-terraform-modules` Script
 
