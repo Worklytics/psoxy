@@ -3,8 +3,11 @@
 ## Examples
 
 - [Example Rules](salesforce.yaml)
-- Example Data : [original](example-api-responses/original) |
-  [sanitized](example-api-responses/sanitized)
+- Example Data : [original/accounts.json](example-api-responses/original/accounts.json) |
+  [sanitized/accounts.json](example-api-responses/sanitized/accounts.json)
+
+See more examples in the `docs/sources/salesforce/example-api-responses` folder
+of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
 ## Steps to Connect
 

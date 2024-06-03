@@ -3,8 +3,11 @@
 ## Examples
 
 - [Example Rules](asana.yaml)
-- Example Data : [original](example-api-responses/original/) |
-  [sanitized](example-api-responses/sanitized/)
+- Example Data:
+  - [original/projects.json](example-api-responses/original/projects.json) |
+  [sanitized/projects.json](example-api-responses/sanitized/projects.json)
+  - [original/tasks.json](example-api-responses/original/tasks.json) |
+  [sanitized/tasks.json](example-api-responses/sanitized/tasks.json)
 
 ## Steps to Connect
 
