@@ -31,6 +31,16 @@ Objectives:
      party API and then perform minimal transformation on the response (pseudonymization, field
      redaction) to ease code review and auditing of its behavior.
 
+
+## Documentation
+
 For full documentation, visit [https://docs.worklytics.co/psoxy](https://docs.worklytics.co/psoxy).
 
 For development purposes, latest docs are also accessible at GitHub [docs/](./docs/README.md).
+
+## Support
+
+Psoxy is maintained by Worklytics, Co. Support as well as professional services to assist with
+configuration and customization are available. Please contact
+[sales@worklytics.co](mailto:sales@worklytics.co) for more information or visit
+[www.worklytics.co](https://www.worklytics.co).
