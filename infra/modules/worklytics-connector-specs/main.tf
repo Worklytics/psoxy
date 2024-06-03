@@ -27,6 +27,7 @@ locals {
     # to the Google Workspace, so may be directly connected in such scenarios.
     "gdirectory" : {
       source_kind : "gdirectory",
+      availability : "ga",
       worklytics_connector_id : "gdirectory-psoxy",
       display_name : "Google Directory"
       identifier_scope_id : "gapps"
@@ -57,6 +58,7 @@ locals {
     },
     "gcal" : {
       source_kind : "gcal",
+      availability : "ga",
       worklytics_connector_id : "gcal-psoxy",
       display_name : "Google Calendar"
       identifier_scope_id : "gapps"
@@ -80,6 +82,7 @@ locals {
     },
     "gmail" : {
       source_kind : "gmail",
+      availability : "ga",
       worklytics_connector_id : "gmail-meta-psoxy",
       display_name : "GMail"
       identifier_scope_id : "gapps"
@@ -100,6 +103,7 @@ locals {
     },
     "google-chat" : {
       source_kind : "google-chat",
+      availability : "ga",
       worklytics_connector_id : "google-chat-psoxy",
       display_name : "Google Chat"
       identifier_scope_id : "gapps"
@@ -119,6 +123,7 @@ locals {
     },
     "google-meet" : {
       source_kind : "google-meet"
+      availability : "ga",
       worklytics_connector_id : "google-meet-psoxy"
       display_name : "Google Meet"
       identifier_scope_id : "gapps"
@@ -138,6 +143,7 @@ locals {
     },
     "gdrive" : {
       source_kind : "gdrive",
+      availability : "ga",
       worklytics_connector_id : "gdrive-psoxy",
       display_name : "Google Drive"
       identifier_scope_id : "gapps"
@@ -181,6 +187,7 @@ locals {
   msft_365_connectors = {
     "azure-ad" : {
       worklytics_connector_id : "azure-ad-psoxy",
+      availability : "deprecated",
       source_kind : "azure-ad",
       display_name : "(Deprecated, use MSFT Entra Id instead) Azure Directory"
       identifier_scope_id : "azure-ad"
@@ -207,6 +214,7 @@ locals {
     },
     "msft-entra-id" : {
       worklytics_connector_id : "azure-ad-psoxy",
+      availability : "ga",
       source_kind : "azure-ad",
       display_name : "Microsoft Entra ID (former Azure AD)"
       identifier_scope_id : "azure-ad"
@@ -233,6 +241,7 @@ locals {
     },
     "outlook-cal" : {
       source_kind : "outlook-cal",
+      availability : "ga",
       worklytics_connector_id : "outlook-cal-psoxy",
       display_name : "Outlook Calendar"
       identifier_scope_id : "azure-ad"
@@ -263,6 +272,7 @@ locals {
     },
     "outlook-mail" : {
       source_kind : "outlook-mail"
+      availability : "ga",
       worklytics_connector_id : "outlook-mail-psoxy",
       display_name : "Outlook Mail"
       identifier_scope_id : "azure-ad"
@@ -291,6 +301,7 @@ locals {
     },
     "msft-teams" : {
       source_kind : "msft-teams"
+      availability : "ga",
       worklytics_connector_id : "msft-teams-psoxy",
       display_name : "Microsoft Teams"
       identifier_scope_id : "azure-ad"
@@ -373,6 +384,7 @@ EOT
   oauth_long_access_connectors = {
     asana = {
       source_kind : "asana",
+      availability : "ga",
       worklytics_connector_id : "asana-psoxy"
       display_name : "Asana"
       identifier_scope_id : "asana"
@@ -409,6 +421,7 @@ EOT
     }
     github = {
       source_kind : "github",
+      availability : "ga",
       worklytics_connector_id : "github-enterprise-psoxy"
       display_name : "Github Enterprise"
       identifier_scope_id : "github"
@@ -516,6 +529,7 @@ EOT
     }
     github-enterprise-server = {
       source_kind : "github-enterprise-server",
+      availability : "ga",
       worklytics_connector_id : "github-enterprise-server-psoxy"
       display_name : "Github Enterprise Server"
       identifier_scope_id : "github"
@@ -638,6 +652,7 @@ EOT
     }
     github-non-enterprise = {
       source_kind : "github",
+      availability : "ga",
       worklytics_connector_id : "github-free-team-psoxy"
       display_name : "Github"
       identifier_scope_id : "github"
@@ -742,6 +757,7 @@ EOT
     }
     salesforce = {
       source_kind : "salesforce",
+      availability : "ga",
       worklytics_connector_id : "salesforce-psoxy"
       display_name : "Salesforce"
       identifier_scope_id : "salesforce"
@@ -843,6 +859,7 @@ EOT
     }
     slack-discovery-api = {
       source_kind : "slack"
+      availability : "ga",
       identifier_scope_id : "slack"
       worklytics_connector_id : "slack-discovery-api-psoxy",
       worklytics_connector_name : "Slack via Psoxy",
@@ -913,6 +930,7 @@ EOT
     }
     zoom = {
       source_kind : "zoom"
+      availability : "ga",
       worklytics_connector_id : "zoom-psoxy"
       display_name : "Zoom"
       worklytics_connector_name : "Zoom via Psoxy"
@@ -1031,6 +1049,7 @@ EOT
     },
     dropbox-business = {
       source_kind : "dropbox-business"
+      availability : "deprecated",
       worklytics_connector_id : "dropbox-business-log-psoxy"
       target_host : "api.dropboxapi.com"
       source_auth_strategy : "oauth2_refresh_token"
@@ -1118,6 +1137,7 @@ EOT
     },
     jira-server = {
       source_kind : "jira-server"
+      availability : "deprecated",
       worklytics_connector_id : "jira-server-psoxy"
       target_host : var.jira_server_url
       source_auth_strategy : "oauth2_access_token"
@@ -1159,6 +1179,7 @@ EOT
     }
     jira-cloud = {
       source_kind : "jira-cloud"
+      availability : "ga"
       worklytics_connector_id : "jira-cloud-psoxy"
       target_host : "api.atlassian.com"
       source_auth_strategy : "oauth2_refresh_token"
@@ -1332,6 +1353,7 @@ EOT
   bulk_connectors = {
     "badge" = {
       source_kind               = "badge"
+      availability              = "ga"
       worklytics_connector_id   = "bulk-import-psoxy",
       worklytics_connector_name = "Bulk Data Import via Psoxy"
       rules = {
@@ -1348,6 +1370,7 @@ EOT
     }
     "hris" = {
       source_kind               = "hris"
+      availability              = "ga"
       worklytics_connector_id   = "hris-import-psoxy"
       worklytics_connector_name = "HRIS Data Import via Psoxy"
       rules = {
@@ -1366,6 +1389,7 @@ EOT
     }
     "survey" = {
       worklytics_connector_id   = "survey-import-psoxy"
+      availability              = "ga"
       source_kind               = "survey"
       worklytics_connector_name = "Survey Data Import via Psoxy"
       rules = {
@@ -1379,6 +1403,7 @@ EOT
     }
     "qualtrics" = {
       source_kind               = "qualtrics"
+      availability              = "beta"
       worklytics_connector_id   = "survey-import-psoxy"
       worklytics_connector_name = "Survey Data Import via Psoxy"
       rules = {
@@ -1396,14 +1421,21 @@ EOT
   k => merge(v, { example_calls : v.example_api_calls }) }
 
 
-  # to expose via console
-  # eg, `echo "local.available_connector_ids" | terraform console` will print this
-  available_connector_ids = keys(merge(
+  all_connectors =  merge(
     local.google_workspace_sources,
     local.msft_365_connectors,
     local.oauth_long_access_connectors,
     local.bulk_connectors,
-  ))
+  )
+
+  ga_connectors = {
+    for k, v in local.all_connectors : k => v if v.availability == "ga"
+  }
+
+  # to expose via console
+  # eg, `echo "local.available_connector_ids" | terraform console` will print this
+  # used via `tools/init-tfvars.sh` script, as default values for `enabled_connectors` variable
+  available_connector_ids = keys(local.ga_connectors)
 
 }
 
