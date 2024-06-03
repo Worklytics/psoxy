@@ -310,7 +310,7 @@ AVAILABLE_CONNECTORS=$(echo "local.available_connector_ids" | terraform -chdir="
 rm -rf "${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs/.terraform" 2> /dev/null
 rm "${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs/.terraform.lock.hcl" 2> /dev/null
 
-if [ -z $AVAILABLE_CONNECTORS ]; then
+if [ -z "$AVAILABLE_CONNECTORS" ]; then
   printf "${RED}Failed to generate list of enabled_connectors${NC}; you will need to add an variable assigned for ${BLUE}enabled_connectors${NC} to your ${BLUE}terraform.tfvars${NC} as a list of connector ID strings. Contact support for assistance.\n"
 else
   printf "# review following list of connectors to enable, and comment out what you don't want\n" >> $TFVARS_FILE
