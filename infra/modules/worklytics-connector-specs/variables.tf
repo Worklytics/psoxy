@@ -15,6 +15,18 @@ variable "google_workspace_example_admin" {
   default     = null # will failover to user
 }
 
+variable "include_msft" {
+  type        = bool
+  description = "whether to include Microsoft 365 connectors by default"
+  default     = true
+}
+
+variable "include_google_workspace" {
+  type        = bool
+  description = "whether to include Google Workspace connectors by default"
+  default     = true
+}
+
 variable "msft_tenant_id" {
   type        = string
   description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
