@@ -31,5 +31,6 @@ Objectives:
      party API and then perform minimal transformation on the response (pseudonymization, field
      redaction) to ease code review and auditing of its behavior.
 
-For full documentation, visit [https://docs.worklytics.co/psoxy](https://docs.worklytics.co/psoxy)
-or [`docs/`](./docs/README.md).
+For full documentation, visit [https://docs.worklytics.co/psoxy](https://docs.worklytics.co/psoxy).
+
+For development purposes, latest docs are also accessible at GitHub [docs/](./docs/README.md).
