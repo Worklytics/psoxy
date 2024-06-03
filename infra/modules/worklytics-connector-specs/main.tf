@@ -1156,12 +1156,12 @@ EOT
     },
     jira-server = {
       source_kind : "jira-server"
-      availability : "deprecated",
+      availability : "ga",
       enable_by_default : false
       worklytics_connector_id : "jira-server-psoxy"
       target_host : var.jira_server_url
       source_auth_strategy : "oauth2_access_token"
-      display_name : "Jira Server REST API"
+      display_name : "Jira Data Center"
       identifier_scope_id : "jira"
       worklytics_connector_name : "Jira Server REST API via Psoxy"
       secured_variables : [
