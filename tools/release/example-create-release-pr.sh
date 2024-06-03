@@ -170,7 +170,19 @@ if command -v gh &> /dev/null; then
   PR_URL=$(gh pr create --title "update to \`${RELEASE_TAG}\`" --body "update to proxy release https://github.com/Worklytics/psoxy/releases/tag/${RELEASE_TAG}" --assignee "@me")
   printf "created PR ${BLUE}${PR_URL}${NC}\n"
   PR_NUMBER=$(gh pr view $PR_URL --json number | jq -r ".number")
-  gh pr comment $PR_NUMBER --body "when ready, from your Psoxy checkout, run \`./tools/release/example-publish-release-pr.sh $EXAMPLE_TEMPLATE_REPO $PR_NUMBER\`"
+  # Generate a random file name for the comment body file
+  COMMENT_BODY_FILE="/tmp/comment-body-file-$(uuidgen).md"
+
+  # Create and write to the comment body file
+  {
+    echo "🛑 Stop! Do not merge manually.🛑"
+    echo "Tooling will merge it for you. When ready, from your Psoxy checkout, run:"
+    echo "\`./tools/release/example-publish-release-pr.sh $EXAMPLE_TEMPLATE_REPO $PR_NUMBER\`"
+  } >> "$COMMENT_BODY_FILE"
+
+  # Add the comment to the PR
+  gh pr comment "$PR_NUMBER" --body-file "$COMMENT_BODY_FILE"
+  rm "$COMMENT_BODY_FILE"
   gh pr view $PR_URL --web
 fi
 

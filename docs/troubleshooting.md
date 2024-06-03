@@ -2,7 +2,7 @@
 
 ## Specific Data Sources
 
-- [Microsoft 365](docs/sources/msft-365/troubleshooting.md)
+- [Microsoft 365](sources/microsoft-365/README.md)
 
 
 ### Error: Attempted to load application default credentials (Google provider authentication failure)
@@ -25,8 +25,8 @@ authentication details. See: [Google Terraform Provider](https://registry.terraf
 
 ## Specific Host platforms:
 
-- [AWS](docs/aws/troubleshooting.md)
-- [GCP](docs/gcp/troubleshooting.md)
+- [AWS](aws/troubleshooting.md)
+- [GCP](gcp/troubleshooting.md)
 
 ## General Tips
 

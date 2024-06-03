@@ -3,8 +3,13 @@
 ## Examples
 
 - [Example Rules](discovery.yaml)
-- Example Data : [original](example-api-responses/original) |
-  [sanitized](example-api-responses/sanitized)
+- [Example Rules: bulk](discovery-bulk.yaml)
+- [Example Rules: bulk hierarchical](discovery-bulk-hierarchical.yaml)
+- Example Data : [original/discovery-conversations-history.json](example-api-responses/original/discovery-conversations-history.json) |
+  [sanitized/discovery-conversations-history.json](example-api-responses/sanitized/discovery-conversations-history.json)
+
+See more examples in the `docs/sources/slack/example-api-responses` folder
+of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
 ## Steps to Connect
 

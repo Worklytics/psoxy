@@ -83,32 +83,32 @@ fi
 # check status of PR
 PR_STATUS=$(gh pr view $PR_NUMBER --json state | jq -r '.state')
 if [ "$PR_STATUS" != "OPEN" ]; then
-  printf "PR ${BLUE}${PR_NUMBER}${NC} is not open. Exiting.\n"
-  exit 1
+  printf "PR ${BLUE}${PR_NUMBER}${NC} is not open. Continuing with cutting release from ${BLUE}main${NC}, presuming it's already merged.\n"
+else
+  # check if PR is mergeable
+  PR_MERGEABLE=$(gh pr view $PR_NUMBER --json mergeable | jq -r '.mergeable')
+  if [ "$PR_MERGEABLE" != "MERGEABLE" ]; then
+    printf "${RED}PR ${PR_NUMBER} is not mergeable. Exiting.${NC}\n"
+    exit 1
+  fi
+
+  # confirm all status checks succeeded
+  PR_CHECKS_PASSED=$(gh pr view $PR_NUMBER --json statusCheckRollup | jq 'all(.statusCheckRollup[]; .conclusion == "SUCCESS")')
+  if [ "$PR_CHECKS_PASSED" != "true" ]; then
+    printf "${RED}PR ${PR_NUMBER} does not have all status checks passing. Exiting.${NC}\n"
+    printf "Here are the status checks that failed:\n"
+    gh pr view $PR_NUMBER --json statusCheckRollup | jq '.statusCheckRollup[] | select(.conclusion == "FAILURE")'
+    exit 1
+  fi
+
+  # merge the PR to main
+  printf "Merging PR ${BLUE}${PR_NUMBER}${NC} to main ...\n"
+  gh pr merge $PR_NUMBER --delete-branch --squash
 fi
 
-# check if PR is mergeable
-PR_MERGEABLE=$(gh pr view $PR_NUMBER --json mergeable | jq -r '.mergeable')
-if [ "$PR_MERGEABLE" != "MERGEABLE" ]; then
-  printf "${RED}PR ${PR_NUMBER} is not mergeable. Exiting.${NC}\n"
-  exit 1
-fi
-
-# confirm all status checks succeeded
-PR_CHECKS_PASSED=$(gh pr view $PR_NUMBER --json statusCheckRollup | jq 'all(.statusCheckRollup[]; .conclusion == "SUCCESS")')
-if [ "$PR_CHECKS_PASSED" != "true" ]; then
-  printf "${RED}PR ${PR_NUMBER} does not have all status checks passing. Exiting.${NC}\n"
-  printf "Here are the status checks that failed:\n"
-  gh pr view $PR_NUMBER --json statusCheckRollup | jq '.statusCheckRollup[] | select(.conclusion == "FAILURE")'
-  exit 1
-fi
-
-# merge the PR to main
-printf "Merging PR ${BLUE}${PR_NUMBER}${NC} to main ...\n"
-gh pr merge $PR_NUMBER --delete-branch --squash
 
 # ensure `main` up-to-date with origin
-printf "Ensuring local main branch is up-to-date with origin ...\n"
+printf "Ensuring local ${BLUE}main${NC} branch is up-to-date with origin ...\n"
 if git fetch origin main --dry-run | grep -q 'up to date'; then
       echo "The local main branch is up to date with origin/main."
   else
@@ -127,8 +127,11 @@ git tag $RELEASE_NUMBER
 git push origin $RELEASE_NUMBER
 
 printf "Creating release ${BLUE}${RELEASE_NUMBER}${NC} in GitHub ...\n"
-PSOXY_RELEASE_URL=$(gh release view v${RELEASE_NUMBER} --repo ${REMOTE_MAIN_REPO_NAME} --json url | jq -r ".url")
-gh release create $RELEASE_NUMBER --title $RELEASE_NUMBER --notes "Update example to psoxy release ${RELEASE_NUMBER}\nSee: ${PSOXY_RELEASE_URL}"
+PSOXY_RELEASE_URL=$(gh release view ${RELEASE_NUMBER} --repo ${REMOTE_MAIN_REPO_NAME} --json url | jq -r ".url")
+touch /tmp/release-notes.md
+printf "Update example to psoxy release ${RELEASE_NUMBER}\nSee: ${PSOXY_RELEASE_URL}" >> /tmp/release-notes.md
+gh release create $RELEASE_NUMBER --title $RELEASE_NUMBER --notes-file /tmp/release-notes.md
+rm /tmp/release-notes.md
 
 
 
