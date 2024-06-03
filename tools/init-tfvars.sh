@@ -169,7 +169,7 @@ remove_google_workspace() {
   sed -i '' '/^[[:space:]]*module\.worklytics_connectors_google_workspace\.next_todo_step,[[:space:]]*$/d' main.tf
 }
 
-
+INCLUDE_GWS="false"
 GOOGLE_PROVIDER_COUNT=$(terraform providers | grep "${TOP_LEVEL_PROVIDER_PATTERN}/google" | wc -l)
 if test $GOOGLE_PROVIDER_COUNT -ne 0; then
   if gcloud --version &> /dev/null ; then
@@ -201,6 +201,7 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
     prompt_user_Yn "Do you want to use ${BLUE}Google Workspace${NC} as a data source? (requires ${BLUE}gcloud${NC} to be installed and authenticated in the environment from which this terraform configuration will be applied) "
 
     if [[ $? -eq 1 ]]; then
+      INCLUDE_GWS="true"
       # init google workspace variables if file exists OR the variables are in the main variables.tf file
       # (google_workspace_gcp_project_id not in all legacy examples)
       [[ -f google-workspace-variables.tf ]] || grep -q '^variable "google_workspace_gcp_project_id"' variables.tf
@@ -260,6 +261,7 @@ remove_msft() {
 
 # Microsoft 365
 AZUREAD_PROVIDER_COUNT=$(terraform providers | grep "${TOP_LEVEL_PROVIDER_PATTERN}/azuread" | wc -l)
+INCLUDE_MSFT="false"
 if test $AZUREAD_PROVIDER_COUNT -ne 0; then
   printf "AzureAD provider in Terraform configuration.\n"
   MSFT_VARIABLES_DEFINED=$( [[ -f msft-365-variables.tf ]] || grep -q '^variable "msft_tenant_id"' variables.tf)
@@ -283,6 +285,7 @@ if test $AZUREAD_PROVIDER_COUNT -ne 0; then
         printf "#  - if you're not connecting to Microsoft 365 data sources, you can omit this value\n" >> $TFVARS_FILE
         printf "msft_owners_email=[\n  \"${MSFT_USER_EMAIL}\"\n]\n\n" >> $TFVARS_FILE
         printf "\tmsft_owners_email=${BLUE}[ \"${MSFT_USER_EMAIL}\" ]${NC}\n"
+        INCLUDE_MSFT="true"
       else
         printf "${RED}az not available${NC}. Microsoft 365 variables cannot be initialized.\n"
       fi
@@ -304,13 +307,14 @@ fi
 # init worklytics-connector-specs module as if it's a terraform config, so subsequent 'console' call
 # will work
 terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" init >> /dev/null
-AVAILABLE_CONNECTORS=$(echo "local.available_connector_ids" | terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" console)
+CLI_VARS="-var=include_msft=${INCLUDE_MSFT} -var=include_google_workspace=${INCLUDE_GWS}"
+AVAILABLE_CONNECTORS=$(echo "local.default_enabled_connector_ids" | terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" console $CLI_VARS)
 
 # clean up what the init did above
 rm -rf "${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs/.terraform" 2> /dev/null
 rm "${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs/.terraform.lock.hcl" 2> /dev/null
 
-if [ -z $AVAILABLE_CONNECTORS ]; then
+if [ -z "$AVAILABLE_CONNECTORS" ]; then
   printf "${RED}Failed to generate list of enabled_connectors${NC}; you will need to add an variable assigned for ${BLUE}enabled_connectors${NC} to your ${BLUE}terraform.tfvars${NC} as a list of connector ID strings. Contact support for assistance.\n"
 else
   printf "# review following list of connectors to enable, and comment out what you don't want\n" >> $TFVARS_FILE
