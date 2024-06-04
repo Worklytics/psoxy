@@ -178,7 +178,7 @@ locals {
   k => merge(v, { example_calls : v.example_api_calls }) }
 
 
-  jira_cloud_id                    = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
+  jira_example_cloud_id                    = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   jira_example_issue_id            = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
   github_installation_id           = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
   github_enterprise_server_host    = coalesce(var.github_api_host, var.github_enterprise_server_host, "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
@@ -1246,26 +1246,25 @@ EOT
         USE_SHARED_TOKEN : "TRUE"
       }
       settings_to_provide = {
-        "Jira Cloud Id" = local.jira_cloud_id
       }
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/oauth/token/accessible-resources", # obtain Jira Cloud ID from here
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/users",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/users",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/group/bulk",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/search?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/comment?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/users",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/group/bulk",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/search?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/comment?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/project/search?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/users",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/users",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/group/bulk",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/search?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/comment?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/users",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/group/bulk",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/search?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/comment?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/project/search?maxResults=25",
       ],
       external_token_todo : <<EOT
 ## Prerequisites
@@ -1366,7 +1365,7 @@ And following granular scopes:
 
   Add the `id` value from that JSON response as the value of the `jira_cloud_id` variable in the
   `terraform.tfvars` file of your Terraform configuration. This will generate all the test URLs with
-  a proper value and it will populate the right value for setting up the configuration.
+  proper value for targeting a valid Jira Cloud instance.
 EOT
     }
   }
