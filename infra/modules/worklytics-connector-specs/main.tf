@@ -369,16 +369,23 @@ Please follow the steps below:
 
 **NOTE**: About the role, can be assigned through Entra Id portal in Azure portal OR in Entra Admin center https://admin.microsoft.com/AdminPortal/Home. It is possible that even login with an admin account in Entra Admin Center the Teams role is not available to assign to any user; if so, please do it through Azure Portal (Entra Id -> Users -> Assign roles)
 
-2. Install [PowerShell Teams](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install) module.
-3. Run the following commands in Powershell terminal:
+2. Install [PowerShell Teams](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install)  You can use `pwsh` in the terminal
+    enter to PowerShell.
+3. Then, run the following command. It will open a browser window for login to Microsoft Teams. After login, close the browser and return to the terminal.
+   Please choose the user who has the "Teams Administrator" role.
 ```shell
 Connect-MicrosoftTeams
 ```
-And use the user with the "Teams Administrator" for login it.
 
 4. Follow steps on [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
   - Add a policy for the application created for the connector, providing its `application id`
+```shell
+New-CsApplicationAccessPolicy -Identity Teams-Policy-For-Worklytics -AppIds "%%entraid.application_id%%" -Description "Policy for MSFT Teams used for Worklytics Psoxy connector"
+```
   - Grant the policy to the whole tenant (NOT to any specific application or user)
+```shell
+Grant-CsApplicationAccessPolicy -PolicyName Teams-Policy-For-Worklytics -Global
+```
 
 **Issues**:
 - If you receive "access denied" is because no admin role for Teams has been detected. Please close and reopen the Powershell terminal after assigning the role.

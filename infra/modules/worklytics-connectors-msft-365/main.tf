@@ -68,7 +68,7 @@ resource "local_file" "todo-with-external-todo" {
   for_each = local.todos_to_populate
 
   filename = module.msft_365_grants[each.key].filename
-  content  = format("%s\n## Setup\nThen, please follow next instructions for complete the setup: \n\n%s", module.msft_365_grants[each.key].todo, each.value.external_token_todo)
+  content  = format("%s\n## Setup\nThen, please follow next instructions for complete the setup: \n\n%s", module.msft_365_grants[each.key].todo, replace(each.value.external_token_todo, "%%entraid.application_id%%", module.msft_connection[each.key].connector.application_id))
 }
 
 locals {
