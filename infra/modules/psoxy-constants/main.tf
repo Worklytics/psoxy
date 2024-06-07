@@ -300,13 +300,19 @@ locals {
         Resource : "arn:aws:logs:*:${local.account_id_resource_pattern}:log-group:/aws/lambda/${module.env_id.id}*"
       },
       {
+        Sid : "SSMParameterAccessAccountLevel",
+        Effect : "Allow",
+        Action : [
+          "ssm:DescribeParameters",
+        ]
+      },
+      {
         Sid : "SSMParameterAccess",
         Effect : "Allow",
         Action : [
           "ssm:AddTagsToResource",
           "ssm:DeleteParameter",
           "ssm:DeleteParameters",
-          "ssm:DescribeParameters",
           "ssm:GetParameter",
           "ssm:GetParameterHistory",
           "ssm:GetParameters",
@@ -332,10 +338,35 @@ locals {
           "lambda:DeleteFunction",
           "lambda:GetFunction",
           "lambda:GetFunctionConfiguration",
+          "lambda:GetEventSourceMapping",
+          "lambda:GetFunctionEventInvokeConfig",
+          "lambda:GetFunctionConcurrency",
+          "lambda:GetProvisionedConcurrencyConfig",
+
+          "lambda:ListVersionsByFunction",
+          "lambda:ListProvisionedConcurrencyConfigs",
+          "lambda:PutFunctionConcurrency",
+          "lambda:PutFunctionEventInvokeConfig",
+          "lambda:PutProvisionedConcurrencyConfig",
+          "lambda:RemovePermission",
+
           # "lambda:InvokeFunction",
           "lambda:ListFunctions",
           "lambda:UpdateFunctionCode",
-          "lambda:UpdateFunctionConfiguration"
+          "lambda:UpdateFunctionConfiguration",
+          "lambda:UpdateEventSourceMapping",
+          "lambda:DeleteEventSourceMapping",
+          "lambda:DeleteFunctionEventInvokeConfig",
+          "lambda:DeleteFunctionConcurrency",
+
+
+          # can drop these if using API gateway stuff
+          "lambda:GetFunctionUrlConfig",
+          "lambda:ListFunctionUrlConfigs",
+          "lambda:UpdateFunctionUrlConfig",
+          "lambda:DeleteFunctionUrlConfig",
+          "lambda:CreateFunctionUrlConfig",
+
         ]
         Resource = "arn:aws:lambda:*:${local.account_id_resource_pattern}:function:${module.env_id.id}*"
       }
