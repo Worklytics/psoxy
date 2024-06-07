@@ -11,7 +11,7 @@ block supported by the AWS lambda terraform resource.
 Some caveats:
 
 - API connectors on a VPC must be exposed via [API Gateway](https://aws.amazon.com/api-gateway/)
-  rather than [Function URLs](https://docs.aws.amazon.com/lambda/latest/dg/lambda-urls.html)
+  rather than [Function URLs](https://docs.aws.amazon.com/lambda/latest/dg/lambda-urls.html) (our Terraform modules will make this change for you).
 - VPC *must* be configured such that your lambda has connectivity to AWS services including S3, SSM,
   and CloudWatch Logs; this is typically done by adding a [VPC Endpoint](https://docs.aws.amazon.com/vpc/latest/userguide/vpce-gateway.html)
   for each service.
@@ -20,7 +20,8 @@ Some caveats:
 - VPC *must* allow your API gateway to connect to your lambdas.
 
 The requirements above MAY require you to modify your VPC configuration, and/or the security groups
-to support proxy deployment.
+to support proxy deployment.  The example we provide in our [`vpc.tf`](https://github.com/Worklytics/psoxy-example-aws/blob/main/vpc.tf)
+should fulfill this if you adapt it; or you can use it as a reference to adapt you existing VPC.
 
 To put the lambdas created by our terraform example under a VPC, please follow one of the approaches
 documented in the next sections.
@@ -44,9 +45,9 @@ module "psoxy" {
 ## Usage - with `vpc.tf`
 
 If you don't have a pre-existing VPC, you wish to use, our [aws example repo](https://github.com/Worklytics/psoxy-example-aws)
-includes `vpc.tf` file at the top-level. This file has a bunch of commented-out terraform resource
-blocks that can serve as examples for creating the minimal VPC + associated infra.  Review and
-uncomment to meet your use-case.
+includes [`vpc.tf`](https://github.com/Worklytics/psoxy-example-aws/blob/main/vpc.tf) file at the
+top-level. This file has a bunch of commented-out terraform resource blocks that can serve as
+examples for creating the minimal VPC + associated infra.  Review and uncomment to meet your use-case.
 
 Prerequisites:
 
