@@ -1,3 +1,11 @@
+
+module "env_id" {
+  source = "../../modules/env-id"
+
+  environment_name = var.environment_name
+}
+
+
 locals {
 
   # AWS Managed polices
@@ -15,6 +23,324 @@ locals {
     "arn:aws:iam::aws:policy/AmazonCognitoPowerUser" = "AmazonCognitoPowerUser"
   }
 
+  # TODO: could restrict in future, but this is implicit
+  account_id_resource_pattern = "*"
+
+  aws_least_privileged_policy= jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+          # subset of iam:* that we actually need
+          # "iam:AddUserToGroup",
+          # "iam:AttachGroupPolicy",
+          "iam:AttachRolePolicy",
+          # "iam:AttachUserPolicy",
+          # "iam:CreateAccessKey",
+          # "iam:CreateAccountAlias",
+          # "iam:CreateGroup",
+          # "iam:CreateInstanceProfile",
+          # "iam:CreateLoginProfile",
+          "iam:CreatePolicy",
+          "iam:CreatePolicyVersion",
+          "iam:CreateRole",
+          # "iam:CreateSAMLProvider",
+          # "iam:CreateServiceLinkedRole",
+          # "iam:CreateServiceSpecificCredential",
+          # "iam:CreateUser",
+          # "iam:CreateVirtualMFADevice",
+          # "iam:DeactivateMFADevice",
+          # "iam:DeleteAccessKey",
+          # "iam:DeleteAccountAlias",
+          # "iam:DeleteAccountPasswordPolicy",
+          # "iam:DeleteGroup",
+          # "iam:DeleteGroupPolicy",
+          # "iam:DeleteInstanceProfile",
+          # "iam:DeleteLoginProfile",
+          "iam:DeletePolicy",
+          "iam:DeletePolicyVersion",
+          "iam:DeleteRole",
+          "iam:DeleteRolePermissionsBoundary",
+          "iam:DeleteRolePolicy",
+          # "iam:DeleteSAMLProvider",
+          # "iam:DeleteSSHPublicKey",
+          # "iam:DeleteServerCertificate",
+          # "iam:DeleteServiceLinkedRole",
+          # "iam:DeleteServiceSpecificCredential",
+          # "iam:DeleteSigningCertificate",
+          # "iam:DeleteUser",
+          # "iam:DeleteUserPermissionsBoundary",
+          # "iam:DeleteUserPolicy",
+          # "iam:DeleteVirtualMFADevice",
+          # "iam:DetachGroupPolicy",
+          "iam:DetachRolePolicy",
+          # "iam:DetachUserPolicy",
+          # "iam:EnableMFADevice",
+          # "iam:GenerateCredentialReport",
+          # "iam:GenerateOrganizationsAccessReport",
+          # "iam:GenerateServiceLastAccessedDetails",
+          # "iam:GetAccessKeyLastUsed",
+          # "iam:GetAccountAuthorizationDetails",
+          # "iam:GetAccountPasswordPolicy",
+          # "iam:GetAccountSummary",
+          # "iam:GetContextKeysForCustomPolicy",
+          # "iam:GetContextKeysForPrincipalPolicy",
+          # "iam:GetCredentialReport",
+          # "iam:GetGroup",
+          # "iam:GetGroupPolicy",
+          # "iam:GetInstanceProfile",
+          # "iam:GetLoginProfile",
+          "iam:GetOpenIDConnectProvider",
+          # "iam:GetOrganizationsAccessReport",
+          "iam:GetPolicy",
+          "iam:GetPolicyVersion",
+          "iam:GetRole",
+          "iam:GetRolePolicy",
+          # "iam:GetSAMLProvider",
+          # "iam:GetSSHPublicKey",
+          # "iam:GetServerCertificate",
+          # "iam:GetServiceLastAccessedDetails",
+          # "iam:GetServiceLastAccessedDetailsWithEntities",
+          # "iam:GetServiceLinkedRoleDeletionStatus",
+          # "iam:GetUser",
+          # "iam:GetUserPolicy",
+          # "iam:ListAccessKeys",
+          # "iam:ListAccountAliases",
+          # "iam:ListAttachedGroupPolicies",
+          "iam:ListAttachedRolePolicies",
+          # "iam:ListAttachedUserPolicies",
+          # "iam:ListEntitiesForPolicy",
+          # "iam:ListGroupPolicies",
+          # "iam:ListGroups",
+          # "iam:ListGroupsForUser",
+          # "iam:ListInstanceProfiles",
+          # "iam:ListInstanceProfilesForRole",
+          # "iam:ListMFADevices",
+          "iam:ListOpenIDConnectProviders",
+          "iam:ListPolicies",
+          "iam:ListPoliciesGrantingServiceAccess",
+          "iam:ListPolicyVersions",
+          "iam:ListRolePolicies",
+          "iam:ListRoles",
+          # "iam:ListSAMLProviders",
+          # "iam:ListSSHPublicKeys",
+          # "iam:ListServerCertificates",
+          # "iam:ListServiceSpecificCredentials",
+          # "iam:ListSigningCertificates",
+          # "iam:ListUserPolicies",
+          # "iam:ListUsers",
+          # "iam:ListVirtualMFADevices",
+          # "iam:PassRole",
+          # "iam:PutGroupPolicy",
+          "iam:PutRolePermissionsBoundary",
+          "iam:PutRolePolicy",
+          # "iam:PutUserPermissionsBoundary",
+          # "iam:PutUserPolicy",
+          "iam:RemoveClientIDFromOpenIDConnectProvider",
+          # "iam:RemoveRoleFromInstanceProfile",
+          # "iam:RemoveUserFromGroup",
+          # "iam:ResetServiceSpecificCredential",
+          # "iam:ResyncMFADevice",
+          "iam:SetDefaultPolicyVersion",
+          # "iam:SetSecurityTokenServicePreferences",
+          # "iam:SimulateCustomPolicy",
+          # "iam:SimulatePrincipalPolicy",
+          # "iam:TagInstanceProfile",
+          # "iam:TagMFADevice",
+          "iam:TagOpenIDConnectProvider",
+          "iam:TagPolicy",
+          "iam:TagRole",
+          "iam:TagSAMLProvider",
+          # "iam:TagServerCertificate",
+          # "iam:TagUser",
+          # "iam:UntagInstanceProfile",
+          # "iam:UntagMFADevice",
+          "iam:UntagOpenIDConnectProvider",
+          "iam:UntagPolicy",
+          "iam:UntagRole",
+          # "iam:UntagSAMLProvider",
+          # "iam:UntagServerCertificate",
+          # "iam:UntagUser",
+          # "iam:UpdateAccessKey",
+          # "iam:UpdateAccountPasswordPolicy",
+          "iam:UpdateAssumeRolePolicy",
+          # "iam:UpdateGroup",
+          # "iam:UpdateLoginProfile",
+          "iam:UpdateOpenIDConnectProviderThumbprint",
+          "iam:UpdateRole",
+          "iam:UpdateRoleDescription",
+          # "iam:UpdateSAMLProvider",
+          # "iam:UpdateSSHPublicKey",
+          # "iam:UpdateServerCertificate",
+          # "iam:UpdateServiceSpecificCredential",
+          # "iam:UpdateSigningCertificate",
+          # "iam:UpdateUser",
+          # "iam:UploadSSHPublicKey",
+          # "iam:UploadServerCertificate",
+          # "iam:UploadSigningCertificate",
+        ]
+        Resource = [
+          "arn:aws:iam::${local.account_id_resource_pattern}:policy/${module.env_id.id}*",
+          "arn:aws:iam::${local.account_id_resource_pattern}:role/${module.env_id.id}*"
+        ]
+      },
+      {
+        Sid    = "OrganizationsRead"
+        Effect = "Allow"
+        Action = [
+          "organizations:DescribeAccount",
+          "organizations:DescribeOrganization",
+          "organizations:DescribeOrganizationalUnit",
+          "organizations:DescribePolicy",
+          "organizations:ListChildren",
+          "organizations:ListParents",
+          "organizations:ListPolicies",
+          "organizations:ListPoliciesForTarget",
+          "organizations:ListRoots",
+          "organizations:ListTargetsForPolicy"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = [
+          # subset of s3:* that we actually need
+          "s3:AbortMultipartUpload",
+          "s3:CreateBucket",
+          "s3:DeleteBucket",
+          "s3:DeleteBucketPolicy",
+          "s3:DeleteObject",
+          "s3:DeleteObjectTagging",
+          "s3:DeleteObjectVersion",
+          "s3:DeleteObjectVersionTagging",
+          # "s3:GetAccelerateConfiguration",
+          # "s3:GetAnalyticsConfiguration",
+          "s3:GetBucketAcl",
+          "s3:GetBucketCORS",
+          "s3:GetBucketLocation",
+          "s3:GetBucketLogging",
+          "s3:GetBucketNotification",
+          "s3:GetBucketObjectLockConfiguration",
+          "s3:GetBucketPolicy",
+          "s3:GetBucketPolicyStatus",
+          "s3:GetBucketPublicAccessBlock",
+          "s3:GetBucketRequestPayment",
+          "s3:GetBucketTagging",
+          "s3:GetBucketVersioning",
+          # "s3:GetBucketWebsite",
+          "s3:GetEncryptionConfiguration",
+          # "s3:GetInventoryConfiguration",
+          "s3:GetLifecycleConfiguration",
+          # "s3:GetMetricsConfiguration",
+          "s3:GetObject",
+          "s3:GetObjectAcl",
+          # "s3:GetObjectLegalHold",
+          "s3:GetObjectRetention",
+          "s3:GetObjectTagging",
+          # "s3:GetObjectTorrent",
+          "s3:GetObjectVersion",
+          "s3:GetObjectVersionAcl",
+          "s3:GetObjectVersionForReplication",
+          "s3:GetObjectVersionTagging",
+          # "s3:GetObjectVersionTorrent",
+          # "s3:GetReplicationConfiguration",
+          # "s3:ListAllMyBuckets",
+          # "s3:ListBucket",
+          # "s3:ListBucketByTags",
+          # "s3:ListBucketMultipartUploads",
+          # "s3:ListBucketVersions",
+          # "s3:ListMultipartUploadParts",
+          # "s3:PutAccelerateConfiguration",
+          # "s3:PutAnalyticsConfiguration",
+          "s3:PutBucketAcl",
+          "s3:PutBucketCORS",
+          "s3:PutBucketLogging",
+          "s3:PutBucketNotification",
+          "s3:PutBucketObjectLockConfiguration",
+          "s3:PutBucketPolicy",
+          "s3:PutBucketPublicAccessBlock",
+          # "s3:PutBucketRequestPayment",
+          "s3:PutBucketTagging",
+          "s3:PutBucketVersioning",
+          # "s3:PutBucketWebsite",
+          "s3:PutEncryptionConfiguration",
+          # "s3:PutInventoryConfiguration",
+          "s3:PutLifecycleConfiguration",
+          # "s3:PutMetricsConfiguration",
+          "s3:PutObject"
+        ]
+        Resource = [
+          "arn:aws:s3::${local.account_id_resource_pattern}:${module.env_id.id}*",
+          "arn:aws:s3::${local.account_id_resource_pattern}:${module.env_id.id}*/*"
+        ]
+      },
+      {
+        Sid:    "CloudWatchLogsAccess",
+        Effect: "Allow",
+        Action: [
+          "logs:CreateLogGroup",
+          "logs:DeleteLogGroup",
+          "logs:DescribeLogGroups",
+          # "logs:DescribeLogStreams",
+          # "logs:PutLogEvents",
+          # "logs:DeleteLogStream",
+          # "logs:CreateLogStream",
+          "logs:PutRetentionPolicy",
+          "logs:DeleteRetentionPolicy",
+          "logs:DescribeResourcePolicies",
+          # "logs:DescribeSubscriptionFilters",
+          # "logs:PutSubscriptionFilter",
+          # "logs:DeleteSubscriptionFilter",
+          "logs:PutResourcePolicy",
+          "logs:DeleteResourcePolicy",
+          "logs:TagLogGroup",
+          "logs:UntagLogGroup"
+        ],
+        Resource: "arn:aws:logs:*:${local.account_id_resource_pattern}:log-group:/aws/lambda/${module.env_id.id}*"
+      },
+      {
+        Sid:    "SSMParameterAccess",
+        Effect: "Allow",
+        Action: [
+          "ssm:AddTagsToResource",
+          "ssm:DeleteParameter",
+          "ssm:DeleteParameters",
+          "ssm:DescribeParameters",
+          "ssm:GetParameter",
+          "ssm:GetParameterHistory",
+          "ssm:GetParameters",
+          "ssm:GetParametersByPath",
+          "ssm:GetResourcePolicies",
+          "ssm:LabelParameterVersion",
+          "ssm:ListTagsForResource",
+          "ssm:PutParameter",
+          "ssm:PutResourcePolicy",
+          "ssm:RemoveTagsFromResource",
+          "ssm:UnlabelParameterVersion",
+        ],
+        Resource: "arn:aws:ssm:*:${local.account_id_resource_pattern}:parameter/${module.env_id.id}*"
+      },
+      {
+        Sid      = "LambdaAccess"
+        Effect   = "Allow"
+        Action   = [
+          # subset of lambda:* that we actually need
+          "lambda:AddPermission",
+          "lambda:CreateFunction",
+          "lambda:DeleteFunction",
+          "lambda:GetFunction",
+          "lambda:GetFunctionConfiguration",
+          # "lambda:InvokeFunction",
+          "lambda:ListFunctions",
+          "lambda:UpdateFunctionCode",
+          "lambda:UpdateFunctionConfiguration"
+        ]
+        Resource = "arn:aws:lambda:*:${local.account_id_resource_pattern}:function:${module.env_id.id}*"
+      }
+    ]
+  })
+
   # subset of https://docs.aws.amazon.com/aws-managed-policy/latest/reference/SecretsManagerReadWrite.html
   # as that seems like overkill
   #  - if you're going to use KMS to encrypt the secrets, then you'll need to add the KMS permissions
@@ -27,10 +353,33 @@ locals {
       {
         "Effect" : "Allow",
         "Action" : [
-          "secretsmanager:*",
-          "tag:GetResources"
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret",
+          "secretsmanager:ListSecrets",
+          "secretsmanager:ListSecretVersionIds",
+          "secretsmanager:GetResourcePolicy",
+          "secretsmanager:ListTagsForResource",
+          # "secretsmanager:GetRandomPassword",
+          "secretsmanager:CreateSecret",
+          "secretsmanager:UpdateSecret",
+          "secretsmanager:DeleteSecret",
+          "secretsmanager:PutSecretValue",
+          "secretsmanager:RestoreSecret",
+          "secretsmanager:ReplicateSecretToRegions",
+          "secretsmanager:RemoveRegionsFromReplication",
+          "secretsmanager:TagResource",
+          "secretsmanager:UntagResource",
+          # "secretsmanager:RotateSecret",
+          # "secretsmanager:CancelRotateSecret",
+          "secretsmanager:UpdateSecretVersionStage",
+          # "secretsmanager:ModifyRotationRules",
+          # "secretsmanager:RotateImmediately",
+          # "secretsmanager:PutResourcePolicy",
+          # "secretsmanager:DeleteResourcePolicy",
+          # "secretsmanager:ValidateResourcePolicy",
+          "secretsmanager:StopReplicationToReplica"
         ],
-        "Resource" : "*"
+        "Resource": "arn:aws:secretsmanager:*:*:secret:${module.env_id.id}*"
       }
     ]
   }
