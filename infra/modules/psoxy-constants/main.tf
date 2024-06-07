@@ -246,7 +246,7 @@ locals {
           # "s3:GetObjectVersionTorrent",
           "s3:GetReplicationConfiguration",
           # "s3:ListAllMyBuckets",
-          # "s3:ListBucket",
+          "s3:ListBucket", # don't love this, but seems needed
           # "s3:ListBucketByTags",
           # "s3:ListBucketMultipartUploads",
           # "s3:ListBucketVersions",
