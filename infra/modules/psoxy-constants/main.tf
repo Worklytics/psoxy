@@ -244,7 +244,7 @@ locals {
           "s3:GetObjectVersionForReplication",
           "s3:GetObjectVersionTagging",
           # "s3:GetObjectVersionTorrent",
-          # "s3:GetReplicationConfiguration",
+          "s3:GetReplicationConfiguration",
           # "s3:ListAllMyBuckets",
           # "s3:ListBucket",
           # "s3:ListBucketByTags",
