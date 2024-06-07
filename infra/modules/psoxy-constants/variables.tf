@@ -1,6 +1,8 @@
 variable "environment_name" {
   type        = string
   description = "friendly qualifier to distinguish resources created by this terraform configuration other Terraform deployments, (eg, 'prod', 'dev', etc)"
+  default     = "psoxy"
+
 
   validation {
     condition     = can(regex("^[a-zA-Z][a-zA-Z0-9-_ ]*[a-zA-Z0-9]$", var.environment_name))
