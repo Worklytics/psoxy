@@ -22,16 +22,40 @@ Some caveats:
 The requirements above MAY require you to modify your VPC configuration, and/or the security groups
 to support proxy deployment.
 
+To put the lambdas created by our terraform example under a VPC, please follow one of the approaches
+documented in the next sections.
+
+## Usage - Bring-your-own VPC
+If you have an existing VPC, you can use it with the `vpc_config` variable by hard coding the ids
+of the pre-existing resources (provisioned outside the scope of your proxy's terraform configuration).
+
+```hcl
+module "psoxy" {
+  # lines above omitted ...
+
+  vpc_config = {
+    vpc_id             = "vpc-0a1b2c3d4e5f67890"
+    security_group_ids = ["sg-0a1b2c3d4e5f67890"]
+    subnet_ids         = ["subnet-0a1b2c3d4e5f67890"]
+  }
+}
+```
+
 ## Usage - with `vpc.tf`
 
-Prequisites:
+If you don't have a pre-existing VPC, you wish to use, our [aws example repo](https://github.com/Worklytics/psoxy-example-aws)
+includes `vpc.tf` file at the top-level. This file has a bunch of commented-out terraform resource
+blocks that can serve as examples for creating the minimal VPC + associated infra.  Review and
+uncomment to meet your use-case.
+
+Prerequisites:
 
 - the AWS principal (user or role) you're using to run Terraform must have permissions to manage
   VPCs, subnets, and security groups. The AWS managed policy `AmazonVPCFullAccess` provides this.
 - all pre-requisites for the api-gateways (see [api-gateway.md](./api-gateway.md))
 
 NOTE: if you provide `vpc_config`, the value you pass for `use_api_gateway_v2` will be ignored;
-using a VPC **requires** API Gateway v2.
+using a VPC **requires** API Gateway v2, so will override value of this flag to `true`.
 
 Add the following to "psoxy" module in your `main.tf` (or uncomment if already present):
 
