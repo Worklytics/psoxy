@@ -26,12 +26,12 @@ locals {
   # TODO: could restrict in future, but this is implicit
   account_id_resource_pattern = "*"
 
-  aws_least_privileged_policy= jsonencode({
+  aws_least_privileged_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = [
+        Effect = "Allow"
+        Action = [
           # subset of iam:* that we actually need
           # "iam:AddUserToGroup",
           # "iam:AttachGroupPolicy",
@@ -203,8 +203,8 @@ locals {
         Resource = "*"
       },
       {
-        Effect   = "Allow"
-        Action   = [
+        Effect = "Allow"
+        Action = [
           # subset of s3:* that we actually need
           "s3:AbortMultipartUpload",
           "s3:CreateBucket",
@@ -276,9 +276,9 @@ locals {
         ]
       },
       {
-        Sid:    "CloudWatchLogsAccess",
-        Effect: "Allow",
-        Action: [
+        Sid : "CloudWatchLogsAccess",
+        Effect : "Allow",
+        Action : [
           "logs:CreateLogGroup",
           "logs:DeleteLogGroup",
           "logs:DescribeLogGroups",
@@ -297,12 +297,12 @@ locals {
           "logs:TagLogGroup",
           "logs:UntagLogGroup"
         ],
-        Resource: "arn:aws:logs:*:${local.account_id_resource_pattern}:log-group:/aws/lambda/${module.env_id.id}*"
+        Resource : "arn:aws:logs:*:${local.account_id_resource_pattern}:log-group:/aws/lambda/${module.env_id.id}*"
       },
       {
-        Sid:    "SSMParameterAccess",
-        Effect: "Allow",
-        Action: [
+        Sid : "SSMParameterAccess",
+        Effect : "Allow",
+        Action : [
           "ssm:AddTagsToResource",
           "ssm:DeleteParameter",
           "ssm:DeleteParameters",
@@ -319,12 +319,12 @@ locals {
           "ssm:RemoveTagsFromResource",
           "ssm:UnlabelParameterVersion",
         ],
-        Resource: "arn:aws:ssm:*:${local.account_id_resource_pattern}:parameter/${module.env_id.id}*"
+        Resource : "arn:aws:ssm:*:${local.account_id_resource_pattern}:parameter/${module.env_id.id}*"
       },
       {
-        Sid      = "LambdaAccess"
-        Effect   = "Allow"
-        Action   = [
+        Sid    = "LambdaAccess"
+        Effect = "Allow"
+        Action = [
           # subset of lambda:* that we actually need
           "lambda:AddPermission",
           "lambda:CreateFunction",
@@ -379,7 +379,7 @@ locals {
           # "secretsmanager:ValidateResourcePolicy",
           "secretsmanager:StopReplicationToReplica"
         ],
-        "Resource": "arn:aws:secretsmanager:*:*:secret:${module.env_id.id}*"
+        "Resource" : "arn:aws:secretsmanager:*:*:secret:${module.env_id.id}*"
       }
     ]
   }

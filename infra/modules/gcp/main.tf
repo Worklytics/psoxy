@@ -43,7 +43,7 @@ resource "google_project_service" "gcp_infra_api" {
   # but even is present in the documentation (https://registry.terraform.io/providers/hashicorp/google/4.80.0/docs/resources/artifact_registry_repository#argument-reference)
   # when applied it throws an error with the message: "An argument named "cleanup_policy_dry_run" is not expected here"
   # and "no block for cleanup_policies" is expected
-  *//*cleanup_policy_dry_run = false
+  */ /*cleanup_policy_dry_run = false
 
   # https://cloud.google.com/artifact-registry/docs/repositories/cleanup-policy#json_2
   # https://registry.terraform.io/providers/hashicorp/google/4.80.0/docs/resources/artifact_registry_repository#argument-reference
@@ -54,7 +54,7 @@ resource "google_project_service" "gcp_infra_api" {
     most_recent_versions {
       keep_count = 3
     }
-  }*//*
+  }*/ /*
 
   depends_on = [
     google_project_service.gcp_infra_api

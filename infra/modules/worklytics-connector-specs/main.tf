@@ -1446,7 +1446,7 @@ EOT
   k => merge(v, { example_calls : v.example_api_calls }) }
 
 
-  all_default_connectors =  merge(
+  all_default_connectors = merge(
     local.google_workspace_sources,
     local.msft_365_connectors,
     local.oauth_long_access_connectors,
@@ -1454,7 +1454,7 @@ EOT
   )
 
   default_ga_connectors = {
-    for k, v in local.all_default_connectors : k => v if (
+    for k, v in local.all_default_connectors : k => v if(
       v.availability == "ga"
       && v.enable_by_default
       # either GWS included, or NOT a gws-connector
