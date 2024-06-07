@@ -110,7 +110,7 @@ locals {
           # "iam:ListAttachedGroupPolicies",
           "iam:ListAttachedRolePolicies",
           # "iam:ListAttachedUserPolicies",
-          # "iam:ListEntitiesForPolicy",
+          "iam:ListEntitiesForPolicy",
           # "iam:ListGroupPolicies",
           # "iam:ListGroups",
           # "iam:ListGroupsForUser",
