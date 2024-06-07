@@ -339,6 +339,7 @@ locals {
           "lambda:AddPermission",
           "lambda:CreateFunction",
           "lambda:DeleteFunction",
+          "lambda:GetPolicy",
           "lambda:GetFunction",
           "lambda:GetFunctionConfiguration",
           "lambda:GetEventSourceMapping",
