@@ -345,6 +345,7 @@ locals {
           "lambda:GetFunctionEventInvokeConfig",
           "lambda:GetFunctionConcurrency",
           "lambda:GetProvisionedConcurrencyConfig",
+          "lambda:GetFunctionCodeSigningConfig",
 
           "lambda:ListVersionsByFunction",
           "lambda:ListProvisionedConcurrencyConfigs",
