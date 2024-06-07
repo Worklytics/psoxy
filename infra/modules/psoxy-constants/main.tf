@@ -131,7 +131,7 @@ locals {
           # "iam:ListUserPolicies",
           # "iam:ListUsers",
           # "iam:ListVirtualMFADevices",
-          # "iam:PassRole",
+          "iam:PassRole", # seems required to attach roles to Lambda functions
           # "iam:PutGroupPolicy",
           "iam:PutRolePermissionsBoundary",
           "iam:PutRolePolicy",
