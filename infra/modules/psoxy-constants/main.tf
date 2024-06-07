@@ -319,7 +319,8 @@ locals {
           "ssm:RemoveTagsFromResource",
           "ssm:UnlabelParameterVersion",
         ],
-        Resource : "arn:aws:ssm:*:${local.account_id_resource_pattern}:parameter/${module.env_id.id}*"
+        # convention here that SSM parameters are prefixed with the environment name
+        Resource : "arn:aws:ssm:*:${local.account_id_resource_pattern}:parameter/${upper(module.env_id.id)}*"
       },
       {
         Sid    = "LambdaAccess"
