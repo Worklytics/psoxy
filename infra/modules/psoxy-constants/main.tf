@@ -297,7 +297,11 @@ locals {
           "logs:TagLogGroup",
           "logs:UntagLogGroup"
         ],
-        Resource : "arn:aws:logs:*:${local.account_id_resource_pattern}:log-group:/aws/lambda/${module.env_id.id}*"
+        Resource : [
+          "arn:aws:logs:*:${local.account_id_resource_pattern}:log-group:/aws/lambda/${module.env_id.id}*",
+          # seems how needed for initial log groups; uses 'logs:DescribeLogGroups' to enumerate streams, it seems
+          "arn:aws:logs:*:${local.account_id_resource_pattern}:log-group::log-stream*",
+        ]
       },
       {
         # seems this needed by Terraform on account-level; avoids error like the following:
