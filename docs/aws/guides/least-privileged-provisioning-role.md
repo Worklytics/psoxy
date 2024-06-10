@@ -1,6 +1,7 @@
 # Least Privileged Provisioning Role
 
-**alpha** - *as of v0.4.55, this is not fully tested*
+**beta** - we're not committed that maintaining this under versioning policy; minor proxy iterations
+*may* require changes to privileges required in the least-privileged role.
 
 This is a guide about how to create a role for provisioning psoxy infrastructure in AWS, following
 the principle of least-privilege at permission-level, rather than policy-level.
