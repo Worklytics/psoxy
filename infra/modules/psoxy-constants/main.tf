@@ -294,6 +294,7 @@ locals {
           # "logs:DeleteSubscriptionFilter",
           "logs:PutResourcePolicy",
           "logs:DeleteResourcePolicy",
+          "logs:ListTagsLogGroup",
           "logs:TagLogGroup",
           "logs:UntagLogGroup"
         ],
