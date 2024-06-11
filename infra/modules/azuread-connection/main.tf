@@ -13,7 +13,11 @@ terraform {
 data "azuread_application_published_app_ids" "well_known" {}
 
 data "azuread_service_principal" "msgraph" {
-  client_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
+  # Deprecated since 2.44.0:
+  # https://registry.terraform.io/providers/hashicorp/azuread/2.44.0/docs/data-sources/service_principal
+  application_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
+  # Uncomment when azuread version is bumped to 2.44.0 or greater
+  # client_id      = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
 }
 
 resource "azuread_application" "connector" {
