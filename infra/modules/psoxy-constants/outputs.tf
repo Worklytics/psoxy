@@ -29,3 +29,8 @@ output "required_azuread_roles_to_provision_msft_365_source" {
   value       = local.required_azuread_roles_to_provision_msft_365_source
   description = "The Azure AD roles required to provision OAuth Client(s) needed to use Microsoft 365 as a data source via Psoxy"
 }
+
+output "aws_least_privileged_policy" {
+  value       = local.aws_least_privileged_policy
+  description = "ALPHA! YMMV. Least-privileged AWS policy to permit proxy provisioning/deployment. As of v0.4.55, use as basis for a policy; not yet tested for all deployment scenarios."
+}
