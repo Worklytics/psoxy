@@ -44,6 +44,10 @@ endpoints:
         encoding: "JSON"
   - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
     transforms:
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
       - !<redact>
         jsonPaths:
           - "$..owners"
