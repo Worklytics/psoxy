@@ -96,6 +96,7 @@ public class PrebuiltSanitizerRules {
 
     static final Endpoint ENTRA_ID_GROUPS = Endpoint.builder()
             .pathRegex("^/(v1.0|beta)/groups/?[^/]*")
+            .transform(PSEUDONYMIZE_PROXY_ADDRESSES)
             .transform(Transform.Redact.builder()
                     .jsonPath("$..owners")
                     .jsonPath("$..rejectedSenders")
