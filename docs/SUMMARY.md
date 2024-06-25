@@ -13,6 +13,7 @@
   * [Protips](aws/protips.md)
   * [Guides](aws/guides/README.md)
     * [Using API Gateway](aws/guides/api-gateway.md)
+    * [Using AWS Secrets Manager](aws/guides/secrets-manager.md)
     * [Lambdas on a VPC](aws/guides/lambdas-on-vpc.md)
     * [Least-Privileged Provisioning Role](aws/guides/least-privileged-provisioning-role.md)
   * [AWS Troubleshooting](aws/troubleshooting.md)
