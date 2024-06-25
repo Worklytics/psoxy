@@ -40,12 +40,19 @@ module "google_workspace_connection" {
   todo_step                    = var.todo_step
 }
 
+locals {
+  service_accounts_for_which_to_provision_keys = var.provision_gcp_sa_keys ? {
+    for k, v in module.worklytics_connector_specs.enabled_google_workspace_connectors :
+    k => module.google_workspace_connection[k].service_account_id
+  } : {}
+}
+
 module "google_workspace_connection_auth" {
-  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
+  for_each = local.service_accounts_for_which_to_provision_keys
 
   source = "../../modules/gcp-sa-auth-key"
 
-  service_account_id = module.google_workspace_connection[each.key].service_account_id
+  service_account_id = each.value
 }
 
 
@@ -60,10 +67,10 @@ locals {
         [
           {
             name                = "SERVICE_ACCOUNT_KEY"
-            value               = module.google_workspace_connection_auth[k].key_value
+            value               = try(module.google_workspace_connection_auth[k].key_value, "fill me")
             writable            = false
             sensitive           = true
-            value_managed_by_tf = true
+            value_managed_by_tf = var.provision_gcp_sa_keys
             description         = "The API key for the GCP Service Account that is the OAuth Client for accessing the Google Workspace APIs used by the ${k} connector."
           }
         ]
