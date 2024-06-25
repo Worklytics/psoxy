@@ -45,6 +45,9 @@ locals {
     for k, v in module.worklytics_connector_specs.enabled_google_workspace_connectors :
     k => module.google_workspace_connection[k].service_account_id
   } : {}
+
+  # TODO: in scenario where we're not provisioning keys, we should create TODO files for customer
+  # (but we don't know the secret store or secret ID  at this point)
 }
 
 module "google_workspace_connection_auth" {
