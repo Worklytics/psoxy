@@ -19,6 +19,7 @@ module "worklytics_connectors_google_workspace" {
   gcp_project_id                 = var.google_workspace_gcp_project_id
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin
+  provision_gcp_sa_keys          = var.google_workspace_provision_keys
   todos_as_local_files           = var.todos_as_local_files
 }
 

@@ -40,12 +40,44 @@ module "google_workspace_connection" {
   todo_step                    = var.todo_step
 }
 
+locals {
+
+  key_creation_todos = {
+    for id, connection in module.google_workspace_connection :
+    id => templatefile("${path.module}/gcp-sa-key-create-todo.tftpl", { gcp_project_id : var.gcp_project_id, gcp_service_account : connection.service_account_email, secret_prefix : connection.instance_id })
+  }
+
+  todos = [for id, connection in module.google_workspace_connection :
+    var.provision_gcp_sa_keys ? connection.todo : "${local.key_creation_todos[id]}\n${connection.todo}"
+  ]
+
+  current_todo_step = try(max(values(module.google_workspace_connection)[*].next_todo_step...), var.todo_step)
+  next_todo_step    = var.provision_gcp_sa_keys ? local.current_todo_step : local.current_todo_step + 1
+
+  service_accounts_tf_managed_keys = var.provision_gcp_sa_keys ? {
+    for k, v in module.worklytics_connector_specs.enabled_google_workspace_connectors :
+    k => module.google_workspace_connection[k].service_account_id
+  } : {}
+
+  service_accounts_user_managed_keys = var.provision_gcp_sa_keys ? {} : {
+    for k, v in module.worklytics_connector_specs.enabled_google_workspace_connectors :
+    k => module.google_workspace_connection[k].service_account_id
+  }
+}
+
+resource "local_file" "todo_gcp_sa_key_creation" {
+  for_each = var.todos_as_local_files ? local.service_accounts_user_managed_keys : {}
+
+  filename = "TODO ${local.current_todo_step} - Create Key for ${each.key}.md"
+  content  = local.key_creation_todos[each.key]
+}
+
 module "google_workspace_connection_auth" {
-  for_each = module.worklytics_connector_specs.enabled_google_workspace_connectors
+  for_each = local.service_accounts_tf_managed_keys
 
   source = "../../modules/gcp-sa-auth-key"
 
-  service_account_id = module.google_workspace_connection[each.key].service_account_id
+  service_account_id = each.value
 }
 
 
@@ -60,10 +92,10 @@ locals {
         [
           {
             name                = "SERVICE_ACCOUNT_KEY"
-            value               = module.google_workspace_connection_auth[k].key_value
+            value               = try(module.google_workspace_connection_auth[k].key_value, "fill me")
             writable            = false
             sensitive           = true
-            value_managed_by_tf = true
+            value_managed_by_tf = var.provision_gcp_sa_keys
             description         = "The API key for the GCP Service Account that is the OAuth Client for accessing the Google Workspace APIs used by the ${k} connector."
           }
         ]

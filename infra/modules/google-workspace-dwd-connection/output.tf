@@ -1,3 +1,7 @@
+output "instance_id" {
+  value = var.instance_id
+}
+
 output "service_account_id" {
   value = google_service_account.connector_sa.id
 }
