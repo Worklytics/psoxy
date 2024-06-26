@@ -264,3 +264,27 @@ Alternatively, you can remove the environment variable from your instance, and i
 
 This approach is useful for testing, but note that if you later run `terraform apply` again, any
 changes you make to the environment variable may be overwritten by Terraform.
+
+
+### Troubleshooting
+
+If you encounter issues processing your files, check the logs of the Psoxy instance. The logs will
+give some indication of what went wrong, and may help you identify the issue.
+
+#### Error: java.lang.IllegalArgumentException: Mapping for employee_id not found
+
+**Causes**: The column specified in `columnsToPseudonymize` is not present in the input data or contains
+empty values. Any column specified in `columnsToPseudonymize` must be present in the input data.
+
+**Solution**: Regenerate your input file removing empty values for mandatory columns.
+
+#### Error: java.lang.OutOfMemoryError
+
+**Causes**: The file size is too large for the Psoxy instance to process, likely in AWS Lambda in proxy
+versions prior to v0.4.54.
+
+**Solutions:**
+1. Use compression in the file (see [Compression](#compression)); if already compressed, then:
+2. Split the file into smaller files and process them separately
+3. (AWS only) Update the proxy version to v0.4.55 or later
+4. (AWS only) If in v0.4.55 or later, process the files one by one or increase the ephemeral storage allocated to the Lambda function (see https://aws.amazon.com/blogs/aws/aws-lambda-now-supports-up-to-10-gb-ephemeral-storage/)
