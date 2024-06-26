@@ -4,6 +4,7 @@ import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.PseudonymizerImplFactory;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
+import co.worklytics.psoxy.utils.ProcessingBuffer;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
@@ -15,13 +16,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.*;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -32,7 +31,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.TriConsumer;
 import org.apache.commons.lang3.function.TriFunction;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -40,10 +38,10 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -81,14 +79,23 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     public void sanitize(@NonNull Reader reader,
                          @NonNull Writer writer,
                          @NonNull Pseudonymizer pseudonymizer) throws IOException {
-
+/*
+        CSVParser records = CSVFormat.DEFAULT
+            .builder()
+            .setHeader().setSkipHeaderRecord(true)
+            .setDelimiter(rules.getDelimiter())
+            .setAutoFlush(true)
+            .setIgnoreHeaderCase(true)
+            .setTrim(true)
+            .build().parse(reader);
+*/
         CSVParser records = CSVFormat
-                .DEFAULT
-                .withDelimiter(rules.getDelimiter())
-                .withFirstRecordAsHeader()
-                .withIgnoreHeaderCase()
-                .withTrim()
-                .parse(reader);
+            .DEFAULT
+            .withDelimiter(rules.getDelimiter())
+            .withFirstRecordAsHeader()
+            .withIgnoreHeaderCase()
+            .withTrim()
+            .parse(reader);
 
         Preconditions.checkArgument(records.getHeaderMap() != null, "Failed to parse header from file");
 
@@ -294,6 +301,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         CSVFormat csvFormat = CSVFormat.Builder.create()
             .setHeader(columnNamesForOutputFile.toArray(new String[0]))
             .setRecordSeparator(records.getFirstEndOfLine())
+            .setNullString("")
             .build();
 
         // create an empty record to fill with the transformed values, ensuring all rows have
@@ -304,57 +312,72 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         columnNamesForOutputFile.forEach(h -> newRecord.put(h, null));
 
         try (CSVPrinter printer = new CSVPrinter(writer, csvFormat)) {
-            UnmodifiableIterator<List<CSVRecord>> chunks =
-                Iterators.partition(records.iterator(), this.getRecordShuffleChunkSize());
 
-            for (UnmodifiableIterator<List<CSVRecord>> chunkIterator = chunks; chunkIterator.hasNext(); ) {
-                List<CSVRecord> chunk = new ArrayList<>(chunkIterator.next());
+            ProcessingBuffer<ProcessedRecord> buffer = getRecordsProcessingBuffer(printer);
 
-                shuffleImplementation.apply(chunk).forEach(record -> {
+            for (CSVRecord record : records) {
+                // clean up the record prior to use
+                newRecord.replaceAll((k, v) -> null);
+                newRecord.keySet().forEach(h -> {
 
-                    // clean up the record prior to use
-                    newRecord.replaceAll((k, v) -> null);
-                    newRecord.keySet().forEach(h -> {
-
-                        Pair<String, List<Function<String, Optional<String>>>> transforms = columnTransforms.getOrDefault(h, null);
-                        if (transforms == null) {
-                            newRecord.put(h, null);
-                        } else {
-                            // apply all transformations in insertion order
-                            // key holds the original column
-                            String v = record.get(transforms.getKey());
-                            if (StringUtils.isNotBlank(v)) {
-                                for (Function<String, Optional<String>> transform : transforms.getValue()) {
-                                    v = transform.apply(v).orElse(null);
-                                }
-                                newRecord.put(h, v);
-                            } else {
-                                newRecord.put(h, null);
+                    Pair<String, List<Function<String, Optional<String>>>> transforms = columnTransforms.getOrDefault(h, null);
+                    if (transforms == null) {
+                        newRecord.put(h, null);
+                    } else {
+                        // apply all transformations in insertion order
+                        // key holds the original column
+                        String v = record.get(transforms.getKey());
+                        if (StringUtils.isNotBlank(v)) {
+                            for (Function<String, Optional<String>> transform : transforms.getValue()) {
+                                v = transform.apply(v).orElse(null);
                             }
+                            newRecord.put(h, v);
+                        } else {
+                            newRecord.put(h, null);
                         }
-
-                    });
-
-                    try {
-                        printer.printRecord(newRecord.values());
-                    } catch (Throwable e) {
-                        throw new RuntimeException("Failed to write row", e);
                     }
+
                 });
 
+                buffer.addAndAttemptFlush(ProcessedRecord.of(Lists.newArrayList(newRecord.values())));
             }
-            writer.flush();
+            buffer.flush();
         }
     }
 
-    private UnaryOperator<List<CSVRecord>> shuffleImplementation = (List<CSVRecord> l) -> {
+    private ProcessingBuffer<ProcessedRecord> getRecordsProcessingBuffer(final CSVPrinter printer) {
+        Consumer<Collection<ProcessedRecord>> printRecords = (Collection<ProcessedRecord> recordsToPrint) -> {
+            try {
+                // we control instantiation, so we can safely cast w/o checking instance of
+                // every chunk. We shuffle the records before printing them
+                System.out.println("recordsToPrint: " + recordsToPrint);
+                shuffleImplementation.apply((List<ProcessedRecord>) recordsToPrint);
+                for (ProcessedRecord record : recordsToPrint) {
+                    printer.printRecord(record.getValues());
+                }
+                printer.flush();
+            } catch (Throwable e) {
+                throw new RuntimeException("Failed to write row", e);
+            }
+        };
+
+        return new ProcessingBuffer<>(this.getRecordShuffleChunkSize(), printRecords);
+    }
+
+    @Value
+    @RequiredArgsConstructor(staticName = "of")
+    private static class ProcessedRecord {
+        Collection<String> values;
+    }
+
+    private UnaryOperator<List<?>> shuffleImplementation = (List<?> l) -> {
         Collections.shuffle(l);
         return l;
     };
 
     @VisibleForTesting
     void makeShuffleDeterministic() {
-        this.shuffleImplementation = (List<CSVRecord> l) -> {
+        this.shuffleImplementation = (List<?> l) -> {
             Collections.reverse(l);
             return l;
         };
