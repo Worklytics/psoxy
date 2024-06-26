@@ -331,11 +331,11 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                 });
 
                 if (buffer.addAndAttemptFlush(ProcessedRecord.of(Lists.newArrayList(newRecord.values())))) {
-                    log.info(String.format("Processed records: %.2f%%", (double) records.getRecordNumber()*100/buffer.getProcessed()));
+                    log.info(String.format("Processed records: %d", buffer.getProcessed()));
                 };
             }
             if (buffer.flush()) {
-                log.info(String.format("Processed records: %.2f%%", (double) records.getRecordNumber()*100/buffer.getProcessed()));
+                log.info(String.format("Processed records: %d", buffer.getProcessed()));
             }
         }
     }
