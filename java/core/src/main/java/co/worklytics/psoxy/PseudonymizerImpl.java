@@ -39,6 +39,7 @@ public class PseudonymizerImpl implements Pseudonymizer {
 
     Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
 
+    //TODO: what if options conflict w dependencies??
     @Getter
     ConfigurationOptions options;
 

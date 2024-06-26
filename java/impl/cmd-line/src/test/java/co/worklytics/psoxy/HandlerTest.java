@@ -25,34 +25,17 @@ import static org.mockito.Mockito.when;
 public class HandlerTest {
 
 
-    @Singleton
-    @Component(modules = {
-        PsoxyModule.class,
-        ForPlaceholderRules.class,
-        TestModules.ForConfigService.class,
-        TestModules.ForSecretStore.class,
-    })
-    public interface Container {
-        void inject(HandlerTest test);
-    }
-
-
-    @Inject
     Handler handler;
-
-    @Module
-    public interface ForPlaceholderRules {
-        @Provides
-        @Singleton
-        static ColumnarRules ruleSet() {
-            return mock(ColumnarRules.class);
-        }
-    }
 
     @BeforeEach
     public void setup() {
-        Container container = DaggerHandlerTest_Container.create();
-        container.inject(this);
+        String[] args = new String[]{"--salt", "salt", "--pseudonymize", "email"};
+
+
+        CmdLineContainer container = DaggerCmdLineContainer.builder()
+            .cmdLineModule(new CmdLineModule(args))
+            .build();
+        handler = container.fileHandler();
 
         ColumnarRules csvRules = ColumnarRules.builder()
             .build();
@@ -84,11 +67,7 @@ public class HandlerTest {
 
         StringWriter s = new StringWriter();
 
-
-
         handler.sanitize(config, inputFile, s);
-
-
         assertEquals(EXPECTED, s.toString());
     }
 

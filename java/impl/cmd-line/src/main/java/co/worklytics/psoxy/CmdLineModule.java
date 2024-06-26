@@ -2,45 +2,64 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.impl.BlindlyOptimisticLockService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
+import java.io.File;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-@Module
-public interface CmdLineModule {
+@NoArgsConstructor
+@AllArgsConstructor
+@Module(
+   includes = CmdLineModule.Bindings.class
+)
+public class CmdLineModule {
 
-    @Binds
-    ConfigService configService(EnvVarsConfigService impl);
 
-    @Binds
-    LockService lockService(BlindlyOptimisticLockService impl);
+    String[] args;
+
 
     @Provides @Singleton
-    static SecretStore secretStore(EnvVarsConfigService envVarsConfigService) {
+    ConfigService configService(CommandLineConfigServiceFactory factory) {
+        return factory.create(args);
+    }
 
-        //proxy to env vars
-        return new SecretStore() {
-            @Override
-            public void putConfigProperty(ConfigProperty property, String value) {
-                throw new UnsupportedOperationException("Not implemented");
-            }
+    @Provides @Singleton
+    SecretStore secretStore(CommandLineConfigServiceFactory factory) {
+        return factory.create(args);
+    }
 
-            @Override
-            public String getConfigPropertyOrError(ConfigProperty property) {
-                return envVarsConfigService.getConfigPropertyOrError(property);
-            }
 
-            @Override
-            public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
-                return envVarsConfigService.getConfigPropertyAsOptional(property);
-            }
-        };
+    @Module
+    interface Bindings {
+
+        @Binds
+        LockService lockService(BlindlyOptimisticLockService impl);
+
     }
 
 }
