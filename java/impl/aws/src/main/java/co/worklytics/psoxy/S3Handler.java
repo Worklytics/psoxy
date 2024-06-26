@@ -90,8 +90,6 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         try (InputStream fileInputStream = new FileInputStream(tmpFile);
             BufferedInputStream processedStream = new BufferedInputStream(fileInputStream, storageHandler.getBufferSize())) {
             ObjectMetadata destinationMetadata = new ObjectMetadata();
-            //NOTE: not setting content length here causes S3 client to buffer the output stream ...
-            //   --> OK, bc we have no way to know output length apriori
             destinationMetadata.setContentLength(tmpFile.length());
 
             // set headers iff they're non-null on source object
