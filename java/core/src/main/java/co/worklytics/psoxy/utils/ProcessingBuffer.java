@@ -34,7 +34,8 @@ public class ProcessingBuffer<T> {
     }
 
     /**
-     * Flushes if buffer has anything
+     * Flushes if buffer has anything.
+     * @return true if flush happened
      */
     public boolean flush() {
         if (!this.buffer.isEmpty()) {
@@ -48,6 +49,7 @@ public class ProcessingBuffer<T> {
 
     /**
      * Flushes if buffer is full
+     * @return true if flush happened
      */
     private boolean flushIfFull() {
         if (this.buffer.size() >= capacity) {
