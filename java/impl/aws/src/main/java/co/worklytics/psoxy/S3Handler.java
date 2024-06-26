@@ -13,6 +13,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
+import org.apache.commons.io.IOUtils;
 
 import javax.inject.Inject;
 import java.io.*;
@@ -69,20 +70,43 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         }
 
         byte[] processedData = null;
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+             PipedInputStream pis = new PipedInputStream();
+             PipedOutputStream pos = new PipedOutputStream(pis)) {
+
+            outputStream.writeTo(pos);
 
             StorageEventRequest request =
                 storageHandler.buildRequest(importBucket, sourceKey, transform, sourceMetadata.getContentEncoding());
+
+            ObjectMetadata destinationMetadata = new ObjectMetadata();
+            //NOTE: not setting content length here causes S3 client to buffer the output stream ...
+            //   --> OK, bc we have no way to know output length apriori
+            //meta.setContentLength(storageEventResponse.getBytes().length);
+
+            // set headers iff they're non-null on source object
+            Optional.ofNullable(sourceMetadata.getContentType())
+                .ifPresent(destinationMetadata::setContentType);
+            Optional.ofNullable(sourceMetadata.getContentEncoding())
+                .ifPresent(destinationMetadata::setContentEncoding);
+
+            destinationMetadata.setUserMetadata(storageHandler.buildObjectMetadata(importBucket, sourceKey, transform));
+
+            s3Client.putObject(request.getDestinationBucketName(),
+                request.getDestinationObjectPath(),
+                pis,
+                destinationMetadata);
 
             storageEventResponse = storageHandler.handle(request, transform, () -> {
                 S3Object sourceObject = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
                 return sourceObject.getObjectContent();
             }, () -> outputStream);
 
-            processedData = outputStream.toByteArray();
             log.info(String.format("Successfully pseudonymized %s/%s to buffer", importBucket, sourceKey));
-        }
 
+
+        }
+/*
         try (InputStream processedStream = new ByteArrayInputStream(processedData)) {
             ObjectMetadata destinationMetadata = new ObjectMetadata();
             //NOTE: not setting content length here causes S3 client to buffer the output stream ...
@@ -109,7 +133,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
                 storageEventResponse.getDestinationBucketName(),
                 storageEventResponse.getDestinationObjectPath()));
         }
-
+*/
         return storageEventResponse;
     }
 
