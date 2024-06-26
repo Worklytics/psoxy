@@ -68,9 +68,13 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             return null;
         }
 
+        // AWS lambdas have a shared ephemeral storage (shared across invocations) of 512MB
+        // This can be upped to 10GB, but this should be enough as long as we're not processing
+        // lots of large files in parallel.
+        // https://aws.amazon.com/blogs/aws/aws-lambda-now-supports-up-to-10-gb-ephemeral-storage/
         File tmpFile = new File("/tmp/" + UUID.randomUUID());
         try (FileOutputStream fos = new FileOutputStream(tmpFile);
-             BufferedOutputStream outputStream = new BufferedOutputStream(fos)) {
+             BufferedOutputStream outputStream = new BufferedOutputStream(fos, storageHandler.getBufferSize())) {
 
             StorageEventRequest request =
                 storageHandler.buildRequest(importBucket, sourceKey, transform, sourceMetadata.getContentEncoding());
@@ -83,7 +87,8 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             log.info(String.format("Successfully pseudonymized %s/%s to buffer", importBucket, sourceKey));
         }
 
-        try (InputStream processedStream = new FileInputStream(tmpFile)) {
+        try (InputStream fileInputStream = new FileInputStream(tmpFile);
+            BufferedInputStream processedStream = new BufferedInputStream(fileInputStream, storageHandler.getBufferSize())) {
             ObjectMetadata destinationMetadata = new ObjectMetadata();
             //NOTE: not setting content length here causes S3 client to buffer the output stream ...
             //   --> OK, bc we have no way to know output length apriori
@@ -104,8 +109,6 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
                 destinationMetadata);
 
             log.info(String.format("Successfully uploaded to %s/%s",
-                importBucket,
-                sourceKey,
                 storageEventResponse.getDestinationBucketName(),
                 storageEventResponse.getDestinationObjectPath()));
         } finally {

@@ -19,7 +19,7 @@ public class ProcessingBuffer<T> {
     // making it synchronized so can be used in parallel streams if wanted, but usually won't
     private final List<T> buffer = Collections.synchronizedList(Lists.newArrayList());
     @Getter
-    private int flushes = 0;
+    private long processed = 0;
 
     public ProcessingBuffer(int capacity, Consumer<Collection<T>> consumer) {
         Preconditions.checkArgument(capacity > 0);
@@ -28,28 +28,31 @@ public class ProcessingBuffer<T> {
     }
 
 
-    public void addAndAttemptFlush(T t) {
+    public boolean addAndAttemptFlush(T t) {
         this.buffer.add(t);
-        this.flushIfFull();
+        return this.flushIfFull();
     }
 
     /**
      * Flushes if buffer has anything
      */
-    public void flush() {
+    public boolean flush() {
         if (!this.buffer.isEmpty()) {
             consumer.accept(this.buffer);
-            flushes++;
+            processed+=this.buffer.size();
             this.buffer.clear();
+            return true;
         }
+        return false;
     }
 
     /**
      * Flushes if buffer is full
      */
-    private void flushIfFull() {
+    private boolean flushIfFull() {
         if (this.buffer.size() >= capacity) {
-            this.flush();
+            return this.flush();
         }
+        return false;
     }
 }

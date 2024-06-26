@@ -79,16 +79,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     public void sanitize(@NonNull Reader reader,
                          @NonNull Writer writer,
                          @NonNull Pseudonymizer pseudonymizer) throws IOException {
-/*
-        CSVParser records = CSVFormat.DEFAULT
-            .builder()
-            .setHeader().setSkipHeaderRecord(true)
-            .setDelimiter(rules.getDelimiter())
-            .setAutoFlush(true)
-            .setIgnoreHeaderCase(true)
-            .setTrim(true)
-            .build().parse(reader);
-*/
+
         CSVParser records = CSVFormat
             .DEFAULT
             .withDelimiter(rules.getDelimiter())
@@ -339,9 +330,13 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
                 });
 
-                buffer.addAndAttemptFlush(ProcessedRecord.of(Lists.newArrayList(newRecord.values())));
+                if (buffer.addAndAttemptFlush(ProcessedRecord.of(Lists.newArrayList(newRecord.values())))) {
+                    log.info(String.format("Processed records: %.2f%%", (double) records.getRecordNumber()*100/buffer.getProcessed()));
+                };
             }
-            buffer.flush();
+            if (buffer.flush()) {
+                log.info(String.format("Processed records: %.2f%%", (double) records.getRecordNumber()*100/buffer.getProcessed()));
+            }
         }
     }
 
@@ -350,7 +345,6 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             try {
                 // we control instantiation, so we can safely cast w/o checking instance of
                 // every chunk. We shuffle the records before printing them
-                System.out.println("recordsToPrint: " + recordsToPrint);
                 shuffleImplementation.apply((List<ProcessedRecord>) recordsToPrint);
                 for (ProcessedRecord record : recordsToPrint) {
                     printer.printRecord(record.getValues());
