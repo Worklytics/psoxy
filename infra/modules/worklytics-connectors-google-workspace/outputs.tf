@@ -9,7 +9,7 @@ output "todos" {
 }
 
 output "next_todo_step" {
-  value = try(max(values(module.google_workspace_connection)[*].next_todo_step...), var.todo_step)
+  value = local.next_todo_step
 }
 
 output "api_clients" {

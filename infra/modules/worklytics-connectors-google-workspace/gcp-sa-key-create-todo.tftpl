@@ -1,12 +1,13 @@
-In the GCP console for `${gcp_project_id}`, create a JSON key for the service account
-`${gcp_service_account}`. Base64 encode the result (eg. `cat key.json | base64`) and store the
-result as a content of the secret with id `${secret_prefix}_SERVICE_ACCOUNT_KEY` in your host
-environment. (Secret id may vary depending on your configuration).
+In the GCP console for `${gcp_project_id}`:
 
-See the page below for more information on how to create a service account key:
+1. create a JSON key for the service account `${gcp_service_account}`.
+
+2. base64 encode the result (eg. `cat key.json | base64`)
+
+3. store the result as a content of the secret with id `${secret_prefix}_SERVICE_ACCOUNT_KEY` in
+   your host environment. (Secret id may vary depending on your configuration).
+
+See the page below for more information on how to create a service account key in GCP:
 
 https://docs.worklytics.co/psoxy/sources/google-workspace#provisioning-api-clients-without-terraform
 
-
-Then pass the instructions below to a Google Workspace admin:
-${gws_todo}
