@@ -44,11 +44,11 @@ locals {
 
   key_creation_todos = {
     for id, connection in module.google_workspace_connection :
-       id => templatefile("${path.module}/gcp-sa-key-create-todo.tftpl", { gcp_project_id: var.gcp_project_id, gcp_service_account: connection.service_account_email, secret_prefix: connection.instance_id})
+    id => templatefile("${path.module}/gcp-sa-key-create-todo.tftpl", { gcp_project_id : var.gcp_project_id, gcp_service_account : connection.service_account_email, secret_prefix : connection.instance_id })
   }
 
-  todos = [ for id, connection in module.google_workspace_connection :
-      var.provision_gcp_sa_keys ? connection.todo : "${local.key_creation_todos[id]}\n${connection.todo}"
+  todos = [for id, connection in module.google_workspace_connection :
+    var.provision_gcp_sa_keys ? connection.todo : "${local.key_creation_todos[id]}\n${connection.todo}"
   ]
 
   current_todo_step = try(max(values(module.google_workspace_connection)[*].next_todo_step...), var.todo_step)
