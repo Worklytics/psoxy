@@ -41,17 +41,26 @@ module "google_workspace_connection" {
 }
 
 locals {
-  service_accounts_for_which_to_provision_keys = var.provision_gcp_sa_keys ? {
+
+  todos = [ for id, connection in module.google_workspace_connection :
+      var.provision_gcp_sa_keys ? connection.todo :
+      templatefile("${path.module}/gcp-sa-key-create-todo.tftpl", { gws_todo: connection.todo, gcp_project_id: var.gcp_project_id, gcp_service_account: connection.service_account_email, secret_prefix: connection.instance_id})
+  ]
+
+
+  service_accounts_tf_managed_keys = var.provision_gcp_sa_keys ? {
     for k, v in module.worklytics_connector_specs.enabled_google_workspace_connectors :
     k => module.google_workspace_connection[k].service_account_id
   } : {}
 
-  # TODO: in scenario where we're not provisioning keys, we should create TODO files for customer
-  # (but we don't know the secret store or secret ID  at this point)
+  service_accounts_user_managed_keys = var.provision_gcp_sa_keys ? {} : {
+    for k, v in module.worklytics_connector_specs.enabled_google_workspace_connectors :
+    k => module.google_workspace_connection[k].service_account_id
+  }
 }
 
 module "google_workspace_connection_auth" {
-  for_each = local.service_accounts_for_which_to_provision_keys
+  for_each = local.service_accounts_tf_managed_keys
 
   source = "../../modules/gcp-sa-auth-key"
 
