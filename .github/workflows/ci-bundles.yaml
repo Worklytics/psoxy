@@ -11,14 +11,13 @@ on:
     branches:
       - 'main'
       - 'rc-*'
-      - 's177-recover-cmd-line' # otherwise updates to this not actually run until merged!!
 
 jobs:
   bundle:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        implementation: [ 'gcp', 'aws', 'cmd-line' ]
+        implementation: [ 'gcp', 'aws' ]
     name: bundle ${{ matrix.implementation }}
     steps:
       - name: Check out code

@@ -1,4 +1,4 @@
-name: CI - bundles
+name: CI - cmd-line
 
 # CI for our project as a GitHub action
 # see https://help.github.com/en/actions/language-and-framework-guides/building-and-testing-java-with-maven
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java-version: [ '11', '17', '21', 'latest' ]
+        java-version: [ '11', '17', '21']
     name: bundle ${{ matrix.implementation }}
     steps:
       - name: Check out code
