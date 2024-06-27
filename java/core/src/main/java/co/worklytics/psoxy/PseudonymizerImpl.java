@@ -6,6 +6,7 @@ import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.google.common.base.Preconditions;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
@@ -79,6 +80,16 @@ public class PseudonymizerImpl implements Pseudonymizer {
     public PseudonymizedIdentity pseudonymize(Object value, Transform.PseudonymizationTransform transformOptions) {
         if (value == null) {
             return null;
+        }
+
+        if (this.getOptions().getPseudonymizationSalt() != null &&
+                this.deterministicTokenizationStrategy instanceof Sha256DeterministicTokenizationStrategy) {
+
+            if (!Objects.equals(((Sha256DeterministicTokenizationStrategy) this.deterministicTokenizationStrategy).getSalt(),
+                    this.options.getPseudonymizationSalt())) {
+                //shouldn't happen in real life, but just in case
+                throw new RuntimeException("Salt mismatch between pseudonymizer and tokenization strategy");
+            }
         }
 
         Preconditions.checkArgument(value instanceof String || value instanceof Number,

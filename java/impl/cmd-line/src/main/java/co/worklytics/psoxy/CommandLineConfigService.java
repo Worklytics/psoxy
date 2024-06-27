@@ -18,6 +18,7 @@ import javax.inject.Named;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -98,12 +99,19 @@ public class CommandLineConfigService implements ConfigService, SecretStore {
 
 
     public Config getCliConfig() {
-        return getConfigFromFile().orElseGet(() ->
-            Config.builder()
-                .columnsToPseudonymize(Arrays.stream(cmd.getOptionValues("p")).collect(Collectors.toSet()))
-                .columnsToRedact(Arrays.stream(cmd.getOptionValues("r")).collect(Collectors.toSet()))
-                .pseudonymizationSalt(getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT))
-                .build());
+        return getConfigFromFile().orElseGet(() -> {
+            Config.ConfigBuilder builder = Config.builder().pseudonymizationSalt(getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
+
+            if (cmd.hasOption("p")) {
+                builder.columnsToPseudonymize(Arrays.stream(cmd.getOptionValues("p")).collect(Collectors.toSet()));
+            }
+
+            if (cmd.hasOption("r")) {
+                builder.columnsToRedact(Arrays.stream(cmd.getOptionValues("r")).collect(Collectors.toSet()));
+
+            }
+            return builder.build();
+        });
     }
 
     @Override
