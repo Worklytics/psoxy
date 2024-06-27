@@ -23,6 +23,7 @@ public interface Pseudonymizer {
          * q: split this out? it's per-customer, not per-source API (although it *could* be the
          * later, if you don't need to match with it)
          */
+        @Deprecated //used ONLY in LEGACY case ; otherwise behavior determined by tokenization strategies
         String pseudonymizationSalt;
 
         /**

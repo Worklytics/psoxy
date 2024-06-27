@@ -102,7 +102,7 @@ class RESTApiSanitizerImplTest {
         container.inject(this);
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt("an irrelevant per org secret")
+            .pseudonymizationSalt("salt")
             .defaultScopeId("scope")
             .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
@@ -270,9 +270,10 @@ class RESTApiSanitizerImplTest {
 
     @Test
     void pseudonymizeWithReversalKey() {
+        //NOTE: this is a LEGACY case
         MapFunction f = sanitizer.getPseudonymize(Transform.Pseudonymize.builder().includeReversible(true).build());
 
-        assertEquals("{\"scope\":\"scope\",\"hash\":\"Htt5DmAnE8xaCjfYnLm83_xR8.hhEJE2f_bkFP2yljg\",\"h_4\":\"Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0M\",\"reversible\":\"p~Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0MzTTbTCc7BcR53imT1qZgI\"}",
+        assertEquals("{\"scope\":\"scope\",\"hash\":\"kCGiAd9lGjEbWqbPlXo32fOl5YVmrasomP4QwTAsHww\",\"h_4\":\"Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0M\",\"reversible\":\"p~Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0MzTTbTCc7BcR53imT1qZgI\"}",
             f.map("asfa", sanitizer.getJsonConfiguration()));
     }
 
@@ -431,11 +432,11 @@ class RESTApiSanitizerImplTest {
 
     @CsvSource(
         value = {
-            "LEGACY,test,false,URL_SAFE_TOKEN,vja8bQGC4pq5kPnJR9D5JFG.WY2S0CX9y5bNT1KmutM",
-            "LEGACY,alice@acme.com,false,URL_SAFE_TOKEN,BlFx65qHrkRrhMsuq7lg4bCpwsbXgpLhVZnZ6VBMqoY",
+            "LEGACY,test,false,URL_SAFE_TOKEN,qdRJIFbPHPza8bRV67W_Fq.SYBn77xdIHll17pXhilo",
+            "LEGACY,alice@acme.com,false,URL_SAFE_TOKEN,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
             //legacy w reversible fail to JSON format!!
-            "LEGACY,test,true,URL_SAFE_TOKEN,'{\"scope\":\"scope\",\"hash\":\"vja8bQGC4pq5kPnJR9D5JFG.WY2S0CX9y5bNT1KmutM\",\"h_4\":\"Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDI\",\"reversible\":\"p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ\"}'",
-            "LEGACY,alice@acme.com,true,URL_SAFE_TOKEN,'{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"BlFx65qHrkRrhMsuq7lg4bCpwsbXgpLhVZnZ6VBMqoY\",\"h_4\":\"UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk\",\"reversible\":\"p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com\"}'",
+            "LEGACY,test,true,URL_SAFE_TOKEN,'{\"scope\":\"scope\",\"hash\":\"qdRJIFbPHPza8bRV67W_Fq.SYBn77xdIHll17pXhilo\",\"h_4\":\"Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDI\",\"reversible\":\"p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ\"}'",
+            "LEGACY,alice@acme.com,true,URL_SAFE_TOKEN,'{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk\",\"h_4\":\"UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk\",\"reversible\":\"p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com\"}'",
 
             // pseudonyms build with DEFAULT implementation always support URL_SAFE_TOKEN encoding
             "DEFAULT,test,false,URL_SAFE_TOKEN,Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDI",
@@ -452,7 +453,7 @@ class RESTApiSanitizerImplTest {
     public void getPseudonymize_URL_SAFE_TOKEN(PseudonymImplementation implementation, String value, Boolean includeReversible, String encoding, String expected) {
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt("an irrelevant per org secret")
+            .pseudonymizationSalt("salt")
             .defaultScopeId("scope")
             .pseudonymImplementation(implementation)
             .build());
@@ -549,7 +550,7 @@ class RESTApiSanitizerImplTest {
     void pseudonymizeWithRegexMatches(String input) {
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt("an irrelevant per org secret")
+            .pseudonymizationSalt("salt")
             .defaultScopeId("scope")
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build());
@@ -605,13 +606,14 @@ class RESTApiSanitizerImplTest {
 
 
     @CsvSource(value = {
-        "something,.*,t~wUW4bkpTjD6c.BIQaE_oLQxN4nD5vbnf5HBVz7gxck8",
+        "something,.*,t~Pym88cXj0AbPDFzkwBY_4jRh8Tq8KpfLNNwE3PTolQ4",
         "something,blah:.*thing,", // no match, should redact
-        "blah:something,blah:.*thing,t~iWybsRb4SscO_Z6v2gpnMTjPujG2E4FtxgYkjWc5HXQ",
-        "blah:something,blah:(.*),blah:t~wUW4bkpTjD6c.BIQaE_oLQxN4nD5vbnf5HBVz7gxck8",
+        "blah:something,blah:.*thing,t~fZJVpgu6vQk2f6Q8G9IXNysNnxwwJO4cd1zWOZV.Zcg",
+        "blah:something,blah:(.*),blah:t~Pym88cXj0AbPDFzkwBY_4jRh8Tq8KpfLNNwE3PTolQ4",
     })
     @ParameterizedTest
     public void pseudonymizeWithRegexMatches_nonMatchingRedacted(String input, String regex, String expected) {
+        //NOTE: this is a LEGACY case
         MapFunction transform = sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder()
             .regex(regex)
             .includeReversible(false)
