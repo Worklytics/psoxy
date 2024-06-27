@@ -26,6 +26,12 @@ variable "google_workspace_example_admin" {
   default     = null # will failover to user
 }
 
+variable "google_workspace_provision_keys" {
+  type        = bool
+  description = "whether to provision key for each Google Workspace connector's GCP Service Account (OAuth Client). If false, you must create the key manually and provide it."
+  default     = true
+}
+
 locals {
   # tflint-ignore: terraform_unused_declarations
   validate_google_workspace_gcp_project_id         = (var.google_workspace_gcp_project_id == null || var.google_workspace_gcp_project_id == "") && (length(setintersection(var.enabled_connectors, ["gcal", "gdirectory", "gdrive", "gmail", "google-meet", "google-chat"])) > 0)
