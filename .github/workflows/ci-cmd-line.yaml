@@ -1,4 +1,4 @@
-name: CI - bundles
+name: CI - cmd-line
 
 # CI for our project as a GitHub action
 # see https://help.github.com/en/actions/language-and-framework-guides/building-and-testing-java-with-maven
@@ -11,13 +11,14 @@ on:
     branches:
       - 'main'
       - 'rc-*'
+      - 's177-recover-cmd-line' # otherwise updates to this not actually run until merged!!
 
 jobs:
   bundle:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        implementation: [ 'gcp', 'aws' ]
+        java-version: [ '11', '17', '21']
     name: bundle ${{ matrix.implementation }}
     steps:
       - name: Check out code
@@ -25,14 +26,23 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: 17
+          java-version: ${{ matrix.java-version }}
           distribution: zulu
+      - name: Setup xmllint
+        uses: Bpolitycki/setup-xmllint-action@1.0.1 # reviewed the code; does effectively nothing but sudo apt-get install libxml2-utils
       - name: Package Deployment artifact
         working-directory: java/
         # see tools/build.sh; this should be equivalent to that, w/o re-routing errors to log file
         # or logic to skip build if artifact already exists
         run: |
+          VERSION=$(xmllint --xpath "string(//*[local-name()='revision'])" pom.xml)
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
           mvn clean -f pom.xml
           mvn package install -f "gateway-core/pom.xml" -Dmaven.test.skip=true
           mvn package install -f "core/pom.xml" -Dmaven.test.skip=true
-          mvn package -f "impl/${{ matrix.implementation }}/pom.xml"
+          mvn package -f "impl/cmd-line/pom.xml"
+      - name: Test processing with CLI
+        working-directory: java/impl/cmd-line
+        run: |
+          java -jar target/psoxy-cmd-line-${{ env.VERSION }}.jar --salt salt --pseudonymize email src/test/resources/hris-example.csv > pseudonymized.csv

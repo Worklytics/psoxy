@@ -4,43 +4,41 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.impl.BlindlyOptimisticLockService;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import javax.inject.Singleton;
-import java.util.Optional;
 
-@Module
-public interface CmdLineModule {
+@NoArgsConstructor
+@AllArgsConstructor
+@Module(
+   includes = CmdLineModule.Bindings.class
+)
+public class CmdLineModule {
 
-    @Binds
-    ConfigService configService(EnvVarsConfigService impl);
 
-    @Binds
-    LockService lockService(BlindlyOptimisticLockService impl);
+    String[] args;
+
 
     @Provides @Singleton
-    static SecretStore secretStore(EnvVarsConfigService envVarsConfigService) {
+    ConfigService configService(CommandLineConfigServiceFactory factory) {
+        return factory.create(args);
+    }
 
-        //proxy to env vars
-        return new SecretStore() {
-            @Override
-            public void putConfigProperty(ConfigProperty property, String value) {
-                throw new UnsupportedOperationException("Not implemented");
-            }
+    @Provides @Singleton
+    SecretStore secretStore(CommandLineConfigServiceFactory factory) {
+        return factory.create(args);
+    }
 
-            @Override
-            public String getConfigPropertyOrError(ConfigProperty property) {
-                return envVarsConfigService.getConfigPropertyOrError(property);
-            }
+    @Module
+    interface Bindings {
 
-            @Override
-            public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
-                return envVarsConfigService.getConfigPropertyAsOptional(property);
-            }
-        };
+        @Binds
+        LockService lockService(BlindlyOptimisticLockService impl);
+
     }
 
 }

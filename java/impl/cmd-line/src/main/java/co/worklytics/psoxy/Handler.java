@@ -40,7 +40,6 @@ public class Handler {
             .defaultScopeId(config.getDefaultScopeId());
 
         if (config.getPseudonymizationSaltSecret() != null) {
-            //TODO: platform dependent; inject
             try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
                 AccessSecretVersionResponse secretVersionResponse =
                     client.accessSecretVersion(config.getPseudonymizationSaltSecret().getIdentifier());
@@ -50,11 +49,16 @@ public class Handler {
             options.pseudonymizationSalt(config.getPseudonymizationSalt());
         }
 
-        ColumnarRules rules = defaultRules.toBuilder()
-                .columnsToPseudonymize(Lists.newArrayList(config.getColumnsToPseudonymize()))
-                .columnsToRedact(Lists.newArrayList(config.getColumnsToRedact()))
-                .build();
+        ColumnarRules.ColumnarRulesBuilder<?, ?> rulesBuilder = defaultRules.toBuilder();
 
+        if (config.getColumnsToPseudonymize() != null) {
+            rulesBuilder.columnsToPseudonymize(Lists.newArrayList(config.getColumnsToPseudonymize()));
+        }
+        if (config.getColumnsToRedact() != null) {
+            rulesBuilder.columnsToRedact(Lists.newArrayList(config.getColumnsToRedact()));
+        }
+
+        ColumnarRules rules = rulesBuilder.build();
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(options.build());
         BulkDataSanitizer sanitizer = fileHandlerStrategy.get(rules);
