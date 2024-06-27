@@ -178,7 +178,7 @@ locals {
   k => merge(v, { example_calls : v.example_api_calls }) }
 
 
-  jira_example_cloud_id                    = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
+  jira_example_cloud_id            = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   jira_example_issue_id            = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
   github_installation_id           = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
   github_enterprise_server_host    = coalesce(var.github_api_host, var.github_enterprise_server_host, "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
