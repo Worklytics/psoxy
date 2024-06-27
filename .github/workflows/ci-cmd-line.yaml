@@ -28,6 +28,8 @@ jobs:
         with:
           java-version: ${{ matrix.java-version }}
           distribution: zulu
+      - name: Setup xmllint
+        uses: Bpolitycki/setup-xmllint-action@1.0.1
       - name: Package Deployment artifact
         working-directory: java/
         # see tools/build.sh; this should be equivalent to that, w/o re-routing errors to log file
