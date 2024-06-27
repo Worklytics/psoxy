@@ -45,4 +45,4 @@ jobs:
       - name: Test processing with CLI
         working-directory: java/impl/cmd-line
         run: |
-          java -jar target/psoxy-cmd-line-${{ env.VERSION }}.jar src/test/resources/hris-example.csv > pseudonymized.csv
+          java -jar target/psoxy-cmd-line-${{ env.VERSION }}.jar --salt salt --pseudonymize email src/test/resources/hris-example.csv > pseudonymized.csv
