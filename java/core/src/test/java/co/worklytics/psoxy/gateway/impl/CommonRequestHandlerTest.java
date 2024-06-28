@@ -1,12 +1,11 @@
 package co.worklytics.psoxy.gateway.impl;
 
-import co.worklytics.psoxy.ControlHeader;
-import co.worklytics.psoxy.Pseudonymizer;
-import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.RESTApiSanitizer;
+import co.worklytics.psoxy.*;
+import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import co.worklytics.test.MockModules;
@@ -190,17 +189,14 @@ class CommonRequestHandlerTest {
         when(request.getQuery())
                 .thenReturn(Optional.of("%24select=proxyAddresses%2CotherMails%2ChireDate%2CisResourceAccount%2Cmail%2CemployeeId%2Cid%2CuserType%2CmailboxSettings%2CaccountEnabled"));
 
-        RESTApiSanitizer sanitizer = mock(RESTApiSanitizer.class);
-        doReturn(true).when(sanitizer).isAllowed(anyString(), any());
-        when(sanitizer.isAllowed(anyString(), any()))
-                .thenReturn(true);
-
         HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
         when(requestFactory.buildRequest(anyString(), any(), any()))
                 .thenReturn(null);
-
         doReturn(requestFactory).when(spy).getRequestFactory(any());
 
+        RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
+        when(sanitizer.isAllowed(anyString(), any()))
+                .thenReturn(true);
         spy.sanitizer = sanitizer;
 
         try {
@@ -239,15 +235,14 @@ class CommonRequestHandlerTest {
         when(request.getQuery())
                 .thenReturn(Optional.of("%24select=proxyAddresses%2CotherMails%2ChireDate%2CisResourceAccount%2Cmail%2CemployeeId%2Cid%2CuserType%2CmailboxSettings%2CaccountEnabled"));
 
-        RESTApiSanitizer sanitizer = mock(RESTApiSanitizer.class);
-        when(sanitizer.isAllowed(anyString(), any()))
-                .thenReturn(true);
-
         HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
         when(requestFactory.buildRequest(anyString(), any(), any()))
                 .thenReturn(null);
-
         doReturn(requestFactory).when(spy).getRequestFactory(any());
+
+        RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
+        when(sanitizer.isAllowed(anyString(), any()))
+                .thenReturn(true);
 
         spy.sanitizer = sanitizer;
 
