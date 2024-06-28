@@ -102,6 +102,9 @@ public class CommonRequestHandler {
             Pattern.compile(normalizeHeader("X-RateLimit.*"))
     );
 
+    @VisibleForTesting
+    volatile RESTApiSanitizer sanitizer;
+
     /**
      * <a href="https://www.rfc-editor.org/rfc/rfc7230#section-3.2.2">rfc7230</a>
      * "... A recipient MAY combine multiple header fields with the same field
@@ -111,8 +114,6 @@ public class CommonRequestHandler {
      */
     private static final Joiner HEADER_JOINER = Joiner.on(",");
 
-
-    private volatile RESTApiSanitizer sanitizer;
     private final Object $writeLock = new Object[0];
 
     private RESTApiSanitizer loadSanitizerRules() {

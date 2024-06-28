@@ -3,12 +3,24 @@ package co.worklytics.psoxy.gateway.impl;
 import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.PsoxyModule;
+import co.worklytics.psoxy.RESTApiSanitizer;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.rules.RESTRules;
+import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestUtils;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.BulkDataRules;
+import com.avaulta.gateway.rules.ColumnarRules;
+import com.avaulta.gateway.rules.RuleSet;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.google.api.client.http.*;
 import com.google.api.client.json.Json;
 import com.google.api.client.testing.http.HttpTesting;
@@ -16,42 +28,55 @@ import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.MockLowLevelHttpRequest;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import dagger.Component;
+import dagger.Module;
+import dagger.Provides;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class CommonRequestHandlerTest {
 
     @Singleton
     @Component(modules = {
-        PsoxyModule.class,
-        MockModules.ForConfigService.class,
-        MockModules.ForSecretStore.class,
-        MockModules.ForRules.class,
-        MockModules.ForSourceAuthStrategySet.class,
+            PsoxyModule.class,
+            MockModules.ForConfigService.class,
+            MockModules.ForSecretStore.class,
+            MockModules.ForRules.class,
+            MockModules.ForSourceAuthStrategySet.class,
     })
     public interface Container {
         void inject(CommonRequestHandlerTest test);
     }
+
+    @Inject
+    CommonRequestHandler handler;
+
+    @Inject
+    RESTRules rules;
+
+    ReversibleTokenizationStrategy reversibleTokenizationStrategy;
+
+    DeterministicTokenizationStrategy deterministicTokenizationStrategy = new Sha256DeterministicTokenizationStrategy("salt");
+
+    UrlSafeTokenPseudonymEncoder pseudonymEncoder = new UrlSafeTokenPseudonymEncoder();
 
     @BeforeEach
     public void setup() {
@@ -59,26 +84,28 @@ class CommonRequestHandlerTest {
         container.inject(this);
 
         when(handler.secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
-            .thenReturn(Optional.of("salt"));
+                .thenReturn(Optional.of("salt"));
         when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
-            .thenReturn("gmail");
+                .thenReturn("gmail");
+        when(handler.config.getConfigPropertyOrError(ProxyConfigProperty.TARGET_HOST))
+                .thenReturn("google.apis.com");
+
+        reversibleTokenizationStrategy = AESReversibleTokenizationStrategy.builder()
+                .cipherSuite(AESReversibleTokenizationStrategy.CBC)
+                .key(TestUtils.testKey())
+                .deterministicTokenizationStrategy(deterministicTokenizationStrategy)
+                .build();
     }
-
-    @Inject
-    CommonRequestHandler handler;
-
-    @Inject
-    ReversibleTokenizationStrategy reversibleTokenizationStrategy;
 
     private static Stream<Arguments> provideRequestToBuildTarget() {
         return Stream.of(
-            Arguments.of("/some/path", null, "https://proxyhost.com/some/path"),
-            Arguments.of("/some/path", "", "https://proxyhost.com/some/path"),
-            // calls left as they come:
-            Arguments.of("/some/path", "token=base64%2Ftoken%3D%3D&deleted=true", "https://proxyhost.com/some/path?token=base64%2Ftoken%3D%3D&deleted=true"),
-            // double encoded path (some ids in zoom contain / or =)n
-            Arguments.of("/some/base64%2Fid%3D%3D/path", "pageNumber=3&value=%2526ampsymbol", "https://proxyhost.com/some/base64%2Fid%3D%3D/path?pageNumber=3&value=%2526ampsymbol"),
-            Arguments.of("/v2/past_meetings/%2F1%2Bs5FPqReaG4LXW4WCMDQ%3D%3D","","https://proxyhost.com/v2/past_meetings/%2F1%2Bs5FPqReaG4LXW4WCMDQ%3D%3D")
+                Arguments.of("/some/path", null, "https://proxyhost.com/some/path"),
+                Arguments.of("/some/path", "", "https://proxyhost.com/some/path"),
+                // calls left as they come:
+                Arguments.of("/some/path", "token=base64%2Ftoken%3D%3D&deleted=true", "https://proxyhost.com/some/path?token=base64%2Ftoken%3D%3D&deleted=true"),
+                // double encoded path (some ids in zoom contain / or =)n
+                Arguments.of("/some/base64%2Fid%3D%3D/path", "pageNumber=3&value=%2526ampsymbol", "https://proxyhost.com/some/base64%2Fid%3D%3D/path?pageNumber=3&value=%2526ampsymbol"),
+                Arguments.of("/v2/past_meetings/%2F1%2Bs5FPqReaG4LXW4WCMDQ%3D%3D", "", "https://proxyhost.com/v2/past_meetings/%2F1%2Bs5FPqReaG4LXW4WCMDQ%3D%3D")
         );
     }
 
@@ -128,13 +155,13 @@ class CommonRequestHandlerTest {
     void parseOptionsFromRequest() {
         //verify precondition that defaults != LEGACY
         assertEquals(
-            PseudonymImplementation.DEFAULT,
-            Pseudonymizer.ConfigurationOptions.builder().build().getPseudonymImplementation());
+                PseudonymImplementation.DEFAULT,
+                Pseudonymizer.ConfigurationOptions.builder().build().getPseudonymImplementation());
 
         //prep mock request
         HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
         when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
-            .thenReturn(Optional.of(PseudonymImplementation.LEGACY.getHttpHeaderValue()));
+                .thenReturn(Optional.of(PseudonymImplementation.LEGACY.getHttpHeaderValue()));
 
         //test parsing options from request
         Optional<PseudonymImplementation> impl = handler.parsePseudonymImplementation(request);
@@ -144,22 +171,112 @@ class CommonRequestHandlerTest {
     }
 
     @Test
+    @SneakyThrows
+    void handleShouldUseOriginalURLWhenIsReversed() {
+        CommonRequestHandler spy = spy(handler);
+        String original = "blah";
+        String encodedPseudonym =
+                pseudonymEncoder.encode(Pseudonym.builder()
+                        .hash(deterministicTokenizationStrategy.getToken(original, Function.identity()))
+                        .reversible(reversibleTokenizationStrategy.getReversibleToken(original, Function.identity())).build());
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
+                .thenReturn(Optional.of(PseudonymImplementation.DEFAULT.getHttpHeaderValue()));
+        when(request.getHttpMethod())
+                .thenReturn("GET");
+        when(request.getPath())
+                .thenReturn("/admin/directory/v1/users/" + encodedPseudonym);
+        when(request.getQuery())
+                .thenReturn(Optional.of("%24select=proxyAddresses%2CotherMails%2ChireDate%2CisResourceAccount%2Cmail%2CemployeeId%2Cid%2CuserType%2CmailboxSettings%2CaccountEnabled"));
+
+        RESTApiSanitizer sanitizer = mock(RESTApiSanitizer.class);
+
+        ArgumentCaptor<URL> urlArgumentCaptor = ArgumentCaptor.forClass(URL.class);
+        doReturn(true).when(sanitizer).isAllowed(any(), urlArgumentCaptor.capture());
+
+        HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
+        ArgumentCaptor<GenericUrl> targetUrlArgumentCaptor = ArgumentCaptor.forClass(GenericUrl.class);
+        doReturn(null).when(requestFactory).buildRequest(any(), targetUrlArgumentCaptor.capture(), any());
+
+        doReturn(requestFactory).when(spy).getRequestFactory(any());
+
+        spy.sanitizer = sanitizer;
+
+        try {
+            spy.handle(request);
+        } catch (Exception ignored) {
+            // it should raise an exception due missing configuration
+        }
+
+        // Sanitization should receive original URL requested
+        assertEquals("https://google.apis.com/admin/directory/v1/users/" + encodedPseudonym + "?%24select=proxyAddresses%2CotherMails%2ChireDate%2CisResourceAccount%2Cmail%2CemployeeId%2Cid%2CuserType%2CmailboxSettings%2CaccountEnabled",
+                urlArgumentCaptor.getValue().toString());
+        // But request done to source should get the URL with the reverse tokens
+        assertEquals("https://google.apis.com/admin/directory/v1/users/" + original + "?$select=proxyAddresses,otherMails,hireDate,isResourceAccount,mail,employeeId,id,userType,mailboxSettings,accountEnabled",
+                targetUrlArgumentCaptor.getValue().toString());
+    }
+
+    @Test
+    @SneakyThrows
+    void handleShouldUseOriginalURLWhenIsNotReversed() {
+        CommonRequestHandler spy = spy(handler);
+        String original = "blah";
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
+                .thenReturn(Optional.of(PseudonymImplementation.DEFAULT.getHttpHeaderValue()));
+        when(request.getHttpMethod())
+                .thenReturn("GET");
+        when(request.getPath())
+                .thenReturn("/admin/directory/v1/users/" + original);
+        when(request.getQuery())
+                .thenReturn(Optional.of("%24select=proxyAddresses%2CotherMails%2ChireDate%2CisResourceAccount%2Cmail%2CemployeeId%2Cid%2CuserType%2CmailboxSettings%2CaccountEnabled"));
+
+        RESTApiSanitizer sanitizer = mock(RESTApiSanitizer.class);
+
+        ArgumentCaptor<URL> urlArgumentCaptor = ArgumentCaptor.forClass(URL.class);
+        doReturn(true).when(sanitizer).isAllowed(any(), urlArgumentCaptor.capture());
+
+        HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
+        ArgumentCaptor<GenericUrl> targetUrlArgumentCaptor = ArgumentCaptor.forClass(GenericUrl.class);
+        doReturn(null).when(requestFactory).buildRequest(any(), targetUrlArgumentCaptor.capture(), any());
+
+        doReturn(requestFactory).when(spy).getRequestFactory(any());
+
+        spy.sanitizer = sanitizer;
+
+        try {
+            spy.handle(request);
+        } catch (Exception ignored) {
+            // it should raise an exception due missing configuration
+        }
+
+        // Sanitization should receive original URL requested
+        assertEquals("https://google.apis.com/admin/directory/v1/users/" + original + "?%24select=proxyAddresses%2CotherMails%2ChireDate%2CisResourceAccount%2Cmail%2CemployeeId%2Cid%2CuserType%2CmailboxSettings%2CaccountEnabled",
+                urlArgumentCaptor.getValue().toString());
+        // But request done to source should get the URL with the reverse tokens
+        assertEquals("https://google.apis.com/admin/directory/v1/users/" + original + "?$select=proxyAddresses,otherMails,hireDate,isResourceAccount,mail,employeeId,id,userType,mailboxSettings,accountEnabled",
+                targetUrlArgumentCaptor.getValue().toString());
+    }
+
+    @Test
     void getSanitizerForRequest() {
         //verify precondition that defaults != LEGACY
         assertEquals(
-            PseudonymImplementation.DEFAULT,
-            Pseudonymizer.ConfigurationOptions.builder().build().getPseudonymImplementation());
+                PseudonymImplementation.DEFAULT,
+                Pseudonymizer.ConfigurationOptions.builder().build().getPseudonymImplementation());
 
         //prep mock request
         HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
         when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
-            .thenReturn(Optional.of(PseudonymImplementation.LEGACY.getHttpHeaderValue()));
+                .thenReturn(Optional.of(PseudonymImplementation.LEGACY.getHttpHeaderValue()));
 
         assertEquals(PseudonymImplementation.LEGACY,
-            handler.getSanitizerForRequest(request).getPseudonymizer().getOptions().getPseudonymImplementation());
+                handler.getSanitizerForRequest(request).getPseudonymizer().getOptions().getPseudonymImplementation());
 
         assertEquals(PseudonymImplementation.DEFAULT,
-            handler.getSanitizerForRequest(mock(HttpEventRequest.class)).getPseudonymizer().getOptions().getPseudonymImplementation());
+                handler.getSanitizerForRequest(mock(HttpEventRequest.class)).getPseudonymizer().getOptions().getPseudonymImplementation());
     }
 
     @Test
@@ -202,7 +319,7 @@ class CommonRequestHandlerTest {
         Map<String, String> headersMap = httpEventResponse.getHeaders();
 
         Set<String> UNEXPECTED_HEADERS = CommonRequestHandler.normalizeHeaders(
-            Set.of("Set-Cookie", org.apache.http.HttpHeaders.CONNECTION, "X-CustomStuff"));
+                Set.of("Set-Cookie", org.apache.http.HttpHeaders.CONNECTION, "X-CustomStuff"));
 
         // 8 headers + content-type
         assertEquals(9, headersMap.size());
