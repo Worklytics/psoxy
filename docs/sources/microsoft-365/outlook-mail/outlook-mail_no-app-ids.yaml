@@ -94,6 +94,7 @@ endpoints:
           - "$..preferredName"
           - "$..givenName"
           - "$..surname"
+          - "$..jobTitle"
           - "$..mailNickname"
           - "$..responsibilities"
           - "$..skills"
