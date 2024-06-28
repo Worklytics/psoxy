@@ -193,11 +193,13 @@ class CommonRequestHandlerTest {
         RESTApiSanitizer sanitizer = mock(RESTApiSanitizer.class);
 
         ArgumentCaptor<URL> urlArgumentCaptor = ArgumentCaptor.forClass(URL.class);
-        doReturn(true).when(sanitizer).isAllowed(any(), urlArgumentCaptor.capture());
+        when(sanitizer.isAllowed(any(), urlArgumentCaptor.capture()))
+                .thenReturn(true);
 
         HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
         ArgumentCaptor<GenericUrl> targetUrlArgumentCaptor = ArgumentCaptor.forClass(GenericUrl.class);
-        doReturn(null).when(requestFactory).buildRequest(any(), targetUrlArgumentCaptor.capture(), any());
+        when(requestFactory.buildRequest(any(), targetUrlArgumentCaptor.capture(), any()))
+                .thenReturn(null);
 
         doReturn(requestFactory).when(spy).getRequestFactory(any());
 
@@ -236,11 +238,13 @@ class CommonRequestHandlerTest {
         RESTApiSanitizer sanitizer = mock(RESTApiSanitizer.class);
 
         ArgumentCaptor<URL> urlArgumentCaptor = ArgumentCaptor.forClass(URL.class);
-        doReturn(true).when(sanitizer).isAllowed(any(), urlArgumentCaptor.capture());
+        when(sanitizer.isAllowed(any(), urlArgumentCaptor.capture()))
+                .thenReturn(true);
 
         HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
         ArgumentCaptor<GenericUrl> targetUrlArgumentCaptor = ArgumentCaptor.forClass(GenericUrl.class);
-        doReturn(null).when(requestFactory).buildRequest(any(), targetUrlArgumentCaptor.capture(), any());
+        when(requestFactory.buildRequest(any(), targetUrlArgumentCaptor.capture(), any()))
+                .thenReturn(null);
 
         doReturn(requestFactory).when(spy).getRequestFactory(any());
 
