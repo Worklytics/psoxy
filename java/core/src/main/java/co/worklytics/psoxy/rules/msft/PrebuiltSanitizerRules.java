@@ -59,6 +59,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..preferredName")
                     .jsonPath("$..givenName")
                     .jsonPath("$..surname")
+                    .jsonPath("$..jobTitle")
                     .jsonPath("$..mailNickname") //get the actual mail
                     .jsonPath("$..responsibilities")
                     .jsonPath("$..skills")
