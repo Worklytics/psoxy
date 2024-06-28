@@ -412,8 +412,6 @@ public class CommonRequestHandler {
     String reverseTokenizedUrlComponents(String encodedURL) {
         String result = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(encodedURL, reversibleTokenizationStrategy);
 
-        log.warning("Decoded URL: " + encodedURL + " to: " + result);
-
         return result;
     }
 
