@@ -191,14 +191,11 @@ class CommonRequestHandlerTest {
                 .thenReturn(Optional.of("%24select=proxyAddresses%2CotherMails%2ChireDate%2CisResourceAccount%2Cmail%2CemployeeId%2Cid%2CuserType%2CmailboxSettings%2CaccountEnabled"));
 
         RESTApiSanitizer sanitizer = mock(RESTApiSanitizer.class);
-
-        ArgumentCaptor<URL> urlArgumentCaptor = ArgumentCaptor.forClass(URL.class);
+        doReturn(true).when(sanitizer).isAllowed(anyString(), any());
         when(sanitizer.isAllowed(anyString(), any()))
                 .thenReturn(true);
 
         HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
-
-        ArgumentCaptor<GenericUrl> targetUrlArgumentCaptor = ArgumentCaptor.forClass(GenericUrl.class);
         when(requestFactory.buildRequest(anyString(), any(), any()))
                 .thenReturn(null);
 
@@ -211,6 +208,9 @@ class CommonRequestHandlerTest {
         } catch (Exception ignored) {
             // it should raise an exception due missing configuration
         }
+
+        ArgumentCaptor<URL> urlArgumentCaptor = ArgumentCaptor.forClass(URL.class);
+        ArgumentCaptor<GenericUrl> targetUrlArgumentCaptor = ArgumentCaptor.forClass(GenericUrl.class);
 
         verify(sanitizer).isAllowed(anyString(), urlArgumentCaptor.capture());
         verify(requestFactory).buildRequest(anyString(), targetUrlArgumentCaptor.capture(), any());
@@ -240,14 +240,10 @@ class CommonRequestHandlerTest {
                 .thenReturn(Optional.of("%24select=proxyAddresses%2CotherMails%2ChireDate%2CisResourceAccount%2Cmail%2CemployeeId%2Cid%2CuserType%2CmailboxSettings%2CaccountEnabled"));
 
         RESTApiSanitizer sanitizer = mock(RESTApiSanitizer.class);
-
-        ArgumentCaptor<URL> urlArgumentCaptor = ArgumentCaptor.forClass(URL.class);
         when(sanitizer.isAllowed(anyString(), any()))
                 .thenReturn(true);
 
         HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
-
-        ArgumentCaptor<GenericUrl> targetUrlArgumentCaptor = ArgumentCaptor.forClass(GenericUrl.class);
         when(requestFactory.buildRequest(anyString(), any(), any()))
                 .thenReturn(null);
 
@@ -260,6 +256,9 @@ class CommonRequestHandlerTest {
         } catch (Exception ignored) {
             // it should raise an exception due missing configuration
         }
+
+        ArgumentCaptor<URL> urlArgumentCaptor = ArgumentCaptor.forClass(URL.class);
+        ArgumentCaptor<GenericUrl> targetUrlArgumentCaptor = ArgumentCaptor.forClass(GenericUrl.class);
 
         verify(sanitizer).isAllowed(anyString(), urlArgumentCaptor.capture());
         verify(requestFactory).buildRequest(anyString(), targetUrlArgumentCaptor.capture(), any());
