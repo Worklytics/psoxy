@@ -163,7 +163,9 @@ public class CommonRequestHandler {
         String callLog = String.format("%s %s TokenInUrlReversed=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), tokenizedURLReversed);
         if (skipSanitization) {
             log.info(String.format("%s. Skipping sanitization.", callLog));
-        } else if (sanitizer.isAllowed(request.getHttpMethod(), targetUrl)) {
+        } else if (sanitizer.isAllowed(request.getHttpMethod(),
+                // Using original URL to check sanitized rules, as they should match the original URL
+                new URL(requestedTargetUrl))) {
             log.info(String.format("%s. Rules allowed call.", callLog));
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
@@ -402,7 +404,11 @@ public class CommonRequestHandler {
 
     // NOTE: not 'decrypt', as that is only one possible implementation of reversible tokenization
     String reverseTokenizedUrlComponents(String encodedURL) {
-        return pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(encodedURL, reversibleTokenizationStrategy);
+        String result = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(encodedURL, reversibleTokenizationStrategy);
+
+        log.warning("Decoded URL: " + encodedURL + " to: " + result);
+
+        return result;
     }
 
     private void logIfDevelopmentMode(Supplier<String> messageSupplier) {
