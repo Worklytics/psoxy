@@ -124,7 +124,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     @Override
     public String sanitize(String httpMethod, URL url, String jsonResponse) {        //extra check ...
         if (!isAllowed(httpMethod, url)) {
-            throw new IllegalStateException(String.format("Sanitizer called to sanitize response that should not have been retrieved: %s", url.toString()));
+            throw new IllegalStateException(String.format("Sanitizer called to sanitize response that should not have been retrieved: %s", url));
         }
         if (StringUtils.isEmpty(jsonResponse)) {
             // Nothing to do

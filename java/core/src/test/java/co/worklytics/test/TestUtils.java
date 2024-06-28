@@ -1,10 +1,12 @@
 package co.worklytics.test;
 
+import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 
+import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -116,5 +118,9 @@ public class TestUtils {
         String expectedJson = expected.replaceAll("\n", ",");
 
         assertEquals(expected, actual);
+    }
+
+    public static SecretKeySpec testKey() {
+        return AESReversibleTokenizationStrategy.aesKeyFromPassword("secret", "salt");
     }
 }
