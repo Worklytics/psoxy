@@ -193,12 +193,13 @@ class CommonRequestHandlerTest {
         RESTApiSanitizer sanitizer = mock(RESTApiSanitizer.class);
 
         ArgumentCaptor<URL> urlArgumentCaptor = ArgumentCaptor.forClass(URL.class);
-        when(sanitizer.isAllowed(any(), urlArgumentCaptor.capture()))
+        when(sanitizer.isAllowed(anyString(), any()))
                 .thenReturn(true);
 
         HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
+
         ArgumentCaptor<GenericUrl> targetUrlArgumentCaptor = ArgumentCaptor.forClass(GenericUrl.class);
-        when(requestFactory.buildRequest(any(), targetUrlArgumentCaptor.capture(), any()))
+        when(requestFactory.buildRequest(anyString(), any(), any()))
                 .thenReturn(null);
 
         doReturn(requestFactory).when(spy).getRequestFactory(any());
@@ -210,6 +211,9 @@ class CommonRequestHandlerTest {
         } catch (Exception ignored) {
             // it should raise an exception due missing configuration
         }
+
+        verify(sanitizer).isAllowed(anyString(), urlArgumentCaptor.capture());
+        verify(requestFactory).buildRequest(anyString(), targetUrlArgumentCaptor.capture(), any());
 
         // Sanitization should receive original URL requested
         assertEquals("https://google.apis.com/admin/directory/v1/users/" + encodedPseudonym + "?%24select=proxyAddresses%2CotherMails%2ChireDate%2CisResourceAccount%2Cmail%2CemployeeId%2Cid%2CuserType%2CmailboxSettings%2CaccountEnabled",
@@ -238,12 +242,13 @@ class CommonRequestHandlerTest {
         RESTApiSanitizer sanitizer = mock(RESTApiSanitizer.class);
 
         ArgumentCaptor<URL> urlArgumentCaptor = ArgumentCaptor.forClass(URL.class);
-        when(sanitizer.isAllowed(any(), urlArgumentCaptor.capture()))
+        when(sanitizer.isAllowed(anyString(), any()))
                 .thenReturn(true);
 
         HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
+
         ArgumentCaptor<GenericUrl> targetUrlArgumentCaptor = ArgumentCaptor.forClass(GenericUrl.class);
-        when(requestFactory.buildRequest(any(), targetUrlArgumentCaptor.capture(), any()))
+        when(requestFactory.buildRequest(anyString(), any(), any()))
                 .thenReturn(null);
 
         doReturn(requestFactory).when(spy).getRequestFactory(any());
@@ -255,6 +260,9 @@ class CommonRequestHandlerTest {
         } catch (Exception ignored) {
             // it should raise an exception due missing configuration
         }
+
+        verify(sanitizer).isAllowed(anyString(), urlArgumentCaptor.capture());
+        verify(requestFactory).buildRequest(anyString(), targetUrlArgumentCaptor.capture(), any());
 
         // Sanitization should receive original URL requested
         assertEquals("https://google.apis.com/admin/directory/v1/users/" + original + "?%24select=proxyAddresses%2CotherMails%2ChireDate%2CisResourceAccount%2Cmail%2CemployeeId%2Cid%2CuserType%2CmailboxSettings%2CaccountEnabled",
