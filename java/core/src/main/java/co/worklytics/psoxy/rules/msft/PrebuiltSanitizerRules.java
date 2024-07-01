@@ -46,9 +46,9 @@ public class PrebuiltSanitizerRules {
             .regex("(?i)^smtp:(.*)$")
             .build();
 
-    static final String ENTRA_ID_REGEX_USERS = "^/(v1.0|beta)/users/?[^/]*";
-    static final String ENTRA_ID_REGEX_USERS_BY_PSEUDO = "^/(v1.0|beta)/users(/p~[a-zA-Z0-9_-]+?)?[^/]*";
-    static final String ENTRA_ID_REGEX_GROUP_MEMBERS = "^/(v1.0|beta)/groups/[^/]*/members.*";
+    static final String ENTRA_ID_REGEX_USERS = "^/v1.0/users/?[^/]*";
+    static final String ENTRA_ID_REGEX_USERS_BY_PSEUDO = "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*";
+    static final String ENTRA_ID_REGEX_GROUP_MEMBERS = "^/v1.0/groups/[^/]*/members.*";
 
     static final List<Transform> USER_TRANSFORMS = Arrays.asList(
             PSEUDONYMIZE_PROXY_ADDRESSES,
@@ -96,7 +96,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
     static final Endpoint ENTRA_ID_GROUPS = Endpoint.builder()
-            .pathRegex("^/(v1.0|beta)/groups/?[^/]*")
+            .pathRegex("^/v1.0/groups/?[^/]*")
             .transform(PSEUDONYMIZE_PROXY_ADDRESSES)
             .transform(Transform.Redact.builder()
                     .jsonPath("$..owners")
@@ -157,9 +157,9 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..id")
                     .build());
 
-    static final String OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS = "^/(v1.0|beta)/users/[^/]*/mailboxSettings";
-    static final String OUTLOOK_MAIL_PATH_REGEX_MESSAGES = "^/(v1.0|beta)/users/[^/]*/messages/[^/]*";
-    static final String OUTLOOK_MAIL_PATH_REGEX_SENT_MESSAGES = "^/(v1.0|beta)/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*";
+    static final String OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS = "^/v1.0/users/[^/]*/mailboxSettings";
+    static final String OUTLOOK_MAIL_PATH_REGEX_MESSAGES = "^/v1.0/users/[^/]*/messages/[^/]*";
+    static final String OUTLOOK_MAIL_PATH_REGEX_SENT_MESSAGES = "^/v1.0/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*";
 
     static final List<Endpoint> OUTLOOK_MAIL_ENDPOINTS = Arrays.asList(
             Endpoint.builder()
@@ -257,7 +257,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
 
-    static final String OUTLOOK_CALENDAR_PATH_REGEX_EVENTS = "^/(v1.0|beta)/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))";
+    static final String OUTLOOK_CALENDAR_PATH_REGEX_EVENTS = "^/v1.0/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))";
 
     static final List<Endpoint> OUTLOOK_CALENDAR_ENDPOINTS = Arrays.asList(
             Endpoint.builder()
@@ -295,7 +295,7 @@ public class PrebuiltSanitizerRules {
                     REDACT_CALENDAR_ODATA_LINKS);
 
 
-    static final String MS_TEAMS_PATH_TEMPLATES_TEAMS = "/{apiVersion}/teams"; // ^/(v1.0|beta)
+    static final String MS_TEAMS_PATH_TEMPLATES_TEAMS = "/{apiVersion}/teams"; // ^/v1.0
     static final String MS_TEAMS_PATH_TEMPLATES_TEAMS_ALL_CHANNELS = "/{apiVersion}/teams/{teamId}/allChannels";
     static final String MS_TEAMS_PATH_TEMPLATES_USERS_CHATS = "/{apiVersion}/users/{userId}/chats";
     static final String MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES = "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages";
@@ -321,11 +321,11 @@ public class PrebuiltSanitizerRules {
         As you can see, first two are correct, but rest are completely different endpoints and should not match.
 
         So, following regular expression can handle this case:
-        1. Match URL:                       ^/(v1.0|beta)/communications/callRecords/
+        1. Match URL:                       ^/v1.0/communications/callRecords/
         2. Match ID:                        (?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)
         2. Match GraphQL query parameters: (?<queryParameters>\?[a-zA-z0-9\s\$\=\(\)]*)
     */
-    static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX = "^/(v1.0|beta)/communications/callRecords/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)(?<queryParameters>[a-zA-z0-9\\s\\$\\=\\?\\(\\)]*)";
+    static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX = "^/v1.0/communications/callRecords/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)(?<queryParameters>[a-zA-z0-9\\s\\$\\=\\?\\(\\)]*)";
     static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS = "/{apiVersion}/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})";
     static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS = "/{apiVersion}/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})";
     static final String MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS = "/{apiVersion}/users/{userId}/onlineMeetings";

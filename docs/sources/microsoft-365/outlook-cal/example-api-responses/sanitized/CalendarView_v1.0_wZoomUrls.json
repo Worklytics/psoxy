@@ -1,4 +1,5 @@
 {
+  "@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendar/calendarView",
   "value":[
     {
       "@odata.etag":"W/\"IiLKjG2I7E+Xv0+ys6MD0wAEd5/kNQ==\"",
@@ -15,7 +16,7 @@
       "isReminderOn":true,
       "hasAttachments":false,
       "subject":"",
-      "bodyPreview":null,
+      "bodyPreview":"https://acme.zoom.us/j/12354234234?&from=addon",
       "importance":"normal",
       "sensitivity":"normal",
       "isAllDay":false,
@@ -26,7 +27,7 @@
       "showAs":"tentative",
       "type":"occurrence",
       "webLink":"https://outlook.office365.com/owa/?itemid=AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OAFRAAgI15I7X4zAAEYAAAAAIkPFveuwe0ygY4Mfa1RFEQcAIiLKjG2I7E%2BXv0%2Bys6MD0wAAAAABDQAAIiLKjG2I7E%2BXv0%2Bys6MD0wAAGvliswAAEA%3D%3D&exvsurl=1&path=/calendar/item",
-      "onlineMeetingUrl":null,
+      "onlineMeetingUrl":"https://acme.zoom.us/j/12354234234?&from=addon",
       "isOnlineMeeting":false,
       "onlineMeetingProvider":"unknown",
       "allowNewTimeProposals":true,
@@ -39,7 +40,7 @@
       },
       "body":{
         "contentType":"html",
-        "content":null
+        "content":"https://acme.zoom.us/j/12354234234?&from=addon"
       },
       "start":{
         "dateTime":"2020-01-06T17:00:00.0000000",
@@ -50,17 +51,18 @@
         "timeZone":"UTC"
       },
       "location":{
-        "displayName":"Conf Room Rainier",
+        "displayName":"Private Zoom Room \"https://acme.zoom.us/j/12354234234?&from=addon\"",
         "locationType":"default",
-        "uniqueId":"Conf Room Rainier",
+        "uniqueId":"https://acme.zoom.us/j/12354234234?&from=addon",
         "uniqueIdType":"private"
       },
       "locations":[
         {
-          "displayName":"Conf Room Rainier",
+          "displayName":"Private Zoom Room \"https://acme.zoom.us/j/12354234234?&from=addon\"",
           "locationType":"default",
-          "uniqueId":"",
-          "uniqueIdType":"unknown"
+          "uniqueId":"https://acme.zoom.us/j/12354234234?&from=addon",
+          "uniqueIdType":"unknown",
+          "locationUri":"https://acme.zoom.us/j/12354234234?&from=addon"
         }
       ],
       "recurrence":null,
@@ -91,8 +93,10 @@
           "address":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"_UsB0Yw8M953FpyOz6V9ikDhugZE6P3W72AwwCmmYe8\"}"
         }
       },
-      "onlineMeeting":null
+      "onlineMeeting":{
+        "joinUrl":"https://acme.zoom.us/j/12354234234?&from=addon"
+      }
     }
   ],
-  "@odata.nextLink":"https://graph.microsoft.com/p~pm8BP6O-XIenb0pTjdxBwt3KW3ibWrpl1yWu-K0pAQh6cP6psOIE3KiGP6eilAMP28v0JlWPf1tufl4NAHfnQFuP2c30Y58QC4XB74f-bOcHPmTHVvaBhpvJrsRwH-rocdQjDkxjH50ruoXynCP0VSqkmfjAqZ6RkJ24g8VE-9qzgX9QbLJ7I91Y0_nPRO-WKo0SLU8zEsVfDtEm0xaIw7fiDP9Wr4A3_IY8XshrAQI"
+  "@odata.nextLink":"https://graph.microsoft.com/v1.0/me/calendar/calendarView?startDateTime=2019-12-30T00%3a00%3a00Z&endDateTime=2022-05-16T00%3a00%3a00Z&limit=1&%24top=1&%24skip=1"
 }

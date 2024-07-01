@@ -302,9 +302,9 @@ locals {
         REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
       }
       example_api_calls : [
-        "/beta/users",
-        "/beta/users/${var.example_msft_user_guid}/mailboxSettings",
-        "/beta/users/${var.example_msft_user_guid}/mailFolders/SentItems/messages",
+        "/v1.0/users",
+        "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
+        "/v1.0/users/${var.example_msft_user_guid}/mailFolders/SentItems/messages",
         "/v1.0/groups",
         "/v1.0/groups/{group-id}/members"
       ]
@@ -336,18 +336,6 @@ locals {
         REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
       }
       example_api_calls : [
-        "/beta/teams",
-        "/beta/teams/${var.msft_teams_example_team_guid}/allChannels",
-        "/beta/users/${var.example_msft_user_guid}/chats",
-        "/beta/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages",
-        "/beta/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages/delta",
-        "/beta/chats/${var.msft_teams_example_chat_guid}/messages",
-        "/beta/communications/calls/${var.msft_teams_example_call_guid}",
-        "/beta/communications/callRecords/${var.msft_teams_example_call_record_guid}",
-        "/beta/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(time_static.deployment.id, "-2160h"))},toDateTime=${urlencode(time_static.deployment.id)})",
-        "/beta/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(time_static.deployment.id, "-2160h"))},toDateTime=${urlencode(time_static.deployment.id)})",
-        "/beta/users/${var.example_msft_user_guid}/onlineMeetings",
-
         "/v1.0/teams",
         "/v1.0/teams/${var.msft_teams_example_team_guid}/allChannels",
         "/v1.0/users/${var.example_msft_user_guid}/chats",

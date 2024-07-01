@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
+  - pathRegex: "^/v1.0/users/?[^/]*"
     allowedQueryParams:
       - "$top"
       - "$select"
@@ -43,7 +43,7 @@ endpoints:
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
         encoding: "JSON"
-  - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
+  - pathRegex: "^/v1.0/groups/?[^/]*"
     transforms:
       - !<pseudonymizeRegexMatches>
         jsonPaths:
@@ -69,7 +69,7 @@ endpoints:
           - "$..mail"
         includeOriginal: true
         encoding: "JSON"
-  - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
+  - pathRegex: "^/v1.0/groups/[^/]*/members.*"
     allowedQueryParams:
       - "$top"
       - "$select"
@@ -112,13 +112,13 @@ endpoints:
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
         encoding: "JSON"
-  - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
+  - pathRegex: "^/v1.0/users/[^/]*/mailboxSettings"
     transforms:
       - !<redact>
         jsonPaths:
           - "$..internalReplyMessage"
           - "$..externalReplyMessage"
-  - pathRegex: "^/(v1.0|beta)/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))"
+  - pathRegex: "^/v1.0/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))"
     transforms:
       - !<redactExceptSubstringsMatchingRegexes>
         jsonPaths:

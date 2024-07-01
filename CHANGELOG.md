@@ -21,9 +21,11 @@ Changes to be including in future/planned release notes will be added here.
   - keys/salts per value kind (PII, item id, etc)
 
 ## [0.4.55]https://github.com/Worklytics/psoxy/release/tag/v0.4.55
-- For Microsoft Connectors, reference to `msgraph` service principal has been replaced with `data` instead of `terraform` resource.
-  For that reason you will see changes in plan related to these resource, but those changes are only related on the resources for Terraform 
-  state as the kind (*data* from *resource*) has been changed. No change will be done in real Entra ID for that.
+- For Microsoft Connectors:
+  - reference to `msgraph` service principal has been replaced with `data` instead of `terraform` resource.
+    For that reason you will see changes in plan related to these resource, but those changes are only related on the resources for Terraform
+    state as the kind (*data* from *resource*) has been changed. No change will be done in real Entra ID for that.
+  - dropping support for `/beta` endpoints in Microsoft Graph API. All endpoints are now using `/v1.0` version.
 
 ## [0.4.53]https://github.com/Worklytics/psoxy/release/tag/v0.4.53)
   - As Microsoft Azure Active Directory has been [renamed](https://learn.microsoft.com/en-us/entra/fundamentals/new-name) 

@@ -1,5 +1,5 @@
 {
-  "@odata.context": "https://graph.microsoft.com/beta/$metadata#users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendar/calendarView",
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendar/calendarView",
   "value": [
     {
       "@odata.etag": "W/\"IiLKjG2I7E+Xv0+ys6MD0wAEd5/kNQ==\"",
@@ -98,5 +98,5 @@
       "onlineMeeting": null
     }
   ],
-  "@odata.nextLink": "https://graph.microsoft.com/beta/me/calendar/calendarView?startDateTime=2019-12-30T00%3a00%3a00Z&endDateTime=2022-05-16T00%3a00%3a00Z&limit=1&%24top=1&%24skip=1"
+  "@odata.nextLink": "https://graph.microsoft.com/v1.0/me/calendar/calendarView?startDateTime=2019-12-30T00%3a00%3a00Z&endDateTime=2022-05-16T00%3a00%3a00Z&limit=1&%24top=1&%24skip=1"
 }

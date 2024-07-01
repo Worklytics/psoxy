@@ -15,7 +15,7 @@
       "isReminderOn":true,
       "hasAttachments":false,
       "subject":"",
-      "bodyPreview":"https://acme.zoom.us/j/12354234234?&from=addon",
+      "bodyPreview":null,
       "importance":"normal",
       "sensitivity":"normal",
       "isAllDay":false,
@@ -26,7 +26,7 @@
       "showAs":"tentative",
       "type":"occurrence",
       "webLink":"https://outlook.office365.com/owa/?itemid=AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OAFRAAgI15I7X4zAAEYAAAAAIkPFveuwe0ygY4Mfa1RFEQcAIiLKjG2I7E%2BXv0%2Bys6MD0wAAAAABDQAAIiLKjG2I7E%2BXv0%2Bys6MD0wAAGvliswAAEA%3D%3D&exvsurl=1&path=/calendar/item",
-      "onlineMeetingUrl":"https://acme.zoom.us/j/12354234234?&from=addon",
+      "onlineMeetingUrl":null,
       "isOnlineMeeting":false,
       "onlineMeetingProvider":"unknown",
       "allowNewTimeProposals":true,
@@ -39,7 +39,7 @@
       },
       "body":{
         "contentType":"html",
-        "content":"https://acme.zoom.us/j/12354234234?&from=addon"
+        "content":null
       },
       "start":{
         "dateTime":"2020-01-06T17:00:00.0000000",
@@ -50,18 +50,17 @@
         "timeZone":"UTC"
       },
       "location":{
-        "displayName":"Private Zoom Room \"https://acme.zoom.us/j/12354234234?&from=addon\"",
+        "displayName":"Conf Room Rainier",
         "locationType":"default",
-        "uniqueId":"https://acme.zoom.us/j/12354234234?&from=addon",
+        "uniqueId":"Conf Room Rainier",
         "uniqueIdType":"private"
       },
       "locations":[
         {
-          "displayName":"Private Zoom Room \"https://acme.zoom.us/j/12354234234?&from=addon\"",
+          "displayName":"Conf Room Rainier",
           "locationType":"default",
-          "uniqueId":"https://acme.zoom.us/j/12354234234?&from=addon",
-          "uniqueIdType":"unknown",
-          "locationUri":"https://acme.zoom.us/j/12354234234?&from=addon"
+          "uniqueId":"",
+          "uniqueIdType":"unknown"
         }
       ],
       "recurrence":null,
@@ -92,10 +91,8 @@
           "address":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"_UsB0Yw8M953FpyOz6V9ikDhugZE6P3W72AwwCmmYe8\"}"
         }
       },
-      "onlineMeeting":{
-        "joinUrl":"https://acme.zoom.us/j/12354234234?&from=addon"
-      }
+      "onlineMeeting":null
     }
   ],
-  "@odata.nextLink":"https://graph.microsoft.com/p~pm8BP6O-XIenb0pTjdxBwt3KW3ibWrpl1yWu-K0pAQh6cP6psOIE3KiGP6eilAMP28v0JlWPf1tufl4NAHfnQFuP2c30Y58QC4XB74f-bOcHPmTHVvaBhpvJrsRwH-rocdQjDkxjH50ruoXynCP0VSqkmfjAqZ6RkJ24g8VE-9qzgX9QbLJ7I91Y0_nPRO-WKo0SLU8zEsVfDtEm0xaIw7fiDP9Wr4A3_IY8XshrAQI"
+  "@odata.nextLink":"https://graph.microsoft.com/p~BjnHhOwk9J8oAcNFNCgwaetZAgh5R5vL05oKgUoLzBAYLjsU4gLA3wNmgfknZFL_VTRu8-pYY4Ts1RpwdmYrzH1U4po4CChI_qprNGtQpr8gK_UyhPHfVkHgn_Ms72rUl9-lXwIAmzb5lO5OS55YHvjFBZPi4hcbaz_RS7iUIVPZiRW3B0eG1YM2e4jB2FufxszzeJABAXdmGCm06ucsGj9oaUc6GbFxJ3frBIl3XwU"
 }

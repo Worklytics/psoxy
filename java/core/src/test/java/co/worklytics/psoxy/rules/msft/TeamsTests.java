@@ -23,7 +23,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
             .build();
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint:" + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS)
     public void teams(String apiVersion) {
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/teams";
@@ -50,7 +50,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS_ALL_CHANNELS)
     public void teams_allChannels(String apiVersion) {
         String teamId = "172b0cce-e65d-44ce-9a49-91d9f2e8493a";
@@ -79,7 +79,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_USERS_CHATS)
     public void users_chats(String apiVersion) {
         String userId = "8b081ef6-4792-4def-b2c9-c363a1bf41d5";
@@ -115,7 +115,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES)
     public void teams_channels_messages(String apiVersion) {
         String teamId = "172b0cce-e65d-44ce-9a49-91d9f2e8493a";
@@ -177,7 +177,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA)
     public void teams_channels_messages_delta(String apiVersion) {
         String teamId = "172b0cce-e65d-44ce-9a49-91d9f2e8493a";
@@ -225,7 +225,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES)
     public void chats_messages(String apiVersion) {
         String chatId = "fbe2bf47-16c8-47cf-b4a5-4b9b187c508b";
@@ -260,7 +260,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS)
     public void communications_calls(String apiVersion) {
         String callId = "2f1a1100-b174-40a0-aba7-0b405e01ed92";
@@ -281,7 +281,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX)
     public void communications_callRecords(String apiVersion) {
         String callChainId = "2f1a1100-b174-40a0-aba7-0b405e01ed92";
@@ -313,7 +313,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS)
     public void communications_callRecords_getDirectRoutingCalls(String apiVersion) {
         String fromDateTime = "2019-11-01";
@@ -351,7 +351,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS)
     public void communications_callRecords_getPstnCalls(String apiVersion) {
         String fromDateTime = "2019-11-01";
@@ -391,7 +391,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS)
     public void users_onlineMeetings(String apiVersion) {
         String userId = "dc17674c-81d9-4adb-bfb2-8f6a442e4622";
