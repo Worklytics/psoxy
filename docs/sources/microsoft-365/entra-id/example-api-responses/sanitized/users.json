@@ -4,7 +4,6 @@
     {
       "id":"cdfb873d-61f9-4656-bbbb-9e49fba4de97",
       "businessPhones":[ ],
-      "jobTitle":null,
       "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"80OuLKaSEacbENaFngf3v1Ul1rcs-6BmJRZsfb9scss\"}",
       "officeLocation":null,
       "preferredLanguage":"en-US",
@@ -20,7 +19,6 @@
     {
       "id":"307ee26b-fe96-40a9-bc8a-9e49fba4de97",
       "businessPhones":[ ],
-      "jobTitle":null,
       "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"8ooPMu_uHiLVL-w_T7gTwJDA4S_ttDhB93_NhIXfkkE\"}",
       "officeLocation":null,
       "preferredLanguage":null,
@@ -29,7 +27,6 @@
     {
       "id":"4ea7fc01-0264-4e84-b85e-9e49fba4de97",
       "businessPhones":[ ],
-      "jobTitle":null,
       "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"QKF0JFDeWizMmaAamuk9jwtDKUqh_xFG4etyOOHcrEA\"}",
       "officeLocation":null,
       "preferredLanguage":"en-US",
@@ -38,7 +35,6 @@
     {
       "id":"219435cc-746e-48d6-8ccd-242345234f6e",
       "businessPhones":[ ],
-      "jobTitle":null,
       "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"_oJw-9fORXMFfHtwNXQ5xyTsva2CebpVGKae78dHEeQ\"}",
       "officeLocation":null,
       "preferredLanguage":"es-ES",
@@ -47,7 +43,6 @@
     {
       "id":"f8f2864c-c353-4471-bd75-9e49fba4de97",
       "businessPhones":[ ],
-      "jobTitle":null,
       "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"98Qqjyepls36L4F39whrqv_YskOZCB71RNm8gO43sis\"}",
       "officeLocation":null,
       "preferredLanguage":"en-US",
@@ -55,7 +50,6 @@
     },
     {
       "businessPhones":[ ],
-      "jobTitle":null,
       "mail":"null",
       "officeLocation":null,
       "preferredLanguage":null,
