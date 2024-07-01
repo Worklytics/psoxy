@@ -32,11 +32,8 @@ UserPrincipalName (often your email address).
 Assuming proxy is auth'd as an application, you'll have to replace `me` with your MSFT ID or
 UserPrincipalName (often your email address).
 
-NOTE: `beta` is used, as Worklytics relies on 'metadata-only' oauth scope `Messages.ReadBasic`,
-which is only supported by that API version.
-
 ```
-/beta/users/me/mailFolders/SentItems/messages
-/beta/users/me/messages/{messageId}
-/beta/users/me/mailboxSettings
+/v1.0/users/me/mailFolders/SentItems/messages
+/v1.0/users/me/messages/{messageId}
+/v1.0/users/me/mailboxSettings
 ```
