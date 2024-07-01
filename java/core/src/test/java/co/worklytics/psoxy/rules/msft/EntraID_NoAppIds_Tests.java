@@ -127,6 +127,7 @@ public class EntraID_NoAppIds_Tests extends EntraIDTests {
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
             InvocationExample.of("https://graph.microsoft.com/v1.0/groups/02bd9fd6-8f93-4758-87c3-1fb73740a315/members?$count=true", "group-members.json"),
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug?%24select=proxyAddresses%2CotherMails%2ChireDate%2CisResourceAccount%2Cmail%2CemployeeId%2Cid%2CuserType%2CmailboxSettings%2CaccountEnabled", "user.json"),
             InvocationExample.of("https://graph.microsoft.com/v1.0/users/p~12398123012312", "user.json"),
             InvocationExample.of("https://graph.microsoft.com/v1.0/users", "users.json")
         );

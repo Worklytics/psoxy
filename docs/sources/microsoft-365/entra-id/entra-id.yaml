@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
+  - pathRegex: "^/v1.0/users/?[^/]*"
     allowedQueryParams:
       - "$top"
       - "$select"
@@ -20,6 +20,7 @@ endpoints:
           - "$..preferredName"
           - "$..givenName"
           - "$..surname"
+          - "$..jobTitle"
           - "$..mailNickname"
           - "$..responsibilities"
           - "$..skills"
@@ -42,8 +43,12 @@ endpoints:
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
         encoding: "JSON"
-  - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
+  - pathRegex: "^/v1.0/groups/?[^/]*"
     transforms:
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
       - !<redact>
         jsonPaths:
           - "$..owners"
@@ -64,7 +69,7 @@ endpoints:
           - "$..mail"
         includeOriginal: true
         encoding: "JSON"
-  - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
+  - pathRegex: "^/v1.0/groups/[^/]*/members.*"
     allowedQueryParams:
       - "$top"
       - "$select"
@@ -84,6 +89,7 @@ endpoints:
           - "$..preferredName"
           - "$..givenName"
           - "$..surname"
+          - "$..jobTitle"
           - "$..mailNickname"
           - "$..responsibilities"
           - "$..skills"

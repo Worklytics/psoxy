@@ -121,7 +121,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..displayName"
-  - pathRegex: "^/(v1.0|beta)/communications/callRecords/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)(?<queryParameters>[a-zA-z0-9\\\
+  - pathRegex: "^/v1.0/communications/callRecords/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)(?<queryParameters>[a-zA-z0-9\\\
     s\\$\\=\\?\\(\\)]*)"
     allowedQueryParams:
       - "$select"
@@ -249,7 +249,7 @@ endpoints:
           - "$..subject"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
-  - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
+  - pathRegex: "^/v1.0/users/?[^/]*"
     allowedQueryParams:
       - "$top"
       - "$select"
@@ -269,6 +269,7 @@ endpoints:
           - "$..preferredName"
           - "$..givenName"
           - "$..surname"
+          - "$..jobTitle"
           - "$..mailNickname"
           - "$..responsibilities"
           - "$..skills"

@@ -178,7 +178,7 @@ locals {
   k => merge(v, { example_calls : v.example_api_calls }) }
 
 
-  jira_cloud_id                    = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
+  jira_example_cloud_id            = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   jira_example_issue_id            = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
   github_installation_id           = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
   github_enterprise_server_host    = coalesce(var.github_api_host, var.github_enterprise_server_host, "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
@@ -302,9 +302,9 @@ locals {
         REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
       }
       example_api_calls : [
-        "/beta/users",
-        "/beta/users/${var.example_msft_user_guid}/mailboxSettings",
-        "/beta/users/${var.example_msft_user_guid}/mailFolders/SentItems/messages",
+        "/v1.0/users",
+        "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
+        "/v1.0/users/${var.example_msft_user_guid}/mailFolders/SentItems/messages",
         "/v1.0/groups",
         "/v1.0/groups/{group-id}/members"
       ]
@@ -336,18 +336,6 @@ locals {
         REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
       }
       example_api_calls : [
-        "/beta/teams",
-        "/beta/teams/${var.msft_teams_example_team_guid}/allChannels",
-        "/beta/users/${var.example_msft_user_guid}/chats",
-        "/beta/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages",
-        "/beta/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages/delta",
-        "/beta/chats/${var.msft_teams_example_chat_guid}/messages",
-        "/beta/communications/calls/${var.msft_teams_example_call_guid}",
-        "/beta/communications/callRecords/${var.msft_teams_example_call_record_guid}",
-        "/beta/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(time_static.deployment.id, "-2160h"))},toDateTime=${urlencode(time_static.deployment.id)})",
-        "/beta/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(time_static.deployment.id, "-2160h"))},toDateTime=${urlencode(time_static.deployment.id)})",
-        "/beta/users/${var.example_msft_user_guid}/onlineMeetings",
-
         "/v1.0/teams",
         "/v1.0/teams/${var.msft_teams_example_team_guid}/allChannels",
         "/v1.0/users/${var.example_msft_user_guid}/chats",
@@ -369,16 +357,23 @@ Please follow the steps below:
 
 **NOTE**: About the role, can be assigned through Entra Id portal in Azure portal OR in Entra Admin center https://admin.microsoft.com/AdminPortal/Home. It is possible that even login with an admin account in Entra Admin Center the Teams role is not available to assign to any user; if so, please do it through Azure Portal (Entra Id -> Users -> Assign roles)
 
-2. Install [PowerShell Teams](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install) module.
-3. Run the following commands in Powershell terminal:
+2. Install [PowerShell Teams](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install)  You can use `pwsh` in the terminal
+    enter to PowerShell.
+3. Then, run the following command. It will open a browser window for login to Microsoft Teams. After login, close the browser and return to the terminal.
+   Please choose the user who has the "Teams Administrator" role.
 ```shell
 Connect-MicrosoftTeams
 ```
-And use the user with the "Teams Administrator" for login it.
 
 4. Follow steps on [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
   - Add a policy for the application created for the connector, providing its `application id`
+```shell
+New-CsApplicationAccessPolicy -Identity Teams-Policy-For-Worklytics -AppIds "%%entraid.application_id%%" -Description "Policy for MSFT Teams used for Worklytics Psoxy connector"
+```
   - Grant the policy to the whole tenant (NOT to any specific application or user)
+```shell
+Grant-CsApplicationAccessPolicy -PolicyName Teams-Policy-For-Worklytics -Global
+```
 
 **Issues**:
 - If you receive "access denied" is because no admin role for Teams has been detected. Please close and reopen the Powershell terminal after assigning the role.
@@ -1246,26 +1241,25 @@ EOT
         USE_SHARED_TOKEN : "TRUE"
       }
       settings_to_provide = {
-        "Jira Cloud Id" = local.jira_cloud_id
       }
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/oauth/token/accessible-resources", # obtain Jira Cloud ID from here
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/users",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/users",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/group/bulk",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/search?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/comment?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/users",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/group/bulk",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/search?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/comment?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/project/search?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/users",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/users",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/group/bulk",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/search?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/comment?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/users",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/group/bulk",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/search?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/comment?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/project/search?maxResults=25",
       ],
       external_token_todo : <<EOT
 ## Prerequisites
@@ -1366,7 +1360,7 @@ And following granular scopes:
 
   Add the `id` value from that JSON response as the value of the `jira_cloud_id` variable in the
   `terraform.tfvars` file of your Terraform configuration. This will generate all the test URLs with
-  a proper value and it will populate the right value for setting up the configuration.
+  proper value for targeting a valid Jira Cloud instance.
 EOT
     }
   }
@@ -1446,7 +1440,7 @@ EOT
   k => merge(v, { example_calls : v.example_api_calls }) }
 
 
-  all_default_connectors =  merge(
+  all_default_connectors = merge(
     local.google_workspace_sources,
     local.msft_365_connectors,
     local.oauth_long_access_connectors,
@@ -1454,7 +1448,7 @@ EOT
   )
 
   default_ga_connectors = {
-    for k, v in local.all_default_connectors : k => v if (
+    for k, v in local.all_default_connectors : k => v if(
       v.availability == "ga"
       && v.enable_by_default
       # either GWS included, or NOT a gws-connector

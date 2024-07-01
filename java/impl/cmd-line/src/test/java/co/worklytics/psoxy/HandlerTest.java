@@ -25,34 +25,20 @@ import static org.mockito.Mockito.when;
 public class HandlerTest {
 
 
-    @Singleton
-    @Component(modules = {
-        PsoxyModule.class,
-        ForPlaceholderRules.class,
-        TestModules.ForConfigService.class,
-        TestModules.ForSecretStore.class,
-    })
-    public interface Container {
-        void inject(HandlerTest test);
-    }
-
-
-    @Inject
     Handler handler;
-
-    @Module
-    public interface ForPlaceholderRules {
-        @Provides
-        @Singleton
-        static ColumnarRules ruleSet() {
-            return mock(ColumnarRules.class);
-        }
-    }
+    CommandLineConfigService configService;
 
     @BeforeEach
     public void setup() {
-        Container container = DaggerHandlerTest_Container.create();
-        container.inject(this);
+        String[] args = new String[]{"--salt", "secret", "--pseudonymize", "email"};
+
+
+        CmdLineContainer container = DaggerCmdLineContainer.builder()
+            .cmdLineModule(new CmdLineModule(args))
+            .build();
+        handler = container.fileHandler();
+
+        configService = container.commandLineConfigServiceFactory().create(args);
 
         ColumnarRules csvRules = ColumnarRules.builder()
             .build();
@@ -76,19 +62,12 @@ public class HandlerTest {
             "4,,Engineering\n"; //blank ID
 
 
-        Config config = new Config();
-        config.pseudonymizationSalt = "salt";
-        config.columnsToPseudonymize = Collections.singleton("email");
 
         File inputFile = new File(getClass().getResource("/hris-example.csv").getFile());
 
         StringWriter s = new StringWriter();
 
-
-
-        handler.sanitize(config, inputFile, s);
-
-
+        handler.sanitize(configService.getCliConfig(), inputFile, s);
         assertEquals(EXPECTED, s.toString());
     }
 
@@ -102,7 +81,6 @@ public class HandlerTest {
             "4,\n"; //blank ID
 
         Config config = new Config();
-        config.pseudonymizationSalt = "salt";
         config.columnsToRedact = Collections.singleton("department");
         config.columnsToPseudonymize = Collections.singleton("email");
 
@@ -120,7 +98,6 @@ public class HandlerTest {
             "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"pLl3XK16GbhWPs9BmUho9Q73VAOllCeIsVQQMFvnYr4\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"wdxMApbuV7MglPNkZrM2WdV_v6x5Z31k8VbmqFCPRZI\"\"}\",Engineering\n";
 
         Config config = new Config();
-        config.pseudonymizationSalt = "salt";
         config.columnsToPseudonymize = Set.of("Employee Id","Email");
         config.defaultScopeId = "hris";
 

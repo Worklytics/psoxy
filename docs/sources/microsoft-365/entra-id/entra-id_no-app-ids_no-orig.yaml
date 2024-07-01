@@ -20,6 +20,7 @@ endpoints:
           - "$..preferredName"
           - "$..givenName"
           - "$..surname"
+          - "$..jobTitle"
           - "$..mailNickname"
           - "$..responsibilities"
           - "$..skills"
@@ -49,6 +50,10 @@ endpoints:
         encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
     transforms:
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
       - !<redact>
         jsonPaths:
           - "$..owners"
@@ -69,6 +74,10 @@ endpoints:
           - "$..mail"
         includeOriginal: false
         encoding: "JSON"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
   - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
     allowedQueryParams:
       - "$top"
@@ -89,6 +98,7 @@ endpoints:
           - "$..preferredName"
           - "$..givenName"
           - "$..surname"
+          - "$..jobTitle"
           - "$..mailNickname"
           - "$..responsibilities"
           - "$..skills"

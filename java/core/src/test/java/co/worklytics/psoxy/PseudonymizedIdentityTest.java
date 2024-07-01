@@ -61,7 +61,7 @@ class PseudonymizedIdentityTest {
     @Test
     void asPseudonym() {
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("an irrelevant per org secret")
+                .pseudonymizationSalt("salt")
                 .defaultScopeId("scope")
                 .pseudonymImplementation(PseudonymImplementation.DEFAULT)
                 .build());
@@ -82,7 +82,7 @@ class PseudonymizedIdentityTest {
     })
     void asPseudonym_should_return_null_if_null_or_empty(String identifier) {
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("an irrelevant per org secret")
+                .pseudonymizationSalt("salt")
                 .defaultScopeId("scope")
                 .pseudonymImplementation(PseudonymImplementation.DEFAULT)
                 .build());
@@ -95,7 +95,7 @@ class PseudonymizedIdentityTest {
     @Test
     void asPseudonym_reversible() {
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("an irrelevant per org secret")
+                .pseudonymizationSalt("salt")
                 .defaultScopeId("scope")
                 .pseudonymImplementation(PseudonymImplementation.DEFAULT)
                 .build());
@@ -126,7 +126,7 @@ class PseudonymizedIdentityTest {
     @Test
     void asPseudonym_legacy() {
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("an irrelevant per org secret")
+                .pseudonymizationSalt("salt")
                 .defaultScopeId("scope")
                 .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .build());
@@ -142,7 +142,7 @@ class PseudonymizedIdentityTest {
     @Test
     void asPseudonym_reversible_legacy() {
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("an irrelevant per org secret")
+                .pseudonymizationSalt("salt")
                 .defaultScopeId("scope")
                 .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .build());
@@ -152,7 +152,7 @@ class PseudonymizedIdentityTest {
                 .includeReversible(true)
                 .build());
 
-        assertEquals("BlFx65qHrkRrhMsuq7lg4bCpwsbXgpLhVZnZ6VBMqoY",
+        assertEquals("UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
             pseudonymizedIdentity.getHash());
 
         PseudonymizedIdentity notReversible =

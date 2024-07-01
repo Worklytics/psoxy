@@ -187,7 +187,7 @@ endpoints:
           - "$..['@odata.context']"
           - "$..['@odata.count']"
           - "$..['@odata.type']"
-  - pathRegex: "^/(v1.0|beta)/communications/callRecords/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)(?<queryParameters>[a-zA-z0-9\\\
+  - pathRegex: "^/v1.0/communications/callRecords/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)(?<queryParameters>[a-zA-z0-9\\\
     s\\$\\=\\?\\(\\)]*)"
     allowedQueryParams:
       - "$select"
@@ -383,7 +383,7 @@ endpoints:
           - "$..joinMeetingIdSettings.passcode"
           - "$..['@odata.context']"
           - "$..['@odata.type']"
-  - pathRegex: "^/(v1.0|beta)/users(/p~[a-zA-Z0-9_-]+?)?[^/]*"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*"
     allowedQueryParams:
       - "$top"
       - "$select"
@@ -403,6 +403,7 @@ endpoints:
           - "$..preferredName"
           - "$..givenName"
           - "$..surname"
+          - "$..jobTitle"
           - "$..mailNickname"
           - "$..responsibilities"
           - "$..skills"

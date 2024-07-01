@@ -136,22 +136,59 @@ which have been the subject of criticism by security researchers. In particular:
 
 ### Provisioning API clients without Terraform
 
-While not recommend, it is possibly to set up Google API clients without Terraform, via the GCP web
-console:
+While not recommended, it is possible to set up Google API clients without Terraform, via the GCP
+web console.
 
 1. Create or choose the GCP project in which to create the OAuth Clients.
 2. Activate relevant API(s) in the project.
-3. Create a Service Account and a JSON key for the service account.
-4. Base64-encode the key and store it as a Systems Manager Parameter in AWS (same region as your
-   lambda function deployed). The parameter name should be something like
-   `PSOXY_GDIRECTORY_SERVICE_ACCOUNT_KEY`. Ensure you do inadvertently add extra characters,
-   including whitespace, when copying-pasting the key value.
-5. Get the numeric ID of the service account. Use this plus the oauth scopes to make domain-wide
+3. Create a Service Account in the project; this will be the OAuth Client.
+4. Get the numeric ID of the service account. Use this plus the oauth scopes to make domain-wide
    delegation grants via the Google Workspace admin console.
 
-NOTE: you could also use a single Service Account for everything, but you will need to store it's
-key repeatedly in AWS/GCP as the `SERVICE_ACCOUNT_KEY` for each of your Google Workspace
-connections.
+Then follow the steps in the next section to create the keys for the Oauth Clients.
+
+NOTE: if you are creating connections to multiple Google Workspace sources, you can use a single
+OAuth client and share it between all the proxy instances. You just need to authorize the entire
+superset of Oauth scopes required by those connnections for the OAuth Client via the Google Workspace
+Admin console.
+
+
+### Provisioning API Keys without Terraform
+
+If your organization's policies don't allow GCP service account keys to be managed via Terraform
+(or you lack the perms to do so), you can still use our Terraform modules to create the clients, and
+just add the following to your `terraform.tfvars` to disable provisioning of the keys:
+
+```hcl
+google_workspace_provision_keys = false
+```
+
+Then you can create the keys manually, and store them in your secrets manager of choice.
+
+For each API client you need to:
+
+1. Create a JSON key for the service account (via GCP console or CLI)
+2. Base64-encode the key; eg `cat service-account.json | base64 | pbcopy`
+3. store it as a secret named should be something like `PSOXY_GDIRECTORY_SERVICE_ACCOUNT_KEY`. Our
+   Terraform modules should still create an instance of the secret in your host environment, just
+   filled with a placeholder value.
+
+For GCP Secrets manager, you can do (3) via CLI as follows:
+`pbpaste | gcloud secrets versions add PSOXY_GCAL_SERVICE_ACCOUNT_KEY --data-file=- --project=YOUR_PROJECT_ID`
+
+For AWS Systems Manager Parameter Store, you can do (3) via CLI as follows:
+`pbpaste | aws ssm put-parameter --name PSOXY_GCAL_SERVICE_ACCOUNT_KEY --type SecureString --value - --region us-east1`
+
+(NOTE: please refer to aws/gcloud docs for exact versions of commands above; YMMV, as this is not
+our recommended approach for managing keys)
+
+If you are sharing a single OAuth client between multiple proxy instances, you just repeat step (3)
+for EACH client. (eg, store N copies of the key, all with the same value)
+
+Whenever you want to rotate the key (which GCP recommends at least every 90 days), you must repeat
+the steps in this section (no need to create Service Account again; just create a new key for it
+and put the new version into Secrets Manager).
+
 
 ## Domain-wide Delegation Alternative
 

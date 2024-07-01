@@ -84,7 +84,7 @@ variable "jira_server_url" {
 variable "jira_cloud_id" {
   type        = string
   default     = null
-  description = "(Only required if using Jira Cloud connector) Cloud id of the Jira Cloud to connect to (ex: 1324a887-45db-1bf4-1e99-ef0ff456d421)."
+  description = "(Only required if using Jira Cloud connector) Example of cloud id of the Jira Cloud to connect to (ex: 1324a887-45db-1bf4-1e99-ef0ff456d421)."
 }
 
 #DEPRECATED

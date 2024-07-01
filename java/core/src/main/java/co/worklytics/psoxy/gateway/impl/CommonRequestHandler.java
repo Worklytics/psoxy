@@ -111,8 +111,9 @@ public class CommonRequestHandler {
      */
     private static final Joiner HEADER_JOINER = Joiner.on(",");
 
+    @VisibleForTesting
+    volatile RESTApiSanitizer sanitizer;
 
-    private volatile RESTApiSanitizer sanitizer;
     private final Object $writeLock = new Object[0];
 
     private RESTApiSanitizer loadSanitizerRules() {
@@ -149,10 +150,16 @@ public class CommonRequestHandler {
 
         boolean tokenizedURLReversed = ObjectUtils.notEqual(requestedTargetUrl, clearTargetUrl);
 
-        URL targetUrl = new URL(clearTargetUrl);
+        // Using original URL to check sanitized rules, as they should match the original URL. It could contain tokenized components.
+        // Examples:
+        // /v1/accounts/p~12adsfasdfasdf31
+        // /v1/accounts/12345
+        URL originalRequestedURL = new URL(requestedTargetUrl);
+        // And the URL to use for source request; it could contain the reversed tokenized components
+        URL targetForSourceApiRequest = new URL(clearTargetUrl);
 
         // avoid logging clear URL outside of dev
-        URL toLog = envVarsConfigService.isDevelopment() ? targetUrl : new URL(requestedTargetUrl);
+        URL toLog = envVarsConfigService.isDevelopment() ? targetForSourceApiRequest : originalRequestedURL;
 
         boolean skipSanitization = skipSanitization(request);
 
@@ -163,7 +170,8 @@ public class CommonRequestHandler {
         String callLog = String.format("%s %s TokenInUrlReversed=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), tokenizedURLReversed);
         if (skipSanitization) {
             log.info(String.format("%s. Skipping sanitization.", callLog));
-        } else if (sanitizer.isAllowed(request.getHttpMethod(), targetUrl)) {
+        } else if (sanitizer.isAllowed(request.getHttpMethod(),
+                originalRequestedURL)) {
             log.info(String.format("%s. Rules allowed call.", callLog));
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
@@ -184,7 +192,7 @@ public class CommonRequestHandler {
                 content = new ByteArrayContent(contentType, request.getBody());
             }
 
-            sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(targetUrl), content);
+            sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(targetForSourceApiRequest), content);
         } catch (IOException e) {
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             builder.body("Failed to parse request; review logs");
@@ -202,7 +210,7 @@ public class CommonRequestHandler {
         }
 
         //TODO: what headers to forward???
-        populateHeadersFromSource(sourceApiRequest, request, targetUrl);
+        populateHeadersFromSource(sourceApiRequest, request, targetForSourceApiRequest);
 
         //setup request
         sourceApiRequest
@@ -236,7 +244,7 @@ public class CommonRequestHandler {
                 } else {
                     RESTApiSanitizer sanitizerForRequest = getSanitizerForRequest(request);
 
-                    proxyResponseContent = sanitizerForRequest.sanitize(request.getHttpMethod(), targetUrl, responseContent);
+                    proxyResponseContent = sanitizerForRequest.sanitize(request.getHttpMethod(), originalRequestedURL, responseContent);
                     String rulesSha = rulesUtils.sha(sanitizerForRequest.getRules());
                     builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
                     log.info("response sanitized with rule set " + rulesSha);
@@ -402,7 +410,9 @@ public class CommonRequestHandler {
 
     // NOTE: not 'decrypt', as that is only one possible implementation of reversible tokenization
     String reverseTokenizedUrlComponents(String encodedURL) {
-        return pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(encodedURL, reversibleTokenizationStrategy);
+        String result = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(encodedURL, reversibleTokenizationStrategy);
+
+        return result;
     }
 
     private void logIfDevelopmentMode(Supplier<String> messageSupplier) {
