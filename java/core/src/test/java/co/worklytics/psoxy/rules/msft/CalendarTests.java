@@ -23,7 +23,7 @@ public class CalendarTests extends EntraIDTests {
         .build();
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     void events(String apiVersion) {
         String endpoint = "https://graph.microsoft.com/" + apiVersion +
             "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events";
@@ -46,7 +46,7 @@ public class CalendarTests extends EntraIDTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     void calendarEvents(String apiVersion) {
         String endpoint = "https://graph.microsoft.com/" + apiVersion +
             "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendars/AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=/events";
@@ -69,7 +69,7 @@ public class CalendarTests extends EntraIDTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"beta"})
+    @ValueSource(strings = {"v1.0"})
     void calendarViews(String apiVersion) {
         String endpoint = "https://graph.microsoft.com/" + apiVersion +
             "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView";
@@ -97,7 +97,7 @@ public class CalendarTests extends EntraIDTests {
 
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     void event(String apiVersion) {
         String endpoint = "https://graph.microsoft.com/" + apiVersion +
             "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events";
@@ -127,7 +127,7 @@ public class CalendarTests extends EntraIDTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     public void mailboxSettings(String apiVersion) {
         String endpoint = "https://graph.microsoft.com/" + apiVersion +
             "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/mailboxSettings";
@@ -139,10 +139,10 @@ public class CalendarTests extends EntraIDTests {
 
     @Test
     public void calendarView_zoomUrls() {
-        String endpoint = "https://graph.microsoft.com/" + "beta" +
+        String endpoint = "https://graph.microsoft.com/" + "v1.0" +
             "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView";
 
-        String jsonResponse = asJson("CalendarView_beta_wZoomUrls.json");
+        String jsonResponse = asJson("CalendarView_v1.0_wZoomUrls.json");
 
         assertNotSanitized(jsonResponse,
             "https://acme.zoom.us/j/12354234234?pwd=123123&from=addon"
@@ -158,21 +158,15 @@ public class CalendarTests extends EntraIDTests {
     @Override // rather than copy directory examples
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
-            InvocationExample.of("https://graph.microsoft.com/beta/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendars/AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=/events", "CalendarEvents_beta.json"),
-
             InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendars/AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=/events", "CalendarEvents_v1.0.json"),
-            InvocationExample.of("https://graph.microsoft.com/beta/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView",
-                "CalendarView_beta.json"),
-            InvocationExample.of("https://graph.microsoft.com/beta/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView",
-                "CalendarView_beta_wZoomUrls.json"),
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView",
+                "CalendarView_v1.0.json"),
+            InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView",
+                "CalendarView_v1.0_wZoomUrls.json"),
             //InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView",
             //    "CalendarView_v1.0.json"),
-            InvocationExample.of("https://graph.microsoft.com/beta/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events",
-                "Events_beta.json"),
             InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events",
                 "Events_v1.0.json"),
-            InvocationExample.of("https://graph.microsoft.com/beta/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events/asdfasdfas",
-                "Event_beta.json"),
             InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events/asdfasdf",
                 "Event_v1.0.json")
             );

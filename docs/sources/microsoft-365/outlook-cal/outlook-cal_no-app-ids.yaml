@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathRegex: "^/(v1.0|beta)/users(/p~[a-zA-Z0-9_-]+?)?[^/]*"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*"
     allowedQueryParams:
       - "$top"
       - "$select"
@@ -47,7 +47,7 @@ endpoints:
           - "$..id"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
+  - pathRegex: "^/v1.0/groups/?[^/]*"
     transforms:
       - !<pseudonymizeRegexMatches>
         jsonPaths:
@@ -73,7 +73,7 @@ endpoints:
           - "$..mail"
         includeOriginal: true
         encoding: "JSON"
-  - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
+  - pathRegex: "^/v1.0/groups/[^/]*/members.*"
     allowedQueryParams:
       - "$top"
       - "$select"
@@ -119,7 +119,7 @@ endpoints:
         jsonPaths:
           - "$..id"
         encoding: "JSON"
-  - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
+  - pathRegex: "^/v1.0/users/[^/]*/mailboxSettings"
     transforms:
       - !<redact>
         jsonPaths:
@@ -128,7 +128,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..['@odata.context']"
-  - pathRegex: "^/(v1.0|beta)/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))"
+  - pathRegex: "^/v1.0/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))"
     transforms:
       - !<redactExceptSubstringsMatchingRegexes>
         jsonPaths:
