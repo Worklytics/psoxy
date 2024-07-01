@@ -155,6 +155,22 @@ public class CalendarTests extends EntraIDTests {
         assertNotSanitized(sanitized, "https://acme.zoom.us/j/12354234234");
     }
 
+    @Test
+    public void calendarView_teams_meeting() {
+        String endpoint = "https://graph.microsoft.com/" + "v1.0" +
+                "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView";
+
+        String jsonResponse = asJson("CalendarView_v1.0_wOnlineMeetings.json");
+
+        assertNotSanitized(jsonResponse,
+                "https://teams.microsoft.com/l/meetup-join/19%3ameeting_MjI3MDU2NWItYTdmYy00YTRiLTkyOGQtNzE1OTQ4NDBkZDEz%40thread.v2/0?context=%7b%22Tid%22%3a%226e4c8e9f-76cf-41d1-806e-61838b880b87%22%2c%22Oid%22%3a%226257b47d-9e87-418b-9ac2-031f09397de7%22%7d"
+        );
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+
+        assertNotSanitized(sanitized, "https://teams.microsoft.com/l/meetup-join/19%3ameeting_MjI3MDU2NWItYTdmYy00YTRiLTkyOGQtNzE1OTQ4NDBkZDEz%40thread.v2/0?context=%7b%22Tid%22%3a%226e4c8e9f-76cf-41d1-806e-61838b880b87%22%2c%22Oid%22%3a%226257b47d-9e87-418b-9ac2-031f09397de7%22%7d");
+    }
+
     @Override // rather than copy directory examples
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
@@ -163,6 +179,8 @@ public class CalendarTests extends EntraIDTests {
                 "CalendarView_v1.0.json"),
             InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView",
                 "CalendarView_v1.0_wZoomUrls.json"),
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView",
+                        "CalendarView_v1.0_wOnlineMeetings.json"),
             //InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView",
             //    "CalendarView_v1.0.json"),
             InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/events",
