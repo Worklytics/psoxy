@@ -211,7 +211,8 @@ locals {
         GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
         TOKEN_SCOPE : "https://graph.microsoft.com/.default"
         REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-      },
+      }
+      external_todo : null
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}",
@@ -228,7 +229,7 @@ locals {
       identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"
-      required_oauth2_permission_scopes : [],
+      required_oauth2_permission_scopes : []
       # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
       required_app_roles : [
         # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
@@ -239,7 +240,8 @@ locals {
         GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
         TOKEN_SCOPE : "https://graph.microsoft.com/.default"
         REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-      },
+      }
+      external_todo : null
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}",
@@ -256,7 +258,7 @@ locals {
       identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"
-      required_oauth2_permission_scopes : [],
+      required_oauth2_permission_scopes : []
       required_app_roles : [
         "OnlineMeetings.Read.All",
         "OnlineMeetingArtifact.Read.All",
@@ -270,6 +272,7 @@ locals {
         TOKEN_SCOPE : "https://graph.microsoft.com/.default"
         REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
       },
+      external_todo : null
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}/events",
@@ -288,19 +291,20 @@ locals {
       identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"
-      required_oauth2_permission_scopes : [],
+      required_oauth2_permission_scopes : []
       required_app_roles : [
         "Mail.ReadBasic.All",
         "MailboxSettings.Read",
         "Group.Read.All",
         "User.Read.All"
-      ],
+      ]
       environment_variables : {
         GRANT_TYPE : "workload_identity_federation"
         # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
         TOKEN_SCOPE : "https://graph.microsoft.com/.default"
         REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
       }
+      external_todo : null
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
@@ -311,7 +315,7 @@ locals {
     },
     "msft-teams" : {
       source_kind : "msft-teams"
-      availability : "ga",
+      availability : "beta",
       enable_by_default : false,
       worklytics_connector_id : "msft-teams-psoxy",
       display_name : "Microsoft Teams"
@@ -348,7 +352,7 @@ locals {
         "/v1.0/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(time_static.deployment.id, "-2160h"))},toDateTime=${urlencode(time_static.deployment.id)})",
         "/v1.0/users/${var.example_msft_user_guid}/onlineMeetings"
       ]
-      external_token_todo : <<EOT
+      external_todo : <<EOT
 To enable the connector, you need to allow permissions on the application created for reading OnlineMeetings. You will need Powershell for this.
 
 Please follow the steps below:
