@@ -62,12 +62,11 @@ variable "msft_owners_email" {
   default     = []
 }
 
-variable "existing_app_object_id" {
+variable "msft_connector_app_object_id" {
   type        = string
   description = "BETA; if provided, the app corresponding to this object id will be used instead of creating new ones per source. User must ensure that roles/scopes are appropriate for the connector"
   default     = null
 }
-
 
 variable "todos_as_local_files" {
   type        = bool
