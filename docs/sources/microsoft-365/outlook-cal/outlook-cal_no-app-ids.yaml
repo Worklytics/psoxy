@@ -185,3 +185,102 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..['calendar@odata.associationLink', 'calendar@odata.navigationLink']"
+  - pathTemplate: "/v1.0/users/{userId}/onlineMeetings"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$filter"
+      - "$orderby"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..subject"
+          - "$..joinMeetingIdSettings.isPasscodeRequired"
+          - "$..joinMeetingIdSettings.passcode"
+          - "$..['@odata.context']"
+          - "$..['@odata.type']"
+  - pathTemplate: "/v1.0/users/{userId}/onlineMeetings/{meetingId}/attendanceReports"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$filter"
+      - "$orderby"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..subject"
+          - "$..joinMeetingIdSettings.isPasscodeRequired"
+          - "$..joinMeetingIdSettings.passcode"
+          - "$..['@odata.context']"
+          - "$..['@odata.type']"
+  - pathTemplate: "/v1.0/users/{userId}/onlineMeetings/{meetingId}/attendanceReports/{reportId}"
+    allowedQueryParams:
+      - "$select"
+      - "$top"
+      - "$skiptoken"
+      - "$filter"
+      - "$orderby"
+      - "$count"
+      - "$expand"
+      - "$format"
+      - "$search"
+      - "$skip"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..subject"
+          - "$..joinMeetingIdSettings.isPasscodeRequired"
+          - "$..joinMeetingIdSettings.passcode"
+          - "$..['@odata.context']"
+          - "$..['@odata.type']"
