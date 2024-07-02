@@ -3,6 +3,9 @@
 This page provides an overview of how psoxy authenticates and confirms authorization of clients
 (Worklytics tenants) to access data for GCP-hosted deployments.
 
+For general overview of how Psoxy is authorized to access data sources, and authenticates when
+making API calls to those sources, see [API Mode Authentication and Authorization](../authentication-authorization.md).
+
 ## Authentication
 
 As Worklytics tenants run inside GCP, they are implicitly authenticated by GCP. No secrets or keys

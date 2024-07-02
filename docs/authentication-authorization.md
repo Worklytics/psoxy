@@ -33,8 +33,8 @@ data source is specified in the documentation of each connector.
 
 See https://docs.worklytics.co/psoxy#supported-data-sources
 
-The proxy **authenticates** usually via one of the support Oauth 2.0 mechanisms, see [https://oauth.net/2/client-authentication/].
-Most commonly, these are [Client Credentials](https://oauth.net/2/grant-types/client-credentials/)
+The proxy **authenticates** itself for calls to the data source using one of the supported OAuth 2.0
+mechanisms, see [https://oauth.net/2/client-authentication/]. Most commonly, these are [Client Credentials](https://oauth.net/2/grant-types/client-credentials/)
 or [Workload Identity Federation](https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation).
 
 In particular, a quick overview for common sources:
@@ -45,4 +45,9 @@ In particular, a quick overview for common sources:
   - Slack authenticates via Client Credentials (a Slack App token)
   - Salesforce authenticates via Client Credentials (a Salesforce App client id + secret)
   - Zoom authenticates via Client Credentials (a Zoom App client id + secret)
+
+In all cases relying on secrets (a key, client secret, token, etc) to authenticate, these values
+are stored in the secret store implementation of your Host cloud provider (eg, GCP Secret Manager)
+and **never** passed to or accessed by Worklytics.  Worklytics has no means to directly connect to
+any of your data sources.
 

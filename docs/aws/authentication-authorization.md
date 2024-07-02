@@ -1,7 +1,10 @@
 # Authentication and Authorization in AWS Deployments of Psoxy
 
-This page provides an overview of how proxy authenticates and confirms authorization of clients
+This page provides an overview of how Psoxy authenticates and confirms authorization of clients
 (Worklytics tenants).
+
+For general overview of how Psoxy is authorized to access data sources, and authenticates when
+making API calls to those sources, see [API Mode Authentication and Authorization](../authentication-authorization.md).
 
 ## Authentication
 
