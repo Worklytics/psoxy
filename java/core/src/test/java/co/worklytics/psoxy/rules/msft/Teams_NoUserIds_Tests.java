@@ -236,7 +236,7 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0"})
-    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS)
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.ONLINE_MEETINGS_PATH_TEMPLATES)
     public void users_onlineMeetings(String apiVersion) {
         String userId = "dc17674c-81d9-4adb-bfb2-8f6a442e4622";
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/users/" + userId + "/onlineMeetings";
