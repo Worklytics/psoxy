@@ -355,7 +355,7 @@ Please follow the steps below:
 1. Ensure the user you are going to use for running the commands has the "Teams Administrator" role. You can add the role in the
 [Microsoft 365 Admin Center](https://learn.microsoft.com/en-us/microsoft-365/admin/add-users/assign-admin-roles?view=o365-worldwide#assign-a-user-to-an-admin-role-from-active-users)
 
-**NOTE**: About the role, can be assigned through Entra Id portal in Azure portal OR in Entra Admin center https://admin.microsoft.com/AdminPortal/Home. It is possible that even login with an admin account in Entra Admin Center the Teams role is not available to assign to any user; if so, please do it through Azure Portal (Entra Id -> Users -> Assign roles)
+**NOTE**: About the role, can be assigned through Entra Id portal in Azure portal OR in Entra Id Admin center https://admin.microsoft.com/AdminPortal/Home. It is possible that even login with an admin account in Entra Admin Center the Teams role is not available to assign to any user; if so, please do it through Azure Portal (Entra Id -> Users -> Assign roles)
 
 2. Install [PowerShell Teams](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install)  You can use `pwsh` in the terminal
     enter to PowerShell.
@@ -368,7 +368,7 @@ Connect-MicrosoftTeams
 4. Follow steps on [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
   - Add a policy for the application created for the connector, providing its `application id`
 ```shell
-New-CsApplicationAccessPolicy -Identity Teams-Policy-For-Worklytics -AppIds "%%entraid.application_id%%" -Description "Policy for MSFT Teams used for Worklytics Psoxy connector"
+New-CsApplicationAccessPolicy -Identity Teams-Policy-For-Worklytics -AppIds %%entraid.application_ids%% -Description "Policy for MSFT Teams used for Worklytics Psoxy connector"
 ```
   - Grant the policy to the whole tenant (NOT to any specific application or user)
 ```shell
