@@ -10,17 +10,33 @@ terraform {
   }
 }
 
-data "azuread_application_published_app_ids" "well_known" {}
+locals {
+  provision_azuread_application = var.existing_app_object_id == null
+}
+
+data "azuread_application_published_app_ids" "well_known" {
+  count = local.provision_azuread_application ? 1 : 0
+}
 
 data "azuread_service_principal" "msgraph" {
+  count = local.provision_azuread_application ? 1 : 0
+
   # Deprecated since 2.44.0:
   # https://registry.terraform.io/providers/hashicorp/azuread/2.44.0/docs/data-sources/service_principal
-  application_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
+  application_id = data.azuread_application_published_app_ids.well_known[0].result.MicrosoftGraph
   # Uncomment when azuread version is bumped to 2.44.0 or greater
   # client_id      = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
 }
 
+data "azuread_application" "connector" {
+  count = local.provision_azuread_application ? 0 : 1
+
+  object_id = var.existing_app_object_id
+}
+
 resource "azuread_application" "connector" {
+  count = local.provision_azuread_application ? 1 : 0
+
   display_name = var.display_name
 
   # NOTE: introduced in 2.7.0
@@ -35,7 +51,7 @@ resource "azuread_application" "connector" {
   owners = var.owners
 
   required_resource_access {
-    resource_app_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
+    resource_app_id = data.azuread_application_published_app_ids.well_known[0].result.MicrosoftGraph
 
     dynamic "resource_access" {
       for_each = var.required_oauth2_permission_scopes
@@ -43,7 +59,7 @@ resource "azuread_application" "connector" {
       content {
         # this approach is consistent with what you get via `az ad sp list`, which is what MSFT docs
         # recommend: https://docs.microsoft.com/en-us/graph/permissions-reference#retrieving-permission-ids
-        id   = data.azuread_service_principal.msgraph.oauth2_permission_scope_ids[resource_access.value]
+        id   = data.azuread_service_principal.msgraph[0].oauth2_permission_scope_ids[resource_access.value]
         type = "Scope"
       }
     }
@@ -52,7 +68,7 @@ resource "azuread_application" "connector" {
       for_each = var.required_app_roles
 
       content {
-        id   = data.azuread_service_principal.msgraph.app_role_ids[resource_access.value]
+        id   = data.azuread_service_principal.msgraph[0].app_role_ids[resource_access.value]
         type = "Role"
       }
     }
@@ -60,5 +76,5 @@ resource "azuread_application" "connector" {
 }
 
 output "connector" {
-  value = azuread_application.connector
+  value = local.provision_azuread_application ? azuread_application.connector[0] : data.azuread_application.connector[0]
 }
