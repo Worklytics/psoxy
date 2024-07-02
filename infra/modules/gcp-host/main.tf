@@ -180,6 +180,10 @@ module "api_connector" {
     module.psoxy.secrets,
     module.psoxy.artifact_repository
   )
+
+  depends_on = [
+    google_service_account.api_connectors
+  ]
 }
 
 module "custom_api_connector_rules" {
