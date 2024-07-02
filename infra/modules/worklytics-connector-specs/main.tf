@@ -366,7 +366,7 @@ Connect-MicrosoftTeams
 ```
 
 4. Follow steps on [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
-  - Add a policy for the application created for the connector, providing its `application id`
+  - Add a policy for the application created for the connector, providing its `application id` (NOTE: if `outlook-cal` is already present, it will be included as well it contains the OnlineMeetings role)
 ```shell
 New-CsApplicationAccessPolicy -Identity Teams-Policy-For-Worklytics -AppIds %%entraid.application_ids%% -Description "Policy for MSFT Teams used for Worklytics Psoxy connector"
 ```

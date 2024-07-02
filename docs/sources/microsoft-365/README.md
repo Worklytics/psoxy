@@ -115,7 +115,8 @@ And use the user with the "Teams Administrator" for login it.
 4. Follow steps on
    [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
 
-- Add a policy for the application created for the connector, providing its `application id`
+- Add a policy for the application created for the connector, providing the `application id` for Teams
+  and for outlook-calendar if present, as meetings artifacts can be retrieved as part of calendar events too.
 - Grant the policy to the whole tenant (NOT to any specific application or user)
 
 **Issues**:
