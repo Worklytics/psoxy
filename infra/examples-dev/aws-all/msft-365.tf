@@ -55,12 +55,12 @@ module "cognito_identity_pool" {
 
 locals {
   # either ONE shared, or ONE per connector
-  shared_connector = var.msft_connector_app_object_id == null ? null : module.worklytics_connectors_msft_365.enabled_api_connectors[0].connector
+  shared_connector = var.msft_connector_app_object_id == null ? null : module.worklytics_connectors_msft_365.enabled_api_connectors[keys(module.worklytics_connectors_msft_365.enabled_api_connectors)[0]]
   cognito_identity_login_ids = var.msft_connector_app_object_id == null ? {
       for k, msft_connector in module.worklytics_connectors_msft_365.enabled_api_connectors :
-      k => msft_connector.connector.application_id
+      k => msft_connector.connector.client_id
     } : {
-      "shared" : local.shared_connector.application_id
+      "shared" : local.shared_connector.connector.client_id
     }
 }
 
@@ -74,8 +74,8 @@ module "cognito_identity" {
   aws_role         = var.aws_assume_role_arn
   identity_pool_id = module.cognito_identity_pool[0].pool_id
   login_ids = {
-    for k, application_id in local.cognito_identity_login_ids :
-     k => "${local.developer_provider_name}=${application_id}"
+    for k, client_id in local.cognito_identity_login_ids :
+     k => "${local.developer_provider_name}=${client_id}"
   }
 }
 
@@ -91,7 +91,7 @@ locals {
 
   azuread_federated_credentials_to_provision = local.provision_entraid_apps ? module.worklytics_connectors_msft_365.enabled_api_connectors : {
       "shared" : merge(
-        module.worklytics_connectors_msft_365.enabled_api_connectors[0],
+        local.shared_connector,
         { display_name: "Shared" })
     }
 }
@@ -117,7 +117,7 @@ locals {
       environment_variables = merge(try(msft_connector.environment_variables, {}),
         {
           IDENTITY_POOL_ID  = module.cognito_identity_pool[0].pool_id,
-          IDENTITY_ID       = module.cognito_identity[0].identity_id[k],
+          IDENTITY_ID       = try(module.cognito_identity[0].identity_id[k], module.cognito_identity[0].identity_id["shared"]),
           DEVELOPER_NAME_ID = local.developer_provider_name
         }
       )

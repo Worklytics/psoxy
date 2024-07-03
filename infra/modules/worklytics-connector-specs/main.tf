@@ -370,9 +370,9 @@ Connect-MicrosoftTeams
 ```
 
 4. Follow steps on [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
-  - Add a policy for the application created for the connector, providing its `application id`
+  - Add a policy for the application created for the connector, providing its `application id` (client ID)
 ```shell
-New-CsApplicationAccessPolicy -Identity Teams-Policy-For-Worklytics -AppIds "%%entraid.application_id%%" -Description "Policy for MSFT Teams used for Worklytics Psoxy connector"
+New-CsApplicationAccessPolicy -Identity Teams-Policy-For-Worklytics -AppIds "%%entraid.client_id%%" -Description "Policy for MSFT Teams used for Worklytics Psoxy connector"
 ```
   - Grant the policy to the whole tenant (NOT to any specific application or user)
 ```shell

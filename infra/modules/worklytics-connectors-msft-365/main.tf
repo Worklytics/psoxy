@@ -70,7 +70,7 @@ module "msft_365_grants" {
   source = "../../modules/azuread-grant-all-users"
 
   psoxy_instance_id        = each.key
-  application_id           = module.msft_connection[each.key].connector.application_id
+  application_id           = module.msft_connection[each.key].connector.client_id
   oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
   app_roles                = each.value.required_app_roles
   application_name         = each.key
@@ -95,8 +95,8 @@ ${ module.msft_365_grants[each.key].todo}
 ## Setup
 Then, please follow next instructions to complete the setup:
 
-${replace(each.value.external_token_todo, "%%entraid.application_id%%",
-    try(module.msft_connection[each.key].connector.application_id, data.azuread_application.existing_connector_app[0].application_id))}
+${replace(each.value.external_token_todo, "%%entraid.client_id%%",
+    try(module.msft_connection[each.key].connector.client_id, data.azuread_application.existing_connector_app[0].client_id))}
 EOT
 }
 
@@ -106,7 +106,7 @@ locals {
     k => merge(v, {
       connector = try(module.msft_connection[k].connector, data.azuread_application.existing_connector_app[0])
       environment_variables = merge(v.environment_variables, {
-        CLIENT_ID = try(module.msft_connection[k].connector.application_id, data.azuread_application.existing_connector_app[0].application_id)
+        CLIENT_ID = try(module.msft_connection[k].connector.client_id, data.azuread_application.existing_connector_app[0].client_id)
       })
     })
   }

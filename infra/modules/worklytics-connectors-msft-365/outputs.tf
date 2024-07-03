@@ -35,8 +35,8 @@ output "api_clients" {
   value = {
     for id, connection in module.msft_connection :
     id => {
-      azuread_application_id = connection.connector.application_id
-      oauth_client_id        = connection.connector.application_id # yes, it's same as application id; but duplicated for clarity
+      azuread_application_id = connection.connector.client_id
+      oauth_client_id        = connection.connector.client_id # yes, it's same as application id; but duplicated for clarity
       azuread_object_id      = connection.connector.object_id      # used for terraform imports
     }
   }
