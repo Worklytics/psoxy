@@ -40,7 +40,7 @@ fi
 touch rc_to_main.md
 echo "$RELEASE back to main" >> rc_to_main.md
 echo "" >> rc_to_main.md
-echo "Next steps:" >> rc_to_main.md
+echo "Next steps, after that's merged to \`main\`:" >> rc_to_main.md
 echo "  1. publish the release: \`./tools/release/publish.sh $RELEASE\`" >> rc_to_main.md
 echo "  2. update stable deployment in demos repo to point to $RELEASE" >> rc_to_main.md
 echo "  3. prep next rc: \`./tools/release/prep.sh $RELEASE rc-{x.y.z}\`" >> rc_to_main.md
