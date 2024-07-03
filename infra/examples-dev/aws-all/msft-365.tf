@@ -53,6 +53,17 @@ module "cognito_identity_pool" {
   name                    = "${local.env_qualifier}-azure-ad-federation"
 }
 
+locals {
+  # either ONE shared, or ONE per connector
+  shared_connector = var.msft_connector_app_object_id == null ? null : module.worklytics_connectors_msft_365.enabled_api_connectors[0].connector
+  cognito_identity_login_ids = var.msft_connector_app_object_id == null ? {
+      for k, msft_connector in module.worklytics_connectors_msft_365.enabled_api_connectors :
+      k => msft_connector.connector.application_id
+    } : {
+      "shared" : local.shared_connector.application_id
+    }
+}
+
 module "cognito_identity" {
   count = local.msft_365_enabled ? 1 : 0 # only provision identity pool if MSFT-365 connectors are enabled
 
@@ -63,8 +74,8 @@ module "cognito_identity" {
   aws_role         = var.aws_assume_role_arn
   identity_pool_id = module.cognito_identity_pool[0].pool_id
   login_ids = {
-    for k, v in module.worklytics_connectors_msft_365.enabled_api_connectors :
-    k => "${local.developer_provider_name}=${v.connector.application_id}"
+    for k, application_id in local.cognito_identity_login_ids :
+     k => "${local.developer_provider_name}=${application_id}"
   }
 }
 
@@ -75,8 +86,18 @@ resource "aws_iam_role_policy_attachment" "cognito_lambda_policy" {
   policy_arn = module.cognito_identity_pool[0].policy_arn
 }
 
+locals {
+  provision_entraid_apps = var.msft_connector_app_object_id == null
+
+  azuread_federated_credentials_to_provision = local.provision_entraid_apps ? module.worklytics_connectors_msft_365.enabled_api_connectors : {
+      "shared" : merge(
+        module.worklytics_connectors_msft_365.enabled_api_connectors[0],
+        { display_name: "Shared" })
+    }
+}
+
 module "msft_connection_auth_federation" {
-  for_each = module.worklytics_connectors_msft_365.enabled_api_connectors
+  for_each = local.azuread_federated_credentials_to_provision
 
   source = "../../modules/azuread-federated-credentials"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=v0.4.56"
