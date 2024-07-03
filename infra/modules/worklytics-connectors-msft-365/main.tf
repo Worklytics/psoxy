@@ -78,6 +78,22 @@ module "msft_365_grants" {
   todo_step                = var.todo_step
 }
 
+module "msft_365_grant_to_shared" {
+  count = local.provision_entraid_apps ? 0 : 1
+
+  source = "../../modules/azuread-grant-all-users"
+
+  psoxy_instance_id        = "msft-365"
+  application_id           = data.azuread_application.existing_connector_app[0].client_id
+  oauth2_permission_scopes = data.azuread_application.existing_connector_app[0].api[0].oauth2_permission_scopes[*].admin_consent_display_name
+  # TODO: this is a list of GUIDs, so not very user-friendly
+  app_roles                = flatten([for id in [ for k, v in data.azuread_application.existing_connector_app[0].required_resource_access[*].resource_access[*] : v[*].id ] : id[*] ])
+  application_name         = data.azuread_application.existing_connector_app[0].display_name
+  todos_as_local_files     = var.todos_as_local_files
+  todo_step                = var.todo_step
+}
+
+
 # NOTE: this OVERWRITES the todo_file created by the azuread-grant-all-users module, if there's an
 # external_token_todo to append to that file
 locals {
