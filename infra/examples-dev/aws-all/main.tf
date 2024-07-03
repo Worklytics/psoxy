@@ -133,6 +133,7 @@ module "psoxy" {
   custom_bulk_connector_rules          = var.custom_bulk_connector_rules
   custom_bulk_connector_arguments      = var.custom_bulk_connector_arguments
   todo_step                            = local.max_auth_todo_step
+  todos_as_local_files                 = var.todos_as_local_files
 
 
   #  vpc_config = {
@@ -157,15 +158,16 @@ module "connection_in_worklytics" {
   source = "../../modules/worklytics-psoxy-connection-aws"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.56"
 
-  psoxy_instance_id  = each.key
-  worklytics_host    = var.worklytics_host
-  aws_region         = var.aws_region
-  aws_role_arn       = module.psoxy.caller_role_arn
-  psoxy_endpoint_url = try(each.value.endpoint_url, null)
-  bucket_name        = try(each.value.sanitized_bucket, null)
-  connector_id       = try(local.all_connectors[each.key].worklytics_connector_id, "")
-  display_name       = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
-  todo_step          = module.psoxy.next_todo_step
+  psoxy_instance_id    = each.key
+  worklytics_host      = var.worklytics_host
+  aws_region           = var.aws_region
+  aws_role_arn         = module.psoxy.caller_role_arn
+  psoxy_endpoint_url   = try(each.value.endpoint_url, null)
+  bucket_name          = try(each.value.sanitized_bucket, null)
+  connector_id         = try(local.all_connectors[each.key].worklytics_connector_id, "")
+  display_name         = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
+  todo_step            = module.psoxy.next_todo_step
+  todos_as_local_files = var.todos_as_local_files
 
   connector_settings_to_provide = try(each.value.settings_to_provide, {})
 
