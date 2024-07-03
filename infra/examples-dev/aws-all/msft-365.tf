@@ -54,9 +54,11 @@ module "cognito_identity_pool" {
 }
 
 locals {
+
+  provision_entraid_apps = var.msft_connector_app_object_id == null
   # either ONE shared, or ONE per connector
-  shared_connector = var.msft_connector_app_object_id == null ? null : module.worklytics_connectors_msft_365.enabled_api_connectors[keys(module.worklytics_connectors_msft_365.enabled_api_connectors)[0]]
-  cognito_identity_login_ids = var.msft_connector_app_object_id == null ? {
+  shared_connector = local.provision_entraid_apps ? null : module.worklytics_connectors_msft_365.enabled_api_connectors[keys(module.worklytics_connectors_msft_365.enabled_api_connectors)[0]]
+  cognito_identity_login_ids = local.provision_entraid_apps ? {
       for k, msft_connector in module.worklytics_connectors_msft_365.enabled_api_connectors :
       k => msft_connector.connector.client_id
     } : {
@@ -87,22 +89,27 @@ resource "aws_iam_role_policy_attachment" "cognito_lambda_policy" {
 }
 
 locals {
-  provision_entraid_apps = var.msft_connector_app_object_id == null
 
-  azuread_federated_credentials_to_provision = local.provision_entraid_apps ? module.worklytics_connectors_msft_365.enabled_api_connectors : {
-      "shared" : merge(
-        local.shared_connector,
-        { display_name: "Shared" })
+  enabled_to_entraid_object = { for k, msft_connector in module.worklytics_connectors_msft_365.enabled_api_connectors : k => {
+      connector_id: msft_connector.connector.id
+      display_name: msft_connector.display_name
     }
+  }
+  shared_to_entraid_object = {
+    "shared" : {
+      connector_id: try(local.shared_connector.connector.id, null),
+      display_name: "Shared"
+    }
+  }
 }
 
 module "msft_connection_auth_federation" {
-  for_each = local.azuread_federated_credentials_to_provision
+  for_each = local.provision_entraid_apps ? local.enabled_to_entraid_object : local.shared_to_entraid_object
 
   source = "../../modules/azuread-federated-credentials"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=v0.4.56"
 
-  application_object_id = each.value.connector.id
+  application_object_id = each.value.connector_id
   display_name          = "${local.env_qualifier}AccessFromAWS"
   description           = "AWS federation to be used for ${local.env_qualifier} Connectors - ${each.value.display_name}${var.connector_display_name_suffix}"
   issuer                = "https://cognito-identity.amazonaws.com"
