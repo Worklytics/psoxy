@@ -7,30 +7,21 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
-## 0.5 *future, subject to change!!*
-  - RULES only via config management, never env variable
-  - Eliminate "fall-through" configs.
-     - `PATH_TO_SHARED_CONFIG` - env var that locates shared parameters within the config store.
-     - `PATH_TO_CONNECTOR_CONFIG` - env var that locates connector-specific parameters within the
-       config store.
-  - Expect distinct paths for the shared and connector scopes, to support more  straight-forward IAM
-    policies.
-     - eg, `PSOXY_SHARED` and `PSOXY_GCAL`, to allow IAM policies such as "read `PSOXY_SHARED*`" and
-        "read+write `PSOXY_GCAL*`" (if shared secrets have common prefix with connector secrets,
-        then wildcard policy to read shared also grants read of secrets across all connectors)
-  - keys/salts per value kind (PII, item id, etc)
+## [0.4.56](https://github.com/Worklytics/psoxy/release/tag/v0.4.56)
+ - due to refactoring, users of Microsoft connectors may see some moves of resources in Terraform
+   plan; these will be no-ops.
 
-## [0.4.55]https://github.com/Worklytics/psoxy/release/tag/v0.4.55
+## [0.4.55](https://github.com/Worklytics/psoxy/release/tag/v0.4.55)
 - For Microsoft Connectors:
   - reference to `msgraph` service principal has been replaced with `data` instead of `terraform` resource.
     For that reason you will see changes in plan related to these resource, but those changes are only related on the resources for Terraform
     state as the kind (*data* from *resource*) has been changed. No change will be done in real Entra ID for that.
   - dropping support for `/beta` endpoints in Microsoft Graph API. All endpoints are now using `/v1.0` version.
 
-## [0.4.53]https://github.com/Worklytics/psoxy/release/tag/v0.4.53)
-  - As Microsoft Azure Active Directory has been [renamed](https://learn.microsoft.com/en-us/entra/fundamentals/new-name) 
-    to Microsoft Entra ID, there is a new connector `msft-entra-id`. Old connector `azure-ad` is deprecated and in case of 
-    new connection, the new one `msft-entra-id` should be used. 
+## [0.4.53](https://github.com/Worklytics/psoxy/release/tag/v0.4.53)
+  - As Microsoft Azure Active Directory has been [renamed](https://learn.microsoft.com/en-us/entra/fundamentals/new-name)
+    to Microsoft Entra ID, there is a new connector `msft-entra-id`. Old connector `azure-ad` is deprecated and in case of
+    new connection, the new one `msft-entra-id` should be used.
 
 ## [0.4.52](https://github.com/Worklytics/psoxy/release/tag/v0.4.52)
   - BREAKING: default behavior for sub-addressing aka "plus addressing" of emails has changed; the
@@ -50,8 +41,8 @@ Changes to be including in future/planned release notes will be added here.
     if you fork an example > 0.4.52 and are attempting to migrate a proxy deployment initially built
     with modules or examples from < 0.4.52, you should explicitly add `email_canonicalization = "STRICT"`
     in your `terraform.tfvars`
-  - GCP: Existing GCP functions are using *Container Registry* for building their internal docker image where the psoxy code is deployed. However, 
-    this is [deprecated since May 2023 and starting Feb 2024](https://cloud.google.com/container-registry/docs/deprecations/container-registry-deprecation) it 
+  - GCP: Existing GCP functions are using *Container Registry* for building their internal docker image where the psoxy code is deployed. However,
+    this is [deprecated since May 2023 and starting Feb 2024](https://cloud.google.com/container-registry/docs/deprecations/container-registry-deprecation) it
     is required that functions use *Artifact Registry* instead. All deployments made since this version will use *Artifact Registry*
     default repository for storing all psoxy images. Any previous version before this version will work without any issue.
 
@@ -324,3 +315,18 @@ Upgrade Notes:
   - secret management has been refactored; you may see indications of some secrets being moved, or
     even destroyed and recreated. If you plan shows SALT or ENCRYPTION_KEY as being destroyed,
     **DO NOT** apply the plan and contact Worklytics support for assistance.
+
+# Planned
+
+## 0.5 *future, subject to change!!*
+- RULES only via config management, never env variable
+- Eliminate "fall-through" configs.
+    - `PATH_TO_SHARED_CONFIG` - env var that locates shared parameters within the config store.
+    - `PATH_TO_CONNECTOR_CONFIG` - env var that locates connector-specific parameters within the
+      config store.
+- Expect distinct paths for the shared and connector scopes, to support more  straight-forward IAM
+  policies.
+    - eg, `PSOXY_SHARED` and `PSOXY_GCAL`, to allow IAM policies such as "read `PSOXY_SHARED*`" and
+      "read+write `PSOXY_GCAL*`" (if shared secrets have common prefix with connector secrets,
+      then wildcard policy to read shared also grants read of secrets across all connectors)
+- keys/salts per value kind (PII, item id, etc)
