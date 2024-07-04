@@ -21,7 +21,7 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.55"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.4.56"
 
   enabled_connectors               = var.enabled_connectors
   jira_cloud_id                    = var.jira_cloud_id
@@ -35,6 +35,8 @@ module "worklytics_connectors" {
   github_organization              = var.github_organization
   github_example_repository        = var.github_example_repository
   salesforce_example_account_id    = var.salesforce_example_account_id
+  todos_as_local_files             = var.todos_as_local_files
+  todo_step                        = 1
 }
 
 # sources which require additional dependencies are split into distinct Terraform files, following
@@ -99,7 +101,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.4.55"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.4.56"
 
   environment_name                     = var.environment_name
   aws_account_id                       = var.aws_account_id
@@ -133,6 +135,7 @@ module "psoxy" {
   custom_bulk_connector_rules          = var.custom_bulk_connector_rules
   custom_bulk_connector_arguments      = var.custom_bulk_connector_arguments
   todo_step                            = local.max_auth_todo_step
+  todos_as_local_files                 = var.todos_as_local_files
 
 
   #  vpc_config = {
@@ -155,17 +158,18 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.55"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.4.56"
 
-  psoxy_instance_id  = each.key
-  worklytics_host    = var.worklytics_host
-  aws_region         = var.aws_region
-  aws_role_arn       = module.psoxy.caller_role_arn
-  psoxy_endpoint_url = try(each.value.endpoint_url, null)
-  bucket_name        = try(each.value.sanitized_bucket, null)
-  connector_id       = try(local.all_connectors[each.key].worklytics_connector_id, "")
-  display_name       = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
-  todo_step          = module.psoxy.next_todo_step
+  psoxy_instance_id    = each.key
+  worklytics_host      = var.worklytics_host
+  aws_region           = var.aws_region
+  aws_role_arn         = module.psoxy.caller_role_arn
+  psoxy_endpoint_url   = try(each.value.endpoint_url, null)
+  bucket_name          = try(each.value.sanitized_bucket, null)
+  connector_id         = try(local.all_connectors[each.key].worklytics_connector_id, "")
+  display_name         = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
+  todo_step            = module.psoxy.next_todo_step
+  todos_as_local_files = var.todos_as_local_files
 
   connector_settings_to_provide = try(each.value.settings_to_provide, {})
 
