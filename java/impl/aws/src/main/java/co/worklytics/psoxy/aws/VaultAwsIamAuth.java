@@ -217,7 +217,7 @@ public class VaultAwsIamAuth {
             //if succeeds, content is the lambda's identity  (eg, it's IAM execution role)
             log.info("STS preflight check succeeded");
             //actual content is XML; don't want to mess around w XML parser so if you want to
-            // double-chekc identity, uncomment the following:
+            // double-check identity, uncomment the following:
             // log.info("Assumed rule: " + IOUtils.toString(r.getEntity().getContent(), StandardCharsets.UTF_8));
         } else {
             throw new RuntimeException("STS preflight failed: " + r.getStatusLine());
