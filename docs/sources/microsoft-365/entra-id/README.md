@@ -35,5 +35,5 @@ of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
 - [Default Rules](entra-id.yaml)
 - [Rules, pseudonymizing MSFT account IDs](entra-id_no-app-ids.yaml)
-- [Rules, pseudonimizing MSFT account IDs](entra-id_no-app-ids_no-orig.yaml)
+- [Rules, pseudonymizing MSFT account IDs](entra-id_no-app-ids_no-orig.yaml)
 
