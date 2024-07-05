@@ -1,6 +1,6 @@
 # Microsoft Teams
 
-Connect Micorosft Teams data to Worklytics, enabling communication analysis and general collaboration
+Connect Microsoft Teams data to Worklytics, enabling communication analysis and general collaboration
 insights based on collaboration via Micorosft Teams. Includes user enumeration to support fetching
 mailboxes from each account; and group enumeration to expand emails via mailing list (groups).
 
