@@ -1,4 +1,4 @@
-# Micorosft Teams
+# Microsoft Teams
 
 Connect Micorosft Teams data to Worklytics, enabling communication analysis and general collaboration
 insights based on collaboration via Micorosft Teams. Includes user enumeration to support fetching
