@@ -60,5 +60,9 @@ resource "azuread_application" "connector" {
 }
 
 output "connector" {
-  value = azuread_application.connector
+  value = merge(azuread_application.connector,
+    # ensure client_id is filled, even for older versions of Azure AD provider
+    {
+      client_id = try(azuread_application.connector.client_id, azuread_application.connector.application_id)
+    })
 }

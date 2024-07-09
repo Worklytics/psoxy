@@ -7,8 +7,14 @@ variable "msft_tenant_id" {
 
 variable "msft_owners_email" {
   type        = set(string)
-  description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
+  description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user. Ignored if `existing_app_object_id` provided."
   default     = []
+}
+
+variable "msft_connector_app_object_id" {
+  type        = string
+  description = "BETA; if provided, the app corresponding to this object id will be used instead of creating new ones per source. User must ensure that roles/scopes are appropriate for the connector"
+  default     = null
 }
 
 variable "example_msft_user_guid" {
