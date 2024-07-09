@@ -22,19 +22,24 @@ module "worklytics_connector_specs" {
 }
 
 locals {
-  todos_to_populate = { for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors : k => v if try(v.external_token_todo != null, false) && var.todos_as_local_files }
+  provision_entraid_apps = var.msft_connector_app_object_id == null
+  connectors_needing_apps = local.provision_entraid_apps ? module.worklytics_connector_specs.enabled_msft_365_connectors : {}
 }
 
 data "azuread_client_config" "current" {
+  count = local.provision_entraid_apps ? 1 : 0
 
 }
 
 data "azuread_users" "owners" {
+  count = local.provision_entraid_apps && length(var.msft_owners_email) > 0 ? 1 : 0
+
   user_principal_names = var.msft_owners_email
 }
 
+
 module "msft_connection" {
-  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
+  for_each = local.connectors_needing_apps
 
   source = "../../modules/azuread-connection"
 
@@ -42,21 +47,30 @@ module "msft_connection" {
   tenant_id                         = var.msft_tenant_id
   required_app_roles                = each.value.required_app_roles
   required_oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
-  owners = toset(concat(data.azuread_users.owners.object_ids, [
-    data.azuread_client_config.current.object_id
+  owners = toset(concat(data.azuread_users.owners[0].object_ids, [
+    data.azuread_client_config.current[0].object_id
   ]))
 }
+
+# if an existing app object id is provided, use it as a shared app for ALL MSFT connectors
+# (requires that it has the superset of permissions required by all connectors)
+data "azuread_application" "existing_connector_app" {
+  count = var.msft_connector_app_object_id == null ? 0 : 1
+
+  object_id = var.msft_connector_app_object_id
+}
+
 
 # grant required permissions to connectors via Azure AD
 # (requires terraform configuration being applied by an Azure User with privileges to do this; it
 #  usually requires a 'Global Administrator' for your tenant)
 module "msft_365_grants" {
-  for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
+  for_each = local.connectors_needing_apps
 
   source = "../../modules/azuread-grant-all-users"
 
   psoxy_instance_id        = each.key
-  application_id           = module.msft_connection[each.key].connector.application_id
+  application_id           = module.msft_connection[each.key].connector.client_id
   oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
   app_roles                = each.value.required_app_roles
   application_name         = each.key
@@ -64,20 +78,51 @@ module "msft_365_grants" {
   todo_step                = var.todo_step
 }
 
+module "msft_365_grant_to_shared" {
+  count = local.provision_entraid_apps ? 0 : 1
+
+  source = "../../modules/azuread-grant-all-users"
+
+  psoxy_instance_id        = "msft-365"
+  application_id           = data.azuread_application.existing_connector_app[0].client_id
+  oauth2_permission_scopes = data.azuread_application.existing_connector_app[0].api[0].oauth2_permission_scopes[*].admin_consent_display_name
+  # TODO: this is a list of GUIDs, so not very user-friendly
+  app_roles                = flatten([for id in [ for k, v in data.azuread_application.existing_connector_app[0].required_resource_access[*].resource_access[*] : v[*].id ] : id[*] ])
+  application_name         = data.azuread_application.existing_connector_app[0].display_name
+  todos_as_local_files     = var.todos_as_local_files
+  todo_step                = var.todo_step
+}
+
+
+# NOTE: this OVERWRITES the todo_file created by the azuread-grant-all-users module, if there's an
+# external_token_todo to append to that file
+locals {
+  todos_to_populate = { for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors :
+    k => v if try(v.external_token_todo != null, false) && var.todos_as_local_files
+  }
+}
+
 resource "local_file" "todo-with-external-todo" {
   for_each = local.todos_to_populate
 
   filename = module.msft_365_grants[each.key].filename
-  content  = format("%s\n## Setup\nThen, please follow next instructions for complete the setup: \n\n%s", module.msft_365_grants[each.key].todo, replace(each.value.external_token_todo, "%%entraid.application_id%%", module.msft_connection[each.key].connector.application_id))
+  content  = <<EOT
+${ module.msft_365_grants[each.key].todo}
+## Setup
+Then, please follow next instructions to complete the setup:
+
+${replace(each.value.external_token_todo, "%%entraid.client_id%%",
+    try(module.msft_connection[each.key].connector.client_id, data.azuread_application.existing_connector_app[0].client_id))}
+EOT
 }
 
 locals {
   enabled_api_connectors = {
     for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors :
     k => merge(v, {
-      connector = module.msft_connection[k].connector
+      connector = try(module.msft_connection[k].connector, data.azuread_application.existing_connector_app[0])
       environment_variables = merge(v.environment_variables, {
-        CLIENT_ID = module.msft_connection[k].connector.application_id
+        CLIENT_ID = try(module.msft_connection[k].connector.client_id, data.azuread_application.existing_connector_app[0].client_id)
       })
     })
   }
