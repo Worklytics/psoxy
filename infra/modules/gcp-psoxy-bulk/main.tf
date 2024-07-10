@@ -162,12 +162,11 @@ resource "google_service_account_iam_member" "act_as" {
 }
 
 resource "google_cloudfunctions_function" "function" {
-  name        = local.function_name
-  description = "Psoxy instance to process ${var.source_kind} files"
-  runtime     = "java11"
-  project     = var.project_id
-  region      = var.region
-
+  name                  = local.function_name
+  description           = "Psoxy instance to process ${var.source_kind} files"
+  runtime               = "java17"
+  project               = var.project_id
+  region                = var.region
   available_memory_mb   = coalesce(var.available_memory_mb, 1024)
   source_archive_bucket = var.artifacts_bucket_name
   source_archive_object = var.deployment_bundle_object_name
