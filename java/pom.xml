@@ -20,7 +20,7 @@
         <dependency.guava.version>32.0.1-jre</dependency.guava.version>
         <dependency.commons-io.version>2.13.0</dependency.commons-io.version>
         <dependency.apache-httpcore.version>5.2.2</dependency.apache-httpcore.version>
-        <dependency.google-cloud-bom.version>0.198.0</dependency.google-cloud-bom.version>
+        <dependency.google-cloud-bom.version>26.42.0</dependency.google-cloud-bom.version>
         <dependency.google-http-client.version>1.43.3</dependency.google-http-client.version>
         <dependency.google-auth-library-oauth2-http.version>1.18.0</dependency.google-auth-library-oauth2-http.version>
         <dependency.junit-jupiter.version>5.10.1</dependency.junit-jupiter.version>
