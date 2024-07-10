@@ -177,7 +177,7 @@
             <!-- produces an 'uber' JAR, with all deps pkg'd -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.6.0</version> <!-- 3.7.0, 3.7.1 don't work; 3.7.1 is default as of mvn 3.9.8 ... -->
+                <version>3.7.1</version>
                 <configuration>
                     <archive>
                         <manifest>
