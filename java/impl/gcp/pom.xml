@@ -154,6 +154,8 @@
 
                   mvn function:run -Drun.functionTarget=your.package.yourFunction
 
+                  eg, mvn function:run -Drun.functionTarget=co.worklytics.psoxy.Route
+
                   NOTE: intellij deploy run config doesn't work the first time. you should run the
                   `gcloud functions deploy` cmd once interactively, and follow the prompt to confirm
                   that you wish to block unauthenticated connections

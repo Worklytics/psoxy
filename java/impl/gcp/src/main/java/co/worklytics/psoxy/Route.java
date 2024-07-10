@@ -1,6 +1,5 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
