@@ -21,7 +21,7 @@
         <!-- serviceAccount that function will run as. For Google Workspace use cases, should be the
          one configured as OAuth Client and authorized for your instance. -->
         <serviceAccount>psoxy-gmail-dwd@psoxy-dev-erik.iam.gserviceaccount.com</serviceAccount>
-        <google-libraries-bom.version>26.42.0</google-libraries-bom.version>
+        <google-libraries-bom.version>${dependency.google-cloud-bom.version}</google-libraries-bom.version>
     </properties>
 
     <repositories>
