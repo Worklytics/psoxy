@@ -46,7 +46,7 @@
             <dependency>
                 <groupId>com.google.cloud</groupId>
                 <artifactId>libraries-bom</artifactId>
-                <version>${google-libraries-bom.version}</version>
+                <version>${dependency.google-cloud-bom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
