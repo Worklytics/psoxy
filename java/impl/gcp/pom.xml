@@ -96,6 +96,7 @@
             <groupId>com.google.cloud.functions</groupId>
             <artifactId>functions-framework-api</artifactId>
             <version>1.1.0</version> <!-- June 2023 - https://mvnrepository.com/artifact/com.google.cloud.functions/functions-framework-api -->
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
