@@ -177,6 +177,7 @@
             <!-- produces an 'uber' JAR, with all deps pkg'd -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.6.0</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -246,7 +247,7 @@
 
             <!-- add license plugin -->
             <!-- use mvn goal license:aggregate-third-party-report to get report on licenses about
-                 dependencies, to facillitate eventual distribution of built JAR -->
+                 dependencies, to facilitate eventual distribution of built JAR -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
