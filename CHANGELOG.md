@@ -7,6 +7,12 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
+
+## [0.4.58](https://github.com/Worklytics/psoxy/release/tag/v0.4.58)
+- AWS-only: added SIDs to IAM policies for clarity; and added additional statements to
+  S3 policies to explicitly deny non-SSL operations
+
+
 ## [0.4.57](https://github.com/Worklytics/psoxy/release/tag/v0.4.57)
 Several changes in this version will result in visible changes during `terraform plan`/`apply`:
 - Permission changes on Microsoft 365:

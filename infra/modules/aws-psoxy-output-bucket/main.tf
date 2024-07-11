@@ -72,6 +72,7 @@ resource "aws_iam_policy" "sanitized_bucket_read" {
       "Version" : "2012-10-17",
       "Statement" : [
         {
+          "Sid": "AllowRead"
           "Action" : [
             "s3:GetObject",
             "s3:ListBucket"

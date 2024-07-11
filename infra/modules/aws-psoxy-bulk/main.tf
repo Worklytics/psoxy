@@ -154,11 +154,28 @@ resource "aws_iam_policy" "input_bucket_getObject_policy" {
       "Version" : "2012-10-17",
       "Statement" : [
         {
+          "Sid": "AllowObjectRead"
           "Action" : [
             "s3:GetObject"
           ],
           "Effect" : "Allow",
           "Resource" : "${aws_s3_bucket.input.arn}/*"
+        },
+        {
+          "Sid": "DenyNonSSLActions",
+          "Action" : [
+            "s3:*"
+          ],
+          "Effect" : "Deny",
+          "Resource" : [
+            "${aws_s3_bucket.input.arn}",
+            "${aws_s3_bucket.input.arn}/*"
+          ],
+          "Condition": {
+            "Bool": {
+              "aws:SecureTransport": "false"
+            }
+          }
         }
       ]
   })
@@ -185,11 +202,28 @@ resource "aws_iam_policy" "sanitized_bucket_write_policy" {
       "Version" : "2012-10-17",
       "Statement" : [
         {
+          "Sid": "AllowObjectWrite",
           "Action" : [
             "s3:PutObject",
           ],
           "Effect" : "Allow",
           "Resource" : "${aws_s3_bucket.sanitized.arn}/*"
+        },
+        {
+          "Sid": "DenyNonSSLActions",
+          "Action" : [
+            "s3:*"
+          ],
+          "Effect" : "Deny",
+          "Resource" : [
+            "${aws_s3_bucket.sanitized.arn}",
+            "${aws_s3_bucket.sanitized.arn}/*"
+          ],
+          "Condition": {
+            "Bool": {
+              "aws:SecureTransport": "false"
+            }
+          }
         }
       ]
   })
