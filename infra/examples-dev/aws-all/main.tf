@@ -126,6 +126,7 @@ module "psoxy" {
   aws_ssm_key_id                       = var.project_aws_kms_key_arn
   use_api_gateway_v2                   = var.use_api_gateway_v2
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
+  iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   secrets_store_implementation         = var.secrets_store_implementation
   bulk_sanitized_expiration_days       = var.bulk_sanitized_expiration_days
   bulk_input_expiration_days           = var.bulk_input_expiration_days

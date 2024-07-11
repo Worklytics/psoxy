@@ -56,6 +56,8 @@ module "psoxy_lambda" {
   vpc_config                           = var.vpc_config
   secrets_store_implementation         = var.secrets_store_implementation
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
+  iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
+
 
   environment_variables = merge(
     var.environment_variables,

@@ -141,6 +141,11 @@ variable "global_secrets_manager_secret_arns" {
   default     = {}
 }
 
+variable "iam_roles_permissions_boundary" {
+  type        = string
+  description = "*beta* ARN of the permissions boundary to attach to IAM roles created by this module."
+  default     = null
+}
 
 # TODO: remove after v0.4.x
 variable "function_parameters" {
