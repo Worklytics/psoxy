@@ -54,7 +54,6 @@ resource "google_service_account_iam_member" "act_as" {
   service_account_id = data.google_service_account.function.id
 }
 
-
 resource "google_cloudfunctions2_function" "function" {
   project                      = var.project_id
   name                         = "${var.environment_id_prefix}${var.instance_id}"
@@ -63,6 +62,7 @@ resource "google_cloudfunctions2_function" "function" {
 
   # trigger_http                 = true
   # https_trigger_security_level = "SECURE_ALWAYS"
+
 
   labels                       = var.default_labels
 

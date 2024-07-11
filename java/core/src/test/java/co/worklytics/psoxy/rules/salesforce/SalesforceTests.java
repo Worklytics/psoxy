@@ -1,4 +1,4 @@
-package co.worklytics.psoxy.salesforce;
+package co.worklytics.psoxy.rules.salesforce;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RESTRules;

@@ -32,7 +32,7 @@ data "azuread_client_config" "current" {
 }
 
 data "azuread_users" "owners" {
-  count = local.provision_entraid_apps && length(var.msft_owners_email) > 0 ? 1 : 0
+  count = local.provision_entraid_apps ? 1 : 0
 
   user_principal_names = var.msft_owners_email
 }

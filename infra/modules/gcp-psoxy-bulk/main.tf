@@ -167,15 +167,16 @@ resource "google_cloudfunctions_function" "function" {
   runtime               = "java17"
   project               = var.project_id
   region                = var.region
+
   available_memory_mb   = coalesce(var.available_memory_mb, 1024)
   source_archive_bucket = var.artifacts_bucket_name
   source_archive_object = var.deployment_bundle_object_name
-  docker_repository     = var.artifact_repository_id
   entry_point           = "co.worklytics.psoxy.GCSFileEvent"
   service_account_email = google_service_account.service_account.email
   timeout               = 540 # 9 minutes, which is gen1 max allowed
   labels                = var.default_labels
-  docker_registry       = "CONTAINER_REGISTRY"
+  docker_registry       = "ARTIFACT_REGISTRY"
+  docker_repository     = var.artifact_repository_id
 
   environment_variables = merge(tomap({
     INPUT_BUCKET  = google_storage_bucket.input_bucket.name,
