@@ -190,7 +190,7 @@
                         </manifest>
                     </archive>
                     <descriptors>
-                        <descriptor>uber-jar.xml</descriptor>
+                        <descriptor>../uber-jar.xml</descriptor>
                     </descriptors>
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
