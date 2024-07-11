@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathTemplate: "/{apiVersion}/teams"
+  - pathTemplate: "/v1.0/teams"
     allowedQueryParams:
       - "$select"
       - "$top"
@@ -25,7 +25,7 @@ endpoints:
           - "$..['@odata.id']"
           - "$..['@odata.type']"
           - "$..['@odata.count']"
-  - pathTemplate: "/{apiVersion}/teams/{teamId}/allChannels"
+  - pathTemplate: "/v1.0/teams/{teamId}/allChannels"
     allowedQueryParams:
       - "$select"
       - "$filter"
@@ -47,7 +47,7 @@ endpoints:
           - "$..['@odata.id']"
           - "$..['@odata.type']"
           - "$..['@odata.count']"
-  - pathTemplate: "/{apiVersion}/users/{userId}/chats"
+  - pathTemplate: "/v1.0/users/{userId}/chats"
     allowedQueryParams:
       - "$select"
       - "$top"
@@ -70,7 +70,7 @@ endpoints:
           - "$..topic"
           - "$..['@odata.context']"
           - "$..['@odata.count']"
-  - pathTemplate: "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages"
+  - pathTemplate: "/v1.0/teams/{teamId}/channels/{channelId}/messages"
     allowedQueryParams:
       - "$select"
       - "$top"
@@ -99,7 +99,7 @@ endpoints:
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink']"
         regex: "^https://graph.microsoft.com/(.*)$"
-  - pathTemplate: "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages/delta"
+  - pathTemplate: "/v1.0/teams/{teamId}/channels/{channelId}/messages/delta"
     allowedQueryParams:
       - "$select"
       - "$top"
@@ -130,7 +130,7 @@ endpoints:
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink']"
         regex: "^https://graph.microsoft.com/(.*)$"
-  - pathTemplate: "/{apiVersion}/chats/{chatId}/messages"
+  - pathTemplate: "/v1.0/chats/{chatId}/messages"
     allowedQueryParams:
       - "$select"
       - "$top"
@@ -166,7 +166,7 @@ endpoints:
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink']"
         regex: "^https://graph.microsoft.com/(.*)$"
-  - pathTemplate: "/{apiVersion}/communications/calls/{callId}"
+  - pathTemplate: "/v1.0/communications/calls/{callId}"
     allowedQueryParams:
       - "$select"
       - "$top"
@@ -224,7 +224,7 @@ endpoints:
         jsonPaths:
           - "$.['sessions@odata.nextLink']"
         regex: "^https://graph.microsoft.com/(.*)$"
-  - pathTemplate: "/{apiVersion}/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})"
+  - pathTemplate: "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})"
     allowedQueryParams:
       - "$skip"
     transforms:
@@ -254,7 +254,7 @@ endpoints:
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink']"
         regex: "^https://graph.microsoft.com/(.*)$"
-  - pathTemplate: "/{apiVersion}/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})"
+  - pathTemplate: "/v1.0/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})"
     allowedQueryParams:
       - "$skip"
     transforms:
@@ -284,7 +284,7 @@ endpoints:
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink']"
         regex: "^https://graph.microsoft.com/(.*)$"
-  - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings"
+  - pathTemplate: "/v1.0/users/{userId}/onlineMeetings"
     allowedQueryParams:
       - "$select"
       - "$top"
@@ -317,7 +317,7 @@ endpoints:
           - "$..joinMeetingIdSettings.passcode"
           - "$..['@odata.context']"
           - "$..['@odata.type']"
-  - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings/{meetingId}/attendanceReports"
+  - pathTemplate: "/v1.0/users/{userId}/onlineMeetings/{meetingId}/attendanceReports"
     allowedQueryParams:
       - "$select"
       - "$top"
@@ -350,7 +350,7 @@ endpoints:
           - "$..joinMeetingIdSettings.passcode"
           - "$..['@odata.context']"
           - "$..['@odata.type']"
-  - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings/{meetingId}/attendanceReports/{reportId}"
+  - pathTemplate: "/v1.0/users/{userId}/onlineMeetings/{meetingId}/attendanceReports/{reportId}"
     allowedQueryParams:
       - "$select"
       - "$top"

@@ -205,7 +205,8 @@ locals {
       required_app_roles : [
         # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
         "User.Read.All",
-        "Group.Read.All"
+        "Group.Read.All",
+        "MailboxSettings.Read",
       ]
       environment_variables : {
         GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
@@ -234,7 +235,8 @@ locals {
       required_app_roles : [
         # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
         "User.Read.All",
-        "Group.Read.All"
+        "Group.Read.All",
+        "MailboxSettings.Read"
       ]
       environment_variables : {
         GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
@@ -260,8 +262,6 @@ locals {
       target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : []
       required_app_roles : [
-        "OnlineMeetings.Read.All",
-        "OnlineMeetingArtifact.Read.All",
         "Calendars.Read",
         "MailboxSettings.Read",
         "Group.Read.All",

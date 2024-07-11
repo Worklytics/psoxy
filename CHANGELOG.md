@@ -7,6 +7,18 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
+## [0.4.57](https://github.com/Worklytics/psoxy/release/tag/v0.4.57)
+Several changes in this version will result in visible changes during `terraform plan`/`apply`:
+- Permission changes on Microsoft 365:
+  - `MailboxSettings.Read` permission has been added for directory connectors (`azure-ad`, `entra-id`)
+    This will have NO impact until your Admin grants this permission in the Microsoft 365 Admin
+    Center; until that happens, Worklytics will continue to NOT retrieve mailbox settings.
+  - `OnlineMeetings.Read.All` and `OnlineMeetingArtifact.Read.All` permissions have been removed from `outlook-cal` connector
+- `java17` runtime by default (previously, was `java11`); `java11` is still supported by AWS, but
+   will be deprecated by GCP in Sept 2024. As of 0.4, proxy code is still compiled for java 11 - so
+   if you wish to keep using `java11` runtime, it will work; if you require this, let us know asnd
+   we'll expose option to select runtime version in the Terraform module.
+
 ## [0.4.56](https://github.com/Worklytics/psoxy/release/tag/v0.4.56)
  - due to refactoring, users of Microsoft connectors may see some moves of resources in Terraform
    plan; these will be no-ops.

@@ -89,6 +89,25 @@ fi
 printf "Opening release ${BLUE}${RELEASE}${NC} in browser; review / update notes and then publish as latest ...\n"
 gh release view $RELEASE --web
 
+printf "Do you want to create a docs branch based on the release? (Y/n)\n"
+read -p "(Y/n) " -n 1 -r
+REPLY=${REPLY:-Y}
+echo    # Move to a new line
+if [[ "$REPLY" =~ ^[Yy][Ee]?[Ss]?$ ]]; then
+ if git rev-parse --verify "docs-$RELEASE" >/dev/null 2>&1; then
+    printf "${RED}Branch docs-${RELEASE} already exists.${NC}\n"
+  else
+    git checkout -b "docs-$RELEASE"
+    git push origin "docs-$RELEASE"
+    git checkout main
+    printf "Docs branch ${GREEN}docs-$RELEASE${NC} created and pushed. View it at: ${BLUE}https://github.com/Worklytics/psoxy/tree/docs-$RELEASE${NC}\n"
+    printf "Manual steps to publish docs in GitBook: \n"
+    printf "1. Create a new space under the Psoxy collection with the same name than the release ${GREEN}X.Y.Z${NC}\n"
+    printf "2. Enable GitHub Sync on the new space and sync with the branch: ${GREEN}docs-$RELEASE${NC}\n"
+    printf "3. Share → Publish to the web → Publish in collection\n"
+    printf "4. Now, go back to the collection and customize: General → Default space → select ${GREEN}X.Y.Z${NC}\n"
+  fi
+fi
 
 printf "  Then update example templates to point to it:\n"
 if [ -d ~/code/psoxy-example-aws/ ]; then

@@ -152,6 +152,12 @@ variable "memory_size_mb" {
   default     = 512
 }
 
+variable "iam_roles_permissions_boundary" {
+  type        = string
+  description = "*beta* ARN of the permissions boundary to attach to IAM roles created by this module."
+  default     = null
+}
+
 variable "vpc_config" {
   type = object({
     # ipv6_allowed_for_dual_stack = optional(bool, false)

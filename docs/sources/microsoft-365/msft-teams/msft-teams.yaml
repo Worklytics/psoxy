@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathTemplate: "/{apiVersion}/teams"
+  - pathTemplate: "/v1.0/teams"
     allowedQueryParams:
       - "$select"
       - "$top"
@@ -16,7 +16,7 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$..description"
-  - pathTemplate: "/{apiVersion}/teams/{teamId}/allChannels"
+  - pathTemplate: "/v1.0/teams/{teamId}/allChannels"
     allowedQueryParams:
       - "$select"
       - "$filter"
@@ -29,7 +29,7 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$..description"
-  - pathTemplate: "/{apiVersion}/users/{userId}/chats"
+  - pathTemplate: "/v1.0/users/{userId}/chats"
     allowedQueryParams:
       - "$select"
       - "$top"
@@ -45,7 +45,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..topic"
-  - pathTemplate: "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages"
+  - pathTemplate: "/v1.0/teams/{teamId}/channels/{channelId}/messages"
     allowedQueryParams:
       - "$select"
       - "$top"
@@ -63,7 +63,7 @@ endpoints:
           - "$..attachments"
           - "$..mentions[*].mentionText"
           - "$..eventDetail.teamDescription"
-  - pathTemplate: "/{apiVersion}/teams/{teamId}/channels/{channelId}/messages/delta"
+  - pathTemplate: "/v1.0/teams/{teamId}/channels/{channelId}/messages/delta"
     allowedQueryParams:
       - "$select"
       - "$top"
@@ -83,7 +83,7 @@ endpoints:
           - "$..value[*].attachments"
           - "$..value[*].mentions[*].mentionText"
           - "$..value[*].eventDetail.teamDescription"
-  - pathTemplate: "/{apiVersion}/chats/{chatId}/messages"
+  - pathTemplate: "/v1.0/chats/{chatId}/messages"
     allowedQueryParams:
       - "$select"
       - "$top"
@@ -108,7 +108,7 @@ endpoints:
           - "$..value[*].mentions[*].mentionText"
           - "$..value[*].eventDetail.teamDescription"
           - "$..value[*].eventDetail.chatDisplayName"
-  - pathTemplate: "/{apiVersion}/communications/calls/{callId}"
+  - pathTemplate: "/v1.0/communications/calls/{callId}"
     allowedQueryParams:
       - "$select"
       - "$top"
@@ -143,7 +143,7 @@ endpoints:
           - "$..callee.name"
           - "$..captureDeviceName"
           - "$..renderDeviceName"
-  - pathTemplate: "/{apiVersion}/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})"
+  - pathTemplate: "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})"
     allowedQueryParams:
       - "$skip"
     transforms:
@@ -157,7 +157,7 @@ endpoints:
           - "$..value[*].userDisplayName"
           - "$..value[*].callerNumber"
           - "$..value[*].calleeNumber"
-  - pathTemplate: "/{apiVersion}/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})"
+  - pathTemplate: "/v1.0/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})"
     allowedQueryParams:
       - "$skip"
     transforms:
@@ -171,7 +171,7 @@ endpoints:
           - "$..value[*].userDisplayName"
           - "$..value[*].callerNumber"
           - "$..value[*].calleeNumber"
-  - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings"
+  - pathTemplate: "/v1.0/users/{userId}/onlineMeetings"
     allowedQueryParams:
       - "$select"
       - "$top"
@@ -197,7 +197,7 @@ endpoints:
           - "$..subject"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
-  - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings/{meetingId}/attendanceReports"
+  - pathTemplate: "/v1.0/users/{userId}/onlineMeetings/{meetingId}/attendanceReports"
     allowedQueryParams:
       - "$select"
       - "$top"
@@ -223,7 +223,7 @@ endpoints:
           - "$..subject"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
-  - pathTemplate: "/{apiVersion}/users/{userId}/onlineMeetings/{meetingId}/attendanceReports/{reportId}"
+  - pathTemplate: "/v1.0/users/{userId}/onlineMeetings/{meetingId}/attendanceReports/{reportId}"
     allowedQueryParams:
       - "$select"
       - "$top"
