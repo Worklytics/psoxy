@@ -7,6 +7,9 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
+## [0.4.57](https://github.com/Worklytics/psoxy/release/tag/v0.4.57)
+- For Microsoft 365 directory connectors (`azure-ad`, `entra-id`) `MailboxSettings.Read` permission has been added.
+
 ## [0.4.56](https://github.com/Worklytics/psoxy/release/tag/v0.4.56)
  - due to refactoring, users of Microsoft connectors may see some moves of resources in Terraform
    plan; these will be no-ops.
