@@ -164,7 +164,7 @@ resource "google_service_account_iam_member" "act_as" {
 resource "google_cloudfunctions_function" "function" {
   name        = local.function_name
   description = "Psoxy instance to process ${var.source_kind} files"
-  runtime     = "java11"
+  runtime     = "java17"
   project     = var.project_id
   region      = var.region
 

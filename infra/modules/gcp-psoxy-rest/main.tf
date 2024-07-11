@@ -58,7 +58,7 @@ resource "google_service_account_iam_member" "act_as" {
 resource "google_cloudfunctions_function" "function" {
   name        = "${var.environment_id_prefix}${var.instance_id}"
   description = "Psoxy Connector - ${var.source_kind}"
-  runtime     = "java11"
+  runtime     = "java17"
   project     = var.project_id
   region      = var.region
 
