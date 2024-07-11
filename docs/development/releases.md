@@ -34,7 +34,7 @@ Create PR to merge `rc-` to `main`.
 ./tools/release/rc-to-main.sh v0.4.16
 ```
 
-After merged to `main`:å
+After merged to `main`:
 
 ```shell
 ./tools/release/publish.sh v0.4.16
