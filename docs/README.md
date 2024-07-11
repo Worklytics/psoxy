@@ -126,7 +126,7 @@ modules, specific instructions that you can pass to the Microsoft 365 Admin will
 
 | Source&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Examples &nbsp;&nbsp;                                                                                                                                                                                                                  | Application Scopes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 |--------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Entra ID (former Active Directory)                                                                     | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/entra-id/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/entra-id/entra-id.yaml)             | [`User.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall) [`Group.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Entra ID (former Active Directory)                                                                     | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/entra-id/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/entra-id/entra-id.yaml)             | [`User.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall) [`Group.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall) [`MailboxSettings.Read`](https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxsettingsread)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | Calendar                                                                                               | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/outlook-cal/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/outlook-cal/outlook-cal.yaml)    | [`User.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall) [`Group.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall) [`Calendars.Read`](https://learn.microsoft.com/en-us/graph/permissions-reference#calendarsread) [`MailboxSettings.Read`](https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxsettingsread)                                                                                                                                                                                                                                       |
 | Mail                                                                                                   | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/outlook-mail/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/outlook-mail/outlook-mail.yaml) | [`User.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall) [`Group.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall) [`Mail.ReadBasic.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#mailreadbasicall) [`MailboxSettings.Read`](https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxsettingsread)                                                                                                                                                                                                                                                                                                                                                |
 | Teams (**__beta__**)                                                                                   | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/msft-teams/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/msft-teams/msft-teams.yaml)       | [`User.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall) [`Team.ReadBasic.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#teamreadbasicall) [`Channel.ReadBasic.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#channelreadbasicall) [`Chat.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#chatreadall) [`ChannelMessage.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#channelmessagereadall) [`CallRecords.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#channelmessagereadall) [`OnlineMeetings.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#onlinemeetingsreadall) |
@@ -234,13 +234,113 @@ NOTE: Refrain to use Terraform versions 1.4.x that are < v1.4.3. We've seen bugs
 
 Depending on your Cloud Host / Data Sources, you will need:
 
-| Condition                         | Tool                                                                                          | Test Command     | Roles / Permissions (Examples, YMMV)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-|-----------------------------------|-----------------------------------------------------------------------------------------------|------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| if deploying to AWS               | [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) 2.2+ | `aws --version`  | <ul><li>[IAMFullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/IAMFullAccess$serviceLevelSummary)</li><li>[AmazonSSMFullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AmazonSSMFullAccess$serviceLevelSummary)</li><li>[AWSLambda_FullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AWSLambda_FullAccess$serviceLevelSummary)</li><li>[AmazonS3FullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AmazonS3FullAccess$serviceLevelSummary)</li><li>[CloudWatchFullAccess](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/CloudWatchFullAccess$serviceLevelSummary)</li></ul><br/>see [aws/getting-started.md](aws/getting-started.md) |
-| if deploying to GCP               | [Google Cloud CLI](https://cloud.google.com/sdk/docs/install) 1.0+                            | `gcloud version` | <ul><li>[Service Account Creator](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountCreator)</li><li>[Cloud Functions Admin](https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.admin)</li><li>[Cloud Storage Admin](https://cloud.google.com/iam/docs/understanding-roles#storage.admin)</li><li>[Secret Manager Admin](https://cloud.google.com/iam/docs/understanding-roles#secretmanager.admin)</li><li>[Service Usage Admin](https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin)</li></ul><br/>see [gcp/getting-started.md](gcp/getting-started.md)                                                                                                                                                                                                                                                                                                              |
-| if connecting to Microsoft 365    | [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) 2.29+               | `az --version`   | [Cloud Application Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#cloud-application-administrator)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| if connecting to Google Workspace | [Google Cloud CLI](https://cloud.google.com/sdk/docs/install) 1.0+                            | `gcloud version` | <ul><li>[Service Account Creator](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountCreator)</li><li>[Service Account Key Admin](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountKeyAdmin)</li><li>[Service Usage Admin](https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin)</li></ul><br/>see [sources/google-workspace/README.md](sources/google-workspace/README.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-
+<table data-full-width="true">
+  <thead>
+    <tr>
+      <th>Condition</th>
+      <th>Tool</th>
+      <th>Test Command</th>
+      <th>Roles / Permissions (Examples, YMMV)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>if deploying to AWS</td>
+      <td>
+        <a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html">AWS CLI</a>
+        2.2+
+      </td>
+      <td><code>aws --version</code></td>
+      <td>
+        <ul>
+          <li>
+            <a
+              href="https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/IAMFullAccess$serviceLevelSummary">IAMFullAccess</a>
+          </li>
+          <li>
+            <a
+              href="https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AmazonSSMFullAccess$serviceLevelSummary">AmazonSSMFullAccess</a>
+          </li>
+          <li>
+            <a
+              href="https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AWSLambda_FullAccess$serviceLevelSummary">AWSLambda_FullAccess</a>
+          </li>
+          <li>
+            <a
+              href="https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AmazonS3FullAccess$serviceLevelSummary">AmazonS3FullAccess</a>
+          </li>
+          <li>
+            <a
+              href="https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/CloudWatchFullAccess$serviceLevelSummary">CloudWatchFullAccess</a>
+          </li>
+        </ul>
+        <p>see <a href="aws/getting-started.md">aws/getting-started.md</a></p>
+      </td>
+    </tr>
+    <tr>
+      <td>if deploying to GCP</td>
+      <td><a href="https://cloud.google.com/sdk/docs/install">Google Cloud CLI</a> 1.0+</td>
+      <td><code>gcloud version</code></td>
+      <td>
+        <ul>
+          <li>
+            <a href="https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountCreator">Service Account
+              Creator</a>
+          </li>
+          <li>
+            <a href="https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.admin">Cloud Functions
+              Admin</a>
+          </li>
+          <li>
+            <a href="https://cloud.google.com/iam/docs/understanding-roles#storage.admin">Cloud Storage Admin</a>
+          </li>
+          <li>
+            <a href="https://cloud.google.com/iam/docs/understanding-roles#secretmanager.admin">Secret Manager Admin</a>
+          </li>
+          <li>
+            <a href="https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin">Service Usage
+              Admin</a>
+          </li>
+        </ul>
+        <p>see <a href="gcp/getting-started.md">gcp/getting-started.md</a></p>
+      </td>
+    </tr>
+    <tr>
+      <td>if connecting to Microsoft 365</td>
+      <td>
+        <a href="https://docs.microsoft.com/en-us/cli/azure/install-azure-cli">Azure CLI</a> 2.29+
+      </td>
+      <td><code>az --version</code></td>
+      <td>
+        <a
+          href="https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#cloud-application-administrator">Cloud
+          Application Administrator</a>
+      </td>
+    </tr>
+    <tr>
+      <td>if connecting to Google Workspace</td>
+      <td><a href="https://cloud.google.com/sdk/docs/install">Google Cloud CLI</a> 1.0+</td>
+      <td><code>gcloud version</code></td>
+      <td>
+        <ul>
+          <li>
+            <a href="https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountCreator">Service Account
+              Creator</a>
+          </li>
+          <li>
+            <a href="https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountKeyAdmin">Service Account
+              Key Admin</a>
+          </li>
+          <li>
+            <a href="https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin">Service Usage
+              Admin</a>
+          </li>
+        </ul>
+        <p>see <a href="sources/google-workspace/">sources/google-workspace/README.md</a></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 For testing your psoxy instance, you will need:
 
