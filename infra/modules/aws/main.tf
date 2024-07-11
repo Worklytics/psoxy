@@ -103,11 +103,6 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "invoker_lambda_execution" {
-  role       = aws_iam_role.api-caller.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
 resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {
   count = var.use_api_gateway_v2 ? 0 : 1
 
