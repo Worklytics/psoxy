@@ -22,11 +22,19 @@ On `rc-`:
 
 QA aws, gcp dev examples by running `terraform apply` for each, and testing various connectors.
 
+Scan a GCP container image for vulnerabilities:
+
 ```shell
-./tools/release/rc-to-release.sh v0.4.16
+./tools/gcp/container-scan.sh psoxy-dev-erik psoxy-dev-erik-gcal
 ```
 
-After merged to `main`:
+Create PR to merge `rc-` to `main`.
+
+```shell
+./tools/release/rc-to-main.sh v0.4.16
+```
+
+After merged to `main`:å
 
 ```shell
 ./tools/release/publish.sh v0.4.16
