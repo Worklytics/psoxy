@@ -46,6 +46,7 @@ module "psoxy_lambda" {
   log_retention_in_days                = var.log_retention_days
   vpc_config                           = var.vpc_config
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
+  iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
 
   environment_variables = merge(
     var.environment_variables,

@@ -61,6 +61,11 @@ variable "aws_lambda_execution_role_policy_arn" {
   default     = null
 }
 
+variable "iam_roles_permissions_boundary" {
+  type        = string
+  description = "*beta* ARN of the permissions boundary to attach to IAM roles created by this module."
+  default     = null
+}
 
 variable "caller_gcp_service_account_ids" {
   type        = list(string)

@@ -45,8 +45,9 @@ data "aws_region" "current" {}
 
 # role that Worklytics user will use to call the API
 resource "aws_iam_role" "api-caller" {
-  name        = "${var.deployment_id}Caller"
-  description = "role for AWS principals that may invoke the psoxy instance or read an instance's output"
+  name                 = "${var.deployment_id}Caller"
+  description          = "role for AWS principals that may invoke the psoxy instance or read an instance's output"
+  permissions_boundary = var.iam_roles_permissions_boundary
 
   # who can assume this role
   assume_role_policy = jsonencode({
@@ -66,6 +67,8 @@ resource "aws_iam_role" "api-caller" {
       local.gcp_service_account_caller_statements
     )
   })
+
+
 
   lifecycle {
     ignore_changes = [
@@ -101,11 +104,6 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
       tags
     ]
   }
-}
-
-resource "aws_iam_role_policy_attachment" "invoker_lambda_execution" {
-  role       = aws_iam_role.api-caller.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {

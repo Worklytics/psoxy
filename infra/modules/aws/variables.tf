@@ -111,3 +111,9 @@ variable "logs_kms_key_arn" {
   description = "AWS KMS key ARN to use to encrypt lambdas' logs. NOTE: ensure CloudWatch is setup to use this key (cloudwatch principal has perms, log group in same region as key, etc) - see https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html ."
   default     = null
 }
+
+variable "iam_roles_permissions_boundary" {
+  type        = string
+  description = "*beta* ARN of the permissions boundary to attach to IAM roles created by this module."
+  default     = null
+}

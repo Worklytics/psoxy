@@ -36,6 +36,12 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
+variable "iam_roles_permissions_boundary" {
+  type        = string
+  description = "*beta* ARN of the permissions boundary to attach to IAM roles created by this module."
+  default     = null
+}
+
 variable "default_tags" {
   type        = map(string)
   description = "Tags to apply to all resources created by this configuration. See https://registry.terraform.io/providers/hashicorp/aws/latest/docs#default_tags for more info."

@@ -119,6 +119,8 @@ resource "aws_iam_role" "iam_for_lambda" {
     ]
   })
 
+  permissions_boundary = var.iam_roles_permissions_boundary
+
   lifecycle {
     ignore_changes = [
       tags

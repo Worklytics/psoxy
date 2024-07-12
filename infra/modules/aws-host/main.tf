@@ -42,6 +42,7 @@ module "psoxy" {
   api_function_name_prefix       = "${lower(module.env_id.id)}-"
   use_api_gateway_v2             = local.use_api_gateway_v2
   logs_kms_key_arn               = var.logs_kms_key_arn
+  iam_roles_permissions_boundary = var.iam_roles_permissions_boundary
 }
 
 
@@ -138,6 +139,7 @@ module "api_connector" {
   vpc_config                            = var.vpc_config
   api_gateway_v2                        = module.psoxy.api_gateway_v2
   aws_lambda_execution_role_policy_arn  = var.aws_lambda_execution_role_policy_arn
+  iam_roles_permissions_boundary        = var.iam_roles_permissions_boundary
   todos_as_local_files                  = var.todos_as_local_files
   todo_step                             = var.todo_step
 
@@ -198,6 +200,7 @@ module "bulk_connector" {
   vpc_config                           = var.vpc_config
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
   provision_bucket_public_access_block = var.provision_bucket_public_access_block
+  iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   todos_as_local_files                 = var.todos_as_local_files
 
 

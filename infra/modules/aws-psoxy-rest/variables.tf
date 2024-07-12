@@ -63,6 +63,12 @@ variable "ssm_kms_key_ids" {
   default     = {}
 }
 
+variable "iam_roles_permissions_boundary" {
+  type        = string
+  description = "*beta* ARN of the permissions boundary to attach to IAM roles created by this module."
+  default     = null
+}
+
 variable "log_retention_days" {
   type        = number
   description = "number of days to retain logs in CloudWatch for this psoxy instance"
