@@ -28,6 +28,8 @@ Service Account Keys and activate Google Workspace APIs.
 
   - [Cloud Functions Admin](https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.admin) -
     proxy instances are deployed as GCP cloud functions
+  - [Cloud Run Admin](https://cloud.google.com/iam/docs/understanding-roles#cloudrun.admin) - cloud
+     function deployment requires Cloud Run Admin role
   - [Cloud Storage Admin](https://cloud.google.com/iam/docs/understanding-roles#storage.admin) -
     processing of bulk data (such as HRIS exports) uses GCS buckets
   - [IAM Role Admin](https://cloud.google.com/iam/docs/understanding-roles#iam.roles.admin) - create
