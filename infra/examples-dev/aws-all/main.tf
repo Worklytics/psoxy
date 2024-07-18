@@ -106,7 +106,7 @@ module "psoxy" {
   environment_name                     = var.environment_name
   aws_account_id                       = var.aws_account_id
   aws_ssm_param_root_path              = var.aws_ssm_param_root_path
-  aws_secrets_manager_path             = var.aws_secrets_manager_path
+  aws_secrets_manager_path             = coalesce(var.aws_secrets_manager_path, "${var.environment_name}_")
   psoxy_base_dir                       = var.psoxy_base_dir
   deployment_bundle                    = var.deployment_bundle
   install_test_tool                    = var.install_test_tool
