@@ -173,6 +173,64 @@
           ]
         }
       ]
+    },
+    {
+      "user":"{\"scope\":\"slack\",\"hash\":\"BMW33akERx6B1jg4ktZ3Q6lh18zJptJ0zYoRgqcjdxU\"}",
+      "channel":"D075J2RKK4Y",
+      "room":{
+        "id":"R07BNSQTZSP",
+        "created_by":"{\"scope\":\"slack\",\"hash\":\"ht3jIZhCUKqR7UVboNfpxTZZUWLoExaW1WX6GG19JVg\"}",
+        "date_start":1720542372,
+        "date_end":1720542756,
+        "participants":[ ],
+        "participant_history":[
+          "{\"scope\":\"slack\",\"hash\":\"ht3jIZhCUKqR7UVboNfpxTZZUWLoExaW1WX6GG19JVg\"}",
+          "{\"scope\":\"slack\",\"hash\":\"C35tSgm0FijTntSB1kSz4RzerO3J58n-H3rwI7A0698\"}"
+        ],
+        "canvas_thread_ts":"1720542372.566689",
+        "thread_root_ts":"1720542372.566689",
+        "channels":[
+          "D075J2RKK4Y"
+        ],
+        "is_dm_call":true,
+        "was_rejected":false,
+        "was_missed":false,
+        "was_accepted":true,
+        "has_ended":true,
+        "background_id":"GRADIENT_03",
+        "canvas_background":"GRADIENT_03",
+        "is_prewarmed":false,
+        "is_scheduled":false,
+        "attached_file_ids":[ ],
+        "display_id":"",
+        "external_unique_id":"b88ef6b8-9450-4633-83a2-dfb2cfd12713",
+        "app_id":"A00",
+        "call_family":"huddle"
+      },
+      "no_notifications":true,
+      "subtype":"huddle_thread",
+      "type":"message",
+      "ts":"1720542372.566689",
+      "edited":{
+        "user":"{\"scope\":\"slack\",\"hash\":\"BMW33akERx6B1jg4ktZ3Q6lh18zJptJ0zYoRgqcjdxU\"}",
+        "ts":"1720542757.000000"
+      },
+      "blocks":[
+        {
+          "type":"rich_text",
+          "block_id":"UoEcF",
+          "elements":[
+            {
+              "type":"rich_text_section",
+              "elements":[
+                {
+                  "type":"text"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "offset":"1463084600.000000"

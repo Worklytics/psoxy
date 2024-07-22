@@ -196,6 +196,106 @@
           ]
         }
       ]
+    },
+    {
+      "user": "USLACKBOT",
+      "channel": "D075J2RKK4Y",
+      "room": {
+        "id": "R07BNSQTZSP",
+        "name": "huddle test topic",
+        "media_server": "",
+        "created_by": "U02K5LRARED",
+        "date_start": 1720542372,
+        "date_end": 1720542756,
+        "participants": [],
+        "participant_history": [
+          "U02K5LRARED",
+          "U074XMEDGUU"
+        ],
+        "participants_events": {
+          "U02K5LRARED": {
+            "user_team": {},
+            "joined": true,
+            "camera_on": false,
+            "camera_off": false,
+            "screenshare_on": true,
+            "screenshare_off": true
+          },
+          "U074XMEDGUU": {
+            "user_team": {},
+            "joined": true,
+            "camera_on": false,
+            "camera_off": false,
+            "screenshare_on": false,
+            "screenshare_off": false
+          },
+          "U060ZTHGQ2H": {
+            "user_team": {},
+            "joined": false,
+            "camera_on": false,
+            "camera_off": false,
+            "screenshare_on": false,
+            "screenshare_off": false
+          }
+        },
+        "participants_camera_on": [],
+        "participants_camera_off": [],
+        "participants_screenshare_on": [],
+        "participants_screenshare_off": [],
+        "canvas_thread_ts": "1720542372.566689",
+        "thread_root_ts": "1720542372.566689",
+        "channels": [
+          "D075J2RKK4Y"
+        ],
+        "is_dm_call": true,
+        "was_rejected": false,
+        "was_missed": false,
+        "was_accepted": true,
+        "has_ended": true,
+        "background_id": "GRADIENT_03",
+        "canvas_background": "GRADIENT_03",
+        "is_prewarmed": false,
+        "is_scheduled": false,
+        "attached_file_ids": [],
+        "media_backend_type": "free_willy",
+        "display_id": "",
+        "external_unique_id": "b88ef6b8-9450-4633-83a2-dfb2cfd12713",
+        "app_id": "A00",
+        "call_family": "huddle",
+        "pending_invitees": {},
+        "last_invite_status_by_user": {
+          "U060ZTHGQ2H": "expired",
+          "U074XMEDGUU": "accepted"
+        },
+        "knocks": {}
+      },
+      "no_notifications": true,
+      "permalink": "https://some-company.enterprise.slack.com/call/R07BNSQTZSP",
+      "subtype": "huddle_thread",
+      "type": "message",
+      "ts": "1720542372.566689",
+      "edited": {
+        "user": "USLACKBOT",
+        "ts": "1720542757.000000"
+      },
+      "text": "",
+      "blocks": [
+        {
+          "type": "rich_text",
+          "block_id": "UoEcF",
+          "elements": [
+            {
+              "type": "rich_text_section",
+              "elements": [
+                {
+                  "type": "text",
+                  "text": "A huddle started"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "offset": "1463084600.000000"
