@@ -95,18 +95,8 @@ public class PrebuiltSanitizerRules {
                             .jsonPath("$.messages[*].attachments[*]['fallback','service_name', 'thumb_url','thumb_width','thumb_height']")
                             .jsonPath("$.messages[*].files[*]['thumb_url','thumb_width','thumb_height','thumb_tiny']")
                             .jsonPath("$.messages[*].room.media_backend_type")
-                            .jsonPath("$.messages[*].room.name")
-                            .jsonPath("$.messages[*].room.media_server")
-                            .jsonPath("$.messages[*].room.attached_file_ids[*]")
-                            // This will be break JSON structure with pseudonymization
-                            .jsonPath("$.messages[*].room.participants_events")
-                            .jsonPath("$.messages[*].room.participants_camera_on")
-                            .jsonPath("$.messages[*].room.participants_camera_off")
-                            .jsonPath("$.messages[*].room.participants_screenshare_on")
-                            .jsonPath("$.messages[*].room.participants_screenshare_off")
-                            .jsonPath("$.messages[*].room.pending_invitees")
-                            .jsonPath("$.messages[*].room.last_invite_status_by_user")
-                            .jsonPath("$.messages[*].room.knocks")
+                            // This will be break JSON structure with pseudonymization, so redact it
+                            .jsonPath("$.messages[*].room..['name','media_server','attached_file_ids','participants_events','participants_camera_on','participants_camera_off','participants_screenshare_on','participants_screenshare_off','pending_invitees','last_invite_status_by_user','knocks']")
                             .build())
                     .build())
             .build();
