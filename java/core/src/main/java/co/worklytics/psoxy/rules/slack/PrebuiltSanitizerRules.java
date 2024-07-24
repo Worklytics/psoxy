@@ -82,7 +82,6 @@ public class PrebuiltSanitizerRules {
                             .jsonPath("$.messages[*].edited.user")
                             .jsonPath("$.messages[*].blocks[*].elements[*].elements[*].user_id") // mentions in rich blocks
                             .jsonPath("$.messages[*].room.created_by")
-                            .jsonPath("$.messages[*].room.participants[*]")
                             .jsonPath("$.messages[*].room.participant_history[*]")
                             .build())
                     .transform(Transform.Redact.builder()
@@ -96,7 +95,7 @@ public class PrebuiltSanitizerRules {
                             .jsonPath("$.messages[*].files[*]['thumb_url','thumb_width','thumb_height','thumb_tiny']")
                             .jsonPath("$.messages[*].room.media_backend_type")
                             // This will be break JSON structure with pseudonymization, so redact it
-                            .jsonPath("$.messages[*].room..['name','media_server','attached_file_ids','participants_events','participants_camera_on','participants_camera_off','participants_screenshare_on','participants_screenshare_off','pending_invitees','last_invite_status_by_user','knocks']")
+                            .jsonPath("$.messages[*].room..['name','media_server','attached_file_ids','participants','participants_events','participants_camera_on','participants_camera_off','participants_screenshare_on','participants_screenshare_off','pending_invitees','last_invite_status_by_user','knocks']")
                             .build())
                     .build())
             .build();

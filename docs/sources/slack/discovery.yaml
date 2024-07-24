@@ -52,7 +52,6 @@ endpoints:
           - "$.messages[*].edited.user"
           - "$.messages[*].blocks[*].elements[*].elements[*].user_id"
           - "$.messages[*].room.created_by"
-          - "$.messages[*].room.participants[*]"
           - "$.messages[*].room.participant_history[*]"
         encoding: "JSON"
       - !<redact>
@@ -63,4 +62,4 @@ endpoints:
           - "$.messages[*].attachments[*]['fallback','service_name', 'thumb_url','thumb_width','thumb_height']"
           - "$.messages[*].files[*]['thumb_url','thumb_width','thumb_height','thumb_tiny']"
           - "$.messages[*].room.media_backend_type"
-          - "$.messages[*].room..['name','media_server','attached_file_ids','participants_events','participants_camera_on','participants_camera_off','participants_screenshare_on','participants_screenshare_off','pending_invitees','last_invite_status_by_user','knocks']"
+          - "$.messages[*].room..['name','media_server','attached_file_ids','participants','participants_events','participants_camera_on','participants_camera_off','participants_screenshare_on','participants_screenshare_off','pending_invitees','last_invite_status_by_user','knocks']"
