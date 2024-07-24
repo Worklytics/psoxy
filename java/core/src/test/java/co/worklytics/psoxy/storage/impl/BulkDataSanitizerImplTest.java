@@ -219,14 +219,46 @@ public class BulkDataSanitizerImplTest {
         }
     }
 
+    final String EXPECTED_HRIS_DEFAULT_RULES = "EMPLOYEE_ID,employee_EMAIL,MANAGER_id,Manager_Email,JOIN_DATE,ROLE\n" +
+        "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\",\"\"h_4\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\",\"\"h_4\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI\"\",\"\"h_4\"\":\"\"-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\",\"\"h_4\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",2021-01-01,Accounting Manager\n" +
+        "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI\"\",\"\"h_4\"\":\"\"-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\",\"\"h_4\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",,,2020-01-01,CEO\n";
+
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "/csv/hris-default-rules.csv",
+        "/csv/hris-default-rules_whitespace.csv",
+    })
+    @SneakyThrows
+    void defaultRules(String exampleFile) {
+
+        final String EXPECTED = EXPECTED_HRIS_DEFAULT_RULES;
+        ConfigService config = MockModules.provideMock(ConfigService.class);
+        when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
+            .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("sources/hris/csv.yaml"))));
+
+        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config, new EnvVarsConfigService()).orElseThrow();
+
+        File inputFile = new File(getClass().getResource(exampleFile).getFile());
+        columnarFileSanitizerImpl.setRules(rules);
+
+        try (FileReader in = new FileReader(inputFile);
+             StringWriter out = new StringWriter()) {
+            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            assertEquals(EXPECTED, out.toString());
+        }
+    }
+
     @Test
     @SneakyThrows
-    void defaultRules() {
+    void defaultRules_padded() {
 
         final String EXPECTED = "EMPLOYEE_ID,employee_EMAIL,MANAGER_id,Manager_Email,JOIN_DATE,ROLE\n" +
-            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\",\"\"h_4\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\",\"\"h_4\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI\"\",\"\"h_4\"\":\"\"-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\",\"\"h_4\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",2021-01-01,Accounting Manager\n" +
-            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI\"\",\"\"h_4\"\":\"\"-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\",\"\"h_4\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",,,2020-01-01,CEO\n";
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"dj_GUEgeG9cw1.2kXK_sN3FkRVTXVQ9JG2tvrbJiwV0\"\",\"\"h_4\"\":\"\"ni_o9pmj5bcNxQ_2cGsYSoOP-CtAUw8GyvT0xa8xSMA\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\",\"\"h_4\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"vgBsYd59dbOaOGs3QJUSmTS0iKB9hgrLzfeWvWdXAI0\"\",\"\"h_4\"\":\"\"fzLpsPTdf6VDPAD0PKU4GPQvKQpsaHn0OGKeOmSpQ-c\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\",\"\"h_4\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",2021-01-01,Accounting Manager\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"vgBsYd59dbOaOGs3QJUSmTS0iKB9hgrLzfeWvWdXAI0\"\",\"\"h_4\"\":\"\"fzLpsPTdf6VDPAD0PKU4GPQvKQpsaHn0OGKeOmSpQ-c\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\",\"\"h_4\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",,,2020-01-01,CEO\n";
 
+        //padded case (eg, 001 instead of 1 for employee_id), should result in different hashes
+        assertNotEquals(EXPECTED, EXPECTED_HRIS_DEFAULT_RULES);
 
         ConfigService config = MockModules.provideMock(ConfigService.class);
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
@@ -234,7 +266,7 @@ public class BulkDataSanitizerImplTest {
 
         ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config, new EnvVarsConfigService()).orElseThrow();
 
-        File inputFile = new File(getClass().getResource("/csv/hris-default-rules.csv").getFile());
+        File inputFile = new File(getClass().getResource("/csv/hris-default-rules_padded-employee-id.csv").getFile());
         columnarFileSanitizerImpl.setRules(rules);
 
         try (FileReader in = new FileReader(inputFile);
@@ -756,13 +788,6 @@ public class BulkDataSanitizerImplTest {
     @Test
     @SneakyThrows
     void handle_null_transformations() {
-        Pseudonymizer defaultPseudonymizer =
-            pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("salt")
-                .defaultScopeId("hris")
-                .pseudonymImplementation(PseudonymImplementation.LEGACY)
-                .build());
-
 
         // this is a lookup-table use case (for customers to use in own data warehouse)
         // First row has empty employee id and team, both duplicated and renamed later
