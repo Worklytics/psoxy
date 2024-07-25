@@ -7,6 +7,9 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
+## [0.4.58](https://github.com/Worklytics/psoxy/release/tag/v0.4.58)
+ - Including rules for Slack Huddles through *Rooms* as part of conversation history endpoint
+
 ## [0.4.57](https://github.com/Worklytics/psoxy/release/tag/v0.4.57)
 Several changes in this version will result in visible changes during `terraform plan`/`apply`:
 - Permission changes on Microsoft 365:
