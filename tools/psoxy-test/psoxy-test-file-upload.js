@@ -7,6 +7,7 @@ import {
   unzip,
 } from './lib/utils.js';
 import aws from './lib/aws.js';
+import chalk from 'chalk';
 import fs from 'fs';
 import gcp from './lib/gcp.js';
 import getLogger from './lib/logger.js';
@@ -66,7 +67,7 @@ async function testAWS(options, logger) {
   logger.success('File downloaded');
 
   if (options.deleteSanitizedFile) {
-    logger.verbose(`Deleting sanitized file from output bucket: ${outputBucket}`);
+    logger.info(`Deleting sanitized file from output bucket: ${outputBucket}`);
     try {
       // Note:
       // We don't use bucket versioning. The S3 client will attempt to delete
@@ -132,7 +133,7 @@ async function testGCP(options, logger) {
   logger.success('File downloaded');
 
   if (options.deleteSanitizedFile) {
-    logger.verbose(`Deleting sanitized file from output bucket: ${outputBucket}`);
+    logger.info(`Deleting sanitized file from output bucket: ${outputBucket}`);
     try {
       await gcp.deleteFile(outputBucket, outputKey, client);
     } catch (error) {
@@ -167,6 +168,13 @@ async function testGCP(options, logger) {
  */
 export default async function (options = {}) {
   const logger = getLogger(options.verbose);
+
+  if (options.deleteSanitizedFile) {
+    logger.info(chalk.yellow(`
+      Sanitized file will be deleted from the output bucket after test comparison.
+      Use the "-delete-santized-file false" option to keep the sanitized file.
+    `));
+  }
 
   const deploymentTypeFn = options.deploy === 'AWS' ? testAWS : testGCP;
   const { original, sanitized } = await deploymentTypeFn(options, logger);
