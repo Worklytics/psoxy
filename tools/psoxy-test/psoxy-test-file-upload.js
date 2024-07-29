@@ -172,7 +172,7 @@ export default async function (options = {}) {
   if (options.deleteSanitizedFile) {
     logger.info(chalk.yellow(`
       Sanitized file will be deleted from the output bucket after test comparison.
-      Use the "-delete-santized-file false" option to keep the sanitized file.
+      Use the "--delete-sanitized-file false" option to keep the sanitized file.
     `));
   }
 
