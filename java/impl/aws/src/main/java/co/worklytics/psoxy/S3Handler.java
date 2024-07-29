@@ -81,7 +81,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         if (sourceMetadata.getContentType() != null
                 && !EXPECTED_CONTENT_TYPES.contains(sourceMetadata.getContentType().toLowerCase())) {
             // our code presumes a CSV, which is utf-8 encoded atm (or something like ascii, which is a subset of utf-8)
-            log.warning(String.format("S3 file content type for %s/%s is %s ; this is not known to be compatible with UTF-8-encoded CSVs, so may not work as expected", importBucket, sourceKey, sourceMetadata.getContentEncoding()))
+            log.warning(String.format("S3 file content type for %s/%s is %s ; this is not known to be compatible with UTF-8-encoded CSVs, so may not work as expected", importBucket, sourceKey, sourceMetadata.getContentEncoding()));
         }
 
         // AWS lambdas have a shared ephemeral storage (shared across invocations) of 512MB
