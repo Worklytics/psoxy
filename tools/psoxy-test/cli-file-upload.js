@@ -34,7 +34,7 @@ const { version } = require('./package.json');
       'us-east-1')
     .option('-v, --verbose', 'Verbose output', false)
     .option('-s, --save-sanitized-file', 'Save sanitized file to disk', false)
-    .option('-ds, --delete-sanitized-file <true or false>', 'Delete sanitized file from output bucket', true)
+    .option('-k, --keep-sanitized-file', 'Keep sanitized file from output bucket', false)
     .configureOutput({
       outputError: (str, write) => write(chalk.bold.red(str)),
     });
@@ -49,11 +49,15 @@ const { version } = require('./package.json');
 
   program.parse(process.argv);
   const options = program.opts();
-  if (_.isString(options.deleteSanitizedFile)) {
-    options.deleteSanitizedFile = !(options.deleteSanitizedFile === 'false');
-  }
 
   const logger = getLogger(options.verbose);
+
+  if (!options.keepSanitizedFile) {
+    logger.info(chalk.yellow(`
+      Sanitized file will be deleted from the output bucket after test comparison.
+      Use the "--keep-sanitized-file" option to keep the sanitized file.
+    `));
+  }
 
   // For async errors on 3rd party libraries
   process.on('uncaughtException', (error) => {
