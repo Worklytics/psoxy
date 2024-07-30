@@ -148,6 +148,10 @@ The testing script will rename the files you upload by appending a timestamp val
 `my-test-file.csv` will appear as `my-test-file-{timestamp}.csv` in both the input and output
 buckets. This is done to avoid conflicts with files that may already exist in the buckets.
 
+By default, the sanitized file will be deleted from the output bucket after the comparison
+test (original file vs. sanitized one). Run `node cli-file-upload.js -h` to see all the
+available options (keep sanitized file in the output bucket, save it to disk, etc).
+
 [AWS]: https://aws.amazon.com
 [GCP]: https://cloud.google.com/
 [Node.js]: https://nodejs.org/en/
