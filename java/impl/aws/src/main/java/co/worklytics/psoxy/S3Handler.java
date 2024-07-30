@@ -28,6 +28,15 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     AmazonS3 s3Client;
 
 
+    List<String> EXPECTED_CONTENT_TYPES = Arrays.asList(
+        "text/csv; charset=utf-8",
+        "text/csv; charset=ascii",
+        "text/csv; charset=us-ascii"
+        //"text/csv; charset=iso-8859-1" // standardized latin-1, don't expect this
+    );
+
+
+
     @SneakyThrows
     @Override
     public String handleRequest(S3Event s3Event, Context context) {
@@ -66,6 +75,13 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             //to the same bucket it originally read from. to avoid perpetuating the loop, skip
             log.warning("Skipping " + importBucket + "/" + sourceKey + " because it has already been sanitized; does your configuration result in a loop?");
             return null;
+        }
+
+        // check content type here
+        if (sourceMetadata.getContentType() != null
+                && !EXPECTED_CONTENT_TYPES.contains(sourceMetadata.getContentType().toLowerCase())) {
+            // our code presumes a CSV, which is utf-8 encoded atm (or something like ascii, which is a subset of utf-8)
+            log.warning(String.format("S3 file content type for %s/%s is %s ; this is not known to be compatible with UTF-8-encoded CSVs, so may not work as expected", importBucket, sourceKey, sourceMetadata.getContentEncoding()));
         }
 
         // AWS lambdas have a shared ephemeral storage (shared across invocations) of 512MB
