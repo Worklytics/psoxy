@@ -66,7 +66,7 @@ async function testAWS(options, logger) {
     }, client, logger);
   logger.success('File downloaded');
 
-  if (options.deleteSanitizedFile) {
+  if (!options.keepSanitizedFile) {
     logger.info(`Deleting sanitized file from output bucket: ${outputBucket}`);
     try {
       // Note:
@@ -132,7 +132,7 @@ async function testGCP(options, logger) {
   await gcp.download(outputBucket, outputKey, destination, client, logger);
   logger.success('File downloaded');
 
-  if (options.deleteSanitizedFile) {
+  if (!options.keepSanitizedFile) {
     logger.info(`Deleting sanitized file from output bucket: ${outputBucket}`);
     try {
       await gcp.deleteFile(outputBucket, outputKey, client);
@@ -162,19 +162,12 @@ async function testGCP(options, logger) {
  * @param {string} options.region - AWS: buckets region
  * @param {string} options.role - AWS: role to assume (ARN format; optional)
  * @param {boolean} options.saveSanitizedFile - Whether to save sanitized file or not
- * @param {boolean} options.deleteSanitizedFile - Whether to delete sanitized file or not (from
+ * @param {boolean} options.keepSanitizedFile - Whether to delete sanitized file or not (from
  *  output bucket, after test completion)
  * @returns {string}
  */
 export default async function (options = {}) {
   const logger = getLogger(options.verbose);
-
-  if (options.deleteSanitizedFile) {
-    logger.info(chalk.yellow(`
-      Sanitized file will be deleted from the output bucket after test comparison.
-      Use the "--delete-sanitized-file false" option to keep the sanitized file.
-    `));
-  }
 
   const deploymentTypeFn = options.deploy === 'AWS' ? testAWS : testGCP;
   const { original, sanitized } = await deploymentTypeFn(options, logger);
