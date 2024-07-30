@@ -7,7 +7,6 @@ import {
   unzip,
 } from './lib/utils.js';
 import aws from './lib/aws.js';
-import chalk from 'chalk';
 import fs from 'fs';
 import gcp from './lib/gcp.js';
 import getLogger from './lib/logger.js';
