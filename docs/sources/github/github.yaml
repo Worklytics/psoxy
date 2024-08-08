@@ -87,6 +87,7 @@ endpoints:
         jsonPaths:
           - "$..nameId"
           - "$..email"
+          - "$..value"
           - "$..guid"
           - "$..organizationVerifiedDomainEmails[*]"
         encoding: "JSON"
@@ -153,6 +154,13 @@ endpoints:
                                   samlIdentity:
                                     type: "object"
                                     properties:
+                                      emails:
+                                        type: "array"
+                                        items:
+                                          type: "object"
+                                          properties:
+                                            value:
+                                              type: "string"
                                       nameId:
                                         type: "string"
                                   user:
