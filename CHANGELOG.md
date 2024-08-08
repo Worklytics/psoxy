@@ -8,7 +8,8 @@ Changes to be including in future/planned release notes will be added here.
 ## Next
 
 ## [0.4.58](https://github.com/Worklytics/psoxy/release/tag/v0.4.58)
- - Including rules for Slack Huddles through *Rooms* as part of conversation history endpoint
+ - Slack: Including rules for Slack Huddles through *Rooms* as part of conversation history endpoint
+ - GitHub: Adding support for [email](https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/iam-configuration-reference/saml-configuration-reference#saml-attributes) attribute in SAML response model on GraphQL 
 
 ## [0.4.57](https://github.com/Worklytics/psoxy/release/tag/v0.4.57)
 Several changes in this version will result in visible changes during `terraform plan`/`apply`:

@@ -12,7 +12,12 @@
               "node": {
                 "guid": "abc3f758-1a88-11ee-85d2-07ac5bf201d6",
                 "samlIdentity": {
-                  "nameId": "fake1@contoso.com"
+                  "nameId": "fake1@contoso.com",
+                  "emails": [
+                    {
+                      "value": "fake1@contoso.com"
+                    }
+                  ]
                 },
                 "user": {
                   "login": "fake1"
