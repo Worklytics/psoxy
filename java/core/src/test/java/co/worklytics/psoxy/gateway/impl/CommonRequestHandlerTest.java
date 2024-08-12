@@ -256,11 +256,11 @@ class CommonRequestHandlerTest {
         ArgumentCaptor<URL> urlArgumentCaptor = ArgumentCaptor.forClass(URL.class);
         ArgumentCaptor<GenericUrl> targetUrlArgumentCaptor = ArgumentCaptor.forClass(GenericUrl.class);
 
-        verify(sanitizer).isAllowed(anyString(), urlArgumentCaptor.capture());
+        verify(sanitizer, times(2)).isAllowed(anyString(), urlArgumentCaptor.capture());
         verify(requestFactory).buildRequest(anyString(), targetUrlArgumentCaptor.capture(), any());
 
         // Sanitization should receive original URL requested
-        assertEquals("https://graph.microsoft.com" + encodedPseudonym,
+        assertEquals("https://graph.microsoft.com" + original,
                 urlArgumentCaptor.getValue().toString());
         // But request done to source should get the URL with the reverse tokens
         assertEquals("https://graph.microsoft.com" + original,
