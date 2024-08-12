@@ -18,12 +18,12 @@ public class PrebuiltSanitizerRules {
 
     static final Transform.Tokenize TOKENIZE_ODATA_LINKS = Transform.Tokenize.builder()
             .jsonPath("$.['@odata.nextLink', '@odata.prevLink']")
-            .regex("^https://graph.microsoft.com/(.*)$")
+            .regex("^https://graph.microsoft.com/v1.0/(.*)$")
             .build();
 
     static final Transform.Tokenize TOKENIZE_SESSIONS_ODATA_LINKS = Transform.Tokenize.builder()
             .jsonPath("$.['sessions@odata.nextLink']")
-            .regex("^https://graph.microsoft.com/(.*)$")
+            .regex("^https://graph.microsoft.com/v1.0/(.*)$")
             .build();
     static final Transform REDACT_ODATA_CONTEXT = Transform.Redact.builder()
             .jsonPath("$..['@odata.context']")
