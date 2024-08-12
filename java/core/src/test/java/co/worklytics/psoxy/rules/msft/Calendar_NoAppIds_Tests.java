@@ -3,6 +3,7 @@ package co.worklytics.psoxy.rules.msft;
 import co.worklytics.psoxy.rules.Rules2;
 import lombok.Getter;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 
 //TODO: fix this re-use via inheritance; makes tests brittle; we should inject this rule set into
 // the directory tests, or something like that

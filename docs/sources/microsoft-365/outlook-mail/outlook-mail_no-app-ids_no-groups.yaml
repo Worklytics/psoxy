@@ -76,7 +76,7 @@ endpoints:
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/(.*)$"
+        regex: "^https://graph.microsoft.com/v1.0/(.*)$"
       - !<redact>
         jsonPaths:
           - "$..['@odata.context']"
@@ -99,7 +99,7 @@ endpoints:
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/(.*)$"
+        regex: "^https://graph.microsoft.com/v1.0/(.*)$"
       - !<redact>
         jsonPaths:
           - "$..['@odata.context']"

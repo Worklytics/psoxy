@@ -98,7 +98,7 @@ endpoints:
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/(.*)$"
+        regex: "^https://graph.microsoft.com/v1.0/(.*)$"
   - pathTemplate: "/v1.0/teams/{teamId}/channels/{channelId}/messages/delta"
     allowedQueryParams:
       - "$select"
@@ -129,7 +129,7 @@ endpoints:
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/(.*)$"
+        regex: "^https://graph.microsoft.com/v1.0/(.*)$"
   - pathTemplate: "/v1.0/chats/{chatId}/messages"
     allowedQueryParams:
       - "$select"
@@ -165,7 +165,7 @@ endpoints:
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/(.*)$"
+        regex: "^https://graph.microsoft.com/v1.0/(.*)$"
   - pathTemplate: "/v1.0/communications/calls/{callId}"
     allowedQueryParams:
       - "$select"
@@ -219,11 +219,11 @@ endpoints:
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/(.*)$"
+        regex: "^https://graph.microsoft.com/v1.0/(.*)$"
       - !<tokenize>
         jsonPaths:
           - "$.['sessions@odata.nextLink']"
-        regex: "^https://graph.microsoft.com/(.*)$"
+        regex: "^https://graph.microsoft.com/v1.0/(.*)$"
   - pathTemplate: "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})"
     allowedQueryParams:
       - "$skip"
@@ -253,7 +253,7 @@ endpoints:
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/(.*)$"
+        regex: "^https://graph.microsoft.com/v1.0/(.*)$"
   - pathTemplate: "/v1.0/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})"
     allowedQueryParams:
       - "$skip"
@@ -283,7 +283,7 @@ endpoints:
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/(.*)$"
+        regex: "^https://graph.microsoft.com/v1.0/(.*)$"
   - pathTemplate: "/v1.0/users/{userId}/onlineMeetings"
     allowedQueryParams:
       - "$select"
