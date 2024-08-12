@@ -302,10 +302,10 @@ class RESTApiSanitizerImplTest {
 
     @Test
     void tokenize_regex() {
-        String path = "v1.0/$metadata#users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA%3D')/events";
-        String host = "https://graph.microsoft.com/";
+        String path = "/v1.0/$metadata#users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA%3D')/events";
+        String host = "https://graph.microsoft.com";
         MapFunction f = sanitizer.getTokenize(Transform.Tokenize.builder()
-                .regex("^https://graph.microsoft.com/(.*)$")
+                .regex("^https://graph.microsoft.com/v1.0/(.*)$")
                 .build());
         String r = (String) f.map(host+path, sanitizer.getJsonConfiguration());
 

@@ -223,11 +223,11 @@ class CommonRequestHandlerTest {
 
         CommonRequestHandler spy = spy(handler);
 
-        String original = "v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView?startDateTime=2019-12-30T00%3a00%3a00Z&endDateTime=2022-05-16T00%3a00%3a00Z&limit=1&%24top=1&%24skip=1";
+        String originalPath = "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView?startDateTime=2019-12-30T00:00:00Z&endDateTime=2022-05-16T00:00:00Z&limit=1&$top=1&$skip=1";
         String encodedPseudonym =
                 pseudonymEncoder.encode(Pseudonym.builder()
-                        .hash(deterministicTokenizationStrategy.getToken(original, Function.identity()))
-                        .reversible(reversibleTokenizationStrategy.getReversibleToken(original, Function.identity())).build());
+                        .hash(deterministicTokenizationStrategy.getToken(originalPath, Function.identity()))
+                        .reversible(reversibleTokenizationStrategy.getReversibleToken(originalPath, Function.identity())).build());
 
         HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
         when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
@@ -235,8 +235,9 @@ class CommonRequestHandlerTest {
         when(request.getHttpMethod())
                 .thenReturn("GET");
         when(request.getPath())
-                .thenReturn(encodedPseudonym);
+                .thenReturn("/v1.0" + encodedPseudonym);
         when(request.getQuery())
+                // Empty as the path is encoded, containing full path + query
                 .thenReturn(Optional.empty());
 
         HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
@@ -260,10 +261,10 @@ class CommonRequestHandlerTest {
         verify(requestFactory).buildRequest(anyString(), targetUrlArgumentCaptor.capture(), any());
 
         // Sanitization should receive original URL requested
-        assertEquals("https://graph.microsoft.com" + original,
+        assertEquals("https://graph.microsoft.com" + "/v1.0" + originalPath,
                 urlArgumentCaptor.getValue().toString());
         // But request done to source should get the URL with the reverse tokens
-        assertEquals("https://graph.microsoft.com" + original,
+        assertEquals("https://graph.microsoft.com" + "/v1.0" + originalPath,
                 targetUrlArgumentCaptor.getValue().toString());
     }
 
