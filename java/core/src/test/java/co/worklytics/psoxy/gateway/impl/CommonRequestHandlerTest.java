@@ -7,6 +7,7 @@ import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
 import co.worklytics.psoxy.rules.RESTRules;
+import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
@@ -76,6 +77,16 @@ class CommonRequestHandlerTest {
     DeterministicTokenizationStrategy deterministicTokenizationStrategy = new Sha256DeterministicTokenizationStrategy("salt");
 
     UrlSafeTokenPseudonymEncoder pseudonymEncoder = new UrlSafeTokenPseudonymEncoder();
+
+    @Inject
+    RESTApiSanitizerFactory sanitizerFactory;
+
+    @Inject
+    RulesUtils rulesUtils;
+
+    @Inject
+    PseudonymizerImplFactory pseudonymizerImplFactory;
+
 
     @BeforeEach
     public void setup() {
@@ -171,7 +182,7 @@ class CommonRequestHandlerTest {
 
     @Test
     @SneakyThrows
-    void handleShouldUseOriginalURLWhenIsReversed() {
+    void handleShouldUseOriginalURLWhenIsParametersAreReversed() {
         CommonRequestHandler spy = spy(handler);
         String original = "blah";
         String encodedPseudonym =
@@ -216,6 +227,54 @@ class CommonRequestHandlerTest {
                 urlArgumentCaptor.getValue().toString());
         // But request done to source should get the URL with the reverse tokens
         assertEquals("https://google.apis.com/admin/directory/v1/users/" + original + "?$select=proxyAddresses,otherMails,hireDate,isResourceAccount,mail,employeeId,id,userType,mailboxSettings,accountEnabled",
+                targetUrlArgumentCaptor.getValue().toString());
+    }
+
+    @Test
+    @SneakyThrows
+    void handleShouldUseOriginalURLWhenIsAllIsReversed() {
+        CommonRequestHandler spy = spy(handler);
+        String original = "/admin/directory/v1/users/blah?$select=proxyAddresses,otherMails,hireDate,isResourceAccount,mail,employeeId,id,userType,mailboxSettings,accountEnabled";
+        String encodedPseudonym =
+                pseudonymEncoder.encode(Pseudonym.builder()
+                        .hash(deterministicTokenizationStrategy.getToken(original, Function.identity()))
+                        .reversible(reversibleTokenizationStrategy.getReversibleToken(original, Function.identity())).build());
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
+                .thenReturn(Optional.of(PseudonymImplementation.DEFAULT.getHttpHeaderValue()));
+        when(request.getHttpMethod())
+                .thenReturn("GET");
+        when(request.getPath())
+                .thenReturn(encodedPseudonym);
+        when(request.getQuery())
+                .thenReturn(Optional.empty());
+
+        HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
+        when(requestFactory.buildRequest(anyString(), any(), any()))
+                .thenReturn(null);
+        doReturn(requestFactory).when(spy).getRequestFactory(any());
+
+        RESTApiSanitizer sanitizer = spy(buildSanitizer());
+        spy.sanitizer = sanitizer;
+
+        try {
+            spy.handle(request);
+        } catch (Exception ignored) {
+            // it should raise an exception due missing configuration
+        }
+
+        ArgumentCaptor<URL> urlArgumentCaptor = ArgumentCaptor.forClass(URL.class);
+        ArgumentCaptor<GenericUrl> targetUrlArgumentCaptor = ArgumentCaptor.forClass(GenericUrl.class);
+
+        verify(sanitizer).isAllowed(anyString(), urlArgumentCaptor.capture());
+        verify(requestFactory).buildRequest(anyString(), targetUrlArgumentCaptor.capture(), any());
+
+        // Sanitization should receive original URL requested
+        assertEquals("https://google.apis.com" + encodedPseudonym,
+                urlArgumentCaptor.getValue().toString());
+        // But request done to source should get the URL with the reverse tokens
+        assertEquals("https://google.apis.com" + original,
                 targetUrlArgumentCaptor.getValue().toString());
     }
 
@@ -336,5 +395,16 @@ class CommonRequestHandlerTest {
         assertEquals("ABC", headersMap.get(CommonRequestHandler.normalizeHeader("X-RateLimit-Category")));
         assertEquals("15", headersMap.get(CommonRequestHandler.normalizeHeader(org.apache.http.HttpHeaders.RETRY_AFTER)));
         assertEquals(Json.MEDIA_TYPE, headersMap.get(CommonRequestHandler.normalizeHeader(org.apache.http.HttpHeaders.CONTENT_TYPE)));
+    }
+
+    private RESTApiSanitizer buildSanitizer() {
+        Pseudonymizer defaultPseudonymizer =
+                pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+                        .pseudonymizationSalt("salt")
+                        .defaultScopeId("gapps")
+                        .pseudonymImplementation(PseudonymImplementation.LEGACY)
+                        .build());
+
+        return sanitizerFactory.create(rules, defaultPseudonymizer);
     }
 }
