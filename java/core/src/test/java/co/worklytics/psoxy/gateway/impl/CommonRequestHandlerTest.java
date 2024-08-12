@@ -8,7 +8,7 @@ import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
-import co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules;
+import co.worklytics.psoxy.rules.msft.PrebuiltSanitizerRules;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
@@ -87,26 +87,6 @@ class CommonRequestHandlerTest {
     @Inject
     PseudonymizerImplFactory pseudonymizerImplFactory;
 
-
-    @BeforeEach
-    public void setup() {
-        CommonRequestHandlerTest.Container container = DaggerCommonRequestHandlerTest_Container.create();
-        container.inject(this);
-
-        when(handler.secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
-                .thenReturn(Optional.of("salt"));
-        when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
-                .thenReturn("gmail");
-        when(handler.config.getConfigPropertyOrError(ProxyConfigProperty.TARGET_HOST))
-                .thenReturn("google.apis.com");
-
-        reversibleTokenizationStrategy = AESReversibleTokenizationStrategy.builder()
-                .cipherSuite(AESReversibleTokenizationStrategy.CBC)
-                .key(TestUtils.testKey())
-                .deterministicTokenizationStrategy(deterministicTokenizationStrategy)
-                .build();
-    }
-
     private static Stream<Arguments> provideRequestToBuildTarget() {
         return Stream.of(
                 Arguments.of("/some/path", null, "https://proxyhost.com/some/path"),
@@ -123,6 +103,8 @@ class CommonRequestHandlerTest {
     @ParameterizedTest
     @MethodSource("provideRequestToBuildTarget")
     void parseTargetUrlAndDecrypt(String path, String queryString, String expectedProxyCallUrl) {
+        setup("gmail", "google.apis.com");
+
         HttpEventRequest request = new HttpEventRequest() {
             @Override
             public String getPath() {
@@ -163,6 +145,8 @@ class CommonRequestHandlerTest {
 
     @Test
     void parseOptionsFromRequest() {
+        setup("gmail", "google.apis.com");
+
         //verify precondition that defaults != LEGACY
         assertEquals(
                 PseudonymImplementation.DEFAULT,
@@ -183,6 +167,8 @@ class CommonRequestHandlerTest {
     @Test
     @SneakyThrows
     void handleShouldUseOriginalURLWhenIsParametersAreReversed() {
+        setup("gmail", "google.apis.com");
+
         CommonRequestHandler spy = spy(handler);
         String original = "blah";
         String encodedPseudonym =
@@ -233,8 +219,11 @@ class CommonRequestHandlerTest {
     @Test
     @SneakyThrows
     void handleShouldUseOriginalURLWhenIsAllIsReversed() {
+        setup("azure-ad", "graph.microsoft.com");
+
         CommonRequestHandler spy = spy(handler);
-        String original = "/admin/directory/v1/users/blah?$select=proxyAddresses,otherMails,hireDate,isResourceAccount,mail,employeeId,id,userType,mailboxSettings,accountEnabled";
+
+        String original = "v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView?startDateTime=2019-12-30T00%3a00%3a00Z&endDateTime=2022-05-16T00%3a00%3a00Z&limit=1&%24top=1&%24skip=1";
         String encodedPseudonym =
                 pseudonymEncoder.encode(Pseudonym.builder()
                         .hash(deterministicTokenizationStrategy.getToken(original, Function.identity()))
@@ -255,7 +244,7 @@ class CommonRequestHandlerTest {
                 .thenReturn(null);
         doReturn(requestFactory).when(spy).getRequestFactory(any());
 
-        RESTApiSanitizer sanitizer = spy(buildSanitizer());
+        RESTApiSanitizer sanitizer = spy(buildSanitizer(PrebuiltSanitizerRules.MSFT_DEFAULT_RULES_MAP.get("outlook-cal"+ ConfigRulesModule.NO_APP_IDS_SUFFIX)));
         spy.sanitizer = sanitizer;
 
         try {
@@ -271,16 +260,18 @@ class CommonRequestHandlerTest {
         verify(requestFactory).buildRequest(anyString(), targetUrlArgumentCaptor.capture(), any());
 
         // Sanitization should receive original URL requested
-        assertEquals("https://google.apis.com" + encodedPseudonym,
+        assertEquals("https://graph.microsoft.com" + encodedPseudonym,
                 urlArgumentCaptor.getValue().toString());
         // But request done to source should get the URL with the reverse tokens
-        assertEquals("https://google.apis.com" + original,
+        assertEquals("https://graph.microsoft.com" + original,
                 targetUrlArgumentCaptor.getValue().toString());
     }
 
     @Test
     @SneakyThrows
     void handleShouldUseOriginalURLWhenIsNotReversed() {
+        setup("gmail", "google.apis.com");
+
         CommonRequestHandler spy = spy(handler);
         String original = "blah";
 
@@ -327,6 +318,8 @@ class CommonRequestHandlerTest {
 
     @Test
     void getSanitizerForRequest() {
+        setup("gmail", "google.apis.com");
+
         //verify precondition that defaults != LEGACY
         assertEquals(
                 PseudonymImplementation.DEFAULT,
@@ -346,6 +339,8 @@ class CommonRequestHandlerTest {
 
     @Test
     void testHeadersPassThrough() throws IOException {
+        setup("gmail", "google.apis.com");
+
         HttpEventResponse.HttpEventResponseBuilder responseBuilder = HttpEventResponse.builder();
 
         HttpTransport transport = new MockHttpTransport() {
@@ -397,7 +392,25 @@ class CommonRequestHandlerTest {
         assertEquals(Json.MEDIA_TYPE, headersMap.get(CommonRequestHandler.normalizeHeader(org.apache.http.HttpHeaders.CONTENT_TYPE)));
     }
 
-    private RESTApiSanitizer buildSanitizer() {
+    private void setup(String source, String host) {
+        CommonRequestHandlerTest.Container container = DaggerCommonRequestHandlerTest_Container.create();
+        container.inject(this);
+
+        when(handler.secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
+                .thenReturn(Optional.of("salt"));
+        when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
+                .thenReturn(source);
+        when(handler.config.getConfigPropertyOrError(ProxyConfigProperty.TARGET_HOST))
+                .thenReturn(host);
+
+        reversibleTokenizationStrategy = AESReversibleTokenizationStrategy.builder()
+                .cipherSuite(AESReversibleTokenizationStrategy.CBC)
+                .key(TestUtils.testKey())
+                .deterministicTokenizationStrategy(deterministicTokenizationStrategy)
+                .build();
+    }
+
+    private RESTApiSanitizer buildSanitizer(RESTRules rules) {
         Pseudonymizer defaultPseudonymizer =
                 pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
                         .pseudonymizationSalt("salt")
