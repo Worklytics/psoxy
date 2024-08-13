@@ -10,10 +10,6 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..emailAddress"
-        encoding: "JSON"
-      - !<pseudonymize>
-        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
@@ -32,10 +28,6 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..emailAddress"
-        encoding: "JSON"
-      - !<pseudonymize>
-        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
@@ -47,29 +39,19 @@ endpoints:
           - "$..['@odata.id']"
           - "$..['@odata.type']"
           - "$..['@odata.count']"
-  - pathTemplate: "/v1.0/users/{userId}/chats"
-    allowedQueryParams:
-      - "$select"
-      - "$top"
-      - "$skiptoken"
-      - "$filter"
-      - "$orderby"
-      - "$expand"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/chats(\\?.*)?"
     transforms:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
-        encoding: "JSON"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..user.id"
-          - "$..userId"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
           - "$..topic"
           - "$..['@odata.context']"
           - "$..['@odata.count']"
+          - "$..user.id"
+          - "$..userId"
   - pathTemplate: "/v1.0/teams/{teamId}/channels/{channelId}/messages"
     allowedQueryParams:
       - "$select"
@@ -77,10 +59,6 @@ endpoints:
       - "$skiptoken"
       - "$expand"
     transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..emailAddress"
-        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
@@ -95,10 +73,6 @@ endpoints:
           - "$..eventDetail.teamDescription"
           - "$..['@odata.context']"
           - "$..['@odata.count']"
-      - !<tokenize>
-        jsonPaths:
-          - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/v1.0/(.*)$"
   - pathTemplate: "/v1.0/teams/{teamId}/channels/{channelId}/messages/delta"
     allowedQueryParams:
       - "$select"
@@ -108,10 +82,6 @@ endpoints:
       - "$deltatoken"
       - "$filter"
     transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..emailAddress"
-        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
@@ -126,10 +96,6 @@ endpoints:
           - "$..value[*].eventDetail.teamDescription"
           - "$..['@odata.context']"
           - "$..['@odata.count']"
-      - !<tokenize>
-        jsonPaths:
-          - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/v1.0/(.*)$"
   - pathTemplate: "/v1.0/chats/{chatId}/messages"
     allowedQueryParams:
       - "$select"
@@ -145,10 +111,6 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..emailAddress"
-        encoding: "JSON"
-      - !<pseudonymize>
-        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
@@ -162,20 +124,12 @@ endpoints:
           - "$..value[*].eventDetail.chatDisplayName"
           - "$..['@odata.context']"
           - "$..['@odata.count']"
-      - !<tokenize>
-        jsonPaths:
-          - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/v1.0/(.*)$"
   - pathTemplate: "/v1.0/communications/calls/{callId}"
     allowedQueryParams:
       - "$select"
       - "$top"
       - "$expand"
     transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..emailAddress"
-        encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
@@ -195,10 +149,6 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..emailAddress"
-        encoding: "JSON"
-      - !<pseudonymize>
-        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
@@ -216,30 +166,14 @@ endpoints:
           - "$..renderDeviceName"
           - "$..['@odata.context']"
           - "$..['@odata.type']"
-      - !<tokenize>
-        jsonPaths:
-          - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/v1.0/(.*)$"
-      - !<tokenize>
-        jsonPaths:
-          - "$.['sessions@odata.nextLink']"
-        regex: "^https://graph.microsoft.com/v1.0/(.*)$"
   - pathTemplate: "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})"
     allowedQueryParams:
       - "$skip"
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..emailAddress"
-        encoding: "JSON"
-      - !<pseudonymize>
-        jsonPaths:
           - "$..user.id"
           - "$..userId"
-        encoding: "JSON"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..callId"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
@@ -250,26 +184,14 @@ endpoints:
           - "$..['@odata.context']"
           - "$..['@odata.type']"
           - "$..['@odata.count']"
-      - !<tokenize>
-        jsonPaths:
-          - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/v1.0/(.*)$"
   - pathTemplate: "/v1.0/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})"
     allowedQueryParams:
       - "$skip"
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..emailAddress"
-        encoding: "JSON"
-      - !<pseudonymize>
-        jsonPaths:
           - "$..user.id"
           - "$..userId"
-        encoding: "JSON"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..callId"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
@@ -280,26 +202,37 @@ endpoints:
           - "$..['@odata.context']"
           - "$..['@odata.type']"
           - "$..['@odata.count']"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/onlineMeetings/[a-zA-Z0-9_-]+/attendanceReports/[a-zA-Z0-9_-]+(\\\
+    ?.*)?"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..subject"
+          - "$..joinMeetingIdSettings.isPasscodeRequired"
+          - "$..joinMeetingIdSettings.passcode"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.type']"
       - !<tokenize>
         jsonPaths:
-          - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/v1.0/(.*)$"
-  - pathTemplate: "/v1.0/users/{userId}/onlineMeetings"
-    allowedQueryParams:
-      - "$select"
-      - "$top"
-      - "$skiptoken"
-      - "$filter"
-      - "$orderby"
-      - "$count"
-      - "$expand"
-      - "$format"
-      - "$search"
-      - "$skip"
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/onlineMeetings/[a-zA-Z0-9_-]+/attendanceReports(\\\
+    ?.*)?"
     transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..['@odata.context']"
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
@@ -315,66 +248,31 @@ endpoints:
           - "$..subject"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
-          - "$..['@odata.context']"
-          - "$..['@odata.type']"
-  - pathTemplate: "/v1.0/users/{userId}/onlineMeetings/{meetingId}/attendanceReports"
-    allowedQueryParams:
-      - "$select"
-      - "$top"
-      - "$skiptoken"
-      - "$filter"
-      - "$orderby"
-      - "$count"
-      - "$expand"
-      - "$format"
-      - "$search"
-      - "$skip"
-    transforms:
       - !<redact>
         jsonPaths:
           - "$..['@odata.context']"
-      - !<pseudonymize>
+      - !<redact>
         jsonPaths:
-          - "$..emailAddress"
-        encoding: "JSON"
+          - "$..['@odata.type']"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/onlineMeetings(\\?.*)?"
+    transforms:
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..displayName"
-          - "$..subject"
-          - "$..joinMeetingIdSettings.isPasscodeRequired"
-          - "$..joinMeetingIdSettings.passcode"
-          - "$..['@odata.context']"
-          - "$..['@odata.type']"
-  - pathTemplate: "/v1.0/users/{userId}/onlineMeetings/{meetingId}/attendanceReports/{reportId}"
-    allowedQueryParams:
-      - "$select"
-      - "$top"
-      - "$skiptoken"
-      - "$filter"
-      - "$orderby"
-      - "$count"
-      - "$expand"
-      - "$format"
-      - "$search"
-      - "$skip"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..['@odata.context']"
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
         encoding: "JSON"
-      - !<pseudonymize>
+      - !<tokenize>
         jsonPaths:
-          - "$..user.id"
-          - "$..userId"
-        encoding: "JSON"
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
       - !<redact>
         jsonPaths:
           - "$..displayName"

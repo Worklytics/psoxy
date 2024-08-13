@@ -20,14 +20,10 @@ import java.util.stream.Stream;
 public class PrebuiltSanitizerRules {
 
     static final Transform.Tokenize TOKENIZE_ODATA_LINKS = Transform.Tokenize.builder()
-            .jsonPath("$.['@odata.nextLink', '@odata.prevLink']")
+            .jsonPath("$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']")
             .regex("^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$")
             .build();
 
-    static final Transform.Tokenize TOKENIZE_SESSIONS_ODATA_LINKS = Transform.Tokenize.builder()
-            .jsonPath("$.['sessions@odata.nextLink']")
-            .regex("^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$")
-            .build();
     static final Transform REDACT_ODATA_CONTEXT = Transform.Redact.builder()
             .jsonPath("$..['@odata.context']")
             .build();
@@ -228,7 +224,6 @@ public class PrebuiltSanitizerRules {
                             .build()
                     )
                     .transform(TOKENIZE_ODATA_LINKS)
-                    .transform(TOKENIZE_SESSIONS_ODATA_LINKS)
                     .transform(REDACT_ODATA_CONTEXT)
                     .build(),
             Endpoint.builder()
@@ -247,7 +242,6 @@ public class PrebuiltSanitizerRules {
                             .jsonPath("$..emailAddress.address")
                             .build())
                     .transform(TOKENIZE_ODATA_LINKS)
-                    .transform(TOKENIZE_SESSIONS_ODATA_LINKS)
                     .transform(REDACT_ODATA_CONTEXT)
                     .build()
     );
@@ -645,7 +639,6 @@ public class PrebuiltSanitizerRules {
                     .transform(REDACT_ODATA_CONTEXT)
                     .transform(REDACT_ODATA_TYPE)
                     .transform(TOKENIZE_ODATA_LINKS)
-                    .transform(TOKENIZE_SESSIONS_ODATA_LINKS)
                     .build())
             .endpoint(Endpoint.builder()
                     .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/onlineMeetings/[a-zA-Z0-9_-]+/attendanceReports(\\?.*)?")
@@ -655,13 +648,11 @@ public class PrebuiltSanitizerRules {
                     .transform(REDACT_ODATA_CONTEXT)
                     .transform(REDACT_ODATA_TYPE)
                     .transform(TOKENIZE_ODATA_LINKS)
-                    .transform(TOKENIZE_SESSIONS_ODATA_LINKS)
                     .build())
             .endpoint(Endpoint.builder()
                     .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/onlineMeetings(\\?.*)?")
                     .transforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
                             MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE,
-                            TOKENIZE_SESSIONS_ODATA_LINKS,
                             TOKENIZE_ODATA_LINKS,
                             MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT
                                     .toBuilder()

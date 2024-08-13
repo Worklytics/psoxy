@@ -112,12 +112,15 @@ endpoints:
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
         encoding: "JSON"
-  - pathRegex: "^/v1.0/users/[^/]*/mailboxSettings"
+  - pathRegex: "^/v1.0/users/?[^/]*/mailboxSettings"
     transforms:
       - !<redact>
         jsonPaths:
           - "$..internalReplyMessage"
           - "$..externalReplyMessage"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
   - pathRegex: "^/v1.0/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))"
     transforms:
       - !<redactExceptSubstringsMatchingRegexes>

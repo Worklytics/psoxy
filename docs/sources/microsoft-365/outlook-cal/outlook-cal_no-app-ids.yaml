@@ -121,7 +121,7 @@ endpoints:
         jsonPaths:
           - "$..id"
         encoding: "JSON"
-  - pathRegex: "^/v1.0/users/[^/]*/mailboxSettings"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/mailboxSettings"
     transforms:
       - !<redact>
         jsonPaths:
@@ -130,7 +130,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..['@odata.context']"
-  - pathRegex: "^/v1.0/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))"
     transforms:
       - !<redactExceptSubstringsMatchingRegexes>
         jsonPaths:
@@ -177,8 +177,8 @@ endpoints:
           - "https://[^.]+\\.zoom\\.us/.*"
       - !<tokenize>
         jsonPaths:
-          - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/v1.0/(.*)$"
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
       - !<redact>
         jsonPaths:
           - "$..['@odata.context']"
