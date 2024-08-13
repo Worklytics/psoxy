@@ -20,5 +20,5 @@
       "mediaBypassEnabled":false
     }
   ],
-  "@odata.nextLink":"https://graph.microsoft.com/v1.0/p~V5BPWGu2uFQP19soU5jrhUHripT4KJANhOkpZIu688X4W0QqkfwvlD9wkLcyUxnTKlmaHs1MTEk96myPEb07qG56pwVBfnYOBRcOU-v0cbqJ8TwU_PPICswpWS31MMIJGQCm-ZbslqYnWm-wAHbnYJhfznogwetW5stf6CNDhqDecWAhR0rNydaENwCyUnXg"
+  "@odata.nextLink":"https://graph.microsoft.com/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)?$skip=1000"
 }

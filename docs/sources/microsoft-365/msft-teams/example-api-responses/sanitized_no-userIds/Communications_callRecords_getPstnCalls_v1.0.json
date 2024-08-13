@@ -2,7 +2,7 @@
   "value":[
     {
       "id":"9c4984c7-6c3c-427d-a30c-bd0b2eacee90",
-      "callId":"{\"scope\":\"azure-ad\",\"hash\":\"Bvc4jV4RzsaEt4XIerSH40pfOsnpmsA1SuHUaIQ__1o\"}",
+      "callId":"1835317186_112562680@61.221.3.176",
       "userId":"{\"scope\":\"azure-ad\",\"hash\":\"2ZGitAxyjkjPJ6l2GfLqf2kr0xFtleWfl5XA_zNbtMA\"}",
       "startDateTime":"2019-11-01T00:00:08.2589935Z",
       "endDateTime":"2019-11-01T00:03:47.2589935Z",
@@ -22,5 +22,5 @@
       "callDurationSource":"microsoft"
     }
   ],
-  "@odata.nextLink":"https://graph.microsoft.com/v1.0/p~GjRAveTHeLRzOWRuZKeC2_rySxLDX5I9GM1drSYzl6NqTRvw-xMIyVVXDk36LIWW2ZVF-mfiq1OLYogD7u6inWAgUPCIxmdpE8AdvobOs1xR3ufrrBGR4Mng510rENSY2AUOTkyteuiIH8vrZpIYFjos8z4NIbSebkC1ryr4LJI"
+  "@odata.nextLink":"https://graph.microsoft.com/v1.0/communications/callRecords/getPstnCalls(from=2019-11-01,to=2019-12-01)?$skip=1000"
 }

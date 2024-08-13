@@ -1,5 +1,5 @@
 {
-  "@odata.nextLink":"https://graph.microsoft.com/v1.0/p~2o4Tv83SL3sbFdtWgRmBf6Syk3qUm73PEBusD8wkPEBtVaxj8py6GgG6O6NCHZ_hOJ_ZSzngDnqd4Ku2QrJl2xAcEGkiw1r2CcljdOBmWm8QrBdMWojiB3hHnAcAUbzjxUt6FzD0gL7d3JzD5Z8jdUyllcymboDoMQ1BeBVFyCpg0shpritUO7rSPT6IUJsUo6q6ShUuGgi9nNXqttdPkoQDLRipAlrip1vUDu-I-Z5X1vvyfU5AjQOzAJY6qPRiGjNEWJ6NXARJYxmMRqHnMuwvy-8K8psvnVcsryQVFs8paarOnYlyG55lu7dU8nN3ws4Kf4_rtffi5DuRLEY_eJSlXpZAuSvaNPnrmg2DhOH1Grf4NjUS3F5H_H9rCvBGJK_S3-2EFS08ACitFqNv9xyxf-QY9otaVCjWrzw0wz_AAbhLfYTumakASFiVFh5F",
+  "@odata.nextLink":"https://graph.microsoft.com/v1.0/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta?$skiptoken=-FG3FPHv7HuyuazNLuy3eXlzQGbEjYLUsW9-pYkmXgn5KGsaOwrCoor2W23dGNNM1KtAX4AyvpFQNVsBgsEwUOX9lw8x9zDumgJy-C-UbjZLlZDQACyC9FyrVelZus9n.--rshdLwy_WBFJd8anPXJPbSUtUD7r3V4neB5tcrG58",
   "value":[
     {
       "@odata.type":"#microsoft.graph.chatMessage",

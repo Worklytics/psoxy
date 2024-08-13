@@ -212,5 +212,5 @@
       ]
     }
   ],
-  "sessions@odata.nextLink":"https://graph.microsoft.com/v1.0/p~F7kpb6BXhjomcdj8paU8P6ozIAQ_UoMCYeakY0RdZxKucwHGNFgxcskGn0tkCQxGxFU8M4P_DnEBv5F3WBs3UKcDomEOYHfVH-ZtNTNk6RO4reZOwVjdZp5ktbYXYaAXBDDG0yNHe4JACPjsXxmyIEdtVumFR1Kej-M8kbX9vQOTFbp05wu8ZBwtrIoWe0zbSMVTGNxbOwkXemcWaBlTYA"
+  "sessions@odata.nextLink":"https://graph.microsoft.com/v1.0/$metadata#communications/callRecords('e523d2ed-2966-4b6b-925b-754a88034cc5')/sessions?$expand=segments&$skiptoken=abc"
 }
