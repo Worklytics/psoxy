@@ -167,9 +167,6 @@ public class CommonRequestHandler {
 
         this.sanitizer = loadSanitizerRules();
 
-        log.warning("Original: " + originalRequestedURL);
-        log.warning("Target: " + targetForSourceApiRequest);
-
         String callLog = String.format("%s %s TokenInUrlReversed=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), tokenizedURLReversed);
         if (skipSanitization) {
             log.info(String.format("%s. Skipping sanitization.", callLog));
