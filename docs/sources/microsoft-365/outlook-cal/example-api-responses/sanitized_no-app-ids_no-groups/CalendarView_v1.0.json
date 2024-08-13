@@ -94,5 +94,5 @@
       "onlineMeeting":null
     }
   ],
-  "@odata.nextLink":"https://graph.microsoft.com/v1.0/p~2jgiYqCYqVHt62h2sLCZbgU8eVuIb-ldLu2RHlBYEq16OY8M02qjnoVLUA18OSDqeLCltf36rCwCAIaEhIdkfB6TAA7sjK-1J1dJGYwyIrSqg11zzsJsPeFtXUWewdkVUhEjga6bnorjrTA1GpqeN8JHpnEOMqDFPU9RVCcWWc_tu7V-RWlvadfChRXl--VuE9yefJHXoc82qZZ_L_SAhg"
+  "@odata.nextLink":"https://graph.microsoft.com/v1.0/me/calendar/calendarView?startDateTime=2019-12-30T00%3a00%3a00Z&endDateTime=2022-05-16T00%3a00%3a00Z&limit=1&%24top=1&%24skip=1"
 }

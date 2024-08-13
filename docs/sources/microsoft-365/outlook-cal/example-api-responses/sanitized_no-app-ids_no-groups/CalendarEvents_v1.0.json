@@ -1162,5 +1162,5 @@
       "onlineMeeting":null
     }
   ],
-  "@odata.nextLink":"https://graph.microsoft.com/v1.0/p~YAX51HOZWLBWwEn8L1qw5T51-DrzniQ_k1NcwHzHWbp4Rs02d_y8kzS8jlZgHpVB308HTmWIx5RwSfCe3bIG35LBgThHHK6iC8Zb_Cp8a1q9Jk6ctrHTxoe3zadIQ_DHnYLdMOhX8_vdvClBvjUEsEw7XJNmF-pOEVeYiR6cFj7FC1-VyZxE0AQTVLdhzVm2kkBilBTPSN9oSiwCZwDRLL1u75rlMV6_qf_vehpvylejuiVk8_M51W7j8adk56fzhvFWlDjvylxCY33b-Hbej8CA30dO5LwYvWiKi33CX2JaRqtgK4bObMtU354UNUgdn0l-dJZb7-8fKG1TaG4B9KHAM-04daac1t_QwgQREkU"
+  "@odata.nextLink":"https://graph.microsoft.com/v1.0/users/p~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpDRcddGnKI4QDKyjQI9KtjJZDb8FZ27UE_toS68FyWz7Y22fnQYLP91SHJGVwQiN3E/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA=')/events?%24top=10&%24skip=10"
 }

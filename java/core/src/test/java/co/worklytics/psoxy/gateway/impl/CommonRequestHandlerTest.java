@@ -223,22 +223,24 @@ class CommonRequestHandlerTest {
 
         CommonRequestHandler spy = spy(handler);
 
-        String originalPath = "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView?startDateTime=2019-12-30T00:00:00Z&endDateTime=2022-05-16T00:00:00Z&limit=1&$top=1&$skip=1";
+        String userId = "48d31887-5fad-4d73-a9f5-3c356e68a038";
+        String query = "startDateTime=2019-12-30T00:00:00Z&endDateTime=2022-05-16T00:00:00Z&limit=1&$top=1&$skip=1";
+
         String encodedPseudonym =
                 pseudonymEncoder.encode(Pseudonym.builder()
-                        .hash(deterministicTokenizationStrategy.getToken(originalPath, Function.identity()))
-                        .reversible(reversibleTokenizationStrategy.getReversibleToken(originalPath, Function.identity())).build());
+                        .hash(deterministicTokenizationStrategy.getToken(userId, Function.identity()))
+                        .reversible(reversibleTokenizationStrategy.getReversibleToken(userId, Function.identity())).build());
 
+        String originalPath = "/v1.0/users/" + userId + "/calendar/calendarView?" + query;
         HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
         when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
                 .thenReturn(Optional.of(PseudonymImplementation.DEFAULT.getHttpHeaderValue()));
         when(request.getHttpMethod())
                 .thenReturn("GET");
         when(request.getPath())
-                .thenReturn("/v1.0" + encodedPseudonym);
+                .thenReturn("/v1.0/users/" + encodedPseudonym + "/calendar/calendarView");
         when(request.getQuery())
-                // Empty as the path is encoded, containing full path + query
-                .thenReturn(Optional.empty());
+                .thenReturn(Optional.of(query));
 
         HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
         when(requestFactory.buildRequest(anyString(), any(), any()))
@@ -257,14 +259,14 @@ class CommonRequestHandlerTest {
         ArgumentCaptor<URL> urlArgumentCaptor = ArgumentCaptor.forClass(URL.class);
         ArgumentCaptor<GenericUrl> targetUrlArgumentCaptor = ArgumentCaptor.forClass(GenericUrl.class);
 
-        verify(sanitizer, times(2)).isAllowed(anyString(), urlArgumentCaptor.capture());
+        verify(sanitizer, times(1)).isAllowed(anyString(), urlArgumentCaptor.capture());
         verify(requestFactory).buildRequest(anyString(), targetUrlArgumentCaptor.capture(), any());
 
         // Sanitization should receive original URL requested
-        assertEquals("https://graph.microsoft.com" + "/v1.0" + originalPath,
+        assertEquals("https://graph.microsoft.com" + "/v1.0/users/" + encodedPseudonym + "/calendar/calendarView?" + query,
                 urlArgumentCaptor.getValue().toString());
         // But request done to source should get the URL with the reverse tokens
-        assertEquals("https://graph.microsoft.com" + "/v1.0" + originalPath,
+        assertEquals("https://graph.microsoft.com" + "/v1.0/users/" + userId + "/calendar/calendarView?" + query,
                 targetUrlArgumentCaptor.getValue().toString());
     }
 

@@ -167,10 +167,13 @@ public class CommonRequestHandler {
 
         this.sanitizer = loadSanitizerRules();
 
+        log.warning("Original: " + originalRequestedURL);
+        log.warning("Target: " + targetForSourceApiRequest);
+
         String callLog = String.format("%s %s TokenInUrlReversed=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), tokenizedURLReversed);
         if (skipSanitization) {
             log.info(String.format("%s. Skipping sanitization.", callLog));
-        } else if (isAllowedURL(request, tokenizedURLReversed, originalRequestedURL, targetForSourceApiRequest)) {
+        } else if (sanitizer.isAllowed(request.getHttpMethod(), originalRequestedURL)) {
             log.info(String.format("%s. Rules allowed call.", callLog));
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
@@ -434,21 +437,5 @@ public class CommonRequestHandler {
                         headers.set(h, headerValue);
                     });
                 }));
-    }
-
-    private boolean isAllowedURL(HttpEventRequest request, boolean isTokenReversed, URL originalRequestedURL, URL targetForSourceApiRequest) {
-        // 1st attempt because reversed could be partial, with some parameter like a tokenized id (so it may match the full rule). Example
-        // requested: users/id -> users/p~12345 as tokenized id
-        boolean result = sanitizer.isAllowed(request.getHttpMethod(), originalRequestedURL);
-
-        if (!result && isTokenReversed) {
-            // 2nd attempt the full URL could be entirely tokenized, so need to reverse it to try to match it with the rules.
-            // Example: rule users/{id}
-            //       requested:/p~12345adadfasd
-            //       reversed: /users/12345
-            result = sanitizer.isAllowed(request.getHttpMethod(), targetForSourceApiRequest);
-        }
-
-        return result;
     }
 }

@@ -19,16 +19,14 @@ import java.util.stream.Stream;
 
 public class PrebuiltSanitizerRules {
 
-    static final String GRAPHQL_QUERY_PARAMETERS_REGEX_GROUP = "(?<queryParameters>\\?[a-zA-z0-9\\s\\$\\=\\(\\)]*";
-
     static final Transform.Tokenize TOKENIZE_ODATA_LINKS = Transform.Tokenize.builder()
             .jsonPath("$.['@odata.nextLink', '@odata.prevLink']")
-            .regex("^https://graph.microsoft.com/v1.0/(.*)$")
+            .regex("^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$")
             .build();
 
     static final Transform.Tokenize TOKENIZE_SESSIONS_ODATA_LINKS = Transform.Tokenize.builder()
             .jsonPath("$.['sessions@odata.nextLink']")
-            .regex("^https://graph.microsoft.com/v1.0/(.*)$")
+            .regex("^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$")
             .build();
     static final Transform REDACT_ODATA_CONTEXT = Transform.Redact.builder()
             .jsonPath("$..['@odata.context']")
