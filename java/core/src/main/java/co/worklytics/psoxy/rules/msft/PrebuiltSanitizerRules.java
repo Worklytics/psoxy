@@ -9,12 +9,17 @@ import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Streams;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PrebuiltSanitizerRules {
+
+    static final String GRAPHQL_QUERY_PARAMETERS_REGEX_GROUP = "(?<queryParameters>\\?[a-zA-z0-9\\s\\$\\=\\(\\)]*";
 
     static final Transform.Tokenize TOKENIZE_ODATA_LINKS = Transform.Tokenize.builder()
             .jsonPath("$.['@odata.nextLink', '@odata.prevLink']")
@@ -311,10 +316,11 @@ public class PrebuiltSanitizerRules {
                     .build();
 
     static final List<Endpoint> OUTLOOK_CALENDAR_NO_APP_IDS_ENDPOINTS = Arrays.asList(getMailboxSettings(ENTRA_ID_REGEX_USERS_BY_PSEUDO),
-            EVENT_TRANSFORMS.withTransforms(Arrays.asList(TOKENIZE_ODATA_LINKS, REDACT_ODATA_CONTEXT, REDACT_CALENDAR_ODATA_LINKS))
-                    .toBuilder()
+            Endpoint.builder()
                     .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))")
-                    .allowedQueryParams(List.of("$top", "$select", "$skip", "$orderBy", "$count"))
+                    .transforms(Streams.concat(EVENT_TRANSFORMS.getTransforms().stream(),
+                                    Stream.of(TOKENIZE_ODATA_LINKS, REDACT_ODATA_CONTEXT, REDACT_CALENDAR_ODATA_LINKS))
+                            .collect(Collectors.toList()))
                     .build());
 
     static final Rules2 OUTLOOK_CALENDAR_NO_APP_IDS =
@@ -578,12 +584,16 @@ public class PrebuiltSanitizerRules {
                             .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
                             .build())))
-            .endpoint(MS_TEAMS_USERS_CHATS.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
-                    MS_TEAMS_USERS_CHATS_REDACT
-                            .toBuilder()
-                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                            .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                            .build())))
+            .endpoint(Endpoint.builder()
+                    .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/chats(\\?.*)?")
+                    .transforms(Arrays.asList(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE,
+                            MS_TEAMS_USERS_CHATS_REDACT
+                                    .toBuilder()
+                                    .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
+                                    .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
+                                    .jsonPaths(PSEUDONYMIZE_USER_ID.getJsonPaths())
+                                    .build()))
+                    .build())
             .endpoint(MS_TEAMS_TEAMS_CHANNELS_MESSAGES.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
                     MS_TEAMS_TEAMS_CHANNELS_MESSAGES_REDACT
                             .toBuilder()
@@ -630,30 +640,29 @@ public class PrebuiltSanitizerRules {
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
                             .build())))
             .endpoint(Endpoint.builder()
-                    .pathTemplate(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/onlineMeetings")
-                    .transforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
-                            TOKENIZE_SESSIONS_ODATA_LINKS,
-                            TOKENIZE_ODATA_LINKS,
-                            MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT
-                                    .toBuilder()
-                                    .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                                    .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
-                                    .build()))
+                    .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/onlineMeetings/[a-zA-Z0-9_-]+/attendanceReports/[a-zA-Z0-9_-]+(\\?.*)?")
+                    .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+                    .transform(PSEUDONYMIZE_USER_ID)
+                    .transform(MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT)
+                    .transform(REDACT_ODATA_CONTEXT)
+                    .transform(REDACT_ODATA_TYPE)
+                    .transform(TOKENIZE_ODATA_LINKS)
+                    .transform(TOKENIZE_SESSIONS_ODATA_LINKS)
                     .build())
             .endpoint(Endpoint.builder()
-                    .pathTemplate(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/onlineMeetings/{meetingId}/attendanceReports")
-                    .transforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
-                            TOKENIZE_SESSIONS_ODATA_LINKS,
-                            TOKENIZE_ODATA_LINKS,
-                            MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT
-                                    .toBuilder()
-                                    .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                                    .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
-                                    .build()))
+                    .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/onlineMeetings/[a-zA-Z0-9_-]+/attendanceReports(\\?.*)?")
+                    .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+                    .transform(PSEUDONYMIZE_USER_ID)
+                    .transform(MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT)
+                    .transform(REDACT_ODATA_CONTEXT)
+                    .transform(REDACT_ODATA_TYPE)
+                    .transform(TOKENIZE_ODATA_LINKS)
+                    .transform(TOKENIZE_SESSIONS_ODATA_LINKS)
                     .build())
             .endpoint(Endpoint.builder()
-                    .pathTemplate(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "onlineMeetings/{meetingId}/attendanceReports/{reportId}")
+                    .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/onlineMeetings(\\?.*)?")
                     .transforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
+                            MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE,
                             TOKENIZE_SESSIONS_ODATA_LINKS,
                             TOKENIZE_ODATA_LINKS,
                             MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT

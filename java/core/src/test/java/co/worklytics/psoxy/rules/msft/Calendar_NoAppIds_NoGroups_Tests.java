@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 //TODO: fix this re-use via inheritance; makes tests brittle; we should inject this rule set into
 // the directory tests, or something like that
-public class Calendar_NoAppIds_NoGroups_Tests extends CalendarTests {
+public class Calendar_NoAppIds_NoGroups_Tests extends Calendar_NoAppIds_Tests {
 
     @Getter
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.OUTLOOK_CALENDAR_NO_APP_IDS_NO_GROUPS;
