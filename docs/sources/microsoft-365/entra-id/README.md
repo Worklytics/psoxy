@@ -3,6 +3,9 @@
 Connect to Directory data in Microsoft 365. This allows enumeration of all users, groups, and group
 members in your organization, to provide additional segmentation, timezone/workday information, etc.
 
+Please review the [Microsoft 365 README](../README.md) for general information applicable to
+all Microsoft 365 connectors.
+
 ## Required Scopes
 - [`User.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
 - [`Group.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
