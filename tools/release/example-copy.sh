@@ -51,3 +51,6 @@ chmod +x ${EXAMPLE_TEMPLATE_REPO}init
 
 cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/check-prereqs.sh ${EXAMPLE_TEMPLATE_REPO}check-prereqs
 chmod +x ${EXAMPLE_TEMPLATE_REPO}check-prereqs
+
+cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/reset-example.sh ${EXAMPLE_TEMPLATE_REPO}reset-example
+chmod +x ${EXAMPLE_TEMPLATE_REPO}reset-example
