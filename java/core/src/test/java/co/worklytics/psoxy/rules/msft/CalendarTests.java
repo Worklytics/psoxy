@@ -95,6 +95,33 @@ public class CalendarTests extends EntraIDTests {
 
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"v1.0"})
+    void calendarViewsWithOData(String apiVersion) {
+        String endpoint = "https://graph.microsoft.com/" + apiVersion +
+                "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView?startDateTime=2020-01-01T00%3a00%3a00Z&endDateTime=2024-09-07T00%3a00%3a00Z&%24top=100&%24skip=100";
+
+        assertUrlAllowed(endpoint);
+        assertUrlWithQueryParamsAllowed(endpoint);
+        assertUrlWithSubResourcesBlocked(endpoint);
+
+        String jsonResponse = asJson("CalendarView_" + apiVersion + ".json");
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+
+        assertRedacted(sanitized,
+                "Irvin Sayers",
+                "New Product Regulations Touchpoint", //subject
+                "New Product Regulations Strategy Online Touchpoint Meeting" //body
+        );
+
+        assertPseudonymized(sanitized,
+                "engineering@M365x214355.onmicrosoft.com",
+                "IrvinS@M365x214355.onmicrosoft.com"
+        );
+
+    }
+
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0"})
@@ -179,6 +206,8 @@ public class CalendarTests extends EntraIDTests {
                 "CalendarView_v1.0.json"),
             InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView",
                 "CalendarView_v1.0_wZoomUrls.json"),
+                InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView?startDateTime=2020-01-01T00%3a00%3a00Z&endDateTime=2024-09-07T00%3a00%3a00Z&%24top=100&%24skip=100",
+                        "CalendarView_v1.0_wZoomUrls.json"),
                 InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView",
                         "CalendarView_v1.0_wOnlineMeetings.json"),
             //InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendar/calendarView",
