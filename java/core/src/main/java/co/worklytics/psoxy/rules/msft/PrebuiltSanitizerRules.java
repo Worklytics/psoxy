@@ -205,19 +205,57 @@ public class PrebuiltSanitizerRules {
                     .build()
     );
 
+    static final List<Endpoint> OUTLOOK_MAIL_ENDPOINTS_NO_APP_IDS = Arrays.asList(
+            getMailboxSettings(ENTRA_ID_REGEX_USERS_BY_PSEUDO),
+            Endpoint.builder()
+                    .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/messages/[^/]*")
+                    .transform(Transform.Redact.builder()
+                            .jsonPath("$..subject")
+                            .jsonPath("$..body")
+                            .jsonPath("$..bodyPreview")
+                            .jsonPath("$..emailAddress.name")
+                            .jsonPath("$..extensions")
+                            .jsonPath("$..multiValueExtendedProperties")
+                            .jsonPath("$..singleValueExtendedProperties")
+                            .jsonPath("$..internetMessageHeaders") //values that we care about generally parsed to other fields
+                            .build()
+                    )
+                    .transform(Transform.Pseudonymize.builder()
+                            .jsonPath("$..emailAddress.address")
+                            .build()
+                    )
+                    .transform(TOKENIZE_ODATA_LINKS)
+                    .transform(TOKENIZE_SESSIONS_ODATA_LINKS)
+                    .transform(REDACT_ODATA_CONTEXT)
+                    .build(),
+            Endpoint.builder()
+                    .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/mailFolders(/SentItems|\\('SentItems'\\))/messages.*")
+                    .transform(Transform.Redact.builder()
+                            .jsonPath("$..subject")
+                            .jsonPath("$..body")
+                            .jsonPath("$..bodyPreview")
+                            .jsonPath("$..emailAddress.name")
+                            .jsonPath("$..extensions")
+                            .jsonPath("$..multiValueExtendedProperties")
+                            .jsonPath("$..singleValueExtendedProperties")
+                            .jsonPath("$..internetMessageHeaders") //values that we care about generally parsed to other fields
+                            .build())
+                    .transform(Transform.Pseudonymize.builder()
+                            .jsonPath("$..emailAddress.address")
+                            .build())
+                    .transform(TOKENIZE_ODATA_LINKS)
+                    .transform(TOKENIZE_SESSIONS_ODATA_LINKS)
+                    .transform(REDACT_ODATA_CONTEXT)
+                    .build()
+    );
+
     static final Rules2 OUTLOOK_MAIL = ENTRA_ID.withAdditionalEndpoints(OUTLOOK_MAIL_ENDPOINTS);
 
     static final Rules2 OUTLOOK_MAIL_NO_APP_IDS = ENTRA_ID_NO_MSFT_IDS
-            .withAdditionalEndpoints(OUTLOOK_MAIL_ENDPOINTS)
-            .withTransformByEndpoint(OUTLOOK_MAIL_PATH_REGEX_MESSAGES, TOKENIZE_ODATA_LINKS, REDACT_ODATA_CONTEXT)
-            .withTransformByEndpoint(OUTLOOK_MAIL_PATH_REGEX_SENT_MESSAGES, TOKENIZE_ODATA_LINKS, REDACT_ODATA_CONTEXT)
-            .withTransformByEndpoint(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS, REDACT_ODATA_CONTEXT);
+            .withAdditionalEndpoints(OUTLOOK_MAIL_ENDPOINTS_NO_APP_IDS);
 
     static final Rules2 OUTLOOK_MAIL_NO_APP_IDS_NO_GROUPS = ENTRA_ID_NO_MSFT_IDS_NO_GROUPS
-            .withAdditionalEndpoints(OUTLOOK_MAIL_ENDPOINTS)
-            .withTransformByEndpoint(OUTLOOK_MAIL_PATH_REGEX_MESSAGES, TOKENIZE_ODATA_LINKS, REDACT_ODATA_CONTEXT)
-            .withTransformByEndpoint(OUTLOOK_MAIL_PATH_REGEX_SENT_MESSAGES, TOKENIZE_ODATA_LINKS, REDACT_ODATA_CONTEXT)
-            .withTransformByEndpoint(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS, REDACT_ODATA_CONTEXT);
+            .withAdditionalEndpoints(OUTLOOK_MAIL_ENDPOINTS_NO_APP_IDS);
 
 
     //transforms to apply to endpoints that return Event or Event collection
@@ -259,14 +297,7 @@ public class PrebuiltSanitizerRules {
 
     static final String OUTLOOK_CALENDAR_PATH_REGEX_EVENTS = "^/v1.0/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))";
 
-    static final List<Endpoint> OUTLOOK_CALENDAR_ENDPOINTS = Arrays.asList(
-            Endpoint.builder()
-                    .pathRegex(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS)
-                    .transform(Transform.Redact.builder()
-                            .jsonPath("$..internalReplyMessage")
-                            .jsonPath("$..externalReplyMessage")
-                            .build())
-                    .build(),
+    static final List<Endpoint> OUTLOOK_CALENDAR_ENDPOINTS = Arrays.asList(getMailboxSettings(ENTRA_ID_REGEX_USERS),
             EVENT_TRANSFORMS.toBuilder()
                     .pathRegex(OUTLOOK_CALENDAR_PATH_REGEX_EVENTS)
                     .build()
@@ -279,21 +310,19 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..['calendar@odata.associationLink', 'calendar@odata.navigationLink']")
                     .build();
 
+    static final List<Endpoint> OUTLOOK_CALENDAR_NO_APP_IDS_ENDPOINTS = Arrays.asList(getMailboxSettings(ENTRA_ID_REGEX_USERS_BY_PSEUDO),
+            EVENT_TRANSFORMS.withTransforms(Arrays.asList(TOKENIZE_ODATA_LINKS, REDACT_ODATA_CONTEXT, REDACT_CALENDAR_ODATA_LINKS))
+                    .toBuilder()
+                    .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))")
+                    .allowedQueryParams(List.of("$top", "$select", "$skip", "$orderBy", "$count"))
+                    .build());
+
     static final Rules2 OUTLOOK_CALENDAR_NO_APP_IDS =
             ENTRA_ID_NO_MSFT_IDS
-                    .withAdditionalEndpoints(OUTLOOK_CALENDAR_ENDPOINTS)
-                    .withTransformByEndpoint(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS, REDACT_ODATA_CONTEXT)
-                    .withTransformByEndpoint(OUTLOOK_CALENDAR_PATH_REGEX_EVENTS, TOKENIZE_ODATA_LINKS,
-                            REDACT_ODATA_CONTEXT,
-                            REDACT_CALENDAR_ODATA_LINKS);
+                    .withAdditionalEndpoints(OUTLOOK_CALENDAR_NO_APP_IDS_ENDPOINTS);
 
     static final Rules2 OUTLOOK_CALENDAR_NO_APP_IDS_NO_GROUPS = ENTRA_ID_NO_MSFT_IDS_NO_GROUPS
-            .withAdditionalEndpoints(OUTLOOK_CALENDAR_ENDPOINTS)
-            .withTransformByEndpoint(OUTLOOK_PATH_REGEX_MAILBOX_SETTINGS, REDACT_ODATA_CONTEXT)
-            .withTransformByEndpoint(OUTLOOK_CALENDAR_PATH_REGEX_EVENTS, TOKENIZE_ODATA_LINKS,
-                    REDACT_ODATA_CONTEXT,
-                    REDACT_CALENDAR_ODATA_LINKS);
-
+            .withAdditionalEndpoints(OUTLOOK_CALENDAR_NO_APP_IDS_ENDPOINTS);
 
     static final String MS_TEAMS_PATH_TEMPLATES_TEAMS = "/v1.0/teams"; //
     static final String MS_TEAMS_PATH_TEMPLATES_TEAMS_ALL_CHANNELS = "/v1.0/teams/{teamId}/allChannels";
@@ -532,105 +561,110 @@ public class PrebuiltSanitizerRules {
             .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORTS, MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT)
             .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS, MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT);
 
-    static final Rules2 MS_TEAMS_NO_USER_ID = MS_TEAMS_BASE
-            .withAdditionalEndpoints(ENTRA_ID_USERS_NO_APP_IDS)
-            .withTransformByEndpoint(ENTRA_ID_REGEX_USERS_BY_PSEUDO, ENTRA_ID_USERS_NO_APP_IDS_TRANSFORM_RULE)
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS, PSEUDONYMIZE_USER_ID,
+    static final Rules2 MS_TEAMS_NO_USER_ID = Rules2.builder()
+            .endpoint(MS_TEAMS_TEAMS.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
                     MS_TEAMS_TEAMS_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_ID.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                            .build())
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_ALL_CHANNELS, PSEUDONYMIZE_USER_ID,
+                            .build())))
+            .endpoint(MS_TEAMS_TEAMS_ALL_CHANNELS.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
                     MS_TEAMS_TEAMS_ALL_CHANNELS_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_ID.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                            .build())
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_CHATS, PSEUDONYMIZE_USER_ID,
+                            .build())))
+            .endpoint(MS_TEAMS_USERS_CHATS.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
                     MS_TEAMS_USERS_CHATS_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                            .build())
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES, PSEUDONYMIZE_USER_ID,
+                            .build())))
+            .endpoint(MS_TEAMS_TEAMS_CHANNELS_MESSAGES.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
                     MS_TEAMS_TEAMS_CHANNELS_MESSAGES_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                            .build(),
-                    TOKENIZE_ODATA_LINKS)
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA, PSEUDONYMIZE_USER_ID,
+                            .build())))
+            .endpoint(MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
                     MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                            .build(),
-                    TOKENIZE_ODATA_LINKS)
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES, PSEUDONYMIZE_USER_ID,
+                            .build())))
+            .endpoint(MS_TEAMS_CHATS_MESSAGES.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
                     MS_TEAMS_CHATS_MESSAGES_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                            .build(),
-                    TOKENIZE_ODATA_LINKS)
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS, PSEUDONYMIZE_USER_ID,
+                            .build())))
+            .endpoint(MS_TEAMS_COMMUNICATIONS_CALLS.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
                     MS_TEAMS_COMMUNICATIONS_CALLS_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
-                            .build())
-            .withTransformByEndpoint(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX, PSEUDONYMIZE_USER_ID,
+                            .build())))
+            .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
                     MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
-                            .build(),
-                    TOKENIZE_ODATA_LINKS,
-                    TOKENIZE_SESSIONS_ODATA_LINKS)
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS,
-                    PSEUDONYMIZE_USER_ID,
-                    PSEUDONYMIZE_CALL_ID,
+                            .build())))
+            .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
                     MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                            .build(),
-                    TOKENIZE_ODATA_LINKS)
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS,
-                    PSEUDONYMIZE_USER_ID,
-                    PSEUDONYMIZE_CALL_ID,
+                            .build())))
+            .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
                     MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                            .build(),
-                    TOKENIZE_ODATA_LINKS)
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS, PSEUDONYMIZE_USER_ID,
-                    MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT
-                            .toBuilder()
-                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                            .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
-                            .build())
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORTS, PSEUDONYMIZE_USER_ID,
-                    MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT
-                            .toBuilder()
-                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                            .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
-                            .build())
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS_ATTENDANCE_REPORT, PSEUDONYMIZE_USER_ID,
-                    MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT
-                            .toBuilder()
-                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                            .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
-                            .build());
+                            .build())))
+            .endpoint(Endpoint.builder()
+                    .pathTemplate(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/onlineMeetings")
+                    .transforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
+                            TOKENIZE_SESSIONS_ODATA_LINKS,
+                            TOKENIZE_ODATA_LINKS,
+                            MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT
+                                    .toBuilder()
+                                    .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
+                                    .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
+                                    .build()))
+                    .build())
+            .endpoint(Endpoint.builder()
+                    .pathTemplate(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/onlineMeetings/{meetingId}/attendanceReports")
+                    .transforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
+                            TOKENIZE_SESSIONS_ODATA_LINKS,
+                            TOKENIZE_ODATA_LINKS,
+                            MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT
+                                    .toBuilder()
+                                    .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
+                                    .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
+                                    .build()))
+                    .build())
+            .endpoint(Endpoint.builder()
+                    .pathTemplate(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "onlineMeetings/{meetingId}/attendanceReports/{reportId}")
+                    .transforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
+                            TOKENIZE_SESSIONS_ODATA_LINKS,
+                            TOKENIZE_ODATA_LINKS,
+                            MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT
+                                    .toBuilder()
+                                    .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
+                                    .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
+                                    .build()))
+                    .build())
+            .build()
+            .withAdditionalEndpoints(ENTRA_ID_USERS_NO_APP_IDS)
+            .withTransformByEndpoint(ENTRA_ID_REGEX_USERS_BY_PSEUDO, ENTRA_ID_USERS_NO_APP_IDS_TRANSFORM_RULE);
 
     public static final Map<String, RESTRules> MSFT_DEFAULT_RULES_MAP =
             ImmutableMap.<String, RESTRules>builder()
@@ -645,4 +679,15 @@ public class PrebuiltSanitizerRules {
                     .put("msft-teams", MS_TEAMS)
                     .put("msft-teams" + ConfigRulesModule.NO_APP_IDS_SUFFIX + "-no-userIds", MS_TEAMS_NO_USER_ID)
                     .build();
+
+    private static Endpoint getMailboxSettings(String path) {
+        return Endpoint.builder()
+                .pathRegex(path + "/mailboxSettings")
+                .transform(Transform.Redact.builder()
+                        .jsonPath("$..internalReplyMessage")
+                        .jsonPath("$..externalReplyMessage")
+                        .build())
+                .transform(REDACT_ODATA_CONTEXT)
+                .build();
+    }
 }
