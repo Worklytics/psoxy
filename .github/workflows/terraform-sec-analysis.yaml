@@ -1,0 +1,30 @@
+on:
+  workflow_call:
+    inputs:
+      example_path:
+        required: false
+        type: string
+        description: Path to the example to validate
+
+name: 'terrafrom-sec-analysis'
+jobs:
+  tfsec:
+    name: terrafrom-sec-analysis
+    runs-on: ubuntu-latest
+
+    # q: what version of Terraform does this use??
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner in IaC mode
+        uses: aquasecurity/trivy-action@0.20.0
+        working-directory: ${{ inputs.example_path }}
+        with:
+          scan-type: 'config'
+          format: 'table'
+          hide-progress: true
+          scanners: 'config'
+          trivyignores: '.trivyignore' # default? omit this?
+          # tf-vars: # add an example-dev tfvars file, 
