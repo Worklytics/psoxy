@@ -29,7 +29,7 @@ file.
 | `jira-server`              | Jira Server                          | API  | ALPHA        |
 | `outlook-cal`              | Outlook Calendar                     | API  | GA           |
 | `outlook-mail`             | Outlook Mail                         | API  | GA           |
-| `msft-teams`               | Microsoft Teams                      | API  | GA           |
+| `msft-teams`               | Microsoft Teams                      | API  | BETA         |
 | `msft-entra-id`            | Microsoft Entra ID                   | API  | GA           |
 | `qualtrics`                | Qualtrics (survey)                   | API  | GA           |
 | `salesforce`               | Salesforce                           | API  | GA           |
