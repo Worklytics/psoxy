@@ -27,7 +27,6 @@ jobs:
           # format: 'sarif'
           output: trivy.txt
           hide-progress: true
-          exit-code: '1' # detected vulnerabilities fail build
           # scanners: 'config' # although documented, seems incompatible with 'scan-type'
           # trivyignores: ${{ inputs.example_path }}/.trivyignore
           tf-vars: .github/workflows/tfvars-examples/${{ inputs.example_path }}.tfvars
@@ -43,4 +42,5 @@ jobs:
               echo '```'
               echo "</details>"
             } >> $GITHUB_STEP_SUMMARY
+            exit 1 # force fail if there was output
           fi
