@@ -5,6 +5,9 @@ insights based on collaboration via Outlook Calendar. Includes user enumeration 
 calendars from each account; and group enumeration to expand attendance/invitations to meetings
 via mailing list (groups).
 
+Please review the [Microsoft 365 README](../README.md) for general information applicable to
+all Microsoft 365 connectors.
+
 ## Required Scopes
 - [`User.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
 - [`Group.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
