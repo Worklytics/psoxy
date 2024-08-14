@@ -129,8 +129,12 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
         Collection<String> PIItoPseudonymize = Arrays.asList(
                 "W06CA4EAC", "W0G81RDQT", "W0N0ZQDED", "W0R8EBMXP", "W0G81RDQZ", "W000000", "U02DU306H0B",
                 "REPLYUSER",
-                "some parent user"
+                "some parent user",
+                "U02K5LRARED",
+                "U074XMEDGUU",
+                "USLACKBOT"
         );
+
         Collection<String> dataToRedact = Arrays.asList(
                 "Test message!",
                 "<@U06CA4EAC|bjin>",
@@ -144,7 +148,17 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
                 "Leg end nary a laugh, Ink.",
                 "Some other text",
                 "https://badpuns.example.com/puns/123.png",
-                "permalink value"
+                "permalink value",
+                "huddle test topic",
+                "A huddle started"
+        );
+
+        Collection<String> dataToKeep = Arrays.asList(
+                "R07BNSQTZSP",
+                "D075J2RKK4Y",
+                "b88ef6b8-9450-4633-83a2-dfb2cfd12713",
+                "huddle",
+                "huddle_thread"
         );
 
         assertNotSanitized(jsonString, PIItoPseudonymize);
@@ -155,6 +169,7 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
 
         assertPseudonymized(sanitized, PIItoPseudonymize);
         assertRedacted(sanitized, dataToRedact);
+        assertNotSanitized(sanitized, dataToKeep);
     }
 
     @SneakyThrows
