@@ -21,8 +21,8 @@ jobs:
         # see: https://github.com/marketplace/actions/aqua-security-trivy#inputs
       - name: Run Trivy vulnerability scanner in IaC mode
         uses: aquasecurity/trivy-action@0.20.0
-        working-directory: infra/${{ inputs.example_path }}
         with:
+          scan-ref: infra/${{ inputs.example_path }}
           scan-type: 'config'
           format: 'table'
           hide-progress: true
