@@ -117,11 +117,11 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
     @Test
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES)
     public void chats_messages() {
-        String chatId = "fbe2bf47-16c8-47cf-b4a5-4b9b187c508b";
+        String chatId = "p~12345";
         String endpoint = "https://graph.microsoft.com/" + "v1.0" + "/chats/" + chatId + "/messages";
         String jsonResponse = asJson("Chats_messages_" + "v1.0" + ".json");
 
-        String sanitized = sanitize(endpoint, jsonResponse);
+            String sanitized = sanitize(endpoint, jsonResponse);
         assertPseudonymized(sanitized, "8ea0e38b-efb3-4757-924a-5f94061cf8c2", "1fb8890f-423e-4154-8fbf-db6809bc8756");
         assertRedacted(sanitized,
                 "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#chats('19%3A2da4c29f6d7041eca70b638b43d45437%40thread.v2')/messages",
@@ -285,7 +285,7 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
                 InvocationExample.of(baseEndpoint + "/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/chats", "Users_chats_" + "v1.0" + ".json"),
                 InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages", "Teams_channels_messages_" + "v1.0" + ".json"),
                 InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta", "Teams_channels_messages_delta_" + "v1.0" + ".json"),
-                InvocationExample.of(baseEndpoint + "/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages", "Chats_messages_" + "v1.0" + ".json"),
+                InvocationExample.of(baseEndpoint + "/chats/p~bWr_bA0wnI4CDi2z8MuXG2vEmijbgJ9-MX1hsrnF20ik1FwGIGIQ_uMj2B_4LQV7U7F8XPs4Nx_URHgdx-pukZu2Hb6QzmB24IBvBInSdwA/messages", "Chats_messages_" + "v1.0" + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92", "Communications_calls_" + "v1.0" + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/callRecords/2f1a1100-b174-40a0-aba7-0b405e01ed92?$expand=sessions($expand=segments)", "Communications_callRecords_" + "v1.0" + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getDirectRoutingCalls_" + "v1.0" + ".json"),

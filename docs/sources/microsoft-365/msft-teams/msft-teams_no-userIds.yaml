@@ -96,24 +96,16 @@ endpoints:
           - "$..value[*].eventDetail.teamDescription"
           - "$..['@odata.context']"
           - "$..['@odata.count']"
-  - pathTemplate: "/v1.0/chats/{chatId}/messages"
-    allowedQueryParams:
-      - "$select"
-      - "$top"
-      - "$skiptoken"
-      - "$filter"
-      - "$orderby"
-      - "$count"
-      - "$expand"
-      - "$format"
-      - "$search"
-      - "$skip"
+  - pathRegex: "^/v1.0/chats/(/p~[a-zA-Z0-9_-]+?)?[^/]*/messages(\\?.*)?"
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..user.id"
-          - "$..userId"
+          - "$..emailAddress"
         encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..description"
       - !<redact>
         jsonPaths:
           - "$..user.displayName"
@@ -122,7 +114,23 @@ endpoints:
           - "$..value[*].mentions[*].mentionText"
           - "$..value[*].eventDetail.teamDescription"
           - "$..value[*].eventDetail.chatDisplayName"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..user.id"
+          - "$..userId"
+        encoding: "JSON"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/chats/(.*)/messages(\\?.*).*$"
+      - !<redact>
+        jsonPaths:
           - "$..['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.type']"
+      - !<redact>
+        jsonPaths:
           - "$..['@odata.count']"
   - pathTemplate: "/v1.0/communications/calls/{callId}"
     allowedQueryParams:

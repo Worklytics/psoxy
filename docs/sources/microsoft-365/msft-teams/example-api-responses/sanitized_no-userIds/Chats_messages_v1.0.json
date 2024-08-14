@@ -1,5 +1,5 @@
 {
-  "@odata.nextLink":"https://graph.microsoft.com/v1.0/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages?$top=2&$skiptoken=M2UyZDAwMDAwMDMxMzkzYTMyNjQ2MTM0NjMzMjM5NjYzNjY0MzczMDM0MzE2NTYzNjEzNzMwNjIzNjMzMzg2MjM0MzM2NDM0MzUzNDMzMzc0MDc0Njg3MjY1NjE2NDJlNzYzMjAxZThmYjY4M2Y3ODAxMDAwMDg4NjA5ODdhNzgwMTAwMDB8MTYxNjk2NDUwOTgzMg%3d%3d",
+  "@odata.nextLink":"https://graph.microsoft.com/v1.0/chats/p~bWr_bA0wnI4CDi2z8MuXG2vEmijbgJ9-MX1hsrnF20ik1FwGIGIQ_uMj2B_4LQV7U7F8XPs4Nx_URHgdx-pukZu2Hb6QzmB24IBvBInSdwA/messages?$top=2&$skiptoken=M2UyZDAwMDAwMDMxMzkzYTMyNjQ2MTM0NjMzMjM5NjYzNjY0MzczMDM0MzE2NTYzNjEzNzMwNjIzNjMzMzg2MjM0MzM2NDM0MzUzNDMzMzc0MDc0Njg3MjY1NjE2NDJlNzYzMjAxZThmYjY4M2Y3ODAxMDAwMDg4NjA5ODdhNzgwMTAwMDB8MTYxNjk2NDUwOTgzMg%3d%3d",
   "value":[
     {
       "id":"1616964509832",
@@ -92,7 +92,6 @@
       "reactions":[ ],
       "messageHistory":[ ],
       "eventDetail":{
-        "@odata.type":"#microsoft.graph.chatRenamedEventMessageDetail",
         "chatId":"19:2da4c29f6d7041eca70b638b43d45437@thread.v2",
         "initiator":{
           "application":null,

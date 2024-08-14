@@ -598,12 +598,18 @@ public class PrebuiltSanitizerRules {
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
                             .build())))
-            .endpoint(MS_TEAMS_CHATS_MESSAGES.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
-                    MS_TEAMS_CHATS_MESSAGES_REDACT
-                            .toBuilder()
-                            .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
-                            .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
-                            .build())))
+            .endpoint(Endpoint.builder()
+                    .pathRegex("^/v1.0/chats/(/p~[a-zA-Z0-9_-]+?)?[^/]*/messages(\\?.*)?")
+                    .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+                    .transform(MS_TEAMS_TEAMS_REDACT)
+                    .transform(MS_TEAMS_CHATS_MESSAGES_REDACT)
+                    .transform(PSEUDONYMIZE_USER_ID)
+                    // Chat message id could contain MSFT user guids
+                    .transform(getTokenizeWithExpressionForLinks("chats/(.*)/messages(\\?.*)"))
+                    .transform(REDACT_ODATA_CONTEXT)
+                    .transform(REDACT_ODATA_TYPE)
+                    .transform(REDACT_ODATA_COUNT)
+                    .build())
             .endpoint(MS_TEAMS_COMMUNICATIONS_CALLS.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
                     MS_TEAMS_COMMUNICATIONS_CALLS_REDACT
                             .toBuilder()
@@ -686,6 +692,13 @@ public class PrebuiltSanitizerRules {
                         .jsonPath("$..externalReplyMessage")
                         .build())
                 .transform(REDACT_ODATA_CONTEXT)
+                .build();
+    }
+
+    private static Transform.Tokenize getTokenizeWithExpressionForLinks(String regex) {
+        return Transform.Tokenize.builder()
+                .jsonPath("$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']")
+                .regex("^https://graph.microsoft.com/v1.0/" + regex + ".*$")
                 .build();
     }
 }
