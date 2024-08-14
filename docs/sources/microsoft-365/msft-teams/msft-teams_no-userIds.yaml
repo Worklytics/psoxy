@@ -45,6 +45,9 @@ endpoints:
         jsonPaths:
           - "$..emailAddress"
         encoding: "JSON"
+      - !<tokenize>
+        jsonPaths:
+          - "$..id"
       - !<redact>
         jsonPaths:
           - "$..topic"

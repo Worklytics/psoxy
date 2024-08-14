@@ -579,6 +579,10 @@ public class PrebuiltSanitizerRules {
             .endpoint(Endpoint.builder()
                     .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/chats(\\?.*)?")
                     .transforms(Arrays.asList(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE,
+                            // id of the chat may contain MSFT user GUIDS
+                            Transform.Tokenize.builder()
+                                    .jsonPath("$..id")
+                                    .build(),
                             MS_TEAMS_USERS_CHATS_REDACT
                                     .toBuilder()
                                     .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
