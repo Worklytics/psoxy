@@ -1,0 +1,18 @@
+name: 'terrafrom-sec-analysis'
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  tfsec:
+    strategy:
+      matrix:
+        example_path: [
+          'examples-dev/aws-all',
+          'examples-dev/gcp',
+        ]
+    uses: ./.github/workflows/terraform-sec-analysis.yaml
+    with:
+      example_path: ${{ matrix.example_path }}

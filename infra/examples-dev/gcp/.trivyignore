@@ -1,0 +1,8 @@
+
+# see https://avd.aquasec.com/misconfig/avd-gcp-0066
+# GCS bucket does not use a CMEK
+# GCS buckets are encrypted by default, with google default keys; proxy tf modules do not provision
+# a CMEK by default, to avoid imposing additional cost/complexity on users. If you wish to do so,
+# this can be configured via composition - as all gcs bucket ids are provides as outputs from our
+# modules.
+AVD-GCP-0066

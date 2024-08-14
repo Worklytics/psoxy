@@ -4,14 +4,14 @@
 
 You'll provision the following to host Psoxy in AWS:
 
-- Lambda Functions
-- IAM Roles and Policies
-- System Manager Parameter Store Parameters
-- Cloud Watch Log Groups
-- S3 buckets, if using the 'bulk' mode to sanitize file data (such as CSVs)
-- Cognito Pools and Identities, if connecting to Microsoft 365 (Azure AD) data sources
+- [Lambda Functions](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html)
+- [IAM Roles and Policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html)
+- [System Manager Parameter Store Parameters](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html)
+- [CloudWatch Log Groups](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html)
+- S3 buckets, if using the 'bulk' mode to sanitize file data (such as CSVs); see [S3 docs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html)
+- [Cognito Pools and Identities](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-identity.html), if connecting to Microsoft 365 data sources
 
-The diagram below provides an architecture overview of the 'REST' and 'Bulk' use-cases.
+The diagram below provides an architecture overview of the 'API' and 'Bulk' mode use-cases.
 
 ![AWS Arch Diagram](aws-arch-diagram.jpg)
 
@@ -103,7 +103,7 @@ provisioning Psoxy's required infra from an EC2 instance may be an option.
    that or something else, you may need to adapt these instructions). Be sure to create a PEM key to
    access it via SSH (unless your AWS Organization/account provides some other ssh solution).
 2. associate the Role above with your instance (see
-   https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html)
+   [https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html))
 3. [connect to your instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstances.html?icmpid=docs_ec2_console),
 
 ```shell
@@ -113,8 +113,7 @@ chmod 400 psoxy-access-key.pem
 ssh -i ~/psoxy-access-key.pem ubuntu@{PUBLIC_IPV4_DNS_OF_YOUR_EC2_INSTANCE}
 ```
 
-Whichever environment you choose, follow general [prereq installation](../prereqs-ubuntu.md), and,
-when ready, continue with [README](../../README.md).
+Whichever environment you choose, follow general [prereq installation](../prereqs-ubuntu.md).
 
 ## Terraform State Backend
 
@@ -124,14 +123,14 @@ You'll also need a backend location for your Terraform state (such as an S3 buck
 any AWS account, as long as the AWS role that you'll use to run Terraform has read/write access to
 it.
 
-See https://developer.hashicorp.com/terraform/language/settings/backends/s3 for more details.
+See [https://developer.hashicorp.com/terraform/language/settings/backends/s3](https://developer.hashicorp.com/terraform/language/settings/backends/s3).
 
 ### Local File System
 
 Alternatively, you may use a local file system, but this is not recommended for production use - as
 your Terraform state may contain secrets such as API keys, depending on the sources you connect.
 
-See https://developer.hashicorp.com/terraform/language/settings/backends/local
+See [https://developer.hashicorp.com/terraform/language/settings/backends/local](https://developer.hashicorp.com/terraform/language/settings/backends/local).
 
 ## Bootstrap
 
@@ -144,6 +143,6 @@ proxy instances will reside.
 Once you've fulfilled the prereqs, including having your terraform deployment environment, backend,
 and AWS account prepared, we suggest you use our AWS example template repo:
 
-- https://github.com/Worklytics/psoxy-example-aws
+- [Worklytics/psoxy-example-aws](https://github.com/Worklytics/psoxy-example-aws)
 
 Follow the 'Usage' instructions there to continue.

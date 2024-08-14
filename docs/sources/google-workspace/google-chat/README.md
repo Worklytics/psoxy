@@ -1,5 +1,9 @@
 # Google Chat
 
+Please review the [Google Workspace README](../README.md) for general information applicable to
+all Google Workspace connectors.
+
+
 ## Examples
 
 - [Example Rules](google-chat.yaml)

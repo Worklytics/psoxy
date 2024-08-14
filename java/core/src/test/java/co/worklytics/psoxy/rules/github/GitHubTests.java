@@ -80,6 +80,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
         assertPseudonymized(sanitized, "fake1", "fake1@contoso.com");
         assertPseudonymized(sanitized, "fake2", "fake2@contoso.com");
+        assertPseudonymized(sanitized,"fake1_email_value@contoso.com");
 
         assertUrlAllowed("https://api.github.com/graphql");
     }

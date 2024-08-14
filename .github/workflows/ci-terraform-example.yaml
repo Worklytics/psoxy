@@ -4,8 +4,7 @@ on:
       example_path:
         required: false
         type: string
-        description: Java version to use # see https://github.com/actions/setup-java#supported-version-syntax
-        default: 17
+        description: Path to the example to validate
       terraform_version:
         required: false
         type: string

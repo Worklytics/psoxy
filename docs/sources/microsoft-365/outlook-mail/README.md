@@ -4,7 +4,10 @@ Connect Outlook Mail data to Worklytics, enabling communication analysis and gen
 insights based on collaboration via Outlook Mail. Includes user enumeration to support fetching
 mailboxes from each account; and group enumeration to expand emails via mailing list (groups).
 
-## Required Scopes
+Please review the [Microsoft 365 README](../README.md) for general information applicable to
+all Microsoft 365 connectors.
+
+## Required Scopeså
 - [`User.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
 - [`Group.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
 - [`MailboxSettings.Read`](https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxsettingsread)
