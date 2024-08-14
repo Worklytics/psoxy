@@ -4,7 +4,7 @@ on:
       example_path:
         required: false
         type: string
-        description: Path to the example to validate
+        description: Path to the example to validate, relative to ./infra/
 
 name: 'terrafrom-sec-analysis'
 jobs:
@@ -18,13 +18,14 @@ jobs:
       - name: Clone repo
         uses: actions/checkout@v4
 
+        # see: https://github.com/marketplace/actions/aqua-security-trivy#inputs
       - name: Run Trivy vulnerability scanner in IaC mode
         uses: aquasecurity/trivy-action@0.20.0
-        working-directory: ${{ inputs.example_path }}
+        working-directory: infra/${{ inputs.example_path }}
         with:
           scan-type: 'config'
           format: 'table'
           hide-progress: true
           scanners: 'config'
           trivyignores: '.trivyignore' # default? omit this?
-          # tf-vars: # add an example-dev tfvars file, 
+          tf-vars: .github/workflows/tfvars-examples/${{ inputs.example_path }}.tfvars
