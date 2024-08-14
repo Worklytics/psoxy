@@ -60,6 +60,8 @@ connector. Each of these has two attributes that correspond to the names of its 
 So in our AWS example, you can use these to enable logging, for example, you could do something like
 this: (YMMV, syntax etc should be tested)
 
+See `s3-extra-sec.tf` in example repo from v0.4.58+ for example code you can uncomment and modify.
+
 ```hcl
 locals {
     # Gather buckets created by the various terraform modules

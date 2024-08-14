@@ -1,0 +1,58 @@
+on:
+  workflow_call:
+    inputs:
+      example_path:
+        required: false
+        type: string
+        description: Path to the example to validate, relative to ./infra/
+
+name: 'terrafrom-sec-analysis'
+jobs:
+  tfsec:
+    name: terrafrom-sec-analysis
+    runs-on: ubuntu-latest
+
+    # q: what version of Terraform does this use??
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+        # see: https://github.com/marketplace/actions/aqua-security-trivy#inputs
+      - name: trivy-all
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          scan-ref: infra/${{ inputs.example_path }}
+          scan-type: 'config'
+          output: trivy.txt
+          hide-progress: true
+          trivyignores: infra/${{ inputs.example_path }}/.trivyignore
+          tf-vars: .github/workflows/tfvars-examples/${{ inputs.example_path }}.tfvars
+      - name: trivy-severe
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          scan-ref: infra/${{ inputs.example_path }}
+          scan-type: 'config'
+          output: trivy-severe.txt
+          severity: 'CRITICAL,HIGH'
+          hide-progress: true
+          trivyignores: infra/${{ inputs.example_path }}/.trivyignore
+          tf-vars: .github/workflows/tfvars-examples/${{ inputs.example_path }}.tfvars
+      - name: Publish Trivy Output to Summary
+        run: |
+          if [[ -s trivy.txt ]]; then
+            {
+              echo "### Security Output"
+              echo "<details><summary>Click to expand</summary>"
+              echo ""
+              echo '```terraform'
+              cat trivy.txt
+              echo '```'
+              echo "</details>"
+            } >> $GITHUB_STEP_SUMMARY
+            cat trivy.txt
+          fi
+          if [[ -s trivy-severe.txt ]]; then
+            echo "failing bc severe/critical vulnerabilities found"
+            exit 1
+          fi

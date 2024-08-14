@@ -45,6 +45,39 @@ module "psoxy" {
   iam_roles_permissions_boundary = var.iam_roles_permissions_boundary
 }
 
+resource "aws_iam_policy" "execution_lambda_to_caller" {
+  count = local.use_api_gateway_v2 ? 0 : 1
+
+  name        = "${module.env_id.id}ExecuteLambdas"
+  description = "Allow caller role to execute the lambda url directly"
+
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Action" : ["lambda:InvokeFunctionUrl"],
+          "Effect" : "Allow",
+          "Resource" : [ for k, v in module.api_connector : v.function_arn ]
+        }
+      ]
+    })
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {
+  count = var.use_api_gateway_v2 ? 0 : 1
+
+  role       = module.psoxy.api_caller_role_name
+  policy_arn = aws_iam_policy.execution_lambda_to_caller[0].arn
+}
+
+
 
 # secrets shared across all instances
 module "global_secrets_ssm" {
