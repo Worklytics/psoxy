@@ -27,5 +27,5 @@ jobs:
           format: 'table'
           hide-progress: true
           scanners: 'config'
-          trivyignores: '.trivyignore' # default? omit this?
+          # trivyignores: ${{ inputs.example_path }}/.trivyignore
           tf-vars: .github/workflows/tfvars-examples/${{ inputs.example_path }}.tfvars
