@@ -13,7 +13,6 @@ jobs:
           'examples-dev/aws-all',
           'examples-dev/gcp',
         ]
-    # q: what version of Terraform does this use??
-    uses: ./.github/workflows/ci-terraform-example.yaml
+    uses: ./.github/workflows/terraform-sec-analysis.yaml
     with:
       example_path: ${{ matrix.example_path }}
