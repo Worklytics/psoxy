@@ -20,11 +20,13 @@ AVD-AWS-0132
 # Trivy rule that checks that versioning is enabled on S3 buckets
 # as of v0.4.58, we don't version S3 buckets created by proxy by default; this is because proxy S3
 # buckets are NOT intended to be used as a long-term storage solution
+# if desired, see `s3-extra-sec.tf` for an example of enabling versioning on proxy buckets
 AVD-AWS-0090
 
+# see https://avd.aquasec.com/misconfig/avd-aws-0089
 # Trivy rule that checks that logging is enabled for customer buckets
 # as this would impose additional cost/complexity, Proxy modules DO NOT enable logging on
-# S3 buckets; if desired, see `s3-logging.tf` for an example of enabling logging on proxy buckets
+# S3 buckets; if desired, see `s3-extra-sec.tf` for an example of enabling logging on proxy buckets
 # (it would also be circular to do this internally to the Proxy modules; if it provisioned a bucket
 #  for logs, should it also enable logging for that log bucket? where to the logs for the logs
 #  bucket go?)
