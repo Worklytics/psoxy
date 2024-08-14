@@ -87,7 +87,7 @@ endpoints:
         jsonPaths:
           - "$..nameId"
           - "$..email"
-          - "$..value"
+          - "$..emails[*].value"
           - "$..guid"
           - "$..organizationVerifiedDomainEmails[*]"
         encoding: "JSON"

@@ -15,7 +15,7 @@
                   "nameId": "fake1@contoso.com",
                   "emails": [
                     {
-                      "value": "fake1@contoso.com"
+                      "value": "fake1_email_value@contoso.com"
                     }
                   ]
                 },

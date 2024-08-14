@@ -111,7 +111,7 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..nameId")
                     .jsonPath("$..email")
-                    .jsonPath("$..value")
+                    .jsonPath("$..emails[*].value")
                     .jsonPath("$..guid")
                     .jsonPath("$..organizationVerifiedDomainEmails[*]")
                     .build())
