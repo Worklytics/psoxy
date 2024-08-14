@@ -42,5 +42,6 @@ jobs:
               echo '```'
               echo "</details>"
             } >> $GITHUB_STEP_SUMMARY
+            cat trivy.txt
             exit 1 # force fail if there was output
           fi
