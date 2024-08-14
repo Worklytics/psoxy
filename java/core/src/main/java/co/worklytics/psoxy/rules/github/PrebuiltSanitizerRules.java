@@ -111,6 +111,7 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..nameId")
                     .jsonPath("$..email")
+                    .jsonPath("$..emails[*].value")
                     .jsonPath("$..guid")
                     .jsonPath("$..organizationVerifiedDomainEmails[*]")
                     .build())
@@ -697,6 +698,15 @@ public class PrebuiltSanitizerRules {
                     put("guid", JsonSchemaFilter.builder().type("string").build());
                     put("samlIdentity", JsonSchemaFilter.builder().type("object").properties(new LinkedHashMap<String, JsonSchemaFilter>() {{
                         put("nameId", JsonSchemaFilter.builder().type("string").build());
+                        put("emails", JsonSchemaFilter.builder()
+                                .type("array")
+                                .items(JsonSchemaFilter.builder()
+                                        .type("object")
+                                        .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                                            put("value", JsonSchemaFilter.builder().type("string").build());
+                                        }})
+                                        .build())
+                                .build());
                     }}).build());
                     put("user", JsonSchemaFilter.builder().type("object").properties(new LinkedHashMap<String, JsonSchemaFilter>() {{
                         put("login", JsonSchemaFilter.builder().type("string").build());
