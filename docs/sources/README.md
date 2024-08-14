@@ -26,7 +26,7 @@ file.
 | `google-meet`              | Google Meet                          | API  | GA           |
 | `hris`                     | HR Information System (eg, Workday)  | Bulk | GA           |
 | `jira-cloud`               | Jira Cloud                           | API  | GA           |
-| `jira-server`              | Jira Server                          | API  | ALPHA        |
+| `jira-server`              | Jira Server                          | API  | GA           |
 | `outlook-cal`              | Outlook Calendar                     | API  | GA           |
 | `outlook-mail`             | Outlook Mail                         | API  | GA           |
 | `msft-teams`               | Microsoft Teams                      | API  | BETA         |
