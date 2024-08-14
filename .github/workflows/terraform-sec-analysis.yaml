@@ -24,8 +24,22 @@ jobs:
         with:
           scan-ref: infra/${{ inputs.example_path }}
           scan-type: 'config'
-          format: 'table'
+          # format: 'sarif'
+          output: trivy.txt
           hide-progress: true
           # scanners: 'config' # although documented, seems incompatible with 'scan-type'
           # trivyignores: ${{ inputs.example_path }}/.trivyignore
           tf-vars: .github/workflows/tfvars-examples/${{ inputs.example_path }}.tfvars
+      - name: Publish Trivy Output to Summary
+        run: |
+          if [[ -s trivy.txt ]]; then
+            {
+              echo "### Security Output"
+              echo "<details><summary>Click to expand</summary>"
+              echo ""
+              echo '```terraform'
+              cat trivy.txt
+              echo '```'
+              echo "</details>"
+            } >> $GITHUB_STEP_SUMMARY
+          fi
