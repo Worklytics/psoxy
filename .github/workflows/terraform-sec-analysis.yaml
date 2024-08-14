@@ -24,7 +24,7 @@ jobs:
         with:
           scan-ref: infra/${{ inputs.example_path }}
           scan-type: 'config'
-          # format: 'sarif'
+          format: 'json'
           output: trivy.txt
           hide-progress: true
           trivyignores: infra/${{ inputs.example_path }}/.trivyignore
