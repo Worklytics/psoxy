@@ -19,13 +19,22 @@ jobs:
         uses: actions/checkout@v4
 
         # see: https://github.com/marketplace/actions/aqua-security-trivy#inputs
-      - name: Run Trivy vulnerability scanner in IaC mode
+      - name: trivy-all
         uses: aquasecurity/trivy-action@0.20.0
         with:
           scan-ref: infra/${{ inputs.example_path }}
           scan-type: 'config'
-          format: 'json'
           output: trivy.txt
+          hide-progress: true
+          trivyignores: infra/${{ inputs.example_path }}/.trivyignore
+          tf-vars: .github/workflows/tfvars-examples/${{ inputs.example_path }}.tfvars
+      - name: trivy-severe
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          scan-ref: infra/${{ inputs.example_path }}
+          scan-type: 'config'
+          output: trivy-severe.txt
+          severity: 'CRITICAL,HIGH'
           hide-progress: true
           trivyignores: infra/${{ inputs.example_path }}/.trivyignore
           tf-vars: .github/workflows/tfvars-examples/${{ inputs.example_path }}.tfvars
@@ -42,5 +51,8 @@ jobs:
               echo "</details>"
             } >> $GITHUB_STEP_SUMMARY
             cat trivy.txt
-            exit 1 # force fail if there was output
+          fi
+          if [[ -s trivy-severe.txt ]]; then
+            echo "failing bc severe/critical vulnerabilities found"
+            exit 1
           fi
