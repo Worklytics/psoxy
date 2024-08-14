@@ -48,7 +48,7 @@ endpoints:
           - "$..id"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-  - pathRegex: "^/v1.0/users/[^/]*/mailboxSettings"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/mailboxSettings"
     transforms:
       - !<redact>
         jsonPaths:
@@ -57,7 +57,7 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..['@odata.context']"
-  - pathRegex: "^/v1.0/users/[^/]*/messages/[^/]*"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/messages/[^/]*"
     transforms:
       - !<redact>
         jsonPaths:
@@ -75,12 +75,13 @@ endpoints:
         encoding: "JSON"
       - !<tokenize>
         jsonPaths:
-          - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/(.*)$"
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
       - !<redact>
         jsonPaths:
           - "$..['@odata.context']"
-  - pathRegex: "^/v1.0/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/mailFolders(/SentItems|\\('SentItems'\\\
+    ))/messages.*"
     transforms:
       - !<redact>
         jsonPaths:
@@ -98,8 +99,8 @@ endpoints:
         encoding: "JSON"
       - !<tokenize>
         jsonPaths:
-          - "$.['@odata.nextLink', '@odata.prevLink']"
-        regex: "^https://graph.microsoft.com/(.*)$"
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
       - !<redact>
         jsonPaths:
           - "$..['@odata.context']"

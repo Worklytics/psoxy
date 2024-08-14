@@ -1162,5 +1162,5 @@
       "onlineMeeting":null
     }
   ],
-  "@odata.nextLink":"https://graph.microsoft.com/p~21WOhC53IzywxRN1Gx6PKLXaKQr3h7cJe5dDz4v7UDRrUsbVhnvwpjarTvsc5K1jc-aeo02EB48cXywl-zg8IAKQbYvx22j5cNu_1JPxzWCpSIHaNIXWKwizHeoDmqyQLiQK-RbsOrvxvNs_Tzi0HQ"
+  "@odata.nextLink":"https://graph.microsoft.com/v1.0/users/p~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpDRcddGnKI4QDKyjQI9KtjJZDb8FZ27UE_toS68FyWz7Y22fnQYLP91SHJGVwQiN3E/events?%24top=10&%24skip=10"
 }

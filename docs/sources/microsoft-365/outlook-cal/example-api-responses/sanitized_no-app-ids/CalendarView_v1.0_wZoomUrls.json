@@ -97,5 +97,5 @@
       }
     }
   ],
-  "@odata.nextLink":"https://graph.microsoft.com/p~BjnHhOwk9J8oAcNFNCgwaetZAgh5R5vL05oKgUoLzBAYLjsU4gLA3wNmgfknZFL_VTRu8-pYY4Ts1RpwdmYrzH1U4po4CChI_qprNGtQpr8gK_UyhPHfVkHgn_Ms72rUl9-lXwIAmzb5lO5OS55YHvjFBZPi4hcbaz_RS7iUIVPZiRW3B0eG1YM2e4jB2FufxszzeJABAXdmGCm06ucsGj9oaUc6GbFxJ3frBIl3XwU"
+  "@odata.nextLink":"https://graph.microsoft.com/v1.0/me/calendar/calendarView?startDateTime=2019-12-30T00%3a00%3a00Z&endDateTime=2022-05-16T00%3a00%3a00Z&limit=1&%24top=1&%24skip=1"
 }

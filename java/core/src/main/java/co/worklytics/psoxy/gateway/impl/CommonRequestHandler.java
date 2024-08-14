@@ -121,10 +121,10 @@ public class CommonRequestHandler {
             synchronized ($writeLock) {
                 if (this.sanitizer == null) {
                     String defaultScopeId = rulesUtils.getDefaultScopeIdFromRules(rules)
-                        .orElseGet(() -> rulesUtils.getDefaultScopeIdFromSource(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE)));
+                            .orElseGet(() -> rulesUtils.getDefaultScopeIdFromSource(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE)));
 
                     Pseudonymizer.ConfigurationOptions options =
-                        pseudonymizerImplFactory.buildOptions(config, secretStore, defaultScopeId);
+                            pseudonymizerImplFactory.buildOptions(config, secretStore, defaultScopeId);
                     this.sanitizer = sanitizerFactory.create(rules, pseudonymizerImplFactory.create(options));
                 }
             }
@@ -170,8 +170,7 @@ public class CommonRequestHandler {
         String callLog = String.format("%s %s TokenInUrlReversed=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), tokenizedURLReversed);
         if (skipSanitization) {
             log.info(String.format("%s. Skipping sanitization.", callLog));
-        } else if (sanitizer.isAllowed(request.getHttpMethod(),
-                originalRequestedURL)) {
+        } else if (sanitizer.isAllowed(request.getHttpMethod(), originalRequestedURL)) {
             log.info(String.format("%s. Rules allowed call.", callLog));
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
@@ -432,7 +431,8 @@ public class CommonRequestHandler {
                 .ifPresent(i -> i.forEach(h -> {
                     request.getHeader(h).ifPresent(headerValue -> {
                         logIfDevelopmentMode(() -> String.format("Header %s included", h));
-                        headers.set(h, headerValue);});
+                        headers.set(h, headerValue);
+                    });
                 }));
     }
 }

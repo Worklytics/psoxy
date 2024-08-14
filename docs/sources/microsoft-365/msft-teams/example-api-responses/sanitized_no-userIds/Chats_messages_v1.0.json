@@ -1,5 +1,5 @@
 {
-  "@odata.nextLink":"https://graph.microsoft.com/p~vcUkt_p5HOQqyS7BBDVykxMSpO_aQm3jdK0XYeKgIiV6gDK7nZsjjo35lJp6_Z999ij7XW03WoytMD7iMn0beWt7hkIq0SumEqFef8RXmXgy2bOa85jW2nFdkfEZj7uTAbgxYY6ZvfPAKN_dwTW1Ggqvihmid9SVg7vucKldPSUJR68VShkLRlYm7r9LnGPreSqQIpGbj-VKlGT6Zl9_23AMsh7lhHaIVTbNntUsu8xnB_6T8Opn7nyf1q73PciJRMp8ccp_5cFKNLo76cZEU9HaQotw3Yu-15VCcBmRqjLYIr8j8m3Xy-54yxQ2_2Hcqoht8mfyuhR_5t1ZQ3uUcFMhdNHT0Gw9QHUN07i4KJWEPI1KnTQWKujM9esoBHTFfnQ_Ooa9LFAD7kvn5v1NHY_qFyWAlDaoi9pnNoCxlvr5pUap38dkUDVAY8LQ0sXg",
+  "@odata.nextLink":"https://graph.microsoft.com/v1.0/chats/p~bWr_bA0wnI4CDi2z8MuXG2vEmijbgJ9-MX1hsrnF20ik1FwGIGIQ_uMj2B_4LQV7U7F8XPs4Nx_URHgdx-pukZu2Hb6QzmB24IBvBInSdwA/messages?$top=2&$skiptoken=M2UyZDAwMDAwMDMxMzkzYTMyNjQ2MTM0NjMzMjM5NjYzNjY0MzczMDM0MzE2NTYzNjEzNzMwNjIzNjMzMzg2MjM0MzM2NDM0MzUzNDMzMzc0MDc0Njg3MjY1NjE2NDJlNzYzMjAxZThmYjY4M2Y3ODAxMDAwMDg4NjA5ODdhNzgwMTAwMDB8MTYxNjk2NDUwOTgzMg%3d%3d",
   "value":[
     {
       "id":"1616964509832",
@@ -92,7 +92,6 @@
       "reactions":[ ],
       "messageHistory":[ ],
       "eventDetail":{
-        "@odata.type":"#microsoft.graph.chatRenamedEventMessageDetail",
         "chatId":"19:2da4c29f6d7041eca70b638b43d45437@thread.v2",
         "initiator":{
           "application":null,
