@@ -184,13 +184,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         // by pseudonymizing IF column should happen to exist
         Set<String> outputColumnsCI = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         outputColumnsCI.addAll(applyReplacements(headersCI, columnsToRename));
-        Sets.SetView<String> missingColumnsToPseudonymize =
-            Sets.difference(columnsToPseudonymize, outputColumnsCI);
-        if (!missingColumnsToPseudonymize.isEmpty()) {
-            log.info(String.format("Columns to pseudonymize (%s) missing from set found in file (%s)",
-                "\"" + String.join("\",\"", missingColumnsToPseudonymize) + "\"",
-                "\"" + String.join("\",\"", headersCI) + "\""));
-        }
+
+        determineMissingColumnsToPseudonymize(columnsToPseudonymize, outputColumnsCI);
 
         TriFunction<String, String, Pseudonymizer, String> pseudonymizationFunction = buildPseudonymizationFunction(rules);
 
@@ -338,6 +333,20 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                 log.info(String.format("Processed records: %d", buffer.getProcessed()));
             }
         }
+    }
+
+    @VisibleForTesting
+    Set<String> determineMissingColumnsToPseudonymize(Set<String> columnsToPseudonymize, Set<String> outputColumnsCI) {
+        Function<Set<String>, Set<String>> asLowercase = (Set<String> set) -> set.stream().map(String::toLowerCase).collect(Collectors.toSet());
+
+        Sets.SetView<String> missingColumnsToPseudonymize =
+            Sets.difference(asLowercase.apply(columnsToPseudonymize), asLowercase.apply(outputColumnsCI));
+        if (!missingColumnsToPseudonymize.isEmpty()) {
+            log.info(String.format("Columns to pseudonymize (%s) missing from set to output, eg those found in file, after renames: (%s)",
+                "\"" + String.join("\",\"", missingColumnsToPseudonymize) + "\"",
+                "\"" + String.join("\",\"", outputColumnsCI) + "\""));
+        }
+        return missingColumnsToPseudonymize;
     }
 
     private ProcessingBuffer<ProcessedRecord> getRecordsProcessingBuffer(final CSVPrinter printer) {
