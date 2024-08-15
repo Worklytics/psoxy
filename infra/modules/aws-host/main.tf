@@ -81,7 +81,7 @@ resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {
 
 # secrets shared across all instances
 locals {
-  path_to_global_secrets = var.secrets_store_implementation == "aws_secrets_manager" ? var.aws_secrets_manager_path : var.aws_ssm_param_root_path
+  path_to_shared_secrets = var.secrets_store_implementation == "aws_secrets_manager" ? var.aws_secrets_manager_path : var.aws_ssm_param_root_path
 }
 
 module "global_secrets_ssm" {
@@ -89,7 +89,7 @@ module "global_secrets_ssm" {
 
   source = "../../modules/aws-ssm-secrets"
 
-  path       = local.path_to_global_secrets
+  path       = local.path_to_shared_secrets
   kms_key_id = var.aws_ssm_key_id
   secrets    = module.psoxy.secrets
 }
@@ -99,7 +99,7 @@ module "global_secrets_secrets_manager" {
 
   source = "../../modules/aws-secretsmanager-secrets"
 
-  path       = local.path_to_global_secrets
+  path       = local.path_to_shared_secrets
   kms_key_id = var.aws_ssm_key_id
   secrets    = module.psoxy.secrets
 }
@@ -167,7 +167,7 @@ module "api_connector" {
   global_parameter_arns                 = try(module.global_secrets_ssm[0].secret_arns, [])
   global_secrets_manager_secret_arns    = try(module.global_secrets_secrets_manager[0].secret_arns, {})
   path_to_instance_ssm_parameters       = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
-  path_to_shared_ssm_parameters         = local.path_to_global_secrets
+  path_to_shared_ssm_parameters         = local.path_to_shared_secrets
   ssm_kms_key_ids                       = local.ssm_key_ids
   target_host                           = each.value.target_host
   source_auth_strategy                  = each.value.source_auth_strategy
@@ -227,7 +227,7 @@ module "bulk_connector" {
   global_parameter_arns                = try(module.global_secrets_ssm[0].secret_arns, [])
   global_secrets_manager_secret_arns   = try(module.global_secrets_secrets_manager[0].secret_arns, {})
   path_to_instance_ssm_parameters      = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
-  path_to_shared_ssm_parameters        = local.path_to_global_secrets
+  path_to_shared_ssm_parameters        = local.path_to_shared_secrets
   ssm_kms_key_ids                      = local.ssm_key_ids
   sanitized_accessor_role_names        = [module.psoxy.api_caller_role_name]
   memory_size_mb                       = coalesce(try(var.custom_bulk_connector_arguments[each.key].memory_size_mb, null), each.value.memory_size_mb, 1024)
