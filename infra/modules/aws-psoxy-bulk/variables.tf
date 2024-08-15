@@ -53,6 +53,7 @@ variable "path_to_instance_ssm_parameters" {
   default     = null
 }
 
+# TODO : rename, this is misleading
 variable "path_to_shared_ssm_parameters" {
   type        = string
   description = "path to shared global config parameters in SSM Parameter Store"
