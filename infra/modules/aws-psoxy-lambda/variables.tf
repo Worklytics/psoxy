@@ -116,6 +116,12 @@ variable "memory_size_mb" {
   default     = 512
 }
 
+variable "ephemeral_storage_mb" {
+  type        = number
+  description = "ephemeral storage size in MB"
+  default     = 512 # this is the free amount; over this though it's pretty
+}
+
 variable "timeout_seconds" {
   type        = number
   description = "lambda timeout in seconds"
