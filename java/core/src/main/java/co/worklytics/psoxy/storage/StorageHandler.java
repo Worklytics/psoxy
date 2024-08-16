@@ -35,7 +35,7 @@ public class StorageHandler {
     // as writing to remote storage, err on size of larger buffer
     private static final int DEFAULT_BUFFER_SIZE = 1_048_576; //1 MB
 
-    private static final String CONTENT_ENCODING_GZIP = "gzip";
+    public static final String CONTENT_ENCODING_GZIP = "gzip";
     public static final String EXTENSION_GZIP = ".gz";
 
     /**
@@ -143,14 +143,18 @@ public class StorageHandler {
 
         boolean isSourceCompressed = isSourceCompressed(sourceContentEncoding, sourceObjectPath);
 
+        boolean compressOutput = isSourceCompressed ||
+            config.getConfigPropertyAsOptional(BulkModeConfigProperty.COMPRESS_OUTPUT_ALWAYS)
+                .map(Boolean::parseBoolean)
+                .orElse(true);
+
         StorageEventRequest request = StorageEventRequest.builder()
             .sourceBucketName(sourceBucketName)
             .sourceObjectPath(sourceObjectPath)
             .destinationBucketName(transform.getDestinationBucketName())
             .destinationObjectPath(transform.getPathWithinBucket() + sourceObjectPathWithinBase)
             .decompressInput(isSourceCompressed)
-            //TODO: specify compressOutput as part of the rule. For now, follow the input
-            .compressOutput(isSourceCompressed)
+            .compressOutput(compressOutput)
             .build();
 
         warnIfEncodingDoesNotMatchFilename(request, sourceContentEncoding);
@@ -233,16 +237,17 @@ public class StorageHandler {
 
         @NonNull
         BulkDataRules rules;
+
     }
 
 
     @VisibleForTesting
     ObjectTransform buildDefaultTransform() {
-        return ObjectTransform.builder()
-                .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
-                .pathWithinBucket(outputBasePath().orElse(""))
-                .rules(defaultRuleSet)
-                .build();
+       return ObjectTransform.builder()
+            .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
+            .pathWithinBucket(outputBasePath().orElse(""))
+            .rules(defaultRuleSet)
+            .build();
     }
 
 
