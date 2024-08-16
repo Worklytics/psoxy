@@ -119,7 +119,7 @@ variable "memory_size_mb" {
 variable "ephemeral_storage_mb" {
   type        = number
   description = "ephemeral storage size in MB"
-  default     = 512 # this is the free amount; over this though it's pretty
+  default     = 512 # this is the free amount; over this though it's pretty trivial cost for the use-case
 }
 
 variable "timeout_seconds" {
