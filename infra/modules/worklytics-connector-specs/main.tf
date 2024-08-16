@@ -1398,9 +1398,11 @@ EOT
         columnsToRedact = []
         columnsToPseudonymize = [
           "EMPLOYEE_ID",    # primary key
-          "EMPLOYEE_EMAIL", # for matching
+          "EMPLOYEE_EMAIL", # for linking to other data sources
           "MANAGER_ID",     # should match to employee_id
-          # "MANAGER_EMAIL"      # if exists
+        ]
+        columnsToPseudonymizeIfPresent = [
+          "MANAGER_EMAIL"
         ]
       }
       settings_to_provide = {
