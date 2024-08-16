@@ -20,6 +20,7 @@ resource "google_storage_bucket" "bucket" {
   # TODO: remove in v0.5
   lifecycle {
     ignore_changes = [
+      name, # due to name change from -output --> -sanitized, ignore name change to avoid recreating bucket
       labels
     ]
   }

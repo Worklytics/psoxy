@@ -91,7 +91,7 @@ module "output_bucket" {
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = google_service_account.service_account.email
   bucket_name_prefix             = coalesce(var.sanitized_bucket_name, local.bucket_prefix)
-  bucket_name_suffix             = var.sanitized_bucket_name == null ? "-output" : ""
+  bucket_name_suffix             = var.sanitized_bucket_name == null ? "-sanitized" : ""
   region                         = var.region
   expiration_days                = var.sanitized_expiration_days
   bucket_labels                  = var.default_labels
