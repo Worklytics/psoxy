@@ -301,6 +301,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
             ProcessingBuffer<ProcessedRecord> buffer = getRecordsProcessingBuffer(printer);
 
+            Set<String> transformsWithoutMappings = new HashSet<>();
+
             for (CSVRecord record : records) {
                 // clean up the record prior to use
                 newRecord.replaceAll((k, v) -> null);
@@ -312,14 +314,21 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                     } else {
                         // apply all transformations in insertion order
                         // key holds the original column
-                        String v = record.get(transforms.getKey());
-                        if (StringUtils.isNotBlank(v)) {
-                            for (Function<String, Optional<String>> transform : transforms.getValue()) {
-                                v = transform.apply(v).orElse(null);
+                        if (record.isMapped(transforms.getKey())) {
+                            String v = record.get(transforms.getKey());
+                            if (StringUtils.isNotBlank(v)) {
+                                for (Function<String, Optional<String>> transform : transforms.getValue()) {
+                                    v = transform.apply(v).orElse(null);
+                                }
+                                newRecord.put(h, v);
+                            } else {
+                                newRecord.put(h, null);
                             }
-                            newRecord.put(h, v);
                         } else {
-                            newRecord.put(h, null);
+                            if (!transformsWithoutMappings.contains(transforms.getKey())) {
+                                log.warning("Column with defined transform '" + transforms.getKey() + "' not found in record number " + record.getRecordNumber() + "; no further warnings about this column will be logged");
+                                transformsWithoutMappings.add(transforms.getKey());
+                            }
                         }
                     }
 
@@ -342,7 +351,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         Sets.SetView<String> missingColumnsToPseudonymize =
             Sets.difference(asLowercase.apply(columnsToPseudonymize), asLowercase.apply(outputColumnsCI));
         if (!missingColumnsToPseudonymize.isEmpty()) {
-            log.info(String.format("Columns to pseudonymize (%s) missing from set to output, eg those found in file, after renames: (%s)",
+            log.warning(String.format("non-fatal, but FYI: Columns to pseudonymize (%s) missing from set to output, eg those found in file, after renames: (%s)",
                 "\"" + String.join("\",\"", missingColumnsToPseudonymize) + "\"",
                 "\"" + String.join("\",\"", outputColumnsCI) + "\""));
         }
