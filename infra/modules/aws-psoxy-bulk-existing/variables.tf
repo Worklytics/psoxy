@@ -113,6 +113,7 @@ variable "rules" {
     columnsToRedact       = list(string)
     columnsToInclude      = list(string)
     columnsToPseudonymize = list(string)
+    columnsToPseudonymize = optional(list(string), [])
     columnsToDuplicate    = map(string)
     columnsToRename       = map(string)
     fieldsToTransform = optional(map(object({
@@ -126,6 +127,7 @@ variable "rules" {
     columnsToRedact       = []
     columnsToInclude      = null
     columnsToPseudonymize = []
+    columnsToPseudonymize = null
     columnsToDuplicate    = {}
     columnsToRename       = {}
     fieldsToTransform     = {}

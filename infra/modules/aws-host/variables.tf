@@ -217,6 +217,7 @@ variable "bulk_connectors" {
       columnsToRedact       = optional(list(string), [])
       columnsToInclude      = optional(list(string), null)
       columnsToPseudonymize = optional(list(string), [])
+      columnsToPseudonymizeIfPresent = optional(list(string), [])
       columnsToDuplicate    = optional(map(string), {})
       columnsToRename       = optional(map(string), {})
       fieldsToTransform = optional(map(object({
@@ -251,6 +252,7 @@ variable "custom_bulk_connector_rules" {
     columnsToRedact       = optional(list(string))
     columnsToInclude      = optional(list(string))
     columnsToPseudonymize = optional(list(string))
+    columnsToPseudonymizeIfPresent = optional(list(string), null)
     columnsToDuplicate    = optional(map(string))
     columnsToRename       = optional(map(string))
     fieldsToTransform = optional(map(object({

@@ -174,6 +174,7 @@ variable "rules" {
     columnsToRedact       = optional(list(string), [])
     columnsToInclude      = optional(list(string), null)
     columnsToPseudonymize = optional(list(string), [])
+    columnsToPseudonymizeIfPresent = optional(list(string), null)
     columnsToDuplicate    = optional(map(string), {})
     columnsToRename       = optional(map(string), {})
     fieldsToTransform = optional(map(object({
