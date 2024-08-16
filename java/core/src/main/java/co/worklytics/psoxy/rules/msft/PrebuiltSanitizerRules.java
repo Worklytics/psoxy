@@ -446,6 +446,11 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..joinMeetingIdSettings.isPasscodeRequired")
             .jsonPath("$..joinMeetingIdSettings.passcode")
             .build();
+
+    static final Transform.Tokenize MS_TEAMS_CALL_ID_TOKENIZATION = Transform.Tokenize.builder()
+            .jsonPath("$..callId")
+            .build();
+
     static final Endpoint MS_TEAMS_TEAMS = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS)
             .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$count"))
@@ -504,6 +509,7 @@ public class PrebuiltSanitizerRules {
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS)
             .allowedQueryParams(List.of("$skip"))
             .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+            .transform(MS_TEAMS_CALL_ID_TOKENIZATION)
             .build();
 
     static final Endpoint MS_TEAMS_USERS_ONLINE_MEETINGS = Endpoint.builder()
@@ -635,6 +641,7 @@ public class PrebuiltSanitizerRules {
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
                             .build())))
             .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
+                    MS_TEAMS_CALL_ID_TOKENIZATION,
                     MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
