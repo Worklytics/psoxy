@@ -255,7 +255,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         });
         // we apply pseudonymization in the pseudonymized columns, only if present
         columnsToPseudonymizeIfPresent.forEach(column -> {
-            if (headers.contains(column)) {
+            if (headersCI.contains(column)) {
                 addColumnTransform.accept(column, column, (s) -> Optional.of(pseudonymizationFunction.apply(s, column, pseudonymizer)));
             }
         });
