@@ -315,12 +315,36 @@ class StorageHandlerTest {
         "directory/file.csv.gz,gzip,true",      // honor content-encoding/extension
         "directory/file.json.gz,deflate,true",  // honor extension
         "directory/file.json.gz,,true",         // honor extension - null encoding
-        "directory/file.json,deflate,false"     // deflate is not supported
+        "directory/file.json,deflate,false",    // deflate is not supported
+        "directory/file.json,,false"
     })
-    public void handlesCompressedContent(String filename, String contentEncoding, boolean expected) {
+    public void handlesCompressedContent_legacy(String filename, String contentEncoding, boolean expected) {
+
+        // configure such that legacy behavior
+        when(config.getConfigPropertyAsOptional(BulkModeConfigProperty.COMPRESS_OUTPUT_ALWAYS))
+            .thenReturn(Optional.of("false"));
+
         StorageEventRequest request = handler.buildRequest("bucket", filename, handler.buildDefaultTransform(), contentEncoding);
         assertEquals(expected, request.getDecompressInput());
         assertEquals(expected, request.getCompressOutput());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "directory/file.csv,gzip,true,true",     // honor content-encoding
+        "directory/file.csv.gz,gzip,true,true",  // honor content-encoding/extension
+        "directory/file.json.gz,,true,true",     // honor extension
+        "directory/file.json,,false,true"        // compress even though input was not compressed
+    })
+    public void handlesCompressedContent(String filename, String contentEncoding, boolean expectCompressedInput, boolean expectCompressedOutput) {
+
+        // configure such that legacy behavior
+        when(config.getConfigPropertyAsOptional(BulkModeConfigProperty.COMPRESS_OUTPUT_ALWAYS))
+            .thenReturn(Optional.of("true"));
+
+        StorageEventRequest request = handler.buildRequest("bucket", filename, handler.buildDefaultTransform(), contentEncoding);
+        assertEquals(expectCompressedInput, request.getDecompressInput());
+        assertEquals(expectCompressedOutput, request.getCompressOutput());
     }
 
     @SneakyThrows
