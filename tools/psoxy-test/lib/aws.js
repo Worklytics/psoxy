@@ -24,7 +24,6 @@ import {
 import fs from 'fs';
 import getLogger from './logger.js';
 import _ from 'lodash';
-import {execSync} from 'child_process';
 import zlib from 'node:zlib';
 
 
