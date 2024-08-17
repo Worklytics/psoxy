@@ -24,6 +24,8 @@ import {
 import fs from 'fs';
 import getLogger from './logger.js';
 import _ from 'lodash';
+import {execSync} from 'child_process';
+import zlib from 'node:zlib';
 
 
 /**
@@ -292,7 +294,12 @@ async function download(bucket, key, destination, options, client, logger) {
 
   // save file locally
   await new Promise((resolve, reject) => {
-    downloadResponse.Body.pipe(fs.createWriteStream(destination))
+    let stream = downloadResponse.Body;
+    if (downloadResponse.ContentEncoding?.toLowerCase() === 'gzip') {
+      stream = stream.pipe(zlib.createGunzip());
+    }
+    stream
+      .pipe(fs.createWriteStream(destination))
       .on('error', err => reject(err))
       .on('close', () => resolve())
   })
