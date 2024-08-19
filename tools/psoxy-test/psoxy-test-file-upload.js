@@ -175,9 +175,7 @@ export default async function (options = {}) {
   let sanitizedDiffPath = sanitized;
   const isOriginalGzipped = await isGzipped(original);
   if (isOriginalGzipped) {
-    // Assume sanitized file is also gzipped
     originalDiffPath = await unzip(original);
-    sanitizedDiffPath = await unzip(sanitized);
   }
 
   let diff;
