@@ -16,7 +16,7 @@
     <description>Code for pseuydonymizations</description>
 
     <properties>
-        <!-- empty for java 11 builds -->
+        <!-- empty for java 17 builds -->
         <artifactSuffix></artifactSuffix>
     </properties>
 

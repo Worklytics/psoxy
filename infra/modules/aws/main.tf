@@ -81,42 +81,6 @@ locals {
   function_name_prefix = coalesce(var.rest_function_name_prefix, var.api_function_name_prefix)
 }
 
-resource "aws_iam_policy" "execution_lambda_to_caller" {
-  count = var.use_api_gateway_v2 ? 0 : 1
-
-  name        = "${var.deployment_id}ExecuteLambdas"
-  description = "Allow caller role to execute the lambda url directly"
-
-  policy = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Action" : ["lambda:InvokeFunctionUrl"],
-          "Effect" : "Allow",
-          "Resource" : "arn:aws:lambda:${data.aws_region.current.id}:${var.aws_account_id}:function:${local.function_name_prefix}*"
-        }
-      ]
-  })
-
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
-  }
-}
-
-resource "aws_iam_role_policy_attachment" "invoker_lambda_execution" {
-  role       = aws_iam_role.api-caller.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
-resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {
-  count = var.use_api_gateway_v2 ? 0 : 1
-
-  role       = aws_iam_role.api-caller.name
-  policy_arn = aws_iam_policy.execution_lambda_to_caller[0].arn
-}
 
 
 # not really a 'password', but 'random_string' isn't "sensitive" by terraform, so

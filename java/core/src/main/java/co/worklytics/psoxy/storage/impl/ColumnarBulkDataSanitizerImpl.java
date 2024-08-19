@@ -184,13 +184,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         // by pseudonymizing IF column should happen to exist
         Set<String> outputColumnsCI = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         outputColumnsCI.addAll(applyReplacements(headersCI, columnsToRename));
-        Sets.SetView<String> missingColumnsToPseudonymize =
-            Sets.difference(columnsToPseudonymize, outputColumnsCI);
-        if (!missingColumnsToPseudonymize.isEmpty()) {
-            log.info(String.format("Columns to pseudonymize (%s) missing from set found in file (%s)",
-                "\"" + String.join("\",\"", missingColumnsToPseudonymize) + "\"",
-                "\"" + String.join("\",\"", headersCI) + "\""));
-        }
+
+        determineMissingColumnsToPseudonymize(columnsToPseudonymize, outputColumnsCI);
 
         TriFunction<String, String, Pseudonymizer, String> pseudonymizationFunction = buildPseudonymizationFunction(rules);
 
@@ -260,7 +255,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         });
         // we apply pseudonymization in the pseudonymized columns, only if present
         columnsToPseudonymizeIfPresent.forEach(column -> {
-            if (headers.contains(column)) {
+            if (headersCI.contains(column)) {
                 addColumnTransform.accept(column, column, (s) -> Optional.of(pseudonymizationFunction.apply(s, column, pseudonymizer)));
             }
         });
@@ -306,6 +301,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
             ProcessingBuffer<ProcessedRecord> buffer = getRecordsProcessingBuffer(printer);
 
+            Set<String> transformsWithoutMappings = new HashSet<>();
+
             for (CSVRecord record : records) {
                 // clean up the record prior to use
                 newRecord.replaceAll((k, v) -> null);
@@ -317,14 +314,21 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                     } else {
                         // apply all transformations in insertion order
                         // key holds the original column
-                        String v = record.get(transforms.getKey());
-                        if (StringUtils.isNotBlank(v)) {
-                            for (Function<String, Optional<String>> transform : transforms.getValue()) {
-                                v = transform.apply(v).orElse(null);
+                        if (record.isMapped(transforms.getKey())) {
+                            String v = record.get(transforms.getKey());
+                            if (StringUtils.isNotBlank(v)) {
+                                for (Function<String, Optional<String>> transform : transforms.getValue()) {
+                                    v = transform.apply(v).orElse(null);
+                                }
+                                newRecord.put(h, v);
+                            } else {
+                                newRecord.put(h, null);
                             }
-                            newRecord.put(h, v);
                         } else {
-                            newRecord.put(h, null);
+                            if (!transformsWithoutMappings.contains(transforms.getKey())) {
+                                log.warning("Column with defined transform '" + transforms.getKey() + "' not found in record number " + record.getRecordNumber() + "; no further warnings about this column will be logged");
+                                transformsWithoutMappings.add(transforms.getKey());
+                            }
                         }
                     }
 
@@ -338,6 +342,20 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                 log.info(String.format("Processed records: %d", buffer.getProcessed()));
             }
         }
+    }
+
+    @VisibleForTesting
+    Set<String> determineMissingColumnsToPseudonymize(Set<String> columnsToPseudonymize, Set<String> outputColumnsCI) {
+        Function<Set<String>, Set<String>> asLowercase = (Set<String> set) -> set.stream().map(String::toLowerCase).collect(Collectors.toSet());
+
+        Sets.SetView<String> missingColumnsToPseudonymize =
+            Sets.difference(asLowercase.apply(columnsToPseudonymize), asLowercase.apply(outputColumnsCI));
+        if (!missingColumnsToPseudonymize.isEmpty()) {
+            log.warning(String.format("non-fatal, but FYI: Columns to pseudonymize (%s) missing from set to output, eg those found in file, after renames: (%s)",
+                "\"" + String.join("\",\"", missingColumnsToPseudonymize) + "\"",
+                "\"" + String.join("\",\"", outputColumnsCI) + "\""));
+        }
+        return missingColumnsToPseudonymize;
     }
 
     private ProcessingBuffer<ProcessedRecord> getRecordsProcessingBuffer(final CSVPrinter printer) {

@@ -57,7 +57,7 @@ async function testAWS(options, logger) {
   logger.info(`Downloading sanitized file from output bucket: ${outputBucket}`);
 
   const sanitizedFilename = addFilenameSuffix(outputKey, SANITIZED_FILE_SUFFIX);
-  const destination = `${parsedPath.dir}/${sanitizedFilename}`;
+  const destination = `./${sanitizedFilename}`;
 
   await aws.download(outputBucket, outputKey, destination, {
       role: options.role,
@@ -65,8 +65,8 @@ async function testAWS(options, logger) {
     }, client, logger);
   logger.success('File downloaded');
 
-  if (options.deleteSanitizedFile) {
-    logger.verbose(`Deleting sanitized file from output bucket: ${outputBucket}`);
+  if (!options.keepSanitizedFile) {
+    logger.info(`Deleting sanitized file from output bucket: ${outputBucket}`);
     try {
       // Note:
       // We don't use bucket versioning. The S3 client will attempt to delete
@@ -126,13 +126,13 @@ async function testGCP(options, logger) {
   // {original filename}-{timestamp}-{sanitized} to minimize the chance of
   // modifying files in the system
   const sanitizedFilename = addFilenameSuffix(outputKey, SANITIZED_FILE_SUFFIX);
-  const destination = `${parsedPath.dir}/${sanitizedFilename}`;
+  const destination = `./${sanitizedFilename}`;
 
   await gcp.download(outputBucket, outputKey, destination, client, logger);
   logger.success('File downloaded');
 
-  if (options.deleteSanitizedFile) {
-    logger.verbose(`Deleting sanitized file from output bucket: ${outputBucket}`);
+  if (!options.keepSanitizedFile) {
+    logger.info(`Deleting sanitized file from output bucket: ${outputBucket}`);
     try {
       await gcp.deleteFile(outputBucket, outputKey, client);
     } catch (error) {
@@ -161,7 +161,7 @@ async function testGCP(options, logger) {
  * @param {string} options.region - AWS: buckets region
  * @param {string} options.role - AWS: role to assume (ARN format; optional)
  * @param {boolean} options.saveSanitizedFile - Whether to save sanitized file or not
- * @param {boolean} options.deleteSanitizedFile - Whether to delete sanitized file or not (from
+ * @param {boolean} options.keepSanitizedFile - Whether to delete sanitized file or not (from
  *  output bucket, after test completion)
  * @returns {string}
  */
@@ -175,9 +175,7 @@ export default async function (options = {}) {
   let sanitizedDiffPath = sanitized;
   const isOriginalGzipped = await isGzipped(original);
   if (isOriginalGzipped) {
-    // Assume sanitized file is also gzipped
     originalDiffPath = await unzip(original);
-    sanitizedDiffPath = await unzip(sanitized);
   }
 
   let diff;
@@ -201,7 +199,7 @@ export default async function (options = {}) {
     // delete sanitized file
     fs.unlinkSync(sanitized);
   } else {
-    logger.info(`Sanitized file saved to ${sanitized}`);
+    logger.info(`Sanitized file saved to ${path.resolve(sanitized)}`);
   }
 
   return diff;

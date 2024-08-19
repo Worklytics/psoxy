@@ -39,6 +39,15 @@ public enum BulkModeConfigProperty implements ConfigService.ConfigProperty {
      * default: 65536 (64KB)
      */
     BUFFER_SIZE,
-    ;
 
+
+    /**
+     * whether output files produced by proxy instance should be compressed, regardless of whether
+     * input files were compressed.
+     *
+     * default; true
+     */
+    COMPRESS_OUTPUT_ALWAYS,
+
+    ;
 }

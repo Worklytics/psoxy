@@ -1,4 +1,3 @@
----
 endpoints:
   - pathTemplate: "/v1.0/teams"
     allowedQueryParams:
@@ -165,6 +164,9 @@ endpoints:
         jsonPaths:
           - "$..emailAddress"
         encoding: "JSON"
+      - !<tokenize>
+        jsonPaths:
+          - "$..callId"
       - !<redact>
         jsonPaths:
           - "$..value[*].userPrincipalName"

@@ -1,5 +1,23 @@
 #!/bin/bash
 
+
+# colors
+RED='\e[0;31m'
+BLUE='\e[0;34m'
+NC='\e[0m' # No Color
+
+
+# warn user that will delete a bunch of files
+printf "This script will ${RED}delete${NC} the your local terraform state, variable files, etc, to "
+printf "reset to example template prior to ${BLUE}./init${NC} and any terraform init/plan/apply you've done.\n"
+printf "If you have ${RED}NOT${NC} committed these files and/or your local changes, they will be lost.\n"
+printf "Do you want to continue? (y/N): "
+read -r response
+if [[ ! "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    printf "Exiting...\n"
+    exit 0
+fi
+
 # resets example to state prior to `./init`
 rm .terraform.lock.hcl 2>/dev/null
 rm build 2>/dev/null
@@ -7,13 +25,7 @@ rm update-bundle 2>/dev/null
 rm psoxy-* 2>/dev/null
 rm -rf .terraform 2>/dev/null
 rm terraform.tfvars 2>/dev/null
-
-
-# colors
-RED='\e[0;31m'
-BLUE='\e[0;34m'
-NC='\e[0m' # No Color
-
+rm terraform.tfstate 2>/dev/null
 
 # restore main.tf, if modified
 printf "Restoring ${BLUE}main.tf${NC} configuration file ...\n"
@@ -48,3 +60,5 @@ done
 if [[ -f upgrade-terraform-modules ]]; then
   rm upgrade-terraform-modules
 fi
+
+

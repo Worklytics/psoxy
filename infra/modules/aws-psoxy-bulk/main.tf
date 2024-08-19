@@ -32,6 +32,7 @@ module "psoxy_lambda" {
   handler_class                        = "co.worklytics.psoxy.S3Handler"
   timeout_seconds                      = 600 # 10 minutes
   memory_size_mb                       = var.memory_size_mb
+  ephemeral_storage_mb                 = 10240 # max it out; expected to cost nothing
   source_kind                          = var.source_kind
   path_to_function_zip                 = var.path_to_function_zip
   function_zip_hash                    = var.function_zip_hash
@@ -47,6 +48,8 @@ module "psoxy_lambda" {
   vpc_config                           = var.vpc_config
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
+
+
 
   environment_variables = merge(
     var.environment_variables,

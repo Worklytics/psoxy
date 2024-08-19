@@ -7,7 +7,7 @@ PSOXY_BASE_DIR=$2
 DEPLOYMENT_ENV=${3:-"local"}
 HOST_PLATFORM=${4:-"aws"}
 
-SCRIPT_VERSION="v0.4.57"
+SCRIPT_VERSION="v0.4.58"
 
 if [ -z "$PSOXY_BASE_DIR" ]; then
   printf "Usage: init-tfvars.sh <path-to-terraform.tfvars> <path-to-psoxy-base-directory> [DEPLOYMENT_ENV]\n"
@@ -317,7 +317,8 @@ rm "${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs/.terraform.lock.hc
 if [ -z "$AVAILABLE_CONNECTORS" ]; then
   printf "${RED}Failed to generate list of enabled_connectors${NC}; you will need to add an variable assigned for ${BLUE}enabled_connectors${NC} to your ${BLUE}terraform.tfvars${NC} as a list of connector ID strings. Contact support for assistance.\n"
 else
-  printf "# review following list of connectors to enable, and comment out what you don't want\n" >> $TFVARS_FILE
+  printf "# review following list of connectors below to enable, and comment out what you don't want\n" >> $TFVARS_FILE
+  printf "# NOTE: usage of some connectors may require specific license from Worklytics or the data source; or have a usage cost on the data source side. Worklytics is not responsible for any costs incurred on the data source side or by usage of the APIs it provides.\n" >> $TFVARS_FILE
   printf "enabled_connectors = ${AVAILABLE_CONNECTORS}\n\n" >> $TFVARS_FILE
 fi
 

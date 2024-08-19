@@ -2,7 +2,7 @@
   "value":[
     {
       "id":"9c4984c7-6c3c-427d-a30c-bd0b2eacee90",
-      "callId":"{\"scope\":\"azure-ad\",\"hash\":\"Bvc4jV4RzsaEt4XIerSH40pfOsnpmsA1SuHUaIQ__1o\"}",
+      "callId":"p~Bvc4jV4RzsaEt4XIerSH40pfOsnpmsA1SuHUaIQ__1rmJYqLjsX9x4FjOXqaJLWshHPYWjB_xi0zPWc-9r6F_Nv5l7DJWsgKi0Kjd3k8hfU",
       "userId":"{\"scope\":\"azure-ad\",\"hash\":\"2ZGitAxyjkjPJ6l2GfLqf2kr0xFtleWfl5XA_zNbtMA\"}",
       "startDateTime":"2019-11-01T00:00:08.2589935Z",
       "endDateTime":"2019-11-01T00:03:47.2589935Z",
@@ -22,5 +22,5 @@
       "callDurationSource":"microsoft"
     }
   ],
-  "@odata.nextLink":"https://graph.microsoft.com/p~USCvpgpl60UiPYohwbpo_js7yQ5KJ4IcuNU-NJeKKOD3wL0OvMWJ3gB3aX59bZxuT_wXfKHOHn2UxKGY15_120YIb_6-Zs4hQxfy1JddH4JhU5vxSa6pgfSOrzIHsGXC0vNlAdnSdZO7eVdf9CypaAzXUFvfQE1QV4V7eYwaDVI"
+  "@odata.nextLink":"https://graph.microsoft.com/v1.0/communications/callRecords/getPstnCalls(from=2019-11-01,to=2019-12-01)?$skip=1000"
 }

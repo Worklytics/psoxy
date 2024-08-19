@@ -4,6 +4,9 @@ Connect Microsoft Teams data to Worklytics, enabling communication analysis and 
 insights based on collaboration via Microsoft Teams. Includes user enumeration to support fetching
 mailboxes from each account; and group enumeration to expand emails via mailing list (groups).
 
+Please review the [Microsoft 365 README](../README.md) for general information applicable to
+all Microsoft 365 connectors.
+
 ## Required Scopes
 - [`User.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
 - [`Team.ReadBasic.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#teamreadbasicall)

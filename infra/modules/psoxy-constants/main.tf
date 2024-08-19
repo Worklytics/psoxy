@@ -368,7 +368,7 @@ locals {
           "lambda:DeleteEventSourceMapping",
           "lambda:DeleteFunctionEventInvokeConfig",
           "lambda:DeleteFunctionConcurrency",
-
+          "lambda:TagResource", # required if using default_tags
 
           # can drop these if using API gateway stuff
           "lambda:GetFunctionUrlConfig",
