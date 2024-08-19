@@ -247,7 +247,7 @@ async function download(bucketName, fileName, destination, client, logger) {
   }
 
   const downloadFunction = async () => client.bucket(bucketName).file(fileName)
-    .download({ destination: destination, decompress: false });
+    .download({ destination: destination, decompress: true });
   const onErrorStop = (error) => error.code !== 404;
 
   const downloadResponse = await executeWithRetry(downloadFunction, onErrorStop,
