@@ -447,6 +447,10 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..callId")
             .build();
 
+    static final Transform.Tokenize MS_TEAMS_CHAT_ID_TOKENIZATION = Transform.Tokenize.builder()
+            .jsonPath("$..chatId")
+            .build();
+
     static final Endpoint MS_TEAMS_TEAMS = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS)
             .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$count"))
@@ -610,10 +614,10 @@ public class PrebuiltSanitizerRules {
                     .transform(MS_TEAMS_TEAMS_REDACT)
                     .transform(MS_TEAMS_CHATS_MESSAGES_REDACT)
                     .transform(PSEUDONYMIZE_USER_ID)
+                    .transform(MS_TEAMS_CHAT_ID_TOKENIZATION)
                     // Chat message id could contain MSFT user guids
                     .transform(getTokenizeWithExpressionForLinks("chats/(.*)/messages(\\?.*)"))
                     .transform(REDACT_ODATA_CONTEXT)
-                    .transform(REDACT_ODATA_TYPE)
                     .transform(REDACT_ODATA_COUNT)
                     .build())
             .endpoint(MS_TEAMS_COMMUNICATIONS_CALLS.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
