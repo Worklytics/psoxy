@@ -71,6 +71,15 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
     }
 
     @Test
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_USERS_CHATS)
+    public void users_chats_should_block_user_id() {
+        String userId = "8b081ef6-4792-4def-b2c9-c363a1bf41d5";
+        String endpoint = "https://graph.microsoft.com/" + "v1.0" + "/users/" + userId + "/chats";
+
+        assertUrlBlocked(endpoint);
+    }
+
+    @Test
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES)
     public void teams_channels_messages() {
         String teamId = "172b0cce-e65d-44ce-9a49-91d9f2e8493a";
