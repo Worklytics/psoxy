@@ -364,10 +364,6 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..userId")
             .build();
 
-    static final Transform.Pseudonymize PSEUDONYMIZE_CALL_ID = Transform.Pseudonymize.builder()
-            .jsonPath("$..callId")
-            .build();
-
     static final Transform.Redact MS_TEAMS_TEAMS_REDACT = Transform.Redact.builder()
             .jsonPath("$..displayName")
             .jsonPath("$..description")
