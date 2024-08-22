@@ -19,7 +19,7 @@ jobs:
                         'examples-dev/gcp',
                         'examples-dev/gcp-google-workspace',
         ]
-        terraform_version: [ '~1.4.0', '~1.5.0', '~1.6.0', '~1.7.0' ]
+        terraform_version: [ '~1.4.0', '~1.5.0', '~1.6.0', '~1.7.0', '~1.8.0', '~1.9.0', 'latest' ]
     uses: ./.github/workflows/ci-terraform-example.yaml
     with:
       terraform_version: ${{ matrix.terraform_version }}
