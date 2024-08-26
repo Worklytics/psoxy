@@ -217,7 +217,7 @@ You will need all the following in your deployment environment (eg, your laptop)
 | [git](https://git-scm.com/)                     | 2.17+                  | `git --version`       |
 | [Maven](https://maven.apache.org/)              | 3.6+                   | `mvn -v`              |
 | [Java JDK 11+](https://openjdk.org/install/) | 11, 17, 21 (see notes) | `mvn -v \| grep Java` |
-| [Terraform](https://www.terraform.io/)          | 1.3.x, <= 1.6          | `terraform version`   |
+| [Terraform](https://www.terraform.io/)          | 1.3+, <= 1.9           | `terraform version`   |
 
 NOTE: we will support Java versions for duration of official support windows, in particular the
 LTS versions. As of Nov 2023, we  still support java 11 but may end this at any time. Minor
@@ -231,6 +231,10 @@ tool, but we don't offer documentation or support in doing so.  Adapting one of 
 [modules](https://github.com/Worklytics/psoxy/tree/main/infra/modules) will simplify things greatly.
 
 NOTE: Refrain to use Terraform versions 1.4.x that are < v1.4.3. We've seen bugs.
+
+NOTE: from v0.4.59, we've relaxed Terraform version constraint on our modules to allow up to 1.9.x.
+However, we are not officially supporting this, as we strive to maintain compatibility with both
+OpenTofu and Terraform.
 
 Depending on your Cloud Host / Data Sources, you will need:
 
