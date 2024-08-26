@@ -53,6 +53,7 @@ variable "path_to_instance_ssm_parameters" {
   default     = null
 }
 
+# TODO : rename, this is misleading
 variable "path_to_shared_ssm_parameters" {
   type        = string
   description = "path to shared global config parameters in SSM Parameter Store"
@@ -173,6 +174,7 @@ variable "rules" {
     columnsToRedact       = optional(list(string), [])
     columnsToInclude      = optional(list(string), null)
     columnsToPseudonymize = optional(list(string), [])
+    columnsToPseudonymizeIfPresent = optional(list(string), null)
     columnsToDuplicate    = optional(map(string), {})
     columnsToRename       = optional(map(string), {})
     fieldsToTransform = optional(map(object({

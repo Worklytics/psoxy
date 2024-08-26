@@ -368,10 +368,6 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..userId")
             .build();
 
-    static final Transform.Pseudonymize PSEUDONYMIZE_CALL_ID = Transform.Pseudonymize.builder()
-            .jsonPath("$..callId")
-            .build();
-
     static final Transform.Redact MS_TEAMS_TEAMS_REDACT = Transform.Redact.builder()
             .jsonPath("$..displayName")
             .jsonPath("$..description")
@@ -450,6 +446,15 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..joinMeetingIdSettings.isPasscodeRequired")
             .jsonPath("$..joinMeetingIdSettings.passcode")
             .build();
+
+    static final Transform.Tokenize MS_TEAMS_CALL_ID_TOKENIZATION = Transform.Tokenize.builder()
+            .jsonPath("$..callId")
+            .build();
+
+    static final Transform.Tokenize MS_TEAMS_CHAT_ID_TOKENIZATION = Transform.Tokenize.builder()
+            .jsonPath("$..chatId")
+            .build();
+
     static final Endpoint MS_TEAMS_TEAMS = Endpoint.builder()
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS)
             .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$count"))
@@ -508,6 +513,7 @@ public class PrebuiltSanitizerRules {
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS)
             .allowedQueryParams(List.of("$skip"))
             .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+            .transform(MS_TEAMS_CALL_ID_TOKENIZATION)
             .build();
 
     static final Endpoint MS_TEAMS_USERS_ONLINE_MEETINGS = Endpoint.builder()
@@ -612,10 +618,10 @@ public class PrebuiltSanitizerRules {
                     .transform(MS_TEAMS_TEAMS_REDACT)
                     .transform(MS_TEAMS_CHATS_MESSAGES_REDACT)
                     .transform(PSEUDONYMIZE_USER_ID)
+                    .transform(MS_TEAMS_CHAT_ID_TOKENIZATION)
                     // Chat message id could contain MSFT user guids
                     .transform(getTokenizeWithExpressionForLinks("chats/(.*)/messages(\\?.*)"))
                     .transform(REDACT_ODATA_CONTEXT)
-                    .transform(REDACT_ODATA_TYPE)
                     .transform(REDACT_ODATA_COUNT)
                     .build())
             .endpoint(MS_TEAMS_COMMUNICATIONS_CALLS.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
@@ -639,6 +645,7 @@ public class PrebuiltSanitizerRules {
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
                             .build())))
             .endpoint(MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
+                    MS_TEAMS_CALL_ID_TOKENIZATION,
                     MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
@@ -689,7 +696,7 @@ public class PrebuiltSanitizerRules {
                     .put("outlook-mail" + ConfigRulesModule.NO_APP_IDS_SUFFIX, OUTLOOK_MAIL_NO_APP_IDS)
                     .put("outlook-mail" + ConfigRulesModule.NO_APP_IDS_SUFFIX + "-no-groups", OUTLOOK_MAIL_NO_APP_IDS_NO_GROUPS)
                     .put("msft-teams", MS_TEAMS)
-                    .put("msft-teams" + ConfigRulesModule.NO_APP_IDS_SUFFIX + "-no-userIds", MS_TEAMS_NO_USER_ID)
+                    .put("msft-teams" + ConfigRulesModule.NO_APP_IDS_SUFFIX, MS_TEAMS_NO_USER_ID)
                     .build();
 
     private static Endpoint getMailboxSettings(String path) {

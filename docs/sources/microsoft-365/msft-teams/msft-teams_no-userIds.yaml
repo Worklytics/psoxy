@@ -124,14 +124,14 @@ endpoints:
         encoding: "JSON"
       - !<tokenize>
         jsonPaths:
+          - "$..chatId"
+      - !<tokenize>
+        jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
         regex: "^https://graph.microsoft.com/v1.0/chats/(.*)/messages(\\?.*).*$"
       - !<redact>
         jsonPaths:
           - "$..['@odata.context']"
-      - !<redact>
-        jsonPaths:
-          - "$..['@odata.type']"
       - !<redact>
         jsonPaths:
           - "$..['@odata.count']"
@@ -204,6 +204,9 @@ endpoints:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
+      - !<tokenize>
+        jsonPaths:
+          - "$..callId"
       - !<redact>
         jsonPaths:
           - "$..value[*].userPrincipalName"

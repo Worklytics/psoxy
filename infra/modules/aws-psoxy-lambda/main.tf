@@ -55,6 +55,14 @@ resource "aws_lambda_function" "instance" {
   reserved_concurrent_executions = coalesce(var.reserved_concurrent_executions, -1)
   kms_key_arn                    = var.function_env_kms_key_arn
 
+
+  ephemeral_storage {
+    size = var.ephemeral_storage_mb
+  }
+  # TODO: aws provider v5 this becomes
+  # ephemeral_storage              = var.ephemeral_storage_mb
+
+
   dynamic "vpc_config" {
     for_each = var.vpc_config[*]
 

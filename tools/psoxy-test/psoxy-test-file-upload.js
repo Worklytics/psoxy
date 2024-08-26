@@ -57,7 +57,7 @@ async function testAWS(options, logger) {
   logger.info(`Downloading sanitized file from output bucket: ${outputBucket}`);
 
   const sanitizedFilename = addFilenameSuffix(outputKey, SANITIZED_FILE_SUFFIX);
-  const destination = `${parsedPath.dir}/${sanitizedFilename}`;
+  const destination = `./${sanitizedFilename}`;
 
   await aws.download(outputBucket, outputKey, destination, {
       role: options.role,
@@ -126,7 +126,7 @@ async function testGCP(options, logger) {
   // {original filename}-{timestamp}-{sanitized} to minimize the chance of
   // modifying files in the system
   const sanitizedFilename = addFilenameSuffix(outputKey, SANITIZED_FILE_SUFFIX);
-  const destination = `${parsedPath.dir}/${sanitizedFilename}`;
+  const destination = `./${sanitizedFilename}`;
 
   await gcp.download(outputBucket, outputKey, destination, client, logger);
   logger.success('File downloaded');
@@ -175,9 +175,7 @@ export default async function (options = {}) {
   let sanitizedDiffPath = sanitized;
   const isOriginalGzipped = await isGzipped(original);
   if (isOriginalGzipped) {
-    // Assume sanitized file is also gzipped
     originalDiffPath = await unzip(original);
-    sanitizedDiffPath = await unzip(sanitized);
   }
 
   let diff;
@@ -201,7 +199,7 @@ export default async function (options = {}) {
     // delete sanitized file
     fs.unlinkSync(sanitized);
   } else {
-    logger.info(`Sanitized file saved to ${sanitized}`);
+    logger.info(`Sanitized file saved to ${path.resolve(sanitized)}`);
   }
 
   return diff;

@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.stream.Stream;
 
 public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
@@ -71,6 +72,15 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
     }
 
     @Test
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_USERS_CHATS)
+    public void users_chats_should_block_user_id() {
+        String userId = "8b081ef6-4792-4def-b2c9-c363a1bf41d5";
+        String endpoint = "https://graph.microsoft.com/" + "v1.0" + "/users/" + userId + "/chats";
+
+        assertUrlBlocked(endpoint);
+    }
+
+    @Test
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES)
     public void teams_channels_messages() {
         String teamId = "172b0cce-e65d-44ce-9a49-91d9f2e8493a";
@@ -121,12 +131,15 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
         String endpoint = "https://graph.microsoft.com/" + "v1.0" + "/chats/" + chatId + "/messages";
         String jsonResponse = asJson("Chats_messages_" + "v1.0" + ".json");
 
-            String sanitized = sanitize(endpoint, jsonResponse);
+        String sanitized = sanitize(endpoint, jsonResponse);
+
         assertPseudonymized(sanitized, "8ea0e38b-efb3-4757-924a-5f94061cf8c2", "1fb8890f-423e-4154-8fbf-db6809bc8756");
         assertRedacted(sanitized,
                 "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#chats('19%3A2da4c29f6d7041eca70b638b43d45437%40thread.v2')/messages",
                 "@odata.count"
         );
+
+        assertReversibleUrlTokenized(sanitized, Collections.singletonList("19:2da4c29f6d7041eca70b638b43d45437@thread.v2"));
 
         Collection<String> oDataUrl = Arrays.asList(
                 "https://graph.microsoft.com/v1.0/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages?$top=2&$skiptoken=M2UyZDAwMDAwMDMxMzkzYTMyNjQ2MTM0NjMzMjM5NjYzNjY0MzczMDM0MzE2NTYzNjEzNzMwNjIzNjMzMzg2MjM0MzM2NDM0MzUzNDMzMzc0MDc0Njg3MjY1NjE2NDJlNzYzMjAxZThmYjY4M2Y3ODAxMDAwMDg4NjA5ODdhNzgwMTAwMDB8MTYxNjk2NDUwOTgzMg%3d%3d"

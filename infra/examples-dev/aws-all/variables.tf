@@ -75,6 +75,11 @@ variable "secrets_store_implementation" {
   type        = string
   description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
   default     = "aws_ssm_parameter_store"
+
+  validation {
+    error_message = "The `secrets_store_implementation` value must be one of 'aws_ssm_parameter_store' or 'aws_secrets_manager'."
+    condition     = var.secrets_store_implementation == "aws_ssm_parameter_store" || var.secrets_store_implementation == "aws_secrets_manager"
+  }
 }
 
 variable "project_aws_kms_key_arn" {

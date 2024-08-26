@@ -34,7 +34,7 @@ data "azuread_client_config" "current" {}
 
 module "worklytics_connector_specs" {
   # source = "../../modules/worklytics-connector-specs"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=rc-v0.4.58"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connector-specs?ref=v0.4.59"
 
   enabled_connectors = var.enabled_connectors
 
@@ -52,7 +52,7 @@ module "msft-connection" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-connection"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=rc-v0.4.58"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-connection?ref=v0.4.59"
 
   display_name                      = "Psoxy Connector - ${each.value.display_name}${var.connector_display_name_suffix}"
   tenant_id                         = var.msft_tenant_id
@@ -65,7 +65,7 @@ module "msft-connection-auth-federation" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-federated-credentials"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=rc-v0.4.58"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=v0.4.59"
 
   application_object_id = module.msft-connection[each.key].connector.id
   display_name          = "AccessFromAWS"
@@ -107,7 +107,7 @@ module "msft_365_grants" {
   for_each = module.worklytics_connector_specs.enabled_msft_365_connectors
 
   # source = "../../modules/azuread-grant-all-users"
-  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=rc-v0.4.58"
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-grant-all-users?ref=v0.4.59"
 
   psoxy_instance_id        = each.key
   application_id           = module.msft-connection[each.key].connector.application_id

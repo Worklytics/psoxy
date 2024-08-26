@@ -9,11 +9,17 @@ Changes to be including in future/planned release notes will be added here.
 
 ## [0.4.58](https://github.com/Worklytics/psoxy/release/tag/v0.4.58)
  - Including rules for Slack Huddles through *Rooms* as part of conversation history endpoint
- - Rules for Outlook Calendar, Outlook Mail and Teams have been updated for *no app id* and *no group id* cases 
+ - Rules for Outlook Calendar, Outlook Mail and Teams have been updated for *no app id* and *no group id* cases
    to avoid supporting requests with plain user GUIDs instead of pseudonymized.
  - Slack: Including rules for Slack Huddles through *Rooms* as part of conversation history endpoint
- - GitHub: Adding support for [email](https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/iam-configuration-reference/saml-configuration-reference#saml-attributes) attribute in SAML response model on GraphQL 
+ - GitHub: Adding support for [email](https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/iam-configuration-reference/saml-configuration-reference#saml-attributes) attribute in SAML response model on GraphQL
  - AWS: you'll see `moved` resources on next apply, relating to refactoring; as well as updating IAM policy that had a wildcard to instead be an explicit list of function ARNs. If you're upgrading from before v0.4.46, you'll see create + destroy instead of move.
+ - AWS: if using `MinProvisioner` role from `psoxy-constants` module, we've added a req'd perm to
+   that role (to allow tagging lambda functions); without this, `default_tags` option does not work.
+ - AWS: bulk-mode ephemeral storage set to 10240 (10GB), raised from free amount of 512MB; this will
+   incur small cost. It's billable at $0.0000000309 per GB-second. For most bulk use-cases, files
+   are processed in fewer than 30 seconds, and customers process fewer than 10 files per week. So
+   expected cost of this is $0.0000927 - less than one-thousandth of a cent.
 
 ## [0.4.57](https://github.com/Worklytics/psoxy/release/tag/v0.4.57)
 Several changes in this version will result in visible changes during `terraform plan`/`apply`:
