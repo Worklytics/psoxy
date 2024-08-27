@@ -308,18 +308,29 @@ fi
 # will work
 terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" init >> /dev/null
 CLI_VARS="-var=include_msft=${INCLUDE_MSFT} -var=include_google_workspace=${INCLUDE_GWS}"
-AVAILABLE_CONNECTORS=$(echo "local.default_enabled_connector_ids" | terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" console $CLI_VARS)
+DEFAULT_CONNECTORS_TO_ENABLE=$(echo "local.default_enabled_connector_ids" | terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" console $CLI_VARS)
+ALL_AVAILABLE_CONNECTORS=$(echo "jsonencode(tolist(keys(local.all_default_connectors)))" | terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" console $CLI_VARS)
 
 # clean up what the init did above
 rm -rf "${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs/.terraform" 2> /dev/null
 rm "${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs/.terraform.lock.hcl" 2> /dev/null
 
-if [ -z "$AVAILABLE_CONNECTORS" ]; then
+if [ -z "$DEFAULT_CONNECTORS_TO_ENABLE" ]; then
   printf "${RED}Failed to generate list of enabled_connectors${NC}; you will need to add an variable assigned for ${BLUE}enabled_connectors${NC} to your ${BLUE}terraform.tfvars${NC} as a list of connector ID strings. Contact support for assistance.\n"
 else
   printf "# review following list of connectors below to enable, and comment out what you don't want\n" >> $TFVARS_FILE
   printf "# NOTE: usage of some connectors may require specific license from Worklytics or the data source; or have a usage cost on the data source side. Worklytics is not responsible for any costs incurred on the data source side or by usage of the APIs it provides.\n" >> $TFVARS_FILE
-  printf "enabled_connectors = ${AVAILABLE_CONNECTORS}\n\n" >> $TFVARS_FILE
+  printf "enabled_connectors = ${DEFAULT_CONNECTORS_TO_ENABLE}\n\n" >> $TFVARS_FILE
+fi
+
+# if ALL_AVAILABLE_CONNECTORS is not empty, then list them in terraform.tfvars
+if [[ -n "$ALL_AVAILABLE_CONNECTORS" ]]; then
+  # add comment '#' to each line of the ALL_AVAILABLE_CONNECTORS
+  ALL_AVAILABLE_CONNECTORS=$(echo "$ALL_AVAILABLE_CONNECTORS" | sed 's/^/# /')
+
+  printf "# If you wish to enable additional connectors, you can uncomment and add one of the ids\n" >> $TFVARS_FILE
+  printf "# listed below  to \`enabled_connectors\`; run \`./available-connectors\` if available for an updated list\n" >> $TFVARS_FILE
+  printf "${ALL_AVAILABLE_CONNECTORS}\n\n" >> $TFVARS_FILE
 fi
 
 printf "\n"
