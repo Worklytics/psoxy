@@ -12,7 +12,8 @@ MODULE_PATH="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs"
 
 if [ ! -d "$MODULE_PATH" ]; then
   printf "${RED}Connector specs module not found at ${MODULE_PATH}.${NC}\n"
-  printf "(if testing from main psoxy repo, run this script as ${BLUE}./tools/available-connects.sh ./${NC})\n"
+  printf "(if testing from root of main psoxy repo, run this script as ${BLUE}./tools/available-connectors.sh ./${NC})\n"
+  printf "(if testing from inside example, run this script as ${BLUE}../../../tools/available-connectors.sh ../../../${NC})\n"
   printf "Exiting.${NC}\n"
   exit 1
 fi
