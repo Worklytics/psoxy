@@ -35,6 +35,9 @@ See [AWS Authentication and Authorization](aws/authentication-authorization.md) 
 
 See [GCP Authentication and Authorization](gcp/authentication-authorization.md) for more details.
 
+And always remember: an IP is **not** an authenticated identity for a client, and should not be
+relied upon as an authentication mechanism. IPs can be spoofed. It is at best an extra control.
+
 ## Can Psoxy instances be deployed behind an AWS API Gateway?
 
 Yes - and prior to March 2022 this was necessary. But AWS has released
