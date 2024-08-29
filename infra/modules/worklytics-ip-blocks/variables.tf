@@ -4,7 +4,7 @@ variable "tenant_location" {
   default     = "us"
 
   validation {
-    condition     = can(regex("^(us|eu)$", var.tenant_location))
+    condition     = can(regex("(?i)^(us|eu)$", var.tenant_location))
     error_message = "The `tenant_location` must be either 'us' or 'eu'."
   }
 }
