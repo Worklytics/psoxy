@@ -142,6 +142,10 @@ endpoints:
       \ \\E)"
       - !<redact>
         jsonPaths:
+          - "$..reminderMinutesBeforeStart"
+          - "$..isReminderOn"
+          - "$..allowNewTimeProposals"
+          - "$..transactionId"
           - "$..emailAddress.name"
           - "$..extensions"
           - "$..multiValueExtendedProperties"

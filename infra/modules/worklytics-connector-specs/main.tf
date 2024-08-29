@@ -85,7 +85,7 @@ locals {
     "gmail" : {
       source_kind : "gmail",
       availability : "ga",
-      enable_by_default : true
+      enable_by_default : false,
       worklytics_connector_id : "gmail-meta-psoxy",
       display_name : "GMail"
       identifier_scope_id : "gapps"
@@ -285,7 +285,7 @@ locals {
     "outlook-mail" : {
       source_kind : "outlook-mail"
       availability : "ga",
-      enable_by_default : true,
+      enable_by_default : false,
       worklytics_connector_id : "outlook-mail-psoxy",
       display_name : "Outlook Mail"
       identifier_scope_id : "azure-ad"
@@ -433,7 +433,7 @@ EOT
     github = {
       source_kind : "github",
       availability : "ga",
-      enable_by_default : true,
+      enable_by_default : false,
       worklytics_connector_id : "github-enterprise-psoxy"
       display_name : "Github Enterprise"
       identifier_scope_id : "github"
@@ -947,7 +947,7 @@ EOT
     zoom = {
       source_kind : "zoom"
       availability : "ga",
-      enable_by_default : true
+      enable_by_default : false
       worklytics_connector_id : "zoom-psoxy"
       display_name : "Zoom"
       worklytics_connector_name : "Zoom via Psoxy"
@@ -1199,7 +1199,7 @@ EOT
     jira-cloud = {
       source_kind : "jira-cloud"
       availability : "ga"
-      enable_by_default : true
+      enable_by_default : false
       worklytics_connector_id : "jira-cloud-psoxy"
       target_host : "api.atlassian.com"
       source_auth_strategy : "oauth2_refresh_token"
@@ -1373,7 +1373,7 @@ EOT
     "badge" = {
       source_kind               = "badge"
       availability              = "ga"
-      enable_by_default         = true
+      enable_by_default         = false
       worklytics_connector_id   = "bulk-import-psoxy",
       worklytics_connector_name = "Bulk Data Import via Psoxy"
       rules = {
@@ -1413,7 +1413,7 @@ EOT
     "survey" = {
       worklytics_connector_id   = "survey-import-psoxy"
       availability              = "ga"
-      enable_by_default         = true
+      enable_by_default         = false
       source_kind               = "survey"
       worklytics_connector_name = "Survey Data Import via Psoxy"
       rules = {
