@@ -16,7 +16,7 @@ necessary.
 
 If you take this approach, you will be responsible for updating your IP restrictions frequently as
 GCP changes their IP blocks, or your data flow to Worklytics may break. As such, this is not
-officially supported by Worklytics.
+officially supported by Worklytics. For an example of how to do this, see [worklytics-ip-blocks](../infra/modules/worklytics-ip-blocks/README.md) module.
 
 Your Worklytics tenant is a process running in GCP, personified by a unique GCP service account. You
 simply use your cloud's IAM to grant that service account access to your psoxy instance.
