@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Stream;
 
 //TODO: fix this re-use via inheritance; makes tests brittle; we should inject this rule set into
@@ -14,6 +16,13 @@ public class CalendarTests extends EntraIDTests {
 
     @Getter
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.OUTLOOK_CALENDAR;
+
+    static final Collection<String> EVENT_FIELDS_TO_REDACT = Set.of(
+        "transactionId",
+        "reminderMinutesBeforeStart",
+        "isReminderOn",
+        "allowNewTimeProposals"
+    );
 
     @Getter
     RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
@@ -43,6 +52,9 @@ public class CalendarTests extends EntraIDTests {
             "IrvinS@M365x214355.onmicrosoft.com"
         );
 
+        assertNotSanitized(jsonResponse, EVENT_FIELDS_TO_REDACT);
+        assertRedacted(sanitized, EVENT_FIELDS_TO_REDACT);
+
     }
 
     @ParameterizedTest
@@ -65,6 +77,9 @@ public class CalendarTests extends EntraIDTests {
             "engineering@M365x214355.onmicrosoft.com",
             "IrvinS@M365x214355.onmicrosoft.com"
         );
+
+        assertNotSanitized(jsonResponse, EVENT_FIELDS_TO_REDACT);
+        assertRedacted(sanitized, EVENT_FIELDS_TO_REDACT);
 
     }
 
@@ -93,6 +108,8 @@ public class CalendarTests extends EntraIDTests {
             "IrvinS@M365x214355.onmicrosoft.com"
         );
 
+        assertNotSanitized(jsonResponse, EVENT_FIELDS_TO_REDACT);
+        assertRedacted(sanitized, EVENT_FIELDS_TO_REDACT);
     }
 
     @ParameterizedTest
@@ -119,6 +136,9 @@ public class CalendarTests extends EntraIDTests {
                 "engineering@M365x214355.onmicrosoft.com",
                 "IrvinS@M365x214355.onmicrosoft.com"
         );
+
+        assertNotSanitized(jsonResponse, EVENT_FIELDS_TO_REDACT);
+        assertRedacted(sanitized, EVENT_FIELDS_TO_REDACT);
 
     }
 
@@ -151,6 +171,10 @@ public class CalendarTests extends EntraIDTests {
             "engineering@M365x214355.onmicrosoft.com",
             "IrvinS@M365x214355.onmicrosoft.com"
         );
+
+
+        assertNotSanitized(jsonResponse, EVENT_FIELDS_TO_REDACT);
+        assertRedacted(sanitized, EVENT_FIELDS_TO_REDACT);
     }
 
     @ParameterizedTest
@@ -180,6 +204,9 @@ public class CalendarTests extends EntraIDTests {
         assertRedacted(sanitized, "pwd=123123");
 
         assertNotSanitized(sanitized, "https://acme.zoom.us/j/12354234234");
+
+        assertNotSanitized(jsonResponse, EVENT_FIELDS_TO_REDACT);
+        assertRedacted(sanitized, EVENT_FIELDS_TO_REDACT);
     }
 
     @Test
