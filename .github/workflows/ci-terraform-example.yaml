@@ -9,7 +9,6 @@ on:
         required: false
         type: string
         description: Terraform version to use
-        default: '~1.6.0'
 
 jobs:
   validate:

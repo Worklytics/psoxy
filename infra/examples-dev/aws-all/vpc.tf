@@ -2,6 +2,9 @@
 ### locals that function like variables, but without tedium of declaring them in a separate file
 #locals {
 #  # must pick one that supports arm64 lambdas (which apparently is not all of them)
+#  # and probably should be from the same region as the rest of your infra (eg, var.aws_region)
+#  # don't really care about high-availability or anything; Worklytics will handle short outages and
+#  # retry as needed
 #  availability_zone = "us-east-1a"
 #}
 

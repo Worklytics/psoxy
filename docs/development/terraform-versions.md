@@ -11,7 +11,7 @@ Do NOT use any features from 1.3.x or later, as we wish to allow all our terrafo
 to work with Terraform back to 1.3.x, which is vintage Sept 2022.
 
 In particular, **features to NOT use**:
-  - `removed` block - introduced in 1.7
+  - `removed` block - introduced in 1.7 (this is our major constraint to maintain compatibility with OpenTofu)
   - `check` block - introduced in 1.5
   - `import` block - introduced in 1.5, but not relevant in use case anyways.
   - `plantimestamp` function - introduced in 1.5
