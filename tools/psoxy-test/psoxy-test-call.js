@@ -6,7 +6,7 @@ import path from 'path';
 import _ from 'lodash';
 import { constants as httpCodes } from 'http2';
 import { fileURLToPath } from 'url';
-import { saveToFile, getFileNameFromURL } from './lib/utils.js';
+import { environmentCheck, saveToFile, getFileNameFromURL } from './lib/utils.js';
 
 // Since we're using ESM modules, we need to make `__dirname` available
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -39,6 +39,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  */
 export default async function (options = {}) {
   const logger = getLogger(options.verbose);
+
+  environmentCheck(logger);
+
   let result = {};
   let url;
 
@@ -146,7 +149,7 @@ export default async function (options = {}) {
       const logsURL = isAWS ? aws.getLogsURL(options) : gcp.getLogsURL(url);
       // In general, we could add more "trobleshooting" tips here:
       // - Check out script logs `run.log` which store verbose output
-      // - Directly show logs from the cloud provider (GCP is feasible, AWS 
+      // - Directly show logs from the cloud provider (GCP is feasible, AWS
       //  require more parameters i.e. cloudwatch log group name)
       logger.info(`This looks like an internal error in the Proxy. Check out the logs for more details: ${logsURL}`);
     }

@@ -4,6 +4,7 @@ import gcp from './lib/gcp.js';
 import getLogger from './lib/logger.js';
 import _ from 'lodash';
 import { constants as httpCodes } from 'http2';
+import { environmentCheck } from './lib/utils.js';
 
 /**
  * Get (and display using logger passed as param) the latest log events from a
@@ -146,6 +147,7 @@ export default async function (options = {}, logger) {
   if (!logger) {
     logger = getLogger(options.verbose);
   }
+  environmentCheck(logger);
 
   return isGCP ? getGCPLogs(options, logger) : getAWSLogs(options, logger);
 }
