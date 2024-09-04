@@ -8,6 +8,7 @@ import {
 } from "@aws-sdk/credential-providers";
 import _ from 'lodash';
 import aws4 from 'aws4';
+import chalk from 'chalk';
 import fs from 'node:fs/promises';
 import getLogger from './logger.js';
 import https from 'https';
@@ -205,6 +206,38 @@ function signAWSRequestURL(url, method = 'GET', body = {}, credentials, region) 
   }
 
   return aws4.sign(requestOptions, credentials);
+}
+
+/**
+ * Check environment and warn if Node.js version is not LTS. As of 2024-08 deprecation
+ * warning messages are expected for Node.js v21 due to @google-cloud/storage dependency.
+ * Ref: https://github.com/googleapis/nodejs-storage/issues/1907#issuecomment-1817620435
+ *
+ * > After six months, odd-numbered releases (9, 11, etc.) become unsupported, and even-numbered
+ * releases (10, 12, etc.) move to Active LTS status and are ready for general use.
+ *
+ * @param logger
+ */
+function environmentCheck(logger = getLogger()) {
+  const [major] = process.versions.node.split('.').map(Number);
+  const isNotLTS = major % 2 !== 0;
+  if (isNotLTS) {
+    let warningMessage = `
+      Please, consider using a LTS release of Node.js (v18, v20, etc.):
+      https://nodejs.org/en/about/previous-releases
+    `
+
+    if (major === 21) {
+      warningMessage = `
+      Your Node.js version may display ${chalk.yellow("deprecation warnings")} related to an
+      official Google dependency used by this tool. These warnings are not
+      the direct responsibility of this tool and ${chalk.green('do not compromise its functionality')}.
+      ${warningMessage}
+      `
+    }
+
+    logger.info(warningMessage);
+  }
 }
 
 /**
@@ -469,6 +502,7 @@ async function isGzipped(filePath) {
 export {
   addFilenameSuffix,
   unzip,
+  environmentCheck,
   executeCommand,
   executeWithRetry,
   getAWSCredentials,

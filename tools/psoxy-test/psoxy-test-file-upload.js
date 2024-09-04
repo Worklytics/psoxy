@@ -2,6 +2,7 @@ import { constants as httpCodes } from 'http2';
 import { execFileSync } from 'child_process';
 import {
   addFilenameSuffix,
+  environmentCheck,
   isGzipped,
   parseBucketOption,
   unzip,
@@ -167,6 +168,7 @@ async function testGCP(options, logger) {
  */
 export default async function (options = {}) {
   const logger = getLogger(options.verbose);
+  environmentCheck(logger);
 
   const deploymentTypeFn = options.deploy === 'AWS' ? testAWS : testGCP;
   const { original, sanitized } = await deploymentTypeFn(options, logger);
