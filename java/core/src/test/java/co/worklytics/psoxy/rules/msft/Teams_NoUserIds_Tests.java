@@ -65,9 +65,12 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
 
         String sanitized = sanitize(endpoint, jsonResponse);
         assertRedacted(sanitized,
-                "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#chats",
+                "@odata.context",
+                "https://graph.microsoft.com/v1.0/$metadata#chats",
+                "48d31887-5fad-4d73-a9f5-3c356e68a038",
                 "@odata.count"
         );
+
         assertUrlWithSubResourcesBlocked(endpoint);
     }
 

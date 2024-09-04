@@ -379,35 +379,20 @@ public class PrebuiltSanitizerRules {
 
     static final Transform.Redact MS_TEAMS_USERS_CHATS_REDACT = Transform.Redact.builder()
             .jsonPath("$..topic")
+            .jsonPath("$..lastMessagePreview@odata.context")
             .build();
     static final Transform.Redact MS_TEAMS_TEAMS_ALL_CHANNELS_REDACT = Transform.Redact.builder()
             .jsonPath("$..displayName")
             .jsonPath("$..description")
             .build();
 
-    static final Transform.Redact MS_TEAMS_TEAMS_CHANNELS_MESSAGES_REDACT = Transform.Redact.builder()
+    static final Transform.Redact MS_TEAMS_CHATS_MESSAGES_REDACT = Transform.Redact.builder()
             .jsonPath("$..user.displayName")
             .jsonPath("$..body.content")
             .jsonPath("$..attachments")
             .jsonPath("$..mentions[*].mentionText")
             .jsonPath("$..eventDetail.teamDescription")
-            .build();
-
-    static final Transform.Redact MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA_REDACT = Transform.Redact.builder()
-            .jsonPath("$..user.displayName")
-            .jsonPath("$..value[*].body.content")
-            .jsonPath("$..value[*].attachments")
-            .jsonPath("$..value[*].mentions[*].mentionText")
-            .jsonPath("$..value[*].eventDetail.teamDescription")
-            .build();
-
-    static final Transform.Redact MS_TEAMS_CHATS_MESSAGES_REDACT = Transform.Redact.builder()
-            .jsonPath("$..user.displayName")
-            .jsonPath("$..value[*].body.content")
-            .jsonPath("$..value[*].attachments")
-            .jsonPath("$..value[*].mentions[*].mentionText")
-            .jsonPath("$..value[*].eventDetail.teamDescription")
-            .jsonPath("$..value[*].eventDetail.chatDisplayName")
+            .jsonPath("$..eventDetail.chatDisplayName")
             .build();
 
     static final Transform.Redact MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_REDACT = Transform.Redact.builder()
@@ -471,6 +456,7 @@ public class PrebuiltSanitizerRules {
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_CHATS)
             .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$expand"))
             .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+            .transform(MS_TEAMS_TEAMS_REDACT)
             .build();
 
     static final Endpoint MS_TEAMS_TEAMS_CHANNELS_MESSAGES = Endpoint.builder()
@@ -557,9 +543,9 @@ public class PrebuiltSanitizerRules {
             .withAdditionalEndpoints(ENTRA_ID_USERS)
             .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS, MS_TEAMS_TEAMS_REDACT)
             .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_ALL_CHANNELS, MS_TEAMS_TEAMS_ALL_CHANNELS_REDACT)
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_CHATS, MS_TEAMS_USERS_CHATS_REDACT)
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES, MS_TEAMS_TEAMS_CHANNELS_MESSAGES_REDACT)
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA, MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_CHATS, MS_TEAMS_USERS_CHATS_REDACT, MS_TEAMS_CHATS_MESSAGES_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES, MS_TEAMS_CHATS_MESSAGES_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA, MS_TEAMS_CHATS_MESSAGES_REDACT)
             .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES, MS_TEAMS_CHATS_MESSAGES_REDACT)
             .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS, MS_TEAMS_COMMUNICATIONS_CALLS_REDACT)
             .withTransformByEndpoint(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX, MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_REDACT)
@@ -598,16 +584,19 @@ public class PrebuiltSanitizerRules {
                                     .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                                     .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
                                     .jsonPaths(PSEUDONYMIZE_USER_ID.getJsonPaths())
-                                    .build()))
+                                    .build(),
+                            // Chat message id could contain MSFT user guids
+                            getTokenizeWithExpressionForLinks("(.*)/chats(\\?.*)"),
+                            MS_TEAMS_CHATS_MESSAGES_REDACT))
                     .build())
             .endpoint(MS_TEAMS_TEAMS_CHANNELS_MESSAGES.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
-                    MS_TEAMS_TEAMS_CHANNELS_MESSAGES_REDACT
+                    MS_TEAMS_CHATS_MESSAGES_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
                             .build())))
             .endpoint(MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
-                    MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA_REDACT
+                    MS_TEAMS_CHATS_MESSAGES_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
