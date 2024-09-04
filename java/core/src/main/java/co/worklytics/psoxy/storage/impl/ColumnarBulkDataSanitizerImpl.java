@@ -80,15 +80,20 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                          @NonNull Writer writer,
                          @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
-        CSVParser records = CSVFormat
-            .DEFAULT
-            .withDelimiter(rules.getDelimiter())
-            .withFirstRecordAsHeader()
-            .withIgnoreHeaderCase()
-            .withTrim()
-            .parse(reader);
+        CSVFormat inputCSVFormat = CSVFormat.Builder.create(CSVFormat.DEFAULT)
+            .setDelimiter(rules.getDelimiter())
+            .setHeader() // needed, indicates needs to be parsed from input
+            .setSkipHeaderRecord(true)
+            .setIgnoreHeaderCase(true)
+            .setTrim(true)
+            .build();
+
+
+        CSVParser records = inputCSVFormat.parse(reader);
 
         Preconditions.checkArgument(records.getHeaderMap() != null, "Failed to parse header from file");
+
+        Preconditions.checkArgument( records.getHeaderMap().keySet().stream().allMatch(StringUtils::isAsciiPrintable), "Non-ASCII characters found in headers, inspect file with cat -v for control characters");
 
         /*
          * Table to store the transformation to be applied to each column
