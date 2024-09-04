@@ -40,6 +40,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -811,6 +812,29 @@ public class BulkDataSanitizerImplTest {
         columnarFileSanitizerImpl.setRules(rules);
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
+
+        try (StringReader in = new StringReader(SOURCE);
+             StringWriter out = new StringWriter()) {
+            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            assertEquals(EXPECTED, out.toString());
+        }
+    }
+
+    @Test
+    @SneakyThrows
+    void handle_control_chars_in_headers_reproduce_error() {
+
+        final String SOURCE = " EMPLOYEE_ID,SWIPE_DATE,BUILDING_ID,BUILDING_ASSIGNED\n" +
+            "E001,01/01/2024 3:10PM,B1,B2";
+
+        final String EXPECTED = " EMPLOYEE_ID,SWIPE_DATE,BUILDING_ID,BUILDING_ASSIGNED,EMPLOYEE_ID\n" +
+            "E001,01/01/2024 3:10PM,B1,B2,\n";
+
+        ColumnarRules rules = ColumnarRules.builder()
+            .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+            .columnToPseudonymize("EMPLOYEE_ID")
+            .build();
+        columnarFileSanitizerImpl.setRules(rules);
 
         try (StringReader in = new StringReader(SOURCE);
              StringWriter out = new StringWriter()) {
