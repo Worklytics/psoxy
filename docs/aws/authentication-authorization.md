@@ -60,5 +60,3 @@ asserted the claim that `aud` == `12345678901234567890123456789` to assume the r
 Then you use this AWS IAM role as the principal in AWS IAM policies you define to authorize to
 invoke your proxy instances via their function URLs (API connectors) or to read from their sanitized
 output buckets (bulk data connectors)
-
-See: https://github.com/Worklytics/psoxy/blob/v0.4.40/infra/modules/aws/main.tf#L81-L102
