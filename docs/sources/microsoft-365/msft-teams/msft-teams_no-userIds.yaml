@@ -51,10 +51,23 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..topic"
+          - "$..['lastMessagePreview@odata.context']"
           - "$..['@odata.context']"
           - "$..['@odata.count']"
           - "$..user.id"
           - "$..userId"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/v1.0/(.*)/chats(\\?.*).*$"
+      - !<redact>
+        jsonPaths:
+          - "$..user.displayName"
+          - "$..body.content"
+          - "$..attachments"
+          - "$..mentions[*].mentionText"
+          - "$..eventDetail.teamDescription"
+          - "$..eventDetail.chatDisplayName"
   - pathTemplate: "/v1.0/teams/{teamId}/channels/{channelId}/messages"
     allowedQueryParams:
       - "$select"
@@ -74,6 +87,7 @@ endpoints:
           - "$..attachments"
           - "$..mentions[*].mentionText"
           - "$..eventDetail.teamDescription"
+          - "$..eventDetail.chatDisplayName"
           - "$..['@odata.context']"
           - "$..['@odata.count']"
   - pathTemplate: "/v1.0/teams/{teamId}/channels/{channelId}/messages/delta"
@@ -93,10 +107,11 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..user.displayName"
-          - "$..value[*].body.content"
-          - "$..value[*].attachments"
-          - "$..value[*].mentions[*].mentionText"
-          - "$..value[*].eventDetail.teamDescription"
+          - "$..body.content"
+          - "$..attachments"
+          - "$..mentions[*].mentionText"
+          - "$..eventDetail.teamDescription"
+          - "$..eventDetail.chatDisplayName"
           - "$..['@odata.context']"
           - "$..['@odata.count']"
   - pathRegex: "^/v1.0/chats/(/p~[a-zA-Z0-9_-]+?)?[^/]*/messages(\\?.*)?"
@@ -112,11 +127,11 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$..user.displayName"
-          - "$..value[*].body.content"
-          - "$..value[*].attachments"
-          - "$..value[*].mentions[*].mentionText"
-          - "$..value[*].eventDetail.teamDescription"
-          - "$..value[*].eventDetail.chatDisplayName"
+          - "$..body.content"
+          - "$..attachments"
+          - "$..mentions[*].mentionText"
+          - "$..eventDetail.teamDescription"
+          - "$..eventDetail.chatDisplayName"
       - !<pseudonymize>
         jsonPaths:
           - "$..user.id"
@@ -152,11 +167,12 @@ endpoints:
           - "$..['@odata.context']"
           - "$..['@odata.count']"
           - "$..['@odata.type']"
-  - pathRegex: "^/v1.0/communications/callRecords/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)(?<queryParameters>[a-zA-z0-9\\\
+  - pathRegex: "^/v1.0/communications/callRecords(/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?))?(?<queryParameters>[a-zA-z0-9\\\
     s\\$\\=\\?\\(\\)]*)"
     allowedQueryParams:
       - "$select"
       - "$expand"
+      - "$filter"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -175,6 +191,10 @@ endpoints:
           - "$..callee.name"
           - "$..captureDeviceName"
           - "$..renderDeviceName"
+          - "$..organizer_v2.id"
+          - "$..participants_v2[*].id"
+          - "$..phone"
+          - "$..['organizer_v2@odata.context']"
           - "$..['@odata.context']"
           - "$..['@odata.type']"
   - pathTemplate: "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})"
