@@ -1,7 +1,7 @@
 {
   "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#chats",
   "@odata.count": 3,
-  "@odata.nextLink": "https://graph.microsoft.com/v1.0/48d31887-5fad-4d73-a9f5-3c356e68a038/chats?$expand=lastMessagePreview&$skiptoken=1.kscDYs0BDcYAAAEP8D2BqlByb3BlcnRpZXOCqVN5bmNTdGF0ZdnkZXlKa1pXeHBkbVZ5WldSVFpXZHRaVzUwY3lJNlczc2ljM1JoY25RaU9pSXlNREkwTFRBBADwrnhWREV3T2pBNE9qQTNMamsxTVNzd01Eb3dNQ0lzSW1WdVpDSTZJakl3TWpRdE1EZ3RNRFZVTURJNk1UVTZNVGd1TVRFck1EQTZNREFpZlYwc0lucGxjbTlNVFZOVVJHVnNhWFpsY21Wa1UyVm5iV1Z1ZEhNaU9sdGRMQ0p6YjNKMFQzSmtaWElpT2pBc0ltbHVZMngxWkdWYVpYSnZURTFUVkNJNlptRnNjMlY5rExhc3RQYWdlU2l6ZaIyMA%3d%3d",
+  "@odata.nextLink": "https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/chats?$expand=lastMessagePreview&$skiptoken=1.kscDYs0BDcYAAAEP8D2BqlByb3BlcnRpZXOCqVN5bmNTdGF0ZdnkZXlKa1pXeHBkbVZ5WldSVFpXZHRaVzUwY3lJNlczc2ljM1JoY25RaU9pSXlNREkwTFRBBADwrnhWREV3T2pBNE9qQTNMamsxTVNzd01Eb3dNQ0lzSW1WdVpDSTZJakl3TWpRdE1EZ3RNRFZVTURJNk1UVTZNVGd1TVRFck1EQTZNREFpZlYwc0lucGxjbTlNVFZOVVJHVnNhWFpsY21Wa1UyVm5iV1Z1ZEhNaU9sdGRMQ0p6YjNKMFQzSmtaWElpT2pBc0ltbHVZMngxWkdWYVpYSnZURTFUVkNJNlptRnNjMlY5rExhc3RQYWdlU2l6ZaIyMA%3d%3d",
   "value": [
     {
       "id": "19:meeting_MjdhNjM4YzUtYzExZi00OTFkLTkzZTAtNTVlNmZmMDhkNGU2@thread.v2",

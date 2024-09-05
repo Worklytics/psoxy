@@ -59,7 +59,7 @@ endpoints:
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
-        regex: "^https://graph.microsoft.com/v1.0/(.*)/chats(\\?.*).*$"
+        regex: "^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$"
       - !<redact>
         jsonPaths:
           - "$..user.displayName"

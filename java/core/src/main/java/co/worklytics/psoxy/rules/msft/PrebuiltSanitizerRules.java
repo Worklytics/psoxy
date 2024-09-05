@@ -590,8 +590,8 @@ public class PrebuiltSanitizerRules {
                                     .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
                                     .jsonPaths(PSEUDONYMIZE_USER_ID.getJsonPaths())
                                     .build(),
-                            // Chat message id could contain MSFT user guids
-                            getTokenizeWithExpressionForLinks("(.*)/chats(\\?.*)"),
+                            // Next link could contain user id + chat id
+                            TOKENIZE_ODATA_LINKS,
                             MS_TEAMS_CHATS_MESSAGES_REDACT))
                     .build())
             .endpoint(MS_TEAMS_TEAMS_CHANNELS_MESSAGES.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
