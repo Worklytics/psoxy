@@ -356,7 +356,7 @@ public class PrebuiltSanitizerRules {
         2. Match ID:                        (?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)
         2. Match GraphQL query parameters: (?<queryParameters>\?[a-zA-z0-9\s\$\=\(\)]*)
     */
-    static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX = "^/v1.0/communications/callRecords/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)(?<queryParameters>[a-zA-z0-9\\s\\$\\=\\?\\(\\)]*)";
+    static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX = "^/v1.0/communications/callRecords(/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?))?(?<queryParameters>[a-zA-z0-9\\s\\$\\=\\?\\(\\)]*)";
     static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS = "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})";
     static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS = "/v1.0/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})";
     static final String MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS = "/v1.0/users/{userId}/onlineMeetings";
@@ -406,6 +406,11 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..callee.name")
             .jsonPath("$..captureDeviceName")
             .jsonPath("$..renderDeviceName")
+            // organizer_v2.id could contain user id, phone number, etc.
+            .jsonPath("$..organizer_v2.id")
+            .jsonPath("$..participants_v2[*].id")
+            .jsonPath("$..phone")
+            .jsonPath("$..['organizer_v2@odata.context']")
             .build();
 
     static final Transform.Redact MS_TEAMS_COMMUNICATIONS_CALLS_REDACT = Transform.Redact.builder()
@@ -485,7 +490,7 @@ public class PrebuiltSanitizerRules {
 
     static final Endpoint MS_TEAMS_COMMUNICATIONS_CALL_RECORDS = Endpoint.builder()
             .pathRegex(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX)
-            .allowedQueryParams(List.of("$select", "$expand"))
+            .allowedQueryParams(List.of("$select", "$expand", "$filter"))
             .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
             .build();
 

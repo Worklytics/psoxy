@@ -13,7 +13,6 @@
         "lastMessageReadDateTime":"2021-06-03T08:05:49.521Z"
       },
       "webUrl":"https://teams.microsoft.com/l/chat/19%3Ameeting_MjdhNjM4YzUtYzExZi00OTFkLTkzZTAtNTVlNmZmMDhkNGU2@thread.v2/0?tenantId=b33cbe9f-8ebe-4f2a-912b-7e2a427f477f",
-      "lastMessagePreview@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users('48d31887-5fad-4d73-a9f5-3c356e68a038')/chats('19%3A48d31887-5fad-4d73-a9f5-3c356e68a038_7b622a03-ca9d-4506-9aae-2d691f26cd27%40unq.gbl.spaces')/lastMessagePreview/$entity",
       "lastMessagePreview":{
         "id":"1711966087452",
         "createdDateTime":"2024-04-01T10:08:07.452Z",
