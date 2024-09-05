@@ -7,6 +7,9 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
+## [0.4.60](https://github.com/Worklytics/psoxy/release/tag/v0.4.60)
+ - MSFT Teams: Support for listing callRecords
+ 
 ## [0.4.58](https://github.com/Worklytics/psoxy/release/tag/v0.4.58)
  - Including rules for Slack Huddles through *Rooms* as part of conversation history endpoint
  - Rules for Outlook Calendar, Outlook Mail and Teams have been updated for *no app id* and *no group id* cases
