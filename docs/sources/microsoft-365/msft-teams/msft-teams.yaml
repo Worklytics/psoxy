@@ -218,6 +218,7 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$..subject"
+          - "$..joinInformation"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
   - pathTemplate: "/v1.0/users/{userId}/onlineMeetings/{meetingId}/attendanceReports"
@@ -244,6 +245,7 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$..subject"
+          - "$..joinInformation"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
   - pathTemplate: "/v1.0/users/{userId}/onlineMeetings/{meetingId}/attendanceReports/{reportId}"
@@ -270,6 +272,7 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$..subject"
+          - "$..joinInformation"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
   - pathRegex: "^/v1.0/users/?[^/]*"

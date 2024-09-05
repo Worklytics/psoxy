@@ -252,6 +252,7 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$..subject"
+          - "$..joinInformation"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
       - !<redact>
@@ -280,6 +281,7 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$..subject"
+          - "$..joinInformation"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
       - !<redact>
@@ -311,6 +313,7 @@ endpoints:
         jsonPaths:
           - "$..displayName"
           - "$..subject"
+          - "$..joinInformation"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
           - "$..['@odata.context']"

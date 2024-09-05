@@ -433,6 +433,7 @@ public class PrebuiltSanitizerRules {
     static final Transform.Redact MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT = Transform.Redact.builder()
             .jsonPath("$..displayName")
             .jsonPath("$..subject")
+            .jsonPath("$..joinInformation")
             .jsonPath("$..joinMeetingIdSettings.isPasscodeRequired")
             .jsonPath("$..joinMeetingIdSettings.passcode")
             .build();
