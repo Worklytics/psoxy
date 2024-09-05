@@ -379,7 +379,7 @@ public class PrebuiltSanitizerRules {
 
     static final Transform.Redact MS_TEAMS_USERS_CHATS_REDACT = Transform.Redact.builder()
             .jsonPath("$..topic")
-            .jsonPath("$..lastMessagePreview@odata.context")
+            .jsonPath("$..['lastMessagePreview@odata.context']")
             .build();
     static final Transform.Redact MS_TEAMS_TEAMS_ALL_CHANNELS_REDACT = Transform.Redact.builder()
             .jsonPath("$..displayName")

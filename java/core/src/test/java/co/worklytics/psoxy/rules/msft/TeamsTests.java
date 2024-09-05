@@ -107,6 +107,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
 
         String sanitized = sanitize(endpoint, jsonResponse);
         assertRedacted(sanitized,
+                "lastMessagePreview@odata.context",
                 "Meeting chat sample",
                 "Group chat sample",
                 "topic"
