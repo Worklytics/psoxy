@@ -37,7 +37,7 @@ output "api_clients" {
     id => {
       azuread_application_id = connection.connector.client_id
       oauth_client_id        = connection.connector.client_id # yes, it's same as application id; but duplicated for clarity
-      azuread_object_id      = connection.connector.object_id      # used for terraform imports
+      azuread_object_id      = connection.connector.object_id # used for terraform imports
     }
   }
 }
