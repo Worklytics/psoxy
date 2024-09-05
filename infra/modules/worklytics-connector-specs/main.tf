@@ -347,10 +347,11 @@ locals {
         "/v1.0/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages/delta",
         "/v1.0/chats/${var.msft_teams_example_chat_guid}/messages",
         "/v1.0/communications/calls/${var.msft_teams_example_call_guid}",
+        "/v1.0/communications/callRecords",
         "/v1.0/communications/callRecords/${var.msft_teams_example_call_record_guid}",
         "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(time_static.deployment.id, "-2160h"))},toDateTime=${urlencode(time_static.deployment.id)})",
         "/v1.0/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(time_static.deployment.id, "-2160h"))},toDateTime=${urlencode(time_static.deployment.id)})",
-        "/v1.0/users/${var.example_msft_user_guid}/onlineMeetings"
+        "/v1.0/users/${var.example_msft_user_guid}/onlineMeetings?\$filter=JoinWebUrl eq '${var.msft_teams_example_online_meeting_join_url}'"
       ]
       external_todo : <<EOT
 To enable the connector, you need to allow permissions on the application created for reading OnlineMeetings. You will need Powershell for this.

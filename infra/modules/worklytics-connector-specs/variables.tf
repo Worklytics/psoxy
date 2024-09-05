@@ -69,6 +69,12 @@ variable "msft_teams_example_call_record_guid" {
   default     = "{EXAMPLE_MSFT_TEAMS_CALL_RECORD_GUID}"
 }
 
+variable "msft_teams_example_online_meeting_join_url" {
+  type        = string
+  description = "example of an URL to join into an OnlineMeeting for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_TEAMS_ONLINE_MEETING_URL}"
+}
+
 variable "salesforce_domain" {
   type        = string
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"

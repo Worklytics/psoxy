@@ -14,6 +14,7 @@ module "worklytics_connectors_msft_365" {
   msft_teams_example_chat_guid        = var.msft_teams_example_chat_guid
   msft_teams_example_call_guid        = var.msft_teams_example_call_guid
   msft_teams_example_call_record_guid = var.msft_teams_example_call_record_guid
+    msft_teams_example_online_meeting_join_url = var.msft_teams_example_online_meeting_join_url
   msft_connector_app_object_id        = var.msft_connector_app_object_id
   todos_as_local_files                = var.todos_as_local_files
   todo_step                           = 1

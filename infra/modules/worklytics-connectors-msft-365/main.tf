@@ -19,6 +19,7 @@ module "worklytics_connector_specs" {
   msft_teams_example_chat_guid        = var.msft_teams_example_chat_guid
   msft_teams_example_call_guid        = var.msft_teams_example_call_guid
   msft_teams_example_call_record_guid = var.msft_teams_example_call_record_guid
+  msft_teams_example_online_meeting_join_url = var.msft_teams_example_online_meeting_join_url
 }
 
 locals {
