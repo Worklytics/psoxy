@@ -15,10 +15,7 @@ import com.jayway.jsonpath.JsonPathException;
 import com.jayway.jsonpath.MapFunction;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Value;
+import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -48,6 +45,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
     @Inject
     UrlSafeTokenPseudonymEncoder encoder;
 
+    @Setter(onMethod_ = @VisibleForTesting)
     RecordRules rules;
 
     @AssistedInject
