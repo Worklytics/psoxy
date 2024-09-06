@@ -1410,6 +1410,23 @@ EOT
       }
       example_file = "docs/sources/hris/hris-example.csv"
     }
+    "metrics" = {
+      source_kind               = "metrics"
+      availability              = "beta"
+      enable_by_default         = false
+      worklytics_connector_id   = "bulk-import-psoxy",
+      worklytics_connector_name = "Bulk Data Import via Psoxy"
+      rules = {
+        columnsToPseudonymize = [
+          "EMPLOYEE_ID", # primary key
+          # "employee_email", # if exists
+        ]
+      }
+      settings_to_provide = {
+        "Parser" = "metrics"
+      }
+      example_file = "docs/sources/metrics/metrics-example.csv"
+    }
     "survey" = {
       worklytics_connector_id   = "survey-import-psoxy"
       availability              = "ga"
