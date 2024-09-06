@@ -31,6 +31,8 @@ endpoints:
       E|\\QNo Meetings Block\\E|\\QNo Meetings\\E|\\QNo Meeting\\E)"
           - "(?i)(\\QPrep Time Block\\E|\\QPrep Time\\E|\\QPrep:\\E|\\QPrep \\E|\\QPrepare\
       \ \\E)"
+          - "(?i)(\\QOOO\\E|\\QOOO:\\E|\\QOut of Office\\E|\\QOut of Office:\\E|\\QOut of\
+      \ the Office\\E|\\QOut of the Office:\\E)"
       - !<filterTokenByRegex>
         jsonPaths:
           - "$.items[*].description"
@@ -62,6 +64,8 @@ endpoints:
       E|\\QNo Meetings Block\\E|\\QNo Meetings\\E|\\QNo Meeting\\E)"
           - "(?i)(\\QPrep Time Block\\E|\\QPrep Time\\E|\\QPrep:\\E|\\QPrep \\E|\\QPrepare\
       \ \\E)"
+          - "(?i)(\\QOOO\\E|\\QOOO:\\E|\\QOut of Office\\E|\\QOut of Office:\\E|\\QOut of\
+      \ the Office\\E|\\QOut of the Office:\\E)"
       - !<filterTokenByRegex>
         jsonPaths:
           - "$.description"
