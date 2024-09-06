@@ -13,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CalendarTest {
 
-    Pattern pattern = Pattern.compile(Calendar.PRESERVE_FOCUS_TIME_BLOCK_SNIPPETS_PATTERN);
+    Pattern pattern = Pattern.compile(
+        Calendar.toCaseInsensitiveMultiPattern(Calendar.FOCUS_TIME_BLOCK_SNIPPETS));
 
     RESTApiSanitizerImpl restApiSanitizer = new RESTApiSanitizerImpl(null, null);
 
