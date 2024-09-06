@@ -48,7 +48,7 @@ Tips:
 
 Further guidance on proxy testing:
 
-[https://docs.worklytics.co/psoxy/guides/testing](guides/testing.md)
+[https://docs.worklytics.co/psoxy/guides/testing](testing.md)
 
 ## 4 Authorize Worklytics to Access Sanitized Data
 
