@@ -94,7 +94,6 @@ public class StorageHandler {
         public String getMetaDataKey() {
             return META_DATA_KEY_PREFIX + name().replace("_", "-").toLowerCase();
         }
-
     }
 
 
@@ -187,7 +186,7 @@ public class StorageHandler {
             BulkMetaData.INSTANCE_ID.getMetaDataKey(), hostEnvironment.getInstanceId(),
             BulkMetaData.VERSION.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.BUNDLE_FILENAME).orElse("unknown"),
             BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), sourceBucket + "/" + sourceKey,
-            BulkMetaData.RULES_HASH, config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES).map(DigestUtils::sha1Hex).orElse("unknown")
+            BulkMetaData.RULES_SHA.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES).map(DigestUtils::sha1Hex).orElse("unknown")
         );
     }
 
