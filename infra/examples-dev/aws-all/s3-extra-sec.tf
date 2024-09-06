@@ -1,8 +1,8 @@
 
 locals {
   buckets_to_secure = merge(
-    { for k, v in module.psoxy.bulk_connector_instances: "${k}_input" => v.input_bucket } ,
-    { for k, v in module.psoxy.bulk_connector_instances: "${k}_sanitized" => v.sanitized_bucket } ,
+    { for k, v in module.psoxy.bulk_connector_instances : "${k}_input" => v.input_bucket },
+    { for k, v in module.psoxy.bulk_connector_instances : "${k}_sanitized" => v.sanitized_bucket },
     module.psoxy.lookup_output_buckets,
   )
 }
