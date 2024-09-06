@@ -65,9 +65,12 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
 
         String sanitized = sanitize(endpoint, jsonResponse);
         assertRedacted(sanitized,
-                "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#chats",
+                "@odata.context",
+                "https://graph.microsoft.com/v1.0/$metadata#chats",
+                "48d31887-5fad-4d73-a9f5-3c356e68a038",
                 "@odata.count"
         );
+
         assertUrlWithSubResourcesBlocked(endpoint);
     }
 
@@ -170,9 +173,34 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
     @Test
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX)
     public void communications_callRecords() {
+        String endpoint = "https://graph.microsoft.com/" + "v1.0" + "/communications/callRecords";
+        String jsonResponse = asJson("Communications_callRecords_" + "v1.0" + ".json");
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertPseudonymized(sanitized, "821809f5-0000-0000-0000-3b5136c0e777");
+        assertRedacted(sanitized,
+                "@odata.context", "https://graph.microsoft.com/v1.0/$metadata#communications/callRecords(sessions(segments()))/$entity",
+                "@odata.type", "#microsoft.graph.callRecords.participantEndpoint",
+                "#microsoft.graph.callRecords.clientUserAgent",
+                "#microsoft.graph.identitySet",
+                "+5564981205182",
+                "#microsoft.graph.callRecords.participantEndpoint",
+                "#microsoft.graph.callRecords.clientUserAgent"
+        );
+
+        Collection<String> oDataUrl = Arrays.asList(
+                "https://graph.microsoft.com/v1.0/$metadata#communications/callRecords('e523d2ed-2966-4b6b-925b-754a88034cc5')/sessions?$expand=segments&$skiptoken=abc"
+        );
+
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @Test
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX)
+    public void communications_callRecord() {
         String callChainId = "2f1a1100-b174-40a0-aba7-0b405e01ed92";
         String endpoint = "https://graph.microsoft.com/" + "v1.0" + "/communications/callRecords/" + callChainId;
-        String jsonResponse = asJson("Communications_callRecords_" + "v1.0" + ".json");
+        String jsonResponse = asJson("Communications_callRecord_" + "v1.0" + ".json");
 
         String sanitized = sanitize(endpoint, jsonResponse);
         assertPseudonymized(sanitized, "821809f5-0000-0000-0000-3b5136c0e777", "f69e2c00-0000-0000-0000-185e5f5f5d8a");
@@ -296,11 +324,13 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
                 InvocationExample.of(baseEndpoint + "/teams", "Teams_" + "v1.0" + ".json"),
                 InvocationExample.of(baseEndpoint + "/teams/893075dd-2487-4122-925f-022c42e20265/allChannels", "Teams_allChannels_" + "v1.0" + ".json"),
                 InvocationExample.of(baseEndpoint + "/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/chats", "Users_chats_" + "v1.0" + ".json"),
+                InvocationExample.of(baseEndpoint + "/users/p~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpDRcddGnKI4QDKyjQI9KtjJZDb8FZ27UE_toS68FyWz7Y22fnQYLP91SHJGVwQiN3E/chats?$expand=lastMessagePreview&$skiptoken=1.kscDYs0BDcYAAAEP8D2BqlByb3BlcnRpZXOCqVN5bmNTdGF0ZdnkZXlKa1pXeHBkbVZ5WldSVFpXZHRaVzUwY3lJNlczc2ljM1JoY25RaU9pSXlNREkwTFRBBADwrnhWREV3T2pBNE9qQTNMamsxTVNzd01Eb3dNQ0lzSW1WdVpDSTZJakl3TWpRdE1EZ3RNRFZVTURJNk1UVTZNVGd1TVRFck1EQTZNREFpZlYwc0lucGxjbTlNVFZOVVJHVnNhWFpsY21Wa1UyVm5iV1Z1ZEhNaU9sdGRMQ0p6YjNKMFQzSmtaWElpT2pBc0ltbHVZMngxWkdWYVpYSnZURTFUVkNJNlptRnNjMlY5rExhc3RQYWdlU2l6ZaIyMA%3d%3d", "Users_chats_" + "v1.0" + ".json"),
                 InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages", "Teams_channels_messages_" + "v1.0" + ".json"),
                 InvocationExample.of(baseEndpoint + "/teams/fbe2bf47-16c8-47cf-b4a5-4b9b187c508b/channels/19:4a95f7d8db4c4e7fae857bcebe0623e6@thread.tacv2/messages/delta", "Teams_channels_messages_delta_" + "v1.0" + ".json"),
                 InvocationExample.of(baseEndpoint + "/chats/p~bWr_bA0wnI4CDi2z8MuXG2vEmijbgJ9-MX1hsrnF20ik1FwGIGIQ_uMj2B_4LQV7U7F8XPs4Nx_URHgdx-pukZu2Hb6QzmB24IBvBInSdwA/messages", "Chats_messages_" + "v1.0" + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92", "Communications_calls_" + "v1.0" + ".json"),
-                InvocationExample.of(baseEndpoint + "/communications/callRecords/2f1a1100-b174-40a0-aba7-0b405e01ed92?$expand=sessions($expand=segments)", "Communications_callRecords_" + "v1.0" + ".json"),
+                InvocationExample.of(baseEndpoint + "/communications/callRecords?$expand=sessions($expand=segments)", "Communications_callRecords_" + "v1.0" + ".json"),
+                InvocationExample.of(baseEndpoint + "/communications/callRecords/2f1a1100-b174-40a0-aba7-0b405e01ed92?$expand=sessions($expand=segments)", "Communications_callRecord_" + "v1.0" + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getDirectRoutingCalls_" + "v1.0" + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getPstnCalls_" + "v1.0" + ".json"),
                 InvocationExample.of(baseEndpoint + "/users/p~JuB1uFI_rtVS0Ygtc3m4uxhEiLI-6vn5ySKma20etlGvAJvlFOlnYuRejZSdIm5tmHzio-TdKzazWRwL50vNeFravJETR0l1WAvE219Jwug/onlineMeetings", "Users_onlineMeetings_" + "v1.0" + ".json"),
