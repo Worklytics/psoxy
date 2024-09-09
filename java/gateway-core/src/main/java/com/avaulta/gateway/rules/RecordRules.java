@@ -31,6 +31,7 @@ public class RecordRules implements BulkDataRules {
      *
      */
     public enum Format {
+        NDJSON_RELAXED,
         NDJSON,
         CSV,
         ;

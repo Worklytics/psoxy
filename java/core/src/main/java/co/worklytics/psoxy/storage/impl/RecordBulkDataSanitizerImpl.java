@@ -9,10 +9,7 @@ import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.RecordRules;
 import com.avaulta.gateway.rules.transforms.RecordTransform;
 import com.google.common.annotations.VisibleForTesting;
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.JsonPathException;
-import com.jayway.jsonpath.MapFunction;
+import com.jayway.jsonpath.*;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.*;
@@ -70,7 +67,9 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                 .collect(Collectors.toList());
 
         if (rules.getFormat() == RecordRules.Format.NDJSON) {
-            sanitizeNdjson(reader, writer, compiledTransforms);
+            sanitizeNdjson(reader, writer, compiledTransforms, true);
+        } else if (rules.getFormat() == RecordRules.Format.NDJSON_RELAXED) {
+            sanitizeNdjson(reader, writer, compiledTransforms, false);
         } else if (rules.getFormat() == RecordRules.Format.CSV) {
             sanitizeCsv(reader, writer, compiledTransforms);
         } else {
@@ -119,7 +118,9 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
     @VisibleForTesting
     void sanitizeNdjson(@NonNull Reader reader,
                         @NonNull Writer writer,
-                        @NonNull List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms) throws IOException {
+                        @NonNull List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms,
+                        boolean strict
+                        ) throws IOException {
         try (BufferedReader bufferedReader = new BufferedReader(reader)) {
             String line;
             while ((line = StringUtils.trimToNull(bufferedReader.readLine())) != null) {
@@ -127,7 +128,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                 Object document = jsonConfiguration.jsonProvider().parse(line);
 
                 try {
-                    document = applyTransforms(document, compiledTransforms);
+                    document = applyTransforms(document, compiledTransforms, strict);
                     writer.append(jsonConfiguration.jsonProvider().toJson(document));
                     writer.append('\n'); // NDJSON uses newlines between records
                     writer.flush(); //after each line
@@ -138,9 +139,8 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
         }
     }
 
-
     /**
-     * Apply the compiled transforms to the document
+     * Apply the compiled transforms to the document, strict mode
      *
      * @param document JSON "document object"
      * @param compiledTransforms ordered list of compiled transforms
@@ -148,12 +148,38 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
      * @throws UnmatchedPseudonymization if a pseudonymization transform should be applied, but nothing matches the path
      */
     LinkedHashMap applyTransforms(Object document, List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
+        throws UnmatchedPseudonymization {
+        return applyTransforms(document, compiledTransforms, true);
+    }
+
+    /**
+     * Apply the compiled transforms to the document
+     *
+     * @param document JSON "document object"
+     * @param compiledTransforms ordered list of compiled transforms
+     * @param strict if true, throw an exception if a pseudonymization transform should be applied, but nothing matches the path
+     * @return the transformed document
+     * @throws UnmatchedPseudonymization if a pseudonymization transform should be applied, but nothing matches the path
+     */
+    LinkedHashMap applyTransforms(Object document, List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms, boolean strict)
             throws UnmatchedPseudonymization {
         for (Triple<JsonPath, RecordTransform, MapFunction> compiledTransform : compiledTransforms) {
             if (compiledTransform.getMiddle() instanceof RecordTransform.Pseudonymize) {
-                Object matches = compiledTransform.getLeft().read(document);
-                if (matches == null) {
-                    throw new UnmatchedPseudonymization(compiledTransform.getMiddle().getPath());
+                try {
+                    Object matches = compiledTransform.getLeft().read(document);
+                    if (matches == null) {
+                        if (strict) {
+                            throw new UnmatchedPseudonymization(compiledTransform.getMiddle().getPath());
+                        } else {
+                            log.warning("Skipping pseudonymization transform, check for PII leaks: " + compiledTransform.getMiddle().getPath());
+                        }
+                    }
+                } catch (PathNotFoundException e) {
+                    if (strict) {
+                        throw new UnmatchedPseudonymization(compiledTransform.getMiddle().getPath());
+                    } else {
+                        log.warning("Skipping pseudonymization transform, check for PII leaks: " + compiledTransform.getMiddle().getPath());
+                    }
                 }
             }
 

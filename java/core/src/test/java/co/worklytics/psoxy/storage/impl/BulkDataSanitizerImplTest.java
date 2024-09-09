@@ -858,7 +858,6 @@ public class BulkDataSanitizerImplTest {
             "    format: \"NDJSON\"\n" +
             "    transforms:\n" +
             "      - pseudonymize: \"$.id\"\n" +
-           // "      - pseudonymize: \"$.email\"\n" +
             "      - pseudonymize: \"$.profile.email\"\n" +
             "      - redact: \"$.['name','real_name']\"\n" +
             "      - redact: \"$.profile.['title','phone','skype','first_name','last_name','real_name','real_name_normalized','display_name','display_name_normalized']\"\n" +
@@ -876,6 +875,40 @@ public class BulkDataSanitizerImplTest {
             .build());
 
         try (StringReader in = new StringReader(SOURCE);
+             StringWriter out = new StringWriter()) {
+            recordBulkDataSanitizerImpl.sanitize(in, out, defaultPseudonymizer);
+            System.out.println(out.toString());
+        }
+    }
+
+    @Test
+    @SneakyThrows
+    void slack_bulk_users_relaxed() {
+
+        final String SOURCE_NO_ID = "{\"team_id\":\"T3344494SV\",\"name\":\"John\",\"deleted\":false,\"color\":\"9f69e7\",\"real_name\":\"John Doe\",\"tz\":\"America/Los_Angeles\",\"tz_label\":\"Pacific Daylight Time\",\"tz_offset\":-25200,\"profile\":{\"title\":\"Worklytics Team\",\"phone\":\"\",\"skype\":\"\",\"real_name\":\"John Doe\",\"real_name_normalized\":\"John Doe\",\"display_name\":\"John\",\"display_name_normalized\":\"John\",\"fields\":{\"Xf03RRBR91T9\":{\"value\":\"Worklytics Team\",\"alt\":\"\"}},\"status_text\":\"\",\"status_emoji\":\"\",\"status_emoji_display_info\":[],\"status_expiration\":0,\"avatar_hash\":\"efd5ea50c8bb\",\"image_original\":\"https://avatars.slack-edge.com/2023-11-20/aaaaaaaaa_original.jpg\",\"is_custom_image\":true,\"email\":\"John@worklytics.co\",\"huddle_state\":\"default_unset\",\"huddle_state_expiration_ts\":0,\"first_name\":\"John\",\"last_name\":\"Doe\",\"image_24\":\"https://avatars.slack-edge.com/2023-11-20/aaaa_24.jpg\",\"image_32\":\"https://avatars.slack-edge.com/2023-11-20/aaaa_32.jpg\",\"image_48\":\"https://avatars.slack-edge.com/2023-11-20/aaaa_48.jpg\",\"image_72\":\"https://avatars.slack-edge.com/2023-11-20/aaaa_72.jpg\",\"image_192\":\"https://avatars.slack-edge.com/2023-11-20/aaaa_192.jpg\",\"image_512\":\"https://avatars.slack-edge.com/2023-11-20/aaaa_512.jpg\",\"image_1024\":\"https://avatars.slack-edge.com/2023-11-20/aaaa_1024.jpg\",\"status_text_canonical\":\"\",\"team\":\"T06FG94SV\"},\"is_admin\":true,\"is_owner\":true,\"is_primary_owner\":false,\"is_restricted\":false,\"is_ultra_restricted\":false,\"is_bot\":false,\"is_app_user\":false,\"updated\":1725565047,\"is_email_confirmed\":true,\"who_can_share_contact_card\":\"EVERYONE\"}";
+
+        MultiTypeBulkDataRules rules = (MultiTypeBulkDataRules) rulesUtils.parse("fileRules:\n" +
+            "  /worklytics_slack/slack_data_export-{week}/users.json.gz:\n" +
+            "    format: \"NDJSON_RELAXED\"\n" +
+            "    transforms:\n" +
+            "      - pseudonymize: \"$.id\"\n" +
+            "      - pseudonymize: \"$.profile.email\"\n" +
+            "      - redact: \"$.['name','real_name']\"\n" +
+            "      - redact: \"$.profile.['title','phone','skype','first_name','last_name','real_name','real_name_normalized','display_name','display_name_normalized']\"\n" +
+            "      - redact: \"$.profile.['fields','pronouns','status_text','status_emoji','status_emoji_display_info','status_expiration','avatar_hash']\"\n" +
+            "      - redact: \"$.profile.['image_original','is_custom_image','image_24','image_32','image_48','image_72','image_192','image_512','image_1024','status_text_canonical']\"");
+
+        RecordRules recordRules = (RecordRules) rules.getFileRules().get("/worklytics_slack/slack_data_export-{week}/users.json.gz");
+        recordBulkDataSanitizerImpl = recordBulkDataSanitizerImplFactory.create(recordRules);
+        //recordBulkDataSanitizerImpl.rules = recordRules;
+
+        Pseudonymizer defaultPseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+            .pseudonymizationSalt("salt")
+            .defaultScopeId("hris")
+            .pseudonymImplementation(PseudonymImplementation.DEFAULT)
+            .build());
+
+        try (StringReader in = new StringReader(SOURCE_NO_ID);
              StringWriter out = new StringWriter()) {
             recordBulkDataSanitizerImpl.sanitize(in, out, defaultPseudonymizer);
             System.out.println(out.toString());
