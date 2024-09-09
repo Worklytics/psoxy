@@ -50,6 +50,7 @@ async function testAWS(options, logger) {
     throw new Error('Unable to upload file', { cause: uploadResult });
   }
   logger.success('File uploaded');
+  logger.verbose('Upload result:', { additional: uploadResult });
 
   const parsedBucketOutputOption = parseBucketOption(options.output)
   const outputBucket = parsedBucketOutputOption.bucket;
