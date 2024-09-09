@@ -847,6 +847,7 @@ public class BulkDataSanitizerImplTest {
         }
     }
 
+
     @Test
     @SneakyThrows
     void slack_bulk_users() {

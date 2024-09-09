@@ -56,6 +56,12 @@ variable "msft_teams_example_call_record_guid" {
   default     = "{EXAMPLE_MSFT_TEAMS_CALL_RECORD_GUID}"
 }
 
+variable "msft_teams_example_online_meeting_join_url" {
+  type        = string
+  description = "example of an URL to join into an OnlineMeeting for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_TEAMS_ONLINE_MEETING_URL}"
+}
+
 variable "msft_owners_email" {
   type        = set(string)
   description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user. Ignored if `existing_app_object_id` provided."
