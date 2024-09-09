@@ -23,6 +23,7 @@ import {
 } from '@aws-sdk/client-cloudwatch-logs';
 import fs from 'fs';
 import getLogger from './logger.js';
+import path from 'path';
 import _ from 'lodash';
 import zlib from 'node:zlib';
 
@@ -246,6 +247,10 @@ async function upload(bucket, key, file, options, client) {
     commandOptions.ContentEncoding = 'gzip';
   }
 
+  if(path.extname(key)?.toLowerCase() === '.csv') {
+    commandOptions.ContentType = 'text/csv';
+  }
+
   return await client.send(new PutObjectCommand(commandOptions));
 }
 
@@ -270,6 +275,9 @@ async function upload(bucket, key, file, options, client) {
  * @param {number} options.attempts - max number of download attempts
  * @param {S3Client} client
  * @param {Object} logger - winston instance
+ * @returns {Object} downloadResponse
+ * @returns {Object} downloadResponse.content - stream
+ * @returns {Object} downloadResponse.metadata - object metadata
  */
 async function download(bucket, key, destination, options, client, logger) {
   if (!client) {
@@ -280,6 +288,7 @@ async function download(bucket, key, destination, options, client, logger) {
       Bucket: bucket,
       Key: key,
     }));
+
   const onErrorStop = (error) => {
     return error.Code !== 'NoSuchKey'
   };
@@ -302,6 +311,22 @@ async function download(bucket, key, destination, options, client, logger) {
       .on('error', err => reject(err))
       .on('close', () => resolve())
   })
+
+  return {
+    content: downloadResponse.Body,
+    metadata: {
+      "ChecksumCRC32": downloadResponse?.ChecksumCRC32,
+      "ChecksumCRC32C": downloadResponse?.ChecksumCRC32C,
+      "ChecksumSHA1": downloadResponse?.ChecksumSHA1,
+      "ChecksumSHA256": downloadResponse?.ChecksumSHA256,
+      "ContentEncoding": downloadResponse?.ContentEncoding,
+      "ContentLength": downloadResponse?.ContentLength,
+      "ContentType": downloadResponse?.ContentType,
+      "ETag": downloadResponse?.ETag,
+      "LastModified": downloadResponse?.LastModified,
+      ...downloadResponse?.Metadata
+    },
+  };
 }
 
 /**
