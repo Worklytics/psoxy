@@ -55,7 +55,7 @@ Further guidance on proxy testing:
 *can be completed without call; but Worklytics can assist if desired*
 
 Authorize Worklytics to invoke API connectors and access sanitized bulk data:
-  1. obtain service account ID of your tenant from Worklytics (via Worklytics web portal)
+  1. obtain service account ID of your tenant from Worklytics (via [Worklytics web portal](https://app.worklytics.co/analytics/integrations/configuration))
   2. configure it in your `terraform.tfvars` file (details below)
   3. run `terraform apply` again to update IAM policy to reflect the change
 
