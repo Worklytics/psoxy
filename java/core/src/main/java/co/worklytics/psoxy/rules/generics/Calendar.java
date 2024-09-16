@@ -107,7 +107,15 @@ public class Calendar {
         "problem solving",
         "retro",
         "review",
-        "sprint"
+        "sprint",
+
+        //extra
+        "decisionmaking",
+        "fon",
+        "nerd",
+        "game",
+        "gaming",
+        "informationsharing"
     );
 
     public static final Transform.RedactExceptSubstringsMatchingRegexes PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS =
