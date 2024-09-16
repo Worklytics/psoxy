@@ -2,6 +2,7 @@ package co.worklytics.psoxy.rules.generics;
 
 import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
 import com.jayway.jsonpath.Configuration;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -49,14 +50,25 @@ class CalendarTest {
     }
 
     @CsvSource(value = {
+        "OOO,OOO",
+        "OOO: Vacation,OOO: ",
+        "OOO Conference,OOO ",
+        "Out of Office,Out of Office",
+        "Out of the Office: Vacation,Out of the Office: ",
         "Focus Time,Focus Time",
         "Secret Project Focus Time,Focus Time",
         "Focus Time Block,Focus Time Block",
-        "Focus: Secret Project,Focus:",
-        "No Meeting Wednesday,No Meeting",
+        "Focus: Secret Project,Focus: ",
+        "No Meeting Wednesday,No Meeting ",
         " No Meetings,No Meetings",
         "Prep Time,Prep Time",
-        "Prep Customer Meeting,Prep "
+        "Prep Customer Meeting,Prep ",
+        "Prep: Customer,Prep: ",
+
+        // extended cases
+        "Team weekly,weekly",
+        "Team lunch,lunch",
+        "Teem monthly,monthly"
     },
         ignoreLeadingAndTrailingWhitespace = false
     )
@@ -67,4 +79,27 @@ class CalendarTest {
                 .map(input, Configuration.defaultConfiguration()));
 
     }
+
+    @ValueSource(strings = {
+      "Prepended Time",
+      "prepaid planning meeting",
+    })
+    @ParameterizedTest
+    public void transformDrops(String input) {
+        assertEquals("",
+            restApiSanitizer.getTransformImpl(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS)
+                .map(input, Configuration.defaultConfiguration()));
+    }
+
+    @Test
+    public void extendedCases_self() {
+        String pattern = Calendar.toCaseInsensitiveMultiPattern(Calendar.EXTENDED_MEETING_TITLE_TOKENS);
+        for (String token : Calendar.EXTENDED_MEETING_TITLE_TOKENS) {
+            assertEquals(token,
+                restApiSanitizer.getTransformImpl(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS)
+                    .map(token, Configuration.defaultConfiguration()));
+        }
+
+    }
+
 }
