@@ -41,10 +41,9 @@ endpoints:
       E|\\Qdaily\\E)[\\s:]*\\b"
           - "(?i)\\b(\\Qteam meeting\\E|\\Qone-on-one\\E|\\Qall-hands\\E|\\Qall hands\\\
       E|\\Qallhands\\E|\\Q1-on-1\\E|\\Q1:1\\E)[\\s:]*\\b"
-          - "(?i)\\b(\\Qinformation sharing\\E|\\Qinformationsharing\\E|\\Qdecision making\\\
-      E|\\Qproblem solving\\E|\\Qdecisionmaking\\E|\\Qdecision\\E|\\Qhand off\\E|\\\
-      Qhand-off\\E|\\Qhandover\\E|\\Qhandoff\\E|\\Qreview\\E|\\Qsprint\\E|\\Qgaming\\\
-      E|\\Qretro\\E|\\Qnerd\\E|\\Qgame\\E|\\Qfon\\E)[\\s:]*\\b"
+          - "(?i)\\b(\\Qinformation sharing\\E|\\Qdecision making\\E|\\Qproblem solving\\\
+      E|\\Qdecision\\E|\\Qhand off\\E|\\Qhand-off\\E|\\Qhandover\\E|\\Qhandoff\\E|\\\
+      Qreview\\E|\\Qsprint\\E|\\Qretro\\E)[\\s:]*\\b"
       - !<filterTokenByRegex>
         jsonPaths:
           - "$.items[*].description"
@@ -86,10 +85,9 @@ endpoints:
       E|\\Qdaily\\E)[\\s:]*\\b"
           - "(?i)\\b(\\Qteam meeting\\E|\\Qone-on-one\\E|\\Qall-hands\\E|\\Qall hands\\\
       E|\\Qallhands\\E|\\Q1-on-1\\E|\\Q1:1\\E)[\\s:]*\\b"
-          - "(?i)\\b(\\Qinformation sharing\\E|\\Qinformationsharing\\E|\\Qdecision making\\\
-      E|\\Qproblem solving\\E|\\Qdecisionmaking\\E|\\Qdecision\\E|\\Qhand off\\E|\\\
-      Qhand-off\\E|\\Qhandover\\E|\\Qhandoff\\E|\\Qreview\\E|\\Qsprint\\E|\\Qgaming\\\
-      E|\\Qretro\\E|\\Qnerd\\E|\\Qgame\\E|\\Qfon\\E)[\\s:]*\\b"
+          - "(?i)\\b(\\Qinformation sharing\\E|\\Qdecision making\\E|\\Qproblem solving\\\
+      E|\\Qdecision\\E|\\Qhand off\\E|\\Qhand-off\\E|\\Qhandover\\E|\\Qhandoff\\E|\\\
+      Qreview\\E|\\Qsprint\\E|\\Qretro\\E)[\\s:]*\\b"
       - !<filterTokenByRegex>
         jsonPaths:
           - "$.description"
