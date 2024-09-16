@@ -9,8 +9,7 @@ import java.util.stream.Collectors;
 
 
 // so the real behavior we want is effectively a simple classifier, rather than to redact?
-// Weekly Sprint Planning - in theory we want to allow all of that; but would be OK to tokenize and
-// then do any permutati
+// "Weekly Sprint Planning" - in theory we want to allow all of that
 public class Calendar {
 
     /**
