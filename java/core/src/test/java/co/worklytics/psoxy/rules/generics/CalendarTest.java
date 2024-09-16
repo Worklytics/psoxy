@@ -7,6 +7,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -92,14 +94,29 @@ class CalendarTest {
     }
 
     @Test
-    public void extendedCases_self() {
-        String pattern = Calendar.toCaseInsensitiveMultiPattern(Calendar.EXTENDED_MEETING_TITLE_TOKENS);
-        for (String token : Calendar.EXTENDED_MEETING_TITLE_TOKENS) {
-            assertEquals(token,
-                restApiSanitizer.getTransformImpl(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS)
-                    .map(token, Configuration.defaultConfiguration()));
-        }
+    public void biweekly() {
+        assertEquals("bi-weekly",
+            restApiSanitizer.getTransformImpl(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS)
+                .map("bi-weekly", Configuration.defaultConfiguration()));
+    }
 
+    @Test
+    public void extendedCases_self() {
+
+        for (List<String> set : Arrays.asList(
+            Calendar.FOCUS_TIME_BLOCK_SNIPPETS,
+            Calendar.PREP_TIME_BLOCK_TITLE_SNIPPETS,
+            Calendar.OOO_TITLE_SNIPPETS,
+            Calendar.FREQUENCY_TITLE_SNIPPETS,
+            Calendar.AUDIENCE_TITLE_SNIPPETS,
+            Calendar.TOPICAL_TITLE_SNIPPETS
+        )) {
+            for (String token : set) {
+                assertEquals(token,
+                    restApiSanitizer.getTransformImpl(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS)
+                        .map(token, Configuration.defaultConfiguration()));
+            }
+        }
     }
 
 }
