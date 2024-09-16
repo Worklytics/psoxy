@@ -142,8 +142,8 @@ endpoints:
           - "(?i)\\b(\\Qteam meeting\\E|\\Qone-on-one\\E|\\Qall-hands\\E|\\Qall hands\\\
       E|\\Qallhands\\E|\\Q1-on-1\\E|\\Q1:1\\E)[\\s:]*\\b"
           - "(?i)\\b(\\Qinformation sharing\\E|\\Qdecision making\\E|\\Qproblem solving\\\
-      E|\\Qhand off\\E|\\Qhand-off\\E|\\Qhandover\\E|\\Qhandoff\\E|\\Qreview\\E|\\\
-      Qsprint\\E|\\Qretro\\E)[\\s:]*\\b"
+      E|\\Qdecision\\E|\\Qhand off\\E|\\Qhand-off\\E|\\Qhandover\\E|\\Qhandoff\\E|\\\
+      Qreview\\E|\\Qsprint\\E|\\Qretro\\E)[\\s:]*\\b"
       - !<redact>
         jsonPaths:
           - "$..reminderMinutesBeforeStart"

@@ -98,6 +98,7 @@ public class Calendar {
 
     public static final List<String> TOPICAL_TITLE_SNIPPETS = Arrays.asList(
         "decision making",
+        "decision",
         "hand off",
         "hand-off",
         "handoff",
