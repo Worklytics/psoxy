@@ -52,3 +52,9 @@ variable "msft_teams_example_call_record_guid" {
   description = "example of MSFT Id (GUID) of a Teams Call Record for test API calls (OPTIONAL)"
   default     = "{EXAMPLE_MSFT_TEAMS_CALL_RECORD_GUID}"
 }
+
+variable "msft_teams_example_online_meeting_join_url" {
+  type        = string
+  description = "example of an URL to join into an OnlineMeeting for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_TEAMS_ONLINE_MEETING_URL}"
+}

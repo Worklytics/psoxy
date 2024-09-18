@@ -28,6 +28,7 @@
   * [Implementation](guides/implementation.md)
   * [Terraform Cloud / Enterprise](guides/terraform-cloud.md)
   * [Testing](guides/testing.md)
+  * [Test tool](guides/psoxy-test-tool.md)
   * [Deployment Migration](guides/deployment-migration.md)
   * [Upgrade Proxy Versions](guides/upgrading-versions.md)
   * [Cleaning Up](guides/cleaning-up.md)

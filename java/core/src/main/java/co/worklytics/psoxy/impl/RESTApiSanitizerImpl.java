@@ -52,6 +52,7 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
@@ -323,7 +324,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     MapFunction getRedactExceptSubstringsMatchingRegexes(Transform.RedactExceptSubstringsMatchingRegexes transform) {
         List<Pattern> patterns = transform.getExceptions().stream()
-                .map(p -> ".*(" + p + ").*") //wrap in .* to match anywhere in the string
+                .map(p -> ".*?(" + p + ").*?") //wrap in .*? to match anywhere in the string, but reluctantly
                 .map(Pattern::compile).collect(Collectors.toList());
         return (s, jsonConfiguration) -> {
             if (!(s instanceof String)) {
@@ -337,12 +338,14 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 return patterns.stream()
                         .map(p -> p.matcher((String) s))
                         .filter(Matcher::matches)
+                        .map(m -> m.group(1)) //group 1, bc we created caputuring group in regex above
+                        .sorted((a, b) -> Integer.compare(b.length(), a.length())) // longest first
                         .findFirst()
-                        .map(m -> m.group(1))
                         .orElse("");
             }
         };
     }
+
 
     MapFunction getFilterTokenByRegex(Transform.FilterTokenByRegex transform) {
         List<java.util.function.Predicate<String>> patterns =

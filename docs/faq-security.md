@@ -9,8 +9,14 @@ to perform santization generally across many fields and endpoints.
 
 ## Can Psoxy invocation be locked to a set of known IP addresses?
 
-No, but this is not necessary, as requests from your Worklytics tenant to your Psoxy instances are
-authenticated via identity federation (OIDC) and authorized by your Cloud providers IAM policies.
+Yes, but only to a broad set of IP blocks that are not exclusive to your Worklytics tenant. As
+requests from your Worklytics tenant to your Psoxy instances are authenticated via identity
+federation (OIDC) and authorized by your Cloud providers IAM policies, IP-based restrictions are not
+necessary.
+
+If you take this approach, you will be responsible for updating your IP restrictions frequently as
+GCP changes their IP blocks, or your data flow to Worklytics may break. As such, this is not
+officially supported by Worklytics. For an example of how to do this, see [worklytics-ip-blocks](../infra/modules/worklytics-ip-blocks/README.md) module.
 
 Your Worklytics tenant is a process running in GCP, personified by a unique GCP service account. You
 simply use your cloud's IAM to grant that service account access to your psoxy instance.
@@ -28,6 +34,9 @@ that contain PII redacted or pseudonymized.
 See [AWS Authentication and Authorization](aws/authentication-authorization.md) for more details.
 
 See [GCP Authentication and Authorization](gcp/authentication-authorization.md) for more details.
+
+And always remember: an IP is **not** an authenticated identity for a client, and should not be
+relied upon as an authentication mechanism. IPs can be spoofed. It is at best an extra control.
 
 ## Can Psoxy instances be deployed behind an AWS API Gateway?
 

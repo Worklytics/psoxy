@@ -356,7 +356,7 @@ public class PrebuiltSanitizerRules {
         2. Match ID:                        (?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)
         2. Match GraphQL query parameters: (?<queryParameters>\?[a-zA-z0-9\s\$\=\(\)]*)
     */
-    static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX = "^/v1.0/communications/callRecords/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?)(?<queryParameters>[a-zA-z0-9\\s\\$\\=\\?\\(\\)]*)";
+    static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX = "^/v1.0/communications/callRecords(/(?<callChainId>[({]?[a-fA-F0-9]{8}[-]?([a-fA-F0-9]{4}[-]?){3}[a-fA-F0-9]{12}[})]?))?(?<queryParameters>[a-zA-z0-9\\s\\$\\=\\?\\(\\)]*)";
     static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS = "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime={startDate},toDateTime={endDate})";
     static final String MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS = "/v1.0/communications/callRecords/getPstnCalls(fromDateTime={startDate},toDateTime={endDate})";
     static final String MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS = "/v1.0/users/{userId}/onlineMeetings";
@@ -379,35 +379,20 @@ public class PrebuiltSanitizerRules {
 
     static final Transform.Redact MS_TEAMS_USERS_CHATS_REDACT = Transform.Redact.builder()
             .jsonPath("$..topic")
+            .jsonPath("$..['lastMessagePreview@odata.context']")
             .build();
     static final Transform.Redact MS_TEAMS_TEAMS_ALL_CHANNELS_REDACT = Transform.Redact.builder()
             .jsonPath("$..displayName")
             .jsonPath("$..description")
             .build();
 
-    static final Transform.Redact MS_TEAMS_TEAMS_CHANNELS_MESSAGES_REDACT = Transform.Redact.builder()
+    static final Transform.Redact MS_TEAMS_CHATS_MESSAGES_REDACT = Transform.Redact.builder()
             .jsonPath("$..user.displayName")
             .jsonPath("$..body.content")
             .jsonPath("$..attachments")
             .jsonPath("$..mentions[*].mentionText")
             .jsonPath("$..eventDetail.teamDescription")
-            .build();
-
-    static final Transform.Redact MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA_REDACT = Transform.Redact.builder()
-            .jsonPath("$..user.displayName")
-            .jsonPath("$..value[*].body.content")
-            .jsonPath("$..value[*].attachments")
-            .jsonPath("$..value[*].mentions[*].mentionText")
-            .jsonPath("$..value[*].eventDetail.teamDescription")
-            .build();
-
-    static final Transform.Redact MS_TEAMS_CHATS_MESSAGES_REDACT = Transform.Redact.builder()
-            .jsonPath("$..user.displayName")
-            .jsonPath("$..value[*].body.content")
-            .jsonPath("$..value[*].attachments")
-            .jsonPath("$..value[*].mentions[*].mentionText")
-            .jsonPath("$..value[*].eventDetail.teamDescription")
-            .jsonPath("$..value[*].eventDetail.chatDisplayName")
+            .jsonPath("$..eventDetail.chatDisplayName")
             .build();
 
     static final Transform.Redact MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_REDACT = Transform.Redact.builder()
@@ -421,6 +406,11 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..callee.name")
             .jsonPath("$..captureDeviceName")
             .jsonPath("$..renderDeviceName")
+            // organizer_v2.id could contain user id, phone number, etc.
+            .jsonPath("$..organizer_v2.id")
+            .jsonPath("$..participants_v2[*].id")
+            .jsonPath("$..phone")
+            .jsonPath("$..['organizer_v2@odata.context']")
             .build();
 
     static final Transform.Redact MS_TEAMS_COMMUNICATIONS_CALLS_REDACT = Transform.Redact.builder()
@@ -443,6 +433,7 @@ public class PrebuiltSanitizerRules {
     static final Transform.Redact MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT = Transform.Redact.builder()
             .jsonPath("$..displayName")
             .jsonPath("$..subject")
+            .jsonPath("$..joinInformation")
             .jsonPath("$..joinMeetingIdSettings.isPasscodeRequired")
             .jsonPath("$..joinMeetingIdSettings.passcode")
             .build();
@@ -471,6 +462,7 @@ public class PrebuiltSanitizerRules {
             .pathTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_CHATS)
             .allowedQueryParams(List.of("$select", "$top", "$skiptoken", "$filter", "$orderby", "$expand"))
             .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+            .transform(MS_TEAMS_TEAMS_REDACT)
             .build();
 
     static final Endpoint MS_TEAMS_TEAMS_CHANNELS_MESSAGES = Endpoint.builder()
@@ -499,7 +491,7 @@ public class PrebuiltSanitizerRules {
 
     static final Endpoint MS_TEAMS_COMMUNICATIONS_CALL_RECORDS = Endpoint.builder()
             .pathRegex(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX)
-            .allowedQueryParams(List.of("$select", "$expand"))
+            .allowedQueryParams(List.of("$select", "$expand", "$filter"))
             .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
             .build();
 
@@ -557,9 +549,9 @@ public class PrebuiltSanitizerRules {
             .withAdditionalEndpoints(ENTRA_ID_USERS)
             .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS, MS_TEAMS_TEAMS_REDACT)
             .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_ALL_CHANNELS, MS_TEAMS_TEAMS_ALL_CHANNELS_REDACT)
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_CHATS, MS_TEAMS_USERS_CHATS_REDACT)
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES, MS_TEAMS_TEAMS_CHANNELS_MESSAGES_REDACT)
-            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA, MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_USERS_CHATS, MS_TEAMS_USERS_CHATS_REDACT, MS_TEAMS_CHATS_MESSAGES_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES, MS_TEAMS_CHATS_MESSAGES_REDACT)
+            .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA, MS_TEAMS_CHATS_MESSAGES_REDACT)
             .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES, MS_TEAMS_CHATS_MESSAGES_REDACT)
             .withTransformByEndpointTemplate(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS, MS_TEAMS_COMMUNICATIONS_CALLS_REDACT)
             .withTransformByEndpoint(MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX, MS_TEAMS_COMMUNICATIONS_CALL_RECORDS_REDACT)
@@ -598,16 +590,19 @@ public class PrebuiltSanitizerRules {
                                     .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                                     .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
                                     .jsonPaths(PSEUDONYMIZE_USER_ID.getJsonPaths())
-                                    .build()))
+                                    .build(),
+                            // Next link could contain user id + chat id
+                            TOKENIZE_ODATA_LINKS,
+                            MS_TEAMS_CHATS_MESSAGES_REDACT))
                     .build())
             .endpoint(MS_TEAMS_TEAMS_CHANNELS_MESSAGES.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
-                    MS_TEAMS_TEAMS_CHANNELS_MESSAGES_REDACT
+                    MS_TEAMS_CHATS_MESSAGES_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
                             .build())))
             .endpoint(MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA.withTransforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
-                    MS_TEAMS_TEAMS_CHANNELS_MESSAGES_DELTA_REDACT
+                    MS_TEAMS_CHATS_MESSAGES_REDACT
                             .toBuilder()
                             .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                             .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())

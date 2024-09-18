@@ -213,13 +213,13 @@ variable "bulk_connectors" {
     input_bucket_name     = optional(string) # allow override of default bucket name
     sanitized_bucket_name = optional(string) # allow override of default bucket name
     rules = optional(object({
-      pseudonymFormat       = optional(string)
-      columnsToRedact       = optional(list(string), [])
-      columnsToInclude      = optional(list(string), null)
-      columnsToPseudonymize = optional(list(string), [])
+      pseudonymFormat                = optional(string)
+      columnsToRedact                = optional(list(string), [])
+      columnsToInclude               = optional(list(string), null)
+      columnsToPseudonymize          = optional(list(string), [])
       columnsToPseudonymizeIfPresent = optional(list(string), [])
-      columnsToDuplicate    = optional(map(string), {})
-      columnsToRename       = optional(map(string), {})
+      columnsToDuplicate             = optional(map(string), {})
+      columnsToRename                = optional(map(string), {})
       fieldsToTransform = optional(map(object({
         newName    = string
         transforms = optional(list(map(string)), [])
@@ -248,13 +248,13 @@ variable "bulk_sanitized_expiration_days" {
 
 variable "custom_bulk_connector_rules" {
   type = map(object({
-    pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
-    columnsToRedact       = optional(list(string))
-    columnsToInclude      = optional(list(string))
-    columnsToPseudonymize = optional(list(string))
+    pseudonymFormat                = optional(string, "URL_SAFE_TOKEN")
+    columnsToRedact                = optional(list(string))
+    columnsToInclude               = optional(list(string))
+    columnsToPseudonymize          = optional(list(string))
     columnsToPseudonymizeIfPresent = optional(list(string), null)
-    columnsToDuplicate    = optional(map(string))
-    columnsToRename       = optional(map(string))
+    columnsToDuplicate             = optional(map(string))
+    columnsToRename                = optional(map(string))
     fieldsToTransform = optional(map(object({
       newName    = string
       transforms = optional(list(map(string)), [])
