@@ -1415,16 +1415,15 @@ EOT
       source_kind               = "metrics"
       availability              = "beta"
       enable_by_default         = false
-      worklytics_connector_id   = "bulk-import-psoxy",
-      worklytics_connector_name = "Bulk Data Import via Psoxy"
+      worklytics_connector_id   = "metrics-import-psoxy",
+      worklytics_connector_name = "Metrics via Psoxy"
       rules = {
-        columnsToPseudonymize = [
-          "EMPLOYEE_ID", # primary key
-          # "employee_email", # if exists
+        columnsToPseudonymizeIfPresent = [
+          "EMPLOYEE_ID",
+          "EMPLOYEE_EMAIL",
         ]
       }
       settings_to_provide = {
-        "Parser" = "metrics"
       }
       example_file = "docs/sources/metrics/metrics-example.csv"
     }
