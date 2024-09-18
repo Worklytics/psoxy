@@ -11,18 +11,19 @@ locals {
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
-  enabled_connectors                  = var.enabled_connectors
-  msft_tenant_id                      = var.msft_tenant_id
-  example_msft_user_guid              = var.example_msft_user_guid
-  msft_teams_example_team_guid        = var.msft_teams_example_team_guid
-  msft_teams_example_channel_guid     = var.msft_teams_example_channel_guid
-  msft_teams_example_chat_guid        = var.msft_teams_example_chat_guid
-  msft_teams_example_call_guid        = var.msft_teams_example_call_guid
-  msft_teams_example_call_record_guid = var.msft_teams_example_call_record_guid
+  enabled_connectors                         = var.enabled_connectors
+  msft_tenant_id                             = var.msft_tenant_id
+  example_msft_user_guid                     = var.example_msft_user_guid
+  msft_teams_example_team_guid               = var.msft_teams_example_team_guid
+  msft_teams_example_channel_guid            = var.msft_teams_example_channel_guid
+  msft_teams_example_chat_guid               = var.msft_teams_example_chat_guid
+  msft_teams_example_call_guid               = var.msft_teams_example_call_guid
+  msft_teams_example_call_record_guid        = var.msft_teams_example_call_record_guid
+  msft_teams_example_online_meeting_join_url = var.msft_teams_example_online_meeting_join_url
 }
 
 locals {
-  provision_entraid_apps = var.msft_connector_app_object_id == null
+  provision_entraid_apps  = var.msft_connector_app_object_id == null
   connectors_needing_apps = local.provision_entraid_apps ? module.worklytics_connector_specs.enabled_msft_365_connectors : {}
 }
 
@@ -87,10 +88,10 @@ module "msft_365_grant_to_shared" {
   application_id           = data.azuread_application.existing_connector_app[0].client_id
   oauth2_permission_scopes = data.azuread_application.existing_connector_app[0].api[0].oauth2_permission_scopes[*].admin_consent_display_name
   # TODO: this is a list of GUIDs, so not very user-friendly
-  app_roles                = flatten([for id in [ for k, v in data.azuread_application.existing_connector_app[0].required_resource_access[*].resource_access[*] : v[*].id ] : id[*] ])
-  application_name         = data.azuread_application.existing_connector_app[0].display_name
-  todos_as_local_files     = var.todos_as_local_files
-  todo_step                = var.todo_step
+  app_roles            = flatten([for id in [for k, v in data.azuread_application.existing_connector_app[0].required_resource_access[*].resource_access[*] : v[*].id] : id[*]])
+  application_name     = data.azuread_application.existing_connector_app[0].display_name
+  todos_as_local_files = var.todos_as_local_files
+  todo_step            = var.todo_step
 }
 
 
@@ -106,13 +107,13 @@ resource "local_file" "todo-with-external-todo" {
   for_each = local.todos_to_populate
 
   filename = module.msft_365_grants[each.key].filename
-  content  = <<EOT
-${ module.msft_365_grants[each.key].todo}
+  content = <<EOT
+${module.msft_365_grants[each.key].todo}
 ## Setup
 Then, please follow next instructions to complete the setup:
 
 ${replace(each.value.external_token_todo, "%%entraid.client_id%%",
-    try(module.msft_connection[each.key].connector.client_id, data.azuread_application.existing_connector_app[0].client_id))}
+try(module.msft_connection[each.key].connector.client_id, data.azuread_application.existing_connector_app[0].client_id))}
 EOT
 }
 

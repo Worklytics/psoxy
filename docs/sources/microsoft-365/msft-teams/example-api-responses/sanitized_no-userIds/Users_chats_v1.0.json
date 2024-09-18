@@ -1,4 +1,5 @@
 {
+  "@odata.nextLink":"https://graph.microsoft.com/v1.0/users/p~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpDRcddGnKI4QDKyjQI9KtjJZDb8FZ27UE_toS68FyWz7Y22fnQYLP91SHJGVwQiN3E/chats?$expand=lastMessagePreview&$skiptoken=1.kscDYs0BDcYAAAEP8D2BqlByb3BlcnRpZXOCqVN5bmNTdGF0ZdnkZXlKa1pXeHBkbVZ5WldSVFpXZHRaVzUwY3lJNlczc2ljM1JoY25RaU9pSXlNREkwTFRBBADwrnhWREV3T2pBNE9qQTNMamsxTVNzd01Eb3dNQ0lzSW1WdVpDSTZJakl3TWpRdE1EZ3RNRFZVTURJNk1UVTZNVGd1TVRFck1EQTZNREFpZlYwc0lucGxjbTlNVFZOVVJHVnNhWFpsY21Wa1UyVm5iV1Z1ZEhNaU9sdGRMQ0p6YjNKMFQzSmtaWElpT2pBc0ltbHVZMngxWkdWYVpYSnZURTFUVkNJNlptRnNjMlY5rExhc3RQYWdlU2l6ZaIyMA%3d%3d",
   "value":[
     {
       "id":"p~dt97dl6xElPCQmE0FVBwWrlPjdjny4zHWbxF1enDVWT_9E0v02TshSdB7a7yFQw3kma9kiOIxsY8j08OisRw3Mko-pPKIu5F2r5SmxRJDr45zEGb_hg4AGkheF07fXHugkvvZXScGgHL9MlSjeZOdg",
@@ -9,7 +10,44 @@
         "isHidden":false,
         "lastMessageReadDateTime":"2021-06-03T08:05:49.521Z"
       },
-      "webUrl":"https://teams.microsoft.com/l/chat/19%3Ameeting_MjdhNjM4YzUtYzExZi00OTFkLTkzZTAtNTVlNmZmMDhkNGU2@thread.v2/0?tenantId=b33cbe9f-8ebe-4f2a-912b-7e2a427f477f"
+      "webUrl":"https://teams.microsoft.com/l/chat/19%3Ameeting_MjdhNjM4YzUtYzExZi00OTFkLTkzZTAtNTVlNmZmMDhkNGU2@thread.v2/0?tenantId=b33cbe9f-8ebe-4f2a-912b-7e2a427f477f",
+      "lastMessagePreview":{
+        "id":"p~KeMVVe8SmJO8m1s-Qh72rR09aNOGMk8u_iFE5OnTL_6FlglHNUpnuA6Tt7WbgGhf",
+        "createdDateTime":"2024-04-01T10:08:07.452Z",
+        "isDeleted":false,
+        "messageType":"unknownFutureValue",
+        "from":null,
+        "body":{
+          "contentType":"html"
+        },
+        "eventDetail":{
+          "@odata.type":"#microsoft.graph.membersAddedEventMessageDetail",
+          "visibleHistoryStartDateTime":"2024-04-01T10:08:06.302Z",
+          "members":[
+            {
+              "id":"p~JDdzmC4v95Omi06Uc27e7piLn8bF6IPQYGrTbjfMCGDopvJMBmt6M7AImJblqjUy1NY6C4hiGYZA_VSyceEm10K_q9ISWhkoOc4Fkb6XCU4",
+              "displayName":null,
+              "userIdentityType":"aadUser",
+              "tenantId":"2ae41f0c-acca-40f1-9c63-49475ff38512"
+            },
+            {
+              "id":"p~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpDRcddGnKI4QDKyjQI9KtjJZDb8FZ27UE_toS68FyWz7Y22fnQYLP91SHJGVwQiN3E",
+              "displayName":null,
+              "userIdentityType":"aadUser",
+              "tenantId":"dcd219dd-bc68-4b9b-bf0b-4a33a796be35"
+            }
+          ],
+          "initiator":{
+            "application":null,
+            "device":null,
+            "user":{
+              "@odata.type":"#microsoft.graph.teamworkUserIdentity",
+              "userIdentityType":"aadUser",
+              "tenantId":"2ae41f0c-acca-40f1-9c63-49475ff38512"
+            }
+          }
+        }
+      }
     },
     {
       "id":"p~FPy0_JXj7Z9qpTC8Pgbnu7xIUrkZuZYB7IMq4JS9W_ssh5Zzf28nQGcKOXpYc8BpO--G0uhvHOca8V08ezg2-hz9SRFcCrnWPhIpJ0VoeDs",

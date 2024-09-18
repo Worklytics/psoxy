@@ -136,10 +136,23 @@ endpoints:
         jsonPaths:
           - "$..subject"
         exceptions:
-          - "(?i)(\\QFocus Time Block\\E|\\QFocus Time\\E|\\QFocus:\\E|\\QNo Meeting Block\\\
-      E|\\QNo Meetings Block\\E|\\QNo Meetings\\E|\\QNo Meeting\\E)"
-          - "(?i)(\\QPrep Time Block\\E|\\QPrep Time\\E|\\QPrep:\\E|\\QPrep \\E|\\QPrepare\
-      \ \\E)"
+          - "(?i)\\b(\\QNo Meetings Block\\E|\\QFocus Time Block\\E|\\QNo Meeting Block\\\
+      E|\\QNo Meetings\\E|\\QFocus Time\\E|\\QNo Meeting\\E|\\Qno mtg\\E|\\QFocus\\\
+      E)[\\s:]*\\b"
+          - "(?i)\\b(\\QPrep Time Block\\E|\\QPrep Time\\E|\\QPrep\\E)[\\s:]*\\b"
+          - "(?i)\\b(\\QOut of the Office\\E|\\QOut of Office\\E|\\QOOO\\E)[\\s:]*\\b"
+          - "(?i)\\b(\\Qbrainstorming\\E|\\Qteam building\\E|\\Qteambuilding\\E|\\Qbrain\
+      \ storm\\E|\\Qoffice hour\\E|\\Qbrainstorm\\E|\\Qhappy hour\\E|\\Qcheck in\\\
+      E|\\Qcheck-in\\E|\\Qstand up\\E|\\Qstand-up\\E|\\Qcheckin\\E|\\Qon-site\\E|\\\
+      Qstandup\\E|\\Qcoffee\\E|\\Qonsite\\E|\\Qsocial\\E|\\Qlunch\\E|\\Qcall\\E|\\\
+      Qfood\\E)[\\s:]*\\b"
+          - "(?i)\\b(\\Qbi-weekly\\E|\\Qquarterly\\E|\\Qbiweekly\\E|\\Qmonthly\\E|\\Qweekly\\\
+      E|\\Qdaily\\E)[\\s:]*\\b"
+          - "(?i)\\b(\\Qteam meeting\\E|\\Qone-on-one\\E|\\Qall-hands\\E|\\Qall hands\\\
+      E|\\Qallhands\\E|\\Q1-on-1\\E|\\Q1:1\\E)[\\s:]*\\b"
+          - "(?i)\\b(\\Qinformation sharing\\E|\\Qdecision making\\E|\\Qproblem solving\\\
+      E|\\Qdecision\\E|\\Qhand off\\E|\\Qhand-off\\E|\\Qhandover\\E|\\Qhandoff\\E|\\\
+      Qreview\\E|\\Qsprint\\E|\\Qretro\\E)[\\s:]*\\b"
       - !<redact>
         jsonPaths:
           - "$..reminderMinutesBeforeStart"

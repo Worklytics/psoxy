@@ -37,6 +37,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.net.URL;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -704,5 +705,6 @@ class RESTApiSanitizerImplTest {
        assertEquals("/path/api/v1", sanitizer.stripTargetHostPath("/api/v1/path/api/v1"));
        assertEquals("/path/api/v1", sanitizer.stripTargetHostPath("/path/api/v1"));
     }
+
 
 }

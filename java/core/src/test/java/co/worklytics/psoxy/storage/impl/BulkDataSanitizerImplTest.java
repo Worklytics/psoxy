@@ -14,8 +14,8 @@ import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.ColumnarRules;
-import com.avaulta.gateway.rules.transforms.FieldTransformPipeline;
 import com.avaulta.gateway.rules.transforms.FieldTransform;
+import com.avaulta.gateway.rules.transforms.FieldTransformPipeline;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
@@ -39,17 +39,19 @@ import org.junit.jupiter.params.provider.ValueSource;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 public class BulkDataSanitizerImplTest {
 
@@ -816,6 +818,25 @@ public class BulkDataSanitizerImplTest {
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
+        }
+    }
+
+    @Test
+    @SneakyThrows
+    void handle_control_chars_in_headers_reproduce_error() {
+
+        final String SOURCE = " EMPLOYEE_ID,SWIPE_DATE,BUILDING_ID,BUILDING_ASSIGNED\n" +
+            "E001,01/01/2024 3:10PM,B1,B2";
+
+        ColumnarRules rules = ColumnarRules.builder()
+            .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+            .columnToPseudonymize("EMPLOYEE_ID")
+            .build();
+        columnarFileSanitizerImpl.setRules(rules);
+
+        try (StringReader in = new StringReader(SOURCE);
+             StringWriter out = new StringWriter()) {
+            assertThrows(IllegalArgumentException.class, () -> columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer), "Non-ASCII characters found in headers, inspect file with cat -v for control characters");
         }
     }
 

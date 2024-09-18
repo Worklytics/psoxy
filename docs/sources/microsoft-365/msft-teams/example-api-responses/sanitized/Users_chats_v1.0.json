@@ -1,6 +1,7 @@
 {
   "@odata.context":"https://graph.microsoft.com/v1.0/$metadata#chats",
   "@odata.count":3,
+  "@odata.nextLink":"https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/chats?$expand=lastMessagePreview&$skiptoken=1.kscDYs0BDcYAAAEP8D2BqlByb3BlcnRpZXOCqVN5bmNTdGF0ZdnkZXlKa1pXeHBkbVZ5WldSVFpXZHRaVzUwY3lJNlczc2ljM1JoY25RaU9pSXlNREkwTFRBBADwrnhWREV3T2pBNE9qQTNMamsxTVNzd01Eb3dNQ0lzSW1WdVpDSTZJakl3TWpRdE1EZ3RNRFZVTURJNk1UVTZNVGd1TVRFck1EQTZNREFpZlYwc0lucGxjbTlNVFZOVVJHVnNhWFpsY21Wa1UyVm5iV1Z1ZEhNaU9sdGRMQ0p6YjNKMFQzSmtaWElpT2pBc0ltbHVZMngxWkdWYVpYSnZURTFUVkNJNlptRnNjMlY5rExhc3RQYWdlU2l6ZaIyMA%3d%3d",
   "value":[
     {
       "id":"19:meeting_MjdhNjM4YzUtYzExZi00OTFkLTkzZTAtNTVlNmZmMDhkNGU2@thread.v2",
@@ -11,7 +12,43 @@
         "isHidden":false,
         "lastMessageReadDateTime":"2021-06-03T08:05:49.521Z"
       },
-      "webUrl":"https://teams.microsoft.com/l/chat/19%3Ameeting_MjdhNjM4YzUtYzExZi00OTFkLTkzZTAtNTVlNmZmMDhkNGU2@thread.v2/0?tenantId=b33cbe9f-8ebe-4f2a-912b-7e2a427f477f"
+      "webUrl":"https://teams.microsoft.com/l/chat/19%3Ameeting_MjdhNjM4YzUtYzExZi00OTFkLTkzZTAtNTVlNmZmMDhkNGU2@thread.v2/0?tenantId=b33cbe9f-8ebe-4f2a-912b-7e2a427f477f",
+      "lastMessagePreview":{
+        "id":"1711966087452",
+        "createdDateTime":"2024-04-01T10:08:07.452Z",
+        "isDeleted":false,
+        "messageType":"unknownFutureValue",
+        "from":null,
+        "body":{
+          "contentType":"html"
+        },
+        "eventDetail":{
+          "@odata.type":"#microsoft.graph.membersAddedEventMessageDetail",
+          "visibleHistoryStartDateTime":"2024-04-01T10:08:06.302Z",
+          "members":[
+            {
+              "id":"7b622a03-ca9d-4506-9aae-2d691f26cd27",
+              "userIdentityType":"aadUser",
+              "tenantId":"2ae41f0c-acca-40f1-9c63-49475ff38512"
+            },
+            {
+              "id":"48d31887-5fad-4d73-a9f5-3c356e68a038",
+              "userIdentityType":"aadUser",
+              "tenantId":"dcd219dd-bc68-4b9b-bf0b-4a33a796be35"
+            }
+          ],
+          "initiator":{
+            "application":null,
+            "device":null,
+            "user":{
+              "@odata.type":"#microsoft.graph.teamworkUserIdentity",
+              "id":"7b622a03-ca9d-4506-9aae-2d691f26cd27",
+              "userIdentityType":"aadUser",
+              "tenantId":"2ae41f0c-acca-40f1-9c63-49475ff38512"
+            }
+          }
+        }
+      }
     },
     {
       "id":"19:561082c0f3f847a58069deb8eb300807@thread.v2",

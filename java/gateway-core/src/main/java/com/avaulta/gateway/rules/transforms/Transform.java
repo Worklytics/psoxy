@@ -130,6 +130,10 @@ public abstract class Transform {
         @Singular
         List<String> exceptions;
 
+        // q: why not make all the exceptions case-insensitive by default??
+
+        // why not make boundary encapsulation the default??
+
         public RedactExceptSubstringsMatchingRegexes clone() {
             return this.toBuilder()
                 .clearJsonPaths()

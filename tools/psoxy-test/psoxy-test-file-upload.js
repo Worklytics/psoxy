@@ -2,6 +2,7 @@ import { constants as httpCodes } from 'http2';
 import { execFileSync } from 'child_process';
 import {
   addFilenameSuffix,
+  environmentCheck,
   isGzipped,
   parseBucketOption,
   unzip,
@@ -49,6 +50,7 @@ async function testAWS(options, logger) {
     throw new Error('Unable to upload file', { cause: uploadResult });
   }
   logger.success('File uploaded');
+  logger.verbose('Upload result:', { additional: uploadResult });
 
   const parsedBucketOutputOption = parseBucketOption(options.output)
   const outputBucket = parsedBucketOutputOption.bucket;
@@ -59,11 +61,15 @@ async function testAWS(options, logger) {
   const sanitizedFilename = addFilenameSuffix(outputKey, SANITIZED_FILE_SUFFIX);
   const destination = `./${sanitizedFilename}`;
 
-  await aws.download(outputBucket, outputKey, destination, {
+  const file = await aws.download(outputBucket, outputKey, destination, {
       role: options.role,
       region: options.region,
     }, client, logger);
   logger.success('File downloaded');
+
+  if (file?.metadata) {
+    logger.verbose('File metadata:', { additional: file.metadata });
+  }
 
   if (!options.keepSanitizedFile) {
     logger.info(`Deleting sanitized file from output bucket: ${outputBucket}`);
@@ -128,8 +134,12 @@ async function testGCP(options, logger) {
   const sanitizedFilename = addFilenameSuffix(outputKey, SANITIZED_FILE_SUFFIX);
   const destination = `./${sanitizedFilename}`;
 
-  await gcp.download(outputBucket, outputKey, destination, client, logger);
+  const file = await gcp.download(outputBucket, outputKey, destination, client, logger);
   logger.success('File downloaded');
+
+  if (file?.metadata) {
+    logger.verbose('File metadata:', { additional: file.metadata });
+  }
 
   if (!options.keepSanitizedFile) {
     logger.info(`Deleting sanitized file from output bucket: ${outputBucket}`);
@@ -167,6 +177,7 @@ async function testGCP(options, logger) {
  */
 export default async function (options = {}) {
   const logger = getLogger(options.verbose);
+  environmentCheck(logger);
 
   const deploymentTypeFn = options.deploy === 'AWS' ? testAWS : testGCP;
   const { original, sanitized } = await deploymentTypeFn(options, logger);

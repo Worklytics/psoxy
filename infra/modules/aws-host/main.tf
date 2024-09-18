@@ -59,10 +59,10 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
         {
           "Action" : ["lambda:InvokeFunctionUrl"],
           "Effect" : "Allow",
-          "Resource" : [ for k, v in module.api_connector : v.function_arn ]
+          "Resource" : [for k, v in module.api_connector : v.function_arn]
         }
       ]
-    })
+  })
 
   lifecycle {
     ignore_changes = [

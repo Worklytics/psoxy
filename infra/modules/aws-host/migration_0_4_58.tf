@@ -1,8 +1,8 @@
 
 # for customers coming from >=0.4.46
 moved {
-   from = module.psoxy.aws_iam_policy.execution_lambda_to_caller[0]
-   to   = aws_iam_policy.execution_lambda_to_caller[0]
+  from = module.psoxy.aws_iam_policy.execution_lambda_to_caller[0]
+  to   = aws_iam_policy.execution_lambda_to_caller[0]
 }
 
 moved {

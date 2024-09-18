@@ -170,13 +170,13 @@ variable "rules" {
   type = object({
     # NOTE: use `optional()` in variables.tf of modules that wrap this one, but omit the default
     # value so that the one here prevails (unless should really be different for your use-case)
-    pseudonymFormat       = optional(string, "JSON") # TODO: change to URL_SAFE_TOKEN in v0.5
-    columnsToRedact       = optional(list(string), [])
-    columnsToInclude      = optional(list(string), null)
-    columnsToPseudonymize = optional(list(string), [])
+    pseudonymFormat                = optional(string, "JSON") # TODO: change to URL_SAFE_TOKEN in v0.5
+    columnsToRedact                = optional(list(string), [])
+    columnsToInclude               = optional(list(string), null)
+    columnsToPseudonymize          = optional(list(string), [])
     columnsToPseudonymizeIfPresent = optional(list(string), null)
-    columnsToDuplicate    = optional(map(string), {})
-    columnsToRename       = optional(map(string), {})
+    columnsToDuplicate             = optional(map(string), {})
+    columnsToRename                = optional(map(string), {})
     fieldsToTransform = optional(map(object({
       newName    = string
       transforms = optional(list(map(string)), [])
