@@ -27,7 +27,7 @@ resource "google_project_iam_member" "perms" {
 }
 ```
 
-### Attach Required Predefined AWS Policies to an AWS IAM Role
+### Attach min set of AWS-Managed Policies to an AWS IAM Role for Provisioning
 
 equivalent of https://docs.worklytics.co/psoxy/aws/getting-started#prerequisites step 2
 
@@ -45,6 +45,8 @@ resource "aws_iam_role_policy_attachment" "roles_for_psoxy_deploy_to_github_acti
 ```
 
 ### Create a Least-Privileged AWS IAM Role for Provisioning
+
+equivalent of https://docs.worklytics.co/psoxy/aws/getting-started#prerequisites step 2
 
 ```hcl
 module "psoxy_constants" {
