@@ -245,3 +245,7 @@ output "api_gateway_v2" {
     aws_apigatewayv2_api.proxy_api[0]
   ) : null
 }
+
+output "api_gateway_v2_stage" {
+  value = var.use_api_gateway_v2 ? aws_apigatewayv2_stage.live[0] : null
+}
