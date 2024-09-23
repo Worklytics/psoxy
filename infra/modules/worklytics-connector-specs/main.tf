@@ -1436,8 +1436,10 @@ EOT
       rules = {
         columnsToRedact = []
         columnsToPseudonymize = [
-          "EMPLOYEE_ID", # primary key
-          # "EMPLOYEE_EMAIL", # if exists
+          "EMPLOYEE_ID", # primary key; transform FAILS if not present
+        ]
+        columnsToPseudonymizeIfPresent = [
+          "EMPLOYEE_EMAIL" # just in case sent
         ]
       }
       example_file = "docs/sources/survey/survey-example.csv"
@@ -1452,7 +1454,9 @@ EOT
         columnsToRedact = []
         columnsToPseudonymize = [
           "EMPLOYEE_ID", # primary key
-          # "employee_email", # if exists
+        ]
+        columnsToPseudonymizeIfPresent = [
+          "EMPLOYEE_EMAIL" # just in case sent
         ]
       }
       example_file = "docs/sources/survey/survey-example.csv"
