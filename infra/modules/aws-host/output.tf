@@ -45,6 +45,11 @@ output "api_gateway_v2" {
   value       = module.psoxy.api_gateway_v2
 }
 
+output "api_gateway_v2_stage" {
+  description = "the API Gateway V2 stage created, if any."
+  value       = module.psoxy.api_gateway_v2_stage
+}
+
 output "todos" {
   description = "List of todo steps to complete, in markdown format."
   value       = values(module.api_connector)[*].todo
