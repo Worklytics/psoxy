@@ -17,7 +17,7 @@
 #   domain_name_configuration {
 #     certificate_arn = aws_acm_certificate.cert.arn
 #     endpoint_type   = "REGIONAL"
-#     security_policy = "TLS_1_2"
+#     security_policy = "TLS_1_2" # this is a 'min version'; 'TLS_1_2' allows TLS v1.2 or TLS v1.3 in practice; see https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-custom-domain-tls-version.html
 #   }
 # }
 #
