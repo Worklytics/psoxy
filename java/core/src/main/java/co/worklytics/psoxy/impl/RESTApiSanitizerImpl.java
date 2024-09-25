@@ -40,7 +40,6 @@ import org.hazlewood.connor.bottema.emailaddress.EmailAddressParser;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.mail.internet.InternetAddress;
-import javax.xml.crypto.dsig.Transform;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
