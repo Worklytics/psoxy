@@ -187,6 +187,27 @@ class RESTApiSanitizerImplTest {
 
 
     @SneakyThrows
+    @CsvSource({
+        "phase1,phrase1",
+        "Phrase1,Phrase1",
+        "phase2 2,phase2 2",
+        "phase3,phase3",
+        "phase4,",
+        "blah phrase1,phrase1",
+        "blah phrase1: blah,phrase1"
+    }),
+    @ParameterizedTest
+    void redactExceptPhases(String raw, String sanitized) {
+        Transform.RedactExceptPhases transform = Transform.RedactExceptPhases.builder()
+            .phases(Arrays.asList("phase1", "phase2 2", "Phase3"))
+            .build();
+
+        String redacted = (String) sanitizer.getRedactExceptPhases(transform).map(raw, sanitizer.jsonConfiguration);
+
+        assertEquals(sanitized, redacted);
+    }
+
+    @SneakyThrows
     @ValueSource(strings = {
         "https://acme.zoom.us/12312345?pwd=1234asAf asdfasdf",
         " https://acme.zoom.us/12312345?pwd=1234asAf  ",

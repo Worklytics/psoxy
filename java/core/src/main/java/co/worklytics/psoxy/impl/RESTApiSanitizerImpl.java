@@ -40,6 +40,7 @@ import org.hazlewood.connor.bottema.emailaddress.EmailAddressParser;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.mail.internet.InternetAddress;
+import javax.xml.crypto.dsig.Transform;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -223,6 +224,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             f = getPseudonymizeRegexMatches((Transform.PseudonymizeRegexMatches) transform);
         } else if (transform instanceof Transform.RedactRegexMatches) {
             f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
+        } else if (transform instanceof Transform.RedactExceptPhrases) {
+            f = getRedactExceptPhrases((Transform.RedaceExceptPhrases) transform);
         } else if (transform instanceof Transform.RedactExceptSubstringsMatchingRegexes) {
             f = getRedactExceptSubstringsMatchingRegexes((Transform.RedactExceptSubstringsMatchingRegexes) transform);
         } else if (transform instanceof Transform.FilterTokenByRegex) {
@@ -299,6 +302,37 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             log.warning("value matched by HashIP transform not a valid IP address: " + ip);
             return null;
         }
+    }
+
+    MapFunction getRedactExceptPhrases(Transform.RedaceExceptPhrases transform) {
+
+        //TODO: alternatively, all different patterns, and preserve ALL matches?
+        // --> means we might enlarge, if the same phrase matches multiple times
+
+        List<Pattern> patterns = transform.getPhrases().stream()
+            .map(p -> "\\Q" + p + "\\E") // quote it
+            .map(p -> "\\b" + p + "[\\\\s:]*\\b") //boundary match, with optional whitespace or colon at end
+            .map(p -> ".*?(" + p + ").*?") //wrap in .*? to match anywhere in the string, but reluctantly
+            .map(p -> Pattern.compile(p, CASE_INSENSITIVE))
+            .collect(Collectors.toList());
+
+        return (s, jsonConfiguration) -> {
+            if (!(s instanceof String)) {
+                if (s != null) {
+                    log.warning("value matched by " + transform + " not of type String");
+                }
+                return null;
+            } else if (StringUtils.isBlank((String) s)) {
+                return s;
+            } else {
+                return patterns.stream()
+                    .map(p -> p.matcher((String) s))
+                    .filter(Matcher::matches)
+                    .map(m -> m.group(1)) //group 1, bc we created caputuring group in regex above
+                    .collect(Collectors.joining(",")); //q: something better? if , in phrases, can't reparse
+
+            }
+        };
     }
 
 
