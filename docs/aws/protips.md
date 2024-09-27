@@ -142,3 +142,27 @@ For organizations that don't allow use of AWS Managed Policies, you can use the
 `aws_lambda_execution_role_policy_arn` variable to pass in an alternative which will be used INSTEAD
 of the AWS Managed Policy.
 
+## Least-Privileged IAM Policy for Provisioning
+
+YMMV, but we exposed a minimal IAM policy for provisioning in the `psoxy-constants` module, which
+you attach to your desired role to ensure it has sufficient permissions to provision the proxy.
+
+NOTE: using features beyond the default set, such as AWS API Gateway, VPC, or Secrets Manager, may
+require some additional permissions beyond what is provided in the least-privileged policy.
+
+```hcl
+module "psoxy_constants" {
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-constants?ref=v0.4.61"
+}
+
+resource "aws_iam_policy" "min_provisioner_policy" {
+    name   = "PsoxyMinProvisioner"
+    policy = module.psoxy_constants.aws_least_privileged_policy
+}
+
+resource "aws_iam_role_policy_attachment" "min_provisioner_policy" {
+    policy_arn         = aws_iam_policy.min_provisioner_policy.arn
+    role               = "{{NAME_OF_YOUR_AWS_PROVISIONER_ROLE}}"
+}
+```
+

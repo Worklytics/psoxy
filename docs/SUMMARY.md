@@ -50,6 +50,9 @@
     * [New Relic Monitoring](development/alpha-features/new-relic-monitoring.md)
 * [Data Sources](sources/README.md)
   * [Asana](sources/asana/README.md)
+  * [Atlassian](sources/atlassian/README.md)
+    * [Jira Cloud](sources/atlassian/jira/README.md)
+    * [Jira Data Center](sources/atlassian/jira/jira-server.md)
   * [Dropbox](sources/dropbox-business/README.md)
   * [GitHub](sources/github/README.md)
   * [Google Workspace](sources/google-workspace/README.md)
@@ -72,9 +75,7 @@
     * [API Call Examples](sources/slack/example-api-calls.md)
   * [Zoom](sources/zoom/README.md)
     * [API Call Examples](sources/zoom/example-api-calls.md)
-  * [Atlassian](sources/atlassian/README.md)
-    * [Jira Cloud](sources/atlassian/jira/README.md)
-    * [Jira Data Center](sources/atlassian/jira/jira-server.md)
+
 * [FAQ](faq-security.md)
 * [Release Notes](https://github.com/Worklytics/psoxy/releases)
 
