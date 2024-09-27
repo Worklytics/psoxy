@@ -1,0 +1,29 @@
+name: "require PRs to be merged via 'rc-*' branches"
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  check-branch-name:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check if base and head branches follow naming convention
+        run: |
+          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+          HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
+
+          # Check if base branch starts with 'rc-'
+          if [[ "$BASE_BRANCH" != rc-* ]]; then
+            echo "Error: The base branch '$BASE_BRANCH' does not start with 'rc-'."
+            exit 1
+          fi
+
+          # Check if head branch starts with 'rc-'
+          if [[ "$HEAD_BRANCH" != rc-* ]]; then
+            echo "Error: The head branch '$HEAD_BRANCH' does not start with 'rc-'."
+            exit 1
+          fi
+
+          echo "Both base and head branches follow the 'rc-*' naming convention."
