@@ -109,7 +109,7 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
     @Override
     public Optional<String> getClientIp() {
         // standard: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
-       return Optional.ofNullable(event.getHeaders().get("X-Forwarded-For"));
+       return Optional.ofNullable(this.getCaseInsensitiveHeaders().get("X-Forwarded-For".toLowerCase()));
     }
 
     /**
