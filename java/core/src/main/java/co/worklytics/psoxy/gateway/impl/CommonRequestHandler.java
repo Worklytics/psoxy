@@ -135,7 +135,7 @@ public class CommonRequestHandler {
     @SneakyThrows
     public HttpEventResponse handle(HttpEventRequest request) {
 
-        logRequestIfAllowed(request);
+        logRequest(request);
 
         Optional<HttpEventResponse> healthCheckResponse = healthCheckRequestHandler.handleIfHealthCheck(request);
         if (healthCheckResponse.isPresent()) {
@@ -380,8 +380,13 @@ public class CommonRequestHandler {
         }
     }
 
-    private void logRequestIfAllowed(HttpEventRequest request) {
-        logIfDevelopmentMode(() -> String.format("Request:\n%s", request.prettyPrint()));
+    private void logRequest(HttpEventRequest request) {
+        String logMessage = String.format("Client IP: %s", request.getClientIp().orElse("unknown"));
+
+        if (config.isDevelopment()) {
+            logMessage += String.format("\n%s", request.prettyPrint());
+        }
+        log.info(logMessage);
     }
 
     boolean isSuccessFamily(int statusCode) {

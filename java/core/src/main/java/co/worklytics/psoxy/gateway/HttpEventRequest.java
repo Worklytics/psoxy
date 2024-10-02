@@ -26,4 +26,9 @@ public interface HttpEventRequest {
         return "Not implemented";
     }
 
+    /**
+     * @return IP of the client making the request, if known
+     */
+    Optional<String> getClientIp();
+
 }

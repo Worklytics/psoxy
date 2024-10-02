@@ -83,6 +83,16 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
         return event.toString();
     }
 
+    @Override
+    public Optional<String> getClientIp() {
+        //this correct?
+        // standard: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
+        String ip = Optional.ofNullable(event.getHeaders().get("X-Forwarded-For"))
+            .orElseGet(() -> event.getRequestContext().getIdentity().getSourceIp());
+
+        return Optional.ofNullable(ip);
+    }
+
     /**
      * @return view of Headers with lower-case names
      *
