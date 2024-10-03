@@ -17,20 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CalendarTest {
 
-    Pattern pattern = Pattern.compile(
-        Calendar.toCaseInsensitiveMultiPattern(Calendar.FOCUS_TIME_BLOCK_SNIPPETS));
-
     RESTApiSanitizerImpl restApiSanitizer = new RESTApiSanitizerImpl(null, null);
-
-    @ValueSource(strings = {
-        "Focus Talk Time",
-        "Focus About Blocks",
-        "No Meetings Meeting",
-    })
-    @ParameterizedTest
-    public void focusTimeBlockTitleSnippets_noMatch(String input) {
-        assertFalse(pattern.matcher(input).matches());
-    }
 
     @CsvSource(value = {
         "OOO,OOO",

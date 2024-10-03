@@ -27,15 +27,6 @@ public class Calendar {
         "no mtg"
     );
 
-    public static final String toCaseInsensitiveMultiPattern(List<String> snippets) {
-        return "(?i)\\b(" +
-            snippets.stream()
-                .sorted((a, b) -> Integer.compare(b.length(), a.length())) // longest first
-                .map(s -> Pattern.quote(s))
-                .collect(Collectors.joining("|"))
-            + ")[\\s:]*\\b";
-    }
-
     /**
      * strings that, by convention, indicate that a calendar event is time blocked by individual for
      * prep - rather than a work event in and of itself
@@ -90,7 +81,7 @@ public class Calendar {
         "standup",
         "team building",
         "teambuilding"
-        );
+     );
 
 
     public static final List<String> TOPICAL_TITLE_SNIPPETS = Arrays.asList(
