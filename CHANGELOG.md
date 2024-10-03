@@ -7,6 +7,9 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
+  - variables to `aws-host`/`gcp-host` modules to have changed slightly; if you initially copied an
+    example based on 0.4.x, you may have to update some variable names in your `main.tf`.
+
 ## [0.4.61](https://github.com/Worklytics/psoxy/release/tag/v0.4.61)
  - added some `columnsToPseudonymizeIfPresent` to survey bulk connectors; these are to avoid PII
    being sent to Worklytics if these unexpected columns sent, but without errors in usual case, when
