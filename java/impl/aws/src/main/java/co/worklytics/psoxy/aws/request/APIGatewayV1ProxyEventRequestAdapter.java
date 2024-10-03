@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import software.amazon.awssdk.identity.spi.Identity;
 
 import java.util.List;
 import java.util.Map;
@@ -85,10 +86,10 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
 
     @Override
     public Optional<String> getClientIp() {
-        //this correct?
-        // standard: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
-        String ip = Optional.ofNullable(event.getHeaders().get("X-Forwarded-For"))
-            .orElseGet(() -> event.getRequestContext().getIdentity().getSourceIp());
+        // unclear that we every get anything here, but can try
+
+        String ip = Optional.ofNullable(event.getHeaders().get(HTTP_HEADER_X_FORWARDED_FOR.toLowerCase()))
+            .orElseGet(() -> Optional.ofNullable(event.getRequestContext().getIdentity()).map(APIGatewayProxyRequestEvent.RequestIdentity::getSourceIp).orElse(null));
 
         return Optional.ofNullable(ip);
     }

@@ -97,9 +97,8 @@ public class CloudFunctionRequest implements HttpEventRequest {
 
     @Override
     public Optional<String> getClientIp() {
-        //correct?
-        // standard: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
-        return Optional.ofNullable(request.getHeaders().get("X-Forwarded-For")).map(values -> values.get(0));
+        return Optional.ofNullable(request.getHeaders().get(HttpEventRequest.HTTP_HEADER_X_FORWARDED_FOR))
+            .map(values -> values.get(0));
     }
 
 

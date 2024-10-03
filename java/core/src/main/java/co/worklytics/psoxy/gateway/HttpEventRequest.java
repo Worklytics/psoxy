@@ -10,6 +10,10 @@ import java.util.Optional;
  */
 public interface HttpEventRequest {
 
+    // standard: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
+    public static final String HTTP_HEADER_X_FORWARDED_FOR = "X-Forwarded-For";
+
+
     String getPath();
 
     Optional<String> getQuery();
