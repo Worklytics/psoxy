@@ -94,7 +94,7 @@ module "psoxy" {
   install_test_tool                 = var.install_test_tool
   gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
   gcp_region                        = var.gcp_region
-  replica_regions                   = coalesce(var.replica_regions, var.gcp_secret_replica_locations)
+  secret_replica_locations          = var.secret_replica_locations
   api_connectors                    = local.api_connectors
   bulk_connectors                   = local.bulk_connectors
   non_production_connectors         = var.non_production_connectors
@@ -123,12 +123,12 @@ module "connection_in_worklytics" {
   source = "../../modules/worklytics-psoxy-connection-generic"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=rc-v0.5.0"
 
-  psoxy_host_platform_id = local.host_platform_id
-  psoxy_instance_id      = each.key
-  worklytics_host        = var.worklytics_host
-  connector_id           = try(local.all_connectors[each.key].worklytics_connector_id, "")
-  display_name           = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
-  todo_step              = module.psoxy.next_todo_step
+  host_platform_id  = local.host_platform_id
+  proxy_instance_id = each.key
+  worklytics_host   = var.worklytics_host
+  connector_id      = try(local.all_connectors[each.key].worklytics_connector_id, "")
+  display_name      = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
+  todo_step         = module.psoxy.next_todo_step
 
   settings_to_provide = merge(
     # Source API case

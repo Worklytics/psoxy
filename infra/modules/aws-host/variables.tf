@@ -1,4 +1,4 @@
-variable "aws_account_id" {
+0variable "aws_account_id" {
   type        = string
   description = "id of aws account in which to provision your AWS infra"
   validation {
@@ -316,7 +316,7 @@ variable "lookup_table_builders" {
 
 variable "use_api_gateway_v2" {
   type        = bool
-  description = "**alpha**. whether to use API Gateway, or not. Only v2 supported atm. Ignored if `vpc_config` is provided, bc that's incompatible with function URLs."
+  description = "**beta**. whether to use API Gateway, or not. Only v2 supported atm. Ignored if `vpc_config` is provided, bc that's incompatible with function URLs."
   default     = false
 }
 
@@ -326,7 +326,7 @@ variable "vpc_config" {
     subnet_ids         = list(string)
     security_group_ids = list(string)
   })
-  description = "**alpha** VPC configuration for lambda; if not provided, lambda will not be deployed in a VPC. see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#vpc_config"
+  description = "**beta** VPC configuration for lambda; if not provided, lambda will not be deployed in a VPC. see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#vpc_config"
   default     = null
 }
 
