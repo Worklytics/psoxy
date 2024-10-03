@@ -1,4 +1,4 @@
-0variable "aws_account_id" {
+variable "aws_account_id" {
   type        = string
   description = "id of aws account in which to provision your AWS infra"
   validation {
