@@ -224,7 +224,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         } else if (transform instanceof Transform.RedactRegexMatches) {
             f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
         } else if (transform instanceof Transform.RedactExceptPhrases) {
-            f = getRedactExceptPhrases((Transform.RedaceExceptPhrases) transform);
+            f = getRedactExceptPhrases((Transform.RedactExceptPhrases) transform);
         } else if (transform instanceof Transform.RedactExceptSubstringsMatchingRegexes) {
             f = getRedactExceptSubstringsMatchingRegexes((Transform.RedactExceptSubstringsMatchingRegexes) transform);
         } else if (transform instanceof Transform.FilterTokenByRegex) {
@@ -303,12 +303,12 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         }
     }
 
-    MapFunction getRedactExceptPhrases(Transform.RedaceExceptPhrases transform) {
+    MapFunction getRedactExceptPhrases(Transform.RedactExceptPhrases transform) {
 
         //TODO: alternatively, all different patterns, and preserve ALL matches?
         // --> means we might enlarge, if the same phrase matches multiple times
 
-        List<Pattern> patterns = transform.getPhrases().stream()
+        List<Pattern> patterns = transform.getAllowedPhrases().stream()
             .map(p -> "\\Q" + p + "\\E") // quote it
             .map(p -> "\\b" + p + "[\\\\s:]*\\b") //boundary match, with optional whitespace or colon at end
             .map(p -> ".*?(" + p + ").*?") //wrap in .*? to match anywhere in the string, but reluctantly
