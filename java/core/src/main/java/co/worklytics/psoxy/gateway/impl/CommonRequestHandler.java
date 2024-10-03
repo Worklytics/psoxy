@@ -135,7 +135,7 @@ public class CommonRequestHandler {
     @SneakyThrows
     public HttpEventResponse handle(HttpEventRequest request) {
 
-        logRequestIfAllowed(request);
+        logRequestIfVerbose(request);
 
         Optional<HttpEventResponse> healthCheckResponse = healthCheckRequestHandler.handleIfHealthCheck(request);
         if (healthCheckResponse.isPresent()) {
@@ -167,15 +167,22 @@ public class CommonRequestHandler {
 
         this.sanitizer = loadSanitizerRules();
 
-        String callLog = String.format("%s %s TokenInUrlReversed=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), tokenizedURLReversed);
+        //build log entry
+        String logEntry = String.format("%s %s TokenInUrlReversed=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), tokenizedURLReversed);
+        if (request.getClientIp().isPresent()) {
+            // client IP is NOT available for direct AWS Lambda calls; only for API Gateway.
+            // don't want to put blank/unknown in direct case, so log IP conditionally
+            logEntry += String.format(" ClientIP=%s", request.getClientIp().get());
+        }
+
         if (skipSanitization) {
-            log.info(String.format("%s. Skipping sanitization.", callLog));
+            log.info(String.format("%s. Skipping sanitization.", logEntry));
         } else if (sanitizer.isAllowed(request.getHttpMethod(), originalRequestedURL)) {
-            log.info(String.format("%s. Rules allowed call.", callLog));
+            log.info(String.format("%s. Rules allowed call.", logEntry));
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
             builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.BLOCKED_BY_RULES.name());
-            log.warning(String.format("%s. Blocked call by rules %s", callLog, objectMapper.writeValueAsString(rules)));
+            log.warning(String.format("%s. Blocked call by rules %s", logEntry, objectMapper.writeValueAsString(rules)));
             return builder.build();
         }
 
@@ -380,8 +387,10 @@ public class CommonRequestHandler {
         }
     }
 
-    private void logRequestIfAllowed(HttpEventRequest request) {
-        logIfDevelopmentMode(() -> String.format("Request:\n%s", request.prettyPrint()));
+    private void logRequestIfVerbose(HttpEventRequest request) {
+        if (config.isDevelopment()) {
+            log.info(request.prettyPrint());
+        }
     }
 
     boolean isSuccessFamily(int statusCode) {

@@ -135,6 +135,11 @@ class CommonRequestHandlerTest {
             public byte[] getBody() {
                 return null;
             }
+
+            @Override
+            public Optional<String> getClientIp() {
+                return Optional.of("127.0.0.1");
+            }
         };
         when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.TARGET_HOST))).thenReturn("proxyhost.com");
 

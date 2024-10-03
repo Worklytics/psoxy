@@ -64,6 +64,11 @@ proxy host platform)
 
 ![Microsoft Workload Identity Federation Scenarios](msft-workload-identity-federation-scenarios.png)
 
+The video below explains the general idea for identity federation for Azure AD-gated resources more
+generally, of which your Graph API is an example:
+{% embed url="https://www.youtube.com/watch?v=WIs3IRCJhEo" %}
+
+
 ### Authorization and Scopes
 
 The following Scopes are required for each connector. Note that they are all READ-only scopes.
