@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>0.4.62</revision>
+        <revision>0.5.0</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.30</dependency.lombok.version> <!-- 1.18.30 is min compatible with jdk 21+ -->
         <dependency.dagger.version>2.40.5</dependency.dagger.version>
