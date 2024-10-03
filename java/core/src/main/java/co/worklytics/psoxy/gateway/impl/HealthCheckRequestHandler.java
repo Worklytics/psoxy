@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @Log
 public class HealthCheckRequestHandler {
 
-    static final String JAVA_SOURCE_CODE_VERSION = "rc-v0.4.61";
+    static final String JAVA_SOURCE_CODE_VERSION = "v0.4.61";
 
     @Inject
     EnvVarsConfigService envVarsConfigService;
@@ -48,7 +48,10 @@ public class HealthCheckRequestHandler {
 
     public Optional<HttpEventResponse> handleIfHealthCheck(HttpEventRequest request) {
         if (isHealthCheckRequest(request)) {
-            return Optional.of(handle());
+            if (request.getClientIp().isPresent()) {
+                log.info("Health check request from " + request.getClientIp().get());
+            }
+            return Optional.of(handle(request));
         }
         return Optional.empty();
     }
@@ -63,7 +66,7 @@ public class HealthCheckRequestHandler {
         }
     }
 
-    private HttpEventResponse handle() {
+    private HttpEventResponse handle(HttpEventRequest request) {
         Set<String> missing =
                 sourceAuthStrategy.getRequiredConfigProperties().stream()
                         .filter(configProperty -> config.getConfigPropertyAsOptional(configProperty).isEmpty())
@@ -87,7 +90,9 @@ public class HealthCheckRequestHandler {
                 .configuredHost(config.getConfigPropertyAsOptional(ProxyConfigProperty.TARGET_HOST).orElse(null))
                 .nonDefaultSalt(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
                 .pseudonymImplementation(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION).orElse(null))
-                .missingConfigProperties(missing);
+                .missingConfigProperties(missing)
+                .callerIp(request.getClientIp().orElse("unknown"));
+
 
         try {
             config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYMIZE_APP_IDS)

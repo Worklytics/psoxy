@@ -3,7 +3,7 @@
 terraform {
   required_providers {
     azuread = {
-      version = ">= 2.14.0"
+      version = ">= 2.14.0, < 3.0.0"
     }
   }
 }

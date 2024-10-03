@@ -14,8 +14,13 @@ import dagger.Provides;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -49,9 +54,28 @@ public class FunctionRuntimeModule {
     }
 
     @Provides @Singleton
-    HttpTransportFactory providesHttpTransportFactory() {
-        //atm, all function runtimes expected to use generic java NetHttpTransport
-        return () -> new NetHttpTransport();
+    HttpTransportFactory providesHttpTransportFactory(EnvVarsConfigService envVarsConfigService) {
+        final String sslContextProtocol =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.TLS_VERSION)
+                .orElse(ProxyConfigProperty.TlsVersions.TLSv1_3);
+        if (Arrays.stream(ProxyConfigProperty.TlsVersions.ALL).noneMatch(s -> sslContextProtocol.equals(s))) {
+            throw new IllegalArgumentException("Invalid TLS version: " + sslContextProtocol);
+        }
+
+        return () -> {
+            try {
+                SSLContext sslContext = SSLContext.getInstance(sslContextProtocol);
+                sslContext.init(null, null, new java.security.SecureRandom());
+                SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+
+                // Configure the NetHttpTransport to use the custom SSL context
+                return new NetHttpTransport.Builder()
+                    .setSslSocketFactory(sslSocketFactory)
+                    .build();
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                throw new RuntimeException("Failed to create custom SSL context with " + sslContextProtocol, e);
+            }
+        };
     }
 
     @Provides @Singleton
@@ -62,8 +86,6 @@ public class FunctionRuntimeModule {
             .fallback(nativeConfigService)
             .build();
     }
-
-
 
 
 }

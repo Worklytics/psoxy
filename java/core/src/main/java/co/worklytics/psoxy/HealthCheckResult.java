@@ -68,6 +68,8 @@ public class HealthCheckResult {
      */
     Boolean pseudonymizeAppIds;
 
+    String callerIp;
+
     public boolean passed() {
         return getConfiguredSource() != null
             && getNonDefaultSalt()

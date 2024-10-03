@@ -95,6 +95,12 @@ public class CloudFunctionRequest implements HttpEventRequest {
         return request.toString();
     }
 
+    @Override
+    public Optional<String> getClientIp() {
+        return Optional.ofNullable(request.getHeaders().get(HttpEventRequest.HTTP_HEADER_X_FORWARDED_FOR))
+            .map(values -> values.get(0));
+    }
+
 
     public List<String> getWarnings() {
         List<String> warnings = new LinkedList<>();
