@@ -7,6 +7,11 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
+## [0.4.61](https://github.com/Worklytics/psoxy/release/tag/v0.4.61)
+ - added some `columnsToPseudonymizeIfPresent` to survey bulk connectors; these are to avoid PII
+   being sent to Worklytics if these unexpected columns sent, but without errors in usual case, when
+   these are omitted.
+
 ## [0.4.60](https://github.com/Worklytics/psoxy/release/tag/v0.4.60)
  - Calendar rules change to allow OOO-related snippets to be passed through event title fields;
     this is required for proper OOO-analysis in Worklytics Calendar 3.0 methodology.

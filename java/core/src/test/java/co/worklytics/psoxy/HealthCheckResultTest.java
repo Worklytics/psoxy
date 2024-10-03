@@ -21,6 +21,7 @@ class HealthCheckResultTest {
     public void json() throws JsonProcessingException {
         final String JSON = "{\n" +
             "  \"bundleFilename\" : \"psoxy-aws-rc-v0.1.15.jar\",\n" +
+            "  \"callerIp\" : null,\n" +
             "  \"configPropertiesLastModified\" : null,\n" +
             "  \"configuredHost\" : \"blah.com\",\n" +
             "  \"configuredSource\" : \"blah\",\n" +
@@ -77,6 +78,7 @@ class HealthCheckResultTest {
     @ValueSource(strings={
         "{\n" +
             "              \"bundleFilename\" : \"psoxy-aws-rc-v0.1.15.jar\",\n" +
+            "              \"callerIp\" : null,\n" +
             "              \"configPropertiesLastModified\" : null,\n" +
             "              \"configuredHost\" : \"blah.com\",\n" +
             "              \"configuredSource\" : \"blah\",\n" +
