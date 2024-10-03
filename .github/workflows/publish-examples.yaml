@@ -16,13 +16,13 @@ jobs:
     uses: ./.github/workflows/publish-example.yaml
     with:
       example-repo: 'Worklytics/psoxy-example-aws'
-      example-to-copy: 'infra/examples-dev/aws-all'
+      example-to-copy: 'infra/examples-dev/aws'
       example-repo-token: ${{ secrets.PSOXY_EXAMPLE_AWS_TOKEN }}
       release: ${{ inputs.release }}
   publish-example-gcp:
     uses: ./.github/workflows/publish-example.yaml
     with:
       example-repo: 'Worklytics/psoxy-example-gcp'
-      example-to-copy: 'infra/examples-dev/gcp-all'
+      example-to-copy: 'infra/examples-dev/gcp'
       example-repo-token: ${{ secrets.PSOXY_EXAMPLE_GCP_TOKEN }}
       release: ${{ inputs.release }}

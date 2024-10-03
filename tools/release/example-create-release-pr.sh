@@ -3,7 +3,7 @@
 # Creates a PR to update an example repo to reference the latest release of the main Psoxy repo
 #
 # Usage:
-# ./tools/release/example-create-release-pr.sh ~/psoxy/ aws-all ~/psoxy-example-aws
+# ./tools/release/example-create-release-pr.sh ~/psoxy/ aws ~/psoxy-example-aws
 # ./tools/release/example-create-release-pr.sh ~/psoxy/ gcp ~/psoxy-example-gcp
 
 # colors
@@ -24,7 +24,7 @@ display_usage() {
     printf "\n"
     printf "Usage:\n"
     printf "  %s <path-to-repo> <example> <path-to-example-repo>\n" $SCRIPT_NAME
-    printf "  %s ~/psoxy/ aws-all ~/psoxy-example-aws\n" $SCRIPT_NAME
+    printf "  %s ~/psoxy/ aws ~/psoxy-example-aws\n" $SCRIPT_NAME
     printf "  %s ~/psoxy/ gcp ~/psoxy-example-gcp\n" $SCRIPT_NAME
 }
 

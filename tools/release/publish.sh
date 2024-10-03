@@ -122,5 +122,5 @@ else
   GCP_EXAMPLE_DIR="~/psoxy-example-gcp"
 fi
 
-printf "    ${BLUE}./tools/release/example-create-release-pr.sh . aws-all ${AWS_EXAMPLE_DIR}${NC}\n"
+printf "    ${BLUE}./tools/release/example-create-release-pr.sh . aws ${AWS_EXAMPLE_DIR}${NC}\n"
 printf "    ${BLUE}./tools/release/example-create-release-pr.sh . gcp ${GCP_EXAMPLE_DIR}${NC}\n"
