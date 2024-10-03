@@ -94,6 +94,12 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
         return Optional.ofNullable(ip);
     }
 
+    @Override
+    public Optional<Boolean> isHttps() {
+        return Optional.ofNullable(event.getHeaders().get(HTTP_HEADER_X_FORWARDED_PROTO.toLowerCase()))
+            .map(p -> p.equals("https"));
+    }
+
     /**
      * @return view of Headers with lower-case names
      *
