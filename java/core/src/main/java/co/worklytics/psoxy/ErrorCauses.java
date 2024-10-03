@@ -18,6 +18,12 @@ public enum ErrorCauses {
     /**
      * Third party call returned error
      */
-    API_ERROR;
+    API_ERROR,
+
+    /**
+     * request was not sent over HTTPS
+     */
+    HTTPS_REQUIRED,
+    ;
 
 }
