@@ -137,6 +137,17 @@ public class CommonRequestHandler {
 
         logRequestIfVerbose(request);
 
+        // application-level enforcement of HTTPS
+        // (NOTE: should be redundant with infrastructure-level configuration)
+        if (!request.isHttps().orElse(true)) {
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_BAD_REQUEST)
+                    .header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.HTTPS_REQUIRED.name())
+                    .body("Requests MUST be sent over HTTPS")
+                    .build();
+        }
+
+
         Optional<HttpEventResponse> healthCheckResponse = healthCheckRequestHandler.handleIfHealthCheck(request);
         if (healthCheckResponse.isPresent()) {
             return healthCheckResponse.get();
