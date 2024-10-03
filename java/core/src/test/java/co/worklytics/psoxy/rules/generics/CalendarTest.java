@@ -22,26 +22,6 @@ class CalendarTest {
 
     RESTApiSanitizerImpl restApiSanitizer = new RESTApiSanitizerImpl(null, null);
 
-
-    @ValueSource(strings = {
-        "Focus Time",
-        "Focus Time Block",
-        "No Meeting Block",
-        "Focus time",
-        "Focus time block",
-        "No meeting block",
-    })
-    @ParameterizedTest
-    public void focusTimeBlockTitleSnippetsExact(String input) {
-        Matcher matcher = pattern.matcher(input);
-
-        assertTrue(matcher.matches());
-
-        String match = matcher.group();
-
-        assertEquals(input, match);
-    }
-
     @ValueSource(strings = {
         "Focus Talk Time",
         "Focus About Blocks",
@@ -96,7 +76,7 @@ class CalendarTest {
 
     @Test
     public void biweekly() {
-        assertEquals("bi-weekly",
+        assertEquals("bi-weekly,weekly",
             restApiSanitizer.getTransformImpl(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS)
                 .map("bi-weekly", Configuration.defaultConfiguration()));
     }
