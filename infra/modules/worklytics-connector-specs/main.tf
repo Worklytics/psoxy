@@ -971,14 +971,14 @@ EOT
         {
           name : "CLIENT_ID"
           writable : false
-          sensitive : false
+          sensitive : false # zoom renders in clear in console
           value_managed_by_tf : false
           description : "Client ID of the Zoom 'Server-to-Server' OAuth App used by the Connector to retrieve Zoom data. Value should be obtained from your Zoom admin."
         },
         {
           name : "ACCOUNT_ID"
           writable : false
-          sensitive : false
+          sensitive : false # zoom renders in clear in console
           value_managed_by_tf : false
           description : "Account ID of the Zoom tenant from which the Connector will retrieve Zoom data. Value should be obtained from your Zoom admin."
         },
