@@ -978,7 +978,7 @@ EOT
         {
           name : "ACCOUNT_ID"
           writable : false
-          sensitive : true
+          sensitive : false
           value_managed_by_tf : false
           description : "Account ID of the Zoom tenant from which the Connector will retrieve Zoom data. Value should be obtained from your Zoom admin."
         },
