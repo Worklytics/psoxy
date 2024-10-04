@@ -120,7 +120,7 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
 
             Optional<T> r;
             if (Objects.equals(parameterResponse.parameter().value(), PLACEHOLDER_VALUE)) {
-                log.warning("Found placeholder value for " + paramName + "; this is either a misconfiguration, or a value that proxy itself should later fill.");
+                log.info("Found placeholder value for " + paramName + "; this is either a misconfiguration, or a value that proxy itself should later fill.");
                 r = Optional.empty();
             } else {
                 if (envVarsConfig.isDevelopment()) {
