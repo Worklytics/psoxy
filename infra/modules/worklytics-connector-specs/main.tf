@@ -989,13 +989,7 @@ EOT
           value_managed_by_tf : false
           description : "Short-lived Oauth access_token used by connector to retrieve Zoom data. Filled by Proxy instance."
         },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true
-          sensitive : true
-          value_managed_by_tf : false
-        }, # q: needed? per logic as of 9 June 2023, would be created
+        # used to have OAUTH_REFRESH_TOKEN; but as of Sept 2024, seeing that it's not being used
       ],
       reserved_concurrent_executions : null # 1
       example_api_calls_user_to_impersonate : null
