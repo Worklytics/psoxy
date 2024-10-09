@@ -61,6 +61,10 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
 
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {
+        if (property.isEnvVarOnly()) {
+            throw new IllegalArgumentException("Can't put env-only config property: " + property);
+        }
+
         String key = parameterName(property);
         SecretName secretName = SecretName.of(projectId, key);
         try {
@@ -93,6 +97,11 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
     @SneakyThrows
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
+        if (property.isEnvVarOnly()) {
+            Optional.empty();
+        }
+
+
         String paramName = parameterName(property);
 
         SecretName secretName = SecretName.of(projectId, paramName);

@@ -48,6 +48,9 @@ public class SecretsManagerSecretStore implements SecretStore {
 
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {
+        if (property.isEnvVarOnly()) {
+            throw new IllegalArgumentException("Can't put env-only config property: " + property);
+        }
         String id = secretId(property);
         try {
             PutSecretValueRequest request = PutSecretValueRequest.builder()
@@ -84,6 +87,9 @@ public class SecretsManagerSecretStore implements SecretStore {
     }
 
     <T> Optional<T> getConfigPropertyAsOptional(ConfigProperty property, Function<GetSecretValueResponse, T> mapping) {
+        if (property.isEnvVarOnly()) {
+            return Optional.empty();
+        }
 
         String id = secretId(property);
         try {
