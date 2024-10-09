@@ -9,17 +9,13 @@ to perform santization generally across many fields and endpoints.
 
 ## Can Psoxy invocation be locked to a set of known IP addresses?
 
-Yes, but only to a broad set of IP blocks that are not exclusive to your Worklytics tenant. As
-requests from your Worklytics tenant to your Psoxy instances are authenticated via identity
-federation (OIDC) and authorized by your Cloud providers IAM policies, IP-based restrictions are not
-necessary.
+Yes, but this is an add-on feature to your Worklytics subscription that must be enabled for your
+Worklytics  tenant. Please contact [sales@worklytics.co](mailto:sales@worklytics.co] to access this
+feature.
 
-If you take this approach, you will be responsible for updating your IP restrictions frequently as
-GCP changes their IP blocks, or your data flow to Worklytics may break. As such, this is not
-officially supported by Worklytics. For an example of how to do this, see [worklytics-ip-blocks](../infra/modules/worklytics-ip-blocks/README.md) module.
-
-Your Worklytics tenant is a process running in GCP, personified by a unique GCP service account. You
-simply use your cloud's IAM to grant that service account access to your psoxy instance.
+Note that all requests from your Worklytics tenant to your Psoxy instances are authenticated via identity
+federation (OIDC) and authorized by your Cloud providers IAM policies, so IP-based restrictions are only
+a marginal, redundant control in addition to this.
 
 This is functionally equivalent to how access is authenticated and authorized to within and between
 any public cloud infrastructure. Eg, access to your S3 buckets is authorized via a policy you
@@ -36,7 +32,8 @@ See [AWS Authentication and Authorization](aws/authentication-authorization.md) 
 See [GCP Authentication and Authorization](gcp/authentication-authorization.md) for more details.
 
 And always remember: an IP is **not** an authenticated identity for a client, and should not be
-relied upon as an authentication mechanism. IPs can be spoofed. It is at best an extra control.
+relied upon as an authentication mechanism. IPs can be spoofed. It is an extra control on top of the core
+access control policy.
 
 ## Can Psoxy instances be deployed behind an AWS API Gateway?
 
