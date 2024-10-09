@@ -5,7 +5,7 @@
 terraform {
   required_providers {
     azuread = {
-      version = ">= 2.7.0, < 3.0.0"
+      version = ">= 2.44.0, < 4.0.0"
     }
   }
 }
@@ -13,11 +13,7 @@ terraform {
 data "azuread_application_published_app_ids" "well_known" {}
 
 data "azuread_service_principal" "msgraph" {
-  # Deprecated since 2.44.0:
-  # https://registry.terraform.io/providers/hashicorp/azuread/2.44.0/docs/data-sources/service_principal
-  application_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
-  # Uncomment when azuread version is bumped to 2.44.0 or greater
-  # client_id      = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
+  client_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
 }
 
 resource "azuread_application" "connector" {
@@ -60,9 +56,5 @@ resource "azuread_application" "connector" {
 }
 
 output "connector" {
-  value = merge(azuread_application.connector,
-    # ensure client_id is filled, even for older versions of Azure AD provider
-    {
-      client_id = try(azuread_application.connector.client_id, azuread_application.connector.application_id)
-  })
+  value = azuread_application.connector
 }
