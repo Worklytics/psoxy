@@ -2,7 +2,7 @@
 
 * [Worklytics Pseudonymizing Proxy](README.md)
 * [Overview](overview.md)
-  * [Authentication](authentication-authorization)
+  * [Authentication](authentication-authorization.md)
 * [Install Prerequisites](prereqs-ubuntu.md)
 * [AWS](aws/README.md)
   * [Getting Started](aws/getting-started.md)
