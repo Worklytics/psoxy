@@ -25,7 +25,7 @@ Please note that this role is the least-privileged role sufficient for this task
 Application), per Microsoft's documentation. See
 [Least privileged roles by task in Microsoft Entra ID](https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/delegate-by-task#enterprise-applications).
 
-This role is needed _ONLY_ for the initial `terraform apply` . After each Azure AD enterprise
+This role is needed _ONLY_ for the initial `terraform apply` . After each Entra ID enterprise
 application is created, the user will be set as the `owner` of that application, providing ongoing
 access to read and update the application's settings. At that point, the general role can be
 removed.
@@ -51,7 +51,7 @@ Psoxy uses
 to authenticate with the Microsoft Graph API. This approach avoids the need for any secrets to be
 exchanged between your Psoxy instances and your Microsoft 365 tenant. Rather, each API request from
 the proxy to Microsoft Graph API is signed by an identity credential generated in your host cloud
-platform. You configure your Azure AD application for each connection to trust this identity
+platform. You configure your Entra ID application for each connection to trust this identity
 credential as identifying the application, and Microsoft trusts your host cloud platform (AWS/GCP)
 as an external identity provider of those credentials.
 
@@ -64,7 +64,7 @@ proxy host platform)
 
 ![Microsoft Workload Identity Federation Scenarios](msft-workload-identity-federation-scenarios.png)
 
-The video below explains the general idea for identity federation for Azure AD-gated resources more
+The video below explains the general idea for identity federation for Entra ID-gated resources more
 generally, of which your Graph API is an example:
 {% embed url="https://www.youtube.com/watch?v=WIs3IRCJhEo" %}
 
