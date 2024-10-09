@@ -1,6 +1,6 @@
 # Table of contents
 
-* [PSOXY](README.md)
+* [Worklytics Pseudonymizing Proxy](README.md)
 * [Overview](overview.md)
   * [Authentication](authentication-authorization)
 * [Install Prerequisites](prereqs-ubuntu.md)
