@@ -92,12 +92,25 @@ NOTE: that `Mail.ReadBasic` affords only access to email metadata, not content/a
 NOTE: These are all 'Application' scopes, allowing the proxy itself data access as an application,
 rather than on behalf of a specific authenticated end-user ('Delegated' scopes).
 
+### Single Entra ID Application for Multiple Connections
+
+Our [AWS example](https://github.com/Worklytics/psoxy-example-aws/tree/main) supports using a SINGLE Entra ID application for multiple connections,
+instead of one for each. This could be ease management, but requires that you determine the superset of scopes needed across all connectors you wish to use and create
+the Entra ID application with those scopes via the MSFT CLI or portal.
+
+If you lack the `Cloud Application Administrator` role, you can ask someone in your organization with that rule to create the Application for you.
+
+Then you obtain the `Object ID` of the Entra ID application you created, and set it as the value of `msft_connector_app_object_id`
+in your `terraform.tfvars` file. See:
+
+https://github.com/Worklytics/psoxy-example-aws/blob/main/msft-365-variables.tf
+
 ## Troubleshooting
 
 ### Lack of 'Cloud Application Administrator' role
 
 If you do not have the 'Cloud Application Administrator' role, someone with that or an alternative
-role that can create Azure AD applications can create one application per connection and set you as
+role that can create Entra ID applications can create one application per connection and set you as
 an owner of each.
 
 You can then `import` these into your Terraform configuration.
