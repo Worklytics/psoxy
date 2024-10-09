@@ -95,7 +95,7 @@ rather than on behalf of a specific authenticated end-user ('Delegated' scopes).
 ### Single Entra ID Application for Multiple Connections
 
 Our [AWS example](https://github.com/Worklytics/psoxy-example-aws/tree/main) supports using a SINGLE Entra ID application for multiple connections,
-instead of one for each. This could be ease management, but requires that you determine the superset of scopes needed across all connectors you wish to use and create
+instead of one for each. This could ease management, but requires that you determine the superset of scopes needed across all connectors you wish to use and create
 the Entra ID application with those scopes via the MSFT CLI or portal.
 
 If you lack the `Cloud Application Administrator` role, you can ask someone in your organization with that rule to create the Application for you.
