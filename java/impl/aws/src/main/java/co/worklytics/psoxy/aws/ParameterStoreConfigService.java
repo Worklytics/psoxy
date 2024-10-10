@@ -73,6 +73,10 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
 
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {
+        if (property.isEnvVarOnly()) {
+            throw new IllegalArgumentException("Can't put env-only config property: " + property);
+        }
+
         String key = parameterName(property);
         try {
             PutParameterRequest parameterRequest = PutParameterRequest.builder()
@@ -104,6 +108,10 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
     }
 
     <T> Optional<T> getConfigPropertyAsOptional(ConfigProperty property, Function<GetParameterResponse, T> mapping) {
+        if (property.isEnvVarOnly()) {
+            return Optional.empty();
+        }
+
         String paramName = parameterName(property);
 
         try {

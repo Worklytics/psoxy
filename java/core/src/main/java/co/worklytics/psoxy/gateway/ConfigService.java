@@ -33,6 +33,13 @@ public interface ConfigService {
         default Boolean noCache() {
             return false;
         }
+
+        /**
+         * @return whether this property is limited to being set via environment variables only
+         */
+        default boolean isEnvVarOnly() {
+            return false;
+        }
     }
 
     /**

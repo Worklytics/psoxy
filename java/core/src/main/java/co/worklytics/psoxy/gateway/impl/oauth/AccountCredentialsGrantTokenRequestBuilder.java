@@ -52,6 +52,7 @@ public class AccountCredentialsGrantTokenRequestBuilder implements OAuthRefreshT
         CLIENT_ID,
         // secrets
         CLIENT_SECRET,
+        ;
     }
 
     @Getter(onMethod_ = @Override)
