@@ -18,7 +18,7 @@ be set as the encryption key for these resources. A few caveats:
 - CloudWatch must be able to use the key, as described in
   [AWS CloudWatch docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html)
 
-In `example-dev/aws-all/kms-cmek.tf`, we provide a bunch of lines that you can uncomment to use
+In `example-dev/aws/kms-cmek.tf`, we provide a bunch of lines that you can uncomment to use
 encryption on S3 and properly set key policy to support S3/CloudWatch use.
 
 For production use, you should adapt the key policy to your environment and scope as needed to

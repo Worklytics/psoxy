@@ -93,6 +93,7 @@ locals {
 
   enabled_to_entraid_object = { for k, msft_connector in module.worklytics_connectors_msft_365.enabled_api_connectors : k => {
     connector_id : msft_connector.connector.id
+    application_id : msft_connector.connector.application_id
     display_name : msft_connector.display_name
     }
   }
@@ -110,12 +111,12 @@ module "msft_connection_auth_federation" {
   source = "../../modules/azuread-federated-credentials"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=rc-v0.5.0"
 
-  application_object_id = each.value.connector_id
-  display_name          = "${local.env_qualifier}AccessFromAWS"
-  description           = "AWS federation to be used for ${local.env_qualifier} Connectors - ${each.value.display_name}${var.connector_display_name_suffix}"
-  issuer                = "https://cognito-identity.amazonaws.com"
-  audience              = module.cognito_identity_pool[0].pool_id
-  subject               = module.cognito_identity[0].identity_id[each.key]
+  application_id = each.value.client_id
+  display_name   = "${local.env_qualifier}AccessFromAWS"
+  description    = "AWS federation to be used for ${local.env_qualifier} Connectors - ${each.value.display_name}${var.connector_display_name_suffix}"
+  issuer         = "https://cognito-identity.amazonaws.com"
+  audience       = module.cognito_identity_pool[0].pool_id
+  subject        = module.cognito_identity[0].identity_id[each.key]
 }
 
 locals {

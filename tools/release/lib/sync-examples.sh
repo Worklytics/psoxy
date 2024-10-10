@@ -24,7 +24,7 @@ if [ -z "$PATH_TO_REPO" ]; then
   exit 1
 fi
 
-SOURCE_OF_TRUTH="aws-all"
+SOURCE_OF_TRUTH="aws"
 REPLICAS=("gcp")
 FILES_TO_COPY=("google-workspace.tf" "google-workspace-variables.tf" "misc-data-source-variables.tf" "msft-365-variables.tf")
 

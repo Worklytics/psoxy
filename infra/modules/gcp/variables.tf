@@ -3,12 +3,6 @@ variable "project_id" {
   description = "id of GCP project that will host psoxy instance"
 }
 
-# left for backwards compatibility to avoid errors; v0.4.20 modules for gcp-psoxy-rest
-variable "invoker_sa_emails" {
-  type        = list(string)
-  description = "DEPRECATED; emails of GCP service accounts to allow to invoke ALL cloud functions in target project"
-  default     = []
-}
 
 variable "bucket_location" {
   type        = string

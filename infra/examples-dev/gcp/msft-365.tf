@@ -36,11 +36,11 @@ module "msft-connection-auth-federation" {
   source = "../../modules/azuread-federated-credentials"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=rc-v0.5.0"
 
-  application_object_id = each.value.connector.id
-  display_name          = "GcpFederation"
-  description           = "Federation to be used for psoxy Connector - ${each.value.display_name}${local.env_qualifier}"
-  issuer                = "https://accounts.google.com"
-  subject               = module.psoxy.api_connector_gcp_execution_service_accounts[each.key].unique_id
+  application_id = each.value.connector.application_id
+  display_name   = "GcpFederation"
+  description    = "Federation to be used for psoxy Connector - ${each.value.display_name}${local.env_qualifier}"
+  issuer         = "https://accounts.google.com"
+  subject        = module.psoxy.api_connector_gcp_execution_service_accounts[each.key].unique_id
 }
 
 locals {

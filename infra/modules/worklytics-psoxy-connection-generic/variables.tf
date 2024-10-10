@@ -1,7 +1,6 @@
-# TODO: rename to `proxy_instance_id` in future versions; avoid coupling to brand name
-variable "psoxy_instance_id" {
+variable "proxy_instance_id" {
   type        = string
-  description = "friendly unique-id for Psoxy instance"
+  description = "friendly unique-id for proxy instance"
   default     = null
 }
 
@@ -11,15 +10,14 @@ variable "connector_id" {
   default     = "" # will be REQUIRED for v0.5 onwards
 }
 
-# TODO: rename to `host_platform_id` in future versions; avoid coupling to brand name
-variable "psoxy_host_platform_id" {
+variable "host_platform_id" {
   type        = string
-  description = "Psoxy host platform id (AWS, GCP, etc"
+  description = "Proxy host platform id (AWS, GCP, etc)"
   default     = "GCP"
 
   validation {
-    condition     = contains(["AWS", "GCP"], var.psoxy_host_platform_id)
-    error_message = "`psoxy_host_platform_id` must be one of AWS or GCP."
+    condition     = contains(["AWS", "GCP"], var.host_platform_id)
+    error_message = "`host_platform_id` must be one of AWS or GCP."
   }
 }
 

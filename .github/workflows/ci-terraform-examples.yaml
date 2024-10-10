@@ -13,11 +13,7 @@ jobs:
       matrix:
         example_path: [
                         'examples-dev/aws',
-                        'examples-dev/aws-all',
-                        'examples-dev/aws-google-workspace',
-                        'examples-dev/aws-msft-365',
                         'examples-dev/gcp',
-                        'examples-dev/gcp-google-workspace',
         ]
         terraform_version: [ '~1.6.0', '~1.7.0', '~1.8.0', '~1.9.0', 'latest' ]
     uses: ./.github/workflows/ci-terraform-example.yaml

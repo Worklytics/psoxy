@@ -6,8 +6,8 @@
 module "generic" {
   source = "../worklytics-psoxy-connection-generic"
 
-  psoxy_instance_id      = var.psoxy_instance_id
-  psoxy_host_platform_id = "AWS"
+  proxy_instance_id      = var.proxy_instance_id
+  host_platform_id       = "AWS"
   todo_step              = var.todo_step
   display_name           = var.display_name
   worklytics_host        = var.worklytics_host
@@ -16,7 +16,7 @@ module "generic" {
 
 
   settings_to_provide = merge(
-    var.psoxy_endpoint_url == null ? {} : { "Psoxy Base URL" = var.psoxy_endpoint_url },
+    var.proxy_endpoint_url == null ? {} : { "Psoxy Base URL" = var.proxy_endpoint_url },
     # Source Bucket (bulk file) case
     var.bucket_name == null ? {} : { "Bucket Name" = var.bucket_name },
     {
