@@ -28,6 +28,8 @@ public class APIGatewayV1ProxyEventRequestAdapterTest {
         assertFalse(requestAdapter.getQuery().isPresent());
 
         assertFalse(requestAdapter.getClientIp().isPresent());
+
+        assertFalse(requestAdapter.isHttps().isPresent());
     }
 
     @SneakyThrows
@@ -46,5 +48,7 @@ public class APIGatewayV1ProxyEventRequestAdapterTest {
 
         assertEquals("name=John", requestAdapter.getQuery().get());
 
+
+        assertFalse(requestAdapter.isHttps().isPresent());
     }
 }

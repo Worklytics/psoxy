@@ -25,7 +25,7 @@ Please note that this role is the least-privileged role sufficient for this task
 Application), per Microsoft's documentation. See
 [Least privileged roles by task in Microsoft Entra ID](https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/delegate-by-task#enterprise-applications).
 
-This role is needed _ONLY_ for the initial `terraform apply` . After each Azure AD enterprise
+This role is needed _ONLY_ for the initial `terraform apply` . After each Entra ID enterprise
 application is created, the user will be set as the `owner` of that application, providing ongoing
 access to read and update the application's settings. At that point, the general role can be
 removed.
@@ -51,7 +51,7 @@ Psoxy uses
 to authenticate with the Microsoft Graph API. This approach avoids the need for any secrets to be
 exchanged between your Psoxy instances and your Microsoft 365 tenant. Rather, each API request from
 the proxy to Microsoft Graph API is signed by an identity credential generated in your host cloud
-platform. You configure your Azure AD application for each connection to trust this identity
+platform. You configure your Entra ID application for each connection to trust this identity
 credential as identifying the application, and Microsoft trusts your host cloud platform (AWS/GCP)
 as an external identity provider of those credentials.
 
@@ -64,7 +64,7 @@ proxy host platform)
 
 ![Microsoft Workload Identity Federation Scenarios](msft-workload-identity-federation-scenarios.png)
 
-The video below explains the general idea for identity federation for Azure AD-gated resources more
+The video below explains the general idea for identity federation for Entra ID-gated resources more
 generally, of which your Graph API is an example:
 {% embed url="https://www.youtube.com/watch?v=WIs3IRCJhEo" %}
 
@@ -72,6 +72,9 @@ generally, of which your Graph API is an example:
 ### Authorization and Scopes
 
 The following Scopes are required for each connector. Note that they are all READ-only scopes.
+
+Connectors are independent, so you can choose to connect to only one or a subset of the connectors.
+For example, pilot/PoC deployments typically use only the `Calendar` connector initially.
 
 | Source&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Examples &nbsp;&nbsp;                                                                                                        | Application Scopes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 |--------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -89,12 +92,25 @@ NOTE: that `Mail.ReadBasic` affords only access to email metadata, not content/a
 NOTE: These are all 'Application' scopes, allowing the proxy itself data access as an application,
 rather than on behalf of a specific authenticated end-user ('Delegated' scopes).
 
+### Single Entra ID Application for Multiple Connections
+
+Our [AWS example](https://github.com/Worklytics/psoxy-example-aws/tree/main) supports using a SINGLE Entra ID application for multiple connections,
+instead of one for each. This could ease management, but requires that you determine the superset of scopes needed across all connectors you wish to use and create
+the Entra ID application with those scopes via the MSFT CLI or portal.
+
+If you lack the `Cloud Application Administrator` role, you can ask someone in your organization with that rule to create the Application for you.
+
+Then you obtain the `Object ID` of the Entra ID application you created, and set it as the value of `msft_connector_app_object_id`
+in your `terraform.tfvars` file. See:
+
+https://github.com/Worklytics/psoxy-example-aws/blob/main/msft-365-variables.tf
+
 ## Troubleshooting
 
 ### Lack of 'Cloud Application Administrator' role
 
 If you do not have the 'Cloud Application Administrator' role, someone with that or an alternative
-role that can create Azure AD applications can create one application per connection and set you as
+role that can create Entra ID applications can create one application per connection and set you as
 an owner of each.
 
 You can then `import` these into your Terraform configuration.

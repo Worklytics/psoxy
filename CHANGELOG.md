@@ -7,6 +7,14 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
+## [0.5.0](https://github.com/Worklytics/psoxy/release/tag/v0.5.0)
+
+BREAKING:
+  - min `azuread` provider is generally 2.44; if you're using an older version, you'll need to
+    upgrade (`terraform init --upgrade`)
+  - `azuread-local-cert` module variables have changed; you must now pass `application_id` instead
+    of `application_object_id`; these refer to different values you can obtain via the Entra ID web
+    portal (formally Azure AD portal)
   - variables to `aws-host`/`gcp-host` modules to have changed slightly; if you initially copied an
     example based on 0.4.x, you may have to update some variable names in your `main.tf`.
 
