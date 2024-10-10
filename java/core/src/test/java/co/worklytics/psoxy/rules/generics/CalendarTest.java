@@ -30,7 +30,7 @@ class CalendarTest {
         "Focus Time Block,'Focus Time,Focus'",
         "Focus: Secret Project,Focus",
         "No Meeting Wednesday,No Meeting",
-        " No Meetings,'No Meetings,No Meetings'", // q: why????
+        " No Meetings,No Meetings",
         "Prep Time,Prep",
         "Prep Customer Meeting,Prep",
         "Prep: Customer,Prep",

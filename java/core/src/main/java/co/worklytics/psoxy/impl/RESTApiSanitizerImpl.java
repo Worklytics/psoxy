@@ -310,8 +310,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
         List<Pattern> patterns = transform.getAllowedPhrases().stream()
             .map(p -> "\\Q" + p + "\\E") // quote it
-            .map(p -> "\\b" + p + "[\\\\s:]*\\b") //boundary match, with optional whitespace or colon at end
-            .map(p -> ".*?(" + p + ").*?") //wrap in .*? to match anywhere in the string, but reluctantly
+            .map(p -> "\\b(" + p + ")[\\s:]*\\b") //boundary match, with optional whitespace or colon at end
+            .map(p -> ".*?" + p + ".*?") //wrap in .*? to match anywhere in the string, but reluctantly
             .map(p -> Pattern.compile(p, CASE_INSENSITIVE))
             .collect(Collectors.toList());
 
