@@ -8,6 +8,7 @@ import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.UrlEncodedContent;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
@@ -59,23 +60,26 @@ public class AccountCredentialsGrantTokenRequestBuilder implements OAuthRefreshT
 
     @Override
     public HttpContent buildPayload() {
+
+        //trim to avoid copy-paste errors
+        //q : check for non-printable chars or anything like that
+        String accountId = StringUtils.trim(config.getConfigPropertyAsOptional(ConfigProperty.ACCOUNT_ID)
+            .orElseGet(() -> secretStore.getConfigPropertyOrError(ConfigProperty.ACCOUNT_ID)));
+
         // The documentation doesn't say anything to use POST data, but passes everything in the URL
         // Tested manually and, for the moment, it is accepted as POST data
         Map<String, String> data = new TreeMap<>();
         data.put(PARAM_GRANT_TYPE, getGrantType());
-        //q: move to config? cost-benefit, mainly
-        data.put(PARAM_ACCOUNT_ID,
-            config.getConfigPropertyAsOptional(ConfigProperty.ACCOUNT_ID)
-            .orElseGet(() -> secretStore.getConfigPropertyOrError(ConfigProperty.ACCOUNT_ID)));
+        data.put(PARAM_ACCOUNT_ID, accountId);
         return new UrlEncodedContent(data);
     }
 
     @Override
     public void addHeaders(HttpHeaders httpHeaders) {
-        String clientId = config.getConfigPropertyAsOptional(ConfigProperty.CLIENT_ID)
-            .orElseGet(() -> secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_ID));
+        String clientId = StringUtils.trim(config.getConfigPropertyAsOptional(ConfigProperty.CLIENT_ID)
+            .orElseGet(() -> secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_ID)));
 
-        String clientSecret = secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET);
+        String clientSecret = StringUtils.trim(secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET));
         String token = Base64.getEncoder()
             .encodeToString(String.join(":", clientId, clientSecret).getBytes(StandardCharsets.UTF_8));
         httpHeaders.setAuthorization("Basic " + token);
