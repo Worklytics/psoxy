@@ -10,7 +10,7 @@ to perform santization generally across many fields and endpoints.
 ## Can Psoxy invocation be locked to a set of known IP addresses?
 
 Yes, but this is an add-on feature to your Worklytics subscription that must be enabled for your
-Worklytics  tenant. Please contact [sales@worklytics.co](mailto:sales@worklytics.co] to access this
+Worklytics tenant. Please contact [sales@worklytics.co](mailto:sales@worklytics.co] to access this
 feature.
 
 Note that all requests from your Worklytics tenant to your Psoxy instances are authenticated via identity
