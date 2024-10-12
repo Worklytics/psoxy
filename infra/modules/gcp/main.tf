@@ -19,6 +19,7 @@ resource "google_project_service" "gcp_infra_api" {
     "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com", # seems required w newer Google provider versions, for resources we use
     "iam.googleapis.com",     # manage IAM via terraform (as of 2023-04-17, internal dev envs didn't have this; so really needed?)
+    "run.googleapis.com", # required for cloud functions gen2
     "secretmanager.googleapis.com",
     "artifactregistry.googleapis.com", # for GCP Artifact Registry, as required for new Cloud Functions since Feb 2024
     # "serviceusage.googleapis.com", # manage service APIs via terraform (prob already
