@@ -72,7 +72,7 @@ public class Calendar {
         "food",
         "happy hour",
         "lunch",
-        "office hour",
+        "office hours",
         "onsite",
         "on-site",
         "social",

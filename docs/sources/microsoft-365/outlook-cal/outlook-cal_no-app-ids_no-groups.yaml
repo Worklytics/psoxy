@@ -83,7 +83,7 @@ endpoints:
           - "food"
           - "happy hour"
           - "lunch"
-          - "office hour"
+          - "office hours"
           - "onsite"
           - "on-site"
           - "social"

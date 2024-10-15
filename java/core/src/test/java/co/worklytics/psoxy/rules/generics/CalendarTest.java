@@ -34,6 +34,7 @@ class CalendarTest {
         "Prep Time,Prep",
         "Prep Customer Meeting,Prep",
         "Prep: Customer,Prep",
+        "call,call",
 
         // extended cases
         "Team weekly,weekly",
