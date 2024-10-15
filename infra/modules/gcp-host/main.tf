@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.3, < 1.10"
+  required_version = ">= 1.6, < 2.0"
 }
 
 locals {
@@ -7,8 +7,6 @@ locals {
   config_parameter_prefix               = var.config_parameter_prefix == "" ? local.default_config_parameter_prefix : var.config_parameter_prefix
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
-
-  secret_replica_locations = coalesce(var.replica_regions, var.secret_replica_locations)
 }
 
 module "psoxy" {
@@ -90,7 +88,7 @@ module "secrets" {
   path_prefix       = "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_"
   secrets           = local.secrets_to_provision[each.key]
   default_labels    = var.default_labels
-  replica_locations = local.secret_replica_locations
+  replica_locations = var.secret_replica_locations
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionManager_on_writable_secret" {
@@ -272,7 +270,7 @@ resource "google_secret_manager_secret" "additional_transforms" {
   replication {
     user_managed {
       dynamic "replicas" {
-        for_each = local.secret_replica_locations
+        for_each = var.secret_replica_locations
         content {
           location = replicas.value
         }

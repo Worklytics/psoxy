@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         example_path: [
-          'examples-dev/aws-all',
+          'examples-dev/aws',
           'examples-dev/gcp',
         ]
     uses: ./.github/workflows/terraform-sec-analysis.yaml

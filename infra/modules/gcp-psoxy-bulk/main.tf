@@ -1,11 +1,3 @@
-terraform {
-  required_providers {
-    google = {
-      version = ">= 3.74, <= 5.0"
-    }
-  }
-}
-
 # constants
 locals {
   SA_NAME_MIN_LENGTH             = 6

@@ -1,6 +1,6 @@
-variable "psoxy_instance_id" {
+variable "proxy_instance_id" {
   type        = string
-  description = "friendly unique-id for Psoxy instance"
+  description = "friendly unique-id for proxy instance"
   default     = null
 }
 
@@ -25,7 +25,7 @@ variable "aws_region" {
   description = "AWS region in which proxy lambda is deployed"
 }
 
-variable "psoxy_endpoint_url" {
+variable "proxy_endpoint_url" {
   type        = string
   description = "URL of endpoint which hosts Psoxy instance, for API connectors."
   default     = null

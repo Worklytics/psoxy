@@ -14,12 +14,8 @@ jobs:
     strategy:
       matrix:
         example_path: [
-          'examples/aws-google-workspace',
-          'examples/aws-msft-365',
           'examples/gcp-bootstrap-cft',
           'examples/gcp-bootstrap-simple',
-          'examples/gcp-google-workspace',
-          'examples/msft-365'
         ]
         terraform_version: [ '~1.6.0', '~1.7.0', '~1.8.0', '~1.9.0', 'latest' ]
     uses: ./.github/workflows/ci-terraform-example.yaml
