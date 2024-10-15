@@ -17,6 +17,8 @@ BREAKING:
     portal (formally Azure AD portal blade)
   - variables to `aws-host`/`gcp-host` modules to have changed slightly; if you initially copied an
     example based on 0.4.x, you may have to update some variable names in your `main.tf`.
+  - min `google` provider is not 5.0; this applies whether you're using GCP-hosted proxy, or merely Google Workspace as a
+    data source
 
 ## [0.4.61](https://github.com/Worklytics/psoxy/release/tag/v0.4.61)
  - added some `columnsToPseudonymizeIfPresent` to survey bulk connectors; these are to avoid PII
