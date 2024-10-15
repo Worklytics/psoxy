@@ -101,6 +101,7 @@ locals {
     "shared" : {
       connector_id : try(local.shared_connector.connector.id, null),
       display_name : "Shared"
+      application_id : try(local.shared_connector.connector.application_id, null)
     }
   }
 }
@@ -111,7 +112,7 @@ module "msft_connection_auth_federation" {
   source = "../../modules/azuread-federated-credentials"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=rc-v0.5.0"
 
-  application_id = each.value.client_id
+  application_id = each.value.application_id
   display_name   = "${local.env_qualifier}AccessFromAWS"
   description    = "AWS federation to be used for ${local.env_qualifier} Connectors - ${each.value.display_name}${var.connector_display_name_suffix}"
   issuer         = "https://cognito-identity.amazonaws.com"
