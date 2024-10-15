@@ -1,14 +1,6 @@
 # deployment for a single Psoxy instance in GCP project that has be initialized for Psoxy.
 # project itself may hold MULTIPLE psoxy instances
 
-terraform {
-  required_providers {
-    google = {
-      version = "~> 4.12"
-    }
-  }
-}
-
 data "google_project" "project" {
   project_id = var.project_id
 }
