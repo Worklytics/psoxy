@@ -19,6 +19,8 @@ BREAKING:
     example based on 0.4.x, you may have to update some variable names in your `main.tf`.
   - min `google` provider is not 5.0; this applies whether you're using GCP-hosted proxy, or merely Google Workspace as a
     data source
+  - various migrations applicable to 0.4.x have been removed; if upgrading from 0.4.x, make sure you first upgrade to latest version of 0.4.x (eg, 0.4.61), run
+    `terraform apply`, and THEN update to 0.5.x
 
 ## [0.4.61](https://github.com/Worklytics/psoxy/release/tag/v0.4.61)
  - added some `columnsToPseudonymizeIfPresent` to survey bulk connectors; these are to avoid PII
