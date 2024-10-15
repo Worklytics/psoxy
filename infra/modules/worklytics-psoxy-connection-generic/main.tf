@@ -39,7 +39,7 @@ locals {
 3. Find the connector named "${var.display_name}" and click 'Connect'.
     - If presented with a further screen with several options, choose the 'via Psoxy' one.
 4. Review instructions and click 'Connect' again.
-5. Select `${var.psoxy_host_platform_id}` for "Proxy Instance Type".${local.per_setting_instructions_manual_text}
+5. Select `${var.host_platform_id}` for "Proxy Instance Type".${local.per_setting_instructions_manual_text}
 6. Review any additional settings that connector supports, adjusting values as you see fit, then
    click "Connect".
 EOT
