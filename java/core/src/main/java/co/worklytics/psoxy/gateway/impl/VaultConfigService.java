@@ -42,6 +42,9 @@ public class VaultConfigService implements SecretStore {
         //base64 encoding of an X.509 certificate in PEM format with UTF-8 encoding
         //VAULT_SSL_CERTIFICATE,
         ;
+
+        @Getter
+        private boolean envVarOnly = true;
     }
 
     //q: vault caters to storing secrets in groups, as a "map" (eg key-value pairs)
@@ -126,6 +129,10 @@ public class VaultConfigService implements SecretStore {
     @SneakyThrows
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {
+        if (property.isEnvVarOnly()) {
+            throw new IllegalArgumentException("Can't put env-only config property: " + property);
+        }
+
         vault.logical()
             .write(path(property), Map.of(VALUE_FIELD, value));
     }
@@ -133,6 +140,9 @@ public class VaultConfigService implements SecretStore {
     @SneakyThrows
     @Override
     public String getConfigPropertyOrError(ConfigProperty property) {
+        if (property.isEnvVarOnly()) {
+            throw new IllegalArgumentException("Can't get env-only config property: " + property);
+        }
 
         LogicalResponse response = vault.logical()
             .read(path(property));
@@ -148,6 +158,10 @@ public class VaultConfigService implements SecretStore {
     @SneakyThrows
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
+        if (property.isEnvVarOnly()) {
+            return Optional.empty();
+        }
+
         LogicalResponse response = vault.logical()
             .read(path(property));
 

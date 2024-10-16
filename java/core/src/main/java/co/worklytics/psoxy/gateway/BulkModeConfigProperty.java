@@ -1,9 +1,15 @@
 package co.worklytics.psoxy.gateway;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 /**
  * configuration properties used to control Proxy behavior in Bulk Mode
  *
  */
+@NoArgsConstructor
+@AllArgsConstructor
 public enum BulkModeConfigProperty implements ConfigService.ConfigProperty {
 
     OUTPUT_BUCKET,
@@ -12,7 +18,7 @@ public enum BulkModeConfigProperty implements ConfigService.ConfigProperty {
      * additional transforms to apply to each input file
      * @see co.worklytics.psoxy.storage.StorageHandler.ObjectTransform
      */
-    ADDITIONAL_TRANSFORMS,
+    ADDITIONAL_TRANSFORMS(false),
 
     /**
      * if provided, this path segment will be removed from keys of input object to produce
@@ -50,4 +56,8 @@ public enum BulkModeConfigProperty implements ConfigService.ConfigProperty {
     COMPRESS_OUTPUT_ALWAYS,
 
     ;
+
+
+    @Getter
+    private boolean envVarOnly = true;
 }
