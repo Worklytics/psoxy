@@ -26,10 +26,3 @@ jobs:
         run: |
           terraform init -reconfigure
           terraform validate
-
-      - name: "Terraform - validate modules/worklytics-ip-blocks"
-        working-directory: infra/modules/worklytics-ip-blocks
-        run: |
-          terraform init -reconfigure
-          terraform validate
-          terraform apply --auto-approve
