@@ -53,6 +53,16 @@ resource "azuread_application" "connector" {
       }
     }
   }
+
+  lifecycle {
+    # see https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application#argument-reference
+    ignore_changes = [
+      # '(Optional) References application context information from a Service or Asset Management database.' --> have seen customers manage this outside our provided Terraform
+      service_management_reference,
+      # internal notes; have seen customers manage this outside our provided Terraform
+      notes
+    ]
+  }
 }
 
 output "connector" {
