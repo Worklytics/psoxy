@@ -3,6 +3,7 @@ package co.worklytics.psoxy.aws;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
@@ -48,9 +49,8 @@ public class SecretsManagerSecretStore implements SecretStore {
 
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {
-        if (property.isEnvVarOnly()) {
-            throw new IllegalArgumentException("Can't put env-only config property: " + property);
-        }
+        Preconditions.checkArgument(!property.isEnvVarOnly(), "Can't put env-only config property: " + property);
+
         String id = secretId(property);
         try {
             PutSecretValueRequest request = PutSecretValueRequest.builder()

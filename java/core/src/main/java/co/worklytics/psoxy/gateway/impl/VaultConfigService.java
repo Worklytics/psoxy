@@ -10,6 +10,7 @@ import com.bettercloud.vault.response.AuthResponse;
 import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.response.LookupResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
@@ -129,9 +130,7 @@ public class VaultConfigService implements SecretStore {
     @SneakyThrows
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {
-        if (property.isEnvVarOnly()) {
-            throw new IllegalArgumentException("Can't put env-only config property: " + property);
-        }
+        Preconditions.checkArgument(!property.isEnvVarOnly(), "Can't put env-only config property: " + property);
 
         vault.logical()
             .write(path(property), Map.of(VALUE_FIELD, value));

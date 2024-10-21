@@ -73,9 +73,7 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
 
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {
-        if (property.isEnvVarOnly()) {
-            throw new IllegalArgumentException("Can't put env-only config property: " + property);
-        }
+        Preconditions.checkArgument(!property.isEnvVarOnly(), "Can't put env-only config property: " + property);
 
         String key = parameterName(property);
         try {
