@@ -12,7 +12,7 @@ variable "cert_expiration_days" {
 
 variable "application_id" {
   type        = string
-  description = "application ID of the Azure AD application to authenticate; this is NOT the object ID of the application"
+  description = "application (client) ID of the Azure AD application to authenticate; this is NOT the object ID of the application"
 }
 
 variable "certificate_subject" {

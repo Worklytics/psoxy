@@ -1,7 +1,9 @@
-variable "application_object_id" {
+variable "application_id" {
   type        = string
-  description = "Object ID of the Azure Active Directory Application to assign the federated credential"
+  description = "The resource ID (Object ID) of the Azure Active Directory Application to assign the federated credential"
 }
+# NOTE: naming of above variable aligns to argument name on azuread_application_federated_identity_credential
+# see: https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application_federated_identity_credential
 
 variable "display_name" {
   type        = string

@@ -1,14 +1,6 @@
 # deployment for a single Psoxy instance in GCP project that has be initialized for Psoxy.
 # project itself may hold MULTIPLE psoxy instances
 
-terraform {
-  required_providers {
-    google = {
-      version = "~> 4.12"
-    }
-  }
-}
-
 data "google_project" "project" {
   project_id = var.project_id
 }
@@ -197,7 +189,7 @@ ${local.command_cli_call} -u "${local.proxy_endpoint_url}" --health-check
 
 ${local.command_cli_call} -u "${local.proxy_endpoint_url}$API_PATH" ${local.impersonation_param}
 
-echo "Invoke this script with any of the following as arguments to test other endpoints:${"\r\n\t"}${join("\r\n\t", var.example_api_calls)}"
+echo "Invoke this script with any of the following as arguments to test other endpoints:${"\r\n\t"}${join("\"\r\n\t\"", var.example_api_calls)}"
 EOT
 }
 

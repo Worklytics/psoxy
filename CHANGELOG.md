@@ -13,8 +13,14 @@ BREAKING:
   - min `azuread` provider is generally 2.44; if you're using an older version, you'll need to
     upgrade (`terraform init --upgrade`)
   - `azuread-local-cert` module variables have changed; you must now pass `application_id` instead
-    of `application_object_id`; these refer to different values you can obtain via the Entra ID web
-    portal (formally Azure AD portal)
+    of `application_object_id`; these refer to different values you can obtain via the [Microsoft Entra admin center](https://entra.microsoft.com/#home)
+    portal (formally Azure AD portal blade)
+  - variables to `aws-host`/`gcp-host` modules to have changed slightly; if you initially copied an
+    example based on 0.4.x, you may have to update some variable names in your `main.tf`.
+  - min `google` provider is not 5.0; this applies whether you're using GCP-hosted proxy, or merely Google Workspace as a
+    data source
+  - various migrations applicable to 0.4.x have been removed; if upgrading from 0.4.x, make sure you first upgrade to latest version of 0.4.x (eg, 0.4.61), run
+    `terraform apply`, and THEN update to 0.5.x
 
 ## [0.4.61](https://github.com/Worklytics/psoxy/release/tag/v0.4.61)
  - added some `columnsToPseudonymizeIfPresent` to survey bulk connectors; these are to avoid PII
@@ -27,7 +33,6 @@ BREAKING:
  - MSFT Teams: Support for listing callRecords
 
 ## [0.4.58](https://github.com/Worklytics/psoxy/release/tag/v0.4.58)
- - Including rules for Slack Huddles through *Rooms* as part of conversation history endpoint
  - Rules for Outlook Calendar, Outlook Mail and Teams have been updated for *no app id* and *no group id* cases
    to avoid supporting requests with plain user GUIDs instead of pseudonymized.
  - Slack: Including rules for Slack Huddles through *Rooms* as part of conversation history endpoint
