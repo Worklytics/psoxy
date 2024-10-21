@@ -21,6 +21,9 @@ class ProxyConfigPropertyTest {
     )
     @ParameterizedTest
     public void remoteConfigVars(String paramName) {
+        ProxyConfigProperty property = ProxyConfigProperty.valueOf(paramName);
+        assertNotNull(property);
+        assertFalse(property.isEnvVarOnly());
     }
 
     @ValueSource(
