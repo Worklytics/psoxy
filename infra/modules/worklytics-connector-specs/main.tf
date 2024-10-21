@@ -276,7 +276,7 @@ locals {
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}/events",
-        "/v1.0/users/${var.example_msft_user_guid}/calendarView?startDateTime=2024-10-01T00:00:00Z&endDateTime=${time_static.deployment.id}",
+        "/v1.0/users/${var.example_msft_user_guid}/calendarView?startDateTime=timeadd(time_static.deployment.id, "-4320h")&endDateTime=${time_static.deployment.id}",
         "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
         "/v1.0/groups",
         "/v1.0/groups/{group-id}/members"
