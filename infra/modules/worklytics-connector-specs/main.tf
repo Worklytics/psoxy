@@ -902,7 +902,7 @@ EOT
         "/api/discovery.conversations.list?limit=10",
         "/api/discovery.conversations.info?team={WORKSPACE_ID}&channel={CHANNEL_ID}",
         "/api/discovery.conversations.recent?limit=10",
-        "/api/discovery.conversations.history?team={WORKSPACE_ID}&channel={CHANNEL_ID}&limit=10",
+        "/api/discovery.conversations.history?reactions=1&team={WORKSPACE_ID}&channel={CHANNEL_ID}&limit=10",
         "/api/discovery.users.list?limit=5",
       ]
       external_token_todo : <<EOT
