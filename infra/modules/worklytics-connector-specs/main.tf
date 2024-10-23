@@ -276,7 +276,7 @@ locals {
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}/events",
-        "/v1.0/users/${var.example_msft_user_guid}/calendarView?startDateTime=2022-10-01T00:00:00Z&endDateTime=${time_static.deployment.id}",
+        "/v1.0/users/${var.example_msft_user_guid}/calendarView?startDateTime=${timeadd(time_static.deployment.id, "-4320h")}&endDateTime=${time_static.deployment.id}",
         "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
         "/v1.0/groups",
         "/v1.0/groups/{group-id}/members"
@@ -902,7 +902,7 @@ EOT
         "/api/discovery.conversations.list?limit=10",
         "/api/discovery.conversations.info?team={WORKSPACE_ID}&channel={CHANNEL_ID}",
         "/api/discovery.conversations.recent?limit=10",
-        "/api/discovery.conversations.history?team={WORKSPACE_ID}&channel={CHANNEL_ID}&limit=10",
+        "/api/discovery.conversations.history?reactions=1&team={WORKSPACE_ID}&channel={CHANNEL_ID}&limit=10",
         "/api/discovery.users.list?limit=5",
       ]
       external_token_todo : <<EOT
