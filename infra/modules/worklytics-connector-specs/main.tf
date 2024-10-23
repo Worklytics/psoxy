@@ -898,7 +898,7 @@ EOT
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/api/discovery.enterprise.info",
+        "/api/discovery.enterprise.info?include_deleted=false&limit=5",
         "/api/discovery.conversations.list?limit=10",
         "/api/discovery.conversations.info?team={WORKSPACE_ID}&channel={CHANNEL_ID}",
         "/api/discovery.conversations.recent?limit=10",
