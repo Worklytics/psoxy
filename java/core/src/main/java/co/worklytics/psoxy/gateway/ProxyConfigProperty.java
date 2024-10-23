@@ -1,8 +1,14 @@
 package co.worklytics.psoxy.gateway;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 /**
  * config properties that control basic proxy behavior
  */
+@NoArgsConstructor
+@AllArgsConstructor
 public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
 
 
@@ -34,16 +40,17 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
      */
     PATH_TO_INSTANCE_CONFIG,
 
-    PSOXY_ENCRYPTION_KEY,
-    ENCRYPTION_KEY_IP,
+    PSOXY_ENCRYPTION_KEY(false),
+
+    ENCRYPTION_KEY_IP(false),
 
 
-    @Deprecated //removed from v0.4
+    @Deprecated //removed from v0.5
     IDENTIFIER_SCOPE_ID,
 
 
-    PSOXY_SALT,
-    SALT_IP, // used to salt IP; distinct value so can independently rotate IP salt from primary salt
+    PSOXY_SALT(false),
+    SALT_IP(false), // used to salt IP; distinct value so can independently rotate IP salt from primary salt
 
 
     //see PseudonymImplementation
@@ -59,7 +66,7 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     PSEUDONYMIZE_APP_IDS,
 
     // if set, a base64-YAML encoding of rules
-    RULES,
+    RULES(false),
     // for testing - if set, allows for behavior that should only be permitted in development context,
     // such as to skip sanitizer if corresponding header is sent
     IS_DEVELOPMENT_MODE,
@@ -84,4 +91,8 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
         public final static String TLSv1_3 = "TLSv1.3";
         public final  static String[] ALL = {TLSv1_2, TLSv1_3};
     }
+
+
+    @Getter
+    private boolean envVarOnly = true;
 }

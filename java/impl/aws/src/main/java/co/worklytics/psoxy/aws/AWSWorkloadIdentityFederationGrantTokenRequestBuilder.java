@@ -3,6 +3,7 @@ package co.worklytics.psoxy.aws;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.WorkloadIdentityFederationGrantTokenRequestBuilder;
 import com.google.common.collect.Streams;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
@@ -30,7 +31,11 @@ public class AWSWorkloadIdentityFederationGrantTokenRequestBuilder extends Workl
     enum ConfigProperty implements ConfigService.ConfigProperty {
         IDENTITY_POOL_ID,
         IDENTITY_ID,
-        DEVELOPER_NAME_ID
+        DEVELOPER_NAME_ID,
+        ;
+
+        @Getter
+        private boolean envVarOnly = true;
     }
 
     @Inject
