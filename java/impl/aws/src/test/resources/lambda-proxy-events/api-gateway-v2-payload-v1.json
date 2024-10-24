@@ -1,0 +1,71 @@
+{
+  "version": "1.0",
+  "resource": "/psoxy-zoom/{proxy+}",
+  "path": "/live/ipsoxy-zoom/v2/report/meetings/NUXghb123TCj0bP6nPVe%252Fsg253D253D/participants",
+  "httpMethod": "GET",
+  "headers": {
+    "Content-Length": "0",
+    "Host": "plo6j40ys5.execute-api.us-west-1.amazonaws.com",
+    "User-Agent": "psoxy-test (gzip)",
+    "X-Amz-Date": "20241024T051222Z",
+    "X-Amz-Security-Token": "  REDACTED",
+    "X-Amzn-Trace-Id": "Root=1-6719d736-2767c9a4696498c012b1effc",
+    "X-Forwarded-For": "67.170.106.47",
+    "X-Forwarded-Port": "443",
+    "X-Forwarded-Proto": "https",
+    "X-Psoxy-Skip-Sanitizer": "false",
+    "accept-encoding": "gzip,deflate",
+    "authorization": "AWS4-HMAC-SHA256 Credential=ASIAU5LH55NXUPVVUYPI/20241024/us-west-1/execute-api/aws4_request, SignedHeaders=host;x-amz-date;x-amz-security-token, Signature=REDACTED"
+  },
+  "multiValueHeaders": {
+    "Content-Length": ["0"],
+    "Host": ["plo6j40ys5.execute-api.us-west-1.amazonaws.com"],
+    "User-Agent": ["psoxy-test (gzip)"],
+    "X-Amz-Date": ["20241024T051222Z"],
+    "X-Amz-Security-Token": ["REDACTED"],
+    "X-Amzn-Trace-Id": ["Root=1-6719d736-2767c9a4696498c012b1effc"],
+    "X-Forwarded-For": ["67.170.106.47"],
+    "X-Forwarded-Port": ["443"],
+    "X-Forwarded-Proto": ["https"],
+    "X-Psoxy-Skip-Sanitizer": ["false"],
+    "accept-encoding": ["gzip,deflate"],
+    "authorization": [
+      "AWS4-HMAC-SHA256 Credential=ASIAU5LH55NXUPVVUYPI/20241024/us-west-1/execute-api/aws4_request, SignedHeaders=host;x-amz-date;x-amz-security-token, Signature=REDACTED"]
+  },
+  "queryStringParameters": {
+    "page_size": "30"
+  },
+  "multiValueQueryStringParameters": {
+    "page_size": ["30"]
+  },
+  "pathParameters": {
+    "proxy": "v2/report/meetings/NUXghb123TCj0bP6nPVe/sg253D253D/participants"
+  },
+  "requestContext": {
+    "accountId": "337909771119",
+    "resourceId": "GET /psoxy-zoom/{proxy+}",
+    "stage": "live",
+    "requestId": "AI6Qjjd1SK4EJ_Q=",
+    "identity": {
+      "accountId": "337909771119",
+      "caller": "REDACTED:lambda_test",
+      "principalOrgId": "aws:PrincipalOrgID",
+      "sourceIp": "67.170.106.47",
+      "userArn": "arn:aws:sts::337909771119:assumed-role/irobotCaller/lambda_test",
+      "userAgent": "psoxy-test (gzip)",
+      "user": "REDACTED:lambda_test",
+      "accessKey": "REDACTED"
+    },
+    "resourcePath": "/irobot-zoom/{proxy+}",
+    "httpMethod": "GET",
+    "apiId": "plo6j40ys5",
+    "path": "/live/psoxy-zoom/v2/report/meetings/NUXghb123TCj0bP6nPVe/sg253D253D/participants",
+    "extendedRequestId": "AI6Qjjd1SK4EJ_Q=",
+    "requestTime": "24/Oct/2024:05:12:22 +0000",
+    "protocol": "HTTP/1.1",
+    "requestTimeEpoch": 1729746742367,
+    "domainPrefix": "plo6j40ys5",
+    "domainName": "plo6j40ys5.execute-api.us-west-1.amazonaws.com"
+  },
+  "isBase64Encoded": false
+}
