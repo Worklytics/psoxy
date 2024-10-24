@@ -29,6 +29,12 @@ locals {
 
   # helper to clarify conditionals throughout
   use_api_gateway = var.api_gateway_v2 != null
+
+  # handler MUST expect payload format.
+  # payload 2.0 format is used by function URL invocation AND APIGatewayV2 by default.
+  # but in latter case, seems to urldecode the path; such that /foo%25/bar becomes /foo//bar, which is not what we want
+  # so oddly, for APIGatewayV2 we need to use 1.0 format instead of its default , even though that default is our usual case otherwise
+  event_handler_implementation = local.use_api_gateway ? "APIGatewayV1Handler" : "Handler"
 }
 
 module "psoxy_lambda" {
@@ -36,7 +42,7 @@ module "psoxy_lambda" {
 
   environment_name                     = var.environment_name
   instance_id                          = var.instance_id
-  handler_class                        = "co.worklytics.psoxy.Handler"
+  handler_class                        = "co.worklytics.psoxy.${local.event_handler_implementation}"
   path_to_function_zip                 = var.path_to_function_zip
   function_zip_hash                    = var.function_zip_hash
   function_env_kms_key_arn             = var.function_env_kms_key_arn
@@ -86,7 +92,7 @@ resource "aws_apigatewayv2_integration" "map" {
   connection_type        = "INTERNET"
   integration_method     = "POST"
   integration_uri        = module.psoxy_lambda.function_arn
-  payload_format_version = "2.0"
+  payload_format_version = "1.0" # must match to handler value, set in lambda
   timeout_milliseconds   = 30000 # ideally would be 55 or 60, but docs say limit is 30s
 }
 
