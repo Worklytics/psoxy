@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "resource": "/psoxy-zoom/{proxy+}",
-  "path": "/live/ipsoxy-zoom/v2/report/meetings/NUXghb123TCj0bP6nPVe%252Fsg253D253D/participants",
+  "path": "/live/psoxy-zoom/v2/report/meetings/NUXghb123TCj0bP6nPVe%252Fsg253D253D/participants",
   "httpMethod": "GET",
   "headers": {
     "Content-Length": "0",
