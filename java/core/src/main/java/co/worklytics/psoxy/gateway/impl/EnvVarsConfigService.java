@@ -24,7 +24,7 @@ public class EnvVarsConfigService implements ConfigService {
         return Optional.ofNullable(System.getenv(property.name()));
     }
 
-     boolean isDevelopment() {
+     public boolean isDevelopment() {
         return this.getConfigPropertyAsOptional(ProxyConfigProperty.IS_DEVELOPMENT_MODE)
             .map(Boolean::parseBoolean).orElse(false);
     }
