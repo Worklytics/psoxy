@@ -388,7 +388,7 @@ public class CommonRequestHandler {
      * @return
      */
     private boolean skipSanitization(HttpEventRequest request) {
-        if (config.isDevelopment()) {
+        if (envVarsConfigService.isDevelopment()) {
             // caller requested to skip
             return request.getHeader(ControlHeader.SKIP_SANITIZER.getHttpHeader())
                     .map(Boolean::parseBoolean)
@@ -399,7 +399,7 @@ public class CommonRequestHandler {
     }
 
     private void logRequestIfVerbose(HttpEventRequest request) {
-        if (config.isDevelopment()) {
+        if (envVarsConfigService.isDevelopment()) {
             log.info(request.prettyPrint());
         }
     }
