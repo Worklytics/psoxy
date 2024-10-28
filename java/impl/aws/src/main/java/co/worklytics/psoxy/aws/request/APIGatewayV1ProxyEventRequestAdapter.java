@@ -25,12 +25,11 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
 
     @Override
     public String getPath() {
-        String resourcePath;
-        if (event.getRequestContext() != null) {
-            resourcePath = event.getRequestContext().getResourcePath();
-        } else {
-            resourcePath = ObjectUtils.firstNonNull(event.getResource(), event.getPath());
-        }
+        String resourcePath = event.getPath();
+
+        String route = event.getResource().replace("{proxy+}", "");
+
+        resourcePath = StringUtils.removeStart(resourcePath, "/" + event.getRequestContext().getStage()  + route);
 
         return StringUtils.prependIfMissing(resourcePath, "/");
     }
