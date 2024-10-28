@@ -21,8 +21,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.Value;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.http.HttpStatus;
@@ -32,6 +32,7 @@ import org.apache.http.entity.ContentType;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.Objects;
@@ -148,30 +149,14 @@ public class CommonRequestHandler {
                     .build();
         }
 
-
         Optional<HttpEventResponse> healthCheckResponse = healthCheckRequestHandler.handleIfHealthCheck(request);
         if (healthCheckResponse.isPresent()) {
             return healthCheckResponse.get();
         }
 
-        // parse requested URL, re-writing host/etc
-        String requestedTargetUrl = parseRequestedTarget(request);
-
-        // if requested target URL has tokenized components, reverse
-        String clearTargetUrl = reverseTokenizedUrlComponents(requestedTargetUrl);
-
-        boolean tokenizedURLReversed = ObjectUtils.notEqual(requestedTargetUrl, clearTargetUrl);
-
-        // Using original URL to check sanitized rules, as they should match the original URL. It could contain tokenized components.
-        // Examples:
-        // /v1/accounts/p~12adsfasdfasdf31
-        // /v1/accounts/12345
-        URL originalRequestedURL = new URL(requestedTargetUrl);
-        // And the URL to use for source request; it could contain the reversed tokenized components
-        URL targetForSourceApiRequest = new URL(clearTargetUrl);
-
+        RequestUrls requestUrls = buildRequestedUrls(request);
         // avoid logging clear URL outside of dev
-        URL toLog = envVarsConfigService.isDevelopment() ? targetForSourceApiRequest : originalRequestedURL;
+        URL toLog = envVarsConfigService.isDevelopment() ? requestUrls.getTarget() : requestUrls.getOriginal();
 
         boolean skipSanitization = skipSanitization(request);
 
@@ -180,7 +165,7 @@ public class CommonRequestHandler {
         this.sanitizer = loadSanitizerRules();
 
         //build log entry
-        String logEntry = String.format("%s %s TokenInUrlReversed=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), tokenizedURLReversed);
+        String logEntry = String.format("%s %s TokenInUrlDecrypted=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), requestUrls.hasDecryptedTokens());
         if (request.getClientIp().isPresent()) {
             // client IP is NOT available for direct AWS Lambda calls; only for API Gateway.
             // don't want to put blank/unknown in direct case, so log IP conditionally
@@ -189,7 +174,7 @@ public class CommonRequestHandler {
 
         if (skipSanitization) {
             log.info(String.format("%s. Skipping sanitization.", logEntry));
-        } else if (sanitizer.isAllowed(request.getHttpMethod(), originalRequestedURL)) {
+        } else if (sanitizer.isAllowed(request.getHttpMethod(), requestUrls.getOriginal())) {
             log.info(String.format("%s. Rules allowed call.", logEntry));
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
@@ -210,10 +195,10 @@ public class CommonRequestHandler {
                 content = new ByteArrayContent(contentType, request.getBody());
             }
 
-            sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(targetForSourceApiRequest), content);
+            sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(requestUrls.getTarget()), content);
 
             //TODO: what headers to forward???
-            populateHeadersFromSource(sourceApiRequest, request, targetForSourceApiRequest);
+            populateHeadersFromSource(sourceApiRequest, request, requestUrls.getTarget());
 
             //setup request
             sourceApiRequest
@@ -270,7 +255,7 @@ public class CommonRequestHandler {
                 } else {
                     RESTApiSanitizer sanitizerForRequest = getSanitizerForRequest(request);
 
-                    proxyResponseContent = sanitizerForRequest.sanitize(request.getHttpMethod(), originalRequestedURL, responseContent);
+                    proxyResponseContent = sanitizerForRequest.sanitize(request.getHttpMethod(), requestUrls.getOriginal(), responseContent);
                     String rulesSha = rulesUtils.sha(sanitizerForRequest.getRules());
                     builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
                     log.info("response sanitized with rule set " + rulesSha);
@@ -289,6 +274,24 @@ public class CommonRequestHandler {
         }
     }
 
+
+    @Value
+    static class RequestUrls {
+
+        /**
+         * original URL, as requested
+         */
+        URL original;
+
+        /**
+         * decrypted URL, if tokenized components were found
+         */
+        URL target;
+
+        boolean hasDecryptedTokens() {
+            return !original.equals(target);
+        }
+    }
 
     /**
      * encapsulates dynamically configuring Sanitizer based on request (to support some aspects of
@@ -315,6 +318,27 @@ public class CommonRequestHandler {
     Optional<PseudonymImplementation> parsePseudonymImplementation(HttpEventRequest request) {
         return request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader())
                 .map(PseudonymImplementation::parseHttpHeaderValue);
+    }
+
+    @VisibleForTesting
+    @SneakyThrows // MalformedURLException, but that really shouldn't happen!!
+    RequestUrls buildRequestedUrls(HttpEventRequest request) {
+
+        // parse requested URL, re-writing host/etc
+        String requestedTargetUrl = parseRequestedTarget(request);
+
+        // if requested target URL has tokenized components, reverse
+        String clearTargetUrl = reverseTokenizedUrlComponents(requestedTargetUrl);
+
+        // Using original URL to check sanitized rules, as they should match the original URL. It could contain tokenized components.
+        // Examples:
+        // /v1/accounts/p~12adsfasdfasdf31
+        // /v1/accounts/12345
+        URL originalRequestedURL = new URL(requestedTargetUrl);
+        // And the URL to use for source request; it could contain the reversed tokenized components
+        URL targetForSourceApiRequest = new URL(clearTargetUrl);
+
+        return new RequestUrls(originalRequestedURL, targetForSourceApiRequest);
     }
 
     /**
