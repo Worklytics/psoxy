@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
+import com.amazonaws.SdkClientException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -148,6 +149,10 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
                 log.log(Level.SEVERE, String.format("Throttling issues for key %s, rate limit reached most likely despite retries", paramName), e);
             }
             throw new IllegalStateException(String.format("failed to get config value: %s", paramName), e);
+        } catch (SdkClientException e) {
+            // transient IO related errors reading from SSM? can't reproduce exactly
+            log.log(Level.SEVERE, "Error reading configuration from SSM: " + e.getMessage(), e);
+            throw e;
         }
     }
 
