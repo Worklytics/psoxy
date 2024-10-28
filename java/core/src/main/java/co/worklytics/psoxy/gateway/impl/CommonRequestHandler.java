@@ -468,7 +468,7 @@ public class CommonRequestHandler {
     }
 
     private void logIfDevelopmentMode(Supplier<String> messageSupplier) {
-        if (config.isDevelopment()) {
+        if (envVarsConfigService.isDevelopment()) {
             log.info(messageSupplier.get());
         }
     }

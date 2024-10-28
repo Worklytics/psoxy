@@ -241,14 +241,14 @@ public class PsoxyModule {
 
     @Provides
     @Singleton
-    JsonSchemaFilterUtils schemaRuleUtils(EnvVarsConfigService configService) {
+    JsonSchemaFilterUtils schemaRuleUtils(EnvVarsConfigService envVarsConfigService) {
         ObjectMapper objectMapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
         //TODO: probably more proper to override with a 'development' module of some kind
         JsonSchemaFilterUtils.Options.OptionsBuilder options = JsonSchemaFilterUtils.Options.builder();
-        options.logRedactions(configService.isDevelopment());
+        options.logRedactions(envVarsConfigService.is());
 
         return new JsonSchemaFilterUtils(objectMapper, options.build());
     }
