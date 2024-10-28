@@ -31,6 +31,7 @@ import org.apache.http.entity.ContentType;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.Objects;
@@ -210,6 +211,16 @@ public class CommonRequestHandler {
             }
 
             sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(targetForSourceApiRequest), content);
+
+            //TODO: what headers to forward???
+            populateHeadersFromSource(sourceApiRequest, request, targetForSourceApiRequest);
+
+            //setup request
+            sourceApiRequest
+                .setThrowExceptionOnExecuteError(false)
+                .setConnectTimeout(SOURCE_API_REQUEST_CONNECT_TIMEOUT_MILLISECONDS)
+                .setReadTimeout(SOURCE_API_REQUEST_READ_TIMEOUT);
+
         } catch (IOException e) {
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             builder.body("Failed to parse request; review logs");
@@ -226,21 +237,19 @@ public class CommonRequestHandler {
             return builder.build();
         }
 
-        //TODO: what headers to forward???
-        populateHeadersFromSource(sourceApiRequest, request, targetForSourceApiRequest);
-
-        //setup request
-        sourceApiRequest
-                .setThrowExceptionOnExecuteError(false)
-                .setConnectTimeout(SOURCE_API_REQUEST_CONNECT_TIMEOUT_MILLISECONDS)
-                .setReadTimeout(SOURCE_API_REQUEST_READ_TIMEOUT);
-
-        //q: add exception handlers for IOExceptions / HTTP error responses, so those retries
-        // happen in proxy rather than on Worklytics-side?
-        com.google.api.client.http.HttpResponse sourceApiResponse = sourceApiRequest.execute();
-
-        // return response
-        builder.statusCode(sourceApiResponse.getStatusCode());
+        com.google.api.client.http.HttpResponse sourceApiResponse = null;
+        try {
+            //q: add exception handlers for IOExceptions / HTTP error responses, so those retries
+            // happen in proxy rather than on Worklytics-side?
+            sourceApiResponse = sourceApiRequest.execute();
+        } catch (ConnectException e) {
+            //connectivity problems
+            builder.statusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
+            builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.CONNECTION_TO_SOURCE.name());
+            builder.body("Error connecting to source API: " + e.getMessage());
+            log.log(Level.SEVERE, "Error connecting to source API: " + e.getMessage(), e);
+            return builder.build();
+        }
 
         try {
             // return response
