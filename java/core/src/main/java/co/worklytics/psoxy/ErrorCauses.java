@@ -30,6 +30,6 @@ public enum ErrorCauses {
      */
     CONNECTION_TO_SOURCE,
 
-    ;
+    FAILED_TO_BUILD_URL;
 
 }

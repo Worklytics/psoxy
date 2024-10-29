@@ -154,7 +154,19 @@ public class CommonRequestHandler {
             return healthCheckResponse.get();
         }
 
-        RequestUrls requestUrls = buildRequestedUrls(request);
+        RequestUrls requestUrls;
+        try {
+            requestUrls = buildRequestedUrls(request);
+        } catch (Throwable e) {
+            //really shouldn't happen ... parsing one url from another, so would be a bad bug in our canonicalization code for this to go wrong
+            log.log(Level.WARNING, "Error parsing  / building request URL", e);
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.FAILED_TO_BUILD_URL.name())
+                    .body("Error parsing request URL")
+                    .build();
+        }
+
         // avoid logging clear URL outside of dev
         URL toLog = envVarsConfigService.isDevelopment() ? requestUrls.getTarget() : requestUrls.getOriginal();
 
