@@ -1,6 +1,5 @@
 package co.worklytics.psoxy.aws;
 
-import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
@@ -26,7 +25,6 @@ import java.time.Instant;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.logging.Level;
 
