@@ -174,7 +174,16 @@ public class CommonRequestHandler {
 
         HttpEventResponse.HttpEventResponseBuilder builder = HttpEventResponse.builder();
 
-        this.sanitizer = loadSanitizerRules();
+        try {
+            this.sanitizer = loadSanitizerRules();
+        } catch (Throwable e) {
+            log.log(Level.SEVERE, "Error loading sanitizer rules", e);
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.CONFIGURATION_FAILURE.name())
+                    .body("Error loading sanitizer rules")
+                    .build();
+        }
 
         //build log entry
         String logEntry = String.format("%s %s TokenInUrlDecrypted=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), requestUrls.hasDecryptedTokens());

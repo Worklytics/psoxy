@@ -30,6 +30,15 @@ public enum ErrorCauses {
      */
     CONNECTION_TO_SOURCE,
 
-    FAILED_TO_BUILD_URL;
+    /**
+     *  failed to build target URL (eg, that of source) from request URL (requested from proxy)
+     */
+    FAILED_TO_BUILD_URL,
+
+    /**
+     *  failed to get configuration data; or misconfigured.
+     */
+    CONFIGURATION_FAILURE,
+    ;
 
 }
