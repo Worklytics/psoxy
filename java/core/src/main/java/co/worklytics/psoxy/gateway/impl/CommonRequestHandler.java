@@ -212,11 +212,10 @@ public class CommonRequestHandler {
             sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(targetForSourceApiRequest), content);
         } catch (IOException e) {
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-            builder.body("Failed to parse request; review logs");
+            builder.body("Failed to parse response; review logs");
             builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.CONNECTION_SETUP.name());
-            log.log(Level.WARNING, e.getMessage(), e);
+            log.log(Level.WARNING, e.getMessage());
             //something like "Error getting access token for service account: 401 Unauthorized POST https://oauth2.googleapis.com/token,"
-            log.log(Level.WARNING, "Confirm oauth scopes set in config.yaml match those granted in data source");
             return builder.build();
         } catch (java.util.NoSuchElementException e) {
             // missing config, such as ACCESS_TOKEN
@@ -225,8 +224,6 @@ public class CommonRequestHandler {
             log.log(Level.WARNING, e.getMessage(), e);
             return builder.build();
         }
-
-        //TODO: what headers to forward???
         populateHeadersFromSource(sourceApiRequest, request, targetForSourceApiRequest);
 
         //setup request
