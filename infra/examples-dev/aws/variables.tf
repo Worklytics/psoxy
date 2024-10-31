@@ -299,3 +299,8 @@ variable "todos_as_outputs" {
   description = "whether to render TODOs as outputs or flat files (former useful if you're using Terraform Cloud/Enterprise, or somewhere else where the filesystem is not readily accessible to you)"
   default     = false
 }
+
+variable "user_principal_email" {
+  type        = string
+  description = "The email of the user that has been granted access to the Worklytics Tenant API (configure in Worklytics Web App)."
+}
