@@ -82,3 +82,15 @@ output "next_todo_step" {
 output "todo" {
   value = local.todo_content
 }
+
+output "tenant_api_connection_settings" {
+  value = merge(
+    { integration = var.connector_id },
+    contains(keys(var.settings_to_provide), "Psoxy Base URL") ? { endpoint = var.settings_to_provide["Psoxy Base URL"] } : {},
+    contains(keys(var.settings_to_provide), "Bucket Name") ? { bucket = var.settings_to_provide["Bucket Name"] } : {},
+    contains(keys(var.settings_to_provide), "AWS Psoxy Region") ? { region = var.settings_to_provide["AWS Psoxy Region"] } : {},
+    contains(keys(var.settings_to_provide), "AWS Psoxy Role ARN") ? { role_arn = var.settings_to_provide["AWS Psoxy Role ARN"] } : {},
+    contains(keys(var.settings_to_provide), "Parser") ? { parser_id = var.settings_to_provide["Parser"] } : {},
+    contains(keys(var.settings_to_provide), "GitHub Organization") ? { github_organization = var.settings_to_provide["GitHub Organization"] } : {},
+  )
+}
