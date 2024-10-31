@@ -63,6 +63,16 @@ variable "worklytics_sa_emails" {
   description = "service accounts for your organization's Worklytics instances (list supported for test/dev scenarios)"
 }
 
+variable "worklytics_tenant_id" {
+  type        = string
+  description = "Numeric ID of your Worklytics tenant's service account (obtain from Worklytics Web App)."
+
+  validation {
+    condition     = var.worklytics_tenant_id == null || can(regex("^\\d{21}$", var.worklytics_tenant_id))
+    error_message = "`worklytics_tenant_id` must be a 21-digit numeric value."
+  }
+}
+
 variable "psoxy_base_dir" {
   type        = string
   description = "the path where your psoxy repo resides"
