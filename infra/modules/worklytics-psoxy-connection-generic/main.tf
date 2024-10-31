@@ -14,7 +14,6 @@ locals {
     PROXY_ENDPOINT      = "Psoxy Base URL"
     PROXY_BUCKET_NAME   = "Bucket Name"
     parserId            = "Parser"
-    CLOUD_ID            = "Jira Cloud Id"
     GITHUB_ORGANIZATION = "GitHub Organization"
   }
 
