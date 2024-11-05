@@ -9,8 +9,14 @@ to perform santization generally across many fields and endpoints.
 
 ## Can Psoxy invocation be locked to a set of known IP addresses?
 
-No, but this is not necessary, as requests from your Worklytics tenant to your Psoxy instances are
-authenticated via identity federation (OIDC) and authorized by your Cloud providers IAM policies.
+Yes, but only to a broad set of IP blocks that are not exclusive to your Worklytics tenant. As
+requests from your Worklytics tenant to your Psoxy instances are authenticated via identity
+federation (OIDC) and authorized by your Cloud providers IAM policies, IP-based restrictions are not
+necessary.
+
+If you take this approach, you will be responsible for updating your IP restrictions frequently as
+GCP changes their IP blocks, or your data flow to Worklytics may break. As such, this is not
+officially supported by Worklytics. For an example of how to do this, see [worklytics-ip-blocks](../infra/modules/worklytics-ip-blocks/README.md) module.
 
 Your Worklytics tenant is a process running in GCP, personified by a unique GCP service account. You
 simply use your cloud's IAM to grant that service account access to your psoxy instance.
@@ -28,6 +34,9 @@ that contain PII redacted or pseudonymized.
 See [AWS Authentication and Authorization](aws/authentication-authorization.md) for more details.
 
 See [GCP Authentication and Authorization](gcp/authentication-authorization.md) for more details.
+
+And always remember: an IP is **not** an authenticated identity for a client, and should not be
+relied upon as an authentication mechanism. IPs can be spoofed. It is at best an extra control.
 
 ## Can Psoxy instances be deployed behind an AWS API Gateway?
 
@@ -106,3 +115,15 @@ researchers complain about.
 If you remain uncomfortable with DWD, a private Google Marketplace App is a possible alternative,
 albeit more tedious to configure. It requires a dedicated GCP project, with additional APIs enabled
 in the project.
+
+
+### Is this Attribute-based Access Control (ABAC)?
+No. [ABAC](https://en.wikipedia.org/wiki/Attribute-based_access_control) is specifying an access
+control policy predicated on attributes of the object/resource being accessed. The approach of Psoxy
+is better described as Attribute-level Access Control, where the access control policy can be
+written to limit access to specific attritibutes (fields) within an object/resource.
+
+Eg, evaluation of an ABAC policy still results in boolean, allow/deny decision on the request; Psoxy
+policy (rule) evaluation results in a modified response, with specific fields redacted or
+transformed in accordance with the policy.
+

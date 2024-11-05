@@ -63,6 +63,12 @@ The diagram below provides an architecture overview of the 'API' and 'Bulk' mode
    in place that deny this by default, even if you have an IAM role that allows it at an account
    level.
 
+   NOTE: using AWS API Gateway, VPC, or Secrets Manager (not used by default in our examples) will
+   require additional permissions beyond the above.
+
+   See: [protips.md](protips.md) for guide to create a least-privileged iam policy for provisioning.
+
+
 3. **An authenticated AWS CLI in your provisioning environment**. Your environment (eg, shell/etc
    from which you'll run terraform commands) must be authenticated as an identity that can assume
    that role. (see next section for tips on options for various environments you can use)

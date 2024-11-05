@@ -1411,6 +1411,22 @@ EOT
       }
       example_file = "docs/sources/hris/hris-example.csv"
     }
+    "metrics" = {
+      source_kind               = "metrics"
+      availability              = "beta"
+      enable_by_default         = false
+      worklytics_connector_id   = "metrics-import-psoxy",
+      worklytics_connector_name = "Metrics via Psoxy"
+      rules = {
+        columnsToPseudonymizeIfPresent = [
+          "EMPLOYEE_ID",
+          "EMPLOYEE_EMAIL",
+        ]
+      }
+      settings_to_provide = {
+      }
+      example_file = "docs/sources/metrics/metrics-example.csv"
+    }
     "survey" = {
       worklytics_connector_id   = "survey-import-psoxy"
       availability              = "ga"
@@ -1420,8 +1436,10 @@ EOT
       rules = {
         columnsToRedact = []
         columnsToPseudonymize = [
-          "EMPLOYEE_ID", # primary key
-          # "EMPLOYEE_EMAIL", # if exists
+          "EMPLOYEE_ID", # primary key; transform FAILS if not present
+        ]
+        columnsToPseudonymizeIfPresent = [
+          "EMPLOYEE_EMAIL" # just in case sent
         ]
       }
       example_file = "docs/sources/survey/survey-example.csv"
@@ -1436,7 +1454,9 @@ EOT
         columnsToRedact = []
         columnsToPseudonymize = [
           "EMPLOYEE_ID", # primary key
-          # "employee_email", # if exists
+        ]
+        columnsToPseudonymizeIfPresent = [
+          "EMPLOYEE_EMAIL" # just in case sent
         ]
       }
       example_file = "docs/sources/survey/survey-example.csv"
