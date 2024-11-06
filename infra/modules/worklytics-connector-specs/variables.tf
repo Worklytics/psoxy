@@ -15,6 +15,18 @@ variable "google_workspace_example_admin" {
   default     = null # will failover to user
 }
 
+variable "include_msft" {
+  type        = bool
+  description = "whether to include Microsoft 365 connectors by default"
+  default     = true
+}
+
+variable "include_google_workspace" {
+  type        = bool
+  description = "whether to include Google Workspace connectors by default"
+  default     = true
+}
+
 variable "msft_tenant_id" {
   type        = string
   description = "ID of Microsoft tenant to connect to (req'd only if config includes MSFT connectors)"
@@ -57,6 +69,12 @@ variable "msft_teams_example_call_record_guid" {
   default     = "{EXAMPLE_MSFT_TEAMS_CALL_RECORD_GUID}"
 }
 
+variable "msft_teams_example_online_meeting_join_url" {
+  type        = string
+  description = "example of an URL to join into an OnlineMeeting for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_TEAMS_ONLINE_MEETING_URL}"
+}
+
 variable "salesforce_domain" {
   type        = string
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
@@ -72,7 +90,7 @@ variable "jira_server_url" {
 variable "jira_cloud_id" {
   type        = string
   default     = null
-  description = "(Only required if using Jira Cloud connector) Cloud id of the Jira Cloud to connect to (ex: 1324a887-45db-1bf4-1e99-ef0ff456d421)."
+  description = "(Only required if using Jira Cloud connector) Example of cloud id of the Jira Cloud to connect to (ex: 1324a887-45db-1bf4-1e99-ef0ff456d421)."
 }
 
 #DEPRECATED

@@ -77,12 +77,11 @@ test('Psoxy Call: get identity token when option missing', async (t) => {
       td.matchers.contains('GET'),
       td.matchers.contains({
         Authorization: `Bearer ${TOKEN}`,
-      })
+      }),
+      td.matchers.anything()
     )
   ).thenReturn({ status: httpCodes.HTTP_STATUS_OK });
 
   const result = await gcp.call(options);
   t.is(result.status, httpCodes.HTTP_STATUS_OK);
-
-  td.verify(utils.executeCommand(COMMAND));
 });

@@ -1,14 +1,6 @@
 # deployment for a single Psoxy instance in GCP project that has be initialized for Psoxy.
 # project itself may hold MULTIPLE psoxy instances
 
-terraform {
-  required_providers {
-    google = {
-      version = "~> 4.12"
-    }
-  }
-}
-
 data "google_project" "project" {
   project_id = var.project_id
 }
@@ -58,7 +50,7 @@ resource "google_service_account_iam_member" "act_as" {
 resource "google_cloudfunctions_function" "function" {
   name        = "${var.environment_id_prefix}${var.instance_id}"
   description = "Psoxy Connector - ${var.source_kind}"
-  runtime     = "java11"
+  runtime     = "java17"
   project     = var.project_id
   region      = var.region
 
@@ -70,6 +62,8 @@ resource "google_cloudfunctions_function" "function" {
   entry_point                  = "co.worklytics.psoxy.Route"
   service_account_email        = var.service_account_email
   labels                       = var.default_labels
+  docker_registry              = "ARTIFACT_REGISTRY"
+  docker_repository            = var.artifact_repository_id
 
   environment_variables = merge(
     local.required_env_vars,
@@ -90,8 +84,6 @@ resource "google_cloudfunctions_function" "function" {
       version    = secret_environment_variable.value.version_number
     }
   }
-
-
 
   lifecycle {
     ignore_changes = [
@@ -158,7 +150,7 @@ ${local.command_cli_call} -u ${local.proxy_endpoint_url} --health-check
 Then, based on your configuration, these are some example test calls you can try (YMMV):
 
 ```shell
-${coalesce(join("\n", local.command_test_calls), "cd docs/example-api-calls/")}
+${join("\n", local.command_test_calls)}
 ```
 
 Feel free to try the above calls, and reference to the source's API docs for other parameters /
@@ -197,7 +189,7 @@ ${local.command_cli_call} -u "${local.proxy_endpoint_url}" --health-check
 
 ${local.command_cli_call} -u "${local.proxy_endpoint_url}$API_PATH" ${local.impersonation_param}
 
-echo "Invoke this script with any of the following as arguments to test other endpoints:${"\r\n\t"}${join("\r\n\t", var.example_api_calls)}"
+echo "Invoke this script with any of the following as arguments to test other endpoints:${"\r\n\t"}${join("\"\r\n\t\"", var.example_api_calls)}"
 EOT
 }
 

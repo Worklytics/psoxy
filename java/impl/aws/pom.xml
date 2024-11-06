@@ -16,19 +16,11 @@
     <packaging>jar</packaging>
 
     <properties>
-        <gcpProjectId>psoxy-dev-erik</gcpProjectId>
-        <sourceApi>gmail</sourceApi>
-        <!-- serviceAccount that function will run as. For Google Workspace use cases, should be the
-         one configured as OAuth Client and authorized for your instance. -->
-        <serviceAccount>psoxy-gmail-dwd@psoxy-dev-erik.iam.gserviceaccount.com</serviceAccount>
-
-        <!-- dependencies local to module; if want to re-use across more modules, move up to root pom -->
-        <dependency.aws-bom.version>2.17.46</dependency.aws-bom.version>
-        <dependency.aws-lambda-core.version>1.2.1</dependency.aws-lambda-core.version>
-        <dependency.aws-lambda-java-events.version>3.11.0</dependency.aws-lambda-java-events.version>
-        <dependency.aws-s3.version>1.12.261</dependency.aws-s3.version>
-
+        <!-- dependencies local to module; if you want to re-use across more modules, move up to root pom -->
+        <dependency.aws-lambda-core.version>1.2.3</dependency.aws-lambda-core.version>
+        <dependency.aws-lambda-java-events.version>3.11.5</dependency.aws-lambda-java-events.version>
     </properties>
+
 
     <repositories>
         <repository>
@@ -49,17 +41,21 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- AWS java SDK v2 bom -->
+            <!-- https://mvnrepository.com/artifact/software.amazon.awssdk/bom -->
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>
                 <artifactId>bom</artifactId>
-                <version>${dependency.aws-bom.version}</version>
+                <version>2.25.31</version> <!-- Apr 12, 2024 -->
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- AWS java SDK v1 bom -->
+            <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-bom</artifactId>
-                <version>1.12.362</version>
+                <version>1.12.701</version> <!-- Apr 13, 2024 -->
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -104,27 +100,31 @@
         </dependency>
 
 
+        <!-- from BOM - https://mvnrepository.com/artifact/software.amazon.awssdk/bom -->
         <!-- platform stuff (eg, AWS Lambda support) -->
-        <dependency> <!-- get from Java SDK v2 bom too?? -->
+        <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-core</artifactId>
+            <!-- q: why won't bom give this? -->
             <version>${dependency.aws-lambda-core.version}</version>
         </dependency>
-        <dependency> <!-- get from Java SDK v2 bom too?? -->
+        <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-events</artifactId>
+            <!-- q: why won't bom give this? -->
             <version>${dependency.aws-lambda-java-events.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3 -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>${dependency.aws-s3.version}</version>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-sts</artifactId>
         </dependency>
+
+        <!-- from BOM - https://mvnrepository.com/artifact/software.amazon.awssdk/bom -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>sts</artifactId>
@@ -133,11 +133,13 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>cognitoidentity</artifactId>
         </dependency>
-
-
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>ssm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>secretsmanager</artifactId>
         </dependency>
 
         <!-- support Hashicorp Vault as a secret store-->
@@ -180,19 +182,20 @@
 
     <build>
         <plugins>
-            <!-- produces an 'uber' JAR, with all deps pkg'd -->
+            <!-- produces an 'uber' JAR, with all deps packaged -->
 
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.7.1</version>
                 <configuration>
                     <archive>
                         <manifest> <!-- TODO: does this matter for AWS?? -->
                             <mainClass>co.worklytics.psoxy.Handler</mainClass>
                         </manifest>
                     </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                    <descriptors>
+                        <descriptor>../uber-jar.xml</descriptor>
+                    </descriptors>
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>

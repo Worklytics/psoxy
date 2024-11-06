@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import software.amazon.awssdk.identity.spi.Identity;
 
 import java.util.List;
 import java.util.Map;
@@ -24,12 +25,11 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
 
     @Override
     public String getPath() {
-        String resourcePath;
-        if (event.getRequestContext() != null) {
-            resourcePath = event.getRequestContext().getResourcePath();
-        } else {
-            resourcePath = ObjectUtils.firstNonNull(event.getResource(), event.getPath());
-        }
+        String resourcePath = event.getPath();
+
+        String route = event.getResource().replace("{proxy+}", "");
+
+        resourcePath = StringUtils.removeStart(resourcePath, "/" + event.getRequestContext().getStage()  + route);
 
         return StringUtils.prependIfMissing(resourcePath, "/");
     }
@@ -81,6 +81,22 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
     @Override
     public String prettyPrint() {
         return event.toString();
+    }
+
+    @Override
+    public Optional<String> getClientIp() {
+        // unclear that we every get anything here, but can try
+
+        String ip = Optional.ofNullable(event.getHeaders().get(HTTP_HEADER_X_FORWARDED_FOR.toLowerCase()))
+            .orElseGet(() -> Optional.ofNullable(event.getRequestContext().getIdentity()).map(APIGatewayProxyRequestEvent.RequestIdentity::getSourceIp).orElse(null));
+
+        return Optional.ofNullable(ip);
+    }
+
+    @Override
+    public Optional<Boolean> isHttps() {
+        return Optional.ofNullable(event.getHeaders().get(HTTP_HEADER_X_FORWARDED_PROTO.toLowerCase()))
+            .map(p -> p.equals("https"));
     }
 
     /**

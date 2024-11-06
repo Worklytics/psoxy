@@ -52,6 +52,12 @@ variable "artifacts_bucket_name" {
   description = "Name of the bucket where artifacts are stored"
 }
 
+variable "artifact_repository_id" {
+  type        = string
+  description = "(NOTE: it will be available since 0.5 psoxy version) ID of the artifact repository"
+  default     = null
+}
+
 variable "deployment_bundle_object_name" {
   type        = string
   description = "Name of the object containing the deployment bundle"

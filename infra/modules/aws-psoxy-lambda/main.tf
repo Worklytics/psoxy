@@ -3,7 +3,7 @@
 terraform {
   required_providers {
     aws = {
-      version = "~> 4.12"
+      version = ">= 4.12, < 5.0"
     }
   }
 }
@@ -33,13 +33,6 @@ locals {
   is_instance_ssm_prefix_default = local.instance_ssm_prefix == local.instance_ssm_prefix_default
   instance_ssm_prefix_with_slash = startswith(local.instance_ssm_prefix, "/") ? local.instance_ssm_prefix : "/${local.instance_ssm_prefix}"
 
-
-  # parse PATH_TO_SHARED_CONFIG in super-hacky way
-  # expect something like:
-  # arn:aws:ssm:us-east-1:123123123123:parameter/PSOXY_SALT
-  salt_arn              = [for l in var.global_parameter_arns : l if endswith(l, local.salt_parameter_name_suffix)][0]
-  path_to_shared_config = regex("arn.+parameter(/.*)${local.salt_parameter_name_suffix}", local.salt_arn)[0]
-
   bundle_from_s3  = startswith(var.path_to_function_zip, "s3://")
   s3_bucket       = local.bundle_from_s3 ? regex("s3://([^/]+)/.*", var.path_to_function_zip)[0] : null
   s3_key          = local.bundle_from_s3 ? regex("s3://[^/]+/(.*)", var.path_to_function_zip)[0] : null
@@ -51,7 +44,7 @@ resource "aws_lambda_function" "instance" {
   function_name                  = local.function_name
   role                           = aws_iam_role.iam_for_lambda.arn
   architectures                  = ["arm64"] # 20% cheaper per ms exec time than x86_64
-  runtime                        = "java11"
+  runtime                        = "java17"
   filename                       = local.bundle_from_s3 ? null : var.path_to_function_zip
   s3_bucket                      = local.s3_bucket # null if local file
   s3_key                         = local.s3_key    # null if local file
@@ -62,16 +55,36 @@ resource "aws_lambda_function" "instance" {
   reserved_concurrent_executions = coalesce(var.reserved_concurrent_executions, -1)
   kms_key_arn                    = var.function_env_kms_key_arn
 
+
+  ephemeral_storage {
+    size = var.ephemeral_storage_mb
+  }
+  # TODO: aws provider v5 this becomes
+  # ephemeral_storage              = var.ephemeral_storage_mb
+
+
+  dynamic "vpc_config" {
+    for_each = var.vpc_config[*]
+
+    content {
+      subnet_ids         = vpc_config.value.subnet_ids
+      security_group_ids = vpc_config.value.security_group_ids
+      # q: why does the following not validate??
+      #ipv6_allowed_for_dual_stack = vpc_config.value.ipv6_allowed_for_dual_stack
+    }
+  }
+
   environment {
     variables = merge(
       var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
       var.environment_variables,
       {
-        EXECUTION_ROLE  = aws_iam_role.iam_for_lambda.arn,
+        EXECUTION_ROLE  = aws_iam_role.iam_for_lambda.arn, # q: used for anything? doesn't seem accessed by Java code ...
         BUNDLE_FILENAME = local.bundle_filename
+        SECRETS_STORE   = upper(var.secrets_store_implementation)
       },
       # only set env vars for config paths if non-default values
-      length(local.path_to_shared_config) > 1 ? { PATH_TO_SHARED_CONFIG = local.path_to_shared_config } : {},
+      length(var.path_to_shared_ssm_parameters) > 1 ? { PATH_TO_SHARED_CONFIG = var.path_to_shared_ssm_parameters } : {},
       local.is_instance_ssm_prefix_default ? {} : { PATH_TO_INSTANCE_CONFIG = var.path_to_instance_ssm_parameters }
     )
   }
@@ -114,6 +127,8 @@ resource "aws_iam_role" "iam_for_lambda" {
     ]
   })
 
+  permissions_boundary = var.iam_roles_permissions_boundary
+
   lifecycle {
     ignore_changes = [
       tags
@@ -121,9 +136,18 @@ resource "aws_iam_role" "iam_for_lambda" {
   }
 }
 
+locals {
+  # which policy we attach depends on lambda's need
+  # - AWSLambdaBasicExecutionRole usually sufficient
+  # - AWSLambdaVPCAccessExecutionRole if lambda is configured to be on a VPC (if lacks this, deploy fails bc exec role can't create network interface)
+  lambda_execution_role_aws_managed_policy = var.vpc_config == null ? "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" : "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
+
+
 resource "aws_iam_role_policy_attachment" "basic" {
   role       = aws_iam_role.iam_for_lambda.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  policy_arn = coalesce(var.aws_lambda_execution_role_policy_arn, local.lambda_execution_role_aws_managed_policy)
 }
 
 
@@ -142,6 +166,8 @@ data "aws_kms_key" "keys_to_allow" {
 
 locals {
   param_arn_prefix = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter${local.instance_ssm_prefix_with_slash}"
+
+  secret_arn_prefix = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:${local.instance_ssm_prefix}"
 
   kms_keys_to_allow_arns = distinct(concat(
     [for k in data.aws_kms_key.keys_to_allow : k.arn],
@@ -164,7 +190,23 @@ locals {
     ]
   }]
 
-  global_ssm_param_statements = [{
+  local_secrets_manager_statements = var.secrets_store_implementation == "aws_secrets_manager" ? [{
+    Sid = "ReadWriteInstanceSecretsManagerSecrets"
+    Action = [
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:DescribeSecret",
+      "secretsmanager:GetResourcePolicy",
+      "secretsmanager:ListSecretVersionIds",
+      "secretsmanager:PutSecretValue",
+      "secretsmanager:DeleteSecret",
+    ]
+    Effect = "Allow"
+    Resource = [
+      "${local.secret_arn_prefix}*" # wildcard to match all secrets corresponding to this function
+    ]
+  }] : []
+
+  global_ssm_param_statements = length(var.global_parameter_arns) == 0 ? [] : [{
     Sid = "ReadSharedSSMParameters"
     Action = [
       "ssm:GetParameter",
@@ -174,6 +216,18 @@ locals {
     ]
     Effect   = "Allow"
     Resource = var.global_parameter_arns
+  }]
+
+  global_secretsmanager_statements = length(var.global_secrets_manager_secret_arns) == 0 ? [] : [{
+    Sid = "ReadSharedSecrets"
+    Action = [
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:DescribeSecret",
+      "secretsmanager:GetResourcePolicy",
+      "secretsmanager:ListSecretVersionIds"
+    ]
+    Effect   = "Allow"
+    Resource = values(var.global_secrets_manager_secret_arns)
   }]
 
   key_statements = length(local.kms_key_ids_to_allow) > 0 ? [{
@@ -188,13 +242,17 @@ locals {
 
   policy_statements = concat(
     local.global_ssm_param_statements,
+    local.global_secretsmanager_statements,
     local.local_ssm_param_statements,
-    local.key_statements
+    local.local_secrets_manager_statements,
+    local.key_statements,
   )
 }
 
 resource "aws_iam_policy" "ssm_param_policy" {
-  name        = "${local.function_name}_ssmParameters"
+  name = "${local.function_name}_ssmParameters"
+
+  # description here not accurate any more, but changing it will destroy and re-create the policy
   description = "Allow SSM parameter access needed by ${local.function_name}"
 
   policy = jsonencode(

@@ -28,6 +28,15 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     AmazonS3 s3Client;
 
 
+    List<String> EXPECTED_CONTENT_TYPES = Arrays.asList(
+        "text/csv; charset=utf-8",
+        "text/csv; charset=ascii",
+        "text/csv; charset=us-ascii"
+        //"text/csv; charset=iso-8859-1" // standardized latin-1, don't expect this
+    );
+
+
+
     @SneakyThrows
     @Override
     public String handleRequest(S3Event s3Event, Context context) {
@@ -68,32 +77,49 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
             return null;
         }
 
-        byte[] processedData = null;
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+        // check content type here
+        if (sourceMetadata.getContentType() != null
+                && !EXPECTED_CONTENT_TYPES.contains(sourceMetadata.getContentType().toLowerCase())) {
+            // our code presumes a CSV, which is utf-8 encoded atm (or something like ascii, which is a subset of utf-8)
+            log.warning(String.format("S3 file content type for %s/%s is %s ; this is not known to be compatible with UTF-8-encoded CSVs, so may not work as expected", importBucket, sourceKey, sourceMetadata.getContentEncoding()));
+        }
 
-            StorageEventRequest request =
-                storageHandler.buildRequest(importBucket, sourceKey, transform, sourceMetadata.getContentEncoding());
+
+        StorageEventRequest request =
+            storageHandler.buildRequest(importBucket, sourceKey, transform, sourceMetadata.getContentEncoding());
+
+        // AWS lambdas have a shared ephemeral storage (shared across invocations) of 512MB
+        // This can be upped to 10GB, but this should be enough as long as we're not processing
+        // lots of large files in parallel.
+        // https://aws.amazon.com/blogs/aws/aws-lambda-now-supports-up-to-10-gb-ephemeral-storage/
+        File tmpFile = new File("/tmp/" + UUID.randomUUID());
+        try (FileOutputStream fos = new FileOutputStream(tmpFile);
+             BufferedOutputStream outputStream = new BufferedOutputStream(fos, storageHandler.getBufferSize())) {
+
 
             storageEventResponse = storageHandler.handle(request, transform, () -> {
                 S3Object sourceObject = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
                 return sourceObject.getObjectContent();
             }, () -> outputStream);
 
-            processedData = outputStream.toByteArray();
             log.info(String.format("Successfully pseudonymized %s/%s to buffer", importBucket, sourceKey));
         }
 
-        try (InputStream processedStream = new ByteArrayInputStream(processedData)) {
+        try (InputStream fileInputStream = new FileInputStream(tmpFile);
+            BufferedInputStream processedStream = new BufferedInputStream(fileInputStream, storageHandler.getBufferSize())) {
             ObjectMetadata destinationMetadata = new ObjectMetadata();
-            //NOTE: not setting content length here causes S3 client to buffer the output stream ...
-            //   --> OK, bc we have no way to know output length apriori
-            //meta.setContentLength(storageEventResponse.getBytes().length);
+            destinationMetadata.setContentLength(tmpFile.length());
 
             // set headers iff they're non-null on source object
             Optional.ofNullable(sourceMetadata.getContentType())
                 .ifPresent(destinationMetadata::setContentType);
-            Optional.ofNullable(sourceMetadata.getContentEncoding())
-                .ifPresent(destinationMetadata::setContentEncoding);
+
+            if (request.getCompressOutput()) {
+                destinationMetadata.setContentEncoding(StorageHandler.CONTENT_ENCODING_GZIP);
+            } else {
+                Optional.ofNullable(sourceMetadata.getContentEncoding())
+                    .ifPresent(destinationMetadata::setContentEncoding);
+            }
 
             destinationMetadata.setUserMetadata(storageHandler.buildObjectMetadata(importBucket, sourceKey, transform));
 
@@ -104,10 +130,11 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
                 destinationMetadata);
 
             log.info(String.format("Successfully uploaded to %s/%s",
-                importBucket,
-                sourceKey,
                 storageEventResponse.getDestinationBucketName(),
                 storageEventResponse.getDestinationObjectPath()));
+        } finally {
+            //noinspection ResultOfMethodCallIgnored
+            tmpFile.delete();
         }
 
         return storageEventResponse;

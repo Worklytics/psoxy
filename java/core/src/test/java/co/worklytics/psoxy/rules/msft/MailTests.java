@@ -21,7 +21,7 @@ public class MailTests extends JavaRulesTestBaseCase {
         .build();
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     public void messages(String apiVersion) {
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/mailFolders/SentItems/messages";
         String jsonResponse = asJson("Messages_SentItems_"+ apiVersion + ".json");
@@ -50,7 +50,7 @@ public class MailTests extends JavaRulesTestBaseCase {
 
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     public void message(String apiVersion) {
         String endpoint = "https://graph.microsoft.com/" + apiVersion +
             "/users/48d31887-5fad-4d73-a9f5-3c356e68a038/messages/AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEJAAAiIsqMbYjsT5e-T7KzowPTAAQSfAIWAAA=";
@@ -105,7 +105,7 @@ public class MailTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     public void mailboxPaging(String apiVersion) {
         String endpoint = "https://graph.microsoft.com/" + apiVersion +
             "/users/4ea7fc01-0264-4e84-b85e-9e49fba4de97/mailFolders('SentItems')/messages?$filter=SentDateTime+gt+2019-12-30T00%3a00%3a00Z+and+SentDateTime+lt+2022-05-16T00%3a00%3a00Z&%24top=10&$skip=10";
@@ -113,7 +113,7 @@ public class MailTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     public void inboxBlocked(String apiVersion) {
         String pagingEndpoint = "https://graph.microsoft.com/" + apiVersion +
             "/users/4ea7fc01-0264-4e84-b85e-9e49fba4de97/mailFolders('Inbox')/messages?$filter=SentDateTime+gt+2019-12-30T00%3a00%3a00Z+and+SentDateTime+lt+2022-05-16T00%3a00%3a00Z&%24top=10&$skip=10";
@@ -128,11 +128,8 @@ public class MailTests extends JavaRulesTestBaseCase {
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
             InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/mailboxSettings", "MailboxSettings_v1.0.json"),
-            InvocationExample.of("https://graph.microsoft.com/beta/users/48d31887-5fad-4d73-a9f5-3c356e68a038/messages/AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEJAAAiIsqMbYjsT5e-T7KzowPTAAQSfAIWAAA=", "Message_beta.json"),
             InvocationExample.of("https://graph.microsoft.com/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/messages/AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEJAAAiIsqMbYjsT5e-T7KzowPTAAQSfAIWAAA=", "Message_v1.0.json"),
-            InvocationExample.of("https://graph.microsoft.com/beta/users/4ea7fc01-0264-4e84-b85e-9e49fba4de97/mailFolders('SentItems')/messages?$filter=SentDateTime+gt+2019-12-30T00%3a00%3a00Z+and+SentDateTime+lt+2022-05-16T00%3a00%3a00Z&%24top=10&$skip=10", "Messages_SentItems_beta.json"),
             InvocationExample.of("https://graph.microsoft.com/v1.0/users/4ea7fc01-0264-4e84-b85e-9e49fba4de97/mailFolders('SentItems')/messages?$filter=SentDateTime+gt+2019-12-30T00%3a00%3a00Z+and+SentDateTime+lt+2022-05-16T00%3a00%3a00Z&%24top=10&$skip=10", "Messages_SentItems_v1.0.json")
         );
     }
   }
-

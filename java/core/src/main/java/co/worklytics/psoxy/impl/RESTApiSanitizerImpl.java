@@ -52,6 +52,7 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
@@ -124,7 +125,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     @Override
     public String sanitize(String httpMethod, URL url, String jsonResponse) {        //extra check ...
         if (!isAllowed(httpMethod, url)) {
-            throw new IllegalStateException(String.format("Sanitizer called to sanitize response that should not have been retrieved: %s", url.toString()));
+            throw new IllegalStateException(String.format("Sanitizer called to sanitize response that should not have been retrieved: %s", url));
         }
         if (StringUtils.isEmpty(jsonResponse)) {
             // Nothing to do
@@ -222,6 +223,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             f = getPseudonymizeRegexMatches((Transform.PseudonymizeRegexMatches) transform);
         } else if (transform instanceof Transform.RedactRegexMatches) {
             f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
+        } else if (transform instanceof Transform.RedactExceptPhrases) {
+            f = getRedactExceptPhrases((Transform.RedactExceptPhrases) transform);
         } else if (transform instanceof Transform.RedactExceptSubstringsMatchingRegexes) {
             f = getRedactExceptSubstringsMatchingRegexes((Transform.RedactExceptSubstringsMatchingRegexes) transform);
         } else if (transform instanceof Transform.FilterTokenByRegex) {
@@ -300,6 +303,37 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         }
     }
 
+    MapFunction getRedactExceptPhrases(Transform.RedactExceptPhrases transform) {
+
+        //TODO: alternatively, all different patterns, and preserve ALL matches?
+        // --> means we might enlarge, if the same phrase matches multiple times
+
+        List<Pattern> patterns = transform.getAllowedPhrases().stream()
+            .map(p -> "\\Q" + p + "\\E") // quote it
+            .map(p -> "\\b(" + p + ")[\\s:]*\\b") //boundary match, with optional whitespace or colon at end
+            .map(p -> ".*?" + p + ".*?") //wrap in .*? to match anywhere in the string, but reluctantly
+            .map(p -> Pattern.compile(p, CASE_INSENSITIVE))
+            .collect(Collectors.toList());
+
+        return (s, jsonConfiguration) -> {
+            if (!(s instanceof String)) {
+                if (s != null) {
+                    log.warning("value matched by " + transform + " not of type String");
+                }
+                return null;
+            } else if (StringUtils.isBlank((String) s)) {
+                return s;
+            } else {
+                return patterns.stream()
+                    .map(p -> p.matcher((String) s))
+                    .filter(Matcher::matches)
+                    .map(m -> m.group(1)) //group 1, bc we created caputuring group in regex above
+                    .collect(Collectors.joining(",")); //q: something better? if , in phrases, can't reparse
+
+            }
+        };
+    }
+
 
     MapFunction getRedactRegexMatches(Transform.RedactRegexMatches transform) {
         List<Pattern> patterns = transform.getRedactions().stream().map(Pattern::compile).collect(Collectors.toList());
@@ -323,7 +357,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     MapFunction getRedactExceptSubstringsMatchingRegexes(Transform.RedactExceptSubstringsMatchingRegexes transform) {
         List<Pattern> patterns = transform.getExceptions().stream()
-                .map(p -> ".*(" + p + ").*") //wrap in .* to match anywhere in the string
+                .map(p -> ".*?(" + p + ").*?") //wrap in .*? to match anywhere in the string, but reluctantly
                 .map(Pattern::compile).collect(Collectors.toList());
         return (s, jsonConfiguration) -> {
             if (!(s instanceof String)) {
@@ -337,12 +371,14 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 return patterns.stream()
                         .map(p -> p.matcher((String) s))
                         .filter(Matcher::matches)
+                        .map(m -> m.group(1)) //group 1, bc we created caputuring group in regex above
+                        .sorted((a, b) -> Integer.compare(b.length(), a.length())) // longest first
                         .findFirst()
-                        .map(m -> m.group(1))
                         .orElse("");
             }
         };
     }
+
 
     MapFunction getFilterTokenByRegex(Transform.FilterTokenByRegex transform) {
         List<java.util.function.Predicate<String>> patterns =

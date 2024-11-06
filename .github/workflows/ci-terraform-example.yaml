@@ -1,28 +1,26 @@
-name: 'validate Terraform Examples'
-
 on:
   workflow_call:
     inputs:
       example_path:
         required: false
         type: string
-        description: Java version to use # see https://github.com/actions/setup-java#supported-version-syntax
-        default: 17
+        description: Path to the example to validate
+      terraform_version:
+        required: false
+        type: string
+        description: Terraform version to use
 
 jobs:
-  validate_tf_example:
-    name: 'validate tf examples'
+  validate:
     runs-on: ubuntu-latest
-    env:
-      TERRAFORM_VERSION: 1.3.9
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 'setup Terraform'
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_version: ${{ inputs.terraform_version }}
 
       - name: "Terraform - validate ${{ inputs.example_path }}"
         working-directory: infra/${{ inputs.example_path }}

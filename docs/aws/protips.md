@@ -3,15 +3,16 @@
 Some ideas on how to support scenarios and configuration requirements beyond what our default
 examples show:
 
-
 ## Encryption Keys
+
 see [encryption-keys.md](encryption-keys.md)
 
 ## Tagging ALL infra created by your Terraform Configuration
 
 If you're using our AWS example, it should support a `default_tags` variable.
 
-You can add the following in your `terrform.tfvars` file to set tags on all resources created by the example configuration:
+You can add the following in your `terrform.tfvars` file to set tags on all resources created by the
+example configuration:
 
 ```hcl
 default_tags = {
@@ -19,8 +20,9 @@ default_tags = {
 }
 ```
 
-If you're not using our AWS example, you can add the following to your configuration, then you will need to modify
-the `aws` provider block in your configuration to add a `default_tags`. Example shown below:
+If you're not using our AWS example, you can add the following to your configuration, then you will
+need to modify the `aws` provider block in your configuration to add a `default_tags`. Example shown
+below:
 
 See: [https://registry.terraform.io/providers/hashicorp/aws/latest/docs#default_tags]
 
@@ -42,184 +44,125 @@ provider "aws" {
 }
 ```
 
-## Using AWS API Gateway **alpha**
-
-Worklytics' examples expose your Psoxy instances using AWS Lambda function URLs, which AWS released
-in March 2022. These support secure invocation auth'd by AWS IAM. As Psoxy instances simply proxy
-a restricted, sanitized view of REST APIs that are generally open on the public internet, we don't
-consider there to be a security need to add further authentication layers that API Gateways could
-be used to provide. (Especially given the complexity that such additional layers introduce; any
-added complexity in a system increases potential for breach due to misconfiguration). Nonetheless,
-should you wish to add an API Gateway in front of your Psoxy instances, it is possible and *should*
-be compatible with the code.
-
-### Using API Gateway V2
-API Gateway V2 sends requests to lambdas with the same format as Function URLs; so slapping something
-like the following onto one of our AWS examples should suffice:
-
-```hcl
-locals {
-  rest_instances = {
-    for id, instance in module.psoxy-aws-google-workspace.instances :
-      id => instance if instance.proxy_kind == "rest"
-  }
-}
-
-resource "aws_apigatewayv2_api" "psoxy-api" {
-  name          = "psoxy-api"
-  protocol_type = "HTTP"
-  description   = "API to expose psoxy instances"
-}
-
-resource "aws_cloudwatch_log_group" "gateway-log" {
-  name              = aws_apigatewayv2_api.psoxy-api.name
-  retention_in_days = 7
-}
-
-resource "aws_apigatewayv2_stage" "live" {
-  api_id      = aws_apigatewayv2_api.psoxy-api.id
-  name        = "live" # q: what name??
-  auto_deploy = true
-  access_log_settings {
-    destination_arn = aws_cloudwatch_log_group.gateway-log.arn
-    format          = "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] \"$context.httpMethod $context.path $context.protocol\" $context.status $context.responseLength $context.requestId $context.extendedRequestId $context.error.messageString $context.integrationErrorMessage"
-  }
-}
-
-
-resource "aws_apigatewayv2_integration" "map" {
-  for_each = local.rest_instances
-
-  api_id                    = aws_apigatewayv2_api.psoxy-api.id
-  integration_type          = "AWS_PROXY"
-  connection_type           = "INTERNET"
-
-  integration_method        = "POST"
-  integration_uri           = each.value.function_arn
-  request_parameters        = {}
-  request_templates         = {}
-  payload_format_version    = "2.0"
-}
-
-
-resource "aws_apigatewayv2_route" "get_route" {
-  for_each = local.rest_instances
-
-  api_id             = aws_apigatewayv2_api.psoxy-api.id
-  route_key          = "GET /${each.key}/{proxy+}"
-  authorization_type = "AWS_IAM"
-  target             = "integrations/${aws_apigatewayv2_integration.map[each.key].id}"
-}
-
-resource "aws_apigatewayv2_route" "head_route" {
-  for_each = local.rest_instances
-
-  api_id             = aws_apigatewayv2_api.psoxy-api.id
-  route_key          = "HEAD /${each.key}/{proxy+}"
-  authorization_type = "AWS_IAM"
-  target             = "integrations/${aws_apigatewayv2_integration.map[each.key].id}"
-}
-
-# allow API gateway to invoke the lambda function
-resource "aws_lambda_permission" "lambda_permission" {
-  for_each = local.rest_instances
-
-  statement_id  = "Allow${each.key}Invoke"
-  action        = "lambda:InvokeFunction"
-  function_name = each.value.function_name
-  principal     = "apigateway.amazonaws.com"
-
-
-  # The /*/*/ part allows invocation from any stage, method and resource path
-  # within API Gateway REST API.
-  source_arn = "${aws_apigatewayv2_api.psoxy-api.execution_arn}/*/*/${each.value.function_name}/{proxy+}"
-}
-
-resource "aws_iam_policy" "invoke_api" {
-  name_prefix = "PsoxyInvokeAPI"
-
-  policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Effect" : "Allow",
-        "Action" : "execute-api:Invoke",
-        "Resource" : "arn:aws:execute-api:*:${var.aws_account_id}:${aws_apigatewayv2_api.psoxy-api.id}/*/GET/*",
-      },
-      {
-        "Effect" : "Allow",
-        "Action" : "execute-api:Invoke",
-        "Resource" : "arn:aws:execute-api:*:${var.aws_account_id}:${aws_apigatewayv2_api.psoxy-api.id}/*/HEAD/*",
-      },
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "invoke_api_policy_to_role" {
-  role       = "PsoxyCaller" # Name (not ARN) of the API caller role
-  policy_arn = aws_iam_policy.invoke_api.arn
-}
-
-```
-
-### Using API Gateway V1 **alpha**
-
-You'll need to do something similar to above, but use plain `apigateway` Terraform resources instead
-of V2. It will be a 'REST' api, instead of an 'HTTP' api.
-
-Additionally, you'll need to set a different handler class to be invoked instead of the default
-(`co.workltyics.psoxy.Handler`, should be `co.worklytics.psoxy.APIGatewayV1Handler`). This can be
-done in Terraform or by modifying configuration via AWS Console..
-
 ## Extensibility
 
-To support extensibility, our Terraform examples/modules output the IDs/names of the major resources they create, so
-that you can compose them with other Terraform resources.
+To support extensibility, our Terraform examples/modules output the IDs/names of the major resources
+they create, so that you can compose them with other Terraform resources.
 
 ### Buckets
 
-The `aws-host` module outputs `bulk_connector_instances`; a map of `id => instance` for each bulk connector. Each of
-these has two attributes that correspond to the names of its related buckets:
-  - `sanitized_bucket_name`
-  - `input_bucket_name`
+The `aws-host` module outputs `bulk_connector_instances`; a map of `id => instance` for each bulk
+connector. Each of these has two attributes that correspond to the names of its related buckets:
 
-So in our AWS example, you can use these to enable logging, for example, you could do something like this: (YMMV, syntax
-etc should be tested)
+- `sanitized_bucket_name`
+- `input_bucket_name`
+
+So in our AWS example, you can use these to enable logging, for example, you could do something like
+this: (YMMV, syntax etc should be tested)
+
+See `s3-extra-sec.tf` in example repo from v0.4.58+ for example code you can uncomment and modify.
 
 ```hcl
-local {
-  id_of_bucket_to_store_logs = "{YOUR_BUCKET_ID_HERE}"
+locals {
+    # Gather buckets created by the various terraform modules
+    buckets_to_secure = concat(
+        flatten([ for k, instance in module.psoxy.bulk_connector_instances : [ instance.sanitized_bucket, instance.input_bucket ] ]),
+        values(module.psoxy.lookup_output_buckets)[*]
+    )
+
+    id_of_bucket_to_store_logs = "{YOUR_BUCKET_ID_HERE}"
 }
 
 resource "aws_s3_bucket_logging" "logging" {
-  for_each = module.psoxy.bulk_connector_instances
+  for_each = toset(local.buckets_to_secure)
 
   bucket = each.value.sanitized_bucket_name
 
   target_bucket = local.id_of_bucket_to_store_logs
   target_prefix = "psoxy/${each.key}/"
 }
+```
 
-resource "aws_s3_bucket_logging" "logging" {
-  for_each = module.psoxy.bulk_connector_instances
+You can also set bucket-level policies to restrict access to SSL-only, with something like the
+following:
 
-  bucket = each.value.input_bucket_name
+```hcl
+locals {
+  buckets_to_secure = concat(
+    flatten([ for k, instance in module.psoxy.bulk_connector_instances : [ instance.sanitized_bucket, instance.input_bucket ] ]),
+    values(module.psoxy.lookup_output_buckets)[*]
+  )
+}
 
-  target_bucket = local.id_of_bucket_to_store_logs
-  target_prefix = "psoxy/${each.key}/"
+resource "aws_s3_bucket_policy" "deny_s3_nonsecure_transport" {
+  for_each = toset(local.buckets_to_secure)
+
+  bucket = each.key
+  policy = jsonencode({
+    Version   = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "DenyNonSecureTransport"
+        Effect   = "Deny"
+        Action   = ["s3:*"]
+        Principal = "*"
+        Resource =  [
+          "arn:aws:s3:::${each.key}",
+          "arn:aws:s3:::${each.key}/*"
+        ]
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = false
+          }
+        }
+      }
+    ]
+  })
 }
 ```
 
 Analogous approaches can be used to configure versioning, replication, etc;
-  - [`aws_s3_bucket_versioning`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning)
-  - [`aws_s3_bucket_replication`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_replication)
 
-Note that encryption, lifecycle, public_access_block are set by the Workltyics-provided modules, so you may have
-conflicts issues if you also try to set those outside.
+- [`aws_s3_bucket_versioning`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning)
+- [`aws_s3_bucket_replication`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_replication)
 
+Note that encryption, lifecycle, public_access_block are set by the Workltyics-provided modules, so
+you may have conflicts issues if you also try to set those outside.
 
+## Lambda Execution Role
+*beta* - released from v0.4.50; YMMV, and may be subject to change.
 
+The terraform modules we provide provision execution roles for each lambda function, and attach
+by default attach the appropriate AWS Managed Policy to each.
 
+Specifically, this is [`AWSLambdaBasicExecutionRole`](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AWSLambdaBasicExecutionRole.html),
+unless you're using a VPC - in which case it is `AWSLambdaVPCAccessExecutionRole`(https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AWSLambdaVPCAccessExecutionRole.html).
 
+For organizations that don't allow use of AWS Managed Policies, you can use the
+`aws_lambda_execution_role_policy_arn` variable to pass in an alternative which will be used INSTEAD
+of the AWS Managed Policy.
 
+## Least-Privileged IAM Policy for Provisioning
+
+YMMV, but we exposed a minimal IAM policy for provisioning in the `psoxy-constants` module, which
+you attach to your desired role to ensure it has sufficient permissions to provision the proxy.
+
+NOTE: using features beyond the default set, such as AWS API Gateway, VPC, or Secrets Manager, may
+require some additional permissions beyond what is provided in the least-privileged policy.
+
+```hcl
+module "psoxy_constants" {
+  source = "git::https://github.com/worklytics/psoxy//infra/modules/psoxy-constants?ref=v0.4.61"
+}
+
+resource "aws_iam_policy" "min_provisioner_policy" {
+    name   = "PsoxyMinProvisioner"
+    policy = module.psoxy_constants.aws_least_privileged_policy
+}
+
+resource "aws_iam_role_policy_attachment" "min_provisioner_policy" {
+    policy_arn         = aws_iam_policy.min_provisioner_policy.arn
+    role               = "{{NAME_OF_YOUR_AWS_PROVISIONER_ROLE}}"
+}
+```
 

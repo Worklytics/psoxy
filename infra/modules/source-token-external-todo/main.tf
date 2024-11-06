@@ -23,16 +23,9 @@ resource "local_file" "source_connection_instructions" {
   content  = local.todo_content
 }
 
-moved {
-  from = local_file.source_connection_instructions
-  to   = local_file.source_connection_instructions[0]
-}
-
-
 output "next_todo_step" {
   value = var.todo_step + 1
 }
-
 
 output "todo" {
   value = local.todo_content

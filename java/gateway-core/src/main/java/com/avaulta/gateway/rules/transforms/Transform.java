@@ -16,6 +16,7 @@ import java.util.List;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Transform.Redact.class, name = "redact"),
     @JsonSubTypes.Type(value = Transform.RedactRegexMatches.class, name = "redactRegexMatches"),
+    @JsonSubTypes.Type(value = Transform.RedactExceptPhrases.class, name = "redactExceptPhrases"),
     @JsonSubTypes.Type(value = Transform.RedactExceptSubstringsMatchingRegexes.class, name = "redactExceptSubstringsMatchingRegexes"),
     @JsonSubTypes.Type(value = Transform.Pseudonymize.class, name = "pseudonymize"),
     @JsonSubTypes.Type(value = Transform.PseudonymizeEmailHeader.class, name = "pseudonymizeEmailHeader"),
@@ -90,6 +91,34 @@ public abstract class Transform {
         }
     }
 
+    //beta
+    @NoArgsConstructor //for jackson
+    @SuperBuilder(toBuilder = true)
+    @Getter
+    @ToString
+    @EqualsAndHashCode(callSuper = true)
+    public static class RedactExceptPhrases extends Transform {
+
+        /**
+         * redact portions of content that do NOT match these phases; if multiple match, will build
+         * CSV of all matching phrases present in field
+         */
+        @Singular
+        List<String> allowedPhrases;
+
+        public RedactExceptPhrases clone() {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .clearAllowedPhrases()
+                .allowedPhrases(new ArrayList<>(this.allowedPhrases))
+                .build();
+        }
+    }
+
+
     @NoArgsConstructor //for jackson
     @SuperBuilder(toBuilder = true)
     @Getter
@@ -129,6 +158,10 @@ public abstract class Transform {
          */
         @Singular
         List<String> exceptions;
+
+        // q: why not make all the exceptions case-insensitive by default??
+
+        // why not make boundary encapsulation the default??
 
         public RedactExceptSubstringsMatchingRegexes clone() {
             return this.toBuilder()

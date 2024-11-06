@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.WritableConfigService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -19,7 +20,7 @@ class CachingConfigServiceDecoratorTest {
 
 
     LocalHashMapConfigService localHashMapConfigService;
-    ConfigService config;
+    WritableConfigService config;
 
     @BeforeEach
     public void setup() {
@@ -90,7 +91,7 @@ class CachingConfigServiceDecoratorTest {
     }
 
 
-    static class LocalHashMapConfigService implements ConfigService {
+    static class LocalHashMapConfigService implements WritableConfigService {
 
         Map<ConfigProperty, String> map = new HashMap<>();
 
@@ -122,9 +123,5 @@ class CachingConfigServiceDecoratorTest {
             return Optional.ofNullable(map.get(property));
         }
 
-        @Override
-        public boolean supportsWriting() {
-            return true;
-        }
     }
 }

@@ -56,10 +56,28 @@ variable "msft_teams_example_call_record_guid" {
   default     = "{EXAMPLE_MSFT_TEAMS_CALL_RECORD_GUID}"
 }
 
+variable "msft_teams_example_online_meeting_join_url" {
+  type        = string
+  description = "example of an URL to join into an OnlineMeeting for test API calls (OPTIONAL)"
+  default     = "{EXAMPLE_MSFT_TEAMS_ONLINE_MEETING_URL}"
+}
+
 variable "msft_owners_email" {
   type        = set(string)
-  description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user"
+  description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user. Ignored if `existing_app_object_id` provided."
   default     = []
+}
+
+variable "msft_connector_app_object_id" {
+  type        = string
+  description = "BETA; if provided, the app corresponding to this object id will be used instead of creating new ones per source. User must ensure that roles/scopes are appropriate for the connector"
+  default     = null
+}
+
+variable "todos_as_local_files" {
+  type        = bool
+  description = "whether to render TODOs as flat files"
+  default     = true
 }
 
 variable "todo_step" {

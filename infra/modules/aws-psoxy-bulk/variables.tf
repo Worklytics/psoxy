@@ -53,6 +53,13 @@ variable "path_to_instance_ssm_parameters" {
   default     = null
 }
 
+# TODO : rename, this is misleading
+variable "path_to_shared_ssm_parameters" {
+  type        = string
+  description = "path to shared global config parameters in SSM Parameter Store"
+  default     = ""
+}
+
 variable "function_env_kms_key_arn" {
   type        = string
   description = "AWS KMS key ARN to use to encrypt lambda's environment. NOTE: Terraform must be authenticated as an AWS principal authorized to encrypt/decrypt with this key."
@@ -69,6 +76,18 @@ variable "ssm_kms_key_ids" {
   type        = map(string)
   description = "KMS key IDs or ARNs that were used for encrypting SSM parameters needed by this lambda, if any."
   default     = {}
+}
+
+variable "aws_lambda_execution_role_policy_arn" {
+  type        = string
+  description = "*beta* The ARN of policy to attach to the lambda execution role, if you want one other than the default. (usually, AWSLambdaBasicExecutionRole)."
+  default     = null
+}
+
+variable "iam_roles_permissions_boundary" {
+  type        = string
+  description = "*beta* ARN of the permissions boundary to attach to IAM roles created by this module."
+  default     = null
 }
 
 variable "log_retention_days" {
@@ -151,12 +170,13 @@ variable "rules" {
   type = object({
     # NOTE: use `optional()` in variables.tf of modules that wrap this one, but omit the default
     # value so that the one here prevails (unless should really be different for your use-case)
-    pseudonymFormat       = optional(string, "JSON") # TODO: change to URL_SAFE_TOKEN in v0.5
-    columnsToRedact       = optional(list(string), [])
-    columnsToInclude      = optional(list(string), null)
-    columnsToPseudonymize = optional(list(string), [])
-    columnsToDuplicate    = optional(map(string), {})
-    columnsToRename       = optional(map(string), {})
+    pseudonymFormat                = optional(string, "JSON") # TODO: change to URL_SAFE_TOKEN in v0.5
+    columnsToRedact                = optional(list(string), [])
+    columnsToInclude               = optional(list(string), null)
+    columnsToPseudonymize          = optional(list(string), [])
+    columnsToPseudonymizeIfPresent = optional(list(string), null)
+    columnsToDuplicate             = optional(map(string), {})
+    columnsToRename                = optional(map(string), {})
     fieldsToTransform = optional(map(object({
       newName    = string
       transforms = optional(list(map(string)), [])
@@ -180,6 +200,12 @@ variable "global_parameter_arns" {
   default     = []
 }
 
+variable "global_secrets_manager_secret_arns" {
+  type        = map(string)
+  description = "Secrets Manager Secrets ARNs to expose to proxy instance, expected to contain global shared secrets, like salt or encryption keys"
+  default     = {}
+}
+
 variable "memory_size_mb" {
   # See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#memory_size
   type        = number
@@ -199,10 +225,38 @@ variable "sanitized_expiration_days" {
   default     = 720
 }
 
+variable "vpc_config" {
+  type = object({
+    # ipv6_allowed_for_dual_stack = optional(bool, false)
+    subnet_ids         = list(string)
+    security_group_ids = list(string)
+  })
+  description = "**alpha** VPC configuration for lambda; if not provided, lambda will not be deployed in a VPC. see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#vpc_config"
+  default     = null
+}
+
+variable "secrets_store_implementation" {
+  type        = string
+  description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
+  default     = "aws_ssm_parameter_store"
+}
+
 variable "example_file" {
   type        = string
   description = "path to example file to use for testing, from psoxy_base_dir"
   default     = null
+}
+
+variable "provision_bucket_public_access_block" {
+  type        = bool
+  description = "Whether to provision public_access_block resources on all buckets; defaults to 'true', but can be 'false' if you have organizational control policies that do this at a higher level."
+  default     = true
+}
+
+variable "todos_as_local_files" {
+  type        = bool
+  description = "whether to render TODOs as flat files"
+  default     = true
 }
 
 variable "todo_step" {

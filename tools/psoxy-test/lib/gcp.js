@@ -61,9 +61,9 @@ async function call(options = {}) {
   logger.verbose('Request Headers:', { additional: headers });
 
   const url = new URL(options.url);
-  const method = options.method || resolveHTTPMethod(url.pathname);
+  const method = options.method || resolveHTTPMethod(url.pathname, options);
 
-  return await request(url, method, headers);
+  return await request(url, method, headers, options.body);
 }
 
 /**
@@ -240,22 +240,36 @@ async function deleteFile(bucketName, filename, client) {
  * @param {string} destination - local path and filename
  * @param {Storage} client
  * @param {Object} logger - winston instance
+ * @returns {Object} downloadResponse
+ * @returns {Object} downloadResponse.content - DownloadResponse (see ref)
+ * @returns {Object} downloadResponse.metadata - file metadata
  */
 async function download(bucketName, fileName, destination, client, logger) {
   if (!client) {
     client = createStorageClient();
   }
 
-  const downloadFunction = async () => client.bucket(bucketName).file(fileName)
-    .download({ destination: destination });
+  const downloadFunction = async () => {
+    const file = client.bucket(bucketName).file(fileName)
+
+    const [metadata] = await file.getMetadata();
+    const content = await file
+      .download({ destination: destination, decompress: true});
+
+    return {
+      content,
+      metadata,
+    }
+  };
   const onErrorStop = (error) => error.code !== 404;
 
-  const downloadResponse = await executeWithRetry(downloadFunction, onErrorStop,
-    logger);
+  const downloadResponse = await executeWithRetry(downloadFunction, onErrorStop, logger);
 
   if (downloadResponse === undefined) {
     throw new Error(`${fileName} not found after multiple attempts`);
   }
+
+  return downloadResponse;
 }
 
 export default {

@@ -1,13 +1,14 @@
 data "external" "identity-result" {
   for_each = var.login_ids
 
+  # NOTE: passing blank string will, in effect, shift arguments!!
   program = [
     "${path.module}/addIdentity.sh",
     var.identity_pool_id,
     each.value,
     var.aws_region,
-    var.aws_role,
-    each.key
+    each.key,
+    var.aws_role # possibly empty string, so must come last!!
   ]
 }
 

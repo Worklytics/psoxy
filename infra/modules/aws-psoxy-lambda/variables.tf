@@ -68,6 +68,12 @@ variable "path_to_instance_ssm_parameters" {
   default     = null
 }
 
+variable "path_to_shared_ssm_parameters" {
+  type        = string
+  description = "path to shared global config parameters in SSM Parameter Store"
+  default     = ""
+}
+
 variable "reserved_concurrent_executions" {
   type        = number
   description = "Max number of concurrent instances for the function"
@@ -110,6 +116,12 @@ variable "memory_size_mb" {
   default     = 512
 }
 
+variable "ephemeral_storage_mb" {
+  type        = number
+  description = "ephemeral storage size in MB"
+  default     = 512 # this is the free amount; over this though it's pretty trivial cost for the use-case
+}
+
 variable "timeout_seconds" {
   type        = number
   description = "lambda timeout in seconds"
@@ -125,9 +137,21 @@ variable "log_retention_in_days" {
 variable "global_parameter_arns" {
   # see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter#attributes-reference
   type        = list(string)
-  description = "System Manager Parameters ARNS to expose to psoxy instance, expected to contain global shared parameters, like salt or encryption keys"
+  description = "System Manager Parameters ARNS to expose to proxy instance, expected to contain global shared parameters, like salt or encryption keys"
+  default     = []
 }
 
+variable "global_secrets_manager_secret_arns" {
+  type        = map(string)
+  description = "Secrets Manager Secrets ARNs to expose to proxy instance, expected to contain global shared secrets, like salt or encryption keys"
+  default     = {}
+}
+
+variable "iam_roles_permissions_boundary" {
+  type        = string
+  description = "*beta* ARN of the permissions boundary to attach to IAM roles created by this module."
+  default     = null
+}
 
 # TODO: remove after v0.4.x
 variable "function_parameters" {
@@ -139,3 +163,25 @@ variable "function_parameters" {
   default     = []
 }
 
+
+variable "vpc_config" {
+  type = object({
+    # ipv6_allowed_for_dual_stack = optional(bool, false)
+    subnet_ids         = list(string)
+    security_group_ids = list(string)
+  })
+  description = "**beta** VPC configuration for lambda; if not provided, lambda will not be deployed in a VPC. see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#vpc_config"
+  default     = null
+}
+
+variable "aws_lambda_execution_role_policy_arn" {
+  type        = string
+  description = "**beta** The ARN of policy to attach to the lambda execution role, if you want one other than the default. (usually, AWSLambdaBasicExecutionRole)."
+  default     = null
+}
+
+variable "secrets_store_implementation" {
+  type        = string
+  description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
+  default     = "aws_ssm_parameter_store"
+}

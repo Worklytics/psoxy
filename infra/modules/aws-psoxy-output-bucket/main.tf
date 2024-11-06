@@ -19,6 +19,8 @@ resource "aws_s3_bucket" "output" {
 }
 
 resource "aws_s3_bucket_public_access_block" "sanitized" {
+  count = var.provision_bucket_public_access_block ? 1 : 0
+
   bucket = aws_s3_bucket.output.bucket
 
   block_public_acls       = true

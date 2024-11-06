@@ -37,7 +37,7 @@ class ConfigTest {
             () -> Config.SecretReference.validate(secretReference));
 
 
-        secretReference.service = Config.SecretService.AWS;
+        secretReference.service = Config.SecretService.AWS_PARAMETER_STORE;
         secretReference.identifier = "projects/example-project/secrets/some-secret/versions/1";
 
         assertThrows(NotImplementedException.class,

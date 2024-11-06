@@ -31,6 +31,18 @@ variable "google_workspace_example_admin" {
   default     = null # will failover to user
 }
 
+variable "provision_gcp_sa_keys" {
+  type        = bool
+  description = "whether to provision key for each connector's GCP Service Account (OAuth Client). If false, you must create the key manually and provide it."
+  default     = true
+}
+
+variable "todos_as_local_files" {
+  type        = bool
+  description = "whether to render TODOs as flat files"
+  default     = true
+}
+
 variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"

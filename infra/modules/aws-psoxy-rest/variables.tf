@@ -39,6 +39,12 @@ variable "path_to_instance_ssm_parameters" {
   default     = null
 }
 
+variable "path_to_shared_ssm_parameters" {
+  type        = string
+  description = "path to shared global config parameters in SSM Parameter Store"
+  default     = ""
+}
+
 variable "function_env_kms_key_arn" {
   type        = string
   description = "AWS KMS key ARN to use to encrypt lambda's environment. NOTE: Terraform must be authenticated as an AWS principal authorized to encrypt/decrypt with this key."
@@ -55,6 +61,12 @@ variable "ssm_kms_key_ids" {
   type        = map(string)
   description = "KMS key IDs or ARNs that were used for encrypting SSM parameters needed by this lambda, if any."
   default     = {}
+}
+
+variable "iam_roles_permissions_boundary" {
+  type        = string
+  description = "*beta* ARN of the permissions boundary to attach to IAM roles created by this module."
+  default     = null
 }
 
 variable "log_retention_days" {
@@ -162,6 +174,12 @@ variable "global_parameter_arns" {
   default     = []
 }
 
+variable "global_secrets_manager_secret_arns" {
+  type        = map(string)
+  description = "Secrets Manager Secrets ARNs to expose to proxy instance, expected to contain global shared secrets, like salt or encryption keys"
+  default     = {}
+}
+
 # remove after v0.4.x
 variable "function_parameters" {
   type = list(object({
@@ -172,10 +190,14 @@ variable "function_parameters" {
   default     = []
 }
 
-variable "todo_step" {
-  type        = number
-  description = "of all todos, where does this one logically fall in sequence"
-  default     = 2
+variable "vpc_config" {
+  type = object({
+    # ipv6_allowed_for_dual_stack = optional(bool, false)
+    subnet_ids         = list(string)
+    security_group_ids = list(string)
+  })
+  description = "**alpha** VPC configuration for lambda; if not provided, lambda will not be deployed in a VPC. see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#vpc_config"
+  default     = null
 }
 
 variable "memory_size_mb" {
@@ -184,3 +206,46 @@ variable "memory_size_mb" {
   description = "Amount of memory in MB your Lambda Function can use at runtime. Defaults to 512"
   default     = 512
 }
+
+variable "aws_lambda_execution_role_policy_arn" {
+  type        = string
+  description = "**beta** The ARN of policy to attach to the lambda execution role, if you want one other than the default. (usually, AWSLambdaBasicExecutionRole)."
+  default     = null
+}
+
+variable "api_gateway_v2" {
+  type = object({
+    name             = string
+    id               = string
+    execution_arn    = string
+    api_endpoint     = string
+    stage_invoke_url = string # augmentation to apigatewayv2 resource; adding the invoke url from the stage
+  })
+  description = "the API Gateway v2 instance via which to expose this instance, if any (leave `null` for none)"
+  default     = null
+}
+
+variable "http_methods" {
+  type        = list(string)
+  description = "HTTP methods to expose; has no effect unless api_gateway is also provided"
+  default     = ["HEAD", "GET", "POST"]
+}
+
+variable "secrets_store_implementation" {
+  type        = string
+  description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
+  default     = "aws_ssm_parameter_store"
+}
+
+variable "todos_as_local_files" {
+  type        = bool
+  description = "whether to render TODOs as flat files"
+  default     = true
+}
+
+variable "todo_step" {
+  type        = number
+  description = "of all todos, where does this one logically fall in sequence"
+  default     = 2
+}
+

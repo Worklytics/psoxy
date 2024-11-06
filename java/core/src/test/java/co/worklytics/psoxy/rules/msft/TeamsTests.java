@@ -23,7 +23,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
             .build();
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint:" + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS)
     public void teams(String apiVersion) {
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/teams";
@@ -50,7 +50,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS_ALL_CHANNELS)
     public void teams_allChannels(String apiVersion) {
         String teamId = "172b0cce-e65d-44ce-9a49-91d9f2e8493a";
@@ -79,7 +79,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_USERS_CHATS)
     public void users_chats(String apiVersion) {
         String userId = "8b081ef6-4792-4def-b2c9-c363a1bf41d5";
@@ -107,6 +107,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
 
         String sanitized = sanitize(endpoint, jsonResponse);
         assertRedacted(sanitized,
+                "lastMessagePreview@odata.context",
                 "Meeting chat sample",
                 "Group chat sample",
                 "topic"
@@ -115,7 +116,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES)
     public void teams_channels_messages(String apiVersion) {
         String teamId = "172b0cce-e65d-44ce-9a49-91d9f2e8493a";
@@ -177,7 +178,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS_CHANNELS_MESSAGES_DELTA)
     public void teams_channels_messages_delta(String apiVersion) {
         String teamId = "172b0cce-e65d-44ce-9a49-91d9f2e8493a";
@@ -225,7 +226,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_CHATS_MESSAGES)
     public void chats_messages(String apiVersion) {
         String chatId = "fbe2bf47-16c8-47cf-b4a5-4b9b187c508b";
@@ -260,7 +261,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALLS)
     public void communications_calls(String apiVersion) {
         String callId = "2f1a1100-b174-40a0-aba7-0b405e01ed92";
@@ -280,13 +281,39 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         assertUrlWithSubResourcesBlocked(endpoint);
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @Test
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX)
-    public void communications_callRecords(String apiVersion) {
+    public void communications_callRecords() {
+        String apiVersion = "v1.0";
+        String endpoint = "https://graph.microsoft.com/" + apiVersion + "/communications/callRecords";
+        String jsonResponse = asJson("Communications_callRecords_" + apiVersion + ".json");
+        assertNotSanitized(jsonResponse,
+                "821809f5-0000-0000-0000-3b5136c0e777",
+                "dc368399-474c-4d40-900c-6265431fd81f",
+                "821809f5-0000-0000-0000-3b5136c0e777",
+                "dc368399-474c-4d40-900c-6265431fd81f",
+                "dc368399-474c-4d40-900c-6265431fd81f"
+        );
+
+        String sanitized = sanitize(endpoint, jsonResponse);
+        assertRedacted(sanitized,
+                "Abbie Wilkins",
+                "Owen Franklin",
+                "+5564981205182",
+                "machineName_",
+                "Default input device",
+                "Microphone (Microsoft Virtual Audio Device (Simple) (WDM))"
+        );
+        assertUrlWithSubResourcesBlocked(endpoint);
+    }
+
+    @Test
+    @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_REGEX)
+    public void communications_callRecord() {
+        String apiVersion = "v1.0";
         String callChainId = "2f1a1100-b174-40a0-aba7-0b405e01ed92";
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/communications/callRecords/" + callChainId;
-        String jsonResponse = asJson("Communications_callRecords_" + apiVersion + ".json");
+        String jsonResponse = asJson("Communications_callRecord_" + apiVersion + ".json");
         assertNotSanitized(jsonResponse,
                 "2020-02-25T19:00:24.582757Z",
                 "2020-02-25T18:52:21.2169889Z",
@@ -313,7 +340,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_DIRECT_ROUTING_CALLS)
     public void communications_callRecords_getDirectRoutingCalls(String apiVersion) {
         String fromDateTime = "2019-11-01";
@@ -351,7 +378,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_COMMUNICATIONS_CALL_RECORDS_GET_PSTN_CALLS)
     public void communications_callRecords_getPstnCalls(String apiVersion) {
         String fromDateTime = "2019-11-01";
@@ -391,7 +418,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1.0", "beta"})
+    @ValueSource(strings = {"v1.0"})
     @Description("Test endpoint: " + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_USERS_ONLINE_MEETINGS)
     public void users_onlineMeetings(String apiVersion) {
         String userId = "dc17674c-81d9-4adb-bfb2-8f6a442e4622";
@@ -474,7 +501,8 @@ public class TeamsTests extends JavaRulesTestBaseCase {
                 InvocationExample.of(baseEndpoint + "/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages", "Chats_messages_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/chats/19:2da4c29f6d7041eca70b638b43d45437@thread.v2/messages", "Chats_messages_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/calls/2f1a1100-b174-40a0-aba7-0b405e01ed92", "Communications_calls_" + apiVersion + ".json"),
-                InvocationExample.of(baseEndpoint + "/communications/callRecords/2f1a1100-b174-40a0-aba7-0b405e01ed92?$expand=sessions($expand=segments)", "Communications_callRecords_" + apiVersion + ".json"),
+                InvocationExample.of(baseEndpoint + "/communications/callRecords?$expand=sessions($expand=segments)", "Communications_callRecords_" + apiVersion + ".json"),
+                InvocationExample.of(baseEndpoint + "/communications/callRecords/2f1a1100-b174-40a0-aba7-0b405e01ed92?$expand=sessions($expand=segments)", "Communications_callRecord_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/callRecords/getDirectRoutingCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getDirectRoutingCalls_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/communications/callRecords/getPstnCalls(fromDateTime=2019-11-01,toDateTime=2019-12-01)", "Communications_callRecords_getPstnCalls_" + apiVersion + ".json"),
                 InvocationExample.of(baseEndpoint + "/users", "Users_" + apiVersion + ".json"),

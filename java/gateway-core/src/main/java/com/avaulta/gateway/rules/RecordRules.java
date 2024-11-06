@@ -32,6 +32,7 @@ public class RecordRules implements BulkDataRules {
      */
     public enum Format {
         NDJSON,
+        CSV,
         ;
         //AVRO?
 

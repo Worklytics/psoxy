@@ -9,16 +9,17 @@ jobs:
   validate_tf_modules:
     name: 'validate tf modules'
     runs-on: ubuntu-latest
-    env:
-      TERRAFORM_VERSION: 1.3.9
+    strategy:
+      matrix:
+        terraform_version: [ '~1.6.0', '~1.7.0', '~1.8.0', '~1.9.0', 'latest' ]
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 'setup Terraform'
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_version: ${{ matrix.terraform_version }}
 
       - name: "Terraform - validate modules/psoxy-constants"
         working-directory: infra/modules/psoxy-constants

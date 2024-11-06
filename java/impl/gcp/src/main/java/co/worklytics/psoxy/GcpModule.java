@@ -1,10 +1,7 @@
 package co.worklytics.psoxy;
 
 
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.HostEnvironment;
-import co.worklytics.psoxy.gateway.LockService;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import com.bettercloud.vault.Vault;
@@ -61,6 +58,29 @@ public interface GcpModule {
         return instanceConfigService;
     }
 
+    @Provides @Singleton
+    static SecretStore secretStore(@Named("Native") SecretStore nativeSecretStore,
+                                   HostEnvironment hostEnvironment,
+                                   VaultConfigServiceFactory vaultConfigServiceFactory,
+                                   EnvVarsConfigService envVarsConfigService) {
+        if (vaultConfigServiceFactory.isVaultConfigured(envVarsConfigService)) {
+            if (!vaultConfigServiceFactory.isVaultConfigured(envVarsConfigService)) {
+                throw new IllegalStateException("Vault is not configured, but HASHICORP_VAULT secret store implementation was requested");
+            }
+            VaultConfigService  sharedVault =
+                vaultConfigServiceFactory.createInitialized(vaultConfigServiceFactory.pathForSharedVault(hostEnvironment, envVarsConfigService));
+            VaultConfigService instanceVault =
+                vaultConfigServiceFactory.createInitialized(vaultConfigServiceFactory.pathForInstanceVault(hostEnvironment, envVarsConfigService));
+
+            return CompositeSecretStore.builder()
+                .preferred(instanceVault)
+                .fallback(sharedVault)
+                .build();
+        } else {
+            return nativeSecretStore;
+        }
+    }
+
     /**
      * in GCP cloud function, we should be able to configure everything via env vars; either
      * directly or by binding them to secrets at function deployment:
@@ -74,15 +94,14 @@ public interface GcpModule {
      *    fails to boot (or even deploy from Terraform - it just times out)
      *
      */
-    @Provides @Named("Native") @Singleton
-    static ConfigService nativeConfigService(EnvVarsConfigService envVarsConfigService,
-                                             SecretManagerConfigServiceFactory secretManagerConfigServiceFactory,
-                                             @Named("instance") SecretManagerConfigService instanceConfigService) {
+    @Provides @Singleton @Named("Native")
+    static SecretStore nativeSecretStore(EnvVarsConfigService envVarsConfigService,
+                                         SecretManagerConfigServiceFactory secretManagerConfigServiceFactory,
+                                         @Named("instance") SecretManagerConfigService instanceConfigService) {
         String pathToSharedConfig =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
-                    // Default is considered as empty; otherwise it will fail due a NPE
+                // Default is considered as empty; otherwise it will fail due a NPE
                 .orElse("");
-
 
         SecretManagerConfigService shared = secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToSharedConfig);
 
@@ -92,6 +111,12 @@ public interface GcpModule {
             .preferred(new CachingConfigServiceDecorator(instanceConfigService, proxyInstanceConfigCacheTtl))
             .fallback(new CachingConfigServiceDecorator(shared, sharedConfigCacheTtl))
             .build();
+    }
+
+
+    @Provides @Named("Native") @Singleton
+    static ConfigService nativeConfigService(@Named("Native") SecretStore secretStore) {
+        return secretStore;
     }
 
     @Provides @Singleton

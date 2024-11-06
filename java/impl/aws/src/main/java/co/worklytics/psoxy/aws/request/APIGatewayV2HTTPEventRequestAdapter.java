@@ -95,6 +95,10 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
         return event.getRequestContext().getHttp().getMethod();
     }
 
+    public String getProtocol() {
+        return event.getRequestContext().getHttp().getProtocol();
+    }
+
     @Override
     @SneakyThrows
     public byte[] getBody() {
@@ -104,6 +108,17 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
     @Override
     public String prettyPrint() {
         return event.toString();
+    }
+
+    @Override
+    public Optional<String> getClientIp() {
+       return Optional.ofNullable(this.getCaseInsensitiveHeaders().get(HTTP_HEADER_X_FORWARDED_FOR.toLowerCase()));
+    }
+
+    @Override
+    public Optional<Boolean> isHttps() {
+        return Optional.ofNullable(this.getCaseInsensitiveHeaders().get(HTTP_HEADER_X_FORWARDED_PROTO.toLowerCase()))
+            .map(p -> p.equals("https"));
     }
 
     /**

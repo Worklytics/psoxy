@@ -3,6 +3,7 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
@@ -26,7 +27,6 @@ import java.util.Base64;
 import static co.worklytics.test.TestModules.withMockEncryptionKey;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class PseudonymizedIdentityTest {
@@ -35,6 +35,7 @@ class PseudonymizedIdentityTest {
     @Component(modules = {
             PsoxyModule.class,
             MockModules.ForConfigService.class,
+            MockModules.ForSecretStore.class,
             MockModules.ForRules.class,
     })
     public interface Container {
@@ -46,20 +47,21 @@ class PseudonymizedIdentityTest {
         PseudonymizedIdentityTest.Container container = DaggerPseudonymizedIdentityTest_Container.create();
         container.inject(this);
 
-        withMockEncryptionKey(config);
+        withMockEncryptionKey(secretStore);
         when(config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
             .thenReturn("gmail");
     }
 
 
     @Inject ConfigService config;
+    @Inject SecretStore secretStore;
     @Inject Pseudonymizer pseudonymizer;
     @Inject PseudonymizerImplFactory pseudonymizerImplFactory;
 
     @Test
     void asPseudonym() {
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("an irrelevant per org secret")
+                .pseudonymizationSalt("salt")
                 .defaultScopeId("scope")
                 .pseudonymImplementation(PseudonymImplementation.DEFAULT)
                 .build());
@@ -80,7 +82,7 @@ class PseudonymizedIdentityTest {
     })
     void asPseudonym_should_return_null_if_null_or_empty(String identifier) {
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("an irrelevant per org secret")
+                .pseudonymizationSalt("salt")
                 .defaultScopeId("scope")
                 .pseudonymImplementation(PseudonymImplementation.DEFAULT)
                 .build());
@@ -93,7 +95,7 @@ class PseudonymizedIdentityTest {
     @Test
     void asPseudonym_reversible() {
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("an irrelevant per org secret")
+                .pseudonymizationSalt("salt")
                 .defaultScopeId("scope")
                 .pseudonymImplementation(PseudonymImplementation.DEFAULT)
                 .build());
@@ -124,7 +126,7 @@ class PseudonymizedIdentityTest {
     @Test
     void asPseudonym_legacy() {
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("an irrelevant per org secret")
+                .pseudonymizationSalt("salt")
                 .defaultScopeId("scope")
                 .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .build());
@@ -140,7 +142,7 @@ class PseudonymizedIdentityTest {
     @Test
     void asPseudonym_reversible_legacy() {
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("an irrelevant per org secret")
+                .pseudonymizationSalt("salt")
                 .defaultScopeId("scope")
                 .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .build());
@@ -150,7 +152,7 @@ class PseudonymizedIdentityTest {
                 .includeReversible(true)
                 .build());
 
-        assertEquals("BlFx65qHrkRrhMsuq7lg4bCpwsbXgpLhVZnZ6VBMqoY",
+        assertEquals("UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
             pseudonymizedIdentity.getHash());
 
         PseudonymizedIdentity notReversible =

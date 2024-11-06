@@ -8,6 +8,7 @@ import {
 } from "@aws-sdk/credential-providers";
 import _ from 'lodash';
 import aws4 from 'aws4';
+import chalk from 'chalk';
 import fs from 'node:fs/promises';
 import getLogger from './logger.js';
 import https from 'https';
@@ -90,22 +91,24 @@ function getCommonHTTPHeaders(options = {}) {
  * @param {String|URL} url
  * @param {Object} headers
  * @param {String} method
+ * @param {Object} body
  * @return {Promise}
  */
-function requestWrapper(url, method = 'GET', headers) {
+function requestWrapper(url, method = 'GET', headers, body = {}) {
   url = typeof url === 'string' ? new URL(url) : url;
   const params = url.searchParams.toString();
   const responseBody = [];
+  const requestOptions = {
+    hostname: url.host,
+    port: 443,
+    path: url.pathname + (params !== '' ? `?${params}` : ''),
+    method: method,
+    headers: headers,
+    timeout: REQUEST_TIMEOUT_MS,
+  }
+
   return new Promise((resolve, reject) => {
-    const req = https.request(
-      {
-        hostname: url.host,
-        port: 443,
-        path: url.pathname + (params !== '' ? `?${params}` : ''),
-        method: method,
-        headers: headers,
-        timeout: REQUEST_TIMEOUT_MS,
-      },
+    const req = https.request(requestOptions,
       (res) => {
         res.on('data', (data) => {
           responseBody.push(data);
@@ -142,6 +145,10 @@ function requestWrapper(url, method = 'GET', headers) {
         });
       }
     );
+    if (!_.isEmpty(body)) {
+      req.write(JSON.stringify(body));
+    }
+
     req.on('timeout', () => {
       req.destroy();
       reject({ statusMessage: 'Psoxy is taking too long to respond' });
@@ -157,18 +164,19 @@ function requestWrapper(url, method = 'GET', headers) {
  * Simple wrapper around `aws4` to ease testing.
  *
  * TODO aws4 is not able to resolve region nor service (see how we try to
- *  resolve the "service" here)from the URL for our use cases, so we need to
+ *  resolve the "service" here) from the URL for our use cases, so we need to
  *  improve the resolution of those values
  *
  * Ref: https://github.com/mhart/aws4#api
  *
  * @param {URL} url
  * @param {String} method
+ * @param {Object} body
  * @param {Object} credentials
  * @param {String} region
  * @return {Object}
  */
-function signAWSRequestURL(url, method = 'GET', credentials, region) {
+function signAWSRequestURL(url, method = 'GET', body = {}, credentials, region) {
   // According to aws4 docs, search params should be part of the "path"
   const params = url.searchParams.toString();
 
@@ -178,6 +186,14 @@ function signAWSRequestURL(url, method = 'GET', credentials, region) {
     method: method,
     region: region,
   };
+
+  if (method === 'POST' && !_.isEmpty(body)) {
+    requestOptions.body = JSON.stringify(body);
+    // `aws4` will infer the rest
+    requestOptions.headers = {
+      'content-type': 'application/json',
+    }
+  }
 
   // Closer look at aws4 source code: region and service are calculated from
   // URL's host, but for Lambda functions it doesn't translate the URL part
@@ -190,6 +206,38 @@ function signAWSRequestURL(url, method = 'GET', credentials, region) {
   }
 
   return aws4.sign(requestOptions, credentials);
+}
+
+/**
+ * Check environment and warn if Node.js version is not LTS. As of 2024-08 deprecation
+ * warning messages are expected for Node.js v21 due to @google-cloud/storage dependency.
+ * Ref: https://github.com/googleapis/nodejs-storage/issues/1907#issuecomment-1817620435
+ *
+ * > After six months, odd-numbered releases (9, 11, etc.) become unsupported, and even-numbered
+ * releases (10, 12, etc.) move to Active LTS status and are ready for general use.
+ *
+ * @param logger
+ */
+function environmentCheck(logger = getLogger()) {
+  const [major] = process.versions.node.split('.').map(Number);
+  const isNotLTS = major % 2 !== 0;
+  if (isNotLTS) {
+    let warningMessage = `
+      Please, consider using a LTS release of Node.js (v18, v20, etc.):
+      https://nodejs.org/en/about/previous-releases
+    `
+
+    if (major === 21) {
+      warningMessage = `
+      Your Node.js version may display ${chalk.yellow("deprecation warnings")} related to an
+      official Google dependency used by this tool. These warnings are not
+      the direct responsibility of this tool and ${chalk.green('do not compromise its functionality')}.
+      ${warningMessage}
+      `
+    }
+
+    logger.info(warningMessage);
+  }
 }
 
 /**
@@ -241,13 +289,21 @@ function transformSpecWithResponse(endpointName = '', sourceData = {}, spec = {}
  * Resolve HTTP method based on known API paths (defined in spec module)
  *
  * @param {string} path - path to inspect
+ * @param {object} options - see `../index.js`
  * @returns {string}
  */
-function resolveHTTPMethod(path = '') {
-  const endpointMatch = Object.values(spec)
+function resolveHTTPMethod(path = '', options = {}) {
+  let method = 'GET';
+  if (!_.isEmpty(options.body)) {
+    method = 'POST';
+  } else {
+    const endpointMatch = Object.values(spec)
     .reduce((acc, value) => acc.concat(value.endpoints), [])
     .find(endpoint => endpoint.path === path);
-  return endpointMatch?.method || 'GET';
+    method = endpointMatch?.method || method;
+  }
+
+  return method;
 }
 
 /**
@@ -446,6 +502,7 @@ async function isGzipped(filePath) {
 export {
   addFilenameSuffix,
   unzip,
+  environmentCheck,
   executeCommand,
   executeWithRetry,
   getAWSCredentials,

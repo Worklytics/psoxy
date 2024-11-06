@@ -2,6 +2,7 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
@@ -55,13 +56,17 @@ public class PsoxyModule {
     @Singleton
         //should be thread-safe
     ObjectMapper providesObjectMapper() {
-        return new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        return objectMapper;
     }
 
     @Provides @Singleton
     @Named("ForYAML")
     ObjectMapper providesYAMLObjectMapper() {
-        return new ObjectMapper(new YAMLFactory());
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        mapper.registerModule(new JavaTimeModule());
+        return mapper;
     }
 
     @Provides
@@ -158,18 +163,18 @@ public class PsoxyModule {
 
     @Provides
     @Singleton
-    DeterministicTokenizationStrategy deterministicPseudonymStrategy(ConfigService config) {
-        String salt = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT);
+    DeterministicTokenizationStrategy deterministicPseudonymStrategy(SecretStore secretStore) {
+        String salt = secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT);
         return new Sha256DeterministicTokenizationStrategy(salt);
     }
 
     @Provides
     @Singleton
-    ReversibleTokenizationStrategy pseudonymizationStrategy(ConfigService config,
+    ReversibleTokenizationStrategy pseudonymizationStrategy(SecretStore secretStore,
                                                             DeterministicTokenizationStrategy deterministicTokenizationStrategy) {
 
-        String salt = config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT);
-        Optional<SecretKeySpec> keyFromConfig = config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY)
+        String salt = secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT);
+        Optional<SecretKeySpec> keyFromConfig = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY)
                 .map(passkey -> AESReversibleTokenizationStrategy.aesKeyFromPassword(passkey, salt));
         //q: do we need to support actual fully AES keys?
 
@@ -187,15 +192,15 @@ public class PsoxyModule {
     @Provides
     @Named("ipEncryptionStrategy")
     @Singleton
-    ReversibleTokenizationStrategy ipEncryptionStrategy(ConfigService config,
+    ReversibleTokenizationStrategy ipEncryptionStrategy(SecretStore secretStore,
                                                         @Named("ipHashStrategy") DeterministicTokenizationStrategy deterministicTokenizationStrategy) {
-        String salt = config.getConfigPropertyAsOptional(ProxyConfigProperty.SALT_IP)
-            .orElse(config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
+        String salt = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.SALT_IP)
+            .orElse(secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
 
         Optional<SecretKeySpec> keyFromConfig =
             firstPresent(
-                config.getConfigPropertyAsOptional(ProxyConfigProperty.ENCRYPTION_KEY_IP),
-                config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY)
+                secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.ENCRYPTION_KEY_IP),
+                secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY)
             )
             .map(passkey -> AESReversibleTokenizationStrategy.aesKeyFromPassword(passkey, salt));
         //q: do we need to support actual fully AES keys?
@@ -214,9 +219,9 @@ public class PsoxyModule {
     @Provides
     @Named("ipHashStrategy")
     @Singleton
-    DeterministicTokenizationStrategy deterministicTokenizationStrategy(ConfigService config) {
-        String salt = config.getConfigPropertyAsOptional(ProxyConfigProperty.SALT_IP)
-            .orElse(config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
+    DeterministicTokenizationStrategy deterministicTokenizationStrategy(SecretStore secretStore) {
+        String salt = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.SALT_IP)
+            .orElse(secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
 
         return new Sha256DeterministicTokenizationStrategy(salt);
     }
@@ -255,8 +260,12 @@ public class PsoxyModule {
     }
 
     @Provides
-    Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory, ConfigService config, RulesUtils rulesUtils, com.avaulta.gateway.rules.RuleSet ruleSet) {
+    Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory,
+                                ConfigService config,
+                                SecretStore secretStore,
+                                RulesUtils rulesUtils, com.avaulta.gateway.rules.RuleSet ruleSet) {
         return factory.create(factory.buildOptions(config,
+            secretStore,
             rulesUtils.getDefaultScopeIdFromRules(ruleSet)
                 .orElseGet(() -> {
                     boolean legacy =

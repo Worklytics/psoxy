@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathRegex: "^/(v1.0|beta)/users/?[^/]*"
+  - pathRegex: "^/v1.0/users/?[^/]*"
     allowedQueryParams:
       - "$top"
       - "$select"
@@ -20,6 +20,7 @@ endpoints:
           - "$..preferredName"
           - "$..givenName"
           - "$..surname"
+          - "$..jobTitle"
           - "$..mailNickname"
           - "$..responsibilities"
           - "$..skills"
@@ -42,8 +43,12 @@ endpoints:
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
         encoding: "JSON"
-  - pathRegex: "^/(v1.0|beta)/groups/?[^/]*"
+  - pathRegex: "^/v1.0/groups/?[^/]*"
     transforms:
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
       - !<redact>
         jsonPaths:
           - "$..owners"
@@ -64,7 +69,7 @@ endpoints:
           - "$..mail"
         includeOriginal: true
         encoding: "JSON"
-  - pathRegex: "^/(v1.0|beta)/groups/[^/]*/members.*"
+  - pathRegex: "^/v1.0/groups/[^/]*/members.*"
     allowedQueryParams:
       - "$top"
       - "$select"
@@ -84,6 +89,7 @@ endpoints:
           - "$..preferredName"
           - "$..givenName"
           - "$..surname"
+          - "$..jobTitle"
           - "$..mailNickname"
           - "$..responsibilities"
           - "$..skills"
@@ -106,24 +112,80 @@ endpoints:
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
         encoding: "JSON"
-  - pathRegex: "^/(v1.0|beta)/users/[^/]*/mailboxSettings"
+  - pathRegex: "^/v1.0/users/?[^/]*/mailboxSettings"
     transforms:
       - !<redact>
         jsonPaths:
           - "$..internalReplyMessage"
           - "$..externalReplyMessage"
-  - pathRegex: "^/(v1.0|beta)/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))"
-    transforms:
-      - !<redactExceptSubstringsMatchingRegexes>
-        jsonPaths:
-          - "$..subject"
-        exceptions:
-          - "(?i)(\\QFocus Time Block\\E|\\QFocus Time\\E|\\QFocus:\\E|\\QNo Meeting Block\\\
-      E|\\QNo Meetings Block\\E|\\QNo Meetings\\E|\\QNo Meeting\\E)"
-          - "(?i)(\\QPrep Time Block\\E|\\QPrep Time\\E|\\QPrep:\\E|\\QPrep \\E|\\QPrepare\
-      \ \\E)"
       - !<redact>
         jsonPaths:
+          - "$..['@odata.context']"
+  - pathRegex: "^/v1.0/users/[^/]*/(((calendars/[^/]*/)?events.*)|(calendar/calendarView(?)[^/]*))"
+    transforms:
+      - !<redactExceptPhrases>
+        jsonPaths:
+          - "$..subject"
+        allowedPhrases:
+          - "Focus Time"
+          - "Focus"
+          - "No Meetings"
+          - "No Meeting"
+          - "no mtg"
+          - "Prep"
+          - "OOO"
+          - "Out of Office"
+          - "Out of the Office"
+          - "call"
+          - "brainstorm"
+          - "brainstorming"
+          - "brain storm"
+          - "check in"
+          - "check-in"
+          - "checkin"
+          - "coffee"
+          - "food"
+          - "happy hour"
+          - "lunch"
+          - "office hours"
+          - "onsite"
+          - "on-site"
+          - "social"
+          - "stand up"
+          - "stand-up"
+          - "standup"
+          - "team building"
+          - "teambuilding"
+          - "daily"
+          - "bi-weekly"
+          - "biweekly"
+          - "weekly"
+          - "monthly"
+          - "quarterly"
+          - "1:1"
+          - "1-on-1"
+          - "one-on-one"
+          - "all-hands"
+          - "all hands"
+          - "allhands"
+          - "team meeting"
+          - "decision making"
+          - "decision"
+          - "hand off"
+          - "hand-off"
+          - "handoff"
+          - "handover"
+          - "information sharing"
+          - "problem solving"
+          - "retro"
+          - "review"
+          - "sprint"
+      - !<redact>
+        jsonPaths:
+          - "$..reminderMinutesBeforeStart"
+          - "$..isReminderOn"
+          - "$..allowNewTimeProposals"
+          - "$..transactionId"
           - "$..emailAddress.name"
           - "$..extensions"
           - "$..multiValueExtendedProperties"

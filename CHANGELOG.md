@@ -7,18 +7,120 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
-## 0.5 *future, subject to change!!*
-  - RULES only via config management, never env variable
-  - Eliminate "fall-through" configs.
-     - `PATH_TO_SHARED_CONFIG` - env var that locates shared parameters within the config store.
-     - `PATH_TO_CONNECTOR_CONFIG` - env var that locates connector-specific parameters within the
-       config store.
-  - Expect distinct paths for the shared and connector scopes, to support more  straight-forward IAM
-    policies.
-     - eg, `PSOXY_SHARED` and `PSOXY_GCAL`, to allow IAM policies such as "read `PSOXY_SHARED*`" and
-        "read+write `PSOXY_GCAL*`" (if shared secrets have common prefix with connector secrets,
-        then wildcard policy to read shared also grants read of secrets across all connectors)
-  - keys/salts per value kind (PII, item id, etc)
+## [0.5.0](https://github.com/Worklytics/psoxy/release/tag/v0.5.0)
+
+BREAKING:
+  - min `azuread` provider is generally 2.44; if you're using an older version, you'll need to
+    upgrade (`terraform init --upgrade`)
+  - `azuread-local-cert` module variables have changed; you must now pass `application_id` instead
+    of `application_object_id`; these refer to different values you can obtain via the [Microsoft Entra admin center](https://entra.microsoft.com/#home)
+    portal (formally Azure AD portal blade)
+  - variables to `aws-host`/`gcp-host` modules to have changed slightly; if you initially copied an
+    example based on 0.4.x, you may have to update some variable names in your `main.tf`.
+  - min `google` provider is not 5.0; this applies whether you're using GCP-hosted proxy, or merely Google Workspace as a
+    data source
+  - various migrations applicable to 0.4.x have been removed; if upgrading from 0.4.x, make sure you first upgrade to latest version of 0.4.x (eg, 0.4.61), run
+    `terraform apply`, and THEN update to 0.5.x
+
+## [0.4.61](https://github.com/Worklytics/psoxy/release/tag/v0.4.61)
+ - added some `columnsToPseudonymizeIfPresent` to survey bulk connectors; these are to avoid PII
+   being sent to Worklytics if these unexpected columns sent, but without errors in usual case, when
+   these are omitted.
+
+## [0.4.60](https://github.com/Worklytics/psoxy/release/tag/v0.4.60)
+ - Calendar rules change to allow OOO-related snippets to be passed through event title fields;
+    this is required for proper OOO-analysis in Worklytics Calendar 3.0 methodology.
+ - MSFT Teams: Support for listing callRecords
+
+## [0.4.58](https://github.com/Worklytics/psoxy/release/tag/v0.4.58)
+ - Rules for Outlook Calendar, Outlook Mail and Teams have been updated for *no app id* and *no group id* cases
+   to avoid supporting requests with plain user GUIDs instead of pseudonymized.
+ - Slack: Including rules for Slack Huddles through *Rooms* as part of conversation history endpoint
+ - GitHub: Adding support for [email](https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/iam-configuration-reference/saml-configuration-reference#saml-attributes) attribute in SAML response model on GraphQL
+ - AWS: you'll see `moved` resources on next apply, relating to refactoring; as well as updating IAM policy that had a wildcard to instead be an explicit list of function ARNs. If you're upgrading from before v0.4.46, you'll see create + destroy instead of move.
+ - AWS: if using `MinProvisioner` role from `psoxy-constants` module, we've added a req'd perm to
+   that role (to allow tagging lambda functions); without this, `default_tags` option does not work.
+ - AWS: bulk-mode ephemeral storage set to 10240 (10GB), raised from free amount of 512MB; this will
+   incur small cost. It's billable at $0.0000000309 per GB-second. For most bulk use-cases, files
+   are processed in fewer than 30 seconds, and customers process fewer than 10 files per week. So
+   expected cost of this is $0.0000927 - less than one-thousandth of a cent.
+
+## [0.4.57](https://github.com/Worklytics/psoxy/release/tag/v0.4.57)
+Several changes in this version will result in visible changes during `terraform plan`/`apply`:
+- Permission changes on Microsoft 365:
+  - `MailboxSettings.Read` permission has been added for directory connectors (`azure-ad`, `entra-id`)
+    This will have NO impact until your Admin grants this permission in the Microsoft 365 Admin
+    Center; until that happens, Worklytics will continue to NOT retrieve mailbox settings.
+  - `OnlineMeetings.Read.All` and `OnlineMeetingArtifact.Read.All` permissions have been removed from `outlook-cal` connector
+- `java17` runtime by default (previously, was `java11`); `java11` is still supported by AWS, but
+   will be deprecated by GCP in Sept 2024. As of 0.4, proxy code is still compiled for java 11 - so
+   if you wish to keep using `java11` runtime, it will work; if you require this, let us know asnd
+   we'll expose option to select runtime version in the Terraform module.
+
+## [0.4.56](https://github.com/Worklytics/psoxy/release/tag/v0.4.56)
+ - due to refactoring, users of Microsoft connectors may see some moves of resources in Terraform
+   plan; these will be no-ops.
+
+## [0.4.55](https://github.com/Worklytics/psoxy/release/tag/v0.4.55)
+- For Microsoft Connectors:
+  - reference to `msgraph` service principal has been replaced with `data` instead of `terraform` resource.
+    For that reason you will see changes in plan related to these resource, but those changes are only related on the resources for Terraform
+    state as the kind (*data* from *resource*) has been changed. No change will be done in real Entra ID for that.
+  - dropping support for `/beta` endpoints in Microsoft Graph API. All endpoints are now using `/v1.0` version.
+
+## [0.4.53](https://github.com/Worklytics/psoxy/release/tag/v0.4.53)
+  - As Microsoft Azure Active Directory has been [renamed](https://learn.microsoft.com/en-us/entra/fundamentals/new-name)
+    to Microsoft Entra ID, there is a new connector `msft-entra-id`. Old connector `azure-ad` is deprecated and in case of
+    new connection, the new one `msft-entra-id` should be used.
+
+## [0.4.52](https://github.com/Worklytics/psoxy/release/tag/v0.4.52)
+  - BREAKING: default behavior for sub-addressing aka "plus addressing" of emails has changed; the
+    proxy previously considered these canonically distinct. Now, the proxy will consider these
+    canonically equivalent. As we don't expect plus addressing to be used hris or directory data,
+    this should have little impact.  Changes will most likely be in a few edge cases, such as
+    emails or calendar invites sent to a sub-address - sender unlikely to be a subaddress, but
+    recipient could be.  In such cases, behavior prior to 0.4.52 would cause recipient to appear
+    as a distinct mailbox; from 0.4.52 onward, they will be considered the same mailbox; we expect
+    this to be behavior that is more in line with user expectations, so although technically
+    breaking, we're introducing it without a major version bump.
+  - there new option to enable less strict email canonicalization; we strongly recommend new
+    customers to enable it, although it is not enabled by default to avoid a breaking change. Set
+    `email_canonicalization` to `IGNORE_DOTS` to enable this feature.
+  - BREAKING for examples: default value fore `email_canonicalization` in our example repos has been
+    set to `IGNORE_DOTS`; if you've previously forked an example, this is not a breaking change. but
+    if you fork an example > 0.4.52 and are attempting to migrate a proxy deployment initially built
+    with modules or examples from < 0.4.52, you should explicitly add `email_canonicalization = "STRICT"`
+    in your `terraform.tfvars`
+  - GCP: Existing GCP functions are using *Container Registry* for building their internal docker image where the psoxy code is deployed. However,
+    this is [deprecated since May 2023 and starting Feb 2024](https://cloud.google.com/container-registry/docs/deprecations/container-registry-deprecation) it
+    is required that functions use *Artifact Registry* instead. All deployments made since this version will use *Artifact Registry*
+    default repository for storing all psoxy images. Any previous version before this version will work without any issue.
+
+## [0.4.51](https://github.com/Worklytics/psoxy/release/tag/v0.4.51)
+ - GCP: non-breaking, but noticeable in Terraform plan: `title` attribute of GCP Custom Project
+   roles created by our modules are changing to more closely follow conventions GCP uses for its
+   built-in roles; as well as prefixing them with your environment ID to group them together
+   alphabetically and differentiate in shared project.
+
+## [0.4.50](https://github.com/Worklytics/psoxy/release/tag/v0.4.50)
+  - `todos_as_local_files` properly respected now; if you had it as `false`, you may see some local
+    files deleted on your next `terraform apply`.
+  - to accommodate this fix, many people will see moves of local_file resources, to append `[0]` to
+    the resource ids
+  - BREAKING - for AWS Secrets Manager (released in 0.4.47 as 'alpha' feature), these will now
+    be prefixed by default with the environment ID, unless a `aws_secrets_manager_path` is set.
+
+## [0.4.48](https://github.com/Worklytics/psoxy/release/tag/v0.4.48)
+  - BREAKING - GitHub Enterprise Server: authentication strategy has changed; you will see creation
+    and destruction of some secrets that are used for authentication; you MUST generate new auth
+    credentials for your proxy instance. see [`docs/sources/github/README.md`](docs/sources/github/README.md)
+    or contact support for assistance.
+
+## [0.4.47](https://github.com/Worklytics/psoxy/release/tag/v0.4.47)
+  - AWS: some moved resources due to refactoring to accommodate option to use AWS Secrets Manager
+
+possibility of breaking due to no longer inferring global SSM parameter prefix?
+
 
 ## [0.4.46](https://github.com/Worklytics/psoxy/release/tag/v0.4.46)
   - you'll see several `timestamp_static` resources provisioned by terraform; these are simply
@@ -263,3 +365,18 @@ Upgrade Notes:
   - secret management has been refactored; you may see indications of some secrets being moved, or
     even destroyed and recreated. If you plan shows SALT or ENCRYPTION_KEY as being destroyed,
     **DO NOT** apply the plan and contact Worklytics support for assistance.
+
+# Planned
+
+## 0.5 *future, subject to change!!*
+- RULES only via config management, never env variable
+- Eliminate "fall-through" configs.
+    - `PATH_TO_SHARED_CONFIG` - env var that locates shared parameters within the config store.
+    - `PATH_TO_CONNECTOR_CONFIG` - env var that locates connector-specific parameters within the
+      config store.
+- Expect distinct paths for the shared and connector scopes, to support more  straight-forward IAM
+  policies.
+    - eg, `PSOXY_SHARED` and `PSOXY_GCAL`, to allow IAM policies such as "read `PSOXY_SHARED*`" and
+      "read+write `PSOXY_GCAL*`" (if shared secrets have common prefix with connector secrets,
+      then wildcard policy to read shared also grants read of secrets across all connectors)
+- keys/salts per value kind (PII, item id, etc)

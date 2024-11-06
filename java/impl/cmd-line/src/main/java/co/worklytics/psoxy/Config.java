@@ -1,17 +1,16 @@
 package co.worklytics.psoxy;
 
 import com.google.common.base.Preconditions;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+@Builder
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor //for Jackson
 public class Config {
 
@@ -32,6 +31,7 @@ public class Config {
     SecretReference pseudonymizationSaltSecret;
 
 
+    @AllArgsConstructor(staticName = "of")
     @Getter
     @NoArgsConstructor //for Jackson
     public static class SecretReference {
@@ -59,7 +59,8 @@ public class Config {
 
     @RequiredArgsConstructor
     enum SecretService {
-        AWS("not implemented"),
+        AWS_PARAMETER_STORE("not implemented"),
+        AWS_SECRET_MANAGER("not implemented"),
         AZURE("not implemented"),
         GCP("^projects/.*?/secrets/.*/versions/.*$");
 

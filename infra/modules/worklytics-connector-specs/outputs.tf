@@ -36,9 +36,15 @@ output "enabled_bulk_connectors" {
   value       = local.enabled_bulk_connectors
 }
 
+# deprecated; remove in 0.5
 output "available_connector_ids" {
+  description = "List of available connector IDs (deprecated since 0.4.54)"
+  value       = local.default_enabled_connector_ids
+}
+
+output "default_enabled_connector_ids" {
   description = "List of available connector IDs"
-  value       = local.available_connector_ids
+  value       = local.default_enabled_connector_ids
 }
 
 output "available_google_workspace_connectors" {

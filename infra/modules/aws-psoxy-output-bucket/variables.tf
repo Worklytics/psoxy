@@ -39,3 +39,9 @@ variable "expiration_days" {
   description = "**alpha** Number of days after which objects in the bucket will expire"
   default     = 720
 }
+
+variable "provision_bucket_public_access_block" {
+  type        = bool
+  description = "Whether to provision public_access_block resources on all buckets; defaults to 'true', but can be 'false' if you have organizational control policies that do this at a higher level."
+  default     = true
+}

@@ -1,11 +1,3 @@
-terraform {
-  required_providers {
-    google = {
-      version = ">= 3.74, <= 5.0"
-    }
-  }
-}
-
 # constants
 locals {
   SA_NAME_MIN_LENGTH             = 6
@@ -91,7 +83,7 @@ module "output_bucket" {
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = google_service_account.service_account.email
   bucket_name_prefix             = coalesce(var.sanitized_bucket_name, local.bucket_prefix)
-  bucket_name_suffix             = var.sanitized_bucket_name == null ? "-output" : ""
+  bucket_name_suffix             = var.sanitized_bucket_name == null ? "-sanitized" : ""
   region                         = var.region
   expiration_days                = var.sanitized_expiration_days
   bucket_labels                  = var.default_labels
@@ -164,7 +156,7 @@ resource "google_service_account_iam_member" "act_as" {
 resource "google_cloudfunctions_function" "function" {
   name        = local.function_name
   description = "Psoxy instance to process ${var.source_kind} files"
-  runtime     = "java11"
+  runtime     = "java17"
   project     = var.project_id
   region      = var.region
 
@@ -175,6 +167,8 @@ resource "google_cloudfunctions_function" "function" {
   service_account_email = google_service_account.service_account.email
   timeout               = 540 # 9 minutes, which is gen1 max allowed
   labels                = var.default_labels
+  docker_registry       = "ARTIFACT_REGISTRY"
+  docker_repository     = var.artifact_repository_id
 
   environment_variables = merge(tomap({
     INPUT_BUCKET  = google_storage_bucket.input_bucket.name,
@@ -276,6 +270,19 @@ NC='\e[0m'
 printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"tf
 
 node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
+
+if gzip -t "$FILE_PATH"; then
+  printf "test file was compressed, so not testing compression as a separate case\n"
+else
+  printf "testing with compressed input file ... \n"
+  # extract the file name from the path
+  TEST_FILE_NAME=./$(basename $FILE_PATH)
+
+  gzip -c $FILE_PATH > $TEST_FILE_NAME
+  node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $TEST_FILE_NAME -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
+  rm $TEST_FILE_NAME
+fi
+
 EOT
 
 }

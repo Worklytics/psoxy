@@ -1,3 +1,6 @@
+terraform {
+  required_version = ">= 1.3, < 1.10"
+}
 
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
@@ -25,7 +28,9 @@ module "source_token_external_todo" {
 
   source_id                         = each.key
   connector_specific_external_steps = each.value.external_token_todo
+  todos_as_local_files              = var.todos_as_local_files
   todo_step                         = var.todo_step
+
 }
 
 locals {

@@ -5,16 +5,15 @@
 terraform {
   required_providers {
     azuread = {
-      version = ">= 2.7.0"
+      version = ">= 2.44.0, < 4.0.0"
     }
   }
 }
 
 data "azuread_application_published_app_ids" "well_known" {}
 
-resource "azuread_service_principal" "msgraph" {
-  application_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
-  use_existing   = true
+data "azuread_service_principal" "msgraph" {
+  client_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
 }
 
 resource "azuread_application" "connector" {
@@ -40,7 +39,7 @@ resource "azuread_application" "connector" {
       content {
         # this approach is consistent with what you get via `az ad sp list`, which is what MSFT docs
         # recommend: https://docs.microsoft.com/en-us/graph/permissions-reference#retrieving-permission-ids
-        id   = azuread_service_principal.msgraph.oauth2_permission_scope_ids[resource_access.value]
+        id   = data.azuread_service_principal.msgraph.oauth2_permission_scope_ids[resource_access.value]
         type = "Scope"
       }
     }
@@ -49,10 +48,20 @@ resource "azuread_application" "connector" {
       for_each = var.required_app_roles
 
       content {
-        id   = azuread_service_principal.msgraph.app_role_ids[resource_access.value]
+        id   = data.azuread_service_principal.msgraph.app_role_ids[resource_access.value]
         type = "Role"
       }
     }
+  }
+
+  lifecycle {
+    # see https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application#argument-reference
+    ignore_changes = [
+      # '(Optional) References application context information from a Service or Asset Management database.' --> have seen customers manage this outside our provided Terraform
+      service_management_reference,
+      # internal notes; have seen customers manage this outside our provided Terraform
+      notes
+    ]
   }
 }
 

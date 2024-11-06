@@ -9,7 +9,7 @@ variable "aws_account_id" {
 
 variable "aws_ssm_param_root_path" {
   type        = string
-  description = "root to path under which SSM parameters created by this module will be created"
+  description = "path under which SSM parameters created by this module will be created"
   default     = ""
 
   validation {
@@ -18,6 +18,19 @@ variable "aws_ssm_param_root_path" {
   }
 }
 
+variable "aws_secrets_manager_path" {
+  type        = string
+  description = "**beta** path under which Secrets Manager secrets created by this module will be created"
+  default     = ""
+
+  validation {
+    condition     = var.aws_secrets_manager_path == null || length(var.aws_secrets_manager_path) == 0 || length(regexall("/", var.aws_secrets_manager_path)) == 0 || startswith(var.aws_secrets_manager_path, "/")
+    error_message = "The `aws_secrets_manager_path` value must be fully qualified (begin with `/`) if it contains any `/` characters."
+  }
+}
+
+
+# TODO: generalize to 'secrets', regardless of store (AWS SSM, AWS Secrets Manager, etc)
 variable "aws_ssm_key_id" {
   type        = string
   description = "KMS key id to use for encrypting SSM SecureString parameters created by this module, in any. (by default, will encrypt with AWS-managed keys)"
@@ -33,6 +46,24 @@ variable "function_env_kms_key_arn" {
 variable "logs_kms_key_arn" {
   type        = string
   description = "AWS KMS key ARN to use to encrypt lambdas' logs. NOTE: ensure CloudWatch is setup to use this key (cloudwatch principal has perms, log group in same region as key, etc) - see https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html ."
+  default     = null
+}
+
+variable "log_retention_days" {
+  type        = number
+  description = "Number of days to retain logs in CloudWatch."
+  default     = 7
+}
+
+variable "aws_lambda_execution_role_policy_arn" {
+  type        = string
+  description = "*beta* The ARN of policy to attach to the lambda execution role, if you want one other than the default. (usually, AWSLambdaBasicExecutionRole)."
+  default     = null
+}
+
+variable "iam_roles_permissions_boundary" {
+  type        = string
+  description = "*beta* ARN of the permissions boundary to attach to IAM roles created by this module."
   default     = null
 }
 
@@ -127,6 +158,12 @@ variable "pseudonymize_app_ids" {
   default     = true
 }
 
+variable "email_canonicalization" {
+  type        = string
+  description = "defines how email address are processed prior to hashing, hence which are considered 'canonically equivalent'; one of 'STRICT' (default and most standard compliant) or 'IGNORE_DOTS' (probably most in line with user expectations)"
+  default     = "STRICT"
+}
+
 variable "general_environment_variables" {
   type        = map(string)
   description = "environment variables to add for all connectors"
@@ -176,12 +213,13 @@ variable "bulk_connectors" {
     input_bucket_name     = optional(string) # allow override of default bucket name
     sanitized_bucket_name = optional(string) # allow override of default bucket name
     rules = optional(object({
-      pseudonymFormat       = optional(string)
-      columnsToRedact       = optional(list(string), [])
-      columnsToInclude      = optional(list(string), null)
-      columnsToPseudonymize = optional(list(string), [])
-      columnsToDuplicate    = optional(map(string), {})
-      columnsToRename       = optional(map(string), {})
+      pseudonymFormat                = optional(string)
+      columnsToRedact                = optional(list(string), [])
+      columnsToInclude               = optional(list(string), null)
+      columnsToPseudonymize          = optional(list(string), [])
+      columnsToPseudonymizeIfPresent = optional(list(string), [])
+      columnsToDuplicate             = optional(map(string), {})
+      columnsToRename                = optional(map(string), {})
       fieldsToTransform = optional(map(object({
         newName    = string
         transforms = optional(list(map(string)), [])
@@ -210,12 +248,13 @@ variable "bulk_sanitized_expiration_days" {
 
 variable "custom_bulk_connector_rules" {
   type = map(object({
-    pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
-    columnsToRedact       = optional(list(string))
-    columnsToInclude      = optional(list(string))
-    columnsToPseudonymize = optional(list(string))
-    columnsToDuplicate    = optional(map(string))
-    columnsToRename       = optional(map(string))
+    pseudonymFormat                = optional(string, "URL_SAFE_TOKEN")
+    columnsToRedact                = optional(list(string))
+    columnsToInclude               = optional(list(string))
+    columnsToPseudonymize          = optional(list(string))
+    columnsToPseudonymizeIfPresent = optional(list(string), null)
+    columnsToDuplicate             = optional(map(string))
+    columnsToRename                = optional(map(string))
     fieldsToTransform = optional(map(object({
       newName    = string
       transforms = optional(list(map(string)), [])
@@ -273,6 +312,40 @@ variable "lookup_table_builders" {
     #
     #    }
   }
+}
+
+variable "use_api_gateway_v2" {
+  type        = bool
+  description = "**beta**. whether to use API Gateway, or not. Only v2 supported atm. Ignored if `vpc_config` is provided, bc that's incompatible with function URLs."
+  default     = false
+}
+
+variable "vpc_config" {
+  type = object({
+    # ipv6_allowed_for_dual_stack = optional(bool, false)
+    subnet_ids         = list(string)
+    security_group_ids = list(string)
+  })
+  description = "**beta** VPC configuration for lambda; if not provided, lambda will not be deployed in a VPC. see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#vpc_config"
+  default     = null
+}
+
+variable "secrets_store_implementation" {
+  type        = string
+  description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
+  default     = "aws_ssm_parameter_store"
+}
+
+variable "provision_bucket_public_access_block" {
+  type        = bool
+  description = "Whether to provision public_access_block resources on all buckets; defaults to 'true', but can be 'false' if you have organizational control policies that do this at a higher level."
+  default     = true
+}
+
+variable "todos_as_local_files" {
+  type        = bool
+  description = "whether to render TODOs as flat files"
+  default     = true
 }
 
 variable "todo_step" {

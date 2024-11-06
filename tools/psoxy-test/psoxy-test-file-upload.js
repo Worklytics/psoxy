@@ -2,6 +2,7 @@ import { constants as httpCodes } from 'http2';
 import { execFileSync } from 'child_process';
 import {
   addFilenameSuffix,
+  environmentCheck,
   isGzipped,
   parseBucketOption,
   unzip,
@@ -49,6 +50,7 @@ async function testAWS(options, logger) {
     throw new Error('Unable to upload file', { cause: uploadResult });
   }
   logger.success('File uploaded');
+  logger.verbose('Upload result:', { additional: uploadResult });
 
   const parsedBucketOutputOption = parseBucketOption(options.output)
   const outputBucket = parsedBucketOutputOption.bucket;
@@ -57,16 +59,20 @@ async function testAWS(options, logger) {
   logger.info(`Downloading sanitized file from output bucket: ${outputBucket}`);
 
   const sanitizedFilename = addFilenameSuffix(outputKey, SANITIZED_FILE_SUFFIX);
-  const destination = `${parsedPath.dir}/${sanitizedFilename}`;
+  const destination = `./${sanitizedFilename}`;
 
-  await aws.download(outputBucket, outputKey, destination, {
+  const file = await aws.download(outputBucket, outputKey, destination, {
       role: options.role,
       region: options.region,
     }, client, logger);
   logger.success('File downloaded');
 
-  if (options.deleteSanitizedFile) {
-    logger.verbose(`Deleting sanitized file from output bucket: ${outputBucket}`);
+  if (file?.metadata) {
+    logger.verbose('File metadata:', { additional: file.metadata });
+  }
+
+  if (!options.keepSanitizedFile) {
+    logger.info(`Deleting sanitized file from output bucket: ${outputBucket}`);
     try {
       // Note:
       // We don't use bucket versioning. The S3 client will attempt to delete
@@ -126,13 +132,17 @@ async function testGCP(options, logger) {
   // {original filename}-{timestamp}-{sanitized} to minimize the chance of
   // modifying files in the system
   const sanitizedFilename = addFilenameSuffix(outputKey, SANITIZED_FILE_SUFFIX);
-  const destination = `${parsedPath.dir}/${sanitizedFilename}`;
+  const destination = `./${sanitizedFilename}`;
 
-  await gcp.download(outputBucket, outputKey, destination, client, logger);
+  const file = await gcp.download(outputBucket, outputKey, destination, client, logger);
   logger.success('File downloaded');
 
-  if (options.deleteSanitizedFile) {
-    logger.verbose(`Deleting sanitized file from output bucket: ${outputBucket}`);
+  if (file?.metadata) {
+    logger.verbose('File metadata:', { additional: file.metadata });
+  }
+
+  if (!options.keepSanitizedFile) {
+    logger.info(`Deleting sanitized file from output bucket: ${outputBucket}`);
     try {
       await gcp.deleteFile(outputBucket, outputKey, client);
     } catch (error) {
@@ -161,12 +171,13 @@ async function testGCP(options, logger) {
  * @param {string} options.region - AWS: buckets region
  * @param {string} options.role - AWS: role to assume (ARN format; optional)
  * @param {boolean} options.saveSanitizedFile - Whether to save sanitized file or not
- * @param {boolean} options.deleteSanitizedFile - Whether to delete sanitized file or not (from
+ * @param {boolean} options.keepSanitizedFile - Whether to delete sanitized file or not (from
  *  output bucket, after test completion)
  * @returns {string}
  */
 export default async function (options = {}) {
   const logger = getLogger(options.verbose);
+  environmentCheck(logger);
 
   const deploymentTypeFn = options.deploy === 'AWS' ? testAWS : testGCP;
   const { original, sanitized } = await deploymentTypeFn(options, logger);
@@ -175,9 +186,7 @@ export default async function (options = {}) {
   let sanitizedDiffPath = sanitized;
   const isOriginalGzipped = await isGzipped(original);
   if (isOriginalGzipped) {
-    // Assume sanitized file is also gzipped
     originalDiffPath = await unzip(original);
-    sanitizedDiffPath = await unzip(sanitized);
   }
 
   let diff;
@@ -185,7 +194,7 @@ export default async function (options = {}) {
     logger.info('Comparing input and sanitized output:\n');
     const diff = execFileSync('diff', [ originalDiffPath, sanitizedDiffPath ]);
     logger.info(diff);
-  } catch(error) {
+  } catch (error) {
     // if files are different `diff` will end with exit code 1, so print results
     diff = error.stdout.toString();
     logger.info(diff);
@@ -201,7 +210,7 @@ export default async function (options = {}) {
     // delete sanitized file
     fs.unlinkSync(sanitized);
   } else {
-    logger.info(`Sanitized file saved to ${sanitized}`);
+    logger.info(`Sanitized file saved to ${path.resolve(sanitized)}`);
   }
 
   return diff;

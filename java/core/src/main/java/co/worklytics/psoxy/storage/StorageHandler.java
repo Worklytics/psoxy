@@ -11,6 +11,7 @@ import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.*;
 import lombok.extern.java.Log;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
@@ -33,9 +34,10 @@ import java.util.zip.GZIPOutputStream;
 public class StorageHandler {
 
     // as writing to remote storage, err on size of larger buffer
-    private static final int DEFAULT_BUFFER_SIZE = 65_536; //64 KB
+    private static final int DEFAULT_BUFFER_SIZE = 1_048_576; //1 MB
 
-    private static final String CONTENT_ENCODING_GZIP = "gzip";
+    public static final String CONTENT_ENCODING_GZIP = "gzip";
+    public static final String EXTENSION_GZIP = ".gz";
 
     /**
      * how many lines to process as a 'validation' of the file/transform/etc; if fails, then we abort
@@ -66,7 +68,7 @@ public class StorageHandler {
     PathTemplateUtils pathTemplateUtils;
 
     static void warnIfEncodingDoesNotMatchFilename(@NonNull StorageEventRequest request, @Nullable String contentEncoding) {
-        if (request.getSourceObjectPath().endsWith(".gz")
+        if (request.getSourceObjectPath().endsWith(EXTENSION_GZIP)
             && !StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP)) {
             log.warning("Input filename ends with .gz, but 'Content-Encoding' metadata is not 'gzip'; is this correct? Decompression is based on object's 'Content-Encoding'");
         }
@@ -78,8 +80,8 @@ public class StorageHandler {
         VERSION,
         ORIGINAL_OBJECT_KEY,
 
-        //q: sha-1 of rules? discarded for now as don't really see utility; would be complicated to
-        // map back to actual value for debugging
+        //SHA-1 of rules
+        RULES_SHA,
         ;
 
         // aws prepends `x-amz-meta-` to this; but per documentation, that's not visible via the
@@ -92,7 +94,6 @@ public class StorageHandler {
         public String getMetaDataKey() {
             return META_DATA_KEY_PREFIX + name().replace("_", "-").toLowerCase();
         }
-
     }
 
 
@@ -140,12 +141,20 @@ public class StorageHandler {
                 .map(inputBasePath -> sourceObjectPath.replace(inputBasePath, ""))
                 .orElse(sourceObjectPath);
 
+        boolean isSourceCompressed = isSourceCompressed(sourceContentEncoding, sourceObjectPath);
+
+        boolean compressOutput = isSourceCompressed ||
+            config.getConfigPropertyAsOptional(BulkModeConfigProperty.COMPRESS_OUTPUT_ALWAYS)
+                .map(Boolean::parseBoolean)
+                .orElse(true);
 
         StorageEventRequest request = StorageEventRequest.builder()
             .sourceBucketName(sourceBucketName)
             .sourceObjectPath(sourceObjectPath)
             .destinationBucketName(transform.getDestinationBucketName())
             .destinationObjectPath(transform.getPathWithinBucket() + sourceObjectPathWithinBase)
+            .decompressInput(isSourceCompressed)
+            .compressOutput(compressOutput)
             .build();
 
         warnIfEncodingDoesNotMatchFilename(request, sourceContentEncoding);
@@ -158,8 +167,7 @@ public class StorageHandler {
         List<StorageHandler.ObjectTransform> transforms = new ArrayList<>();
         transforms.add(buildDefaultTransform());
 
-        rulesUtils.parseAdditionalTransforms(config)
-            .forEach(transforms::add);
+        transforms.addAll(rulesUtils.parseAdditionalTransforms(config));
 
         return transforms;
     }
@@ -177,7 +185,8 @@ public class StorageHandler {
         return Map.of(
             BulkMetaData.INSTANCE_ID.getMetaDataKey(), hostEnvironment.getInstanceId(),
             BulkMetaData.VERSION.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.BUNDLE_FILENAME).orElse("unknown"),
-            BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), sourceBucket + "/" + sourceKey
+            BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), sourceBucket + "/" + sourceKey,
+            BulkMetaData.RULES_SHA.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES).map(DigestUtils::sha1Hex).orElse("unknown")
         );
     }
 
@@ -229,16 +238,17 @@ public class StorageHandler {
 
         @NonNull
         BulkDataRules rules;
+
     }
 
 
     @VisibleForTesting
     ObjectTransform buildDefaultTransform() {
-        return ObjectTransform.builder()
-                .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
-                .pathWithinBucket(outputBasePath().orElse(""))
-                .rules(defaultRuleSet)
-                .build();
+       return ObjectTransform.builder()
+            .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
+            .pathWithinBucket(outputBasePath().orElse(""))
+            .rules(defaultRuleSet)
+            .build();
     }
 
 
@@ -302,28 +312,26 @@ public class StorageHandler {
                   Supplier<InputStream> inputStreamSupplier) {
         int bufferSize = getBufferSize();
         try (
-            InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8), bufferSize);
+            InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8), bufferSize);
             OutputStream out = new ByteArrayOutputStream()
         ) {
 
-            StringBuffer firstLines = new StringBuffer();
-            for (int lineCount = 0; lineCount < LINES_TO_VALIDATE ; lineCount++) {
-                String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
-                firstLines.append(line + "\n");
-            }
+            String firstLines = reader.lines()
+                .map(StringUtils::trimToNull)
+                .filter(Objects::nonNull)
+                .limit(LINES_TO_VALIDATE)
+                .collect(Collectors.joining("\n"));
 
-            Supplier<InputStream> firstLinesSupplier = () -> new ByteArrayInputStream(firstLines.toString().getBytes());
+            Supplier<InputStream> firstLinesSupplier = () -> new ByteArrayInputStream(firstLines.getBytes());
 
-            this.process(request, transform, firstLinesSupplier, () -> out);
+            // content is already decompressed, so don't try to decompress again
+            this.process(request.withDecompressInput(false), transform, firstLinesSupplier, () -> out);
         }
     }
 
 
-    private int getBufferSize() {
+    public int getBufferSize() {
         return config.getConfigPropertyAsOptional(BulkModeConfigProperty.BUFFER_SIZE).map(Integer::parseInt).orElse(DEFAULT_BUFFER_SIZE);
     }
 
@@ -343,9 +351,9 @@ public class StorageHandler {
         int bufferSize = getBufferSize();
 
         try (
-            InputStream decompressedStream = request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
-            Reader reader = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8), bufferSize);
-            OutputStream outputStream = request.getCompressOutput() ? new GZIPOutputStream(outputStreamSupplier.get(), bufferSize) : outputStreamSupplier.get();
+            InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
+            Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8), bufferSize);
+            OutputStream outputStream = writeOutputStream(request, bufferSize, outputStreamSupplier);
             OutputStreamWriter writer = new OutputStreamWriter(outputStream)
         ) {
 
@@ -363,12 +371,45 @@ public class StorageHandler {
 
     }
 
+    /**
+     * Reads an input stream, decompressing if necessary
+     * @param request
+     * @param bufferSize
+     * @param inputStreamSupplier
+     * @return
+     * @throws IOException
+     */
+    private InputStream readInputStream(StorageEventRequest request, int bufferSize, Supplier<InputStream> inputStreamSupplier) throws IOException {
+        return request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
+    }
+
+    /**
+     * Writes an output stream, compressing if necessary
+     * @param request
+     * @param bufferSize
+     * @param outputStreamSupplier
+     * @return
+     * @throws IOException
+     */
+    private OutputStream writeOutputStream(StorageEventRequest request, int bufferSize, Supplier<OutputStream> outputStreamSupplier) throws IOException {
+        return request.getCompressOutput() ? new GZIPOutputStream(outputStreamSupplier.get(), bufferSize) : outputStreamSupplier.get();
+    }
+
+    /**
+     * Check if the source content is compressed based on file's content encoding or assuming it's
+     * encoded if extension is .gz
+     * @param contentEncoding
+     * @return
+     */
+    boolean isSourceCompressed(String contentEncoding, String sourceObjectPath) {
+        return StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP) || sourceObjectPath.endsWith(EXTENSION_GZIP);
+    }
 
     Map<String, BulkDataRules> effectiveTemplates(Map<String, BulkDataRules> original) {
         return original.entrySet().stream()
             .collect(Collectors.toMap(
                 entry -> entry.getKey().startsWith("/") ? entry.getKey().substring(1) : entry.getKey(),
-                entry -> entry.getValue(),
+                Map.Entry::getValue,
                 (a, b) -> a,
                 LinkedHashMap::new //preserve order
             ));
@@ -381,13 +422,13 @@ public class StorageHandler {
      */
     Optional<String> inputBasePath() {
         return config.getConfigPropertyAsOptional(BulkModeConfigProperty.INPUT_BASE_PATH)
-            .filter(inputBasePath -> StringUtils.isNotBlank(inputBasePath));
+            .filter(StringUtils::isNotBlank);
             //.map(inputBasePath -> inputBasePath.startsWith("/") ? inputBasePath : "/" + inputBasePath);
     }
 
     Optional<String> outputBasePath() {
         return config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH)
-            .filter(outputBasePath -> StringUtils.isNotBlank(outputBasePath));
+            .filter(StringUtils::isNotBlank);
             //.map(outputBasePath -> outputBasePath.startsWith("/") ? outputBasePath : "/" + outputBasePath);
     }
 

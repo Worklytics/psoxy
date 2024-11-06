@@ -1,6 +1,6 @@
-variable "psoxy_instance_id" {
+variable "proxy_instance_id" {
   type        = string
-  description = "friendly unique-id for Psoxy instance"
+  description = "friendly unique-id for proxy instance"
   default     = null
 }
 
@@ -25,7 +25,7 @@ variable "aws_region" {
   description = "AWS region in which proxy lambda is deployed"
 }
 
-variable "psoxy_endpoint_url" {
+variable "proxy_endpoint_url" {
   type        = string
   description = "URL of endpoint which hosts Psoxy instance, for API connectors."
   default     = null
@@ -47,6 +47,12 @@ variable "connector_settings_to_provide" {
   type        = map(string)
   description = "Map of additional, connector-specific settings to provide to Worklytics when creating connection."
   default     = {}
+}
+
+variable "todos_as_local_files" {
+  type        = bool
+  description = "whether to render TODOs as flat files"
+  default     = true
 }
 
 variable "todo_step" {

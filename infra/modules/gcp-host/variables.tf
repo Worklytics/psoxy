@@ -88,16 +88,16 @@ variable "pseudonymize_app_ids" {
   default     = true
 }
 
+variable "email_canonicalization" {
+  type        = string
+  description = "defines how email address are processed prior to hashing, hence which are considered 'canonically equivalent'; one of 'STRICT' (default and most standard compliant) or 'IGNORE_DOTS' (probably most in line with user expectations)"
+  default     = "STRICT"
+}
+
 variable "gcp_region" {
   type        = string
   description = "Region in which to provision GCP resources, if applicable"
   default     = "us-central1"
-}
-
-variable "replica_regions" {
-  type        = list(string)
-  description = "DEPRECATED; use `gcp_secret_replica_locations`. List of locations to which to replicate secrets. See https://cloud.google.com/secret-manager/docs/locations"
-  default     = null
 }
 
 variable "secret_replica_locations" {
@@ -153,12 +153,13 @@ variable "bulk_connectors" {
     input_bucket_name     = optional(string) # allow override of default bucket name
     sanitized_bucket_name = optional(string) # allow override of default bucket name
     rules = optional(object({
-      pseudonymFormat       = optional(string)
-      columnsToRedact       = optional(list(string), [])
-      columnsToInclude      = optional(list(string), null)
-      columnsToPseudonymize = optional(list(string), [])
-      columnsToDuplicate    = optional(map(string), {})
-      columnsToRename       = optional(map(string), {})
+      pseudonymFormat                = optional(string)
+      columnsToRedact                = optional(list(string), [])
+      columnsToInclude               = optional(list(string), null)
+      columnsToPseudonymize          = optional(list(string), [])
+      columnsToPseudonymizeIfPresent = optional(list(string), null)
+      columnsToDuplicate             = optional(map(string), {})
+      columnsToRename                = optional(map(string), {})
       fieldsToTransform = optional(map(object({
         newName    = string
         transforms = optional(list(map(string)), [])

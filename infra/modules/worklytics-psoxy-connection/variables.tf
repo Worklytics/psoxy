@@ -1,4 +1,4 @@
-variable "psoxy_instance_id" {
+variable "proxy_instance_id" {
   type        = string
   description = "friendly unique-id for Psoxy instance"
   default     = null
@@ -10,14 +10,14 @@ variable "connector_id" {
   default     = "" # will be REQUIRED for v0.5 onwards
 }
 
-variable "psoxy_host_platform_id" {
+variable "host_platform_id" {
   type        = string
-  description = "Psoxy host platform id (AWS, GCP, etc)"
+  description = "proxy host platform id (AWS, GCP, etc)"
   default     = "GCP"
 
   validation {
-    condition     = contains(["AWS", "GCP"], var.psoxy_host_platform_id)
-    error_message = "`psoxy_host_platform_id` must be one of AWS or GCP."
+    condition     = contains(["AWS", "GCP"], var.host_platform_id)
+    error_message = "`host_platform_id` must be one of AWS or GCP."
   }
 }
 
@@ -35,6 +35,12 @@ variable "worklytics_host" {
 variable "display_name" {
   type        = string
   description = "display name of connector in Worklytics."
+}
+
+variable "todos_as_local_files" {
+  type        = bool
+  description = "whether to render TODOs as flat files"
+  default     = true
 }
 
 variable "todo_step" {

@@ -5,41 +5,33 @@
 module "psoxy_lambda" {
   source = "../aws-psoxy-lambda"
 
-  environment_name                = var.environment_name
-  instance_id                     = var.instance_id
-  handler_class                   = "co.worklytics.psoxy.S3Handler"
-  timeout_seconds                 = 600 # 10 minutes
-  memory_size_mb                  = var.memory_size_mb
-  path_to_function_zip            = var.path_to_function_zip
-  function_zip_hash               = var.function_zip_hash
-  global_parameter_arns           = var.global_parameter_arns
-  path_to_instance_ssm_parameters = var.path_to_instance_ssm_parameters
-  function_env_kms_key_arn        = var.function_env_kms_key_arn
-  logs_kms_key_arn                = var.logs_kms_key_arn
-  ssm_kms_key_ids                 = var.ssm_kms_key_ids
+  environment_name                     = var.environment_name
+  instance_id                          = var.instance_id
+  handler_class                        = "co.worklytics.psoxy.S3Handler"
+  timeout_seconds                      = 600 # 10 minutes
+  memory_size_mb                       = var.memory_size_mb
+  path_to_function_zip                 = var.path_to_function_zip
+  function_zip_hash                    = var.function_zip_hash
+  global_parameter_arns                = var.global_parameter_arns
+  global_secrets_manager_secrets_arns  = var.global_secrets_manager_secret_arns
+  path_to_instance_ssm_parameters      = var.path_to_instance_ssm_parameters
+  path_to_shared_ssm_parameters        = var.path_to_shared_ssm_parameters
+  function_env_kms_key_arn             = var.function_env_kms_key_arn
+  logs_kms_key_arn                     = var.logs_kms_key_arn
+  ssm_kms_key_ids                      = var.ssm_kms_key_ids
+  vpc_config                           = var.vpc_config
+  secrets_store_implementation         = var.secrets_store_implementation
+  aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
+  iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
+
 
   environment_variables = merge(
     var.environment_variables,
     {
       INPUT_BUCKET  = var.input_bucket
-      OUTPUT_BUCKET = aws_s3_bucket.output.bucket,
+      OUTPUT_BUCKET = module.sanitized_output_bucket.output_bucket
     }
   )
-}
-
-moved {
-  from = aws_s3_bucket.output
-  to   = module.sanitized_output_bucket.output
-}
-
-moved {
-  from = aws_s3_bucket_server_side_encryption_configuration.sanitized
-  to   = module.sanitized_output_bucket.aws_s3_bucket_server_side_encryption_configuration.sanitized
-}
-
-moved {
-  from = aws_s3_bucket_public_access_block.sanitized
-  to   = module.sanitized_output_bucket.aws_s3_bucket_public_access_block.sanitized
 }
 
 data "aws_s3_bucket" "input" {
@@ -98,33 +90,13 @@ resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
   policy_arn = aws_iam_policy.input_bucket_getObject_policy.arn
 }
 
-
-moved {
-  from = aws_iam_policy.sanitized_bucket_write_policy
-  to   = module.sanitized_output_bucket.aws_iam_policy.sanitized_bucket_write_policy
-}
-
-moved {
-  from = aws_iam_role_policy_attachment.write_policy_for_sanitized_bucket
-  to   = module.sanitized_output_bucket.aws_iam_role_policy_attachment.write_policy_for_sanitized_bucket
-}
-
-moved {
-  from = aws_iam_policy.sanitized_bucket_read
-  to   = module.sanitized_output_bucket.aws_iam_policy.sanitized_bucket_read
-}
-
-moved {
-  from = aws_iam_role_policy_attachment.reader_policy_to_accessor_role
-  to   = module.sanitized_output_bucket.aws_iam_role_policy_attachment.reader_policy_to_accessor_role
-}
-
 module "sanitized_output_bucket" {
   source = "../aws-psoxy-output-bucket"
 
-  instance_id                   = var.instance_id
-  iam_role_for_lambda_name      = module.psoxy_lambda.iam_role_for_lambda_name
-  sanitized_accessor_role_names = var.sanitized_accessor_role_names
+  instance_id                          = var.instance_id
+  iam_role_for_lambda_name             = module.psoxy_lambda.iam_role_for_lambda_name
+  sanitized_accessor_role_names        = var.sanitized_accessor_role_names
+  provision_bucket_public_access_block = var.provision_bucket_public_access_block
 }
 
 

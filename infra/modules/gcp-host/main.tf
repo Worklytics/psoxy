@@ -1,10 +1,12 @@
+terraform {
+  required_version = ">= 1.6, < 2.0"
+}
+
 locals {
   default_config_parameter_prefix       = length(var.environment_name) == 0 ? "psoxy_" : "${var.environment_name}_"
   config_parameter_prefix               = var.config_parameter_prefix == "" ? local.default_config_parameter_prefix : var.config_parameter_prefix
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
-
-  secret_replica_locations = coalesce(var.replica_regions, var.secret_replica_locations)
 }
 
 module "psoxy" {
@@ -86,7 +88,7 @@ module "secrets" {
   path_prefix       = "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_"
   secrets           = local.secrets_to_provision[each.key]
   default_labels    = var.default_labels
-  replica_locations = local.secret_replica_locations
+  replica_locations = var.secret_replica_locations
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionManager_on_writable_secret" {
@@ -143,6 +145,7 @@ module "api_connector" {
   service_account_email                 = google_service_account.api_connectors[each.key].email
   artifacts_bucket_name                 = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name         = module.psoxy.deployment_bundle_object_name
+  artifact_repository_id                = module.psoxy.artifact_repository
   path_to_config                        = null
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
@@ -157,20 +160,23 @@ module "api_connector" {
   gcp_principals_authorized_to_test     = var.gcp_principals_authorized_to_test
   todos_as_local_files                  = var.todos_as_local_files
 
+
   environment_variables = merge(
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
-      BUNDLE_FILENAME      = module.psoxy.filename
-      IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
-      PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-      CUSTOM_RULES_SHA     = try(var.custom_api_connector_rules[each.key], null) != null ? filesha1(var.custom_api_connector_rules[each.key]) : null
+      BUNDLE_FILENAME        = module.psoxy.filename
+      IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
+      PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
+      CUSTOM_RULES_SHA       = try(var.custom_api_connector_rules[each.key], null) != null ? filesha1(var.custom_api_connector_rules[each.key]) : null
+      EMAIL_CANONICALIZATION = var.email_canonicalization
     }
   )
 
   secret_bindings = merge(
     local.secrets_bound_as_env_vars[each.key],
-    module.psoxy.secrets
+    module.psoxy.secrets,
+    module.psoxy.artifact_repository
   )
 }
 
@@ -202,6 +208,7 @@ module "bulk_connector" {
   config_parameter_prefix           = local.config_parameter_prefix
   source_kind                       = each.value.source_kind
   artifacts_bucket_name             = module.psoxy.artifacts_bucket_name
+  artifact_repository_id            = module.psoxy.artifact_repository
   deployment_bundle_object_name     = module.psoxy.deployment_bundle_object_name
   psoxy_base_dir                    = var.psoxy_base_dir
   bucket_write_role_id              = module.psoxy.bucket_write_role_id
@@ -220,10 +227,11 @@ module "bulk_connector" {
     var.general_environment_variables,
     try(each.value.environment_variables, {}),
     {
-      SOURCE              = each.value.source_kind
-      RULES               = each.value.rules_file == null ? yamlencode(try(var.custom_bulk_connector_rules[each.key], each.value.rules)) : file(each.value.rules_file)
-      BUNDLE_FILENAME     = module.psoxy.filename
-      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+      SOURCE                 = each.value.source_kind
+      RULES                  = each.value.rules_file == null ? yamlencode(try(var.custom_bulk_connector_rules[each.key], each.value.rules)) : file(each.value.rules_file)
+      BUNDLE_FILENAME        = module.psoxy.filename
+      IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
+      EMAIL_CANONICALIZATION = var.email_canonicalization
     }
   )
 }
@@ -262,7 +270,7 @@ resource "google_secret_manager_secret" "additional_transforms" {
   replication {
     user_managed {
       dynamic "replicas" {
-        for_each = local.secret_replica_locations
+        for_each = var.secret_replica_locations
         content {
           location = replicas.value
         }

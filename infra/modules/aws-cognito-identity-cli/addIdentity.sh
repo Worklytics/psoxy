@@ -7,8 +7,8 @@ set -e
 IDENTITY_POOL_ID=$1
 LOGIN_ID=$2 # expected to be an AAD clientId, etc
 REGION=$3 # expected us-east-1, etc
-ROLE=$4 # ARN of the role to assume; can be empty
-CONNECTOR_ID=$5 # connector id, such "outlook-mail", etc
+CONNECTOR_ID=$4 # connector id, such "outlook-mail", etc
+ROLE=$5 # ARN of the role to assume; can be empty
 
 if test $ROLE
 then

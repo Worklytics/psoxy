@@ -3,16 +3,20 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.SourceAuthModule;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.webtoken.JsonWebSignature;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -22,7 +26,7 @@ import java.time.Clock;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class ClientCredentialsGrantTokenRequestBuilderTest {
 
@@ -60,6 +64,8 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
 
     @Inject
     ConfigService configService;
+    @Inject
+    SecretStore secretStore;
 
     @Inject
     ClientCredentialsGrantTokenRequestBuilder payloadBuilder;
@@ -74,6 +80,7 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
         TestModules.ForFixedClock.class,
         TestModules.ForFixedUUID.class,
         MockModules.ForConfigService.class,
+        MockModules.ForSecretStore.class,
     })
     public interface Container {
         void inject(ClientCredentialsGrantTokenRequestBuilderTest test);
@@ -85,7 +92,7 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
             DaggerClientCredentialsGrantTokenRequestBuilderTest_Container.create();
         container.inject(this);
 
-        when(configService.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID))
+        when(secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID))
             .thenReturn(clientId);
         when(configService.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT))
             .thenReturn(tokenEndpoint);
@@ -98,9 +105,9 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
     @SneakyThrows
     @Test
     public void tokenRequestPayload_with_jwt() {
-        when(configService.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
-            .thenReturn(EXAMPLE_PRIVATE_KEY);
-        when(configService.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY_ID))
+        when(secretStore.getConfigPropertyWithMetadata(eq(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY)))
+            .thenReturn(Optional.of(ConfigService.ConfigValueWithMetadata.builder().value(EXAMPLE_PRIVATE_KEY).build()));
+        when(secretStore.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY_ID))
             .thenReturn("F4194D924E8471C804F65E77BCF90418CEEB0DA2");
 
         final String EXPECTED_ASSERTION = "client_assertion=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsIng1dCI6IjlCbE5razZFY2NnRTlsNTN2UGtFR003ckRhST0ifQ.eyJhdWQiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vNmU0YzhlOWYtNzZjZi00MWQxLTgwNmUtNjE4MzhiODgwYjg3L29hdXRoMi92Mi4wL3Rva2VuIiwiZXhwIjoxNjM5NTI2NzAwLCJpYXQiOjE2Mzk1MjY0MDAsImlzcyI6IjYwYjYxMmUzLWEzYjAtNDVkMS1hNTgyLTQ4NzZmMjg2NDkwYSIsImp0aSI6Ijg4NmNkMmQxLTJhMWQtNDNlOS05MWQ0LTZhMmIxNjZkZmY5ZSIsInN1YiI6IjYwYjYxMmUzLWEzYjAtNDVkMS1hNTgyLTQ4NzZmMjg2NDkwYSJ9.tkGyEKoTPkkn7CXR8w45himxXzlnva0JY9DH_fIfr7uu5zC5BsZmF5HuBdCgU4_rWVPHDUGQmyVyUcRkNZsO9CnHDeHzCoPvWD1FSx8hV3oTwREgjXWQka08PC5ps2wEydSZfPTemP-7AXeIayLl5cWYzS7L_KRylQjNMlrXgMhv5SvUL1lJD76JolX0ksskfBmLldmu99UrMIizREPFkWQUvLE_cX8P9C6mZGl5PB7Ku5kovZAEOrOVQbESUtTUaSdmCEdpGCJz9osvWyksoC1Drp-isKw4FAGwGG6t1BTThL45R2kx-0fQH_jCYiKwLYtedREID9GZourmF8BNdw&client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_id=60b612e3-a3b0-45d1-a582-4876f286490a&grant_type=client_credentials&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default";
@@ -118,7 +125,7 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
 
         when(configService.getConfigPropertyAsOptional(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.CREDENTIALS_FLOW))
                 .thenReturn(Optional.of("client_secret"));
-        when(configService.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_SECRET))
+        when(secretStore.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_SECRET))
                 .thenReturn("fake");
 
         HttpContent payload = payloadBuilder.buildPayload();
@@ -178,9 +185,9 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
             "m8lD1czHbMIsv1EHZj/GcCIa\n" +
             "-----END PRIVATE KEY-----";
 
-        when(configService.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
+        when(secretStore.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
             .thenReturn(PRIVATE_KEY_FOR_INTEGRATION);
-        when(configService.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY_ID))
+        when(secretStore.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY_ID))
             .thenReturn(PRIVATE_KEY_ID_FOR_INTEGRATION);
 
         HttpRequestFactory requestFactory = (new NetHttpTransport()).createRequestFactory();
@@ -199,6 +206,25 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
         assertEquals("Bearer", tokenResponse.getTokenType());
         assertNotNull(tokenResponse.getAccessToken());
         assertNotNull(tokenResponse.getExpiresIn());
+    }
+
+    @ValueSource(strings = {
+        "6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B",
+        "  6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B  ",
+        "sha1 Fingerprint=6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B",
+        "  sha1 Fingerprint=6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B  ",
+        "6F:CC:8E:28:F6:A6:3B:4E:99:4E:D6:2F:52:BD:F3:C3:B0:B7:E8:8B",
+        "6fcc8e28f6a63b4e994ed62f52bdf3c3b0b7e88b",
+    })
+    @ParameterizedTest
+    public void setJWTCustomHeaders(String configuredPrivateKeyId) {
+        JsonWebSignature.Header header = mock(JsonWebSignature.Header.class);
+
+        when(secretStore.getConfigPropertyOrError(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY_ID))
+            .thenReturn(configuredPrivateKeyId);
+        payloadBuilder.setJWTCustomHeaders(header);
+        verify(header, times(1))
+            .setX509Thumbprint(eq(payloadBuilder.encodeKeyId("6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B")));
     }
 
 

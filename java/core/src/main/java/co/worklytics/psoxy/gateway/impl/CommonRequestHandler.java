@@ -53,6 +53,9 @@ public class CommonRequestHandler {
     EnvVarsConfigService envVarsConfigService;
     @Inject
     ConfigService config;
+
+    @Inject
+    SecretStore secretStore;
     @Inject
     RulesUtils rulesUtils;
     @Inject
@@ -108,8 +111,9 @@ public class CommonRequestHandler {
      */
     private static final Joiner HEADER_JOINER = Joiner.on(",");
 
+    @VisibleForTesting
+    volatile RESTApiSanitizer sanitizer;
 
-    private volatile RESTApiSanitizer sanitizer;
     private final Object $writeLock = new Object[0];
 
     private RESTApiSanitizer loadSanitizerRules() {
@@ -117,10 +121,10 @@ public class CommonRequestHandler {
             synchronized ($writeLock) {
                 if (this.sanitizer == null) {
                     String defaultScopeId = rulesUtils.getDefaultScopeIdFromRules(rules)
-                        .orElseGet(() -> rulesUtils.getDefaultScopeIdFromSource(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE)));
+                            .orElseGet(() -> rulesUtils.getDefaultScopeIdFromSource(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE)));
 
                     Pseudonymizer.ConfigurationOptions options =
-                        pseudonymizerImplFactory.buildOptions(config, defaultScopeId);
+                            pseudonymizerImplFactory.buildOptions(config, secretStore, defaultScopeId);
                     this.sanitizer = sanitizerFactory.create(rules, pseudonymizerImplFactory.create(options));
                 }
             }
@@ -131,7 +135,18 @@ public class CommonRequestHandler {
     @SneakyThrows
     public HttpEventResponse handle(HttpEventRequest request) {
 
-        logRequestIfAllowed(request);
+        logRequestIfVerbose(request);
+
+        // application-level enforcement of HTTPS
+        // (NOTE: should be redundant with infrastructure-level configuration)
+        if (!request.isHttps().orElse(true)) {
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_BAD_REQUEST)
+                    .header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.HTTPS_REQUIRED.name())
+                    .body("Requests MUST be sent over HTTPS")
+                    .build();
+        }
+
 
         Optional<HttpEventResponse> healthCheckResponse = healthCheckRequestHandler.handleIfHealthCheck(request);
         if (healthCheckResponse.isPresent()) {
@@ -146,10 +161,16 @@ public class CommonRequestHandler {
 
         boolean tokenizedURLReversed = ObjectUtils.notEqual(requestedTargetUrl, clearTargetUrl);
 
-        URL targetUrl = new URL(clearTargetUrl);
+        // Using original URL to check sanitized rules, as they should match the original URL. It could contain tokenized components.
+        // Examples:
+        // /v1/accounts/p~12adsfasdfasdf31
+        // /v1/accounts/12345
+        URL originalRequestedURL = new URL(requestedTargetUrl);
+        // And the URL to use for source request; it could contain the reversed tokenized components
+        URL targetForSourceApiRequest = new URL(clearTargetUrl);
 
         // avoid logging clear URL outside of dev
-        URL toLog = envVarsConfigService.isDevelopment() ? targetUrl : new URL(requestedTargetUrl);
+        URL toLog = envVarsConfigService.isDevelopment() ? targetForSourceApiRequest : originalRequestedURL;
 
         boolean skipSanitization = skipSanitization(request);
 
@@ -157,15 +178,22 @@ public class CommonRequestHandler {
 
         this.sanitizer = loadSanitizerRules();
 
-        String callLog = String.format("%s %s TokenInUrlReversed=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), tokenizedURLReversed);
+        //build log entry
+        String logEntry = String.format("%s %s TokenInUrlReversed=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), tokenizedURLReversed);
+        if (request.getClientIp().isPresent()) {
+            // client IP is NOT available for direct AWS Lambda calls; only for API Gateway.
+            // don't want to put blank/unknown in direct case, so log IP conditionally
+            logEntry += String.format(" ClientIP=%s", request.getClientIp().get());
+        }
+
         if (skipSanitization) {
-            log.info(String.format("%s. Skipping sanitization.", callLog));
-        } else if (sanitizer.isAllowed(request.getHttpMethod(), targetUrl)) {
-            log.info(String.format("%s. Rules allowed call.", callLog));
+            log.info(String.format("%s. Skipping sanitization.", logEntry));
+        } else if (sanitizer.isAllowed(request.getHttpMethod(), originalRequestedURL)) {
+            log.info(String.format("%s. Rules allowed call.", logEntry));
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
             builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.BLOCKED_BY_RULES.name());
-            log.warning(String.format("%s. Blocked call by rules %s", callLog, objectMapper.writeValueAsString(rules)));
+            log.warning(String.format("%s. Blocked call by rules %s", logEntry, objectMapper.writeValueAsString(rules)));
             return builder.build();
         }
 
@@ -181,7 +209,7 @@ public class CommonRequestHandler {
                 content = new ByteArrayContent(contentType, request.getBody());
             }
 
-            sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(targetUrl), content);
+            sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(targetForSourceApiRequest), content);
         } catch (IOException e) {
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             builder.body("Failed to parse request; review logs");
@@ -199,7 +227,7 @@ public class CommonRequestHandler {
         }
 
         //TODO: what headers to forward???
-        populateHeadersFromSource(sourceApiRequest, request, targetUrl);
+        populateHeadersFromSource(sourceApiRequest, request, targetForSourceApiRequest);
 
         //setup request
         sourceApiRequest
@@ -233,7 +261,7 @@ public class CommonRequestHandler {
                 } else {
                     RESTApiSanitizer sanitizerForRequest = getSanitizerForRequest(request);
 
-                    proxyResponseContent = sanitizerForRequest.sanitize(request.getHttpMethod(), targetUrl, responseContent);
+                    proxyResponseContent = sanitizerForRequest.sanitize(request.getHttpMethod(), originalRequestedURL, responseContent);
                     String rulesSha = rulesUtils.sha(sanitizerForRequest.getRules());
                     builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
                     log.info("response sanitized with rule set " + rulesSha);
@@ -370,8 +398,10 @@ public class CommonRequestHandler {
         }
     }
 
-    private void logRequestIfAllowed(HttpEventRequest request) {
-        logIfDevelopmentMode(() -> String.format("Request:\n%s", request.prettyPrint()));
+    private void logRequestIfVerbose(HttpEventRequest request) {
+        if (config.isDevelopment()) {
+            log.info(request.prettyPrint());
+        }
     }
 
     boolean isSuccessFamily(int statusCode) {
@@ -399,7 +429,9 @@ public class CommonRequestHandler {
 
     // NOTE: not 'decrypt', as that is only one possible implementation of reversible tokenization
     String reverseTokenizedUrlComponents(String encodedURL) {
-        return pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(encodedURL, reversibleTokenizationStrategy);
+        String result = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(encodedURL, reversibleTokenizationStrategy);
+
+        return result;
     }
 
     private void logIfDevelopmentMode(Supplier<String> messageSupplier) {
@@ -419,7 +451,8 @@ public class CommonRequestHandler {
                 .ifPresent(i -> i.forEach(h -> {
                     request.getHeader(h).ifPresent(headerValue -> {
                         logIfDevelopmentMode(() -> String.format("Header %s included", h));
-                        headers.set(h, headerValue);});
+                        headers.set(h, headerValue);
+                    });
                 }));
     }
 }

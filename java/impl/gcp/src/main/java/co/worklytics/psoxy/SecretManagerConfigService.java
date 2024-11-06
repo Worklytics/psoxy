@@ -1,7 +1,8 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.WritableConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.api.gax.rpc.PermissionDeniedException;
 import com.google.cloud.secretmanager.v1.*;
@@ -18,13 +19,16 @@ import org.apache.commons.lang3.StringUtils;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.logging.Level;
 
 @Log
-public class SecretManagerConfigService implements ConfigService, LockService {
+public class SecretManagerConfigService implements WritableConfigService, LockService, SecretStore {
 
     private static final String LOCK_LABEL = "locked";
     private static final String VERSION_LABEL = "latest-version";
@@ -54,13 +58,11 @@ public class SecretManagerConfigService implements ConfigService, LockService {
         this.namespace = namespace;
     }
 
-    @Override
-    public boolean supportsWriting() {
-        return true;
-    }
 
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {
+        Preconditions.checkArgument(!property.isEnvVarOnly(), "Can't put env-only config property: " + property);
+
         String key = parameterName(property);
         SecretName secretName = SecretName.of(projectId, key);
         try {
@@ -77,7 +79,7 @@ public class SecretManagerConfigService implements ConfigService, LockService {
 
                 updateLabelFromSecret(client, secretName, VERSION_LABEL, secretVersionName.getSecretVersion());
 
-                disableOldSecretVersions(client, secretName, version);
+                destroyOldSecretVersions(client, secretName, version);
             }
         } catch (IOException e) {
             log.log(Level.SEVERE, "Could not store property " + secretName, e);
@@ -93,6 +95,11 @@ public class SecretManagerConfigService implements ConfigService, LockService {
     @SneakyThrows
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
+        if (property.isEnvVarOnly()) {
+            Optional.empty();
+        }
+
+
         String paramName = parameterName(property);
 
         SecretName secretName = SecretName.of(projectId, paramName);
@@ -117,7 +124,7 @@ public class SecretManagerConfigService implements ConfigService, LockService {
             }
 
             SecretVersionName secretVersionName =
-                SecretVersionName.of(projectId, secretName.getSecret(), versionName);
+                    SecretVersionName.of(projectId, secretName.getSecret(), versionName);
 
             // Access the secret version.
             AccessSecretVersionResponse response = client.accessSecretVersion(secretVersionName);
@@ -211,29 +218,67 @@ public class SecretManagerConfigService implements ConfigService, LockService {
         }
     }
 
-    private static void disableOldSecretVersions(SecretManagerServiceClient client, SecretName secretName, SecretVersion exceptVersion) {
-        try {
-            SecretManagerServiceClient.ListSecretVersionsPage enabledVersions = client.listSecretVersions(ListSecretVersionsRequest.newBuilder()
-                            .setFilter("state:ENABLED")
-                            .setParent(secretName.toString())
-                            // Reduce the page, as each version will be disabled one by one
-                            .setPageSize(NUMBER_OF_VERSIONS_TO_RETRIEVE)
-                            .build())
-                    .getPage();
+    private static void destroyOldSecretVersions(SecretManagerServiceClient client, SecretName secretName, SecretVersion exceptVersion) {
 
-            // Disable secret version, just the first page
+        // 1. destroy up to ONE page of ENABLED secret versions (max 20)
+        try {
+            SecretManagerServiceClient.ListSecretVersionsPage enabledVersions =
+                    client.listSecretVersions(ListSecretVersionsRequest.newBuilder()
+                                    .setFilter("state:ENABLED")
+                                    .setParent(secretName.toString())
+                                    // Reduce the page, as each version will be disabled one by one
+                                    .setPageSize(NUMBER_OF_VERSIONS_TO_RETRIEVE)
+                                    .build())
+                            .getPage();
+
             enabledVersions.getValues().forEach(i -> {
                 if (!i.getName().equals(exceptVersion.getName())) {
-                    client.disableSecretVersion(DisableSecretVersionRequest.newBuilder()
+                    client.destroySecretVersion(DestroySecretVersionRequest.newBuilder()
                             .setName(i.getName())
                             .build());
 
-                    log.info(String.format("Property: %s, disabled version %s", secretName, i.getName()));
+                    log.info(String.format("Property: %s, destroyed version %s", secretName, i.getName()));
                 }
             });
         } catch (Exception e) {
-            log.log(Level.SEVERE, String.format("Cannot disable old versions from secret %s", secretName.toString()), e);
+            log.log(Level.SEVERE, String.format("Failed to destroy old versions of secret %s", secretName), e);
             throw e;
+        }
+
+        // 2. transitionally, destroy up to ONE page of old, DISABLED secret versions
+        // transitional - added in 0.4.49; previously, we just DISABLED secret versions, but GCP
+        // still bills for these - "0.06 per version per location per month for 'Active secret versions'"
+        // in Notes section of their pricing paging,
+        // "1. A secret version is 'active' when it's in any of these states: ENABLED, DISABLED"
+        // so we need to DESTROY any versions of these secrets that are merely DISABLED
+        try {
+            Instant until = Instant.ofEpochSecond(exceptVersion.getCreateTime().getSeconds())
+                    .minus(Duration.ofDays(7));
+
+            SecretManagerServiceClient.ListSecretVersionsPage disabledVersions =
+                    client.listSecretVersions(ListSecretVersionsRequest.newBuilder()
+                                    // From docs, https://cloud.google.com/secret-manager/docs/filtering#filter
+                                    // when comparing time we need to use RFC3399 (2020-10-15T01:30:15Z)
+                                    // but filter returns an invalid token error on that value when parsing the ":" of the date
+                                    // Tried several ways but none working, so let's use
+                                    // just the
+                                    .setFilter("state:DISABLED AND create_time < " + DateTimeFormatter.ISO_LOCAL_DATE
+                                            .withZone(ZoneOffset.UTC)
+                                            .format(until))
+                                    .setParent(secretName.toString())
+                                    .setPageSize(NUMBER_OF_VERSIONS_TO_RETRIEVE)
+                                    .build())
+                            .getPage();
+
+            //destroy all
+            disabledVersions.getValues().forEach(i -> {
+                client.destroySecretVersion(DestroySecretVersionRequest.newBuilder()
+                        .setName(i.getName())
+                        .build());
+            });
+        } catch (Exception e) {
+            log.log(Level.SEVERE, String.format("Failed to destroy old, disabled versions of secret %s", secretName), e);
+            //suppress - we don't want to fail if can't clean up old versions
         }
     }
 

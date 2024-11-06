@@ -6,6 +6,7 @@ import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.google.common.base.Preconditions;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
@@ -39,6 +40,7 @@ public class PseudonymizerImpl implements Pseudonymizer {
 
     Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
 
+    //TODO: what if options conflict w dependencies??
     @Getter
     ConfigurationOptions options;
 
@@ -56,8 +58,19 @@ public class PseudonymizerImpl implements Pseudonymizer {
         String domain = EmailAddressParser.getDomain(original, EmailAddressCriteria.RECOMMENDED, true);
 
         //NOTE: lower-case here is NOT stipulated by RFC
-        return  EmailAddressParser.getLocalPart(original, EmailAddressCriteria.RECOMMENDED, true)
-            .toLowerCase()
+        String mailboxLowercase = EmailAddressParser.getLocalPart(original, EmailAddressCriteria.RECOMMENDED, true)
+            .toLowerCase();
+
+        //trim off any + and anything after it (sub-address)
+        if (mailboxLowercase.contains("+")) {
+            mailboxLowercase = mailboxLowercase.substring(0, mailboxLowercase.indexOf("+"));
+        }
+
+        if (getOptions().getEmailCanonicalization() == EmailCanonicalization.IGNORE_DOTS) {
+            mailboxLowercase = mailboxLowercase.replace(".", "");
+        }
+
+        return mailboxLowercase
             + "@"
             + domain.toLowerCase();
 
@@ -67,6 +80,16 @@ public class PseudonymizerImpl implements Pseudonymizer {
     public PseudonymizedIdentity pseudonymize(Object value, Transform.PseudonymizationTransform transformOptions) {
         if (value == null) {
             return null;
+        }
+
+        if (this.getOptions().getPseudonymizationSalt() != null &&
+                this.deterministicTokenizationStrategy instanceof Sha256DeterministicTokenizationStrategy) {
+
+            if (!Objects.equals(((Sha256DeterministicTokenizationStrategy) this.deterministicTokenizationStrategy).getSalt(),
+                    this.options.getPseudonymizationSalt())) {
+                //shouldn't happen in real life, but just in case
+                throw new RuntimeException("Salt mismatch between pseudonymizer and tokenization strategy");
+            }
         }
 
         Preconditions.checkArgument(value instanceof String || value instanceof Number,

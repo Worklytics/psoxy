@@ -25,7 +25,15 @@ public class FieldTransformPipeline {
      * (eg, not replacing existing column)
      */
     @Deprecated //split into renameTo, copyTo cases for clarity
-      String newName;
+    String newName;
+
+
+    /**
+     * if provided, will look up the column using that, otherwise will assume that the key of the map
+     * that the transform is in refers to the source column (for backwards compatibility)
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String sourceColumn;
 
     // TODO: renameTo:
 

@@ -1,10 +1,12 @@
 package co.worklytics.psoxy.gateway.impl.oauth;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.json.webtoken.JsonWebSignature;
+import com.google.common.collect.Collections2;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -38,6 +40,8 @@ public class CertificateGrantTokenRequestBuilder
 
     @Inject
     ConfigService config;
+    @Inject
+    SecretStore secretStore;
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
@@ -49,16 +53,19 @@ public class CertificateGrantTokenRequestBuilder
 
     @Override
     public void addHeaders(HttpHeaders httpHeaders) {
-        String oauthClientId = config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID);
+        String oauthClientId =
+            config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID)
+                .orElseGet(() -> secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
+
         String tokenEndpoint =
-                config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
+            config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);
 
         httpHeaders.setAuthorization("Bearer " + buildJwtAssertion(oauthClientId, tokenEndpoint));
     }
 
     @Override
     public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
-        return Set.of(ConfigProperty.values());
+        return getRequiredConfigProperties();
     }
 
     @SneakyThrows

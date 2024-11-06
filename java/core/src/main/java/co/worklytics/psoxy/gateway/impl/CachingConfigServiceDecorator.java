@@ -1,6 +1,8 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.WritableConfigService;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -17,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 
 @RequiredArgsConstructor
-public class CachingConfigServiceDecorator implements ConfigService {
+public class CachingConfigServiceDecorator implements WritableConfigService, SecretStore {
 
     final ConfigService delegate;
     final Duration defaultTtl;
@@ -51,16 +53,15 @@ public class CachingConfigServiceDecorator implements ConfigService {
     }
 
     @Override
-    public boolean supportsWriting() {
-        return delegate.supportsWriting();
-    }
-
-    @Override
     public void putConfigProperty(ConfigProperty property, String value) {
-        if (!property.noCache()) {
-            getCache().put(property, value);
+        if (delegate instanceof WritableConfigService) {
+            if (!property.noCache()) {
+                getCache().put(property, value);
+            }
+            ((WritableConfigService) delegate).putConfigProperty(property, value);
+        } else {
+            throw new UnsupportedOperationException("ConfigService does not support writes: " + delegate.getClass().getName());
         }
-        delegate.putConfigProperty(property, value);
     }
 
     @SneakyThrows

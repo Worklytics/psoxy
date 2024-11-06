@@ -1,12 +1,7 @@
 package com.avaulta.gateway.rules.transforms;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import com.fasterxml.jackson.annotation.*;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
@@ -18,14 +13,15 @@ import java.util.regex.PatternSyntaxException;
  * a transform to operate on a single field value
  */
 @JsonTypeInfo(
-    use = JsonTypeInfo.Id.DEDUCTION,
-    defaultImpl = FieldTransform.class
+    use = JsonTypeInfo.Id.DEDUCTION
+    //defaultImpl = FieldTransform.class
 )
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = FieldTransform.Filter.class),
-    @JsonSubTypes.Type(value = FieldTransform.FormatString.class),
-    @JsonSubTypes.Type(value = FieldTransform.PseudonymizeWithScope.class),
-})
+    @JsonSubTypes.Type(FieldTransform.JavaRegExpReplace.class),
+    @JsonSubTypes.Type(FieldTransform.Filter.class),
+    @JsonSubTypes.Type(FieldTransform.FormatString.class),
+    @JsonSubTypes.Type(FieldTransform.PseudonymizeWithScope.class),
+    @JsonSubTypes.Type(FieldTransform.Pseudonymize.class) })
 public interface FieldTransform {
 
     @JsonIgnore
@@ -35,12 +31,22 @@ public interface FieldTransform {
         return Filter.builder().filter(filter).build();
     }
 
+    @Deprecated // only relevant for legacy case
     static FieldTransform pseudonymizeWithScope(String scope) {
         return PseudonymizeWithScope.builder().pseudonymizeWithScope(scope).build();
     }
 
     static FieldTransform formatString(String template) {
         return FormatString.builder().formatString(template).build();
+    }
+
+    static FieldTransform javaRegExpReplace(String re, String replace) {
+        JavaRegExpReplace.Config config = JavaRegExpReplace.Config.builder().regExp(re).replace(replace).build();
+        return JavaRegExpReplace.builder().javaRegExpReplace(config).build();
+    }
+
+    static FieldTransform pseudonymize(boolean pseudonymize) {
+        return Pseudonymize.builder().pseudonymize(pseudonymize).build();
     }
 
     /**
@@ -75,6 +81,86 @@ public interface FieldTransform {
     }
 
     /**
+     * if provided, value will be replaced using provided regex
+     * Note: the parameter name must match the name of the class otherwise it will not be deserialized
+     */
+    @JsonTypeName("javaRegExpReplace")
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @SuperBuilder(toBuilder = true)
+    @Data
+    @Log
+    class JavaRegExpReplace implements FieldTransform {
+
+        @Data
+        @Builder
+        @AllArgsConstructor
+        @NoArgsConstructor
+        static class Config {
+            @NonNull
+            @JsonProperty("regExp")
+            String regExp;
+            @NonNull
+            @JsonProperty("replace")
+            String replace;
+        }
+
+        Config javaRegExpReplace;
+
+        @JsonIgnore
+        private Pattern compiledPattern;
+
+        @JsonIgnore
+        public String getRegExp() {
+            return javaRegExpReplace.getRegExp();
+        }
+
+        @JsonIgnore
+        public String getReplaceString() {
+            return javaRegExpReplace.getReplace();
+        }
+
+        @JsonIgnore
+        public synchronized Pattern getCompiledPattern() {
+            if (compiledPattern == null) {
+                compiledPattern = Pattern.compile(getRegExp());
+            }
+            return compiledPattern;
+        }
+
+        @Override
+        public boolean isValid() {
+            try {
+                getCompiledPattern();
+            } catch (PatternSyntaxException e) {
+                log.warning("invalid regex: " + getRegExp());
+                return false;
+            }
+            return true;
+        }
+    }
+
+    /**
+     * if provided, value will be replaced using provided regex
+     * Note: the parameter name must match the name of the class otherwise it will not be deserialized
+     */
+    @JsonTypeName("pseudonymize")
+    @NoArgsConstructor
+    @SuperBuilder(toBuilder = true)
+    @Data
+    @Log
+    class Pseudonymize implements FieldTransform {
+
+        @NonNull
+        boolean pseudonymize;
+
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+    }
+
+    /**
      * if provided, filter regex will be applied and only values matching filter will be
      * preserved; not matching values will be redacted.
      * <p>
@@ -93,12 +179,22 @@ public interface FieldTransform {
         @NonNull
         String filter;
 
+        @JsonIgnore
+        private Pattern compiledPattern;
+        @JsonIgnore
+        public synchronized Pattern getCompiledPattern() {
+            if (compiledPattern == null) {
+                compiledPattern = Pattern.compile(getFilter());
+            }
+            return compiledPattern;
+        }
+
         @Override
         public boolean isValid() {
             try {
-                Pattern pattern = Pattern.compile(filter);
+                getCompiledPattern();
             } catch (PatternSyntaxException e) {
-                log.warning("invalid regex: " + filter);
+                log.warning("invalid regex: " + getFilter());
                 return false;
             }
 

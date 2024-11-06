@@ -111,6 +111,7 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..nameId")
                     .jsonPath("$..email")
+                    .jsonPath("$..emails[*].value")
                     .jsonPath("$..guid")
                     .jsonPath("$..organizationVerifiedDomainEmails[*]")
                     .build())
@@ -184,9 +185,6 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..signature")
                     .jsonPath("$..payload")
                     .build())
-            .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$.commit..email")
-                    .build())
             .transforms(generateUserTransformations("..", Arrays.asList("author", "committer")))
             .build();
 
@@ -249,9 +247,6 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..payload")
                     .jsonPath("$..dismissalMessage")
                     .build())
-            .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$..email")
-                    .build())
             .transforms(generateUserTransformations("..", Arrays.asList(
                     // Owner can be a user or an organization user
                     "owner",
@@ -281,9 +276,6 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..signature")
                     .jsonPath("$..payload")
                     .jsonPath("$..dismissalMessage")
-                    .build())
-            .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$..email")
                     .build())
             .transforms(generateUserTransformations("..", Arrays.asList(
                     // Owner can be a user or an organization user
@@ -448,9 +440,6 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..signature")
                     .jsonPath("$..payload")
                     .build())
-            .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$.commit..email")
-                    .build())
             .transforms(generateUserTransformations("..", Arrays.asList("author", "committer")))
             .build();
 
@@ -468,9 +457,6 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..files")
                     .jsonPath("$..signature")
                     .jsonPath("$..payload")
-                    .build())
-            .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$.commit..email")
                     .build())
             .transforms(generateUserTransformations("..", Arrays.asList("author", "committer")))
             .build();
@@ -712,6 +698,15 @@ public class PrebuiltSanitizerRules {
                     put("guid", JsonSchemaFilter.builder().type("string").build());
                     put("samlIdentity", JsonSchemaFilter.builder().type("object").properties(new LinkedHashMap<String, JsonSchemaFilter>() {{
                         put("nameId", JsonSchemaFilter.builder().type("string").build());
+                        put("emails", JsonSchemaFilter.builder()
+                                .type("array")
+                                .items(JsonSchemaFilter.builder()
+                                        .type("object")
+                                        .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                                            put("value", JsonSchemaFilter.builder().type("string").build());
+                                        }})
+                                        .build())
+                                .build());
                     }}).build());
                     put("user", JsonSchemaFilter.builder().type("object").properties(new LinkedHashMap<String, JsonSchemaFilter>() {{
                         put("login", JsonSchemaFilter.builder().type("string").build());

@@ -45,6 +45,12 @@ variable "path_to_instance_ssm_parameters" {
   default     = null
 }
 
+variable "path_to_shared_ssm_parameters" {
+  type        = string
+  description = "path to shared global config parameters in SSM Parameter Store"
+  default     = ""
+}
+
 variable "function_env_kms_key_arn" {
   type        = string
   description = "AWS KMS key ARN to use to encrypt lambda's environment. NOTE: Terraform must be authenticated as an AWS principal authorized to encrypt/decrypt with this key."
@@ -61,6 +67,12 @@ variable "ssm_kms_key_ids" {
   type        = map(string)
   description = "KMS key IDs or ARNs that were used for encrypting SSM parameters needed by this lambda, if any."
   default     = {}
+}
+
+variable "aws_lambda_execution_role_policy_arn" {
+  type        = string
+  description = "**beta** The ARN of policy to attach to the lambda execution role, if you want one other than the default. (usually, AWSLambdaBasicExecutionRole)."
+  default     = null
 }
 
 variable "input_bucket" {
@@ -101,6 +113,7 @@ variable "rules" {
     columnsToRedact       = list(string)
     columnsToInclude      = list(string)
     columnsToPseudonymize = list(string)
+    columnsToPseudonymize = optional(list(string), [])
     columnsToDuplicate    = map(string)
     columnsToRename       = map(string)
     fieldsToTransform = optional(map(object({
@@ -114,6 +127,7 @@ variable "rules" {
     columnsToRedact       = []
     columnsToInclude      = null
     columnsToPseudonymize = []
+    columnsToPseudonymize = null
     columnsToDuplicate    = {}
     columnsToRename       = {}
     fieldsToTransform     = {}
@@ -127,11 +141,45 @@ variable "global_parameter_arns" {
   default     = []
 }
 
+variable "global_secrets_manager_secret_arns" {
+  type        = map(string)
+  description = "Secrets Manager Secrets ARNs to expose to proxy instance, expected to contain global shared secrets, like salt or encryption keys"
+  default     = {}
+}
+
 variable "memory_size_mb" {
   # See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#memory_size
   type        = number
   description = "Amount of memory in MB your Lambda Function can use at runtime. Defaults to 512"
   default     = 512
+}
+
+variable "iam_roles_permissions_boundary" {
+  type        = string
+  description = "*beta* ARN of the permissions boundary to attach to IAM roles created by this module."
+  default     = null
+}
+
+variable "vpc_config" {
+  type = object({
+    # ipv6_allowed_for_dual_stack = optional(bool, false)
+    subnet_ids         = list(string)
+    security_group_ids = list(string)
+  })
+  description = "**alpha** VPC configuration for lambda; if not provided, lambda will not be deployed in a VPC. see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#vpc_config"
+  default     = null
+}
+
+variable "secrets_store_implementation" {
+  type        = string
+  description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
+  default     = "aws_ssm_parameter_store"
+}
+
+variable "provision_bucket_public_access_block" {
+  type        = bool
+  description = "Whether to provision public_access_block resources on all buckets; defaults to 'true', but can be 'false' if you have organizational control policies that do this at a higher level."
+  default     = true
 }
 
 variable "todo_step" {

@@ -32,6 +32,8 @@ EOT
 }
 
 resource "local_file" "todo" {
+  count = var.todos_as_local_files ? 1 : 0
+
   filename = "TODO ${var.todo_step} - setup ${local.instance_id}.md"
 
   content = local.todo_content
@@ -39,6 +41,10 @@ resource "local_file" "todo" {
 
 output "todo" {
   value = local.todo_content
+}
+
+output "filename" {
+  value = var.todos_as_local_files ? local_file.todo[0].filename : null
 }
 
 output "next_todo_step" {

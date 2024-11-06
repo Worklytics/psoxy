@@ -20,6 +20,7 @@ import javax.inject.Singleton;
 import java.io.*;
 import java.nio.channels.Channels;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 @Singleton
@@ -71,11 +72,18 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
             };
 
             Supplier<OutputStream> outputStreamSupplier = () -> {
-                BlobInfo destBlobInfo = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
+                BlobInfo.Builder blobInfoBuilder = BlobInfo.newBuilder(BlobId.of(request.getDestinationBucketName(), request.getDestinationObjectPath()))
                     .setContentType(sourceBlobInfo.getContentType())
-                    .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform))
-                    .build();
-                WriteChannel writeChannel = storage.writer(destBlobInfo);
+                    .setMetadata(storageHandler.buildObjectMetadata(importBucket, sourceName, transform));
+
+                if (request.getCompressOutput()) {
+                    blobInfoBuilder.setContentEncoding(StorageHandler.CONTENT_ENCODING_GZIP);
+                } else {
+                    Optional.ofNullable(sourceBlobInfo.getContentEncoding())
+                        .ifPresent(blobInfoBuilder::setContentEncoding);
+                }
+                //NOTE: disableGzipContent() is important to avoid double compression
+                WriteChannel writeChannel = storage.writer(blobInfoBuilder.build(), Storage.BlobWriteOption.disableGzipContent());
                 //NOTE: when close() called on the stream, close is called on channel, so should be OK
                 return Channels.newOutputStream(writeChannel);
             };

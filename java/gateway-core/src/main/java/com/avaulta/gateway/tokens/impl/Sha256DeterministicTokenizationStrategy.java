@@ -2,6 +2,7 @@ package com.avaulta.gateway.tokens.impl;
 
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -14,7 +15,7 @@ public class Sha256DeterministicTokenizationStrategy implements DeterministicTok
 
     public static final int HASH_SIZE_BYTES = 32; //SHA-256
 
-    @Getter
+    @Getter @NonNull
     final String salt;
 
     @Override

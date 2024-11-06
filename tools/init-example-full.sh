@@ -10,30 +10,22 @@ REPO_CLONE_BASE_DIR=${1:-".terraform/modules/psoxy/"}
 TF_CONFIG_ROOT=`pwd`
 
 if [[ ! -d "$REPO_CLONE_BASE_DIR" ]]; then
-  printf "Directory ${RED}${TF_CONFIG_ROOT}${NC} does not exist.\n"
+  printf "Directory ${RED}${REPO_CLONE_BASE_DIR}${NC} does not exist.\n"
   exit 1
 fi
 
-echo "Please choose your host platform:"
-echo "1) AWS"
-echo "2) GCP"
+grep -q 'provider "aws"' *.tf
+AWS_PROVIDER=$?
 
-read -p "Enter your choice [1-2]: " choice
-case $choice in
-  1)
-    HOST_PLATFORM="aws"
-    ;;
-  2)
-    HOST_PLATFORM="gcp"
-    ;;
-  *)
-    printf "${RED}Invalid choice! Please re-run initialization script.${NC}\n"
-    exit 1
-    ;;
-esac
+if [ $AWS_PROVIDER -eq 0 ]; then
+  HOST_PLATFORM="aws"
+else
+  # TODO: if ever support azure, may need to check or prompt for that here
+  HOST_PLATFORM="gcp"
+fi
 
 UC_HOST=$(echo "$HOST_PLATFORM" | tr '[:lower:]' '[:upper:]')
-printf "You have chosen ${GREEN}${UC_HOST}${NC} as your host platform.\n"
+printf "Host platform detected as ${GREEN}${UC_HOST}${NC}.\n"
 
 
 TFVARS_FILE="${TF_CONFIG_ROOT}/terraform.tfvars"
@@ -137,7 +129,7 @@ if [ -f "${TF_CONFIG_ROOT}/backend.tf" ]; then
 fi
 
 printf "\n${GREEN}Initialization complete.${NC}"
-printf "If you wish to remove files created by this initalization, run ${BLUE}${REPO_CLONE_BASE_DIR}tools/reset-example.sh${NC}.\n"
+printf "If you wish to remove files created by this initialization, run ${BLUE}${REPO_CLONE_BASE_DIR}tools/reset-example.sh${NC}.\n"
 
 
 

@@ -10,10 +10,7 @@ import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.Uninterruptibles;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
@@ -72,12 +69,13 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     //q: should we put these as config properties? creates potential for inconsistent configs
     // eg, orphaned config properties for SourceAuthStrategy not in use; missing config properties
     //  expected by this
+    @AllArgsConstructor
     @RequiredArgsConstructor
     public enum ConfigProperty implements ConfigService.ConfigProperty {
-        REFRESH_ENDPOINT(false),
-        CLIENT_ID(false),
-        GRANT_TYPE(false),
-        ACCESS_TOKEN(true),
+        REFRESH_ENDPOINT(false, false),
+        CLIENT_ID(false, false),
+        GRANT_TYPE(false, true),
+        ACCESS_TOKEN(true, false),
 
         /**
          * whether resulting `access_token` should be shared across all instances of connections
@@ -109,6 +107,11 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         public Boolean noCache() {
             return noCache;
         }
+
+        ;
+
+        @Getter
+        private boolean envVarOnly = true;
     }
 
     @Inject OAuth2CredentialsWithRefresh.OAuth2RefreshHandler refreshHandler;
@@ -182,6 +185,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         @Inject
         ConfigService config;
+        @Inject
+        SecretStore secretStore;
         @Inject
         ObjectMapper objectMapper;
         @Inject
@@ -341,23 +346,19 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         void storeRefreshTokenIfRotated(CanonicalOAuthAccessTokenResponseDto tokenResponse) {
             if (!StringUtils.isBlank(tokenResponse.getRefreshToken())) {
                 //if a refresh_token came back from server, potentially update it
-                config.getConfigPropertyWithMetadata(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN)
+                secretStore.getConfigPropertyWithMetadata(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN)
                     .filter(storedToken -> !Objects.equals(storedToken.getValue(), tokenResponse.getRefreshToken()))
                     .filter(storedToken -> storedToken.getLastModifiedDate().isEmpty()
                         || storedToken.getLastModifiedDate().get()
                                 .isBefore(Instant.now().minus(MIN_DURATION_TO_KEEP_REFRESH_TOKEN)))
                     .ifPresent(storedTokenToRotate -> {
-                        if (config.supportsWriting()) {
-                            try {
-                                config.putConfigProperty(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN,
+                        try {
+                            secretStore.putConfigProperty(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN,
                                     tokenResponse.getRefreshToken(), WRITE_RETRIES);
-                            } catch (WritePropertyRetriesExhaustedException e) {
-                                log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value after " + WRITE_RETRIES + " attempts; while this access_token may work, future token exchanges may fail", e);
-                            } catch (Throwable e) {
-                                log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value; while this access_token may work, future token exchanges may fail", e);
-                            }
-                        } else {
-                            log.log(Level.SEVERE, "refresh_token rotated, but config service does not support writing; while this access_token may work, future token exchanges may fail");
+                        } catch (WritePropertyRetriesExhaustedException e) {
+                            log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value after " + WRITE_RETRIES + " attempts; while this access_token may work, future token exchanges may fail", e);
+                        } catch (Throwable e) {
+                            log.log(Level.SEVERE, "refresh_token rotated, but failed to write updated value; while this access_token may work, future token exchanges may fail", e);
                         }
                     });
             }
@@ -434,7 +435,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @VisibleForTesting
         Optional<AccessToken> getSharedAccessTokenIfSupported() {
             if (useSharedToken()) {
-                Optional<String> jsonToken = config.getConfigPropertyAsOptional(ConfigProperty.ACCESS_TOKEN);
+                Optional<String> jsonToken = secretStore.getConfigPropertyAsOptional(ConfigProperty.ACCESS_TOKEN);
                 if (jsonToken.isEmpty()) {
                     return Optional.empty();
                 } else {
@@ -458,7 +459,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         void storeSharedAccessTokenIfSupported(@NonNull AccessToken accessToken, boolean useSharedToken) {
             if (useSharedToken) {
                 try {
-                    config.putConfigProperty(ConfigProperty.ACCESS_TOKEN,
+                    secretStore.putConfigProperty(ConfigProperty.ACCESS_TOKEN,
                         objectMapper.writerFor(AccessTokenDto.class)
                             .writeValueAsString(AccessTokenDto.toAccessTokenDto(accessToken)), WRITE_RETRIES);
                     log.log(Level.INFO, "New token stored in config");

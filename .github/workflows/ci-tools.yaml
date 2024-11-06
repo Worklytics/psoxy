@@ -10,14 +10,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # 16 is min version recommended to users
-        # 18 released 2022-04-19
-        # 19 released 2022-10-18
-        node-version: [ 19 ]
+        # even numbers are LTS; ods go to ~3m maintenance after next major version
+        # 16 is min version recommended to users; but unmaintained since 2023-10
+        # 18 released 2022-04-19 - maintained until June 2025
+        # 20 maintained until June 2026
+        # 21 released Oct 2023; superseded in May 2024
+        # latest is the 22 as of May 2024; 23 coming in Oct 2024
+        node-version: [ 18, 20, 21, latest]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'

@@ -118,19 +118,20 @@ variable "pseudonymize_app_ids" {
   default     = true
 }
 
+variable "email_canonicalization" {
+  type        = string
+  description = "defines how email address are processed prior to hashing, hence which are considered 'canonically equivalent'; one of 'STRICT' (default and most standard compliant) or 'IGNORE_DOTS' (probably most in line with user expectations)"
+  default     = "IGNORE_DOTS"
+}
+
 variable "gcp_region" {
   type        = string
   description = "Region in which to provision GCP resources, if applicable"
   default     = "us-central1"
 }
 
-variable "replica_regions" {
-  type        = list(string)
-  description = "DEPRECATED; use `gcp_secret_replica_locations`. List of locations to which to replicate secrets. See https://cloud.google.com/secret-manager/docs/locations"
-  default     = null
-}
 
-variable "gcp_secret_replica_locations" {
+variable "secret_replica_locations" {
   type        = list(string)
   description = "List of locations to which to replicate GCP Secret Manager secrets. See https://cloud.google.com/secret-manager/docs/locations"
   default = [
@@ -139,7 +140,7 @@ variable "gcp_secret_replica_locations" {
   ]
 
   validation {
-    condition     = length(var.gcp_secret_replica_locations) > 0
+    condition     = length(var.secret_replica_locations) > 0
     error_message = "`gcp_secret_replica_locations` must be non-empty list."
   }
 }

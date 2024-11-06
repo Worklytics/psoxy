@@ -1,0 +1,54 @@
+on:
+  workflow_call:
+    inputs:
+      example-repo:
+        required: true
+        type: string
+        description: "repo to publish example to"
+      example-to-copy:
+        required: true
+        type: string
+        description: "path to example to copy"
+      example-repo-token:
+        required: true
+        type: string
+        description: "token to use to publish example"
+      release:
+        required: true
+        type: string
+        description: "release to publish (eg, v0.4.49)"
+
+jobs:
+  checkout-and-modify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Proxy Repository
+        uses: actions/checkout@v4
+        with:
+          path: 'proxy'
+          ref: 'main'
+      - name: Checkout Target Repository
+        uses: actions/checkout@v4
+        with:
+          path: 'example'
+          repository: ${{ inputs.example-repo }}
+          ref: 'main'
+          token: ${{ inputs.example-repo-token }}
+      - name: Copy Example from examples-dev/ to example repo
+        run: |
+          proxy/tools/release/example-copy.sh proxy/${{ inputs.example-to-copy }} example
+      - name: Commit changes to example repo
+        working-directory: example
+        uses: planetscale/ghcommit-action@v0.1.6
+        with:
+          commit_message: "update example to ${{ inputs.release }}"
+          repo: ${{ inputs.example-repo }}
+          branch: rc-${{ inputs.release }}
+        env:
+          GITHUB_TOKEN: ${{ inputs.example-repo-token }}
+      - name: Open PR in example repo to merge update back to its mainline
+        env:
+          GH_TOKEN: ${{ inputs.example-repo-token }}
+        run: |
+          gh pr create --base main --head rc-${{ inputs.release }} --title "Update release to ${{ inputs.release }}" --body "Update release to ${{ inputs.release }}"
+

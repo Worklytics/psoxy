@@ -40,11 +40,10 @@ fi
 touch rc_to_main.md
 echo "$RELEASE back to main" >> rc_to_main.md
 echo "" >> rc_to_main.md
-echo "Next steps:" >> rc_to_main.md
-echo "  - Publish the release: \`./tools/release/publish.sh $RELEASE\`" >> rc_to_main.md
-echo "  - Update example templates to point to it:" >> rc_to_main.md
-echo "    - \`./tools/release/example-create-release-pr.sh . aws-all ~/psoxy-example-aws\`" >> rc_to_main.md
-echo "    - \`./tools/release/example-create-release-pr.sh . gcp ~/psoxy-example-gcp\`" >> rc_to_main.md
+echo "Next steps, after that's merged to \`main\`:" >> rc_to_main.md
+echo "  1. publish the release: \`./tools/release/publish.sh $RELEASE\`" >> rc_to_main.md
+echo "  2. update stable deployment in demos repo to point to $RELEASE" >> rc_to_main.md
+echo "  3. prep next rc: \`./tools/release/prep.sh $RELEASE rc-v{x.y.z}\`" >> rc_to_main.md
 
 PR_URL=$(gh pr create --title "$RELEASE" --body-file rc_to_main.md --base main --assignee "@me")
 PR_NUMBER=$(echo $PR_URL | sed -n 's/.*\/pull\/\([0-9]*\).*/\1/p')
@@ -57,8 +56,8 @@ gh pr merge $PR_NUMBER --auto --merge --subject "release $RELEASE from PR #${PR_
 printf "created PR ${GREEN}${PR_URL}${NC} and set to auto-merge to ${BLUE}main${NC}\n"
 
 printf "Next steps, after that's merged to ${BLUE}main${NC}:\n"
-printf "  Publish the release: ${BLUE}./tools/release/publish.sh $RELEASE${NC}\n"
-printf "  Update example templates to point to it:\n"
-printf "    ${BLUE}./tools/release/example-create-release-pr.sh . aws-all ~/psoxy-example-aws${NC}\n"
-printf "    ${BLUE}./tools/release/example-create-release-pr.sh . gcp ~/psoxy-example-gcp${NC}\n"
+printf "  1. publish the release: ${BLUE}./tools/release/publish.sh $RELEASE${NC}\n"
+printf "  2. update stable deployment in demos repo to point to ${BLUE}$RELEASE${NC}\n"
+printf "  3. prep next rc : ${BLUE}./tools/release/prep.sh $RELEASE rc-{x.y.z}${NC}\n"
+
 

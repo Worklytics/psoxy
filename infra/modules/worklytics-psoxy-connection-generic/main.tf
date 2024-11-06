@@ -1,7 +1,7 @@
 
 locals {
   # for backwards compatibility < 0.4.6
-  instance_id = coalesce(var.psoxy_instance_id, var.display_name)
+  instance_id = coalesce(var.proxy_instance_id, var.display_name)
 
   # build TODO
 
@@ -30,7 +30,7 @@ locals {
   per_setting_instructions_manual      = [for ux_name, value_to_provide in var.settings_to_provide : "    - Copy and paste `${value_to_provide}` as the value for \"${ux_name}\"." if value_to_provide != null]
   per_setting_instructions_manual_text = length(var.settings_to_provide) > 0 ? "\n${join("\n", tolist(local.per_setting_instructions_manual))}" : ""
 
-  deep_link_base = "${local.worklytics_add_connection_url}${var.connector_id}/settings?PROXY_DEPLOYMENT_KIND=${var.psoxy_host_platform_id}&${local.query_param_string}"
+  deep_link_base = "${local.worklytics_add_connection_url}${var.connector_id}/settings?PROXY_DEPLOYMENT_KIND=${var.host_platform_id}&${local.query_param_string}"
 
   manual_instructions = <<EOT
 1. Visit https://intl.worklytics.co/analytics/integrations (or login into Worklytics, and navigate to
@@ -39,7 +39,7 @@ locals {
 3. Find the connector named "${var.display_name}" and click 'Connect'.
     - If presented with a further screen with several options, choose the 'via Psoxy' one.
 4. Review instructions and click 'Connect' again.
-5. Select `${var.psoxy_host_platform_id}` for "Proxy Instance Type".${local.per_setting_instructions_manual_text}
+5. Select `${var.host_platform_id}` for "Proxy Instance Type".${local.per_setting_instructions_manual_text}
 6. Review any additional settings that connector supports, adjusting values as you see fit, then
    click "Connect".
 EOT
@@ -68,7 +68,9 @@ EOT
 
 }
 
-resource "local_file" "todo-worklytics-connection" {
+resource "local_file" "todo_worklytics_connection" {
+  count = var.todos_as_local_files ? 1 : 0
+
   filename = "TODO ${var.todo_step} - connect ${local.instance_id} in Worklytics.md"
   content  = local.todo_content
 }

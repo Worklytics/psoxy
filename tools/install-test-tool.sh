@@ -20,5 +20,5 @@ if npm -v &> /dev/null ; then
   npm --no-audit --no-fund --prefix "${TEST_TOOL_ROOT}" install
   printf "Test tool ${GREEN}successfully${NC} installed at ${GREEN}${TEST_TOOL_ROOT}${NC}\n"
 else
-  printf "${RED}NPM / Node.JS not available; could not install test tool. We recommend installing Node.JS ( https://nodejs.org/ ), then re-running this init script.${NC}\n"
+  printf "${RED}NPM / Node.JS not available; could not install test tool. We recommend installing Node.js ( https://nodejs.org/ LTS version preferred), then re-running this init script.${NC}\n"
 fi

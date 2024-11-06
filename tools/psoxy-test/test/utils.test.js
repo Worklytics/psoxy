@@ -52,6 +52,8 @@ test('Resolve HTTP method', (t) => {
   // Unknown endpoint (not in spec), defaults to 'GET'
   t.is(resolveHTTPMethod('/foo/bar'), 'GET');
   t.is(resolveHTTPMethod('/2/team/members/list_v2'), 'POST');
+  // if body is specified, defaults to 'POST'
+  t.is(resolveHTTPMethod('/foo/bar', { body: 'baz' }), 'POST');
 });
 
 test('Execute with retry: make "n" attempts if conditions met', async (t) => {

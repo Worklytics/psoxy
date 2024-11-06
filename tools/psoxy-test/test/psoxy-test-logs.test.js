@@ -1,3 +1,8 @@
+/**
+ * TODO disabled test by now
+ * testdouble ESM module replacement doesn't work on node v22;
+ * related issue: https://github.com/testdouble/testdouble.js/issues/530
+ */
 import test from 'ava';
 import * as td from 'testdouble';
 import { constants as httpCodes } from 'http2';

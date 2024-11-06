@@ -1,6 +1,7 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.test.MockModules;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
@@ -29,6 +30,8 @@ class PseudonymizerImplTest {
     @Inject
     ConfigService config;
     @Inject
+    SecretStore secretStore;
+    @Inject
     PseudonymizerImplFactory pseudonymizerImplFactory;
 
 
@@ -39,6 +42,7 @@ class PseudonymizerImplTest {
     @Component(modules = {
         PsoxyModule.class,
         MockModules.ForConfigService.class,
+        MockModules.ForSecretStore.class
     })
     public interface Container {
         void inject(PseudonymizerImplTest test);
@@ -50,12 +54,12 @@ class PseudonymizerImplTest {
         container.inject(this);
 
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt("an irrelevant per org secret")
+            .pseudonymizationSalt("salt")
             .defaultScopeId("scope")
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build());
 
-        withMockEncryptionKey(config);
+        withMockEncryptionKey(secretStore);
     }
 
     @ValueSource(strings = {
@@ -75,9 +79,34 @@ class PseudonymizerImplTest {
         "\"Alice Different Last name\" <alice@worklytics.co>",
         "Alice@worklytics.co",
         "AlIcE@worklytics.co",
+        "alice+test@worklytics.co", // + suffix should be ignored
     })
     @ParameterizedTest
     void emailCanonicalEquivalents(String mailHeaderValue) {
+        PseudonymizedIdentity canonicalExample = pseudonymizer.pseudonymize(ALICE_CANONICAL);
+
+        assertEquals(canonicalExample.getHash(),
+            pseudonymizer.pseudonymize(mailHeaderValue).getHash());
+    }
+    @ValueSource(strings = {
+        ALICE_CANONICAL,
+        "Alice Example <alice@worklytics.co>",
+        "\"Alice Different Last name\" <alice@worklytics.co>",
+        "Alice@worklytics.co",
+        "AlIcE@worklytics.co",
+        "alice+test@worklytics.co", // + suffix should be ignored
+        "al.ice@worklytics.co",
+        "\"Alice Different Last name\" <alice+t@worklytics.co>",
+    })
+    @ParameterizedTest
+    void emailCanonicalEquivalents_IgnoreDots(String mailHeaderValue) {
+         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+            .pseudonymizationSalt("salt")
+            .defaultScopeId("scope")
+            .pseudonymImplementation(PseudonymImplementation.DEFAULT)
+            .emailCanonicalization(EmailCanonicalization.IGNORE_DOTS)
+            .build());
+
         PseudonymizedIdentity canonicalExample = pseudonymizer.pseudonymize(ALICE_CANONICAL);
 
         assertEquals(canonicalExample.getHash(),
@@ -105,7 +134,7 @@ class PseudonymizerImplTest {
         // all this is really testing is that we aren't breaking the LEGACY hash implementation
 
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt("an irrelevant per org secret")
+            .pseudonymizationSalt("salt")
             .defaultScopeId("scope")
             .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
@@ -114,7 +143,7 @@ class PseudonymizerImplTest {
         final String CANONICAL = "original";
 
         //value taken from legacy app
-        final String identityHash = "xqUOU_DGuUAw4ErZIFL4pGx3bZDrFfLU6jQC4ClhrJI";
+        final String identityHash = "Xz77cF4Fm7KMPAuwLaGXD82LKXNwi69nNcH0nKtGRJA";
 
         assertEquals(identityHash,
             pseudonymizer.pseudonymize(CANONICAL).getHash());

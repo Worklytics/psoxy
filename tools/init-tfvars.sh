@@ -7,7 +7,7 @@ PSOXY_BASE_DIR=$2
 DEPLOYMENT_ENV=${3:-"local"}
 HOST_PLATFORM=${4:-"aws"}
 
-SCRIPT_VERSION="rc-v0.4.46"
+SCRIPT_VERSION="rc-v0.5.0"
 
 if [ -z "$PSOXY_BASE_DIR" ]; then
   printf "Usage: init-tfvars.sh <path-to-terraform.tfvars> <path-to-psoxy-base-directory> [DEPLOYMENT_ENV]\n"
@@ -55,8 +55,6 @@ prompt_confirm_variable_setting() {
     yn="y"
   fi
 
-
-
   # Convert input to lowercase to be case insensitive
   yn=$(echo "$yn" | tr '[:upper:]' '[:lower:]')
 
@@ -94,28 +92,31 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
   printf "AWS provider in Terraform configuration. Initializing variables it requires ...\n"
   if aws --version &> /dev/null; then
 
+
+    printf "# AWS account in which your Psoxy instances will be deployed\n" >> $TFVARS_FILE
     AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
     if [ $? -eq 0 ] && [ -n "$AWS_ACCOUNT_ID" ]; then
-      printf "# AWS account in which your Psoxy instances will be deployed\n" >> $TFVARS_FILE
-
       user_value=$(prompt_confirm_variable_setting "aws_account_id" "$AWS_ACCOUNT_ID")
       printf "aws_account_id=\"${user_value}\"\n\n" >> $TFVARS_FILE
       printf "\taws_account_id=${BLUE}\"${user_value}\"${NC}\n"
     else
       printf "${RED}Failed to determine AWS account ID from your aws CLI configuration. You MUST fill ${BLUE}aws_account_id${NC} in your terraform.tfvars file yourself.${NC}\n"
-      exit 1
+      printf "aws_account_id=\"{{FILL_YOUR_VALUE}}\"\n\n" >> $TFVARS_FILE
     fi
 
+
     AWS_REGION=$(aws configure get region)
+
     if [ $? -eq 0 ] && [ -n "$AWS_REGION" ]; then
       printf "# AWS region in which your Psoxy infrastructure will be deployed\n" >> $TFVARS_FILE
       printf "aws_region=\"${AWS_REGION}\"\n\n" >> $TFVARS_FILE
       printf "\taws_region=${BLUE}\"${AWS_REGION}\"${NC}\n"
+    else
+      printf "No ${BLUE}aws_region${NC} could be determined from your AWS CLI configuration. You should fill ${BLUE}aws_region${NC} in your terraform.tfvars file if you wish to use a value other than the default.\n"
     fi
 
-
     AWS_ARN=$(aws sts get-caller-identity --query Arn --output text)
-    if [ -z "$AWS_ARN" ]; then
+    if [ $? -eq 0 ] && [ -z "$AWS_ARN" ]; then
       AWS_ARN="{{ARN_OF_AWS_ROLE_TERRAFORM_SHOULD_ASSUME}}"
       TEST_AWS_ARN=" # add ARN of AWS principals you want to be able to invoke your proxy instances for testing purposes\n"
     else
@@ -168,7 +169,7 @@ remove_google_workspace() {
   sed -i '' '/^[[:space:]]*module\.worklytics_connectors_google_workspace\.next_todo_step,[[:space:]]*$/d' main.tf
 }
 
-
+INCLUDE_GWS="false"
 GOOGLE_PROVIDER_COUNT=$(terraform providers | grep "${TOP_LEVEL_PROVIDER_PATTERN}/google" | wc -l)
 if test $GOOGLE_PROVIDER_COUNT -ne 0; then
   if gcloud --version &> /dev/null ; then
@@ -197,9 +198,10 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
       fi
     fi
 
-    prompt_user_Yn "Do you want to use ${BLUE}Google Workspace${NC} as a data source for your proxy instances?"
+    prompt_user_Yn "Do you want to use ${BLUE}Google Workspace${NC} as a data source? (requires ${BLUE}gcloud${NC} to be installed and authenticated in the environment from which this terraform configuration will be applied) "
 
     if [[ $? -eq 1 ]]; then
+      INCLUDE_GWS="true"
       # init google workspace variables if file exists OR the variables are in the main variables.tf file
       # (google_workspace_gcp_project_id not in all legacy examples)
       [[ -f google-workspace-variables.tf ]] || grep -q '^variable "google_workspace_gcp_project_id"' variables.tf
@@ -259,12 +261,13 @@ remove_msft() {
 
 # Microsoft 365
 AZUREAD_PROVIDER_COUNT=$(terraform providers | grep "${TOP_LEVEL_PROVIDER_PATTERN}/azuread" | wc -l)
+INCLUDE_MSFT="false"
 if test $AZUREAD_PROVIDER_COUNT -ne 0; then
   printf "AzureAD provider in Terraform configuration.\n"
   MSFT_VARIABLES_DEFINED=$( [[ -f msft-365-variables.tf ]] || grep -q '^variable "msft_tenant_id"' variables.tf)
 
   if $MSFT_VARIABLES_DEFINED; then
-    prompt_user_Yn "Do you want to use ${BLUE}Microsoft 365${NC} as a data source for your proxy instances?"
+    prompt_user_Yn "Do you want to use ${BLUE}Microsoft 365${NC} as a data source? (requires ${BLUE}az${NC} CLI to be installed and authenticated in the environment from which this terraform configuration will be applied) "
 
     if [[ $? -eq 1 ]]; then
       if az --version &> /dev/null ; then
@@ -282,6 +285,7 @@ if test $AZUREAD_PROVIDER_COUNT -ne 0; then
         printf "#  - if you're not connecting to Microsoft 365 data sources, you can omit this value\n" >> $TFVARS_FILE
         printf "msft_owners_email=[\n  \"${MSFT_USER_EMAIL}\"\n]\n\n" >> $TFVARS_FILE
         printf "\tmsft_owners_email=${BLUE}[ \"${MSFT_USER_EMAIL}\" ]${NC}\n"
+        INCLUDE_MSFT="true"
       else
         printf "${RED}az not available${NC}. Microsoft 365 variables cannot be initialized.\n"
       fi
@@ -299,9 +303,35 @@ fi
 # NOTE: could be conditional based on google workspace, azure, etc - but as we expect future
 # examples to cover ALL connectors, and just vary by host platform, we'll just initialize all for
 # now and expect customers to remove them as needed
-AVAILABLE_CONNECTORS=$(echo "local.available_connector_ids" | terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" console)
-printf "# review following list of connectors to enable, and comment out what you don't want\n" >> $TFVARS_FILE
-printf "enabled_connectors = ${AVAILABLE_CONNECTORS}\n\n" >> $TFVARS_FILE
+
+# init worklytics-connector-specs module as if it's a terraform config, so subsequent 'console' call
+# will work
+terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" init >> /dev/null
+CLI_VARS="-var=include_msft=${INCLUDE_MSFT} -var=include_google_workspace=${INCLUDE_GWS}"
+DEFAULT_CONNECTORS_TO_ENABLE=$(echo "local.default_enabled_connector_ids" | terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" console $CLI_VARS)
+ALL_AVAILABLE_CONNECTORS=$(echo "jsonencode(tolist(keys(local.all_default_connectors)))" | terraform -chdir="${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs" console $CLI_VARS)
+
+# clean up what the init did above
+rm -rf "${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs/.terraform" 2> /dev/null
+rm "${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs/.terraform.lock.hcl" 2> /dev/null
+
+if [ -z "$DEFAULT_CONNECTORS_TO_ENABLE" ]; then
+  printf "${RED}Failed to generate list of enabled_connectors${NC}; you will need to add an variable assigned for ${BLUE}enabled_connectors${NC} to your ${BLUE}terraform.tfvars${NC} as a list of connector ID strings. Contact support for assistance.\n"
+else
+  printf "# review following list of connectors below to enable, and comment out what you don't want\n" >> $TFVARS_FILE
+  printf "# NOTE: usage of some connectors may require specific license from Worklytics or the data source; or have a usage cost on the data source side. Worklytics is not responsible for any costs incurred on the data source side or by usage of the APIs it provides.\n" >> $TFVARS_FILE
+  printf "enabled_connectors = ${DEFAULT_CONNECTORS_TO_ENABLE}\n\n" >> $TFVARS_FILE
+fi
+
+# if ALL_AVAILABLE_CONNECTORS is not empty, then list them in terraform.tfvars
+if [[ -n "$ALL_AVAILABLE_CONNECTORS" ]]; then
+  # add comment '#' to each line of the ALL_AVAILABLE_CONNECTORS
+  ALL_AVAILABLE_CONNECTORS=$(echo "$ALL_AVAILABLE_CONNECTORS" | sed 's/^/# /')
+
+  printf "# If you wish to enable additional connectors, you can uncomment and add one of the ids\n" >> $TFVARS_FILE
+  printf "# listed below  to \`enabled_connectors\`; run \`./available-connectors\` if available for an updated list\n" >> $TFVARS_FILE
+  printf "${ALL_AVAILABLE_CONNECTORS}\n\n" >> $TFVARS_FILE
+fi
 
 printf "\n"
 

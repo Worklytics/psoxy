@@ -2,20 +2,22 @@
 
 module "worklytics_connectors_msft_365" {
   source = "../../modules/worklytics-connectors-msft-365"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors-msft-365?ref=rc-v0.4.46"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors-msft-365?ref=rc-v0.5.0"
 
-
-  enabled_connectors                  = var.enabled_connectors
-  environment_id                      = var.environment_name
-  msft_tenant_id                      = var.msft_tenant_id
-  example_msft_user_guid              = var.example_msft_user_guid
-  msft_owners_email                   = var.msft_owners_email
-  msft_teams_example_team_guid        = var.msft_teams_example_team_guid
-  msft_teams_example_channel_guid     = var.msft_teams_example_channel_guid
-  msft_teams_example_chat_guid        = var.msft_teams_example_chat_guid
-  msft_teams_example_call_guid        = var.msft_teams_example_call_guid
-  msft_teams_example_call_record_guid = var.msft_teams_example_call_record_guid
-  todo_step                           = 1
+  enabled_connectors                         = var.enabled_connectors
+  environment_id                             = var.environment_name
+  msft_tenant_id                             = var.msft_tenant_id
+  example_msft_user_guid                     = var.example_msft_user_guid
+  msft_owners_email                          = var.msft_owners_email
+  msft_teams_example_team_guid               = var.msft_teams_example_team_guid
+  msft_teams_example_channel_guid            = var.msft_teams_example_channel_guid
+  msft_teams_example_chat_guid               = var.msft_teams_example_chat_guid
+  msft_teams_example_call_guid               = var.msft_teams_example_call_guid
+  msft_teams_example_call_record_guid        = var.msft_teams_example_call_record_guid
+  msft_teams_example_online_meeting_join_url = var.msft_teams_example_online_meeting_join_url
+  msft_connector_app_object_id               = var.msft_connector_app_object_id
+  todos_as_local_files                       = var.todos_as_local_files
+  todo_step                                  = 1
 }
 
 provider "azuread" {
@@ -32,13 +34,13 @@ module "msft-connection-auth-federation" {
   for_each = module.worklytics_connectors_msft_365.enabled_api_connectors
 
   source = "../../modules/azuread-federated-credentials"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=rc-v0.4.46"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/azuread-federated-credentials?ref=rc-v0.5.0"
 
-  application_object_id = each.value.connector.id
-  display_name          = "GcpFederation"
-  description           = "Federation to be used for psoxy Connector - ${each.value.display_name}${local.env_qualifier}"
-  issuer                = "https://accounts.google.com"
-  subject               = module.psoxy.api_connector_gcp_execution_service_accounts[each.key].unique_id
+  application_id = each.value.connector.id
+  display_name   = "GcpFederation"
+  description    = "Federation to be used for psoxy Connector - ${each.value.display_name}${local.env_qualifier}"
+  issuer         = "https://accounts.google.com"
+  subject        = module.psoxy.api_connector_gcp_execution_service_accounts[each.key].unique_id
 }
 
 locals {

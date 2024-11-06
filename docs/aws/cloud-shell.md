@@ -6,11 +6,14 @@ proxy deployments, which typically require install gcloud CLI / Azure CLI to con
 **So use use your local machine, or a VM/container elsewhere in AWS (EC2, AWS Cloud9, etc**
 
 1. clone the repo
+
 ```shell
 git clone https://github.com/Worklytics/psoxy.git
 ```
 
-2. add the following lines to your `~/.bashrc`. (AWS Cloud Shell preserves only your HOME directory across sessions, so add any commands that modify/install things outside to your `.bashrc`)
+2. add the following lines to your `~/.bashrc`. (AWS Cloud Shell preserves only your HOME directory
+   across sessions, so add any commands that modify/install things outside to your `.bashrc`)
+
 ```shell
 
 # install Maven (and, via dependency, java)
@@ -27,6 +30,7 @@ if [ -f '/home/cloudshell-user/google-cloud-sdk/completion.bash.inc' ]; then . '
 Then `source ~/.bashrc`, to execute the above.
 
 3. install Terraform
+
 ```shell
 git clone https://github.com/tfutils/tfenv.git ~/.tfenv
 mkdir ~/bin
@@ -35,7 +39,9 @@ tfenv install
 tfenv use latest
 ```
 
-4. if using Google Workspace data sources, [install Google Cloud CLI](https://cloud.google.com/sdk/docs/install#linux) and authenticate.
+4. if using Google Workspace data sources,
+   [install Google Cloud CLI](https://cloud.google.com/sdk/docs/install#linux) and authenticate.
+
 ```shell
 curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-435.0.1-linux-x86_64.tar.gz
 tar -xvf google-cloud-cli-435.0.1-linux-x86_64.tar.gz
@@ -47,9 +53,7 @@ rm google-cloud-cli-435.0.1-linux-x86_64.tar.gz
 
 https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
 
-
 You should now be ready for the general instructions in the [README.md](../../README.md).
-
 
 ## Other stuff
 

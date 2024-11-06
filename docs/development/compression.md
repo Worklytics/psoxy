@@ -3,15 +3,18 @@
 ## Overview
 
 Given nature of use-case, proxy does A LOT of network transit:
-  * client to proxy (request)
-  * proxy to data source (request)
-  * data source to proxy (response)
-  * proxy to client (response)
+
+- client to proxy (request)
+- proxy to data source (request)
+- data source to proxy (response)
+- proxy to client (response)
 
 So this drives cost in several ways:
-   - larger network payloads increases proxy running time, which is billable
-   - network volume itself is billable in some host platforms
-   - indirectly, clients are waiting for proxy to respond, so that's an indirect cost (paid on client-side)
+
+- larger network payloads increases proxy running time, which is billable
+- network volume itself is billable in some host platforms
+- indirectly, clients are waiting for proxy to respond, so that's an indirect cost (paid on
+  client-side)
 
 Generally, proxy is transferring JSON data, which is highly compressible. Using `gzip` likely to
 reduce network volume by 50-80%. So we want to make sure we do this everywhere.
@@ -32,8 +35,8 @@ request for compressed response, and then compress the response.
 
 #### API Gateway
 
-API Gateway is no longer used by our default terraform examples. But compression can be enabled
-at the gateway level (rather than relying on function url implementation, or in addition to).
+API Gateway is no longer used by our default terraform examples. But compression can be enabled at
+the gateway level (rather than relying on function url implementation, or in addition to).
 
 https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-gzip-compression-decompression.html
 
@@ -49,11 +52,9 @@ https://cloud.google.com/appengine/docs/legacy/standard/go111/how-requests-are-h
 ## Source-to-Proxy Response
 
 All requests should be built using `GzipedContentHttpRequestInitializer`, which should add:
-  - `Accept-Encoding: gzip`
-  -  append `(gzip)` to `User-Agent` header
+
+- `Accept-Encoding: gzip`
+- append `(gzip)` to `User-Agent` header
 
 We believe this will trigger compression for most sources (the User-Agent thing being practice that
 Google seems to want).
-
-
-

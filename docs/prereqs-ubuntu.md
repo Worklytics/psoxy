@@ -1,6 +1,6 @@
-# Psoxy Prereq Install
+# Install Prerequisites
 
-These shell command examples presume Ubuntu; you may need to translate to your *nix variant. If you
+These shell command examples presume Ubuntu; you may need to translate to your \*nix variant. If you
 starting with a fairly rich environment, many of these tools may already be on your machine.
 
 1. install dependencies
@@ -24,8 +24,8 @@ mvn -v
 
 3. install Terraform
 
-Follow [Terraform's install guide](https://learn.hashicorp.com/tutorials/terraform/install-cli) (recommended)
-or, if you need to manage multiple Terraform versions, use `tfenv`:
+Follow [Terraform's install guide](https://learn.hashicorp.com/tutorials/terraform/install-cli)
+(recommended) or, if you need to manage multiple Terraform versions, use `tfenv`:
 
 ```shell
 git clone https://github.com/tfutils/tfenv.git ~/.tfenv
@@ -37,6 +37,7 @@ tfenv use latest
 ```
 
 4. if you're deploying in AWS, install the AWS CLI
+
 ```shell
 sudo apt install awscli
 ```
@@ -57,7 +58,9 @@ sudo apt install pip
 pip install awscurl
 ```
 
-6. if deploying to GCP *or* using Google Workspace data sources, [install Google Cloud CLI](https://cloud.google.com/sdk/docs/install#linux) and authenticate.
+6. if deploying to GCP _or_ using Google Workspace data sources,
+   [install Google Cloud CLI](https://cloud.google.com/sdk/docs/install#linux) and authenticate.
+
 ```shell
 curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-384.0.0-linux-x86_64.tar.gz
 tar -xvf google-cloud-cli-384.0.0-linux-x86_64.tar.gz
@@ -80,4 +83,4 @@ gcloud auth application-default login --no-launch-browser
 
 https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
 
-You should now be ready for the general instructions in the [README.md](../../README.md).
+You should now be ready for the general instructions in the [README.md](README.md).

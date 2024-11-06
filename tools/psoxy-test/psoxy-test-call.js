@@ -6,7 +6,7 @@ import path from 'path';
 import _ from 'lodash';
 import { constants as httpCodes } from 'http2';
 import { fileURLToPath } from 'url';
-import { saveToFile, getFileNameFromURL } from './lib/utils.js';
+import { environmentCheck, saveToFile, getFileNameFromURL } from './lib/utils.js';
 
 // Since we're using ESM modules, we need to make `__dirname` available
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -33,11 +33,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  * @param {boolean} options.verbose - Verbose ouput
  * @param {boolean} options.saveToFile - Whether to save successful responses to a file (responses/[api-path]-[ISO8601 timestamp].json)
  * @param {string} options.method - HTTP request method
+ * @param {string} options.body - HTTP request body (JSON string, GitHub use-case)
  * @param {boolean} options.healthCheck - Run "Health Check" call against Psoxy deploy
  * @return {PsoxyResponse}
  */
 export default async function (options = {}) {
   const logger = getLogger(options.verbose);
+
+  environmentCheck(logger);
+
   let result = {};
   let url;
 
@@ -45,6 +49,14 @@ export default async function (options = {}) {
     url = new URL(options.url);
   } catch (error) {
     throw new Error(`"${error.input}" is not a valid URL`, { cause: error });
+  }
+
+  if (!_.isEmpty(options.body)) {
+    try {
+      options.body = JSON.parse(options.body);
+    } catch(error) {
+      throw new Error(`Body option must be a JSON string: ${error.message}`);
+    }
   }
 
   const isAWS = aws.isValidURL(url);
@@ -137,7 +149,7 @@ export default async function (options = {}) {
       const logsURL = isAWS ? aws.getLogsURL(options) : gcp.getLogsURL(url);
       // In general, we could add more "trobleshooting" tips here:
       // - Check out script logs `run.log` which store verbose output
-      // - Directly show logs from the cloud provider (GCP is feasible, AWS 
+      // - Directly show logs from the cloud provider (GCP is feasible, AWS
       //  require more parameters i.e. cloudwatch log group name)
       logger.info(`This looks like an internal error in the Proxy. Check out the logs for more details: ${logsURL}`);
     }

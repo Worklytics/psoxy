@@ -3,7 +3,7 @@ package co.worklytics.psoxy.impl;
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.test.TestModules;
+import co.worklytics.psoxy.gateway.SecretStore;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
@@ -37,6 +37,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.net.URL;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -66,12 +67,16 @@ class RESTApiSanitizerImplTest {
 
     @Inject
     ConfigService config;
+    @Inject
+    SecretStore secretStore;
 
 
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
         ForConfigService.class,
+        MockModules.ForSecretStore.class,
+        //TestModules.ForSecretStore.class,
     })
     public interface Container {
         void inject(RESTApiSanitizerImplTest test);
@@ -83,7 +88,6 @@ class RESTApiSanitizerImplTest {
         @Singleton
         static ConfigService configService() {
             ConfigService mock = MockModules.provideMock(ConfigService.class);
-            TestModules.withMockEncryptionKey(mock);
             when(mock.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
                 .thenReturn("gmail");
             when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.TARGET_HOST)))
@@ -99,15 +103,12 @@ class RESTApiSanitizerImplTest {
         container.inject(this);
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt("an irrelevant per org secret")
+            .pseudonymizationSalt("salt")
             .defaultScopeId("scope")
             .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
 
-
         sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"), pseudonymizer);
-
-        withMockEncryptionKey(config);
     }
 
     @SneakyThrows
@@ -184,6 +185,27 @@ class RESTApiSanitizerImplTest {
         assertFalse(StringUtils.containsIgnoreCase(redacted, "pwd=1234asAf"));
     }
 
+
+    @SneakyThrows
+    @CsvSource({
+        "phrase1,phrase1",
+        "Phrase1,Phrase1",
+        "phrase2 2,phrase2 2",
+        "phrase3,phrase3",
+        "phrase4,",
+        "blah phrase1,phrase1",
+        "blah phrase1: blah,phrase1",
+    })
+    @ParameterizedTest
+    void redactExceptPhases(String raw, String sanitized) {
+        Transform.RedactExceptPhrases transform = Transform.RedactExceptPhrases.builder()
+            .allowedPhrases(Arrays.asList("phrase1", "phrase2 2", "Phrase3"))
+            .build();
+
+        String redacted = (String) sanitizer.getRedactExceptPhrases(transform).map(raw, sanitizer.jsonConfiguration);
+
+        assertEquals(sanitized, StringUtils.trimToNull(redacted));
+    }
 
     @SneakyThrows
     @ValueSource(strings = {
@@ -270,9 +292,10 @@ class RESTApiSanitizerImplTest {
 
     @Test
     void pseudonymizeWithReversalKey() {
+        //NOTE: this is a LEGACY case
         MapFunction f = sanitizer.getPseudonymize(Transform.Pseudonymize.builder().includeReversible(true).build());
 
-        assertEquals("{\"scope\":\"scope\",\"hash\":\"Htt5DmAnE8xaCjfYnLm83_xR8.hhEJE2f_bkFP2yljg\",\"h_4\":\"Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0M\",\"reversible\":\"p~Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0MzTTbTCc7BcR53imT1qZgI\"}",
+        assertEquals("{\"scope\":\"scope\",\"hash\":\"kCGiAd9lGjEbWqbPlXo32fOl5YVmrasomP4QwTAsHww\",\"h_4\":\"Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0M\",\"reversible\":\"p~Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0MzTTbTCc7BcR53imT1qZgI\"}",
             f.map("asfa", sanitizer.getJsonConfiguration()));
     }
 
@@ -301,10 +324,10 @@ class RESTApiSanitizerImplTest {
 
     @Test
     void tokenize_regex() {
-        String path = "v1.0/$metadata#users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA%3D')/events";
-        String host = "https://graph.microsoft.com/";
+        String path = "/v1.0/$metadata#users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA%3D')/events";
+        String host = "https://graph.microsoft.com";
         MapFunction f = sanitizer.getTokenize(Transform.Tokenize.builder()
-                .regex("^https://graph.microsoft.com/(.*)$")
+                .regex("^https://graph.microsoft.com/v1.0/(.*)$")
                 .build());
         String r = (String) f.map(host+path, sanitizer.getJsonConfiguration());
 
@@ -312,6 +335,20 @@ class RESTApiSanitizerImplTest {
         assertNotEquals(host + path, r);
         assertEquals(host + path,
             pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(r, reversibleTokenizationStrategy));
+    }
+
+    @Test
+    void tokenize_regex_on_the_middle() {
+        String path = "/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA%3D')/events";
+        String host = "https://graph.microsoft.com";
+        MapFunction f = sanitizer.getTokenize(Transform.Tokenize.builder()
+                .regex("^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$")
+                .build());
+        String r = (String) f.map(host+path, sanitizer.getJsonConfiguration());
+
+        assertNotEquals(host + path, r);
+        assertEquals(host + path,
+                pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(r, reversibleTokenizationStrategy));
     }
 
 
@@ -431,11 +468,11 @@ class RESTApiSanitizerImplTest {
 
     @CsvSource(
         value = {
-            "LEGACY,test,false,URL_SAFE_TOKEN,vja8bQGC4pq5kPnJR9D5JFG.WY2S0CX9y5bNT1KmutM",
-            "LEGACY,alice@acme.com,false,URL_SAFE_TOKEN,BlFx65qHrkRrhMsuq7lg4bCpwsbXgpLhVZnZ6VBMqoY",
+            "LEGACY,test,false,URL_SAFE_TOKEN,qdRJIFbPHPza8bRV67W_Fq.SYBn77xdIHll17pXhilo",
+            "LEGACY,alice@acme.com,false,URL_SAFE_TOKEN,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
             //legacy w reversible fail to JSON format!!
-            "LEGACY,test,true,URL_SAFE_TOKEN,'{\"scope\":\"scope\",\"hash\":\"vja8bQGC4pq5kPnJR9D5JFG.WY2S0CX9y5bNT1KmutM\",\"h_4\":\"Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDI\",\"reversible\":\"p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ\"}'",
-            "LEGACY,alice@acme.com,true,URL_SAFE_TOKEN,'{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"BlFx65qHrkRrhMsuq7lg4bCpwsbXgpLhVZnZ6VBMqoY\",\"h_4\":\"UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk\",\"reversible\":\"p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com\"}'",
+            "LEGACY,test,true,URL_SAFE_TOKEN,'{\"scope\":\"scope\",\"hash\":\"qdRJIFbPHPza8bRV67W_Fq.SYBn77xdIHll17pXhilo\",\"h_4\":\"Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDI\",\"reversible\":\"p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ\"}'",
+            "LEGACY,alice@acme.com,true,URL_SAFE_TOKEN,'{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk\",\"h_4\":\"UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk\",\"reversible\":\"p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com\"}'",
 
             // pseudonyms build with DEFAULT implementation always support URL_SAFE_TOKEN encoding
             "DEFAULT,test,false,URL_SAFE_TOKEN,Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDI",
@@ -452,7 +489,7 @@ class RESTApiSanitizerImplTest {
     public void getPseudonymize_URL_SAFE_TOKEN(PseudonymImplementation implementation, String value, Boolean includeReversible, String encoding, String expected) {
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt("an irrelevant per org secret")
+            .pseudonymizationSalt("salt")
             .defaultScopeId("scope")
             .pseudonymImplementation(implementation)
             .build());
@@ -549,7 +586,7 @@ class RESTApiSanitizerImplTest {
     void pseudonymizeWithRegexMatches(String input) {
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt("an irrelevant per org secret")
+            .pseudonymizationSalt("salt")
             .defaultScopeId("scope")
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build());
@@ -605,13 +642,14 @@ class RESTApiSanitizerImplTest {
 
 
     @CsvSource(value = {
-        "something,.*,t~wUW4bkpTjD6c.BIQaE_oLQxN4nD5vbnf5HBVz7gxck8",
+        "something,.*,t~Pym88cXj0AbPDFzkwBY_4jRh8Tq8KpfLNNwE3PTolQ4",
         "something,blah:.*thing,", // no match, should redact
-        "blah:something,blah:.*thing,t~iWybsRb4SscO_Z6v2gpnMTjPujG2E4FtxgYkjWc5HXQ",
-        "blah:something,blah:(.*),blah:t~wUW4bkpTjD6c.BIQaE_oLQxN4nD5vbnf5HBVz7gxck8",
+        "blah:something,blah:.*thing,t~fZJVpgu6vQk2f6Q8G9IXNysNnxwwJO4cd1zWOZV.Zcg",
+        "blah:something,blah:(.*),blah:t~Pym88cXj0AbPDFzkwBY_4jRh8Tq8KpfLNNwE3PTolQ4",
     })
     @ParameterizedTest
     public void pseudonymizeWithRegexMatches_nonMatchingRedacted(String input, String regex, String expected) {
+        //NOTE: this is a LEGACY case
         MapFunction transform = sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder()
             .regex(regex)
             .includeReversible(false)
@@ -688,5 +726,6 @@ class RESTApiSanitizerImplTest {
        assertEquals("/path/api/v1", sanitizer.stripTargetHostPath("/api/v1/path/api/v1"));
        assertEquals("/path/api/v1", sanitizer.stripTargetHostPath("/path/api/v1"));
     }
+
 
 }

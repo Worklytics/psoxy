@@ -4,6 +4,7 @@ import co.worklytics.test.TestUtils;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.apache.http.HttpHeaders;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -31,6 +32,12 @@ class APIGatewayV2HTTPEventRequestAdapterTest {
 
         assertTrue(requestAdapter.getMultiValueHeader("multi-header").isPresent());
         assertEquals("value1,value2", String.join(",", requestAdapter.getMultiValueHeader("multi-header").get()));
+
+        assertEquals("73.19.103.123", requestAdapter.getClientIp().get());
+
+        assertEquals("GET", requestAdapter.getHttpMethod());
+
+        assertTrue(requestAdapter.isHttps().get());
     }
 
     @SneakyThrows
@@ -43,6 +50,11 @@ class APIGatewayV2HTTPEventRequestAdapterTest {
         APIGatewayV2HTTPEventRequestAdapter requestAdapter = new APIGatewayV2HTTPEventRequestAdapter(apiGatewayV2HTTPEvent);
 
         assertEquals("/", requestAdapter.getPath());
+
+        assertEquals("205.255.255.176", requestAdapter.getClientIp().get());
+
+
+        assertTrue(requestAdapter.isHttps().get());
     }
 
     @SneakyThrows

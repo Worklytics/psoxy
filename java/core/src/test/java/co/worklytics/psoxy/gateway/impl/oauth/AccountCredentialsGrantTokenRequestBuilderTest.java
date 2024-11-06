@@ -24,6 +24,7 @@ class AccountCredentialsGrantTokenRequestBuilderTest {
         PsoxyModule.class,
         SourceAuthModule.class,
         MockModules.ForConfigService.class,
+        MockModules.ForSecretStore.class,
     })
     public interface Container {
         void inject(AccountCredentialsGrantTokenRequestBuilderTest test);
@@ -38,10 +39,10 @@ class AccountCredentialsGrantTokenRequestBuilderTest {
 
     @Test
     void addHeaders() {
-        when(payloadBuilder.config
+        when(payloadBuilder.secretStore
             .getConfigPropertyOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID))
             .thenReturn("client");
-        when(payloadBuilder.config
+        when(payloadBuilder.secretStore
             .getConfigPropertyOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_SECRET))
             .thenReturn("secret");
 

@@ -2,6 +2,7 @@ package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.SecretStore;
 import dagger.Module;
 import dagger.Provides;
 import lombok.SneakyThrows;
@@ -19,15 +20,14 @@ import static org.mockito.Mockito.when;
 
 public class TestModules {
 
-
     @Module
-    public interface ForConfigService {
-
+    public interface ForSecretStore  {
         @SneakyThrows
         @Provides
         @Singleton
-        static ConfigService configService() {
-            ConfigService config = mock(ConfigService.class);
+        static SecretStore secretStore() {
+            SecretStore secretStore = mock(SecretStore.class);
+
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
             KeySpec spec = new PBEKeySpec("secret".toCharArray(), "salt".getBytes(), 65536, 256);
             SecretKey tmp = factory.generateSecret(spec);
@@ -46,12 +46,25 @@ public class TestModules {
 
             String key = new String(Base64.getEncoder().encode(tmp.getEncoded()));
 
-            when(config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY))
+            when(secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY))
                 .thenReturn(key);
 
-            when(config.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT))
+            when(secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT))
                 .thenReturn("secret");
+            return secretStore;
+        }
+    }
 
+
+    @Module
+    public interface ForConfigService {
+
+
+        @SneakyThrows
+        @Provides
+        @Singleton
+        static ConfigService configService() {
+            ConfigService config = mock(ConfigService.class);
             return config;
         }
     }

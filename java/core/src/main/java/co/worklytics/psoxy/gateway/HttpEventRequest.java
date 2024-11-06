@@ -10,6 +10,13 @@ import java.util.Optional;
  */
 public interface HttpEventRequest {
 
+    // "de-facto" standard: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
+    public static final String HTTP_HEADER_X_FORWARDED_FOR = "X-Forwarded-For";
+
+    // "de-facto" standard:  https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-Proto
+    public static final String HTTP_HEADER_X_FORWARDED_PROTO = "X-Forwarded-Proto";
+
+
     String getPath();
 
     Optional<String> getQuery();
@@ -26,4 +33,13 @@ public interface HttpEventRequest {
         return "Not implemented";
     }
 
+    /**
+     * @return IP of the client making the request, if known
+     */
+    Optional<String> getClientIp();
+
+    /**
+     * @return whether original protocol of request is HTTPS, if known
+     */
+    Optional<Boolean> isHttps();
 }

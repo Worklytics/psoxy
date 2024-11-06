@@ -27,6 +27,8 @@ locals {
     # to the Google Workspace, so may be directly connected in such scenarios.
     "gdirectory" : {
       source_kind : "gdirectory",
+      availability : "ga",
+      enable_by_default : true
       worklytics_connector_id : "gdirectory-psoxy",
       display_name : "Google Directory"
       identifier_scope_id : "gapps"
@@ -57,6 +59,8 @@ locals {
     },
     "gcal" : {
       source_kind : "gcal",
+      availability : "ga",
+      enable_by_default : true
       worklytics_connector_id : "gcal-psoxy",
       display_name : "Google Calendar"
       identifier_scope_id : "gapps"
@@ -80,6 +84,8 @@ locals {
     },
     "gmail" : {
       source_kind : "gmail",
+      availability : "ga",
+      enable_by_default : false,
       worklytics_connector_id : "gmail-meta-psoxy",
       display_name : "GMail"
       identifier_scope_id : "gapps"
@@ -93,13 +99,15 @@ locals {
       ],
       environment_variables : {},
       example_api_calls : [
-        "/gmail/v1/users/me/messages?maxResults=10",
+        "/gmail/v1/users/me/messages?maxResults=5&labelIds=SENT",
         "/gmail/v1/users/me/messages/{MESSAGE_ID}?format=metadata"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_user
     },
     "google-chat" : {
       source_kind : "google-chat",
+      availability : "ga",
+      enable_by_default : false
       worklytics_connector_id : "google-chat-psoxy",
       display_name : "Google Chat"
       identifier_scope_id : "gapps"
@@ -119,6 +127,8 @@ locals {
     },
     "google-meet" : {
       source_kind : "google-meet"
+      availability : "ga",
+      enable_by_default : false
       worklytics_connector_id : "google-meet-psoxy"
       display_name : "Google Meet"
       identifier_scope_id : "gapps"
@@ -138,6 +148,8 @@ locals {
     },
     "gdrive" : {
       source_kind : "gdrive",
+      availability : "ga",
+      enable_by_default : false
       worklytics_connector_id : "gdrive-psoxy",
       display_name : "Google Drive"
       identifier_scope_id : "gapps"
@@ -166,7 +178,7 @@ locals {
   k => merge(v, { example_calls : v.example_api_calls }) }
 
 
-  jira_cloud_id                    = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
+  jira_example_cloud_id            = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   jira_example_issue_id            = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
   github_installation_id           = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
   github_enterprise_server_host    = coalesce(var.github_api_host, var.github_enterprise_server_host, "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
@@ -181,8 +193,10 @@ locals {
   msft_365_connectors = {
     "azure-ad" : {
       worklytics_connector_id : "azure-ad-psoxy",
+      availability : "deprecated",
+      enable_by_default : false,
       source_kind : "azure-ad",
-      display_name : "Azure Directory"
+      display_name : "(Deprecated, use MSFT Entra Id instead) Azure Directory"
       identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"
@@ -191,13 +205,45 @@ locals {
       required_app_roles : [
         # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
         "User.Read.All",
-        "Group.Read.All"
+        "Group.Read.All",
+        "MailboxSettings.Read",
       ]
       environment_variables : {
         GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
         TOKEN_SCOPE : "https://graph.microsoft.com/.default"
         REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-      },
+      }
+      external_todo : null
+      example_api_calls : [
+        "/v1.0/users",
+        "/v1.0/users/${var.example_msft_user_guid}",
+        "/v1.0/groups",
+        "/v1.0/groups/{group-id}/members"
+      ]
+    },
+    "msft-entra-id" : {
+      worklytics_connector_id : "azure-ad-psoxy",
+      availability : "ga",
+      enable_by_default : true,
+      source_kind : "azure-ad",
+      display_name : "Microsoft Entra ID (former Azure AD)"
+      identifier_scope_id : "azure-ad"
+      source_auth_strategy : "oauth2_refresh_token"
+      target_host : "graph.microsoft.com"
+      required_oauth2_permission_scopes : []
+      # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
+      required_app_roles : [
+        # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
+        "User.Read.All",
+        "Group.Read.All",
+        "MailboxSettings.Read"
+      ]
+      environment_variables : {
+        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
+        REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+      }
+      external_todo : null
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}",
@@ -207,15 +253,15 @@ locals {
     },
     "outlook-cal" : {
       source_kind : "outlook-cal",
+      availability : "ga",
+      enable_by_default : true,
       worklytics_connector_id : "outlook-cal-psoxy",
       display_name : "Outlook Calendar"
       identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"
-      required_oauth2_permission_scopes : [],
+      required_oauth2_permission_scopes : []
       required_app_roles : [
-        "OnlineMeetings.Read.All",
-        "OnlineMeetingArtifact.Read.All",
         "Calendars.Read",
         "MailboxSettings.Read",
         "Group.Read.All",
@@ -226,10 +272,11 @@ locals {
         TOKEN_SCOPE : "https://graph.microsoft.com/.default"
         REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
       },
+      external_todo : null
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}/events",
-        "/v1.0/users/${var.example_msft_user_guid}/calendarView?startDateTime=2022-10-01T00:00:00Z&endDateTime=${time_static.deployment.id}",
+        "/v1.0/users/${var.example_msft_user_guid}/calendarView?startDateTime=${timeadd(time_static.deployment.id, "-4320h")}&endDateTime=${time_static.deployment.id}",
         "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
         "/v1.0/groups",
         "/v1.0/groups/{group-id}/members"
@@ -237,34 +284,39 @@ locals {
     },
     "outlook-mail" : {
       source_kind : "outlook-mail"
+      availability : "ga",
+      enable_by_default : false,
       worklytics_connector_id : "outlook-mail-psoxy",
       display_name : "Outlook Mail"
       identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"
-      required_oauth2_permission_scopes : [],
+      required_oauth2_permission_scopes : []
       required_app_roles : [
         "Mail.ReadBasic.All",
         "MailboxSettings.Read",
         "Group.Read.All",
         "User.Read.All"
-      ],
+      ]
       environment_variables : {
         GRANT_TYPE : "workload_identity_federation"
         # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
         TOKEN_SCOPE : "https://graph.microsoft.com/.default"
         REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
       }
+      external_todo : null
       example_api_calls : [
-        "/beta/users",
-        "/beta/users/${var.example_msft_user_guid}/mailboxSettings",
-        "/beta/users/${var.example_msft_user_guid}/mailFolders/SentItems/messages",
+        "/v1.0/users",
+        "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
+        "/v1.0/users/${var.example_msft_user_guid}/mailFolders/SentItems/messages",
         "/v1.0/groups",
         "/v1.0/groups/{group-id}/members"
       ]
     },
     "msft-teams" : {
       source_kind : "msft-teams"
+      availability : "beta",
+      enable_by_default : false,
       worklytics_connector_id : "msft-teams-psoxy",
       display_name : "Microsoft Teams"
       identifier_scope_id : "azure-ad"
@@ -288,18 +340,6 @@ locals {
         REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
       }
       example_api_calls : [
-        "/beta/teams",
-        "/beta/teams/${var.msft_teams_example_team_guid}/allChannels",
-        "/beta/users/${var.example_msft_user_guid}/chats",
-        "/beta/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages",
-        "/beta/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages/delta",
-        "/beta/chats/${var.msft_teams_example_chat_guid}/messages",
-        "/beta/communications/calls/${var.msft_teams_example_call_guid}",
-        "/beta/communications/callRecords/${var.msft_teams_example_call_record_guid}",
-        "/beta/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(time_static.deployment.id, "-2160h"))},toDateTime=${urlencode(time_static.deployment.id)})",
-        "/beta/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(time_static.deployment.id, "-2160h"))},toDateTime=${urlencode(time_static.deployment.id)})",
-        "/beta/users/${var.example_msft_user_guid}/onlineMeetings",
-
         "/v1.0/teams",
         "/v1.0/teams/${var.msft_teams_example_team_guid}/allChannels",
         "/v1.0/users/${var.example_msft_user_guid}/chats",
@@ -307,12 +347,13 @@ locals {
         "/v1.0/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages/delta",
         "/v1.0/chats/${var.msft_teams_example_chat_guid}/messages",
         "/v1.0/communications/calls/${var.msft_teams_example_call_guid}",
+        "/v1.0/communications/callRecords",
         "/v1.0/communications/callRecords/${var.msft_teams_example_call_record_guid}",
         "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(time_static.deployment.id, "-2160h"))},toDateTime=${urlencode(time_static.deployment.id)})",
         "/v1.0/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(time_static.deployment.id, "-2160h"))},toDateTime=${urlencode(time_static.deployment.id)})",
-        "/v1.0/users/${var.example_msft_user_guid}/onlineMeetings"
+        "/v1.0/users/${var.example_msft_user_guid}/onlineMeetings?\\$filter=JoinWebUrl eq '${var.msft_teams_example_online_meeting_join_url}'"
       ]
-      external_token_todo : <<EOT
+      external_todo : <<EOT
 To enable the connector, you need to allow permissions on the application created for reading OnlineMeetings. You will need Powershell for this.
 
 Please follow the steps below:
@@ -321,16 +362,23 @@ Please follow the steps below:
 
 **NOTE**: About the role, can be assigned through Entra Id portal in Azure portal OR in Entra Admin center https://admin.microsoft.com/AdminPortal/Home. It is possible that even login with an admin account in Entra Admin Center the Teams role is not available to assign to any user; if so, please do it through Azure Portal (Entra Id -> Users -> Assign roles)
 
-2. Install [PowerShell Teams](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install) module.
-3. Run the following commands in Powershell terminal:
+2. Install [PowerShell Teams](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install)  You can use `pwsh` in the terminal
+    enter to PowerShell.
+3. Then, run the following command. It will open a browser window for login to Microsoft Teams. After login, close the browser and return to the terminal.
+   Please choose the user who has the "Teams Administrator" role.
 ```shell
 Connect-MicrosoftTeams
 ```
-And use the user with the "Teams Administrator" for login it.
 
 4. Follow steps on [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
-  - Add a policy for the application created for the connector, providing its `application id`
+  - Add a policy for the application created for the connector, providing its `application id` (client ID)
+```shell
+New-CsApplicationAccessPolicy -Identity Teams-Policy-For-Worklytics -AppIds "%%entraid.client_id%%" -Description "Policy for MSFT Teams used for Worklytics Psoxy connector"
+```
   - Grant the policy to the whole tenant (NOT to any specific application or user)
+```shell
+Grant-CsApplicationAccessPolicy -PolicyName Teams-Policy-For-Worklytics -Global
+```
 
 **Issues**:
 - If you receive "access denied" is because no admin role for Teams has been detected. Please close and reopen the Powershell terminal after assigning the role.
@@ -347,6 +395,8 @@ EOT
   oauth_long_access_connectors = {
     asana = {
       source_kind : "asana",
+      availability : "ga",
+      enable_by_default : false,
       worklytics_connector_id : "asana-psoxy"
       display_name : "Asana"
       identifier_scope_id : "asana"
@@ -383,6 +433,8 @@ EOT
     }
     github = {
       source_kind : "github",
+      availability : "ga",
+      enable_by_default : false,
       worklytics_connector_id : "github-enterprise-psoxy"
       display_name : "Github Enterprise"
       identifier_scope_id : "github"
@@ -490,6 +542,8 @@ EOT
     }
     github-enterprise-server = {
       source_kind : "github-enterprise-server",
+      availability : "ga",
+      enable_by_default : false
       worklytics_connector_id : "github-enterprise-server-psoxy"
       display_name : "Github Enterprise Server"
       identifier_scope_id : "github"
@@ -504,29 +558,34 @@ EOT
           value_managed_by_tf : false
         },
         {
-          name : "PRIVATE_KEY"
-          writable : false
-          sensitive : true
-          value_managed_by_tf : false
-        },
-        {
-          name : "CLIENT_ID"
-          writable : false
+          name : "REFRESH_TOKEN"
+          writable : true
           sensitive : true
           value_managed_by_tf : false
         },
         {
           name : "OAUTH_REFRESH_TOKEN"
           writable : true
-          lockable : true
+          lockable : true   # nonsensical; this parameter/secret IS the lock. it's really the tokens that should have lockable:true
+          sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_ID"
+          writable : false
+          sensitive : true # not really, but simpler this way; and some may want it treated as sensitive, since would be req'd to brute-force app tokens or something
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_SECRET"
+          writable : false
           sensitive : true
           value_managed_by_tf : false
-        }
+        },
       ],
       environment_variables : {
-        GRANT_TYPE : "certificate_credentials"
-        TOKEN_RESPONSE_TYPE : "GITHUB_ACCESS_TOKEN"
-        REFRESH_ENDPOINT : "https://${local.github_enterprise_server_host}/api/${local.github_enterprise_server_version}/app/installations/${local.github_installation_id}/access_tokens"
+        GRANT_TYPE : "refresh_token"
+        REFRESH_ENDPOINT : "https://${local.github_enterprise_server_host}/login/oauth/access_token"
         USE_SHARED_TOKEN : "TRUE"
       }
       settings_to_provide = {
@@ -545,8 +604,11 @@ EOT
         "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/pulls",
       ]
       external_token_todo : <<EOT
+You can use a [guided script](../../../tools/github-enterprise-server-auth.sh) to setup the connector. In any case, you can follow here the manual steps that needs to be done.
+
   1. You have to populate:
      - `github_enterprise_server_host` variable in Terraform with the hostname of your Github Enterprise Server (example: `github.your-company.com`).
+This host should be accessible from the psoxy function, as the connector will need to reach it.
      - `github_organization` variable in Terraform with the name of your organization in Github Enterprise Server. You can put more than one, just split them in commas (example: `org1,org2`).
   2. From your organization, register a [GitHub App](https://docs.github.com/en/enterprise-server@3.11/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
     with following permissions with **Read Only**:
@@ -561,44 +623,51 @@ EOT
 
   NOTES:
     - We assume that ALL the repositories are going to be listed **should be owned by the organization, not the users**.
-    - Enterprise Cloud is required for this connector.
 
   Apart from Github instructions please review the following:
   - "Homepage URL" can be anything, not required in this flow but required by GitHub.
+  - "Callback URL" can be anything, but we recommend something like `http://localhost` as we will need it for the redirect as part of the authentication.
   - Webhooks check can be disabled as this connector is not using them
   - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
-  3. Once is created please generate a new `Private Key`.
-  4. It is required to convert the format of the certificate downloaded from PKCS#1 in previous step to PKCS#8. Please run following command:
-```shell
-openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out gh_pk_pkcs8.pem -nocrypt
+  3. Once is created please generate a new `Client Secret`.
+  4. Copy the `Client ID` and copy in your browser following URL, replacing the `CLIENT_ID` with the value you have just copied:
 ```
+https://${local.github_enterprise_server_host}/login/oauth/authorize?client_id={YOUR CLIENT ID}
+```
+  5. The browser will ask you to accept permissions and then it will redirect you with to the previous `Callback URL` set as part of the application.
+The URL should look like this: `https://localhost/?code=69d0f5bd0d82282b9a11`.
+  6. Copy the value of `code` and run the following URL replacing in the placeholders the values of `Client ID` and `Client Secret`:
+```
+curl --location --request POST 'https://${local.github_enterprise_server_host}/login/oauth/access_token?client_id={YOUR CLIENT ID}&client_secret={YOUR CLIENT SECRET}&code={YOUR CODE}' --header 'Content-Type: application/json' --header 'Accept: application/json'
+```
+The response will be something like:
+
+```json
+{
+  "access_token":"ghu_...",
+  "expires_in":28800,
+  "refresh_token":"ghr_...",
+  "refresh_token_expires_in":15724800,
+  "token_type":"bearer",
+  "scope":""
+}
+```
+You will need to copy the value of the `refresh_token`.
 
 **NOTES**:
- - If the certificate is not converted to PKCS#8 connector will NOT work. You might see in logs a Java error `Invalid PKCS8 data.` if the format is not correct.
- - Command proposed has been successfully tested on Ubuntu; it may differ for other operating systems.
+ - `Code` can be used once, so if you need to repeat the process you will need to generate a new one.
 
-  5. Install the application in your organization.
-     Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "Github App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
-  6. Once installed, the `installationId` is required as it needs to be provided in the proxy as parameter for the connector in your Terraform module. You can go to your organization settings and
-click on `Third Party Access`. Click on `Configure` the application you have installed in previous step and you will find the `installationId` at the URL of the browser:
-```
-https://{YOUR GITHUB HOST}/organizations/{YOUR ORG}/settings/installations/{INSTALLATION_ID}
-```
-  Copy the value of `installationId` and assign it to the `github_installation_id` variable in Terraform. You will need to redeploy the proxy again if that value was not populated before.
-
-**NOTE**:
- - If `github_installation_id` is not set, authentication URL will not be properly formatted and you will see *401: Unauthorized* when trying to get an access token.
- - If you see *404: Not found* in logs please review the *IP restriction policies* that your organization might have; that could cause connections from psoxy AWS Lambda/GCP Cloud Functions be rejected.
-
-  6. Update the variables with values obtained in previous step:
-     - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
-     - `PSOXY_GITHUB_PRIVATE_KEY` with content of the `gh_pk_pkcs8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content *as-is* into this variable.
-  7. Once the certificate has been uploaded, please remove {YOUR DOWNLOADED CERTIFICATE FILE} and `gh_pk_pkcs8.pem` from your computer or store it in a safe place.
+  7. Update the variables with values obtained in previous step:
+     - `psoxy_GITHUB_ENTERPRISE_SERVER_CLIENT_ID` with `Client Id` value.
+     - `psoxy_GITHUB_ENTERPRISE_SERVER_CLIENT_SECRET` with `Client Secret` value.
+     - `psoxy_GITHUB_ENTERPRISE_SERVER_REFRESH_TOKEN` with the `refresh_token`.
 
 EOT
     }
     github-non-enterprise = {
       source_kind : "github",
+      availability : "ga",
+      enable_by_default : false
       worklytics_connector_id : "github-free-team-psoxy"
       display_name : "Github"
       identifier_scope_id : "github"
@@ -703,6 +772,8 @@ EOT
     }
     salesforce = {
       source_kind : "salesforce",
+      availability : "ga",
+      enable_by_default : false
       worklytics_connector_id : "salesforce-psoxy"
       display_name : "Salesforce"
       identifier_scope_id : "salesforce"
@@ -804,6 +875,8 @@ EOT
     }
     slack-discovery-api = {
       source_kind : "slack"
+      availability : "ga",
+      enable_by_default : true
       identifier_scope_id : "slack"
       worklytics_connector_id : "slack-discovery-api-psoxy",
       worklytics_connector_name : "Slack via Psoxy",
@@ -826,9 +899,11 @@ EOT
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/api/discovery.enterprise.info",
-        "/api/discovery.conversations.list",
-        "/api/discovery.conversations.history?channel={CHANNEL_ID}&limit=10",
-        "/api/discovery.users.list",
+        "/api/discovery.conversations.list?limit=10",
+        "/api/discovery.conversations.info?team={WORKSPACE_ID}&channel={CHANNEL_ID}",
+        "/api/discovery.conversations.recent?limit=10",
+        "/api/discovery.conversations.history?reactions=1&team={WORKSPACE_ID}&channel={CHANNEL_ID}&limit=10",
+        "/api/discovery.users.list?limit=5",
       ]
       external_token_todo : <<EOT
 ### Slack Discovery Setup
@@ -874,6 +949,8 @@ EOT
     }
     zoom = {
       source_kind : "zoom"
+      availability : "ga",
+      enable_by_default : false
       worklytics_connector_id : "zoom-psoxy"
       display_name : "Zoom"
       worklytics_connector_name : "Zoom via Psoxy"
@@ -936,28 +1013,64 @@ EOT
       ],
       external_token_todo : <<EOT
 ## Zoom Setup
-Zoom connector through Psoxy requires a custom managed app on the Zoom Marketplace (in development
-mode, no need to publish).
-1. Go to https://marketplace.zoom.us/develop/create and create an app of type "Server to Server OAuth"
-2. After creation it will show the App Credentials. Share them with the AWS/GCP administrator, the
-following secret values must be filled in the Secret Manager for the Proxy with the appropriate values:
-- `PSOXY_ZOOM_CLIENT_ID`
-- `PSOXY_ZOOM_ACCOUNT_ID`
-- `PSOXY_ZOOM_CLIENT_SECRET`
-Anytime the *client secret* is regenerated it needs to be updated in the Proxy too.
-3. Fill the information section
-4. Fill the scopes section, enabling the following:
-- Users / View all user information /user:read:admin
-  - To be able to gather information about the zoom users
-- Meetings / View all user meetings /meeting:read:admin
-  - Allows us to list all user meeting
-- Report / View report data /report:read:admin
-  - Last 6 months view for user meetings
-5. Activate the app
+The Zoom connector through Psoxy requires a Custom Managed App on the Zoom Marketplace. This app may
+be left in development mode; it does not need to be published.
+
+1. Go to https://marketplace.zoom.us/develop/create and create an app of type "Server to Server
+   OAuth" for creating a server-to-server app.
+
+2. After creation, it will show the App Credentials.
+
+   Copy the following values:
+
+   - `Account ID`
+   - `Client ID`
+   - `Client Secret`
+
+   Share them with the AWS/GCP administrator, who should fill them in your host platform's secret
+   manager (AWS Systems Manager Parameter Store / GCP Secret Manager) for use by the proxy when
+   authenticating with the Zoom API:
+
+   - `Account ID` --> `PSOXY_ZOOM_ACCOUNT_ID`
+   - `Client ID` --> `PSOXY_ZOOM_CLIENT_ID`
+   - `Client Secret` --> `PSOXY_ZOOM_CLIENT_SECRET`
+
+   NOTE: Anytime the _Client Secret_ is regenerated it needs to be updated in the Proxy too. NOTE:
+   _Client Secret_ should be handled according to your organization's security policies for API
+   keys/secrets as, in combination with the above, allows access to your organization's data.
+
+3. Fill the 'Information' section. Zoom requires company name, developer name, and developer email
+   to activate the app.
+
+4. No changes are needed in the 'Features' section. Continue.
+
+5. Fill the scopes section clicking on `+ Add Scopes` and adding the following:
+
+    * `meeting:read:past_meeting:admin`
+    * `meeting:read:meeting:admin`
+    * `meeting:read:list_past_participants:admin`
+    * `meeting:read:list_past_instances:admin`
+    * `meeting:read:list_meetings:admin`
+    * `meeting:read:participant:admin`
+    * `report:read:list_meeting_participants:admin`
+    * `report:read:meeting:admin`
+    * `report:read:user:admin`
+    * `user:read:user:admin`
+    * `user:read:list_users:admin`
+
+  Alternatively, the scopes: `user:read:admin`, `meeting:read:admin`, `report:read:admin` are
+  sufficient, but as of May 2024 are no longer available for newly created Zoom apps.
+
+  Once the scopes are added, click on `Done` and then `Continue`.
+
+6. Activate the app
+
 EOT
     },
     dropbox-business = {
       source_kind : "dropbox-business"
+      availability : "deprecated",
+      enable_by_default : false
       worklytics_connector_id : "dropbox-business-log-psoxy"
       target_host : "api.dropboxapi.com"
       source_auth_strategy : "oauth2_refresh_token"
@@ -1045,10 +1158,12 @@ EOT
     },
     jira-server = {
       source_kind : "jira-server"
+      availability : "ga",
+      enable_by_default : false
       worklytics_connector_id : "jira-server-psoxy"
       target_host : var.jira_server_url
       source_auth_strategy : "oauth2_access_token"
-      display_name : "Jira Server REST API"
+      display_name : "Jira Data Center"
       identifier_scope_id : "jira"
       worklytics_connector_name : "Jira Server REST API via Psoxy"
       secured_variables : [
@@ -1086,6 +1201,8 @@ EOT
     }
     jira-cloud = {
       source_kind : "jira-cloud"
+      availability : "ga"
+      enable_by_default : false
       worklytics_connector_id : "jira-cloud-psoxy"
       target_host : "api.atlassian.com"
       source_auth_strategy : "oauth2_refresh_token"
@@ -1108,14 +1225,14 @@ EOT
         {
           name : "OAUTH_REFRESH_TOKEN"
           writable : true
-          lockable : true
-          sensitive : true
+          lockable : true   # nonsensical; this parameter/secret IS the lock. it's really the tokens that should have lockable:true
+          sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself
           value_managed_by_tf : false
         },
         {
           name : "CLIENT_ID"
           writable : false
-          sensitive : false
+          sensitive : true # not really, but simpler this way; and some may want it treated as sensitive, since would be req'd to brute-force app tokens or something
           value_managed_by_tf : false
         },
         {
@@ -1131,26 +1248,25 @@ EOT
         USE_SHARED_TOKEN : "TRUE"
       }
       settings_to_provide = {
-        "Jira Cloud Id" = local.jira_cloud_id
       }
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/oauth/token/accessible-resources", # obtain Jira Cloud ID from here
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/users",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/users",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/group/bulk",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/search?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/comment?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/users",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/group/bulk",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/search?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/comment?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
-        "/ex/jira/${local.jira_cloud_id}/rest/api/3/project/search?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/users",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/users",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/group/bulk",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/search?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/comment?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/users",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/group/bulk",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/search?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/comment?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
+        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/project/search?maxResults=25",
       ],
       external_token_todo : <<EOT
 ## Prerequisites
@@ -1252,6 +1368,7 @@ it will print the all the values to complete the configuration:
 Add the `id` value from that JSON response as the value of the `jira_cloud_id` variable in the
 `terraform.tfvars` file of your Terraform configuration. This will generate all the test URLs with
 a proper value.
+
 EOT
     }
   }
@@ -1259,6 +1376,8 @@ EOT
   bulk_connectors = {
     "badge" = {
       source_kind               = "badge"
+      availability              = "ga"
+      enable_by_default         = false
       worklytics_connector_id   = "bulk-import-psoxy",
       worklytics_connector_name = "Bulk Data Import via Psoxy"
       rules = {
@@ -1275,15 +1394,19 @@ EOT
     }
     "hris" = {
       source_kind               = "hris"
+      availability              = "ga"
+      enable_by_default         = true
       worklytics_connector_id   = "hris-import-psoxy"
       worklytics_connector_name = "HRIS Data Import via Psoxy"
       rules = {
         columnsToRedact = []
         columnsToPseudonymize = [
           "EMPLOYEE_ID",    # primary key
-          "EMPLOYEE_EMAIL", # for matching
+          "EMPLOYEE_EMAIL", # for linking to other data sources
           "MANAGER_ID",     # should match to employee_id
-          # "MANAGER_EMAIL"      # if exists
+        ]
+        columnsToPseudonymizeIfPresent = [
+          "MANAGER_EMAIL"
         ]
       }
       settings_to_provide = {
@@ -1291,28 +1414,52 @@ EOT
       }
       example_file = "docs/sources/hris/hris-example.csv"
     }
+    "metrics" = {
+      source_kind               = "metrics"
+      availability              = "beta"
+      enable_by_default         = false
+      worklytics_connector_id   = "metrics-import-psoxy",
+      worklytics_connector_name = "Metrics via Psoxy"
+      rules = {
+        columnsToPseudonymizeIfPresent = [
+          "EMPLOYEE_ID",
+          "EMPLOYEE_EMAIL",
+        ]
+      }
+      settings_to_provide = {
+      }
+      example_file = "docs/sources/metrics/metrics-example.csv"
+    }
     "survey" = {
       worklytics_connector_id   = "survey-import-psoxy"
+      availability              = "ga"
+      enable_by_default         = false
       source_kind               = "survey"
       worklytics_connector_name = "Survey Data Import via Psoxy"
       rules = {
         columnsToRedact = []
         columnsToPseudonymize = [
-          "EMPLOYEE_ID", # primary key
-          # "EMPLOYEE_EMAIL", # if exists
+          "EMPLOYEE_ID", # primary key; transform FAILS if not present
+        ]
+        columnsToPseudonymizeIfPresent = [
+          "EMPLOYEE_EMAIL" # just in case sent
         ]
       }
       example_file = "docs/sources/survey/survey-example.csv"
     }
     "qualtrics" = {
       source_kind               = "qualtrics"
+      availability              = "beta"
+      enable_by_default         = false
       worklytics_connector_id   = "survey-import-psoxy"
       worklytics_connector_name = "Survey Data Import via Psoxy"
       rules = {
         columnsToRedact = []
         columnsToPseudonymize = [
           "EMPLOYEE_ID", # primary key
-          # "employee_email", # if exists
+        ]
+        columnsToPseudonymizeIfPresent = [
+          "EMPLOYEE_EMAIL" # just in case sent
         ]
       }
       example_file = "docs/sources/survey/survey-example.csv"
@@ -1323,15 +1470,28 @@ EOT
   k => merge(v, { example_calls : v.example_api_calls }) }
 
 
-  # to expose via console
-  # eg, `echo "local.available_connector_ids" | terraform console` will print this
-  available_connector_ids = keys(merge(
+  all_default_connectors = merge(
     local.google_workspace_sources,
     local.msft_365_connectors,
     local.oauth_long_access_connectors,
     local.bulk_connectors,
-  ))
+  )
 
+  default_ga_connectors = {
+    for k, v in local.all_default_connectors : k => v if(
+      v.availability == "ga"
+      && v.enable_by_default
+      # either GWS included, or NOT a gws-connector
+      && (var.include_google_workspace || !contains(keys(local.google_workspace_sources), k))
+      # either MSFT include or NOT a msft-connector
+      && (var.include_msft || !contains(keys(local.msft_365_connectors), k))
+    )
+  }
+
+  # to expose via console
+  # eg, `echo "local.available_connector_ids" | terraform console` will print this
+  # used via `tools/init-tfvars.sh` script, as default values for `enabled_connectors` variable
+  default_enabled_connector_ids = keys(local.default_ga_connectors)
 }
 
 # computed values filtered by enabled connectors

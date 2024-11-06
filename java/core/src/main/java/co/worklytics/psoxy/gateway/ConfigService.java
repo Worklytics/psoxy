@@ -21,9 +21,8 @@ public interface ConfigService {
         // shared? (across multiple instances?)
         // local? (per-instance secrets)
 
-        //sensitive? (eg, value should not be exposed to 3rd parties)
-
-        //secret? (eg, value should be handled as a secret; obscured/acl even internally; avoid in logs, etc)
+        // sensitive? (eg, value should not be exposed to 3rd parties)
+        // secret? (eg, value should be handled as a secret; obscured/acl even internally; avoid in logs, etc)
 
         /**
          * @return whether cached value for property must be revalidated with origin before re-use
@@ -34,49 +33,13 @@ public interface ConfigService {
         default Boolean noCache() {
             return false;
         }
-    }
 
-    /**
-     * whether implementation supports writing
-     *
-     * @return whether implementation supports writing
-     */
-    default boolean supportsWriting() {
-        return false;
-    }
-
-    /**
-     * write value of property in config, if supports it
-     *
-     * @param property to write value for
-     * @param value to write
-     */
-    void putConfigProperty(ConfigProperty property, String value);
-
-    /**
-     * write value of property in config, if supports it
-     *
-     * @param property to write value for
-     * @param value to write
-     * @throws WritePropertyRetriesExhaustedException if write fails after designated retries
-     */
-    default void putConfigProperty(ConfigProperty property, String value, int retries) throws WritePropertyRetriesExhaustedException {
-        if (retries <= 0) {
-            // use the non-retry version
-            throw new IllegalArgumentException("retries must be > 0");
+        /**
+         * @return whether this property is limited to being set via environment variables only
+         */
+        default boolean isEnvVarOnly() {
+            return false;
         }
-        Exception lastException;
-        do {
-            try {
-                putConfigProperty(property, value);
-                return;
-            } catch (Exception e) {
-                // retry - wait slightly
-                lastException = e;
-                Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(150));
-            }
-        } while (--retries > 0);
-        throw new WritePropertyRetriesExhaustedException("Failed to write config property " + property, lastException);
     }
 
     /**

@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
 import com.bettercloud.vault.SslConfig;
 import com.bettercloud.vault.Vault;
 import com.bettercloud.vault.VaultConfig;
@@ -9,6 +10,7 @@ import com.bettercloud.vault.response.AuthResponse;
 import com.bettercloud.vault.response.LogicalResponse;
 import com.bettercloud.vault.response.LookupResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
@@ -24,7 +26,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 
 @Log
-public class VaultConfigService implements ConfigService {
+public class VaultConfigService implements SecretStore {
 
     //these config values must be provided as ENV_VARs to use vault as secret store
     public enum VaultConfigProperty implements ConfigProperty {
@@ -41,6 +43,9 @@ public class VaultConfigService implements ConfigService {
         //base64 encoding of an X.509 certificate in PEM format with UTF-8 encoding
         //VAULT_SSL_CERTIFICATE,
         ;
+
+        @Getter
+        private boolean envVarOnly = true;
     }
 
     //q: vault caters to storing secrets in groups, as a "map" (eg key-value pairs)
@@ -94,10 +99,12 @@ public class VaultConfigService implements ConfigService {
     }
 
 
-
-
+    /**
+     * initializes for use
+     * @return itself, for chaining
+     */
     @SneakyThrows
-    public void init() {
+    public VaultConfigService init() {
         LookupResponse initialAuth = this.vault.auth().lookupSelf();
 
         log.info("Token: " + (new ObjectMapper()).writeValueAsString(initialAuth));
@@ -117,17 +124,14 @@ public class VaultConfigService implements ConfigService {
                 log.log(Level.WARNING, "Failed to renew Vault token. ", e);
             }
         }
-    }
-
-
-    @Override
-    public boolean supportsWriting() {
-        return true;
+        return this;
     }
 
     @SneakyThrows
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {
+        Preconditions.checkArgument(!property.isEnvVarOnly(), "Can't put env-only config property: " + property);
+
         vault.logical()
             .write(path(property), Map.of(VALUE_FIELD, value));
     }
@@ -135,6 +139,9 @@ public class VaultConfigService implements ConfigService {
     @SneakyThrows
     @Override
     public String getConfigPropertyOrError(ConfigProperty property) {
+        if (property.isEnvVarOnly()) {
+            throw new IllegalArgumentException("Can't get env-only config property: " + property);
+        }
 
         LogicalResponse response = vault.logical()
             .read(path(property));
@@ -150,6 +157,10 @@ public class VaultConfigService implements ConfigService {
     @SneakyThrows
     @Override
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
+        if (property.isEnvVarOnly()) {
+            return Optional.empty();
+        }
+
         LogicalResponse response = vault.logical()
             .read(path(property));
 
