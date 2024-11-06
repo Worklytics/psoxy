@@ -24,6 +24,21 @@ public enum ErrorCauses {
      * request was not sent over HTTPS
      */
     HTTPS_REQUIRED,
+
+    /**
+     *  indicates failure to connect from proxy instance to source
+     */
+    CONNECTION_TO_SOURCE,
+
+    /**
+     *  failed to build target URL (eg, that of source) from request URL (requested from proxy)
+     */
+    FAILED_TO_BUILD_URL,
+
+    /**
+     *  failed to get configuration data; or misconfigured.
+     */
+    CONFIGURATION_FAILURE,
     ;
 
 }
