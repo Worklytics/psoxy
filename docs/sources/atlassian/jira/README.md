@@ -42,25 +42,25 @@ AWS CLoud Shell,
 
    - `read:jira-user`
    - `read:jira-work`
-   
-   ![Classic Scopes for Jira API](./img/jira-cloud-jira-api-scope-permissions.png) 
+
+   ![Classic Scopes for Jira API](./img/jira-cloud-jira-api-scope-permissions.png)
 
    And these from "Granular Scopes":
    - `read:group:jira`
    - `read:avatar:jira`
    - `read:user:jira`
-  
+
   ![Granular Scopes for Jira API](./img/jira-cloud-jira-api-scope-granular-permissions.png)
 
    Then go back to "Permissions" and click on "Add" for `User Identity API`, only selecting
    following scopes:
 
    - `read:account`
-  
+
   ![Classic Scopes for User Identity API](./img/jira-cloud-user-api-scope-permissions.png)
 
    After adding all the scopes, you should have 1 permission for `User Identity API` and 5 for
-   `Jira API`: 
+   `Jira API`:
 
   ![Permissions](./img/jira-cloud-final-permissions.png)
 
@@ -140,9 +140,9 @@ And its response will be something like:
 ]
 ```
 
-Add the `id` value from that JSON response as the value of the `jira_cloud_id` variable in the
-`terraform.tfvars` file of your Terraform configuration. This will generate all the test URLs with a
-proper value for targeting a valid Jira Cloud instance.
+In your Terraform configuration's `terraform.tfvars` file, set the `jira_cloud_id` variable to the
+`id` value from the JSON response. This will ensure that all **test URLs** are generated with the
+correct value, targeting a valid Jira Cloud instance.
 
 NOTE: A "token family" includes the initial access/refresh tokens generated above as well as all
 subsequent access/refresh tokens that Jira returns to any future token refresh requests. By default,

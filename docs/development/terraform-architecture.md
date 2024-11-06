@@ -6,14 +6,22 @@ provide easy support for extending the examples/modules to support them in the e
 
 Composition is the canonical terraform approach.
 
-3 approaches:
+Two approaches:
 
-1. composition, which is canonical terraform a. commented out
-   - validation
-   - instructions to explain to customers are more complex b. conditional : validation will work,
-     but hacky 0 indexes around in places
-2. conditionals + variables pros:
-   - simplest for customers
-   - easiest to read/follow cons:
-   - verbose interfaces
-   - brittle stacks (changing variable requires changing many in hierarch)
+1. composition, which is canonical terraform
+
+    a. commented out
+    - validation
+    - instructions to explain to customers are more complex
+
+    b. conditional: validation will work, but hacky 0 indexes around in places
+
+2. conditionals + variables
+
+    pros:
+    - simplest for customers
+    - easiest to read/follow
+
+   cons:
+     - verbose interfaces
+     - brittle stacks (changing variable requires changing many in hierarchy)

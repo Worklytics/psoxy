@@ -2,7 +2,7 @@
 
 # a script to simplify the process of creating oauth app in Jira Cloud, authorizing it for the
 # the required scopes, and obtaining authentication credentials that can be used by the proxy
-# connector
+# connector (similar to https://github.com/Worklytics/psoxy-oauth-setup-tool)
 
 # Prefer printf over echo for compatibility and formatting
 # Use colors for output
