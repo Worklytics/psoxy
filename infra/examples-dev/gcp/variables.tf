@@ -279,7 +279,7 @@ variable "lookup_tables" {
     sanitized_accessor_principals = optional(list(string))
     expiration_days               = optional(number)
     output_bucket_name            = optional(string) # allow override of default bucket name
-    compress_output = optional(bool)
+    compress_output               = optional(bool)
   }))
   description = "Lookup tables to build from same source input as another connector, output to a distinct bucket. The original `join_key_column` will be preserved, "
 

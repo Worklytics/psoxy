@@ -25,10 +25,10 @@ data "external" "certificate" {
 # NOTE: have gotten '400 with OData error: KeyCredentialsInvalidEndDate: Key credential end date is invalid'
 # when trying to apply this, even though only using 6 month expiration window. Re-apply worked ...
 resource "azuread_application_certificate" "certificate" {
-  application_id        = var.application_id
-  type                  = "AsymmetricX509Cert"
-  value                 = base64decode(data.external.certificate.result.cert)
-  end_date              = timeadd(time_rotating.rotation.id, "${var.cert_expiration_days * 24}h")
+  application_id = var.application_id
+  type           = "AsymmetricX509Cert"
+  value          = base64decode(data.external.certificate.result.cert)
+  end_date       = timeadd(time_rotating.rotation.id, "${var.cert_expiration_days * 24}h")
 
   lifecycle {
     create_before_destroy = true
