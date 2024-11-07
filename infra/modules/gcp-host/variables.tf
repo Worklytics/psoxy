@@ -195,12 +195,13 @@ variable "bulk_sanitized_expiration_days" {
 # q: move this into custom_bulk_connector_args
 variable "custom_bulk_connector_rules" {
   type = map(object({
-    pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
-    columnsToRedact       = optional(list(string), [])
-    columnsToInclude      = optional(list(string))
-    columnsToPseudonymize = optional(list(string), [])
-    columnsToDuplicate    = optional(map(string))
-    columnsToRename       = optional(map(string))
+    pseudonymFormat                = optional(string, "URL_SAFE_TOKEN")
+    columnsToRedact                = optional(list(string), [])
+    columnsToInclude               = optional(list(string))
+    columnsToPseudonymize          = optional(list(string), [])
+    columnsToPseudonymizeIfPresent = optional(list(string))
+    columnsToDuplicate             = optional(map(string))
+    columnsToRename                = optional(map(string))
     fieldsToTransform = optional(map(object({
       newName    = string
       transforms = optional(list(map(string)), [])
