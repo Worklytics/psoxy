@@ -301,6 +301,7 @@ resource "google_secret_manager_secret_version" "additional_transforms" {
           v.join_key_column, "${v.join_key_column}_pseudonym"
         ]), null)
       }
+      compressOutput : v.compress_output
     } if v.source_connector_id == each.key
   ])
 }

@@ -339,6 +339,7 @@ variable "lookup_table_builders" {
       columnsToDuplicate    = optional(map(string))
       columnsToRename       = optional(map(string))
     })
+    compress_output = optional(bool)
   }))
   default = {
     #    "hris-lookup" = {
