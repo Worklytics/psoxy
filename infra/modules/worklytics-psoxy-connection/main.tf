@@ -28,3 +28,7 @@ output "todo" {
 output "next_todo_step" {
   value = module.generic.next_todo_step
 }
+
+output "tenant_api_connection_settings" {
+  value = module.generic.tenant_api_connection_settings
+}

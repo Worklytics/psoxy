@@ -94,6 +94,19 @@ module "psoxy" {
   bulk_input_expiration_days     = var.bulk_input_expiration_days
 }
 
+module "connection_via_tenant_api" {
+  # dev example path: "../../../../terraform-aws-worklytics/examples/create_psoxy_connections"
+  # TODO URL of the actual repo to illustrate... initial version not released yet
+  source = "git::https://github.com/worklytics/terraform-aws-worklytics/examples/create_psoxy_connections?ref=v0.1.0"
+
+  # TODO review this: using the 1st unique ID while testing is OK, but maybe we should define a
+  #  an explicit variable for it
+  worklytics_tenant_id         = var.caller_gcp_service_account_ids[0]
+  user_principal_email         = var.user_principal_email
+  psoxy_connections            = module.psoxy.tenant_api_connection_settings
+  psoxy_connection_script_path = path.module
+}
+
 # if you generated these, you may want them to import back into your data warehouse
 output "lookup_tables" {
   value = module.psoxy.lookup_tables

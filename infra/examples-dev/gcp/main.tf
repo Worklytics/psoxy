@@ -142,6 +142,18 @@ module "connection_in_worklytics" {
   try(each.value.settings_to_provide, {}))
 }
 
+module "connection_via_tenant_api" {
+  # dev example path  = "../../../../terraform-gcp-worklytics/examples/create_psoxy_connections"
+  # TODO URL of the actual repo to illustrate... initial version not released yet
+  source = "git::https://github.com/worklytics/terraform-gcp-worklytics/examples/create_psoxy_connections?ref=v0.1.0"
+
+  project_id                   = var.gcp_project_id
+  service_account_id           = "worklytics-tenant-api" # it's the default value
+  worklytics_tenant_id         = var.worklytics_tenant_id
+  psoxy_connections            = [for connection in module.connection_in_worklytics : connection.tenant_api_connection_settings]
+  psoxy_connection_script_path = path.module
+}
+
 output "path_to_deployment_jar" {
   description = "Path to the package to deploy (JAR)."
   value       = module.psoxy.path_to_deployment_jar
