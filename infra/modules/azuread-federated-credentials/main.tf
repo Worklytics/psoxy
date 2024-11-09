@@ -10,11 +10,11 @@ terraform {
 
 resource "azuread_application_federated_identity_credential" "federated_credential" {
   application_id = var.application_id
-  display_name = var.display_name
-  description     = var.description
+  display_name   = var.display_name
+  description    = var.description
   audiences      = [var.audience]
-  issuer             = var.issuer
-  subject           = var.subject
+  issuer         = var.issuer
+  subject        = var.subject
 }
 
 output "credential" {

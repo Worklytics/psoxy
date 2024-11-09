@@ -153,13 +153,13 @@ class StorageHandlerTest {
         when(config.getConfigPropertyAsOptional(eq(BulkModeConfigProperty.OUTPUT_BASE_PATH)))
             .thenReturn(Optional.ofNullable(outputBasePath));
 
-        StorageHandler.ObjectTransform tranform = StorageHandler.ObjectTransform.builder()
+        StorageHandler.ObjectTransform transform = StorageHandler.ObjectTransform.builder()
             .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
             .pathWithinBucket(config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH).orElse(""))
             .rules(mock(BulkDataRules.class))
             .build();
 
-        StorageEventRequest request = handler.buildRequest("bucket-in", "directory/file.csv", tranform, null);
+        StorageEventRequest request = handler.buildRequest("bucket-in", "directory/file.csv", transform, null);
 
         assertEquals("bucket-in", request.getSourceBucketName());
         assertEquals("directory/file.csv", request.getSourceObjectPath());
@@ -345,6 +345,44 @@ class StorageHandlerTest {
         StorageEventRequest request = handler.buildRequest("bucket", filename, handler.buildDefaultTransform(), contentEncoding);
         assertEquals(expectCompressedInput, request.getDecompressInput());
         assertEquals(expectCompressedOutput, request.getCompressOutput());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        //inputCompressed,configSetting,transformSetting,expected
+        // explicit transform setting should prevail
+        "true,true,true,true",
+        "true,true,false,false",
+        "true,false,true,true",
+        "false,true,true,true",
+        "false,false,false,false",
+        "false,,true,true",
+        "false,,false,false",
+
+        // nothing for config/transform should default to 'true'
+        "false,,,true",
+        "true,,,true",
+
+        // when config setting is false, should match input
+        "true,false,,true",
+        "false,false,,false",
+
+        // when config setting is true and no transform setting, should be true
+        "true,true,,true",
+        "false,true,,true",
+    })
+    public void compressOutputSetting(Boolean inputCompressed, Boolean configSetting, Boolean transformSetting, Boolean expected) {
+        when(config.getConfigPropertyAsOptional(BulkModeConfigProperty.COMPRESS_OUTPUT_ALWAYS))
+            .thenReturn(configSetting == null ? Optional.empty() : Optional.of(configSetting.toString()));
+
+        StorageHandler.ObjectTransform transform = StorageHandler.ObjectTransform.builder()
+            .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
+            .pathWithinBucket(config.getConfigPropertyAsOptional(BulkModeConfigProperty.OUTPUT_BASE_PATH).orElse(""))
+            .rules(mock(BulkDataRules.class))
+            .compressOutput(transformSetting)
+            .build();
+
+        assertEquals(expected, handler.compressOutput(inputCompressed, config,  transform));
     }
 
     @SneakyThrows
