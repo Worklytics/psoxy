@@ -121,8 +121,30 @@ public class StorageHandler {
         return response;
     }
 
+    /**
+     * determines compression behavior based on config and transform.
+     * if source
+     *
+     * @param config
+     * @param transform
+     * @return
+     */
+    @VisibleForTesting
+    boolean compressOutput(boolean isSourceCompressed,
+                                               ConfigService config,
+                                                ObjectTransform transform) {
 
+        Optional<Boolean> transformSetting = Optional.ofNullable(transform.getCompressOutput());
 
+        if (transformSetting.isPresent()) {
+            return transformSetting.get();
+        } else {
+            return isSourceCompressed ||
+                config.getConfigPropertyAsOptional(BulkModeConfigProperty.COMPRESS_OUTPUT_ALWAYS)
+                    .map(Boolean::parseBoolean)
+                    .orElse(true); //effectively, default COMPRESS_OUTPUT_ALWAYS=true
+        }
+    }
 
     /**
      * @param sourceBucketName      bucket name
@@ -143,10 +165,7 @@ public class StorageHandler {
 
         boolean isSourceCompressed = isSourceCompressed(sourceContentEncoding, sourceObjectPath);
 
-        boolean compressOutput = isSourceCompressed ||
-            config.getConfigPropertyAsOptional(BulkModeConfigProperty.COMPRESS_OUTPUT_ALWAYS)
-                .map(Boolean::parseBoolean)
-                .orElse(true);
+        boolean compressOutput = compressOutput(isSourceCompressed, config, transform);
 
         StorageEventRequest request = StorageEventRequest.builder()
             .sourceBucketName(sourceBucketName)
@@ -238,6 +257,14 @@ public class StorageHandler {
 
         @NonNull
         BulkDataRules rules;
+
+        /**
+         * whether to compress (gzip) output from this transform
+         *
+         * NOTE: may be overridden by `BulkModeConfigProperty.COMPRESS_OUTPUT_ALWAYS`
+         */
+        @Nullable
+        Boolean compressOutput;
 
     }
 

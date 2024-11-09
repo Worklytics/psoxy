@@ -189,12 +189,13 @@ variable "custom_bulk_connectors" {
     worklytics_connector_id   = optional(string, "bulk-import-psoxy")
     worklytics_connector_name = optional(string, "Custom Bulk Data via Psoxy")
     rules = optional(object({
-      pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
-      columnsToRedact       = optional(list(string)) # columns to remove from CSV
-      columnsToInclude      = optional(list(string)) # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
-      columnsToPseudonymize = optional(list(string)) # columns to pseudonymize
-      columnsToDuplicate    = optional(map(string))  # columns to create copy of; name --> new name
-      columnsToRename       = optional(map(string))  # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
+      pseudonymFormat                = optional(string, "URL_SAFE_TOKEN")
+      columnsToRedact                = optional(list(string)) # columns to remove from CSV
+      columnsToInclude               = optional(list(string)) # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
+      columnsToPseudonymize          = optional(list(string)) # columns to pseudonymize
+      columnsToPseudonymizeIfPresent = optional(list(string))
+      columnsToDuplicate             = optional(map(string)) # columns to create copy of; name --> new name
+      columnsToRename                = optional(map(string)) # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
       fieldsToTransform = optional(map(object({
         newName    = string
         transforms = optional(list(map(string)), [])
@@ -222,12 +223,13 @@ variable "custom_bulk_connectors" {
 
 variable "custom_bulk_connector_rules" {
   type = map(object({
-    pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
-    columnsToRedact       = optional(list(string), []) # columns to remove from CSV
-    columnsToInclude      = optional(list(string))     # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
-    columnsToPseudonymize = optional(list(string), []) # columns to pseudonymize
-    columnsToDuplicate    = optional(map(string))      # columns to create copy of; name --> new name
-    columnsToRename       = optional(map(string))      # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
+    pseudonymFormat                = optional(string, "URL_SAFE_TOKEN")
+    columnsToRedact                = optional(list(string), []) # columns to remove from CSV
+    columnsToInclude               = optional(list(string))     # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
+    columnsToPseudonymize          = optional(list(string), []) # columns to pseudonymize
+    columnsToPseudonymizeIfPresent = optional(list(string))
+    columnsToDuplicate             = optional(map(string)) # columns to create copy of; name --> new name
+    columnsToRename                = optional(map(string)) # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
     fieldsToTransform = optional(map(object({
       newName    = string
       transforms = optional(list(map(string)), [])
@@ -279,6 +281,7 @@ variable "lookup_tables" {
     sanitized_accessor_principals = optional(list(string))
     expiration_days               = optional(number)
     output_bucket_name            = optional(string) # allow override of default bucket name
+    compress_output               = optional(bool)
   }))
   description = "Lookup tables to build from same source input as another connector, output to a distinct bucket. The original `join_key_column` will be preserved, "
 
