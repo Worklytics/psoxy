@@ -2,6 +2,7 @@ package co.worklytics.psoxy.rules.msft;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.Rules2;
+import co.worklytics.psoxy.rules.RulesUtils;
 import jdk.jfr.Description;
 import lombok.Getter;
 import org.junit.jupiter.api.Disabled;
@@ -20,14 +21,16 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.MS_TEAMS_NO_USER_ID;
 
 
-    @Getter
-    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
-            .sourceFamily("microsoft-365")
-            .defaultScopeId("azure-ad")
-            .sourceKind("msft-teams")
-            .rulesFile("msft-teams_no-userIds")
-            .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-userIds/")
-            .build();
+    @Override
+    public RulesTestSpec getRulesTestSpec() {
+        return RulesTestSpec.builder()
+                .sourceFamily("microsoft-365")
+                .sourceKind("msft-teams")
+                .defaultScopeId(rulesUtils.getDefaultScopeIdFromSource("msft-teams"))
+                .rulesFile("msft-teams_no-userIds")
+                .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-userIds/")
+                .build();
+    }
 
     @Test
     @Description("Test endpoint:" + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS)

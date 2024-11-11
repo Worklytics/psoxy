@@ -15,12 +15,14 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     @Getter
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.MS_TEAMS;
 
-    @Getter
-    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
-            .sourceFamily("microsoft-365")
-            .defaultScopeId("azure-ad")
-            .sourceKind("msft-teams")
-            .build();
+    @Override
+    public RulesTestSpec getRulesTestSpec() {
+        return RulesTestSpec.builder()
+                .sourceFamily("microsoft-365")
+                .defaultScopeId(rulesUtils.getDefaultScopeIdFromSource("msft-teams"))
+                .sourceKind("msft-teams")
+                .build();
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {"v1.0"})
