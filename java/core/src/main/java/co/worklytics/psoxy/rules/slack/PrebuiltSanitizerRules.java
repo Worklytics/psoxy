@@ -40,6 +40,16 @@ public class PrebuiltSanitizerRules {
                             .build())
                     .build())
             .endpoint(Endpoint.builder()
+                    .pathTemplate("/api/discovery.user.conversations")
+                    // no PII
+                    // redact channel name, topic and purpose
+                    .transform(Transform.Redact.builder()
+                            // we don't care about names
+                            // topic and purpose contains user ids, not used at all, so just get rid of the entire content
+                            .jsonPath("$.channels[*]['name','topic','purpose']")
+                            .build())
+                    .build())
+            .endpoint(Endpoint.builder()
                     .pathTemplate("/api/discovery.conversations.list")
                     // no PII
                     // redact channel name, topic and purpose
