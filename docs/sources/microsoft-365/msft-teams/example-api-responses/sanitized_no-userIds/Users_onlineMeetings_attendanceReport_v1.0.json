@@ -9,7 +9,7 @@
       "totalAttendanceInSeconds":1152,
       "role":"Presenter",
       "identity":{
-        "id":"dc17674c-81d9-4adb-bfb2-8f6a442e4623",
+        "id":"{\"scope\":\"azure-ad\",\"hash\":\"MwYK48L-UYMIsFrz1EHA4xX8hwfxJQfyg_L-vtEV1Mc\"}",
         "tenantId":null
       },
       "attendanceIntervals":[

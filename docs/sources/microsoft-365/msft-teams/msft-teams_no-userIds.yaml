@@ -245,6 +245,10 @@ endpoints:
         encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
+          - "$..identity.id"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
@@ -255,6 +259,7 @@ endpoints:
           - "$..joinInformation"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
+          - "$..upn"
       - !<redact>
         jsonPaths:
           - "$..['@odata.context']"
@@ -274,6 +279,10 @@ endpoints:
         encoding: "JSON"
       - !<pseudonymize>
         jsonPaths:
+          - "$..identity.id"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..user.id"
           - "$..userId"
         encoding: "JSON"
@@ -284,6 +293,7 @@ endpoints:
           - "$..joinInformation"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
+          - "$..upn"
       - !<redact>
         jsonPaths:
           - "$..['@odata.context']"
@@ -305,6 +315,10 @@ endpoints:
         jsonPaths:
           - "$..emailAddress"
         encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..identity.id"
+        encoding: "JSON"
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
@@ -316,6 +330,7 @@ endpoints:
           - "$..joinInformation"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
+          - "$..upn"
           - "$..['@odata.context']"
           - "$..['@odata.type']"
   - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*"

@@ -275,6 +275,7 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
         String jsonResponse = asJson("Users_onlineMeetings_" + "v1.0" + ".json");
 
         String sanitized = sanitize(endpoint, jsonResponse);
+
         assertPseudonymized(sanitized, "112f7296-5ca-bae8-6a692b15d4b8", "5810cedeb-b2c1-e9bd5d53ec96");
         assertRedacted(sanitized,
                 "@odata.type",
@@ -282,7 +283,9 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
                 "#microsoft.graph.chatInfo",
                 "#microsoft.graph.meetingParticipants",
                 "#microsoft.graph.identitySet",
-                "#microsoft.graph.identity"
+                "#microsoft.graph.identity",
+                "foo@some-domain.com",
+                "upn-value"
         );
         assertUrlWithSubResourcesBlocked(endpoint);
     }

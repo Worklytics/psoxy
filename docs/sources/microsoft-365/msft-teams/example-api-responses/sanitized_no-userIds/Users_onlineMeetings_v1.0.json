@@ -21,8 +21,7 @@
           "user":{
             "id":"{\"scope\":\"azure-ad\",\"hash\":\"KvrBhIhPrAEMwI320CqhyGSfgVmKedObWZ5X380uX04\"}"
           }
-        },
-        "upn":"upn-value"
+        }
       }
     ],
     "organizer":{
@@ -30,8 +29,7 @@
         "user":{
           "id":"{\"scope\":\"azure-ad\",\"hash\":\"OkGYJKhA8lYaD0IJw3YHj8cB9qiSMw6MA_70P99wa3o\"}"
         }
-      },
-      "upn":"upn-value"
+      }
     }
   },
   "startDateTime":"2018-05-30T00:30:00Z",

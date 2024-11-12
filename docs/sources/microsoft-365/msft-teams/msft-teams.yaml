@@ -221,6 +221,7 @@ endpoints:
           - "$..joinInformation"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
+          - "$..upn"
   - pathTemplate: "/v1.0/users/{userId}/onlineMeetings/{meetingId}/attendanceReports"
     allowedQueryParams:
       - "$select"
@@ -248,6 +249,7 @@ endpoints:
           - "$..joinInformation"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
+          - "$..upn"
   - pathTemplate: "/v1.0/users/{userId}/onlineMeetings/{meetingId}/attendanceReports/{reportId}"
     allowedQueryParams:
       - "$select"
@@ -275,6 +277,7 @@ endpoints:
           - "$..joinInformation"
           - "$..joinMeetingIdSettings.isPasscodeRequired"
           - "$..joinMeetingIdSettings.passcode"
+          - "$..upn"
   - pathRegex: "^/v1.0/users/?[^/]*"
     allowedQueryParams:
       - "$top"
