@@ -436,6 +436,7 @@ public class PrebuiltSanitizerRules {
             .jsonPath("$..joinInformation")
             .jsonPath("$..joinMeetingIdSettings.isPasscodeRequired")
             .jsonPath("$..joinMeetingIdSettings.passcode")
+            .jsonPath("$..upn")
             .build();
 
     static final Transform.Tokenize MS_TEAMS_CALL_ID_TOKENIZATION = Transform.Tokenize.builder()
@@ -650,6 +651,9 @@ public class PrebuiltSanitizerRules {
             .endpoint(Endpoint.builder()
                     .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/onlineMeetings/[a-zA-Z0-9_-]+/attendanceReports/[a-zA-Z0-9_-]+(\\?.*)?")
                     .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+                    .transform(Transform.Pseudonymize.builder()
+                            .jsonPath("$..identity.id")
+                            .build())
                     .transform(PSEUDONYMIZE_USER_ID)
                     .transform(MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT)
                     .transform(REDACT_ODATA_CONTEXT)
@@ -659,6 +663,9 @@ public class PrebuiltSanitizerRules {
             .endpoint(Endpoint.builder()
                     .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/onlineMeetings/[a-zA-Z0-9_-]+/attendanceReports(\\?.*)?")
                     .transform(MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE)
+                    .transform(Transform.Pseudonymize.builder()
+                            .jsonPath("$..identity.id")
+                            .build())
                     .transform(PSEUDONYMIZE_USER_ID)
                     .transform(MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT)
                     .transform(REDACT_ODATA_CONTEXT)
@@ -669,6 +676,9 @@ public class PrebuiltSanitizerRules {
                     .pathRegex(ENTRA_ID_REGEX_USERS_BY_PSEUDO + "/onlineMeetings(\\?.*)?")
                     .transforms(Arrays.asList(PSEUDONYMIZE_USER_ID,
                             MS_TEAMS_TEAMS_DEFAULT_PSEUDONYMIZE,
+                            Transform.Pseudonymize.builder()
+                                    .jsonPath("$..identity.id")
+                                    .build(),
                             TOKENIZE_ODATA_LINKS,
                             MS_TEAMS_USERS_ONLINE_MEETINGS_REDACT
                                     .toBuilder()

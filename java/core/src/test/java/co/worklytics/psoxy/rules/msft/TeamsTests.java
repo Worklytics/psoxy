@@ -424,6 +424,7 @@ public class TeamsTests extends JavaRulesTestBaseCase {
         String userId = "dc17674c-81d9-4adb-bfb2-8f6a442e4622";
         String endpoint = "https://graph.microsoft.com/" + apiVersion + "/users/" + userId + "/onlineMeetings";
         String jsonResponse = asJson("Users_onlineMeetings_" + apiVersion + ".json");
+
         assertNotSanitized(jsonResponse,
                 "everyone",
                 "5552478",
@@ -437,7 +438,8 @@ public class TeamsTests extends JavaRulesTestBaseCase {
                 "https://teams.microsoft.com/l/meetup-join/19%3a:meeting_NTg0NmQ3NTctZDVkZC00YzRhLThmNmEtOGQDdmZDZk@thread.v2/0?context=%7b%22Tid%22%3a%aa67bd4c-8475-432d-bd41-39f255720e0a%22%2c%22Oid%22%3a%22112f7296-5fa4-42ca-bb15d4b8%22%7d",
                 "112f7296-5ca-bae8-6a692b15d4b8",
                 "5810cedeb-b2c1-e9bd5d53ec96",
-                "joinMeetingId", "1234567890"
+                "joinMeetingId",
+                "1234567890"
         );
 
         String sanitized = sanitize(endpoint, jsonResponse);
@@ -451,7 +453,9 @@ public class TeamsTests extends JavaRulesTestBaseCase {
                 "macAddress",
                 "reflexiveIPAddress",
                 "relayIPAddress",
-                "subnet"
+                "subnet",
+                "foo@some-domain.com",
+                "upn-value"
         );
         assertUrlWithSubResourcesBlocked(endpoint);
     }
