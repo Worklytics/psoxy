@@ -165,6 +165,7 @@ public class RulesUtils {
         defaultScopeIdBySource.put("azure-ad", "azure-ad");
         defaultScopeIdBySource.put("outlook-cal", "azure-ad");
         defaultScopeIdBySource.put("outlook-mail", "azure-ad");
+        defaultScopeIdBySource.put("msft-teams", "azure-ad");
 
         defaultScopeIdBySource.put("github", "github");
         defaultScopeIdBySource.put("github-enterprise-server", "github");

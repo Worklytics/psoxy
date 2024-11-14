@@ -28,7 +28,7 @@
             "displayName": "Tyler Stein"
           }
         },
-        "upn": "upn-value"
+        "upn": "foo@some-domain.com"
       }
     ],
     "organizer": {
