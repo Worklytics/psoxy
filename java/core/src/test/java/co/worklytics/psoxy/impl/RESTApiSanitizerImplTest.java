@@ -293,7 +293,7 @@ class RESTApiSanitizerImplTest {
         //NOTE: this is a LEGACY case
         MapFunction f = sanitizer.getPseudonymize(Transform.Pseudonymize.builder().includeReversible(true).build());
 
-        assertEquals("{\"hash\":\"kCGiAd9lGjEbWqbPlXo32fOl5YVmrasomP4QwTAsHww\",\"h_4\":\"Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0M\",\"reversible\":\"p~Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0MzTTbTCc7BcR53imT1qZgI\"}",
+        assertEquals("{\"hash\":\"Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0M\",\"reversible\":\"p~Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0MzTTbTCc7BcR53imT1qZgI\"}",
             f.map("asfa", sanitizer.getJsonConfiguration()));
     }
 
@@ -631,14 +631,13 @@ class RESTApiSanitizerImplTest {
 
 
     @CsvSource(value = {
-        "something,.*,t~Pym88cXj0AbPDFzkwBY_4jRh8Tq8KpfLNNwE3PTolQ4",
+        "something,.*,t~EN_O0yRLJp7bRnw6HrbdPMLul_uqairwpevQ08HtEn0",
         "something,blah:.*thing,", // no match, should redact
-        "blah:something,blah:.*thing,t~fZJVpgu6vQk2f6Q8G9IXNysNnxwwJO4cd1zWOZV.Zcg",
-        "blah:something,blah:(.*),blah:t~Pym88cXj0AbPDFzkwBY_4jRh8Tq8KpfLNNwE3PTolQ4",
+        "blah:something,blah:.*thing,t~ltpmWUv-gqwJTPjfusJMo8Cd45xhqDRQx6REW-gS2CU",
+        "blah:something,blah:(.*),blah:t~EN_O0yRLJp7bRnw6HrbdPMLul_uqairwpevQ08HtEn0",
     })
     @ParameterizedTest
     public void pseudonymizeWithRegexMatches_nonMatchingRedacted(String input, String regex, String expected) {
-        //NOTE: this is a LEGACY case
         MapFunction transform = sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder()
             .regex(regex)
             .includeReversible(false)

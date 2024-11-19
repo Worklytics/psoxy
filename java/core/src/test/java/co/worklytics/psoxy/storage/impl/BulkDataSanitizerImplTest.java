@@ -116,9 +116,9 @@ public class BulkDataSanitizerImplTest {
     @SneakyThrows
     void handle_pseudonymize() {
         final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE\n" +
-            "1,\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\",\"\"h_4\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering,2023-01-06,,2019-11-11,\n" +
-            "2,\"{\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\",\"\"h_4\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",Sales,2023-01-06,1,2020-01-01,\n" +
-            "3,\"{\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\",\"\"h_4\"\":\"\"BlQB8Vk0VwdbdWTGAzBF-ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2023-01-06,1,2019-10-06,2022-12-08\n" +
+            "1,\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering,2023-01-06,,2019-11-11,\n" +
+            "2,\"{\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",Sales,2023-01-06,1,2020-01-01,\n" +
+            "3,\"{\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",Engineering,2023-01-06,1,2019-10-06,2022-12-08\n" +
             "4,,Engineering,2023-01-06,1,2018-06-03,\n"; //blank ID
 
         ColumnarRules rules = ColumnarRules.builder()
@@ -162,9 +162,9 @@ public class BulkDataSanitizerImplTest {
     @SneakyThrows
     void handle_redaction() {
         final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE\n" +
-            "1,\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\",\"\"h_4\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",2023-01-06,,2019-11-11,\n" +
-            "2,\"{\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\",\"\"h_4\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",2023-01-06,1,2020-01-01,\n" +
-            "3,\"{\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\",\"\"h_4\"\":\"\"BlQB8Vk0VwdbdWTGAzBF-ote1357Ajr0fFcgFf72kdk\"\"}\",2023-01-06,1,2019-10-06,2022-12-08\n" +
+            "1,\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",2023-01-06,,2019-11-11,\n" +
+            "2,\"{\"\"domain\"\":\"\"workltyics.co\"\",\"\"hash\"\":\"\"al4JK5KlOIsneC2DM__P_HRYe28LWYTBSf3yWKGm5yQ\"\"}\",2023-01-06,1,2020-01-01,\n" +
+            "3,\"{\"\"domain\"\":\"\"workltycis.co\"\",\"\"hash\"\":\"\"BlQB8Vk0VwdbdWTGAzBF.ote1357Ajr0fFcgFf72kdk\"\"}\",2023-01-06,1,2019-10-06,2022-12-08\n" +
             "4,,2023-01-06,1,2018-06-03,\n"; //blank ID
 
         ColumnarRules rules = ColumnarRules.builder()
@@ -186,7 +186,7 @@ public class BulkDataSanitizerImplTest {
     @SneakyThrows
     void handle_cased() {
         final String EXPECTED = "EMPLOYEE_ID,AN EMAIL,SOME DEPARTMENT\n" +
-            "\"{\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\",\"\"h_4\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\",\"\"h_4\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering\n";
+            "\"{\"\"hash\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering\n";
 
         ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_ID")
@@ -199,6 +199,8 @@ public class BulkDataSanitizerImplTest {
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
+
+            assertTrue(out.toString().contains(pseudonymizer.pseudonymize("1").getHash()));
         }
     }
 
@@ -206,7 +208,7 @@ public class BulkDataSanitizerImplTest {
     @SneakyThrows
     void handle_quotes() {
         final String EXPECTED = "EMPLOYEE_ID,EMAIL,DEPARTMENT\n" +
-            "\"{\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\",\"\"h_4\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\",\"\"h_4\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\",,,\"\n";        ColumnarRules rules = ColumnarRules.builder()
+            "\"{\"\"hash\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\",,,\"\n";        ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnToPseudonymize("EMAIL")
             .build();
@@ -217,12 +219,13 @@ public class BulkDataSanitizerImplTest {
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
+            assertTrue(out.toString().contains(pseudonymizer.pseudonymize("1").getHash()));
         }
     }
 
     final String EXPECTED_HRIS_DEFAULT_RULES = "EMPLOYEE_ID,employee_EMAIL,MANAGER_id,Manager_Email,JOIN_DATE,ROLE\n" +
-        "\"{\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\"{\"\"hash\"\":\"\"mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",2021-01-01,Accounting Manager\n" +
-        "\"{\"\"hash\"\":\"\"mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",,,2020-01-01,CEO\n";
+        "\"{\"\"hash\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\"{\"\"hash\"\":\"\"-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",2021-01-01,Accounting Manager\n" +
+        "\"{\"\"hash\"\":\"\"-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",,,2020-01-01,CEO\n";
 
 
     @ParameterizedTest
@@ -255,8 +258,8 @@ public class BulkDataSanitizerImplTest {
     void defaultRules_padded() {
 
         final String EXPECTED = "EMPLOYEE_ID,employee_EMAIL,MANAGER_id,Manager_Email,JOIN_DATE,ROLE\n" +
-            "\"{\"\"hash\"\":\"\"dj_GUEgeG9cw1.2kXK_sN3FkRVTXVQ9JG2tvrbJiwV0\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\"{\"\"hash\"\":\"\"vgBsYd59dbOaOGs3QJUSmTS0iKB9hgrLzfeWvWdXAI0\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",2021-01-01,Accounting Manager\n" +
-            "\"{\"\"hash\"\":\"\"vgBsYd59dbOaOGs3QJUSmTS0iKB9hgrLzfeWvWdXAI0\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",,,2020-01-01,CEO\n";
+            "\"{\"\"hash\"\":\"\"ni_o9pmj5bcNxQ_2cGsYSoOP-CtAUw8GyvT0xa8xSMA\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\"{\"\"hash\"\":\"\"fzLpsPTdf6VDPAD0PKU4GPQvKQpsaHn0OGKeOmSpQ-c\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",2021-01-01,Accounting Manager\n" +
+            "\"{\"\"hash\"\":\"\"fzLpsPTdf6VDPAD0PKU4GPQvKQpsaHn0OGKeOmSpQ-c\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",,,2020-01-01,CEO\n";
 
         //padded case (eg, 001 instead of 1 for employee_id), should result in different hashes
         assertNotEquals(EXPECTED, EXPECTED_HRIS_DEFAULT_RULES);
@@ -282,7 +285,7 @@ public class BulkDataSanitizerImplTest {
     @SneakyThrows
     void validCaseInsensitiveAndTrimRules() {
         final String EXPECTED = "EMPLOYEE_ID,AN EMAIL,SOME DEPARTMENT\n" +
-            "\"{\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering\n";
+            "\"{\"\"hash\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",Engineering\n";
         ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("    employee_id     ")
             .columnToPseudonymize(" an EMAIL ")
@@ -302,7 +305,7 @@ public class BulkDataSanitizerImplTest {
     @SneakyThrows
     void handle_rename() {
         final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT\n" +
-            "\"{\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\",,,\"\n";
+            "\"{\"\"hash\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\",,,\"\n";
         ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnToPseudonymize("EMPLOYEE_EMAIL")
@@ -473,7 +476,7 @@ public class BulkDataSanitizerImplTest {
     @SneakyThrows
     void handle_inclusion() {
         final String EXPECTED = "EMPLOYEE_ID\n" +
-            "\"{\"\"hash\"\":\"\"SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM\"\",\"\"h_4\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\"\n";
+            "\"{\"\"hash\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\"\n";
         ColumnarRules rules = ColumnarRules.builder()
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnsToInclude(Lists.newArrayList("EMPLOYEE_ID"))
@@ -558,10 +561,10 @@ public class BulkDataSanitizerImplTest {
     void transform_ghusername() {
 
         final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,GITHUB_USERNAME\n" +
-            "2,bob@workltyics.co,Sales,2023-01-06,1,2020-01-01,,\"{\"\"hash\"\":\"\"Y4s0esk6oY5kfgIH2Pvdgr0NVqpKyy7fU0IVbV01xTw\"\"\"\n" +
-            "1,alice@worklytics.co,Engineering,2023-01-06,,2019-11-11,,\"{\"\"hash\"\":\"\"kwv9cWxo7TDgrt1qCegIJv7rA84s_895L_wG_y8hYjA\"\"}\"\n" +
+            "2,bob@workltyics.co,Sales,2023-01-06,1,2020-01-01,,\"{\"\"hash\"\":\"\"hgs2zOvvnp8YG1adeeZCwUmAI_BUk5CFTPF_tca6OmQ\"\"}\"\n" +
+            "1,alice@worklytics.co,Engineering,2023-01-06,,2019-11-11,,\"{\"\"hash\"\":\"\"sbIXAryuJzPz0dxRh4swzuxCY9_ZetgbAQlcrI-W30g\"\"}\"\n" +
             "4,,Engineering,2023-01-06,1,2018-06-03,,\n" +
-            "3,charles@workltycis.co,Engineering,2023-01-06,1,2019-10-06,2022-12-08,\"{\"\"hash\"\":\"\"KqWJXpC.g25eQzR80kCS3RVj4L4JNngo7vFwructvNU\"\"}\"\n";
+            "3,charles@workltycis.co,Engineering,2023-01-06,1,2019-10-06,2022-12-08,\"{\"\"hash\"\":\"\"1RaWPpeCqO4wTAc849d9KY41PEXdkHcxJ32ifrLzsjQ\"\"}\"\n";
         ColumnarRules rules = ColumnarRules.builder()
                 .fieldsToTransform(Map.of("EMPLOYEE_EMAIL", FieldTransformPipeline.builder()
                         .newName("GITHUB_USERNAME")
@@ -617,10 +620,10 @@ public class BulkDataSanitizerImplTest {
             "4,";
 
         final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,GITHUB_USERNAME" + CRLF +
-            "2,bob.smith@worklytics.co,\"{\"\"hash\"\":\"\"vm45r.JHXUgXcP6.mzVLxKX4uyFbgqTIecTPqs_ibdI\"\"}\"" + CRLF +
-            "1,alice@worklytics.co,\"{\"\"hash\"\":\"\"fEFRnzBKYdSKBRoK_I6P4U58TEw79SNGl8lS4Dh4ANY\"\"}\"" + CRLF +
+            "2,bob.smith@worklytics.co,\"{\"\"hash\"\":\"\"3tfnePQDgDoBZxb6c04tqlmpKSfGyOPsUANSLMUEuYU\"\"}\"" + CRLF +
+            "1,alice@worklytics.co,\"{\"\"hash\"\":\"\"3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4\"\"}\"" + CRLF +
             "4,," + CRLF +
-            "3,charles.dickens@worklytics.co,\"{\"\"hash\"\":\"\"LbiVG96eyVeyac3b4CQ1KviNHVK3UQtjS6spDcySBzg\"\"}\"" + CRLF;
+            "3,charles.dickens@worklytics.co,\"{\"\"hash\"\":\"\"fTYkjBMftiSOMolXYIZISI2w__u5mJ7TZrTQtifAD-Q\"\"}\"" + CRLF;
 
         ColumnarRules rules = ColumnarRules.builder()
             .fieldsToTransform(Map.of("EMPLOYEE_EMAIL", FieldTransformPipeline.builder()
@@ -648,28 +651,15 @@ public class BulkDataSanitizerImplTest {
             resultString = out.toString();
             assertEquals(EXPECTED, resultString);
 
-            PseudonymizerImpl githubPseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt(pseudonymizer.getOptions().getPseudonymizationSalt())
-                .build());
-
-            // plain 'usernames' hash shouldn't be there either
-            assertFalse(resultString.contains(pseudonymizer.pseudonymize("alice").getHash()));
-            assertFalse(resultString.contains(pseudonymizer.pseudonymize("bob-smith").getHash()));
-            assertFalse(resultString.contains(pseudonymizer.pseudonymize("bob.smith").getHash()));
-            assertFalse(resultString.contains(pseudonymizer.pseudonymize("charles-dickens").getHash()));
-            assertFalse(resultString.contains(pseudonymizer.pseudonymize("charles.dickens").getHash()));
 
             try (CSVParser parser = CSVParser.parse(resultString, CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
                 List<CSVRecord> records = parser.getRecords();
-                assertTrue(records.get(0).get("GITHUB_USERNAME").contains(githubPseudonymizer.pseudonymize("bob-smith").getHash()));
-                assertTrue(records.get(1).get("GITHUB_USERNAME").contains(githubPseudonymizer.pseudonymize("alice").getHash()));
+                assertTrue(records.get(0).get("GITHUB_USERNAME").contains(pseudonymizer.pseudonymize("bob-smith").getHash()));
+                assertTrue(records.get(1).get("GITHUB_USERNAME").contains(pseudonymizer.pseudonymize("alice").getHash()));
                 assertTrue(StringUtils.isBlank(records.get(2).get("GITHUB_USERNAME")));
-                assertTrue(records.get(3).get("GITHUB_USERNAME").contains(githubPseudonymizer.pseudonymize("charles-dickens").getHash()));
+                assertTrue(records.get(3).get("GITHUB_USERNAME").contains(pseudonymizer.pseudonymize("charles-dickens").getHash()));
             }
-
         }
-
-
     }
 
 
@@ -752,7 +742,7 @@ public class BulkDataSanitizerImplTest {
 
         final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,EMPLOYEE_ID_ORIG\n" +
             ",,2023-01-06,,2019-11-11,,\n" +
-            "t~mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI,Sales,2023-01-06,t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,2020-01-01,,2\n";
+            "t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI,Sales,2023-01-06,t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc,2020-01-01,,2\n";
 
         ColumnarRules rules = ColumnarRules.builder()
             .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
