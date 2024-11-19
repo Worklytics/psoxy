@@ -99,12 +99,6 @@ variable "source_kind" {
   description = "kind of source (eg, 'gmail', 'google-chat', etc)"
 }
 
-variable "identifier_scope_id" {
-  type        = string
-  description = "DEPRECATED; will be removed in v0.5.x"
-  default     = null
-}
-
 variable "path_to_repo_root" {
   type        = string
   description = "the path where your psoxy repo resides"
