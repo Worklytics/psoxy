@@ -36,8 +36,7 @@ public class Handler {
 
 
         Pseudonymizer.ConfigurationOptions.ConfigurationOptionsBuilder options =
-            Pseudonymizer.ConfigurationOptions.builder()
-            .defaultScopeId(config.getDefaultScopeId());
+            Pseudonymizer.ConfigurationOptions.builder();
 
         if (config.getPseudonymizationSaltSecret() != null) {
             try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {

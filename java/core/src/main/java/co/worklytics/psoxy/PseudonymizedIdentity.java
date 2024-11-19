@@ -81,23 +81,4 @@ public class PseudonymizedIdentity {
             .build();
     }
 
-    /**
-     * convert this to Pseudonym; works ONLY if built with LEGACY format
-     *
-     * @return
-     */
-    public Pseudonym fromLegacy() {
-        HashUtils hashUtils = new HashUtils();
-
-        Pseudonym.PseudonymBuilder<?, ?> builder = Pseudonym.builder()
-                .hash(hashUtils.decode(hash))
-                .domain(domain);
-
-        if (reversible != null) {
-            UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();
-            builder.reversible(encoder.decode(reversible).getReversible());
-        }
-
-        return builder.build();
-    }
 }
