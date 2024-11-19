@@ -1,7 +1,7 @@
 [
   {
     "key": "{\"hash\":\"2N68SzffLQ6rOghU_wdzCV7P1oVJoodQEMYf-Q6tPVo\"}",
-    "emailAddress": "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
+    "emailAddress": "{\"domain\":\"worklytics.co\",\"hash\":\"GItqpD0PrNe1WX8MpyKYmCPjh99MGEBG30ziv65GIuw\"}",
     "active": true,
     "deleted": false,
     "timeZone": "GMT",

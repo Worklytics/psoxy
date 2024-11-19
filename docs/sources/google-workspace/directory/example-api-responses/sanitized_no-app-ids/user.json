@@ -2,7 +2,7 @@
   "kind":"admin#directory#user",
   "id":"p~oNKsbK3Y8E5osRUjOgzKP-PbnPggtzc-ID2nzRt8kRNxCQZgDXdDdqs1EQ-uUbCr-JaWI7t2Ow8ZUFnFjhCu_Q",
   "etag":"\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/3nm0BxOJJfOv5nDTHneimEDnNRg\"",
-  "primaryEmail":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+  "primaryEmail":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
   "isAdmin":true,
   "isDelegatedAdmin":false,
   "lastLoginTime":"2021-10-10T14:18:21.000Z",
@@ -14,55 +14,55 @@
   "ipWhitelisted":false,
   "emails":[
     {
-      "address":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+      "address":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
       "primary":true
     },
     {
-      "address":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"2Go3NUnssg6ylUG5KhiUU_iia_EIH6bmHSjuxF8Oqyk\"}"
+      "address":"{\"domain\":\"worklytics.co\",\"hash\":\"2Go3NUnssg6ylUG5KhiUU_iia_EIH6bmHSjuxF8Oqyk\"}"
     },
     {
-      "address":"{\"scope\":\"email\",\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"4JurcaYiPcpIPWoECPGFQVT4JNivIqETS68Ckjllfr0\"}"
+      "address":"{\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"4JurcaYiPcpIPWoECPGFQVT4JNivIqETS68Ckjllfr0\"}"
     },
     {
-      "address":"{\"scope\":\"email\",\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"iiBNwxiPbv8wEeXUc3XiwZhrwDWgY6ZVgUmN_kkxvLc\"}"
+      "address":"{\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"iiBNwxiPbv8wEeXUc3XiwZhrwDWgY6ZVgUmN_kkxvLc\"}"
     },
     {
-      "address":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"ojO-cQo0BsTqF144-884OktttVmtu0XD3XG87EBSkaM\"}"
+      "address":"{\"domain\":\"worklytics.co\",\"hash\":\"ojO-cQo0BsTqF144-884OktttVmtu0XD3XG87EBSkaM\"}"
     },
     {
-      "address":"{\"scope\":\"email\",\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"-zRca6jjo5rjm1TkZWSfDUNKCcarGOITXGdzb23WVY4\"}"
+      "address":"{\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"-zRca6jjo5rjm1TkZWSfDUNKCcarGOITXGdzb23WVY4\"}"
     },
     {
-      "address":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"sCbW9DlpTyWrKrvDu9Z2gwUDJpUm9TPhRsk7YJWdEgI\"}"
+      "address":"{\"domain\":\"worklytics.co\",\"hash\":\"sCbW9DlpTyWrKrvDu9Z2gwUDJpUm9TPhRsk7YJWdEgI\"}"
     },
     {
-      "address":"{\"scope\":\"email\",\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"OkMARU2WwsONKuue1W_WH_5a629Y_oCT3OfQtanN-jE\"}"
+      "address":"{\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"OkMARU2WwsONKuue1W_WH_5a629Y_oCT3OfQtanN-jE\"}"
     },
     {
-      "address":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"Xi6zH99auRMbxsFiQV0NB8wF5U9ITDKzRW8Whf27jbs\"}"
+      "address":"{\"domain\":\"worklytics.co\",\"hash\":\"Xi6zH99auRMbxsFiQV0NB8wF5U9ITDKzRW8Whf27jbs\"}"
     },
     {
-      "address":"{\"scope\":\"email\",\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"FERTSysxax0kaHsIuFWjW2_gf5kpLhIQrpAYkBPrOaQ\"}"
+      "address":"{\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"FERTSysxax0kaHsIuFWjW2_gf5kpLhIQrpAYkBPrOaQ\"}"
     },
     {
-      "address":"{\"scope\":\"email\",\"domain\":\"in.worklytics.co\",\"hash\":\"PcXFdtazNty2P-JkRp3SWzYwBhA-IF1u95MNrJl5Hr0\"}"
+      "address":"{\"domain\":\"in.worklytics.co\",\"hash\":\"PcXFdtazNty2P-JkRp3SWzYwBhA-IF1u95MNrJl5Hr0\"}"
     },
     {
-      "address":"{\"scope\":\"email\",\"domain\":\"in.worklytics.co\",\"hash\":\"9vNzNM4KMF1Imj6P8ia4PBu6zM16s6A-6VgxE9-vASs\"}"
+      "address":"{\"domain\":\"in.worklytics.co\",\"hash\":\"9vNzNM4KMF1Imj6P8ia4PBu6zM16s6A-6VgxE9-vASs\"}"
     },
     {
-      "address":"{\"scope\":\"email\",\"domain\":\"in.worklytics.co\",\"hash\":\"jaLzl86qDL6Woi3LkpG2_3mqAZaS7wRo_skQ65sYdNk\"}"
+      "address":"{\"domain\":\"in.worklytics.co\",\"hash\":\"jaLzl86qDL6Woi3LkpG2_3mqAZaS7wRo_skQ65sYdNk\"}"
     },
     {
-      "address":"{\"scope\":\"email\",\"domain\":\"in.worklytics.co\",\"hash\":\"0hUyOpbBY_QKYkLDvlLMtlBNCaM8obTWz-DMMGU7hSA\"}"
+      "address":"{\"domain\":\"in.worklytics.co\",\"hash\":\"0hUyOpbBY_QKYkLDvlLMtlBNCaM8obTWz-DMMGU7hSA\"}"
     },
     {
-      "address":"{\"scope\":\"email\",\"domain\":\"in.worklytics.co\",\"hash\":\"g4kf0AMm1hVmnx-wFC5kfHCdJY1DOlLzXRQKb5W2Z70\"}"
+      "address":"{\"domain\":\"in.worklytics.co\",\"hash\":\"g4kf0AMm1hVmnx-wFC5kfHCdJY1DOlLzXRQKb5W2Z70\"}"
     }
   ],
   "relations":[
     {
-      "value":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4\"}",
+      "value":"{\"domain\":\"worklytics.co\",\"hash\":\"ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4\"}",
       "type":"manager"
     }
   ],
@@ -77,8 +77,8 @@
   "websites":[ ],
   "posixAccounts":[
     {
-      "username":"{\"scope\":\"gapps\",\"hash\":\"NXK2OHOFQ2Q9KaQwtpa1jNrPXM_Td1_BV4ZpxNituaY\"}",
-      "uid":"{\"scope\":\"gapps\",\"hash\":\"z-Lhp-OY1j1O3yD09MLrYhaL4bxdfZfSt6912AjVCs8\"}",
+      "username":"{\"hash\":\"NXK2OHOFQ2Q9KaQwtpa1jNrPXM_Td1_BV4ZpxNituaY\"}",
+      "uid":"{\"hash\":\"z-Lhp-OY1j1O3yD09MLrYhaL4bxdfZfSt6912AjVCs8\"}",
       "gid":"1113066348",
       "systemId":"",
       "primary":true,
@@ -87,22 +87,22 @@
   ],
   "sshPublicKeys":[ ],
   "aliases":[
-    "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"2Go3NUnssg6ylUG5KhiUU_iia_EIH6bmHSjuxF8Oqyk\"}",
-    "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"ojO-cQo0BsTqF144-884OktttVmtu0XD3XG87EBSkaM\"}",
-    "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"sCbW9DlpTyWrKrvDu9Z2gwUDJpUm9TPhRsk7YJWdEgI\"}",
-    "{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"Xi6zH99auRMbxsFiQV0NB8wF5U9ITDKzRW8Whf27jbs\"}"
+    "{\"domain\":\"worklytics.co\",\"hash\":\"2Go3NUnssg6ylUG5KhiUU_iia_EIH6bmHSjuxF8Oqyk\"}",
+    "{\"domain\":\"worklytics.co\",\"hash\":\"ojO-cQo0BsTqF144-884OktttVmtu0XD3XG87EBSkaM\"}",
+    "{\"domain\":\"worklytics.co\",\"hash\":\"sCbW9DlpTyWrKrvDu9Z2gwUDJpUm9TPhRsk7YJWdEgI\"}",
+    "{\"domain\":\"worklytics.co\",\"hash\":\"Xi6zH99auRMbxsFiQV0NB8wF5U9ITDKzRW8Whf27jbs\"}"
   ],
   "nonEditableAliases":[
-    "{\"scope\":\"email\",\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"4JurcaYiPcpIPWoECPGFQVT4JNivIqETS68Ckjllfr0\"}",
-    "{\"scope\":\"email\",\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"iiBNwxiPbv8wEeXUc3XiwZhrwDWgY6ZVgUmN_kkxvLc\"}",
-    "{\"scope\":\"email\",\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"-zRca6jjo5rjm1TkZWSfDUNKCcarGOITXGdzb23WVY4\"}",
-    "{\"scope\":\"email\",\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"OkMARU2WwsONKuue1W_WH_5a629Y_oCT3OfQtanN-jE\"}",
-    "{\"scope\":\"email\",\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"FERTSysxax0kaHsIuFWjW2_gf5kpLhIQrpAYkBPrOaQ\"}",
-    "{\"scope\":\"email\",\"domain\":\"in.worklytics.co\",\"hash\":\"PcXFdtazNty2P-JkRp3SWzYwBhA-IF1u95MNrJl5Hr0\"}",
-    "{\"scope\":\"email\",\"domain\":\"in.worklytics.co\",\"hash\":\"9vNzNM4KMF1Imj6P8ia4PBu6zM16s6A-6VgxE9-vASs\"}",
-    "{\"scope\":\"email\",\"domain\":\"in.worklytics.co\",\"hash\":\"jaLzl86qDL6Woi3LkpG2_3mqAZaS7wRo_skQ65sYdNk\"}",
-    "{\"scope\":\"email\",\"domain\":\"in.worklytics.co\",\"hash\":\"0hUyOpbBY_QKYkLDvlLMtlBNCaM8obTWz-DMMGU7hSA\"}",
-    "{\"scope\":\"email\",\"domain\":\"in.worklytics.co\",\"hash\":\"g4kf0AMm1hVmnx-wFC5kfHCdJY1DOlLzXRQKb5W2Z70\"}"
+    "{\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"4JurcaYiPcpIPWoECPGFQVT4JNivIqETS68Ckjllfr0\"}",
+    "{\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"iiBNwxiPbv8wEeXUc3XiwZhrwDWgY6ZVgUmN_kkxvLc\"}",
+    "{\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"-zRca6jjo5rjm1TkZWSfDUNKCcarGOITXGdzb23WVY4\"}",
+    "{\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"OkMARU2WwsONKuue1W_WH_5a629Y_oCT3OfQtanN-jE\"}",
+    "{\"domain\":\"worklytics.co.test-google-a.com\",\"hash\":\"FERTSysxax0kaHsIuFWjW2_gf5kpLhIQrpAYkBPrOaQ\"}",
+    "{\"domain\":\"in.worklytics.co\",\"hash\":\"PcXFdtazNty2P-JkRp3SWzYwBhA-IF1u95MNrJl5Hr0\"}",
+    "{\"domain\":\"in.worklytics.co\",\"hash\":\"9vNzNM4KMF1Imj6P8ia4PBu6zM16s6A-6VgxE9-vASs\"}",
+    "{\"domain\":\"in.worklytics.co\",\"hash\":\"jaLzl86qDL6Woi3LkpG2_3mqAZaS7wRo_skQ65sYdNk\"}",
+    "{\"domain\":\"in.worklytics.co\",\"hash\":\"0hUyOpbBY_QKYkLDvlLMtlBNCaM8obTWz-DMMGU7hSA\"}",
+    "{\"domain\":\"in.worklytics.co\",\"hash\":\"g4kf0AMm1hVmnx-wFC5kfHCdJY1DOlLzXRQKb5W2Z70\"}"
   ],
   "customerId":"Y03v4af07",
   "orgUnitPath":"/Employees",

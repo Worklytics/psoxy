@@ -12,7 +12,7 @@
     "headers":[
       {
         "name":"Delivered-To",
-        "value":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}"
+        "value":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}"
       },
       {
         "name":"Date",
@@ -20,7 +20,7 @@
       },
       {
         "name":"From",
-        "value":"[{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"EsXNVTaSltmDUIO4v8CixL66qkCKLlpLB_RHysHbQSQ\"}]"
+        "value":"[{\"domain\":\"worklytics.co\",\"hash\":\"EsXNVTaSltmDUIO4v8CixL66qkCKLlpLB_RHysHbQSQ\"}]"
       },
       {
         "name":"Message-ID",
@@ -28,19 +28,19 @@
       },
       {
         "name":"To",
-        "value":"[{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"t9en8zJVP-3M_f0Zce7WRyACl2EWLeGy_fSnrtJpHm4\"}]"
+        "value":"[{\"domain\":\"worklytics.co\",\"hash\":\"t9en8zJVP-3M_f0Zce7WRyACl2EWLeGy_fSnrtJpHm4\"}]"
       },
       {
         "name":"Cc",
-        "value":"[{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"vZ8I4uZkcdXvnp57XCjVY_bJKr9vZpkDsWBDY3m-qTs\"},{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"FRffHsKrFsvq64VMg84_x1stbyhhFwldLDdV6-8F-No\"}]"
+        "value":"[{\"domain\":\"worklytics.co\",\"hash\":\"vZ8I4uZkcdXvnp57XCjVY_bJKr9vZpkDsWBDY3m-qTs\"},{\"domain\":\"worklytics.co\",\"hash\":\"FRffHsKrFsvq64VMg84_x1stbyhhFwldLDdV6-8F-No\"}]"
       },
       {
         "name":"bcC",
-        "value":"[{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"},{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"p4EqhPet-p2vhJbMJD5jrbrlJtF21L0TOl8bBtjrNpk\"}]"
+        "value":"[{\"domain\":\"worklytics.co\",\"hash\":\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"},{\"domain\":\"worklytics.co\",\"hash\":\"p4EqhPet-p2vhJbMJD5jrbrlJtF21L0TOl8bBtjrNpk\"}]"
       },
       {
         "name":"X-Original-Sender",
-        "value":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"EsXNVTaSltmDUIO4v8CixL66qkCKLlpLB_RHysHbQSQ\"}"
+        "value":"{\"domain\":\"worklytics.co\",\"hash\":\"EsXNVTaSltmDUIO4v8CixL66qkCKLlpLB_RHysHbQSQ\"}"
       }
     ]
   },

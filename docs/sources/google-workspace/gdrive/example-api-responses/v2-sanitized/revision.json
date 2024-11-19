@@ -19,6 +19,6 @@
     "kind":"drive#user",
     "isAuthenticatedUser":true,
     "permissionId":"123421341512341234",
-    "emailAddress":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4\"}"
+    "emailAddress":"{\"domain\":\"worklytics.co\",\"hash\":\"ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4\"}"
   }
 }

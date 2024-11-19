@@ -293,7 +293,7 @@ class RESTApiSanitizerImplTest {
         //NOTE: this is a LEGACY case
         MapFunction f = sanitizer.getPseudonymize(Transform.Pseudonymize.builder().includeReversible(true).build());
 
-        assertEquals("{\"scope\":\"scope\",\"hash\":\"kCGiAd9lGjEbWqbPlXo32fOl5YVmrasomP4QwTAsHww\",\"h_4\":\"Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0M\",\"reversible\":\"p~Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0MzTTbTCc7BcR53imT1qZgI\"}",
+        assertEquals("{\"hash\":\"kCGiAd9lGjEbWqbPlXo32fOl5YVmrasomP4QwTAsHww\",\"h_4\":\"Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0M\",\"reversible\":\"p~Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0MzTTbTCc7BcR53imT1qZgI\"}",
             f.map("asfa", sanitizer.getJsonConfiguration()));
     }
 

@@ -6,14 +6,14 @@
     {
       "self":"http://localhost:8080/rest/api/2/issue/10000/worklog/10000",
       "author":{
-        "key":"{\"scope\":\"jira\",\"hash\":\"XFMcGkt3HwABpThFffmg84wAjV_V-7EYXA2C4uBCDss\"}",
-        "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
+        "key":"{\"hash\":\"XFMcGkt3HwABpThFffmg84wAjV_V-7EYXA2C4uBCDss\"}",
+        "emailAddress":"{\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
         "active":true,
         "timeZone":"GMT"
       },
       "updateAuthor":{
-        "key":"{\"scope\":\"jira\",\"hash\":\"XFMcGkt3HwABpThFffmg84wAjV_V-7EYXA2C4uBCDss\"}",
-        "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
+        "key":"{\"hash\":\"XFMcGkt3HwABpThFffmg84wAjV_V-7EYXA2C4uBCDss\"}",
+        "emailAddress":"{\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
         "active":true,
         "timeZone":"GMT"
       },

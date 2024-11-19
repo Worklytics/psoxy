@@ -6,8 +6,8 @@
         ".tag":"user",
         "user":{
           ".tag":"non_team_member",
-          "account_id":"{\"scope\":\"dropbox\",\"hash\":\"eeXewiH2r2t8ur3dmlrXPBaYsisNOw5axAJ7bv9oAWo\"}",
-          "email":"{\"scope\":\"email\",\"domain\":\"acmecorp.com\",\"hash\":\"L1sNpuGGWZ7C5Rl1x1vr0YL7lo0tfZNfwR2rE7OwkP8\"}"
+          "account_id":"{\"hash\":\"eeXewiH2r2t8ur3dmlrXPBaYsisNOw5axAJ7bv9oAWo\"}",
+          "email":"{\"domain\":\"acmecorp.com\",\"hash\":\"L1sNpuGGWZ7C5Rl1x1vr0YL7lo0tfZNfwR2rE7OwkP8\"}"
         }
       },
       "assets":[
@@ -25,8 +25,8 @@
       ],
       "context":{
         ".tag":"team_member",
-        "account_id":"{\"scope\":\"dropbox\",\"hash\":\"eeXewiH2r2t8ur3dmlrXPBaYsisNOw5axAJ7bv9oAWo\"}",
-        "email":"{\"scope\":\"email\",\"domain\":\"acmecorp.com\",\"hash\":\"L1sNpuGGWZ7C5Rl1x1vr0YL7lo0tfZNfwR2rE7OwkP8\"}",
+        "account_id":"{\"hash\":\"eeXewiH2r2t8ur3dmlrXPBaYsisNOw5axAJ7bv9oAWo\"}",
+        "email":"{\"domain\":\"acmecorp.com\",\"hash\":\"L1sNpuGGWZ7C5Rl1x1vr0YL7lo0tfZNfwR2rE7OwkP8\"}",
         "member_external_id":"ADSYNC S-1-5-21-1004296348-1135238915-682003432-1224",
         "team":{
           "display_name":"A Team"
@@ -41,8 +41,8 @@
         "shared_content_link":"abc",
         "shared_content_owner":{
           ".tag":"non_team_member",
-          "account_id":"{\"scope\":\"dropbox\",\"hash\":\"eeXewiH2r2t8ur3dmlrXPBaYsisNOw5axAJ7bv9oAWo\"}",
-          "email":"{\"scope\":\"email\",\"domain\":\"acmecorp.com\",\"hash\":\"L1sNpuGGWZ7C5Rl1x1vr0YL7lo0tfZNfwR2rE7OwkP8\"}"
+          "account_id":"{\"hash\":\"eeXewiH2r2t8ur3dmlrXPBaYsisNOw5axAJ7bv9oAWo\"}",
+          "email":"{\"domain\":\"acmecorp.com\",\"hash\":\"L1sNpuGGWZ7C5Rl1x1vr0YL7lo0tfZNfwR2rE7OwkP8\"}"
         }
       },
       "event_category":{
@@ -64,7 +64,7 @@
         "geo_location":{
           "city":"San Francisco",
           "country":"US",
-          "ip_address":"{\"scope\":\"dropbox\",\"hash\":\"QDBlIncZwcFCcfu1eUyy-EbjkqIOptGw3CrY5zWS14Y\"}",
+          "ip_address":"{\"hash\":\"QDBlIncZwcFCcfu1eUyy-EbjkqIOptGw3CrY5zWS14Y\"}",
           "region":"California"
         }
       },
@@ -73,8 +73,8 @@
           ".tag":"user",
           "user":{
             ".tag":"non_team_member",
-            "account_id":"{\"scope\":\"dropbox\",\"hash\":\"nETDYw6dYz075n1mDbwGnz8nMxuiALmT_Oqr3C-r0Cs\"}",
-            "email":"{\"scope\":\"email\",\"domain\":\"acmecorp.com\",\"hash\":\"jPsuAFufkXB7XPGbISEkJ9heWB2428ynP4uU0limWLY\"}"
+            "account_id":"{\"hash\":\"nETDYw6dYz075n1mDbwGnz8nMxuiALmT_Oqr3C-r0Cs\"}",
+            "email":"{\"domain\":\"acmecorp.com\",\"hash\":\"jPsuAFufkXB7XPGbISEkJ9heWB2428ynP4uU0limWLY\"}"
           }
         }
       ],

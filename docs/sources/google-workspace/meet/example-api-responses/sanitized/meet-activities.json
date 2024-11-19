@@ -14,7 +14,7 @@
       "etag":"\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/PAymcrru6IH88Gbuhjp_QUb9bsM\"",
       "actor":{
         "callerType":"USER",
-        "email":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"N7KL1RlAGqPFhFxRWCW0yVybYxaeFleLKSfzsA7iTqg\"}",
+        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"N7KL1RlAGqPFhFxRWCW0yVybYxaeFleLKSfzsA7iTqg\"}",
         "profileId":"117927411761819390794"
       },
       "events":[
@@ -56,7 +56,7 @@
             },
             {
               "name":"identifier",
-              "value":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"N7KL1RlAGqPFhFxRWCW0yVybYxaeFleLKSfzsA7iTqg\"}"
+              "value":"{\"domain\":\"worklytics.co\",\"hash\":\"N7KL1RlAGqPFhFxRWCW0yVybYxaeFleLKSfzsA7iTqg\"}"
             },
             {
               "name":"location_region",
@@ -64,11 +64,11 @@
             },
             {
               "name":"organizer_email",
-              "value":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}"
+              "value":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}"
             },
             {
               "name":"ip_address",
-              "value":"{\"scope\":\"gapps\",\"hash\":\"WfmpRw2F8j0xnCafod3Vgkkyj7AhJnZTMIzyQcyyAxA\"}"
+              "value":"{\"hash\":\"WfmpRw2F8j0xnCafod3Vgkkyj7AhJnZTMIzyQcyyAxA\"}"
             },
             {
               "name":"audio_send_seconds",
@@ -113,7 +113,7 @@
       "etag":"\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/bfNuMpXQEesjAyNekWjwO9Z3ohQ\"",
       "actor":{
         "callerType":"USER",
-        "email":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"p4EqhPet-p2vhJbMJD5jrbrlJtF21L0TOl8bBtjrNpk\"}",
+        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"p4EqhPet-p2vhJbMJD5jrbrlJtF21L0TOl8bBtjrNpk\"}",
         "profileId":"114349793749086722850"
       },
       "events":[
@@ -155,7 +155,7 @@
             },
             {
               "name":"identifier",
-              "value":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"p4EqhPet-p2vhJbMJD5jrbrlJtF21L0TOl8bBtjrNpk\"}"
+              "value":"{\"domain\":\"worklytics.co\",\"hash\":\"p4EqhPet-p2vhJbMJD5jrbrlJtF21L0TOl8bBtjrNpk\"}"
             },
             {
               "name":"location_region",
@@ -163,11 +163,11 @@
             },
             {
               "name":"organizer_email",
-              "value":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}"
+              "value":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}"
             },
             {
               "name":"ip_address",
-              "value":"{\"scope\":\"gapps\",\"hash\":\"sKy2eZokin-MzmwodKSn7lwJ3uuZ4ZoIKFH77cVBM50\"}"
+              "value":"{\"hash\":\"sKy2eZokin-MzmwodKSn7lwJ3uuZ4ZoIKFH77cVBM50\"}"
             },
             {
               "name":"audio_send_seconds",
@@ -212,7 +212,7 @@
       "etag":"\"g2-KWSBhdhEV1DJNuuX35hICepPpOEDe4lPvnwuxvf4/FrxCL4LLjbUwKaJQMh7ovJF4V2U\"",
       "actor":{
         "callerType":"USER",
-        "email":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4\"}",
+        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4\"}",
         "profileId":"100531288453445237356"
       },
       "events":[
@@ -254,7 +254,7 @@
             },
             {
               "name":"identifier",
-              "value":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4\"}"
+              "value":"{\"domain\":\"worklytics.co\",\"hash\":\"ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4\"}"
             },
             {
               "name":"location_region",
@@ -262,11 +262,11 @@
             },
             {
               "name":"organizer_email",
-              "value":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}"
+              "value":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}"
             },
             {
               "name":"ip_address",
-              "value":"{\"scope\":\"gapps\",\"hash\":\"GHzNx7nEWMgZRSNkep0upj1HTeXY0Md8bMHOwNT76BE\"}"
+              "value":"{\"hash\":\"GHzNx7nEWMgZRSNkep0upj1HTeXY0Md8bMHOwNT76BE\"}"
             },
             {
               "name":"audio_send_seconds",

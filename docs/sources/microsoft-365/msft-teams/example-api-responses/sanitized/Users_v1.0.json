@@ -4,12 +4,12 @@
     {
       "id":"cdfb873d-61f9-4656-bbbb-9e49fba4de97",
       "businessPhones":[ ],
-      "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"80OuLKaSEacbENaFngf3v1Ul1rcs-6BmJRZsfb9scss\"}",
+      "mail":"{\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"80OuLKaSEacbENaFngf3v1Ul1rcs-6BmJRZsfb9scss\"}",
       "officeLocation":null,
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"80OuLKaSEacbENaFngf3v1Ul1rcs-6BmJRZsfb9scss\"}",
+      "userPrincipalName":"{\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"80OuLKaSEacbENaFngf3v1Ul1rcs-6BmJRZsfb9scss\"}",
       "otherMails":[
-        "{\"scope\":\"email\",\"domain\":\"gmail.com\",\"hash\":\"DE__fI7lKDU-e4_ZTA7yZpj7Vu5cQ7jQbQE9h8aU5zg\"}"
+        "{\"domain\":\"gmail.com\",\"hash\":\"DE__fI7lKDU-e4_ZTA7yZpj7Vu5cQ7jQbQE9h8aU5zg\"}"
       ],
       "proxyAddresses":[
         "SMTP:t~80OuLKaSEacbENaFngf3v1Ul1rcs-6BmJRZsfb9scss@worklytics.onmicrosoft.com",
@@ -19,41 +19,41 @@
     {
       "id":"307ee26b-fe96-40a9-bc8a-9e49fba4de97",
       "businessPhones":[ ],
-      "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"8ooPMu_uHiLVL-w_T7gTwJDA4S_ttDhB93_NhIXfkkE\"}",
+      "mail":"{\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"8ooPMu_uHiLVL-w_T7gTwJDA4S_ttDhB93_NhIXfkkE\"}",
       "officeLocation":null,
       "preferredLanguage":null,
-      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"8ooPMu_uHiLVL-w_T7gTwJDA4S_ttDhB93_NhIXfkkE\"}"
+      "userPrincipalName":"{\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"8ooPMu_uHiLVL-w_T7gTwJDA4S_ttDhB93_NhIXfkkE\"}"
     },
     {
       "id":"4ea7fc01-0264-4e84-b85e-9e49fba4de97",
       "businessPhones":[ ],
-      "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"QKF0JFDeWizMmaAamuk9jwtDKUqh_xFG4etyOOHcrEA\"}",
+      "mail":"{\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"QKF0JFDeWizMmaAamuk9jwtDKUqh_xFG4etyOOHcrEA\"}",
       "officeLocation":null,
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"QKF0JFDeWizMmaAamuk9jwtDKUqh_xFG4etyOOHcrEA\"}"
+      "userPrincipalName":"{\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"QKF0JFDeWizMmaAamuk9jwtDKUqh_xFG4etyOOHcrEA\"}"
     },
     {
       "id":"219435cc-746e-48d6-8ccd-242345234f6e",
       "businessPhones":[ ],
-      "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"_oJw-9fORXMFfHtwNXQ5xyTsva2CebpVGKae78dHEeQ\"}",
+      "mail":"{\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"_oJw-9fORXMFfHtwNXQ5xyTsva2CebpVGKae78dHEeQ\"}",
       "officeLocation":null,
       "preferredLanguage":"es-ES",
-      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"_oJw-9fORXMFfHtwNXQ5xyTsva2CebpVGKae78dHEeQ\"}"
+      "userPrincipalName":"{\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"_oJw-9fORXMFfHtwNXQ5xyTsva2CebpVGKae78dHEeQ\"}"
     },
     {
       "id":"f8f2864c-c353-4471-bd75-9e49fba4de97",
       "businessPhones":[ ],
-      "mail":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"98Qqjyepls36L4F39whrqv_YskOZCB71RNm8gO43sis\"}",
+      "mail":"{\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"98Qqjyepls36L4F39whrqv_YskOZCB71RNm8gO43sis\"}",
       "officeLocation":null,
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"98Qqjyepls36L4F39whrqv_YskOZCB71RNm8gO43sis\"}"
+      "userPrincipalName":"{\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"98Qqjyepls36L4F39whrqv_YskOZCB71RNm8gO43sis\"}"
     },
     {
       "businessPhones":[ ],
       "mail":"null",
       "officeLocation":null,
       "preferredLanguage":null,
-      "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"hLkozOrxrM9tHy-V5lXCNwhujad46BtuFl2uP-J7Dwk\"}",
+      "userPrincipalName":"{\"domain\":\"worklytics.onmicrosoft.com\",\"hash\":\"hLkozOrxrM9tHy-V5lXCNwhujad46BtuFl2uP-J7Dwk\"}",
       "id":"232442306-9942-4750-a708-4a1e4fe8a879"
     }
   ]

@@ -8,7 +8,7 @@
     {
       "id":"10680",
       "author":{
-        "accountId":"{\"scope\":\"jira\",\"hash\":\"_dUKcjeOP82hpF2_-_4EnrTnpuqGC5ov-3cwITIcIs0\"}",
+        "accountId":"{\"hash\":\"_dUKcjeOP82hpF2_-_4EnrTnpuqGC5ov-3cwITIcIs0\"}",
         "active":false,
         "timeZone":"America/New_York",
         "accountType":"atlassian"
@@ -25,7 +25,7 @@
     {
       "id":"10689",
       "author":{
-        "accountId":"{\"scope\":\"jira\",\"hash\":\"_dUKcjeOP82hpF2_-_4EnrTnpuqGC5ov-3cwITIcIs0\"}",
+        "accountId":"{\"hash\":\"_dUKcjeOP82hpF2_-_4EnrTnpuqGC5ov-3cwITIcIs0\"}",
         "active":false,
         "timeZone":"America/New_York",
         "accountType":"atlassian"
@@ -42,7 +42,7 @@
     {
       "id":"10702",
       "author":{
-        "accountId":"{\"scope\":\"jira\",\"hash\":\"_dUKcjeOP82hpF2_-_4EnrTnpuqGC5ov-3cwITIcIs0\"}",
+        "accountId":"{\"hash\":\"_dUKcjeOP82hpF2_-_4EnrTnpuqGC5ov-3cwITIcIs0\"}",
         "active":false,
         "timeZone":"America/New_York",
         "accountType":"atlassian"
@@ -64,8 +64,8 @@
     {
       "id":"10716",
       "author":{
-        "accountId":"{\"scope\":\"jira\",\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
-        "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
+        "accountId":"{\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
+        "emailAddress":"{\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
         "active":true,
         "timeZone":"America/New_York",
         "accountType":"atlassian"
@@ -91,8 +91,8 @@
     {
       "id":"10724",
       "author":{
-        "accountId":"{\"scope\":\"jira\",\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
-        "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
+        "accountId":"{\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
+        "emailAddress":"{\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
         "active":true,
         "timeZone":"America/New_York",
         "accountType":"atlassian"
@@ -103,7 +103,7 @@
           "field":"assignee",
           "fieldtype":"jira",
           "fieldId":"assignee",
-          "tmpFromAccountId":"{\"scope\":\"jira\",\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
+          "tmpFromAccountId":"{\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
           "tmpToAccountId":"null"
         }
       ]

@@ -4,22 +4,22 @@
   "messages":[
     {
       "type":"message",
-      "user":"{\"scope\":\"slack\",\"hash\":\"1GJcmG2Yt3aOsk4gdhKR3Su4PFav1QHrFAO4IfvFX4U\"}",
+      "user":"{\"hash\":\"1GJcmG2Yt3aOsk4gdhKR3Su4PFav1QHrFAO4IfvFX4U\"}",
       "ts":"1234561409.000002",
       "reactions":[
         {
           "name":"slightly_smiling_face",
           "users":[
-            "{\"scope\":\"slack\",\"hash\":\"J3naaMunVdXBRevOPonxRvLPn1Z-CzVNeKqfSVjnE0g\"}",
-            "{\"scope\":\"slack\",\"hash\":\"4j1wnXlhWV17ZmzH7DtuOpA2ziQ-4-ZqbpqBRj7pyr4\"}",
-            "{\"scope\":\"slack\",\"hash\":\"By9wnVuwPV3xzCT63UDVFSYK7ADBy3AOo87k_9N1l6c\"}"
+            "{\"hash\":\"J3naaMunVdXBRevOPonxRvLPn1Z-CzVNeKqfSVjnE0g\"}",
+            "{\"hash\":\"4j1wnXlhWV17ZmzH7DtuOpA2ziQ-4-ZqbpqBRj7pyr4\"}",
+            "{\"hash\":\"By9wnVuwPV3xzCT63UDVFSYK7ADBy3AOo87k_9N1l6c\"}"
           ],
           "count":3
         },
         {
           "name":"tada",
           "users":[
-            "{\"scope\":\"slack\",\"hash\":\"cBAkrpTEyw8LOAlvTnh8tcU-KLNnPBJ-UHYEXg_0cZQ\"}"
+            "{\"hash\":\"cBAkrpTEyw8LOAlvTnh8tcU-KLNnPBJ-UHYEXg_0cZQ\"}"
           ],
           "count":1
         }
@@ -58,7 +58,7 @@
       "ts":"1234561515.000007",
       "wibblr":true,
       "edited":{
-        "user":"{\"scope\":\"slack\",\"hash\":\"a--WYfWyhdweZXjOp8cOVe-s3ZD_hl07oe_jpgITxRM\"}",
+        "user":"{\"hash\":\"a--WYfWyhdweZXjOp8cOVe-s3ZD_hl07oe_jpgITxRM\"}",
         "ts":"38327498237.000000"
       },
       "attachments":[
@@ -70,7 +70,7 @@
     {
       "client_msg_id":"314a746d-82c0-4a05-a081-429e4c096c3f",
       "type":"message",
-      "user":"{\"scope\":\"slack\",\"hash\":\"a--WYfWyhdweZXjOp8cOVe-s3ZD_hl07oe_jpgITxRM\"}",
+      "user":"{\"hash\":\"a--WYfWyhdweZXjOp8cOVe-s3ZD_hl07oe_jpgITxRM\"}",
       "ts":"1651249518.059679",
       "team":"T02MT9XBJL9",
       "user_team":"T02MT9XBJL9",
@@ -88,7 +88,7 @@
                 },
                 {
                   "type":"user",
-                  "user_id":"{\"scope\":\"slack\",\"hash\":\"fyCnHbAdterJaFBMVnh6bo_qduSAt-k18eEgbYN_FqI\"}"
+                  "user_id":"{\"hash\":\"fyCnHbAdterJaFBMVnh6bo_qduSAt-k18eEgbYN_FqI\"}"
                 },
                 {
                   "type":"text"
@@ -123,28 +123,28 @@
       "reply_users_count":4,
       "latest_reply":"1651600000.000001",
       "reply_users":[
-        "{\"scope\":\"slack\",\"hash\":\"-_0U24G8TUIEb9zrrOzQF4FUb5Z02maG29jOKp1RNhk\"}",
-        "{\"scope\":\"slack\",\"hash\":\"1GJcmG2Yt3aOsk4gdhKR3Su4PFav1QHrFAO4IfvFX4U\"}",
-        "{\"scope\":\"slack\",\"hash\":\"J3naaMunVdXBRevOPonxRvLPn1Z-CzVNeKqfSVjnE0g\"}",
-        "{\"scope\":\"slack\",\"hash\":\"4j1wnXlhWV17ZmzH7DtuOpA2ziQ-4-ZqbpqBRj7pyr4\"}"
+        "{\"hash\":\"-_0U24G8TUIEb9zrrOzQF4FUb5Z02maG29jOKp1RNhk\"}",
+        "{\"hash\":\"1GJcmG2Yt3aOsk4gdhKR3Su4PFav1QHrFAO4IfvFX4U\"}",
+        "{\"hash\":\"J3naaMunVdXBRevOPonxRvLPn1Z-CzVNeKqfSVjnE0g\"}",
+        "{\"hash\":\"4j1wnXlhWV17ZmzH7DtuOpA2ziQ-4-ZqbpqBRj7pyr4\"}"
       ],
       "replies":[
         {
-          "user":"{\"scope\":\"slack\",\"hash\":\"-_0U24G8TUIEb9zrrOzQF4FUb5Z02maG29jOKp1RNhk\"}",
+          "user":"{\"hash\":\"-_0U24G8TUIEb9zrrOzQF4FUb5Z02maG29jOKp1RNhk\"}",
           "ts":"1651598339.434889"
         },
         {
-          "user":"{\"scope\":\"slack\",\"hash\":\"1GJcmG2Yt3aOsk4gdhKR3Su4PFav1QHrFAO4IfvFX4U\"}",
+          "user":"{\"hash\":\"1GJcmG2Yt3aOsk4gdhKR3Su4PFav1QHrFAO4IfvFX4U\"}",
           "ts":"1651598395.311239"
         },
         {
-          "user":"{\"scope\":\"slack\",\"hash\":\"J3naaMunVdXBRevOPonxRvLPn1Z-CzVNeKqfSVjnE0g\"}",
+          "user":"{\"hash\":\"J3naaMunVdXBRevOPonxRvLPn1Z-CzVNeKqfSVjnE0g\"}",
           "ts":"1651598519.298169"
         },
         {
-          "user":"{\"scope\":\"slack\",\"hash\":\"4j1wnXlhWV17ZmzH7DtuOpA2ziQ-4-ZqbpqBRj7pyr4\"}",
+          "user":"{\"hash\":\"4j1wnXlhWV17ZmzH7DtuOpA2ziQ-4-ZqbpqBRj7pyr4\"}",
           "ts":"1651599241.015189",
-          "parent_user_id":"{\"scope\":\"slack\",\"hash\":\"MoCetFMMeJZUq3HZFTP7CdOaddg0f7zvKBN2ch_IUnM\"}"
+          "parent_user_id":"{\"hash\":\"MoCetFMMeJZUq3HZFTP7CdOaddg0f7zvKBN2ch_IUnM\"}"
         }
       ],
       "is_locked":false,
@@ -175,16 +175,16 @@
       ]
     },
     {
-      "user":"{\"scope\":\"slack\",\"hash\":\"BMW33akERx6B1jg4ktZ3Q6lh18zJptJ0zYoRgqcjdxU\"}",
+      "user":"{\"hash\":\"BMW33akERx6B1jg4ktZ3Q6lh18zJptJ0zYoRgqcjdxU\"}",
       "channel":"D075J2RKK4Y",
       "room":{
         "id":"R07BNSQTZSP",
-        "created_by":"{\"scope\":\"slack\",\"hash\":\"ht3jIZhCUKqR7UVboNfpxTZZUWLoExaW1WX6GG19JVg\"}",
+        "created_by":"{\"hash\":\"ht3jIZhCUKqR7UVboNfpxTZZUWLoExaW1WX6GG19JVg\"}",
         "date_start":1720542372,
         "date_end":1720542756,
         "participant_history":[
-          "{\"scope\":\"slack\",\"hash\":\"ht3jIZhCUKqR7UVboNfpxTZZUWLoExaW1WX6GG19JVg\"}",
-          "{\"scope\":\"slack\",\"hash\":\"C35tSgm0FijTntSB1kSz4RzerO3J58n-H3rwI7A0698\"}"
+          "{\"hash\":\"ht3jIZhCUKqR7UVboNfpxTZZUWLoExaW1WX6GG19JVg\"}",
+          "{\"hash\":\"C35tSgm0FijTntSB1kSz4RzerO3J58n-H3rwI7A0698\"}"
         ],
         "canvas_thread_ts":"1720542372.566689",
         "thread_root_ts":"1720542372.566689",
@@ -210,7 +210,7 @@
       "type":"message",
       "ts":"1720542372.566689",
       "edited":{
-        "user":"{\"scope\":\"slack\",\"hash\":\"BMW33akERx6B1jg4ktZ3Q6lh18zJptJ0zYoRgqcjdxU\"}",
+        "user":"{\"hash\":\"BMW33akERx6B1jg4ktZ3Q6lh18zJptJ0zYoRgqcjdxU\"}",
         "ts":"1720542757.000000"
       },
       "blocks":[

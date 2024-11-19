@@ -2,14 +2,14 @@
   "ok":true,
   "users":[
     {
-      "id":"{\"scope\":\"slack\",\"hash\":\"BZcy5qhkyGyUTWR9hC_my2o6pHLKA4C8MHUHRy1K5Ts\"}",
+      "id":"{\"hash\":\"BZcy5qhkyGyUTWR9hC_my2o6pHLKA4C8MHUHRy1K5Ts\"}",
       "deleted":false,
       "color":"e7392d",
       "tz":"America/Los_Angeles",
       "tz_label":"Pacific Standard Time",
       "tz_offset":-28800,
       "profile":{
-        "email":"{\"scope\":\"email\",\"domain\":\"domain.com\",\"hash\":\"hUnnRlSR8lUa37PCo-APXltncFZ3mPn3sgLmaI2pDA8\"}",
+        "email":"{\"domain\":\"domain.com\",\"hash\":\"hUnnRlSR8lUa37PCo-APXltncFZ3mPn3sgLmaI2pDA8\"}",
         "team":"T02DDBANBM5"
       },
       "is_admin":true,
@@ -27,14 +27,14 @@
       ]
     },
     {
-      "id":"{\"scope\":\"slack\",\"hash\":\"fyCnHbAdterJaFBMVnh6bo_qduSAt-k18eEgbYN_FqI\"}",
+      "id":"{\"hash\":\"fyCnHbAdterJaFBMVnh6bo_qduSAt-k18eEgbYN_FqI\"}",
       "deleted":false,
       "color":"4bbe2e",
       "tz":"America/Los_Angeles",
       "tz_label":"Pacific Standard Time",
       "tz_offset":-28800,
       "profile":{
-        "email":"{\"scope\":\"email\",\"domain\":\"domain.com\",\"hash\":\"DkRMkqDGNK3wQKF7dvYWOuRMDIJVwtlkVcLMbtFkNyc\"}",
+        "email":"{\"domain\":\"domain.com\",\"hash\":\"DkRMkqDGNK3wQKF7dvYWOuRMDIJVwtlkVcLMbtFkNyc\"}",
         "team":"T02DDBANBM5"
       },
       "is_admin":false,
@@ -53,14 +53,14 @@
       ]
     },
     {
-      "id":"{\"scope\":\"slack\",\"hash\":\"mJlhl3xv52fNY6wyUps5mBYPCl1nVWHT442eQ7v-lJw\"}",
+      "id":"{\"hash\":\"mJlhl3xv52fNY6wyUps5mBYPCl1nVWHT442eQ7v-lJw\"}",
       "deleted":false,
       "color":"9f69e7",
       "tz":"America/Los_Angeles",
       "tz_label":"Pacific Standard Time",
       "tz_offset":-28800,
       "profile":{
-        "email":"{\"scope\":\"email\",\"domain\":\"domain.com\",\"hash\":\"sI1oFw2sET0c7SIXZE2lVvwWfnnX6CB8tutqP9kTnAE\"}",
+        "email":"{\"domain\":\"domain.com\",\"hash\":\"sI1oFw2sET0c7SIXZE2lVvwWfnnX6CB8tutqP9kTnAE\"}",
         "team":"T02DDBANBM5"
       },
       "is_admin":true,

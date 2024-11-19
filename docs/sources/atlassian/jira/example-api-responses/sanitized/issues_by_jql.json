@@ -59,15 +59,15 @@
           }
         },
         "creator":{
-          "accountId":"{\"scope\":\"jira\",\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
-          "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
+          "accountId":"{\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
+          "emailAddress":"{\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
           "active":true,
           "timeZone":"America/New_York",
           "accountType":"atlassian"
         },
         "reporter":{
-          "accountId":"{\"scope\":\"jira\",\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
-          "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
+          "accountId":"{\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
+          "emailAddress":"{\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
           "active":true,
           "timeZone":"America/New_York",
           "accountType":"atlassian"

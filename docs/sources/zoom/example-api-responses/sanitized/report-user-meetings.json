@@ -16,7 +16,7 @@
       "start_time":"2019-07-15T23:24:52Z",
       "total_minutes":11,
       "type":2,
-      "user_email":"{\"scope\":\"email\",\"domain\":\"example.com\",\"hash\":\"cT4rXK7pXh_praaHEyRWzkSHVY6wBNEwngSXsuQ7fTQ\"}",
+      "user_email":"{\"domain\":\"example.com\",\"hash\":\"cT4rXK7pXh_praaHEyRWzkSHVY6wBNEwngSXsuQ7fTQ\"}",
       "uuid":"4444AAAiAAAAAiAiAiiAii==",
       "schedule_time":"12/22/2021 16:20",
       "join_waiting_room_time":"02/11/2022 16:15",

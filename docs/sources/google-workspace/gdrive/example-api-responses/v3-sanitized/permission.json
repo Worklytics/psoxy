@@ -2,7 +2,7 @@
   "kind":"drive#permission",
   "id":"16513690099496370655",
   "type":"user",
-  "emailAddress":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+  "emailAddress":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
   "role":"owner",
   "deleted":false,
   "pendingOwner":false

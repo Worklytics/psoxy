@@ -7,8 +7,8 @@
       "self":"https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10709/comment/10024",
       "id":"10024",
       "author":{
-        "accountId":"{\"scope\":\"jira\",\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
-        "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
+        "accountId":"{\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
+        "emailAddress":"{\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
         "active":true,
         "timeZone":"America/New_York",
         "accountType":"atlassian"
@@ -23,7 +23,7 @@
               {
                 "type":"mention",
                 "attrs":{
-                  "id":"{\"scope\":\"jira\",\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
+                  "id":"{\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
                   "accessLevel":""
                 }
               },
@@ -35,8 +35,8 @@
         ]
       },
       "updateAuthor":{
-        "accountId":"{\"scope\":\"jira\",\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
-        "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
+        "accountId":"{\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
+        "emailAddress":"{\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
         "active":true,
         "timeZone":"America/New_York",
         "accountType":"atlassian"

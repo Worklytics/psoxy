@@ -11,8 +11,8 @@
   "state":"open",
   "user":{
     "login":"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f",
-    "id":"{\"scope\":\"github\",\"hash\":\"5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk\"}",
-    "node_id":"{\"scope\":\"github\",\"hash\":\"4YTpKVPu-74u-26baOFgVjym_0UMqn6D8A3cWAjmJ0U\"}",
+    "id":"{\"hash\":\"5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk\"}",
+    "node_id":"{\"hash\":\"4YTpKVPu-74u-26baOFgVjym_0UMqn6D8A3cWAjmJ0U\"}",
     "type":"User",
     "site_admin":false
   },
@@ -27,16 +27,16 @@
   ],
   "assignee":{
     "login":"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f",
-    "id":"{\"scope\":\"github\",\"hash\":\"5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk\"}",
-    "node_id":"{\"scope\":\"github\",\"hash\":\"4YTpKVPu-74u-26baOFgVjym_0UMqn6D8A3cWAjmJ0U\"}",
+    "id":"{\"hash\":\"5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk\"}",
+    "node_id":"{\"hash\":\"4YTpKVPu-74u-26baOFgVjym_0UMqn6D8A3cWAjmJ0U\"}",
     "type":"User",
     "site_admin":false
   },
   "assignees":[
     {
       "login":"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f",
-      "id":"{\"scope\":\"github\",\"hash\":\"5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk\"}",
-      "node_id":"{\"scope\":\"github\",\"hash\":\"4YTpKVPu-74u-26baOFgVjym_0UMqn6D8A3cWAjmJ0U\"}",
+      "id":"{\"hash\":\"5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk\"}",
+      "node_id":"{\"hash\":\"4YTpKVPu-74u-26baOFgVjym_0UMqn6D8A3cWAjmJ0U\"}",
       "type":"User",
       "site_admin":false
     }
@@ -51,8 +51,8 @@
     "state":"open",
     "creator":{
       "login":"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f",
-      "id":"{\"scope\":\"github\",\"hash\":\"5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk\"}",
-      "node_id":"{\"scope\":\"github\",\"hash\":\"4YTpKVPu-74u-26baOFgVjym_0UMqn6D8A3cWAjmJ0U\"}",
+      "id":"{\"hash\":\"5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk\"}",
+      "node_id":"{\"hash\":\"4YTpKVPu-74u-26baOFgVjym_0UMqn6D8A3cWAjmJ0U\"}",
       "type":"User",
       "site_admin":false
     },
@@ -77,8 +77,8 @@
   "updated_at":"2011-04-22T13:33:48Z",
   "closed_by":{
     "login":"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f",
-    "id":"{\"scope\":\"github\",\"hash\":\"5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk\"}",
-    "node_id":"{\"scope\":\"github\",\"hash\":\"4YTpKVPu-74u-26baOFgVjym_0UMqn6D8A3cWAjmJ0U\"}",
+    "id":"{\"hash\":\"5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk\"}",
+    "node_id":"{\"hash\":\"4YTpKVPu-74u-26baOFgVjym_0UMqn6D8A3cWAjmJ0U\"}",
     "type":"User",
     "site_admin":false
   },

@@ -19,7 +19,7 @@
       {
         "identity":{
           "user":{
-            "id":"{\"scope\":\"azure-ad\",\"hash\":\"KvrBhIhPrAEMwI320CqhyGSfgVmKedObWZ5X380uX04\"}"
+            "id":"{\"hash\":\"KvrBhIhPrAEMwI320CqhyGSfgVmKedObWZ5X380uX04\"}"
           }
         },
         "upn":"upn-value"
@@ -28,7 +28,7 @@
     "organizer":{
       "identity":{
         "user":{
-          "id":"{\"scope\":\"azure-ad\",\"hash\":\"OkGYJKhA8lYaD0IJw3YHj8cB9qiSMw6MA_70P99wa3o\"}"
+          "id":"{\"hash\":\"OkGYJKhA8lYaD0IJw3YHj8cB9qiSMw6MA_70P99wa3o\"}"
         }
       },
       "upn":"upn-value"

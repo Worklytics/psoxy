@@ -3,7 +3,7 @@
     {
       "id":"9e8bba57-dc14-533a-a7dd-f0da6575eed1",
       "correlationId":"c98e1515-a937-4b81-b8a8-3992afde64e0",
-      "userId":"{\"scope\":\"azure-ad\",\"hash\":\"2ZGitAxyjkjPJ6l2GfLqf2kr0xFtleWfl5XA_zNbtMA\"}",
+      "userId":"{\"hash\":\"2ZGitAxyjkjPJ6l2GfLqf2kr0xFtleWfl5XA_zNbtMA\"}",
       "startDateTime":"2019-11-01T00:00:25.105Z",
       "inviteDateTime":"2019-11-01T00:00:21.949Z",
       "failureDateTime":"0001-01-01T00:00:00Z",
