@@ -104,7 +104,6 @@ class RESTApiSanitizerImplTest {
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("salt")
-            .defaultScopeId("scope")
             .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
 
@@ -468,12 +467,6 @@ class RESTApiSanitizerImplTest {
 
     @CsvSource(
         value = {
-            "LEGACY,test,false,URL_SAFE_TOKEN,qdRJIFbPHPza8bRV67W_Fq.SYBn77xdIHll17pXhilo",
-            "LEGACY,alice@acme.com,false,URL_SAFE_TOKEN,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
-            //legacy w reversible fail to JSON format!!
-            "LEGACY,test,true,URL_SAFE_TOKEN,'{\"scope\":\"scope\",\"hash\":\"qdRJIFbPHPza8bRV67W_Fq.SYBn77xdIHll17pXhilo\",\"h_4\":\"Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDI\",\"reversible\":\"p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ\"}'",
-            "LEGACY,alice@acme.com,true,URL_SAFE_TOKEN,'{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk\",\"h_4\":\"UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk\",\"reversible\":\"p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com\"}'",
-
             // pseudonyms build with DEFAULT implementation always support URL_SAFE_TOKEN encoding
             "DEFAULT,test,false,URL_SAFE_TOKEN,Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDI",
             "DEFAULT,test,true,URL_SAFE_TOKEN,p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ",
@@ -490,10 +483,8 @@ class RESTApiSanitizerImplTest {
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("salt")
-            .defaultScopeId("scope")
             .pseudonymImplementation(implementation)
             .build());
-
 
         sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"), pseudonymizer);
 
@@ -587,7 +578,6 @@ class RESTApiSanitizerImplTest {
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("salt")
-            .defaultScopeId("scope")
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build());
 

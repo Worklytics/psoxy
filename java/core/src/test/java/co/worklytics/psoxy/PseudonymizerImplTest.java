@@ -55,7 +55,6 @@ class PseudonymizerImplTest {
 
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("salt")
-            .defaultScopeId("scope")
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build());
 
@@ -102,7 +101,6 @@ class PseudonymizerImplTest {
     void emailCanonicalEquivalents_IgnoreDots(String mailHeaderValue) {
          pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("salt")
-            .defaultScopeId("scope")
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .emailCanonicalization(EmailCanonicalization.IGNORE_DOTS)
             .build());
@@ -135,7 +133,6 @@ class PseudonymizerImplTest {
 
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("salt")
-            .defaultScopeId("scope")
             .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
 

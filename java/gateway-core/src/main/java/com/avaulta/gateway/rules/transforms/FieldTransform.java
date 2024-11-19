@@ -211,6 +211,7 @@ public interface FieldTransform {
     @NoArgsConstructor
     @SuperBuilder(toBuilder = true)
     @Data
+    @Deprecated
     class PseudonymizeWithScope implements FieldTransform {
 
         @NonNull

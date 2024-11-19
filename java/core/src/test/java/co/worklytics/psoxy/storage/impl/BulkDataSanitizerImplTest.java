@@ -105,7 +105,6 @@ public class BulkDataSanitizerImplTest {
 
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("salt")
-            .defaultScopeId("hris")
             .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
 
@@ -323,48 +322,10 @@ public class BulkDataSanitizerImplTest {
 
     @Test
     @SneakyThrows
-    void handle_duplicates_legacy() {
-        Pseudonymizer defaultPseudonymizer =
-            pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("salt")
-                .defaultScopeId("hris")
-                .pseudonymImplementation(PseudonymImplementation.LEGACY)
-                .build());
-
-
-        //this is a lookup-table use case (for customers to use in own data warehouse)
-        final String EXPECTED = "EMPLOYEE_ID,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,EMPLOYEE_ID_ORIG\n" +
-            "t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,Engineering,2023-01-06,,2019-11-11,,1\n" +
-            "t~mfsaNYuCX__xvnRz4gJp_t0zrDTC5DkuCJvMkubugsI,Sales,2023-01-06,t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,2020-01-01,,2\n" +
-            "t~-ZdDGUuOMK-Oy7_PJ3pf9SYX12-3tKPdLHfYbjVGcGk,Engineering,2023-01-06,t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,2019-10-06,2022-12-08,3\n" +
-            "t~-fs1T64Micz8SkbILrABgEv4kSg-tFhvhP35HGSLdOo,Engineering,2023-01-06,t~SappwO4KZKGprqqUNruNreBD2BVR98nEM6NRCu3R2dM,2018-06-03,,4\n";
-
-        ColumnarRules rules = ColumnarRules.builder()
-            .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
-            .columnToPseudonymize("EMPLOYEE_ID")
-            .columnToRedact("EMPLOYEE_EMAIL")
-            .columnToPseudonymize("MANAGER_ID")
-            .columnsToDuplicate(Map.of("EMPLOYEE_ID", "EMPLOYEE_ID_ORIG"))
-            .build();
-        columnarFileSanitizerImpl.setRules(rules);
-
-        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
-
-        try (FileReader in = new FileReader(inputFile);
-             StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
-            assertEquals(EXPECTED, out.toString());
-        }
-    }
-
-
-    @Test
-    @SneakyThrows
     void handle_duplicates() {
         Pseudonymizer defaultPseudonymizer =
             pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
                 .pseudonymizationSalt("salt")
-                .defaultScopeId("hris")
                 .build());
 
 
@@ -401,7 +362,6 @@ public class BulkDataSanitizerImplTest {
         Pseudonymizer defaultPseudonymizer =
             pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
                 .pseudonymizationSalt("salt")
-                .defaultScopeId("hris")
                 .build());
 
 
@@ -442,7 +402,6 @@ public class BulkDataSanitizerImplTest {
         Pseudonymizer defaultPseudonymizer =
             pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
                 .pseudonymizationSalt("salt")
-                .defaultScopeId("hris")
                 .build());
 
 
@@ -498,7 +457,6 @@ public class BulkDataSanitizerImplTest {
         Pseudonymizer defaultPseudonymizer =
             pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
                 .pseudonymizationSalt("salt")
-                .defaultScopeId("hris")
                 .build());
 
 
@@ -570,7 +528,6 @@ public class BulkDataSanitizerImplTest {
     void pre_v0_4_30_bulk_pseudonym_URL_SAFE_TOKEN_ENCODING(String identifier) {
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("salt")
-            .defaultScopeId("hris")
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build());
 
@@ -612,7 +569,7 @@ public class BulkDataSanitizerImplTest {
                         .transforms(Arrays.asList(
                                 FieldTransform.filter("(.*)@.*"),
                                 FieldTransform.formatString("%s_enterprise"),
-                                FieldTransform.pseudonymizeWithScope("github")
+                                FieldTransform.pseudonymize(true)
                         )).build()))
                 .build();
         columnarFileSanitizerImpl.setRules(rules);
@@ -636,7 +593,6 @@ public class BulkDataSanitizerImplTest {
             PseudonymizerImpl githubPseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
                 .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .pseudonymizationSalt(pseudonymizer.getOptions().getPseudonymizationSalt())
-                .defaultScopeId("github")
                 .build());
 
             //validate has _enterprise appended pre-pseudonymization
@@ -676,7 +632,7 @@ public class BulkDataSanitizerImplTest {
                     //FieldTransform.javaRegExpReplace("(.*)@.*" + FieldTransform.JavaRegExpReplace.SEPARATOR + "$1"),
                     FieldTransform.javaRegExpReplace("([^\\.].*)\\.([^\\.].*)","$1-$2"),
                     //FieldTransform.javaRegExpReplace("([^\\.].*)\\.([^\\.].*)" + FieldTransform.JavaRegExpReplace.SEPARATOR + "$1-$2"),
-                    FieldTransform.pseudonymizeWithScope("github")
+                    FieldTransform.pseudonymize(true)
                 )).build()))
             .build();
         columnarFileSanitizerImpl.setRules(rules);
@@ -697,7 +653,6 @@ public class BulkDataSanitizerImplTest {
             PseudonymizerImpl githubPseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
                 .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .pseudonymizationSalt(pseudonymizer.getOptions().getPseudonymizationSalt())
-                .defaultScopeId("github")
                 .build());
 
             // plain 'usernames' hash shouldn't be there either
@@ -859,7 +814,7 @@ public class BulkDataSanitizerImplTest {
 
         @Override
         public ConfigurationOptions getOptions() {
-            return ConfigurationOptions.builder().defaultScopeId("hris").build();
+            return ConfigurationOptions.builder().build();
         }
 
     }

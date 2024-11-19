@@ -427,7 +427,6 @@ class CommonRequestHandlerTest {
         Pseudonymizer defaultPseudonymizer =
                 pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
                         .pseudonymizationSalt("salt")
-                        .defaultScopeId("gapps")
                         .pseudonymImplementation(PseudonymImplementation.LEGACY)
                         .build());
 

@@ -4,10 +4,6 @@ import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
-import org.apache.commons.lang3.StringUtils;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 /**
  * pseudonymized form of an account identifier
@@ -18,25 +14,6 @@ import java.util.Base64;
 @Builder
 @Data
 public class PseudonymizedIdentity {
-
-    public static final String EMAIL_SCOPE = "email";
-
-
-    /**
-     * scope of the identity; eg, 'email', 'slack', etc.
-     *
-     * identity is considered unique within its scope.
-     *
-     * arguably, 'scope' is another tier of 'domain'
-     *
-     * NOTE: `null` scope means scope is implicit from identifier's context
-     *
-     * @deprecated stop sending this. consumers should infer scopes based on context
-     */
-    @Deprecated //will be removed in v0.4; infer from context
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    String scope;
-
 
     /**
      * some sort of organizational domain, if and only if identifier has an immutable 1:1
@@ -60,19 +37,6 @@ public class PseudonymizedIdentity {
      *
      */
     String hash;
-
-    /**
-     * future-use. 0.4 hash for pseudonym, if `hash` is NOT 0.4.
-     *
-     * in the future, will be filled for LEGACY (0.3) cases; but for now, will be null (and always
-     * absent from JSON-serialized form)
-     *
-     * this will give both DEFAULT and LEGACY hashes for pseudonyms, allowing for eventual migration
-     * of LEGACY customers to DEFAULT (0.4)
-     *
-     */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    String h_4;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String original;

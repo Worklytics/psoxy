@@ -26,12 +26,6 @@ public interface Pseudonymizer {
         @Deprecated //used ONLY in LEGACY case ; otherwise behavior determined by tokenization strategies
         String pseudonymizationSalt;
 
-        /**
-         * scope to use where logic + rules don't imply a match
-         */
-        @Deprecated
-        String defaultScopeId;
-
         @Builder.Default
         PseudonymImplementation pseudonymImplementation = PseudonymImplementation.DEFAULT;
 

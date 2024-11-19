@@ -1,13 +1,11 @@
 package co.worklytics.psoxy.gateway;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ProxyConfigPropertyTest {
-
 
 
     @ValueSource(
@@ -32,7 +30,6 @@ class ProxyConfigPropertyTest {
             "EMAIL_CANONICALIZATION",
             "PATH_TO_SHARED_CONFIG",
             "PATH_TO_INSTANCE_CONFIG",
-            "IDENTIFIER_SCOPE_ID",
         }
     )
     @ParameterizedTest

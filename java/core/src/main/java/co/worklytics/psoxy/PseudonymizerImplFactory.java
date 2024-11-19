@@ -16,9 +16,7 @@ public interface PseudonymizerImplFactory {
                                                             String defaultScopeIdForSource) {
         Pseudonymizer.ConfigurationOptions.ConfigurationOptionsBuilder builder = Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
-                .orElseThrow(() -> new Error("Must configure value for SALT to generate pseudonyms")))
-            .defaultScopeId(config.getConfigPropertyAsOptional(ProxyConfigProperty.IDENTIFIER_SCOPE_ID)
-                .orElse(defaultScopeIdForSource));
+                .orElseThrow(() -> new Error("Must configure value for SALT to generate pseudonyms")));
 
         config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION)
             .map(PseudonymImplementation::parseConfigPropertyValue)
