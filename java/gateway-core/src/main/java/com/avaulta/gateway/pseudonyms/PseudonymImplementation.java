@@ -17,6 +17,7 @@ public enum PseudonymImplementation {
     //not based on scope; base64-url encoded
     DEFAULT("v0.4"),
     //includes 'scope'
+    @Deprecated // configuring this should blow up proxy ops, rather than filling nonsense data
     LEGACY("v0.3"),
     ;
 

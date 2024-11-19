@@ -29,7 +29,7 @@ import java.util.*;
 @Getter
 @EqualsAndHashCode
 @JsonPropertyOrder(alphabetic = true)
-@JsonIgnoreProperties("defaultScopeIdForSource") // so compatiable with legacy CsvRules
+@JsonIgnoreProperties("defaultScopeIdForSource") // so compatible with legacy CsvRules
 public class ColumnarRules implements BulkDataRules {
 
     private static final long serialVersionUID = 1L;

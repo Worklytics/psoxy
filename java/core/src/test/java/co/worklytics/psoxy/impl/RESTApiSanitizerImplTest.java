@@ -104,7 +104,6 @@ class RESTApiSanitizerImplTest {
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("salt")
-            .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
 
         sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"), pseudonymizer);

@@ -128,26 +128,6 @@ class PseudonymizerImplTest {
 
 
     @Test
-    void hashMatchesLegacy() {
-        // all this is really testing is that we aren't breaking the LEGACY hash implementation
-
-        pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt("salt")
-            .pseudonymImplementation(PseudonymImplementation.LEGACY)
-            .build());
-
-        //value taken from legacy app
-        final String CANONICAL = "original";
-
-        //value taken from legacy app
-        final String identityHash = "Xz77cF4Fm7KMPAuwLaGXD82LKXNwi69nNcH0nKtGRJA";
-
-        assertEquals(identityHash,
-            pseudonymizer.pseudonymize(CANONICAL).getHash());
-    }
-
-
-    @Test
     void hashesMatchRegardlessOfReversible() {
         final String CANONICAL = "original";
 

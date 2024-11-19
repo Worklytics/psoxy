@@ -4,6 +4,7 @@ package co.worklytics.psoxy.rules;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.transforms.Transform;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.*;
@@ -19,21 +20,12 @@ import java.util.stream.Stream;
 @NoArgsConstructor //for Jackson
 @Getter
 @EqualsAndHashCode
+@JsonIgnoreProperties({"defaultScopeIdForSource"})
 @JsonPropertyOrder({"allowAllEndpoints", "endpoints", "defaultScopeIdForSource"})
 @JsonInclude(JsonInclude.Include.NON_NULL) //NOTE: despite name, also affects YAML encoding
 public class Rules2 implements RESTRules {
 
-
     private static final long serialVersionUID = 1L;
-
-    /**
-     * scopeId to set for any identifiers parsed from source that aren't email addresses
-     *
-     * NOTE: can be overridden by config, in case you're connecting to an on-prem / private instance
-     * of the source and you don't want its identifiers to be treated as under the default scope
-     */
-    @Getter
-    String defaultScopeIdForSource;
 
     @Singular
     List<Endpoint> endpoints;
@@ -42,8 +34,6 @@ public class Rules2 implements RESTRules {
     @Deprecated //will be dropped in v0.5
     @Builder.Default
     Boolean allowAllEndpoints = false;
-
-
 
     Map<String, JsonSchemaFilter> definitions;
 

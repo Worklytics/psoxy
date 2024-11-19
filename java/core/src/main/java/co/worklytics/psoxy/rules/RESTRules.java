@@ -9,8 +9,6 @@ import java.util.Map;
 
 public interface RESTRules extends RuleSet, Serializable {
 
-    String getDefaultScopeIdForSource();
-
     Boolean getAllowAllEndpoints();
     List<Endpoint> getEndpoints();
 

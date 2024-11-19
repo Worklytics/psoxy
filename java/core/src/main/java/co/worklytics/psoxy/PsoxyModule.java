@@ -261,27 +261,8 @@ public class PsoxyModule {
     @Provides
     Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory,
                                 ConfigService config,
-                                SecretStore secretStore,
-                                RulesUtils rulesUtils, com.avaulta.gateway.rules.RuleSet ruleSet) {
-        return factory.create(factory.buildOptions(config,
-            secretStore,
-            rulesUtils.getDefaultScopeIdFromRules(ruleSet)
-                .orElseGet(() -> {
-                    boolean legacy =
-                    config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION)
-                        .map(PseudonymImplementation::valueOf)
-                        .map(implementation -> Objects.equals(implementation, PseudonymImplementation.LEGACY))
-                        .orElse(false);
-
-                    String defaultScopeIdFromSource  = config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE)
-                        .map(rulesUtils::getDefaultScopeIdFromSource)
-                        .orElse(null);
-
-                    if (legacy && StringUtils.isEmpty(defaultScopeIdFromSource)) {
-                        log.severe("Missing scope for legacy pseudonym implementation!");
-                    }
-                    return defaultScopeIdFromSource;
-                })));
+                                SecretStore secretStore) {
+        return factory.create(factory.buildOptions(config, secretStore));
     }
 
     @Provides

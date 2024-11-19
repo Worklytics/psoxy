@@ -105,7 +105,6 @@ public class BulkDataSanitizerImplTest {
 
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("salt")
-            .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
 
         //make it deterministic
@@ -591,7 +590,6 @@ public class BulkDataSanitizerImplTest {
             assertEquals(EXPECTED, resultString);
 
             PseudonymizerImpl githubPseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .pseudonymizationSalt(pseudonymizer.getOptions().getPseudonymizationSalt())
                 .build());
 
@@ -651,7 +649,6 @@ public class BulkDataSanitizerImplTest {
             assertEquals(EXPECTED, resultString);
 
             PseudonymizerImpl githubPseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymImplementation(PseudonymImplementation.LEGACY)
                 .pseudonymizationSalt(pseudonymizer.getOptions().getPseudonymizationSalt())
                 .build());
 
