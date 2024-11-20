@@ -11,8 +11,9 @@ Changes to be including in future/planned release notes will be added here.
 
 BREAKING:
   - min `azuread` provider is generally 2.44; if you're using an older version, you'll need to
-    upgrade (`terraform init --upgrade`)
-  - `azuread-local-cert` module variables have changed; you must now pass `application_id` instead
+    upgrade (`terraform init --upgrade`); a state refresh (`terraform refresh`) may help if it complains about unknown attributes
+    present in your state
+   - `azuread-local-cert` module variables have changed; you must now pass `application_id` instead
     of `application_object_id`; these refer to different values you can obtain via the [Microsoft Entra admin center](https://entra.microsoft.com/#home)
     portal (formally Azure AD portal blade)
   - variables to `aws-host`/`gcp-host` modules to have changed slightly; if you initially copied an
@@ -23,6 +24,8 @@ BREAKING:
     `terraform apply`, and THEN update to 0.5.x
   - the v0.3 pseudonymization algorithm is no longer supported; attempting to do so should result in an error
   - `scope` field will no longer be sent with JSON-encoded pseudonyms. 
+
+
 
 ## [0.4.61](https://github.com/Worklytics/psoxy/release/tag/v0.4.61)
  - added some `columnsToPseudonymizeIfPresent` to survey bulk connectors; these are to avoid PII
