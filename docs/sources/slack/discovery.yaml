@@ -11,6 +11,10 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.users[*].id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
           - "$.users[*].profile.email"
           - "$.users[*].profile.guest_invited_by"
         encoding: "JSON"

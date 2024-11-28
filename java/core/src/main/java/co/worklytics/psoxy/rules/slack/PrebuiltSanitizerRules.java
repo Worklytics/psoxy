@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.slack;
 
 import co.worklytics.psoxy.rules.RESTRules;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.Rules2;
 import com.avaulta.gateway.rules.transforms.Transform;
@@ -26,6 +27,10 @@ public class PrebuiltSanitizerRules {
                     .pathTemplate("/api/discovery.users.list")
                     .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$.users[*].id")
+                            .includeReversible(true)
+                            .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+                            .build())
+                    .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$.users[*].profile.email")
                             .jsonPath("$.users[*].profile.guest_invited_by")
                             .build())
