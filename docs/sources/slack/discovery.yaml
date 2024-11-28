@@ -53,6 +53,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.messages[*].user"
+          - "$.messages[*].inviter"
           - "$.messages[*].files[*].user"
           - "$.messages[*].reactions[*].users[*]"
           - "$.messages[*].replies[*].user"

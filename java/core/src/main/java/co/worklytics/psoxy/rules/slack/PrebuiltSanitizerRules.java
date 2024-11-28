@@ -89,6 +89,7 @@ public class PrebuiltSanitizerRules {
                     .pathTemplate("/api/discovery.conversations.history")
                     .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$.messages[*].user")
+                            .jsonPath("$.messages[*].inviter")
                             .jsonPath("$.messages[*].files[*].user")
                             .jsonPath("$.messages[*].reactions[*].users[*]")
                             .jsonPath("$.messages[*].replies[*].user")
