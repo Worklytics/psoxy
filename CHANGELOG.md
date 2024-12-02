@@ -23,7 +23,7 @@ BREAKING:
   - various migrations applicable to 0.4.x have been removed; if upgrading from 0.4.x, make sure you first upgrade to latest version of 0.4.x (eg, 0.4.61), run
     `terraform apply`, and THEN update to 0.5.x
   - the v0.3 pseudonymization algorithm is no longer supported; attempting to do so should result in an error
-  - `scope` field will no longer be sent with JSON-encoded pseudonyms. 
+  - `scope` field will no longer be sent with JSON-encoded pseudonyms.
 
 
 
