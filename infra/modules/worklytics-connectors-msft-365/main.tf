@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.3, < 1.10"
+  required_version = ">= 1.3, < 1.11"
 }
 
 locals {
