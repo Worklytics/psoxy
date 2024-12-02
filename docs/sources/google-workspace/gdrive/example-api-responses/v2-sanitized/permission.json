@@ -3,7 +3,7 @@
   "etag":"\"_R8P43oBhIhNTnhIfz6n3nucVjg\"",
   "id":"16513690099496370655",
   "selfLink":"https://www.googleapis.com/drive/v2/files/1dCzjG8gA3CkXkNs3qgAj8ruuDLCz-Wrwdo4CIiIBACs/permissions/16513690099496370655",
-  "emailAddress":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+  "emailAddress":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
   "domain":"worklytics.co",
   "role":"owner",
   "type":"user",

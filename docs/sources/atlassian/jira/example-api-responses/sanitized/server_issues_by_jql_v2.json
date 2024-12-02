@@ -23,15 +23,15 @@
           "isWatching":true
         },
         "creator":{
-          "key":"{\"scope\":\"jira\",\"hash\":\"XFMcGkt3HwABpThFffmg84wAjV_V-7EYXA2C4uBCDss\"}",
-          "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
+          "key":"{\"hash\":\"XFMcGkt3HwABpThFffmg84wAjV_V-7EYXA2C4uBCDss\"}",
+          "emailAddress":"{\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
           "active":true,
           "timeZone":"GMT"
         },
         "created":"2023-05-19T17:13:53.000+0000",
         "reporter":{
-          "key":"{\"scope\":\"jira\",\"hash\":\"XFMcGkt3HwABpThFffmg84wAjV_V-7EYXA2C4uBCDss\"}",
-          "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
+          "key":"{\"hash\":\"XFMcGkt3HwABpThFffmg84wAjV_V-7EYXA2C4uBCDss\"}",
+          "emailAddress":"{\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
           "active":true,
           "timeZone":"GMT"
         },
@@ -55,7 +55,7 @@
           "id":"10000",
           "statusCategory":{
             "id":2,
-            "key":"{\"scope\":\"jira\",\"hash\":\"ghSCIzLzTafFlfc1ErWl4k3fig1cwbwSqGD3uwdt3hs\"}",
+            "key":"{\"hash\":\"ghSCIzLzTafFlfc1ErWl4k3fig1cwbwSqGD3uwdt3hs\"}",
             "colorName":"blue-gray"
           }
         }

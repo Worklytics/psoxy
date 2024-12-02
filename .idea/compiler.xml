@@ -7,6 +7,10 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="core" />
+        <module name="psoxy-aws" />
+        <module name="psoxy-gcp" />
+        <module name="psoxy-cmd-line" />
       </profile>
       <profile name="Annotation profile for java" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -39,10 +43,6 @@
           <entry name="$MAVEN_REPOSITORY$/org/jetbrains/kotlinx/kotlinx-metadata-jvm/0.3.0/kotlinx-metadata-jvm-0.3.0.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
         </processorPath>
-        <module name="core" />
-        <module name="psoxy-aws" />
-        <module name="psoxy-gcp" />
-        <module name="psoxy-cmd-line" />
         <module name="psoxy-core" />
       </profile>
       <profile name="Annotation profile for gateway-core" enabled="true">

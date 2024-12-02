@@ -20,7 +20,6 @@ locals {
     TARGET_HOST                     = var.target_host
     SOURCE_AUTH_STRATEGY_IDENTIFIER = var.source_auth_strategy
     OAUTH_SCOPES                    = join(" ", var.oauth_scopes)
-    IDENTIFIER_SCOPE_ID             = var.identifier_scope_id
     }
     : k => v if v != null
   }
@@ -220,17 +219,13 @@ resource "local_file" "todo" {
 }
 
 locals {
-  test_script = <<EOT
-#!/bin/bash
-API_PATH=$${1:-${try(var.example_api_calls[0], "")}}
-echo "Quick test of ${module.psoxy_lambda.function_name} ..."
-
-${local.command_cli_call} -u "${local.proxy_endpoint_url}/" --health-check
-
-${local.command_cli_call} -u "${local.proxy_endpoint_url}$API_PATH" ${local.impersonation_param}
-
-echo "Invoke this script with any of the following as arguments to test other endpoints:${"\r\n\t"}${join("\"\r\n\t\"", var.example_api_calls)}"
-EOT
+  test_script = templatefile("${path.module}/test_script.tftpl", {
+    proxy_endpoint_url = local.proxy_endpoint_url,
+    function_name = module.psoxy_lambda.function_name,
+    impersonation_param = local.impersonation_param,
+    command_cli_call = local.command_cli_call,
+    example_api_calls = var.example_api_calls,
+  })
 }
 
 resource "local_file" "test_script" {

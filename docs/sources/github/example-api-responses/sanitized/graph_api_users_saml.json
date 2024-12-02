@@ -10,12 +10,12 @@
           "edges":[
             {
               "node":{
-                "guid":"{\"scope\":\"github\",\"hash\":\"5yFLE9_eWMz8YE8Fp1Li0TuYIh_eP5WfzjogeJVfLsg\"}",
+                "guid":"{\"hash\":\"5yFLE9_eWMz8YE8Fp1Li0TuYIh_eP5WfzjogeJVfLsg\"}",
                 "samlIdentity":{
-                  "nameId":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"2cclTmgvAaaNoY_a3YFJVu1UUmwFw1MX9nrrF6oH9tM\"}",
+                  "nameId":"{\"domain\":\"contoso.com\",\"hash\":\"2cclTmgvAaaNoY_a3YFJVu1UUmwFw1MX9nrrF6oH9tM\"}",
                   "emails":[
                     {
-                      "value":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"tJeMjd4Zz84TzbzdvLTpWPg1z3gf-5Icpqv7Cbg_c2c\"}"
+                      "value":"{\"domain\":\"contoso.com\",\"hash\":\"tJeMjd4Zz84TzbzdvLTpWPg1z3gf-5Icpqv7Cbg_c2c\"}"
                     }
                   ]
                 },
@@ -26,9 +26,9 @@
             },
             {
               "node":{
-                "guid":"{\"scope\":\"github\",\"hash\":\"rhadwfw52P0hheXmNWvS3KkJavv5p_7Zx7fAac0BjHw\"}",
+                "guid":"{\"hash\":\"rhadwfw52P0hheXmNWvS3KkJavv5p_7Zx7fAac0BjHw\"}",
                 "samlIdentity":{
-                  "nameId":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"OS0ifbJZXKTBbeGUlEbyacwWGTxBMkrAWSSbcy2OKmA\"}"
+                  "nameId":"{\"domain\":\"contoso.com\",\"hash\":\"OS0ifbJZXKTBbeGUlEbyacwWGTxBMkrAWSSbcy2OKmA\"}"
                 },
                 "user":{
                   "login":"p~IfCQZlVaWKPjwpZn6GtislWJJ2ehfSnlyyONl2LdgTAaP2EggmLxGUnmFuzNnZlY"

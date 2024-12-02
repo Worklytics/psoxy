@@ -1,7 +1,6 @@
 package co.worklytics.psoxy;
 
 import com.avaulta.gateway.pseudonyms.Pseudonym;
-import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
@@ -12,7 +11,6 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressCriteria;
@@ -40,7 +38,6 @@ public class PseudonymizerImpl implements Pseudonymizer {
 
     Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
 
-    //TODO: what if options conflict w dependencies??
     @Getter
     ConfigurationOptions options;
 
@@ -102,7 +99,6 @@ public class PseudonymizerImpl implements Pseudonymizer {
 
         PseudonymizedIdentity.PseudonymizedIdentityBuilder builder = PseudonymizedIdentity.builder();
 
-        String scope;
         //q: this auto-detect a good idea? Or invert control and let caller specify with a header
         // or something??
         //NOTE: use of EmailAddressValidator/Parser here is probably overly permissive, as there
@@ -115,40 +111,27 @@ public class PseudonymizerImpl implements Pseudonymizer {
             canonicalization = this::emailCanonicalization;
             domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.RECOMMENDED, true);
             builder.domain(domain);
-            scope = PseudonymizedIdentity.EMAIL_SCOPE;
             //q: do something with the personal name??
             // NO --> it is not going to be reliable (except for From, will fill with whatever
             // sender has for the person in their Contacts), and in enterprise use-cases we
             // shouldn't need it for matching
         } else {
             canonicalization = Function.identity();
-            scope = getOptions().getDefaultScopeId();
         }
-
-        builder.scope(StringUtils.trimToNull(scope));
-
 
         byte[] hashWithDefaultImpl =
             deterministicTokenizationStrategy.getToken(value.toString(), canonicalization);
 
         // encoded hash will be filled based on customer's config; may NOT simply be encoding of
         // hashWithDefaultImpl
-        String encodedHash;
-        if (getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
-            encodedHash = hashUtils.hash(canonicalization.apply(value.toString()),
-                getOptions().getPseudonymizationSalt(), asLegacyScope(scope));
-        } else if (getOptions().getPseudonymImplementation() == PseudonymImplementation.DEFAULT) {
-            encodedHash = encoder.encodeToString(hashWithDefaultImpl);
-        } else {
-            throw new RuntimeException("Unsupported pseudonym implementation: " + getOptions().getPseudonymImplementation());
-        }
+        String encodedHash = encoder.encodeToString(hashWithDefaultImpl);
 
         builder.hash(encodedHash);
 
         if (transformOptions.getIncludeReversible()) {
             builder.reversible(urlSafePseudonymEncoder.encode(
                 Pseudonym.builder()
-                    .hash(hashWithDefaultImpl) //reversibles have ALWAYS relied on the v4 default impl
+                    .hash(hashWithDefaultImpl)
                     .reversible(reversibleTokenizationStrategy.getReversibleToken(value.toString(), canonicalization))
                     .domain(domain)
                     .build()));
@@ -158,22 +141,10 @@ public class PseudonymizerImpl implements Pseudonymizer {
             builder.original(Objects.toString(value));
         }
 
-        // for LEGACY case, fill DEFAULT pseudonym in h_4, to enable future migration by client
-        // (eg, send both DEFAULT + LEGACY)
-        if (getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
-            builder.h_4(encoder.encodeToString(hashWithDefaultImpl));
-        }
-
         return builder.build();
     }
 
     boolean duckTypesAsEmails(Object value) {
         return value instanceof String && EmailAddressValidator.isValid((String) value);
-    }
-
-    //converts 'scope' to legacy value (eg, equivalents to original Worklytics scheme, where no scope
-    // meant 'email'
-    private String asLegacyScope(@NonNull String scope) {
-        return scope.equals(PseudonymizedIdentity.EMAIL_SCOPE) ? "" : scope;
     }
 }

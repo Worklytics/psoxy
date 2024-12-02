@@ -44,11 +44,6 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
 
     ENCRYPTION_KEY_IP(false),
 
-
-    @Deprecated //removed from v0.5
-    IDENTIFIER_SCOPE_ID,
-
-
     PSOXY_SALT(false),
     SALT_IP(false), // used to salt IP; distinct value so can independently rotate IP salt from primary salt
 

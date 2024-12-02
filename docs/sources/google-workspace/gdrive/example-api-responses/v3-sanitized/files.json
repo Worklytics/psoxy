@@ -31,14 +31,14 @@
           "kind":"drive#user",
           "me":false,
           "permissionId":"02185925293822571813",
-          "emailAddress":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"rVTRd0tTDzW6C2bnlwZ8h0afsRh_AYQheCeI9BRyjiI\"}"
+          "emailAddress":"{\"domain\":\"worklytics.co\",\"hash\":\"rVTRd0tTDzW6C2bnlwZ8h0afsRh_AYQheCeI9BRyjiI\"}"
         }
       ],
       "lastModifyingUser":{
         "kind":"drive#user",
         "me":false,
         "permissionId":"02185925293822571813",
-        "emailAddress":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"rVTRd0tTDzW6C2bnlwZ8h0afsRh_AYQheCeI9BRyjiI\"}"
+        "emailAddress":"{\"domain\":\"worklytics.co\",\"hash\":\"rVTRd0tTDzW6C2bnlwZ8h0afsRh_AYQheCeI9BRyjiI\"}"
       },
       "shared":true,
       "ownedByMe":false,
@@ -76,7 +76,7 @@
           "kind":"drive#permission",
           "id":"16513690099496370655",
           "type":"user",
-          "emailAddress":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+          "emailAddress":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
           "role":"writer",
           "deleted":false,
           "pendingOwner":false
@@ -85,7 +85,7 @@
           "kind":"drive#permission",
           "id":"02185925293822571813",
           "type":"user",
-          "emailAddress":"{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"rVTRd0tTDzW6C2bnlwZ8h0afsRh_AYQheCeI9BRyjiI\"}",
+          "emailAddress":"{\"domain\":\"worklytics.co\",\"hash\":\"rVTRd0tTDzW6C2bnlwZ8h0afsRh_AYQheCeI9BRyjiI\"}",
           "role":"owner",
           "deleted":false,
           "pendingOwner":false

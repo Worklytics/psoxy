@@ -22,7 +22,7 @@
         "application":null,
         "device":null,
         "user":{
-          "id":"{\"scope\":\"azure-ad\",\"hash\":\"B9mIayvpLlXmJS0UFmhvp06dDj9WoxgJ9Dc7zS9Dc90\"}",
+          "id":"{\"hash\":\"B9mIayvpLlXmJS0UFmhvp06dDj9WoxgJ9Dc7zS9Dc90\"}",
           "userIdentityType":"aadUser"
         }
       },
@@ -41,7 +41,7 @@
             "device":null,
             "conversation":null,
             "user":{
-              "id":"{\"scope\":\"azure-ad\",\"hash\":\"O4RUPftFsIOsLe5u9m_TNdrNkrJvuUuHCdgafxMyo74\"}",
+              "id":"{\"hash\":\"O4RUPftFsIOsLe5u9m_TNdrNkrJvuUuHCdgafxMyo74\"}",
               "userIdentityType":"aadUser"
             }
           }
@@ -71,7 +71,7 @@
         "application":null,
         "device":null,
         "user":{
-          "id":"{\"scope\":\"azure-ad\",\"hash\":\"B9mIayvpLlXmJS0UFmhvp06dDj9WoxgJ9Dc7zS9Dc90\"}",
+          "id":"{\"hash\":\"B9mIayvpLlXmJS0UFmhvp06dDj9WoxgJ9Dc7zS9Dc90\"}",
           "userIdentityType":"aadUser"
         }
       },
@@ -120,7 +120,7 @@
           "application":null,
           "device":null,
           "user":{
-            "id":"{\"scope\":\"azure-ad\",\"hash\":\"_f_lwH_zqYVtech_dnZSTmXzYq4pDo8vsGQ51YNjrY4\"}",
+            "id":"{\"hash\":\"_f_lwH_zqYVtech_dnZSTmXzYq4pDo8vsGQ51YNjrY4\"}",
             "userIdentityType":"aadUser"
           }
         }

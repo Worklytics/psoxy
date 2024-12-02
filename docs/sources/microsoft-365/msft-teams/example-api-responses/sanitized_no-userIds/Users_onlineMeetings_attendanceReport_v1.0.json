@@ -5,7 +5,7 @@
   "meetingEndDateTime":"2021-10-05T04:43:49.77Z",
   "attendanceRecords":[
     {
-      "emailAddress":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"vmFS5ryxySBiEUyJMW5ZaT6Om1EFFke7j1Srx0mZAxs\"}",
+      "emailAddress":"{\"domain\":\"contoso.com\",\"hash\":\"vmFS5ryxySBiEUyJMW5ZaT6Om1EFFke7j1Srx0mZAxs\"}",
       "totalAttendanceInSeconds":1152,
       "role":"Presenter",
       "identity":{

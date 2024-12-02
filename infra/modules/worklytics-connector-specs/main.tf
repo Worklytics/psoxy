@@ -31,7 +31,6 @@ locals {
       enable_by_default : true
       worklytics_connector_id : "gdirectory-psoxy",
       display_name : "Google Directory"
-      identifier_scope_id : "gapps"
       apis_consumed : [
         "admin.googleapis.com"
       ]
@@ -63,7 +62,6 @@ locals {
       enable_by_default : true
       worklytics_connector_id : "gcal-psoxy",
       display_name : "Google Calendar"
-      identifier_scope_id : "gapps"
       apis_consumed : [
         "calendar-json.googleapis.com"
       ]
@@ -88,7 +86,6 @@ locals {
       enable_by_default : false,
       worklytics_connector_id : "gmail-meta-psoxy",
       display_name : "GMail"
-      identifier_scope_id : "gapps"
       apis_consumed : [
         "gmail.googleapis.com"
       ]
@@ -110,7 +107,6 @@ locals {
       enable_by_default : false
       worklytics_connector_id : "google-chat-psoxy",
       display_name : "Google Chat"
-      identifier_scope_id : "gapps"
       apis_consumed : [
         "admin.googleapis.com"
       ]
@@ -131,7 +127,6 @@ locals {
       enable_by_default : false
       worklytics_connector_id : "google-meet-psoxy"
       display_name : "Google Meet"
-      identifier_scope_id : "gapps"
       apis_consumed : [
         "admin.googleapis.com"
       ]
@@ -152,7 +147,6 @@ locals {
       enable_by_default : false
       worklytics_connector_id : "gdrive-psoxy",
       display_name : "Google Drive"
-      identifier_scope_id : "gapps"
       apis_consumed : [
         "drive.googleapis.com"
       ]
@@ -197,7 +191,6 @@ locals {
       enable_by_default : false,
       source_kind : "azure-ad",
       display_name : "(Deprecated, use MSFT Entra Id instead) Azure Directory"
-      identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : [],
@@ -227,7 +220,6 @@ locals {
       enable_by_default : true,
       source_kind : "azure-ad",
       display_name : "Microsoft Entra ID (former Azure AD)"
-      identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : []
@@ -257,7 +249,6 @@ locals {
       enable_by_default : true,
       worklytics_connector_id : "outlook-cal-psoxy",
       display_name : "Outlook Calendar"
-      identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : []
@@ -288,7 +279,6 @@ locals {
       enable_by_default : false,
       worklytics_connector_id : "outlook-mail-psoxy",
       display_name : "Outlook Mail"
-      identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : []
@@ -319,7 +309,6 @@ locals {
       enable_by_default : false,
       worklytics_connector_id : "msft-teams-psoxy",
       display_name : "Microsoft Teams"
-      identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : [],
@@ -399,7 +388,6 @@ EOT
       enable_by_default : false,
       worklytics_connector_id : "asana-psoxy"
       display_name : "Asana"
-      identifier_scope_id : "asana"
       worklytics_connector_name : "Asana via Psoxy"
       target_host : "app.asana.com"
       source_auth_strategy : "oauth2_access_token"
@@ -437,7 +425,6 @@ EOT
       enable_by_default : false,
       worklytics_connector_id : "github-enterprise-psoxy"
       display_name : "Github Enterprise"
-      identifier_scope_id : "github"
       worklytics_connector_name : "Github Enterprise via Psoxy"
       target_host : "api.github.com"
       source_auth_strategy : "oauth2_refresh_token"
@@ -546,7 +533,6 @@ EOT
       enable_by_default : false
       worklytics_connector_id : "github-enterprise-server-psoxy"
       display_name : "Github Enterprise Server"
-      identifier_scope_id : "github"
       worklytics_connector_name : "Github Enterprise Server via Psoxy"
       target_host : local.github_enterprise_server_host
       source_auth_strategy : "oauth2_refresh_token"
@@ -670,7 +656,6 @@ EOT
       enable_by_default : false
       worklytics_connector_id : "github-free-team-psoxy"
       display_name : "Github"
-      identifier_scope_id : "github"
       worklytics_connector_name : "Github Free/Professional/Team via Psoxy"
       target_host : "api.github.com"
       source_auth_strategy : "oauth2_refresh_token"
@@ -776,7 +761,6 @@ EOT
       enable_by_default : false
       worklytics_connector_id : "salesforce-psoxy"
       display_name : "Salesforce"
-      identifier_scope_id : "salesforce"
       worklytics_connector_name : "Salesforce via Psoxy"
       target_host : var.salesforce_domain
       source_auth_strategy : "oauth2_refresh_token"
@@ -877,7 +861,6 @@ EOT
       source_kind : "slack"
       availability : "ga",
       enable_by_default : true
-      identifier_scope_id : "slack"
       worklytics_connector_id : "slack-discovery-api-psoxy",
       worklytics_connector_name : "Slack via Psoxy",
       display_name : "Slack Discovery API"
@@ -954,7 +937,6 @@ EOT
       worklytics_connector_id : "zoom-psoxy"
       display_name : "Zoom"
       worklytics_connector_name : "Zoom via Psoxy"
-      identifier_scope_id : "zoom"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "api.zoom.us"
       environment_variables : {
@@ -1075,7 +1057,6 @@ EOT
       target_host : "api.dropboxapi.com"
       source_auth_strategy : "oauth2_refresh_token"
       display_name : "Dropbox Business"
-      identifier_scope_id : "dropbox-business"
       worklytics_connector_name : "Dropbox Business via Psoxy"
       secured_variables : [
         {
@@ -1164,7 +1145,6 @@ EOT
       target_host : var.jira_server_url
       source_auth_strategy : "oauth2_access_token"
       display_name : "Jira Data Center"
-      identifier_scope_id : "jira"
       worklytics_connector_name : "Jira Server REST API via Psoxy"
       secured_variables : [
         {
@@ -1207,7 +1187,6 @@ EOT
       target_host : "api.atlassian.com"
       source_auth_strategy : "oauth2_refresh_token"
       display_name : "Jira REST API"
-      identifier_scope_id : "jira"
       worklytics_connector_name : "Jira REST API via Psoxy"
       secured_variables : [
         {

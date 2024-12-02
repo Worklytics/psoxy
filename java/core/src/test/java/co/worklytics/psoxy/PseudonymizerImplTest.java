@@ -55,7 +55,6 @@ class PseudonymizerImplTest {
 
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("salt")
-            .defaultScopeId("scope")
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build());
 
@@ -102,7 +101,6 @@ class PseudonymizerImplTest {
     void emailCanonicalEquivalents_IgnoreDots(String mailHeaderValue) {
          pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("salt")
-            .defaultScopeId("scope")
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .emailCanonicalization(EmailCanonicalization.IGNORE_DOTS)
             .build());
@@ -126,27 +124,6 @@ class PseudonymizerImplTest {
 
         assertNotEquals(canonicalExample.getHash(),
             pseudonymizer.pseudonymize(mailHeaderValue).getHash());
-    }
-
-
-    @Test
-    void hashMatchesLegacy() {
-        // all this is really testing is that we aren't breaking the LEGACY hash implementation
-
-        pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt("salt")
-            .defaultScopeId("scope")
-            .pseudonymImplementation(PseudonymImplementation.LEGACY)
-            .build());
-
-        //value taken from legacy app
-        final String CANONICAL = "original";
-
-        //value taken from legacy app
-        final String identityHash = "Xz77cF4Fm7KMPAuwLaGXD82LKXNwi69nNcH0nKtGRJA";
-
-        assertEquals(identityHash,
-            pseudonymizer.pseudonymize(CANONICAL).getHash());
     }
 
 

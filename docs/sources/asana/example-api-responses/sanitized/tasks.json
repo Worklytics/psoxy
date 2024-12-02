@@ -8,7 +8,7 @@
       "completed":false,
       "completed_at":"2012-02-22T02:06:58.147Z",
       "completed_by":{
-        "gid":"{\"scope\":\"asana\",\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
+        "gid":"{\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
         "resource_type":"user"
       },
       "created_at":"2012-02-22T02:06:58.147Z",
@@ -31,7 +31,7 @@
         {
           "gid":"12345",
           "user":{
-            "gid":"{\"scope\":\"asana\",\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
+            "gid":"{\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
             "resource_type":"user"
           }
         }
@@ -42,7 +42,7 @@
         {
           "gid":"12345",
           "user":{
-            "gid":"{\"scope\":\"asana\",\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
+            "gid":"{\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
             "resource_type":"user"
           }
         }
@@ -67,7 +67,7 @@
       "start_at":"2019-09-14T02:06:58.147Z",
       "start_on":"2019-09-14",
       "assignee":{
-        "gid":"{\"scope\":\"asana\",\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
+        "gid":"{\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
         "resource_type":"user"
       },
       "assignee_section":{
@@ -79,7 +79,7 @@
           "gid":"12345",
           "resource_type":"custom_field",
           "created_by":{
-            "gid":"{\"scope\":\"asana\",\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
+            "gid":"{\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
             "resource_type":"user"
           },
           "currency_code":"EUR",
@@ -121,7 +121,7 @@
       ],
       "followers":[
         {
-          "gid":"{\"scope\":\"asana\",\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
+          "gid":"{\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
           "resource_type":"user"
         }
       ],

@@ -112,7 +112,7 @@ class ColumnarRulesTest {
                         .transforms(Arrays.asList(
                                 FieldTransform.filter(".*@worklytics.co"),
                                 FieldTransform.formatString("%s_gh"),
-                                FieldTransform.pseudonymizeWithScope("github")
+                                FieldTransform.pseudonymize(true)
                         )).build()))
                 .build();
 
@@ -124,7 +124,7 @@ class ColumnarRulesTest {
                 "    transforms:\n" +
                 "    - filter: \".*@worklytics.co\"\n" +
                 "    - formatString: \"%s_gh\"\n" +
-                "    - pseudonymizeWithScope: \"github\"\n" +
+                "    - pseudonymize: true\n" +
                 "pseudonymFormat: \"JSON\"\n";
 
         assertEquals(yaml,

@@ -5,8 +5,8 @@
     {
       "kind":"admin#directory#member",
       "etag":"\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/cClGlnUTD66mPh1UYN596quOzEo\"",
-      "id":"{\"scope\":\"gapps\",\"hash\":\"0rTnwSH60YEXYvNG2URi8ApoDR8Z-BU1a2-hN3w3MkQ\"}",
-      "email":"{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"ariUpTh_cLRE8xlCKjv8WQU9RJ15hsKGZ00dvk9zsg8\"}",
+      "id":"{\"hash\":\"0rTnwSH60YEXYvNG2URi8ApoDR8Z-BU1a2-hN3w3MkQ\"}",
+      "email":"{\"domain\":\"acme.com\",\"hash\":\"ariUpTh_cLRE8xlCKjv8WQU9RJ15hsKGZ00dvk9zsg8\"}",
       "role":"MEMBER",
       "type":"USER",
       "status":"ACTIVE"
@@ -14,8 +14,8 @@
     {
       "kind":"admin#directory#member",
       "etag":"\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/msEQv4CMx2P7EiwQUAjOY6p4QWU\"",
-      "id":"{\"scope\":\"gapps\",\"hash\":\"DZGMkcDzuqFISCHOoqLMuZy8gJSRkzVIOHEyDuw35nU\"}",
-      "email":"{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"TxHAHtCVcT1oMo4koEB2lLPK5Lxw9y9SBs4DJ85-TBQ\"}",
+      "id":"{\"hash\":\"DZGMkcDzuqFISCHOoqLMuZy8gJSRkzVIOHEyDuw35nU\"}",
+      "email":"{\"domain\":\"acme.com\",\"hash\":\"TxHAHtCVcT1oMo4koEB2lLPK5Lxw9y9SBs4DJ85-TBQ\"}",
       "role":"MEMBER",
       "type":"USER",
       "status":"ACTIVE"
@@ -23,8 +23,8 @@
     {
       "kind":"admin#directory#member",
       "etag":"\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/GaG-VcDm4WBDI7XDLhClnr3QXUY\"",
-      "id":"{\"scope\":\"gapps\",\"hash\":\"ncqO_XGMYcr3lBtyQMyO9eHJI7n8IsCO91JMtkFW33g\"}",
-      "email":"{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"JTawMucaPUT7BB_sebdkjujmoZT57KW3nt2PG1KUQS0\"}",
+      "id":"{\"hash\":\"ncqO_XGMYcr3lBtyQMyO9eHJI7n8IsCO91JMtkFW33g\"}",
+      "email":"{\"domain\":\"acme.com\",\"hash\":\"JTawMucaPUT7BB_sebdkjujmoZT57KW3nt2PG1KUQS0\"}",
       "role":"OWNER",
       "type":"USER",
       "status":"ACTIVE"
@@ -32,8 +32,8 @@
     {
       "kind":"admin#directory#member",
       "etag":"\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/aZle5ohKQ9w1HjfzJYKkeV57qpI\"",
-      "id":"{\"scope\":\"gapps\",\"hash\":\"v2LlReuSjcdpk5yEymPMgOel-zueqOxVKuObpqjDgr8\"}",
-      "email":"{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"CLvQNR1KMpLcz_v3fJuXX9IiNiF360SlRBNmPAiWY-w\"}",
+      "id":"{\"hash\":\"v2LlReuSjcdpk5yEymPMgOel-zueqOxVKuObpqjDgr8\"}",
+      "email":"{\"domain\":\"acme.com\",\"hash\":\"CLvQNR1KMpLcz_v3fJuXX9IiNiF360SlRBNmPAiWY-w\"}",
       "role":"MEMBER",
       "type":"USER",
       "status":"ACTIVE"
@@ -41,8 +41,8 @@
     {
       "kind":"admin#directory#member",
       "etag":"\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/OXyW7YpfbUxYBHjHX3Br9lIQdmg\"",
-      "id":"{\"scope\":\"gapps\",\"hash\":\"8dngsJMcWteAYZMDJSUdBOGrwmPacqwpUNMsCQbtFWM\"}",
-      "email":"{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"TQ7vhOBwM8Jra92dAsaazqMJYGE5fo3GkZPDCubSA-c\"}",
+      "id":"{\"hash\":\"8dngsJMcWteAYZMDJSUdBOGrwmPacqwpUNMsCQbtFWM\"}",
+      "email":"{\"domain\":\"acme.com\",\"hash\":\"TQ7vhOBwM8Jra92dAsaazqMJYGE5fo3GkZPDCubSA-c\"}",
       "role":"OWNER",
       "type":"USER",
       "status":"ACTIVE"

@@ -122,11 +122,8 @@ public class CommonRequestHandler {
         if (this.sanitizer == null) {
             synchronized ($writeLock) {
                 if (this.sanitizer == null) {
-                    String defaultScopeId = rulesUtils.getDefaultScopeIdFromRules(rules)
-                            .orElseGet(() -> rulesUtils.getDefaultScopeIdFromSource(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE)));
-
                     Pseudonymizer.ConfigurationOptions options =
-                            pseudonymizerImplFactory.buildOptions(config, secretStore, defaultScopeId);
+                            pseudonymizerImplFactory.buildOptions(config, secretStore);
                     this.sanitizer = sanitizerFactory.create(rules, pseudonymizerImplFactory.create(options));
                 }
             }
