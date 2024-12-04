@@ -2,6 +2,7 @@ package co.worklytics.psoxy.rules.msft;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.Rules2;
+import co.worklytics.psoxy.rules.RulesUtils;
 import jdk.jfr.Description;
 import lombok.Getter;
 import org.junit.jupiter.api.Disabled;
@@ -20,14 +21,16 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.MS_TEAMS_NO_USER_ID;
 
 
-    @Getter
-    final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
-            .sourceFamily("microsoft-365")
-            .defaultScopeId("azure-ad")
-            .sourceKind("msft-teams")
-            .rulesFile("msft-teams_no-userIds")
-            .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-userIds/")
-            .build();
+    @Override
+    public RulesTestSpec getRulesTestSpec() {
+        return RulesTestSpec.builder()
+                .sourceFamily("microsoft-365")
+                .sourceKind("msft-teams")
+                .defaultScopeId(rulesUtils.getDefaultScopeIdFromSource("msft-teams"))
+                .rulesFile("msft-teams_no-userIds")
+                .exampleSanitizedApiResponsesPath("example-api-responses/sanitized_no-userIds/")
+                .build();
+    }
 
     @Test
     @Description("Test endpoint:" + PrebuiltSanitizerRules.MS_TEAMS_PATH_TEMPLATES_TEAMS)
@@ -272,6 +275,7 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
         String jsonResponse = asJson("Users_onlineMeetings_" + "v1.0" + ".json");
 
         String sanitized = sanitize(endpoint, jsonResponse);
+
         assertPseudonymized(sanitized, "112f7296-5ca-bae8-6a692b15d4b8", "5810cedeb-b2c1-e9bd5d53ec96");
         assertRedacted(sanitized,
                 "@odata.type",
@@ -279,7 +283,9 @@ public class Teams_NoUserIds_Tests extends JavaRulesTestBaseCase {
                 "#microsoft.graph.chatInfo",
                 "#microsoft.graph.meetingParticipants",
                 "#microsoft.graph.identitySet",
-                "#microsoft.graph.identity"
+                "#microsoft.graph.identity",
+                "foo@some-domain.com",
+                "upn-value"
         );
         assertUrlWithSubResourcesBlocked(endpoint);
     }

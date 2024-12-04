@@ -898,10 +898,12 @@ EOT
       reserved_concurrent_executions : null
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/api/discovery.enterprise.info",
-        "/api/discovery.conversations.list",
-        "/api/discovery.conversations.history?channel={CHANNEL_ID}&limit=10",
-        "/api/discovery.users.list",
+        "/api/discovery.enterprise.info?include_deleted=false&limit=5",
+        "/api/discovery.conversations.list?limit=10",
+        "/api/discovery.conversations.info?team={WORKSPACE_ID}&channel={CHANNEL_ID}",
+        "/api/discovery.conversations.recent?limit=10",
+        "/api/discovery.conversations.history?team={WORKSPACE_ID}&channel={CHANNEL_ID}&limit=10",
+        "/api/discovery.users.list?limit=5",
       ]
       external_token_todo : <<EOT
 ### Slack Discovery Setup
