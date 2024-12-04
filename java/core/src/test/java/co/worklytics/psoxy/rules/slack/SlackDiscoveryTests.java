@@ -26,10 +26,10 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
 
     @Getter
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
-        .defaultScopeId("slack")
-        .sourceKind("slack")
-        .rulesFile("discovery")
-        .build();
+            .defaultScopeId("slack")
+            .sourceKind("slack")
+            .rulesFile("discovery")
+            .build();
 
     @SneakyThrows
     @ValueSource(strings = {
@@ -40,6 +40,7 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
             "https://slack.com/api/discovery.conversations.history",
             "https://slack.com/api/discovery.conversations.history?channel=X&limit=10",
             "https://slack.com/api/discovery.conversations.recent?team=X&limit=10&latest=123",
+            "https://slack.com/api/discovery.user.conversations?include_historical=true&user=X&limit=10&offset=Y",
             "https://slack.com/api/discovery.users.list",
             "https://slack.com/api/discovery.users.list?limit=20&include_deleted=true",
     })
@@ -58,7 +59,6 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
             "https://slack.com/api/discovery.conversation.info/",
             // all the rest of the discovery methods
             "https://slack.com/api/discovery.user.info",
-            "https://slack.com/api/discovery.user.conversations",
             "https://slack.com/api/discovery.conversations.edits",
             "https://slack.com/api/discovery.conversations.members",
             "https://slack.com/api/discovery.conversations.renames",
@@ -186,6 +186,18 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
 
     @SneakyThrows
     @Test
+    void discovery_users_conversations() {
+        String jsonString = asJson("discovery-user-conversations.json");
+
+        String sanitized =
+                sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.user.conversations"), jsonString);
+
+        // nothing to redact / pseudonymize
+        assertJsonEquals(jsonString, sanitized);
+    }
+
+    @SneakyThrows
+    @Test
     void discovery_conversations_info() {
         String jsonString = asJson("discovery-conversations-info.json");
 
@@ -225,12 +237,13 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
-            InvocationExample.of("https://slack.com/api/discovery.enterprise.info", "discovery-enterprise-info.json"),
-            InvocationExample.of("https://slack.com/api/discovery.conversations.info", "discovery-conversations-info.json"),
-            InvocationExample.of("https://slack.com/api/discovery.conversations.recent", "discovery-conversations-recent.json"),
-            InvocationExample.of("https://slack.com/api/discovery.conversations.history", "discovery-conversations-history.json"),
-            InvocationExample.of("https://slack.com/api/discovery.users.list", "discovery-users-list.json"),
-            InvocationExample.of("https://slack.com/api/discovery.conversations.list", "discovery-conversations-list.json")
+                InvocationExample.of("https://slack.com/api/discovery.enterprise.info", "discovery-enterprise-info.json"),
+                InvocationExample.of("https://slack.com/api/discovery.conversations.info", "discovery-conversations-info.json"),
+                InvocationExample.of("https://slack.com/api/discovery.conversations.recent", "discovery-conversations-recent.json"),
+                InvocationExample.of("https://slack.com/api/discovery.conversations.history", "discovery-conversations-history.json"),
+                InvocationExample.of("https://slack.com/api/discovery.users.list", "discovery-users-list.json"),
+                InvocationExample.of("https://slack.com/api/discovery.user.conversations", "discovery-user-conversations.json"),
+                InvocationExample.of("https://slack.com/api/discovery.conversations.list", "discovery-conversations-list.json")
         );
     }
 }
