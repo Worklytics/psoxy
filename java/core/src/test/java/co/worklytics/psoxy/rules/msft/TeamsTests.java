@@ -19,7 +19,6 @@ public class TeamsTests extends JavaRulesTestBaseCase {
     public RulesTestSpec getRulesTestSpec() {
         return RulesTestSpec.builder()
                 .sourceFamily("microsoft-365")
-                .defaultScopeId(rulesUtils.getDefaultScopeIdFromSource("msft-teams"))
                 .sourceKind("msft-teams")
                 .build();
     }

@@ -12,10 +12,10 @@ sudo apt update
 2. install Java + maven (required to build the proxy binary to be deployed)
 
 ```shell
-sudo apt install openjdk-11-jdk
+sudo apt install openjdk-17-jdk
 sudo apt install maven
 
-# check that maven version at least 3.6+ and java 11+
+# check that maven version at least 3.6+ and java 17+
 mvn -v
 
 # if not, get latest direct from Apache Maven
