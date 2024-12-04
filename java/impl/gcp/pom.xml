@@ -228,6 +228,7 @@
             <!-- builds deployment directory containing only 'uber' JAR for deployment as GCP cloud function -->
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
                 <executions>
                     <execution>
                         <id>copy-resources</id>
