@@ -11,6 +11,10 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.users[*].id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
           - "$.users[*].profile.email"
           - "$.users[*].profile.guest_invited_by"
         encoding: "JSON"
@@ -20,6 +24,11 @@ endpoints:
           - "$.users[*].profile['title','phone','skype','first_name','last_name','real_name','real_name_normalized','display_name','display_name_normalized']"
           - "$.users[*].profile['fields','pronouns','status_text','status_emoji','status_emoji_display_info','status_expiration','avatar_hash']"
           - "$.users[*].profile['image_original','is_custom_image','image_24','image_32','image_48','image_72','image_192','image_512','image_1024','status_text_canonical']"
+  - pathTemplate: "/api/discovery.user.conversations"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.channels[*]['name','topic','purpose']"
   - pathTemplate: "/api/discovery.conversations.list"
     transforms:
       - !<redact>
@@ -44,6 +53,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.messages[*].user"
+          - "$.messages[*].inviter"
           - "$.messages[*].files[*].user"
           - "$.messages[*].reactions[*].users[*]"
           - "$.messages[*].replies[*].user"

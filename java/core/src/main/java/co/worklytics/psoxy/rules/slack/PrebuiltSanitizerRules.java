@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.slack;
 
 import co.worklytics.psoxy.rules.RESTRules;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.Rules2;
 import com.avaulta.gateway.rules.transforms.Transform;
@@ -26,6 +27,10 @@ public class PrebuiltSanitizerRules {
                     .pathTemplate("/api/discovery.users.list")
                     .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$.users[*].id")
+                            .includeReversible(true)
+                            .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+                            .build())
+                    .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$.users[*].profile.email")
                             .jsonPath("$.users[*].profile.guest_invited_by")
                             .build())
@@ -37,6 +42,16 @@ public class PrebuiltSanitizerRules {
                             .jsonPath("$.users[*].profile['title','phone','skype','first_name','last_name','real_name','real_name_normalized','display_name','display_name_normalized']")
                             .jsonPath("$.users[*].profile['fields','pronouns','status_text','status_emoji','status_emoji_display_info','status_expiration','avatar_hash']")
                             .jsonPath("$.users[*].profile['image_original','is_custom_image','image_24','image_32','image_48','image_72','image_192','image_512','image_1024','status_text_canonical']")
+                            .build())
+                    .build())
+            .endpoint(Endpoint.builder()
+                    .pathTemplate("/api/discovery.user.conversations")
+                    // no PII
+                    // redact channel name, topic and purpose
+                    .transform(Transform.Redact.builder()
+                            // we don't care about names
+                            // topic and purpose contains user ids, not used at all, so just get rid of the entire content
+                            .jsonPath("$.channels[*]['name','topic','purpose']")
                             .build())
                     .build())
             .endpoint(Endpoint.builder()
@@ -74,6 +89,7 @@ public class PrebuiltSanitizerRules {
                     .pathTemplate("/api/discovery.conversations.history")
                     .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$.messages[*].user")
+                            .jsonPath("$.messages[*].inviter")
                             .jsonPath("$.messages[*].files[*].user")
                             .jsonPath("$.messages[*].reactions[*].users[*]")
                             .jsonPath("$.messages[*].replies[*].user")
