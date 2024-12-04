@@ -24,8 +24,7 @@ BREAKING:
     `terraform apply`, and THEN update to 0.5.x
   - the v0.3 pseudonymization algorithm is no longer supported; attempting to do so should result in an error
   - `scope` field will no longer be sent with JSON-encoded pseudonyms.
-
-
+  - min java version in now 17; java 11 no longer supported (as it's a deprecated runtime in GCP; and Oracle supported has ended)
 
 ## [0.4.61](https://github.com/Worklytics/psoxy/release/tag/v0.4.61)
  - added some `columnsToPseudonymizeIfPresent` to survey bulk connectors; these are to avoid PII
