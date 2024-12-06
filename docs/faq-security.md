@@ -13,7 +13,7 @@ Yes, but this is an add-on feature to your Worklytics subscription that must be 
 Worklytics tenant. Please contact [sales@worklytics.co](mailto:sales@worklytics.co] to access this
 feature.
 
-Note that all requests from your Worklytics tenant to your Psoxy instances are authenticated via identity
+Note that all requests from your Worklytics tenant to your Pseudonymizing Proxy instances are authenticated via identity
 federation (OIDC) and authorized by your Cloud providers IAM policies, so IP-based restrictions are only
 a marginal, redundant control in addition to this.
 
