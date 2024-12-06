@@ -7,7 +7,7 @@ data prior to transfer to a 3rd party. You configure it with a static set of rul
 customizable sanitization behavior of fields. Psoxy supports complex JsonPath expressions if needed,
 to perform santization generally across many fields and endpoints.
 
-## Can Psoxy invocation be locked to a set of known IP addresses?
+## Can Worklytics Pseudonymizing Proxy invocation be locked to a set of known IP addresses?
 
 Yes, but this is an add-on feature to your Worklytics subscription that must be enabled for your
 Worklytics tenant. Please contact [sales@worklytics.co](mailto:sales@worklytics.co] to access this
