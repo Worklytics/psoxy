@@ -95,8 +95,4 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
         }
     }
 
-    @Override
-    public boolean isDevelopment() {
-        return delegate.isDevelopment();
-    }
 }

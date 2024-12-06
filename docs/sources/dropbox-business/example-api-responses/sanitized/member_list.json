@@ -4,8 +4,8 @@
   "members":[
     {
       "profile":{
-        "account_id":"{\"scope\":\"dropbox\",\"hash\":\"jZhmTOhV_8tNq3E_tPSJblmnPYNERff__TX5uh6HBG8\"}",
-        "email":"{\"scope\":\"email\",\"domain\":\"seagull.com\",\"hash\":\"3hBvYidwm7M3dr99AXtSl-XoLLdz7zv7Q6wAoLQlCVU\"}",
+        "account_id":"{\"hash\":\"jZhmTOhV_8tNq3E_tPSJblmnPYNERff__TX5uh6HBG8\"}",
+        "email":"{\"domain\":\"seagull.com\",\"hash\":\"3hBvYidwm7M3dr99AXtSl-XoLLdz7zv7Q6wAoLQlCVU\"}",
         "email_verified":false,
         "external_id":"244423",
         "groups":[
@@ -19,11 +19,11 @@
         "name":{ },
         "secondary_emails":[
           {
-            "email":"{\"scope\":\"email\",\"domain\":\"strawberry.com\",\"hash\":\"SDocf39ydRQwm4B-qkfkodf8vgjoY_ormOShRpnPExs\"}",
+            "email":"{\"domain\":\"strawberry.com\",\"hash\":\"SDocf39ydRQwm4B-qkfkodf8vgjoY_ormOShRpnPExs\"}",
             "is_verified":false
           },
           {
-            "email":"{\"scope\":\"email\",\"domain\":\"orange.com\",\"hash\":\"oJHymm_W3TQ9P3nUA3Ef9DuQE_7D2uiedo68_yL03oM\"}",
+            "email":"{\"domain\":\"orange.com\",\"hash\":\"oJHymm_W3TQ9P3nUA3Ef9DuQE_7D2uiedo68_yL03oM\"}",
             "is_verified":true
           }
         ],

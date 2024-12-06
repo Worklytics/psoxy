@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import lombok.NoArgsConstructor;
 
 import javax.inject.Inject;
@@ -22,4 +23,11 @@ public class EnvVarsConfigService implements ConfigService {
     public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
         return Optional.ofNullable(System.getenv(property.name()));
     }
+
+     public boolean isDevelopment() {
+        return this.getConfigPropertyAsOptional(ProxyConfigProperty.IS_DEVELOPMENT_MODE)
+            .map(Boolean::parseBoolean).orElse(false);
+    }
+
+
 }

@@ -62,7 +62,6 @@ class PseudonymizedIdentityTest {
     void asPseudonym() {
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
                 .pseudonymizationSalt("salt")
-                .defaultScopeId("scope")
                 .pseudonymImplementation(PseudonymImplementation.DEFAULT)
                 .build());
 
@@ -83,7 +82,6 @@ class PseudonymizedIdentityTest {
     void asPseudonym_should_return_null_if_null_or_empty(String identifier) {
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
                 .pseudonymizationSalt("salt")
-                .defaultScopeId("scope")
                 .pseudonymImplementation(PseudonymImplementation.DEFAULT)
                 .build());
 
@@ -96,7 +94,6 @@ class PseudonymizedIdentityTest {
     void asPseudonym_reversible() {
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
                 .pseudonymizationSalt("salt")
-                .defaultScopeId("scope")
                 .pseudonymImplementation(PseudonymImplementation.DEFAULT)
                 .build());
 
@@ -123,55 +120,4 @@ class PseudonymizedIdentityTest {
             urlSafeTokenPseudonymEncoder.decode(pseudonymizedIdentity.getReversible()).getHash());
     }
 
-    @Test
-    void asPseudonym_legacy() {
-        pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("salt")
-                .defaultScopeId("scope")
-                .pseudonymImplementation(PseudonymImplementation.LEGACY)
-                .build());
-
-        PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize("alice@acme.com");
-
-        Pseudonym pseudonym = pseudonymizedIdentity.fromLegacy();
-
-        assertEquals(Base64.getUrlEncoder().withoutPadding().encodeToString(pseudonym.getHash()),
-                pseudonymizedIdentity.getHash());
-    }
-
-    @Test
-    void asPseudonym_reversible_legacy() {
-        pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("salt")
-                .defaultScopeId("scope")
-                .pseudonymImplementation(PseudonymImplementation.LEGACY)
-                .build());
-
-        PseudonymizedIdentity pseudonymizedIdentity
-                = pseudonymizer.pseudonymize("alice@acme.com", Transform.Pseudonymize.builder()
-                .includeReversible(true)
-                .build());
-
-        assertEquals("UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
-            pseudonymizedIdentity.getHash());
-
-        PseudonymizedIdentity notReversible =
-            pseudonymizer.pseudonymize("alice@acme.com", Transform.Pseudonymize.builder()
-                .includeReversible(false)
-                .build());
-
-        // round trip from legacy should now be working OK, even with reversible
-        Pseudonym pseudonym = pseudonymizedIdentity.fromLegacy();
-
-        assertEquals(Base64.getUrlEncoder().withoutPadding().encodeToString(pseudonym.getHash()),
-                pseudonymizedIdentity.getHash());
-
-        assertEquals(Base64.getUrlEncoder().withoutPadding().encodeToString(pseudonym.getHash()),
-                notReversible.getHash());
-
-        // hash on the reversible is NOT equal to the hash for the legacy pseudonyms
-        UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder = new UrlSafeTokenPseudonymEncoder();
-        assertNotEquals(pseudonymizedIdentity.getHash(),
-            urlSafeTokenPseudonymEncoder.decode(pseudonymizedIdentity.getReversible()).getHash());
-    }
 }

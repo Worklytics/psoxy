@@ -6,10 +6,10 @@
   "users":[
     {
       "id":"p~JzXCV2FA272NOeqHYQbR4PewwSZI9hznATn7Wse3j8GpsoD91NC0nDg1vNKrhPEc",
-      "email":"{\"scope\":\"email\",\"domain\":\"example.com\",\"hash\":\"8ZuLJANBU0hIFqmaE8RjwHZqRb4MezRyGZ6rLZUkKSg\"}",
+      "email":"{\"domain\":\"example.com\",\"hash\":\"8ZuLJANBU0hIFqmaE8RjwHZqRb4MezRyGZ6rLZUkKSg\"}",
       "type":2,
       "pmi":"p~LKW3WIP3bZzEQFelvQBi0lpLDZtk-1qJbWe3rHfhYhdfeki-8voee3S0wopon6Y3",
-      "phone_number":"{\"scope\":\"zoom\",\"hash\":\"gYkykBgGMDuc3PCagpgnLxf71Bde2_7QuMV41oIRypc\"}",
+      "phone_number":"{\"hash\":\"gYkykBgGMDuc3PCagpgnLxf71Bde2_7QuMV41oIRypc\"}",
       "timezone":"America/Los_Angeles",
       "verified":1,
       "dept":"",

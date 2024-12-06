@@ -28,6 +28,8 @@ public class APIGatewayV1ProxyEventRequestAdapterTest {
         assertFalse(requestAdapter.getQuery().isPresent());
 
         assertFalse(requestAdapter.getClientIp().isPresent());
+
+        assertFalse(requestAdapter.isHttps().isPresent());
     }
 
     @SneakyThrows
@@ -46,5 +48,20 @@ public class APIGatewayV1ProxyEventRequestAdapterTest {
 
         assertEquals("name=John", requestAdapter.getQuery().get());
 
+
+        assertFalse(requestAdapter.isHttps().isPresent());
+    }
+
+    @SneakyThrows
+    @Test
+    public void parse_payload1_from_api_gateway_v2() {
+
+        APIGatewayProxyRequestEvent apiGatewayEvent = objectMapper.readerFor(APIGatewayProxyRequestEvent.class)
+            .readValue(TestUtils.getData("lambda-proxy-events/api-gateway-v2-payload-v1.json"));
+
+        APIGatewayV1ProxyEventRequestAdapter requestAdapter =
+            APIGatewayV1ProxyEventRequestAdapter.of(apiGatewayEvent);
+
+        assertEquals("/v2/report/meetings/NUXghb123TCj0bP6nPVe%252Fsg253D253D/participants", requestAdapter.getPath());
     }
 }

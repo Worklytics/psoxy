@@ -101,6 +101,12 @@ public class CloudFunctionRequest implements HttpEventRequest {
             .map(values -> values.get(0));
     }
 
+    @Override
+    public Optional<Boolean> isHttps() {
+        return Optional.ofNullable(request.getHeaders().get(HttpEventRequest.HTTP_HEADER_X_FORWARDED_PROTO))
+            .map(values -> values.get(0).equals("https"));
+    }
+
 
     public List<String> getWarnings() {
         List<String> warnings = new LinkedList<>();

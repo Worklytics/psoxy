@@ -20,7 +20,6 @@ locals {
     TARGET_HOST                     = var.target_host
     SOURCE_AUTH_STRATEGY_IDENTIFIER = var.source_auth_strategy
     OAUTH_SCOPES                    = join(" ", var.oauth_scopes)
-    IDENTIFIER_SCOPE_ID             = var.identifier_scope_id
     }
     : k => v if v != null
   }
@@ -29,6 +28,12 @@ locals {
 
   # helper to clarify conditionals throughout
   use_api_gateway = var.api_gateway_v2 != null
+
+  # handler MUST expect payload format.
+  # payload 2.0 format is used by function URL invocation AND APIGatewayV2 by default.
+  # but in latter case, seems to urldecode the path; such that /foo%25/bar becomes /foo//bar, which is not what we want
+  # so oddly, for APIGatewayV2 we need to use 1.0 format instead of its default , even though that default is our usual case otherwise
+  event_handler_implementation = local.use_api_gateway ? "APIGatewayV1Handler" : "Handler"
 }
 
 module "psoxy_lambda" {
@@ -36,7 +41,7 @@ module "psoxy_lambda" {
 
   environment_name                     = var.environment_name
   instance_id                          = var.instance_id
-  handler_class                        = "co.worklytics.psoxy.Handler"
+  handler_class                        = "co.worklytics.psoxy.${local.event_handler_implementation}"
   path_to_function_zip                 = var.path_to_function_zip
   function_zip_hash                    = var.function_zip_hash
   function_env_kms_key_arn             = var.function_env_kms_key_arn
@@ -86,7 +91,7 @@ resource "aws_apigatewayv2_integration" "map" {
   connection_type        = "INTERNET"
   integration_method     = "POST"
   integration_uri        = module.psoxy_lambda.function_arn
-  payload_format_version = "2.0"
+  payload_format_version = "1.0" # must match to handler value, set in lambda
   timeout_milliseconds   = 30000 # ideally would be 55 or 60, but docs say limit is 30s
 }
 
@@ -214,17 +219,13 @@ resource "local_file" "todo" {
 }
 
 locals {
-  test_script = <<EOT
-#!/bin/bash
-API_PATH=$${1:-${try(var.example_api_calls[0], "")}}
-echo "Quick test of ${module.psoxy_lambda.function_name} ..."
-
-${local.command_cli_call} -u "${local.proxy_endpoint_url}/" --health-check
-
-${local.command_cli_call} -u "${local.proxy_endpoint_url}$API_PATH" ${local.impersonation_param}
-
-echo "Invoke this script with any of the following as arguments to test other endpoints:${"\r\n\t"}${join("\r\n\t", var.example_api_calls)}"
-EOT
+  test_script = templatefile("${path.module}/test_script.tftpl", {
+    proxy_endpoint_url = local.proxy_endpoint_url,
+    function_name = module.psoxy_lambda.function_name,
+    impersonation_param = local.impersonation_param,
+    command_cli_call = local.command_cli_call,
+    example_api_calls = var.example_api_calls,
+  })
 }
 
 resource "local_file" "test_script" {

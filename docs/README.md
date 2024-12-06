@@ -212,16 +212,15 @@ command line tools.
 
 You will need all the following in your deployment environment (eg, your laptop):
 
-| Tool                                            | Version                | Test Command          |
-|-------------------------------------------------|------------------------|-----------------------|
-| [git](https://git-scm.com/)                     | 2.17+                  | `git --version`       |
-| [Maven](https://maven.apache.org/)              | 3.6+                   | `mvn -v`              |
-| [Java JDK 11+](https://openjdk.org/install/) | 11, 17, 21 (see notes) | `mvn -v \| grep Java` |
-| [Terraform](https://www.terraform.io/)          | 1.3+, <= 1.9           | `terraform version`   |
+| Tool                                            | Version               | Test Command          |
+|-------------------------------------------------|-----------------------|-----------------------|
+| [git](https://git-scm.com/)                     | 2.17+                 | `git --version`       |
+| [Maven](https://maven.apache.org/)              | 3.6+                  | `mvn -v`              |
+| [Java JDK 11+](https://openjdk.org/install/) | 17, 21 (see notes) | `mvn -v \| grep Java` |
+| [Terraform](https://www.terraform.io/)          | 1.6+, < 2.0           | `terraform version`   |
 
 NOTE: we will support Java versions for duration of official support windows, in particular the
-LTS versions. As of Nov 2023, we  still support java 11 but may end this at any time. Minor
-versions, such as 12-16, and 18-20, which are out of official support, may work but are not
+LTS versions. Minor versions, such as 18-20, which are out of official support, may work but are not
 routinely tested.
 
 NOTE: Using `terraform` is not strictly necessary, but it is the only supported method. You may
@@ -229,8 +228,6 @@ provision your infrastructure via your host's CLI, web console, or another infra
 tool, but we don't offer documentation or support in doing so.  Adapting one of our
 [terraform examples](https://github.com/Worklytics/psoxy/tree/main/infra/examples) or writing your own config that re-uses our
 [modules](https://github.com/Worklytics/psoxy/tree/main/infra/modules) will simplify things greatly.
-
-NOTE: Refrain to use Terraform versions 1.4.x that are < v1.4.3. We've seen bugs.
 
 NOTE: from v0.4.59, we've relaxed Terraform version constraint on our modules to allow up to 1.9.x.
 However, we are not officially supporting this, as we strive to maintain compatibility with both

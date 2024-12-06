@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java-version: [ '11', '17', '21']
+        java-version: [ '17', '21']
     name: bundle ${{ matrix.implementation }}
     steps:
       - name: Check out code

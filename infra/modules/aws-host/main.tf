@@ -19,7 +19,6 @@ module "env_id" {
 }
 
 locals {
-  base_config_path    = "${var.psoxy_base_dir}/configs/"
   host_platform_id    = "AWS"
   ssm_key_ids         = var.aws_ssm_key_id == null ? {} : { 0 : var.aws_ssm_key_id }
   instance_ssm_prefix = "${var.aws_ssm_param_root_path}${upper(module.env_id.id)}_"
@@ -278,6 +277,7 @@ resource "aws_ssm_parameter" "additional_transforms" {
   value = yamlencode([for k, v in var.lookup_table_builders : {
     destinationBucketName : module.lookup_output[k].output_bucket
     rules : v.rules
+    compressOutput : v.compress_output
   } if v.input_connector_id == each.key])
 }
 

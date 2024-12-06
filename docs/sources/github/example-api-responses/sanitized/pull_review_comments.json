@@ -11,8 +11,8 @@
     "in_reply_to_id":8,
     "user":{
       "login":"p~E9mJyHvRHfGqXxImuUuTlHddbcjrRSOBItcF2cUkFUAH5Z9Z3LdF2qUAzaGcl-9Q",
-      "id":"{\"scope\":\"github\",\"hash\":\"5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk\"}",
-      "node_id":"{\"scope\":\"github\",\"hash\":\"4YTpKVPu-74u-26baOFgVjym_0UMqn6D8A3cWAjmJ0U\"}",
+      "id":"{\"hash\":\"5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk\"}",
+      "node_id":"{\"hash\":\"4YTpKVPu-74u-26baOFgVjym_0UMqn6D8A3cWAjmJ0U\"}",
       "type":"User",
       "site_admin":false
     },

@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        terraform_version: [ '~1.3.0', '~1.4.0', '~1.5.0', '~1.6.0', '~1.7.0', '~1.8.0', '~1.9.0', 'latest' ]
+        terraform_version: [ '~1.6.0', '~1.7.0', '~1.8.0', '~1.9.0', '~1.10.0', 'latest' ]
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -26,10 +26,3 @@ jobs:
         run: |
           terraform init -reconfigure
           terraform validate
-
-      - name: "Terraform - validate modules/worklytics-ip-blocks"
-        working-directory: infra/modules/worklytics-ip-blocks
-        run: |
-          terraform init -reconfigure
-          terraform validate
-          terraform apply --auto-approve

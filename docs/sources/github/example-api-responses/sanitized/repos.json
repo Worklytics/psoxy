@@ -7,8 +7,8 @@
     "private":false,
     "owner":{
       "login":"p~l0ZHcnX2-XcT91-gbmB0SzV-hkXoRsHSKRUk0EZAWiNWnE7dA-D02Jw9gFgVL1l0",
-      "id":"{\"scope\":\"github\",\"hash\":\"RWbAXptYuc_vRthO1B5VwTMd3DcXLegwZciDuEAPqXg\"}",
-      "node_id":"{\"scope\":\"github\",\"hash\":\"IVjoAeB7canEKtgxCaqABqV46Gn0VV0Yr9Be6H-dX0I\"}",
+      "id":"{\"hash\":\"RWbAXptYuc_vRthO1B5VwTMd3DcXLegwZciDuEAPqXg\"}",
+      "node_id":"{\"hash\":\"IVjoAeB7canEKtgxCaqABqV46Gn0VV0Yr9Be6H-dX0I\"}",
       "type":"Organization",
       "site_admin":false
     },

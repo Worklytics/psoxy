@@ -21,7 +21,6 @@ type = map(object({
     source_kind = string
     worklytics_connector_id = string
     worklytics_connector_name = string
-    identifier_scope_id = string # deprecated
     source_auth_strategy = string
     target_host = string
     environment_variables = map(string)

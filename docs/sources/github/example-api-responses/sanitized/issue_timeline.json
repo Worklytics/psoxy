@@ -4,11 +4,11 @@
     "node_id":"C_kwDOKU_SqtoAKDY2MjQ5YzgzOTE0ZTdhZDhlOTk3NmVlZGVkZGEwNjliOTM2ZWU0MjY",
     "html_url":"https://github.com/khnum-heket/test2/commit/66249c83914e7ad8e9976eededda069b936ee426",
     "author":{
-      "email":"{\"scope\":\"email\",\"domain\":\"some-domain.com\",\"hash\":\"h6PdMetXUw2gjVVsnjSgAXCBCSbTAHOAwIlrzYyylKo\"}",
+      "email":"{\"domain\":\"some-domain.com\",\"hash\":\"h6PdMetXUw2gjVVsnjSgAXCBCSbTAHOAwIlrzYyylKo\"}",
       "date":"2023-09-18T10:46:54Z"
     },
     "committer":{
-      "email":"{\"scope\":\"email\",\"domain\":\"github.com\",\"hash\":\"MIHgBni75cZjiHCpj2v957zYWWKML5xc_Zu-0HvVQ2w\"}",
+      "email":"{\"domain\":\"github.com\",\"hash\":\"MIHgBni75cZjiHCpj2v957zYWWKML5xc_Zu-0HvVQ2w\"}",
       "date":"2023-09-18T10:46:54Z"
     },
     "tree":{
@@ -31,8 +31,8 @@
     "node_id":"LOE_lADODwFebM5HwC0kzwAAAAF_RoSA",
     "actor":{
       "login":"p~ZDdmVplwpGt-ndiFTEd48w48N7HJOo69xHBBmO9DI2JT6M_X-qOTr1g7XSHLY88x",
-      "id":"{\"scope\":\"github\",\"hash\":\"C1pwy6O6wHT7VCJRNw5JSAlIKuGDb3HDxkc0URHm1zQ\"}",
-      "node_id":"{\"scope\":\"github\",\"hash\":\"JvTIGMW1yFX6BhvmbFrOVQ5H1z7SO2lfbPlkB_4rlzc\"}",
+      "id":"{\"hash\":\"C1pwy6O6wHT7VCJRNw5JSAlIKuGDb3HDxkc0URHm1zQ\"}",
+      "node_id":"{\"hash\":\"JvTIGMW1yFX6BhvmbFrOVQ5H1z7SO2lfbPlkB_4rlzc\"}",
       "type":"Organization",
       "site_admin":false
     },
@@ -48,8 +48,8 @@
     "node_id":"LE_lADODwFebM5HwC0kzwAAAAF_Roqs",
     "actor":{
       "login":"p~nugAVvYwYXkW7Lu0C8eVb8HeQmAlzbInT2WT9-Vjr3scfqTA3SmegyRgtxuiR3lUIV5p8z3z9sNVmOTR74sHKA",
-      "id":"{\"scope\":\"github\",\"hash\":\"BCpu8EenbtOGYWLUQoH22P9u3Hei3rcaIMwxE9pIxr0\"}",
-      "node_id":"{\"scope\":\"github\",\"hash\":\"xxNmyG-rm_H9EQ0yo4PiBiFuSuitlA-5h3kNtjRjrls\"}",
+      "id":"{\"hash\":\"BCpu8EenbtOGYWLUQoH22P9u3Hei3rcaIMwxE9pIxr0\"}",
+      "node_id":"{\"hash\":\"xxNmyG-rm_H9EQ0yo4PiBiFuSuitlA-5h3kNtjRjrls\"}",
       "type":"User",
       "site_admin":false
     },
@@ -67,8 +67,8 @@
     "node_id":"RTE_lADODwFebM5HwC0kzwAAAAGLfJhq",
     "actor":{
       "login":"p~nugAVvYwYXkW7Lu0C8eVb8HeQmAlzbInT2WT9-Vjr3scfqTA3SmegyRgtxuiR3lUIV5p8z3z9sNVmOTR74sHKA",
-      "id":"{\"scope\":\"github\",\"hash\":\"BCpu8EenbtOGYWLUQoH22P9u3Hei3rcaIMwxE9pIxr0\"}",
-      "node_id":"{\"scope\":\"github\",\"hash\":\"xxNmyG-rm_H9EQ0yo4PiBiFuSuitlA-5h3kNtjRjrls\"}",
+      "id":"{\"hash\":\"BCpu8EenbtOGYWLUQoH22P9u3Hei3rcaIMwxE9pIxr0\"}",
+      "node_id":"{\"hash\":\"xxNmyG-rm_H9EQ0yo4PiBiFuSuitlA-5h3kNtjRjrls\"}",
       "type":"User",
       "site_admin":false
     },
@@ -85,8 +85,8 @@
     "node_id":"IC_kwDODwFebM5DZ8-5",
     "user":{
       "login":"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f",
-      "id":"{\"scope\":\"github\",\"hash\":\"YW8DUgSVdjPT832gPzR5orzqfDyytNXPlk80y9PT3J0\"}",
-      "node_id":"{\"scope\":\"github\",\"hash\":\"yYOYDm3DmI6R6GgoBDc7I1Y7Ec3qzsWt-xF6_EI-C8U\"}",
+      "id":"{\"hash\":\"YW8DUgSVdjPT832gPzR5orzqfDyytNXPlk80y9PT3J0\"}",
+      "node_id":"{\"hash\":\"yYOYDm3DmI6R6GgoBDc7I1Y7Ec3qzsWt-xF6_EI-C8U\"}",
       "type":"User",
       "site_admin":true
     },
@@ -108,8 +108,8 @@
     "event":"commented",
     "actor":{
       "login":"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f",
-      "id":"{\"scope\":\"github\",\"hash\":\"YW8DUgSVdjPT832gPzR5orzqfDyytNXPlk80y9PT3J0\"}",
-      "node_id":"{\"scope\":\"github\",\"hash\":\"yYOYDm3DmI6R6GgoBDc7I1Y7Ec3qzsWt-xF6_EI-C8U\"}",
+      "id":"{\"hash\":\"YW8DUgSVdjPT832gPzR5orzqfDyytNXPlk80y9PT3J0\"}",
+      "node_id":"{\"hash\":\"yYOYDm3DmI6R6GgoBDc7I1Y7Ec3qzsWt-xF6_EI-C8U\"}",
       "type":"User",
       "site_admin":true
     }
@@ -119,8 +119,8 @@
     "node_id":"RRE_lADOGF_7K85wUBeSzwAAAAJly0ti",
     "actor":{
       "login":"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f",
-      "id":"{\"scope\":\"github\",\"hash\":\"YW8DUgSVdjPT832gPzR5orzqfDyytNXPlk80y9PT3J0\"}",
-      "node_id":"{\"scope\":\"github\",\"hash\":\"yYOYDm3DmI6R6GgoBDc7I1Y7Ec3qzsWt-xF6_EI-C8U\"}",
+      "id":"{\"hash\":\"YW8DUgSVdjPT832gPzR5orzqfDyytNXPlk80y9PT3J0\"}",
+      "node_id":"{\"hash\":\"yYOYDm3DmI6R6GgoBDc7I1Y7Ec3qzsWt-xF6_EI-C8U\"}",
       "type":"User",
       "site_admin":true
     },
@@ -130,15 +130,15 @@
     "created_at":"2023-09-06T15:46:55Z",
     "review_requester":{
       "login":"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f",
-      "id":"{\"scope\":\"github\",\"hash\":\"YW8DUgSVdjPT832gPzR5orzqfDyytNXPlk80y9PT3J0\"}",
-      "node_id":"{\"scope\":\"github\",\"hash\":\"yYOYDm3DmI6R6GgoBDc7I1Y7Ec3qzsWt-xF6_EI-C8U\"}",
+      "id":"{\"hash\":\"YW8DUgSVdjPT832gPzR5orzqfDyytNXPlk80y9PT3J0\"}",
+      "node_id":"{\"hash\":\"yYOYDm3DmI6R6GgoBDc7I1Y7Ec3qzsWt-xF6_EI-C8U\"}",
       "type":"User",
       "site_admin":true
     },
     "requested_reviewer":{
       "login":"p~KWW-U36Jy95xooasPNc1hK3lODgmlQbJ12d04oeHMEen7KL3JZnIg32WYqugl1FG",
-      "id":"{\"scope\":\"github\",\"hash\":\"YW8DUgSVdjPT832gPzR5orzqfDyytNXPlk80y9PT3J0\"}",
-      "node_id":"{\"scope\":\"github\",\"hash\":\"yYOYDm3DmI6R6GgoBDc7I1Y7Ec3qzsWt-xF6_EI-C8U\"}",
+      "id":"{\"hash\":\"YW8DUgSVdjPT832gPzR5orzqfDyytNXPlk80y9PT3J0\"}",
+      "node_id":"{\"hash\":\"yYOYDm3DmI6R6GgoBDc7I1Y7Ec3qzsWt-xF6_EI-C8U\"}",
       "type":"User",
       "site_admin":true
     },

@@ -1,13 +1,13 @@
 {
   "@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users/$entity",
   "businessPhones":[ ],
-  "mail":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg\"}",
+  "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg\"}",
   "officeLocation":"12/1110",
   "preferredLanguage":"en-US",
-  "userPrincipalName":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg\"}",
+  "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg\"}",
   "id":"p~SIoJOpeSgYF7YUPQ28IWZexVuHyN9A80SJXrbfawKpDRcddGnKI4QDKyjQI9KtjJZDb8FZ27UE_toS68FyWz7Y22fnQYLP91SHJGVwQiN3E",
   "otherMails":[
-    "{\"scope\":\"email\",\"domain\":\"gmail.com\",\"hash\":\"9hOtJuGJwqk4-lnsJ2csmTnmD9R_Y28iXox85gjemWU\"}"
+    "{\"domain\":\"gmail.com\",\"hash\":\"9hOtJuGJwqk4-lnsJ2csmTnmD9R_Y28iXox85gjemWU\"}"
   ],
   "proxyAddresses":[
     "SMTP:t~aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg@M365x214355.onmicrosoft.com",

@@ -1,0 +1,13 @@
+
+#!/bin/bash
+API_PATH=$${1:-${try(example_api_calls[0], "")}}
+echo "Quick test of ${function_name} ..."
+
+${command_cli_call} -u "${proxy_endpoint_url}/" --health-check
+
+${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param}
+
+echo "Invoke this script with any of the following as arguments to test other endpoints:"
+%{ for example_api_call in example_api_calls ~}
+  printf "\t\"${example_api_call}\"\n"
+%{ endfor ~}

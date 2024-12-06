@@ -6,13 +6,13 @@
 module "generic" {
   source = "../worklytics-psoxy-connection-generic"
 
-  psoxy_instance_id      = var.psoxy_instance_id
-  connector_id           = var.connector_id
-  psoxy_host_platform_id = var.psoxy_host_platform_id
-  display_name           = var.display_name
-  todo_step              = var.todo_step
-  todos_as_local_files   = var.todos_as_local_files
-  worklytics_host        = var.worklytics_host
+  proxy_instance_id    = var.psoxy_instance_id
+  connector_id         = var.connector_id
+  host_platform_id     = var.psoxy_host_platform_id
+  display_name         = var.display_name
+  todo_step            = var.todo_step
+  todos_as_local_files = var.todos_as_local_files
+  worklytics_host      = var.worklytics_host
 
   settings_to_provide = merge(var.settings_to_provide,
     {

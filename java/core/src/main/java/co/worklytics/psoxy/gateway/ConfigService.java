@@ -33,6 +33,13 @@ public interface ConfigService {
         default Boolean noCache() {
             return false;
         }
+
+        /**
+         * @return whether this property is limited to being set via environment variables only
+         */
+        default boolean isEnvVarOnly() {
+            return false;
+        }
     }
 
     /**
@@ -58,15 +65,6 @@ public interface ConfigService {
     default Optional<ConfigValueWithMetadata> getConfigPropertyWithMetadata(ConfigProperty configProperty) {
         return getConfigPropertyAsOptional(configProperty)
             .map(value -> ConfigValueWithMetadata.builder().value(value).build());
-    }
-
-    /**
-     * @deprecated use EnvVarsConfigService::isDevelopment
-     */
-    @Deprecated // use EnvVarsConfigService::isDevelopment
-    default boolean isDevelopment() {
-        return this.getConfigPropertyAsOptional(ProxyConfigProperty.IS_DEVELOPMENT_MODE)
-                .map(Boolean::parseBoolean).orElse(false);
     }
 
 

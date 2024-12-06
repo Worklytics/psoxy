@@ -21,18 +21,18 @@
   "inferenceClassification":"focused",
   "sender":{
     "emailAddress":{
-      "address":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg\"}"
+      "address":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg\"}"
     }
   },
   "from":{
     "emailAddress":{
-      "address":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg\"}"
+      "address":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg\"}"
     }
   },
   "toRecipients":[
     {
       "emailAddress":{
-        "address":"{\"scope\":\"email\",\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"Obq2eJM8H6PaBmbsLgcx0lmrKetFS9OTpk2LuaA-goI\"}"
+        "address":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"Obq2eJM8H6PaBmbsLgcx0lmrKetFS9OTpk2LuaA-goI\"}"
       }
     }
   ],

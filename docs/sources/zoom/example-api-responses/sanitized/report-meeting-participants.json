@@ -8,14 +8,14 @@
       "customer_key":"349589LkJyeW",
       "duration":259,
       "failover":false,
-      "id":"{\"scope\":\"zoom\",\"hash\":\"VjaDLjRhCKAqZXudj3csGB04rnu-0CZB8xTximmvE6I\"}",
+      "id":"{\"hash\":\"VjaDLjRhCKAqZXudj3csGB04rnu-0CZB8xTximmvE6I\"}",
       "join_time":"2022-03-23T06:58:09Z",
       "leave_time":"2022-03-23T07:02:28Z",
-      "user_email":"{\"scope\":\"email\",\"domain\":\"example.com\",\"hash\":\"cT4rXK7pXh_praaHEyRWzkSHVY6wBNEwngSXsuQ7fTQ\"}",
-      "user_id":"{\"scope\":\"zoom\",\"hash\":\"ISyOqmEgl9Ec1uB-GWWZDdqDqdQDTRwpTM8CjUMOnwU\"}",
+      "user_email":"{\"domain\":\"example.com\",\"hash\":\"cT4rXK7pXh_praaHEyRWzkSHVY6wBNEwngSXsuQ7fTQ\"}",
+      "user_id":"{\"hash\":\"ISyOqmEgl9Ec1uB-GWWZDdqDqdQDTRwpTM8CjUMOnwU\"}",
       "status":"in_meeting",
       "bo_mtg_id":"27423744",
-      "pmi":"{\"scope\":\"zoom\",\"hash\":\"LKW3WIP3bZzEQFelvQBi0lpLDZtk-1qJbWe3rHfhYhc\"}"
+      "pmi":"{\"hash\":\"LKW3WIP3bZzEQFelvQBi0lpLDZtk-1qJbWe3rHfhYhc\"}"
     }
   ]
 }

@@ -31,7 +31,6 @@ locals {
       enable_by_default : true
       worklytics_connector_id : "gdirectory-psoxy",
       display_name : "Google Directory"
-      identifier_scope_id : "gapps"
       apis_consumed : [
         "admin.googleapis.com"
       ]
@@ -63,7 +62,6 @@ locals {
       enable_by_default : true
       worklytics_connector_id : "gcal-psoxy",
       display_name : "Google Calendar"
-      identifier_scope_id : "gapps"
       apis_consumed : [
         "calendar-json.googleapis.com"
       ]
@@ -88,7 +86,6 @@ locals {
       enable_by_default : false,
       worklytics_connector_id : "gmail-meta-psoxy",
       display_name : "GMail"
-      identifier_scope_id : "gapps"
       apis_consumed : [
         "gmail.googleapis.com"
       ]
@@ -110,7 +107,6 @@ locals {
       enable_by_default : false
       worklytics_connector_id : "google-chat-psoxy",
       display_name : "Google Chat"
-      identifier_scope_id : "gapps"
       apis_consumed : [
         "admin.googleapis.com"
       ]
@@ -131,7 +127,6 @@ locals {
       enable_by_default : false
       worklytics_connector_id : "google-meet-psoxy"
       display_name : "Google Meet"
-      identifier_scope_id : "gapps"
       apis_consumed : [
         "admin.googleapis.com"
       ]
@@ -152,7 +147,6 @@ locals {
       enable_by_default : false
       worklytics_connector_id : "gdrive-psoxy",
       display_name : "Google Drive"
-      identifier_scope_id : "gapps"
       apis_consumed : [
         "drive.googleapis.com"
       ]
@@ -197,7 +191,6 @@ locals {
       enable_by_default : false,
       source_kind : "azure-ad",
       display_name : "(Deprecated, use MSFT Entra Id instead) Azure Directory"
-      identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : [],
@@ -227,7 +220,6 @@ locals {
       enable_by_default : true,
       source_kind : "azure-ad",
       display_name : "Microsoft Entra ID (former Azure AD)"
-      identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : []
@@ -257,7 +249,6 @@ locals {
       enable_by_default : true,
       worklytics_connector_id : "outlook-cal-psoxy",
       display_name : "Outlook Calendar"
-      identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : []
@@ -276,7 +267,7 @@ locals {
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}/events",
-        "/v1.0/users/${var.example_msft_user_guid}/calendarView?startDateTime=2022-10-01T00:00:00Z&endDateTime=${time_static.deployment.id}",
+        "/v1.0/users/${var.example_msft_user_guid}/calendarView?startDateTime=${timeadd(time_static.deployment.id, "-4320h")}&endDateTime=${time_static.deployment.id}",
         "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
         "/v1.0/groups",
         "/v1.0/groups/{group-id}/members"
@@ -288,7 +279,6 @@ locals {
       enable_by_default : false,
       worklytics_connector_id : "outlook-mail-psoxy",
       display_name : "Outlook Mail"
-      identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : []
@@ -319,7 +309,6 @@ locals {
       enable_by_default : false,
       worklytics_connector_id : "msft-teams-psoxy",
       display_name : "Microsoft Teams"
-      identifier_scope_id : "azure-ad"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : [],
@@ -399,7 +388,6 @@ EOT
       enable_by_default : false,
       worklytics_connector_id : "asana-psoxy"
       display_name : "Asana"
-      identifier_scope_id : "asana"
       worklytics_connector_name : "Asana via Psoxy"
       target_host : "app.asana.com"
       source_auth_strategy : "oauth2_access_token"
@@ -437,7 +425,6 @@ EOT
       enable_by_default : false,
       worklytics_connector_id : "github-enterprise-psoxy"
       display_name : "Github Enterprise"
-      identifier_scope_id : "github"
       worklytics_connector_name : "Github Enterprise via Psoxy"
       target_host : "api.github.com"
       source_auth_strategy : "oauth2_refresh_token"
@@ -546,7 +533,6 @@ EOT
       enable_by_default : false
       worklytics_connector_id : "github-enterprise-server-psoxy"
       display_name : "Github Enterprise Server"
-      identifier_scope_id : "github"
       worklytics_connector_name : "Github Enterprise Server via Psoxy"
       target_host : local.github_enterprise_server_host
       source_auth_strategy : "oauth2_refresh_token"
@@ -670,7 +656,6 @@ EOT
       enable_by_default : false
       worklytics_connector_id : "github-free-team-psoxy"
       display_name : "Github"
-      identifier_scope_id : "github"
       worklytics_connector_name : "Github Free/Professional/Team via Psoxy"
       target_host : "api.github.com"
       source_auth_strategy : "oauth2_refresh_token"
@@ -776,7 +761,6 @@ EOT
       enable_by_default : false
       worklytics_connector_id : "salesforce-psoxy"
       display_name : "Salesforce"
-      identifier_scope_id : "salesforce"
       worklytics_connector_name : "Salesforce via Psoxy"
       target_host : var.salesforce_domain
       source_auth_strategy : "oauth2_refresh_token"
@@ -877,7 +861,6 @@ EOT
       source_kind : "slack"
       availability : "ga",
       enable_by_default : true
-      identifier_scope_id : "slack"
       worklytics_connector_id : "slack-discovery-api-psoxy",
       worklytics_connector_name : "Slack via Psoxy",
       display_name : "Slack Discovery API"
@@ -902,7 +885,7 @@ EOT
         "/api/discovery.conversations.list?limit=10",
         "/api/discovery.conversations.info?team={WORKSPACE_ID}&channel={CHANNEL_ID}",
         "/api/discovery.conversations.recent?limit=10",
-        "/api/discovery.conversations.history?team={WORKSPACE_ID}&channel={CHANNEL_ID}&limit=10",
+        "/api/discovery.conversations.history?reactions=1&team={WORKSPACE_ID}&channel={CHANNEL_ID}&limit=10",
         "/api/discovery.users.list?limit=5",
       ]
       external_token_todo : <<EOT
@@ -954,7 +937,6 @@ EOT
       worklytics_connector_id : "zoom-psoxy"
       display_name : "Zoom"
       worklytics_connector_name : "Zoom via Psoxy"
-      identifier_scope_id : "zoom"
       source_auth_strategy : "oauth2_refresh_token"
       target_host : "api.zoom.us"
       environment_variables : {
@@ -1075,7 +1057,6 @@ EOT
       target_host : "api.dropboxapi.com"
       source_auth_strategy : "oauth2_refresh_token"
       display_name : "Dropbox Business"
-      identifier_scope_id : "dropbox-business"
       worklytics_connector_name : "Dropbox Business via Psoxy"
       secured_variables : [
         {
@@ -1164,7 +1145,6 @@ EOT
       target_host : var.jira_server_url
       source_auth_strategy : "oauth2_access_token"
       display_name : "Jira Data Center"
-      identifier_scope_id : "jira"
       worklytics_connector_name : "Jira Server REST API via Psoxy"
       secured_variables : [
         {
@@ -1207,7 +1187,6 @@ EOT
       target_host : "api.atlassian.com"
       source_auth_strategy : "oauth2_refresh_token"
       display_name : "Jira REST API"
-      identifier_scope_id : "jira"
       worklytics_connector_name : "Jira REST API via Psoxy"
       secured_variables : [
         {
@@ -1270,7 +1249,7 @@ EOT
       ],
       external_token_todo : <<EOT
 ## Prerequisites
-[Jira OAuth 2.0 (3LO)](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/) through Psoxy requires a Jira Cloud account with following classical scopes:
+Jira OAuth 2.0 (3LO) through Psoxy requires a Jira Cloud account with following classical scopes:
 
 - read:jira-user: for getting generic user information
 - read:jira-work: for getting information about issues, comments, etc
@@ -1281,93 +1260,94 @@ And following granular scopes:
 - read:avatar:jira: for retrieving group members
 
 ## Setup Instructions
-  1. Go to https://developer.atlassian.com/console/myapps/ and click on "Create" and choose "OAuth 2.0 Integration"
 
-  2. Then click "Authorization" and "Add" on `OAuth 2.0 (3L0)`, adding `http://localhost` as callback URI. It can be any URL
-     that matches the URL format and it is required to be populated, but the proxy instance workflow will not use it.
+### App configuration
+1. Go to the [Atlassian Developer Console](https://developer.atlassian.com/console/myapps/) and
+   click on "Create" (OAuth 2.0 integration).
+2. Now navigate to "Permissions" and click on "Add" for Jira. Once added, click on "Configure".
+   Add the following scopes as part of "Classic Scopes":
+   - `read:jira-user`
+   - `read:jira-work`
+   And these from "Granular Scopes":
+   - `read:group:jira`
+   - `read:avatar:jira`
+   - `read:user:jira`
+   Then repeat the same but for "User Identity API", adding the following scope:
+   - `read:account`
+3. Go to the "Authorization" section and add an OAuth 2.0 (3LO) authorization type: click on "Add"
+   and you will be prompted to provide a "Callback URI". At this point, you could add
+   `http://localhost` as value and follow the [Manual steps](#manual-steps), or you could
+   use our [Psoxy OAuth setup tool](#worklytics-psoxy-oauth-setup-tool) (see details below).
 
-  3. Now navigate to "Permissions" and click on "Add" for `Jira API`. Once added, click on "Configure".
-     Add following scopes as part of "Classic Scopes", first clicking on `Edit Scopes` and then selecting them:
-       - `read:jira-user`
-       - `read:jira-work`
-     And these from "Granular Scopes":
-       - `read:group:jira`
-       - `read:avatar:jira`
-       - `read:user:jira`
-     Then go back to "Permissions" and click on "Add" for `User Identity API`, only selecting following scopes:
-       - `read:account`
+### Worklytics OAuth setup tool
+Assuming you've created a Jira Cloud OAuth 2.0 (3LO) integration as described above, from the
+use our [Psoxy OAuth setup tool](https://github.com/Worklytics/psoxy-oauth-setup-tool) to obtain
+the necessary OAuth tokens and your Jira Cloud ID.
+Once you've installed and run the tool, you will get a Callback URI like this:
+`http://localhost:9000/psoxy-setup-callback` (instead of just `http://localhost`) that you can
+use in the "Authorization" section of the Developer Console. The tool is interactive, and you
+will be prompted to confirm that you've registered the Callback URI before continuing.
+Then, you will be prompted to enter the "Client ID" and "Secret" from the Developer Console, and
+the tool will open a web browser to perform the authentication and authorization flows. After that,
+it will print the all the values to complete the configuration:
+- OAuth tokens, Client ID and Secret to be stored in AWS System Manager parameters store / GCP
+  Cloud Secrets (if default implementation).
+- Jira Cloud ID as value of the `jira_cloud_id` variable in the `terraform.tfvars` file of your
+  Terraform configuration.
 
-     After adding all the scopes, you should have 1 permission for `User Identity API` and 5 for `Jira API`.
-
-  4. Once Configured, go to "Settings" and copy the "Client Id" and "Secret". You will use these to
-     obtain an OAuth `refresh_token`.
-
-  5. Build an OAuth authorization endpoint URL by copying the value for "Client Id" obtained in the
-    previous step into the URL below. Then open the result in a web browser:
-
+### Manual steps
+1. Assuming you've created a Jira Cloud OAuth 2.0 (3LO) integration as described above, go to
+   "Settings" and copy the "Client ID" and "Secret". You will use these to obtain an OAuth
+   `refresh_token`.
+2. Build an OAuth authorization endpoint URL by copying the value for "Client Id" obtained in the
+   previous step into the URL below. Then open the result in a web browser:
    `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
-
-     NOTES:
-     - That URL can be obtained from "Authorization" and clicking on `Configure` for  "OAuth 2.0 (3LO)" page.
-     - If after pasting the URL you see an error page (like an issue with identity provider) please check:
-       1 - The `clientId` is correct
-       2 - The `redirect_uri` is the same as the one configured in the "OAuth 2.0 (3LO)" page
-  6. Choose a site in your Jira workspace to allow access for this application and click "Accept".
-     As the callback does not exist, you will see an error. But in the URL of your browser you will see
-     something like this as URL:
-
-    `http://localhost/?state=YOUR_USER_BOUND_VALUE&code=eyJhbGc...`
-
-     Copy the value of the `code` parameter from that URI. It is the "authorization code" required
-     for next step.
-
-     **NOTE** This "Authorization Code" is single-use; if it expires or is used, you will need to obtain
-     a new code by  again pasting the authorization URL in the browser.
-
-  7. Now, replace the values in following URL and run it from command line in your terminal. Replace `YOUR_AUTHENTICATION_CODE`, `YOUR_CLIENT_ID` and `YOUR_CLIENT_SECRET` in the placeholders:
-
-    `curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Content-Type: application/json' --data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET", "code": "YOUR_AUTHENTICATION_CODE", "redirect_uri": "http://localhost"}'`
-
-  8. After running that command, if successful you will see a [JSON response](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/#2--exchange-authorization-code-for-access-token) like this:
-
-```json
-{
-  "access_token": "some short live access token",
-  "expires_in": 3600,
-  "token_type": "Bearer",
-  "refresh_token": "some long live token we are going to use",
-  "scope": "read:jira-work offline_access read:jira-user"
-}
-```
-
-9. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
-     - `PSOXY_JIRA_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
-     - `PSOXY_JIRA_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
-     - `PSOXY_JIRA_CLOUD_CLIENT_ID` with `Client Id` value.
-     - `PSOXY_JIRA_CLOUD_CLIENT_SECRET` with `Client Secret` value.
-
- 10. Obtain the "Cloud ID" of your Jira instance. Use the following command, with the
-    `access_token` obtained in the previous step in place of `<ACCESS_TOKEN>` below:
-
+3. Choose a site in your Jira workspace to allow access for this application and click "Accept".
+   As the callback does not exist, you will see an error. But in the URL of your browser you will
+   see something like this as URL:
+   `http://localhost/?state=YOUR_USER_BOUND_VALUE&code=eyJhbGc...`
+   Copy the value of the `code` parameter from that URI. It is the "authorization code" required
+   for next step.
+   **NOTE** This "Authorization Code" is single-use; if it expires or is used, you will need to
+   obtain a new code by  again pasting the authorization URL in the browser.
+4. Now, replace the values in following URL and run it from command line in your terminal. Replace
+   `YOUR_AUTHENTICATION_CODE`, `YOUR_CLIENT_ID` and `YOUR_CLIENT_SECRET` in the placeholders:
+   `curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Content-Type: application/json' --data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET", "code": "YOUR_AUTHENTICATION_CODE", "redirect_uri": "http://localhost"}'`
+5. After running that command, if successful you will see a
+   [JSON response](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/#2--exchange-authorization-code-for-access-token) like this:
+   ```json
+   {
+     "access_token": "some short live access token",
+     "expires_in": 3600,
+     "token_type": "Bearer",
+     "refresh_token": "some long live token we are going to use",
+     "scope": "read:jira-work offline_access read:jira-user"
+   }
+   ```
+6. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
+   - `PSOXY_JIRA_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
+   - `PSOXY_JIRA_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
+   - `PSOXY_JIRA_CLOUD_CLIENT_ID` with `Client Id` value.
+   - `PSOXY_JIRA_CLOUD_CLIENT_SECRET` with `Client Secret` value.
+7. Optional, obtain the "Cloud ID" of your Jira instance. Use the following command, with the
+   `access_token` obtained in the previous step in place of `<ACCESS_TOKEN>` below:
    `curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'`
-
    And its response will be something like:
+   ```json
+   [
+     {
+       "id":"SOME UUID",
+       "url":"https://your-site.atlassian.net",
+       "name":"your-site-name",
+       "scopes":["read:jira-user","read:jira-work"],
+       "avatarUrl":"https://site-admin-avatar-cdn.prod.public.atl-paas.net/avatars/240/rocket.png"
+     }
+   ]
+   ```
+Add the `id` value from that JSON response as the value of the `jira_cloud_id` variable in the
+`terraform.tfvars` file of your Terraform configuration. This will generate all the test URLs with
+a proper value.
 
-```json
-[
-  {
-    "id":"SOME UUID",
-    "url":"https://your-site.atlassian.net",
-    "name":"your-site-name",
-    "scopes":["read:jira-user","read:jira-work"],
-    "avatarUrl":"https://site-admin-avatar-cdn.prod.public.atl-paas.net/avatars/240/rocket.png"
-  }
-]
-```
-
-  Add the `id` value from that JSON response as the value of the `jira_cloud_id` variable in the
-  `terraform.tfvars` file of your Terraform configuration. This will generate all the test URLs with
-  proper value for targeting a valid Jira Cloud instance.
 EOT
     }
   }

@@ -1,11 +1,14 @@
 package co.worklytics.psoxy.rules.generics;
 
 import com.avaulta.gateway.rules.transforms.Transform;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 // so the real behavior we want is effectively a simple classifier, rather than to redact?
@@ -17,32 +20,18 @@ public class Calendar {
      * focus - rather than a work event in and of itself
      */
     public static final List<String> FOCUS_TIME_BLOCK_SNIPPETS = Arrays.asList(
-        "Focus Time Block",
         "Focus Time",
         "Focus",
-        "No Meeting Block",
-        "No Meetings Block",
         "No Meetings",
         "No Meeting",
         "no mtg"
     );
-
-    public static final String toCaseInsensitiveMultiPattern(List<String> snippets) {
-        return "(?i)\\b(" +
-            snippets.stream()
-                .sorted((a, b) -> Integer.compare(b.length(), a.length())) // longest first
-                .map(s -> Pattern.quote(s))
-                .collect(Collectors.joining("|"))
-            + ")[\\s:]*\\b";
-    }
 
     /**
      * strings that, by convention, indicate that a calendar event is time blocked by individual for
      * prep - rather than a work event in and of itself
      */
     public static final List<String> PREP_TIME_BLOCK_TITLE_SNIPPETS = Arrays.asList(
-        "Prep Time Block",
-        "Prep Time",
         "Prep"
     );
 
@@ -83,7 +72,7 @@ public class Calendar {
         "food",
         "happy hour",
         "lunch",
-        "office hour",
+        "office hours",
         "onsite",
         "on-site",
         "social",
@@ -92,7 +81,7 @@ public class Calendar {
         "standup",
         "team building",
         "teambuilding"
-        );
+     );
 
 
     public static final List<String> TOPICAL_TITLE_SNIPPETS = Arrays.asList(
@@ -110,15 +99,19 @@ public class Calendar {
         "sprint"
     );
 
-    public static final Transform.RedactExceptSubstringsMatchingRegexes PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS =
-            Transform.RedactExceptSubstringsMatchingRegexes.builder()
-                .exception(toCaseInsensitiveMultiPattern(FOCUS_TIME_BLOCK_SNIPPETS))
-                .exception(toCaseInsensitiveMultiPattern(PREP_TIME_BLOCK_TITLE_SNIPPETS))
-                .exception(toCaseInsensitiveMultiPattern(OOO_TITLE_SNIPPETS))
-                .exception(toCaseInsensitiveMultiPattern(FORMAT_TITLE_SNIPPETS))
-                .exception(toCaseInsensitiveMultiPattern(FREQUENCY_TITLE_SNIPPETS))
-                .exception(toCaseInsensitiveMultiPattern(AUDIENCE_TITLE_SNIPPETS))
-                .exception(toCaseInsensitiveMultiPattern(TOPICAL_TITLE_SNIPPETS))
+
+    public static final Transform.RedactExceptPhrases PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS =
+        Transform.RedactExceptPhrases.builder()
+                .allowedPhrases(Stream.of(
+                        FOCUS_TIME_BLOCK_SNIPPETS,
+                        PREP_TIME_BLOCK_TITLE_SNIPPETS,
+                        OOO_TITLE_SNIPPETS,
+                        FORMAT_TITLE_SNIPPETS,
+                        FREQUENCY_TITLE_SNIPPETS,
+                        AUDIENCE_TITLE_SNIPPETS,
+                        TOPICAL_TITLE_SNIPPETS)
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList()))
             .build();
 
 }

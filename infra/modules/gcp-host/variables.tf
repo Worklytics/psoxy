@@ -100,12 +100,6 @@ variable "gcp_region" {
   default     = "us-central1"
 }
 
-variable "replica_regions" {
-  type        = list(string)
-  description = "DEPRECATED; use `gcp_secret_replica_locations`. List of locations to which to replicate secrets. See https://cloud.google.com/secret-manager/docs/locations"
-  default     = null
-}
-
 variable "secret_replica_locations" {
   type        = list(string)
   description = "List of locations to which to replicate GCP Secret Manager secrets. See https://cloud.google.com/secret-manager/docs/locations"
@@ -201,12 +195,13 @@ variable "bulk_sanitized_expiration_days" {
 # q: move this into custom_bulk_connector_args
 variable "custom_bulk_connector_rules" {
   type = map(object({
-    pseudonymFormat       = optional(string, "URL_SAFE_TOKEN")
-    columnsToRedact       = optional(list(string), [])
-    columnsToInclude      = optional(list(string))
-    columnsToPseudonymize = optional(list(string), [])
-    columnsToDuplicate    = optional(map(string))
-    columnsToRename       = optional(map(string))
+    pseudonymFormat                = optional(string, "URL_SAFE_TOKEN")
+    columnsToRedact                = optional(list(string), [])
+    columnsToInclude               = optional(list(string))
+    columnsToPseudonymize          = optional(list(string), [])
+    columnsToPseudonymizeIfPresent = optional(list(string))
+    columnsToDuplicate             = optional(map(string))
+    columnsToRename                = optional(map(string))
     fieldsToTransform = optional(map(object({
       newName    = string
       transforms = optional(list(map(string)), [])
@@ -243,6 +238,7 @@ variable "lookup_tables" {
     columns_to_include            = optional(list(string))
     sanitized_accessor_principals = optional(list(string))
     expiration_days               = optional(number, 5 * 365)
+    compress_output               = optional(bool)
   }))
   description = "Lookup tables to build from same source input as another connector, output to a distinct bucket. The original `join_key_column` will be preserved, "
 

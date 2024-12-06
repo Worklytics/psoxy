@@ -128,12 +128,6 @@ variable "source_kind" {
   default     = "unknown"
 }
 
-variable "identifier_scope_id" {
-  type        = string
-  description = "DEPRECATED; will be removed in v0.5.x"
-  default     = null
-}
-
 variable "invoker_sa_emails" {
   type        = list(string)
   description = "emails of GCP service accounts to allow to invoke this proxy instance via HTTP"

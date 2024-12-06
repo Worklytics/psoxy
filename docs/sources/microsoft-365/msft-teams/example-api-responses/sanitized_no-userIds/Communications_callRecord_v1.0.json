@@ -10,20 +10,20 @@
   "id":"e523d2ed-2966-4b6b-925b-754a88034cc5",
   "organizer":{
     "user":{
-      "id":"{\"scope\":\"azure-ad\",\"hash\":\"_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU\"}",
+      "id":"{\"hash\":\"_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU\"}",
       "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
     }
   },
   "participants":[
     {
       "user":{
-        "id":"{\"scope\":\"azure-ad\",\"hash\":\"_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU\"}",
+        "id":"{\"hash\":\"_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU\"}",
         "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
       }
     },
     {
       "user":{
-        "id":"{\"scope\":\"azure-ad\",\"hash\":\"ejSHHUaRnhvrRPBjmJAxSudeydUkOaOBffHT-nIS1s0\"}",
+        "id":"{\"hash\":\"ejSHHUaRnhvrRPBjmJAxSudeydUkOaOBffHT-nIS1s0\"}",
         "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
       }
     }
@@ -48,7 +48,7 @@
         },
         "identity":{
           "user":{
-            "id":"{\"scope\":\"azure-ad\",\"hash\":\"_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU\"}",
+            "id":"{\"hash\":\"_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU\"}",
             "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
           }
         }
@@ -64,7 +64,7 @@
         },
         "identity":{
           "user":{
-            "id":"{\"scope\":\"azure-ad\",\"hash\":\"ejSHHUaRnhvrRPBjmJAxSudeydUkOaOBffHT-nIS1s0\"}",
+            "id":"{\"hash\":\"ejSHHUaRnhvrRPBjmJAxSudeydUkOaOBffHT-nIS1s0\"}",
             "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
           }
         },
@@ -98,7 +98,7 @@
             },
             "identity":{
               "user":{
-                "id":"{\"scope\":\"azure-ad\",\"hash\":\"_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU\"}",
+                "id":"{\"hash\":\"_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU\"}",
                 "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
               }
             }
@@ -114,7 +114,7 @@
             },
             "identity":{
               "user":{
-                "id":"{\"scope\":\"azure-ad\",\"hash\":\"ejSHHUaRnhvrRPBjmJAxSudeydUkOaOBffHT-nIS1s0\"}",
+                "id":"{\"hash\":\"ejSHHUaRnhvrRPBjmJAxSudeydUkOaOBffHT-nIS1s0\"}",
                 "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
               }
             }

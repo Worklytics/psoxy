@@ -13,11 +13,6 @@ on:
       - 'rc-*'
 
 jobs:
-  # Java 11 - Oracle support ended 30 Sept 2023 ... but still what ships with GCP cloud shell!!!
-  ci_java11:
-    uses: ./.github/workflows/build-java.yaml
-    with:
-      java-version: '11'
 
   # Java 17 - supported until 30 Sept 2026; same as our default build as of Apr 2023
   ci_java17:
@@ -25,18 +20,14 @@ jobs:
     with:
       java-version: '17'
 
-  # Java 20 - support ended 19 Sept 2023
-  # NOTE: psoxy versions 0.4.40 supported this; if you need it, option to downgrade to that.
-  # although beyond me why 17 and 21 both work, but 20 doesn't; best guess is Mockito 5 degrading
-  # behavior in some way for 20 that isn't needed for 21 and doesn't matter for 17?
-
-  ci_java20:
-    uses: ./.github/workflows/build-java.yaml
-    with:
-      java-version: '20'
-
   # Java 21 - released 19 Sept 2023, supported until Sept 2028 (LTS)
   ci_java21:
     uses: ./.github/workflows/build-java.yaml
     with:
       java-version: '21'
+
+  # Java 23 - released 17 Sept 2024, supported until March 2025
+  ci_java23:
+    uses: ./.github/workflows/build-java.yaml
+    with:
+      java-version: '23'

@@ -31,11 +31,6 @@ public interface FieldTransform {
         return Filter.builder().filter(filter).build();
     }
 
-    @Deprecated // only relevant for legacy case
-    static FieldTransform pseudonymizeWithScope(String scope) {
-        return PseudonymizeWithScope.builder().pseudonymizeWithScope(scope).build();
-    }
-
     static FieldTransform formatString(String template) {
         return FormatString.builder().formatString(template).build();
     }
@@ -205,12 +200,14 @@ public interface FieldTransform {
     /**
      * if provided, value will be pseudonymized with provided scope
      *
-     * @deprecated ; only relevant for legacy case
+     * @deprecated ; only relevant for legacy case, which is no longer supported; actually class left in code
+     * base so we can give fatal error with good feedback for cause.
      */
     @JsonTypeName("pseudonymizeWithScope")
     @NoArgsConstructor
     @SuperBuilder(toBuilder = true)
     @Data
+    @Deprecated
     class PseudonymizeWithScope implements FieldTransform {
 
         @NonNull

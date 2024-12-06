@@ -166,7 +166,6 @@ abstract public class RulesBaseTestCase {
 
         sanitizer = sanitizerFactory.create(getRulesUnderTest(),
             pseudonymizerFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .defaultScopeId(getRulesTestSpec().getDefaultScopeId())
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build()));
 

@@ -8,4 +8,4 @@ fieldsToTransform:
     transforms:
       - filter: "(.*)@.*"
       - formatString: "%s_acme"
-      - pseudonymizeWithScope: "github"
+      - pseudonymize: true

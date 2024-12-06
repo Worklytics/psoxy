@@ -1,8 +1,8 @@
 {
   "created_at":"2019-09-09T15:54:24Z",
   "duration":60,
-  "host_id":"{\"scope\":\"zoom\",\"hash\":\"vo5kKWepk7kE9KmMkB_ETGinPpXTv1uqiwMwwypWZoc\"}",
-  "host_email":"{\"scope\":\"email\",\"domain\":\"example.com\",\"hash\":\"H53zSk2P3-D_iGoG9l_KxsD84BJoSCtzfQVAYTQ5CxU\"}",
+  "host_id":"{\"hash\":\"vo5kKWepk7kE9KmMkB_ETGinPpXTv1uqiwMwwypWZoc\"}",
+  "host_email":"{\"domain\":\"example.com\",\"hash\":\"H53zSk2P3-D_iGoG9l_KxsD84BJoSCtzfQVAYTQ5CxU\"}",
   "id":1234555466,
   "start_time":"2019-08-30T22:00:00Z",
   "status":"waiting",

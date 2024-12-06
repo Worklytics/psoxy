@@ -249,20 +249,35 @@ variable "bulk_sanitized_expiration_days" {
 variable "custom_bulk_connector_rules" {
   type = map(object({
     pseudonymFormat                = optional(string, "URL_SAFE_TOKEN")
-    columnsToRedact                = optional(list(string))
-    columnsToInclude               = optional(list(string))
-    columnsToPseudonymize          = optional(list(string))
+    columnsToRedact                = optional(list(string), []) # columns to remove from CSV
+    columnsToInclude               = optional(list(string))     # if you prefer to include only an explicit list of columns, rather than redacting those you don't want
+    columnsToPseudonymize          = optional(list(string), []) # columns to pseudonymize
     columnsToPseudonymizeIfPresent = optional(list(string), null)
-    columnsToDuplicate             = optional(map(string))
-    columnsToRename                = optional(map(string))
+    columnsToDuplicate             = optional(map(string)) # columns to create copy of; name --> new name
+    columnsToRename                = optional(map(string)) # columns to rename: original name --> new name; renames applied BEFORE pseudonymization
     fieldsToTransform = optional(map(object({
       newName    = string
       transforms = optional(list(map(string)), [])
-    })), {})
+    })))
   }))
 
   description = "map of connector id --> rules object"
-  default     = {}
+  default = {
+    # hris = {
+    #   columnsToRedact       = []
+    #   columnsToPseudonymize = [
+    #     "EMPLOYEE_ID",
+    #     "EMPLOYEE_EMAIL",
+    #     "MANAGER_ID",
+    #     "MANAGER_EMAIL"
+    #  ]
+    # columnsToRename = {
+    #   # original --> new
+    #   "workday_id" = "employee_id"
+    # }
+    # columnsToInclude = [
+    # ]
+  }
 }
 
 variable "custom_bulk_connector_arguments" {
@@ -286,6 +301,7 @@ variable "lookup_table_builders" {
       columnsToDuplicate    = optional(map(string))
       columnsToRename       = optional(map(string))
     })
+    compress_output = optional(bool)
   }))
   default = {
     #    "lookup-hris" = {
@@ -316,7 +332,7 @@ variable "lookup_table_builders" {
 
 variable "use_api_gateway_v2" {
   type        = bool
-  description = "**alpha**. whether to use API Gateway, or not. Only v2 supported atm. Ignored if `vpc_config` is provided, bc that's incompatible with function URLs."
+  description = "**beta**. whether to use API Gateway, or not. Only v2 supported atm. Ignored if `vpc_config` is provided, bc that's incompatible with function URLs."
   default     = false
 }
 
@@ -326,7 +342,7 @@ variable "vpc_config" {
     subnet_ids         = list(string)
     security_group_ids = list(string)
   })
-  description = "**alpha** VPC configuration for lambda; if not provided, lambda will not be deployed in a VPC. see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#vpc_config"
+  description = "**beta** VPC configuration for lambda; if not provided, lambda will not be deployed in a VPC. see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function#vpc_config"
   default     = null
 }
 

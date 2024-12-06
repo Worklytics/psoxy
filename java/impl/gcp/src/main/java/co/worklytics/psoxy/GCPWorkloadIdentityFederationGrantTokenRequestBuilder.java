@@ -3,6 +3,7 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.WorkloadIdentityFederationGrantTokenRequestBuilder;
 import com.google.common.collect.Streams;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
@@ -28,7 +29,11 @@ import java.util.stream.Stream;
 public class GCPWorkloadIdentityFederationGrantTokenRequestBuilder extends WorkloadIdentityFederationGrantTokenRequestBuilder {
 
     enum ConfigProperty implements ConfigService.ConfigProperty {
-        AUDIENCE
+        AUDIENCE,
+        ;
+
+        @Getter
+        private boolean envVarOnly = true;
     }
 
     @Override

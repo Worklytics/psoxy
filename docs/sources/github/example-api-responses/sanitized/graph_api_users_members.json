@@ -5,16 +5,16 @@
         "edges":[
           {
             "node":{
-              "email":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"2cclTmgvAaaNoY_a3YFJVu1UUmwFw1MX9nrrF6oH9tM\"}",
+              "email":"{\"domain\":\"contoso.com\",\"hash\":\"2cclTmgvAaaNoY_a3YFJVu1UUmwFw1MX9nrrF6oH9tM\"}",
               "login":"p~MsZ4qsVoj0TU_io4Cz9mnMBWrZkfI89B-8qznWvl83mYA56fU9HQ_fR3fOvcTHkx",
               "organizationVerifiedDomainEmails":[
-                "{\"scope\":\"email\",\"domain\":\"verified.contoso.com\",\"hash\":\"_4ek18OM1Bqzf9GAql4c5Aj5q_QL8twXPufhwABSztg\"}"
+                "{\"domain\":\"verified.contoso.com\",\"hash\":\"_4ek18OM1Bqzf9GAql4c5Aj5q_QL8twXPufhwABSztg\"}"
               ]
             }
           },
           {
             "node":{
-              "email":"{\"scope\":\"email\",\"domain\":\"contoso.com\",\"hash\":\"OS0ifbJZXKTBbeGUlEbyacwWGTxBMkrAWSSbcy2OKmA\"}",
+              "email":"{\"domain\":\"contoso.com\",\"hash\":\"OS0ifbJZXKTBbeGUlEbyacwWGTxBMkrAWSSbcy2OKmA\"}",
               "login":"p~IfCQZlVaWKPjwpZn6GtislWJJ2ehfSnlyyONl2LdgTAaP2EggmLxGUnmFuzNnZlY",
               "organizationVerifiedDomainEmails":[ ]
             }

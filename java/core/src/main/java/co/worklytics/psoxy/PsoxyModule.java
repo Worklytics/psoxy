@@ -26,7 +26,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.common.base.Preconditions;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
@@ -241,14 +240,14 @@ public class PsoxyModule {
 
     @Provides
     @Singleton
-    JsonSchemaFilterUtils schemaRuleUtils(EnvVarsConfigService configService) {
+    JsonSchemaFilterUtils schemaRuleUtils(EnvVarsConfigService envVarsConfigService) {
         ObjectMapper objectMapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
         //TODO: probably more proper to override with a 'development' module of some kind
         JsonSchemaFilterUtils.Options.OptionsBuilder options = JsonSchemaFilterUtils.Options.builder();
-        options.logRedactions(configService.isDevelopment());
+        options.logRedactions(envVarsConfigService.isDevelopment());
 
         return new JsonSchemaFilterUtils(objectMapper, options.build());
     }
@@ -262,27 +261,8 @@ public class PsoxyModule {
     @Provides
     Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory,
                                 ConfigService config,
-                                SecretStore secretStore,
-                                RulesUtils rulesUtils, com.avaulta.gateway.rules.RuleSet ruleSet) {
-        return factory.create(factory.buildOptions(config,
-            secretStore,
-            rulesUtils.getDefaultScopeIdFromRules(ruleSet)
-                .orElseGet(() -> {
-                    boolean legacy =
-                    config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION)
-                        .map(PseudonymImplementation::valueOf)
-                        .map(implementation -> Objects.equals(implementation, PseudonymImplementation.LEGACY))
-                        .orElse(false);
-
-                    String defaultScopeIdFromSource  = config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE)
-                        .map(rulesUtils::getDefaultScopeIdFromSource)
-                        .orElse(null);
-
-                    if (legacy && StringUtils.isEmpty(defaultScopeIdFromSource)) {
-                        log.severe("Missing scope for legacy pseudonym implementation!");
-                    }
-                    return defaultScopeIdFromSource;
-                })));
+                                SecretStore secretStore) {
+        return factory.create(factory.buildOptions(config, secretStore));
     }
 
     @Provides

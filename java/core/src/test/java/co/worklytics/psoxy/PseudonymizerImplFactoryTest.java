@@ -43,23 +43,4 @@ class PseudonymizerImplFactoryTest {
         }
     }
 
-    @ValueSource(
-        strings = {
-            "",
-            "from-rules"
-        }
-    )
-    @ParameterizedTest
-    public void testBuildOptions_configuredScopeOverRules(String valueFromRules) {
-        // config value IDENTIFIER_SCOPE_ID should always take precedence
-        when(configService.getConfigPropertyAsOptional(ProxyConfigProperty.IDENTIFIER_SCOPE_ID))
-            .thenReturn(Optional.of("from-config"));
-
-        Pseudonymizer.ConfigurationOptions options =
-            factory.buildOptions(configService, secretStore, StringUtils.trimToNull(valueFromRules));
-
-
-        assertEquals("from-config", options.getDefaultScopeId());
-    }
-
 }

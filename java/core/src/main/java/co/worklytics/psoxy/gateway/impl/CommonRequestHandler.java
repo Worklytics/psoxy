@@ -21,8 +21,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.Value;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.http.HttpStatus;
@@ -31,6 +31,8 @@ import org.apache.http.entity.ContentType;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.Objects;
@@ -120,11 +122,8 @@ public class CommonRequestHandler {
         if (this.sanitizer == null) {
             synchronized ($writeLock) {
                 if (this.sanitizer == null) {
-                    String defaultScopeId = rulesUtils.getDefaultScopeIdFromRules(rules)
-                            .orElseGet(() -> rulesUtils.getDefaultScopeIdFromSource(config.getConfigPropertyOrError(ProxyConfigProperty.SOURCE)));
-
                     Pseudonymizer.ConfigurationOptions options =
-                            pseudonymizerImplFactory.buildOptions(config, secretStore, defaultScopeId);
+                            pseudonymizerImplFactory.buildOptions(config, secretStore);
                     this.sanitizer = sanitizerFactory.create(rules, pseudonymizerImplFactory.create(options));
                 }
             }
@@ -137,38 +136,54 @@ public class CommonRequestHandler {
 
         logRequestIfVerbose(request);
 
+        // application-level enforcement of HTTPS
+        // (NOTE: should be redundant with infrastructure-level configuration)
+        if (!request.isHttps().orElse(true)) {
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_BAD_REQUEST)
+                    .header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.HTTPS_REQUIRED.name())
+                    .body("Requests MUST be sent over HTTPS")
+                    .build();
+        }
+
         Optional<HttpEventResponse> healthCheckResponse = healthCheckRequestHandler.handleIfHealthCheck(request);
         if (healthCheckResponse.isPresent()) {
             return healthCheckResponse.get();
         }
 
-        // parse requested URL, re-writing host/etc
-        String requestedTargetUrl = parseRequestedTarget(request);
-
-        // if requested target URL has tokenized components, reverse
-        String clearTargetUrl = reverseTokenizedUrlComponents(requestedTargetUrl);
-
-        boolean tokenizedURLReversed = ObjectUtils.notEqual(requestedTargetUrl, clearTargetUrl);
-
-        // Using original URL to check sanitized rules, as they should match the original URL. It could contain tokenized components.
-        // Examples:
-        // /v1/accounts/p~12adsfasdfasdf31
-        // /v1/accounts/12345
-        URL originalRequestedURL = new URL(requestedTargetUrl);
-        // And the URL to use for source request; it could contain the reversed tokenized components
-        URL targetForSourceApiRequest = new URL(clearTargetUrl);
+        RequestUrls requestUrls;
+        try {
+            requestUrls = buildRequestedUrls(request);
+        } catch (Throwable e) {
+            //really shouldn't happen ... parsing one url from another, so would be a bad bug in our canonicalization code for this to go wrong
+            log.log(Level.WARNING, "Error parsing  / building request URL", e);
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.FAILED_TO_BUILD_URL.name())
+                    .body("Error parsing request URL")
+                    .build();
+        }
 
         // avoid logging clear URL outside of dev
-        URL toLog = envVarsConfigService.isDevelopment() ? targetForSourceApiRequest : originalRequestedURL;
+        URL toLog = envVarsConfigService.isDevelopment() ? requestUrls.getTarget() : requestUrls.getOriginal();
 
         boolean skipSanitization = skipSanitization(request);
 
         HttpEventResponse.HttpEventResponseBuilder builder = HttpEventResponse.builder();
 
-        this.sanitizer = loadSanitizerRules();
+        try {
+            this.sanitizer = loadSanitizerRules();
+        } catch (Throwable e) {
+            log.log(Level.SEVERE, "Error loading sanitizer rules", e);
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.CONFIGURATION_FAILURE.name())
+                    .body("Error loading sanitizer rules")
+                    .build();
+        }
 
         //build log entry
-        String logEntry = String.format("%s %s TokenInUrlReversed=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), tokenizedURLReversed);
+        String logEntry = String.format("%s %s TokenInUrlDecrypted=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), requestUrls.hasDecryptedTokens());
         if (request.getClientIp().isPresent()) {
             // client IP is NOT available for direct AWS Lambda calls; only for API Gateway.
             // don't want to put blank/unknown in direct case, so log IP conditionally
@@ -177,7 +192,7 @@ public class CommonRequestHandler {
 
         if (skipSanitization) {
             log.info(String.format("%s. Skipping sanitization.", logEntry));
-        } else if (sanitizer.isAllowed(request.getHttpMethod(), originalRequestedURL)) {
+        } else if (sanitizer.isAllowed(request.getHttpMethod(), requestUrls.getOriginal())) {
             log.info(String.format("%s. Rules allowed call.", logEntry));
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
@@ -198,7 +213,17 @@ public class CommonRequestHandler {
                 content = new ByteArrayContent(contentType, request.getBody());
             }
 
-            sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(targetForSourceApiRequest), content);
+            sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(requestUrls.getTarget()), content);
+
+            //TODO: what headers to forward???
+            populateHeadersFromSource(sourceApiRequest, request, requestUrls.getTarget());
+
+            //setup request
+            sourceApiRequest
+                .setThrowExceptionOnExecuteError(false)
+                .setConnectTimeout(SOURCE_API_REQUEST_CONNECT_TIMEOUT_MILLISECONDS)
+                .setReadTimeout(SOURCE_API_REQUEST_READ_TIMEOUT);
+
         } catch (IOException e) {
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             builder.body("Failed to parse request; review logs");
@@ -215,21 +240,19 @@ public class CommonRequestHandler {
             return builder.build();
         }
 
-        //TODO: what headers to forward???
-        populateHeadersFromSource(sourceApiRequest, request, targetForSourceApiRequest);
-
-        //setup request
-        sourceApiRequest
-                .setThrowExceptionOnExecuteError(false)
-                .setConnectTimeout(SOURCE_API_REQUEST_CONNECT_TIMEOUT_MILLISECONDS)
-                .setReadTimeout(SOURCE_API_REQUEST_READ_TIMEOUT);
-
-        //q: add exception handlers for IOExceptions / HTTP error responses, so those retries
-        // happen in proxy rather than on Worklytics-side?
-        com.google.api.client.http.HttpResponse sourceApiResponse = sourceApiRequest.execute();
-
-        // return response
-        builder.statusCode(sourceApiResponse.getStatusCode());
+        com.google.api.client.http.HttpResponse sourceApiResponse = null;
+        try {
+            //q: add exception handlers for IOExceptions / HTTP error responses, so those retries
+            // happen in proxy rather than on Worklytics-side?
+            sourceApiResponse = sourceApiRequest.execute();
+        } catch (ConnectException e) {
+            //connectivity problems
+            builder.statusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
+            builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.CONNECTION_TO_SOURCE.name());
+            builder.body("Error connecting to source API: " + e.getMessage());
+            log.log(Level.SEVERE, "Error connecting to source API: " + e.getMessage(), e);
+            return builder.build();
+        }
 
         try {
             // return response
@@ -250,7 +273,7 @@ public class CommonRequestHandler {
                 } else {
                     RESTApiSanitizer sanitizerForRequest = getSanitizerForRequest(request);
 
-                    proxyResponseContent = sanitizerForRequest.sanitize(request.getHttpMethod(), originalRequestedURL, responseContent);
+                    proxyResponseContent = sanitizerForRequest.sanitize(request.getHttpMethod(), requestUrls.getOriginal(), responseContent);
                     String rulesSha = rulesUtils.sha(sanitizerForRequest.getRules());
                     builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
                     log.info("response sanitized with rule set " + rulesSha);
@@ -269,6 +292,24 @@ public class CommonRequestHandler {
         }
     }
 
+
+    @Value
+    static class RequestUrls {
+
+        /**
+         * original URL, as requested
+         */
+        URL original;
+
+        /**
+         * decrypted URL, if tokenized components were found
+         */
+        URL target;
+
+        boolean hasDecryptedTokens() {
+            return !original.equals(target);
+        }
+    }
 
     /**
      * encapsulates dynamically configuring Sanitizer based on request (to support some aspects of
@@ -295,6 +336,27 @@ public class CommonRequestHandler {
     Optional<PseudonymImplementation> parsePseudonymImplementation(HttpEventRequest request) {
         return request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader())
                 .map(PseudonymImplementation::parseHttpHeaderValue);
+    }
+
+    @VisibleForTesting
+    @SneakyThrows // MalformedURLException, but that really shouldn't happen!!
+    RequestUrls buildRequestedUrls(HttpEventRequest request) {
+
+        // parse requested URL, re-writing host/etc
+        String requestedTargetUrl = parseRequestedTarget(request);
+
+        // if requested target URL has tokenized components, reverse
+        String clearTargetUrl = reverseTokenizedUrlComponents(requestedTargetUrl);
+
+        // Using original URL to check sanitized rules, as they should match the original URL. It could contain tokenized components.
+        // Examples:
+        // /v1/accounts/p~12adsfasdfasdf31
+        // /v1/accounts/12345
+        URL originalRequestedURL = new URL(requestedTargetUrl);
+        // And the URL to use for source request; it could contain the reversed tokenized components
+        URL targetForSourceApiRequest = new URL(clearTargetUrl);
+
+        return new RequestUrls(originalRequestedURL, targetForSourceApiRequest);
     }
 
     /**
@@ -377,7 +439,7 @@ public class CommonRequestHandler {
      * @return
      */
     private boolean skipSanitization(HttpEventRequest request) {
-        if (config.isDevelopment()) {
+        if (envVarsConfigService.isDevelopment()) {
             // caller requested to skip
             return request.getHeader(ControlHeader.SKIP_SANITIZER.getHttpHeader())
                     .map(Boolean::parseBoolean)
@@ -388,7 +450,7 @@ public class CommonRequestHandler {
     }
 
     private void logRequestIfVerbose(HttpEventRequest request) {
-        if (config.isDevelopment()) {
+        if (envVarsConfigService.isDevelopment()) {
             log.info(request.prettyPrint());
         }
     }
@@ -424,7 +486,7 @@ public class CommonRequestHandler {
     }
 
     private void logIfDevelopmentMode(Supplier<String> messageSupplier) {
-        if (config.isDevelopment()) {
+        if (envVarsConfigService.isDevelopment()) {
             log.info(messageSupplier.get());
         }
     }

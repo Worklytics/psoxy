@@ -104,8 +104,6 @@ class RESTApiSanitizerImplTest {
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("salt")
-            .defaultScopeId("scope")
-            .pseudonymImplementation(PseudonymImplementation.LEGACY)
             .build());
 
         sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"), pseudonymizer);
@@ -185,6 +183,27 @@ class RESTApiSanitizerImplTest {
         assertFalse(StringUtils.containsIgnoreCase(redacted, "pwd=1234asAf"));
     }
 
+
+    @SneakyThrows
+    @CsvSource({
+        "phrase1,phrase1",
+        "Phrase1,Phrase1",
+        "phrase2 2,phrase2 2",
+        "phrase3,phrase3",
+        "phrase4,",
+        "blah phrase1,phrase1",
+        "blah phrase1: blah,phrase1",
+    })
+    @ParameterizedTest
+    void redactExceptPhases(String raw, String sanitized) {
+        Transform.RedactExceptPhrases transform = Transform.RedactExceptPhrases.builder()
+            .allowedPhrases(Arrays.asList("phrase1", "phrase2 2", "Phrase3"))
+            .build();
+
+        String redacted = (String) sanitizer.getRedactExceptPhrases(transform).map(raw, sanitizer.jsonConfiguration);
+
+        assertEquals(sanitized, StringUtils.trimToNull(redacted));
+    }
 
     @SneakyThrows
     @ValueSource(strings = {
@@ -274,7 +293,7 @@ class RESTApiSanitizerImplTest {
         //NOTE: this is a LEGACY case
         MapFunction f = sanitizer.getPseudonymize(Transform.Pseudonymize.builder().includeReversible(true).build());
 
-        assertEquals("{\"scope\":\"scope\",\"hash\":\"kCGiAd9lGjEbWqbPlXo32fOl5YVmrasomP4QwTAsHww\",\"h_4\":\"Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0M\",\"reversible\":\"p~Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0MzTTbTCc7BcR53imT1qZgI\"}",
+        assertEquals("{\"hash\":\"Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0M\",\"reversible\":\"p~Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0MzTTbTCc7BcR53imT1qZgI\"}",
             f.map("asfa", sanitizer.getJsonConfiguration()));
     }
 
@@ -447,12 +466,6 @@ class RESTApiSanitizerImplTest {
 
     @CsvSource(
         value = {
-            "LEGACY,test,false,URL_SAFE_TOKEN,qdRJIFbPHPza8bRV67W_Fq.SYBn77xdIHll17pXhilo",
-            "LEGACY,alice@acme.com,false,URL_SAFE_TOKEN,UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk",
-            //legacy w reversible fail to JSON format!!
-            "LEGACY,test,true,URL_SAFE_TOKEN,'{\"scope\":\"scope\",\"hash\":\"qdRJIFbPHPza8bRV67W_Fq.SYBn77xdIHll17pXhilo\",\"h_4\":\"Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDI\",\"reversible\":\"p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ\"}'",
-            "LEGACY,alice@acme.com,true,URL_SAFE_TOKEN,'{\"scope\":\"email\",\"domain\":\"acme.com\",\"hash\":\"UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk\",\"h_4\":\"UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMk\",\"reversible\":\"p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com\"}'",
-
             // pseudonyms build with DEFAULT implementation always support URL_SAFE_TOKEN encoding
             "DEFAULT,test,false,URL_SAFE_TOKEN,Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDI",
             "DEFAULT,test,true,URL_SAFE_TOKEN,p~Tt8H7clbL9y8ryN4_RLYrCEsKqbjJsWcPmKb4wOdZDKAHyevsJLhRTypmrf-DpBZ",
@@ -469,10 +482,8 @@ class RESTApiSanitizerImplTest {
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("salt")
-            .defaultScopeId("scope")
             .pseudonymImplementation(implementation)
             .build());
-
 
         sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"), pseudonymizer);
 
@@ -566,7 +577,6 @@ class RESTApiSanitizerImplTest {
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymizationSalt("salt")
-            .defaultScopeId("scope")
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build());
 
@@ -621,14 +631,13 @@ class RESTApiSanitizerImplTest {
 
 
     @CsvSource(value = {
-        "something,.*,t~Pym88cXj0AbPDFzkwBY_4jRh8Tq8KpfLNNwE3PTolQ4",
+        "something,.*,t~EN_O0yRLJp7bRnw6HrbdPMLul_uqairwpevQ08HtEn0",
         "something,blah:.*thing,", // no match, should redact
-        "blah:something,blah:.*thing,t~fZJVpgu6vQk2f6Q8G9IXNysNnxwwJO4cd1zWOZV.Zcg",
-        "blah:something,blah:(.*),blah:t~Pym88cXj0AbPDFzkwBY_4jRh8Tq8KpfLNNwE3PTolQ4",
+        "blah:something,blah:.*thing,t~ltpmWUv-gqwJTPjfusJMo8Cd45xhqDRQx6REW-gS2CU",
+        "blah:something,blah:(.*),blah:t~EN_O0yRLJp7bRnw6HrbdPMLul_uqairwpevQ08HtEn0",
     })
     @ParameterizedTest
     public void pseudonymizeWithRegexMatches_nonMatchingRedacted(String input, String regex, String expected) {
-        //NOTE: this is a LEGACY case
         MapFunction transform = sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder()
             .regex(regex)
             .includeReversible(false)

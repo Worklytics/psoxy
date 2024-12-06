@@ -6,7 +6,6 @@ import co.worklytics.psoxy.PseudonymizerImplFactory;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import co.worklytics.psoxy.utils.ProcessingBuffer;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.ColumnarRules;
@@ -194,7 +193,6 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
         TriFunction<String, String, Pseudonymizer, String> pseudonymizationFunction = buildPseudonymizationFunction(rules);
 
-        Map<String, Pseudonymizer> pseudonymizers = new HashMap<>();
         BiFunction<String, FieldTransformPipeline, String> applyTransform = (originalValue, pipeline) -> {
           String value = originalValue;
           for ( FieldTransform transform : pipeline.getTransforms()) {
@@ -216,13 +214,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                   }
 
                   if (transform instanceof FieldTransform.PseudonymizeWithScope) {
-                      Pseudonymizer scopedPseudonymizer = pseudonymizer;
-                      if (pseudonymizer.getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
-                          scopedPseudonymizer = pseudonymizers.computeIfAbsent(
-                              ((FieldTransform.PseudonymizeWithScope) transform).getPseudonymizeWithScope(),
-                              scope -> pseudonymizerImplFactory.create(pseudonymizer.getOptions().withDefaultScopeId(scope)));
-                      }
-                      value = pseudonymizationFunction.apply(value, pipeline.getNewName(), scopedPseudonymizer);
+                      throw new UnsupportedOperationException("PseudonymizeWithScope is no longer supported in v0.5+ of proxy");
                   }
 
                   if (transform instanceof FieldTransform.JavaRegExpReplace) {
@@ -430,14 +422,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                             //this shouldn't happen, bc ColumnarRules don't support preserving original
                             log.warning("Encoding pseudonym for column '" + outputColumnName + "' using format that will not include the 'original' value, althought transformation preserved it");
                         }
-                        if (localPseudonymizer.getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
-                            if (identity.getReversible() != null) {
-                                throw new Error("Cannot encode legacy PseudonymizedIdentity with reversibles as URL_SAFE_TOKEN");
-                            }
-                            return urlSafeTokenPseudonymEncoder.encode(identity.fromLegacy());
-                        } else {
-                            return urlSafeTokenPseudonymEncoder.encode(identity.asPseudonym());
-                        }
+                        return urlSafeTokenPseudonymEncoder.encode(identity.asPseudonym());
                     } else if (rules.getPseudonymFormat() == PseudonymEncoder.Implementations.URL_SAFE_HASH_ONLY) {
                         return base64UrlSha256HashPseudonymEncoder.encode(identity.asPseudonym());
                     } else {

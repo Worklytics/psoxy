@@ -1,14 +1,6 @@
 # deployment for a single Psoxy instance in GCP project that has be initialized for Psoxy.
 # project itself may hold MULTIPLE psoxy instances
 
-terraform {
-  required_providers {
-    google = {
-      version = "~> 4.12"
-    }
-  }
-}
-
 data "google_project" "project" {
   project_id = var.project_id
 }
@@ -31,7 +23,6 @@ locals {
     TARGET_HOST                     = var.target_host
     SOURCE_AUTH_STRATEGY_IDENTIFIER = var.source_auth_strategy
     OAUTH_SCOPES                    = join(" ", var.oauth_scopes)
-    IDENTIFIER_SCOPE_ID             = var.identifier_scope_id
     }
     : k => v if v != null
   }
@@ -188,35 +179,20 @@ resource "local_file" "test_script" {
 
   filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
   file_permission = "755"
-  content         = <<EOT
-#!/bin/bash
-API_PATH=$${1:-${try(var.example_api_calls[0], "")}}
-echo "Quick test of ${var.instance_id} ..."
-
-${local.command_cli_call} -u "${local.proxy_endpoint_url}" --health-check
-
-${local.command_cli_call} -u "${local.proxy_endpoint_url}$API_PATH" ${local.impersonation_param}
-
-echo "Invoke this script with any of the following as arguments to test other endpoints:${"\r\n\t"}${join("\r\n\t", var.example_api_calls)}"
-EOT
+  content         = templatefile("${path.module}/test_script.tftpl", {
+    proxy_endpoint_url = local.proxy_endpoint_url,
+    function_name = var.instance_id,
+    impersonation_param = local.impersonation_param,
+    command_cli_call = local.command_cli_call,
+    example_api_calls = var.example_api_calls,
+  })
 }
-
-moved {
-  from = local_file.test_script
-  to   = local_file.test_script[0]
-}
-
 
 resource "local_file" "review" {
   count = var.todos_as_local_files ? 1 : 0
 
   filename = "TODO ${var.todo_step} - test ${google_cloudfunctions_function.function.name}.md"
   content  = local.todo_content
-}
-
-moved {
-  from = local_file.review
-  to   = local_file.review[0]
 }
 
 output "instance_id" {

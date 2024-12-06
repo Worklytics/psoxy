@@ -35,6 +35,11 @@ if [[ -z "$aws_assume_role_arn" ]]; then
     error_exit "Error: aws_assume_role_arn not found in $TFVARS_FILE!"
 fi
 
+# if aws_assume_role_arn contains a space, split it and take the first part
+if [[ $aws_assume_role_arn == *" "* ]]; then
+    aws_assume_role_arn=$(echo $aws_assume_role_arn | cut -d ' ' -f 1)
+fi
+
 aws_region=$(awk -F'=' '/^aws_region/ {gsub(/^[ \t]+|[ \t]+$/, "", $2); gsub(/"/, "", $2); print $2}' "$TFVARS_FILE")
 if [[ -z "$aws_region" ]]; then
     error_exit "Error: aws_region not found in $TFVARS_FILE!"
@@ -61,20 +66,19 @@ if [[ ! $OPEN_CONSOLE =~ ^[Yy]$ ]]; then
 fi
 
 
-credentials=$(aws sts assume-role --role-arn "$aws_assume_role_arn" --role-session-name "SessionFromBash" --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' --output text)
+credentials=$(aws sts assume-role --role-arn "$aws_assume_role_arn" --role-session-name "OpenAwsConsole" --output json)
 
 if [[ $? -ne 0 ]]; then
     error_exit "Error: Failed to assume role!"
 fi
 
 # Extract credentials
-AWS_ACCESS_KEY_ID=$(echo "$credentials" | awk '{print $1}')
-AWS_SECRET_ACCESS_KEY=$(echo "$credentials" | awk '{print $2}')
-AWS_SESSION_TOKEN=$(echo "$credentials" | awk '{print $3}')
+ACCESS_KEY_ID=$(echo "$credentials" | jq -r .Credentials.AccessKeyId)
+SECRET_ACCESS_KEY=$(echo "$credentials" | jq -r .Credentials.SecretAccessKey)
+SESSION_TOKEN=$(echo "$credentials" | jq -r .Credentials.SessionToken)
 
 # Create a URL that allows console login with temporary credentials
-json_data=$(printf '{"sessionId":"%s","sessionKey":"%s","sessionToken":"%s"}' "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$AWS_SESSION_TOKEN")
-
+json_data=$(printf '{"sessionId":"%s","sessionKey":"%s","sessionToken":"%s"}' "$ACCESS_KEY_ID" "$SECRET_ACCESS_KEY" "$SESSION_TOKEN")
 # Encode the JSON object
 encoded_data=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''$json_data'''))")
 

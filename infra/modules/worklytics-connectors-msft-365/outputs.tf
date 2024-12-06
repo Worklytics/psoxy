@@ -23,21 +23,13 @@ output "next_todo_step" {
   value = try(max(concat([var.todo_step], local.next_todo_steps)), var.todo_step + 1)
 }
 
-#deprecated; don't think it's used directly anywhere
-output "application_ids" {
-  value = {
-    for id, connection in module.msft_connection : id => connection.connector.application_id
-  }
-}
-
 output "api_clients" {
   description = "Map of API client identifiers. Useful for configuration of clients, terraform migration."
   value = {
     for id, connection in module.msft_connection :
     id => {
-      azuread_application_id = connection.connector.client_id
-      oauth_client_id        = connection.connector.client_id # yes, it's same as application id; but duplicated for clarity
-      azuread_object_id      = connection.connector.object_id # used for terraform imports
+      oauth_client_id   = connection.connector.client_id
+      entra_object_id = connection.connector.object_id # used for terraform imports
     }
   }
 }
