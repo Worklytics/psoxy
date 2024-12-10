@@ -104,6 +104,8 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
 
         SecretName secretName = SecretName.of(projectId, paramName);
 
+        boolean accessViaExplicitVersion = false;
+
         try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
 
             String versionName = "latest";
@@ -113,6 +115,8 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
                 String versionLabelValue = secret.getLabelsMap() != null ? secret.getLabelsMap().get(VERSION_LABEL) : null;
 
                 if (!StringUtils.isBlank(versionLabelValue)) {
+                    accessViaExplicitVersion = true;
+                    log.info("Accessing secret " + paramName + " using explicit version " + versionLabelValue + " rather than 'latest'.");
                     versionName = versionLabelValue;
                 }
             } catch (PermissionDeniedException e) {
@@ -131,6 +135,10 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
 
             return Optional.of(response.getPayload().getData().toStringUtf8());
         } catch (com.google.api.gax.rpc.NotFoundException e) {
+            if (accessViaExplicitVersion) {
+                // in this case, manual rotation of the secret without relying on our code may have occurred; a new version was written, but the value of the label referencing the latest version was not updated
+                log.log(Level.WARNING, "Could not find secret " + paramName + " in Secret Manager using explicit version; check value of label '" + VERSION_LABEL + "' on the secret itself vs what versions of that secret exist.");
+            }
             if (envVarsConfigService.isDevelopment()) {
                 log.log(Level.INFO, "Could not find secret " + paramName + " in Secret Manager", e);
             }
