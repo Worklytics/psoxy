@@ -7,6 +7,10 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
+## [0.5.1](https://github.com/Worklytics/psoxy/release/tag/v0.5.1) - unreleased
+  - legacy OAUTH_REFRESH_TOKEN secrets/parameters have been removed; these were previously used to
+     "lock" token refresh process, but are no longer used. You may see these destroyed in your terraform plan.
+
 ## [0.5.0](https://github.com/Worklytics/psoxy/release/tag/v0.5.0)
 
 BREAKING:

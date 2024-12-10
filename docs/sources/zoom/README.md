@@ -81,3 +81,21 @@ sufficient, but as of May 2024 are no longer available for newly created Zoom ap
 Once the scopes are added, click on `Done` and then `Continue`.
 
 6. Activate the app
+
+## Troubleshooting
+
+### Zoom API Error : 400 invalid client
+
+`{"reason":"Invalid client_id or client_secret","error":"invalid_client"}`
+
+Causes:
+   - extra chars in Client ID; or incorrect Client ID
+
+Confirm that the `Client ID` and `Client Secret` are correctly set in your secret store solution (AWS Parameter Store, Secrets Manager, or GCP Secret Manager).
+
+### Zoom API Error : 400 Bad Request
+
+`{"reason":"Bad Request","error":"invalid_request"}`
+
+Causes:
+  - extra chars in Account ID; or incorrect Account ID
