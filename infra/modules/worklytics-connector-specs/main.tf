@@ -446,13 +446,6 @@ EOT
           writable : false
           sensitive : true
           value_managed_by_tf : false
-        },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true
-          sensitive : true
-          value_managed_by_tf : false
         }
       ],
       environment_variables : {
@@ -547,13 +540,6 @@ EOT
           name : "REFRESH_TOKEN"
           writable : true
           sensitive : true
-          value_managed_by_tf : false
-        },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true   # nonsensical; this parameter/secret IS the lock. it's really the tokens that should have lockable:true
-          sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself
           value_managed_by_tf : false
         },
         {
@@ -677,13 +663,6 @@ EOT
           writable : false
           sensitive : true
           value_managed_by_tf : false
-        },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true
-          sensitive : true
-          value_managed_by_tf : false
         }
       ],
       environment_variables : {
@@ -781,13 +760,6 @@ EOT
         {
           name : "CLIENT_ID"
           writable : false
-          sensitive : true
-          value_managed_by_tf : false
-        },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true
           sensitive : true
           value_managed_by_tf : false
         },
@@ -972,8 +944,7 @@ EOT
           sensitive : true
           value_managed_by_tf : false
           description : "Short-lived Oauth access_token used by connector to retrieve Zoom data. Filled by Proxy instance."
-        },
-        # used to have OAUTH_REFRESH_TOKEN; but as of Sept 2024, seeing that it's not being used
+        }
       ],
       reserved_concurrent_executions : null # 1
       example_api_calls_user_to_impersonate : null
@@ -1193,13 +1164,6 @@ EOT
           name : "REFRESH_TOKEN"
           writable : true
           sensitive : true
-          value_managed_by_tf : false
-        },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true   # nonsensical; this parameter/secret IS the lock. it's really the tokens that should have lockable:true
-          sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself
           value_managed_by_tf : false
         },
         {

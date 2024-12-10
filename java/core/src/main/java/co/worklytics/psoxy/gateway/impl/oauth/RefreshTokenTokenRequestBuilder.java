@@ -38,7 +38,6 @@ public class RefreshTokenTokenRequestBuilder
     public enum ConfigProperty implements ConfigService.ConfigProperty {
         REFRESH_TOKEN, //NOTE: you should configure this as a secret in Secret Manager
         CLIENT_SECRET, //NOTE: you should configure this as a secret in Secret Manager
-
     }
 
 
