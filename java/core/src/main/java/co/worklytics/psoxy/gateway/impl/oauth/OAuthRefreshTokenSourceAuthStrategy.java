@@ -352,7 +352,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                         || storedToken.getLastModifiedDate().get()
                                 .isBefore(Instant.now().minus(MIN_DURATION_TO_KEEP_REFRESH_TOKEN)))
                     .ifPresent(storedTokenToRotate -> {
+                        // if reaching here, there's a new refresh token AND stored token was last written at least MIN_DURATION_TO_KEEP_REFRESH_TOKEN ago
+                        // (want to avoid churning through refresh tokens if source is giving us a new one every time, as this is pretty expensive for secret manager)
                         try {
+                            log.info("New oauth refresh_token came with access_token response; updating stored value");
                             secretStore.putConfigProperty(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN,
                                     tokenResponse.getRefreshToken(), WRITE_RETRIES);
                         } catch (WritePropertyRetriesExhaustedException e) {
