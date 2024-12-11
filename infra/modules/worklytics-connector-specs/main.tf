@@ -216,7 +216,7 @@ locals {
       "/v1.0/groups",
       "/v1.0/groups/{group-id}/members"
     ]
-  },
+  }
 
   msft_365_connectors = {
     # azure-ad is legacy branding of `entra`; so re-use prototype, but override some fields
