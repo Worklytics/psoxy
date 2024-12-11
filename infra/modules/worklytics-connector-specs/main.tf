@@ -763,7 +763,7 @@ EOT
         CREDENTIALS_FLOW : "client_secret"
         REFRESH_ENDPOINT : "https://${var.salesforce_domain}/services/oauth2/token"
         ACCESS_TOKEN_CACHEABLE : "true",
-        USE_SHARED_TOKEN : "true"
+        USE_SHARED_TOKEN : "TRUE"
       }
       secured_variables : [
         {
