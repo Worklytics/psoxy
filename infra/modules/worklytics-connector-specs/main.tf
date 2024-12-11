@@ -286,7 +286,7 @@ locals {
     },
     "msft-teams" : {
       source_kind : "msft-teams"
-      availability : "beta",
+      availability : "ga",
       enable_by_default : false,
       worklytics_connector_id : "msft-teams-psoxy",
       display_name : "Microsoft Teams"
