@@ -19,6 +19,18 @@ locals {
   google_workspace_example_user  = coalesce(var.google_workspace_example_user, "REPLACE_WITH_EXAMPLE_USER@YOUR_COMPANY.COM")
   google_workspace_example_admin = coalesce(var.google_workspace_example_admin, var.google_workspace_example_user, "REPLACE_WITH_EXAMPLE_ADMIN@YOUR_COMPANY.COM")
 
+  standard_config_values = {
+    oauth_refresh_token_lock = {
+      # NOTE: in GCP case, this is NEVER actually filled with a value; lock is done by labeling the secret
+      name : "OAUTH_REFRESH_TOKEN"
+      writable : true
+      lockable : true   # nonsensical; this parameter/secret IS the lock. it's really the tokens that should have lockable:true
+      sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself
+      value_managed_by_tf : false
+      description: "Used to 'lock' the token refresh flow, so multiple processes don't refresh tokens concurrently.  Filled by Proxy instance."
+    }
+  }
+
   google_workspace_sources = {
     # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
     # if you plan to directly connect Directory to worklytics (without proxy). such a scenario is
@@ -447,13 +459,7 @@ EOT
           sensitive : true
           value_managed_by_tf : false
         },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true
-          sensitive : true
-          value_managed_by_tf : false
-        }
+        local.standard_config_values.oauth_refresh_token_lock,
       ],
       environment_variables : {
         GRANT_TYPE : "certificate_credentials"
@@ -549,13 +555,7 @@ EOT
           sensitive : true
           value_managed_by_tf : false
         },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true   # nonsensical; this parameter/secret IS the lock. it's really the tokens that should have lockable:true
-          sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself
-          value_managed_by_tf : false
-        },
+        local.standard_config_values.oauth_refresh_token_lock,
         {
           name : "CLIENT_ID"
           writable : false
@@ -678,13 +678,7 @@ EOT
           sensitive : true
           value_managed_by_tf : false
         },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true
-          sensitive : true
-          value_managed_by_tf : false
-        }
+        local.standard_config_values.oauth_refresh_token_lock
       ],
       environment_variables : {
         GRANT_TYPE : "certificate_credentials"
@@ -784,13 +778,7 @@ EOT
           sensitive : true
           value_managed_by_tf : false
         },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true
-          sensitive : true
-          value_managed_by_tf : false
-        },
+        local.standard_config_values.oauth_refresh_token_lock,
         {
           name : "ACCESS_TOKEN"
           writable : true
@@ -971,15 +959,9 @@ EOT
           writable : true
           sensitive : true
           value_managed_by_tf : false
-          description : "Short-lived Oauth access_token used by connector to retrieve Zoom data. Filled by Proxy instance."
+          description : "Short-lived oauth access_token. Filled by Proxy instance."
         },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true
-          sensitive : true
-          value_managed_by_tf : false
-        }, # q: needed? per logic as of 9 June 2023, would be created
+        local.standard_config_values.oauth_refresh_token_lock,
       ],
       reserved_concurrent_executions : null # 1
       example_api_calls_user_to_impersonate : null
@@ -1201,13 +1183,7 @@ EOT
           sensitive : true
           value_managed_by_tf : false
         },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true   # nonsensical; this parameter/secret IS the lock. it's really the tokens that should have lockable:true
-          sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself
-          value_managed_by_tf : false
-        },
+        local.standard_config_values.oauth_refresh_token_lock,
         {
           name : "CLIENT_ID"
           writable : false
