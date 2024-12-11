@@ -188,7 +188,7 @@ locals {
   entra_id_prototype =  {
     worklytics_connector_id : "azure-ad-psoxy",
     availability : "ga",
-    enable_by_default : true,
+    enable_by_default : false, # really, ONLY do Outlook Cal in the min-case; get users and workday settings from there
     source_kind : "azure-ad",
     display_name : "Microsoft Entra ID (former Azure AD)"
     source_auth_strategy : "oauth2_refresh_token"
