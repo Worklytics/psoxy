@@ -185,6 +185,13 @@ locals {
   # Microsoft 365 sources; add/remove as you wish
   # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
 
+  # these are the same for all the Microsoft 365 connectors
+  msft_365_environment_variables = {
+    GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+    TOKEN_SCOPE : "https://graph.microsoft.com/.default"
+    REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+  }
+
   entra_id_prototype =  {
     worklytics_connector_id : "azure-ad-psoxy",
     availability : "ga",
@@ -201,11 +208,7 @@ locals {
       "Group.Read.All",
       "MailboxSettings.Read"
     ]
-    environment_variables : {
-      GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
-      TOKEN_SCOPE : "https://graph.microsoft.com/.default"
-      REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-    }
+    environment_variables : local.msft_365_environment_variables
     external_todo : null
     example_api_calls : [
       "/v1.0/users",
@@ -239,11 +242,7 @@ locals {
         "Group.Read.All",
         "User.Read.All"
       ],
-      environment_variables : {
-        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
-        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
-        REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-      },
+      environment_variables : local.msft_365_environment_variables
       external_todo : null
       example_api_calls : [
         "/v1.0/users",
@@ -269,12 +268,7 @@ locals {
         "Group.Read.All",
         "User.Read.All"
       ]
-      environment_variables : {
-        GRANT_TYPE : "workload_identity_federation"
-        # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
-        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
-        REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-      }
+      environment_variables : local.msft_365_environment_variables
       external_todo : null
       example_api_calls : [
         "/v1.0/users",
@@ -303,12 +297,7 @@ locals {
         "OnlineMeetings.Read.All",
         "OnlineMeetingArtifact.Read.All"
       ],
-      environment_variables : {
-        GRANT_TYPE : "workload_identity_federation"
-        # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
-        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
-        REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-      }
+      environment_variables : local.msft_365_environment_variables
       example_api_calls : [
         "/v1.0/teams",
         "/v1.0/teams/${var.msft_teams_example_team_guid}/allChannels",
