@@ -956,7 +956,7 @@ EOT
         },
         {
           name : "ACCESS_TOKEN"
-          writable : true
+          writable : true  # access token
           sensitive : true
           value_managed_by_tf : false
           description : "Short-lived oauth access_token. Filled by Proxy instance."
@@ -1058,6 +1058,13 @@ EOT
           writable : false
           sensitive : true
           value_managed_by_tf : false
+        },
+        {
+          name : "ACCESS_TOKEN"
+          writable : true  # access token
+          sensitive : true
+          value_managed_by_tf : false
+          description : "Short-lived oauth access_token. Filled by Proxy instance."
         },
       ],
       environment_variables : {
