@@ -209,7 +209,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         // not high; better to fail fast and leave it to the caller (Worklytics) to retry than hold
         // open a lambda waiting for a lock
-        private static final String TOKEN_REFRESH_LOCK_ID = "oauth_refresh_token";
+        //NOTE: this is OAUTH_REFRESH_TOKEN secret / parameter that we expect to exist (created by Terraform modules in usual case)
+        private static final String TOKEN_REFRESH_LOCK_ID = "OAUTH_REFRESH_TOKEN";
+
         private static final int MAX_TOKEN_REFRESH_ATTEMPTS = 3;
 
         /**

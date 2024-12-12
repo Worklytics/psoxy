@@ -12,6 +12,7 @@ jobs:
     strategy:
       matrix:
         terraform_version: [ '~1.6.0', '~1.7.0', '~1.8.0', '~1.9.0', '~1.10.0', 'latest' ]
+        # TODO: we should matrix this over modules eventually too
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -26,3 +27,10 @@ jobs:
         run: |
           terraform init -reconfigure
           terraform validate
+
+      # also test here ...
+      - name: "Terraform - test modules/worklytics-connector-specs"
+        working-directory: infra/modules/worklytics-connector-specs
+        run: |
+          terraform init -reconfigure
+          terraform test
