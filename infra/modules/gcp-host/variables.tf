@@ -90,7 +90,7 @@ variable "pseudonymize_app_ids" {
 
 variable "email_canonicalization" {
   type        = string
-  description = "defines how email address are processed prior to hashing, hence which are considered 'canonically equivalent'; one of 'STRICT' (default and most standard compliant) or 'IGNORE_DOTS' (probably most in line with user expectations)"
+  description = "defines how email address are processed prior to hashing, hence which are considered 'canonically equivalent'; one of 'STRICT' (most standard compliant) or 'IGNORE_DOTS' (default and probably most in line with user expectations)"
   default     = "STRICT"
 }
 

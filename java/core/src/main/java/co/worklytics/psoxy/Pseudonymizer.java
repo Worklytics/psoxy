@@ -30,7 +30,7 @@ public interface Pseudonymizer {
         PseudonymImplementation pseudonymImplementation = PseudonymImplementation.DEFAULT;
 
         @Builder.Default
-        EmailCanonicalization emailCanonicalization = EmailCanonicalization.STRICT;
+        EmailCanonicalization emailCanonicalization = EmailCanonicalization.IGNORE_DOTS;
 
     }
 
