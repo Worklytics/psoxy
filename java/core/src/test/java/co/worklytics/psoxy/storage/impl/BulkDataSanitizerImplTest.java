@@ -104,7 +104,6 @@ public class BulkDataSanitizerImplTest {
         container.inject(this);
 
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt("salt")
             .build());
 
         //make it deterministic
@@ -327,7 +326,6 @@ public class BulkDataSanitizerImplTest {
     void handle_duplicates() {
         Pseudonymizer defaultPseudonymizer =
             pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("salt")
                 .build());
 
 
@@ -363,7 +361,6 @@ public class BulkDataSanitizerImplTest {
     void handle_duplicates_lookup_table_via_transforms() {
         Pseudonymizer defaultPseudonymizer =
             pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("salt")
                 .build());
 
 
@@ -403,7 +400,6 @@ public class BulkDataSanitizerImplTest {
     void handle_duplicates_lookup_table_pre_0_4_48() {
         Pseudonymizer defaultPseudonymizer =
             pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("salt")
                 .build());
 
 
@@ -458,7 +454,6 @@ public class BulkDataSanitizerImplTest {
 
         Pseudonymizer defaultPseudonymizer =
             pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt("salt")
                 .build());
 
 
@@ -529,7 +524,6 @@ public class BulkDataSanitizerImplTest {
     @ParameterizedTest
     void pre_v0_4_30_bulk_pseudonym_URL_SAFE_TOKEN_ENCODING(String identifier) {
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt("salt")
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build());
 
@@ -593,7 +587,6 @@ public class BulkDataSanitizerImplTest {
             assertEquals(EXPECTED, resultString);
 
             PseudonymizerImpl githubPseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                .pseudonymizationSalt(pseudonymizer.getOptions().getPseudonymizationSalt())
                 .build());
 
             //validate has _enterprise appended pre-pseudonymization

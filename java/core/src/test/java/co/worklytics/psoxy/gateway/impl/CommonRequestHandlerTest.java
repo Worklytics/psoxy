@@ -165,13 +165,13 @@ class CommonRequestHandlerTest {
         //prep mock request
         HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
         when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
-                .thenReturn(Optional.of(PseudonymImplementation.LEGACY.getHttpHeaderValue()));
+                .thenReturn(Optional.of(PseudonymImplementation.DEFAULT.getHttpHeaderValue()));
 
         //test parsing options from request
         Optional<PseudonymImplementation> impl = handler.parsePseudonymImplementation(request);
 
         //verify options were parsed correctly
-        assertEquals(PseudonymImplementation.LEGACY, impl.orElseThrow());
+        assertEquals(PseudonymImplementation.DEFAULT, impl.orElseThrow());
     }
 
     @Test
@@ -341,9 +341,9 @@ class CommonRequestHandlerTest {
         //prep mock request
         HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
         when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
-                .thenReturn(Optional.of(PseudonymImplementation.LEGACY.getHttpHeaderValue()));
+                .thenReturn(Optional.of(PseudonymImplementation.DEFAULT.getHttpHeaderValue()));
 
-        assertEquals(PseudonymImplementation.LEGACY,
+        assertEquals(PseudonymImplementation.DEFAULT,
                 handler.getSanitizerForRequest(request).getPseudonymizer().getOptions().getPseudonymImplementation());
 
         assertEquals(PseudonymImplementation.DEFAULT,
@@ -426,8 +426,7 @@ class CommonRequestHandlerTest {
     private RESTApiSanitizer buildSanitizer(RESTRules rules) {
         Pseudonymizer defaultPseudonymizer =
                 pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                        .pseudonymizationSalt("salt")
-                        .pseudonymImplementation(PseudonymImplementation.LEGACY)
+                        .pseudonymImplementation(PseudonymImplementation.DEFAULT)
                         .build());
 
         return sanitizerFactory.create(rules, defaultPseudonymizer);

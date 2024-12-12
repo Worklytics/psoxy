@@ -54,7 +54,6 @@ class PseudonymizerImplTest {
         container.inject(this);
 
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt("salt")
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build());
 
@@ -100,7 +99,6 @@ class PseudonymizerImplTest {
     @ParameterizedTest
     void emailCanonicalEquivalents_IgnoreDots(String mailHeaderValue) {
          pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt("salt")
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .emailCanonicalization(EmailCanonicalization.IGNORE_DOTS)
             .build());
