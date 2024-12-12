@@ -184,65 +184,49 @@ locals {
 
   # Microsoft 365 sources; add/remove as you wish
   # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
+
+  # these are the same for all the Microsoft 365 connectors
+  msft_365_environment_variables = {
+    GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+    TOKEN_SCOPE : "https://graph.microsoft.com/.default"
+    REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
+  }
+
+  entra_id_prototype =  {
+    worklytics_connector_id : "azure-ad-psoxy",
+    availability : "ga",
+    enable_by_default : false, # really, ONLY do Outlook Cal in the min-case; get users and workday settings from there
+    source_kind : "azure-ad",
+    display_name : "Microsoft Entra ID (former Azure AD)"
+    source_auth_strategy : "oauth2_refresh_token"
+    target_host : "graph.microsoft.com"
+    required_oauth2_permission_scopes : []
+    # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
+    required_app_roles : [
+      # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
+      "User.Read.All",
+      "Group.Read.All",
+      "MailboxSettings.Read"
+    ]
+    environment_variables : local.msft_365_environment_variables
+    external_todo : null
+    example_api_calls : [
+      "/v1.0/users",
+      "/v1.0/users/${var.example_msft_user_guid}",
+      "/v1.0/groups",
+      "/v1.0/groups/{group-id}/members"
+    ]
+  }
+
   msft_365_connectors = {
-    "azure-ad" : {
-      worklytics_connector_id : "azure-ad-psoxy",
+    # azure-ad is legacy branding of `entra`; so re-use prototype, but override some fields
+    "azure-ad" :merge(local.entra_id_prototype, {
       availability : "deprecated",
       enable_by_default : false,
       source_kind : "azure-ad",
       display_name : "(Deprecated, use MSFT Entra Id instead) Azure Directory"
-      source_auth_strategy : "oauth2_refresh_token"
-      target_host : "graph.microsoft.com"
-      required_oauth2_permission_scopes : [],
-      # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
-      required_app_roles : [
-        # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
-        "User.Read.All",
-        "Group.Read.All",
-        "MailboxSettings.Read",
-      ]
-      environment_variables : {
-        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
-        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
-        REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-      }
-      external_todo : null
-      example_api_calls : [
-        "/v1.0/users",
-        "/v1.0/users/${var.example_msft_user_guid}",
-        "/v1.0/groups",
-        "/v1.0/groups/{group-id}/members"
-      ]
-    },
-    "msft-entra-id" : {
-      worklytics_connector_id : "azure-ad-psoxy",
-      availability : "ga",
-      enable_by_default : true,
-      source_kind : "azure-ad",
-      display_name : "Microsoft Entra ID (former Azure AD)"
-      source_auth_strategy : "oauth2_refresh_token"
-      target_host : "graph.microsoft.com"
-      required_oauth2_permission_scopes : []
-      # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
-      required_app_roles : [
-        # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
-        "User.Read.All",
-        "Group.Read.All",
-        "MailboxSettings.Read"
-      ]
-      environment_variables : {
-        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
-        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
-        REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-      }
-      external_todo : null
-      example_api_calls : [
-        "/v1.0/users",
-        "/v1.0/users/${var.example_msft_user_guid}",
-        "/v1.0/groups",
-        "/v1.0/groups/{group-id}/members"
-      ]
-    },
+    }),
+    "msft-entra-id" : local.entra_id_prototype,
     "outlook-cal" : {
       source_kind : "outlook-cal",
       availability : "ga",
@@ -258,11 +242,7 @@ locals {
         "Group.Read.All",
         "User.Read.All"
       ],
-      environment_variables : {
-        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
-        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
-        REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-      },
+      environment_variables : local.msft_365_environment_variables
       external_todo : null
       example_api_calls : [
         "/v1.0/users",
@@ -288,12 +268,7 @@ locals {
         "Group.Read.All",
         "User.Read.All"
       ]
-      environment_variables : {
-        GRANT_TYPE : "workload_identity_federation"
-        # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
-        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
-        REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-      }
+      environment_variables : local.msft_365_environment_variables
       external_todo : null
       example_api_calls : [
         "/v1.0/users",
@@ -305,7 +280,7 @@ locals {
     },
     "msft-teams" : {
       source_kind : "msft-teams"
-      availability : "beta",
+      availability : "ga",
       enable_by_default : false,
       worklytics_connector_id : "msft-teams-psoxy",
       display_name : "Microsoft Teams"
@@ -322,12 +297,7 @@ locals {
         "OnlineMeetings.Read.All",
         "OnlineMeetingArtifact.Read.All"
       ],
-      environment_variables : {
-        GRANT_TYPE : "workload_identity_federation"
-        # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
-        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
-        REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-      }
+      environment_variables : local.msft_365_environment_variables
       example_api_calls : [
         "/v1.0/teams",
         "/v1.0/teams/${var.msft_teams_example_team_guid}/allChannels",
