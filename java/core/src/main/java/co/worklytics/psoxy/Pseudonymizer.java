@@ -17,15 +17,6 @@ public interface Pseudonymizer {
 
         private static final long serialVersionUID = 5L;
 
-        /**
-         * salt used to generate pseudonyms
-         * <p>
-         * q: split this out? it's per-customer, not per-source API (although it *could* be the
-         * later, if you don't need to match with it)
-         */
-        @Deprecated //used ONLY in LEGACY case ; otherwise behavior determined by tokenization strategies
-        String pseudonymizationSalt;
-
         @Builder.Default
         PseudonymImplementation pseudonymImplementation = PseudonymImplementation.DEFAULT;
 
