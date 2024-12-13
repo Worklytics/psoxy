@@ -15,9 +15,7 @@ public interface PseudonymizerImplFactory {
 
     default Pseudonymizer.ConfigurationOptions buildOptions(ConfigService config,
                                                             SecretStore secretStore) {
-        Pseudonymizer.ConfigurationOptions.ConfigurationOptionsBuilder builder = Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
-                .orElseThrow(() -> new Error("Must configure value for SALT to generate pseudonyms")));
+        Pseudonymizer.ConfigurationOptions.ConfigurationOptionsBuilder builder = Pseudonymizer.ConfigurationOptions.builder();
 
         Optional<PseudonymImplementation> pseudonymImplementation = config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION)
             .map(PseudonymImplementation::parseConfigPropertyValue);

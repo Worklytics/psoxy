@@ -103,7 +103,6 @@ class RESTApiSanitizerImplTest {
         container.inject(this);
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt("salt")
             .build());
 
         sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"), pseudonymizer);
@@ -481,7 +480,6 @@ class RESTApiSanitizerImplTest {
     public void getPseudonymize_URL_SAFE_TOKEN(PseudonymImplementation implementation, String value, Boolean includeReversible, String encoding, String expected) {
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt("salt")
             .pseudonymImplementation(implementation)
             .build());
 
@@ -576,7 +574,6 @@ class RESTApiSanitizerImplTest {
     void pseudonymizeWithRegexMatches(String input) {
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt("salt")
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .build());
 

@@ -448,10 +448,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
                 if (pseudonymizedIdentity.getReversible() != null
                     && getPseudonymizer().getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
-                    // can't URL_SAFE_TOKEN encode reversible portion of pseudonym if LEGACY mode, bc
-                    // URL_SAFE_TOKEN depends on 'hash' being encoded as prefix of the reversible;
-                    // and reverisbles need the non-legacy
-                    return configuration.jsonProvider().toJson(pseudonymizedIdentity);
+                    throw new IllegalArgumentException("LEGACY pseudonymization is no longer supported with v0.5+");
                 }
                 //exploit that already reversibly encoded, including prefix
                 return ObjectUtils.firstNonNull(pseudonymizedIdentity.getReversible(), pseudonymizedIdentity.getHash());
@@ -485,9 +482,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 String pseudonymizedString;
                 if (pseudonymizedIdentity.getReversible() != null) {
                     if (getPseudonymizer().getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
-                        //exploits that already reversibly encoded, including prefix
-                        log.warning("Using transform PseudonymizeRegexMatches, with reversible==true; this is NOT supported for LEGACY pseudonym implementation, so non-reversible pseudonym encoded");
-                        pseudonymizedString = UrlSafeTokenPseudonymEncoder.TOKEN_PREFIX + pseudonymizedIdentity.getHash();
+                        throw new IllegalArgumentException("LEGACY pseudonymization is no longer supported with v0.5+");
                     } else {
                         pseudonymizedString = pseudonymizedIdentity.getReversible();
                     }
