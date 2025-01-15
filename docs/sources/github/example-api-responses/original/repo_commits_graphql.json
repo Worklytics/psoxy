@@ -1,0 +1,234 @@
+{
+  "data": {
+    "organization": {
+      "repository": {
+        "ref": {
+          "target": {
+            "history": {
+              "pageInfo": {
+                "hasNextPage": false,
+                "endCursor": "d879cd97100c8c4de0f07d30990e8c903d13a4c2 4"
+              },
+              "edges": [
+                {
+                  "node": {
+                    "id": "C_kwDOJzN29NoAKGQ4NzljZDk3MTAwYzhjNGRlMGYwN2QzMDk5MGU4YzkwM2QxM2E0YzI",
+                    "oid": "d879cd97100c8c4de0f07d30990e8c903d13a4c2",
+                    "onBehalfOf": null,
+                    "authoredDate": "2023-07-06T18:28:14Z",
+                    "authoredByCommitter": true,
+                    "changedFilesIfAvailable": 1,
+                    "committedDate": "2023-07-06T18:28:14Z",
+                    "committedViaWeb": false,
+                    "parents": {
+                      "nodes": [
+                        {
+                          "oid": "d53ac90dd13b4f88201307a6d311e51908b227f3"
+                        }
+                      ]
+                    },
+                    "author": {
+                      "name": "some-username",
+                      "email": "contoso@hotmail.com",
+                      "date": "2023-07-06T18:28:14.000Z",
+                      "user": {
+                        "login": "some-username"
+                      }
+                    },
+                    "committer": {
+                      "name": "some-username",
+                      "email": "contoso@hotmail.com",
+                      "date": "2023-07-06T18:28:14.000Z",
+                      "user": {
+                        "login": "some-username"
+                      }
+                    },
+                    "associatedPullRequests": {
+                      "nodes": []
+                    },
+                    "tree": {
+                      "oid": "a0140a9624b27c6abd1ce8776c793b282ab876ad"
+                    },
+                    "additions": 2,
+                    "deletions": 0
+                  }
+                },
+                {
+                  "node": {
+                    "id": "C_kwDOJzN29NoAKGQ1M2FjOTBkZDEzYjRmODgyMDEzMDdhNmQzMTFlNTE5MDhiMjI3ZjM",
+                    "oid": "d53ac90dd13b4f88201307a6d311e51908b227f3",
+                    "onBehalfOf": null,
+                    "authoredDate": "2023-07-06T18:24:07Z",
+                    "authoredByCommitter": false,
+                    "changedFilesIfAvailable": 1,
+                    "committedDate": "2023-07-06T18:24:07Z",
+                    "committedViaWeb": true,
+                    "parents": {
+                      "nodes": [
+                        {
+                          "oid": "1630a5ee85b40290cb4bbc29457378da03356a75"
+                        },
+                        {
+                          "oid": "99a63ef97e47f3e99166b6293c811a135a0ea8a6"
+                        }
+                      ]
+                    },
+                    "author": {
+                      "name": "some-username",
+                      "email": "contoso@hotmail.com",
+                      "date": "2023-07-06T18:24:07.000Z",
+                      "user": {
+                        "login": "some-username"
+                      }
+                    },
+                    "committer": {
+                      "name": "GitHub",
+                      "email": "noreply@github.com",
+                      "date": "2023-07-06T18:24:07.000Z",
+                      "user": null
+                    },
+                    "associatedPullRequests": {
+                      "nodes": [
+                        {
+                          "number": 1
+                        }
+                      ]
+                    },
+                    "tree": {
+                      "oid": "e5418a3b64a90c6fcb7dc8cc2ff0313c341422c9"
+                    },
+                    "additions": 1,
+                    "deletions": 0
+                  }
+                },
+                {
+                  "node": {
+                    "id": "C_kwDOJzN29NoAKDk5YTYzZWY5N2U0N2YzZTk5MTY2YjYyOTNjODExYTEzNWEwZWE4YTY",
+                    "oid": "99a63ef97e47f3e99166b6293c811a135a0ea8a6",
+                    "onBehalfOf": null,
+                    "authoredDate": "2023-07-06T18:23:43Z",
+                    "authoredByCommitter": false,
+                    "changedFilesIfAvailable": 1,
+                    "committedDate": "2023-07-06T18:23:43Z",
+                    "committedViaWeb": true,
+                    "parents": {
+                      "nodes": [
+                        {
+                          "oid": "1630a5ee85b40290cb4bbc29457378da03356a75"
+                        }
+                      ]
+                    },
+                    "author": {
+                      "name": "some-username",
+                      "email": "contoso@hotmail.com",
+                      "date": "2023-07-06T18:23:43.000Z",
+                      "user": {
+                        "login": "some-username"
+                      }
+                    },
+                    "committer": {
+                      "name": "GitHub",
+                      "email": "noreply@github.com",
+                      "date": "2023-07-06T18:23:43.000Z",
+                      "user": null
+                    },
+                    "associatedPullRequests": {
+                      "nodes": [
+                        {
+                          "number": 1
+                        }
+                      ]
+                    },
+                    "tree": {
+                      "oid": "e5418a3b64a90c6fcb7dc8cc2ff0313c341422c9"
+                    },
+                    "additions": 1,
+                    "deletions": 0
+                  }
+                },
+                {
+                  "node": {
+                    "id": "C_kwDOJzN29NoAKDE2MzBhNWVlODViNDAyOTBjYjRiYmMyOTQ1NzM3OGRhMDMzNTZhNzU",
+                    "oid": "1630a5ee85b40290cb4bbc29457378da03356a75",
+                    "onBehalfOf": null,
+                    "authoredDate": "2023-07-06T18:20:20Z",
+                    "authoredByCommitter": false,
+                    "changedFilesIfAvailable": 1,
+                    "committedDate": "2023-07-06T18:20:20Z",
+                    "committedViaWeb": true,
+                    "parents": {
+                      "nodes": [
+                        {
+                          "oid": "c9f0213cb6fd6b4388832be6465d5350a7635fdb"
+                        }
+                      ]
+                    },
+                    "author": {
+                      "name": "some-username",
+                      "email": "contoso@hotmail.com",
+                      "date": "2023-07-06T18:20:20.000Z",
+                      "user": {
+                        "login": "some-username"
+                      }
+                    },
+                    "committer": {
+                      "name": "GitHub",
+                      "email": "noreply@github.com",
+                      "date": "2023-07-06T18:20:20.000Z",
+                      "user": null
+                    },
+                    "associatedPullRequests": {
+                      "nodes": []
+                    },
+                    "tree": {
+                      "oid": "e86a764ba69c6af89d457b1b818e833fadb218a4"
+                    },
+                    "additions": 1,
+                    "deletions": 0
+                  }
+                },
+                {
+                  "node": {
+                    "id": "C_kwDOJzN29NoAKGM5ZjAyMTNjYjZmZDZiNDM4ODgzMmJlNjQ2NWQ1MzUwYTc2MzVmZGI",
+                    "oid": "c9f0213cb6fd6b4388832be6465d5350a7635fdb",
+                    "onBehalfOf": null,
+                    "authoredDate": "2023-06-23T15:45:15Z",
+                    "authoredByCommitter": false,
+                    "changedFilesIfAvailable": 1,
+                    "committedDate": "2023-06-23T15:45:15Z",
+                    "committedViaWeb": true,
+                    "parents": {
+                      "nodes": []
+                    },
+                    "author": {
+                      "name": "some-username",
+                      "email": "contoso@hotmail.com",
+                      "date": "2023-06-23T15:45:15.000Z",
+                      "user": {
+                        "login": "some-username"
+                      }
+                    },
+                    "committer": {
+                      "name": "GitHub",
+                      "email": "noreply@github.com",
+                      "date": "2023-06-23T15:45:15.000Z",
+                      "user": null
+                    },
+                    "associatedPullRequests": {
+                      "nodes": []
+                    },
+                    "tree": {
+                      "oid": "77bebb206eb50f1e2df0b9c769d24c5146343c95"
+                    },
+                    "additions": 2,
+                    "deletions": 0
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

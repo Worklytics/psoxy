@@ -1,0 +1,65 @@
+{
+  "data": {
+    "organization": {
+      "repository": {
+        "pullRequest": {
+          "commits": {
+            "pageInfo": {
+              "hasNextPage": false,
+              "endCursor": "MQ"
+            },
+            "edges": [
+              {
+                "node": {
+                  "commit": {
+                    "id": "C_kwDOJzN29NoAKDk5YTYzZWY5N2U0N2YzZTk5MTY2YjYyOTNjODExYTEzNWEwZWE4YTY",
+                    "oid": "99a63ef97e47f3e99166b6293c811a135a0ea8a6",
+                    "onBehalfOf": null,
+                    "authoredDate": "2023-07-06T18:23:43Z",
+                    "authoredByCommitter": false,
+                    "changedFilesIfAvailable": 1,
+                    "committedDate": "2023-07-06T18:23:43Z",
+                    "committedViaWeb": true,
+                    "parents": {
+                      "nodes": [
+                        {
+                          "oid": "1630a5ee85b40290cb4bbc29457378da03356a75"
+                        }
+                      ]
+                    },
+                    "author": {
+                      "name": "Andrés Pérez",
+                      "email": "contoso@hotmail.com",
+                      "date": "2023-07-06T18:23:43.000Z",
+                      "user": {
+                        "login": "khnumdev"
+                      }
+                    },
+                    "committer": {
+                      "name": "GitHub",
+                      "email": "noreply@github.com",
+                      "date": "2023-07-06T18:23:43.000Z",
+                      "user": null
+                    },
+                    "associatedPullRequests": {
+                      "nodes": [
+                        {
+                          "number": 1
+                        }
+                      ]
+                    },
+                    "tree": {
+                      "oid": "e5418a3b64a90c6fcb7dc8cc2ff0313c341422c9"
+                    },
+                    "additions": 1,
+                    "deletions": 0
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
