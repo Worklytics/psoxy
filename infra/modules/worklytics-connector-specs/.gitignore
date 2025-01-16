@@ -1,0 +1,3 @@
+# NOTE: bc this has tests, we're going to init the module but DON'T want to commit terraform files that result
+.terraform.lock.hcl
+.terraform

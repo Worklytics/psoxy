@@ -34,6 +34,14 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
     private static final String VERSION_LABEL = "latest-version";
     private static final int NUMBER_OF_VERSIONS_TO_RETRIEVE = 20;
 
+    /**
+     *  GCP-level alias for the latest version of the secret
+     *
+     *  NOTE: accessing secrets via aliases, including 'latest', is NOT strongly consistent
+     *  see: https://cloud.google.com/secret-manager/docs/access-secret-version#resource_consistency
+     */
+    public static final String LATEST_VERSION_ALIAS = "latest";
+
     @Inject
     EnvVarsConfigService envVarsConfigService;
     @Inject
@@ -104,15 +112,19 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
 
         SecretName secretName = SecretName.of(projectId, paramName);
 
+        boolean accessViaExplicitVersion = false;
+
         try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
 
-            String versionName = "latest";
+            String versionName = LATEST_VERSION_ALIAS;
             try {
                 Secret secret = client.getSecret(secretName);
 
                 String versionLabelValue = secret.getLabelsMap() != null ? secret.getLabelsMap().get(VERSION_LABEL) : null;
 
                 if (!StringUtils.isBlank(versionLabelValue)) {
+                    accessViaExplicitVersion = true;
+                    log.info("Accessing secret " + paramName + " using explicit version " + versionLabelValue + " rather than 'latest'.");
                     versionName = versionLabelValue;
                 }
             } catch (PermissionDeniedException e) {
@@ -126,11 +138,26 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
             SecretVersionName secretVersionName =
                     SecretVersionName.of(projectId, secretName.getSecret(), versionName);
 
-            // Access the secret version.
-            AccessSecretVersionResponse response = client.accessSecretVersion(secretVersionName);
+            return accessSecretVersion(client, secretVersionName);
 
-            return Optional.of(response.getPayload().getData().toStringUtf8());
         } catch (com.google.api.gax.rpc.NotFoundException e) {
+            if (accessViaExplicitVersion) {
+                // in this case, manual rotation of the secret without relying on our code may have occurred; a new version was written, but the value of the label referencing the latest version was not updated
+                // log that we're here, then try to failover to getting the latest version using the GCP Secret Manager 'latest' reference.
+                log.log(Level.WARNING, "Could not find secret " + paramName + " in Secret Manager using explicit version; check value of label '" + VERSION_LABEL + "' on the secret itself vs what versions of that secret exist.");
+
+                try (SecretManagerServiceClient client = SecretManagerServiceClient.create())  {
+                    // try to get the latest version
+                    SecretVersionName secretVersionName =
+                            SecretVersionName.of(projectId, secretName.getSecret(), LATEST_VERSION_ALIAS);
+                    return accessSecretVersion(client, secretVersionName);
+                } catch (com.google.api.gax.rpc.NotFoundException notFoundException) {
+                    log.log(Level.WARNING, "Failover to getting 'latest' version of secret " + paramName + " also failed; check if secret exists and has versions.", notFoundException);
+                } catch (Exception ignored) {
+                    log.log(Level.WARNING, "Failover to getting 'latest' version of secret " + paramName + " failed due to something other than 'NotFound' case.", ignored);
+                }
+            }
+
             if (envVarsConfigService.isDevelopment()) {
                 log.log(Level.INFO, "Could not find secret " + paramName + " in Secret Manager", e);
             }
@@ -144,6 +171,13 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
         }
     }
 
+    Optional<String> accessSecretVersion(SecretManagerServiceClient client, SecretVersionName secretVersionName) {
+        // Access the secret version.
+        AccessSecretVersionResponse response = client.accessSecretVersion(secretVersionName);
+
+        return Optional.of(response.getPayload().getData().toStringUtf8());
+    }
+
     @Override
     public boolean acquire(@NonNull String lockId, @NonNull java.time.Duration expires) {
         Preconditions.checkArgument(StringUtils.isNotBlank(lockId), "lockId cannot be blank");
@@ -155,8 +189,8 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
             try {
                 lockSecret = client.getSecret(lockSecretName);
             } catch (com.google.api.gax.rpc.NotFoundException e) {
-                // It should not happen, as the secret has been created by Terraform
-                throw new RuntimeException(String.format("Secret %s must exist as it should be created by Terraform", lockSecretName));
+                // It should not happen, as the secret should have been created by Terraform
+                throw new RuntimeException(String.format("Secret %s does not exist, but should have be created by Terraform", lockSecretName));
             }
 
             Instant lockedAt = Optional.ofNullable(lockSecret.getLabelsMap().get(LOCK_LABEL))

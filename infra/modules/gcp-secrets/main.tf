@@ -69,20 +69,9 @@ output "secret_ids" { # prefixed w `projects/{numeric_id}/secrets/`
   value = { for k, v in var.secrets : k => google_secret_manager_secret.secret[k].id }
 }
 
-#DEPRECATED; use `secret_ids_within_project` instead
-output "secret_secret_ids" {
-  # relative to project
-  value = { for k, v in var.secrets : k => google_secret_manager_secret.secret[k].secret_id }
-}
-
 output "secret_ids_within_project" {
   # relative to project
   value = { for k, v in var.secrets : k => google_secret_manager_secret.secret[k].secret_id }
-}
-
-#DEPRECATED; don't believe any modules use this, as of v0.4.29
-output "secret_version_names" {
-  value = { for k, v in local.secrets_w_terraform_managed_values : k => google_secret_manager_secret_version.version[k].name }
 }
 
 output "secret_version_numbers" {
