@@ -209,7 +209,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         // not high; better to fail fast and leave it to the caller (Worklytics) to retry than hold
         // open a lambda waiting for a lock
-        private static final String TOKEN_REFRESH_LOCK_ID = "oauth_refresh_token";
+        //NOTE: this is OAUTH_REFRESH_TOKEN secret / parameter that we expect to exist (created by Terraform modules in usual case)
+        private static final String TOKEN_REFRESH_LOCK_ID = "OAUTH_REFRESH_TOKEN";
+
         private static final int MAX_TOKEN_REFRESH_ATTEMPTS = 3;
 
         /**
@@ -352,7 +354,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                         || storedToken.getLastModifiedDate().get()
                                 .isBefore(Instant.now().minus(MIN_DURATION_TO_KEEP_REFRESH_TOKEN)))
                     .ifPresent(storedTokenToRotate -> {
+                        // if reaching here, there's a new refresh token AND stored token was last written at least MIN_DURATION_TO_KEEP_REFRESH_TOKEN ago
+                        // (want to avoid churning through refresh tokens if source is giving us a new one every time, as this is pretty expensive for secret manager)
                         try {
+                            log.info("New oauth refresh_token came with access_token response; updating stored value");
                             secretStore.putConfigProperty(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN,
                                     tokenResponse.getRefreshToken(), WRITE_RETRIES);
                         } catch (WritePropertyRetriesExhaustedException e) {
