@@ -19,10 +19,8 @@ locals {
       ]
       oauth_scopes_needed : [
         "https://www.googleapis.com/auth/admin.directory.user.readonly",
-        "https://www.googleapis.com/auth/admin.directory.user.alias.readonly",
         "https://www.googleapis.com/auth/admin.directory.domain.readonly",
         "https://www.googleapis.com/auth/admin.directory.group.readonly",
-        "https://www.googleapis.com/auth/admin.directory.group.member.readonly",
         "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
       ]
       source_auth_strategy : "gcp_service_account_key"
