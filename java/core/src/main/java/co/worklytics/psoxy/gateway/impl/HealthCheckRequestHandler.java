@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.ControlHeader;
+import co.worklytics.psoxy.HashUtils;
 import co.worklytics.psoxy.HealthCheckResult;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
@@ -33,6 +34,18 @@ public class HealthCheckRequestHandler {
 
     static final String JAVA_SOURCE_CODE_VERSION = "rc-v0.5.1";
 
+    /**
+     * a random UUID used to salt the hash of the salt.  Purpose of this is to invalidate any non-purpose built rainbow table solution.
+     *   (Eg, if we just directly hashed the salt, a general rainbow table of hashes could be used to determine the salt value)
+     *
+     *  That said, if salt is 20+ random characters, there is no *general* rainbow table of that length in existence and one is impossible to
+     *  build, as storing it requires ~10e25 petabytes - which is about 10e20 more storage than humanity actually has. So this additional
+     *  protection isn't so necessary, but whatever.
+     *
+     *  do NOT change this value. if you do, we won't be able to detect that proxy-side salts of changed.
+     */
+    static final String SALT_FOR_SALT = "f33c366c-ae91-4819-b221-f9794ebb8145";
+
     @Inject
     EnvVarsConfigService envVarsConfigService;
     @Inject
@@ -45,6 +58,8 @@ public class HealthCheckRequestHandler {
     ObjectMapper objectMapper;
     @Inject
     RulesUtils rulesUtils;
+    @Inject
+    HashUtils hashUtils;
 
     public Optional<HttpEventResponse> handleIfHealthCheck(HttpEventRequest request) {
         if (isHealthCheckRequest(request)) {
@@ -152,6 +167,12 @@ public class HealthCheckRequestHandler {
         } catch (Throwable e) {
             logInDev("Failed to add rules to health check", e);
         }
+
+        // if SALT configured, as a hash of it to the health check, to enable detection of changes
+        // (if salt changes, client needs to know; as all subsequent pseudonyms produced by proxy instance from that point
+        // will be inconsistent with the prior ones)
+        config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
+                .ifPresent(salt -> healthCheckResult.saltSha256Hash(hashUtils.hash(salt, SALT_FOR_SALT)));
 
         HttpEventResponse.HttpEventResponseBuilder responseBuilder = HttpEventResponse.builder();
 

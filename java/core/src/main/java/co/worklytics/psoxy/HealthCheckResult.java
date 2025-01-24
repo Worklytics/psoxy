@@ -70,6 +70,14 @@ public class HealthCheckResult {
 
     String callerIp;
 
+    /**
+     *  A SHA-256 hash of the salt, to aid in detecting changes to the salt value.
+     *
+     *  If salt changes, client needs to know; as all subsequent pseudonyms produced by proxy instance from that point
+     *  will be inconsistent with the prior ones.
+     */
+    String saltSha256Hash;
+
     public boolean passed() {
         return getConfiguredSource() != null
             && getNonDefaultSalt()

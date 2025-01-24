@@ -30,6 +30,7 @@ class HealthCheckResultTest {
             "  \"nonDefaultSalt\" : true,\n" +
             "  \"pseudonymImplementation\" : null,\n" +
             "  \"pseudonymizeAppIds\" : null,\n" +
+            "  \"saltSha256Hash\" : null,\n" +
             "  \"sourceAuthGrantType\" : null,\n" +
             "  \"sourceAuthStrategy\" : null,\n" +
             "  \"version\" : \"rc-v0.1.15\"\n" +
