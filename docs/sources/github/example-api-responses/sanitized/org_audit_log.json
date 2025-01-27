@@ -64,11 +64,6 @@
     "created_at":1737730851061,
     "operation_type":"remove",
     "data":{
-      "job":"MigrationDestroyFileJob",
-      "active_job_id":"some-job-id",
-      "aqueduct_job_id":"some-aqueduct-job-id",
-      "catalog_service":"github/unknown",
-      "migration_id":2,
       "public_repo":true,
       "started_by":"{\"hash\":\"IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbM\"}",
       "started_by_id":42,
