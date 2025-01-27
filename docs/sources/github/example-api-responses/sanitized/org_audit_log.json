@@ -12,7 +12,7 @@
     "repository":"some-org/test",
     "repository_public":false,
     "user":"null",
-    "user_id":0
+    "user_id":"{\"hash\":\"uXY-rAXeOzg_TOxA3id5pRgzfCc7sMGRAnsZJK0Ds0U\"}"
   },
   {
     "@timestamp":1688668100244,
@@ -27,7 +27,7 @@
     "repository":"some-org/test",
     "repository_public":false,
     "user":"null",
-    "user_id":0
+    "user_id":"{\"hash\":\"uXY-rAXeOzg_TOxA3id5pRgzfCc7sMGRAnsZJK0Ds0U\"}"
   },
   {
     "@timestamp":1688667848231,
@@ -48,6 +48,31 @@
     "repo":"some-org/test",
     "repository":"some-org/test",
     "user":"{\"hash\":\"IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbM\"}",
-    "user_id":13968776
+    "user_id":"{\"hash\":\"S3Nh4slc2XnLp5Qy1CD-pQew9-j0cePbX3U7-DE56Co\"}"
+  },
+  {
+    "repo":[
+      "some-org/test"
+    ],
+    "repo_id":[
+      12324
+    ],
+    "org":"some-org",
+    "org_id":870,
+    "action":"migration.destroy_file",
+    "@timestamp":1737730851061,
+    "created_at":1737730851061,
+    "operation_type":"remove",
+    "data":{
+      "job":"MigrationDestroyFileJob",
+      "active_job_id":"some-job-id",
+      "aqueduct_job_id":"some-aqueduct-job-id",
+      "catalog_service":"github/unknown",
+      "migration_id":2,
+      "public_repo":true,
+      "started_by":"{\"hash\":\"IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbM\"}",
+      "started_by_id":42,
+      "category_type":"Resource Management"
+    }
   }
 ]
