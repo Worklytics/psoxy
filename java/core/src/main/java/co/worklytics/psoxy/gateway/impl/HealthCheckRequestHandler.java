@@ -44,7 +44,7 @@ public class HealthCheckRequestHandler {
      *
      *  do NOT change this value. if you do, we won't be able to detect that proxy-side salts of changed.
      */
-    static final String SALT_FOR_SALT = "f33c366c-ae91-4819-b221-f9794ebb8145";
+    private static final String SALT_FOR_SALT = "f33c366c-ae91-4819-b221-f9794ebb8145";
 
     @Inject
     EnvVarsConfigService envVarsConfigService;
