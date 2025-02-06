@@ -14,7 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.30</dependency.lombok.version> <!-- 1.18.30 is min compatible with jdk 21+ -->
         <dependency.dagger.version>2.40.5</dependency.dagger.version>
-        <dependency.jackson.version>2.15.2</dependency.jackson.version>
+        <dependency.jackson.version>2.17.0</dependency.jackson.version>
         <dependency.apache-commons-lang3.version>3.13.0</dependency.apache-commons-lang3.version> <!-- July 2023 release, doesn't actually have constants for java after 17 yet -->
         <dependency.apache-commons-csv.version>1.10.0</dependency.apache-commons-csv.version>
         <dependency.guava.version>32.0.1-jre</dependency.guava.version>
@@ -25,7 +25,7 @@
         <dependency.google-auth-library-oauth2-http.version>1.18.0</dependency.google-auth-library-oauth2-http.version>
         <dependency.junit-jupiter.version>5.10.1</dependency.junit-jupiter.version>
         <dependency.mockito-junit-jupiter.version>5.14.2</dependency.mockito-junit-jupiter.version>
-        <dependency.json-path.version>2.8.0</dependency.json-path.version>
+        <dependency.json-path.version>2.9.0</dependency.json-path.version>
         <dependency.bettercloud-vault-java-driver>5.1.0</dependency.bettercloud-vault-java-driver>
     </properties>
 

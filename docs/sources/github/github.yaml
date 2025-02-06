@@ -464,11 +464,17 @@ endpoints:
           - "$..transport_protocol_name"
           - "$..pull_request_title"
           - "$..user_agent"
+          - "$..job"
+          - "$..active_job_id"
+          - "$..aqueduct_job_id"
+          - "$..catalog_service"
+          - "$..migration_id"
       - !<pseudonymize>
         jsonPaths:
           - "$..actor"
           - "$..user"
-          - "$..userId"
+          - "$..user_id"
+          - "$..started_by"
         encoding: "JSON"
   - pathTemplate: "/organizations/{installationId}/audit-log"
     allowedQueryParams:
@@ -489,11 +495,17 @@ endpoints:
           - "$..transport_protocol_name"
           - "$..pull_request_title"
           - "$..user_agent"
+          - "$..job"
+          - "$..active_job_id"
+          - "$..aqueduct_job_id"
+          - "$..catalog_service"
+          - "$..migration_id"
       - !<pseudonymize>
         jsonPaths:
           - "$..actor"
           - "$..user"
-          - "$..userId"
+          - "$..user_id"
+          - "$..started_by"
         encoding: "JSON"
   - pathTemplate: "/orgs/{org}/repos"
     allowedQueryParams:
