@@ -135,6 +135,209 @@ endpoints:
                           type: "string"
                         hasNextPage:
                           type: "boolean"
+                repository:
+                  type: "object"
+                  properties:
+                    pullRequest:
+                      type: "object"
+                      properties:
+                        commits:
+                          type: "object"
+                          properties:
+                            edges:
+                              type: "array"
+                              items:
+                                type: "object"
+                                properties:
+                                  node:
+                                    type: "object"
+                                    properties:
+                                      commit:
+                                        type: "object"
+                                        properties:
+                                          additions:
+                                            type: "integer"
+                                          associatedPullRequests:
+                                            type: "object"
+                                            properties:
+                                              nodes:
+                                                type: "array"
+                                                items:
+                                                  type: "object"
+                                                  properties:
+                                                    number:
+                                                      type: "integer"
+                                          author:
+                                            type: "object"
+                                            properties:
+                                              date:
+                                                type: "string"
+                                              email:
+                                                type: "string"
+                                              user:
+                                                type: "object"
+                                                properties:
+                                                  login:
+                                                    type: "string"
+                                          authoredByCommitter:
+                                            type: "boolean"
+                                          authoredDate:
+                                            type: "string"
+                                          changedFilesIfAvailable:
+                                            type: "integer"
+                                          committedDate:
+                                            type: "string"
+                                          committedViaWeb:
+                                            type: "boolean"
+                                          committer:
+                                            type: "object"
+                                            properties:
+                                              date:
+                                                type: "string"
+                                              email:
+                                                type: "string"
+                                              user:
+                                                type: "object"
+                                                properties:
+                                                  login:
+                                                    type: "string"
+                                          deletions:
+                                            type: "integer"
+                                          id:
+                                            type: "string"
+                                          oid:
+                                            type: "string"
+                                          parents:
+                                            type: "object"
+                                            properties:
+                                              nodes:
+                                                type: "array"
+                                                items:
+                                                  type: "object"
+                                                  properties:
+                                                    oid:
+                                                      type: "string"
+                                          tree:
+                                            type: "object"
+                                            properties:
+                                              oid:
+                                                type: "string"
+                                          user:
+                                            type: "onBehalfOf"
+                                            properties:
+                                              email:
+                                                type: "string"
+                                              id:
+                                                type: "string"
+                                              login:
+                                                type: "string"
+                            pageInfo:
+                              type: "object"
+                              properties:
+                                endCursor:
+                                  type: "string"
+                                hasNextPage:
+                                  type: "boolean"
+                    ref:
+                      type: "object"
+                      properties:
+                        target:
+                          type: "object"
+                          properties:
+                            history:
+                              type: "object"
+                              properties:
+                                edges:
+                                  type: "array"
+                                  items:
+                                    type: "object"
+                                    properties:
+                                      node:
+                                        type: "object"
+                                        properties:
+                                          additions:
+                                            type: "integer"
+                                          associatedPullRequests:
+                                            type: "object"
+                                            properties:
+                                              nodes:
+                                                type: "array"
+                                                items:
+                                                  type: "object"
+                                                  properties:
+                                                    number:
+                                                      type: "integer"
+                                          author:
+                                            type: "object"
+                                            properties:
+                                              date:
+                                                type: "string"
+                                              email:
+                                                type: "string"
+                                              user:
+                                                type: "object"
+                                                properties:
+                                                  login:
+                                                    type: "string"
+                                          authoredByCommitter:
+                                            type: "boolean"
+                                          authoredDate:
+                                            type: "string"
+                                          changedFilesIfAvailable:
+                                            type: "integer"
+                                          committedDate:
+                                            type: "string"
+                                          committedViaWeb:
+                                            type: "boolean"
+                                          committer:
+                                            type: "object"
+                                            properties:
+                                              date:
+                                                type: "string"
+                                              email:
+                                                type: "string"
+                                              user:
+                                                type: "object"
+                                                properties:
+                                                  login:
+                                                    type: "string"
+                                          deletions:
+                                            type: "integer"
+                                          id:
+                                            type: "string"
+                                          oid:
+                                            type: "string"
+                                          parents:
+                                            type: "object"
+                                            properties:
+                                              nodes:
+                                                type: "array"
+                                                items:
+                                                  type: "object"
+                                                  properties:
+                                                    oid:
+                                                      type: "string"
+                                          tree:
+                                            type: "object"
+                                            properties:
+                                              oid:
+                                                type: "string"
+                                          user:
+                                            type: "onBehalfOf"
+                                            properties:
+                                              email:
+                                                type: "string"
+                                              id:
+                                                type: "string"
+                                              login:
+                                                type: "string"
+                                pageInfo:
+                                  type: "object"
+                                  properties:
+                                    endCursor:
+                                      type: "string"
+                                    hasNextPage:
+                                      type: "boolean"
                 samlIdentityProvider:
                   type: "object"
                   properties:

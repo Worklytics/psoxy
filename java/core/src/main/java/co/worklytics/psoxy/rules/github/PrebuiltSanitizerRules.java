@@ -89,6 +89,110 @@ public class PrebuiltSanitizerRules {
                 "until").stream())
         .collect(Collectors.toList());
 
+    private final static JsonSchemaFilter GIT_ACTOR_JSON_SCHEMA = JsonSchemaFilter.builder()
+        .type("object")
+        .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+            put("email", JsonSchemaFilter.builder().type("string").build());
+            put("date", JsonSchemaFilter.builder().type("string").build());
+            put("user", JsonSchemaFilter.builder().type("object")
+                .properties(new LinkedHashMap<String, JsonSchemaFilter>() {
+                    {
+                        put("login", JsonSchemaFilter.builder().type("string").build());
+                    }
+                }).build());
+        }}).build();
+
+    private final static JsonSchemaFilter COMMIT_JSON_SCHEMA = JsonSchemaFilter.builder()
+        .type("object")
+        .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+            put("id", JsonSchemaFilter.builder().type("string").build());
+            put("oid", JsonSchemaFilter.builder().type("string").build());
+            put("user", JsonSchemaFilter.builder().type("onBehalfOf")
+                .properties(new LinkedHashMap<String, JsonSchemaFilter>() {
+                    {
+                        put("login", JsonSchemaFilter.builder().type("string").build());
+                        put("email", JsonSchemaFilter.builder().type("string").build());
+                        put("id", JsonSchemaFilter.builder().type("string").build());
+                    }
+                }).build());
+            put("authoredDate", JsonSchemaFilter.builder().type("string").build());
+            put("authoredByCommitter", JsonSchemaFilter.builder().type("boolean").build());
+            put("changedFilesIfAvailable", JsonSchemaFilter.builder().type("integer").build());
+            put("committedDate", JsonSchemaFilter.builder().type("string").build());
+            put("committedViaWeb", JsonSchemaFilter.builder().type("boolean").build());
+            put("parents", JsonSchemaFilter.builder().type("object")
+                .properties(new LinkedHashMap<String, JsonSchemaFilter>() {
+                    {
+                        put("nodes", JsonSchemaFilter.builder().type("array")
+                            .items(JsonSchemaFilter.builder().type("object")
+                                .properties(new LinkedHashMap<String, JsonSchemaFilter>() {
+                                    {
+                                        put("oid", JsonSchemaFilter.builder().type("string").build());
+                                    }
+                                }).build()).build());
+                    }
+                }).build());
+            put("author", GIT_ACTOR_JSON_SCHEMA);
+            put("committer", GIT_ACTOR_JSON_SCHEMA);
+            put("associatedPullRequests", JsonSchemaFilter.builder().type("object")
+                .properties(new LinkedHashMap<String, JsonSchemaFilter>() {
+                    {
+                        put("nodes", JsonSchemaFilter.builder().type("array")
+                            .items(JsonSchemaFilter.builder().type("object")
+                                .properties(new LinkedHashMap<String, JsonSchemaFilter>() {
+                                    {
+                                        put("number", JsonSchemaFilter.builder().type("integer").build());
+                                    }
+                                }).build()).build());
+                    }
+                }).build());
+            put("tree", JsonSchemaFilter.builder().type("object")
+                .properties(new LinkedHashMap<String, JsonSchemaFilter>() {
+                    {
+                        put("oid", JsonSchemaFilter.builder().type("string").build());
+                    }
+                }).build());
+            put("additions", JsonSchemaFilter.builder().type("integer").build());
+            put("deletions", JsonSchemaFilter.builder().type("integer").build());
+        }}).build();
+
+    private final static JsonSchemaFilter PULL_COMMIT_SCHEMA = JsonSchemaFilter.builder().type("object")
+        .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{
+            put("commits", JsonSchemaFilter.builder()
+                .type("object")
+                .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{
+                    put("pageInfo", jsonSchemaForPageInfo());
+                    put("edges",  JsonSchemaFilter.builder()
+                        .type("array")
+                        .items(JsonSchemaFilter.builder()
+                            .type("object")
+                            .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                                put("node", JsonSchemaFilter.builder()
+                                    .type("object")
+                                    .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
+                                        put("commit", COMMIT_JSON_SCHEMA);
+                                    }}).build());
+                            }})
+                            .build())
+                        .build());
+                }}).build());
+        }}).build();
+
+    private final static JsonSchemaFilter REPOSITORY_COMMIT_SCHEMA = JsonSchemaFilter.builder()
+        .type("object")
+        .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{
+            put("target", JsonSchemaFilter.builder()
+                .type("object")
+                .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{
+                    put("history", JsonSchemaFilter.builder()
+                        .type("object")
+                        .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{
+                            put("pageInfo", jsonSchemaForPageInfo());
+                            put("edges", jsonSchemaForEdge(COMMIT_JSON_SCHEMA));
+                        }}).build());
+                }}).build());
+        }}).build();
+
     static final Endpoint ORG_MEMBERS = Endpoint.builder()
         .pathTemplate("/orgs/{org}/members")
         .allowedQueryParams(orgMembersAllowedQueryParameters)
@@ -120,7 +224,7 @@ public class PrebuiltSanitizerRules {
             .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
             .jsonPath("$..login")
             .build())
-        .responseSchema(jsonSchemaForUserQueryResult())
+        .responseSchema(jsonSchemaForGraphQLQueryResult())
         .build();
 
     static final Endpoint ORG_TEAMS = Endpoint.builder()
@@ -644,7 +748,7 @@ public class PrebuiltSanitizerRules {
         );
     }
 
-    private static JsonSchemaFilter jsonSchemaForUserQueryResult() {
+    private static JsonSchemaFilter jsonSchemaForGraphQLQueryResult() {
         return JsonSchemaFilter.builder()
             .type("object")
             // Using LinkedHashMap to keep the order to support same
@@ -658,6 +762,13 @@ public class PrebuiltSanitizerRules {
                             .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{
                                 put("samlIdentityProvider", jsonSchemaForOrganizationProperty("externalIdentities", jsonSchemaForSamlNode()));
                                 put("membersWithRole", jsonSchemaForQueryResult(jsonSchemaForMemberNode()));
+                                put("repository", JsonSchemaFilter.builder()
+                                    .type("object")
+                                    .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{
+                                        put("ref", REPOSITORY_COMMIT_SCHEMA);
+                                        put("pullRequest", PULL_COMMIT_SCHEMA);
+                                    }})
+                                    .build());
                             }}).build());
                     }}).build());
                 put("errors", jsonSchemaForErrors());
