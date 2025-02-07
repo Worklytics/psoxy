@@ -8,7 +8,9 @@ Changes to be including in future/planned release notes will be added here.
 ## Next
 
 ## [0.5.1](https://github.com/Worklytics/psoxy/release/tag/v0.5.1)
-- GitHub: Added rules for fetching commits through repository and pulls using GraphQL
+- `GitHub`: Added rules for fetching commits through repository and pulls using GraphQL
+- `gdirectory` connector: a few redundant oauth scopes removed; no impact on functionality. you can remove these from your DWD grants if you wish, but it's not necessary
+
 
 ## [0.5.0](https://github.com/Worklytics/psoxy/release/tag/v0.5.0)
 
