@@ -2,11 +2,23 @@
 
 ../../../tools/az-auth.sh
 
-if [ -f terraform.tfvars ]; then
-    AWS_ROLE_ARN=$(grep -E "^aws_assume_role_arn" terraform.tfvars | awk -F'=' '{print $2}' | tr -d '"' | xargs)
-    if [ -z "$AWS_ROLE_ARN" ]; then
-        echo "No AWS_ROLE_ARN found in terraform.tfvars"
-    else
-        ../../../tools/aws/preflight.sh -r "$AWS_ROLE_ARN"
-    fi
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# ensure gcloud installed
+if ! command -v gcloud &> /dev/null
+then
+    printf "${RED}gcloud is not installed.${NC}\n"
+    exit 1
 fi
+
+GCLOUD_ACCOUNT=$(gcloud config get-value account)
+
+if [[ -z "$GCLOUD_ACCOUNT" ]]
+then
+    printf "${RED}gcloud is not authenticated.${NC}\n"
+    exit 1
+fi
+
+printf "gcloud is authenticated with ${BLUE}${GCLOUD_ACCOUNT}${NC}.\n"
