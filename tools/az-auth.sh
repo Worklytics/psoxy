@@ -7,11 +7,6 @@ GREEN='\e[0;32m'
 BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
-if ! terraform -v &> /dev/null ; then
-  printf "${RED}Terraform not available.${NC}\n"
-  exit 1
-fi
-
 if ! az -v &> /dev/null ; then
   printf "${RED}Azure CLI not available.${NC}\n"
   exit 1
@@ -24,8 +19,7 @@ if [ -f "terraform.tfvars" ] && [ -z "$TENANT_ID" ]; then
     exit 1
   fi
 
-  TENANT_ID=`echo "var.msft_tenant_id" | terraform console | tr -d '\"'`
-
+  TENANT_ID=$(grep -E "^msft_tenant_id" terraform.tfvars | awk -F'=' '{print $2}' | tr -d '"' | xargs)
   TENANT_ID_PATTERN='^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
 
   if [[ ! "$TENANT_ID" =~ $TENANT_ID_PATTERN ]]; then
