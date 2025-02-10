@@ -10,3 +10,5 @@ if [ -f terraform.tfvars ]; then
         ../../../tools/aws/preflight.sh -r "$AWS_ROLE_ARN"
     fi
 fi
+
+../../../tools/gcp/preflight.sh
