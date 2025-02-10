@@ -1,0 +1,12 @@
+#!/bin/bash
+
+../../../tools/az-auth.sh
+
+if [ -f terraform.tfvars ]; then
+    AWS_ROLE_ARN=$(grep -E "^aws_assume_role_arn" terraform.tfvars | awk -F'=' '{print $2}' | tr -d '"' | xargs)
+    if [ -z "$AWS_ROLE_ARN" ]; then
+        echo "No AWS_ROLE_ARN found in terraform.tfvars"
+    else
+        ../../../tools/aws/preflight.sh -r "$AWS_ROLE_ARN"
+    fi
+fi
