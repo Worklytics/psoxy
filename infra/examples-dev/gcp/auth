@@ -1,0 +1,5 @@
+#!/bin/bash
+
+../../../tools/az-auth.sh
+
+../../../tools/gcp/preflight.sh
