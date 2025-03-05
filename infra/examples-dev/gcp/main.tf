@@ -152,6 +152,7 @@ output "todos_1" {
     concat(
       module.worklytics_connectors.todos,
       module.worklytics_connectors_google_workspace.todos,
+      module.psoxy.setup_todos,
       []
   )) : null
 }

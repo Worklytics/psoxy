@@ -234,6 +234,7 @@ module "bulk_connector" {
   sanitized_expiration_days            = var.bulk_sanitized_expiration_days
   input_expiration_days                = var.bulk_input_expiration_days
   example_file                         = each.value.example_file
+  instructions_template = each.value.instructions_template
   vpc_config                           = var.vpc_config
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
   provision_bucket_public_access_block = var.provision_bucket_public_access_block

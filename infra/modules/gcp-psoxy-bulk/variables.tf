@@ -99,6 +99,12 @@ variable "example_file" {
   default     = null
 }
 
+variable "instructions_template" {
+  type = string
+  description = "path to instructions template file, from psoxy_base_dir"
+  default     = null
+}
+
 variable "input_expiration_days" {
   type        = number
   description = "**alpha** Number of days after which objects in the bucket will expire"

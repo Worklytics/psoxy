@@ -54,6 +54,7 @@ locals {
     module.worklytics_connectors.todos,
     module.worklytics_connectors_google_workspace.todos,
     module.worklytics_connectors_msft_365.todos,
+    module.psoxy.setup_todos,
     []
   )
 

@@ -212,6 +212,11 @@ resource "google_cloudfunctions_function" "function" {
 
 locals {
   example_file = var.example_file == null ? "/path/to/example/file.csv" : "${var.psoxy_base_dir}${var.example_file}"
+  need_setup = var.instructions_template != null
+  test_todo_step = var.todo_step + (local.need_setup ? 1 : 0)
+  setup_todo_content = var.instructions_template == null ? "" : templatefile("${var.instructions_template}", {
+    input_bucket_url  = "gcs://${google_storage_bucket.input_bucket.name}"
+  })
   todo_brief   = <<EOT
 ## Test ${local.function_name}
 Check that the Psoxy works as expected and it transforms the files of your input bucket following
@@ -221,13 +226,7 @@ the rules you have defined:
 node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
 ```
 EOT
-}
-
-resource "local_file" "todo_test_gcp_psoxy_bulk" {
-  count = var.todos_as_local_files ? 1 : 0
-
-  filename = "TODO ${var.todo_step} - test ${local.function_name}.md"
-  content  = <<EOT
+  test_todo_content =  <<EOT
 # Testing Psoxy Bulk: ${local.function_name}
 
 Review the deployed Cloud function in GCP console:
@@ -254,6 +253,21 @@ Please, check the documentation of our [Psoxy Testing tools](${var.psoxy_base_di
 for a detailed description of all the different options.
 
 EOT
+}
+
+resource "local_file" "todo_setup" {
+  count = (var.todos_as_local_files && local.need_setup) ? 1 : 0
+
+  filename = "TODO ${var.todo_step} - setup ${local.function_name}.md"
+  content  = local.setup_todo_content
+}
+
+
+resource "local_file" "todo_test_gcp_psoxy_bulk" {
+  count = var.todos_as_local_files ? 1 : 0
+
+  filename = "TODO ${local.test_todo_step} - test ${local.function_name}.md"
+  content  = local.test_todo_content
 }
 
 resource "local_file" "test_script" {
@@ -322,6 +336,10 @@ output "test_script" {
 
 output "todo" {
   value = local.todo_brief
+}
+
+output "todo_setup" {
+  value = local.setup_todo_content
 }
 
 output "next_todo_step" {

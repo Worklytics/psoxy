@@ -1014,7 +1014,7 @@ EOT
         "Parser" = "gemini-usage"
       }
       example_file = "docs/sources/google-workspace/gemini-usage/example.csv"
-      instructions = templatefile("docs/sources/google-workspace/gemini-usage/instructions.tfpl")
+      instructions_template = "${path.module}/docs/gemini-usage/instructions.tftpl"
     }
     "hris" = {
       source_kind               = "hris"
