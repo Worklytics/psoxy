@@ -998,6 +998,24 @@ EOT
       }
       example_file = "docs/sources/badge/badge-example.csv"
     }
+    "gemini-usage" = {
+      source_kind = "gemini"
+      availability = "alpha"
+      enable_by_default         = false
+      worklytics_connector_id   = "bulk-import-psoxy",
+      worklytics_connector_name = "Bulk Data Import via Psoxy"
+      rules = {
+        columnsToRedact = []
+        columnsToPseudonymize = [
+          "Email"
+        ]
+      }
+      settings_to_provide = {
+        "Parser" = "gemini-usage"
+      }
+      example_file = "docs/sources/google-workspace/gemini-usage/example.csv"
+      instructions = templatefile("docs/sources/google-workspace/gemini-usage/instructions.tfpl")
+    }
     "hris" = {
       source_kind               = "hris"
       availability              = "ga"
