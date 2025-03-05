@@ -12,7 +12,6 @@ The CSV report file must then be uploaded to a proxy `-input` bucket for your co
 for import to Worklytics.
 
 
-
 ## Data Inventory
 As of Feb 2025, the report includes the following fields, providing per-user usage counts during the report period (28 days):
 
@@ -37,4 +36,6 @@ As of Feb 2025, the report includes the following fields, providing per-user usa
   3. Download the Gemini Usage report from the Google Workspace Admin Console (or ask a sufficiently privileged Google Workspace admin to do so). see `TODO 1 - gemini-usage` file that your `terraform apply` generated.
   4. Upload the usage report to the `-input` bucket (via AWS/GCP console, using `gsutil`/`s3` CLI, etc).
   5. Create the a `gemini-usage` connection in Worklytics; see `TODO 3 - gemini-usage` file that your `terraform apply` generated.
+  6. Repeat steps 3-4 as needed, to provide granular insights into AI adoption in your organization.  We recommend weekly uploads.
 
+![gemini-usage-admin-console.png](gemini-usage-admin-console.png)
