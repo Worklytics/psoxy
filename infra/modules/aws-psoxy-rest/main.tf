@@ -220,11 +220,11 @@ resource "local_file" "todo" {
 
 locals {
   test_script = templatefile("${path.module}/test_script.tftpl", {
-    proxy_endpoint_url = local.proxy_endpoint_url,
-    function_name = module.psoxy_lambda.function_name,
+    proxy_endpoint_url  = local.proxy_endpoint_url,
+    function_name       = module.psoxy_lambda.function_name,
     impersonation_param = local.impersonation_param,
-    command_cli_call = local.command_cli_call,
-    example_api_calls = var.example_api_calls,
+    command_cli_call    = local.command_cli_call,
+    example_api_calls   = var.example_api_calls,
   })
 }
 

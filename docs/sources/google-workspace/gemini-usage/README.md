@@ -37,3 +37,4 @@ As of Feb 2025, the report includes the following fields, providing per-user usa
   3. Download the Gemini Usage report from the Google Workspace Admin Console (or ask a sufficiently privileged Google Workspace admin to do so). see `TODO 1 - gemini-usage` file that your `terraform apply` generated.
   4. Upload the usage report to the `-input` bucket (via AWS/GCP console, using `gsutil`/`s3` CLI, etc).
   5. Create the a `gemini-usage` connection in Worklytics; see `TODO 3 - gemini-usage` file that your `terraform apply` generated.
+

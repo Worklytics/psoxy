@@ -23,7 +23,7 @@ locals {
       lockable : true   # nonsensical; this parameter/secret IS the lock. it's really the tokens that should have lockable:true
       sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself
       value_managed_by_tf : false
-      description: "Used to 'lock' the token refresh flow, so multiple processes don't refresh tokens concurrently.  Filled by Proxy instance."
+      description : "Used to 'lock' the token refresh flow, so multiple processes don't refresh tokens concurrently.  Filled by Proxy instance."
     }
   }
 
@@ -600,7 +600,7 @@ EOT
         },
         {
           name : "ACCESS_TOKEN"
-          writable : true  # access token
+          writable : true # access token
           sensitive : true
           value_managed_by_tf : false
           description : "Short-lived oauth access_token. Filled by Proxy instance."
@@ -705,7 +705,7 @@ EOT
         },
         {
           name : "ACCESS_TOKEN"
-          writable : true  # access token
+          writable : true # access token
           sensitive : true
           value_managed_by_tf : false
           description : "Short-lived oauth access_token. Filled by Proxy instance."
@@ -999,8 +999,8 @@ EOT
       example_file = "docs/sources/badge/badge-example.csv"
     }
     "gemini-usage" = {
-      source_kind = "gemini"
-      availability = "alpha"
+      source_kind               = "gemini"
+      availability              = "alpha"
       enable_by_default         = false
       worklytics_connector_id   = "bulk-import-psoxy",
       worklytics_connector_name = "Bulk Data Import via Psoxy"
@@ -1123,11 +1123,11 @@ locals {
 
   # backwards-compatible for v0.4.x; remove in v0.5.x
   google_workspace_sources_backwards = { for k, v in local.google_workspace_sources :
-    k => merge(v, { example_calls : v.example_api_calls }) }
+  k => merge(v, { example_calls : v.example_api_calls }) }
 
   # backwards-compatible for v0.4.x; remove in v0.5.x
   msft_365_connectors_backwards = { for k, v in local.msft_365_connectors :
-    k => merge(v, { example_calls : v.example_api_calls }) }
+  k => merge(v, { example_calls : v.example_api_calls }) }
 
   enabled_google_workspace_connectors = {
     for k, v in local.google_workspace_sources_backwards : k => v if contains(var.enabled_connectors, k)
