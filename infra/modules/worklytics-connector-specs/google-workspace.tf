@@ -1,8 +1,32 @@
 locals {
 
-  google_workspace_example_user = coalesce(var.google_workspace_example_user, "REPLACE_WITH_EXAMPLE_USER@YOUR_COMPANY.COM")
+  google_workspace_example_user  = coalesce(var.google_workspace_example_user, "REPLACE_WITH_EXAMPLE_USER@YOUR_COMPANY.COM")
   google_workspace_example_admin = coalesce(var.google_workspace_example_admin, var.google_workspace_example_user, "REPLACE_WITH_EXAMPLE_ADMIN@YOUR_COMPANY.COM")
   google_workspace_sources = {
+    "gcal" : {
+      source_kind : "gcal",
+      availability : "ga",
+      enable_by_default : true
+      worklytics_connector_id : "gcal-psoxy",
+      display_name : "Google Calendar"
+      apis_consumed : [
+        "calendar-json.googleapis.com"
+      ]
+      source_auth_strategy : "gcp_service_account_key"
+      target_host : "www.googleapis.com"
+      oauth_scopes_needed : [
+        "https://www.googleapis.com/auth/calendar.readonly"
+      ]
+      environment_variables : {}
+      example_api_calls : [
+        "/calendar/v3/calendars/primary",
+        "/calendar/v3/users/me/settings",
+        "/calendar/v3/users/me/calendarList",
+        "/calendar/v3/calendars/primary/events?maxResults=10",
+        "/calendar/v3/calendars/primary/events/{EVENT_ID}"
+      ]
+      example_api_calls_user_to_impersonate : local.google_workspace_example_user
+    },
     # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
     # if you plan to directly connect Directory to worklytics (without proxy). such a scenario is
     # used for customers who care primarily about pseudonymizing PII of external subjects with whom
@@ -37,28 +61,28 @@ locals {
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     },
-    "gcal" : {
-      source_kind : "gcal",
+    "gdrive" : {
+      source_kind : "gdrive",
       availability : "ga",
-      enable_by_default : true
-      worklytics_connector_id : "gcal-psoxy",
-      display_name : "Google Calendar"
+      enable_by_default : false
+      worklytics_connector_id : "gdrive-psoxy",
+      display_name : "Google Drive"
       apis_consumed : [
-        "calendar-json.googleapis.com"
+        "drive.googleapis.com"
       ]
       source_auth_strategy : "gcp_service_account_key"
       target_host : "www.googleapis.com"
       oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/calendar.readonly"
-      ]
+        "https://www.googleapis.com/auth/drive.metadata.readonly"
+      ],
       environment_variables : {}
       example_api_calls : [
-        "/calendar/v3/calendars/primary",
-        "/calendar/v3/users/me/settings",
-        "/calendar/v3/users/me/calendarList",
-        "/calendar/v3/calendars/primary/events?maxResults=10",
-        "/calendar/v3/calendars/primary/events/{EVENT_ID}"
-      ]
+        "/drive/v2/files",
+        "/drive/v3/files",
+        "/drive/v3/files/{FILE_ID}",
+        "/drive/v3/files/{FILE_ID}/permissions",
+        "/drive/v3/files/{FILE_ID}/revisions"
+      ],
       example_api_calls_user_to_impersonate : local.google_workspace_example_user
     },
     "gmail" : {
@@ -121,30 +145,6 @@ locals {
         "/admin/reports/v1/activity/users/all/applications/meet?maxResults=10"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_admin
-    },
-    "gdrive" : {
-      source_kind : "gdrive",
-      availability : "ga",
-      enable_by_default : false
-      worklytics_connector_id : "gdrive-psoxy",
-      display_name : "Google Drive"
-      apis_consumed : [
-        "drive.googleapis.com"
-      ]
-      source_auth_strategy : "gcp_service_account_key"
-      target_host : "www.googleapis.com"
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/drive.metadata.readonly"
-      ],
-      environment_variables : {}
-      example_api_calls : [
-        "/drive/v2/files",
-        "/drive/v3/files",
-        "/drive/v3/files/{FILE_ID}",
-        "/drive/v3/files/{FILE_ID}/permissions",
-        "/drive/v3/files/{FILE_ID}/revisions"
-      ],
-      example_api_calls_user_to_impersonate : local.google_workspace_example_user
     }
   }
 }

@@ -1,0 +1,13 @@
+# Setup of Gemini Usage Logs to Worklytics
+
+NOTE: The following must be done by a sufficiently privileged user in the Google Workspace Admin Console:
+
+  1. Navigate to the Google Workspace Admin Console -> Generative AI --> Gemini reports --> [User-level usage](https://admin.google.com/ac/reporting/report/gemini/user)
+  2. Click "Download usage counts"
+  3. Choose "Comma-separated values (.csv)" and click "Download"
+  4. Wait for the file to be generated, then click "Download CSV"
+  5. Upload the file to the bucket `${input_bucket_url}`.  The proxy instance will process the file to sanitize it, pseudonymizing the PII, and leaving the result in the corresponding `-sanitized` bucket. If desired, you
+can review the result there.
+  6. Once satisified, follow the `TODO 3` instructions to connect your `-sanitized` bucket to Worklytics.
+  7. Repeat steps 1-5 as desired to support ongoing analysis of your organization's Gemini usage.
+

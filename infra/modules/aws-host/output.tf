@@ -55,6 +55,16 @@ output "todos" {
   value       = values(module.api_connector)[*].todo
 }
 
+output "test_todos" {
+  description = "List of todo steps to complete for testing, in markdown format."
+  value       = values(module.api_connector)[*].todo
+}
+
+output "setup_todos" {
+  description = "List of todo steps to complete for setup, in markdown format."
+  value       = values(module.bulk_connector)[*].todo_setup
+}
+
 output "next_todo_step" {
   value = max(concat(
     values(module.api_connector)[*].next_todo_step,

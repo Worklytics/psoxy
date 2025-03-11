@@ -2,7 +2,7 @@
 
 Google Workspace sources can be setup via Terraform, using modules found in our GitHub repo.
 
-As of August 2023, we suggest you use one of our template repo, eg:
+As of August 2023, we suggest you use one of our template repos, eg:
 
 - [`aws`](https://github.com/Worklytics/psoxy-example-aws)
 - [`gcp`](https://github.com/Worklytics/psoxy-example-gcp)
