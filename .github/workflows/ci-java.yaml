@@ -1,0 +1,16 @@
+name: CI - Java
+
+# deprecated, but still a required check in the repo - so leave for now although its redundant
+
+# CI for our project as a GitHub action
+# see https://help.github.com/en/actions/language-and-framework-guides/building-and-testing-java-with-maven
+on:
+  push:
+    branches:
+      - '**' # should match all branches
+
+jobs:
+  ci_java:
+    uses: ./.github/workflows/build-java.yaml
+    with:
+      java-version: '17' # 21 is LTS, so fair that this should be our default
