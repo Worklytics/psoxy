@@ -222,9 +222,9 @@ locals {
   test_todo_step = var.todo_step + (local.need_setup ? 1 : 0)
 
   setup_todo_content = var.instructions_template == null ? "" : templatefile("${var.instructions_template}", {
-    input_bucket_url  = "gcs://${google_storage_bucket.input_bucket.name}"
+    input_bucket_url = "gcs://${google_storage_bucket.input_bucket.name}"
   })
-  todo_brief   = <<EOT
+  todo_brief        = <<EOT
 ## Test ${local.function_name}
 Check that the Psoxy works as expected and it transforms the files of your input bucket following
 the rules you have defined:
@@ -233,7 +233,7 @@ the rules you have defined:
 node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
 ```
 EOT
-  test_todo_content =  <<EOT
+  test_todo_content = <<EOT
 # Testing Psoxy Bulk: ${local.function_name}
 
 Review the deployed Cloud function in GCP console:
