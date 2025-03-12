@@ -165,11 +165,11 @@ variable "bulk_connectors" {
         transforms = optional(list(map(string)), [])
       })))
     }))
-    rules_file          = optional(string)
-    example_file        = optional(string)
+    rules_file            = optional(string)
+    example_file          = optional(string)
     instructions_template = optional(string)
-    settings_to_provide = optional(map(string), {})
-    available_memory_mb = optional(number)
+    settings_to_provide   = optional(map(string), {})
+    available_memory_mb   = optional(number)
   }))
 
   description = "map of connector id  => bulk connectors to provision"

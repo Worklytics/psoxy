@@ -100,7 +100,7 @@ variable "example_file" {
 }
 
 variable "instructions_template" {
-  type = string
+  type        = string
   description = "path to instructions template file, from psoxy_base_dir"
   default     = null
 }

@@ -1013,7 +1013,7 @@ EOT
       settings_to_provide = {
         "Parser" = "gemini-usage"
       }
-      example_file = "docs/sources/google-workspace/gemini-usage/example.csv"
+      example_file          = "docs/sources/google-workspace/gemini-usage/example.csv"
       instructions_template = "${path.module}/docs/gemini-usage/instructions.tftpl"
     }
     "hris" = {
