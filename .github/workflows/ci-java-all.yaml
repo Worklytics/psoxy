@@ -9,11 +9,11 @@ name: CI - java
 on:
   push: # mainline + rc's only
     branches:
+      - '**' # as of March 2025, I think worth doing for all branches
       - 'main'
       - 'rc-*'
 
 jobs:
-
   # Java 17 - supported until 30 Sept 2026; same as our default build as of Apr 2023
   ci_java17:
     uses: ./.github/workflows/build-java.yaml
