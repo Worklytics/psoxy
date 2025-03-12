@@ -167,6 +167,7 @@ variable "bulk_connectors" {
     }))
     rules_file          = optional(string)
     example_file        = optional(string)
+    instructions_template = optional(string)
     settings_to_provide = optional(map(string), {})
     available_memory_mb = optional(number)
   }))

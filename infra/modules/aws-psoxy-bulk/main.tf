@@ -317,6 +317,17 @@ resource "aws_iam_policy_attachment" "testing_policy_to_testing_role" {
 
 locals {
   role_option_for_tests = var.aws_role_to_assume_when_testing == null ? "" : "-r ${var.aws_role_to_assume_when_testing}"
+
+  # id that is unique for connector, within the environment (eg, files with this token in name, but otherwise equivalent, will not conflict)
+  local_file_id = trimprefix(var.instance_id, var.environment_name)
+
+  # whether this connector needs set up
+  need_setup = var.instructions_template != null
+
+  test_todo_step = var.todo_step + (local.need_setup ? 1 : 0)
+  setup_todo_content = var.instructions_template == null ? "" : templatefile(var.instructions_template, {
+    input_bucket_url  = "s3://${aws_s3_bucket.input.bucket}",
+  })
   todo_brief            = <<EOT
 ## Test ${var.instance_id}
 Check that the Psoxy works as expected, and it transforms the files of your input bucket following
@@ -327,7 +338,7 @@ node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example
 ```
 EOT
 
-  todo_content = <<EOT
+  test_todo_content = <<EOT
 # Review Psoxy Bulk: ${var.instance_id}
 
 Review the deployed function in AWS console:
@@ -357,12 +368,18 @@ for a detailed description of all the different options.
 EOT
 }
 
+resource "local_file" "todo_setup" {
+  count = (var.todos_as_local_files && local.need_setup) ? 1 : 0
+
+  filename = "TODO ${var.todo_step} - setup ${local.local_file_id}.md"
+  content  = local.setup_todo_content
+}
 
 resource "local_file" "todo_test" {
   count = var.todos_as_local_files ? 1 : 0
 
-  filename = "TODO ${var.todo_step} - test ${var.instance_id}.md"
-  content  = local.todo_content
+  filename = "TODO ${local.test_todo_step} - test ${var.instance_id}.md"
+  content  = local.test_todo_content
 }
 
 locals {
@@ -381,7 +398,7 @@ EOT
 resource "local_file" "test_script" {
   count = var.todos_as_local_files ? 1 : 0
 
-  filename        = "test-${var.instance_id}.sh"
+  filename        = "test-${local.local_file_id}.sh"
   file_permission = "755"
   content         = local.test_script
 }
@@ -434,6 +451,10 @@ output "test_script_content" {
 
 output "todo" {
   value = local.todo_brief
+}
+
+output "todo_setup" {
+  value = local.setup_todo_content
 }
 
 output "next_todo_step" {

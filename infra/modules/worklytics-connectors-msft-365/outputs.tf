@@ -28,7 +28,7 @@ output "api_clients" {
   value = {
     for id, connection in module.msft_connection :
     id => {
-      oauth_client_id   = connection.connector.client_id
+      oauth_client_id = connection.connector.client_id
       entra_object_id = connection.connector.object_id # used for terraform imports
     }
   }

@@ -15,162 +15,17 @@ resource "time_static" "deployment" {
 }
 
 locals {
-
-  google_workspace_example_user  = coalesce(var.google_workspace_example_user, "REPLACE_WITH_EXAMPLE_USER@YOUR_COMPANY.COM")
-  google_workspace_example_admin = coalesce(var.google_workspace_example_admin, var.google_workspace_example_user, "REPLACE_WITH_EXAMPLE_ADMIN@YOUR_COMPANY.COM")
-
-  google_workspace_sources = {
-    # GDirectory connections are a PRE-REQ for gmail, gdrive, and gcal connections. remove only
-    # if you plan to directly connect Directory to worklytics (without proxy). such a scenario is
-    # used for customers who care primarily about pseudonymizing PII of external subjects with whom
-    # they collaborate in GMail/GCal/GDrive. the Directory does not contain PII of subjects external
-    # to the Google Workspace, so may be directly connected in such scenarios.
-    "gdirectory" : {
-      source_kind : "gdirectory",
-      availability : "ga",
-      enable_by_default : true
-      worklytics_connector_id : "gdirectory-psoxy",
-      display_name : "Google Directory"
-      apis_consumed : [
-        "admin.googleapis.com"
-      ]
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/admin.directory.user.readonly",
-        "https://www.googleapis.com/auth/admin.directory.user.alias.readonly",
-        "https://www.googleapis.com/auth/admin.directory.domain.readonly",
-        "https://www.googleapis.com/auth/admin.directory.group.readonly",
-        "https://www.googleapis.com/auth/admin.directory.group.member.readonly",
-        "https://www.googleapis.com/auth/admin.directory.orgunit.readonly",
-      ]
-      source_auth_strategy : "gcp_service_account_key"
-      target_host : "admin.googleapis.com"
-      environment_variables : {}
-      example_api_calls : [
-        "/admin/directory/v1/users?customer=my_customer&maxResults=10",
-        "/admin/directory/v1/users/{USER_ID}",
-        "/admin/directory/v1/groups?customer=my_customer&maxResults=10",
-        "/admin/directory/v1/groups/{GROUP_ID}",
-        "/admin/directory/v1/groups/{GROUP_ID}/members?maxResults=10",
-        "/admin/directory/v1/customer/my_customer/domains",
-        "/admin/directory/v1/customer/my_customer/orgunits?maxResults=10",
-      ]
-      example_api_calls_user_to_impersonate : local.google_workspace_example_admin
-    },
-    "gcal" : {
-      source_kind : "gcal",
-      availability : "ga",
-      enable_by_default : true
-      worklytics_connector_id : "gcal-psoxy",
-      display_name : "Google Calendar"
-      apis_consumed : [
-        "calendar-json.googleapis.com"
-      ]
-      source_auth_strategy : "gcp_service_account_key"
-      target_host : "www.googleapis.com"
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/calendar.readonly"
-      ]
-      environment_variables : {}
-      example_api_calls : [
-        "/calendar/v3/calendars/primary",
-        "/calendar/v3/users/me/settings",
-        "/calendar/v3/users/me/calendarList",
-        "/calendar/v3/calendars/primary/events?maxResults=10",
-        "/calendar/v3/calendars/primary/events/{EVENT_ID}"
-      ]
-      example_api_calls_user_to_impersonate : local.google_workspace_example_user
-    },
-    "gmail" : {
-      source_kind : "gmail",
-      availability : "ga",
-      enable_by_default : false,
-      worklytics_connector_id : "gmail-meta-psoxy",
-      display_name : "GMail"
-      apis_consumed : [
-        "gmail.googleapis.com"
-      ]
-      source_auth_strategy : "gcp_service_account_key"
-      target_host : "www.googleapis.com"
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/gmail.metadata"
-      ],
-      environment_variables : {},
-      example_api_calls : [
-        "/gmail/v1/users/me/messages?maxResults=5&labelIds=SENT",
-        "/gmail/v1/users/me/messages/{MESSAGE_ID}?format=metadata"
-      ]
-      example_api_calls_user_to_impersonate : local.google_workspace_example_user
-    },
-    "google-chat" : {
-      source_kind : "google-chat",
-      availability : "ga",
-      enable_by_default : false
-      worklytics_connector_id : "google-chat-psoxy",
-      display_name : "Google Chat"
-      apis_consumed : [
-        "admin.googleapis.com"
-      ]
-      source_auth_strategy : "gcp_service_account_key"
-      target_host : "admin.googleapis.com"
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
-      ]
-      environment_variables : {}
-      example_api_calls : [
-        "/admin/reports/v1/activity/users/all/applications/chat?maxResults=10"
-      ]
-      example_api_calls_user_to_impersonate : local.google_workspace_example_admin
-    },
-    "google-meet" : {
-      source_kind : "google-meet"
-      availability : "ga",
-      enable_by_default : false
-      worklytics_connector_id : "google-meet-psoxy"
-      display_name : "Google Meet"
-      apis_consumed : [
-        "admin.googleapis.com"
-      ]
-      source_auth_strategy : "gcp_service_account_key"
-      target_host : "admin.googleapis.com"
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/admin.reports.audit.readonly"
-      ]
-      environment_variables : {}
-      example_api_calls : [
-        "/admin/reports/v1/activity/users/all/applications/meet?maxResults=10"
-      ]
-      example_api_calls_user_to_impersonate : local.google_workspace_example_admin
-    },
-    "gdrive" : {
-      source_kind : "gdrive",
-      availability : "ga",
-      enable_by_default : false
-      worklytics_connector_id : "gdrive-psoxy",
-      display_name : "Google Drive"
-      apis_consumed : [
-        "drive.googleapis.com"
-      ]
-      source_auth_strategy : "gcp_service_account_key"
-      target_host : "www.googleapis.com"
-      oauth_scopes_needed : [
-        "https://www.googleapis.com/auth/drive.metadata.readonly"
-      ],
-      environment_variables : {}
-      example_api_calls : [
-        "/drive/v2/files",
-        "/drive/v3/files",
-        "/drive/v3/files/{FILE_ID}",
-        "/drive/v3/files/{FILE_ID}/permissions",
-        "/drive/v3/files/{FILE_ID}/revisions"
-      ],
-      example_api_calls_user_to_impersonate : local.google_workspace_example_user
+  standard_config_values = {
+    oauth_refresh_token_lock = {
+      # NOTE: in GCP case, this is NEVER actually filled with a value; lock is done by labeling the secret
+      name : "OAUTH_REFRESH_TOKEN"
+      writable : true
+      lockable : true   # nonsensical; this parameter/secret IS the lock. it's really the tokens that should have lockable:true
+      sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself
+      value_managed_by_tf : false
+      description : "Used to 'lock' the token refresh flow, so multiple processes don't refresh tokens concurrently.  Filled by Proxy instance."
     }
   }
-
-  # backwards-compatible for v0.4.x; remove in v0.5.x
-  google_workspace_sources_backwards = { for k, v in local.google_workspace_sources :
-  k => merge(v, { example_calls : v.example_api_calls }) }
-
 
   jira_example_cloud_id            = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   jira_example_issue_id            = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
@@ -181,205 +36,6 @@ locals {
   github_first_organization        = split(",", coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME"))[0]
   github_example_repository        = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
   salesforce_example_account_id    = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
-
-  # Microsoft 365 sources; add/remove as you wish
-  # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
-  msft_365_connectors = {
-    "azure-ad" : {
-      worklytics_connector_id : "azure-ad-psoxy",
-      availability : "deprecated",
-      enable_by_default : false,
-      source_kind : "azure-ad",
-      display_name : "(Deprecated, use MSFT Entra Id instead) Azure Directory"
-      source_auth_strategy : "oauth2_refresh_token"
-      target_host : "graph.microsoft.com"
-      required_oauth2_permission_scopes : [],
-      # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
-      required_app_roles : [
-        # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
-        "User.Read.All",
-        "Group.Read.All",
-        "MailboxSettings.Read",
-      ]
-      environment_variables : {
-        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
-        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
-        REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-      }
-      external_todo : null
-      example_api_calls : [
-        "/v1.0/users",
-        "/v1.0/users/${var.example_msft_user_guid}",
-        "/v1.0/groups",
-        "/v1.0/groups/{group-id}/members"
-      ]
-    },
-    "msft-entra-id" : {
-      worklytics_connector_id : "azure-ad-psoxy",
-      availability : "ga",
-      enable_by_default : true,
-      source_kind : "azure-ad",
-      display_name : "Microsoft Entra ID (former Azure AD)"
-      source_auth_strategy : "oauth2_refresh_token"
-      target_host : "graph.microsoft.com"
-      required_oauth2_permission_scopes : []
-      # Delegated permissions (from `az ad sp list --query "[?appDisplayName=='Microsoft Graph'].oauth2Permissions" --all`)
-      required_app_roles : [
-        # Application permissions (form az ad sp list --query "[?appDisplayName=='Microsoft Graph'].appRoles" --all
-        "User.Read.All",
-        "Group.Read.All",
-        "MailboxSettings.Read"
-      ]
-      environment_variables : {
-        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
-        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
-        REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-      }
-      external_todo : null
-      example_api_calls : [
-        "/v1.0/users",
-        "/v1.0/users/${var.example_msft_user_guid}",
-        "/v1.0/groups",
-        "/v1.0/groups/{group-id}/members"
-      ]
-    },
-    "outlook-cal" : {
-      source_kind : "outlook-cal",
-      availability : "ga",
-      enable_by_default : true,
-      worklytics_connector_id : "outlook-cal-psoxy",
-      display_name : "Outlook Calendar"
-      source_auth_strategy : "oauth2_refresh_token"
-      target_host : "graph.microsoft.com"
-      required_oauth2_permission_scopes : []
-      required_app_roles : [
-        "Calendars.Read",
-        "MailboxSettings.Read",
-        "Group.Read.All",
-        "User.Read.All"
-      ],
-      environment_variables : {
-        GRANT_TYPE : "workload_identity_federation" # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
-        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
-        REFRESH_ENDPOINT = "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-      },
-      external_todo : null
-      example_api_calls : [
-        "/v1.0/users",
-        "/v1.0/users/${var.example_msft_user_guid}/events",
-        "/v1.0/users/${var.example_msft_user_guid}/calendarView?startDateTime=${timeadd(time_static.deployment.id, "-4320h")}&endDateTime=${time_static.deployment.id}",
-        "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
-        "/v1.0/groups",
-        "/v1.0/groups/{group-id}/members"
-      ]
-    },
-    "outlook-mail" : {
-      source_kind : "outlook-mail"
-      availability : "ga",
-      enable_by_default : false,
-      worklytics_connector_id : "outlook-mail-psoxy",
-      display_name : "Outlook Mail"
-      source_auth_strategy : "oauth2_refresh_token"
-      target_host : "graph.microsoft.com"
-      required_oauth2_permission_scopes : []
-      required_app_roles : [
-        "Mail.ReadBasic.All",
-        "MailboxSettings.Read",
-        "Group.Read.All",
-        "User.Read.All"
-      ]
-      environment_variables : {
-        GRANT_TYPE : "workload_identity_federation"
-        # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
-        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
-        REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-      }
-      external_todo : null
-      example_api_calls : [
-        "/v1.0/users",
-        "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
-        "/v1.0/users/${var.example_msft_user_guid}/mailFolders/SentItems/messages",
-        "/v1.0/groups",
-        "/v1.0/groups/{group-id}/members"
-      ]
-    },
-    "msft-teams" : {
-      source_kind : "msft-teams"
-      availability : "beta",
-      enable_by_default : false,
-      worklytics_connector_id : "msft-teams-psoxy",
-      display_name : "Microsoft Teams"
-      source_auth_strategy : "oauth2_refresh_token"
-      target_host : "graph.microsoft.com"
-      required_oauth2_permission_scopes : [],
-      required_app_roles : [
-        "User.Read.All",
-        "Team.ReadBasic.All",
-        "Channel.ReadBasic.All",
-        "Chat.Read.All",
-        "ChannelMessage.Read.All",
-        "CallRecords.Read.All",
-        "OnlineMeetings.Read.All",
-        "OnlineMeetingArtifact.Read.All"
-      ],
-      environment_variables : {
-        GRANT_TYPE : "workload_identity_federation"
-        # by default, assumed to be of type 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
-        TOKEN_SCOPE : "https://graph.microsoft.com/.default"
-        REFRESH_ENDPOINT : "https://login.microsoftonline.com/${var.msft_tenant_id}/oauth2/v2.0/token"
-      }
-      example_api_calls : [
-        "/v1.0/teams",
-        "/v1.0/teams/${var.msft_teams_example_team_guid}/allChannels",
-        "/v1.0/users/${var.example_msft_user_guid}/chats",
-        "/v1.0/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages",
-        "/v1.0/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages/delta",
-        "/v1.0/chats/${var.msft_teams_example_chat_guid}/messages",
-        "/v1.0/communications/calls/${var.msft_teams_example_call_guid}",
-        "/v1.0/communications/callRecords",
-        "/v1.0/communications/callRecords/${var.msft_teams_example_call_record_guid}",
-        "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(time_static.deployment.id, "-2160h"))},toDateTime=${urlencode(time_static.deployment.id)})",
-        "/v1.0/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(time_static.deployment.id, "-2160h"))},toDateTime=${urlencode(time_static.deployment.id)})",
-        "/v1.0/users/${var.example_msft_user_guid}/onlineMeetings?\\$filter=JoinWebUrl eq '${var.msft_teams_example_online_meeting_join_url}'"
-      ]
-      external_todo : <<EOT
-To enable the connector, you need to allow permissions on the application created for reading OnlineMeetings. You will need Powershell for this.
-
-Please follow the steps below:
-1. Ensure the user you are going to use for running the commands has the "Teams Administrator" role. You can add the role in the
-[Microsoft 365 Admin Center](https://learn.microsoft.com/en-us/microsoft-365/admin/add-users/assign-admin-roles?view=o365-worldwide#assign-a-user-to-an-admin-role-from-active-users)
-
-**NOTE**: About the role, can be assigned through Entra Id portal in Azure portal OR in Entra Admin center https://admin.microsoft.com/AdminPortal/Home. It is possible that even login with an admin account in Entra Admin Center the Teams role is not available to assign to any user; if so, please do it through Azure Portal (Entra Id -> Users -> Assign roles)
-
-2. Install [PowerShell Teams](https://learn.microsoft.com/en-us/microsoftteams/teams-powershell-install)  You can use `pwsh` in the terminal
-    enter to PowerShell.
-3. Then, run the following command. It will open a browser window for login to Microsoft Teams. After login, close the browser and return to the terminal.
-   Please choose the user who has the "Teams Administrator" role.
-```shell
-Connect-MicrosoftTeams
-```
-
-4. Follow steps on [Configure application access to online meetings or virtual events](https://learn.microsoft.com/en-us/graph/cloud-communication-online-meeting-application-access-policy):
-  - Add a policy for the application created for the connector, providing its `application id` (client ID)
-```shell
-New-CsApplicationAccessPolicy -Identity Teams-Policy-For-Worklytics -AppIds "%%entraid.client_id%%" -Description "Policy for MSFT Teams used for Worklytics Psoxy connector"
-```
-  - Grant the policy to the whole tenant (NOT to any specific application or user)
-```shell
-Grant-CsApplicationAccessPolicy -PolicyName Teams-Policy-For-Worklytics -Global
-```
-
-**Issues**:
-- If you receive "access denied" is because no admin role for Teams has been detected. Please close and reopen the Powershell terminal after assigning the role.
-- Commands have been tested over a Powershell (7.4.0) terminal in Windows, installed from Microsoft Store and with Teams Module (5.8.0). It might not work on a different environment
-EOT
-    }
-  }
-
-  # backwards-compatible for v0.4.x; remove in v0.5.x
-  msft_365_connectors_backwards = { for k, v in local.msft_365_connectors :
-  k => merge(v, { example_calls : v.example_api_calls }) }
-
 
   oauth_long_access_connectors = {
     asana = {
@@ -447,13 +103,7 @@ EOT
           sensitive : true
           value_managed_by_tf : false
         },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true
-          sensitive : true
-          value_managed_by_tf : false
-        }
+        local.standard_config_values.oauth_refresh_token_lock,
       ],
       environment_variables : {
         GRANT_TYPE : "certificate_credentials"
@@ -549,13 +199,7 @@ EOT
           sensitive : true
           value_managed_by_tf : false
         },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true   # nonsensical; this parameter/secret IS the lock. it's really the tokens that should have lockable:true
-          sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself
-          value_managed_by_tf : false
-        },
+        local.standard_config_values.oauth_refresh_token_lock,
         {
           name : "CLIENT_ID"
           writable : false
@@ -678,13 +322,7 @@ EOT
           sensitive : true
           value_managed_by_tf : false
         },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true
-          sensitive : true
-          value_managed_by_tf : false
-        }
+        local.standard_config_values.oauth_refresh_token_lock
       ],
       environment_variables : {
         GRANT_TYPE : "certificate_credentials"
@@ -769,7 +407,7 @@ EOT
         CREDENTIALS_FLOW : "client_secret"
         REFRESH_ENDPOINT : "https://${var.salesforce_domain}/services/oauth2/token"
         ACCESS_TOKEN_CACHEABLE : "true",
-        USE_SHARED_TOKEN : "true"
+        USE_SHARED_TOKEN : "TRUE"
       }
       secured_variables : [
         {
@@ -784,13 +422,7 @@ EOT
           sensitive : true
           value_managed_by_tf : false
         },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true
-          sensitive : true
-          value_managed_by_tf : false
-        },
+        local.standard_config_values.oauth_refresh_token_lock,
         {
           name : "ACCESS_TOKEN"
           writable : true
@@ -955,31 +587,25 @@ EOT
         {
           name : "CLIENT_ID"
           writable : false
-          sensitive : false
+          sensitive : false # zoom renders in clear in console
           value_managed_by_tf : false
           description : "Client ID of the Zoom 'Server-to-Server' OAuth App used by the Connector to retrieve Zoom data. Value should be obtained from your Zoom admin."
         },
         {
           name : "ACCOUNT_ID"
           writable : false
-          sensitive : true
+          sensitive : false # zoom renders in clear in console
           value_managed_by_tf : false
           description : "Account ID of the Zoom tenant from which the Connector will retrieve Zoom data. Value should be obtained from your Zoom admin."
         },
         {
           name : "ACCESS_TOKEN"
-          writable : true
+          writable : true # access token
           sensitive : true
           value_managed_by_tf : false
-          description : "Short-lived Oauth access_token used by connector to retrieve Zoom data. Filled by Proxy instance."
+          description : "Short-lived oauth access_token. Filled by Proxy instance."
         },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true
-          sensitive : true
-          value_managed_by_tf : false
-        }, # q: needed? per logic as of 9 June 2023, would be created
+        local.standard_config_values.oauth_refresh_token_lock,
       ],
       reserved_concurrent_executions : null # 1
       example_api_calls_user_to_impersonate : null
@@ -1076,6 +702,13 @@ EOT
           writable : false
           sensitive : true
           value_managed_by_tf : false
+        },
+        {
+          name : "ACCESS_TOKEN"
+          writable : true # access token
+          sensitive : true
+          value_managed_by_tf : false
+          description : "Short-lived oauth access_token. Filled by Proxy instance."
         },
       ],
       environment_variables : {
@@ -1201,13 +834,7 @@ EOT
           sensitive : true
           value_managed_by_tf : false
         },
-        {
-          name : "OAUTH_REFRESH_TOKEN"
-          writable : true
-          lockable : true   # nonsensical; this parameter/secret IS the lock. it's really the tokens that should have lockable:true
-          sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself
-          value_managed_by_tf : false
-        },
+        local.standard_config_values.oauth_refresh_token_lock,
         {
           name : "CLIENT_ID"
           writable : false
@@ -1371,6 +998,24 @@ EOT
       }
       example_file = "docs/sources/badge/badge-example.csv"
     }
+    "gemini-usage" = {
+      source_kind               = "gemini"
+      availability              = "alpha"
+      enable_by_default         = false
+      worklytics_connector_id   = "bulk-import-psoxy",
+      worklytics_connector_name = "Bulk Data Import via Psoxy"
+      rules = {
+        columnsToRedact = []
+        columnsToPseudonymize = [
+          "Email"
+        ]
+      }
+      settings_to_provide = {
+        "Parser" = "gemini-usage"
+      }
+      example_file = "docs/sources/google-workspace/gemini-usage/example.csv"
+      instructions_template = "${path.module}/docs/gemini-usage/instructions.tftpl"
+    }
     "hris" = {
       source_kind               = "hris"
       availability              = "ga"
@@ -1475,6 +1120,15 @@ EOT
 
 # computed values filtered by enabled connectors
 locals {
+
+  # backwards-compatible for v0.4.x; remove in v0.5.x
+  google_workspace_sources_backwards = { for k, v in local.google_workspace_sources :
+  k => merge(v, { example_calls : v.example_api_calls }) }
+
+  # backwards-compatible for v0.4.x; remove in v0.5.x
+  msft_365_connectors_backwards = { for k, v in local.msft_365_connectors :
+  k => merge(v, { example_calls : v.example_api_calls }) }
+
   enabled_google_workspace_connectors = {
     for k, v in local.google_workspace_sources_backwards : k => v if contains(var.enabled_connectors, k)
   }
