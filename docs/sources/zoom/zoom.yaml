@@ -33,6 +33,15 @@ endpoints:
         jsonPaths:
           - "$.['topic','settings','agenda','custom_keys']"
           - "$.['password','h323_password','pstn_password','encrypted_password','join_url','start_url']"
+  - pathTemplate: "/v2/meetings/{meetingId}/meeting_summary"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.['meeting_host_id','meeting_host_email', 'summary_last_modified_user_id','summary_last_modified_user_email']"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$.['meeting_topic','summary_title','summary_overview','summary_details','next_steps','edited_summary']"
   - pathTemplate: "/v2/past_meetings/{meetingId}/instances"
   - pathTemplate: "/v2/past_meetings/{meetingId}"
     transforms:
