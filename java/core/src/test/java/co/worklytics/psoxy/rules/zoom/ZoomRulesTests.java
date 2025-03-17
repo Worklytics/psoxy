@@ -15,12 +15,11 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Getter
 public class ZoomRulesTests extends JavaRulesTestBaseCase {
 
-    @Getter
     final Rules2 rulesUnderTest = PrebuiltSanitizerRules.ZOOM;
 
-    @Getter
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
         .sourceKind("zoom")
         .build();
@@ -40,6 +39,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         "https://api.zoom.us/v2/past_meetings/AAAA%252FAAAAAA%252F%252BAaaaaAA%253D%253D/participants?page_size=1",
         "https://api.zoom.us/v2/past_meetings/MEETING_ID/participants?page_size=20&next_page_token=TOKEN",
         "https://api.zoom.us/v2/meetings/MEETING_ID",
+        "https://api.zoom.us/v2/meetings/{meetingId}/meeting_summary",
         "https://api.zoom.us/v2/meetings/MEETING_ID?occurence_id=OCCURRENCE_ID&show_previous_occurrences=false",
         "https://api.zoom.us/v2/report/users/{userId}/meetings",
         "https://api.zoom.us/v2/report/users/myuserid/meetings?from=2022-05-16&to=2022-05-31&type=pastJoined&page_size=1",
@@ -138,6 +138,27 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
 
         assertRedacted(sanitized, "example@example.com", "API overview", "My API Test",             "?pwd=1234567890",
             "SHOULD BE REDACTED");
+    }
+
+    @SneakyThrows
+    @Test
+    void meeting_summary() {
+        String jsonString = asJson("meeting-summary.json");
+
+        Collection<String> PII = Arrays.asList(
+            "30R7kT7bTIKSNUFEuH_Qlg", // host id
+            "jchill@example.com" // host email
+        );
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized =
+            sanitizer.sanitize("GET", new URL("https://api.zoom.us/v2/meetings/MEETING_ID/meeting_summary"), jsonString);
+
+        assertPseudonymized(sanitized, PII);
+
+        assertRedacted(sanitized, "Meeting summary for my meeting",
+            "Meeting overview",
+            "step1");
     }
 
     @SneakyThrows
@@ -251,6 +272,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://api.zoom.us/v2/users/USER_ID/meetings", "list-user-meetings.json"),
             InvocationExample.of("https://api.zoom.us/v2/users", "list-users.json"),
             InvocationExample.of("https://api.zoom.us/v2/meetings/MEETING_ID", "meeting-details.json"),
+            InvocationExample.of("https://api.zoom.us/v2/meetings/MEETING_ID/meeting_summary", "meeting-summary.json"),
             InvocationExample.of("https://api.zoom.us/v2/past_meetings/MEETING_ID", "past-meeting-details.json"),
             InvocationExample.of("https://api.zoom.us/v2/past_meetings/MEETING_ID/instances", "past-meeting-instances.json"),
             InvocationExample.of("https://api.zoom.us/v2/past_meetings/MEETING_ID/participants", "past-meeting-participants.json"),
