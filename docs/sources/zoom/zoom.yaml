@@ -37,11 +37,19 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.['meeting_host_id','meeting_host_email', 'summary_last_modified_user_id','summary_last_modified_user_email']"
+          - "$['meeting_host_id','meeting_host_email', 'summary_last_modified_user_id','summary_last_modified_user_email']"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$.['meeting_topic','summary_title','summary_overview','summary_details','next_steps','edited_summary']"
+          - "$..summary_overview"
+          - "$..summary_details"
+      - !<redact>
+        jsonPaths:
+          - "$['meeting_topic','summary_title']"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..next_steps[*]"
+        encoding: "JSON"
   - pathTemplate: "/v2/past_meetings/{meetingId}/instances"
   - pathTemplate: "/v2/past_meetings/{meetingId}"
     transforms:

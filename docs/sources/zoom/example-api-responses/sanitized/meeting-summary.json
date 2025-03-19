@@ -10,5 +10,13 @@
   "summary_created_time":"2019-07-15T23:24:52Z",
   "summary_last_modified_time":"2020-07-15T23:30:19Z",
   "summary_last_modified_user_id":"{\"hash\":\"eZzolSzaDPlMEKfbuTxHl1CqdvdfbchOWVOf2V54rBM\"}",
-  "summary_last_modified_user_email":"{\"domain\":\"example.com\",\"hash\":\"_Mqo2yH0QgDytVpmJhxPaE36fR9YYF4mJyAMtmlLUAY\"}"
+  "summary_last_modified_user_email":"{\"domain\":\"example.com\",\"hash\":\"_Mqo2yH0QgDytVpmJhxPaE36fR9YYF4mJyAMtmlLUAY\"}",
+  "next_steps":[
+    "{\"hash\":\"CENPoxVGFndkd-0OfgUxUewECRd4Iy0ek91oizWfy-M\"}"
+  ],
+  "edited_summary":{
+    "next_steps":[
+      "{\"hash\":\"CENPoxVGFndkd-0OfgUxUewECRd4Iy0ek91oizWfy-M\"}"
+    ]
+  }
 }
