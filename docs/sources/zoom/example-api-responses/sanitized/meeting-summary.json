@@ -11,12 +11,16 @@
   "summary_last_modified_time":"2020-07-15T23:30:19Z",
   "summary_last_modified_user_id":"{\"hash\":\"eZzolSzaDPlMEKfbuTxHl1CqdvdfbchOWVOf2V54rBM\"}",
   "summary_last_modified_user_email":"{\"domain\":\"example.com\",\"hash\":\"_Mqo2yH0QgDytVpmJhxPaE36fR9YYF4mJyAMtmlLUAY\"}",
+  "summary_overview":"{\"length\":16,\"word_count\":2}",
+  "summary_details":null,
   "next_steps":[
-    "{\"hash\":\"CENPoxVGFndkd-0OfgUxUewECRd4Iy0ek91oizWfy-M\"}"
+    "{\"length\":5,\"word_count\":1}"
   ],
   "edited_summary":{
+    "summary_overview":"{\"length\":16,\"word_count\":2}",
+    "summary_details":"{\"length\":16,\"word_count\":2}",
     "next_steps":[
-      "{\"hash\":\"CENPoxVGFndkd-0OfgUxUewECRd4Iy0ek91oizWfy-M\"}"
+      "{\"length\":5,\"word_count\":1}"
     ]
   }
 }
