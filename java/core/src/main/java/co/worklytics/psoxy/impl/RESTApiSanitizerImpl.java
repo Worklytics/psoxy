@@ -450,10 +450,11 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 }
                 return null;
             } else {
-                return jsonConfiguration.jsonProvider().toJson(Map.of(
-                    "word_count", toTokenize.trim().isEmpty() ? 0 : toTokenize.trim().split("\\s+").length,
-                    "length", toTokenize.length()
-                ));
+                return jsonConfiguration.jsonProvider().toJson(new TreeMap<String, Object>() {
+                    {
+                        put("length", toTokenize.length());
+                        put("word_count", toTokenize.trim().isEmpty() ? 0 : toTokenize.trim().split("\\s+").length);
+                    }});
             }
         };
     }
