@@ -22,6 +22,7 @@ import java.util.List;
     @JsonSubTypes.Type(value = Transform.PseudonymizeEmailHeader.class, name = "pseudonymizeEmailHeader"),
     @JsonSubTypes.Type(value = Transform.FilterTokenByRegex.class, name = "filterTokenByRegex"),
     @JsonSubTypes.Type(value = Transform.Tokenize.class, name = "tokenize"),
+    @JsonSubTypes.Type(value = Transform.TextDigest.class, name = "textDigest"),
     @JsonSubTypes.Type(value = Transform.PseudonymizeRegexMatches.class, name = "pseudonymizeRegexMatches"),
     @JsonSubTypes.Type(value = HashIp.class, name = "hashIp"),
     @JsonSubTypes.Type(value = EncryptIp.class, name = "encryptIp")
@@ -374,6 +375,20 @@ public abstract class Transform {
 
         //NOTE: always format to URL-safe
         public Tokenize clone()  {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .build();
+        }
+    }
+
+    @SuperBuilder(toBuilder = true)
+    @NoArgsConstructor //for Jackson
+    @Getter
+    public static class TextDigest extends Transform {
+        public TextDigest clone()  {
             return this.toBuilder()
                 .clearJsonPaths()
                 .jsonPaths(new ArrayList<>(this.jsonPaths))
