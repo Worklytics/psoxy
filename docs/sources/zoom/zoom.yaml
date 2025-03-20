@@ -42,7 +42,9 @@ endpoints:
       - !<textDigest>
         jsonPaths:
           - "$..summary_overview"
-          - "$..summary_details"
+          - "$.summary_details[*].label"
+          - "$.summary_details[*].summary"
+          - "$.edited_summary.summary_details"
           - "$..next_steps[*]"
       - !<redact>
         jsonPaths:
