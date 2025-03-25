@@ -1,9 +1,9 @@
 {
-  "@odata.nextLink":"https://graph.microsoft.com/beta/copilot/users/4db02e4b-d144-400e-b194-53253a34c5be/interactionHistory/getAllEnterpriseInteractions?$filter=appClass+eq+%27IPM.SkypeTeams.Message.Copilot.BizChat%27&$skiptoken=U2tpcFZhbHVlPTAjTWFpbGJveEZvbGRlcj1NYWlsRm9sZGVycy9UZWFtQ2hhdA%3d%3d",
+  "@odata.nextLink":"https://graph.microsoft.com/beta/copilot/users/p~sMxhtJVS27r5MC4y2Z_akFQRDkAHruk6R5wDIq6powZ1iAsVwy2YDKEPVu2q6nfypG3bROgcL5AJcqe_h3YVyT0ZO6AlXOS3vSV6HXg1BeQ/interactionHistory/getAllEnterpriseInteractions?$filter=appClass+eq+%27IPM.SkypeTeams.Message.Copilot.BizChat%27&$skiptoken=U2tpcFZhbHVlPTAjTWFpbGJveEZvbGRlcj1NYWlsRm9sZGVycy9UZWFtQ2hhdA%3d%3d",
   "value":[
     {
       "id":"1732148357313",
-      "sessionId":"19:YzBP1kUdkNjFtJnketPYT8kQdQ3A08Y51rDTxE_ENIk1@thread.v2",
+      "sessionId":"p~_jOVpDJsSYTlwnDU-S30qzKC7CVepP2u6HkqSezw-o3U6x-2UOkSSKo3qTg8Us9SZ5aG5yrq2gpS6Txz0gIE3Klj3eRVeSaS9dtuUFm5U2tuPffACst5B3iaWTs2Db0v",
       "requestId":"f128b7a9-657e-b420-201e-5602114a29f4",
       "appClass":"IPM.SkypeTeams.Message.Copilot.BizChat",
       "interactionType":"aiResponse",
@@ -16,7 +16,7 @@
         "device":null,
         "user":null,
         "application":{
-          "id":"fb8d773d-7ef8-4ec0-a117-179f88add510",
+          "id":"{\"hash\":\"PtknPBuvPc6KzesKdOr8My9yeOsKY_7nWRbuJsIn2CU\"}",
           "applicationIdentityType":"bot"
         }
       },
@@ -58,7 +58,7 @@
     },
     {
       "id":"1732148356886",
-      "sessionId":"19:YzBP1kUdkNjFtJnketPYT8kQdQ3A08Y51rDTxE_ENIk1@thread.v2",
+      "sessionId":"p~_jOVpDJsSYTlwnDU-S30qzKC7CVepP2u6HkqSezw-o3U6x-2UOkSSKo3qTg8Us9SZ5aG5yrq2gpS6Txz0gIE3Klj3eRVeSaS9dtuUFm5U2tuPffACst5B3iaWTs2Db0v",
       "requestId":"f128b7a9-657e-b420-201e-5602114a29f4",
       "appClass":"IPM.SkypeTeams.Message.Copilot.BizChat",
       "interactionType":"userPrompt",
@@ -71,7 +71,7 @@
         "application":null,
         "device":null,
         "user":{
-          "id":"4db02e4b-d144-400e-b194-53253a34c5be",
+          "id":"{\"hash\":\"sMxhtJVS27r5MC4y2Z_akFQRDkAHruk6R5wDIq6powY\"}",
           "userIdentityType":"aadUser",
           "tenantId":"061ea7c2-cc15-418b-bfc0-9f6a7d98011c"
         }

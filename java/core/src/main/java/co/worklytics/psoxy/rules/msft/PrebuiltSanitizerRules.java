@@ -696,6 +696,11 @@ public class PrebuiltSanitizerRules {
         .jsonPath("$..displayName")
         .jsonPath("$..contentUrl")
         .jsonPath("$..attachments[*].name")
+        .jsonPath("$..attachments[*].contentUrl")
+        .jsonPath("$..mentions[*].mentionText")
+        // It may include URLs of Teams meetings
+        .jsonPath("$..contexts[*].contextReference")
+        .jsonPath("$..links[*].linkUrl")
         .build();
 
     static final Transform.Pseudonymize MS_COPILOT_PSEUDONYMIZE = Transform.Pseudonymize.builder()
@@ -734,11 +739,17 @@ public class PrebuiltSanitizerRules {
 
     static final Rules2 MS_COPILOT_NO_USER_ID = Rules2.builder()
         .endpoint(Endpoint.builder()
-            .pathRegex("^beta/copilot/users/(/p~[a-zA-Z0-9_-]+?)?[^/]*/interactionHistory/getAllEnterpriseInteractions(\\?.*)?")
+            .pathRegex("^/beta/copilot/users/(/p~[a-zA-Z0-9_-]+?)?[^/]*/interactionHistory/getAllEnterpriseInteractions(\\?.*)?")
             .transforms(Arrays.asList(MS_COPILOT_PSEUDONYMIZE,
                 // id of the chat may contain MSFT user GUIDS
                 Transform.Tokenize.builder()
                     .jsonPath("$..sessionId")
+                    .build(),
+                Transform.Tokenize.builder()
+                    .jsonPath("$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']")
+                    .regex("^https://graph.microsoft.com/beta/copilot/users/([a-zA-Z0-9_-]+)/.*$")
+                    .build(),
+                Transform.Pseudonymize.builder()
                     .jsonPath("$..from..id")
                     .jsonPath("$..mentions[*]..id")
                     .build(),
@@ -749,7 +760,6 @@ public class PrebuiltSanitizerRules {
                     .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                     .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
                     .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
-                    .jsonPaths(PSEUDONYMIZE_USER_ID.getJsonPaths())
                     .build()))
             .build())
         .build()

@@ -1,0 +1,80 @@
+---
+endpoints:
+  - pathRegex: "^/beta/copilot/users/(/p~[a-zA-Z0-9_-]+?)?[^/]*/interactionHistory/getAllEnterpriseInteractions(\\\
+    ?.*)?"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<tokenize>
+        jsonPaths:
+          - "$..sessionId"
+          - "$..from..id"
+          - "$..mentions[*]..id"
+      - !<textDigest>
+        jsonPaths:
+          - "$..attachments[*].content"
+        isJsonEscaped: true
+        jsonPathToProcessWhenEscaped: "$..text"
+      - !<textDigest>
+        jsonPaths:
+          - "$..body.content"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..contentUrl"
+          - "$..attachments[*].name"
+          - "$..['@odata.context']"
+          - "$..['@odata.count']"
+          - "$..['@odata.type']"
+          - "$..user.id"
+          - "$..userId"
+  - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+    transforms:
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..aboutMe"
+          - "$..mySite"
+          - "$..preferredName"
+          - "$..givenName"
+          - "$..surname"
+          - "$..jobTitle"
+          - "$..mailNickname"
+          - "$..responsibilities"
+          - "$..skills"
+          - "$..faxNumber"
+          - "$..mobilePhone"
+          - "$..businessPhones[*]"
+          - "$..onPremisesExtensionAttributes"
+          - "$..onPremisesSecurityIdentifier"
+          - "$..securityIdentifier"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
