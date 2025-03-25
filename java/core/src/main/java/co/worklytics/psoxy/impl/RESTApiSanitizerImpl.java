@@ -35,10 +35,8 @@ import lombok.extern.java.Log;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.text.StringEscapeUtils;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressCriteria;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressParser;
-import org.w3c.dom.Text;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -455,7 +453,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 return null;
             } else {
                 if (transform.getIsJsonEscaped() && transform.getJsonPathToProcessWhenEscaped() != null) {
-                    DocumentContext jsonContext = JsonPath.parse(StringEscapeUtils.unescapeJson(toTokenize));
+                    DocumentContext jsonContext = JsonPath.parse(toTokenize);
                     List<String> texts = jsonContext.read(transform.getJsonPathToProcessWhenEscaped());
 
                     for (String text : texts) {
