@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeMap;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
 @JsonSubTypes({
@@ -154,7 +155,7 @@ public abstract class Transform {
 
         /**
          * redact content unless matches at least one of these regexes
-         *
+         * <p>
          * if multiple match, content matched by the first exception regex is preserved
          */
         @Singular
@@ -248,11 +249,11 @@ public abstract class Transform {
         /**
          * use if still need original, but also want its pseudonym to be able to match against
          * pseudonymized fields
-         *
+         * <p>
          * use case: group mailing lists; if they're attendees to an event, the email in that
          * context will be pseudonymized; so when we pull list of groups, we need pseudonyms to
          * match against those, but can also get the original for use in UX/reports, as it's not PII
-         *
+         * <p>
          * NOT compatible with URL_SAFE_TOKEN encoding (Validator checks for this)
          */
         @JsonInclude(JsonInclude.Include.NON_DEFAULT)
@@ -269,14 +270,14 @@ public abstract class Transform {
         /**
          * if provided, only values at this json path(es) will be pseudonymized
          * if has a capture group, only portion of value matched by regex captured by first group
-         *
-         *
+         * <p>
+         * <p>
          * portion of content matching first capture group in regex will be
          * pseudonymized; rest preserved;
-         *
+         * <p>
          * if regex does NOT match content, content is left as-is (not pseudonymized)
-         *   q: better to redact?
-         *
+         * q: better to redact?
+         * <p>
          * Use case: format preserving pseudonymization, namely Microsoft Graph API encodes email
          * aliases as smtp:mailbox@domain.com or SMTP:mailbox@domain.com, depending on secondary
          * or primary; we want to pseudonymize only the actual mailbox portion
@@ -311,7 +312,7 @@ public abstract class Transform {
     @AllArgsConstructor //for builder
     @NoArgsConstructor //for Jackson
     @Getter
-    public static class PseudonymizeRegexMatches extends Transform implements PseudonymizationTransform  {
+    public static class PseudonymizeRegexMatches extends Transform implements PseudonymizationTransform {
         /**
          * whether to include reversible form of pseudonymized value in output
          */
@@ -321,12 +322,12 @@ public abstract class Transform {
 
         /**
          * values at this json path(es) matching regex will be pseudonymized
-         *
+         * <p>
          * if regex has a capture group, only portion of value captured by first group will be
          * pseudonymized and replaced in the content
-         *
+         * <p>
          * if regex does NOT match content, content matching to JSON path is REDACTED.
-         *
+         * <p>
          * Use case: format preserving pseudonymization, namely Microsoft Graph API encodes email
          * aliases as smtp:mailbox@domain.com or SMTP:mailbox@domain.com, depending on secondary
          * or primary; we want to pseudonymize only the actual mailbox portion
@@ -362,11 +363,11 @@ public abstract class Transform {
 
         /**
          * if provided, only group within matched by this regex will be tokenized
-         *
+         * <p>
          * example usage: .regex("^https://graph.microsoft.com/(.*)$") will tokenize the path
          * of a MSFT graph URL (prev/next links in paged endpoints), which may be useful if path
          * might contain PII or something like that
-         *
+         * <p>
          * HUGE CAVEAT: as of Aug 2022, reversing encapsulated tokens BACK to their original values
          * will work if and only if token is bounded by non-base64-urlencoded character
          */
@@ -374,7 +375,7 @@ public abstract class Transform {
         String regex;
 
         //NOTE: always format to URL-safe
-        public Tokenize clone()  {
+        public Tokenize clone() {
             return this.toBuilder()
                 .clearJsonPaths()
                 .jsonPaths(new ArrayList<>(this.jsonPaths))
@@ -388,13 +389,42 @@ public abstract class Transform {
     @NoArgsConstructor //for Jackson
     @Getter
     public static class TextDigest extends Transform {
-        public TextDigest clone()  {
+
+        @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+        @Builder.Default
+        Boolean isJsonEscaped = false;
+
+        @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+        @Builder.Default
+        String jsonPathToProcessWhenEscaped = null;
+
+        public TextDigest clone() {
             return this.toBuilder()
                 .clearJsonPaths()
                 .jsonPaths(new ArrayList<>(this.jsonPaths))
                 .clearFields()
                 .fields(new ArrayList<>(this.fields))
+                .isJsonEscaped(isJsonEscaped)
+                .jsonPathToProcessWhenEscaped(jsonPathToProcessWhenEscaped)
                 .build();
+        }
+
+        public static TreeMap<String, Object> generate(String text) {
+            if (text == null || text.isEmpty()) {
+                return new TreeMap<>() {
+                    {
+                        put("length", 0);
+                        put("word_count", 0);
+                    }
+                };
+            } else {
+                return new TreeMap<>() {
+                    {
+                        put("length", text.length());
+                        put("word_count", text.trim().isEmpty() ? 0 : text.trim().split("\\s+").length);
+                    }
+                };
+            }
         }
     }
 
