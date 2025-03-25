@@ -390,6 +390,13 @@ public abstract class Transform {
     @Getter
     public static class TextDigest extends Transform {
 
+        private final static TreeMap<String, Object> DEFAULT_TRANSFORM_RESULT = new TreeMap<>() {
+            {
+                put("length", 0);
+                put("word_count", 0);
+            }
+        };
+
         @JsonInclude(JsonInclude.Include.NON_DEFAULT)
         @Builder.Default
         Boolean isJsonEscaped = false;
@@ -411,12 +418,7 @@ public abstract class Transform {
 
         public static TreeMap<String, Object> generate(String text) {
             if (text == null || text.isEmpty()) {
-                return new TreeMap<>() {
-                    {
-                        put("length", 0);
-                        put("word_count", 0);
-                    }
-                };
+                return DEFAULT_TRANSFORM_RESULT;
             } else {
                 return new TreeMap<>() {
                     {
