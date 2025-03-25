@@ -180,7 +180,7 @@ EOT
       external_todo : null
       example_api_calls : [
         "/v1.0/users",
-        "/beta/copilot/users/${var.example_msft_user_guid}//interactionHistory/getAllEnterpriseInteractions"
+        "/beta/copilot/users/${var.example_msft_user_guid}/interactionHistory/getAllEnterpriseInteractions"
       ]
     }
   }
