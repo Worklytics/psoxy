@@ -26,7 +26,7 @@
       },
       "attachments":[
         {
-          "attachmentId":"4062fb240a03490b98ccd7c86bb2bcbf",
+          "attachmentId":"p~b7-iqzej17OJkneCXlO1ouZozsG_aj0atv5hHVpKgxM0kzjFc7S6sHiTYXoRAC45pipdQSn_BCn3vJl8dMpaHjBr-dCj3A5A3i2D4QhjLWA",
           "contentType":"application/vnd.microsoft.card.adaptive",
           "content":"{\"type\":\"AdaptiveCard\",\"version\":\"1.0\",\"body\":[{\"type\":\"TextBlock\",\"text\":\"{\\\"length\\\":980,\\\"word_count\\\":154}\",\"wrap\":true},{\"type\":\"TextBlock\",\"id\":\"MessageTextField\",\"text\":\"{\\\"length\\\":980,\\\"word_count\\\":154}\",\"wrap\":true}]}"
         }

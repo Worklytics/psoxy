@@ -744,6 +744,7 @@ public class PrebuiltSanitizerRules {
                 // id of the chat may contain MSFT user GUIDS
                 Transform.Tokenize.builder()
                     .jsonPath("$..sessionId")
+                    .jsonPath("$..attachments[*].attachmentId")
                     .build(),
                 Transform.Tokenize.builder()
                     .jsonPath("$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']")

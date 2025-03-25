@@ -10,8 +10,16 @@ endpoints:
       - !<tokenize>
         jsonPaths:
           - "$..sessionId"
+          - "$..attachments[*].attachmentId"
+      - !<tokenize>
+        jsonPaths:
+          - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
+        regex: "^https://graph.microsoft.com/beta/copilot/users/([a-zA-Z0-9_-]+)/.*$"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..from..id"
           - "$..mentions[*]..id"
+        encoding: "JSON"
       - !<textDigest>
         jsonPaths:
           - "$..attachments[*].content"
@@ -25,11 +33,13 @@ endpoints:
           - "$..displayName"
           - "$..contentUrl"
           - "$..attachments[*].name"
+          - "$..attachments[*].contentUrl"
+          - "$..mentions[*].mentionText"
+          - "$..contexts[*].contextReference"
+          - "$..links[*].linkUrl"
           - "$..['@odata.context']"
           - "$..['@odata.count']"
           - "$..['@odata.type']"
-          - "$..user.id"
-          - "$..userId"
   - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*"
     allowedQueryParams:
       - "$top"
