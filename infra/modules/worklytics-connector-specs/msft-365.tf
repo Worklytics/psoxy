@@ -173,13 +173,14 @@ EOT
       target_host : "graph.microsoft.com"
       required_oauth2_permission_scopes : []
       required_app_roles : [
+        "User.Read.All",
         "AiEnterpriseInteraction.Read.All"
       ]
       environment_variables : local.msft_365_environment_variables
       external_todo : null
       example_api_calls : [
         "/v1.0/users",
-        "/beta/copilot/users//${var.example_msft_user_guid}//interactionHistory/getAllEnterpriseInteractions"
+        "/beta/copilot/users/${var.example_msft_user_guid}//interactionHistory/getAllEnterpriseInteractions"
       ]
     }
   }
