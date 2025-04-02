@@ -207,7 +207,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
             ArrayList<?> results = (ArrayList<?>) filterResult;
 
-            return results != null && results.size() != 0;
+            return results != null && !results.isEmpty();
         }
 
         return true;

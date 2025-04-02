@@ -8,14 +8,6 @@ endpoints:
         jsonPaths:
           - "$..emailAddress"
         encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$..displayName"
-          - "$..contentUrl"
-          - "$..attachments[*].name"
-          - "$..attachments[*].contentUrl"
-          - "$..mentions[*].mentionText"
-          - "$..contexts[*].contextReference"
       - !<textDigest>
         jsonPaths:
           - "$..attachments[*].content"
@@ -24,6 +16,15 @@ endpoints:
       - !<textDigest>
         jsonPaths:
           - "$..body.content"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..contentUrl"
+          - "$..attachments[*].name"
+          - "$..attachments[*].contentUrl"
+          - "$..mentions[*].mentionText"
+          - "$..contexts[*].contextReference"
+          - "$..links[?(@.linkType == 'File')].linkUrl"
       - !<redact>
         jsonPaths:
           - "$..['@odata.context']"

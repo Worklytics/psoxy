@@ -9,6 +9,7 @@ import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 
 import java.util.Arrays;
@@ -700,6 +701,8 @@ public class PrebuiltSanitizerRules {
         .jsonPath("$..mentions[*].mentionText")
         // It may include URLs of Teams meetings
         .jsonPath("$..contexts[*].contextReference")
+        // It may include file names, folders, etc
+        .jsonPath("$..links[?(@.linkType == 'File')].linkUrl")
         .build();
 
     static final Transform.Pseudonymize MS_COPILOT_PSEUDONYMIZE = Transform.Pseudonymize.builder()
@@ -720,9 +723,9 @@ public class PrebuiltSanitizerRules {
         .pathTemplate(MS_COPILOT_INTERACTIONS_PATH)
         .allowedQueryParams(List.of("$filter"))
         .transform(MS_COPILOT_PSEUDONYMIZE)
-        .transform(MS_COPILOT_INTERACTIONS_REDACT)
         .transform(MS_COPILOT_TEXT_DIGEST_ATTACHMENT)
         .transform(MS_COPILOT_TEXT_DIGEST_BODY)
+        .transform(MS_COPILOT_INTERACTIONS_REDACT)
         .transform(REDACT_ODATA_CONTEXT)
         .transform(REDACT_ODATA_COUNT)
         .transform(REDACT_ODATA_TYPE)

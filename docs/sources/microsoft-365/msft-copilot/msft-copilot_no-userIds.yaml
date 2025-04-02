@@ -36,6 +36,7 @@ endpoints:
           - "$..attachments[*].contentUrl"
           - "$..mentions[*].mentionText"
           - "$..contexts[*].contextReference"
+          - "$..links[?(@.linkType == 'File')].linkUrl"
           - "$..['@odata.context']"
           - "$..['@odata.count']"
           - "$..['@odata.type']"
