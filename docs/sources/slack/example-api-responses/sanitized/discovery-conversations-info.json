@@ -19,11 +19,6 @@
       "is_mpim":false,
       "is_dm":false,
       "is_deleted":false,
-      "member_count":52,
-      "retention":{
-        "type":"custom",
-        "duration":"360"
-      },
       "shared":{
         "shared_team_ids":[
           "T02NFGBSH"

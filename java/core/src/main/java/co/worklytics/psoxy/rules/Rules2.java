@@ -1,15 +1,23 @@
 package co.worklytics.psoxy.rules;
 
 
+import co.worklytics.psoxy.rules.slack.PrebuiltSanitizerRules;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import lombok.*;
 import lombok.extern.java.Log;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -108,11 +116,21 @@ public class Rules2 implements RESTRules {
         return clone;
     }
 
-
     //TODO: fix YAML serialization with something like
     // https://stackoverflow.com/questions/55878770/how-to-use-jsonsubtypes-for-polymorphic-type-handling-with-jackson-yaml-mapper
 
+    static ObjectMapper mapper = new YAMLMapper();
 
-
+    public static synchronized Rules2 load(String path) {
+        try {
+            URL url = PrebuiltSanitizerRules.class.getClassLoader().getResource(path);
+            if (url == null) {
+                throw new IllegalArgumentException("No such file: " + path);
+            }
+            return mapper.readerFor(Rules2.class).readValue(Files.readAllBytes(Paths.get(url.toURI())));
+        } catch (IOException | URISyntaxException e) {
+            throw new Error(e);
+        }
+    }
 
 }

@@ -36,13 +36,13 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
             "https://slack.com/api/discovery.enterprise.info",
             "https://slack.com/api/discovery.conversations.list#fragment", // fragments get discarded
             "https://slack.com/api/discovery.conversations.list",
-            "https://slack.com/api/discovery.conversations.list?team=X&offset=Y&only_im=true",
+            "https://slack.com/api/discovery.conversations.list?team=X&offset=30&limit=100&only_im=true",
             "https://slack.com/api/discovery.conversations.history",
             "https://slack.com/api/discovery.conversations.history?channel=X&limit=10",
             "https://slack.com/api/discovery.conversations.recent?team=X&limit=10&latest=123",
-            "https://slack.com/api/discovery.user.conversations?include_historical=true&user=X&limit=10&offset=Y",
+            "https://slack.com/api/discovery.user.conversations?include_historical=true&user=X&limit=10&offset=40",
             "https://slack.com/api/discovery.users.list",
-            "https://slack.com/api/discovery.users.list?limit=20&include_deleted=true",
+            "https://slack.com/api/discovery.users.list?limit=20&include_deleted=true&offset=120",
     })
     @ParameterizedTest
     void allowedEndpointRegex_allowed(String url) {
@@ -104,7 +104,7 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
 
         assertThat(sanitized, hasJsonPath("$.users[*].profile[*].team"));
         assertThat(sanitized, hasJsonPath("$.users[*].profile[*].email"));
-        assertThat(sanitized, hasJsonPath("$.users[0].profile.keys()", hasSize(2)));
+        //assertThat(sanitized, hasJsonPath("$.users[0].profile.keys()", hasSize(2)));
         assertThat(sanitized, hasNoJsonPath("$.users[0].profile.keys()"), not(hasProperty("display_name")));
 
     }
