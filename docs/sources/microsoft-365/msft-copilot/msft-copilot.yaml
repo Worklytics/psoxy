@@ -16,7 +16,6 @@ endpoints:
           - "$..attachments[*].contentUrl"
           - "$..mentions[*].mentionText"
           - "$..contexts[*].contextReference"
-          - "$..links[*].linkUrl"
       - !<textDigest>
         jsonPaths:
           - "$..attachments[*].content"

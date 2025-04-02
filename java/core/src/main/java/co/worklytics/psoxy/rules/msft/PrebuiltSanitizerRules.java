@@ -700,7 +700,6 @@ public class PrebuiltSanitizerRules {
         .jsonPath("$..mentions[*].mentionText")
         // It may include URLs of Teams meetings
         .jsonPath("$..contexts[*].contextReference")
-        .jsonPath("$..links[*].linkUrl")
         .build();
 
     static final Transform.Pseudonymize MS_COPILOT_PSEUDONYMIZE = Transform.Pseudonymize.builder()
