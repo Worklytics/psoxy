@@ -27,6 +27,12 @@ variable "deployment_bundle" {
   default     = null
 }
 
+variable "skip_tests" {
+  type        = bool
+  description = "whether to skip tests when building the deployment bundle"
+  default     = true
+}
+
 variable "force_bundle" {
   type        = bool
   description = "whether to force build of deployment bundle, even if it already exists"
