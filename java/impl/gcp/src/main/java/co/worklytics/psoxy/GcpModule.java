@@ -4,17 +4,15 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
-import com.bettercloud.vault.Vault;
-import com.google.auth.oauth2.GoogleCredentials;
+
 import com.google.cloud.ServiceOptions;
-import dagger.Binds;
+
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.IOException;
 import java.time.Duration;
 
 /**
@@ -59,26 +57,8 @@ public interface GcpModule {
     }
 
     @Provides @Singleton
-    static SecretStore secretStore(@Named("Native") SecretStore nativeSecretStore,
-                                   HostEnvironment hostEnvironment,
-                                   VaultConfigServiceFactory vaultConfigServiceFactory,
-                                   EnvVarsConfigService envVarsConfigService) {
-        if (vaultConfigServiceFactory.isVaultConfigured(envVarsConfigService)) {
-            if (!vaultConfigServiceFactory.isVaultConfigured(envVarsConfigService)) {
-                throw new IllegalStateException("Vault is not configured, but HASHICORP_VAULT secret store implementation was requested");
-            }
-            VaultConfigService  sharedVault =
-                vaultConfigServiceFactory.createInitialized(vaultConfigServiceFactory.pathForSharedVault(hostEnvironment, envVarsConfigService));
-            VaultConfigService instanceVault =
-                vaultConfigServiceFactory.createInitialized(vaultConfigServiceFactory.pathForInstanceVault(hostEnvironment, envVarsConfigService));
-
-            return CompositeSecretStore.builder()
-                .preferred(instanceVault)
-                .fallback(sharedVault)
-                .build();
-        } else {
-            return nativeSecretStore;
-        }
+    static SecretStore secretStore(@Named("Native") SecretStore nativeSecretStore) {
+        return nativeSecretStore;
     }
 
     /**
@@ -117,25 +97,6 @@ public interface GcpModule {
     @Provides @Named("Native") @Singleton
     static ConfigService nativeConfigService(@Named("Native") SecretStore secretStore) {
         return secretStore;
-    }
-
-    @Provides @Singleton
-    static Vault vault(EnvVarsConfigService envVarsConfigService,
-                       VaultGcpIamAuth vaultGcpIamAuth) {
-        if (envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_TOKEN).isPresent()) {
-            return VaultConfigService.createVaultClientFromEnvVarsToken(envVarsConfigService);
-        } else {
-            String vaultAddr =
-                envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR);
-
-            try {
-                GoogleCredentials googleCredentials = GoogleCredentials.getApplicationDefault();
-                return vaultGcpIamAuth.createVaultClient(vaultAddr, CloudFunctionRequest.getFunctionName(), googleCredentials);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-        }
     }
 
     @Provides
