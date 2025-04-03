@@ -40,6 +40,25 @@ public class PrebuiltSanitizerRules {
                 .build())
             .build()
         )
+        // Meeting summary
+        // https://developers.zoom.us/docs/api/meetings/#tag/meetings/GET/meetings/{meetingId}/meeting_summary
+        .endpoint(Endpoint.builder()
+            .pathTemplate("/v2/meetings/{meetingId}/meeting_summary")
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$['meeting_host_id','meeting_host_email', 'summary_last_modified_user_id','summary_last_modified_user_email']")
+                .build())
+            .transform(Transform.TextDigest.builder()
+                .jsonPath("$..summary_overview")
+                .jsonPath("$.summary_details[*].label")
+                .jsonPath("$.summary_details[*].summary")
+                .jsonPath("$.edited_summary.summary_details")
+                .jsonPath("$..next_steps[*]")
+                .build())
+            .transform(Transform.Redact.builder()
+                .jsonPath("$['meeting_topic','summary_title']")
+                .build())
+            .build()
+        )
         // List past meeting instances
         // https://marketplace.zoom.us/docs/api-reference/zoom-api/meetings/pastmeetings
         .endpoint(Endpoint.builder()
@@ -115,9 +134,6 @@ public class PrebuiltSanitizerRules {
                 .build())
         .build())
         .build();
-
-
-
 
     static final Rules2 USERS_ENDPOINTS = Rules2.builder()
         // List users

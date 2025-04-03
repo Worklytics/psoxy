@@ -235,7 +235,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             f = getHashIp((HashIp) transform);
         } else if (transform instanceof EncryptIp) {
             f = getEncryptIp((EncryptIp) transform);
-        } else {
+        } else if (transform instanceof Transform.TextDigest) {
+            f = getTextDigest((Transform.TextDigest) transform);
+        }else {
             throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
         }
         return f;
@@ -436,6 +438,23 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                             .build());
                     return token;
                 }
+            }
+        };
+    }
+
+    MapFunction getTextDigest(Transform.TextDigest transform) {
+        return (s, jsonConfiguration) -> {
+            if (!(s instanceof String toTokenize)) {
+                if (s != null) {
+                    log.warning("value matched by " + transform + " not of type String");
+                }
+                return null;
+            } else {
+                return jsonConfiguration.jsonProvider().toJson(new TreeMap<String, Object>() {
+                    {
+                        put("length", toTokenize.length());
+                        put("word_count", toTokenize.trim().isEmpty() ? 0 : toTokenize.trim().split("\\s+").length);
+                    }});
             }
         };
     }
