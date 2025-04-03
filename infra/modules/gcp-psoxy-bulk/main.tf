@@ -19,20 +19,6 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
-# ensure Storage API is activated
-resource "google_project_service" "gcp_infra_api" {
-  for_each = toset([
-    "storage.googleapis.com",
-  ])
-
-  service                    = each.key
-  project                    = var.project_id
-  disable_dependent_services = false
-  disable_on_destroy         = false
-}
-
-
-
 resource "random_string" "bucket_id_part" {
   length  = 8
   special = false
