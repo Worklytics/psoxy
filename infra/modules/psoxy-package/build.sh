@@ -4,7 +4,7 @@
 set -e
 
 # psoxy build script to be invoked from Terraform 'external' data resource
-# usage ./build.sh /Users/erik/code/psoxy/java aws true
+# usage ./build.sh -sf /Users/erik/code/psoxy/java aws
 
 while getopts ":sf" opt; do
   case $opt in
