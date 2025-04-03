@@ -15,12 +15,6 @@ variable "implementation" {
   default     = "aws"
 }
 
-variable "psoxy_version" {
-  type        = string
-  description = "IGNORED; version of psoxy to deploy"
-  default     = null
-}
-
 variable "deployment_bundle" {
   type        = string
   description = "path to deployment bundle to use (if not provided, will build one)"
