@@ -111,7 +111,6 @@ module "psoxy_package" {
   implementation     = "aws"
   path_to_psoxy_java = "${var.psoxy_base_dir}java"
   deployment_bundle  = var.deployment_bundle
-  psoxy_version      = var.psoxy_version
   force_bundle       = var.force_bundle
 }
 
