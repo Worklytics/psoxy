@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
@@ -31,8 +32,8 @@ public class TestUtils {
      * example usage:
      * TestUtils.getData("confluence-webhook-examples/" + file + ".json")
      *
-     * @param fileName
-     * @return
+     * @param fileName a resource file name, relative to classpath of TestUtils.class
+     * @return byte[] data from the file
      * @throws Error if io problems reading file
      */
     public static byte[] getData(String fileName) {
@@ -45,6 +46,18 @@ public class TestUtils {
         } catch (IOException | URISyntaxException e) {
             throw new Error(e);
         }
+    }
+
+    /**
+     * returns the file content as trimmed UTF-8 string, standardizing newlines to unix-style (\n)
+     *
+     * avoids risk of customers cloning/forking repo with gitconfigs that convert line endings
+     *
+     * @param fileName to read; relative to classpath of TestUtils.class
+     * @return content of the file as trimmed UTF-8 string, ensuring newlines are standardized to unix-style (\n)
+     */
+    public static String getDataAsUtf8UnixString(String fileName) {
+        return standardizeNewlines(StringUtils.trim(new String(getData(fileName), StandardCharsets.UTF_8)));
     }
 
     /**
@@ -94,6 +107,13 @@ public class TestUtils {
         // Gson gson = new GsonBuilder().setPrettyPrinting().create();
         // return gson.toJson(JsonParser.parseString(json));
     }
+
+    public static String standardizeNewlines(String textContent) {
+        return textContent.replaceAll("\r\n", "\n")
+            .replaceAll("\r", "\n");
+    }
+
+
     public static String prettyPrintJson(byte[] json) {
         return prettyPrintJson(new String(json));
     }
