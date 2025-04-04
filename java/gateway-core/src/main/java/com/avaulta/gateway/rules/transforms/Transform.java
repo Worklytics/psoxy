@@ -65,7 +65,6 @@ public abstract class Transform {
     @Deprecated
     List<String> fields;
 
-
     /**
      * A JsonPath whether apply the transformation if matches the expected value
      */
@@ -389,20 +388,6 @@ public abstract class Transform {
     @NoArgsConstructor //for Jackson
     @Getter
     public static class TextDigest extends Transform {
-        public TextDigest clone()  {
-            return this.toBuilder()
-                .clearJsonPaths()
-                .jsonPaths(new ArrayList<>(this.jsonPaths))
-                .clearFields()
-                .fields(new ArrayList<>(this.fields))
-                .build();
-        }
-    }
-
-    @SuperBuilder(toBuilder = true)
-    @NoArgsConstructor //for Jackson
-    @Getter
-    public static class TextDigest extends Transform {
 
         private final static TreeMap<String, Object> DEFAULT_TRANSFORM_RESULT = new TreeMap<>() {
             {
@@ -437,7 +422,7 @@ public abstract class Transform {
                 return new TreeMap<>() {
                     {
                         put("length", text.length());
-                        put("word_count", text.trim().isEmpty() ? 0 : text.trim().split("\\s+").length);
+                        put("word_count", text.trim().split("\\s+").length);
                     }
                 };
             }
