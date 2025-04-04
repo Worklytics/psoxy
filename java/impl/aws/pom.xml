@@ -142,15 +142,6 @@
             <artifactId>secretsmanager</artifactId>
         </dependency>
 
-        <!-- support Hashicorp Vault as a secret store-->
-        <!-- see https://github.com/BetterCloud/vault-java-driver -->
-        <dependency>
-            <groupId>com.bettercloud</groupId>
-            <artifactId>vault-java-driver</artifactId>
-            <version>${dependency.bettercloud-vault-java-driver}</version>
-        </dependency>
-
-
         <!-- Test dependencies -->
         <!-- JUnit Jupiter API for writing tests -->
         <dependency>
