@@ -7,14 +7,11 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.bettercloud.vault.SslConfig;
-import com.bettercloud.vault.Vault;
-import com.bettercloud.vault.VaultConfig;
-import com.bettercloud.vault.VaultException;
+
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
-import org.apache.commons.lang3.StringUtils;
+
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.core.retry.RetryPolicy;
 import software.amazon.awssdk.core.retry.backoff.BackoffStrategy;
@@ -87,8 +84,7 @@ public interface AwsModule {
                                    EnvVarsConfigService envVarsConfigService,
                                    ParameterStoreConfigServiceFactory parameterStoreConfigServiceFactory,
                                    @Named("instance") ParameterStoreConfigService instanceScopedParameterConfigService,
-                                   SecretsManagerSecretStoreFactory secretsManagerSecretStoreFactory,
-                                   VaultConfigServiceFactory vaultSecretStoreFactory) {
+                                   SecretsManagerSecretStoreFactory secretsManagerSecretStoreFactory) {
 
         String pathToSharedConfig =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
@@ -112,11 +108,6 @@ public interface AwsModule {
         } else if (secretStoreImpl == AwsEnvironment.SecretStoreImplementations.AWS_SSM_PARAMETER_STORE) {
             instanceConfigService = instanceScopedParameterConfigService;
             sharedConfigService = parameterStoreConfigServiceFactory.create(pathToSharedConfig);
-        } else if (secretStoreImpl == AwsEnvironment.SecretStoreImplementations.HASHICORP_VAULT) {
-            sharedConfigService =
-                vaultSecretStoreFactory.createInitialized(vaultSecretStoreFactory.pathForSharedVault(hostEnvironment, envVarsConfigService));
-            instanceConfigService =
-                vaultSecretStoreFactory.createInitialized(vaultSecretStoreFactory.pathForInstanceVault(hostEnvironment, envVarsConfigService));
         } else {
             throw new IllegalStateException("Unknown secret store implementation: " + secretStoreImpl);
         }
@@ -189,42 +180,6 @@ public interface AwsModule {
                 .build();
     }
 
-    @Provides
-    @Singleton
-    static Vault vault(AwsEnvironment awsEnvironment,
-                       EnvVarsConfigService envVarsConfigService,
-                       VaultAwsIamAuthFactory vaultAwsIamAuthFactory) {
-        if (envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_TOKEN).isPresent()) {
-            return VaultConfigService.createVaultClientFromEnvVarsToken(envVarsConfigService);
-        } else {
-            VaultAwsIamAuth vaultAwsIamAuth = vaultAwsIamAuthFactory.create(
-                    awsEnvironment.getRegion(),
-                    DefaultAWSCredentialsProviderChain.getInstance().getCredentials());
-
-            if (envVarsConfigService.isDevelopment()) {
-                vaultAwsIamAuth.logCallerIdentity();
-                vaultAwsIamAuth.preflightChecks(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR));
-            }
-
-            VaultConfig vaultConfig = new VaultConfig()
-                    .engineVersion(VaultAwsIamAuth.VAULT_ENGINE_VERSION)
-                    .sslConfig(new SslConfig())
-                    .address(envVarsConfigService.getConfigPropertyOrError(VaultConfigService.VaultConfigProperty.VAULT_ADDR))
-                    .token(vaultAwsIamAuth.getToken());
-
-            envVarsConfigService.getConfigPropertyAsOptional(VaultConfigService.VaultConfigProperty.VAULT_NAMESPACE)
-                    .filter(StringUtils::isNotBlank)  //don't bother tossing error here, assume meant no namespace
-                    .ifPresent(ns -> {
-                        try {
-                            vaultConfig.nameSpace(ns);
-                        } catch (VaultException e) {
-                            throw new Error("Error setting Vault namespace", e);
-                        }
-                    });
-
-            return new Vault(vaultConfig);
-        }
-    }
 
     @Provides
     @IntoSet

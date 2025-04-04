@@ -349,6 +349,24 @@ class RESTApiSanitizerImplTest {
                 pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(r, reversibleTokenizationStrategy));
     }
 
+    @SneakyThrows
+    @ParameterizedTest
+    @CsvSource({
+        "'Hello world', 2, 11",
+        "'This is a test', 4, 14",
+        "'', 0, 0",
+        "'OneWord', 1, 7"
+    })
+    void textDigest(String input, int expectedWordCount, int expectedLength) {
+        Transform.TextDigest transform = Transform.TextDigest.builder().build();
+        MapFunction textDigestFunction = sanitizer.getTextDigest(transform);
+
+        String resultJson = (String) textDigestFunction.map(input, sanitizer.getJsonConfiguration());
+        Map<String, Integer> result = new ObjectMapper().readValue(resultJson, Map.class);
+
+        assertEquals(expectedWordCount, result.get("word_count"));
+        assertEquals(expectedLength, result.get("length"));
+    }
 
     @SneakyThrows
     @ValueSource(strings = { "GET", "POST", "PUT", "PATCH" })
