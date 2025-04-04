@@ -220,8 +220,7 @@ abstract public class RulesBaseTestCase {
 
                 String sanitizedFilepath = getRulesTestSpec().getExampleSanitizedApiResponsesPathFull() + example.getPlainExampleFile();
 
-
-                String expected = StringUtils.trim(new String(TestUtils.getData(sanitizedFilepath)));
+                String expected = TestUtils.getDataAsUtf8UnixString(sanitizedFilepath);
 
                 assertEquals(expected,
                     StringUtils.trim(prettyPrintJson(sanitized)), sanitizedFilepath + " does not match output");
