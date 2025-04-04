@@ -239,7 +239,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             f = getEncryptIp((EncryptIp) transform);
         } else if (transform instanceof Transform.TextDigest) {
             f = getTextDigest((Transform.TextDigest) transform);
-        } else {
+        }else {
             throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
         }
         return f;

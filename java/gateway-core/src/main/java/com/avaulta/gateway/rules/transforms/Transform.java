@@ -389,6 +389,20 @@ public abstract class Transform {
     @NoArgsConstructor //for Jackson
     @Getter
     public static class TextDigest extends Transform {
+        public TextDigest clone()  {
+            return this.toBuilder()
+                .clearJsonPaths()
+                .jsonPaths(new ArrayList<>(this.jsonPaths))
+                .clearFields()
+                .fields(new ArrayList<>(this.fields))
+                .build();
+        }
+    }
+
+    @SuperBuilder(toBuilder = true)
+    @NoArgsConstructor //for Jackson
+    @Getter
+    public static class TextDigest extends Transform {
 
         private final static TreeMap<String, Object> DEFAULT_TRANSFORM_RESULT = new TreeMap<>() {
             {
