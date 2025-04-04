@@ -55,10 +55,6 @@ resource "google_storage_bucket" "input_bucket" {
       labels
     ]
   }
-
-  depends_on = [
-    google_project_service.gcp_infra_api
-  ]
 }
 
 # data output from function
@@ -73,10 +69,6 @@ module "output_bucket" {
   region                         = var.region
   expiration_days                = var.sanitized_expiration_days
   bucket_labels                  = var.default_labels
-
-  depends_on = [
-    google_project_service.gcp_infra_api
-  ]
 }
 
 resource "google_service_account" "service_account" {
