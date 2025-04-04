@@ -1,4 +1,4 @@
-# Microsoft Teams
+# Microsoft Copilot
 
 Connect Microsoft 365 Copilot data to Worklytics, enabling communication analysis and general
 collaboration
