@@ -14,13 +14,14 @@ locals {
 # project, or if other services used to support (eg, monitoring APIs or somthing)
 resource "google_project_service" "gcp_infra_api" {
   for_each = toset([
-    "cloudbuild.googleapis.com", # some modes of Cloud Functions seem to need this, so TBD
+    "artifactregistry.googleapis.com", # for GCP Artifact Registry, as required for new Cloud Functions since Feb 2024
+    "cloudbuild.googleapis.com",       # some modes of Cloud Functions seem to need this, so TBD
     "cloudfunctions.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com", # seems required w newer Google provider versions, for resources we use
     "iam.googleapis.com",     # manage IAM via terraform (as of 2023-04-17, internal dev envs didn't have this; so really needed?)
     "secretmanager.googleapis.com",
-    "artifactregistry.googleapis.com", # for GCP Artifact Registry, as required for new Cloud Functions since Feb 2024
+    "storage.googleapis.com", # needed for bulk sources, which we're going to presume everyone has for simplicity
     # "serviceusage.googleapis.com", # manage service APIs via terraform (prob already
   ])
 
