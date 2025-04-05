@@ -50,3 +50,7 @@ https://cloud.google.com/resource-manager/docs/organization-policy/restricting-d
 
 You may need define an exception for the GCP project in which you're deploying the proxy, or add the
 domain of your Worklytics Tenant SA to the list of allowed domains.
+
+## Warning like 'Failed to find a usable hardware address from the network interfaces; using random bytes: '
+
+This is benign and can be safely ignored.
