@@ -105,10 +105,4 @@ public interface GcpModule {
     static OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder providesSourceAuthStrategy(GCPWorkloadIdentityFederationGrantTokenRequestBuilder tokenRequestBuilder) {
         return tokenRequestBuilder;
     }
-
-    @Provides @Singleton
-    static GCPWorkloadIdentityFederationGrantTokenRequestBuilder providesFederationGrantTokenRequestBuilder() {
-        // thought this has an @Inject constructor, but Dagger doesn't seem to be able to find it
-        return new GCPWorkloadIdentityFederationGrantTokenRequestBuilder();
-    }
 }
