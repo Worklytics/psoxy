@@ -49,6 +49,11 @@ public class FunctionRuntimeModule {
         return new RandomNumberGeneratorImpl();
     }
 
+    @Provides
+    static HttpRequestFactory providesHttpRequestFactory(HttpTransportFactory httpTransportFactory) {
+        return httpTransportFactory.create().createRequestFactory();
+    }
+
     // q: should we just replace this with a Provider<HttpTransport>, rather than having more coupling to google-http-client classes?
     @Provides @Singleton
     HttpTransportFactory providesHttpTransportFactory(EnvVarsConfigService envVarsConfigService) {

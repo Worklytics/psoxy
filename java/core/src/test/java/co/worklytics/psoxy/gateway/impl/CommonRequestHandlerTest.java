@@ -61,6 +61,7 @@ class CommonRequestHandlerTest {
             MockModules.ForSecretStore.class,
             MockModules.ForRules.class,
             MockModules.ForSourceAuthStrategySet.class,
+           MockModules.ForHttpTransportFactory.class,
     })
     public interface Container {
         void inject(CommonRequestHandlerTest test);

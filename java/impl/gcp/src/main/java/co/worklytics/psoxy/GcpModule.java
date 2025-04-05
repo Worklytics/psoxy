@@ -14,6 +14,7 @@ import dagger.multibindings.IntoSet;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.time.Duration;
+import java.util.Optional;
 
 /**
  * defines how to fulfill dependencies that need platform-specific implementations for GCP platform
@@ -46,7 +47,7 @@ public interface GcpModule {
                                                SecretManagerConfigServiceFactory secretManagerConfigServiceFactory) {
         String pathToInstanceConfig =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
-                .orElseGet(() -> asSecretManagerNamespace(hostEnvironment.getInstanceId()));
+                .orElseGet(() -> asSecretManagerNamespace(Optional.ofNullable(hostEnvironment.getInstanceId()).orElse("")));
 
         return secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToInstanceConfig);
     }

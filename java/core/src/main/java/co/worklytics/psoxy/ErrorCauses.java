@@ -12,11 +12,15 @@ public enum ErrorCauses {
     BLOCKED_BY_RULES,
 
     /**
-     * Credentials construction failing
+     * Credentials construction failing, or some authorization step not completed
+     *  could be authentication  - eg a problem with proxy instances credentials
+     *  or authorization - eg  proxy is authenticated with source, but lacks authorization to access requested data
      */
     CONNECTION_SETUP,
+
     /**
-     * Third party call returned error
+     * Third party call returned error, that is not obviously something that falls under 'CONNECTION_SETUP' case
+     * eg - not obvious to use that its an authentication or authorization issue
      */
     API_ERROR,
 
@@ -39,6 +43,12 @@ public enum ErrorCauses {
      *  failed to get configuration data; or misconfigured.
      */
     CONFIGURATION_FAILURE,
+
+    /**
+     *  An error internal to proxy's application logic, but not handled such that it could be mapped into one of the above.
+     *  eg, something very unexpected, or a bug in the code.
+     */
+    UNKNOWN,
     ;
 
 }
