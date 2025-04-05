@@ -28,11 +28,11 @@ import java.util.function.Supplier;
 public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
 
     @Inject
-    StorageHandler storageHandler;
+    volatile StorageHandler storageHandler;
 
     @Override
     public void accept(GcsEvent gcsEvent, Context context) throws Exception {
-        DaggerGcpContainer.create().injectGCSEvent(this);
+       injectDependenciesIfNeeded();
 
         // See https://cloud.google.com/functions/docs/calling/storage#event_types
         if (context.eventType().equals("google.storage.object.finalize")) {
@@ -109,5 +109,16 @@ public class GCSFileEvent implements BackgroundFunction<GCSFileEvent.GcsEvent> {
         private String bucket;
         private String name;
         private String metageneration;
+    }
+
+    void injectDependenciesIfNeeded() {
+        if (storageHandler == null) {
+            synchronized (this) {
+                if (storageHandler == null) {
+                    GcpContainer gcpContainer = DaggerGcpContainer.create();
+                    gcpContainer.injectGCSEvent(this);
+                }
+            }
+        }
     }
 }

@@ -22,6 +22,7 @@ public class Route implements HttpFunction {
     @Inject
     CommonRequestHandler requestHandler;
     @Inject
+    volatile
     EnvVarsConfigService envVarsConfigService;
 
 
