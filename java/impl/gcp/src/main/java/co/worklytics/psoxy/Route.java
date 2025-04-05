@@ -24,15 +24,14 @@ public class Route implements HttpFunction {
     @Inject
     EnvVarsConfigService envVarsConfigService;
 
+
     @Override
     public void service(HttpRequest request, HttpResponse response)
             throws IOException {
 
-        CloudFunctionRequest cloudFunctionRequest = CloudFunctionRequest.of(request);
+        injectDependenciesIfNeeded();
 
-        if (requestHandler == null) {
-            DaggerGcpContainer.create().injectRoute(this);
-        }
+        CloudFunctionRequest cloudFunctionRequest = CloudFunctionRequest.of(request);
 
         try {
             if (envVarsConfigService.isDevelopment()) {
@@ -62,4 +61,16 @@ public class Route implements HttpFunction {
                     .transferTo(response.getOutputStream());
         }
     }
+
+    void injectDependenciesIfNeeded() {
+        if (envVarsConfigService == null) {
+            synchronized (this) {
+                if (envVarsConfigService == null) {
+                    GcpContainer gcpContainer = DaggerGcpContainer.create();
+                    gcpContainer.injectRoute(this);
+                }
+            }
+        }
+    }
+
 }
