@@ -427,8 +427,7 @@ class CommonRequestHandlerTest {
     private RESTApiSanitizer buildSanitizer(RESTRules rules) {
         Pseudonymizer defaultPseudonymizer =
                 pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                        .pseudonymizationSalt("salt")
-                        .pseudonymImplementation(PseudonymImplementation.LEGACY)
+                        .pseudonymImplementation(PseudonymImplementation.DEFAULT)
                         .build());
 
         return sanitizerFactory.create(rules, defaultPseudonymizer);

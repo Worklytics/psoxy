@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class GcpContainerTest {
 
     @Test
-    void testGcpContainer_fileEventHandlerSingletons() {
+    void fileEventHandle_singletons() {
 
         GcpContainer gcpContainer = DaggerGcpContainer.create();
 
@@ -24,7 +24,7 @@ class GcpContainerTest {
     }
 
     @Test
-    void testGcpContainer_httpRequestHandlerSingletons() {
+    void httpRequestHandler_singletons() {
 
         GcpContainer gcpContainer = DaggerGcpContainer.create();
 
