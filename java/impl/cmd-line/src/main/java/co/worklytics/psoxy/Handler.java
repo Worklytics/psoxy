@@ -38,16 +38,6 @@ public class Handler {
         Pseudonymizer.ConfigurationOptions.ConfigurationOptionsBuilder options =
             Pseudonymizer.ConfigurationOptions.builder();
 
-        if (config.getPseudonymizationSaltSecret() != null) {
-            try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
-                AccessSecretVersionResponse secretVersionResponse =
-                    client.accessSecretVersion(config.getPseudonymizationSaltSecret().getIdentifier());
-                options.pseudonymizationSalt(secretVersionResponse.getPayload().getData().toStringUtf8());
-            }
-        } else {
-            options.pseudonymizationSalt(config.getPseudonymizationSalt());
-        }
-
         ColumnarRules.ColumnarRulesBuilder<?, ?> rulesBuilder = defaultRules.toBuilder();
 
         if (config.getColumnsToPseudonymize() != null) {

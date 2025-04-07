@@ -12,9 +12,9 @@ import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.*;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.Credentials;
 import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.http.HttpTransportFactory;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
@@ -32,7 +32,6 @@ import org.apache.http.entity.ContentType;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.net.ConnectException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.Objects;
@@ -55,7 +54,6 @@ public class CommonRequestHandler {
     EnvVarsConfigService envVarsConfigService;
     @Inject
     ConfigService config;
-
     @Inject
     SecretStore secretStore;
     @Inject
@@ -76,6 +74,9 @@ public class CommonRequestHandler {
     ReversibleTokenizationStrategy reversibleTokenizationStrategy;
     @Inject
     UrlSafeTokenPseudonymEncoder pseudonymEncoder;
+    @Inject
+    HttpTransportFactory httpTransportFactory;
+
 
     /**
      * Basic headers to pass: content, caching, retries. Can be expanded by connection later.
@@ -123,7 +124,7 @@ public class CommonRequestHandler {
             synchronized ($writeLock) {
                 if (this.sanitizer == null) {
                     Pseudonymizer.ConfigurationOptions options =
-                            pseudonymizerImplFactory.buildOptions(config, secretStore);
+                            pseudonymizerImplFactory.buildOptions(config);
                     this.sanitizer = sanitizerFactory.create(rules, pseudonymizerImplFactory.create(options));
                 }
             }
@@ -400,8 +401,10 @@ public class CommonRequestHandler {
 
     @SneakyThrows
     HttpRequestFactory getRequestFactory(HttpEventRequest request) {
-        // per connection request factory, abstracts auth ...
-        HttpTransport transport = new NetHttpTransport();
+
+        //q: right idea here? or google-http-client provides factory implementation, but whole point of DI fw is to avoid factories
+        //
+        HttpTransport transport = httpTransportFactory.create();
 
         //TODO: changing impl of credentials/initializer should support sources authenticated by
         // something OTHER than a Google Service account
