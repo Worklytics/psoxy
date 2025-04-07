@@ -28,12 +28,12 @@ import java.util.stream.Stream;
 @Log
 public class GCPWorkloadIdentityFederationGrantTokenRequestBuilder extends WorkloadIdentityFederationGrantTokenRequestBuilder {
 
+    @Getter
     enum ConfigProperty implements ConfigService.ConfigProperty {
         AUDIENCE,
         ;
 
-        @Getter
-        private boolean envVarOnly = true;
+        final private boolean envVarOnly = true;
     }
 
     @Override

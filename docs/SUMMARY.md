@@ -46,7 +46,6 @@
   * [Releases](development/releases.md)
   * [Alpha Features](development/alpha-features/README.md)
     * [AWS Secrets Manager Support](development/alpha-features/aws-secrets-manager.md)
-    * [hashicorp-vault](development/alpha-features/hashicorp-vault.md)
     * [New Relic Monitoring](development/alpha-features/new-relic-monitoring.md)
 * [Data Sources](sources/README.md)
   * [Asana](sources/asana/README.md)
