@@ -1,10 +1,12 @@
-# Microsoft Copilot
+# Microsoft Copilot (alpha)
 
 Connect Microsoft 365 Copilot data to Worklytics, enabling communication analysis and general
 collaboration
 insights based on collaboration via Microsoft 365 Copilot interaction. Includes user enumeration to
 support fetching
 mailboxes from each account.
+
+**Note:** This connector is in alpha and it uses a *beta* endpoint in the API.
 
 Please review the [Microsoft 365 README](../README.md) for general information applicable to
 all Microsoft 365 connectors.

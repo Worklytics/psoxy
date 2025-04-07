@@ -165,7 +165,7 @@ EOT
     },
     "msft-copilot" : {
       source_kind : "msft-copilot"
-      availability : "beta",
+      availability : "alpha",
       enable_by_default : false,
       worklytics_connector_id : "msft-copilot-psoxy",
       display_name : "Microsoft 365 Copilot"
