@@ -66,7 +66,8 @@
   * [Microsoft 365](sources/microsoft-365/README.md)
     * [API Call Examples](sources/microsoft-365/example-api-calls.md)
     * [Entra ID](sources/microsoft-365/entra-id/README.md)
-    * [MSFT Teams](sources/microsoft-365/msft-teams/README.md)
+    * [Microsoft Copilot](sources/microsoft-365/msft-copilot/README.md)
+    * [Microsoft Teams](sources/microsoft-365/msft-teams/README.md)
     * [Outlook Calendar](sources/microsoft-365/outlook-cal/README.md)
     * [Outlook Mail](sources/microsoft-365/outlook-mail/README.md)
   * [Salesforce](sources/salesforce/README.md)
@@ -77,5 +78,3 @@
 
 * [FAQ](faq-security.md)
 * [Release Notes](https://github.com/Worklytics/psoxy/releases)
-
-

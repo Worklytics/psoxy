@@ -162,6 +162,26 @@ Grant-CsApplicationAccessPolicy -PolicyName Teams-Policy-For-Worklytics -Global
 - If you receive "access denied" is because no admin role for Teams has been detected. Please close and reopen the Powershell terminal after assigning the role.
 - Commands have been tested over a Powershell (7.4.0) terminal in Windows, installed from Microsoft Store and with Teams Module (5.8.0). It might not work on a different environment
 EOT
+    },
+    "msft-copilot" : {
+      source_kind : "msft-copilot"
+      availability : "alpha",
+      enable_by_default : false,
+      worklytics_connector_id : "msft-copilot-psoxy",
+      display_name : "Microsoft 365 Copilot"
+      source_auth_strategy : "oauth2_refresh_token"
+      target_host : "graph.microsoft.com"
+      required_oauth2_permission_scopes : []
+      required_app_roles : [
+        "User.Read.All",
+        "AiEnterpriseInteraction.Read.All"
+      ]
+      environment_variables : local.msft_365_environment_variables
+      external_todo : null
+      example_api_calls : [
+        "/v1.0/users",
+        "/beta/copilot/users/${var.example_msft_user_guid}/interactionHistory/getAllEnterpriseInteractions"
+      ]
     }
   }
 }
