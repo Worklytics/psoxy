@@ -6,16 +6,62 @@
   "host_email": "james@example.com",
   "id": 1234555466,
   "join_url": "https://zoom.us/j/1234555466?pwd=1234567890",
-
   "settings": {
-    "alternative_hosts": "example@example.com",
-    "approval_type": 2,
-    "audio": "both",
-    "auto_recording": "local",
+    "allow_multiple_devices": true,
+    "alternative_hosts": "jchill@example.com;thill@example.com",
+    "alternative_hosts_email_notification": true,
+    "alternative_host_update_polls": true,
+    "approval_type": 0,
+    "approved_or_denied_countries_or_regions": {
+      "approved_list": [
+        "CX"
+      ],
+      "denied_list": [
+        "CA"
+      ],
+      "enable": true,
+      "method": "approve"
+    },
+    "audio": "telephony",
+    "audio_conference_info": "test",
+    "authentication_domains": "example.com",
+    "authentication_exception": [
+      {
+        "email": "jchill@example.com",
+        "name": "Jill Chill",
+        "join_url": "https://example.com/s/11111"
+      }
+    ],
+    "authentication_name": "Sign in to Zoom",
+    "authentication_option": "signIn_D8cJuqWVQ623CI4Q8yQK0Q",
+    "auto_recording": "cloud",
+    "breakout_room": {
+      "enable": true,
+      "rooms": [
+        {
+          "name": "room1",
+          "participants": [
+            "jchill@example.com"
+          ]
+        }
+      ]
+    },
+    "calendar_type": 1,
     "close_registration": false,
     "cn_meeting": false,
-    "enforce_login": false,
+    "contact_email": "jchill@example.com",
+    "contact_name": "Jill Chill",
+    "custom_keys": [
+      {
+        "key": "key1",
+        "value": "value1"
+      }
+    ],
+    "email_notification": true,
+    "encryption_type": "enhanced_encryption",
+    "enforce_login": true,
     "enforce_login_domains": "example.com",
+    "focus_mode": true,
     "global_dial_in_countries": [
       "US"
     ],
@@ -24,34 +70,83 @@
         "city": "New York",
         "country": "US",
         "country_name": "US",
-        "number": "+1 000011100",
-        "type": "toll"
-      },
-      {
-        "city": "San Jose",
-        "country": "US",
-        "country_name": "US",
-        "number": "+1 6699006833",
-        "type": "toll"
-      },
-      {
-        "city": "San Jose",
-        "country": "US",
-        "country_name": "US",
-        "number": "+1 221122112211",
+        "number": "+1 1000200200",
         "type": "toll"
       }
     ],
-    "host_video": false,
+    "host_video": true,
     "in_meeting": false,
+    "jbh_time": 0,
     "join_before_host": true,
+    "question_and_answer": {
+      "enable": true,
+      "allow_submit_questions": true,
+      "allow_anonymous_questions": true,
+      "question_visibility": "all",
+      "attendees_can_comment": true,
+      "attendees_can_upvote": true
+    },
+    "language_interpretation": {
+      "enable": true,
+      "interpreters": [
+        {
+          "email": "interpreter@example.com",
+          "languages": "US,FR",
+          "interpreter_languages": "English,French"
+        }
+      ]
+    },
+    "sign_language_interpretation": {
+      "enable": true,
+      "interpreters": [
+        {
+          "email": "interpreter@example.com",
+          "sign_language": "American"
+        }
+      ]
+    },
+    "meeting_authentication": true,
     "mute_upon_entry": false,
     "participant_video": false,
+    "private_meeting": false,
     "registrants_confirmation_email": true,
+    "registrants_email_notification": true,
+    "registration_type": 1,
+    "show_share_button": true,
     "use_pmi": false,
     "waiting_room": false,
     "watermark": false,
-    "registrants_email_notification": true
+    "host_save_video_order": true,
+    "internal_meeting": false,
+    "meeting_invitees": [
+      {
+        "email": "jchill@example.com",
+        "internal_user": false
+      }
+    ],
+    "continuous_meeting_chat": {
+      "enable": true,
+      "auto_add_invited_external_users": true,
+      "auto_add_meeting_participants": true,
+      "who_is_added": "all_users",
+      "channel_id": "cabc1234567defghijkl01234"
+    },
+    "participant_focused_meeting": false,
+    "push_change_to_calendar": false,
+    "resources": [
+      {
+        "resource_type": "whiteboard",
+        "resource_id": "X4Hy02w3QUOdskKofgb9Jg",
+        "permission_level": "editor"
+      }
+    ],
+    "auto_start_meeting_summary": false,
+    "who_will_receive_summary": 1,
+    "auto_start_ai_companion_questions": false,
+    "who_can_ask_questions": 1,
+    "device_testing": false,
+    "allow_host_control_participant_mute_state": false,
+    "disable_participant_video": false
   },
   "start_time": "2019-08-30T22:00:00Z",
   "start_url": "https://zoom.us/1234555466/cdknfdffgggdfg4MDUxNjY0LCJpYXQiOjE1NjgwNDQ0NjQsImFpZCI6IjRBOWR2QkRqVHphd2J0amxoejNQZ1EiLCJjaWQiOiIifQ.Pz_msGuQwtylTtYQ",
