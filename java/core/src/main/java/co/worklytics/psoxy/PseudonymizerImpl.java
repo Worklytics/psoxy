@@ -79,16 +79,6 @@ public class PseudonymizerImpl implements Pseudonymizer {
             return null;
         }
 
-        if (this.getOptions().getPseudonymizationSalt() != null &&
-                this.deterministicTokenizationStrategy instanceof Sha256DeterministicTokenizationStrategy) {
-
-            if (!Objects.equals(((Sha256DeterministicTokenizationStrategy) this.deterministicTokenizationStrategy).getSalt(),
-                    this.options.getPseudonymizationSalt())) {
-                //shouldn't happen in real life, but just in case
-                throw new RuntimeException("Salt mismatch between pseudonymizer and tokenization strategy");
-            }
-        }
-
         Preconditions.checkArgument(value instanceof String || value instanceof Number,
             "Value must be some basic type (eg JSON leaf, not node)");
 

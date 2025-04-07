@@ -28,11 +28,17 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.['host_id','host_email']"
+          - "$..email"
+          - "$..contact_email"
+          - "$..participants[*]"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
-          - "$.['topic','settings','agenda','custom_keys']"
-          - "$.['password','h323_password','pstn_password','encrypted_password','join_url','start_url']"
+          - "$.['topic','agenda','custom_keys']"
+          - "$.settings.['alternative_hosts','enforce_login_domains','approved_or_denied_countries_or_regions','audio_conference_info','name','authentication_name','authentication_option','contact_name','custom_keys','global_dial_in_countries','global_dial_in_numbers']"
+          - "$.['password','h323_password','pstn_password','encrypted_password','start_url']"
+          - "$..join_url"
+          - "$..name"
   - pathTemplate: "/v2/meetings/{meetingId}/meeting_summary"
     transforms:
       - !<pseudonymize>

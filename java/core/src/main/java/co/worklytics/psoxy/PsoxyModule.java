@@ -68,7 +68,7 @@ public class PsoxyModule {
         return mapper;
     }
 
-    @Provides
+    @Provides @Singleton
     Configuration providesJSONConfiguration(JacksonJsonProvider jacksonJsonProvider,
                                             JacksonMappingProvider jacksonMappingProvider) {
         //jackson here because it's our common JSON stack, but adds dependency beyond the one pkg'd
@@ -83,7 +83,7 @@ public class PsoxyModule {
         return new JacksonJsonProvider(objectMapper);
     }
 
-    @Provides
+    @Provides @Singleton
     JacksonMappingProvider jacksonMappingProvider(ObjectMapper objectMapper) {
         return new JacksonMappingProvider(objectMapper);
     }
@@ -260,9 +260,8 @@ public class PsoxyModule {
 
     @Provides
     Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory,
-                                ConfigService config,
-                                SecretStore secretStore) {
-        return factory.create(factory.buildOptions(config, secretStore));
+                                ConfigService config) {
+        return factory.create(factory.buildOptions(config));
     }
 
     @Provides

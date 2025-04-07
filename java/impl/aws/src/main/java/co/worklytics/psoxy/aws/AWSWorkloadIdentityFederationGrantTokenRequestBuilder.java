@@ -23,10 +23,15 @@ import java.util.stream.Stream;
  * identity to obtain its security JWT.
  * The identity created should match login link DEVELOPER_NAME_ID=CLIENT_ID value created
  */
-// NOTE: For some reason, this annotation is not working with @NoArgsConstructor(onConstructor_ = @Inject) syntax
-@NoArgsConstructor(onConstructor = @__(@Inject))
 @Log
 public class AWSWorkloadIdentityFederationGrantTokenRequestBuilder extends WorkloadIdentityFederationGrantTokenRequestBuilder {
+
+    @Inject
+    public AWSWorkloadIdentityFederationGrantTokenRequestBuilder(ConfigService configService,
+                                                                 CognitoIdentityClient cognitoIdentityClient) {
+        super(configService);
+        this.cognitoIdentityClient = cognitoIdentityClient;
+    }
 
     enum ConfigProperty implements ConfigService.ConfigProperty {
         IDENTITY_POOL_ID,
@@ -38,8 +43,7 @@ public class AWSWorkloadIdentityFederationGrantTokenRequestBuilder extends Workl
         private boolean envVarOnly = true;
     }
 
-    @Inject
-    CognitoIdentityClient cognitoIdentityClient;
+    final CognitoIdentityClient cognitoIdentityClient;
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
