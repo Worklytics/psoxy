@@ -127,7 +127,9 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
 
         Collection<String> PII = Arrays.asList(
             "ABcdofjdogh11111", // host id
-            "james@example.com" // host email
+            "james@example.com", // host email
+            "jchill@example.com",
+            "interpreter@example.com"
         );
         assertNotSanitized(jsonString, PII);
 
@@ -136,7 +138,13 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
 
         assertPseudonymized(sanitized, PII);
 
-        assertRedacted(sanitized, "example@example.com", "API overview", "My API Test",             "?pwd=1234567890",
+        assertRedacted(sanitized, "example@example.com",
+            "API overview",
+            "My API Test",
+            "Jill Chill",
+            "?pwd=1234567890",
+            "signIn_D8cJuqWVQ623CI4Q8yQK0Q",
+            "https://example.com/s/11111",
             "SHOULD BE REDACTED");
     }
 
