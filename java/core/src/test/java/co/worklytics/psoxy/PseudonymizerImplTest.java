@@ -34,7 +34,6 @@ class PseudonymizerImplTest {
     @Inject
     PseudonymizerImplFactory pseudonymizerImplFactory;
 
-
     Pseudonymizer pseudonymizer;
 
 

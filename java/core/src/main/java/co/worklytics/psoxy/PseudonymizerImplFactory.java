@@ -13,8 +13,7 @@ public interface PseudonymizerImplFactory {
 
     PseudonymizerImpl create(Pseudonymizer.ConfigurationOptions configurationOptions);
 
-    default Pseudonymizer.ConfigurationOptions buildOptions(ConfigService config,
-                                                            SecretStore secretStore) {
+    default Pseudonymizer.ConfigurationOptions buildOptions(ConfigService config) {
         Pseudonymizer.ConfigurationOptions.ConfigurationOptionsBuilder builder = Pseudonymizer.ConfigurationOptions.builder();
 
         Optional<PseudonymImplementation> pseudonymImplementation = config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION)

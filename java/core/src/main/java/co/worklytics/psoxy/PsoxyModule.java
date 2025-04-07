@@ -260,9 +260,8 @@ public class PsoxyModule {
 
     @Provides
     Pseudonymizer pseudonymizer(PseudonymizerImplFactory factory,
-                                ConfigService config,
-                                SecretStore secretStore) {
-        return factory.create(factory.buildOptions(config, secretStore));
+                                ConfigService config) {
+        return factory.create(factory.buildOptions(config));
     }
 
     @Provides

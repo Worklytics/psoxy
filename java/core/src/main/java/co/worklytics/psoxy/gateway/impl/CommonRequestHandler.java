@@ -124,7 +124,7 @@ public class CommonRequestHandler {
             synchronized ($writeLock) {
                 if (this.sanitizer == null) {
                     Pseudonymizer.ConfigurationOptions options =
-                            pseudonymizerImplFactory.buildOptions(config, secretStore);
+                            pseudonymizerImplFactory.buildOptions(config);
                     this.sanitizer = sanitizerFactory.create(rules, pseudonymizerImplFactory.create(options));
                 }
             }
