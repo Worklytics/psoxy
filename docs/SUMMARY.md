@@ -36,6 +36,7 @@
 * [Configuration](configuration/README.md)
   * [API Data Sanitization](configuration/api-data-sanitization.md)
   * [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
+  * [Email Handling](configuration/email-handling.md)
   * [JSON Filter](configuration/json-filter.md)
   * [TLS Version](configuration/tls.md)
 * [Development](development/README.md)
