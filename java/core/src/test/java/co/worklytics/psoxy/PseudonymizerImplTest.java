@@ -11,6 +11,7 @@ import dagger.Component;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
@@ -153,6 +154,26 @@ class PseudonymizerImplTest {
         assertEquals(
                 encoder.encodeToString(pseudonym.asPseudonym().getHash()),
                 encoder.encodeToString(decoded.getHash()));
+    }
+
+
+    @CsvSource({
+        "PRESERVE,alice@acme.com,acme.com",
+        "REDACT,alice@acme.com,",
+        "HASH,alice@acme.com,v46z63x8plttB_GFx_6FSFM5iQQ-1VrRH6l1LVF5xy4",
+        "ENCRYPT,alice@acme.com,v46z63x8plttB_GFx_6FSFM5iQQ-1VrRH6l1LVF5xy5RinGIJPlKhbKeCPO8O04s"
+    }
+    )
+    @ParameterizedTest
+    void emailDomainHandling(EmailDomainHandling policy, String emailAddress, String expectedDomain) {
+        pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+            .pseudonymImplementation(PseudonymImplementation.DEFAULT)
+            .emailDomainHandling(policy)
+            .build());
+
+        PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(emailAddress);
+
+        assertEquals(expectedDomain, pseudonymizedIdentity.getDomain());
     }
 
 }

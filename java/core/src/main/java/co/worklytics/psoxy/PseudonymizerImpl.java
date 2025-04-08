@@ -5,7 +5,6 @@ import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
-import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.google.common.base.Preconditions;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
@@ -28,7 +27,6 @@ public class PseudonymizerImpl implements Pseudonymizer {
 
     @Inject
     HashUtils hashUtils;
-
     @Inject
     ReversibleTokenizationStrategy reversibleTokenizationStrategy;
     @Inject
@@ -99,8 +97,9 @@ public class PseudonymizerImpl implements Pseudonymizer {
         String domain = null;
         if (duckTypesAsEmails(value)) {
             canonicalization = this::emailCanonicalization;
-            domain = EmailAddressParser.getDomain((String) value, EmailAddressCriteria.RECOMMENDED, true);
+            domain = handleDomain(getOptions().getEmailDomainHandling(), (String) value);
             builder.domain(domain);
+
             //q: do something with the personal name??
             // NO --> it is not going to be reliable (except for From, will fill with whatever
             // sender has for the person in their Contacts), and in enterprise use-cases we
@@ -136,5 +135,29 @@ public class PseudonymizerImpl implements Pseudonymizer {
 
     boolean duckTypesAsEmails(Object value) {
         return value instanceof String && EmailAddressValidator.isValid((String) value);
+    }
+
+    /**
+     * preserves, redacts, encrypts or hashes the domain of the email address, depending on the policy
+     *
+     * @param domainHandlingPolicy to apply to the domain
+     * @param value to interpret as an email address
+     * @return domain, parsed from email address, subject to handling; base64-url-safe encoded in later cases.
+     */
+    String handleDomain(EmailDomainHandling domainHandlingPolicy, String value) {
+        String domain = null;
+        if (domainHandlingPolicy != EmailDomainHandling.REDACT) {
+            domain = EmailAddressParser.getDomain(value, EmailAddressCriteria.RECOMMENDED, true);
+
+            if (domainHandlingPolicy == EmailDomainHandling.ENCRYPT) {
+                domain = encoder.encodeToString(reversibleTokenizationStrategy.getReversibleToken(domain));
+            } else if (domainHandlingPolicy == EmailDomainHandling.HASH) {
+                domain = encoder.encodeToString(deterministicTokenizationStrategy.getToken(domain));
+            } else if (domainHandlingPolicy != EmailDomainHandling.PRESERVE) {
+                log.severe("Unknown email domain handling: " + domainHandlingPolicy + "; will redact");
+                domain = null;
+            }
+        }
+        return domain;
     }
 }
