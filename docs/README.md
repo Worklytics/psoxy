@@ -410,11 +410,12 @@ Subsystem for Linux (WSL) platforms.
 
 ## Component Status
 
-| Component                | Status                                                                                                                       |
-|--------------------------|------------------------------------------------------------------------------------------------------------------------------|
-| Java                     | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-java.yaml)               |
-| Terraform Examples       | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform.yaml)          |
-| Tools                    | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-tools.yaml)              |
+| Component                | Status                                                                                                                                    |
+|--------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| Java                     | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-java.yaml)                            |
+| Terraform Examples       | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform-examples.yaml)              |
+| Tools                    | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-tools.yaml)                           |
+ | Terraform Security Scan | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform-sec-analysis-examples.yaml) |
 
 
 Review [release notes in GitHub](https://github.com/Worklytics/psoxy/releases).
