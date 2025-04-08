@@ -38,7 +38,7 @@ file.
 | `zoom`                     | Zoom                                 | API  | GA           |
 
 From v0.4.58, you can confirm the availability of a connector by running the following command from
-the root of on of our examples:
+the root of one of our examples:
 
 ```shell
 ./available-connectors
