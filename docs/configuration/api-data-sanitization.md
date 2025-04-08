@@ -34,7 +34,7 @@ which do not match a endpoint in this list will be rejected with a `403` respons
 based on OpenAPI Spec v3.0.0 Path Template syntax. Variable path segments are enclosed in curly
 braces (`{}`) and are matched by any value that does not contain an `/` character.
 
-See: https://swagger.io/docs/specification/paths-and-operations/
+See: [https://swagger.io/docs/specification/paths-and-operations/](https://swagger.io/docs/specification/paths-and-operations/)
 
 ### Allowed Methods
 
@@ -201,7 +201,7 @@ able to copy the JSON Schema for an API endpoint from its
 `responseSchema` value in your rule set. Similarly, there are tools that can generate JSON Schema
 from example JSON content, as well as from data models in various languages, that may be useful.
 
-See: https://json-schema.org/implementations.html#schema-generators
+See: [https://json-schema.org/implementations.html#schema-generators](https://json-schema.org/implementations.html#schema-generators)
 
 If a `responseSchema` attribute is specified for an `endpoint`, the response content will be
 _filtered_ (rather than validated) against that schema. Eg, fields NOT specified in the schema, or
@@ -227,7 +227,7 @@ not of expected type, will be removed from the response.
 Example:
 
 The following is for a User from the GitHub API, via graphql. See:
-https://docs.github.com/en/graphql/guides/forming-calls-with-graphql#the-graphql-endpoint
+[https://docs.github.com/en/graphql/guides/forming-calls-with-graphql#the-graphql-endpoint](https://docs.github.com/en/graphql/guides/forming-calls-with-graphql#the-graphql-endpoint)
 
 ```yaml
 - pathTemplate: "/graphql"
