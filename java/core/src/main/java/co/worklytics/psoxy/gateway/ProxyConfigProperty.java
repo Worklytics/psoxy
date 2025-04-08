@@ -23,6 +23,15 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     CUSTOM_RULES_SHA,
 
     /**
+     * OPTIONAL; if omitted, domains are preserved (pass through to clients)
+     *
+     *  - PRESERVE (default)
+     *  - ENCRYPT
+     *  - REDACT
+     */
+    EMAIL_DOMAIN_HANDLING,
+
+    /**
      * 'STRICT', 'IGNORE_DOTS', ...
      *
      * OPTIONAL; default to 'STRICT'; possibly will change in next proxy version.
@@ -43,6 +52,12 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     PSOXY_ENCRYPTION_KEY(false),
 
     ENCRYPTION_KEY_IP(false),
+
+    /**
+     * key used to encrypt the domains of email addresses; use case is to support rotation of this
+     * key independent of that used for PII
+     */
+    ENCRYPTION_KEY_EMAIL_DOMAINS(false),
 
     PSOXY_SALT(false),
     SALT_IP(false), // used to salt IP; distinct value so can independently rotate IP salt from primary salt
