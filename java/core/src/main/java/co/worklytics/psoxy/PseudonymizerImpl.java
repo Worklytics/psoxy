@@ -6,6 +6,7 @@ import com.avaulta.gateway.rules.transforms.Transform;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.google.common.base.Preconditions;
+import dagger.Lazy;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
@@ -17,6 +18,7 @@ import org.hazlewood.connor.bottema.emailaddress.EmailAddressParser;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressValidator;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.function.Function;
@@ -30,8 +32,10 @@ public class PseudonymizerImpl implements Pseudonymizer {
     @Inject
     DeterministicTokenizationStrategy deterministicTokenizationStrategy;
 
-    //TODO: need to add domain-variants of the above, use those so we get the SALT/KEY specific to domain case
-
+    @Inject @Named("emailDomains")
+    Lazy<DeterministicTokenizationStrategy> emailDomainsTokenizationStrategy;
+    @Inject @Named("emailDomains")
+    Lazy<ReversibleTokenizationStrategy> emailDomainsEncryptionStrategy;
 
     @Inject
     UrlSafeTokenPseudonymEncoder urlSafePseudonymEncoder;
@@ -152,9 +156,9 @@ public class PseudonymizerImpl implements Pseudonymizer {
             domain = EmailAddressParser.getDomain(value, EmailAddressCriteria.RECOMMENDED, true);
 
             if (domainHandlingPolicy == EmailDomainHandling.ENCRYPT) {
-                domain = UrlSafeTokenPseudonymEncoder.ENCRYPTED_PREFIX + encoder.encodeToString(reversibleTokenizationStrategy.getReversibleToken(domain));
+                domain = UrlSafeTokenPseudonymEncoder.ENCRYPTED_PREFIX + encoder.encodeToString(emailDomainsEncryptionStrategy.get().getReversibleToken(domain));
             } else if (domainHandlingPolicy == EmailDomainHandling.HASH) {
-                domain = UrlSafeTokenPseudonymEncoder.HASH_PREFIX + encoder.encodeToString(deterministicTokenizationStrategy.getToken(domain));
+                domain = UrlSafeTokenPseudonymEncoder.HASH_PREFIX + encoder.encodeToString(emailDomainsTokenizationStrategy.get().getToken(domain));
             } else if (domainHandlingPolicy != EmailDomainHandling.PRESERVE) {
                 log.severe("Unknown email domain handling: " + domainHandlingPolicy + "; will redact");
                 domain = null;

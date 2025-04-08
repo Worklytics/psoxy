@@ -1,6 +1,7 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.test.MockModules;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
@@ -18,9 +19,12 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import java.util.Base64;
+import java.util.Optional;
 
 import static co.worklytics.test.TestModules.withMockEncryptionKey;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 class PseudonymizerImplTest {
 
@@ -160,12 +164,17 @@ class PseudonymizerImplTest {
     @CsvSource({
         "PRESERVE,alice@acme.com,acme.com",
         "REDACT,alice@acme.com,",
-        "HASH,alice@acme.com,h~v46z63x8plttB_GFx_6FSFM5iQQ-1VrRH6l1LVF5xy4",
-        "ENCRYPT,alice@acme.com,e~v46z63x8plttB_GFx_6FSFM5iQQ-1VrRH6l1LVF5xy5RinGIJPlKhbKeCPO8O04s"
-    }
-    )
+        "HASH,alice@acme.com,h~XeVeXr3msNs83nxpGuEjUO0Cv7JfkmYhnprXIY-BEgs",
+        "ENCRYPT,alice@acme.com,e~XeVeXr3msNs83nxpGuEjUO0Cv7JfkmYhnprXIY-BEgtyvcXqtDujwfr0b5vLmXHQ"
+    })
     @ParameterizedTest
     void emailDomainHandling(EmailDomainHandling policy, String emailAddress, String expectedDomain) {
+       // use specific email domain handling values, to ensure that it's using CORRECT hash/encryption strategies that are seeing these values
+        when(this.secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.SALT_EMAIL_DOMAINS)))
+            .thenReturn(Optional.of("salt-domains"));
+        when(this.secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.ENCRYPTION_KEY_EMAIL_DOMAINS)))
+            .thenReturn(Optional.of("asdfasdf"));
+
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
             .pseudonymImplementation(PseudonymImplementation.DEFAULT)
             .emailDomainHandling(policy)
