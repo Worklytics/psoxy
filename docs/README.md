@@ -220,7 +220,7 @@ You will need all the following in your deployment environment (eg, your laptop)
 | [Java JDK 17+](https://openjdk.org/install/) | 17, 21 (see notes) | `mvn -v \| grep Java` |
 | [Terraform](https://www.terraform.io/)       | 1.6+, < 2.0          | `terraform version`   |
 
-NOTE: as of Apr 8, 2024, although Java 24 has been release Maven 3.9.9 is not compatible with it. Maven
+NOTE: as of Apr 8, 2024, although Java 24 has been released Maven 3.9.9 is not compatible with it. Maven
 has fixed this, but has yet to release a version 3.9.10 or 4.0.x with the fix. Until then, we don't officially
 support Java 24.
 
