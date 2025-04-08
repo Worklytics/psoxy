@@ -430,9 +430,14 @@ public class CommonRequestHandler {
 
         ComposedHttpRequestInitializer initializer =
                 ComposedHttpRequestInitializer.of(initializeWithCredentials,
-                        new GzipedContentHttpRequestInitializer("Psoxy"));
+                        new GzipedContentHttpRequestInitializer(getProxyUserAgentString()));
 
         return transport.createRequestFactory(initializer);
+    }
+
+    private String getProxyUserAgentString() {
+        //q: something better here? pass through the actual client's User-Agent value??
+        return "Psoxy/" + HealthCheckRequestHandler.JAVA_SOURCE_CODE_VERSION  + " (API Data Sanitization; Java/" + System.getProperty("java.version", "unknown") + ")";
     }
 
     /**
