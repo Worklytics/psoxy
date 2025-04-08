@@ -156,6 +156,7 @@ endpoints:
           type: "boolean"
   - pathTemplate: "/api/discovery.users.list"
     allowedQueryParams:
+      - "limit"
       - "offset"
       - "include_deleted"
     transforms:
@@ -500,7 +501,7 @@ definitions:
       archived:
         type: "boolean"
       created:
-        type: "integer"
+        type: "string"
       deleted:
         type: "boolean"
       discoverable:

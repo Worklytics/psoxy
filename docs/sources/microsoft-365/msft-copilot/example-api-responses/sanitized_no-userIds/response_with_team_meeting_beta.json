@@ -1,0 +1,42 @@
+{
+  "@odata.nextLink":"https://graph.microsoft.com/beta/copilot/users/p~sMxhtJVS27r5MC4y2Z_akFQRDkAHruk6R5wDIq6powZ1iAsVwy2YDKEPVu2q6nfypG3bROgcL5AJcqe_h3YVyT0ZO6AlXOS3vSV6HXg1BeQ/interactionHistory/getAllEnterpriseInteractions?$skiptoken=U2tpcFZhbHVlPTEwI01haWxib3hGb2xkZXI9TWFpbEZvbGRlcnMvVGVhbXNNZXNzYWdlc0RhdGE%3d",
+  "value":[
+    {
+      "id":"1731701801008",
+      "sessionId":"p~MWrI1gx5dIe5X2gDJeyeldBhbrS8bCRv9AscVjlaXDepIIpdGkamWvDoJLqKwApq8qMxoWNKhESm7dmMV4EALiLwgEJ_WAQn9Jw5wE0beT9CZK0sK89PL5PAz2-VSyLn",
+      "requestId":"7336770c-fb25-48ac-8303-4493ad11ed71",
+      "appClass":"IPM.SkypeTeams.Message.Copilot.Teams",
+      "interactionType":"aiResponse",
+      "conversationType":"appchat",
+      "etag":"1731701801008",
+      "createdDateTime":"2024-11-15T20:16:41.008Z",
+      "locale":"en-us",
+      "contexts":[
+        {
+          "contextType":"TeamsMeeting"
+        }
+      ],
+      "from":{
+        "device":null,
+        "user":null,
+        "application":{
+          "id":"{\"hash\":\"PtknPBuvPc6KzesKdOr8My9yeOsKY_7nWRbuJsIn2CU\"}",
+          "applicationIdentityType":"bot"
+        }
+      },
+      "body":{
+        "contentType":"text",
+        "content":"{\"length\":236,\"word_count\":27}"
+      },
+      "attachments":[
+        {
+          "attachmentId":"p~O9kgcu_Q1AwZu6SIZ2NwebWeTNLJTtUSWagJUcUIFo-5JNXjKnHCjidm59hZ_P6ugkYu0BSmo7P2mMG4ddYx_JTKdbSk4-IganhvH8iaTORWOiTnnFHkuOWXxuGCNtYiwtTSviIXMmZXz7ypCywaXg",
+          "contentType":"reference",
+          "content":null
+        }
+      ],
+      "links":[ ],
+      "mentions":[ ]
+    }
+  ]
+}

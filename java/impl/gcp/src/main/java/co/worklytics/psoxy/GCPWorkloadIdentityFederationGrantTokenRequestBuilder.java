@@ -10,6 +10,7 @@ import lombok.extern.java.Log;
 import org.apache.http.client.utils.URIBuilder;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -24,16 +25,22 @@ import java.util.stream.Stream;
  * Implementation of Workload Identity Federation for GCP, getting an ID token
  * to be exposed as client assertion
  */
-@NoArgsConstructor(onConstructor_ = @Inject)
+@Singleton // respected??
 @Log
 public class GCPWorkloadIdentityFederationGrantTokenRequestBuilder extends WorkloadIdentityFederationGrantTokenRequestBuilder {
 
+
+    @Inject
+    public GCPWorkloadIdentityFederationGrantTokenRequestBuilder(ConfigService configService) {
+        super(configService);
+    }
+
+    @Getter
     enum ConfigProperty implements ConfigService.ConfigProperty {
         AUDIENCE,
         ;
 
-        @Getter
-        private boolean envVarOnly = true;
+        final private boolean envVarOnly = true;
     }
 
     @Override

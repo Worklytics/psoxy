@@ -14,7 +14,10 @@ import javax.inject.Singleton;
 })
 interface GcpContainer {
 
-    Route injectRoute(Route route);
+    @Singleton
+    HttpRequestHandler httpRequestHandler();
 
-    GCSFileEvent injectGCSEvent(GCSFileEvent gcsEvent);
+
+    @Singleton
+    GcsFileEventHandler gcsFileEventHandler();
 }
