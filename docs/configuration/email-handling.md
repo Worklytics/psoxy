@@ -22,6 +22,8 @@ mailbox).  However, these conventions are NOT universal nor fully standardized. 
   - `STRICT` - default as of 0.5; considers `.` as respected, which is how Microsoft/Yahoo/Apple behave
   - `IGNORE_DOTS` - recommended; ignores `.` in the local (mailbox) portion of the email address, but not the domain portion.
 
+Change this in an operating proxy environment with caution.
+
 ## `EMAIL_DOMAIN_HANDLING` **alpha**
 
 By default, the proxy preserves the domain portion of email addresses. With this configuration variable, you can override this behavior in two ways:
@@ -33,4 +35,15 @@ By default, the proxy preserves the domain portion of email addresses. With this
      communication history will be preserved.
   - `REDACT` - email domains will be dropped entirely
   - `HASH` - email domains will be hashed, but not encrypted. This is the default behavior.
+
+You should be able to change this parameter in an operating proxy environment with not issues OTHER than data loss in the following scenarios:
+   - `PRESERVE` --> anything else; your history may be split.  Collaboration with be with `acme.com` prior to the change, vs `SHA256('acme.com' + {{EMAIL_DOMAIN_SALT}})` after the change.
+   - anything --> `REDACT`; you'll lose abiltiy to analysis domain-level collaboration going forward.
+   - `ENCRYPT` --> `HASH`; you'll lose the ability to allow users to decrypt single encrypted domains to "unmask" particular cases.
+
+## `ENCRYPTION_KEY_EMAIL_DOMAINS` **alpha**
+
+If you set `EMAIL_DOMAIN_HANDLING` to `ENCRYPT`, and provide this key, it will be used to encrypt the domain portion of email addresses RATHER than
+your general `ENCRYPTION_KEY`; this allows you to independently rotate / allow usage of it without granting access or rotating the key used for PII.
+
 
