@@ -224,6 +224,10 @@ not of expected type, will be removed from the response.
 - `definitions` - a map of schema names to schemas of type `JsonSchemaFilter`; only supported at
   root schema of endpoint.
 
+Omitting all of the above, (eg, just `{ }`), is interpreted as a schema that matches any valid leaf node.
+
+
+
 Example:
 
 The following is for a User from the GitHub API, via graphql. See:
