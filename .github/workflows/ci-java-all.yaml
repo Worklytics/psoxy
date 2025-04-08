@@ -32,8 +32,10 @@ jobs:
     with:
       java-version: '23'
 
-  # Java 24 - released 18 March 2025, supported until Sept 2025
-  ci_java24:
-    uses: ./.github/workflows/build-java.yaml
-    with:
-      java-version: '24'
+# Java 24 disabled, pending Maven releasing 3.9.10 or 4.x version that supports Java 24
+# specific issue is https://issues.apache.org/jira/browse/MNG-8248
+#  # Java 24 - released 18 March 2025, supported until Sept 2025
+#  ci_java24:
+#    uses: ./.github/workflows/build-java.yaml
+#    with:
+#      java-version: '24'
