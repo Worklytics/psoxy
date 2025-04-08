@@ -18,6 +18,7 @@ file.
 | `gcal`                     | Google Calendar                      | API  | GA           |
 | `gdrive`                   | Google Drive                         | API  | GA           |
 | `gdirectory`               | Google Directory                     | API  | GA           |
+| `gemini-usage`            | Gemini Usage                         | Bulk | BETA         |
 | `github`                   | GitHub                               | API  | GA           |
 | `github-enterprise-server` | GitHub Enterprise Server             | API  | GA           |
 | `github-non-enterprise`    | GitHub Non-Enterprise                | API  | GA           |
