@@ -26,11 +26,13 @@ import java.util.function.Function;
 public class PseudonymizerImpl implements Pseudonymizer {
 
     @Inject
-    HashUtils hashUtils;
-    @Inject
     ReversibleTokenizationStrategy reversibleTokenizationStrategy;
     @Inject
     DeterministicTokenizationStrategy deterministicTokenizationStrategy;
+
+    //TODO: need to add domain-variants of the above, use those so we get the SALT/KEY specific to domain case
+
+
     @Inject
     UrlSafeTokenPseudonymEncoder urlSafePseudonymEncoder;
 
@@ -150,9 +152,9 @@ public class PseudonymizerImpl implements Pseudonymizer {
             domain = EmailAddressParser.getDomain(value, EmailAddressCriteria.RECOMMENDED, true);
 
             if (domainHandlingPolicy == EmailDomainHandling.ENCRYPT) {
-                domain = encoder.encodeToString(reversibleTokenizationStrategy.getReversibleToken(domain));
+                domain = UrlSafeTokenPseudonymEncoder.ENCRYPTED_PREFIX + encoder.encodeToString(reversibleTokenizationStrategy.getReversibleToken(domain));
             } else if (domainHandlingPolicy == EmailDomainHandling.HASH) {
-                domain = encoder.encodeToString(deterministicTokenizationStrategy.getToken(domain));
+                domain = UrlSafeTokenPseudonymEncoder.HASH_PREFIX + encoder.encodeToString(deterministicTokenizationStrategy.getToken(domain));
             } else if (domainHandlingPolicy != EmailDomainHandling.PRESERVE) {
                 log.severe("Unknown email domain handling: " + domainHandlingPolicy + "; will redact");
                 domain = null;

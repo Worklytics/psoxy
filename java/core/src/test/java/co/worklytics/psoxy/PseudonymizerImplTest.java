@@ -160,8 +160,8 @@ class PseudonymizerImplTest {
     @CsvSource({
         "PRESERVE,alice@acme.com,acme.com",
         "REDACT,alice@acme.com,",
-        "HASH,alice@acme.com,v46z63x8plttB_GFx_6FSFM5iQQ-1VrRH6l1LVF5xy4",
-        "ENCRYPT,alice@acme.com,v46z63x8plttB_GFx_6FSFM5iQQ-1VrRH6l1LVF5xy5RinGIJPlKhbKeCPO8O04s"
+        "HASH,alice@acme.com,h~v46z63x8plttB_GFx_6FSFM5iQQ-1VrRH6l1LVF5xy4",
+        "ENCRYPT,alice@acme.com,e~v46z63x8plttB_GFx_6FSFM5iQQ-1VrRH6l1LVF5xy5RinGIJPlKhbKeCPO8O04s"
     }
     )
     @ParameterizedTest
