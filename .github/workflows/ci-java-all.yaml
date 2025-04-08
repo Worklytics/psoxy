@@ -31,3 +31,9 @@ jobs:
     uses: ./.github/workflows/build-java.yaml
     with:
       java-version: '23'
+
+  # Java 24 - released 18 March 2025, supported until Sept 2025
+  ci_java24:
+    uses: ./.github/workflows/build-java.yaml
+    with:
+      java-version: '24'

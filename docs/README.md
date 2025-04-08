@@ -207,21 +207,21 @@ administrator AFTER you have deployed Psoxy.
 
 #### Required Software and Permissions
 
-As of Feb 2023, Psoxy is implemented with Java 11 and built via Maven. The proxy infrastructure is
+As of April 2025, Psoxy is implemented with Java 17 and built via Maven. The proxy infrastructure is
 provisioned and the Psoxy code deployed using Terraform, relying on Azure, Google Cloud, and/or AWS
 command line tools.
 
 You will need all the following in your deployment environment (eg, your laptop):
 
-| Tool                                            | Version               | Test Command          |
-|-------------------------------------------------|-----------------------|-----------------------|
-| [git](https://git-scm.com/)                     | 2.17+                 | `git --version`       |
-| [Maven](https://maven.apache.org/)              | 3.6+                  | `mvn -v`              |
-| [Java JDK 11+](https://openjdk.org/install/) | 17, 21 (see notes) | `mvn -v \| grep Java` |
-| [Terraform](https://www.terraform.io/)          | 1.6+, < 2.0           | `terraform version`   |
+| Tool                                         | Version                | Test Command          |
+|----------------------------------------------|------------------------|-----------------------|
+| [git](https://git-scm.com/)                  | 2.17+                  | `git --version`       |
+| [Maven](https://maven.apache.org/)           | 3.6+                   | `mvn -v`              |
+| [Java JDK 17+](https://openjdk.org/install/) | 17, 21, 24 (see notes) | `mvn -v \| grep Java` |
+| [Terraform](https://www.terraform.io/)       | 1.6+, < 2.0            | `terraform version`   |
 
 NOTE: we will support Java versions for duration of official support windows, in particular the
-LTS versions. Minor versions, such as 18-20, which are out of official support, may work but are not
+LTS versions. Minor versions, such as 18-20, 22-23 which are out of official support, may work but are not
 routinely tested.
 
 NOTE: Using `terraform` is not strictly necessary, but it is the only supported method. You may
