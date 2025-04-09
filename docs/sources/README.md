@@ -18,6 +18,8 @@ file.
 | `gcal`                     | Google Calendar                      | API  | GA           |
 | `gdrive`                   | Google Drive                         | API  | GA           |
 | `gdirectory`               | Google Directory                     | API  | GA           |
+| `gemini-usage`            | Gemini Usage                         | Bulk | BETA         |
+| `msft-copilot`            |  Microsot 365 Copilot                         | API | ALPHA         |
 | `github`                   | GitHub                               | API  | GA           |
 | `github-enterprise-server` | GitHub Enterprise Server             | API  | GA           |
 | `github-non-enterprise`    | GitHub Non-Enterprise                | API  | GA           |
@@ -38,7 +40,7 @@ file.
 | `zoom`                     | Zoom                                 | API  | GA           |
 
 From v0.4.58, you can confirm the availability of a connector by running the following command from
-the root of on of our examples:
+the root of one of our examples:
 
 ```shell
 ./available-connectors
