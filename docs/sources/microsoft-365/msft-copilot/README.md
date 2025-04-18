@@ -14,7 +14,7 @@ all Microsoft 365 connectors.
 ## Required Scopes
 
 - [`User.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall)
-- [`AiEnterpriseInteraction.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#aienterpriseinteractionread)
+- [`AiEnterpriseInteraction.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#aienterpriseinteractionreadall)
 
 ## Authentication
 
