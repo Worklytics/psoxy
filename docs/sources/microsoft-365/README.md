@@ -180,8 +180,7 @@ If you see an error like this:
 }
 ```
 
-Please ensure the permissions are with admin-content to the application in the Azure AD console.
-
+Please ensure that admin consent has been granted to the application in the Azure AD console.
 If there is a new error after doing the admin like this:
 
 ```json
