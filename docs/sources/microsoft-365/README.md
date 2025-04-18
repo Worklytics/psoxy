@@ -180,4 +180,22 @@ If you see an error like this:
 }
 ```
 
-Please ensure the permissions are admin-granted to the application in the Azure AD console.
+Please ensure the permissions are with admin-content to the application in the Azure AD console.
+
+If there is a new error after doing the admin like this:
+
+```json
+ {
+  "error": {
+    "code": "Authorization_RequestDenied",
+    "message": "Insufficient privileges to complete the operation.",
+    "innerError": {
+      ...
+    }
+  }
+}
+
+```
+
+Please re-deploy the psoxy instance again, as it is an error related on an invalid cached token before the admin consent
+has been done.
