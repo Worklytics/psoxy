@@ -8,8 +8,7 @@ There are several connectors available for GitHub:
 - [GitHub Enterprise Cloud] - GitHub Enterprise instances hosted by github.com on behalf of your
   organization.
 - [GitHub Copilot] - Copilot data from GitHub Enterprise instances hosted by github.com on behalf of your
-  organization.F
-- [GitHub Enterprise Server] - similar to 'Cloud', but you must customize rules and API host;
+  organization.
   contact Worklytics for assistance.
 
 ## Authentication workflow
