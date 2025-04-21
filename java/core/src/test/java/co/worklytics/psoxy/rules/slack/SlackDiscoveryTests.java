@@ -29,6 +29,7 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
             .defaultScopeId("slack")
             .sourceKind("slack")
             .rulesFile("discovery")
+            .checkRegularSSMLimit(false)
             .build();
 
     @SneakyThrows

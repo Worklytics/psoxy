@@ -94,6 +94,9 @@ abstract public class RulesBaseTestCase {
 
         String exampleSanitizedApiResponsesPathFull;
 
+        @Builder.Default
+        boolean checkRegularSSMLimit = true;
+
         public String getExampleSanitizedApiResponsesPathFull() {
             return Optional.ofNullable(exampleSanitizedApiResponsesPathFull)
                 .orElse(sourceDocsRoot() + exampleSanitizedApiResponsesPath);
@@ -199,8 +202,11 @@ abstract public class RulesBaseTestCase {
     @Test
     void yamlLengthCompressed() {
         int rulesLengthInChars = TestUtils.asBase64Gzipped(yamlMapper.writeValueAsString(getRulesUnderTest())).length();
-        assertTrue(rulesLengthInChars < REGULAR_SSM_PARAM_LIMIT,
-            "YAML rules " + rulesLengthInChars + " chars long; want < " + REGULAR_SSM_PARAM_LIMIT + " chars to fit as AWS SSM param");
+        if (getRulesTestSpec().checkRegularSSMLimit) {
+          assertTrue(rulesLengthInChars < REGULAR_SSM_PARAM_LIMIT,
+              "YAML rules " + rulesLengthInChars + " chars long; want < " + REGULAR_SSM_PARAM_LIMIT + " chars to fit as AWS SSM param");
+        }
+
     }
 
     @SneakyThrows
