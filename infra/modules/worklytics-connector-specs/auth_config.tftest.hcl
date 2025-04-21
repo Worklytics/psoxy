@@ -17,7 +17,7 @@ run "oauth_refresh_token_locks" {
 
   assert {
     error_message = "7 oauth connectors expected to USE_SHARED_TOKEN"
-    condition = 6 == length([for k, v in output.available_oauth_data_source_connectors :
+    condition = 7 == length([for k, v in output.available_oauth_data_source_connectors :
     v if try(lower(v.environment_variables.USE_SHARED_TOKEN), "false") == "true"])
   }
 
