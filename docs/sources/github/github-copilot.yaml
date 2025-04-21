@@ -1,0 +1,530 @@
+---
+endpoints:
+  - pathTemplate: "/orgs/{org}/members"
+    allowedQueryParams:
+      - "per_page"
+      - "page"
+      - "filter"
+      - "role"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..avatar_url"
+          - "$..gravatar_id"
+          - "$..url"
+          - "$..html_url"
+          - "$..followers_url"
+          - "$..following_url"
+          - "$..gists_url"
+          - "$..starred_url"
+          - "$..subscriptions_url"
+          - "$..organizations_url"
+          - "$..repos_url"
+          - "$..events_url"
+          - "$..received_events_url"
+          - "$..name"
+          - "$..company"
+          - "$..location"
+          - "$..bio"
+          - "$..twitter_username"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+          - "$..node_id"
+          - "$..email"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+  - pathTemplate: "/users/{username}"
+    allowedQueryParams:
+      - "since"
+      - "per_page"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..avatar_url"
+          - "$..gravatar_id"
+          - "$..url"
+          - "$..html_url"
+          - "$..followers_url"
+          - "$..following_url"
+          - "$..gists_url"
+          - "$..starred_url"
+          - "$..subscriptions_url"
+          - "$..organizations_url"
+          - "$..repos_url"
+          - "$..events_url"
+          - "$..received_events_url"
+          - "$..name"
+          - "$..company"
+          - "$..location"
+          - "$..bio"
+          - "$..twitter_username"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+          - "$..node_id"
+          - "$..email"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+    pathParameterSchemas:
+      username:
+        type: "string"
+        format: "reversible-pseudonym"
+  - pathTemplate: "/graphql"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..ssoUrl"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..nameId"
+          - "$..email"
+          - "$..emails[*].value"
+          - "$..guid"
+          - "$..organizationVerifiedDomainEmails[*]"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "object"
+          properties:
+            organization:
+              type: "object"
+              properties:
+                membersWithRole:
+                  type: "object"
+                  properties:
+                    edges:
+                      type: "array"
+                      items:
+                        type: "object"
+                        properties:
+                          node:
+                            type: "object"
+                            properties:
+                              email:
+                                type: "string"
+                              id:
+                                type: "string"
+                              isSiteAdmin:
+                                type: "boolean"
+                              login:
+                                type: "string"
+                              organizationVerifiedDomainEmails:
+                                type: "array"
+                                items:
+                                  type: "string"
+                    pageInfo:
+                      type: "object"
+                      properties:
+                        endCursor:
+                          type: "string"
+                        hasNextPage:
+                          type: "boolean"
+                repository:
+                  type: "object"
+                  properties:
+                    pullRequest:
+                      type: "object"
+                      properties:
+                        commits:
+                          type: "object"
+                          properties:
+                            edges:
+                              type: "array"
+                              items:
+                                type: "object"
+                                properties:
+                                  node:
+                                    type: "object"
+                                    properties:
+                                      commit:
+                                        type: "object"
+                                        properties:
+                                          additions:
+                                            type: "integer"
+                                          associatedPullRequests:
+                                            type: "object"
+                                            properties:
+                                              nodes:
+                                                type: "array"
+                                                items:
+                                                  type: "object"
+                                                  properties:
+                                                    number:
+                                                      type: "integer"
+                                          author:
+                                            type: "object"
+                                            properties:
+                                              date:
+                                                type: "string"
+                                              email:
+                                                type: "string"
+                                              user:
+                                                type: "object"
+                                                properties:
+                                                  login:
+                                                    type: "string"
+                                          authoredByCommitter:
+                                            type: "boolean"
+                                          authoredDate:
+                                            type: "string"
+                                          changedFilesIfAvailable:
+                                            type: "integer"
+                                          committedDate:
+                                            type: "string"
+                                          committedViaWeb:
+                                            type: "boolean"
+                                          committer:
+                                            type: "object"
+                                            properties:
+                                              date:
+                                                type: "string"
+                                              email:
+                                                type: "string"
+                                              user:
+                                                type: "object"
+                                                properties:
+                                                  login:
+                                                    type: "string"
+                                          deletions:
+                                            type: "integer"
+                                          id:
+                                            type: "string"
+                                          oid:
+                                            type: "string"
+                                          parents:
+                                            type: "object"
+                                            properties:
+                                              nodes:
+                                                type: "array"
+                                                items:
+                                                  type: "object"
+                                                  properties:
+                                                    oid:
+                                                      type: "string"
+                                          tree:
+                                            type: "object"
+                                            properties:
+                                              oid:
+                                                type: "string"
+                                          user:
+                                            type: "onBehalfOf"
+                                            properties:
+                                              email:
+                                                type: "string"
+                                              id:
+                                                type: "string"
+                                              login:
+                                                type: "string"
+                            pageInfo:
+                              type: "object"
+                              properties:
+                                endCursor:
+                                  type: "string"
+                                hasNextPage:
+                                  type: "boolean"
+                    ref:
+                      type: "object"
+                      properties:
+                        target:
+                          type: "object"
+                          properties:
+                            history:
+                              type: "object"
+                              properties:
+                                edges:
+                                  type: "array"
+                                  items:
+                                    type: "object"
+                                    properties:
+                                      node:
+                                        type: "object"
+                                        properties:
+                                          additions:
+                                            type: "integer"
+                                          associatedPullRequests:
+                                            type: "object"
+                                            properties:
+                                              nodes:
+                                                type: "array"
+                                                items:
+                                                  type: "object"
+                                                  properties:
+                                                    number:
+                                                      type: "integer"
+                                          author:
+                                            type: "object"
+                                            properties:
+                                              date:
+                                                type: "string"
+                                              email:
+                                                type: "string"
+                                              user:
+                                                type: "object"
+                                                properties:
+                                                  login:
+                                                    type: "string"
+                                          authoredByCommitter:
+                                            type: "boolean"
+                                          authoredDate:
+                                            type: "string"
+                                          changedFilesIfAvailable:
+                                            type: "integer"
+                                          committedDate:
+                                            type: "string"
+                                          committedViaWeb:
+                                            type: "boolean"
+                                          committer:
+                                            type: "object"
+                                            properties:
+                                              date:
+                                                type: "string"
+                                              email:
+                                                type: "string"
+                                              user:
+                                                type: "object"
+                                                properties:
+                                                  login:
+                                                    type: "string"
+                                          deletions:
+                                            type: "integer"
+                                          id:
+                                            type: "string"
+                                          oid:
+                                            type: "string"
+                                          parents:
+                                            type: "object"
+                                            properties:
+                                              nodes:
+                                                type: "array"
+                                                items:
+                                                  type: "object"
+                                                  properties:
+                                                    oid:
+                                                      type: "string"
+                                          tree:
+                                            type: "object"
+                                            properties:
+                                              oid:
+                                                type: "string"
+                                          user:
+                                            type: "onBehalfOf"
+                                            properties:
+                                              email:
+                                                type: "string"
+                                              id:
+                                                type: "string"
+                                              login:
+                                                type: "string"
+                                pageInfo:
+                                  type: "object"
+                                  properties:
+                                    endCursor:
+                                      type: "string"
+                                    hasNextPage:
+                                      type: "boolean"
+                samlIdentityProvider:
+                  type: "object"
+                  properties:
+                    externalIdentities:
+                      type: "object"
+                      properties:
+                        edges:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              node:
+                                type: "object"
+                                properties:
+                                  guid:
+                                    type: "string"
+                                  samlIdentity:
+                                    type: "object"
+                                    properties:
+                                      emails:
+                                        type: "array"
+                                        items:
+                                          type: "object"
+                                          properties:
+                                            value:
+                                              type: "string"
+                                      nameId:
+                                        type: "string"
+                                  user:
+                                    type: "object"
+                                    properties:
+                                      login:
+                                        type: "string"
+                        pageInfo:
+                          type: "object"
+                          properties:
+                            endCursor:
+                              type: "string"
+                            hasNextPage:
+                              type: "boolean"
+        errors:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              locations:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    column:
+                      type: "integer"
+                    line:
+                      type: "integer"
+              message:
+                type: "string"
+              path:
+                type: "array"
+                items:
+                  type: "string"
+              type:
+                type: "string"
+  - pathTemplate: "/orgs/{org}/teams"
+    allowedQueryParams:
+      - "per_page"
+      - "page"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..name"
+          - "$..description"
+  - pathTemplate: "/orgs/{org}/teams/{teamSlug}/members"
+    allowedQueryParams:
+      - "per_page"
+      - "page"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..avatar_url"
+          - "$..gravatar_id"
+          - "$..url"
+          - "$..html_url"
+          - "$..followers_url"
+          - "$..following_url"
+          - "$..gists_url"
+          - "$..starred_url"
+          - "$..subscriptions_url"
+          - "$..organizations_url"
+          - "$..repos_url"
+          - "$..events_url"
+          - "$..received_events_url"
+          - "$..name"
+          - "$..company"
+          - "$..location"
+          - "$..bio"
+          - "$..twitter_username"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..id"
+          - "$..node_id"
+          - "$..email"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+  - pathTemplate: "/orgs/{org}/copilot/billing/seats"
+    allowedQueryParams:
+      - "per_page"
+      - "page"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..['assignee'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..['assignee'].['id','node_id','email']"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..['assignee'].login"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$..name"
+          - "$..description"
+  - pathTemplate: "/orgs/{org}/audit-log"
+    allowedQueryParams:
+      - "per_page"
+      - "page"
+      - "phrase"
+      - "include"
+      - "after"
+      - "before"
+      - "order"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..hashed_token"
+          - "$..business"
+          - "$..business_id"
+          - "$..transport_protocol"
+          - "$..transport_protocol_name"
+          - "$..pull_request_title"
+          - "$..user_agent"
+          - "$..job"
+          - "$..active_job_id"
+          - "$..aqueduct_job_id"
+          - "$..catalog_service"
+          - "$..migration_id"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..actor"
+          - "$..user"
+          - "$..user_id"
+          - "$..started_by"
+        encoding: "JSON"
+  - pathTemplate: "/organizations/{installationId}/audit-log"
+    allowedQueryParams:
+      - "per_page"
+      - "page"
+      - "phrase"
+      - "include"
+      - "after"
+      - "before"
+      - "order"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..hashed_token"
+          - "$..business"
+          - "$..business_id"
+          - "$..transport_protocol"
+          - "$..transport_protocol_name"
+          - "$..pull_request_title"
+          - "$..user_agent"
+          - "$..job"
+          - "$..active_job_id"
+          - "$..aqueduct_job_id"
+          - "$..catalog_service"
+          - "$..migration_id"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..actor"
+          - "$..user"
+          - "$..user_id"
+          - "$..started_by"
+        encoding: "JSON"
