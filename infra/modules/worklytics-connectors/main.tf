@@ -15,7 +15,7 @@ module "worklytics_connector_specs" {
   github_enterprise_server_host    = var.github_enterprise_server_host
   github_enterprise_server_version = var.github_enterprise_server_version
   github_installation_id           = var.github_installation_id
-  github_copilot_installation_id = var.github_copilot_installation_id
+  github_copilot_installation_id   = var.github_copilot_installation_id
   github_organization              = var.github_organization
   github_example_repository        = var.github_example_repository
   salesforce_example_account_id    = var.salesforce_example_account_id

@@ -214,7 +214,7 @@ module "bulk_connector" {
   bucket_write_role_id              = module.psoxy.bucket_write_role_id
   secret_bindings                   = module.psoxy.secrets
   example_file                      = try(each.value.example_file, null)
-  instructions_template = try(each.value.instructions_template, null)
+  instructions_template             = try(each.value.instructions_template, null)
   input_expiration_days             = var.bulk_input_expiration_days
   sanitized_expiration_days         = var.bulk_sanitized_expiration_days
   input_bucket_name                 = try(each.value.input_bucket_name, null)
