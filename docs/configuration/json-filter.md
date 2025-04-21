@@ -6,6 +6,8 @@ filter schema are removed, rather than the whole document failing validation.
 
 The goal of JsonFilter is that only data elements specified in the filter pass through.
 
+These are used for [API Data Sanitization policies](api-data-sanitization.md).
+
 Some differences:
 
 - `required` properties are ignored. While in JSON schema, an object that was missing a "required"

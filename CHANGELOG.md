@@ -9,6 +9,10 @@ Changes to be including in future/planned release notes will be added here.
 
 ## [0.5.2](https://github.com/Worklytics/psoxy/release/tag/v0.5.2)
 - `GitHub Copilot`: Added new connector for supporting fetching Copilot data from GitHub.
+- `Microsoft 365 Copilot`: Adding support for fetching Copilot interactions through `/beta/copilot/users/{id}/interactionHistory/getAllEnterpriseInteractions` endpoint
+- `Zoom`:
+  - support for fetching meeting summaries, which opens new `/v2/meetings/{meetingId}/meeting_summary` endpoint in proxy rules
+  - support for getting settings from meeting details on `/v2/meetings/{meetingId}`
 
 ## [0.5.1](https://github.com/Worklytics/psoxy/release/tag/v0.5.1)
 - `GitHub`: Added rules for fetching commits through repository and pulls using GraphQL

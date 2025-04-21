@@ -18,9 +18,10 @@ data "external" "deployment_package" {
 
   program = [
     "${path.module}/build.sh",
+    var.skip_tests ? "-s" : "",
+    var.force_bundle ? "-f" : "",
     var.path_to_psoxy_java,
     var.implementation,
-    var.force_bundle ? "--force_bundle" : ""
   ]
 }
 

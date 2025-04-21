@@ -109,8 +109,6 @@ module "instance_ssm_parameters" {
   for_each = var.api_connectors
 
   source = "../../modules/aws-ssm-secrets"
-  # other possibly implementations:
-  # source = "../hashicorp-vault-secrets"
 
   path       = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
   kms_key_id = var.aws_ssm_key_id

@@ -50,8 +50,8 @@ JAVA_VERSION_MAJOR=$(echo $JAVA_VERSION | sed -n 's/^Java version: \([0-9]*\).*/
 
 printf "Your Maven installation uses ${BLUE}${JAVA_VERSION}${NC}.\n"
 
-if [[ "$JAVA_VERSION_MAJOR" != 11 && "$JAVA_VERSION_MAJOR" != 17 && "$JAVA_VERSION_MAJOR" != 21 ]]; then
-  printf "${RED}This Java version appears to be unsupported. You should upgrade it, or may have compile errors.${NC} Psoxy requires a supported version of Java 11 or later; as of Nov 2023, this includes Java 11, 17, or 21. See https://maven.apache.org/install.html\n"
+if [[  "$JAVA_VERSION_MAJOR" != 17 && "$JAVA_VERSION_MAJOR" != 21  && "$JAVA_VERSION_MAJOR" != 23  ]]; then
+  printf "${RED}This Java version appears to be unsupported. You should upgrade it, or may have compile errors.${NC} Psoxy requires an Oracle-supported version of Java 17 or later;  as of April 2025, this includes Java 17 or 21. See https://maven.apache.org/install.html\n"
   if $HOMEBREW_AVAILABLE; then printf "or as you have Homebrew available, run ${BLUE}brew install openjdk@17${NC}\n"; fi
   printf "If you have an alternative JDK installed, then you must update your ${BLUE}JAVA_HOME${NC} environment variable to point to it.\n"
 fi

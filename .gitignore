@@ -13,10 +13,14 @@
 .idea/modules.xml
 *.iml
 
+# IntelliJ config file created IFF you have terraform plugin installed; this includes paths on your machine couple to how terraform is installed,
+# so I dont' think a good idea to commit it
+.idea/terraform.xml
 
 # macOs generated files
 .DS_Store
 
 # Log files
 *.log
+
 

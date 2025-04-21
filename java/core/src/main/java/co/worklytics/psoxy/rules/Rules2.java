@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.*;
 import lombok.extern.java.Log;
 
+import java.io.Serial;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -25,6 +26,7 @@ import java.util.stream.Stream;
 @JsonInclude(JsonInclude.Include.NON_NULL) //NOTE: despite name, also affects YAML encoding
 public class Rules2 implements RESTRules {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Singular

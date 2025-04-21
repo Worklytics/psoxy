@@ -706,6 +706,8 @@ EOT
       example_api_calls : [
         "/v2/users",
         "/v2/users/{USER_ID}/meetings",
+        "/v2/meetings/{MEETING_ID}",
+        "/v2/meetings/{MEETING_ID}/meeting_summary",
         "/v2/past_meetings/{MEETING_ID}",
         "/v2/past_meetings/{MEETING_ID}/instances",
         "/v2/past_meetings/{MEETING_ID}/participants",

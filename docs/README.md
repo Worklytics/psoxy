@@ -207,21 +207,25 @@ administrator AFTER you have deployed Psoxy.
 
 #### Required Software and Permissions
 
-As of Feb 2023, Psoxy is implemented with Java 11 and built via Maven. The proxy infrastructure is
+As of April 2025, Psoxy is implemented with Java 17 and built via Maven. The proxy infrastructure is
 provisioned and the Psoxy code deployed using Terraform, relying on Azure, Google Cloud, and/or AWS
 command line tools.
 
 You will need all the following in your deployment environment (eg, your laptop):
 
-| Tool                                            | Version               | Test Command          |
-|-------------------------------------------------|-----------------------|-----------------------|
-| [git](https://git-scm.com/)                     | 2.17+                 | `git --version`       |
-| [Maven](https://maven.apache.org/)              | 3.6+                  | `mvn -v`              |
-| [Java JDK 11+](https://openjdk.org/install/) | 17, 21 (see notes) | `mvn -v \| grep Java` |
-| [Terraform](https://www.terraform.io/)          | 1.6+, < 2.0           | `terraform version`   |
+| Tool                                         | Version              | Test Command          |
+|----------------------------------------------|----------------------|-----------------------|
+| [git](https://git-scm.com/)                  | 2.17+                | `git --version`       |
+| [Maven](https://maven.apache.org/)           | 3.6+                 | `mvn -v`              |
+| [Java JDK 17+](https://openjdk.org/install/) | 17, 21 (see notes) | `mvn -v \| grep Java` |
+| [Terraform](https://www.terraform.io/)       | 1.6+, < 2.0          | `terraform version`   |
+
+NOTE: as of Apr 8, 2024, although Java 24 has been released Maven 3.9.9 is not compatible with it. Maven
+has fixed this, but has yet to release a version 3.9.10 or 4.0.x with the fix. Until then, we don't officially
+support Java 24.
 
 NOTE: we will support Java versions for duration of official support windows, in particular the
-LTS versions. Minor versions, such as 18-20, which are out of official support, may work but are not
+LTS versions. Minor versions, such as 18-20, 22-23 which are out of official support, may work but are not
 routinely tested.
 
 NOTE: Using `terraform` is not strictly necessary, but it is the only supported method. You may
@@ -410,12 +414,12 @@ Subsystem for Linux (WSL) platforms.
 
 ## Component Status
 
-| Component                | Status                                                                                                                       |
-|--------------------------|------------------------------------------------------------------------------------------------------------------------------|
-| Java                     | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-java.yaml)               |
-| Terraform Examples       | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform.yaml)          |
-| Tools                    | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-tools.yaml)              |
-
+| Component                | Status                                                                                                                                    |
+|--------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| Java                     | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-java.yaml)                            |
+| Terraform Examples       | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform-examples.yaml)              |
+| Tools                    | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-tools.yaml)                           |
+| Terraform Security Scan | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform-sec-analysis-examples.yaml) |
 
 Review [release notes in GitHub](https://github.com/Worklytics/psoxy/releases).
 

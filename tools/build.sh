@@ -1,7 +1,10 @@
 #!/bin/bash
 
 #see ../infra/modules/psoxy-package/build.sh
-# this is similar, but outputs errors directly instead of to log file
+# this is VERY similar, and should be unified - but it's a breaking change bc argument order is different
+
+# set to fail on errors
+set -e
 
 # colors
 RED='\e[0;31m'
@@ -13,12 +16,16 @@ while getopts ":q" opt; do
     q)
       QUIET_OPTIONS="-q -Dmaven.test.skip=true"
       ;;
+    *)
+      printf "Usage: build.sh [-q] <IMPLEMENTATION> <JAVA_SOURCE_ROOT>\n"
+      printf "  -q: Skip tests during build\n"
+      exit 1
+      ;;
   esac
 done
 
 IMPLEMENTATION=${@:$OPTIND:1}
 JAVA_SOURCE_ROOT=${@:$OPTIND+1:1}
-
 
 if [[ "$IMPLEMENTATION" != "aws" && "$IMPLEMENTATION" != "gcp" ]]; then
     printf "${RED}Error: HOST_PLATFORM value '${IMPLEMENTATION}' must be 'aws' or 'gcp'.${NC}\n"
@@ -36,10 +43,7 @@ if [[ "$JAVA_SOURCE_ROOT" != */ ]]; then
     JAVA_SOURCE_ROOT="${JAVA_SOURCE_ROOT}/"
 fi
 
-# set to fail on errors
-set -e
-
-mvn $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}pom.xml" clean
+mvn clean $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}pom.xml"
 
 mvn package install $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}gateway-core/pom.xml"
 

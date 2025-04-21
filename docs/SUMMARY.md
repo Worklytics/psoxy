@@ -46,7 +46,6 @@
   * [Releases](development/releases.md)
   * [Alpha Features](development/alpha-features/README.md)
     * [AWS Secrets Manager Support](development/alpha-features/aws-secrets-manager.md)
-    * [hashicorp-vault](development/alpha-features/hashicorp-vault.md)
     * [New Relic Monitoring](development/alpha-features/new-relic-monitoring.md)
 * [Data Sources](sources/README.md)
   * [Asana](sources/asana/README.md)
@@ -67,7 +66,8 @@
   * [Microsoft 365](sources/microsoft-365/README.md)
     * [API Call Examples](sources/microsoft-365/example-api-calls.md)
     * [Entra ID](sources/microsoft-365/entra-id/README.md)
-    * [MSFT Teams](sources/microsoft-365/msft-teams/README.md)
+    * [Microsoft Copilot](sources/microsoft-365/msft-copilot/README.md)
+    * [Microsoft Teams](sources/microsoft-365/msft-teams/README.md)
     * [Outlook Calendar](sources/microsoft-365/outlook-cal/README.md)
     * [Outlook Mail](sources/microsoft-365/outlook-mail/README.md)
   * [Salesforce](sources/salesforce/README.md)
@@ -78,5 +78,3 @@
 
 * [FAQ](faq-security.md)
 * [Release Notes](https://github.com/Worklytics/psoxy/releases)
-
-

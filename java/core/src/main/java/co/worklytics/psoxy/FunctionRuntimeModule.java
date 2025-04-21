@@ -7,6 +7,7 @@ import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
 import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.http.HttpTransportFactory;
 import dagger.Module;
@@ -53,6 +54,7 @@ public class FunctionRuntimeModule {
         return httpTransportFactory.create().createRequestFactory();
     }
 
+    // q: should we just replace this with a Provider<HttpTransport>, rather than having more coupling to google-http-client classes?
     @Provides @Singleton
     HttpTransportFactory providesHttpTransportFactory(EnvVarsConfigService envVarsConfigService) {
         final String sslContextProtocol =
@@ -86,6 +88,5 @@ public class FunctionRuntimeModule {
             .fallback(nativeConfigService)
             .build();
     }
-
 
 }
