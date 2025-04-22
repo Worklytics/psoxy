@@ -45,6 +45,8 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
         'gmail',
         'google-chat',
         'google-meet',
+        'msft-copilot',
+        'msft-teams',
         'slack-discovery-api',
         'outlook-cal',
         'outlook-mail',
