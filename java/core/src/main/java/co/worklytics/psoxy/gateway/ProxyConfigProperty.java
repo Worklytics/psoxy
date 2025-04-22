@@ -23,6 +23,16 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     CUSTOM_RULES_SHA,
 
     /**
+     * OPTIONAL; if omitted, domains are preserved (pass through to clients)
+     *
+     *  - PRESERVE (default)
+     *  - ENCRYPT
+     *  - TOKENIZE
+     *  - REDACT
+     */
+    EMAIL_DOMAIN_HANDLING,
+
+    /**
      * 'STRICT', 'IGNORE_DOTS', ...
      *
      * OPTIONAL; default to 'STRICT'; possibly will change in next proxy version.
@@ -45,9 +55,31 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
 
     ENCRYPTION_KEY_IP(SupportedSource.ENV_VAR_OR_REMOTE),
 
-    PSOXY_SALT(SupportedSource.ENV_VAR_OR_REMOTE),
-    SALT_IP(SupportedSource.ENV_VAR_OR_REMOTE), // used to salt IP; distinct value so can independently rotate IP salt from primary salt
 
+    /**
+     * key used to encrypt the domains of email addresses; use case is to support rotation of this
+     * key independent of that used for PII
+     *
+     * alpha
+     */
+    ENCRYPTION_KEY_EMAIL_DOMAINS(SupportedSource.ENV_VAR_OR_REMOTE),
+
+    /**
+     * default SALT value, used when computing hashes
+     */
+    PSOXY_SALT(SupportedSource.ENV_VAR_OR_REMOTE),
+
+    /**
+     * if set, used instead of PSOXY_SALT when hashing IP addresses; this is to allow distinct rotation schedule, as IPs may not be considered PII
+     * *alpha*; we may remove this
+     */
+    SALT_IP(SupportedSource.ENV_VAR_OR_REMOTE),
+
+    /**
+     * if set, used instead of PSOXY_SALT when hashing email domains; this is to allow distinct rotation schedule, as domains are not PII
+     * *alpha*; we may remove this
+     */
+    SALT_EMAIL_DOMAINS(SupportedSource.ENV_VAR_OR_REMOTE),
 
     //see PseudonymImplementation
     //use case: use `v0.3` if your initially used a `v0.3.x` version of Proxy to collect data and
@@ -80,7 +112,9 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
      */
     TLS_VERSION,
 
-    BUNDLE_FILENAME, ;
+    BUNDLE_FILENAME,
+
+    ;
 
     public static class TlsVersions {
         public final static String TLSv1_2 = "TLSv1.2";
