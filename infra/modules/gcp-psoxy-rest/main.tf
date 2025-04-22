@@ -54,7 +54,7 @@ resource "google_cloudfunctions2_function" "function" {
   location = var.region
 
   build_config {
-    runtime           = "java17"
+    runtime           = "java21"
     docker_repository = var.artifact_repository_id
     entry_point       = "co.worklytics.psoxy.Route"
 
