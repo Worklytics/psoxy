@@ -5,6 +5,12 @@ locals {
 
   # version of environment_id_prefix with trailing space, presuming it's a hyphen or a underscore
   environment_id_prefix_display = length(var.environment_id_prefix) > 0 ? "${substr(var.environment_id_prefix, 0, length(var.environment_id_prefix) - 1)} " : ""
+
+  # additional services required for bulk mode
+  services_required_for_bulk_mode = [
+    "eventarc.googleapis.com", # required for eventarc triggers to functions gen2
+    "pubsub.googleapis.com",   # needed for cloud run gen2
+  ]
 }
 
 
@@ -13,17 +19,20 @@ locals {
 # disable other APIs that are enabled in the project - which may not be what we want if shared
 # project, or if other services used to support (eg, monitoring APIs or somthing)
 resource "google_project_service" "gcp_infra_api" {
-  for_each = toset([
+  for_each = toset(concat([
     "artifactregistry.googleapis.com", # for GCP Artifact Registry, as required for new Cloud Functions since Feb 2024
     "cloudbuild.googleapis.com",       # some modes of Cloud Functions seem to need this, so TBD
-    "cloudfunctions.googleapis.com",
+    "cloudfunctions.googleapis.com",   # believe remains required for cloud run functions gen2
     "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com", # seems required w newer Google provider versions, for resources we use
     "iam.googleapis.com",     # manage IAM via terraform (as of 2023-04-17, internal dev envs didn't have this; so really needed?)
+    "run.googleapis.com",     # required for cloud run functions gen2
     "secretmanager.googleapis.com",
-    "storage.googleapis.com", # needed for bulk sources, which we're going to presume everyone has for simplicity
+    "storage.googleapis.com", # required for both API and bulk modes, bc gcs used to stage bundles (artifacts) for function deployment
     # "serviceusage.googleapis.com", # manage service APIs via terraform (prob already
-  ])
+    ],
+    var.support_bulk_mode ? local.services_required_for_bulk_mode : []
+  ))
 
   service                    = each.key
   project                    = var.project_id
@@ -263,6 +272,24 @@ resource "google_project_iam_custom_role" "bucket_write" {
     "storage.objects.delete"
   ]
 }
+
+
+# to avoid error 'The Cloud Storage service account for your bucket is unable to publish to Cloud Pub/Sub topics in the specified project'
+# see: https://cloud.google.com/eventarc/docs/run/quickstart-storage#before-you-begin
+data "google_storage_project_service_account" "gcs_default_service_account" {
+  project = var.project_id
+}
+
+resource "google_project_iam_member" "grant_gcs-sa_pub-sub-publisher" {
+  count = var.support_bulk_mode ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/pubsub.publisher"
+  member  = "serviceAccount:${data.google_storage_project_service_account.gcs_default_service_account.email_address}"
+}
+
+
+
 
 # Deprecated; only keep to support old installations
 resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {

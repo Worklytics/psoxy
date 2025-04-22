@@ -28,6 +28,8 @@ Service Account Keys and activate Google Workspace APIs.
 
   - [Cloud Functions Admin](https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.admin) -
     proxy instances are deployed as GCP cloud functions
+  - [Cloud Run Developer](https://cloud.google.com/iam/docs/understanding-roles#cloudrun.developer) - cloud
+    function deployment requires Cloud Run Developer role
   - [Cloud Storage Admin](https://cloud.google.com/iam/docs/understanding-roles#storage.admin) -
     processing of bulk data (such as HRIS exports) uses GCS buckets
   - [IAM Role Admin](https://cloud.google.com/iam/docs/understanding-roles#iam.roles.admin) - create
@@ -53,16 +55,22 @@ Service Account Keys and activate Google Workspace APIs.
   _attempt_ to enable these, but as there is sometimes a few minutes delay in activation and in some
   cases they are required to read your existing infra prior to apply, you may experience errors. To
   pre-empt those, we suggest ensuring the following are enabled:
-  - [Compute Engine API](https://console.cloud.google.com/apis/library/compute.googleapis.com)
-    (`compute.googleapis.com`)
-  - [Cloud Build API](https://console.cloud.google.com/apis/library/cloudbuild.googleapis.com)
-    (`cloudbuild.googleapis.com`)
+   - [Artifact Registry API](https://console.cloud.google.com/apis/library/artifactregistry.googleapis.com)
+    (`artifactregistry.googleapis.com`)
+   - [Cloud Build API](https://console.cloud.google.com/apis/library/cloudbuild.googleapis.com)
+     (`cloudbuild.googleapis.com`)
   - [Cloud Functions API](https://console.cloud.google.com/apis/library/cloudfunctions.googleapis.com)
     (`cloudfunctions.googleapis.com`)
   - [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com)
     (`cloudresourcemanager.googleapis.com`)
+  - [Compute Engine API](https://console.cloud.google.com/apis/library/compute.googleapis.com)
+    (`compute.googleapis.com`)
+  - [Eventarc API](https://console.cloud.google.com/apis/library/eventarc.googleapis.com)
+    (`eventarc.googleapis.com`)
   - [IAM API](https://console.cloud.google.com/apis/library/iam.googleapis.com)
     (`iam.googleapis.com`)
+  - [Pub/Sub API](https://console.cloud.google.com/apis/library/pubsub.googleapis.com)
+    (`pubsub.googleapis.com`)
   - [Secret Manager API](https://console.cloud.google.com/apis/library/secretmanager.googleapis.com)
     (`secretmanager.googleapis.com`)
   - [Storage API](https://console.cloud.google.com/apis/library/storage-api.googleapis.com)
