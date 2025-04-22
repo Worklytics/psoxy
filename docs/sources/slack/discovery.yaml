@@ -21,7 +21,7 @@ endpoints:
           - "$.messages[*].blocks[*].elements[*].elements[*].user_id"
           - "$.messages[*].room.created_by"
           - "$.messages[*].room.participant_history[*]"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
       properties:
@@ -48,7 +48,7 @@ endpoints:
           - "$.info[*].creator"
           - "$.info[*].members[*]"
           - "$.info[*].topic.set_by"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
       properties:
@@ -78,7 +78,7 @@ endpoints:
           - "$.channels[*].creator"
           - "$.channels[*].members[*]"
           - "$.channels[*].topic.set_by"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
       properties:
@@ -103,7 +103,7 @@ endpoints:
           - "$.channels[*].creator"
           - "$.channels[*].members[*]"
           - "$.channels[*].topic.set_by"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
       properties:
@@ -164,11 +164,11 @@ endpoints:
         jsonPaths:
           - "$.users[*].profile.email"
           - "$.users[*].profile.guest_invited_by"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$.users[*].id"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.users[?(@.is_bot != true)].name"
