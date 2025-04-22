@@ -37,7 +37,8 @@ public abstract class WorkloadIdentityFederationGrantTokenRequestBuilder
         TOKEN_SCOPE,
         ;
 
-        private final boolean envVarOnly = true;
+        @Getter(onMethod_ = @Override)
+        private final SupportedSource supportedSource = SupportedSource.ENV_VAR;
     }
 
     // as far as what's actually sent in the OAuth 2.0 'grant_type' param:

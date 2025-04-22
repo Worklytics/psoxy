@@ -34,18 +34,19 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
      * OPTIONAL; default to ""
      */
     PATH_TO_SHARED_CONFIG,
+
     /**
      * where to find configuration parameters that are specific to this instance
      * OPTIONAL; default to ""
      */
     PATH_TO_INSTANCE_CONFIG,
 
-    PSOXY_ENCRYPTION_KEY(false),
+    PSOXY_ENCRYPTION_KEY(SupportedSource.ENV_VAR_OR_REMOTE),
 
-    ENCRYPTION_KEY_IP(false),
+    ENCRYPTION_KEY_IP(SupportedSource.ENV_VAR_OR_REMOTE),
 
-    PSOXY_SALT(false),
-    SALT_IP(false), // used to salt IP; distinct value so can independently rotate IP salt from primary salt
+    PSOXY_SALT(SupportedSource.ENV_VAR_OR_REMOTE),
+    SALT_IP(SupportedSource.ENV_VAR_OR_REMOTE), // used to salt IP; distinct value so can independently rotate IP salt from primary salt
 
 
     //see PseudonymImplementation
@@ -61,7 +62,7 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     PSEUDONYMIZE_APP_IDS,
 
     // if set, a base64-YAML encoding of rules
-    RULES(false),
+    RULES(SupportedSource.ENV_VAR_OR_REMOTE),
     // for testing - if set, allows for behavior that should only be permitted in development context,
     // such as to skip sanitizer if corresponding header is sent
     IS_DEVELOPMENT_MODE,
@@ -88,6 +89,6 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     }
 
 
-    @Getter
-    private boolean envVarOnly = true;
+    @Getter(onMethod_ = @Override)
+    private  SupportedSource supportedSource = SupportedSource.ENV_VAR;
 }
