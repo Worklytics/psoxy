@@ -32,6 +32,9 @@ public interface PseudonymizerImplFactory {
             .map(EmailCanonicalization::parseConfigPropertyValue)
             .ifPresent(builder::emailCanonicalization);
 
+        config.getConfigPropertyAsOptional(ProxyConfigProperty.EMAIL_DOMAIN_HANDLING)
+            .map(EmailDomainHandling::parseConfigPropertyValue)
+            .ifPresent(builder::emailDomainHandling);
 
         return builder.build();
     }

@@ -23,6 +23,16 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     CUSTOM_RULES_SHA,
 
     /**
+     * OPTIONAL; if omitted, domains are preserved (pass through to clients)
+     *
+     *  - PRESERVE (default)
+     *  - ENCRYPT
+     *  - TOKENIZE
+     *  - REDACT
+     */
+    EMAIL_DOMAIN_HANDLING,
+
+    /**
      * 'STRICT', 'IGNORE_DOTS', ...
      *
      * OPTIONAL; default to 'STRICT'; possibly will change in next proxy version.
@@ -44,8 +54,30 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
 
     ENCRYPTION_KEY_IP(false),
 
+    /**
+     * key used to encrypt the domains of email addresses; use case is to support rotation of this
+     * key independent of that used for PII
+     *
+     * alpha
+     */
+    ENCRYPTION_KEY_EMAIL_DOMAINS(false),
+
+    /**
+     * default SALT value, used when computing hashes
+     */
     PSOXY_SALT(false),
-    SALT_IP(false), // used to salt IP; distinct value so can independently rotate IP salt from primary salt
+
+    /**
+     * if set, used instead of PSOXY_SALT when hashing IP addresses; this is to allow distinct rotation schedule, as IPs may not be considered PII
+     * *alpha*; we may remove this
+     */
+    SALT_IP(false),
+
+    /**
+     * if set, used instead of PSOXY_SALT when hashing email domains; this is to allow distinct rotation schedule, as domains are not PII
+     * *alpha*; we may remove this
+     */
+    SALT_EMAIL_DOMAINS(false),
 
 
     //see PseudonymImplementation
@@ -79,7 +111,9 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
      */
     TLS_VERSION,
 
-    BUNDLE_FILENAME, ;
+    BUNDLE_FILENAME,
+
+    ;
 
     public static class TlsVersions {
         public final static String TLSv1_2 = "TLSv1.2";
