@@ -19,9 +19,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.Value;
+import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.HttpHeaders;
@@ -45,6 +43,9 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
 public class CommonRequestHandler {
+
+    // q: where should this go? it's a JRE thing, afaik
+    private static final String JAVA_VERSION_PROPERTY = "java.version";
 
     //we have ~540 total in Cloud Function connection, so can have generous values here
     private static final int SOURCE_API_REQUEST_CONNECT_TIMEOUT_MILLISECONDS = 30_000;
@@ -435,10 +436,13 @@ public class CommonRequestHandler {
         return transport.createRequestFactory(initializer);
     }
 
-    private String getProxyUserAgentString() {
-        //q: something better here? pass through the actual client's User-Agent value??
-        return "Psoxy/" + HealthCheckRequestHandler.JAVA_SOURCE_CODE_VERSION  + " (API Data Sanitization; Java/" + System.getProperty("java.version", "unknown") + ")";
-    }
+    //q: something better here? pass through the actual client's User-Agent value??
+    // or create a config option for doing so ???
+    @Getter(AccessLevel.PRIVATE)
+    static final String proxyUserAgentString = ProxyConstants.PRODUCT_BRAND_NAME + "/"
+        + ProxyConstants.JAVA_SOURCE_CODE_VERSION +
+        " (API Data Sanitization; Java/" +
+        System.getProperty(JAVA_VERSION_PROPERTY, "unknown") + ")";
 
     /**
      * Only allowed under development mode

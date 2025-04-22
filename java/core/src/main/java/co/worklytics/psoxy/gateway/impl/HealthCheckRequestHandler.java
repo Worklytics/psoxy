@@ -32,8 +32,6 @@ import java.util.stream.Collectors;
 @Log
 public class HealthCheckRequestHandler {
 
-    public static final String JAVA_SOURCE_CODE_VERSION = "rc-v0.5.2";
-
     /**
      * a random UUID used to salt the hash of the salt.  Purpose of this is to invalidate any non-purpose built rainbow table solution.
      *   (Eg, if we just directly hashed the salt, a general rainbow table of hashes could be used to determine the salt value)
@@ -100,7 +98,7 @@ public class HealthCheckRequestHandler {
         }
 
         HealthCheckResult.HealthCheckResultBuilder healthCheckResult = HealthCheckResult.builder()
-                .javaSourceCodeVersion(JAVA_SOURCE_CODE_VERSION)
+                .javaSourceCodeVersion(ProxyConstants.JAVA_SOURCE_CODE_VERSION)
                 .configuredSource(config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
                 .configuredHost(config.getConfigPropertyAsOptional(ProxyConfigProperty.TARGET_HOST).orElse(null))
                 .nonDefaultSalt(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
