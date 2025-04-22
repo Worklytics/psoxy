@@ -92,13 +92,13 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          * @return whether resulting `access_token` should be shared across all instances of
          * connections to this source.
          */
-        USE_SHARED_TOKEN(false),
+        USE_SHARED_TOKEN(false, true),
 
         //TODO: whether safe to cache access token or not
-        ACCESS_TOKEN_CACHEABLE(false),
+        ACCESS_TOKEN_CACHEABLE(false, true),
 
 
-        TOKEN_RESPONSE_TYPE(false)
+        TOKEN_RESPONSE_TYPE(false, true)
         ;
 
         private final Boolean noCache;

@@ -31,9 +31,13 @@ public abstract class WorkloadIdentityFederationGrantTokenRequestBuilder
         this.config = configService;
     }
 
+    @Getter
     protected enum ConfigProperty implements ConfigService.ConfigProperty {
         CLIENT_ID,
-        TOKEN_SCOPE
+        TOKEN_SCOPE,
+        ;
+
+        private final boolean envVarOnly = true;
     }
 
     // as far as what's actually sent in the OAuth 2.0 'grant_type' param:
