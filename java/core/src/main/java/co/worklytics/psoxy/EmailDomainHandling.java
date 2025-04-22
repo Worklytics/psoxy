@@ -1,5 +1,7 @@
 package co.worklytics.psoxy;
 
+import lombok.NonNull;
+
 public enum EmailDomainHandling {
 
     /**
@@ -23,7 +25,7 @@ public enum EmailDomainHandling {
     REDACT,
     ;
 
-    public static EmailDomainHandling parseConfigPropertyValue(String s) {
+    public static EmailDomainHandling parseConfigPropertyValue(@NonNull String s) {
         return EmailDomainHandling.valueOf(s.toUpperCase());
     }
 

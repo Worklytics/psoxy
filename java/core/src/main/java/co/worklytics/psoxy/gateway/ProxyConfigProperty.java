@@ -27,6 +27,7 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
      *
      *  - PRESERVE (default)
      *  - ENCRYPT
+     *  - TOKENIZE
      *  - REDACT
      */
     EMAIL_DOMAIN_HANDLING,
