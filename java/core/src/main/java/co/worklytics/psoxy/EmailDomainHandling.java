@@ -13,11 +13,9 @@ public enum EmailDomainHandling {
     ENCRYPT,
 
     /**
-     * Hash the domain of the email address.
-     *
-     * q: better as 'TOKENIZE'? consistent with our `t~` prefix
+     * Tokenize the domain of the email address.
      */
-    HASH,
+    TOKENIZE,
 
     /**
      * Redact the domain of the email address.

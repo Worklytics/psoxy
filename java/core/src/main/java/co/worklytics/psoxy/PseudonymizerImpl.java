@@ -157,7 +157,7 @@ public class PseudonymizerImpl implements Pseudonymizer {
 
             if (domainHandlingPolicy == EmailDomainHandling.ENCRYPT) {
                 domain = UrlSafeTokenPseudonymEncoder.ENCRYPTED_PREFIX + encoder.encodeToString(emailDomainsEncryptionStrategy.get().getReversibleToken(domain));
-            } else if (domainHandlingPolicy == EmailDomainHandling.HASH) {
+            } else if (domainHandlingPolicy == EmailDomainHandling.TOKENIZE) {
                 domain = UrlSafeTokenPseudonymEncoder.HASH_PREFIX + encoder.encodeToString(emailDomainsTokenizationStrategy.get().getToken(domain));
             } else if (domainHandlingPolicy != EmailDomainHandling.PRESERVE) {
                 log.severe("Unknown email domain handling: " + domainHandlingPolicy + "; will redact");
