@@ -11,6 +11,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
 
+    /**
+     * file name of the bundle deployed as the serverless function/lambda (eg, an uber-jar)
+     *
+     * example value:  psoxy-gcp-0.5.2.jar
+     */
+    BUNDLE_FILENAME,
 
     /**
      * CUSTOM_RULES_SHA - sha of custom rules file, if custom rules configured via some method
@@ -34,6 +40,7 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
      * OPTIONAL; default to ""
      */
     PATH_TO_SHARED_CONFIG,
+
     /**
      * where to find configuration parameters that are specific to this instance
      * OPTIONAL; default to ""
@@ -42,10 +49,24 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
 
     PSOXY_ENCRYPTION_KEY(false),
 
+    /**
+     * value used to salt PII values when tokenizing them.
+     */
     ENCRYPTION_KEY_IP(false),
 
+    /**
+     * arbitrary string value used to salt PII values when tokenizing them.
+     * in production environments, this should be a randomly generated value that is kept secret
+     * rotating this value will create a distinct set of pseudonyms for the same PII going forward, with no correspondence to the prior se
+     */
     PSOXY_SALT(false),
-    SALT_IP(false), // used to salt IP; distinct value so can independently rotate IP salt from primary salt
+
+    /**
+     * an arbitrary string used to salt IP values when tokenizing them.
+     *
+     * distinct value so can be rotated independently from the primary salt
+     */
+    SALT_IP(false),
 
 
     //see PseudonymImplementation
@@ -55,19 +76,31 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     // controlled via header
     PSEUDONYM_IMPLEMENTATION,
 
-    //if relying on default rules, whether to use version that pseudonymizes per-account source IDs
-    // that aren't email addresses (eg, the IDs that sources generate for each account, which aren't
-    // usually PII without having access to the source's dataset)
+    /**
+     * if relying on default rules (not specfied in RULES property), whether to use version of default rules that pseudonymizes
+     * per-account source IDs that aren't email addresses (eg, the IDs that sources generate for each account, which aren't
+     * usually PII without having access to the source's dataset)
+     */
     PSEUDONYMIZE_APP_IDS,
 
-    // if set, a base64-YAML encoding of rules
+    /**
+     * if set, a base64-YAML encoding of rules
+     * if unset, default rules for the source kind will be used (hardcoded in the proxy source code)
+     *
+     */
     RULES(false),
+
     // for testing - if set, allows for behavior that should only be permitted in development context,
     // such as to skip sanitizer if corresponding header is sent
     IS_DEVELOPMENT_MODE,
+
     SOURCE,
+
     SOURCE_AUTH_STRATEGY_IDENTIFIER,
-    //target API endpoint to forward request to
+
+    /**
+     * target API endpoint to forward request to (a hostname, eg, api.example.com)
+     */
     TARGET_HOST,
 
     /**
@@ -79,7 +112,7 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
      */
     TLS_VERSION,
 
-    BUNDLE_FILENAME, ;
+    ;
 
     public static class TlsVersions {
         public final static String TLSv1_2 = "TLSv1.2";
