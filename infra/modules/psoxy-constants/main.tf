@@ -469,7 +469,7 @@ locals {
       description_url = "https://cloud.google.com/iam/docs/understanding-roles#cloudrun.developer"
     }
   }
-  
+
   # TODO: add list of permissions, which customer could use to create custom role as alternative
 
 
