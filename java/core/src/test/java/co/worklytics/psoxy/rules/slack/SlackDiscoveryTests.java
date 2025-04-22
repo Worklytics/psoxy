@@ -29,7 +29,7 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
             .defaultScopeId("slack")
             .sourceKind("slack")
             .rulesFile("discovery")
-            .checkRegularSSMLimit(false)
+            .checkUncompressedSSMLength(false)
             .build();
 
     @SneakyThrows
@@ -128,11 +128,12 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("discovery-conversations-history.json");
 
         Collection<String> PIItoPseudonymize = Arrays.asList(
-                "W06CA4EAC", "W0G81RDQT", "W0N0ZQDED", "W0R8EBMXP", "W0G81RDQZ", "W000000", "U02DU306H0B",
+                "W06CA4EAC",
+               "W0G81RDQT",
+                "W0N0ZQDED", "W0R8EBMXP", "W0G81RDQZ", "W000000", "U02DU306H0B",
                 "REPLYUSER",
                 "some parent user",
                 "U02K5LRARED",
-                "U074XMEDGUU",
                 "USLACKBOT"
         );
 
@@ -151,7 +152,8 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
                 "https://badpuns.example.com/puns/123.png",
                 "permalink value",
                 "huddle test topic",
-                "A huddle started"
+                "A huddle started",
+                "U074XMEDGUU" // one of participants; this is now redacted
         );
 
         Collection<String> dataToKeep = Arrays.asList(

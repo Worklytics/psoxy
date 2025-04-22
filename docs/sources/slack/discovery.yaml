@@ -162,9 +162,12 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.users[*].id"
           - "$.users[*].profile.email"
           - "$.users[*].profile.guest_invited_by"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.users[*].id"
         encoding: "JSON"
       - !<redact>
         jsonPaths:
@@ -226,6 +229,8 @@ definitions:
         type: "boolean"
       id:
         type: "string"
+      name:
+        type: "string"
       team_id:
         type: "string"
   Conversation:
@@ -236,7 +241,7 @@ definitions:
       conversation_id:
         $ref: "#/definitions/ConversationId"
       created:
-        type: "string"
+        type: "integer"
       creator:
         type: "string"
       id:
@@ -408,10 +413,6 @@ definitions:
         type: "string"
       email:
         type: "string"
-      status_emoji:
-        type: "string"
-      status_expiration:
-        type: "integer"
       team:
         type: "string"
   Reaction:
@@ -501,7 +502,7 @@ definitions:
       archived:
         type: "boolean"
       created:
-        type: "string"
+        type: "integer"
       deleted:
         type: "boolean"
       discoverable:

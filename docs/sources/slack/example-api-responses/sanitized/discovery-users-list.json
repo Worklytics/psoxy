@@ -2,9 +2,8 @@
   "ok":true,
   "users":[
     {
-      "id":"p~BZcy5qhkyGyUTWR9hC_my2o6pHLKA4C8MHUHRy1K5TuugNC6SKYHB4eIKRZ4cFOg",
+      "id":"{\"hash\":\"BZcy5qhkyGyUTWR9hC_my2o6pHLKA4C8MHUHRy1K5Ts\"}",
       "deleted":false,
-      "color":"e7392d",
       "tz":"America/Los_Angeles",
       "tz_label":"Pacific Standard Time",
       "tz_offset":-28800,
@@ -13,23 +12,14 @@
         "team":"T02DDBANBM5"
       },
       "is_admin":true,
-      "is_owner":true,
-      "is_primary_owner":false,
-      "is_restricted":false,
-      "is_ultra_restricted":false,
-      "is_bot":false,
-      "is_app_user":false,
       "updated":1635194243,
-      "is_email_confirmed":true,
-      "who_can_share_contact_card":"EVERYONE",
       "teams":[
         "T02DDBANBM5"
       ]
     },
     {
-      "id":"p~fyCnHbAdterJaFBMVnh6bo_qduSAt-k18eEgbYN_FqLZ-38BzAOn6weILvGYSJN4",
+      "id":"{\"hash\":\"fyCnHbAdterJaFBMVnh6bo_qduSAt-k18eEgbYN_FqI\"}",
       "deleted":false,
-      "color":"4bbe2e",
       "tz":"America/Los_Angeles",
       "tz_label":"Pacific Standard Time",
       "tz_offset":-28800,
@@ -38,24 +28,14 @@
         "team":"T02DDBANBM5"
       },
       "is_admin":false,
-      "is_owner":false,
-      "is_primary_owner":false,
-      "is_restricted":false,
-      "is_ultra_restricted":false,
-      "is_bot":false,
-      "is_app_user":false,
       "updated":1631135209,
-      "is_email_confirmed":false,
-      "who_can_share_contact_card":"EVERYONE",
-      "is_invited_user":true,
       "teams":[
         "T02DDBANBM5"
       ]
     },
     {
-      "id":"p~mJlhl3xv52fNY6wyUps5mBYPCl1nVWHT442eQ7v-lJyurnRXe1xte4bUgJLOS0DP",
+      "id":"{\"hash\":\"mJlhl3xv52fNY6wyUps5mBYPCl1nVWHT442eQ7v-lJw\"}",
       "deleted":false,
-      "color":"9f69e7",
       "tz":"America/Los_Angeles",
       "tz_label":"Pacific Standard Time",
       "tz_offset":-28800,
@@ -64,15 +44,7 @@
         "team":"T02DDBANBM5"
       },
       "is_admin":true,
-      "is_owner":true,
-      "is_primary_owner":true,
-      "is_restricted":false,
-      "is_ultra_restricted":false,
-      "is_bot":false,
-      "is_app_user":false,
       "updated":1631135179,
-      "is_email_confirmed":true,
-      "who_can_share_contact_card":"EVERYONE",
       "teams":[
         "T02DDBANBM5"
       ]
