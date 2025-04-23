@@ -197,6 +197,14 @@ public class PrebuiltSanitizerRules {
     private static final Transform TEAM_REDACTS = Transform.Redact.builder()
             .jsonPath("$..name")
             .jsonPath("$..description")
+            .jsonPath("$..url")
+            .jsonPath("$..html_url")
+            .jsonPath("$..members_url")
+            .jsonPath("$..repositories_url")
+            .build();
+
+    private static final Transform TEAM_SLUG_TOKENIZATION = Transform.Tokenize.builder()
+            .jsonPath("$..slug")
             .build();
 
     static final Endpoint ORG_MEMBERS = Endpoint.builder()
@@ -237,6 +245,7 @@ public class PrebuiltSanitizerRules {
             .pathTemplate("/orgs/{org}/teams")
             .allowedQueryParams(commonAllowedQueryParameters)
             .transform(TEAM_REDACTS)
+            .transform(TEAM_SLUG_TOKENIZATION)
             .build();
 
     static final Endpoint ORG_AUDIT_LOG = Endpoint.builder()
@@ -300,6 +309,7 @@ public class PrebuiltSanitizerRules {
             .allowedQueryParams(commonAllowedQueryParameters)
             .transforms(generateUserTransformations("..", Collections.singletonList("assignee")))
             .transform(TEAM_REDACTS)
+            .transform(TEAM_SLUG_TOKENIZATION)
             .build();
 
     static final Endpoint REPO_COMMIT = Endpoint.builder()

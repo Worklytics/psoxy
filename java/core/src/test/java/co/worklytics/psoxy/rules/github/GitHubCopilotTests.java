@@ -134,11 +134,11 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertNotSanitized(sanitized, "justice-league");
         assertNotSanitized(sanitized, "123456");
 
         assertRedacted(sanitized, "Justice League",
-                "A great team."
+                "A great team.",
+                "justice-league"
         );
 
         assertUrlAllowed(endpoint);

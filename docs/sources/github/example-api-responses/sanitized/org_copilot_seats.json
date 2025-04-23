@@ -18,14 +18,10 @@
       "assigning_team":{
         "id":1,
         "node_id":"MDQ6VGVhbTE=",
-        "url":"https://api.github.com/teams/1",
-        "html_url":"https://github.com/orgs/github/teams/justice-league",
-        "slug":"justice-league",
+        "slug":"p~eYln4_iIXDr2mXHBaE6frCg5VHOxdR9iRQUcIRUh2DOpBUifPKLi7XWYsIueuR8f",
         "privacy":"closed",
         "notification_setting":"notifications_enabled",
         "permission":"admin",
-        "members_url":"https://api.github.com/teams/1/members{/member}",
-        "repositories_url":"https://api.github.com/teams/1/repos",
         "parent":null
       }
     },
