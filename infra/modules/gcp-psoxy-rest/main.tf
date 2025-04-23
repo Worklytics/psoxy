@@ -46,43 +46,53 @@ resource "google_service_account_iam_member" "act_as" {
 }
 
 
-resource "google_cloudfunctions_function" "function" {
+resource "google_cloudfunctions2_function" "function" {
   name        = "${var.environment_id_prefix}${var.instance_id}"
   description = "Psoxy Connector - ${var.source_kind}"
-  runtime     = "java17"
-  project     = var.project_id
-  region      = var.region
 
-  trigger_http                 = true
-  https_trigger_security_level = "SECURE_ALWAYS"
-  available_memory_mb          = var.available_memory_mb
-  source_archive_bucket        = var.artifacts_bucket_name
-  source_archive_object        = var.deployment_bundle_object_name
-  entry_point                  = "co.worklytics.psoxy.Route"
-  service_account_email        = var.service_account_email
-  labels                       = var.default_labels
-  docker_registry              = "ARTIFACT_REGISTRY"
-  docker_repository            = var.artifact_repository_id
+  project  = var.project_id
+  location = var.region
 
-  environment_variables = merge(
-    local.required_env_vars,
-    var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
-    var.environment_variables,
-    var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
-    var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${replace(upper(var.instance_id), "-", "_")}_" },
-  )
+  build_config {
+    runtime           = "java21"
+    docker_repository = var.artifact_repository_id
+    entry_point       = "co.worklytics.psoxy.Route"
 
-  dynamic "secret_environment_variables" {
-    for_each = var.secret_bindings
-    iterator = secret_environment_variable
-
-    content {
-      key        = secret_environment_variable.key
-      project_id = data.google_project.project.number
-      secret     = secret_environment_variable.value.secret_id
-      version    = secret_environment_variable.value.version_number
+    source {
+      storage_source {
+        bucket = var.artifacts_bucket_name
+        object = var.deployment_bundle_object_name
+      }
     }
   }
+
+  service_config {
+    service_account_email = var.service_account_email
+    available_memory      = "${var.available_memory_mb}M"
+    ingress_settings      = "ALLOW_ALL"
+
+    environment_variables = merge(
+      local.required_env_vars,
+      var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
+      var.environment_variables,
+      var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
+      var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${replace(upper(var.instance_id), "-", "_")}_" },
+    )
+
+    dynamic "secret_environment_variables" {
+      for_each = var.secret_bindings
+      iterator = secret_environment_variable
+
+      content {
+        key        = secret_environment_variable.key
+        project_id = data.google_project.project.number
+        secret     = secret_environment_variable.value.secret_id
+        version    = secret_environment_variable.value.version_number
+      }
+    }
+  }
+
+  labels = var.default_labels
 
   lifecycle {
     ignore_changes = [
@@ -96,40 +106,40 @@ resource "google_cloudfunctions_function" "function" {
   ]
 }
 
-resource "google_cloudfunctions_function_iam_member" "invokers" {
+resource "google_cloudfunctions2_function_iam_member" "invokers" {
   for_each = toset(var.invoker_sa_emails)
 
-  cloud_function = google_cloudfunctions_function.function.id
+  cloud_function = google_cloudfunctions2_function.function.id
   member         = "serviceAccount:${each.value}"
   role           = "roles/cloudfunctions.invoker"
 }
 
-resource "google_cloudfunctions_function_iam_member" "testers" {
+resource "google_cloudfunctions2_function_iam_member" "testers" {
   for_each = toset(var.gcp_principals_authorized_to_test)
 
-  cloud_function = google_cloudfunctions_function.function.id
+  cloud_function = google_cloudfunctions2_function.function.id
   member         = each.value
   role           = "roles/cloudfunctions.invoker"
 }
 
 locals {
-  proxy_endpoint_url  = "https://${google_cloudfunctions_function.function.region}-${google_cloudfunctions_function.function.project}.cloudfunctions.net/${google_cloudfunctions_function.function.name}"
+  proxy_endpoint_url  = google_cloudfunctions2_function.function.service_config[0].uri
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
   command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js"
   command_test_calls = [for path in var.example_api_calls :
     "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
-  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${google_cloudfunctions_function.function.project}\" -f \"${google_cloudfunctions_function.function.name}\""
+  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${google_cloudfunctions2_function.function.project}\" -f \"${google_cloudfunctions2_function.function.name}\""
 }
 
 locals {
   todo_content = <<EOT
-## Testing ${google_cloudfunctions_function.function.name}
+## Testing ${google_cloudfunctions2_function.function.name}
 
 Review the deployed Cloud function in GCP console:
 
-[Function in GCP Console](https://console.cloud.google.com/functions/details/${google_cloudfunctions_function.function.region}/${google_cloudfunctions_function.function.name}?project=${google_cloudfunctions_function.function.project})
+[Function in GCP Console](https://console.cloud.google.com/functions/details/${google_cloudfunctions2_function.function.location}/${google_cloudfunctions2_function.function.name}?project=${google_cloudfunctions2_function.function.project})
 
 We provide some Node.js scripts to easily validate the deployment. To be able
 to run the test commands below, you need Node.js (>=16) and npm (v >=8)
@@ -191,7 +201,7 @@ resource "local_file" "test_script" {
 resource "local_file" "review" {
   count = var.todos_as_local_files ? 1 : 0
 
-  filename = "TODO ${var.todo_step} - test ${google_cloudfunctions_function.function.name}.md"
+  filename = "TODO ${var.todo_step} - test ${google_cloudfunctions2_function.function.name}.md"
   content  = local.todo_content
 }
 
@@ -200,11 +210,11 @@ output "instance_id" {
 }
 
 output "service_account_email" {
-  value = google_cloudfunctions_function.function.service_account_email
+  value = google_cloudfunctions2_function.function.service_config[0].service_account_email
 }
 
 output "cloud_function_name" {
-  value = google_cloudfunctions_function.function.name
+  value = google_cloudfunctions2_function.function.name
 }
 
 output "cloud_function_url" {
