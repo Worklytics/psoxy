@@ -19,8 +19,9 @@ file.
 | `gdrive`                   | Google Drive                         | API  | GA           |
 | `gdirectory`               | Google Directory                     | API  | GA           |
 | `gemini-usage`            | Gemini Usage                         | Bulk | BETA         |
-| `msft-copilot`            |  Microsot 365 Copilot                         | API | ALPHA         |
+| `msft-copilot`            | Microsot 365 Copilot                 | API | ALPHA        |
 | `github`                   | GitHub                               | API  | GA           |
+| `github-copilot`           | GitHub                               | API  | ALPHA        |
 | `github-enterprise-server` | GitHub Enterprise Server             | API  | GA           |
 | `github-non-enterprise`    | GitHub Non-Enterprise                | API  | GA           |
 | `gmail`                    | Gmail                                | API  | GA           |

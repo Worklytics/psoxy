@@ -409,6 +409,13 @@ endpoints:
         jsonPaths:
           - "$..name"
           - "$..description"
+          - "$..url"
+          - "$..html_url"
+          - "$..members_url"
+          - "$..repositories_url"
+      - !<tokenize>
+        jsonPaths:
+          - "$..slug"
   - pathTemplate: "/orgs/{org}/teams/{teamSlug}/members"
     allowedQueryParams:
       - "per_page"

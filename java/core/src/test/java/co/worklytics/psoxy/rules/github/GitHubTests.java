@@ -21,8 +21,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GITHUB;
 
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
-        .sourceKind("github")
-        .build();
+            .sourceKind("github")
+            .build();
 
     @Disabled // not reliable; seems to have different value via IntelliJ/AWS deployment and my
     // laptop's maven, which doesn't make any sense, given that binary deployed to AWS was built via
@@ -45,8 +45,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/orgs/FAKE/members";
 
         Collection<String> PII = Arrays.asList(
-            "octocat",
-            "123456"
+                "octocat",
+                "123456"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -56,8 +56,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "octocat");
         assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
-            "https://api.github.com/users/octocat",
-            "https://api.github.com/users/octocat/events{/privacy}"
+                "https://api.github.com/users/octocat",
+                "https://api.github.com/users/octocat/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -68,10 +68,10 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("graph_api_users_saml.json");
 
         Collection<String> PII = Arrays.asList(
-            "fake1",
-            "fake2",
-            "fake1@contoso.com",
-            "fake2@contoso.com"
+                "fake1",
+                "fake2",
+                "fake1@contoso.com",
+                "fake2@contoso.com"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -90,10 +90,10 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("graph_api_users_members.json");
 
         Collection<String> PII = Arrays.asList(
-            "fake1",
-            "fake2",
-            "fake1@contoso.com",
-            "fake2@contoso.com"
+                "fake1",
+                "fake2",
+                "fake1@contoso.com",
+                "fake2@contoso.com"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -113,9 +113,9 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f";
 
         Collection<String> PII = Arrays.asList(
-            "monalisa octocat",
-            "octocat",
-            "monatheoctocat"
+                "monalisa octocat",
+                "octocat",
+                "monatheoctocat"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -136,11 +136,11 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertNotSanitized(sanitized, "justice-league");
         assertNotSanitized(sanitized, "123456");
 
         assertRedacted(sanitized, "Justice League",
-            "A great team."
+                "A great team.",
+                "justice-league"
         );
 
         assertUrlAllowed(endpoint);
@@ -153,8 +153,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/orgs/FAKE/teams/TEAM/members";
 
         Collection<String> PII = Arrays.asList(
-            "some-user",
-            "12345678"
+                "some-user",
+                "12345678"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -164,8 +164,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "some-user");
         assertPseudonymized(sanitized, "12345678");
         assertRedacted(sanitized,
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -178,8 +178,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF";
 
         Collection<String> PII = Arrays.asList(
-            "Monalisa Octocat",
-            "octocat"
+                "Monalisa Octocat",
+                "octocat"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -189,9 +189,9 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "octocat");
         assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
-            "Monalisa Octocat",
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "Monalisa Octocat",
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -204,8 +204,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/repos/FAKE/REPO/commits";
 
         Collection<String> PII = Arrays.asList(
-            "Monalisa Octocat",
-            "octocat"
+                "Monalisa Octocat",
+                "octocat"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -215,9 +215,9 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "octocat");
         assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
-            "Monalisa Octocat",
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "Monalisa Octocat",
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -230,7 +230,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/repos/{owner}/{repo}/commits/{commit_sha}/comments";
 
         Collection<String> PII = Arrays.asList(
-            "octocat"
+                "octocat"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -250,9 +250,9 @@ public class GitHubTests extends JavaRulesTestBaseCase {
 
         assertPseudonymized(sanitized, "98765432");
         assertRedacted(sanitized,
-            "Monalisa Octocat",
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "Monalisa Octocat",
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -265,7 +265,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE_NUMBER";
 
         Collection<String> PII = List.of(
-            "octocat"
+                "octocat"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -275,11 +275,11 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "octocat");
         assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
-            "I'm having a problem with this.",
-            "Found a bug",
-            "Tracking milestone for version 1.0",
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "I'm having a problem with this.",
+                "Found a bug",
+                "Tracking milestone for version 1.0",
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -300,11 +300,11 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "octocat");
         assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
-            "I'm having a problem with this.",
-            "Found a bug",
-            "Tracking milestone for version 1.0",
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "I'm having a problem with this.",
+                "Found a bug",
+                "Tracking milestone for version 1.0",
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -325,9 +325,9 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "octocat");
         assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
-            "Me too",
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "Me too",
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -348,8 +348,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "octocat");
         assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -362,12 +362,12 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/repos/FAKE/REPO/issues/ISSUE/timeline";
 
         Collection<String> PII = Arrays.asList(
-            "9919",
-            "67656570",
-            "94867353",
-            "octocat",
-            "authorUser@some-domain.com",
-            "noreply@github.com"
+                "9919",
+                "67656570",
+                "94867353",
+                "octocat",
+                "authorUser@some-domain.com",
+                "noreply@github.com"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -381,10 +381,10 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "67656570");
         assertPseudonymized(sanitized, "94867353");
         assertRedacted(sanitized,
-            "Shipped to the cloud",
-            "Secret scanning",
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "Shipped to the cloud",
+                "Secret scanning",
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -401,9 +401,9 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "octocat");
         assertPseudonymized(sanitized, "98765432");
         assertRedacted(sanitized,
-            "Monalisa Octocat",
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "Monalisa Octocat",
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -420,9 +420,9 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "octocat");
         assertPseudonymized(sanitized, "98765432");
         assertRedacted(sanitized,
-            "Monalisa Octocat",
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "Monalisa Octocat",
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -435,10 +435,10 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/repos/FAKE/REPO/events";
 
         Collection<String> PII = Arrays.asList(
-            "Monalisa Octocat",
-            "octocat",
-            "octocat@github.com",
-            "583231"
+                "Monalisa Octocat",
+                "octocat",
+                "octocat@github.com",
+                "583231"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -449,8 +449,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "583231");
         assertPseudonymized(sanitized, "octocat@github.com");
         assertRedacted(sanitized,
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -463,8 +463,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/PULL_NUMBER/reviews";
 
         Collection<String> PII = Arrays.asList(
-            "123456",
-            "octocat"
+                "123456",
+                "octocat"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -474,9 +474,9 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "octocat");
         assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
-            "Here is the body for the review.",
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "Here is the body for the review.",
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -489,8 +489,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/orgs/FAKE/repos";
 
         Collection<String> PII = Arrays.asList(
-            "Worklytics-org",
-            "23456789"
+                "Worklytics-org",
+                "23456789"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -500,9 +500,9 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         //assertPseudonymized(sanitized, "Worklytics-user");
         //assertPseudonymized(sanitized, "23456789");
         assertRedacted(sanitized,
-            "serverless, pseudonymizing proxy between Worklytics and your SaaS workplace data sources' REST APIs",
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "serverless, pseudonymizing proxy between Worklytics and your SaaS workplace data sources' REST APIs",
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -515,12 +515,12 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/repos/{owner}/{repo}/pulls";
 
         Collection<String> PII = Arrays.asList(
-            "octocat",
-            "123456",
-            "hubot",
-            "123457",
-            "other_user",
-            "123458"
+                "octocat",
+                "123456",
+                "hubot",
+                "123457",
+                "other_user",
+                "123458"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -533,11 +533,11 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "123458");
 
         assertRedacted(sanitized,
-            "Amazing new feature",
-            "Please pull these awesome changes in!",
-            "Something isn't working",
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "Amazing new feature",
+                "Please pull these awesome changes in!",
+                "Something isn't working",
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -550,12 +550,12 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/repos/{owner}/{repo}/pulls/PULL_NUMBER";
 
         Collection<String> PII = Arrays.asList(
-            "octocat",
-            "123456",
-            "hubot",
-            "123457",
-            "other_user",
-            "123458"
+                "octocat",
+                "123456",
+                "hubot",
+                "123457",
+                "other_user",
+                "123458"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -568,11 +568,11 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "123458");
 
         assertRedacted(sanitized,
-            "Amazing new feature",
-            "Please pull these awesome changes in!",
-            "Something isn't working",
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "Amazing new feature",
+                "Please pull these awesome changes in!",
+                "Something isn't working",
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -585,8 +585,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/42/commits";
 
         Collection<String> PII = Arrays.asList(
-            "Monalisa Octocat",
-            "octocat"
+                "Monalisa Octocat",
+                "octocat"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -596,9 +596,9 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "octocat");
         assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
-            "Monalisa Octocat",
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "Monalisa Octocat",
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -611,7 +611,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/42/comments";
 
         Collection<String> PII = List.of(
-            "some-user"
+                "some-user"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -621,8 +621,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "some-user");
         assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -635,7 +635,7 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/repos/FAKE/REPO/pulls/42/reviews/10/comments";
 
         Collection<String> PII = List.of(
-            "some-user"
+                "some-user"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -645,8 +645,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "some-user");
         assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
-            "https://api.github.com/users/some-user",
-            "https://api.github.com/users/some-user/events{/privacy}"
+                "https://api.github.com/users/some-user",
+                "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -659,8 +659,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/orgs/{org}/audit-log";
 
         Collection<String> PII = Arrays.asList(
-            "octocat",
-            "some-business"
+                "octocat",
+                "some-business"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -670,8 +670,8 @@ public class GitHubTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "octocat");
 
         assertRedacted(sanitized,
-            "Update README.md",
-            "some-business"
+                "Update README.md",
+                "some-business"
         );
 
         assertUrlAllowed(endpoint);
@@ -680,39 +680,39 @@ public class GitHubTests extends JavaRulesTestBaseCase {
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
-            InvocationExample.of("https://api.github.com/orgs/FAKE/members", "org_members.json"),
-            InvocationExample.of("https://api.github.com/graphql", "graph_api_users_saml.json"),
-            InvocationExample.of("https://api.github.com/graphql", "graph_api_users_members.json"),
-            InvocationExample.of("https://api.github.com/graphql", "graph_api_error.json"),
-            InvocationExample.of("https://api.github.com/graphql", "repo_commits_graphql.json"),
-            InvocationExample.of("https://api.github.com/graphql", "pull_commits_graphql.json"),
-            InvocationExample.of("https://api.github.com/orgs/FAKE/teams", "org_teams.json"),
-            InvocationExample.of("https://api.github.com/orgs/FAKE/teams/TEAM/members", "team_members.json"),
-            InvocationExample.of("https://api.github.com/orgs/FAKE/repos", "repos.json"),
-            InvocationExample.of("https://api.github.com/orgs/FAKE/audit-log", "org_audit_log.json"),
-            InvocationExample.of("https://api.github.com/organizations/123456789/audit-log?include=all&per_page=100&phrase=created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000&page=0&order=asc&after=MS42OEQyOTE2MjX1MqNlJzIyfANVOHoYbUVsZ1ZjUWN6TwlZLXl6EVE%3D&before", "org_audit_log.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF", "commit.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF/comments", "commit_comments.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/branches", "repo_branches.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits", "repo_commits.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/events", "repo_events.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/comments/COMMENT_ID/reactions", "comment_reactions.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE", "issue.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues", "issues.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE/comments", "issues_comments.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE/events", "issue_events.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE/timeline", "issue_timeline.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE/reactions", "issues_reactions.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/comments/reactions", "issues_comments_reactions.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls", "pulls.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/comments", "pull_comments.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/commits", "pull_commits.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/reviews", "pull_reviews.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/reviews/10/comments", "pull_review_comments.json"),
-            InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/PULL_ID", "pull.json"),
-            InvocationExample.of("https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f?per_page=1", "user.json"),
-            InvocationExample.of("https://api.github.com/users/p~wD8RXfeJ5J-Po8ztEdwRQ-ae1xHBQKRMfNsFB5FFteZgtt4TBv84utnnumgFnjsR?per_page=1", "user.json"),
-            InvocationExample.of("https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f", "user.json")
+                InvocationExample.of("https://api.github.com/orgs/FAKE/members", "org_members.json"),
+                InvocationExample.of("https://api.github.com/graphql", "graph_api_users_saml.json"),
+                InvocationExample.of("https://api.github.com/graphql", "graph_api_users_members.json"),
+                InvocationExample.of("https://api.github.com/graphql", "graph_api_error.json"),
+                InvocationExample.of("https://api.github.com/graphql", "repo_commits_graphql.json"),
+                InvocationExample.of("https://api.github.com/graphql", "pull_commits_graphql.json"),
+                InvocationExample.of("https://api.github.com/orgs/FAKE/teams", "org_teams.json"),
+                InvocationExample.of("https://api.github.com/orgs/FAKE/teams/TEAM/members", "team_members.json"),
+                InvocationExample.of("https://api.github.com/orgs/FAKE/repos", "repos.json"),
+                InvocationExample.of("https://api.github.com/orgs/FAKE/audit-log", "org_audit_log.json"),
+                InvocationExample.of("https://api.github.com/organizations/123456789/audit-log?include=all&per_page=100&phrase=created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000&page=0&order=asc&after=MS42OEQyOTE2MjX1MqNlJzIyfANVOHoYbUVsZ1ZjUWN6TwlZLXl6EVE%3D&before", "org_audit_log.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF", "commit.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits/COMMIT_REF/comments", "commit_comments.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/branches", "repo_branches.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/commits", "repo_commits.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/events", "repo_events.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/comments/COMMENT_ID/reactions", "comment_reactions.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE", "issue.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues", "issues.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE/comments", "issues_comments.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE/events", "issue_events.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE/timeline", "issue_timeline.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/ISSUE/reactions", "issues_reactions.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues/comments/reactions", "issues_comments_reactions.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls", "pulls.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/comments", "pull_comments.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/commits", "pull_commits.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/reviews", "pull_reviews.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/42/reviews/10/comments", "pull_review_comments.json"),
+                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/pulls/PULL_ID", "pull.json"),
+                InvocationExample.of("https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f?per_page=1", "user.json"),
+                InvocationExample.of("https://api.github.com/users/p~wD8RXfeJ5J-Po8ztEdwRQ-ae1xHBQKRMfNsFB5FFteZgtt4TBv84utnnumgFnjsR?per_page=1", "user.json"),
+                InvocationExample.of("https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f", "user.json")
         );
     }
 }
