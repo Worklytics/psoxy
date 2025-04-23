@@ -6,10 +6,8 @@ import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
-import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
-import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
@@ -32,7 +30,6 @@ import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import dagger.Module;
 import dagger.Provides;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Named;
@@ -216,10 +213,49 @@ public class PsoxyModule {
     }
 
     @Provides
+    @Named("emailDomains")
+    @Singleton
+    ReversibleTokenizationStrategy emailDomainsEncryptionStrategy(SecretStore secretStore,
+                                                        @Named("emailDomains") DeterministicTokenizationStrategy deterministicTokenizationStrategy) {
+        String salt = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.SALT_EMAIL_DOMAINS)
+            .orElse(secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
+
+        Optional<SecretKeySpec> keyFromConfig =
+            firstPresent(
+                secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.ENCRYPTION_KEY_EMAIL_DOMAINS),
+                secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY)
+            )
+                .map(passkey -> AESReversibleTokenizationStrategy.aesKeyFromPassword(passkey, salt));
+        //q: do we need to support actual fully AES keys?
+
+        if (keyFromConfig.isEmpty()) {
+            log.warning("No value for PSOXY_ENCRYPTION_KEY; any transforms depending on it will fail!");
+        }
+
+        return AESReversibleTokenizationStrategy.builder()
+            .cipherSuite(AESReversibleTokenizationStrategy.CBC)
+            .key(keyFromConfig.orElse(null)) //null disables it, which is OK if transforms depending on this aren't used
+            .deterministicTokenizationStrategy(deterministicTokenizationStrategy)
+            .build();
+    }
+
+    @Provides
     @Named("ipHashStrategy")
     @Singleton
     DeterministicTokenizationStrategy deterministicTokenizationStrategy(SecretStore secretStore) {
         String salt = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.SALT_IP)
+            .orElse(secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
+
+        return new Sha256DeterministicTokenizationStrategy(salt);
+    }
+
+
+
+    @Provides
+    @Named("emailDomains")
+    @Singleton
+    DeterministicTokenizationStrategy deterministicTokenizationStrategyEmailDomains(SecretStore secretStore) {
+        String salt = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.SALT_EMAIL_DOMAINS)
             .orElse(secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
 
         return new Sha256DeterministicTokenizationStrategy(salt);
