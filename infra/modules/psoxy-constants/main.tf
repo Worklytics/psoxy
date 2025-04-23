@@ -460,9 +460,9 @@ locals {
       display_name    = "Service Usage Admin",
       description_url = "https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin"
     },
-    "roles/cloudfunctions.admin" = { # q: can we replace this with Cloud Run Developer ??
-      display_name    = "Cloud Functions Admin",
-      description_url = "https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.admin"
+    "roles/cloudfunctions.developer" = {
+      display_name    = "Cloud Functions Developer",
+      description_url = "https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.developer"
     },
     "roles/cloudrun.developer" = {
       display_name    = "Cloud Run Developer",

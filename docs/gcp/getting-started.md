@@ -26,7 +26,7 @@ Service Account Keys and activate Google Workspace APIs.
 - a GCP (Google) user or Service Account with permissions to provision Service Accounts, Secrets,
   Storage Buckets, Cloud Functions, and enable APIs within that project. eg:
 
-  - [Cloud Functions Admin](https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.admin) -
+  - [Cloud Functions Developer](https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.developer) -
     proxy instances are deployed as GCP cloud functions
   - [Cloud Run Developer](https://cloud.google.com/iam/docs/understanding-roles#cloudrun.developer) - cloud
     function deployment requires Cloud Run Developer role
