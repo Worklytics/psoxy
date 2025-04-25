@@ -3,6 +3,7 @@ package co.worklytics.psoxy.utils.email;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -11,8 +12,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
+/**
+ * our version of EmailAddressParser, which parses/validates email addresses as entity identifiers
+ *
+ * this is slightly different use-case than many parsers/validators, which actually want to ensure that an email address is *deliverable*,
+ *  for example when signing up a user or something.
+ *
+ *  We just care that it syntactically looks like an email address, with personal name / mailbox / domain parts
+ */
+@Singleton
 public class EmailAddressParser {
-
 
     public EmailAddressParser(EnumSet<EmailAddressCriteria> criteria) {
         this.criteria = criteria;
@@ -23,7 +32,6 @@ public class EmailAddressParser {
         this.MAILBOX_LIST_PATTERN = dragon.MAILBOX_LIST_PATTERN;
         this.ADDRESS_PATTERN = dragon.ADDRESS_PATTERN;
         this.GROUP_PREFIX_PATTERN = dragon.GROUP_PREFIX_PATTERN;
-
     }
 
     @Inject
