@@ -60,8 +60,6 @@ public class HttpRequestHandler {
 
             if (abstractResponse.getBody() != null) {
                 try (OutputStream outputStream = response.getOutputStream()) {
-                    new ByteArrayInputStream(abstractResponse.getBody().getBytes(StandardCharsets.UTF_8))
-                        .transferTo(response.getOutputStream());
                     outputStream.write(abstractResponse.getBody().getBytes(StandardCharsets.UTF_8));
                 } catch (IOException e) {
                     log.log(Level.WARNING, "Error writing response body", e);

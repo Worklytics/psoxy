@@ -17,12 +17,11 @@ import lombok.experimental.SuperBuilder;
 public class Pseudonym extends Token {
 
     /**
-     * a 'domain' for the identifier, which may be returned plain or may itself be tokenized
+     * a 'domain' for the identifier, which may be returned plain or may itself be tokenized/encrypted
      *
      * q: is this a specific type of metadata about the identifier?
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("d")
     String domain;
-
 }

@@ -25,6 +25,8 @@ public interface Pseudonymizer {
         @Builder.Default
         EmailCanonicalization emailCanonicalization = EmailCanonicalization.STRICT;
 
+        @Builder.Default
+        EmailDomainHandling emailDomainHandling = EmailDomainHandling.PRESERVE;
     }
 
     /**

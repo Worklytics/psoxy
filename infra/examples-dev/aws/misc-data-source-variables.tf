@@ -51,6 +51,12 @@ variable "github_installation_id" {
   description = "(Only required if using Github connector) InstallationId of the application in your org for authentication with the proxy instance (ex: 123456)"
 }
 
+variable "github_copilot_installation_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Github Copilot connector) InstallationId of the application in your org for authentication with the proxy instance (ex: 123456)"
+}
+
 variable "github_organization" {
   type        = string
   default     = null

@@ -24,8 +24,8 @@ public enum EmailCanonicalization {
      *
      * see: https://learn.microsoft.com/en-us/exchange/recipients-in-exchange-online/plus-addressing-in-exchange-online
      *
-     * default as of 0.4, bc it's the most conservative/standard compliant approach. If a Microsoft
-     * customer wants to have behavior where `.` is ignored, this can always be acheived by explicitly
+     * default as of 0.4 and 0.5 , bc it's the most conservative/standard compliant approach. If a Microsoft
+     * customer wants to have behavior where `.` is ignored, this can always be achieved by explicitly
      * adding those variants as aliases in their directory - and this should pose no problem to
      * proxy operation.
      */

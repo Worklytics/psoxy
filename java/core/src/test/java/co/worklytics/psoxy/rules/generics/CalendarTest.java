@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.generics;
 
 import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
+import co.worklytics.psoxy.utils.email.EmailAddressParser;
 import com.jayway.jsonpath.Configuration;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CalendarTest {
 
-    RESTApiSanitizerImpl restApiSanitizer = new RESTApiSanitizerImpl(null, null);
+    RESTApiSanitizerImpl restApiSanitizer = new RESTApiSanitizerImpl(null, null, new EmailAddressParser());
 
     @CsvSource(value = {
         "OOO,OOO",

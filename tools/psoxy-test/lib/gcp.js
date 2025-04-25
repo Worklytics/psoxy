@@ -11,6 +11,10 @@ import { Storage } from '@google-cloud/storage';
 import getLogger from './logger.js';
 import _ from 'lodash';
 
+
+const GCP_CLOUD_FUNCTION_GEN1_DOMAIN='cloudfunctions.net';
+const GCP_CLOUD_FUNCTION_GEN2_DOMAIN='run.app';
+
 /**
  * Helper: check url deploy type
  *
@@ -21,7 +25,7 @@ function isValidURL(url) {
   if (typeof url === 'string') {
     url = new URL(url);
   }
-  return url.hostname.endsWith('cloudfunctions.net');
+  return url.hostname.endsWith(GCP_CLOUD_FUNCTION_GEN1_DOMAIN) || url.hostname.endsWith(GCP_CLOUD_FUNCTION_GEN2_DOMAIN)
 }
 
 /**
