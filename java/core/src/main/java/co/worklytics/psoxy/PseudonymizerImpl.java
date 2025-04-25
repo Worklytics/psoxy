@@ -15,7 +15,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
-import org.hazlewood.connor.bottema.emailaddress.EmailAddressValidator;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -152,7 +151,7 @@ public class PseudonymizerImpl implements Pseudonymizer {
     }
 
     boolean duckTypesAsEmails(Object value) {
-        return value instanceof String && EmailAddressValidator.isValid((String) value);
+        return value instanceof String && emailAddressParser.isValid((String) value);
     }
 
     /**

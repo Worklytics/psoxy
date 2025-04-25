@@ -25,10 +25,27 @@ public class EmailAddressParser {
     final EnumSet<EmailAddressCriteria> criteria;
     final Pattern MAILBOX_PATTERN;
 
+    /**
+     * Parse an email address into its components. The email address must be valid according to the criteria.
+     * @param rawEmail to parse
+     * @return an Optional containing the parsed email address if valid, or an empty Optional if invalid
+     */
     public Optional<EmailAddress> parse(String rawEmail) {
         return Optional.ofNullable(rawEmail)
             .map(MAILBOX_PATTERN::matcher)
             .filter(Matcher::matches)
             .map(m -> EmailAddressParserRoutines.matcherToStruture(m, criteria, true));
+    }
+
+    /**
+     * whether email address is valid according to the criteria, which is a pragmatic subset of RFC stuff
+     *
+     * @see EmailAddressParserRoutines for details on precise criteria / interpretation of the RFC.
+     *
+     * @param rawEmail to validate
+     * @return true if valid, false if not
+     */
+    public boolean isValid(String rawEmail) {
+        return parse(rawEmail).isPresent();
     }
 }
