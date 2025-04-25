@@ -1,5 +1,7 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.utils.email.EmailAddress;
+import co.worklytics.psoxy.utils.email.EmailAddressParser;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.transforms.Transform;
@@ -13,20 +15,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
-import org.hazlewood.connor.bottema.emailaddress.EmailAddressCriteria;
-import org.hazlewood.connor.bottema.emailaddress.EmailAddressParser;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressValidator;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Base64;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 @NoArgsConstructor
 @Log
 public class PseudonymizerImpl implements Pseudonymizer {
 
+    @Inject
+    HashUtils hashUtils;
     @Inject
     ReversibleTokenizationStrategy reversibleTokenizationStrategy;
     @Inject
@@ -39,6 +42,8 @@ public class PseudonymizerImpl implements Pseudonymizer {
 
     @Inject
     UrlSafeTokenPseudonymEncoder urlSafePseudonymEncoder;
+    @Inject
+    EmailAddressParser emailAddressParser;
 
     Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
 
@@ -56,11 +61,17 @@ public class PseudonymizerImpl implements Pseudonymizer {
     }
 
     String emailCanonicalization(String original) {
-        String domain = EmailAddressParser.getDomain(original, EmailAddressCriteria.RECOMMENDED, true);
+        Optional<EmailAddress> parsedEmailAddress =
+            emailAddressParser.parse(original);
+
+
+        String domain = parsedEmailAddress.map(EmailAddress::getDomain).orElse(null);
 
         //NOTE: lower-case here is NOT stipulated by RFC
-        String mailboxLowercase = EmailAddressParser.getLocalPart(original, EmailAddressCriteria.RECOMMENDED, true)
-            .toLowerCase();
+        String mailboxLowercase =parsedEmailAddress
+            .map(EmailAddress::getLocalPart)
+            .map(String::toLowerCase)
+            .orElse(null);
 
         //trim off any + and anything after it (sub-address)
         if (mailboxLowercase.contains("+")) {
@@ -103,6 +114,7 @@ public class PseudonymizerImpl implements Pseudonymizer {
         String domain = null;
         if (duckTypesAsEmails(value)) {
             canonicalization = this::emailCanonicalization;
+
             domain = handleDomain(getOptions().getEmailDomainHandling(), (String) value);
             builder.domain(domain);
 
@@ -153,8 +165,7 @@ public class PseudonymizerImpl implements Pseudonymizer {
     String handleDomain(EmailDomainHandling domainHandlingPolicy, String value) {
         String domain = null;
         if (domainHandlingPolicy != EmailDomainHandling.REDACT) {
-            domain = EmailAddressParser.getDomain(value, EmailAddressCriteria.RECOMMENDED, true);
-
+            domain = emailAddressParser.parse(value).map(EmailAddress::getDomain).orElse(null);
             if (domainHandlingPolicy == EmailDomainHandling.ENCRYPT) {
                 domain = UrlSafeTokenPseudonymEncoder.ENCRYPTED_PREFIX + encoder.encodeToString(emailDomainsEncryptionStrategy.get().getReversibleToken(domain));
             } else if (domainHandlingPolicy == EmailDomainHandling.TOKENIZE) {
