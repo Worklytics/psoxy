@@ -7,6 +7,8 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.URLUtils;
+import co.worklytics.psoxy.utils.email.EmailAddress;
+import co.worklytics.psoxy.utils.email.EmailAddressParser;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
@@ -35,12 +37,9 @@ import lombok.extern.java.Log;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hazlewood.connor.bottema.emailaddress.EmailAddressCriteria;
-import org.hazlewood.connor.bottema.emailaddress.EmailAddressParser;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.mail.internet.InternetAddress;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -64,6 +63,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     final RESTRules rules;
     @Getter
     final Pseudonymizer pseudonymizer;
+    final EmailAddressParser emailAddressParser;
 
 
     //NOTE: JsonPath seems to be threadsafe
@@ -81,9 +81,11 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @AssistedInject
     public RESTApiSanitizerImpl(@Assisted RESTRules rules,
-                                @Assisted Pseudonymizer pseudonymizer) {
+                                @Assisted Pseudonymizer pseudonymizer,
+                                EmailAddressParser emailAddressParser) {
         this.rules = rules;
         this.pseudonymizer = pseudonymizer;
+        this.emailAddressParser = emailAddressParser;
     }
 
     @Getter(onMethod_ = {@VisibleForTesting})
@@ -565,11 +567,11 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         } else {
             //NOTE: this does NOT seem to work for lists containing empty values (eg ",,"), which
             // per RFC should be allowed ....
-            if (EmailAddressParser.isValidAddressList((String) value, EmailAddressCriteria.RECOMMENDED)) {
-                InternetAddress[] addresses =
-                    EmailAddressParser.extractHeaderAddresses((String) value, EmailAddressCriteria.RECOMMENDED, true);
-                return Arrays.stream(addresses)
-                    .map(InternetAddress::getAddress)
+            if (emailAddressParser.isValidAddressList((String) value)) {
+                List<EmailAddress> addresses =
+                    emailAddressParser.parseEmailAddressesFromHeader((String) value);
+                return addresses.stream()
+                    .map(EmailAddress::asFormattedString)
                     .map(pseudonymizer::pseudonymize)
                     .collect(Collectors.toList());
             } else {
@@ -709,7 +711,6 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             .filter(entry -> allowsHttpMethod.test(entry.getKey()))
             .findAny()
             .map(entry -> Pair.of(entry.getValue(), entry.getKey()));
-
     }
 
 }

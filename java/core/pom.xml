@@ -128,20 +128,6 @@
             <version>${dependency.google-auth-library-oauth2-http.version}</version>
         </dependency>
 
-
-        <!-- RFC 2822 validator -->
-        <!-- see https://github.com/bbottema/email-rfc2822-validator -->
-        <dependency>
-            <groupId>com.github.bbottema</groupId>
-            <artifactId>emailaddress-rfc2822</artifactId>
-            <version>2.3.1</version>
-        </dependency>
-        <dependency> <!-- for email validation to work in lib above; used in RESTApiSanitizerImpl, PseudonymizerImpl as of June 2023 -->
-            <groupId>com.sun.mail</groupId>
-            <artifactId>jakarta.mail</artifactId> <!-- CDDL + GPLv2 with classpath exception license, so ideally would remove -->
-            <version>[1.6.3,1.9.9)</version>
-        </dependency>
-
         <!-- explicit direct dep on apache HTTP Client (psoxy-core has transitive dep on it) -->
         <dependency>
             <groupId>org.apache.httpcomponents.core5</groupId>
