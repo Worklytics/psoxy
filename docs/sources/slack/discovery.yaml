@@ -537,8 +537,6 @@ definitions:
   User:
     type: "object"
     properties:
-      bot:
-        type: "boolean"
       deleted:
         type: "boolean"
       email:
@@ -546,6 +544,8 @@ definitions:
       id:
         type: "string"
       is_admin:
+        type: "boolean"
+      is_bot:
         type: "boolean"
       locale:
         type: "string"
