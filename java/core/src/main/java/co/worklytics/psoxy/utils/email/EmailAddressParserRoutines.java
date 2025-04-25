@@ -30,6 +30,7 @@ package co.worklytics.psoxy.utils.email;
 import lombok.NonNull;
 
 import javax.annotation.Nullable;
+import java.io.UnsupportedEncodingException;
 import java.util.EnumSet;
 import java.util.regex.Matcher;
 
@@ -75,9 +76,9 @@ class EmailAddressParserRoutines {
      */
     @SuppressWarnings("WeakerAccess")
     @NonNull
-    public static EmailAddress matcherToStruture(@NonNull Matcher m,
-                                                 @NonNull EnumSet<EmailAddressCriteria> criteria,
-                                                 boolean extractCfwsPersonalNames) {
+    public static EmailAddress matcherToStructure(@NonNull Matcher m,
+                                                  @NonNull EnumSet<EmailAddressCriteria> criteria,
+                                                  boolean extractCfwsPersonalNames) {
         String current_localpart = null;
         String current_domainpart = null;
         String local_part_da;
@@ -250,4 +251,6 @@ class EmailAddressParserRoutines {
         boolean valueStartsEndsWithSAndE = str != null && str.length() >= 2 && str.startsWith(String.valueOf(s)) && str.endsWith(String.valueOf(e));
         return valueStartsEndsWithSAndE ? str.substring(1, str.length() - 1) : str;
     }
+
+
 }

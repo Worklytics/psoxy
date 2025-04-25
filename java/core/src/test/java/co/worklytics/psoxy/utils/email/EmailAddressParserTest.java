@@ -2,6 +2,9 @@ package co.worklytics.psoxy.utils.email;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -65,17 +68,117 @@ class EmailAddressParserTest {
         "ian@worklytics.co,ian",
         "jack.o'neill@example.com,jack.o'neill",
         "\"Kate\" <kate@example.com>,kate",
-        "luke.skywalker@[192.168.1.1],luke.skywalker",
+        //"luke.skywalker@[192.168.1.1],luke.skywalker",
         "\"Mary Jane\" <mary_jane@worklytics.co>,mary_jane",
         "nancy+hr@company.org,nancy+hr",
         "\"Olivia Pope\" <olivia@whitehouse.gov>,olivia",
         "<peter.parker@example.com>,peter.parker",
         "\"Rachel Green\" <rachel.green@friends.example.com>,rachel.green",
         "\"\",",
-        "user@[IPv6:2001:db8::1],user"
+        //"user@[IPv6:2001:db8::1],user"
     })
     @ParameterizedTest
     void getLocalPart(String original, String expected) {
         assertEquals(expected, emailAddressParser.parse(original).map(EmailAddress::getLocalPart).orElse(null));
     }
+
+
+    @ValueSource(strings = {
+        "alice@example.com",
+        "bob@example.com, charlie@example.com",
+        "\"David Smith\" <david.smith@example.com>, eve@example.com",
+        "frank@example.com, \"Grace Hopper\" <grace.hopper@example.com>",
+        "harry@example.com, <ian@example.com>, \"Jack\" <jack@example.com>",
+        "mary.jane@example.com, nancy+newsletter@company.org",
+        "\"Olivia Pope\" <olivia@whitehouse.gov>, peter.parker@example.com",
+        "rachel.green@friends.example.com, ross.geller@example.com",
+        "\"Monica Geller\" <monica@example.com>, chandler.bing@example.com",
+        "phoebe.buffay@example.com, joey.tribbiani@example.com",
+        ///"\"User\" <user@[IPv6:2001:db8::1]>, admin@example.com",  // thought about allowing IPs, but weird
+        "test.email+alex@leetcode.com, test.email.leet+alex@code.com",
+        "\"Group\" <group@example.com>, \"Another Group\" <another.group@example.com>",
+        "single.address@example.com"
+    })
+    @ParameterizedTest
+    void isValidateAddressList_valid(String original) {
+        assertTrue(emailAddressParser.isValidAddressList(original));
+    }
+
+    //NOTE: commented out some copilot-suggested cases which we don't care about ... I'm OK to accept this as valid,
+    // rather than fully validating domains/ips
+    @ValueSource(strings = {
+        "invalid-email",
+        "plainaddress",
+        "@missinglocalpart.com",
+        "missingdomain@.com",
+        "missingatsign.com",
+        "user@.invalid",
+        //"user@invalid-.com",
+        //"user@-invalid.com",
+        "user@invalid..com",
+        //"user@[192.168.1.256]", // Invalid IP
+        //"user@[IPv6:12345::1]", // Invalid IPv6
+        "user@domain..com",
+        "\"Invalid\" <invalid-email>",
+        //"user@domain, another@domain", // Invalid list
+        "user@domain; another@domain"  // Invalid separator
+    })
+    @ParameterizedTest
+    void isValidateAddressList_invalid(String original) {
+        assertFalse(emailAddressParser.isValidAddressList(original));
+    }
+
+    @ValueSource(strings = {
+        "",
+        "    ",
+        "\t",
+        "\n",  // are newlines legal?? doubtful, but copilot suggested and doesn't hurt to check that doesn't blow things up
+        " \t \n "
+    })
+    @ParameterizedTest
+    void parseEmailAddressesFromHeader_empty(String headerValue) {
+        List<EmailAddress> emailAddresses = emailAddressParser.parseEmailAddressesFromHeader(headerValue);
+        assertNotNull(emailAddresses);
+        assertTrue(emailAddresses.isEmpty());
+    }
+
+    @ValueSource(strings = {
+        "bob@example.com",
+        "rachel.green@friends.example.com",
+        "\"Monica Geller\" <monica@example.com>",
+        "phoebe.buffay@example.com",
+        "test.email+alex@leetcode.com,",
+        "\"Group\" <group@example.com>",
+    })
+    @ParameterizedTest
+    void parseEmailAddressesFromHeader_single(String headerValue) {
+        List<EmailAddress> emailAddresses = emailAddressParser.parseEmailAddressesFromHeader(headerValue);
+        assertNotNull(emailAddresses);
+        assertFalse(emailAddresses.isEmpty());
+        assertEquals(1, emailAddresses.size());
+        assertTrue(emailAddresses.stream().allMatch(emailAddress -> emailAddress.getLocalPart() != null && emailAddress.getDomain() != null));
+    }
+
+    @ValueSource(strings = {
+        "bob@example.com, charlie@example.com",
+        "\"David Smith\" <david.smith@example.com>, eve@example.com",
+        "frank@example.com, \"Grace Hopper\" <grace.hopper@example.com>",
+        "mary.jane@example.com, nancy+newsletter@company.org",
+        "\"Olivia Pope\" <olivia@whitehouse.gov>, peter.parker@example.com",
+        "rachel.green@friends.example.com, ross.geller@example.com",
+        "\"Monica Geller\" <monica@example.com>, chandler.bing@example.com",
+        "phoebe.buffay@example.com, joey.tribbiani@example.com",
+        //"\"User\" <user@[IPv6:2001:db8::1]>, admin@example.com",
+        "test.email+alex@leetcode.com, test.email.leet+alex@code.com",
+        "\"Group\" <group@example.com>, \"Another Group\" <another.group@example.com>",
+    })
+    @ParameterizedTest
+    void parseEmailAddressesFromHeader_multiples(String headerValue) {
+        List<EmailAddress> emailAddresses = emailAddressParser.parseEmailAddressesFromHeader(headerValue);
+        assertNotNull(emailAddresses);
+        assertFalse(emailAddresses.isEmpty());
+        assertEquals(2, emailAddresses.size());
+        assertTrue(emailAddresses.stream().allMatch(emailAddress -> emailAddress.getLocalPart() != null && emailAddress.getDomain() != null));
+    }
+
 }

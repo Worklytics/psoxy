@@ -121,16 +121,5 @@ public enum EmailAddressCriteria {
      */
     ALLOW_PARENS_IN_LOCALPART;
 
-    /**
-     * The recommended setting is not strictly 2822 compliant. For example, it does not include the {@link #ALLOW_DOMAIN_LITERALS} criteria, which results in
-     * exclusions on single domains. Useful for cleaning up email strings that other middleware (ie. the next server) will be able to understand.
-     * <p>
-     * Included in the recommended defaults are:
-     * <ul>
-     *     <li>{@link #ALLOW_QUOTED_IDENTIFIERS}</li>
-     *     <li>{@link #ALLOW_PARENS_IN_LOCALPART}</li>
-     * </ul>.
-     */
-    public static final EnumSet<EmailAddressCriteria> RECOMMENDED = of(ALLOW_QUOTED_IDENTIFIERS, ALLOW_PARENS_IN_LOCALPART);
 
 }
