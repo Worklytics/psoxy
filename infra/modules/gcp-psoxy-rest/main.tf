@@ -111,7 +111,7 @@ resource "google_cloudfunctions2_function_iam_member" "invokers" {
 
   cloud_function = google_cloudfunctions2_function.function.id
   member         = "serviceAccount:${each.value}"
-  role           = "roles/cloudfunctions.invoker"
+  role           = "roles/run.invoker"
 }
 
 resource "google_cloudfunctions2_function_iam_member" "testers" {
@@ -119,7 +119,7 @@ resource "google_cloudfunctions2_function_iam_member" "testers" {
 
   cloud_function = google_cloudfunctions2_function.function.id
   member         = each.value
-  role           = "roles/cloudfunctions.invoker"
+  role           = "roles/run.invoker"
 }
 
 locals {
