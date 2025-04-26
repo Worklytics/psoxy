@@ -106,11 +106,14 @@ resource "google_cloudfunctions2_function" "function" {
   ]
 }
 
-resource "google_cloudfunctions2_function_iam_binding" "invokers" {
-  project        = google_cloudfunctions2_function.function.project
-  location       = google_cloudfunctions2_function.function.location
-  cloud_function = google_cloudfunctions2_function.function.name
-  role           = "roles/run.invoker"
+# bizarrely, `google_cloudfunctions2_function_iam_binding` doesn't work for this; wtf?
+resource "google_cloud_run_service_iam_binding" "invokers" {
+  project  = google_cloudfunctions2_function.function.project
+  location = google_cloudfunctions2_function.function.location
+  service  = google_cloudfunctions2_function.function.name
+
+  role = "roles/run.invoker"
+
   members = concat(
     [for email in var.invoker_sa_emails : "serviceAccount:${email}"],
     var.gcp_principals_authorized_to_test
