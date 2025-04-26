@@ -2,13 +2,13 @@
   "ok":true,
   "users":[
     {
-      "id":"BZcy5qhkyGyUTWR9hC_my2o6pHLKA4C8MHUHRy1K5Ts",
+      "id":"t~BZcy5qhkyGyUTWR9hC_my2o6pHLKA4C8MHUHRy1K5Ts",
       "deleted":false,
       "tz":"America/Los_Angeles",
       "tz_label":"Pacific Standard Time",
       "tz_offset":-28800,
       "profile":{
-        "email":"hUnnRlSR8lUa37PCo-APXltncFZ3mPn3sgLmaI2pDA8",
+        "email":"t~hUnnRlSR8lUa37PCo-APXltncFZ3mPn3sgLmaI2pDA8@domain.com",
         "team":"T02DDBANBM5"
       },
       "is_admin":true,
@@ -19,13 +19,13 @@
       ]
     },
     {
-      "id":"fyCnHbAdterJaFBMVnh6bo_qduSAt-k18eEgbYN_FqI",
+      "id":"t~fyCnHbAdterJaFBMVnh6bo_qduSAt-k18eEgbYN_FqI",
       "deleted":false,
       "tz":"America/Los_Angeles",
       "tz_label":"Pacific Standard Time",
       "tz_offset":-28800,
       "profile":{
-        "email":"DkRMkqDGNK3wQKF7dvYWOuRMDIJVwtlkVcLMbtFkNyc",
+        "email":"t~DkRMkqDGNK3wQKF7dvYWOuRMDIJVwtlkVcLMbtFkNyc@domain.com",
         "team":"T02DDBANBM5"
       },
       "is_admin":false,
@@ -36,13 +36,13 @@
       ]
     },
     {
-      "id":"mJlhl3xv52fNY6wyUps5mBYPCl1nVWHT442eQ7v-lJw",
+      "id":"t~mJlhl3xv52fNY6wyUps5mBYPCl1nVWHT442eQ7v-lJw",
       "deleted":false,
       "tz":"America/Los_Angeles",
       "tz_label":"Pacific Standard Time",
       "tz_offset":-28800,
       "profile":{
-        "email":"sI1oFw2sET0c7SIXZE2lVvwWfnnX6CB8tutqP9kTnAE",
+        "email":"t~sI1oFw2sET0c7SIXZE2lVvwWfnnX6CB8tutqP9kTnAE@domain.com",
         "team":"T02DDBANBM5"
       },
       "is_admin":true,
