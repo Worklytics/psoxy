@@ -106,20 +106,15 @@ resource "google_cloudfunctions2_function" "function" {
   ]
 }
 
-resource "google_cloudfunctions2_function_iam_member" "invokers" {
-  for_each = toset(var.invoker_sa_emails)
-
-  cloud_function = google_cloudfunctions2_function.function.id
-  member         = "serviceAccount:${each.value}"
+resource "google_cloudfunctions2_function_iam_binding" "invokers" {
+  project        = google_cloudfunctions2_function.function.project
+  location       = google_cloudfunctions2_function.function.location
+  cloud_function = google_cloudfunctions2_function.function.name
   role           = "roles/run.invoker"
-}
-
-resource "google_cloudfunctions2_function_iam_member" "testers" {
-  for_each = toset(var.gcp_principals_authorized_to_test)
-
-  cloud_function = google_cloudfunctions2_function.function.id
-  member         = each.value
-  role           = "roles/run.invoker"
+  members = concat(
+    [for email in var.invoker_sa_emails : "serviceAccount:${email}"],
+    var.gcp_principals_authorized_to_test
+  )
 }
 
 locals {
