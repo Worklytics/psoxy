@@ -180,7 +180,10 @@ resource "google_cloudfunctions2_function" "function" {
   event_trigger {
     event_type = "google.cloud.storage.object.v1.finalized"
 
-    # retry_policy = "RETRY_POLICY_RETRY" # what do we want??
+    # no retries for now, consistent with legacy behavior
+    # can configure this to retry on errors, and will do so with exponential backoff. but concern is that
+    # we have no control of that - eg no way to cap it at 3 or 5 retries, as far as can see atm
+    retry_policy = "RETRY_POLICY_DO_NOT_RETRY"
 
     event_filters {
       attribute = "bucket"

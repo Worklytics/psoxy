@@ -106,20 +106,18 @@ resource "google_cloudfunctions2_function" "function" {
   ]
 }
 
-resource "google_cloudfunctions2_function_iam_member" "invokers" {
-  for_each = toset(var.invoker_sa_emails)
+# bizarrely, `google_cloudfunctions2_function_iam_binding` doesn't work for this; wtf?
+resource "google_cloud_run_service_iam_binding" "invokers" {
+  project  = google_cloudfunctions2_function.function.project
+  location = google_cloudfunctions2_function.function.location
+  service  = google_cloudfunctions2_function.function.name
 
-  cloud_function = google_cloudfunctions2_function.function.id
-  member         = "serviceAccount:${each.value}"
-  role           = "roles/cloudfunctions.invoker"
-}
+  role = "roles/run.invoker"
 
-resource "google_cloudfunctions2_function_iam_member" "testers" {
-  for_each = toset(var.gcp_principals_authorized_to_test)
-
-  cloud_function = google_cloudfunctions2_function.function.id
-  member         = each.value
-  role           = "roles/cloudfunctions.invoker"
+  members = concat(
+    [for email in var.invoker_sa_emails : "serviceAccount:${email}"],
+    var.gcp_principals_authorized_to_test
+  )
 }
 
 locals {
