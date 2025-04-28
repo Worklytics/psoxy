@@ -168,6 +168,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.users[*].id"
+        includeReversible: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
