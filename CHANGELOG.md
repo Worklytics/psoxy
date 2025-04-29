@@ -8,7 +8,7 @@ Changes to be including in future/planned release notes will be added here.
 ## Next
 
 ## [0.5.2](https://github.com/Worklytics/psoxy/release/tag/v0.5.2)
-- `slack` : discovery rules now allow names of accounts with `is_bot==true` and with user id as `USLACKBOT`to pass through; are now "default deny" on API fields, returning only data matching expected fields.
+- `slack` : discovery rules now allow names of accounts with `is_bot==true` and with user id as `USLACKBOT` to pass through; are now "default deny" on API fields, returning only data matching expected fields.
 - `GitHub Copilot`: Added new connector for supporting fetching Copilot data from GitHub.
 - `GitHub`: Rules updated for tokenizing team slug name and redacting URLS not required.
 - `Microsoft 365 Copilot`: Adding support for fetching Copilot interactions through `/beta/copilot/users/{id}/interactionHistory/getAllEnterpriseInteractions` endpoint
