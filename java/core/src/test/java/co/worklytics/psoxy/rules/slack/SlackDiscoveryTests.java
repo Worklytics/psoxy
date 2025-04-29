@@ -133,8 +133,8 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
                 "W0N0ZQDED", "W0R8EBMXP", "W0G81RDQZ", "W000000", "U02DU306H0B",
                 "REPLYUSER",
                 "some parent user",
-                "U02K5LRARED",
-                "USLACKBOT"
+                "U02K5LRARED"
+               // "USLACKBOT" // this is not redacted, as it is the slack bot which is not marked with is_bot=true flag
         );
 
         Collection<String> dataToRedact = Arrays.asList(
