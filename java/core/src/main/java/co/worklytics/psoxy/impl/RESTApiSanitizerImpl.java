@@ -484,7 +484,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                     return configuration.jsonProvider().toJson(pseudonymizedIdentity);
                 }
                 //exploit that already reversibly encoded, including prefix
-                return ObjectUtils.firstNonNull(pseudonymizedIdentity.getReversible(), pseudonymizedIdentity.getHash());
+                return ObjectUtils.firstNonNull(pseudonymizedIdentity.getReversible(), urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym()));
             } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_HASH_ONLY) {
                 return pseudonymizedIdentity.getHash();
             } else {
@@ -512,21 +512,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 }
                 PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(toPseudonymize, transform);
 
-                String pseudonymizedString;
-                if (pseudonymizedIdentity.getReversible() != null) {
-                    if (getPseudonymizer().getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
-                        //exploits that already reversibly encoded, including prefix
-                        log.warning("Using transform PseudonymizeRegexMatches, with reversible==true; this is NOT supported for LEGACY pseudonym implementation, so non-reversible pseudonym encoded");
-                        pseudonymizedString = UrlSafeTokenPseudonymEncoder.TOKEN_PREFIX + pseudonymizedIdentity.getHash();
-                    } else {
-                        pseudonymizedString = pseudonymizedIdentity.getReversible();
-                    }
-                } else {
-                    pseudonymizedString = UrlSafeTokenPseudonymEncoder.TOKEN_PREFIX + pseudonymizedIdentity.getHash();
-                }
-                if (pseudonymizedIdentity.getDomain() != null) {
-                    pseudonymizedString += UrlSafeTokenPseudonymEncoder.DOMAIN_SEPARATOR + pseudonymizedIdentity.getDomain();
-                }
+                String pseudonymizedString = urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym());
 
                 if (matcher.groupCount() > 0) {
                     // return original, replacing match with encoded pseudonym

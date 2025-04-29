@@ -104,8 +104,6 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
      */
     public String decodeAndReverseAllContainedKeyedPseudonyms(String containsKeyedPseudonyms,
                                                               ReversibleTokenizationStrategy reidentifier) {
-        //TODO: fix this for full build of java 8 byte code with java 8 compiler to work
-        // (java8 byte code built with later JDK seems to work)
         return REVERSIBLE_PSEUDONYM_PATTERN.matcher(containsKeyedPseudonyms).replaceAll(m -> {
             String keyedPseudonym = m.group();
 
