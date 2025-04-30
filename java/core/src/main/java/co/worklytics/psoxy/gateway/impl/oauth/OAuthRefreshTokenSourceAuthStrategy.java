@@ -72,10 +72,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     @AllArgsConstructor
     @RequiredArgsConstructor
     public enum ConfigProperty implements ConfigService.ConfigProperty {
-        REFRESH_ENDPOINT(false, false),
-        CLIENT_ID(false, false),
-        GRANT_TYPE(false, true),
-        ACCESS_TOKEN(true, false),
+        REFRESH_ENDPOINT(false, SupportedSource.ENV_VAR_OR_REMOTE),
+        CLIENT_ID(false, SupportedSource.ENV_VAR_OR_REMOTE),
+        GRANT_TYPE(false, SupportedSource.ENV_VAR),
+        ACCESS_TOKEN(true,  SupportedSource.ENV_VAR_OR_REMOTE),
 
         /**
          * whether resulting `access_token` should be shared across all instances of connections
@@ -92,13 +92,13 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          * @return whether resulting `access_token` should be shared across all instances of
          * connections to this source.
          */
-        USE_SHARED_TOKEN(false),
+        USE_SHARED_TOKEN(false, SupportedSource.ENV_VAR),
 
         //TODO: whether safe to cache access token or not
-        ACCESS_TOKEN_CACHEABLE(false),
+        ACCESS_TOKEN_CACHEABLE(false, SupportedSource.ENV_VAR),
 
 
-        TOKEN_RESPONSE_TYPE(false)
+        TOKEN_RESPONSE_TYPE(false, SupportedSource.ENV_VAR)
         ;
 
         private final Boolean noCache;
@@ -108,10 +108,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             return noCache;
         }
 
-        ;
-
-        @Getter
-        private boolean envVarOnly = true;
+        @Getter(onMethod_ = @Override)
+        private SupportedSource supportedSource = SupportedSource.ENV_VAR;
     }
 
     @Inject OAuth2CredentialsWithRefresh.OAuth2RefreshHandler refreshHandler;

@@ -18,8 +18,7 @@ public interface ConfigService {
 
         String name();
 
-        // shared? (across multiple instances?)
-        // local? (per-instance secrets)
+
 
         // sensitive? (eg, value should not be exposed to 3rd parties)
         // secret? (eg, value should be handled as a secret; obscured/acl even internally; avoid in logs, etc)
@@ -38,7 +37,29 @@ public interface ConfigService {
          * @return whether this property is limited to being set via environment variables only
          */
         default boolean isEnvVarOnly() {
-            return false;
+            return getSupportedSource() == SupportedSource.ENV_VAR;
+        }
+
+        default SupportedSource getSupportedSource() {
+            return SupportedSource.ENV_VAR_OR_REMOTE;
+        }
+
+        enum SupportedSource {
+
+            /**
+             * config value MUST be set via environment variable; remote source is NOT supported
+             */
+            ENV_VAR,
+
+            /**
+             * config value MUST be set in the remote source; env var is NOT Supported
+             */
+            REMOTE,
+
+            /**
+             * config value may be set either via environment variable or remote config, with former taking precedence
+             */
+            ENV_VAR_OR_REMOTE,
         }
     }
 

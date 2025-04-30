@@ -39,8 +39,8 @@ public class AWSWorkloadIdentityFederationGrantTokenRequestBuilder extends Workl
         DEVELOPER_NAME_ID,
         ;
 
-        @Getter
-        private boolean envVarOnly = true;
+        @Getter(onMethod_ = @Override)
+        private final SupportedSource supportedSource = SupportedSource.ENV_VAR;
     }
 
     final CognitoIdentityClient cognitoIdentityClient;

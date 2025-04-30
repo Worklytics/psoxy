@@ -40,7 +40,10 @@ public class GCPWorkloadIdentityFederationGrantTokenRequestBuilder extends Workl
         AUDIENCE,
         ;
 
-        final private boolean envVarOnly = true;
+        @Override
+        public SupportedSource getSupportedSource() {
+            return SupportedSource.ENV_VAR;
+        }
     }
 
     @Override
