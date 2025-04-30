@@ -5,7 +5,6 @@
     "url":"https://test-grid.enterprise.slack.com/",
     "domain":"test-grid",
     "email_domain":"",
-    "avatar_base_url":"https://ca.slack-edge.com/",
     "is_verified":false,
     "teams":[
       {

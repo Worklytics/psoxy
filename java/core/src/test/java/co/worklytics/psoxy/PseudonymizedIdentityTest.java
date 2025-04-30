@@ -10,9 +10,11 @@ import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.transforms.Transform;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -115,6 +117,23 @@ class PseudonymizedIdentityTest {
         UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder = new UrlSafeTokenPseudonymEncoder();
         assertNotEquals(pseudonymizedIdentity.getHash(),
             urlSafeTokenPseudonymEncoder.decode(pseudonymizedIdentity.getReversible()).getHash());
+    }
+
+
+    /**
+     * pseudonymized identity serialized with older version should still be deserialized correctly with this one
+     */
+    @SneakyThrows
+    @Test
+    void jsonWithScopeWorks() {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        PseudonymizedIdentity identity = objectMapper.readerFor(PseudonymizedIdentity.class)
+            .readValue("{\"scope\":\"email\",\"domain\":\"worklytics.co\",\"hash\":\"wGt4TmRdTGdvKJT_H8AXKLbC4XoxCDKRyyAQtKJQbHE\"}");
+
+        assertEquals(identity.getDomain(), "worklytics.co");
+        assertEquals(identity.getHash(), "wGt4TmRdTGdvKJT_H8AXKLbC4XoxCDKRyyAQtKJQbHE");
+
     }
 
 }

@@ -4,22 +4,22 @@
   "messages":[
     {
       "type":"message",
-      "user":"{\"hash\":\"1GJcmG2Yt3aOsk4gdhKR3Su4PFav1QHrFAO4IfvFX4U\"}",
+      "user":"t~1GJcmG2Yt3aOsk4gdhKR3Su4PFav1QHrFAO4IfvFX4U",
       "ts":"1234561409.000002",
       "reactions":[
         {
           "name":"slightly_smiling_face",
           "users":[
-            "{\"hash\":\"J3naaMunVdXBRevOPonxRvLPn1Z-CzVNeKqfSVjnE0g\"}",
-            "{\"hash\":\"4j1wnXlhWV17ZmzH7DtuOpA2ziQ-4-ZqbpqBRj7pyr4\"}",
-            "{\"hash\":\"By9wnVuwPV3xzCT63UDVFSYK7ADBy3AOo87k_9N1l6c\"}"
+            "t~J3naaMunVdXBRevOPonxRvLPn1Z-CzVNeKqfSVjnE0g",
+            "t~4j1wnXlhWV17ZmzH7DtuOpA2ziQ-4-ZqbpqBRj7pyr4",
+            "t~By9wnVuwPV3xzCT63UDVFSYK7ADBy3AOo87k_9N1l6c"
           ],
           "count":3
         },
         {
           "name":"tada",
           "users":[
-            "{\"hash\":\"cBAkrpTEyw8LOAlvTnh8tcU-KLNnPBJ-UHYEXg_0cZQ\"}"
+            "t~cBAkrpTEyw8LOAlvTnh8tcU-KLNnPBJ-UHYEXg_0cZQ"
           ],
           "count":1
         }
@@ -29,14 +29,8 @@
       "type":"message",
       "files":[
         {
-          "original_h":194,
           "id":"F973098398",
-          "public_url_shared":false,
-          "pretty_type":"JPEG",
-          "timestamp":1532453547,
-          "title":"test.png",
-          "is_public":true,
-          "thumb_360_w":259
+          "timestamp":1532453547
         }
       ],
       "blocks":[
@@ -56,9 +50,8 @@
         }
       ],
       "ts":"1234561515.000007",
-      "wibblr":true,
       "edited":{
-        "user":"{\"hash\":\"a--WYfWyhdweZXjOp8cOVe-s3ZD_hl07oe_jpgITxRM\"}",
+        "user":"t~a--WYfWyhdweZXjOp8cOVe-s3ZD_hl07oe_jpgITxRM",
         "ts":"38327498237.000000"
       },
       "attachments":[
@@ -70,7 +63,7 @@
     {
       "client_msg_id":"314a746d-82c0-4a05-a081-429e4c096c3f",
       "type":"message",
-      "user":"{\"hash\":\"a--WYfWyhdweZXjOp8cOVe-s3ZD_hl07oe_jpgITxRM\"}",
+      "user":"t~a--WYfWyhdweZXjOp8cOVe-s3ZD_hl07oe_jpgITxRM",
       "ts":"1651249518.059679",
       "team":"T02MT9XBJL9",
       "user_team":"T02MT9XBJL9",
@@ -88,7 +81,7 @@
                 },
                 {
                   "type":"user",
-                  "user_id":"{\"hash\":\"fyCnHbAdterJaFBMVnh6bo_qduSAt-k18eEgbYN_FqI\"}"
+                  "user_id":"t~fyCnHbAdterJaFBMVnh6bo_qduSAt-k18eEgbYN_FqI"
                 },
                 {
                   "type":"text"
@@ -109,13 +102,7 @@
         "id":"B00000001",
         "app_id":"A00000001",
         "name":"App name",
-        "icons":{
-          "image_36":"https://avatars.slack-edge.com/YYYY-MM-DD/app_image_36.png",
-          "image_48":"https://avatars.slack-edge.com/YYYY-MM-DD/app_image_48.png",
-          "image_72":"https://avatars.slack-edge.com/YYYY-MM-DD/app_image_72.png"
-        },
         "deleted":false,
-        "updated":1630603699,
         "team_id":"T00000001"
       },
       "thread_ts":"1651598000.000001",
@@ -123,31 +110,30 @@
       "reply_users_count":4,
       "latest_reply":"1651600000.000001",
       "reply_users":[
-        "{\"hash\":\"-_0U24G8TUIEb9zrrOzQF4FUb5Z02maG29jOKp1RNhk\"}",
-        "{\"hash\":\"1GJcmG2Yt3aOsk4gdhKR3Su4PFav1QHrFAO4IfvFX4U\"}",
-        "{\"hash\":\"J3naaMunVdXBRevOPonxRvLPn1Z-CzVNeKqfSVjnE0g\"}",
-        "{\"hash\":\"4j1wnXlhWV17ZmzH7DtuOpA2ziQ-4-ZqbpqBRj7pyr4\"}"
+        "t~-_0U24G8TUIEb9zrrOzQF4FUb5Z02maG29jOKp1RNhk",
+        "t~1GJcmG2Yt3aOsk4gdhKR3Su4PFav1QHrFAO4IfvFX4U",
+        "t~J3naaMunVdXBRevOPonxRvLPn1Z-CzVNeKqfSVjnE0g",
+        "t~4j1wnXlhWV17ZmzH7DtuOpA2ziQ-4-ZqbpqBRj7pyr4"
       ],
       "replies":[
         {
-          "user":"{\"hash\":\"-_0U24G8TUIEb9zrrOzQF4FUb5Z02maG29jOKp1RNhk\"}",
+          "user":"t~-_0U24G8TUIEb9zrrOzQF4FUb5Z02maG29jOKp1RNhk",
           "ts":"1651598339.434889"
         },
         {
-          "user":"{\"hash\":\"1GJcmG2Yt3aOsk4gdhKR3Su4PFav1QHrFAO4IfvFX4U\"}",
+          "user":"t~1GJcmG2Yt3aOsk4gdhKR3Su4PFav1QHrFAO4IfvFX4U",
           "ts":"1651598395.311239"
         },
         {
-          "user":"{\"hash\":\"J3naaMunVdXBRevOPonxRvLPn1Z-CzVNeKqfSVjnE0g\"}",
+          "user":"t~J3naaMunVdXBRevOPonxRvLPn1Z-CzVNeKqfSVjnE0g",
           "ts":"1651598519.298169"
         },
         {
-          "user":"{\"hash\":\"4j1wnXlhWV17ZmzH7DtuOpA2ziQ-4-ZqbpqBRj7pyr4\"}",
+          "user":"t~4j1wnXlhWV17ZmzH7DtuOpA2ziQ-4-ZqbpqBRj7pyr4",
           "ts":"1651599241.015189",
-          "parent_user_id":"{\"hash\":\"MoCetFMMeJZUq3HZFTP7CdOaddg0f7zvKBN2ch_IUnM\"}"
+          "parent_user_id":"t~MoCetFMMeJZUq3HZFTP7CdOaddg0f7zvKBN2ch_IUnM"
         }
       ],
-      "is_locked":false,
       "blocks":[
         {
           "type":"section",
@@ -165,27 +151,20 @@
               "type":"text"
             },
             {
-              "type":"button",
-              "action_id":"callToAction",
-              "value":"buttonValue",
-              "url":"https://somelink.com/whatever"
+              "type":"button"
             }
           ]
         }
       ]
     },
     {
-      "user":"{\"hash\":\"BMW33akERx6B1jg4ktZ3Q6lh18zJptJ0zYoRgqcjdxU\"}",
+      "user":"t~BMW33akERx6B1jg4ktZ3Q6lh18zJptJ0zYoRgqcjdxU",
       "channel":"D075J2RKK4Y",
       "room":{
         "id":"R07BNSQTZSP",
-        "created_by":"{\"hash\":\"ht3jIZhCUKqR7UVboNfpxTZZUWLoExaW1WX6GG19JVg\"}",
+        "created_by":"t~ht3jIZhCUKqR7UVboNfpxTZZUWLoExaW1WX6GG19JVg",
         "date_start":1720542372,
         "date_end":1720542756,
-        "participant_history":[
-          "{\"hash\":\"ht3jIZhCUKqR7UVboNfpxTZZUWLoExaW1WX6GG19JVg\"}",
-          "{\"hash\":\"C35tSgm0FijTntSB1kSz4RzerO3J58n-H3rwI7A0698\"}"
-        ],
         "canvas_thread_ts":"1720542372.566689",
         "thread_root_ts":"1720542372.566689",
         "channels":[
@@ -196,21 +175,18 @@
         "was_missed":false,
         "was_accepted":true,
         "has_ended":true,
-        "background_id":"GRADIENT_03",
-        "canvas_background":"GRADIENT_03",
-        "is_prewarmed":false,
         "is_scheduled":false,
+        "media_backend_type":"free_willy",
         "display_id":"",
         "external_unique_id":"b88ef6b8-9450-4633-83a2-dfb2cfd12713",
         "app_id":"A00",
         "call_family":"huddle"
       },
-      "no_notifications":true,
       "subtype":"huddle_thread",
       "type":"message",
       "ts":"1720542372.566689",
       "edited":{
-        "user":"{\"hash\":\"BMW33akERx6B1jg4ktZ3Q6lh18zJptJ0zYoRgqcjdxU\"}",
+        "user":"t~BMW33akERx6B1jg4ktZ3Q6lh18zJptJ0zYoRgqcjdxU",
         "ts":"1720542757.000000"
       },
       "blocks":[
