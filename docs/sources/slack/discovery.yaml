@@ -11,16 +11,16 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.messages[*].user"
-          - "$.messages[*].files[*].user"
-          - "$.messages[*].reactions[*].users[*]"
-          - "$.messages[*].replies[*].user"
-          - "$.messages[*].replies[*].parent_user_id"
-          - "$.messages[*].reply_users[*]"
-          - "$.messages[*].edited.user"
-          - "$.messages[*].blocks[*].elements[*].elements[*].user_id"
-          - "$.messages[*].room.created_by"
-          - "$.messages[*].room.participant_history[*]"
+          - "$.messages[?(@.user!='USLACKBOT')].user"
+          - "$.messages[*].files[?(@.user!='USLACKBOT')].user"
+          - "$.messages[*].reactions[*].users[?(@!='USLACKBOT')]"
+          - "$.messages[*].replies[?(@.user!='USLACKBOT')].user"
+          - "$.messages[*].replies[?(@.parent_user_id!='USLACKBOT')].parent_user_id"
+          - "$.messages[*].reply_users[?(@!='USLACKBOT')]"
+          - "$.messages[*].edited[?(@.user!='USLACKBOT')].user"
+          - "$.messages[*].blocks[*].elements[*].elements[?(@.user_id!='USLACKBOT')].user_id"
+          - "$.messages[*].room[?(@.created_by!='USLACKBOT')].created_by"
+          - "$.messages[*].room.participant_history[?(@!='USLACKBOT')]"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
@@ -45,9 +45,9 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.info[*].creator"
-          - "$.info[*].members[*]"
-          - "$.info[*].topic.set_by"
+          - "$.info[*].members[?(@!='USLACKBOT')]"
+          - "$.info[*].topic[?(@.set_by!='USLACKBOT')].set_by"
+          - "$.info[?(@.creator!='USLACKBOT')].creator"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
@@ -75,9 +75,9 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.channels[*].creator"
-          - "$.channels[*].members[*]"
-          - "$.channels[*].topic.set_by"
+          - "$.channels[?(@.creator!='USLACKBOT')].creator"
+          - "$.channels[*].members[?(@!='USLACKBOT')]"
+          - "$.channels[*].topic[?(@.set_by!='USLACKBOT')].set_by"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
@@ -100,9 +100,9 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.channels[*].creator"
-          - "$.channels[*].members[*]"
-          - "$.channels[*].topic.set_by"
+          - "$.channels[?(@.creator!='USLACKBOT')].creator"
+          - "$.channels[*].members[?(@!='USLACKBOT')]"
+          - "$.channels[*].topic[?(@.set_by!='USLACKBOT')].set_by"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
@@ -167,7 +167,7 @@ endpoints:
         encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
-          - "$.users[*].id"
+          - "$.users[?(@.id!='USLACKBOT')].id"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>

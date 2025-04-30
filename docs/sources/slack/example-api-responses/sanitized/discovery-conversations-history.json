@@ -158,7 +158,7 @@
       ]
     },
     {
-      "user":"t~BMW33akERx6B1jg4ktZ3Q6lh18zJptJ0zYoRgqcjdxU",
+      "user":"USLACKBOT",
       "channel":"D075J2RKK4Y",
       "room":{
         "id":"R07BNSQTZSP",
@@ -186,7 +186,7 @@
       "type":"message",
       "ts":"1720542372.566689",
       "edited":{
-        "user":"t~BMW33akERx6B1jg4ktZ3Q6lh18zJptJ0zYoRgqcjdxU",
+        "user":"USLACKBOT",
         "ts":"1720542757.000000"
       },
       "blocks":[
