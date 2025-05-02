@@ -51,8 +51,10 @@ public class CopilotNoUserIdsTests extends JavaRulesTestBaseCase {
                 "What should be on my radar from emails last week?"
         );
 
-        assertPseudonymized(sanitized, "4db02e4b-d144-400e-b194-53253a34c5be",
-            "fb8d773d-7ef8-4ec0-a117-179f88add510");
+        assertPseudonymized(sanitized, "4db02e4b-d144-400e-b194-53253a34c5be");
+
+        // Bot is not sanitized
+        assertNotSanitized(sanitized, "fb8d773d-7ef8-4ec0-a117-179f88add510");
 
         assertReversibleUrlTokenized(sanitized, List.of("19:YzBP1kUdkNjFtJnketPYT8kQdQ3A08Y51rDTxE_ENIk1@thread.v2")
         );
