@@ -8,9 +8,11 @@ import co.worklytics.psoxy.rules.Rules2;
 import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -377,6 +379,34 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
+    static final YAMLMapper YAML_MAPPER = new YAMLMapper();
+
+    static final  RESTRules GEMINI_FOR_WORKSPACE;
+
+    static {
+        try {
+            GEMINI_FOR_WORKSPACE = YAML_MAPPER.readValue(
+                    PrebuiltSanitizerRules.class.getClassLoader().getResourceAsStream("sources/google-workspace/gemini_for_workspace/gemini_for_workspace.yaml"),
+                    Rules2.class
+            );
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static final RESTRules GEMINI_FOR_WORKSPACE_NO_APP_IDS;
+
+    static {
+        try {
+            GEMINI_FOR_WORKSPACE_NO_APP_IDS = YAML_MAPPER.readValue(
+                    PrebuiltSanitizerRules.class.getClassLoader().getResourceAsStream("sources/google-workspace/gemini_for_workspace/gemini_for_workspace_no-app-ids.yaml"),
+                    Rules2.class
+            );
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     static public final Map<String, RESTRules> GOOGLE_DEFAULT_RULES_MAP = ImmutableMap.<String, RESTRules>builder()
             .put("gcal", GCAL)
             .put("gdirectory", GDIRECTORY)
@@ -385,5 +415,7 @@ public class PrebuiltSanitizerRules {
             .put("gmail", GMAIL)
             .put("google-chat", GOOGLE_CHAT)
             .put("google-meet", GOOGLE_MEET)
+            .put("gemini_for_workspace", GEMINI_FOR_WORKSPACE)
+            .put("gemini_for_workspace" + ConfigRulesModule.NO_APP_IDS_SUFFIX, GEMINI_FOR_WORKSPACE_NO_APP_IDS)
             .build();
 }
