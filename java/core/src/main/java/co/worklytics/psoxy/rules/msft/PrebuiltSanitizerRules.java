@@ -753,8 +753,8 @@ public class PrebuiltSanitizerRules {
                     .regex("^https://graph.microsoft.com/beta/copilot/users/([a-zA-Z0-9_-]+)/.*$")
                     .build(),
                 Transform.Pseudonymize.builder()
-                    .jsonPath("$..from..id")
-                    .jsonPath("$..mentions[*]..id")
+                    .jsonPath("$..from..[?(@.applicationIdentityType != \"bot\")].id")
+                    .jsonPath("$..mentions[*][?(@.applicationIdentityType != \"bot\")].id")
                     .build(),
                 MS_COPILOT_TEXT_DIGEST_ATTACHMENT,
                 MS_COPILOT_TEXT_DIGEST_BODY,

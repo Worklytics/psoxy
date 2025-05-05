@@ -17,8 +17,8 @@ endpoints:
         regex: "^https://graph.microsoft.com/beta/copilot/users/([a-zA-Z0-9_-]+)/.*$"
       - !<pseudonymize>
         jsonPaths:
-          - "$..from..id"
-          - "$..mentions[*]..id"
+          - "$..from..[?(@.applicationIdentityType != \"bot\")].id"
+          - "$..mentions[*][?(@.applicationIdentityType != \"bot\")].id"
         encoding: "JSON"
       - !<textDigest>
         jsonPaths:
