@@ -53,6 +53,7 @@ class JsonSchemaFilterUtilsTest {
                 .someString("some-string")
                 .date(LocalDate.parse("2023-01-16"))
                 .timestamp(Instant.parse("2023-01-16T05:12:34Z"))
+                .timestampWithMillis(Instant.parse("2023-01-16T05:12:34.123Z"))
                 .someListItem("list-item-1")
                 .build();
 
@@ -65,6 +66,7 @@ class JsonSchemaFilterUtilsTest {
                         "  \"someString\" : \"some-string\",\n" +
                         "  \"date\" : \"2023-01-16\",\n" +
                         "  \"timestamp\" : \"2023-01-16T05:12:34Z\",\n" +
+                        "  \"timestampWithMillis\" : \"2023-01-16T05:12:34.123Z\",\n" +
                         "  \"someListItems\" : [ \"list-item-1\" ]\n" +
                         "}",
                 objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimplePlus.getLeft()));
@@ -77,13 +79,13 @@ class JsonSchemaFilterUtilsTest {
         assertEquals("{\n" +
                         "  \"someString\" : \"some-string\",\n" +
                         "  \"date\" : \"2023-01-16\",\n" +
-                        "  \"timestamp\" : \"2023-01-16T05:12:34Z\"\n" +
+                        "  \"timestamp\" : \"2023-01-16T05:12:34Z\",\n" +
+                        "  \"timestampWithMillis\" : \"2023-01-16T05:12:34.123Z\"\n" +
                         "}",
                 objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filteredToSimple.getLeft()));
 
         assertEquals(1, filteredToSimple.getRight().size());
         assertEquals("$.someListItems", filteredToSimple.getRight().get(0));
-
     }
 
     @Builder
@@ -104,6 +106,10 @@ class JsonSchemaFilterUtilsTest {
                 "      \"type\" : \"string\",\n" +
                 "      \"format\" : \"date-time\"\n" +
                 "    },\n" +
+                "    \"timestampWithMillis\" : {\n" +
+                "      \"type\" : \"string\",\n" +
+                "      \"format\" : \"date-time\"\n" +
+                "    },\n" +
                 "    \"someListItems\" : {\n" +
                 "      \"type\" : \"array\",\n" +
                 "      \"items\" : {\n" +
@@ -117,6 +123,8 @@ class JsonSchemaFilterUtilsTest {
         LocalDate date;
 
         Instant timestamp;
+
+        Instant timestampWithMillis;
 
         @Singular
         List<String> someListItems;
@@ -145,6 +153,10 @@ class JsonSchemaFilterUtilsTest {
                 "    \"timestamp\" : {\n" +
                 "      \"type\" : \"string\",\n" +
                 "      \"format\" : \"date-time\"\n" +
+                "    },\n" +
+                "    \"timestampWithMillis\" : {\n" +
+                "      \"type\" : \"string\",\n" +
+                "      \"format\" : \"date-time\"\n" +
                 "    }\n" +
                 "  }\n" +
                 "}";
@@ -158,6 +170,9 @@ class JsonSchemaFilterUtilsTest {
                 "    type: \"string\"\n" +
                 "    format: \"date\"\n" +
                 "  timestamp:\n" +
+                "    type: \"string\"\n" +
+                "    format: \"date-time\"\n" +
+                "  timestampWithMillis:\n" +
                 "    type: \"string\"\n" +
                 "    format: \"date-time\"\n";
 
