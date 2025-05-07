@@ -6,11 +6,14 @@
   "htmlLink":"https://www.google.com/calendar/event?eid=aHFqOWY4ajg3Ym9iazY3MXV0ZXJ2MTRxb3MgZXJpa0B3b3JrbHl0aWNzLmNv",
   "created":"2015-07-02T22:54:23.000Z",
   "updated":"2015-07-03T11:24:21.213Z",
+  "summary":"Call,Call",
   "creator":{
-    "email":"{\"domain\":\"imagine.com\",\"hash\":\"aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI\"}"
+    "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com",
+    "displayName":"allen boyce"
   },
   "organizer":{
-    "email":"{\"domain\":\"imagine.com\",\"hash\":\"aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI\"}"
+    "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com",
+    "displayName":"allen boyce"
   },
   "start":{
     "dateTime":"2015-07-06T10:00:00-07:00",
@@ -24,16 +27,18 @@
   "sequence":0,
   "attendees":[
     {
-      "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+      "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
       "self":true,
       "responseStatus":"accepted"
     },
     {
-      "email":"{\"domain\":\"imagine.com\",\"hash\":\"zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs\"}",
+      "email":"t~zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs@imagine.com",
+      "displayName":"matt baron",
       "responseStatus":"accepted"
     },
     {
-      "email":"{\"domain\":\"imagine.com\",\"hash\":\"aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI\"}",
+      "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com",
+      "displayName":"allen boyce",
       "organizer":true,
       "responseStatus":"accepted"
     }
@@ -54,11 +59,7 @@
       "name":"Hangouts",
       "iconUri":"https://lh5.googleusercontent.com/proxy/9vT2XwMHPzrIcW56Ic3FX6_OSYvrjHEwOUYOmA0eMoR-_sY59k4mQMd0JnqCp8GCOmqimFKP3vSeFaIe4k5MewpEcCuK6PXlB2Z4AKTMV78OB_CJqXHrrkAO-yf5FYJsiaTBwjUP9cU0lRlP-HPC2w"
     },
-    "conferenceId":"worklytics",
-    "signature":"AGirE/LisFavKHZ9LBpCKUHuuzhL"
-  },
-  "reminders":{
-    "useDefault":true
+    "conferenceId":"worklytics"
   },
   "eventType":"default"
 }

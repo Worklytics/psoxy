@@ -268,7 +268,7 @@ definitions:
       is_member:
         type: "boolean"
       is_moved:
-        type: "integer"
+        type: "boolean"
       is_mpim:
         type: "boolean"
       is_org_default:

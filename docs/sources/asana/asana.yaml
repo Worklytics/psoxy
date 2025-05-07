@@ -1,42 +1,145 @@
 ---
 endpoints:
-  - pathTemplate: "/api/1.0/workspaces"
+  - pathTemplate: "/api/1.0/tasks"
     allowedQueryParams:
       - "limit"
       - "offset"
       - "opt_fields"
-  - pathTemplate: "/api/1.0/users"
-    allowedQueryParams:
-      - "limit"
-      - "offset"
-      - "opt_fields"
-      - "workspace"
-      - "team"
+      - "project"
+      - "completed_since"
+      - "modified_since"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].created_by.gid"
+          - "$.data[*].completed_by.gid"
+          - "$.data[*].hearts[*].user.gid"
+          - "$.data[*].likes[*].user.gid"
+          - "$.data[*].assignee.gid"
+          - "$.data[*].custom_fields[*].created_by.gid"
+          - "$.data[*].custom_fields[*].people_value[*].gid"
+          - "$.data[*].followers[*].gid"
+          - "$.data[*]..email"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
-          - "$.data[*].name"
-          - "$.data[*].photo"
+          - "$.data[*].external"
+          - "$.data[*].html_notes"
+          - "$.data[*].notes"
+          - "$.data[*]..name"
+          - "$.data[*].custom_fields[*].description"
+    responseSchema:
+      properties:
+        data:
+          items:
+            $ref: "#/definitions/Task"
+        errors:
+          items:
+            $ref: "#/definitions/Error"
+        nextPage:
+          $ref: "#/definitions/NextPage"
+  - pathTemplate: "/api/1.0/tasks/{taskId}"
+    allowedQueryParams: []
+    transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.data[*].email"
-        encoding: "JSON"
-      - !<pseudonymize>
+          - "$.data.created_by.gid"
+          - "$.data.completed_by.gid"
+          - "$.data.hearts[*].user.gid"
+          - "$.data.likes[*].user.gid"
+          - "$.data.assignee.gid"
+          - "$.data.custom_fields[*].created_by.gid"
+          - "$.data.custom_fields[*].people_value[*].gid"
+          - "$.data.followers[*].gid"
+          - "$.data..email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
         jsonPaths:
-          - "$.data[*].gid"
-        includeReversible: true
-        encoding: "JSON"
-  - pathTemplate: "/api/1.0/workspaces/{workspaceId}/teams"
+          - "$.data.external"
+          - "$.data.html_notes"
+          - "$.data.notes"
+          - "$.data..name"
+          - "$.data.custom_fields[*].description"
+    responseSchema:
+      properties:
+        data:
+          $ref: "#/definitions/Task"
+        errors:
+          items:
+            $ref: "#/definitions/Error"
+  - pathTemplate: "/api/1.0/tasks/{taskId}/stories"
     allowedQueryParams:
       - "limit"
       - "offset"
       - "opt_fields"
     transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].created_by.gid"
+          - "$.data[*].hearts[*].user.gid"
+          - "$.data[*].likes[*].user.gid"
+          - "$.data[*].source.gid"
+          - "$.data[*].target.gid"
+          - "$.data[*]..email"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.data[*]..name"
-          - "$.data[*].description"
-          - "$.data[*].html_description"
+          - "$.data[*].html_text"
+          - "$.data[*].text"
+          - "$.data[*].new_text_value"
+          - "$.data[*].old_text_value"
+          - "$.data[*].new_name"
+          - "$.data[*].old_name"
+          - "$.data[*].previews"
+    responseSchema:
+      properties:
+        data:
+          items:
+            $ref: "#/definitions/Story"
+        errors:
+          items:
+            $ref: "#/definitions/Error"
+        nextPage:
+          $ref: "#/definitions/NextPage"
+  - pathTemplate: "/api/1.0/tasks/{taskId}/subtasks"
+    allowedQueryParams:
+      - "limit"
+      - "offset"
+      - "opt_fields"
+      - "project"
+      - "completed_since"
+      - "modified_since"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].created_by.gid"
+          - "$.data[*].completed_by.gid"
+          - "$.data[*].hearts[*].user.gid"
+          - "$.data[*].likes[*].user.gid"
+          - "$.data[*].assignee.gid"
+          - "$.data[*].custom_fields[*].created_by.gid"
+          - "$.data[*].custom_fields[*].people_value[*].gid"
+          - "$.data[*].followers[*].gid"
+          - "$.data[*]..email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.data[*].external"
+          - "$.data[*].html_notes"
+          - "$.data[*].notes"
+          - "$.data[*]..name"
+          - "$.data[*].custom_fields[*].description"
+    responseSchema:
+      properties:
+        data:
+          items:
+            $ref: "#/definitions/Task"
+        errors:
+          items:
+            $ref: "#/definitions/Error"
+        nextPage:
+          $ref: "#/definitions/NextPage"
   - pathTemplate: "/api/1.0/teams/{teamId}/projects"
     allowedQueryParams:
       - "limit"
@@ -56,116 +159,62 @@ endpoints:
           - "$.data[*].created_by"
           - "$.data[*].completed_by"
           - "$..name"
-  - pathTemplate: "/api/1.0/tasks"
+    responseSchema:
+      properties:
+        data:
+          items:
+            $ref: "#/definitions/ProjectCompact"
+        errors:
+          items:
+            $ref: "#/definitions/Error"
+        nextPage:
+          $ref: "#/definitions/NextPage"
+  - pathTemplate: "/api/1.0/users"
     allowedQueryParams:
       - "limit"
       - "offset"
       - "opt_fields"
-      - "project"
-      - "completed_since"
-      - "modified_since"
+      - "workspace"
+      - "team"
     transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.data[*].external"
-          - "$.data[*].html_notes"
-          - "$.data[*].notes"
-          - "$.data[*]..name"
-          - "$.data[*].custom_fields[*].description"
       - !<pseudonymize>
         jsonPaths:
-          - "$.data[*].created_by.gid"
-          - "$.data[*].completed_by.gid"
-          - "$.data[*].hearts[*].user.gid"
-          - "$.data[*].likes[*].user.gid"
-          - "$.data[*].assignee.gid"
-          - "$.data[*].custom_fields[*].created_by.gid"
-          - "$.data[*].custom_fields[*].people_value[*].gid"
-          - "$.data[*].followers[*].gid"
-          - "$.data[*]..email"
-        encoding: "JSON"
-  - pathTemplate: "/api/1.0/tasks/{taskId}"
+          - "$.data[*].email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].gid"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.data[*].name"
+          - "$.data[*].photo"
+    responseSchema:
+      properties:
+        data:
+          items:
+            $ref: "#/definitions/User"
+        errors:
+          items:
+            $ref: "#/definitions/Error"
+        nextPage:
+          $ref: "#/definitions/NextPage"
+  - pathTemplate: "/api/1.0/workspaces"
     allowedQueryParams:
       - "limit"
       - "offset"
       - "opt_fields"
-      - "project"
-      - "completed_since"
-      - "modified_since"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.data.external"
-          - "$.data.html_notes"
-          - "$.data.notes"
-          - "$.data..name"
-          - "$.data.custom_fields[*].description"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.data.created_by.gid"
-          - "$.data.completed_by.gid"
-          - "$.data.hearts[*].user.gid"
-          - "$.data.likes[*].user.gid"
-          - "$.data.assignee.gid"
-          - "$.data.custom_fields[*].created_by.gid"
-          - "$.data.custom_fields[*].people_value[*].gid"
-          - "$.data.followers[*].gid"
-          - "$.data..email"
-        encoding: "JSON"
-  - pathTemplate: "/api/1.0/tasks/{taskId}/stories"
-    allowedQueryParams:
-      - "limit"
-      - "offset"
-      - "opt_fields"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.data[*]..name"
-          - "$.data[*].html_text"
-          - "$.data[*].text"
-          - "$.data[*].new_text_value"
-          - "$.data[*].old_text_value"
-          - "$.data[*].new_name"
-          - "$.data[*].old_name"
-          - "$.data[*].previews"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.data[*].assignee.gid"
-          - "$.data[*].created_by.gid"
-          - "$.data[*].follower.gid"
-          - "$.data[*].hearts[*].user.gid"
-          - "$.data[*].likes[*].user.gid"
-          - "$.data[*].story.created_by.gid"
-          - "$.data[*]..email"
-        encoding: "JSON"
-  - pathTemplate: "/api/1.0/tasks/{taskId}/subtasks"
-    allowedQueryParams:
-      - "limit"
-      - "offset"
-      - "opt_fields"
-      - "project"
-      - "completed_since"
-      - "modified_since"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.data[*].external"
-          - "$.data[*].html_notes"
-          - "$.data[*].notes"
-          - "$.data[*]..name"
-          - "$.data[*].custom_fields[*].description"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.data[*].created_by.gid"
-          - "$.data[*].completed_by.gid"
-          - "$.data[*].hearts[*].user.gid"
-          - "$.data[*].likes[*].user.gid"
-          - "$.data[*].assignee.gid"
-          - "$.data[*].custom_fields[*].created_by.gid"
-          - "$.data[*].custom_fields[*].people_value[*].gid"
-          - "$.data[*].followers[*].gid"
-          - "$.data[*]..email"
-        encoding: "JSON"
+    responseSchema:
+      properties:
+        data:
+          items:
+            $ref: "#/definitions/WorkspaceCompact"
+        errors:
+          items:
+            $ref: "#/definitions/Error"
+        nextPage:
+          $ref: "#/definitions/NextPage"
   - pathTemplate: "/api/1.0/workspaces/{workspaceId}/tasks/search"
     allowedQueryParams:
       - "limit"
@@ -175,13 +224,6 @@ endpoints:
       - "sort_ascending"
       - "opt_fields"
     transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.data[*].external"
-          - "$.data[*].html_notes"
-          - "$.data[*].notes"
-          - "$.data[*]..name"
-          - "$.data[*].custom_fields[*].description"
       - !<pseudonymize>
         jsonPaths:
           - "$.data[*].created_by.gid"
@@ -193,4 +235,337 @@ endpoints:
           - "$.data[*].custom_fields[*].people_value[*].gid"
           - "$.data[*].followers[*].gid"
           - "$.data[*]..email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.data[*].external"
+          - "$.data[*].html_notes"
+          - "$.data[*].notes"
+          - "$.data[*]..name"
+          - "$.data[*].custom_fields[*].description"
+    responseSchema:
+      properties:
+        data:
+          items:
+            $ref: "#/definitions/Task"
+        errors:
+          items:
+            $ref: "#/definitions/Error"
+  - pathTemplate: "/api/1.0/workspaces/{workspaceId}/teams"
+    allowedQueryParams:
+      - "limit"
+      - "offset"
+      - "opt_fields"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.data[*]..name"
+          - "$.data[*].description"
+          - "$.data[*].html_description"
+    responseSchema:
+      properties:
+        data:
+          items:
+            $ref: "#/definitions/TeamCompact"
+        errors:
+          items:
+            $ref: "#/definitions/Error"
+        nextPage:
+          $ref: "#/definitions/NextPage"
+definitions:
+  CustomField:
+    properties:
+      asanaCreatedField: {}
+      createdBy:
+        $ref: "#/definitions/User"
+      currencyCode: {}
+      customLabel: {}
+      customLabelPosition: {}
+      dateValue:
+        $ref: "#/definitions/CustomFieldDate"
+      description: {}
+      displayValue: {}
+      enabled: {}
+      enumOptions:
+        items:
+          $ref: "#/definitions/EnumObject"
+      enumValue:
+        $ref: "#/definitions/EnumObject"
+      format: {}
+      gid: {}
+      hasNotificationsEnabled: {}
+      isGlobalToWorkspace: {}
+      multiEnumValues:
+        items:
+          $ref: "#/definitions/EnumObject"
+      name: {}
+      numberValue: {}
+      peopleValue:
+        items:
+          $ref: "#/definitions/Resource"
+      precision: {}
+      resourceSubtype: {}
+      resourceType: {}
+      textValue: {}
+      type: {}
+  CustomFieldDate:
+    properties:
+      date:
+        format: "date"
+      dateTime: {}
+  EnumObject:
+    properties:
+      enabled: {}
+      gid: {}
+      name: {}
+      resourceType: {}
+  Error:
+    properties:
+      message: {}
+      phrase: {}
+  External:
+    properties:
+      data: {}
+      gid: {}
+  Membership:
+    properties:
+      project:
+        $ref: "#/definitions/Resource"
+      section:
+        $ref: "#/definitions/Resource"
+  NextPage:
+    properties:
+      offset: {}
+      path: {}
+      uri: {}
+  Preview:
+    properties:
+      fallBack: {}
+      footer: {}
+      gid: {}
+      header: {}
+      headerLink: {}
+      htmlText: {}
+      name: {}
+      resourceType: {}
+      text: {}
+      title: {}
+      titleLink: {}
+  ProjectCompact:
+    properties:
+      gid: {}
+      name: {}
+      resourceType: {}
+  Resource:
+    properties:
+      gid: {}
+      name: {}
+      resourceType: {}
+  ResourceWithSubtype:
+    properties:
+      gid: {}
+      name: {}
+      resourceSubtype: {}
+      resourceType: {}
+  Story:
+    properties:
+      assignee:
+        $ref: "#/definitions/User"
+      createdAt:
+        format: "date-time"
+      createdBy:
+        $ref: "#/definitions/User"
+      customField:
+        $ref: "#/definitions/CustomField"
+      dependency:
+        $ref: "#/definitions/ResourceWithSubtype"
+      duplicateOf:
+        $ref: "#/definitions/ResourceWithSubtype"
+      duplicatedFrom:
+        $ref: "#/definitions/ResourceWithSubtype"
+      follower:
+        $ref: "#/definitions/User"
+      gid: {}
+      hearts:
+        items:
+          $ref: "#/definitions/UserInteraction"
+      htmlText: {}
+      isEditable: {}
+      isEdited: {}
+      isPinned: {}
+      likes:
+        items:
+          $ref: "#/definitions/UserInteraction"
+      name: {}
+      newApprovalStatus: {}
+      newDates:
+        $ref: "#/definitions/StoryDate"
+      newEnumValue:
+        $ref: "#/definitions/EnumObject"
+      newMultiEnumValues:
+        items:
+          $ref: "#/definitions/EnumObject"
+      newName: {}
+      newNumberValue: {}
+      newPeopleValue:
+        $ref: "#/definitions/Resource"
+      newResourceSubtype: {}
+      newSection:
+        $ref: "#/definitions/Resource"
+      newTextValue: {}
+      numHearts: {}
+      numLikes: {}
+      oldApprovalStatus: {}
+      oldDates:
+        $ref: "#/definitions/StoryDate"
+      oldEnumValue:
+        $ref: "#/definitions/EnumObject"
+      oldMultiEnumValues:
+        items:
+          $ref: "#/definitions/EnumObject"
+      oldName: {}
+      oldNumberValue: {}
+      oldPeopleValue:
+        $ref: "#/definitions/Resource"
+      oldResourceSubtype: {}
+      oldSection:
+        $ref: "#/definitions/Resource"
+      oldTextValue: {}
+      previews:
+        items:
+          $ref: "#/definitions/Preview"
+      project:
+        $ref: "#/definitions/ProjectCompact"
+      resourceSubtype: {}
+      resourceType: {}
+      source: {}
+      stickerName: {}
+      story:
+        $ref: "#/definitions/StoryCompact"
+      tag:
+        $ref: "#/definitions/TagCompact"
+      target:
+        $ref: "#/definitions/Task"
+      task:
+        $ref: "#/definitions/Task"
+      text: {}
+      type: {}
+  StoryCompact:
+    properties:
+      createdAt:
+        format: "date-time"
+      createdBy:
+        $ref: "#/definitions/User"
+      gid: {}
+      name: {}
+      resourceSubtype: {}
+      resourceType: {}
+      text: {}
+  StoryDate:
+    properties:
+      dueAt:
+        format: "date-time"
+      dueOn:
+        format: "date"
+      startOn:
+        format: "date"
+  TagCompact:
+    properties:
+      gid: {}
+      name: {}
+      resourceType: {}
+  Task:
+    properties:
+      actualTimeMinutes: {}
+      approvalStatus: {}
+      assignee:
+        $ref: "#/definitions/User"
+      assigneeSection:
+        $ref: "#/definitions/Resource"
+      assigneeStatus: {}
+      completed: {}
+      completedAt:
+        format: "date-time"
+      completedBy:
+        $ref: "#/definitions/User"
+      createdAt:
+        format: "date-time"
+      createdBy:
+        $ref: "#/definitions/User"
+      customFields:
+        items:
+          $ref: "#/definitions/CustomField"
+      dependencies:
+        items:
+          $ref: "#/definitions/Resource"
+      dependents:
+        items:
+          $ref: "#/definitions/Resource"
+      dueAt:
+        format: "date-time"
+      dueOn:
+        format: "date"
+      external:
+        $ref: "#/definitions/External"
+      followers:
+        items:
+          $ref: "#/definitions/User"
+      gid: {}
+      hearted: {}
+      hearts:
+        items:
+          $ref: "#/definitions/UserInteraction"
+      htmlNotes: {}
+      isRenderedAsSeparator: {}
+      liked: {}
+      likes:
+        items:
+          $ref: "#/definitions/UserInteraction"
+      memberships:
+        items:
+          $ref: "#/definitions/Membership"
+      modifiedAt:
+        format: "date-time"
+      name: {}
+      notes: {}
+      numHearts: {}
+      numLikes: {}
+      numSubtasks: {}
+      parent:
+        $ref: "#/definitions/Task"
+      permalinkUrl: {}
+      projects:
+        items:
+          $ref: "#/definitions/ProjectCompact"
+      resourceSubtype: {}
+      resourceType: {}
+      startAt:
+        format: "date-time"
+      startOn:
+        format: "date"
+      tags:
+        items:
+          $ref: "#/definitions/TagCompact"
+      workspace:
+        $ref: "#/definitions/WorkspaceCompact"
+  TeamCompact:
+    properties:
+      gid: {}
+      name: {}
+      resourceType: {}
+  User:
+    properties:
+      email: {}
+      gid: {}
+      name: {}
+      resourceType: {}
+  UserInteraction:
+    properties:
+      gid: {}
+      user:
+        $ref: "#/definitions/User"
+  WorkspaceCompact:
+    properties:
+      gid: {}
+      name: {}
+      resourceType: {}

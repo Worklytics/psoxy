@@ -2,25 +2,109 @@
 endpoints:
   - pathTemplate: "/gmail/v1/users/{mailboxId}/messages"
     transforms:
-      - !<pseudonymizeEmailHeader>
-        jsonPaths:
-          - "$.messages.payload.headers[?(@.name =~ /^(From|To|Cc|Bcc)$/i)].value"
       - !<pseudonymize>
         jsonPaths:
           - "$.messages.payload.headers[?(@.name =~ /^(X-Original-Sender|Delivered-To|Sender)$/i)].value"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeEmailHeader>
+        jsonPaths:
+          - "$.messages.payload.headers[?(@.name =~ /^(From|To|Cc|Bcc)$/i)].value"
       - !<redact>
         jsonPaths:
           - "$.messages.payload.headers[?(!(@.name =~ /^From|To|Cc|Bcc|X-Original-Sender|Delivered-To|Sender|Message-ID|Date|In-Reply-To|Original-Message-ID|References$/i))]"
+    responseSchema:
+      type: "object"
+      properties:
+        messages:
+          type: "array"
+          items:
+            $ref: "#/definitions/Message"
+        nextPageToken:
+          type: "string"
+        resultSizeEstimate:
+          type: "integer"
   - pathTemplate: "/gmail/v1/users/{mailboxId}/messages/{messageId}"
+    allowedQueryParams: []
     transforms:
-      - !<pseudonymizeEmailHeader>
-        jsonPaths:
-          - "$.payload.headers[?(@.name =~ /^(From|To|Cc|Bcc)$/i)].value"
       - !<pseudonymize>
         jsonPaths:
           - "$.payload.headers[?(@.name =~ /^(X-Original-Sender|Delivered-To|Sender)$/i)].value"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeEmailHeader>
+        jsonPaths:
+          - "$.payload.headers[?(@.name =~ /^(From|To|Cc|Bcc)$/i)].value"
       - !<redact>
         jsonPaths:
           - "$.payload.headers[?(!(@.name =~ /^From|To|Cc|Bcc|X-Original-Sender|Delivered-To|Sender|Message-ID|Date|In-Reply-To|Original-Message-ID|References$/i))]"
+    responseSchema:
+      type: "object"
+      properties:
+        historyId:
+          type: "string"
+        id:
+          type: "string"
+        internalDate:
+          type: "string"
+        labelIds:
+          type: "array"
+          items:
+            type: "string"
+        payload:
+          $ref: "#/definitions/MessagePart"
+        sizeEstimate:
+          type: "integer"
+        threadId:
+          type: "string"
+definitions:
+  Message:
+    type: "object"
+    properties:
+      historyId:
+        type: "string"
+      id:
+        type: "string"
+      internalDate:
+        type: "string"
+      labelIds:
+        type: "array"
+        items:
+          type: "string"
+      payload:
+        $ref: "#/definitions/MessagePart"
+      sizeEstimate:
+        type: "integer"
+      threadId:
+        type: "string"
+  MessagePart:
+    type: "object"
+    properties:
+      body:
+        $ref: "#/definitions/MessagePartBody"
+      filename:
+        type: "string"
+      headers:
+        type: "array"
+        items:
+          $ref: "#/definitions/MessagePartHeader"
+      mimeType:
+        type: "string"
+      partId:
+        type: "string"
+      parts:
+        type: "array"
+        items:
+          $ref: "#/definitions/MessagePart"
+  MessagePartBody:
+    type: "object"
+    properties:
+      attachmentId:
+        type: "string"
+      size:
+        type: "integer"
+  MessagePartHeader:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      value:
+        type: "string"

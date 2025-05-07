@@ -1,111 +1,85 @@
 ---
 endpoints:
   - pathTemplate: "/calendar/v3/calendars/{accountId}"
+    allowedQueryParams: []
     transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.summary"
       - !<pseudonymize>
         jsonPaths:
           - "$.id"
-        encoding: "JSON"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        etag:
+          type: "string"
+        id:
+          type: "string"
+        kind:
+          type: "string"
+        location:
+          type: "string"
+        summary:
+          type: "string"
+        timeZone:
+          type: "string"
   - pathTemplate: "/calendar/v3/calendars/{accountId}/events"
+    allowedQueryParams:
+      - "maxResults"
+      - "pageToken"
+      - "showDeleted"
+      - "showHidden"
     transforms:
       - !<pseudonymize>
         jsonPaths:
           - "$..email"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$.summary"
-          - "$..displayName"
-          - "$.items[*].extendedProperties"
-          - "$.items[*].conferenceData.notes"
-          - "$.items[*].conferenceData.entryPoints[*]['accessCode','password','passcode','pin']"
-          - "$..meetingCreatedBy"
-      - !<redactExceptPhrases>
-        jsonPaths:
-          - "$.items[*].summary"
-        allowedPhrases:
-          - "Focus Time"
-          - "Focus"
-          - "No Meetings"
-          - "No Meeting"
-          - "no mtg"
-          - "Prep"
-          - "OOO"
-          - "Out of Office"
-          - "Out of the Office"
-          - "call"
-          - "brainstorm"
-          - "brainstorming"
-          - "brain storm"
-          - "check in"
-          - "check-in"
-          - "checkin"
-          - "coffee"
-          - "food"
-          - "happy hour"
-          - "lunch"
-          - "office hours"
-          - "onsite"
-          - "on-site"
-          - "social"
-          - "stand up"
-          - "stand-up"
-          - "standup"
-          - "team building"
-          - "teambuilding"
-          - "daily"
-          - "bi-weekly"
-          - "biweekly"
-          - "weekly"
-          - "monthly"
-          - "quarterly"
-          - "1:1"
-          - "1-on-1"
-          - "one-on-one"
-          - "all-hands"
-          - "all hands"
-          - "allhands"
-          - "team meeting"
-          - "decision making"
-          - "decision"
-          - "hand off"
-          - "hand-off"
-          - "handoff"
-          - "handover"
-          - "information sharing"
-          - "problem solving"
-          - "retro"
-          - "review"
-          - "sprint"
-      - !<filterTokenByRegex>
-        jsonPaths:
-          - "$.items[*].description"
-        delimiter: "\\s+"
-        filters:
-          - "https://[^.]+\\.zoom\\.us/.*"
+        encoding: "URL_SAFE_TOKEN"
       - !<redactRegexMatches>
         jsonPaths:
+          - "$.items[*].conferenceData.entryPoints[*].uri"
           - "$.items[*].description"
           - "$.items[*].location"
-          - "$.items[*].conferenceData.entryPoints[*].uri"
         redactions:
           - "(?i)pwd=[^&]*"
+          - "(?i)pin=[^&]*"
+    responseSchema:
+      type: "object"
+      properties:
+        etag:
+          type: "string"
+        items:
+          type: "array"
+          items:
+            $ref: "#/definitions/Event"
+        kind:
+          type: "string"
+        nextPageToken:
+          type: "string"
+        nextSyncToken:
+          type: "string"
+        summary:
+          type: "string"
+        timeZone:
+          type: "string"
+        updated:
+          $ref: "#/definitions/EventDateTime"
   - pathTemplate: "/calendar/v3/calendars/{accountId}/events/{eventId}"
+    allowedQueryParams: []
     transforms:
-      - !<redact>
+      - !<pseudonymize>
         jsonPaths:
-          - "$.summary"
-          - "$..displayName"
-          - "$.extendedProperties"
-          - "$.conferenceData.entryPoints[*]['accessCode','password','passcode','pin']"
-          - "$.conferenceData.notes"
-          - "$..meetingCreatedBy"
+          - "$..email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redactRegexMatches>
+        jsonPaths:
+          - "$.description"
+          - "$.location"
+          - "$.conferenceData.entryPoints[*].uri"
+        redactions:
+          - "(?i)pwd=[^&]*"
       - !<redactExceptPhrases>
         jsonPaths:
-          - "$.items[*].summary"
+          - "$.summary"
         allowedPhrases:
           - "Focus Time"
           - "Focus"
@@ -160,35 +134,429 @@ endpoints:
           - "retro"
           - "review"
           - "sprint"
-      - !<filterTokenByRegex>
-        jsonPaths:
-          - "$.description"
-        delimiter: "\\s+"
-        filters:
-          - "https://[^.]+\\.zoom\\.us/.*"
-      - !<redactRegexMatches>
-        jsonPaths:
-          - "$.description"
-          - "$.conferenceData.entryPoints[*].uri"
-          - "$.location"
-        redactions:
-          - "(?i)pwd=[^&]*"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..email"
-        encoding: "JSON"
-  - pathTemplate: "/calendar/v3/users/{accountId}/settings"
+          - "handoff"
+          - "handover"
+          - "information sharing"
+          - "problem solving"
+          - "retro"
+          - "review"
+          - "sprint"
+          - "Focus Time"
+          - "Focus"
+          - "No Meetings"
+          - "No Meeting"
+          - "no mtg"
+          - "Prep"
+          - "OOO"
+          - "Out of Office"
+          - "Out of the Office"
+          - "call"
+          - "brainstorm"
+          - "brainstorming"
+          - "brain storm"
+          - "check in"
+          - "check-in"
+          - "checkin"
+          - "coffee"
+          - "food"
+          - "happy hour"
+          - "lunch"
+          - "office hours"
+          - "onsite"
+          - "on-site"
+          - "social"
+          - "stand up"
+          - "stand-up"
+          - "standup"
+          - "team building"
+          - "teambuilding"
+          - "daily"
+          - "bi-weekly"
+          - "biweekly"
+          - "weekly"
+          - "monthly"
+          - "quarterly"
+          - "1:1"
+          - "1-on-1"
+          - "one-on-one"
+          - "all-hands"
+          - "all hands"
+          - "allhands"
+          - "team meeting"
+          - "decision making"
+          - "decision"
+          - "hand off"
+          - "hand-off"
+          - "handoff"
+          - "handover"
+          - "information sharing"
+          - "problem solving"
+          - "retro"
+          - "review"
+          - "sprint"
+          - "handoff"
+          - "handover"
+          - "information sharing"
+          - "problem solving"
+          - "retro"
+          - "review"
+          - "sprint"
+    responseSchema:
+      type: "object"
+      properties:
+        anyoneCanAddSelf:
+          type: "boolean"
+        attachments:
+          type: "array"
+          items:
+            $ref: "#/definitions/EventAttachment"
+        attendees:
+          type: "array"
+          items:
+            $ref: "#/definitions/Attendee"
+        attendeesOmitted:
+          type: "boolean"
+        colorId:
+          type: "string"
+        conferenceData:
+          $ref: "#/definitions/ConferenceData"
+        created:
+          type: "string"
+        creator:
+          $ref: "#/definitions/Creator"
+        description:
+          type: "string"
+        end:
+          $ref: "#/definitions/EventDateTime"
+        endTimeUnspecified:
+          type: "boolean"
+        etag:
+          type: "string"
+        eventType:
+          type: "string"
+        extendedProperties:
+          $ref: "#/definitions/ExtendedProperties"
+        guestsCanInviteOthers:
+          type: "boolean"
+        guestsCanModify:
+          type: "boolean"
+        guestsCanSeeOtherGuests:
+          type: "boolean"
+        hangoutLink:
+          type: "string"
+        htmlLink:
+          type: "string"
+        iCalUID:
+          type: "string"
+        id:
+          type: "string"
+        kind:
+          type: "string"
+        location:
+          type: "string"
+        locked:
+          type: "boolean"
+        organizer:
+          $ref: "#/definitions/Organizer"
+        originalStartTime:
+          $ref: "#/definitions/EventDateTime"
+        privateCopy:
+          type: "boolean"
+        recurrence:
+          type: "array"
+          items:
+            type: "string"
+        recurringEventId:
+          type: "string"
+        sequence:
+          type: "integer"
+        start:
+          $ref: "#/definitions/EventDateTime"
+        status:
+          type: "string"
+        summary:
+          type: "string"
+        transparency:
+          type: "string"
+        updated:
+          type: "string"
+        visibility:
+          type: "string"
   - pathTemplate: "/calendar/v3/users/{accountId}/calendarList"
+    allowedQueryParams: []
     transforms:
-      - !<filterTokenByRegex>
-        jsonPaths:
-          - "$.items[*].summaryOverride"
-          - "$.items[*].summary"
-        delimiter: "\\s+"
-        filters:
-          - "Transferred"
       - !<pseudonymize>
         jsonPaths:
           - "$.items[*].id"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
+      - !<redactExceptPhrases>
+        jsonPaths:
+          - "$.items[*].summary"
+        allowedPhrases:
+          - "Transferred"
+    responseSchema:
+      type: "object"
+      properties:
+        etag:
+          type: "string"
+        items:
+          type: "array"
+          items:
+            $ref: "#/definitions/CalendarListEntry"
+        kind:
+          type: "string"
+        nextPageToken:
+          type: "string"
+        nextSyncToken:
+          type: "string"
+  - pathTemplate: "/calendar/v3/users/{accountId}/settings"
+    allowedQueryParams: []
+    responseSchema:
+      type: "object"
+      properties:
+        etag:
+          type: "string"
+        items:
+          type: "array"
+          items:
+            $ref: "#/definitions/Setting"
+        kind:
+          type: "string"
+        nextPageToken:
+          type: "string"
+        nextSyncToken:
+          type: "string"
+definitions:
+  Attendee:
+    type: "object"
+    properties:
+      additionalGuests:
+        type: "integer"
+      displayName:
+        type: "string"
+      email:
+        type: "string"
+      id:
+        type: "string"
+      optional:
+        type: "boolean"
+      organizer:
+        type: "boolean"
+      resource:
+        type: "boolean"
+      responseStatus:
+        type: "string"
+      self:
+        type: "boolean"
+  CalendarListEntry:
+    type: "object"
+    properties:
+      deleted:
+        type: "boolean"
+      etag:
+        type: "string"
+      hidden:
+        type: "boolean"
+      id:
+        type: "string"
+      kind:
+        type: "string"
+      location:
+        type: "string"
+      primary:
+        type: "boolean"
+      summary:
+        type: "string"
+      summaryOverride:
+        type: "string"
+      timeZone:
+        type: "string"
+  ConferenceData:
+    type: "object"
+    properties:
+      conferenceId:
+        type: "string"
+      conferenceSolution:
+        $ref: "#/definitions/ConferenceSolution"
+      entryPoints:
+        type: "array"
+        items:
+          $ref: "#/definitions/EntryPoint"
+  ConferenceSolution:
+    type: "object"
+    properties:
+      iconUri:
+        type: "string"
+      key:
+        $ref: "#/definitions/ConferenceSolutionKey"
+      name:
+        type: "string"
+  ConferenceSolutionKey:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+  Creator:
+    type: "object"
+    properties:
+      displayName:
+        type: "string"
+      email:
+        type: "string"
+      id:
+        type: "string"
+      self:
+        type: "boolean"
+  DateTime:
+    type: "object"
+    properties:
+      dateOnly:
+        type: "boolean"
+      timeZoneShift:
+        type: "integer"
+      value:
+        type: "integer"
+  EntryPoint:
+    type: "object"
+    properties:
+      entryPointFeatures:
+        type: "array"
+        items:
+          type: "string"
+      entryPointType:
+        type: "string"
+      label:
+        type: "string"
+      meetingCode:
+        type: "string"
+      regionCode:
+        type: "string"
+      uri:
+        type: "string"
+  Event:
+    type: "object"
+    properties:
+      anyoneCanAddSelf:
+        type: "boolean"
+      attachments:
+        type: "array"
+        items:
+          $ref: "#/definitions/EventAttachment"
+      attendees:
+        type: "array"
+        items:
+          $ref: "#/definitions/Attendee"
+      attendeesOmitted:
+        type: "boolean"
+      colorId:
+        type: "string"
+      conferenceData:
+        $ref: "#/definitions/ConferenceData"
+      created:
+        type: "string"
+      creator:
+        $ref: "#/definitions/Creator"
+      description:
+        type: "string"
+      end:
+        $ref: "#/definitions/EventDateTime"
+      endTimeUnspecified:
+        type: "boolean"
+      etag:
+        type: "string"
+      eventType:
+        type: "string"
+      extendedProperties:
+        $ref: "#/definitions/ExtendedProperties"
+      guestsCanInviteOthers:
+        type: "boolean"
+      guestsCanModify:
+        type: "boolean"
+      guestsCanSeeOtherGuests:
+        type: "boolean"
+      hangoutLink:
+        type: "string"
+      htmlLink:
+        type: "string"
+      iCalUID:
+        type: "string"
+      id:
+        type: "string"
+      kind:
+        type: "string"
+      location:
+        type: "string"
+      locked:
+        type: "boolean"
+      organizer:
+        $ref: "#/definitions/Organizer"
+      originalStartTime:
+        $ref: "#/definitions/EventDateTime"
+      privateCopy:
+        type: "boolean"
+      recurrence:
+        type: "array"
+        items:
+          type: "string"
+      recurringEventId:
+        type: "string"
+      sequence:
+        type: "integer"
+      start:
+        $ref: "#/definitions/EventDateTime"
+      status:
+        type: "string"
+      summary:
+        type: "string"
+      transparency:
+        type: "string"
+      updated:
+        type: "string"
+      visibility:
+        type: "string"
+  EventAttachment:
+    type: "object"
+    properties:
+      fileId:
+        type: "string"
+      fileUrl:
+        type: "string"
+      mimeType:
+        type: "string"
+  EventDateTime:
+    type: "object"
+    properties:
+      date:
+        type: "string"
+      dateTime:
+        type: "string"
+      timeZone:
+        type: "string"
+  ExtendedProperties:
+    type: "object"
+    properties:
+      shared:
+        type: "object"
+  Organizer:
+    type: "object"
+    properties:
+      displayName:
+        type: "string"
+      email:
+        type: "string"
+      id:
+        type: "string"
+      self:
+        type: "boolean"
+  Setting:
+    type: "object"
+    properties:
+      etag:
+        type: "string"
+      id:
+        type: "string"
+      kind:
+        type: "string"
+      value:
+        type: "string"
