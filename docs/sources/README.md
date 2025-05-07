@@ -37,6 +37,7 @@ file.
 | `qualtrics`                | Qualtrics (survey)                   | API  | GA           |
 | `salesforce`               | Salesforce                           | API  | GA           |
 | `slack-discovery-api`      | Slack Discovery API                  | API  | GA           |
+| `slack-ai-snapshot`      | Slack AI Snapshot                    | API  | ALPHA        |
 | `survey`                   | Survey                               | Bulk | GA           |
 | `zoom`                     | Zoom                                 | API  | GA           |
 
