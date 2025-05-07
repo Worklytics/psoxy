@@ -22,7 +22,7 @@
     "@aws-sdk/client-cloudwatch-logs": "^3.350.0",
     "@aws-sdk/client-s3": "^3.350.0",
     "@aws-sdk/credential-providers": "^3.351.0",
-    "@google-cloud/logging": "^11.0.0",
+    "@google-cloud/logging": "^11.2.0",
     "@google-cloud/storage": "^7.12.1",
     "@stdlib/assert-is-gzip-buffer": "^0.1.1",
     "aws4": "^1.11.0",

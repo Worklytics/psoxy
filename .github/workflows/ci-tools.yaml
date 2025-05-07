@@ -14,9 +14,8 @@ jobs:
         # 16 is min version recommended to users; but unmaintained since 2023-10
         # 18 released 2022-04-19 - maintained until June 2025
         # 20 maintained until June 2026
-        # 21 released Oct 2023; superseded in May 2024
-        # latest is the 22 as of May 2024; 23 coming in Oct 2024
-        node-version: [ 18, 20, 21, latest]
+        # latest is the 24 as of May 2025; 23 maintained until June 2025 or so
+        node-version: [ 18, 20, 22, 23, latest ]
     steps:
     - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
