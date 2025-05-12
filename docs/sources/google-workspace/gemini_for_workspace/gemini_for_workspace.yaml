@@ -10,6 +10,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.items[*].actor.email"
+          - "$.items[*].resourceDetails[*]..email"
         encoding: "URL_SAFE_TOKEN"
       - !<hashIp>
         jsonPaths:
@@ -42,6 +43,10 @@ definitions:
         $ref: "#/definitions/Id"
       ipAddress:
         type: "string"
+      resourceDetails:
+        type: "array"
+        items:
+          $ref: "#/definitions/ResourceDetail"
   Actor:
     type: "object"
     properties:
@@ -85,3 +90,13 @@ definitions:
         type: "string"
       value:
         type: "string"
+  ResourceDetail:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      relation:
+        type: "string"
+      type:
+        type: "string"
+
