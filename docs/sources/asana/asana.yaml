@@ -21,13 +21,6 @@ endpoints:
           - "$.data[*].followers[*].gid"
           - "$.data[*]..email"
         encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$.data[*].external"
-          - "$.data[*].html_notes"
-          - "$.data[*].notes"
-          - "$.data[*]..name"
-          - "$.data[*].custom_fields[*].description"
     responseSchema:
       properties:
         data:
@@ -53,13 +46,6 @@ endpoints:
           - "$.data.followers[*].gid"
           - "$.data..email"
         encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$.data.external"
-          - "$.data.html_notes"
-          - "$.data.notes"
-          - "$.data..name"
-          - "$.data.custom_fields[*].description"
     responseSchema:
       properties:
         data:
@@ -82,16 +68,6 @@ endpoints:
           - "$.data[*].target.gid"
           - "$.data[*]..email"
         encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$.data[*]..name"
-          - "$.data[*].html_text"
-          - "$.data[*].text"
-          - "$.data[*].new_text_value"
-          - "$.data[*].old_text_value"
-          - "$.data[*].new_name"
-          - "$.data[*].old_name"
-          - "$.data[*].previews"
     responseSchema:
       properties:
         data:
@@ -123,13 +99,6 @@ endpoints:
           - "$.data[*].followers[*].gid"
           - "$.data[*]..email"
         encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$.data[*].external"
-          - "$.data[*].html_notes"
-          - "$.data[*].notes"
-          - "$.data[*]..name"
-          - "$.data[*].custom_fields[*].description"
     responseSchema:
       properties:
         data:
@@ -146,159 +115,6 @@ endpoints:
       - "offset"
       - "opt_fields"
       - "archived"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.data[*].current_status"
-          - "$.data[*].current_status_update"
-          - "$.data[*].custom_field_settings[*].custom_field.created_by"
-          - "$.data[*].custom_field_settings[*].custom_field.description"
-          - "$.data[*].name"
-          - "$.data[*].notes"
-          - "$.data[*].html_notes"
-          - "$.data[*].created_by"
-          - "$.data[*].completed_by"
-          - "$..name"
-    responseSchema:
-      properties:
-        data:
-          items:
-            $ref: "#/definitions/ProjectCompact"
-        errors:
-          items:
-            $ref: "#/definitions/Error"
-        nextPage:
-          $ref: "#/definitions/NextPage"
-  - pathTemplate: "/api/1.0/users"
-    allowedQueryParams:
-      - "limit"
-      - "offset"
-      - "opt_fields"
-      - "workspace"
-      - "team"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.data[*].created_by.gid"
-          - "$.data[*].completed_by.gid"
-          - "$.data[*].hearts[*].user.gid"
-          - "$.data[*].likes[*].user.gid"
-          - "$.data[*].assignee.gid"
-          - "$.data[*].custom_fields[*].created_by.gid"
-          - "$.data[*].custom_fields[*].people_value[*].gid"
-          - "$.data[*].followers[*].gid"
-          - "$.data[*]..email"
-        encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$.data[*]..name"
-    responseSchema:
-      properties:
-        data:
-          items:
-            $ref: "#/definitions/Task"
-        errors:
-          items:
-            $ref: "#/definitions/Error"
-        nextPage:
-          $ref: "#/definitions/NextPage"
-  - pathTemplate: "/api/1.0/tasks/{taskId}"
-    allowedQueryParams: []
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.data.created_by.gid"
-          - "$.data.completed_by.gid"
-          - "$.data.hearts[*].user.gid"
-          - "$.data.likes[*].user.gid"
-          - "$.data.assignee.gid"
-          - "$.data.custom_fields[*].created_by.gid"
-          - "$.data.custom_fields[*].people_value[*].gid"
-          - "$.data.followers[*].gid"
-          - "$.data..email"
-        encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$.data..name"
-    responseSchema:
-      properties:
-        data:
-          $ref: "#/definitions/Task"
-        errors:
-          items:
-            $ref: "#/definitions/Error"
-  - pathTemplate: "/api/1.0/tasks/{taskId}/stories"
-    allowedQueryParams:
-      - "limit"
-      - "offset"
-      - "opt_fields"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.data[*].created_by.gid"
-          - "$.data[*].hearts[*].user.gid"
-          - "$.data[*].likes[*].user.gid"
-          - "$.data[*].source.gid"
-          - "$.data[*].target.gid"
-          - "$.data[*]..email"
-        encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$.data[*]..name"
-    responseSchema:
-      properties:
-        data:
-          items:
-            $ref: "#/definitions/Story"
-        errors:
-          items:
-            $ref: "#/definitions/Error"
-        nextPage:
-          $ref: "#/definitions/NextPage"
-  - pathTemplate: "/api/1.0/tasks/{taskId}/subtasks"
-    allowedQueryParams:
-      - "limit"
-      - "offset"
-      - "opt_fields"
-      - "project"
-      - "completed_since"
-      - "modified_since"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.data[*].created_by.gid"
-          - "$.data[*].completed_by.gid"
-          - "$.data[*].hearts[*].user.gid"
-          - "$.data[*].likes[*].user.gid"
-          - "$.data[*].assignee.gid"
-          - "$.data[*].custom_fields[*].created_by.gid"
-          - "$.data[*].custom_fields[*].people_value[*].gid"
-          - "$.data[*].followers[*].gid"
-          - "$.data[*]..email"
-        encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$.data[*]..name"
-    responseSchema:
-      properties:
-        data:
-          items:
-            $ref: "#/definitions/Task"
-        errors:
-          items:
-            $ref: "#/definitions/Error"
-        nextPage:
-          $ref: "#/definitions/NextPage"
-  - pathTemplate: "/api/1.0/teams/{teamId}/projects"
-    allowedQueryParams:
-      - "limit"
-      - "offset"
-      - "opt_fields"
-      - "archived"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..name"
     responseSchema:
       properties:
         data:
@@ -385,12 +201,6 @@ endpoints:
       - "limit"
       - "offset"
       - "opt_fields"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.data[*]..name"
-          - "$.data[*].description"
-          - "$.data[*].html_description"
     responseSchema:
       properties:
         data:
@@ -460,18 +270,6 @@ definitions:
       offset: {}
       path: {}
       uri: {}
-  Preview:
-    properties:
-      fallBack: {}
-      footer: {}
-      gid: {}
-      header: {}
-      headerLink: {}
-      htmlText: {}
-      resourceType: {}
-      text: {}
-      title: {}
-      titleLink: {}
   ProjectCompact:
     properties:
       gid: {}
@@ -504,10 +302,6 @@ definitions:
       follower:
         $ref: "#/definitions/User"
       gid: {}
-      hearts:
-        items:
-          $ref: "#/definitions/UserInteraction"
-      htmlText: {}
       isEditable: {}
       isEdited: {}
       isPinned: {}
@@ -522,14 +316,12 @@ definitions:
       newMultiEnumValues:
         items:
           $ref: "#/definitions/EnumObject"
-      newName: {}
       newNumberValue: {}
       newPeopleValue:
         $ref: "#/definitions/Resource"
       newResourceSubtype: {}
       newSection:
         $ref: "#/definitions/Resource"
-      newTextValue: {}
       numHearts: {}
       numLikes: {}
       oldApprovalStatus: {}
@@ -540,17 +332,12 @@ definitions:
       oldMultiEnumValues:
         items:
           $ref: "#/definitions/EnumObject"
-      oldName: {}
       oldNumberValue: {}
       oldPeopleValue:
         $ref: "#/definitions/Resource"
       oldResourceSubtype: {}
       oldSection:
         $ref: "#/definitions/Resource"
-      oldTextValue: {}
-      previews:
-        items:
-          $ref: "#/definitions/Preview"
       project:
         $ref: "#/definitions/ProjectCompact"
       resourceSubtype: {}
@@ -573,8 +360,6 @@ definitions:
       createdBy:
         $ref: "#/definitions/User"
       gid: {}
-      resourceSubtype: {}
-      resourceType: {}
       resourceSubtype: {}
       resourceType: {}
   StoryDate:
@@ -620,17 +405,10 @@ definitions:
         format: "date-time"
       dueOn:
         format: "date"
-      external:
-        $ref: "#/definitions/External"
       followers:
         items:
           $ref: "#/definitions/User"
       gid: {}
-      hearted: {}
-      hearts:
-        items:
-          $ref: "#/definitions/UserInteraction"
-      htmlNotes: {}
       isRenderedAsSeparator: {}
       liked: {}
       likes:
@@ -641,8 +419,6 @@ definitions:
           $ref: "#/definitions/Membership"
       modifiedAt:
         format: "date-time"
-      name: {}
-      notes: {}
       numHearts: {}
       numLikes: {}
       numSubtasks: {}
