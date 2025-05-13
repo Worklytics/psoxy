@@ -6,6 +6,7 @@ endpoints:
       - "maxResults"
       - "pageToken"
       - "startTime"
+      - "endTime"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -99,4 +100,3 @@ definitions:
         type: "string"
       type:
         type: "string"
-
