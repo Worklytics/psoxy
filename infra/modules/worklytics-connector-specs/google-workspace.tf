@@ -145,6 +145,26 @@ locals {
         "/admin/reports/v1/activity/users/all/applications/meet?maxResults=10"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_admin
-    }
+    },
+  "gemini-for-workspace" : {
+        source_kind : "gemini-for-workspace"
+        availability : "alpha",
+        enable_by_default : false
+        worklytics_connector_id : "gemini-for-workspace-psoxy"
+        display_name : "Google Gemini for Workspace"
+        apis_consumed : [
+          "admin.googleapis.com"
+        ]
+        source_auth_strategy : "gcp_service_account_key"
+        target_host : "admin.googleapis.com"
+        oauth_scopes_needed : [
+          "https://www.googleapis.com/auth/admin.reports.audit.readonly"
+        ]
+        environment_variables : {}
+        example_api_calls : [
+          "/admin/reports/v1/activity/users/all/applications/gemini_for_workspace?maxResults=10"
+        ]
+        example_api_calls_user_to_impersonate : local.google_workspace_example_admin
+      }
   }
 }

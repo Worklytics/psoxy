@@ -34,7 +34,7 @@ variable "google_workspace_provision_keys" {
 
 locals {
   # tflint-ignore: terraform_unused_declarations
-  validate_google_workspace_gcp_project_id         = (var.google_workspace_gcp_project_id == null || var.google_workspace_gcp_project_id == "") && (length(setintersection(var.enabled_connectors, ["gcal", "gdirectory", "gdrive", "gmail", "google-meet", "google-chat"])) > 0)
+  validate_google_workspace_gcp_project_id         = (var.google_workspace_gcp_project_id == null || var.google_workspace_gcp_project_id == "") && (length(setintersection(var.enabled_connectors, ["gcal", "gdirectory", "gdrive", "gmail", "google-meet", "google-chat", "gemini_for_workspace"])) > 0)
   validate_google_workspace_gcp_project_id_message = "The google_workspace_gcp_project_id var should be populated if a Google Workspace connector is enabled."
   validate_google_workspace_gcp_project_id_check = regex(
     "^${local.validate_google_workspace_gcp_project_id_message}$",
