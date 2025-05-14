@@ -51,7 +51,9 @@ class GeminiForWorkspaceTests extends JavaRulesTestBaseCase {
 
 
         assertUrlAllowed(endpoint);
-        assertUrlBlocked("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/gemini_for_workspace");
+        assertUrlAllowed("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/gemini_for_workspace");
+        assertUrlAllowed("https://admin.googleapis.com/admin/reports/v1/activity/users/12341/applications/gemini_for_workspace");
+        assertUrlBlocked("https://admin.googleapis.com/admin/reports/v1/activity/users/alice@acme.com/applications/gemini_for_workspace");
     }
 
     public Stream<InvocationExample> getExamples() {
