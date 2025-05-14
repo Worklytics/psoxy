@@ -379,33 +379,10 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
-    static final YAMLMapper YAML_MAPPER = new YAMLMapper();
-
-    static final  RESTRules GEMINI_FOR_WORKSPACE;
-
-    static {
-        try {
-            GEMINI_FOR_WORKSPACE = YAML_MAPPER.readValue(
-                    PrebuiltSanitizerRules.class.getClassLoader().getResourceAsStream("sources/google-workspace/gemini-for-workspace/gemini-for-workspace.yaml"),
-                    Rules2.class
-            );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    static final RESTRules GEMINI_FOR_WORKSPACE_NO_APP_IDS;
-
-    static {
-        try {
-            GEMINI_FOR_WORKSPACE_NO_APP_IDS = YAML_MAPPER.readValue(
-                    PrebuiltSanitizerRules.class.getClassLoader().getResourceAsStream("sources/google-workspace/gemini-for-workspace/gemini-for-workspace_no-app-ids.yaml"),
-                    Rules2.class
-            );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    static final  RESTRules GEMINI_FOR_WORKSPACE =
+        Rules2.load("sources/google-workspace/gemini-for-workspace/gemini-for-workspace.yaml");
+    static final RESTRules GEMINI_FOR_WORKSPACE_NO_APP_IDS =
+        Rules2.load("sources/google-workspace/gemini-for-workspace/gemini-for-workspace_no-app-ids.yaml");
 
     static public final Map<String, RESTRules> GOOGLE_DEFAULT_RULES_MAP = ImmutableMap.<String, RESTRules>builder()
             .put("gcal", GCAL)

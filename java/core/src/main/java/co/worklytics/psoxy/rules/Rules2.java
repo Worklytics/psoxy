@@ -15,6 +15,7 @@ import lombok.extern.java.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,6 +31,7 @@ import java.util.stream.Stream;
 @JsonInclude(JsonInclude.Include.NON_NULL) //NOTE: despite name, also affects YAML encoding
 public class Rules2 implements RESTRules {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Singular
@@ -119,7 +121,7 @@ public class Rules2 implements RESTRules {
     static ObjectMapper mapper = new YAMLMapper();
 
     public static synchronized Rules2 load(String path) {
-        try (InputStream is = PrebuiltSanitizerRules.class.getClassLoader().getResourceAsStream(path)) {
+        try (InputStream is = Rules2.class.getClassLoader().getResourceAsStream(path)) {
             if (is == null) {
                 throw new IllegalArgumentException("Resource not found: " + path);
             }
