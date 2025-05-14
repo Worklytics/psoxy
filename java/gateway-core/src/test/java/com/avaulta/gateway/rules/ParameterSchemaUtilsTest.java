@@ -81,6 +81,19 @@ class ParameterSchemaUtilsTest {
                         Pair.of("reversible", "not-a-pseudonym")
                 )));
     }
+
+
+    @Test
+    public void validate_or(){
+        ParameterSchema schema = ParameterSchema.builder()
+            .or(ParameterSchema.builder().pattern("^all$").build())
+            .or(ParameterSchema.integer())
+            .build();
+
+        assertTrue(parameterSchemaUtils.validate(schema, "all"));
+        assertTrue(parameterSchemaUtils.validate(schema, "123"));
+        assertFalse(parameterSchemaUtils.validate(schema, "any"));
+    }
 }
 
 
