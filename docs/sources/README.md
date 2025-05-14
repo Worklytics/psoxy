@@ -20,7 +20,7 @@ file.
 | `gdrive`                   | Google Drive                        | API  | GA           |
 | `gdirectory`               | Google Directory                    | API  | GA           |
 | `gemini-usage`             | Gemini Usage                        | Bulk | BETA         |
-| `msft-copilot`             | Microsot 365 Copilot                | API  | ALPHA        |
+| `msft-copilot`             | Microsoft 365 Copilot               | API  | ALPHA        |
 | `github`                   | GitHub                              | API  | GA           |
 | `github-copilot`           | GitHub                              | API  | ALPHA        |
 | `github-enterprise-server` | GitHub Enterprise Server            | API  | GA           |
@@ -28,6 +28,7 @@ file.
 | `gmail`                    | Gmail                               | API  | GA           |
 | `google-chat`              | Google Chat                         | API  | GA           |
 | `google-meet`              | Google Meet                         | API  | GA           |
+| `gemini_for_workspace`     | Google Gemini for Workspace         | API  | ALPHA        |
 | `hris`                     | HR Information System (eg, Workday) | Bulk | GA           |
 | `jira-cloud`               | Jira Cloud                          | API  | GA           |
 | `jira-server`              | Jira Server                         | API  | GA           |
