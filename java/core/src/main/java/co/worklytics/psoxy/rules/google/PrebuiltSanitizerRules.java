@@ -386,7 +386,7 @@ public class PrebuiltSanitizerRules {
     static {
         try {
             GEMINI_FOR_WORKSPACE = YAML_MAPPER.readValue(
-                    PrebuiltSanitizerRules.class.getClassLoader().getResourceAsStream("sources/google-workspace/gemini_for_workspace/gemini_for_workspace.yaml"),
+                    PrebuiltSanitizerRules.class.getClassLoader().getResourceAsStream("sources/google-workspace/gemini-for-workspace/gemini-for-workspace.yaml"),
                     Rules2.class
             );
         } catch (IOException e) {
@@ -399,7 +399,7 @@ public class PrebuiltSanitizerRules {
     static {
         try {
             GEMINI_FOR_WORKSPACE_NO_APP_IDS = YAML_MAPPER.readValue(
-                    PrebuiltSanitizerRules.class.getClassLoader().getResourceAsStream("sources/google-workspace/gemini_for_workspace/gemini_for_workspace_no-app-ids.yaml"),
+                    PrebuiltSanitizerRules.class.getClassLoader().getResourceAsStream("sources/google-workspace/gemini-for-workspace/gemini-for-workspace_no-app-ids.yaml"),
                     Rules2.class
             );
         } catch (IOException e) {
@@ -415,7 +415,7 @@ public class PrebuiltSanitizerRules {
             .put("gmail", GMAIL)
             .put("google-chat", GOOGLE_CHAT)
             .put("google-meet", GOOGLE_MEET)
-            .put("gemini_for_workspace", GEMINI_FOR_WORKSPACE)
-            .put("gemini_for_workspace" + ConfigRulesModule.NO_APP_IDS_SUFFIX, GEMINI_FOR_WORKSPACE_NO_APP_IDS)
+            .put("gemini-for-workspace", GEMINI_FOR_WORKSPACE)
+            .put("gemini-for-workspace" + ConfigRulesModule.NO_APP_IDS_SUFFIX, GEMINI_FOR_WORKSPACE_NO_APP_IDS)
             .build();
 }
