@@ -19,7 +19,7 @@ class GeminiForWorkspaceTests extends JavaRulesTestBaseCase {
     @SneakyThrows
     public RESTRules getRulesUnderTest() {
         return yamlMapper.readValue(
-            this.getClass().getClassLoader().getResourceAsStream("sources/google-workspace/gemini_for_workspace/gemini_for_workspace.yaml"),
+            this.getClass().getClassLoader().getResourceAsStream("sources/google-workspace/gemini-for-workspace/gemini-for-workspace.yaml"),
             Rules2.class
         );
     }
@@ -28,7 +28,7 @@ class GeminiForWorkspaceTests extends JavaRulesTestBaseCase {
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
         .sourceFamily("google-workspace")
         .defaultScopeId("gapps")
-        .sourceKind("gemini_for_workspace")
+        .sourceKind("gemini-for-workspace")
         .build();
 
     @SneakyThrows
