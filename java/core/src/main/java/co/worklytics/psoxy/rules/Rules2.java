@@ -117,22 +117,4 @@ public class Rules2 implements RESTRules {
             .build();
         return clone;
     }
-
-    //TODO: fix YAML serialization with something like
-    // https://stackoverflow.com/questions/55878770/how-to-use-jsonsubtypes-for-polymorphic-type-handling-with-jackson-yaml-mapper
-
-    static ObjectMapper mapper = new YAMLMapper();
-
-    public static synchronized Rules2 load(String path) {
-        try {
-            URL url = PrebuiltSanitizerRules.class.getClassLoader().getResource(path);
-            if (url == null) {
-                throw new IllegalArgumentException("No such file: " + path);
-            }
-            return mapper.readerFor(Rules2.class).readValue(Files.readAllBytes(Paths.get(url.toURI())));
-        } catch (IOException | URISyntaxException e) {
-            throw new Error(e);
-        }
-    }
-
 }
