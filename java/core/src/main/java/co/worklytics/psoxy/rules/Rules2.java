@@ -14,10 +14,7 @@ import lombok.*;
 import lombok.extern.java.Log;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
 import java.io.Serial;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -124,14 +121,13 @@ public class Rules2 implements RESTRules {
     static ObjectMapper mapper = new YAMLMapper();
 
     public static synchronized Rules2 load(String path) {
-        try {
-            URL url = PrebuiltSanitizerRules.class.getClassLoader().getResource(path);
-            if (url == null) {
-                throw new IllegalArgumentException("No such file: " + path);
+        try (InputStream is = Rules2.class.getClassLoader().getResourceAsStream(path)) {
+            if (is == null) {
+                throw new IllegalArgumentException("Resource not found: " + path);
             }
-            return mapper.readerFor(Rules2.class).readValue(Files.readAllBytes(Paths.get(url.toURI())));
-        } catch (IOException | URISyntaxException e) {
-            throw new Error(e);
+            return mapper.readerFor(Rules2.class).readValue(is);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load rules from: " + path, e);
         }
     }
 

@@ -395,19 +395,19 @@ abstract public class RulesBaseTestCase {
 
     @SneakyThrows
     protected void assertUrlWithQueryParamsAllowed(String url) {
-        assertTrue(sanitizer.isAllowed("GET", new URL(url + "?param=value")), "single param blocked");
-        assertTrue(sanitizer.isAllowed("GET", new URL(url + "?param=value&param2=value2")), "multiple params blocked");
+        assertTrue(sanitizer.isAllowed("GET", new URL(url + "?param=value")), "single param blocked when appended to url: " + url);
+        assertTrue(sanitizer.isAllowed("GET", new URL(url + "?param=value&param2=value2")), "multiple params blocked when appended to url: " + url);
     }
 
     @SneakyThrows
     protected void assertUrlAllowed(String url) {
-        assertTrue(sanitizer.isAllowed("GET", new URL(url)), "api endpoint url blocked");
+        assertTrue(sanitizer.isAllowed("GET", new URL(url)), "api endpoint url blocked : " + url);
     }
 
     @SneakyThrows
     protected void assertUrlWithQueryParamsBlocked(String url) {
-        assertFalse(sanitizer.isAllowed("GET", new URL(url + "?param=value")), "query param allowed");
-        assertFalse(sanitizer.isAllowed("GET", new URL(url + "?param=value&param2=value2")), "multiple query params allowed");
+        assertFalse(sanitizer.isAllowed("GET", new URL(url + "?param=value")), "query param allowed when appended to url: " + url);
+        assertFalse(sanitizer.isAllowed("GET", new URL(url + "?param=value&param2=value2")), "multiple query params allowed when appended to url: " + url);
     }
 
     @SneakyThrows
