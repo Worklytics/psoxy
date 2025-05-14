@@ -28,7 +28,7 @@ class GeminiForWorkspaceTests extends JavaRulesTestBaseCase {
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
         .sourceFamily("google-workspace")
         .defaultScopeId("gapps")
-        .sourceKind("gemini_for_workspace")
+        .sourceKind("gemini-for-workspace")
         .build();
 
     @SneakyThrows
