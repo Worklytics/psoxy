@@ -19,8 +19,8 @@ file.
 | `gcal`                     | Google Calendar                     | API  | GA           |
 | `gdrive`                   | Google Drive                        | API  | GA           |
 | `gdirectory`               | Google Directory                    | API  | GA           |
-| `gemini-usage`             | Gemini Usage                        | Bulk | BETA         |
-| `msft-copilot`             | Microsot 365 Copilot                | API  | ALPHA        |
+| `gemini-for-workspace`     | Google Gemini for Workspace         | API  | ALPHA        |
+| `gemini-usage`             | Gemini Usage                        | Bulk | ALPHA        |
 | `github`                   | GitHub                              | API  | GA           |
 | `github-copilot`           | GitHub                              | API  | ALPHA        |
 | `github-enterprise-server` | GitHub Enterprise Server            | API  | GA           |
@@ -33,8 +33,9 @@ file.
 | `jira-server`              | Jira Server                         | API  | GA           |
 | `outlook-cal`              | Outlook Calendar                    | API  | GA           |
 | `outlook-mail`             | Outlook Mail                        | API  | GA           |
-| `msft-teams`               | Microsoft Teams                     | API  | BETA         |
+| `msft-copilot`             | Microsoft 365 Copilot               | API  | ALPHA        |
 | `msft-entra-id`            | Microsoft Entra ID                  | API  | GA           |
+| `msft-teams`               | Microsoft Teams                     | API  | BETA         |
 | `qualtrics`                | Qualtrics (survey)                  | API  | GA           |
 | `salesforce`               | Salesforce                          | API  | GA           |
 | `slack-discovery-api`      | Slack Discovery API                 | API  | GA           |

@@ -1,28 +1,51 @@
 ---
 endpoints:
-  - pathTemplate: "/admin/reports/v1/activity/users/{userKey}/applications/gemini_for_workspace"
+  - pathTemplate: "/admin/reports/v1/activity/users/all/applications/gemini_for_workspace"
     allowedQueryParams:
       - "customerId"
       - "maxResults"
       - "pageToken"
       - "startTime"
+      - "endTime"
     transforms:
       - !<pseudonymize>
         jsonPaths:
           - "$.items[*].actor.email"
           - "$.items[*].resourceDetails[*]..email"
         encoding: "URL_SAFE_TOKEN"
+      - !<hashIp>
+        jsonPaths:
+          - "$.items[*].ipAddress"
+    responseSchema:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            $ref: "#/definitions/Activity"
+        kind:
+          type: "string"
+        nextPageToken:
+          type: "string"
+  - pathTemplate: "/admin/reports/v1/activity/users/{userKey}/applications/gemini_for_workspace"
+    allowedQueryParams:
+      - "customerId"
+      - "maxResults"
+      - "pageToken"
+      - "startTime"
+      - "endTime"
+    transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.items[*].actor.profileId"
+          - "$.items[*].actor.email"
+          - "$.items[*].resourceDetails[*]..email"
         encoding: "URL_SAFE_TOKEN"
       - !<hashIp>
         jsonPaths:
           - "$.items[*].ipAddress"
     pathParameterSchemas:
       userKey:
-        type: "string"
-        format: "pseudonym"
+        type: "integer"
     responseSchema:
       type: "object"
       properties:
