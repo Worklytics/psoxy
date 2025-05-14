@@ -147,7 +147,7 @@ locals {
       example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     },
     "gemini-for-workspace" : {
-      source_kind : "gemini_for_workspace"
+      source_kind : "gemini-for-workspace"
       availability : "alpha",
       enable_by_default : false
       worklytics_connector_id : "gemini-for-workspace-psoxy"
