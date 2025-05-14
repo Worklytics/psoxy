@@ -14,6 +14,8 @@ Some differences:
   property is invalid, objects missing "required" properties in a filter will be preserved.
 - `{ }` , eg, a schema without a type, is interpreted as any valid leaf node (eg, unconstrained
   leaf; everything that's not 'array' or 'object') - rather than any valid JSON.
+- `type: object` MAY be omitted, as implied by the presence of `properties` attribute at the same node.
+- `type: array` MAY be omitted, as implied by the presence of `items` attribute at the same node.
 
 Compatibility goals:
 
