@@ -1,0 +1,79 @@
+---
+endpoints:
+  - pathTemplate: "/beta/copilot/users/{id}/interactionHistory/getAllEnterpriseInteractions"
+    allowedQueryParams:
+      - "$filter"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+        encoding: "JSON"
+      - !<textDigest>
+        jsonPaths:
+          - "$..attachments[*].content"
+        isJsonEscaped: true
+        jsonPathToProcessWhenEscaped: "$..text"
+      - !<textDigest>
+        jsonPaths:
+          - "$..body.content"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..contentUrl"
+          - "$..attachments[*].name"
+          - "$..attachments[*].contentUrl"
+          - "$..mentions[*].mentionText"
+          - "$..contexts[*].contextReference"
+          - "$..links[?(@.linkType == 'File')].linkUrl"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.context']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.count']"
+      - !<redact>
+        jsonPaths:
+          - "$..['@odata.type']"
+  - pathRegex: "^/v1.0/users/?[^/]*"
+    allowedQueryParams:
+      - "$top"
+      - "$select"
+      - "$skiptoken"
+      - "$orderBy"
+      - "$count"
+    transforms:
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$..proxyAddresses[*]"
+        regex: "(?i)^smtp:(.*)$"
+      - !<redact>
+        jsonPaths:
+          - "$..displayName"
+          - "$..aboutMe"
+          - "$..mySite"
+          - "$..preferredName"
+          - "$..givenName"
+          - "$..surname"
+          - "$..jobTitle"
+          - "$..mailNickname"
+          - "$..responsibilities"
+          - "$..skills"
+          - "$..faxNumber"
+          - "$..mobilePhone"
+          - "$..businessPhones[*]"
+          - "$..onPremisesExtensionAttributes"
+          - "$..onPremisesSecurityIdentifier"
+          - "$..securityIdentifier"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..employeeId"
+          - "$..userPrincipalName"
+          - "$..imAddresses[*]"
+          - "$..mail"
+          - "$..otherMails[*]"
+          - "$..onPremisesSamAccountName"
+          - "$..onPremisesUserPrincipalName"
+          - "$..onPremisesDistinguishedName"
+          - "$..onPremisesImmutableId"
+          - "$..identities[*].issuerAssignedId"
+        encoding: "JSON"

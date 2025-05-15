@@ -10,14 +10,14 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>0.5.1</revision>
+        <revision>0.5.2</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.36</dependency.lombok.version> <!-- 1.18.30 is min compatible with jdk 21+ -->
         <dependency.dagger.version>2.40.5</dependency.dagger.version>
         <dependency.jackson.version>2.18.3</dependency.jackson.version>
         <dependency.apache-commons-lang3.version>3.13.0</dependency.apache-commons-lang3.version> <!-- July 2023 release, doesn't actually have constants for java after 17 yet -->
         <dependency.apache-commons-csv.version>1.10.0</dependency.apache-commons-csv.version>
-        <dependency.guava.version>32.0.1-jre</dependency.guava.version>
+        <dependency.guava.version>33.4.7-jre</dependency.guava.version>
         <dependency.commons-io.version>2.13.0</dependency.commons-io.version>
         <dependency.apache-httpcore.version>5.2.2</dependency.apache-httpcore.version>
         <dependency.google-cloud-bom.version>26.42.0</dependency.google-cloud-bom.version>
@@ -26,7 +26,6 @@
         <dependency.junit-jupiter.version>5.10.1</dependency.junit-jupiter.version>
         <dependency.mockito-junit-jupiter.version>5.16.0</dependency.mockito-junit-jupiter.version>
         <dependency.json-path.version>2.9.0</dependency.json-path.version>
-        <dependency.bettercloud-vault-java-driver>5.1.0</dependency.bettercloud-vault-java-driver>
     </properties>
 
     <dependencyManagement>

@@ -2,6 +2,7 @@ package co.worklytics.psoxy;
 
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
@@ -9,6 +10,7 @@ import lombok.*;
  * pseudonymized form of an account identifier
  *
  */
+@JsonIgnoreProperties("scope") // ensure legacy JSON-serialized pseudonyms readable with 0.5.x
 @NoArgsConstructor //for jackson
 @AllArgsConstructor //for builder
 @Builder

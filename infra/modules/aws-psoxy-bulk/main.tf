@@ -326,9 +326,9 @@ locals {
 
   test_todo_step = var.todo_step + (local.need_setup ? 1 : 0)
   setup_todo_content = var.instructions_template == null ? "" : templatefile(var.instructions_template, {
-    input_bucket_url  = "s3://${aws_s3_bucket.input.bucket}",
+    input_bucket_url = "s3://${aws_s3_bucket.input.bucket}",
   })
-  todo_brief            = <<EOT
+  todo_brief = <<EOT
 ## Test ${var.instance_id}
 Check that the Psoxy works as expected, and it transforms the files of your input bucket following
 the rules you have defined:
@@ -391,7 +391,7 @@ NC='\e[0m'
 
 printf "Quick test of $${BLUE}${var.instance_id}$${NC} ...\n"
 
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} ${local.role_option_for_tests} -re ${var.aws_region}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$${FILE_PATH}" -d "AWS" -i "${aws_s3_bucket.input.bucket}" -o "${aws_s3_bucket.sanitized.bucket}" ${local.role_option_for_tests} -re "${var.aws_region}"
 EOT
 }
 

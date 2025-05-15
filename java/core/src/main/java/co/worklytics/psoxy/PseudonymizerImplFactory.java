@@ -13,11 +13,8 @@ public interface PseudonymizerImplFactory {
 
     PseudonymizerImpl create(Pseudonymizer.ConfigurationOptions configurationOptions);
 
-    default Pseudonymizer.ConfigurationOptions buildOptions(ConfigService config,
-                                                            SecretStore secretStore) {
-        Pseudonymizer.ConfigurationOptions.ConfigurationOptionsBuilder builder = Pseudonymizer.ConfigurationOptions.builder()
-            .pseudonymizationSalt(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
-                .orElseThrow(() -> new Error("Must configure value for SALT to generate pseudonyms")));
+    default Pseudonymizer.ConfigurationOptions buildOptions(ConfigService config) {
+        Pseudonymizer.ConfigurationOptions.ConfigurationOptionsBuilder builder = Pseudonymizer.ConfigurationOptions.builder();
 
         Optional<PseudonymImplementation> pseudonymImplementation = config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION)
             .map(PseudonymImplementation::parseConfigPropertyValue);
@@ -35,6 +32,9 @@ public interface PseudonymizerImplFactory {
             .map(EmailCanonicalization::parseConfigPropertyValue)
             .ifPresent(builder::emailCanonicalization);
 
+        config.getConfigPropertyAsOptional(ProxyConfigProperty.EMAIL_DOMAIN_HANDLING)
+            .map(EmailDomainHandling::parseConfigPropertyValue)
+            .ifPresent(builder::emailDomainHandling);
 
         return builder.build();
     }

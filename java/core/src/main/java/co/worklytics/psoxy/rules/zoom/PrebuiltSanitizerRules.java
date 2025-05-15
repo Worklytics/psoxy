@@ -33,10 +33,35 @@ public class PrebuiltSanitizerRules {
             .pathTemplate("/v2/meetings/{meetingId}")
             .transform(Transform.Pseudonymize.builder()
                 .jsonPath("$.['host_id','host_email']")
+                .jsonPath("$..email")
+                .jsonPath("$..contact_email")
+                .jsonPath("$..participants[*]")
                 .build())
             .transform(Transform.Redact.builder()
-                .jsonPath("$.['topic','settings','agenda','custom_keys']")
-                .jsonPath("$.['password','h323_password','pstn_password','encrypted_password','join_url','start_url']")
+                .jsonPath("$.['topic','agenda','custom_keys']")
+                .jsonPath("$.settings.['alternative_hosts','enforce_login_domains','approved_or_denied_countries_or_regions','audio_conference_info','name','authentication_name','authentication_option','contact_name','custom_keys','global_dial_in_countries','global_dial_in_numbers']")
+                .jsonPath("$.['password','h323_password','pstn_password','encrypted_password','start_url']")
+                .jsonPath("$..join_url")
+                .jsonPath("$..name")
+                .build())
+            .build()
+        )
+        // Meeting summary
+        // https://developers.zoom.us/docs/api/meetings/#tag/meetings/GET/meetings/{meetingId}/meeting_summary
+        .endpoint(Endpoint.builder()
+            .pathTemplate("/v2/meetings/{meetingId}/meeting_summary")
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$['meeting_host_id','meeting_host_email', 'summary_last_modified_user_id','summary_last_modified_user_email']")
+                .build())
+            .transform(Transform.TextDigest.builder()
+                .jsonPath("$..summary_overview")
+                .jsonPath("$.summary_details[*].label")
+                .jsonPath("$.summary_details[*].summary")
+                .jsonPath("$.edited_summary.summary_details")
+                .jsonPath("$..next_steps[*]")
+                .build())
+            .transform(Transform.Redact.builder()
+                .jsonPath("$['meeting_topic','summary_title']")
                 .build())
             .build()
         )
@@ -115,9 +140,6 @@ public class PrebuiltSanitizerRules {
                 .build())
         .build())
         .build();
-
-
-
 
     static final Rules2 USERS_ENDPOINTS = Rules2.builder()
         // List users

@@ -19,20 +19,6 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
-# ensure Storage API is activated
-resource "google_project_service" "gcp_infra_api" {
-  for_each = toset([
-    "storage.googleapis.com",
-  ])
-
-  service                    = each.key
-  project                    = var.project_id
-  disable_dependent_services = false
-  disable_on_destroy         = false
-}
-
-
-
 resource "random_string" "bucket_id_part" {
   length  = 8
   special = false
@@ -69,10 +55,6 @@ resource "google_storage_bucket" "input_bucket" {
       labels
     ]
   }
-
-  depends_on = [
-    google_project_service.gcp_infra_api
-  ]
 }
 
 # data output from function
@@ -87,10 +69,6 @@ module "output_bucket" {
   region                         = var.region
   expiration_days                = var.sanitized_expiration_days
   bucket_labels                  = var.default_labels
-
-  depends_on = [
-    google_project_service.gcp_infra_api
-  ]
 }
 
 resource "google_service_account" "service_account" {
@@ -130,8 +108,6 @@ resource "google_storage_bucket_iam_member" "grant_testers_admin_on_processed_bu
   member = each.value
 }
 
-
-
 resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret" {
   for_each = var.secret_bindings
 
@@ -141,61 +117,81 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
   role      = "roles/secretmanager.secretAccessor"
 }
 
+# to provision Cloud Function, TF must be able to act as the service account that the function will
+# run as
 module "tf_runner" {
   source = "../../modules/gcp-tf-runner"
 }
 
-# to provision Cloud Function, TF must be able to act as the service account that the function will
-# run as
 resource "google_service_account_iam_member" "act_as" {
   member             = module.tf_runner.iam_principal
   role               = "roles/iam.serviceAccountUser"
   service_account_id = google_service_account.service_account.id
 }
 
-resource "google_cloudfunctions_function" "function" {
+resource "google_cloudfunctions2_function" "function" {
   name        = local.function_name
   description = "Psoxy instance to process ${var.source_kind} files"
-  runtime     = "java17"
   project     = var.project_id
-  region      = var.region
+  location    = var.region
 
-  available_memory_mb   = coalesce(var.available_memory_mb, 1024)
-  source_archive_bucket = var.artifacts_bucket_name
-  source_archive_object = var.deployment_bundle_object_name
-  entry_point           = "co.worklytics.psoxy.GCSFileEvent"
-  service_account_email = google_service_account.service_account.email
-  timeout               = 540 # 9 minutes, which is gen1 max allowed
-  labels                = var.default_labels
-  docker_registry       = "ARTIFACT_REGISTRY"
-  docker_repository     = var.artifact_repository_id
+  build_config {
+    runtime     = "java21"
+    entry_point = "co.worklytics.psoxy.GCSFileEvent"
 
-  environment_variables = merge(tomap({
-    INPUT_BUCKET  = google_storage_bucket.input_bucket.name,
-    OUTPUT_BUCKET = module.output_bucket.bucket_name,
-    }),
-    var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
-    var.environment_variables,
-    var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
-    var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${replace(upper(var.instance_id), "-", "_")}_" },
-  )
+    docker_repository = var.artifact_repository_id
 
-  dynamic "secret_environment_variables" {
-    for_each = var.secret_bindings
-    iterator = secret_environment_variable
+    source {
+      storage_source {
+        bucket = var.artifacts_bucket_name
+        object = var.deployment_bundle_object_name
+      }
+    }
+  }
 
-    content {
-      key        = secret_environment_variable.key
-      project_id = data.google_project.project.number
-      secret     = secret_environment_variable.value.secret_id
-      version    = secret_environment_variable.value.version_number
+  service_config {
+    available_memory      = "${coalesce(var.available_memory_mb, 1024)}M"
+    service_account_email = google_service_account.service_account.email
+    timeout_seconds       = 540 # 9 minutes
+
+    environment_variables = merge(tomap({
+      INPUT_BUCKET  = google_storage_bucket.input_bucket.name,
+      OUTPUT_BUCKET = module.output_bucket.bucket_name,
+      }),
+      var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
+      var.environment_variables,
+      var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
+      var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${replace(upper(var.instance_id), "-", "_")}_" },
+    )
+
+    dynamic "secret_environment_variables" {
+      for_each = var.secret_bindings
+      iterator = secret_environment_variable
+
+      content {
+        key        = secret_environment_variable.key
+        project_id = data.google_project.project.number
+        secret     = secret_environment_variable.value.secret_id
+        version    = secret_environment_variable.value.version_number
+      }
     }
   }
 
   event_trigger {
-    event_type = "google.storage.object.finalize"
-    resource   = google_storage_bucket.input_bucket.name
+    event_type = "google.cloud.storage.object.v1.finalized"
+
+    # no retries for now, consistent with legacy behavior
+    # can configure this to retry on errors, and will do so with exponential backoff. but concern is that
+    # we have no control of that - eg no way to cap it at 3 or 5 retries, as far as can see atm
+    retry_policy = "RETRY_POLICY_DO_NOT_RETRY"
+
+    event_filters {
+      attribute = "bucket"
+      value     = google_storage_bucket.input_bucket.name
+    }
   }
+
+  labels = var.default_labels
 
   lifecycle {
     ignore_changes = [
@@ -222,9 +218,9 @@ locals {
   test_todo_step = var.todo_step + (local.need_setup ? 1 : 0)
 
   setup_todo_content = var.instructions_template == null ? "" : templatefile("${var.instructions_template}", {
-    input_bucket_url  = "gcs://${google_storage_bucket.input_bucket.name}"
+    input_bucket_url = "gcs://${google_storage_bucket.input_bucket.name}"
   })
-  todo_brief   = <<EOT
+  todo_brief        = <<EOT
 ## Test ${local.function_name}
 Check that the Psoxy works as expected and it transforms the files of your input bucket following
 the rules you have defined:
@@ -233,12 +229,12 @@ the rules you have defined:
 node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
 ```
 EOT
-  test_todo_content =  <<EOT
+  test_todo_content = <<EOT
 # Testing Psoxy Bulk: ${local.function_name}
 
 Review the deployed Cloud function in GCP console:
 
-[Function in GCP Console](https://console.cloud.google.com/functions/details/${var.region}/${google_cloudfunctions_function.function.name}?project=${var.project_id})
+[Function in GCP Console](https://console.cloud.google.com/functions/details/${var.region}/${google_cloudfunctions2_function.function.name}?project=${var.project_id})
 
 We provide some Node.js scripts to easily validate the deployment. To be able
 to run the test commands below, you need Node.js (>=16) and npm (v >=8)

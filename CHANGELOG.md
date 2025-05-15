@@ -7,6 +7,17 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
+## [0.5.2](https://github.com/Worklytics/psoxy/release/tag/v0.5.2)
+- `slack` : discovery rules now allow names of accounts with `is_bot==true` and with user id as `USLACKBOT` to pass through; are now "default deny" on API fields, returning only data matching expected fields.
+- `GitHub Copilot`: Added new connector for supporting fetching Copilot data from GitHub.
+- `GitHub`: Rules updated for tokenizing team slug name and redacting URLS not required.
+- `Google Gemini for Workspace`: Added new connector for supporting fetching Gemini usage data within a Google Workspace organization.
+- `Microsoft 365 Copilot`: Adding support for fetching Copilot interactions through `/beta/copilot/users/{id}/interactionHistory/getAllEnterpriseInteractions` endpoint
+- `Zoom`:
+  - support for fetching meeting summaries, which opens new `/v2/meetings/{meetingId}/meeting_summary` endpoint in proxy rules
+  - support for getting settings from meeting details on `/v2/meetings/{meetingId}`
+
+
 ## [0.5.1](https://github.com/Worklytics/psoxy/release/tag/v0.5.1)
 - `GitHub`: Added rules for fetching commits through repository and pulls using GraphQL
 - `gdirectory` connector: a few redundant oauth scopes removed; no impact on functionality. you can remove these from your DWD grants if you wish, but it's not necessary

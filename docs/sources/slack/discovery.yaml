@@ -1,75 +1,602 @@
 ---
 endpoints:
-  - pathTemplate: "/api/discovery.enterprise.info"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.enterprise.teams[*]['name','description','icon','enterprise_name']"
-          - "$.enterprise['icon','name']"
-  - pathTemplate: "/api/discovery.users.list"
+  - pathTemplate: "/api/discovery.conversations.history"
+    allowedQueryParams:
+      - "channel"
+      - "team"
+      - "latest"
+      - "oldest"
+      - "reactions"
+      - "limit"
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.users[*].id"
-        includeReversible: true
+          - "$.messages[?(@.user!='USLACKBOT')].user"
+          - "$.messages[*].files[?(@.user!='USLACKBOT')].user"
+          - "$.messages[*].reactions[*].users[?(@!='USLACKBOT')]"
+          - "$.messages[*].replies[?(@.user!='USLACKBOT')].user"
+          - "$.messages[*].replies[?(@.parent_user_id!='USLACKBOT')].parent_user_id"
+          - "$.messages[*].reply_users[?(@!='USLACKBOT')]"
+          - "$.messages[*].edited[?(@.user!='USLACKBOT')].user"
+          - "$.messages[*].blocks[*].elements[*].elements[?(@.user_id!='USLACKBOT')].user_id"
+          - "$.messages[*].room[?(@.created_by!='USLACKBOT')].created_by"
+          - "$.messages[*].room.participant_history[?(@!='USLACKBOT')]"
         encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        error:
+          type: "string"
+        has_edits:
+          type: "boolean"
+        messages:
+          type: "array"
+          items:
+            $ref: "#/definitions/Message"
+        offset:
+          type: "string"
+        ok:
+          type: "boolean"
+  - pathTemplate: "/api/discovery.conversations.info"
+    allowedQueryParams:
+      - "channel"
+      - "team"
+      - "offset"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.info[*].members[?(@!='USLACKBOT')]"
+          - "$.info[*].topic[?(@.set_by!='USLACKBOT')].set_by"
+          - "$.info[?(@.creator!='USLACKBOT')].creator"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        error:
+          type: "string"
+        info:
+          type: "array"
+          items:
+            $ref: "#/definitions/Conversation"
+        offset:
+          type: "string"
+        ok:
+          type: "boolean"
+  - pathTemplate: "/api/discovery.conversations.list"
+    allowedQueryParams:
+      - "offset"
+      - "team"
+      - "only_public"
+      - "only_private"
+      - "only_im"
+      - "only_mpim"
+      - "only_ext_shared"
+      - "limit"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.channels[?(@.creator!='USLACKBOT')].creator"
+          - "$.channels[*].members[?(@!='USLACKBOT')]"
+          - "$.channels[*].topic[?(@.set_by!='USLACKBOT')].set_by"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        channels:
+          type: "array"
+          items:
+            $ref: "#/definitions/Conversation"
+        error:
+          type: "string"
+        offset:
+          type: "string"
+        ok:
+          type: "boolean"
+  - pathTemplate: "/api/discovery.conversations.recent"
+    allowedQueryParams:
+      - "team"
+      - "latest"
+      - "limit"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.channels[?(@.creator!='USLACKBOT')].creator"
+          - "$.channels[*].members[?(@!='USLACKBOT')]"
+          - "$.channels[*].topic[?(@.set_by!='USLACKBOT')].set_by"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        channels:
+          type: "array"
+          items:
+            $ref: "#/definitions/UpdatedConversation"
+        error:
+          type: "string"
+        offset:
+          type: "string"
+        ok:
+          type: "boolean"
+  - pathTemplate: "/api/discovery.enterprise.info"
+    allowedQueryParams:
+      - "cursor"
+      - "include_deleted"
+      - "limit"
+    responseSchema:
+      type: "object"
+      properties:
+        enterprise:
+          $ref: "#/definitions/Enterprise"
+        error:
+          type: "string"
+        offset:
+          type: "string"
+        ok:
+          type: "boolean"
+        response_metadata:
+          $ref: "#/definitions/ResponseMetadata"
+  - pathTemplate: "/api/discovery.user.conversations"
+    allowedQueryParams:
+      - "user"
+      - "include_historical"
+      - "limit"
+      - "offset"
+    responseSchema:
+      type: "object"
+      properties:
+        channels:
+          type: "array"
+          items:
+            $ref: "#/definitions/UserConversation"
+        error:
+          type: "string"
+        offset:
+          type: "string"
+        ok:
+          type: "boolean"
+  - pathTemplate: "/api/discovery.users.list"
+    allowedQueryParams:
+      - "limit"
+      - "offset"
+      - "include_deleted"
+    transforms:
       - !<pseudonymize>
         jsonPaths:
           - "$.users[*].profile.email"
           - "$.users[*].profile.guest_invited_by"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$.users[*]['name','real_name']"
-          - "$.users[*].profile['title','phone','skype','first_name','last_name','real_name','real_name_normalized','display_name','display_name_normalized']"
-          - "$.users[*].profile['fields','pronouns','status_text','status_emoji','status_emoji_display_info','status_expiration','avatar_hash']"
-          - "$.users[*].profile['image_original','is_custom_image','image_24','image_32','image_48','image_72','image_192','image_512','image_1024','status_text_canonical']"
-  - pathTemplate: "/api/discovery.user.conversations"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.channels[*]['name','topic','purpose']"
-  - pathTemplate: "/api/discovery.conversations.list"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.channels[*]['name','topic','purpose']"
-  - pathTemplate: "/api/discovery.conversations.recent"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.channels[*]['name','topic','purpose']"
-  - pathTemplate: "/api/discovery.conversations.info"
-    transforms:
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
-          - "$.info[*].creator"
-        encoding: "JSON"
+          - "$.users[?(@.id!='USLACKBOT')].id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
-          - "$.info[*]['name','name_normalized','previous_names','topic','purpose']"
-  - pathTemplate: "/api/discovery.conversations.history"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.messages[*].user"
-          - "$.messages[*].inviter"
-          - "$.messages[*].files[*].user"
-          - "$.messages[*].reactions[*].users[*]"
-          - "$.messages[*].replies[*].user"
-          - "$.messages[*].replies[*].parent_user_id"
-          - "$.messages[*].reply_users[*]"
-          - "$.messages[*].edited.user"
-          - "$.messages[*].blocks[*].elements[*].elements[*].user_id"
-          - "$.messages[*].room.created_by"
-          - "$.messages[*].room.participant_history[*]"
-        encoding: "JSON"
-      - !<redact>
-        jsonPaths:
-          - "$.messages[*]['text','username','permalink']"
-          - "$.messages[*]..['text']"
-          - "$.messages[*].user_profile"
-          - "$.messages[*].attachments[*]['fallback','service_name', 'thumb_url','thumb_width','thumb_height']"
-          - "$.messages[*].files[*]['thumb_url','thumb_width','thumb_height','thumb_tiny']"
-          - "$.messages[*].room.media_backend_type"
-          - "$.messages[*].room..['name','media_server','attached_file_ids','participants','participants_events','participants_camera_on','participants_camera_off','participants_screenshare_on','participants_screenshare_off','pending_invitees','last_invite_status_by_user','knocks']"
+          - "$.users[?(@.is_bot != true)].name"
+    responseSchema:
+      type: "object"
+      properties:
+        error:
+          type: "string"
+        offset:
+          type: "string"
+        ok:
+          type: "boolean"
+        users:
+          type: "array"
+          items:
+            $ref: "#/definitions/User"
+definitions:
+  Action:
+    type: "object"
+    properties:
+      ts:
+        type: "string"
+      user:
+        type: "string"
+  Attachment:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+  Block:
+    type: "object"
+    properties:
+      block_id:
+        type: "string"
+      elements:
+        type: "array"
+        items:
+          $ref: "#/definitions/BlockElement"
+      type:
+        type: "string"
+  BlockElement:
+    type: "object"
+    properties:
+      elements:
+        type: "array"
+        items:
+          $ref: "#/definitions/BlockElement"
+      type:
+        type: "string"
+      user_id:
+        type: "string"
+  BotProfile:
+    type: "object"
+    properties:
+      app_id:
+        type: "string"
+      deleted:
+        type: "boolean"
+      id:
+        type: "string"
+      name:
+        type: "string"
+      team_id:
+        type: "string"
+  Conversation:
+    type: "object"
+    properties:
+      channel_type:
+        type: "string"
+      conversation_id:
+        $ref: "#/definitions/ConversationId"
+      created:
+        type: "integer"
+      creator:
+        type: "string"
+      id:
+        type: "string"
+      is_archived:
+        type: "boolean"
+      is_channel:
+        type: "boolean"
+      is_deleted:
+        type: "boolean"
+      is_dm:
+        type: "boolean"
+      is_ext_shared:
+        type: "boolean"
+      is_general:
+        type: "boolean"
+      is_global_shared:
+        type: "boolean"
+      is_group:
+        type: "boolean"
+      is_im:
+        type: "boolean"
+      is_member:
+        type: "boolean"
+      is_moved:
+        type: "integer"
+      is_mpim:
+        type: "boolean"
+      is_org_default:
+        type: "boolean"
+      is_org_mandatory:
+        type: "boolean"
+      is_org_shared:
+        type: "boolean"
+      is_pending_ext_shared:
+        type: "boolean"
+      is_private:
+        type: "boolean"
+      is_read_only:
+        type: "boolean"
+      is_shared:
+        type: "boolean"
+      locale:
+        type: "string"
+      shared:
+        $ref: "#/definitions/Shared"
+      stub:
+        type: "boolean"
+      unlinked:
+        type: "integer"
+  ConversationId:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      workspace_id:
+        $ref: "#/definitions/WorkspaceId"
+  Enterprise:
+    type: "object"
+    properties:
+      domain:
+        type: "string"
+      email_domain:
+        type: "string"
+      id:
+        type: "string"
+      is_verified:
+        type: "boolean"
+      teams:
+        type: "array"
+        items:
+          $ref: "#/definitions/Team"
+      url:
+        type: "string"
+  File:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      timestamp:
+        type: "integer"
+  Message:
+    type: "object"
+    properties:
+      app_id:
+        type: "string"
+      attachments:
+        type: "array"
+        items:
+          $ref: "#/definitions/Attachment"
+      blocks:
+        type: "array"
+        items:
+          $ref: "#/definitions/Block"
+      bot_id:
+        type: "string"
+      bot_profile:
+        $ref: "#/definitions/BotProfile"
+      channel:
+        type: "string"
+      client_msg_id:
+        type: "string"
+      deleted_ts:
+        type: "string"
+      display_as_bot:
+        type: "boolean"
+      edited:
+        $ref: "#/definitions/Action"
+      event_ts:
+        type: "string"
+      files:
+        type: "array"
+        items:
+          $ref: "#/definitions/File"
+      inviter:
+        type: "string"
+      is_starred:
+        type: "boolean"
+      latest_reply:
+        type: "string"
+      parent_user_id:
+        type: "string"
+      pinned_to:
+        type: "array"
+        items:
+          type: "string"
+      reactions:
+        type: "array"
+        items:
+          $ref: "#/definitions/Reaction"
+      replies:
+        type: "array"
+        items:
+          $ref: "#/definitions/Reply"
+      reply_count:
+        type: "integer"
+      reply_users:
+        type: "array"
+        items:
+          type: "string"
+      reply_users_count:
+        type: "integer"
+      room:
+        $ref: "#/definitions/Room"
+      source_team:
+        type: "string"
+      subtype:
+        type: "string"
+      team:
+        type: "string"
+      thread_ts:
+        type: "string"
+      ts:
+        type: "string"
+      type:
+        type: "string"
+      user:
+        type: "string"
+      user_team:
+        type: "string"
+  Profile:
+    type: "object"
+    properties:
+      always_active:
+        type: "boolean"
+      api_app_id:
+        type: "string"
+      bot_id:
+        type: "string"
+      email:
+        type: "string"
+      team:
+        type: "string"
+  Reaction:
+    type: "object"
+    properties:
+      count:
+        type: "integer"
+      name:
+        type: "string"
+      users:
+        type: "array"
+        items:
+          type: "string"
+  Reply:
+    type: "object"
+    properties:
+      parent_user_id:
+        type: "string"
+      ts:
+        type: "string"
+      user:
+        type: "string"
+  ResponseMetadata:
+    type: "object"
+    properties:
+      next_cursor:
+        type: "string"
+  Room:
+    type: "object"
+    properties:
+      app_id:
+        type: "string"
+      call_family:
+        type: "string"
+      canvas_thread_ts:
+        type: "string"
+      channels:
+        type: "array"
+        items:
+          type: "string"
+      created_by:
+        type: "string"
+      date_end:
+        type: "integer"
+      date_start:
+        type: "integer"
+      display_id:
+        type: "string"
+      external_unique_id:
+        type: "string"
+      has_ended:
+        type: "boolean"
+      id:
+        type: "string"
+      is_dm_call:
+        type: "boolean"
+      is_scheduled:
+        type: "boolean"
+      media_backend_type:
+        type: "string"
+      thread_root_ts:
+        type: "string"
+      was_accepted:
+        type: "boolean"
+      was_missed:
+        type: "boolean"
+      was_rejected:
+        type: "boolean"
+  Shared:
+    type: "object"
+    properties:
+      connected_team_ids:
+        type: "array"
+        items:
+          type: "string"
+      internal_team_ids:
+        type: "array"
+        items:
+          type: "string"
+      shared_team_ids:
+        type: "array"
+        items:
+          type: "string"
+  Team:
+    type: "object"
+    properties:
+      archived:
+        type: "boolean"
+      created:
+        type: "integer"
+      deleted:
+        type: "boolean"
+      discoverable:
+        type: "string"
+      domain:
+        type: "string"
+      email_domain:
+        type: "string"
+      enterprise_domain:
+        type: "string"
+      enterprise_id:
+        type: "string"
+      id:
+        type: "string"
+      is_enterprise:
+        type: "integer"
+      is_verified:
+        type: "boolean"
+      url:
+        type: "string"
+  UpdatedConversation:
+    type: "object"
+    properties:
+      conversation_id:
+        $ref: "#/definitions/ConversationId"
+      id:
+        type: "string"
+      team:
+        type: "string"
+      ts:
+        type: "string"
+  User:
+    type: "object"
+    properties:
+      deleted:
+        type: "boolean"
+      email:
+        type: "string"
+      id:
+        type: "string"
+      is_admin:
+        type: "boolean"
+      is_bot:
+        type: "boolean"
+      locale:
+        type: "string"
+      name:
+        type: "string"
+      profile:
+        $ref: "#/definitions/Profile"
+      stranger:
+        type: "boolean"
+      team_id:
+        type: "string"
+      teams:
+        type: "array"
+        items:
+          type: "string"
+      tz:
+        type: "string"
+      tz_label:
+        type: "string"
+      tz_offset:
+        type: "integer"
+      updated:
+        type: "integer"
+  UserConversation:
+    type: "object"
+    properties:
+      channel_type:
+        type: "string"
+      conversation_id:
+        $ref: "#/definitions/ConversationId"
+      date_joined:
+        type: "integer"
+      date_left:
+        type: "integer"
+      id:
+        type: "string"
+      is_ext_shared:
+        type: "boolean"
+      is_im:
+        type: "boolean"
+      is_mpim:
+        type: "boolean"
+      is_private:
+        type: "boolean"
+      is_shared:
+        type: "boolean"
+      team_id:
+        type: "string"
+  WorkspaceId:
+    type: "object"
+    properties:
+      id:
+        type: "string"

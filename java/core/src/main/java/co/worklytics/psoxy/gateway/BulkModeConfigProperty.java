@@ -18,7 +18,7 @@ public enum BulkModeConfigProperty implements ConfigService.ConfigProperty {
      * additional transforms to apply to each input file
      * @see co.worklytics.psoxy.storage.StorageHandler.ObjectTransform
      */
-    ADDITIONAL_TRANSFORMS(false),
+    ADDITIONAL_TRANSFORMS(SupportedSource.ENV_VAR_OR_REMOTE),
 
     /**
      * if provided, this path segment will be removed from keys of input object to produce
@@ -54,10 +54,8 @@ public enum BulkModeConfigProperty implements ConfigService.ConfigProperty {
      * default; true
      */
     COMPRESS_OUTPUT_ALWAYS,
-
     ;
 
-
-    @Getter
-    private boolean envVarOnly = true;
+    @Getter(onMethod_ = @Override)
+    private SupportedSource supportedSource = SupportedSource.ENV_VAR;
 }

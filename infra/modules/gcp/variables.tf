@@ -77,3 +77,9 @@ variable "default_labels" {
   description = "*Alpha* in v0.4, only respected for new resources. Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
   default     = {}
 }
+
+variable "support_bulk_mode" {
+  type        = bool
+  description = "whether to enable/provision components required for 'bulk mode' instances"
+  default     = true
+}

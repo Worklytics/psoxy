@@ -27,9 +27,18 @@ public abstract class WorkloadIdentityFederationGrantTokenRequestBuilder
         implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
 
+    protected WorkloadIdentityFederationGrantTokenRequestBuilder(ConfigService configService) {
+        this.config = configService;
+    }
+
+    @Getter
     protected enum ConfigProperty implements ConfigService.ConfigProperty {
         CLIENT_ID,
-        TOKEN_SCOPE
+        TOKEN_SCOPE,
+        ;
+
+        @Getter(onMethod_ = @Override)
+        private final SupportedSource supportedSource = SupportedSource.ENV_VAR;
     }
 
     // as far as what's actually sent in the OAuth 2.0 'grant_type' param:
@@ -53,9 +62,8 @@ public abstract class WorkloadIdentityFederationGrantTokenRequestBuilder
     private static final String PARAM_SCOPE = "scope";
     private static final String PARAM_GRANT_TYPE = "grant_type";
 
-    @Inject
     @Getter
-    ConfigService config;
+    final ConfigService config;
 
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {

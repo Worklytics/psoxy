@@ -94,6 +94,9 @@ abstract public class RulesBaseTestCase {
 
         String exampleSanitizedApiResponsesPathFull;
 
+        @Builder.Default
+        boolean checkUncompressedSSMLength = true;
+
         public String getExampleSanitizedApiResponsesPathFull() {
             return Optional.ofNullable(exampleSanitizedApiResponsesPathFull)
                 .orElse(sourceDocsRoot() + exampleSanitizedApiResponsesPath);
@@ -192,15 +195,20 @@ abstract public class RulesBaseTestCase {
     @Test
     public void yamlLength() {
         int rulesLengthInChars = yamlMapper.writeValueAsString(getRulesUnderTest()).length();
-        assertTrue(rulesLengthInChars < ADVANCED_SSM_PARAM_LIMIT, "YAML rules " + rulesLengthInChars + " chars long; want < " + ADVANCED_SSM_PARAM_LIMIT + " chars to fit as AWS SSM param");
+        if (getRulesTestSpec().checkUncompressedSSMLength) {
+            assertTrue(rulesLengthInChars < ADVANCED_SSM_PARAM_LIMIT, "YAML rules " + rulesLengthInChars + " chars long; want < " + ADVANCED_SSM_PARAM_LIMIT + " chars to fit as AWS SSM param");
+        }
     }
 
     @SneakyThrows
     @Test
     void yamlLengthCompressed() {
         int rulesLengthInChars = TestUtils.asBase64Gzipped(yamlMapper.writeValueAsString(getRulesUnderTest())).length();
-        assertTrue(rulesLengthInChars < REGULAR_SSM_PARAM_LIMIT,
-            "YAML rules " + rulesLengthInChars + " chars long; want < " + REGULAR_SSM_PARAM_LIMIT + " chars to fit as AWS SSM param");
+        if (getRulesTestSpec().checkUncompressedSSMLength) {
+          assertTrue(rulesLengthInChars < REGULAR_SSM_PARAM_LIMIT,
+              "YAML rules " + rulesLengthInChars + " chars long; want < " + REGULAR_SSM_PARAM_LIMIT + " chars to fit as AWS SSM param");
+        }
+
     }
 
     @SneakyThrows
@@ -220,8 +228,7 @@ abstract public class RulesBaseTestCase {
 
                 String sanitizedFilepath = getRulesTestSpec().getExampleSanitizedApiResponsesPathFull() + example.getPlainExampleFile();
 
-
-                String expected = StringUtils.trim(new String(TestUtils.getData(sanitizedFilepath)));
+                String expected = TestUtils.getDataAsUtf8UnixString(sanitizedFilepath);
 
                 assertEquals(expected,
                     StringUtils.trim(prettyPrintJson(sanitized)), sanitizedFilepath + " does not match output");
@@ -388,19 +395,19 @@ abstract public class RulesBaseTestCase {
 
     @SneakyThrows
     protected void assertUrlWithQueryParamsAllowed(String url) {
-        assertTrue(sanitizer.isAllowed("GET", new URL(url + "?param=value")), "single param blocked");
-        assertTrue(sanitizer.isAllowed("GET", new URL(url + "?param=value&param2=value2")), "multiple params blocked");
+        assertTrue(sanitizer.isAllowed("GET", new URL(url + "?param=value")), "single param blocked when appended to url: " + url);
+        assertTrue(sanitizer.isAllowed("GET", new URL(url + "?param=value&param2=value2")), "multiple params blocked when appended to url: " + url);
     }
 
     @SneakyThrows
     protected void assertUrlAllowed(String url) {
-        assertTrue(sanitizer.isAllowed("GET", new URL(url)), "api endpoint url blocked");
+        assertTrue(sanitizer.isAllowed("GET", new URL(url)), "api endpoint url blocked : " + url);
     }
 
     @SneakyThrows
     protected void assertUrlWithQueryParamsBlocked(String url) {
-        assertFalse(sanitizer.isAllowed("GET", new URL(url + "?param=value")), "query param allowed");
-        assertFalse(sanitizer.isAllowed("GET", new URL(url + "?param=value&param2=value2")), "multiple query params allowed");
+        assertFalse(sanitizer.isAllowed("GET", new URL(url + "?param=value")), "query param allowed when appended to url: " + url);
+        assertFalse(sanitizer.isAllowed("GET", new URL(url + "?param=value&param2=value2")), "multiple query params allowed when appended to url: " + url);
     }
 
     @SneakyThrows

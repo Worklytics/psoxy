@@ -26,6 +26,8 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
      */
     public static final String REVERSIBLE_PREFIX = "p~";
     public static final String TOKEN_PREFIX = "t~";
+    public static final String ENCRYPTED_PREFIX = "e~"; // q: just use `p~` for this? it's just more general than pseudonym and specifies handling more clea
+    public static final String HASH_PREFIX = "h~"; // q: just use `t~` for this? or don't bother in this case?
 
     //length of base64-url-encoded IV + ciphertext
     static final int REVERSIBLE_PSEUDONYM_LENGTH_WITHOUT_PREFIX = 43;
@@ -102,8 +104,6 @@ public class UrlSafeTokenPseudonymEncoder implements PseudonymEncoder {
      */
     public String decodeAndReverseAllContainedKeyedPseudonyms(String containsKeyedPseudonyms,
                                                               ReversibleTokenizationStrategy reidentifier) {
-        //TODO: fix this for full build of java 8 byte code with java 8 compiler to work
-        // (java8 byte code built with later JDK seems to work)
         return REVERSIBLE_PSEUDONYM_PATTERN.matcher(containsKeyedPseudonyms).replaceAll(m -> {
             String keyedPseudonym = m.group();
 

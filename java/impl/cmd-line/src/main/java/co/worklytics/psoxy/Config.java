@@ -16,8 +16,10 @@ public class Config {
 
     String defaultScopeId;
 
+    @Builder.Default
     Set<String> columnsToPseudonymize = new HashSet<>();
 
+    @Builder.Default
     Set<String> columnsToRedact = new HashSet<>();
 
     /**

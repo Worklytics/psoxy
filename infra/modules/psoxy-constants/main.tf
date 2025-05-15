@@ -460,11 +460,16 @@ locals {
       display_name    = "Service Usage Admin",
       description_url = "https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin"
     },
-    "roles/cloudfunctions.admin" = {
-      display_name    = "Cloud Functions Admin",
-      description_url = "https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.admin"
+    "roles/cloudfunctions.developer" = {
+      display_name    = "Cloud Functions Developer",
+      description_url = "https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.developer"
     },
+    "roles/cloudrun.developer" = {
+      display_name    = "Cloud Run Developer",
+      description_url = "https://cloud.google.com/iam/docs/understanding-roles#cloudrun.developer"
+    }
   }
+
   # TODO: add list of permissions, which customer could use to create custom role as alternative
 
 
