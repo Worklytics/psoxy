@@ -127,3 +127,11 @@ fi
 
 printf "    ${BLUE}./tools/release/example-create-release-pr.sh . aws ${AWS_EXAMPLE_DIR}${NC}\n"
 printf "    ${BLUE}./tools/release/example-create-release-pr.sh . gcp ${GCP_EXAMPLE_DIR}${NC}\n"
+
+
+printf "Finally, update stable demo deployment to point to it: \n"
+printif "In ${BLUE}psoxy-demos${NC} repo, run:\n"
+printf "    ${BLUE}git checkout -b upgrade-aws-stable-to-${RELEASE}${NC}\n"
+printf "    ${BLUE}cd developers/psoxy-dev-stable-aws ${NC}\n"
+printf "    ${BLUE} ./upgrade-terraform-modules.sh  ${RELEASE}${NC}\n"
+printf "    ${BLUE}terraform apply${NC}\n"
