@@ -1,6 +1,7 @@
 package com.avaulta.gateway.rules;
 
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -55,6 +56,11 @@ public class ParameterSchemaUtils {
                 if (!Pattern.compile(schema.getPattern()).matcher(value).matches()) {
                     return false;
                 }
+            }
+
+            if (ObjectUtils.isNotEmpty(schema.getOrs())) {
+                return schema.getOrs().stream().anyMatch(
+                    orSubSchema -> validate(orSubSchema, value));
             }
         }
         return true;
