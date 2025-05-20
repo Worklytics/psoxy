@@ -131,6 +131,7 @@ resource "aws_iam_role" "iam_for_lambda" {
 
   lifecycle {
     ignore_changes = [
+      name, # just for backwards compatibility with legacy deployment
       tags
     ]
   }
@@ -264,6 +265,7 @@ resource "aws_iam_policy" "ssm_param_policy" {
 
   lifecycle {
     ignore_changes = [
+      name, # just for backwards compatibility with legacy deployment
       tags
     ]
   }
