@@ -56,6 +56,24 @@ class ParameterSchemaUtilsTest {
     }
 
     @Test
+    public void validation_integer() {
+        ParameterSchema parameterSchema = ParameterSchema.builder()
+                .type(ParameterSchema.ValueType.INTEGER.getEncoding())
+                .build();
+
+        assertTrue(parameterSchemaUtils.validate(parameterSchema, "1"), "integers should be allowed");
+        assertTrue(parameterSchemaUtils.validate(parameterSchema, String.valueOf( Long.MAX_VALUE)), "max long value should be allowed");
+        assertTrue(parameterSchemaUtils.validate(parameterSchema, "13281932123987132987123981239"), "even longer integers should be allowed");
+        assertTrue(parameterSchemaUtils.validate(parameterSchema, "0"));
+        assertFalse(parameterSchemaUtils.validate(parameterSchema, "1.0"));
+        assertFalse(parameterSchemaUtils.validate(parameterSchema, "not-a-number"));
+        assertTrue(parameterSchemaUtils.validate(parameterSchema, null));
+        assertFalse(parameterSchemaUtils.validate(parameterSchema, "0.423412343123"));
+
+    }
+
+
+    @Test
     public void validate_all() {
         Map<String, ParameterSchema> parameterSchemas =
                 Map.of("string", ParameterSchema.string(),
@@ -80,6 +98,19 @@ class ParameterSchemaUtilsTest {
                         Pair.of("number", "not-a-number"),
                         Pair.of("reversible", "not-a-pseudonym")
                 )));
+    }
+
+
+    @Test
+    public void validate_or(){
+        ParameterSchema schema = ParameterSchema.builder()
+            .or(ParameterSchema.builder().pattern("^all$").build())
+            .or(ParameterSchema.integer())
+            .build();
+
+        assertTrue(parameterSchemaUtils.validate(schema, "all"));
+        assertTrue(parameterSchemaUtils.validate(schema, "123"));
+        assertFalse(parameterSchemaUtils.validate(schema, "any"));
     }
 }
 

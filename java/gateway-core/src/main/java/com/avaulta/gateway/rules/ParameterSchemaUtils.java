@@ -1,6 +1,8 @@
 package com.avaulta.gateway.rules;
 
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
@@ -28,11 +30,7 @@ public class ParameterSchemaUtils {
         if (value != null) {
             if (schema.getType() != null) {
                 if (schema.getType().equals(ParameterSchema.ValueType.INTEGER.getEncoding())) {
-                    try {
-                        Integer.parseInt(value);
-                    } catch (NumberFormatException e) {
-                        return false;
-                    }
+                    return Pattern.compile("\\d+").matcher(StringUtils.trimToEmpty(value)).matches();
                 } else if (schema.getType().equals(ParameterSchema.ValueType.NUMBER.getEncoding())) {
                     try {
                         Double.parseDouble(value);
@@ -58,6 +56,11 @@ public class ParameterSchemaUtils {
                 if (!Pattern.compile(schema.getPattern()).matcher(value).matches()) {
                     return false;
                 }
+            }
+
+            if (ObjectUtils.isNotEmpty(schema.getOrs())) {
+                return schema.getOrs().stream().anyMatch(
+                    orSubSchema -> validate(orSubSchema, value));
             }
         }
         return true;
