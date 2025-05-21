@@ -222,7 +222,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             //curry the defaultScopeId from the transform into the pseudonymization method
             f = getPseudonymize((Transform.Pseudonymize) transform);
         } else if (transform instanceof Transform.PseudonymizeEmailHeader) {
-            f = this::pseudonymizeEmailHeaderToJson;
+            f = getPseudonymizeEmailHeaderToJson((Transform.PseudonymizeEmailHeader) transform);
         } else if (transform instanceof Transform.PseudonymizeRegexMatches) {
             f = getPseudonymizeRegexMatches((Transform.PseudonymizeRegexMatches) transform);
         } else if (transform instanceof Transform.RedactRegexMatches) {
@@ -245,6 +245,43 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
         }
         return f;
+    }
+
+    @VisibleForTesting
+    MapFunction getPseudonymizeEmailHeaderToJson(Transform.PseudonymizeEmailHeader transformOptions) {
+        return (Object value, Configuration jsonConfiguration) -> {
+            if (value == null) {
+                return null;
+            }
+
+            Preconditions.checkArgument(value instanceof String, "Value must be string");
+
+            if (StringUtils.isBlank((String) value)) {
+                return new ArrayList<>();
+            } else {
+                //NOTE: this does NOT seem to work for lists containing empty values (eg ",,"), which
+                // per RFC should be allowed ....
+                if (emailAddressParser.isValidAddressList((String) value)) {
+                    List<EmailAddress> addresses =
+                        emailAddressParser.parseEmailAddressesFromHeader((String) value);
+
+                    return jsonConfiguration.jsonProvider().toJson(addresses.stream()
+                        .map(EmailAddress::asFormattedString)
+                        .map(pseudonymizer::pseudonymize)
+                        .map(pseudonymizedIdentity -> {
+                            if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
+                                return urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym());
+                            } else {
+                                return pseudonymizedIdentity;
+                            }
+                        })
+                        .collect(Collectors.toList()));
+                } else {
+                    log.log(Level.WARNING, "Valued matched by emailHeader rule is not valid address list, but not blank");
+                    return null;
+                }
+            }
+        };
     }
 
     @VisibleForTesting
@@ -534,37 +571,6 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     public String pseudonymizeWithOriginalToJson(Object value, @NonNull Configuration configuration) {
         return configuration.jsonProvider().toJson(pseudonymizer.pseudonymize(value, Transform.Pseudonymize.builder().includeOriginal(true).build()));
-    }
-
-
-    String pseudonymizeEmailHeaderToJson(@NonNull Object value, @NonNull Configuration configuration) {
-        return configuration.jsonProvider().toJson(pseudonymizeEmailHeader(value));
-    }
-
-    List<PseudonymizedIdentity> pseudonymizeEmailHeader(Object value) {
-        if (value == null) {
-            return null;
-        }
-
-        Preconditions.checkArgument(value instanceof String, "Value must be string");
-
-        if (StringUtils.isBlank((String) value)) {
-            return new ArrayList<>();
-        } else {
-            //NOTE: this does NOT seem to work for lists containing empty values (eg ",,"), which
-            // per RFC should be allowed ....
-            if (emailAddressParser.isValidAddressList((String) value)) {
-                List<EmailAddress> addresses =
-                    emailAddressParser.parseEmailAddressesFromHeader((String) value);
-                return addresses.stream()
-                    .map(EmailAddress::asFormattedString)
-                    .map(pseudonymizer::pseudonymize)
-                    .collect(Collectors.toList());
-            } else {
-                log.log(Level.WARNING, "Valued matched by emailHeader rule is not valid address list, but not blank");
-                return null;
-            }
-        }
     }
 
     Map<Endpoint, Pattern> getCompiledAllowedEndpoints() {

@@ -64,6 +64,7 @@ class RESTApiSanitizerImplTest {
     @Inject
     protected PseudonymizerImplFactory pseudonymizerImplFactory;
 
+    ObjectMapper objectMapper = new ObjectMapper();
 
     @Inject
     ConfigService config;
@@ -500,6 +501,7 @@ class RESTApiSanitizerImplTest {
         assertFalse(strict.contains("historyId"));
     }
 
+    @SneakyThrows
     @ValueSource(strings = {
         "alice@worklytics.co, bob@worklytics.co",
         "\"Alice Example\" <alice@worklytics.co>, \"Bob Example\" <bob@worklytics.co>",
@@ -509,7 +511,13 @@ class RESTApiSanitizerImplTest {
     })
     @ParameterizedTest
     void pseudonymize_multivalueEmailHeaders(String headerValue) {
-        List<PseudonymizedIdentity> pseudonyms = sanitizer.pseudonymizeEmailHeader(headerValue);
+        MapFunction mapFunction = sanitizer.getPseudonymizeEmailHeaderToJson(Transform.PseudonymizeEmailHeader.builder().encoding(PseudonymEncoder.Implementations.JSON).build());
+
+        String asJson = (String) mapFunction.map(headerValue, sanitizer.getJsonConfiguration());
+
+        List<PseudonymizedIdentity> pseudonyms = objectMapper.readValue(asJson,
+            objectMapper.getTypeFactory().constructCollectionType(List.class, PseudonymizedIdentity.class));
+
         assertEquals(2, pseudonyms.size());
         assertTrue(pseudonyms.stream().allMatch(p -> Objects.equals("worklytics.co", p.getDomain())));
     }
