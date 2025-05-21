@@ -217,6 +217,13 @@ public abstract class Transform {
     @Getter
     public static class PseudonymizeEmailHeader extends Transform {
 
+        /**
+         * how to encode to the resulting pseudonym
+         */
+        @JsonInclude(JsonInclude.Include.NON_DEFAULT) //doesn't work for enums ...
+        @Builder.Default
+        PseudonymEncoder.Implementations encoding = PseudonymEncoder.Implementations.JSON;
+
         public static PseudonymizeEmailHeader ofPaths(String... jsonPaths) {
             return PseudonymizeEmailHeader.builder().jsonPaths(Arrays.asList(jsonPaths)).build();
         }

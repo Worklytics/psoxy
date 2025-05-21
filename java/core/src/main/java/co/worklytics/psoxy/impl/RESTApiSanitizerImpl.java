@@ -1,53 +1,81 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.Pseudonymizer;
-import co.worklytics.psoxy.RESTApiSanitizer;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.utils.URLUtils;
-import co.worklytics.psoxy.utils.email.EmailAddressParser;
-import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
-import com.avaulta.gateway.rules.Endpoint;
-import com.avaulta.gateway.rules.JsonSchemaFilter;
-import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
-import com.avaulta.gateway.rules.ParameterSchemaUtils;
-import com.avaulta.gateway.rules.PathTemplateUtils;
-import com.avaulta.gateway.rules.transforms.Transform;
-import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
-import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.annotations.VisibleForTesting;
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.JsonPath;
-import dagger.assisted.Assisted;
-import dagger.assisted.AssistedInject;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.extern.java.Log;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.*;
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.UncheckedIOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import java.util.stream.Stream;
+import javax.inject.Inject;
+import javax.inject.Named;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
+import com.avaulta.gateway.rules.ParameterSchemaUtils;
+import com.avaulta.gateway.rules.PathTemplateUtils;
+import com.avaulta.gateway.rules.transforms.EncryptIp;
+import com.avaulta.gateway.rules.transforms.HashIp;
+import com.avaulta.gateway.rules.transforms.Transform;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.util.Preconditions;
+import com.google.common.annotations.VisibleForTesting;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.MapFunction;
+import co.worklytics.psoxy.PseudonymizedIdentity;
+import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.RESTApiSanitizer;
+import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.rules.RESTRules;
+import co.worklytics.psoxy.utils.URLUtils;
+import co.worklytics.psoxy.utils.email.EmailAddress;
+import co.worklytics.psoxy.utils.email.EmailAddressParser;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedInject;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.extern.java.Log;
 
 @Log
 public class RESTApiSanitizerImpl implements RESTApiSanitizer {
@@ -59,9 +87,10 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     final EmailAddressParser emailAddressParser;
 
 
-    //NOTE: JsonPath seems to be threadsafe
-    //  - https://github.com/json-path/JsonPath/issues/384
-    //  - https://github.com/json-path/JsonPath/issues/187 (earlier issue fixing stuff that wasn't thread-safe)
+    // NOTE: JsonPath seems to be threadsafe
+    // - https://github.com/json-path/JsonPath/issues/384
+    // - https://github.com/json-path/JsonPath/issues/187 (earlier issue fixing stuff that wasn't
+    // thread-safe)
 
     Map<Endpoint, Pattern> compiledAllowedEndpoints;
 
@@ -73,9 +102,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     String targetHostPath;
 
     @AssistedInject
-    public RESTApiSanitizerImpl(@Assisted RESTRules rules,
-                                @Assisted Pseudonymizer pseudonymizer,
-                                EmailAddressParser emailAddressParser) {
+    public RESTApiSanitizerImpl(@Assisted RESTRules rules, @Assisted Pseudonymizer pseudonymizer,
+            EmailAddressParser emailAddressParser) {
         this.rules = rules;
         this.pseudonymizer = pseudonymizer;
         this.emailAddressParser = emailAddressParser;
@@ -118,10 +146,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @Override
     public Optional<Collection<String>> getAllowedHeadersToForward(String httpMethod, URL url) {
-        return getEndpoint(httpMethod, url)
-            .map(Pair::getRight)
-            .map(endpoint -> endpoint.getAllowedRequestHeadersToForward())
-            .orElse(Optional.empty());
+        return getEndpoint(httpMethod, url).map(Pair::getRight)
+                .map(endpoint -> endpoint.getAllowedRequestHeadersToForward())
+                .orElse(Optional.empty());
     }
 
     @SneakyThrows
@@ -132,8 +159,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             return jsonResponse;
         }
         // Convert input String to InputStream (UTF-8 encoding)
-        try (InputStream input = new ByteArrayInputStream(jsonResponse.getBytes(StandardCharsets.UTF_8))) {
-             final ProcessedStream processedStream = sanitize(httpMethod, url, input);
+        try (InputStream input =
+                new ByteArrayInputStream(jsonResponse.getBytes(StandardCharsets.UTF_8))) {
+            final ProcessedStream processedStream = sanitize(httpMethod, url, input);
 
             // Read all bytes from the sanitized stream
             byte[] sanitizedBytes = processedStream.getStream().readAllBytes();
@@ -152,10 +180,13 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @SneakyThrows
     @Override
-    public ProcessedStream sanitize(String httpMethod, URL url, InputStream response) throws IOException {
-        //extra check ...
+    public ProcessedStream sanitize(String httpMethod, URL url, InputStream response)
+            throws IOException {
+        // extra check ...
         if (!isAllowed(httpMethod, url)) {
-            throw new IllegalStateException(String.format("Sanitizer called to sanitize response that should not have been retrieved: %s", url));
+            throw new IllegalStateException(String.format(
+                    "Sanitizer called to sanitize response that should not have been retrieved: %s",
+                    url));
         }
         Optional<Pair<Pattern, Endpoint>> matchingEndpoint = getEndpoint(httpMethod, url);
 
@@ -164,7 +195,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             return new ProcessedStream(response, CompletableFuture.completedFuture(null));
         }
 
-        //q: overkill for NON-ndjson case?
+        // q: overkill for NON-ndjson case?
 
         // Create piped stream pair
         PipedOutputStream outPipe = new PipedOutputStream();
@@ -179,21 +210,26 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             JsonFactory factory = objectMapper.getFactory();
 
             try (JsonParser parser = factory.createParser(response);
-                 OutputStreamWriter writer = new OutputStreamWriter(outPipe, StandardCharsets.UTF_8);
-                 BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
+                    OutputStreamWriter writer =
+                            new OutputStreamWriter(outPipe, StandardCharsets.UTF_8);
+                    BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
 
                 boolean first = true;
 
                 while (parser.nextToken() != null) {
-                    // in theory, should parse only the 'next' JSON object from the stream, such that NDJSON, or even "{}{}" works
-                    // string --> jackson jsonNode --> string -> jayway object  for compatibility with jayway jsonpath
-                    // despite jackson provider underneath, Jayway JSONPath seems not do deal with native jackson JsonNode
+                    // in theory, should parse only the 'next' JSON object from the stream, such
+                    // that NDJSON, or even "{}{}" works
+                    // string --> jackson jsonNode --> string -> jayway object for compatibility
+                    // with jayway jsonpath
+                    // despite jackson provider underneath, Jayway JSONPath seems not do deal with
+                    // native jackson JsonNode
                     // TODO: figure out a way to streamline this parsing
-                    Object node = jsonConfiguration.jsonProvider().parse(
-                        objectMapper.writeValueAsString(objectMapper.readTree(parser)));
+                    Object node = jsonConfiguration.jsonProvider()
+                            .parse(objectMapper.writeValueAsString(objectMapper.readTree(parser)));
 
                     Object sanitized = sanitize(endpoint, node);
-                    if (!first) bufferedWriter.write("\n");
+                    if (!first)
+                        bufferedWriter.write("\n");
                     bufferedWriter.write(jsonConfiguration.jsonProvider().toJson(sanitized));
                     first = false;
                 }
@@ -219,38 +255,438 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     /**
      * sanitized a response JSON by applying the endpoint's response schema and transforms
      *
-     * if endpoint allows for ndjson, we expect this to be just a single JSON object at a time, and you call this once per row in the response
+     * if endpoint allows for ndjson, we expect this to be just a single JSON object at a time, and
+     * you call this once per row in the response
      */
     private Object sanitize(Endpoint endpoint, Object jsonResponse) {
-        Object document = endpoint.getResponseSchemaOptional()
-                .map(schema -> {
-                    //q: this read
-                    try {
-                        //TODO: jayway jsonpath Object --> String --> jayway jsonpath Object here is needlessly inefficient
-                        String json = jsonConfiguration.jsonProvider().toJson(jsonResponse);
-                        return jsonConfiguration.jsonProvider().parse(jsonSchemaFilterUtils.filterJsonBySchema(json, schema, getRootDefinitions()));
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .orElse(jsonResponse);
-
-            if (ObjectUtils.isNotEmpty(endpoint.getTransforms())) {
-                for (Transform transform : endpoint.getTransforms()) {
-                    sanitizerUtils.applyTransform(getPseudonymizer(), transform, document, this.compiledTransforms);
-                }
+        Object document = endpoint.getResponseSchemaOptional().map(schema -> {
+            // q: this read
+            try {
+                // TODO: jayway jsonpath Object --> String --> jayway jsonpath Object here is
+                // needlessly inefficient
+                String json = jsonConfiguration.jsonProvider().toJson(jsonResponse);
+                return jsonConfiguration.jsonProvider().parse(jsonSchemaFilterUtils
+                        .filterJsonBySchema(json, schema, getRootDefinitions()));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-            return document;
+        }).orElse(jsonResponse);
+
+        if (ObjectUtils.isNotEmpty(endpoint.getTransforms())) {
+            for (Transform transform : endpoint.getTransforms()) {
+                sanitizerUtils.applyTransform(getPseudonymizer(), transform, document,
+                        this.compiledTransforms);
+            }
+        }
+        return document;
     }
 
+
+    private static boolean transformApplies(Transform transform, Object document) {
+        if (transform.getApplyOnlyWhen() != null) {
+            Object filterResult = JsonPath.compile(transform.getApplyOnlyWhen()).read(document);
+
+            ArrayList<?> results = (ArrayList<?>) filterResult;
+
+            return results != null && !results.isEmpty();
+        }
+
+        return true;
+    }
+
+    @VisibleForTesting
+    public MapFunction getTransformImpl(Transform transform) {
+        MapFunction f;
+        if (transform instanceof Transform.Pseudonymize) {
+            // curry the defaultScopeId from the transform into the pseudonymization method
+            f = getPseudonymize((Transform.Pseudonymize) transform);
+        } else if (transform instanceof Transform.PseudonymizeEmailHeader) {
+            f = getPseudonymizeEmailHeaderToJson((Transform.PseudonymizeEmailHeader) transform);
+        } else if (transform instanceof Transform.PseudonymizeRegexMatches) {
+            f = getPseudonymizeRegexMatches((Transform.PseudonymizeRegexMatches) transform);
+        } else if (transform instanceof Transform.RedactRegexMatches) {
+            f = getRedactRegexMatches((Transform.RedactRegexMatches) transform);
+        } else if (transform instanceof Transform.RedactExceptPhrases) {
+            f = getRedactExceptPhrases((Transform.RedactExceptPhrases) transform);
+        } else if (transform instanceof Transform.RedactExceptSubstringsMatchingRegexes) {
+            f = getRedactExceptSubstringsMatchingRegexes(
+                    (Transform.RedactExceptSubstringsMatchingRegexes) transform);
+        } else if (transform instanceof Transform.FilterTokenByRegex) {
+            f = getFilterTokenByRegex((Transform.FilterTokenByRegex) transform);
+        } else if (transform instanceof Transform.Tokenize) {
+            f = getTokenize((Transform.Tokenize) transform);
+        } else if (transform instanceof HashIp) {
+            f = getHashIp((HashIp) transform);
+        } else if (transform instanceof EncryptIp) {
+            f = getEncryptIp((EncryptIp) transform);
+        } else if (transform instanceof Transform.TextDigest) {
+            f = getTextDigest((Transform.TextDigest) transform);
+        } else {
+            throw new IllegalArgumentException(
+                    "Unknown transform type: " + transform.getClass().getName());
+        }
+        return f;
+    }
+
+    @VisibleForTesting
+    MapFunction getPseudonymizeEmailHeaderToJson(
+            Transform.PseudonymizeEmailHeader transformOptions) {
+        return (Object value, Configuration jsonConfiguration) -> {
+            if (value == null) {
+                return null;
+            }
+
+            Preconditions.checkArgument(value instanceof String, "Value must be string");
+
+            if (StringUtils.isBlank((String) value)) {
+                return new ArrayList<>();
+            } else {
+                // NOTE: this does NOT seem to work for lists containing empty values (eg ",,"),
+                // which
+                // per RFC should be allowed ....
+                if (emailAddressParser.isValidAddressList((String) value)) {
+                    List<EmailAddress> addresses =
+                            emailAddressParser.parseEmailAddressesFromHeader((String) value);
+
+                    return jsonConfiguration.jsonProvider()
+                            .toJson(addresses.stream().map(EmailAddress::asFormattedString)
+                                    .map(pseudonymizer::pseudonymize).map(pseudonymizedIdentity -> {
+                                        if (transformOptions
+                                                .getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
+                                            return urlSafePseudonymEncoder
+                                                    .encode(pseudonymizedIdentity.asPseudonym());
+                                        } else {
+                                            return pseudonymizedIdentity;
+                                        }
+                                    }).collect(Collectors.toList()));
+                } else {
+                    log.log(Level.WARNING,
+                            "Valued matched by emailHeader rule is not valid address list, but not blank");
+                    return null;
+                }
+            }
+        };
+    }
+
+    @VisibleForTesting
+    MapFunction getEncryptIp(EncryptIp transform) {
+        return (s, jsonConfiguration) -> {
+            if (!(s instanceof String)) {
+                if (s != null) {
+                    log.warning("value matched by " + transform + " not of type String");
+                }
+                return null;
+            } else if (StringUtils.isBlank((String) s)) {
+                return s;
+            } else {
+                String canonicalizedIp = canonicalizeIp((String) s);
+                if (canonicalizedIp == null) {
+                    // not a valid IP
+                    return null;
+                }
+
+                return urlSafePseudonymEncoder.encode(Pseudonym.builder()
+                        .hash(ipHashStrategy.getToken(canonicalizedIp))
+                        .reversible(ipEncryptStrategy.getReversibleToken(canonicalizedIp)).build());
+            }
+        };
+    }
+
+    @VisibleForTesting
+    MapFunction getHashIp(HashIp transform) {
+        return (s, jsonConfiguration) -> {
+            if (!(s instanceof String)) {
+                if (s != null) {
+                    log.warning("value matched by " + transform + " not of type String");
+                }
+                return null;
+            } else if (StringUtils.isBlank((String) s)) {
+                return s;
+            } else {
+                String canonicalizedIp = canonicalizeIp((String) s);
+                if (canonicalizedIp == null) {
+                    // not a valid IP
+                    return null;
+                }
+
+                // Parse the IP address string and convert back to string to get the canonical form.
+                return urlSafePseudonymEncoder.encode(
+                        Pseudonym.builder().hash(ipHashStrategy.getToken(canonicalizedIp)).build());
+            }
+        };
+    }
+
+    String canonicalizeIp(String ip) {
+        try {
+            // TODO: force to textual IP address, and never permit hostnames?
+            InetAddress address = InetAddress.getByName(ip);
+            return address.getHostAddress();
+        } catch (UnknownHostException e) {
+            // not a valid IP address
+            log.warning("value matched by HashIP transform not a valid IP address: " + ip);
+            return null;
+        }
+    }
+
+    MapFunction getRedactExceptPhrases(Transform.RedactExceptPhrases transform) {
+
+        // TODO: alternatively, all different patterns, and preserve ALL matches?
+        // --> means we might enlarge, if the same phrase matches multiple times
+
+        List<Pattern> patterns = transform.getAllowedPhrases().stream().map(p -> "\\Q" + p + "\\E") // quote
+                                                                                                    // it
+                .map(p -> "\\b(" + p + ")[\\s:]*\\b") // boundary match, with optional whitespace or
+                                                      // colon at end
+                .map(p -> ".*?" + p + ".*?") // wrap in .*? to match anywhere in the string, but
+                                             // reluctantly
+                .map(p -> Pattern.compile(p, CASE_INSENSITIVE)).collect(Collectors.toList());
+
+        return (s, jsonConfiguration) -> {
+            if (!(s instanceof String)) {
+                if (s != null) {
+                    log.warning("value matched by " + transform + " not of type String");
+                }
+                return null;
+            } else if (StringUtils.isBlank((String) s)) {
+                return s;
+            } else {
+                return patterns.stream().map(p -> p.matcher((String) s)).filter(Matcher::matches)
+                        .map(m -> m.group(1)) // group 1, bc we created caputuring group in regex
+                                              // above
+                        .collect(Collectors.joining(",")); // q: something better? if , in phrases,
+                                                           // can't reparse
+
+            }
+        };
+    }
+
+
+    MapFunction getRedactRegexMatches(Transform.RedactRegexMatches transform) {
+        List<Pattern> patterns = transform.getRedactions().stream().map(Pattern::compile)
+                .collect(Collectors.toList());
+        return (s, jsonConfiguration) -> {
+            if (!(s instanceof String)) {
+                if (s != null) {
+                    log.warning("value matched by " + transform + " not of type String");
+                }
+                return null;
+            } else if (StringUtils.isBlank((String) s)) {
+                return s;
+            } else {
+                String result = (String) s;
+                for (Pattern p : patterns) {
+                    result = p.matcher(result).replaceAll("");
+                }
+                return result;
+            }
+        };
+    }
+
+    MapFunction getRedactExceptSubstringsMatchingRegexes(
+            Transform.RedactExceptSubstringsMatchingRegexes transform) {
+        List<Pattern> patterns = transform.getExceptions().stream().map(p -> ".*?(" + p + ").*?") // wrap
+                                                                                                  // in
+                                                                                                  // .*?
+                                                                                                  // to
+                                                                                                  // match
+                                                                                                  // anywhere
+                                                                                                  // in
+                                                                                                  // the
+                                                                                                  // string,
+                                                                                                  // but
+                                                                                                  // reluctantly
+                .map(Pattern::compile).collect(Collectors.toList());
+        return (s, jsonConfiguration) -> {
+            if (!(s instanceof String)) {
+                if (s != null) {
+                    log.warning("value matched by " + transform + " not of type String");
+                }
+                return null;
+            } else if (StringUtils.isBlank((String) s)) {
+                return s;
+            } else {
+                return patterns.stream().map(p -> p.matcher((String) s)).filter(Matcher::matches)
+                        .map(m -> m.group(1)) // group 1, bc we created caputuring group in regex
+                                              // above
+                        .sorted((a, b) -> Integer.compare(b.length(), a.length())) // longest first
+                        .findFirst().orElse("");
+            }
+        };
+    }
+
+
+    MapFunction getFilterTokenByRegex(Transform.FilterTokenByRegex transform) {
+        List<java.util.function.Predicate<String>> patterns = transform.getFilters().stream()
+                .map(Pattern::compile).map(Pattern::asMatchPredicate).collect(Collectors.toList());
+
+        return (s, jsonConfiguration) -> {
+            if (!(s instanceof String)) {
+                if (s != null) {
+                    log.warning("value matched by " + transform + " not of type String");
+                }
+                return null;
+            } else if (StringUtils.isBlank((String) s)) {
+                return s;
+            } else {
+                String result = (String) s;
+                Stream<String> stream = Optional.ofNullable(transform.getDelimiter())
+                        .map(delimiter -> Arrays.stream(result.split(delimiter)))
+                        .orElse(Stream.of(result));
+
+                return StringUtils.trimToNull(
+                        stream.filter(token -> patterns.stream().anyMatch(p -> p.test(token)))
+                                .collect(Collectors.joining(" ")));
+            }
+        };
+    }
+
+    MapFunction getTokenize(Transform.Tokenize transform) {
+        Optional<Pattern> pattern = Optional.ofNullable(transform.getRegex()).map(Pattern::compile);
+        return (s, jsonConfiguration) -> {
+            if (!(s instanceof String)) {
+                if (s != null) {
+                    log.warning("value matched by " + transform + " not of type String");
+                }
+                return null;
+            } else if (StringUtils.isBlank((String) s)) {
+                return s;
+            } else {
+                String toTokenize = (String) s;
+                Optional<Matcher> matcher = pattern.map(p -> p.matcher(toTokenize));
+                if (matcher.isPresent()) {
+                    if (matcher.get().matches()) {
+                        String token =
+                                urlSafePseudonymEncoder.encode(Pseudonym.builder()
+                                        .reversible(reversibleTokenizationStrategy
+                                                .getReversibleToken(matcher.get().group(1)))
+                                        .build());
+                        return toTokenize.replace(matcher.get().group(1), token);
+                    } else {
+                        return s;
+                    }
+                } else {
+                    String token = urlSafePseudonymEncoder.encode(Pseudonym.builder()
+                            .reversible(
+                                    reversibleTokenizationStrategy.getReversibleToken(toTokenize))
+                            .build());
+                    return token;
+                }
+            }
+        };
+    }
+
+    MapFunction getTextDigest(Transform.TextDigest transform) {
+        return (s, jsonConfiguration) -> {
+            if (!(s instanceof String toTokenize)) {
+                if (s != null) {
+                    log.warning("value matched by " + transform + " not of type String");
+                }
+                return null;
+            } else {
+                if (transform.getIsJsonEscaped()
+                        && transform.getJsonPathToProcessWhenEscaped() != null) {
+                    DocumentContext jsonContext = JsonPath.parse(toTokenize);
+                    List<String> texts =
+                            jsonContext.read(transform.getJsonPathToProcessWhenEscaped());
+
+                    for (String text : texts) {
+                        jsonContext.set(transform.getJsonPathToProcessWhenEscaped(),
+                                jsonConfiguration.jsonProvider()
+                                        .toJson(Transform.TextDigest.generate(text)));
+                    }
+
+                    return jsonContext.jsonString();
+                } else {
+                    return jsonConfiguration.jsonProvider()
+                            .toJson(Transform.TextDigest.generate(toTokenize));
+                }
+            }
+        };
+    }
+
+    public MapFunction getPseudonymize(Transform.Pseudonymize transformOptions) {
+        return (Object s, Configuration configuration) -> {
+            PseudonymizedIdentity pseudonymizedIdentity =
+                    pseudonymizer.pseudonymize(s, transformOptions);
+            if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.JSON) {
+                return configuration.jsonProvider().toJson(pseudonymizedIdentity);
+            } else if (transformOptions
+                    .getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
+                if (pseudonymizedIdentity.getReversible() != null && getPseudonymizer().getOptions()
+                        .getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
+                    // can't URL_SAFE_TOKEN encode reversible portion of pseudonym if LEGACY mode,
+                    // bc
+                    // URL_SAFE_TOKEN depends on 'hash' being encoded as prefix of the reversible;
+                    // and reverisbles need the non-legacy
+                    return configuration.jsonProvider().toJson(pseudonymizedIdentity);
+                }
+                // exploit that already reversibly encoded, including prefix
+                return ObjectUtils.firstNonNull(pseudonymizedIdentity.getReversible(),
+                        urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym()));
+            } else if (transformOptions
+                    .getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_HASH_ONLY) {
+                return pseudonymizedIdentity.getHash();
+            } else {
+                throw new RuntimeException(
+                        "Unsupported pseudonym implementation: " + transformOptions.getEncoding());
+            }
+
+        };
+    }
+
+
+    public MapFunction getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches transform) {
+        Pattern pattern = Pattern.compile(transform.getRegex());
+
+        return (Object s, Configuration configuration) -> {
+
+            String fullString = (String) s;
+            Matcher matcher = pattern.matcher(fullString);
+
+            if (matcher.matches()) {
+                String toPseudonymize;
+                if (matcher.groupCount() > 0) {
+                    toPseudonymize = matcher.group(1);
+                } else {
+                    toPseudonymize = matcher.group(0);
+                }
+                PseudonymizedIdentity pseudonymizedIdentity =
+                        pseudonymizer.pseudonymize(toPseudonymize, transform);
+
+                String pseudonymizedString =
+                        urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym());
+
+                if (matcher.groupCount() > 0) {
+                    // return original, replacing match with encoded pseudonym
+                    return fullString.replace(matcher.group(1), pseudonymizedString);
+                } else {
+                    return pseudonymizedString;
+                }
+            } else {
+                // if no match, redact it
+                return null;
+            }
+        };
+    }
+
+    @VisibleForTesting
+    public String pseudonymizeToJson(Object value, @NonNull Configuration configuration) {
+        return configuration.jsonProvider().toJson(pseudonymizer.pseudonymize(value));
+    }
+
+    public String pseudonymizeWithOriginalToJson(Object value,
+            @NonNull Configuration configuration) {
+        return configuration.jsonProvider().toJson(pseudonymizer.pseudonymize(value,
+                Transform.Pseudonymize.builder().includeOriginal(true).build()));
+    }
 
     Map<Endpoint, Pattern> getCompiledAllowedEndpoints() {
         if (compiledAllowedEndpoints == null) {
             synchronized ($writeLock) {
                 if (compiledAllowedEndpoints == null) {
                     compiledAllowedEndpoints = rules.getEndpoints().stream()
-                        .collect(Collectors.toMap(Function.identity(),
-                            endpoint -> Pattern.compile(effectiveRegex(endpoint), CASE_INSENSITIVE)));
+                            .collect(Collectors.toMap(Function.identity(), endpoint -> Pattern
+                                    .compile(effectiveRegex(endpoint), CASE_INSENSITIVE)));
                 }
             }
         }
@@ -260,24 +696,25 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     @VisibleForTesting
     String effectiveRegex(Endpoint endpoint) {
         return Optional.ofNullable(endpoint.getPathRegex())
-            .orElseGet(() -> pathTemplateUtils.asRegex(endpoint.getPathTemplate()));
+                .orElseGet(() -> pathTemplateUtils.asRegex(endpoint.getPathTemplate()));
     }
 
     boolean allowedQueryParams(Endpoint endpoint, List<Pair<String, String>> queryParams) {
         boolean matchesAllowed = endpoint.getAllowedQueryParamsOptional()
-            .map(allowedParams -> allowedParams.containsAll(queryParams.stream().map(Pair::getKey).collect(Collectors.toList())))
-            .orElse(true);
-        return matchesAllowed
-            && endpoint.getQueryParamSchemasOptional()
-            .map(schemas -> parameterSchemaUtils.validateAll(schemas, queryParams))
-            .orElse(true);
+                .map(allowedParams -> allowedParams.containsAll(
+                        queryParams.stream().map(Pair::getKey).collect(Collectors.toList())))
+                .orElse(true);
+        return matchesAllowed && endpoint.getQueryParamSchemasOptional()
+                .map(schemas -> parameterSchemaUtils.validateAll(schemas, queryParams))
+                .orElse(true);
     }
 
     JsonSchemaFilter getRootDefinitions() {
         if (rootDefinitions == null) {
             synchronized ($writeLock) {
                 if (rootDefinitions == null) {
-                    rootDefinitions = JsonSchemaFilter.builder().definitions(rules.getDefinitions()).build();
+                    rootDefinitions =
+                            JsonSchemaFilter.builder().definitions(rules.getDefinitions()).build();
                 }
             }
         }
@@ -289,20 +726,20 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         if (targetHostPath == null) {
             synchronized ($writeLock) {
                 if (targetHostPath == null) {
-                    targetHostPath = configService.getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST)
-                        .map(s -> {
-                            try {
-                                if (!s.startsWith("https://")) {
-                                    s = "https://" + s;
+                    targetHostPath = configService
+                            .getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST)
+                            .map(s -> {
+                                try {
+                                    if (!s.startsWith("https://")) {
+                                        s = "https://" + s;
+                                    }
+                                    return new URL(s).getPath();
+                                } catch (MalformedURLException e) {
+                                    log.log(Level.WARNING, "Invalid API_HOST: " + s, e);
+                                    // shouldn't happen
+                                    return "";
                                 }
-                                return new URL(s).getPath();
-                            } catch (MalformedURLException e) {
-                                log.log(Level.WARNING, "Invalid API_HOST: " + s, e);
-                                //shouldn't happen
-                                return "";
-                            }
-                        })
-                        .orElse("");
+                            }).orElse("");
                 }
             }
         }
@@ -324,18 +761,21 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             if (entry.getKey().getPathTemplate() != null) {
                 Matcher matcher = entry.getValue().matcher(stripTargetHostPath(url.getPath()));
                 if (matcher.matches()) {
-                    // this should NOT match on empty path segments; eg "/foo//bar" should not match "/foo/{param}/bar"
-                    boolean allParamsValid =
-                        entry.getKey().getPathParameterSchemasOptional()
+                    // this should NOT match on empty path segments; eg "/foo//bar" should not match
+                    // "/foo/{param}/bar"
+                    boolean allParamsValid = entry.getKey().getPathParameterSchemasOptional()
                             .map(schemas -> schemas.entrySet().stream()
-                                .allMatch(paramSchema -> parameterSchemaUtils.validate(paramSchema.getValue(), matcher.group(paramSchema.getKey()))))
+                                    .allMatch(paramSchema -> parameterSchemaUtils.validate(
+                                            paramSchema.getValue(),
+                                            matcher.group(paramSchema.getKey()))))
                             .orElse(true);
 
-                    //q: need to catch possible IllegalArgumentException if path parameter defined in `pathParameterSchemas`
+                    // q: need to catch possible IllegalArgumentException if path parameter defined
+                    // in `pathParameterSchemas`
                     // not in the path template??
 
-                    return allParamsValid &&
-                        allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url));
+                    return allParamsValid
+                            && allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url));
                 }
             }
             return false;
@@ -344,17 +784,16 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @VisibleForTesting
     Predicate<Endpoint> allowsHttpMethod(@NonNull String httpMethod) {
-        return (endpoint) ->
-            endpoint.getAllowedMethods()
-                .map(methods -> methods.stream().map(String::toUpperCase).collect(Collectors.toList())
-                    .contains(httpMethod.toUpperCase()))
+        return (endpoint) -> endpoint.getAllowedMethods()
+                .map(methods -> methods.stream().map(String::toUpperCase)
+                        .collect(Collectors.toList()).contains(httpMethod.toUpperCase()))
                 .orElse(true);
     }
 
     @VisibleForTesting
     Predicate<Map.Entry<Endpoint, Pattern>> getHasPathRegexMatchingUrl(String relativeUrl) {
-        return (entry) ->
-            entry.getKey().getPathRegex() != null && entry.getValue().matcher(relativeUrl).matches();
+        return (entry) -> entry.getKey().getPathRegex() != null
+                && entry.getValue().matcher(relativeUrl).matches();
     }
 
 
@@ -363,19 +802,23 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         String relativeUrl = stripTargetHostPath(URLUtils.relativeURL(url));
 
         Predicate<Map.Entry<Endpoint, Pattern>> hasPathRegexMatchingUrl =
-            getHasPathRegexMatchingUrl(relativeUrl);
+                getHasPathRegexMatchingUrl(relativeUrl);
 
         Predicate<Map.Entry<Endpoint, Pattern>> hasPathTemplateMatchingUrl =
-            getHasPathTemplateMatchingUrl(url);
+                getHasPathTemplateMatchingUrl(url);
 
         Predicate<Endpoint> allowsHttpMethod = allowsHttpMethod(httpMethod);
 
         return getCompiledAllowedEndpoints().entrySet().stream()
-            .filter(entry -> hasPathRegexMatchingUrl.test(entry) || hasPathTemplateMatchingUrl.test(entry))
-            .filter(entry -> allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url))) // redundant in the pathTemplate case
-            .filter(entry -> allowsHttpMethod.test(entry.getKey()))
-            .findAny()
-            .map(entry -> Pair.of(entry.getValue(), entry.getKey()));
+                .filter(entry -> hasPathRegexMatchingUrl.test(entry)
+                        || hasPathTemplateMatchingUrl.test(entry))
+                .filter(entry -> allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url))) // redundant
+                                                                                                     // in
+                                                                                                     // the
+                                                                                                     // pathTemplate
+                                                                                                     // case
+                .filter(entry -> allowsHttpMethod.test(entry.getKey())).findAny()
+                .map(entry -> Pair.of(entry.getValue(), entry.getKey()));
     }
 
 }
