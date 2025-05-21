@@ -237,7 +237,7 @@ EOT
   NOTES:
     - Enterprise Cloud is required for this connector.
 
-  Apart from Github instructions please review the following:
+  Apart from GitHub instructions please review the following:
   - "Homepage URL" can be anything, not required in this flow but required by GitHub.
   - Webhooks check can be disabled as this connector is not using them
   - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
