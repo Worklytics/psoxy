@@ -8,8 +8,8 @@
       "is_archived":false,
       "is_general":false,
       "unlinked":0,
-      "creator":"{\"hash\":\"MOMSVXXFHYCrH2e8Zrt_0G9lcd_GK4cUKRXBmO2QAa0\"}",
-      "is_moved":0,
+      "creator":"t~MOMSVXXFHYCrH2e8Zrt_0G9lcd_GK4cUKRXBmO2QAa0",
+      "is_moved":null,
       "is_shared":true,
       "is_global_shared":false,
       "is_org_default":false,
@@ -19,7 +19,6 @@
       "is_mpim":false,
       "is_dm":false,
       "is_deleted":false,
-      "member_count":52,
       "shared":{
         "shared_team_ids":[
           "T02NFGBSH"

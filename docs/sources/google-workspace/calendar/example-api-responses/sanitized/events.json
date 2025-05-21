@@ -3,13 +3,6 @@
   "etag":"\"p32cen2vjtn1f60g\"",
   "updated":"2021-10-11T17:14:59.183Z",
   "timeZone":"America/Los_Angeles",
-  "accessRole":"owner",
-  "defaultReminders":[
-    {
-      "method":"popup",
-      "minutes":10
-    }
-  ],
   "nextPageToken":"CigKGmpuYXRicmIzaTM3OXE0Nmd1Y21nYmtqbjVrGAEggICA_PXvoL8VGg8IABIAGJjri_PtwvMCIAEiBwgCEOjM5Bo=",
   "items":[
     {
@@ -22,10 +15,10 @@
       "updated":"2015-04-12T01:34:59.063Z",
       "summary":"",
       "creator":{
-        "email":"{\"domain\":\"imagine.com\",\"hash\":\"aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI\"}"
+        "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com"
       },
       "organizer":{
-        "email":"{\"domain\":\"imagine.com\",\"hash\":\"aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI\"}"
+        "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com"
       },
       "start":{
         "dateTime":"2015-04-13T13:00:00-07:00"
@@ -37,15 +30,12 @@
       "sequence":0,
       "attendees":[
         {
-          "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+          "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
           "self":true,
           "responseStatus":"accepted"
         }
       ],
       "guestsCanSeeOtherGuests":false,
-      "reminders":{
-        "useDefault":true
-      },
       "eventType":"default"
     },
     {
@@ -58,11 +48,11 @@
       "updated":"2015-05-05T14:09:13.958Z",
       "summary":"",
       "creator":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "organizer":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "start":{
@@ -75,9 +65,6 @@
       },
       "iCalUID":"9erjlfjrm4tusemov9oavkt1ms@google.com",
       "sequence":0,
-      "reminders":{
-        "useDefault":true
-      },
       "eventType":"default"
     },
     {
@@ -89,13 +76,12 @@
       "created":"2015-05-11T12:52:47.000Z",
       "updated":"2015-05-11T12:52:58.800Z",
       "summary":"",
-      "description":null,
       "location":" 770 Broadway, 6th Floor (Entrance on 9th St). - New York, NY",
       "creator":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4\"}"
+        "email":"t~ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4@worklytics.co"
       },
       "organizer":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4\"}"
+        "email":"t~ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4@worklytics.co"
       },
       "start":{
         "dateTime":"2015-05-12T05:00:00-07:00"
@@ -107,19 +93,16 @@
       "sequence":0,
       "attendees":[
         {
-          "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+          "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
           "self":true,
           "responseStatus":"needsAction"
         },
         {
-          "email":"{\"domain\":\"worklytics.co\",\"hash\":\"ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4\"}",
+          "email":"t~ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4@worklytics.co",
           "organizer":true,
           "responseStatus":"accepted"
         }
       ],
-      "reminders":{
-        "useDefault":true
-      },
       "eventType":"default"
     },
     {
@@ -131,14 +114,13 @@
       "created":"2015-06-09T20:14:06.000Z",
       "updated":"2015-06-10T00:35:26.603Z",
       "summary":"",
-      "description":null,
       "location":"Dial-In Number: (555) 555-2310 / Conference Code: 262 276 3910 #",
       "creator":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "organizer":{
-        "email":"{\"domain\":\"trinet.com\",\"hash\":\"va35X9kWARW4feA-IFQUJ-KwhcJFbiZhMXNB9QhE9HI\"}"
+        "email":"t~va35X9kWARW4feA-IFQUJ-KwhcJFbiZhMXNB9QhE9HI@trinet.com"
       },
       "start":{
         "dateTime":"2015-06-10T10:00:00-07:00"
@@ -150,16 +132,13 @@
       "sequence":0,
       "attendees":[
         {
-          "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+          "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
           "self":true,
           "responseStatus":"accepted"
         }
       ],
       "guestsCanInviteOthers":false,
       "privateCopy":true,
-      "reminders":{
-        "useDefault":true
-      },
       "eventType":"default"
     },
     {
@@ -170,14 +149,13 @@
       "htmlLink":"https://www.google.com/calendar/event?eid=XzZrbzMyZDlvNnNwamVlOWs2b29qaWQ5bTZncWpnY3BtNmNxamdjMWk2c29qaWMxcCBlcmlrQHdvcmtseXRpY3MuY28",
       "created":"2015-07-02T15:47:57.000Z",
       "updated":"2015-07-02T15:54:52.097Z",
-      "summary":"Call",
-      "description":null,
+      "summary":"Call,Call",
       "creator":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "organizer":{
-        "email":"{\"domain\":\"lagroup.com\",\"hash\":\"CNBRGFlrkATtSE3yj964FUjqegxsLoY4pwEAouhCt1k\"}"
+        "email":"t~CNBRGFlrkATtSE3yj964FUjqegxsLoY4pwEAouhCt1k@lagroup.com"
       },
       "start":{
         "dateTime":"2015-07-02T14:30:00-07:00"
@@ -189,16 +167,13 @@
       "sequence":0,
       "attendees":[
         {
-          "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+          "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
           "self":true,
           "responseStatus":"accepted"
         }
       ],
       "guestsCanInviteOthers":false,
       "privateCopy":true,
-      "reminders":{
-        "useDefault":true
-      },
       "eventType":"default"
     },
     {
@@ -209,12 +184,12 @@
       "htmlLink":"https://www.google.com/calendar/event?eid=aHFqOWY4ajg3Ym9iazY3MXV0ZXJ2MTRxb3MgZXJpa0B3b3JrbHl0aWNzLmNv",
       "created":"2015-07-02T22:54:23.000Z",
       "updated":"2015-07-03T11:24:21.213Z",
-      "summary":"Call",
+      "summary":"Call,Call",
       "creator":{
-        "email":"{\"domain\":\"imagine.com\",\"hash\":\"aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI\"}"
+        "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com"
       },
       "organizer":{
-        "email":"{\"domain\":\"imagine.com\",\"hash\":\"aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI\"}"
+        "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com"
       },
       "start":{
         "dateTime":"2015-07-06T10:00:00-07:00",
@@ -228,16 +203,16 @@
       "sequence":0,
       "attendees":[
         {
-          "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+          "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
           "self":true,
           "responseStatus":"accepted"
         },
         {
-          "email":"{\"domain\":\"imagine.com\",\"hash\":\"zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs\"}",
+          "email":"t~zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs@imagine.com",
           "responseStatus":"accepted"
         },
         {
-          "email":"{\"domain\":\"imagine.com\",\"hash\":\"aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI\"}",
+          "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com",
           "organizer":true,
           "responseStatus":"accepted"
         }
@@ -258,11 +233,7 @@
           "name":"Hangouts",
           "iconUri":"https://lh5.googleusercontent.com/proxy/9vT2XwMHPzrIcW56Ic3FX6_OSYvrjHEwOUYOmA0eMoR-_sY59k4mQMd0JnqCp8GCOmqimFKP3vSeFaIe4k5MewpEcCuK6PXlB2Z4AKTMV78OB_CJqXHrrkAO-yf5FYJsiaTBwjUP9cU0lRlP-HPC2w"
         },
-        "conferenceId":"worklytics",
-        "signature":"AGirE/LisFavKHZ9LBpCKUHuuzhL"
-      },
-      "reminders":{
-        "useDefault":true
+        "conferenceId":"worklytics"
       },
       "eventType":"default"
     },
@@ -274,13 +245,13 @@
       "htmlLink":"https://www.google.com/calendar/event?eid=amJpdXNhNWtraHBvMjkxM3RjaGwxOWI1c28gZXJpa0B3b3JrbHl0aWNzLmNv",
       "created":"2015-07-06T13:04:48.000Z",
       "updated":"2015-07-06T13:05:35.772Z",
-      "summary":"call",
+      "summary":"call,call",
       "creator":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "organizer":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "start":{
@@ -295,19 +266,16 @@
       "sequence":0,
       "attendees":[
         {
-          "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+          "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
           "organizer":true,
           "self":true,
           "responseStatus":"accepted"
         },
         {
-          "email":"{\"domain\":\"worklytics.co\",\"hash\":\"ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4\"}",
+          "email":"t~ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4@worklytics.co",
           "responseStatus":"accepted"
         }
       ],
-      "reminders":{
-        "useDefault":true
-      },
       "eventType":"default"
     },
     {
@@ -318,13 +286,13 @@
       "htmlLink":"https://www.google.com/calendar/event?eid=MWhidGlndm50cjRhM3FjbjNjbWxsMzkxdTAgZXJpa0B3b3JrbHl0aWNzLmNv",
       "created":"2015-07-06T17:13:57.000Z",
       "updated":"2015-07-06T17:13:57.241Z",
-      "summary":"call",
+      "summary":"call,call",
       "creator":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "organizer":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "start":{
@@ -337,9 +305,6 @@
       },
       "iCalUID":"1hbtigvntr4a3qcn3cmll391u0@google.com",
       "sequence":0,
-      "reminders":{
-        "useDefault":true
-      },
       "eventType":"default"
     },
     {
@@ -350,13 +315,13 @@
       "htmlLink":"https://www.google.com/calendar/event?eid=bmZlYmo4OWk0ZG5nazZuMG1ibjhvNHVvMG8gZXJpa0B3b3JrbHl0aWNzLmNv",
       "created":"2015-07-06T17:14:13.000Z",
       "updated":"2015-07-06T17:14:13.719Z",
-      "summary":"call",
+      "summary":"call,call",
       "creator":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "organizer":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "start":{
@@ -369,9 +334,6 @@
       },
       "iCalUID":"nfebj89i4dngk6n0mbn8o4uo0o@google.com",
       "sequence":0,
-      "reminders":{
-        "useDefault":true
-      },
       "eventType":"default"
     },
     {
@@ -382,13 +344,12 @@
       "htmlLink":"https://www.google.com/calendar/event?eid=bjl2cGYzNHNsM3NvOG5wOGtoZzZsNHNhdGsgZXJpa0B3b3JrbHl0aWNzLmNv",
       "created":"2015-07-06T17:23:46.000Z",
       "updated":"2015-07-06T21:41:02.706Z",
-      "summary":"Call,Check-In",
-      "description":null,
+      "summary":"Call,Check-In,Call,Check-In",
       "creator":{
-        "email":"{\"domain\":\"imagine.com\",\"hash\":\"zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs\"}"
+        "email":"t~zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs@imagine.com"
       },
       "organizer":{
-        "email":"{\"domain\":\"imagine.com\",\"hash\":\"zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs\"}"
+        "email":"t~zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs@imagine.com"
       },
       "start":{
         "dateTime":"2015-07-13T10:00:00-07:00"
@@ -400,23 +361,20 @@
       "sequence":0,
       "attendees":[
         {
-          "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+          "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
           "self":true,
           "responseStatus":"accepted"
         },
         {
-          "email":"{\"domain\":\"imagine.com\",\"hash\":\"aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI\"}",
+          "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com",
           "responseStatus":"needsAction"
         },
         {
-          "email":"{\"domain\":\"imagine.com\",\"hash\":\"zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs\"}",
+          "email":"t~zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs@imagine.com",
           "organizer":true,
           "responseStatus":"accepted"
         }
       ],
-      "reminders":{
-        "useDefault":true
-      },
       "eventType":"default"
     },
     {
@@ -427,13 +385,12 @@
       "htmlLink":"https://www.google.com/calendar/event?eid=b3Z0NGRnamsxYzA1aXBvZzVucnZ2YXVrMWcgZXJpa0B3b3JrbHl0aWNzLmNv",
       "created":"2015-07-06T17:24:36.000Z",
       "updated":"2015-07-07T13:30:46.137Z",
-      "summary":"Call",
-      "description":null,
+      "summary":"Call,Call",
       "creator":{
-        "email":"{\"domain\":\"imagine.com\",\"hash\":\"zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs\"}"
+        "email":"t~zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs@imagine.com"
       },
       "organizer":{
-        "email":"{\"domain\":\"imagine.com\",\"hash\":\"zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs\"}"
+        "email":"t~zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs@imagine.com"
       },
       "start":{
         "dateTime":"2015-07-21T10:00:00-07:00"
@@ -445,17 +402,17 @@
       "sequence":0,
       "attendees":[
         {
-          "email":"{\"domain\":\"imagine.com\",\"hash\":\"zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs\"}",
+          "email":"t~zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs@imagine.com",
           "organizer":true,
           "responseStatus":"accepted"
         },
         {
-          "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+          "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
           "self":true,
           "responseStatus":"accepted"
         },
         {
-          "email":"{\"domain\":\"imagine.com\",\"hash\":\"aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI\"}",
+          "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com",
           "responseStatus":"needsAction"
         }
       ],
@@ -475,11 +432,7 @@
           "name":"Hangouts",
           "iconUri":"https://lh5.googleusercontent.com/proxy/9vT2XwMHPzrIcW56Ic3FX6_OSYvrjHEwOUYOmA0eMoR-_sY59k4mQMd0JnqCp8GCOmqimFKP3vSeFaIe4k5MewpEcCuK6PXlB2Z4AKTMV78OB_CJqXHrrkAO-yf5FYJsiaTBwjUP9cU0lRlP-HPC2w"
         },
-        "conferenceId":"worklytics",
-        "signature":"AGirE/I5NKdV7MGFLooLvsUAOe1G"
-      },
-      "reminders":{
-        "useDefault":true
+        "conferenceId":"worklytics"
       },
       "eventType":"default"
     },
@@ -494,11 +447,11 @@
       "summary":"",
       "location":"Scotland",
       "creator":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "organizer":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "start":{
@@ -510,15 +463,6 @@
       "transparency":"transparent",
       "iCalUID":"n1fg7l6g2hn8rb390vrqdue6r8@google.com",
       "sequence":0,
-      "reminders":{
-        "useDefault":false,
-        "overrides":[
-          {
-            "method":"popup",
-            "minutes":10
-          }
-        ]
-      },
       "eventType":"default"
     },
     {
@@ -532,11 +476,11 @@
       "summary":"",
       "location":"WeWork Soho West",
       "creator":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "organizer":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4\"}"
+        "email":"t~ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4@worklytics.co"
       },
       "start":{
         "dateTime":"2015-05-01T08:00:00-07:00",
@@ -550,14 +494,11 @@
       "sequence":0,
       "attendees":[
         {
-          "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+          "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
           "self":true,
           "responseStatus":"accepted"
         }
       ],
-      "reminders":{
-        "useDefault":true
-      },
       "eventType":"default"
     },
     {
@@ -568,13 +509,12 @@
       "htmlLink":"https://www.google.com/calendar/event?eid=MW5wcXQyaWg2dDZrMGEwYTU0Mzh2ZWFkbzggZXJpa0B3b3JrbHl0aWNzLmNv",
       "created":"2015-07-27T22:03:38.000Z",
       "updated":"2015-07-27T22:21:49.187Z",
-      "summary":"Call",
-      "description":null,
+      "summary":"Call,Call",
       "creator":{
-        "email":"{\"domain\":\"imagine.com\",\"hash\":\"zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs\"}"
+        "email":"t~zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs@imagine.com"
       },
       "organizer":{
-        "email":"{\"domain\":\"imagine.com\",\"hash\":\"zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs\"}"
+        "email":"t~zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs@imagine.com"
       },
       "start":{
         "dateTime":"2015-07-29T11:30:00-07:00"
@@ -586,12 +526,12 @@
       "sequence":0,
       "attendees":[
         {
-          "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+          "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
           "self":true,
           "responseStatus":"accepted"
         },
         {
-          "email":"{\"domain\":\"imagine.com\",\"hash\":\"zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs\"}",
+          "email":"t~zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs@imagine.com",
           "organizer":true,
           "responseStatus":"accepted"
         }
@@ -612,11 +552,7 @@
           "name":"Hangouts",
           "iconUri":"https://lh5.googleusercontent.com/proxy/9vT2XwMHPzrIcW56Ic3FX6_OSYvrjHEwOUYOmA0eMoR-_sY59k4mQMd0JnqCp8GCOmqimFKP3vSeFaIe4k5MewpEcCuK6PXlB2Z4AKTMV78OB_CJqXHrrkAO-yf5FYJsiaTBwjUP9cU0lRlP-HPC2w"
         },
-        "conferenceId":"alice-matt-wa",
-        "signature":"AGirE/JNjEaBAmJv/sRjDC4x4uyQ"
-      },
-      "reminders":{
-        "useDefault":true
+        "conferenceId":"alice-matt-wa"
       },
       "eventType":"default"
     },
@@ -628,13 +564,13 @@
       "htmlLink":"https://www.google.com/calendar/event?eid=b25lNm9xdGc1cTY2cXR1c3JwYmt2NzgzOW8gZXJpa0B3b3JrbHl0aWNzLmNv",
       "created":"2015-07-08T10:54:04.000Z",
       "updated":"2015-08-04T11:14:58.108Z",
-      "summary":"OOO",
+      "summary":"OOO,OOO",
       "creator":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "organizer":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "start":{
@@ -646,15 +582,6 @@
       "transparency":"transparent",
       "iCalUID":"one6oqtg5q66qtusrpbkv7839o@google.com",
       "sequence":1,
-      "reminders":{
-        "useDefault":false,
-        "overrides":[
-          {
-            "method":"popup",
-            "minutes":10
-          }
-        ]
-      },
       "eventType":"default"
     },
     {
@@ -665,13 +592,13 @@
       "htmlLink":"https://www.google.com/calendar/event?eid=dDkzOGNkNDVkaXZyZzdxdmhkdXNnMXNqYmMgZXJpa0B3b3JrbHl0aWNzLmNv",
       "created":"2015-07-08T10:54:33.000Z",
       "updated":"2015-08-04T11:15:45.864Z",
-      "summary":"OOO",
+      "summary":"OOO,OOO",
       "creator":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "organizer":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "start":{
@@ -683,15 +610,6 @@
       "transparency":"transparent",
       "iCalUID":"t938cd45divrg7qvhdusg1sjbc@google.com",
       "sequence":1,
-      "reminders":{
-        "useDefault":false,
-        "overrides":[
-          {
-            "method":"popup",
-            "minutes":10
-          }
-        ]
-      },
       "eventType":"default"
     },
     {
@@ -703,12 +621,11 @@
       "created":"2015-09-02T14:09:06.000Z",
       "updated":"2015-09-14T15:20:05.399Z",
       "summary":"",
-      "description":null,
       "creator":{
-        "email":"{\"domain\":\"gmail.com\",\"hash\":\"6kb37s7Xrbed1hWIQ02972KS88WjLiAuQzN-fc-1u2k\"}"
+        "email":"t~6kb37s7Xrbed1hWIQ02972KS88WjLiAuQzN-fc-1u2k@gmail.com"
       },
       "organizer":{
-        "email":"{\"domain\":\"gmail.com\",\"hash\":\"6kb37s7Xrbed1hWIQ02972KS88WjLiAuQzN-fc-1u2k\"}"
+        "email":"t~6kb37s7Xrbed1hWIQ02972KS88WjLiAuQzN-fc-1u2k@gmail.com"
       },
       "start":{
         "dateTime":"2015-09-15T11:00:00-07:00"
@@ -720,27 +637,24 @@
       "sequence":1,
       "attendees":[
         {
-          "email":"{\"domain\":\"gmail.com\",\"hash\":\"6kb37s7Xrbed1hWIQ02972KS88WjLiAuQzN-fc-1u2k\"}",
+          "email":"t~6kb37s7Xrbed1hWIQ02972KS88WjLiAuQzN-fc-1u2k@gmail.com",
           "organizer":true,
           "responseStatus":"accepted"
         },
         {
-          "email":"{\"domain\":\"gmail.com\",\"hash\":\"Pgo2PXybS-G8nafRqy85woSRH-pbHUuJllRKs0AGlDg\"}",
+          "email":"t~Pgo2PXybS-G8nafRqy85woSRH-pbHUuJllRKs0AGlDg@gmail.com",
           "responseStatus":"accepted"
         },
         {
-          "email":"{\"domain\":\"worklytics.co\",\"hash\":\"ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4\"}",
+          "email":"t~ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4@worklytics.co",
           "responseStatus":"needsAction"
         },
         {
-          "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+          "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
           "self":true,
           "responseStatus":"needsAction"
         }
       ],
-      "reminders":{
-        "useDefault":true
-      },
       "eventType":"default"
     },
     {
@@ -753,10 +667,10 @@
       "updated":"2015-10-05T13:08:05.913Z",
       "summary":"",
       "creator":{
-        "email":"{\"domain\":\"gmail.com\",\"hash\":\"Pgo2PXybS-G8nafRqy85woSRH-pbHUuJllRKs0AGlDg\"}"
+        "email":"t~Pgo2PXybS-G8nafRqy85woSRH-pbHUuJllRKs0AGlDg@gmail.com"
       },
       "organizer":{
-        "email":"{\"domain\":\"gmail.com\",\"hash\":\"Pgo2PXybS-G8nafRqy85woSRH-pbHUuJllRKs0AGlDg\"}"
+        "email":"t~Pgo2PXybS-G8nafRqy85woSRH-pbHUuJllRKs0AGlDg@gmail.com"
       },
       "start":{
         "dateTime":"2015-10-08T15:00:00-07:00"
@@ -769,19 +683,16 @@
       "sequence":0,
       "attendees":[
         {
-          "email":"{\"domain\":\"gmail.com\",\"hash\":\"Pgo2PXybS-G8nafRqy85woSRH-pbHUuJllRKs0AGlDg\"}",
+          "email":"t~Pgo2PXybS-G8nafRqy85woSRH-pbHUuJllRKs0AGlDg@gmail.com",
           "organizer":true,
           "responseStatus":"tentative"
         },
         {
-          "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+          "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
           "self":true,
           "responseStatus":"needsAction"
         }
       ],
-      "reminders":{
-        "useDefault":true
-      },
       "eventType":"default"
     },
     {
@@ -792,13 +703,13 @@
       "htmlLink":"https://www.google.com/calendar/event?eid=czFnaWFjaDB2cmdzYWtsYzI1cDZmMmpwYzBfMjAxNTEwMDVUMTEwMDAwWiBlcmlrQHdvcmtseXRpY3MuY28",
       "created":"2015-10-06T17:58:53.000Z",
       "updated":"2015-10-06T17:59:33.944Z",
-      "summary":"call",
+      "summary":"call,call",
       "creator":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "organizer":{
-        "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+        "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
         "self":true
       },
       "start":{
@@ -814,9 +725,6 @@
       ],
       "iCalUID":"s1giach0vrgsaklc25p6f2jpc0@google.com",
       "sequence":1,
-      "reminders":{
-        "useDefault":true
-      },
       "eventType":"default"
     }
   ]

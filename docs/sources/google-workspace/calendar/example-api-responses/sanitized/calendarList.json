@@ -5,156 +5,48 @@
   "items":[
     {
       "kind":"calendar#calendarListEntry",
-      "etag":"\"1541799526249000\"",
       "id":"p~UFdK0TvVTvZ23c6QslyCy0o2MSq2DRtDjEXfTPJyyMnKYUk8FJevl3wvFyZY0eF-@acme.com",
-      "summary":null,
+      "summary":"",
       "timeZone":"America/Los_Angeles",
-      "colorId":"8",
-      "backgroundColor":"#16a765",
-      "foregroundColor":"#000000",
-      "selected":true,
-      "accessRole":"owner",
-      "defaultReminders":[
-        {
-          "method":"popup",
-          "minutes":10
-        }
-      ],
-      "notificationSettings":{
-        "notifications":[
-          {
-            "type":"eventCreation",
-            "method":"email"
-          },
-          {
-            "type":"eventChange",
-            "method":"email"
-          },
-          {
-            "type":"eventCancellation",
-            "method":"email"
-          },
-          {
-            "type":"eventResponse",
-            "method":"email"
-          }
-        ]
-      },
-      "primary":true,
-      "conferenceProperties":{
-        "allowedConferenceSolutionTypes":[
-          "hangoutsMeet"
-        ]
-      }
+      "primary":true
     },
     {
       "kind":"calendar#calendarListEntry",
-      "etag":"\"1541799526249000\"",
       "id":"p~Faa3BanSBWkYR2EPtGafNXYuk0V4dwvFVMHYNozsObZ1l6GhwLnzHTroBinny4zMSHzLeKzvWDxRDEvPxET7tqdNNCpj9QWJqZHMsfJctLA@group.v.calendar.google.com",
-      "summary":null,
-      "description":"Holidays and Observances in United States",
+      "summary":"",
       "timeZone":"America/Los_Angeles",
-      "summaryOverride":null,
-      "colorId":"11",
-      "backgroundColor":"#fbe983",
-      "foregroundColor":"#000000",
-      "accessRole":"reader",
-      "defaultReminders":[ ],
-      "conferenceProperties":{
-        "allowedConferenceSolutionTypes":[
-          "hangoutsMeet"
-        ]
-      }
+      "summaryOverride":""
     },
     {
       "kind":"calendar#calendarListEntry",
-      "etag":"\"1639589485357000\"",
       "id":"p~DE__fI7lKDU-e4_ZTA7yZpj7Vu5cQ7jQbQE9h8aU5zhJj5a-qFlQQN2CcRaIPs47@gmail.com",
-      "summary":null,
+      "summary":"",
       "timeZone":"America/Los_Angeles",
-      "summaryOverride":null,
-      "colorId":"16",
-      "backgroundColor":"#4986e7",
-      "foregroundColor":"#000000",
-      "selected":true,
-      "accessRole":"writer",
-      "defaultReminders":[ ],
-      "conferenceProperties":{
-        "allowedConferenceSolutionTypes":[
-          "hangoutsMeet"
-        ]
-      }
+      "summaryOverride":""
     },
     {
       "kind":"calendar#calendarListEntry",
-      "etag":"\"1639589486168000\"",
       "id":"p~PFD1QVQwvuvZRY2tco2DwEsqKpZlDgOOMMQem6rik-tCXf06BdpTZY4rbexbkEuiwUH2qgd6A0bFe3lXRdHtBQMypznMn-d_kZ-IZV-qpEeTpncrcF7un65Qsv6kP90O@group.calendar.google.com",
-      "summary":null,
-      "timeZone":"America/New_York",
-      "colorId":"23",
-      "backgroundColor":"#cd74e6",
-      "foregroundColor":"#000000",
-      "selected":true,
-      "accessRole":"owner",
-      "defaultReminders":[ ],
-      "conferenceProperties":{
-        "allowedConferenceSolutionTypes":[
-          "hangoutsMeet"
-        ]
-      }
+      "summary":"",
+      "timeZone":"America/New_York"
     },
     {
       "kind":"calendar#calendarListEntry",
-      "etag":"\"1639589488947000\"",
       "id":"p~cs917Yg9tfqGyvXJ9TekgMRS9PiX7DoIyrbKf3BPnMXRVZanwrlMfQ5aaVqCGwuX@acme.com",
-      "summary":null,
-      "timeZone":"America/Los_Angeles",
-      "colorId":"20",
-      "backgroundColor":"#cabdbf",
-      "foregroundColor":"#000000",
-      "selected":true,
-      "accessRole":"owner",
-      "defaultReminders":[ ],
-      "conferenceProperties":{
-        "allowedConferenceSolutionTypes":[
-          "hangoutsMeet"
-        ]
-      }
+      "summary":"",
+      "timeZone":"America/Los_Angeles"
     },
     {
       "kind":"calendar#calendarListEntry",
-      "etag":"\"1658269473142000\"",
       "id":"p~nV9LNaGvxSTwebrX20e6Q8qSjkbafIPOXprC66qwbUfPgXI8KR5o4sIOxbekPC5l0ocS-YBBJERZwO0v4ncZJA@acme.com",
-      "summary":null,
-      "timeZone":"Europe/Madrid",
-      "colorId":"19",
-      "backgroundColor":"#c2c2c2",
-      "foregroundColor":"#000000",
-      "accessRole":"owner",
-      "defaultReminders":[ ],
-      "conferenceProperties":{
-        "allowedConferenceSolutionTypes":[
-          "hangoutsMeet"
-        ]
-      }
+      "summary":"",
+      "timeZone":"Europe/Madrid"
     },
     {
       "kind":"calendar#calendarListEntry",
-      "etag":"\"1660779857672000\"",
       "id":"p~-U7WKf4bQgfCSqtg28kpp672BXIc8kZN6Gmtg2iKn15G7DFX6AwvFyZ9VqU3_dCJ@acme.com",
       "summary":"Transferred",
-      "timeZone":"America/Los_Angeles",
-      "colorId":"12",
-      "backgroundColor":"#fad165",
-      "foregroundColor":"#000000",
-      "selected":true,
-      "accessRole":"owner",
-      "defaultReminders":[ ],
-      "conferenceProperties":{
-        "allowedConferenceSolutionTypes":[
-          "hangoutsMeet"
-        ]
-      }
+      "timeZone":"America/Los_Angeles"
     }
   ]
 }

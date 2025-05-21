@@ -42,6 +42,130 @@ endpoints:
         redactions:
           - "(?i)pwd=[^&]*"
           - "(?i)pin=[^&]*"
+      - !<redactExceptPhrases>
+        jsonPaths:
+          - "$.items[*]summary"
+        allowedPhrases:
+          - "Focus Time"
+          - "Focus"
+          - "No Meetings"
+          - "No Meeting"
+          - "no mtg"
+          - "Prep"
+          - "OOO"
+          - "Out of Office"
+          - "Out of the Office"
+          - "call"
+          - "brainstorm"
+          - "brainstorming"
+          - "brain storm"
+          - "check in"
+          - "check-in"
+          - "checkin"
+          - "coffee"
+          - "food"
+          - "happy hour"
+          - "lunch"
+          - "office hours"
+          - "onsite"
+          - "on-site"
+          - "social"
+          - "stand up"
+          - "stand-up"
+          - "standup"
+          - "team building"
+          - "teambuilding"
+          - "daily"
+          - "bi-weekly"
+          - "biweekly"
+          - "weekly"
+          - "monthly"
+          - "quarterly"
+          - "1:1"
+          - "1-on-1"
+          - "one-on-one"
+          - "all-hands"
+          - "all hands"
+          - "allhands"
+          - "team meeting"
+          - "decision making"
+          - "decision"
+          - "hand off"
+          - "hand-off"
+          - "handoff"
+          - "handover"
+          - "information sharing"
+          - "problem solving"
+          - "retro"
+          - "review"
+          - "sprint"
+          - "handoff"
+          - "handover"
+          - "information sharing"
+          - "problem solving"
+          - "retro"
+          - "review"
+          - "sprint"
+          - "Focus Time"
+          - "Focus"
+          - "No Meetings"
+          - "No Meeting"
+          - "no mtg"
+          - "Prep"
+          - "OOO"
+          - "Out of Office"
+          - "Out of the Office"
+          - "call"
+          - "brainstorm"
+          - "brainstorming"
+          - "brain storm"
+          - "check in"
+          - "check-in"
+          - "checkin"
+          - "coffee"
+          - "food"
+          - "happy hour"
+          - "lunch"
+          - "office hours"
+          - "onsite"
+          - "on-site"
+          - "social"
+          - "stand up"
+          - "stand-up"
+          - "standup"
+          - "team building"
+          - "teambuilding"
+          - "daily"
+          - "bi-weekly"
+          - "biweekly"
+          - "weekly"
+          - "monthly"
+          - "quarterly"
+          - "1:1"
+          - "1-on-1"
+          - "one-on-one"
+          - "all-hands"
+          - "all hands"
+          - "allhands"
+          - "team meeting"
+          - "decision making"
+          - "decision"
+          - "hand off"
+          - "hand-off"
+          - "handoff"
+          - "handover"
+          - "information sharing"
+          - "problem solving"
+          - "retro"
+          - "review"
+          - "sprint"
+          - "handoff"
+          - "handover"
+          - "information sharing"
+          - "problem solving"
+          - "retro"
+          - "review"
+          - "sprint"
     responseSchema:
       type: "object"
       properties:
@@ -57,12 +181,11 @@ endpoints:
           type: "string"
         nextSyncToken:
           type: "string"
-        summary:
-          type: "string"
         timeZone:
           type: "string"
         updated:
-          $ref: "#/definitions/EventDateTime"
+          type: "string"
+          format: "date-time"
   - pathTemplate: "/calendar/v3/calendars/{accountId}/events/{eventId}"
     allowedQueryParams: []
     transforms:
@@ -224,8 +347,6 @@ endpoints:
           type: "string"
         creator:
           $ref: "#/definitions/Creator"
-        description:
-          type: "string"
         end:
           $ref: "#/definitions/EventDateTime"
         endTimeUnspecified:
@@ -234,8 +355,6 @@ endpoints:
           type: "string"
         eventType:
           type: "string"
-        extendedProperties:
-          $ref: "#/definitions/ExtendedProperties"
         guestsCanInviteOthers:
           type: "boolean"
         guestsCanModify:
@@ -280,6 +399,7 @@ endpoints:
           type: "string"
         updated:
           type: "string"
+          format: "date-time"
         visibility:
           type: "string"
   - pathTemplate: "/calendar/v3/users/{accountId}/calendarList"
@@ -293,6 +413,7 @@ endpoints:
       - !<redactExceptPhrases>
         jsonPaths:
           - "$.items[*].summary"
+          - "$.items[*].summaryOverride"
         allowedPhrases:
           - "Transferred"
     responseSchema:
@@ -333,8 +454,6 @@ definitions:
     properties:
       additionalGuests:
         type: "integer"
-      displayName:
-        type: "string"
       email:
         type: "string"
       id:
@@ -354,8 +473,6 @@ definitions:
     properties:
       deleted:
         type: "boolean"
-      etag:
-        type: "string"
       hidden:
         type: "boolean"
       id:
@@ -400,8 +517,6 @@ definitions:
   Creator:
     type: "object"
     properties:
-      displayName:
-        type: "string"
       email:
         type: "string"
       id:
@@ -457,8 +572,6 @@ definitions:
         type: "string"
       creator:
         $ref: "#/definitions/Creator"
-      description:
-        type: "string"
       end:
         $ref: "#/definitions/EventDateTime"
       endTimeUnspecified:
@@ -467,8 +580,6 @@ definitions:
         type: "string"
       eventType:
         type: "string"
-      extendedProperties:
-        $ref: "#/definitions/ExtendedProperties"
       guestsCanInviteOthers:
         type: "boolean"
       guestsCanModify:
@@ -513,6 +624,7 @@ definitions:
         type: "string"
       updated:
         type: "string"
+        format: "date-time"
       visibility:
         type: "string"
   EventAttachment:
@@ -533,16 +645,9 @@ definitions:
         type: "string"
       timeZone:
         type: "string"
-  ExtendedProperties:
-    type: "object"
-    properties:
-      shared:
-        type: "object"
   Organizer:
     type: "object"
     properties:
-      displayName:
-        type: "string"
       email:
         type: "string"
       id:

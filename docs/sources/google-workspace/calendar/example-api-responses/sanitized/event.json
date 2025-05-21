@@ -8,12 +8,10 @@
   "updated":"2015-07-03T11:24:21.213Z",
   "summary":"Call,Call",
   "creator":{
-    "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com",
-    "displayName":"allen boyce"
+    "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com"
   },
   "organizer":{
-    "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com",
-    "displayName":"allen boyce"
+    "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com"
   },
   "start":{
     "dateTime":"2015-07-06T10:00:00-07:00",
@@ -33,12 +31,10 @@
     },
     {
       "email":"t~zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs@imagine.com",
-      "displayName":"matt baron",
       "responseStatus":"accepted"
     },
     {
       "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com",
-      "displayName":"allen boyce",
       "organizer":true,
       "responseStatus":"accepted"
     }
