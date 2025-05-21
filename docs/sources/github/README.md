@@ -104,7 +104,7 @@ Terraform. You will need to redeploy the proxy again if that value was not popul
 9. Once the certificate has been uploaded, please remove {YOUR DOWNLOADED CERTIFICATE FILE} and
    `gh_pk_pkcs8.pem` from your computer or store it in a safe place.
 
-## GitHub Enteprise Server: Steps to connect
+## GitHub Enterprise Server: Steps to connect
 
 We provide a [helper script](../../../tools/github-enterprise-server-auth.sh) to set up the connector, which will guide you through the steps
 below and automate some of them. Alternatively, you can follow the steps below directly:
