@@ -12,7 +12,7 @@
     "headers":[
       {
         "name":"Delivered-To",
-        "value":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}"
+        "value":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co"
       },
       {
         "name":"Date",
@@ -40,7 +40,7 @@
       },
       {
         "name":"X-Original-Sender",
-        "value":"{\"domain\":\"worklytics.co\",\"hash\":\"EsXNVTaSltmDUIO4v8CixL66qkCKLlpLB_RHysHbQSQ\"}"
+        "value":"t~EsXNVTaSltmDUIO4v8CixL66qkCKLlpLB_RHysHbQSQ@worklytics.co"
       }
     ]
   },

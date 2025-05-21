@@ -7,6 +7,7 @@ endpoints:
           - "$.messages.payload.headers[?(@.name =~ /^(X-Original-Sender|Delivered-To|Sender)$/i)].value"
         encoding: "URL_SAFE_TOKEN"
       - !<pseudonymizeEmailHeader>
+        encoding: "URL_SAFE_TOKEN"
         jsonPaths:
           - "$.messages.payload.headers[?(@.name =~ /^(From|To|Cc|Bcc)$/i)].value"
       - !<redact>
@@ -33,6 +34,7 @@ endpoints:
       - !<pseudonymizeEmailHeader>
         jsonPaths:
           - "$.payload.headers[?(@.name =~ /^(From|To|Cc|Bcc)$/i)].value"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.payload.headers[?(!(@.name =~ /^From|To|Cc|Bcc|X-Original-Sender|Delivered-To|Sender|Message-ID|Date|In-Reply-To|Original-Message-ID|References$/i))]"
