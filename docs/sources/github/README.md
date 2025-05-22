@@ -124,7 +124,7 @@ Apart from GitHub instructions please review the following:
 - "Homepage URL" can be anything, not required in this flow but required by GitHub.
 - Webhooks check can be disabled as this connector is not using them
 - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
-3. Once is created please generate a new `Private Key`.
+3. Once created, generate a new `Private Key`.
 4. It is required to convert the format of the certificate downloaded from PKCS#1 in previous step to PKCS#8. Please run following command:
 ```shell
 openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out gh_copilot_pk_pkcs8.pem -nocrypt
