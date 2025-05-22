@@ -22,72 +22,7 @@ import java.util.stream.Collectors;
  */
 public class PrebuiltSanitizerRules {
 
-    static final Rules2 GCAL = Rules2.builder()
-        .endpoint(Endpoint.builder()
-            .pathTemplate("/calendar/v3/calendars/{accountId}")
-            .transform(Transform.Redact.ofPaths("$.summary"))
-            .transform(Transform.Pseudonymize.ofPaths("$.id"))
-            .build())
-        .endpoint(Endpoint.builder()
-            .pathTemplate("/calendar/v3/calendars/{accountId}/events")
-            .transform(Transform.Pseudonymize.ofPaths("$..email"))
-            .transform(Transform.Redact.ofPaths(
-                "$.summary",
-                "$..displayName",
-                "$.items[*].extendedProperties", // overly conservative, but we just don't know what's here
-                "$.items[*].conferenceData.notes",
-                "$.items[*].conferenceData.entryPoints[*]['accessCode','password','passcode','pin']",
-                "$..meetingCreatedBy" // not documented; seen for one customer; would be better to pseudonymize, if has reliable schema
-            ))
-            .transform(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS.toBuilder()
-                .jsonPath("$.items[*].summary")
-                .build())
-            .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
-                .jsonPath("$.items[*].description")
-                .build())
-            .transform(ZoomTransforms.SANITIZE_JOIN_URL.toBuilder()
-                .jsonPath("$.items[*].description")
-                .jsonPath("$.items[*].location") // sometimes ppl put meeting url here
-                .jsonPath("$.items[*].conferenceData.entryPoints[*].uri")
-                .build())
-            .build())
-        .endpoint( Endpoint.builder()
-            .pathTemplate("/calendar/v3/calendars/{accountId}/events/{eventId}")
-            .transform(Transform.Redact.ofPaths(
-                "$.summary",
-                "$..displayName",
-                "$.extendedProperties", // overly conservative, but we just don't know what's here
-                "$.conferenceData.entryPoints[*]['accessCode','password','passcode','pin']",
-                "$.conferenceData.notes",
-                "$..meetingCreatedBy" //not documented, but seen for one customer; would be better to pseudonymize, if has reliable schema
-            ))
-            .transform(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS.toBuilder()
-                .jsonPath("$.items[*].summary")
-                .build())
-            .transform(ZoomTransforms.FILTER_CONTENT_EXCEPT_ZOOM_URL.toBuilder()
-                .jsonPath("$.description")
-                .build())
-            .transform(ZoomTransforms.SANITIZE_JOIN_URL.toBuilder()
-                .jsonPath("$.description")
-                .jsonPath("$.conferenceData.entryPoints[*].uri")
-                .jsonPath("$.location") // sometimes ppl put meeting url here
-                .build())
-            .transform(Transform.Pseudonymize.builder()
-                .jsonPath("$..email")
-                .build())
-            .build())
-        .endpoint(Endpoint.builder()
-            .pathTemplate("/calendar/v3/users/{accountId}/settings")
-            .build())
-        //calendarList needed to analyze historical calendars
-        .endpoint(Endpoint.builder()
-            .pathTemplate("/calendar/v3/users/{accountId}/calendarList")
-            .transform(Transform.FilterTokenByRegex.builder().jsonPath("$.items[*].summaryOverride")
-                .jsonPath("$.items[*].summary")
-                .filter("Transferred").build())
-            .transform(Transform.Pseudonymize.builder().jsonPath("$.items[*].id").includeReversible(true).encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).build())
-            .build())
-        .build();
+    static final Rules2 GCAL = Rules2.load("sources/google-workspace/calendar/calendar.yaml");
 
     static final Set<String> GOOGLE_CHAT_EVENT_PARAMETERS_PII = ImmutableSet.of(
             "actor"

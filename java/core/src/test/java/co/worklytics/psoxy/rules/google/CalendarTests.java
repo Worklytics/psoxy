@@ -23,6 +23,7 @@ class CalendarTests extends JavaRulesTestBaseCase {
         .sourceFamily("google-workspace")
         .defaultScopeId("gapps")
         .sourceKind("calendar")
+        .checkUncompressedSSMLength(false) //~13 kB now
         .build();
 
     @SneakyThrows
@@ -41,7 +42,8 @@ class CalendarTests extends JavaRulesTestBaseCase {
 
         assertPseudonymized(sanitized, PII);
 
-        assertUrlWithQueryParamsAllowed("http://calendar.googleapis.com/calendar/v3/calendars/primary/events");
+        assertUrlAllowed("http://calendar.googleapis.com/calendar/v3/calendars/primary/events?maxResults=200");
+        assertUrlAllowed("http://calendar.googleapis.com/calendar/v3/calendars/primary/events?maxResults=200&pageToken=1234");
 
         assertRedacted(sanitized, "calendar-owner@acme.com");
     }
@@ -65,7 +67,7 @@ class CalendarTests extends JavaRulesTestBaseCase {
     @Test
     void calendarList() {
         assertUrlWithSubResourcesBlocked("https://www.googleapis.com/calendar/v3/users/me/calendarList");
-        assertUrlWithQueryParamsAllowed("https://www.googleapis.com/calendar/v3/users/me/calendarList");
+        assertUrlAllowed("https://www.googleapis.com/calendar/v3/users/me/calendarList?");
     }
 
     @Override
