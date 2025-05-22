@@ -72,7 +72,7 @@ openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE F
   systems.
 
 5. Install the application in your organization. Go to your organization settings and then in
-   "Developer Settings". Then, click on "Edit" for your "Github App" and once you are in the app
+   "Developer Settings". Then, click on "Edit" for your "GitHub App" and once you are in the app
    settings, click on "Install App" and click on the "Install" button. Accept the permissions to
    install it in your whole organization.
 6. Once installed, the `installationId` is required as it needs to be provided in the proxy as
@@ -113,7 +113,7 @@ Follow the following steps:
 2. From your organization, register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
    with following permissions with **Read Only**:
     - Organization
-        - Administration: for listing events from audit log
+        - Administration: for listing "copilot" events from audit log
         - Members: for listing teams and their members
         - GitHub Copilot Business: for listing Copilot usage
 
