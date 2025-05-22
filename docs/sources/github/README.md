@@ -115,7 +115,7 @@ Follow the following steps:
     - Organization
         - Administration: for listing events from audit log
         - Members: for listing teams and their members
-        - Github Copilot Business: for listing Copilot usage
+        - GitHub Copilot Business: for listing Copilot usage
 
 NOTES:
 - Enterprise Cloud is required for this connector.
