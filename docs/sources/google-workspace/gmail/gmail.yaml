@@ -7,9 +7,9 @@ endpoints:
           - "$.messages.payload.headers[?(@.name =~ /^(X-Original-Sender|Delivered-To|Sender)$/i)].value"
         encoding: "URL_SAFE_TOKEN"
       - !<pseudonymizeEmailHeader>
-        encoding: "URL_SAFE_TOKEN"
         jsonPaths:
           - "$.messages.payload.headers[?(@.name =~ /^(From|To|Cc|Bcc)$/i)].value"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.messages.payload.headers[?(!(@.name =~ /^From|To|Cc|Bcc|X-Original-Sender|Delivered-To|Sender|Message-ID|Date|In-Reply-To|Original-Message-ID|References$/i))]"
@@ -25,7 +25,8 @@ endpoints:
         resultSizeEstimate:
           type: "integer"
   - pathTemplate: "/gmail/v1/users/{mailboxId}/messages/{messageId}"
-    allowedQueryParams: []
+    allowedQueryParams:
+      - "format"
     transforms:
       - !<pseudonymize>
         jsonPaths:
