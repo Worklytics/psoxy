@@ -1,28 +1,5 @@
 ---
 endpoints:
-  - pathTemplate: "/calendar/v3/calendars/{accountId}"
-    allowedQueryParams: []
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.id"
-        includeReversible: true
-        encoding: "URL_SAFE_TOKEN"
-    responseSchema:
-      type: "object"
-      properties:
-        etag:
-          type: "string"
-        id:
-          type: "string"
-        kind:
-          type: "string"
-        location:
-          type: "string"
-        summary:
-          type: "string"
-        timeZone:
-          type: "string"
   - pathTemplate: "/calendar/v3/calendars/{accountId}/events"
     allowedQueryParams:
       - "maxResults"
@@ -402,8 +379,45 @@ endpoints:
           format: "date-time"
         visibility:
           type: "string"
-  - pathTemplate: "/calendar/v3/users/{accountId}/calendarList"
+  - pathTemplate: "/calendar/v3/calendars/{calendarId}"
     allowedQueryParams: []
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redactExceptPhrases>
+        jsonPaths:
+          - "$.summary"
+          - "$.summaryOverride"
+        allowedPhrases:
+          - "Transferred"
+    pathParameterSchemas:
+      calendarId:
+        type: "string"
+        enum:
+          - "primary"
+    responseSchema:
+      type: "object"
+      properties:
+        etag:
+          type: "string"
+        id:
+          type: "string"
+        kind:
+          type: "string"
+        location:
+          type: "string"
+        summary:
+          type: "string"
+        timeZone:
+          type: "string"
+  - pathTemplate: "/calendar/v3/users/{accountId}/calendarList"
+    allowedQueryParams:
+      - "showDeleted"
+      - "showHidden"
+      - "maxResults"
+      - "pageToken"
     transforms:
       - !<pseudonymize>
         jsonPaths:
