@@ -1,7 +1,8 @@
 package co.worklytics.psoxy.gateway;
 
+import com.google.api.client.http.HttpResponse;
+
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * a side output for the proxy
@@ -24,11 +25,10 @@ public interface SideOutput {
      * writes content, retrieved in response to the request, to this side output, if enabled
      *
      * @param request content is in response to
-     *
-     *  q: other metadata to add? proxy version, etc?
-     *
+     * @param response actual response
+     * @param content to write to side output (maybe modified form of the response)
      */
-    void write(HttpEventRequest request, String content) throws IOException;
+    void write(HttpEventRequest request, HttpResponse response, String content) throws IOException;
 
 
 

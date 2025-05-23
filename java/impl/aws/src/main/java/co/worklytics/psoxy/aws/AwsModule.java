@@ -22,8 +22,10 @@ import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.time.Duration;
+import java.util.Optional;
 
 
 /**
@@ -191,13 +193,30 @@ public interface AwsModule {
 
     //yes, atm a @Binding would work for this; but shortly will be determined from config
     @Provides @Singleton @Named("forOriginal")
-    static SideOutput sideOutputForOriginal(NoSideOutput noSideOutput) {
-        return noSideOutput;
+    static SideOutput sideOutputForOriginal(ConfigService configService, NoSideOutput noSideOutput, Provider<SideOutput> sideOutput) {
+        return SideOutputUtils.forContent(configService, noSideOutput, sideOutput, SideOutputContent.ORIGINAL);
     }
-
     //yes, atm a @Binding would work for this; but shortly will be determined from config
     @Provides @Singleton @Named("forSanitized")
-    static SideOutput sideOutputForSanitized(NoSideOutput noSideOutput) {
-        return noSideOutput;
+    static SideOutput sideOutputForSanitized(ConfigService configService, NoSideOutput noSideOutput, Provider<SideOutput> sideOutput) {
+        return SideOutputUtils.forContent(configService, noSideOutput, sideOutput, SideOutputContent.ORIGINAL);
+    }
+
+    /**
+     * atm, s3 is the ONLY supported side output type
+     */
+    final String EXPECTED_SIDE_OUTPUT_PREFIX = "s3://";
+
+    @Provides @Singleton
+    static SideOutput sideOutput(NoSideOutput noSideOutput, S3SideOutputFactory s3SideOutputFactory, ConfigService configService) {
+        Optional<String> sideOutputBucket = configService.getConfigPropertyAsOptional(ProxyConfigProperty.SIDE_OUTPUT);
+        if (sideOutputBucket.isPresent()) {
+            if (!sideOutputBucket.get().startsWith(EXPECTED_SIDE_OUTPUT_PREFIX)) {
+                throw new IllegalArgumentException("Side output bucket must start with " + EXPECTED_SIDE_OUTPUT_PREFIX);
+            }
+            return s3SideOutputFactory.create(sideOutputBucket.get().substring(EXPECTED_SIDE_OUTPUT_PREFIX.length()));
+        } else {
+            return noSideOutput;
+        }
     }
 }

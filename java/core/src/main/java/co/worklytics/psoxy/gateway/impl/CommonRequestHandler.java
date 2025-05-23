@@ -269,10 +269,12 @@ public class CommonRequestHandler {
 
             String responseContent = StringUtils.EMPTY;
             // could be empty in HEAD calls
-            if (sourceApiResponse.getContent() != null) {
+            if (sourceApiResponse.getContent() != null) { //TODO: revisit this; 1) don't believe this can be null; it's empty stream if no content; 2) prob could use try-with-resources to close it more promptly
                 responseContent = new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
             }
-            sideOutput.write(request, responseContent);
+
+            // TODO: if side output cases of the original, we *could* use the potentially compressed stream directly, instead of reading to a string?
+            sideOutput.write(request, sourceApiResponse, responseContent);
 
             passThroughHeaders(builder, sourceApiResponse);
 
@@ -297,7 +299,7 @@ public class CommonRequestHandler {
             }
 
             String trimmedResponseContent = StringUtils.trimToEmpty(proxyResponseContent);
-            sideOutputSanitized.write(request, trimmedResponseContent);
+            sideOutputSanitized.write(request, sourceApiResponse, trimmedResponseContent);
 
             builder.body(trimmedResponseContent);
             return builder.build();
