@@ -1,9 +1,7 @@
 package co.worklytics.test;
 
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.HostEnvironment;
-import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.impl.output.NoSideOutput;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.avaulta.gateway.rules.BulkDataRules;
@@ -13,6 +11,7 @@ import com.avaulta.gateway.rules.RuleSet;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import com.google.auth.http.HttpTransportFactory;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
@@ -21,6 +20,7 @@ import org.apache.commons.lang3.JavaVersion;
 import org.apache.commons.lang3.SystemUtils;
 import org.mockito.MockMakers;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import java.io.InputStreamReader;
@@ -144,6 +144,16 @@ public class MockModules {
             HostEnvironment hostEnvironment = () -> "psoxy-test";
             return hostEnvironment;
         }
+    }
+
+    @Module
+    public abstract class ForSideOutputs {
+
+        @Binds @Named("forOriginal")
+        abstract SideOutput sideOutputForOriginal(NoSideOutput sideOutput);
+
+        @Binds @Named("forSanitized")
+        abstract SideOutput sideOutputForSanitized(NoSideOutput sideOutput);
     }
 }
 

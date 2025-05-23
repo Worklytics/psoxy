@@ -22,6 +22,14 @@ public enum ControlHeader {
      * intended to be forwarded to source
      */
     HEALTH_CHECK("Health-Check"),
+
+    /**
+     *  if sent to proxy, no response body needs to be returned to client.
+     *  (eg, just write response to side output(s), if any)
+     *
+     */
+    NO_RESPONSE("No-Response"),
+
     /**
      * whether to skip sanitizer (for testing purposes, to obtain unsanitized baseline to compare
      *  with sanitized output)
@@ -29,6 +37,7 @@ public enum ControlHeader {
      * @see co.worklytics.psoxy.gateway.ProxyConfigProperty.SKIP_SANITIZER
      */
     SKIP_SANITIZER("Skip-Sanitizer"),
+
     /**
      * which user to impersonate when calling Source API
      *

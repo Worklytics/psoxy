@@ -30,6 +30,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URL;
@@ -76,6 +77,11 @@ public class CommonRequestHandler {
     UrlSafeTokenPseudonymEncoder pseudonymEncoder;
     @Inject
     HttpTransportFactory httpTransportFactory;
+
+    @Inject @Named("forOriginal")
+    SideOutput sideOutput;
+    @Inject @Named("forSanitized")
+    SideOutput sideOutputSanitized;
 
 
     /**
@@ -255,6 +261,8 @@ public class CommonRequestHandler {
             return builder.build();
         }
 
+
+
         try {
             // return response
             builder.statusCode(sourceApiResponse.getStatusCode());
@@ -264,6 +272,7 @@ public class CommonRequestHandler {
             if (sourceApiResponse.getContent() != null) {
                 responseContent = new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
             }
+            sideOutput.write(request, responseContent);
 
             passThroughHeaders(builder, sourceApiResponse);
 
@@ -286,7 +295,11 @@ public class CommonRequestHandler {
                 builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.API_ERROR.name());
                 proxyResponseContent = responseContent;
             }
-            builder.body(StringUtils.trimToEmpty(proxyResponseContent));
+
+            String trimmedResponseContent = StringUtils.trimToEmpty(proxyResponseContent);
+            sideOutputSanitized.write(request, trimmedResponseContent);
+
+            builder.body(trimmedResponseContent);
             return builder.build();
         } finally {
             sourceApiResponse.disconnect();

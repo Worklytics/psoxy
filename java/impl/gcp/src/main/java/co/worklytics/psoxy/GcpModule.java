@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 
+import co.worklytics.psoxy.gateway.impl.output.NoSideOutput;
 import com.google.cloud.ServiceOptions;
 
 import dagger.Module;
@@ -104,5 +105,18 @@ public interface GcpModule {
     @IntoSet
     static OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder providesSourceAuthStrategy(GCPWorkloadIdentityFederationGrantTokenRequestBuilder tokenRequestBuilder) {
         return tokenRequestBuilder;
+    }
+
+
+    //yes, atm a @Binding would work for this; but shortly will be determined from config
+    @Provides @Singleton @Named("forOriginal")
+    static SideOutput sideOutputForOriginal(NoSideOutput noSideOutput) {
+        return noSideOutput;
+    }
+
+    //yes, atm a @Binding would work for this; but shortly will be determined from config
+    @Provides @Singleton @Named("forSanitized")
+    static SideOutput sideOutputForSanitized(NoSideOutput noSideOutput) {
+        return noSideOutput;
     }
 }

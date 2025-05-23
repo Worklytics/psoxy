@@ -3,6 +3,7 @@ package co.worklytics.psoxy.aws;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
+import co.worklytics.psoxy.gateway.impl.output.NoSideOutput;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
@@ -181,9 +182,22 @@ public interface AwsModule {
     }
 
 
+    //TODO: should be a Binding ?
     @Provides
     @IntoSet
     static OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder providesSourceAuthStrategy(AWSWorkloadIdentityFederationGrantTokenRequestBuilder tokenRequestBuilder) {
         return tokenRequestBuilder;
+    }
+
+    //yes, atm a @Binding would work for this; but shortly will be determined from config
+    @Provides @Singleton @Named("forOriginal")
+    static SideOutput sideOutputForOriginal(NoSideOutput noSideOutput) {
+        return noSideOutput;
+    }
+
+    //yes, atm a @Binding would work for this; but shortly will be determined from config
+    @Provides @Singleton @Named("forSanitized")
+    static SideOutput sideOutputForSanitized(NoSideOutput noSideOutput) {
+        return noSideOutput;
     }
 }

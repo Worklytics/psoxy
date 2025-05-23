@@ -37,6 +37,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -62,6 +63,7 @@ class CommonRequestHandlerTest {
             MockModules.ForRules.class,
             MockModules.ForSourceAuthStrategySet.class,
            MockModules.ForHttpTransportFactory.class,
+        MockModules.ForSideOutputs.class,
     })
     public interface Container {
         void inject(CommonRequestHandlerTest test);
