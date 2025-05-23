@@ -7,6 +7,12 @@ The **Side Outputs** feature allows you to configure additional outputs from you
   - target API has rate limits; and you have another use for the desired response content
   - having extra copy of all data coming through the proxy, pre- or post-processing
 
+
+If client (caller) sends a`X-Psoxy-No-Response-Body` header with request, then the proxy will not send a response body back
+to the client. Instead, it will send the response body to the side output target ONLY, return just the status code / headers back
+to the client.
+
+
 ## Configuration
 
 Use the following configuration properties to configure the side outputs from a proxy instance in API connector mode. These should
@@ -22,3 +28,5 @@ Only a single side output is supported, at least for now.
 ## Future Work
   - support for multiple side outputs
   - support for other targets (BQ, https endpoint, cloud watch, etc)
+  - as a caching solution
+  - as a buffer for slow/large responses (eg, proxy responds with token, which client can later use to fetch the data)

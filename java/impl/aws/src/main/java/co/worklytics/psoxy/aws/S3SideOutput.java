@@ -1,11 +1,11 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.SideOutput;
 import co.worklytics.psoxy.gateway.impl.SideOutputUtils;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.google.api.client.http.HttpResponse;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.extern.java.Log;
@@ -31,18 +31,18 @@ public class S3SideOutput implements SideOutput {
     }
 
     @Override
-    public void write(HttpEventRequest request, HttpResponse response, String content) {
+    public void write(HttpEventRequest request, ProcessedContent content) {
         try {
             AmazonS3 s3Client = s3ClientProvider.get();
 
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentEncoding("gzip");
-            metadata.setContentType(response.getContentType());
+            metadata.setContentType(content.getContentType());
             metadata.setUserMetadata(sideOutputUtils.buildMetadata(request));
 
             s3Client.putObject(bucket,
                 sideOutputUtils.canonicalResponseKey(request),
-                sideOutputUtils.toGzippedStream(content, response.getContentCharset()),
+                sideOutputUtils.toGzippedStream(content.getContent(), content.getContentCharset()),
                 metadata);
         } catch (Exception e) {
             log.log(Level.WARNING, "Failed to write to S3 sideOutput", e);

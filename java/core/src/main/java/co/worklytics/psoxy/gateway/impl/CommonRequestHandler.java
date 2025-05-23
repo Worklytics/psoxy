@@ -17,6 +17,7 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.http.HttpTransportFactory;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import lombok.NoArgsConstructor;
@@ -32,12 +33,10 @@ import org.apache.http.entity.ContentType;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.URL;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -174,7 +173,8 @@ public class CommonRequestHandler {
         // avoid logging clear URL outside of dev
         URL toLog = envVarsConfigService.isDevelopment() ? requestUrls.getTarget() : requestUrls.getOriginal();
 
-        boolean skipSanitization = skipSanitization(request);
+        boolean skipSanitization = clientRequestsSkipSanization(request);
+        boolean clientRequestsNoResponse = clientRequestsNoResponse(request);
 
         HttpEventResponse.HttpEventResponseBuilder builder = HttpEventResponse.builder();
 
@@ -247,7 +247,7 @@ public class CommonRequestHandler {
             return builder.build();
         }
 
-        com.google.api.client.http.HttpResponse sourceApiResponse = null;
+        final com.google.api.client.http.HttpResponse sourceApiResponse;
         try {
             //q: add exception handlers for IOExceptions / HTTP error responses, so those retries
             // happen in proxy rather than on Worklytics-side?
@@ -262,49 +262,87 @@ public class CommonRequestHandler {
         }
 
 
-
+        String proxyResponseContent = "";
         try {
             // return response
             builder.statusCode(sourceApiResponse.getStatusCode());
 
-            String responseContent = StringUtils.EMPTY;
-            // could be empty in HEAD calls
-            if (sourceApiResponse.getContent() != null) { //TODO: revisit this; 1) don't believe this can be null; it's empty stream if no content; 2) prob could use try-with-resources to close it more promptly
-                responseContent = new String(sourceApiResponse.getContent().readAllBytes(), sourceApiResponse.getContentCharset());
-            }
-
             // TODO: if side output cases of the original, we *could* use the potentially compressed stream directly, instead of reading to a string?
-            sideOutput.write(request, sourceApiResponse, responseContent);
+            ProcessedContent original = this.asProcessedContent(sourceApiResponse);
+            sideOutput.write(request, original);
 
             passThroughHeaders(builder, sourceApiResponse);
-
-            String proxyResponseContent;
             if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
-                if (skipSanitization) {
-                    proxyResponseContent = responseContent;
-                } else {
-                    RESTApiSanitizer sanitizerForRequest = getSanitizerForRequest(request);
+                if (clientRequestsNoResponse) {
+                    // client doesn't want a response body; assume there's a side output (otherwise we don't need to do this at all)
+                    new Thread(() -> {
+                       ProcessedContent sanitizedContent = sanitize(request, requestUrls, original);
+                        writeSideOutput(request, sourceApiResponse, sanitizedContent);
+                    }).start();
 
-                    proxyResponseContent = sanitizerForRequest.sanitize(request.getHttpMethod(), requestUrls.getOriginal(), responseContent);
-                    String rulesSha = rulesUtils.sha(sanitizerForRequest.getRules());
-                    builder.header(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
-                    log.info("response sanitized with rule set " + rulesSha);
+                    return builder.build();
+                } else {
+                    // client wants a response body
+                    ProcessedContent sanitizationResult  =
+                        sanitize(request, requestUrls, original);
+                    proxyResponseContent = sanitizationResult.getContent();
+
+                    sanitizationResult.getMetadata().entrySet()
+                        .forEach(e -> builder.header(e.getKey(), e.getValue()));
+
+                    writeSideOutput(request, sourceApiResponse, sanitizationResult);
+                }
+
+                if (skipSanitization) {
+                    proxyResponseContent = original.getContent();
                 }
             } else {
                 //write error, which shouldn't contain PII, directly
-                log.log(Level.WARNING, "Source API Error " + responseContent);
-                //TODO: could run this through DLP to be extra safe
+                log.log(Level.WARNING, "Source API Error " + original.getContent());
                 builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.API_ERROR.name());
-                proxyResponseContent = responseContent;
+                proxyResponseContent = original.getContent();
             }
-
-            String trimmedResponseContent = StringUtils.trimToEmpty(proxyResponseContent);
-            sideOutputSanitized.write(request, sourceApiResponse, trimmedResponseContent);
-
-            builder.body(trimmedResponseContent);
+            builder.body(proxyResponseContent);
             return builder.build();
         } finally {
             sourceApiResponse.disconnect();
+        }
+    }
+
+    ProcessedContent asProcessedContent(HttpResponse sourceApiResponse) throws IOException {
+        ProcessedContent.ProcessedContentBuilder builder = ProcessedContent.builder()
+            .contentType(sourceApiResponse.getContentType())
+            .contentCharset(sourceApiResponse.getContentCharset());
+
+        try (InputStream stream = sourceApiResponse.getContent()) {
+            builder.content(new String(stream.readAllBytes(), sourceApiResponse.getContentCharset()));
+        }
+
+        return builder.build();
+    }
+
+    ProcessedContent sanitize(HttpEventRequest request, RequestUrls requestUrls, ProcessedContent originalContent) {
+        RESTApiSanitizer sanitizerForRequest = getSanitizerForRequest(request);
+        String sanitized = StringUtils.trimToEmpty(sanitizerForRequest.sanitize(request.getHttpMethod(), requestUrls.getOriginal(), originalContent.getContent()));
+
+        String rulesSha = rulesUtils.sha(sanitizerForRequest.getRules());
+        log.info("response sanitized with rule set " + rulesSha);
+
+        Map<String, String> metadata = new HashMap<>(originalContent.getMetadata());
+        metadata.put(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
+
+        return ProcessedContent.builder()
+            .metadata(metadata)
+            .content(sanitized)
+            .build();
+    }
+
+
+    void writeSideOutput(HttpEventRequest request, com.google.api.client.http.HttpResponse sourceApiResponse, ProcessedContent sanitizedContent) {
+        try {
+            sideOutputSanitized.write(request, sanitizedContent);
+        } catch (IOException e) {
+            log.log(Level.WARNING, "Error writing to side output", e);
         }
     }
 
@@ -331,7 +369,7 @@ public class CommonRequestHandler {
      * encapsulates dynamically configuring Sanitizer based on request (to support some aspects of
      * its behavior being controlled via HTTP headers)
      *
-     * @param request
+     * @param request to get sanitizer for
      */
     RESTApiSanitizer getSanitizerForRequest(HttpEventRequest request) {
         Optional<PseudonymImplementation> pseudonymImplementation = parsePseudonymImplementation(request);
@@ -456,15 +494,29 @@ public class CommonRequestHandler {
      * @param request
      * @return
      */
-    private boolean skipSanitization(HttpEventRequest request) {
+    private boolean clientRequestsSkipSanization(HttpEventRequest request) {
         if (envVarsConfigService.isDevelopment()) {
             // caller requested to skip
             return request.getHeader(ControlHeader.SKIP_SANITIZER.getHttpHeader())
-                    .map(Boolean::parseBoolean)
-                    .orElse(false);
+                .map(Boolean::parseBoolean)
+                .orElse(false);
         } else {
             return false;
         }
+    }
+
+     /**
+      * whether client actually wants a response body
+      *
+      * use-case: API that returns very large response bodies that take too long to process synchronously within a single HTTP request (eg, < 55s)
+      *   clients can use this to indicate they don't want a response body, and will pick it up asynchronously from a side output later if they care to
+      *
+      *
+       */
+    private boolean clientRequestsNoResponse(HttpEventRequest request) {
+         return request.getHeader(ControlHeader.NO_RESPONSE_BODY.getHttpHeader())
+                    .map(Boolean::parseBoolean)
+                    .orElse(false);
     }
 
     private void logRequestIfVerbose(HttpEventRequest request) {
@@ -498,9 +550,7 @@ public class CommonRequestHandler {
 
     // NOTE: not 'decrypt', as that is only one possible implementation of reversible tokenization
     String reverseTokenizedUrlComponents(String encodedURL) {
-        String result = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(encodedURL, reversibleTokenizationStrategy);
-
-        return result;
+        return pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(encodedURL, reversibleTokenizationStrategy);
     }
 
     private void logIfDevelopmentMode(Supplier<String> messageSupplier) {
@@ -517,11 +567,10 @@ public class CommonRequestHandler {
         headers.setAccept(ContentType.APPLICATION_JSON.toString());
 
         sanitizer.getAllowedHeadersToForward(request.getHttpMethod(), targetUrl)
-                .ifPresent(i -> i.forEach(h -> {
+                .ifPresent(i -> i.forEach(h ->
                     request.getHeader(h).ifPresent(headerValue -> {
                         logIfDevelopmentMode(() -> String.format("Header %s included", h));
                         headers.set(h, headerValue);
-                    });
-                }));
+                })));
     }
 }
