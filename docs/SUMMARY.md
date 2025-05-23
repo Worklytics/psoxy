@@ -38,6 +38,7 @@
   * [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
   * [Email Handling](configuration/email-handling.md)
   * [JSON Filter](configuration/json-filter.md)
+  * [Side Outputs](configuration/side-outputs.md)
   * [TLS Version](configuration/tls.md)
 * [Development](development/README.md)
   * [Approaches for Example / Module design](development/terraform-architecture.md)

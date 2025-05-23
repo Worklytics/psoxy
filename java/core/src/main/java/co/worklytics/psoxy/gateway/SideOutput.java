@@ -31,5 +31,6 @@ public interface SideOutput {
     void write(HttpEventRequest request, HttpResponse response, String content) throws IOException;
 
 
+    //q: do we need an InputStream version of this,
 
 }
