@@ -188,8 +188,8 @@ variable "secrets_store_implementation" {
 
 variable "side_output" {
   type = object({
-    bucket = string # assumed to be an s3 bucket
-    content_to_output = optional(string, "ORIGINAL")  # 'ORIGINAL' or 'SANITIZED'
+    bucket            = string                       # assumed to be an s3 bucket
+    content_to_output = optional(string, "ORIGINAL") # 'ORIGINAL' or 'SANITIZED'
   })
   description = "Where to write the output of the function. If not provided, no output will be written."
   default     = null

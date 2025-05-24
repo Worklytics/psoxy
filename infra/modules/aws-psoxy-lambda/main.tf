@@ -248,7 +248,7 @@ locals {
       "s3:DeleteObject",
       "s3:ListBucket"
     ]
-    Effect   = "Allow"
+    Effect = "Allow"
     Resource = [
       "arn:aws:s3:::${var.side_output.bucket}",
       "arn:aws:s3:::${var.side_output.bucket}/*"
@@ -280,7 +280,7 @@ resource "aws_iam_policy" "required_resource_access" {
 
   lifecycle {
     ignore_changes = [
-      name, # drop this in v0.6.x; name as of 0.5.2 was "${local.function_name}_ssmParameters"; but it's potentially broader than that
+      name,        # drop this in v0.6.x; name as of 0.5.2 was "${local.function_name}_ssmParameters"; but it's potentially broader than that
       description, # drop this in v0.6.x; description as of 0.5.2 was "Allow infra access parameter access needed by ${local.function_name}"
       tags
     ]

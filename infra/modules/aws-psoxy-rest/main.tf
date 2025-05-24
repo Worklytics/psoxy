@@ -45,16 +45,16 @@ module "side_output" {
   source = "../aws-side-output-s3"
 
   environment_name = var.environment_name
-  instance_id = var.instance_id
+  instance_id      = var.instance_id
 
   # todo : readers??
 }
 
 locals {
   enable_side_output = local.provision_side_output_bucket || var.side_output != null
-  side_output =locals.enable_side_output ? {
-    bucket = try(module.side_output[0].bucket, var.side_output.bucket)
-    content  = var.side_output.content_to_output
+  side_output = locals.enable_side_output ? {
+    bucket  = try(module.side_output[0].bucket, var.side_output.bucket)
+    content = var.side_output.content_to_output
   } : null
 }
 
@@ -85,7 +85,7 @@ module "psoxy_lambda" {
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
 
-  side_output  = local.side_output
+  side_output = local.side_output
 
   environment_variables = merge(
     var.environment_variables,
@@ -300,7 +300,7 @@ output "test_script_content" {
 }
 
 output "side_output_bucket_id" {
-  value = try(module.side_output[0].bucket_id, var.side_output.bucket, null)
+  value       = try(module.side_output[0].bucket_id, var.side_output.bucket, null)
   description = "Bucket ID of the side output bucket, if any. May have been provided by the user, or provisioned by this module."
 }
 
