@@ -185,3 +185,22 @@ variable "secrets_store_implementation" {
   description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
   default     = "aws_ssm_parameter_store"
 }
+
+variable "side_output" {
+  type = object({
+    bucket = string # assumed to be an s3 bucket
+    content_to_output = optional(string, "ORIGINAL")  # 'ORIGINAL' or 'SANITIZED'
+  })
+  description = "Where to write the output of the function. If not provided, no output will be written."
+  default     = null
+
+  validation {
+    condition     = var.side_output == null || can(regex("^[a-zA-Z][a-zA-Z0-9-_ ]*[a-zA-Z0-9]$", var.side_output.target))
+    error_message = "The `side_output` target must start with a letter, can contain alphanumeric characters, hyphens, underscores, and spaces, and must end with a letter or number."
+  }
+
+  validation {
+    condition     = var.side_output == null || var.side_output.content_to_output == "ORIGINAL" || var.side_output.content_to_output == "SANITIZED"
+    error_message = "side_output.content must be either 'ORIGINAL' or 'SANITIZED', if specified."
+  }
+}

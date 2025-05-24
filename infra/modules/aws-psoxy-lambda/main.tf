@@ -240,20 +240,36 @@ locals {
     Resource = local.kms_keys_to_allow_arns
   }] : []
 
+  s3_side_output_statements = var.side_output == null ? [] : [{
+    Sid = "AllowS3SideOutput"
+    Action = [
+      "s3:PutObject",
+      "s3:GetObject",
+      "s3:DeleteObject",
+      "s3:ListBucket"
+    ]
+    Effect   = "Allow"
+    Resource = [
+      "arn:aws:s3:::${var.side_output.bucket}",
+      "arn:aws:s3:::${var.side_output.bucket}/*"
+    ]
+  }]
+
   policy_statements = concat(
     local.global_ssm_param_statements,
     local.global_secretsmanager_statements,
     local.local_ssm_param_statements,
     local.local_secrets_manager_statements,
     local.key_statements,
+    local.s3_side_output_statements
   )
 }
 
-resource "aws_iam_policy" "ssm_param_policy" {
-  name = "${local.function_name}_ssmParameters"
+# what the lambda function needs to operate (fulfill its use-case)
+resource "aws_iam_policy" "required_resource_access" {
+  name = "${local.function_name}_resourceAccess"
 
-  # description here not accurate any more, but changing it will destroy and re-create the policy
-  description = "Allow SSM parameter access needed by ${local.function_name}"
+  description = "Allow access to AWS resources needed by ${local.function_name}; specific resources depend on the use-case of the instance"
 
   policy = jsonencode(
     {
@@ -264,6 +280,8 @@ resource "aws_iam_policy" "ssm_param_policy" {
 
   lifecycle {
     ignore_changes = [
+      name, # drop this in v0.6.x; name as of 0.5.2 was "${local.function_name}_ssmParameters"; but it's potentially broader than that
+      description, # drop this in v0.6.x; description as of 0.5.2 was "Allow infra access parameter access needed by ${local.function_name}"
       tags
     ]
   }
@@ -271,7 +289,7 @@ resource "aws_iam_policy" "ssm_param_policy" {
 
 resource "aws_iam_role_policy_attachment" "attach_policy" {
   role       = aws_iam_role.iam_for_lambda.name
-  policy_arn = aws_iam_policy.ssm_param_policy.arn
+  policy_arn = aws_iam_policy.required_resource_access.arn
 }
 
 output "function_arn" {
