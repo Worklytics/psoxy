@@ -229,7 +229,7 @@ variable "custom_side_outputs" {
     SANITIZED = optional(string, null),
   }))
 
-  description = "map of connector id --> side output target."
+  description = "*ALPHA* map of connector id --> side output targets"
   default     = {}
 }
 

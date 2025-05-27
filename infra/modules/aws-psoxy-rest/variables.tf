@@ -236,7 +236,7 @@ variable "side_output_original" {
     bucket          = optional(string, null),     # if omitted, a bucket will be created
     allowed_readers = optional(list(string), []), # a list of ARNs of aws principals that should be allowed to read the bucket
   })
-  description = "Configures the side output to create. If not bucket provided, one will be provisioned."
+  description = "**ALPHA** Configures the side output to create. If not bucket provided, one will be provisioned."
   default     = null
 }
 
@@ -245,7 +245,7 @@ variable "side_output_sanitized" {
     bucket          = optional(string, null),     # if omitted, a bucket will be created
     allowed_readers = optional(list(string), []), # a list of ARNs of aws principals that should be allowed to read the bucket
   })
-  description = "Configures the side output to create. If not bucket provided, one will be provisioned."
+  description = "**ALPHA** Configures the side output to create. If not bucket provided, one will be provisioned."
   default     = null
 }
 

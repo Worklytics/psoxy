@@ -188,7 +188,7 @@ variable "secrets_store_implementation" {
 
 variable "side_output_original" {
   type        = string
-  description = "If provided, the function will write a copy of the original API response (unprocessed) output to this S3 URL."
+  description = "**ALPHA** If provided, the function will write a copy of the original API response (unprocessed) output to this S3 URL."
   default     = null
 
   validation {
@@ -199,7 +199,7 @@ variable "side_output_original" {
 
 variable "side_output_sanitized" {
   type        = string
-  description = "If set, the function will write sanitized output to this S3 path."
+  description = "**ALPHA** If provided, the function will write sanitized output to this S3 path."
   default     = null
 
   validation {

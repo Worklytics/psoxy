@@ -151,7 +151,7 @@ variable "side_output_original" {
     bucket          = optional(string, null),     # if omitted, a bucket will be created
     allowed_readers = optional(list(string), []), # a list of GCP principals that should be allowed to read the bucket
   })
-  description = "Defines a side output from the instance for original data, as it was received from API."
+  description = "**ALPHA** Defines a side output from the instance for original data, as it was received from API."
   default     = null
 }
 
@@ -160,7 +160,7 @@ variable "side_output_sanitized" {
     bucket          = optional(string, null),     # if omitted, a bucket will be created
     allowed_readers = optional(list(string), []), # a list of GCP principals that should be allowed to read the bucket
   })
-  description = "Defines a side output from the instance for sanitized data."
+  description = "**ALPHA** Defines a side output from the instance for sanitized data."
   default     = null
 }
 
