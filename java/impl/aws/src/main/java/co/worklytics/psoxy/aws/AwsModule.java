@@ -191,30 +191,29 @@ public interface AwsModule {
         return tokenRequestBuilder;
     }
 
-    //yes, atm a @Binding would work for this; but shortly will be determined from config
     @Provides @Singleton @Named("forOriginal")
     static SideOutput sideOutputForOriginal(ConfigService configService, NoSideOutput noSideOutput, Provider<SideOutput> sideOutput) {
         return SideOutputUtils.forContent(configService, noSideOutput, sideOutput, SideOutputContent.ORIGINAL);
     }
-    //yes, atm a @Binding would work for this; but shortly will be determined from config
+
     @Provides @Singleton @Named("forSanitized")
     static SideOutput sideOutputForSanitized(ConfigService configService, NoSideOutput noSideOutput, Provider<SideOutput> sideOutput) {
-        return SideOutputUtils.forContent(configService, noSideOutput, sideOutput, SideOutputContent.ORIGINAL);
+        return SideOutputUtils.forContent(configService, noSideOutput, sideOutput, SideOutputContent.SANITIZED);
     }
 
     /**
      * atm, s3 is the ONLY supported side output type
      */
-    final String EXPECTED_SIDE_OUTPUT_PREFIX = "s3://";
+     String EXPECTED_SIDE_OUTPUT_PREFIX = "s3://";
 
     @Provides @Singleton
-    static SideOutput sideOutput(NoSideOutput noSideOutput, S3SideOutputFactory s3SideOutputFactory, ConfigService configService) {
+    static SideOutput sideOutput(NoSideOutput noSideOutput, S3SideOutputFactory sideOutputFactory, ConfigService configService) {
         Optional<String> sideOutputBucket = configService.getConfigPropertyAsOptional(ProxyConfigProperty.SIDE_OUTPUT);
         if (sideOutputBucket.isPresent()) {
             if (!sideOutputBucket.get().startsWith(EXPECTED_SIDE_OUTPUT_PREFIX)) {
                 throw new IllegalArgumentException("Side output bucket must start with " + EXPECTED_SIDE_OUTPUT_PREFIX);
             }
-            return s3SideOutputFactory.create(sideOutputBucket.get().substring(EXPECTED_SIDE_OUTPUT_PREFIX.length()));
+            return sideOutputFactory.create(sideOutputBucket.get().substring(EXPECTED_SIDE_OUTPUT_PREFIX.length()));
         } else {
             return noSideOutput;
         }
