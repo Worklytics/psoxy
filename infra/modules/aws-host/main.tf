@@ -82,6 +82,20 @@ resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {
 # secrets shared across all instances
 locals {
   path_to_shared_secrets = var.secrets_store_implementation == "aws_secrets_manager" ? var.aws_secrets_manager_path : var.aws_ssm_param_root_path
+
+  custom_original_side_outputs = { for k, v in var.custom_side_outputs :
+    k => { bucket = v.ORIGINAL } if v.ORIGINAL != null
+  }
+  custom_sanitized_side_outputs = { for k, v in var.custom_side_outputs :
+    k => { bucket = v.SANITIZED } if v.SANITIZED != null
+  }
+  required_side_output_config = {
+    allowed_readers = [module.psoxy.api_caller_role_arn]
+  }
+
+  sanitized_side_outputs = { for k, v in var.api_connectors :
+    k => try(v.enable_side_output, false) ? local.required_side_output_config : try(local.custom_sanitized_side_outputs[k], null)
+  }
 }
 
 module "global_secrets_ssm" {
@@ -175,8 +189,11 @@ module "api_connector" {
   api_gateway_v2                        = module.psoxy.api_gateway_v2
   aws_lambda_execution_role_policy_arn  = var.aws_lambda_execution_role_policy_arn
   iam_roles_permissions_boundary        = var.iam_roles_permissions_boundary
-  todos_as_local_files                  = var.todos_as_local_files
-  todo_step                             = var.todo_step
+  side_output_original                  = try(local.custom_original_side_outputs[each.key], null)
+  side_output_sanitized                 = try(local.sanitized_side_outputs[each.key], null)
+
+  todos_as_local_files = var.todos_as_local_files
+  todo_step            = var.todo_step
 
   environment_variables = merge(
     var.general_environment_variables,
