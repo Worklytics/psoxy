@@ -18,6 +18,7 @@ locals {
         "https://www.googleapis.com/auth/calendar.readonly"
       ]
       environment_variables : {}
+      enable_side_output : false
       example_api_calls : [
         "/calendar/v3/calendars/primary",
         "/calendar/v3/users/me/settings",
@@ -50,6 +51,7 @@ locals {
       source_auth_strategy : "gcp_service_account_key"
       target_host : "admin.googleapis.com"
       environment_variables : {}
+      enable_side_output : false
       example_api_calls : [
         "/admin/directory/v1/users?customer=my_customer&maxResults=10",
         "/admin/directory/v1/users/{USER_ID}",
@@ -76,6 +78,7 @@ locals {
         "https://www.googleapis.com/auth/drive.metadata.readonly"
       ],
       environment_variables : {}
+      enable_side_output : false
       example_api_calls : [
         "/drive/v2/files",
         "/drive/v3/files",
@@ -100,6 +103,7 @@ locals {
         "https://www.googleapis.com/auth/gmail.metadata"
       ],
       environment_variables : {},
+      enable_side_output : false
       example_api_calls : [
         "/gmail/v1/users/me/messages?maxResults=5&labelIds=SENT",
         "/gmail/v1/users/me/messages/{MESSAGE_ID}?format=metadata"
@@ -141,6 +145,7 @@ locals {
         "https://www.googleapis.com/auth/admin.reports.audit.readonly"
       ]
       environment_variables : {}
+      enable_side_output : false
       example_api_calls : [
         "/admin/reports/v1/activity/users/all/applications/meet?maxResults=10"
       ]
