@@ -17,7 +17,8 @@ resource "google_storage_bucket" "bucket" {
     }
   }
 
-  # TODO: remove in v0.5
+  # TODO: remove in v0.6 ???
+  # left of 0.5, just to ease migrations; avoid destruction/recreation of bucket
   lifecycle {
     ignore_changes = [
       name, # due to name change from -output --> -sanitized, ignore name change to avoid recreating bucket

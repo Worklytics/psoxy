@@ -146,6 +146,28 @@ variable "gcp_principals_authorized_to_test" {
   default     = []
 }
 
+variable "side_output" {
+  type = object({
+    content_to_output = optional(string, "SANITIZED"),
+    bucket            = optional(string, null),     # if omitted, a bucket will be created
+    allowed_readers   = optional(list(string), []), # a list of GCP principals that should be allowed to read the bucket
+  })
+  description = "The type of side output to produce. Can be either 'ORIGINAL' or 'SANITIZED'. If set, a bucket will be provisioned to receive the output."
+  default     = null
+
+  validation {
+    condition     = var.side_output == null || var.side_output.content_to_output == "ORIGINAL" || var.side_output.content_to_output == "SANITIZED"
+    error_message = "The `setup_side_output` must be either 'ORIGINAL' or 'SANITIZED'."
+  }
+}
+
+variable "bucket_write_role_id" {
+  type        = string
+  description = "The id of role to grant on bucket to enable writes. REQUIRED if configuring `side_output`"
+  default     = null
+}
+
+
 variable "todos_as_local_files" {
   type        = bool
   description = "whether to render TODOs as flat files"

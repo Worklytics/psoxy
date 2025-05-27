@@ -158,6 +158,7 @@ module "api_connector" {
   invoker_sa_emails                     = var.worklytics_sa_emails
   default_labels                        = var.default_labels
   gcp_principals_authorized_to_test     = var.gcp_principals_authorized_to_test
+  bucket_write_role_id                  = module.psoxy.bucket_write_role_id
   todos_as_local_files                  = var.todos_as_local_files
 
 
