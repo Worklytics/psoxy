@@ -148,16 +148,16 @@ variable "gcp_principals_authorized_to_test" {
 
 variable "side_output" {
   type = object({
-    content_to_output = optional(string, "SANITIZED"),
-    bucket            = optional(string, null),     # if omitted, a bucket will be created
-    allowed_readers   = optional(list(string), []), # a list of GCP principals that should be allowed to read the bucket
+    stage           = optional(string, "SANITIZED"),
+    bucket          = optional(string, null),     # if omitted, a bucket will be created
+    allowed_readers = optional(list(string), []), # a list of GCP principals that should be allowed to read the bucket
   })
-  description = "The type of side output to produce. Can be either 'ORIGINAL' or 'SANITIZED'. If set, a bucket will be provisioned to receive the output."
+  description = "Defines a side output from the instance."
   default     = null
 
   validation {
-    condition     = var.side_output == null || var.side_output.content_to_output == "ORIGINAL" || var.side_output.content_to_output == "SANITIZED"
-    error_message = "The `setup_side_output` must be either 'ORIGINAL' or 'SANITIZED'."
+    condition     = var.side_output == null || var.side_output.stage == "ORIGINAL" || var.side_output.stage == "SANITIZED"
+    error_message = "The `stage` must be either 'ORIGINAL' or 'SANITIZED'."
   }
 }
 

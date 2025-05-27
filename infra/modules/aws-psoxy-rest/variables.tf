@@ -232,17 +232,20 @@ variable "secrets_store_implementation" {
 }
 
 variable "side_output" {
+  # NOTE: this behavior is rather odd; if you pass side_output={}, it a side_output bucket will be provisioned, writing original data to it
+  # without any readers allowed to read it ...
+
   type = object({
-    content_to_output = optional(string, "SANITIZED"),
-    bucket            = optional(string, null),     # if omitted, a bucket will be created
-    allowed_readers   = optional(list(string), []), # a list of ARNs of aws principals that should be allowed to read the bucket
+    stage           = optional(string, "ORIGINAL"),
+    bucket          = optional(string, null),     # if omitted, a bucket will be created
+    allowed_readers = optional(list(string), []), # a list of ARNs of aws principals that should be allowed to read the bucket
   })
-  description = "The type of side output to produce. Can be either 'ORIGINAL' or 'SANITIZED'. If set, a bucket will be provisioned to receive the output."
+  description = "Configures the side output to create. If not bucket provided, one will be provisioned."
   default     = null
 
   validation {
-    condition     = var.side_output == null || var.side_output.content_to_output == "ORIGINAL" || var.side_output.content_to_output == "SANITIZED"
-    error_message = "The `setup_side_output` must be either 'ORIGINAL' or 'SANITIZED'."
+    condition     = var.side_output == null || var.side_output.stage == "ORIGINAL" || var.side_output.stage == "SANITIZED"
+    error_message = "The `stage` must be either 'ORIGINAL' or 'SANITIZED'."
   }
 }
 

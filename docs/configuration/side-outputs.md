@@ -24,8 +24,8 @@ Use the following configuration properties to configure the side outputs from a 
 be set as environment variables in the proxy instance:
   - `SIDE_OUTPUT` - defines the target of the side output. Eg `s3://bucket-name/`, `gs://bucket-name/`, etc;
       - in the future, we might support `bq://dataset.table`, etc.
-  - `SIDE_OUTPUT_CONTENT` - defines the format of the side output.
-      - `ORIGINAL` - the original content from the source API
+  - `SIDE_OUTPUT_STAGE` - defines the stage at which to write the data (content) to the side output.
+      - `ORIGINAL` - the original content as retrieved from the source API, before processing
       - `SANITIZED` - the content after it has been processed by the proxy
 
 Only a single side output is supported, at least for now.

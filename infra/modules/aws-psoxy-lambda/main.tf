@@ -85,7 +85,11 @@ resource "aws_lambda_function" "instance" {
       },
       # only set env vars for config paths if non-default values
       length(var.path_to_shared_ssm_parameters) > 1 ? { PATH_TO_SHARED_CONFIG = var.path_to_shared_ssm_parameters } : {},
-      local.is_instance_ssm_prefix_default ? {} : { PATH_TO_INSTANCE_CONFIG = var.path_to_instance_ssm_parameters }
+      local.is_instance_ssm_prefix_default ? {} : { PATH_TO_INSTANCE_CONFIG = var.path_to_instance_ssm_parameters },
+      var.side_output == null ? {} : {
+        SIDE_OUTPUT       = var.side_output.bucket,
+        SIDE_OUTPUT_STAGE = var.side_output.stage
+      }
     )
   }
 

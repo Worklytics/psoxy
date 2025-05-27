@@ -2,7 +2,6 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
-import co.worklytics.psoxy.gateway.impl.output.NoSideOutput;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
 import com.google.api.client.http.HttpRequestFactory;
@@ -90,12 +89,12 @@ public class FunctionRuntimeModule {
 
     @Provides @Singleton @Named("forOriginal")
     static SideOutput sideOutputForOriginal(SideOutputUtils sideOutputUtils, Provider<SideOutput> sideOutputProvider) {
-        return sideOutputUtils.forContent(sideOutputProvider, SideOutputContent.ORIGINAL);
+        return sideOutputUtils.forContent(sideOutputProvider, ProcessedDataStage.ORIGINAL);
     }
 
     @Provides @Singleton @Named("forSanitized")
     static SideOutput sideOutputForSanitized(SideOutputUtils sideOutputUtils, Provider<SideOutput> sideOutputProvider) {
-        return sideOutputUtils.forContent(sideOutputProvider, SideOutputContent.SANITIZED);
+        return sideOutputUtils.forContent(sideOutputProvider, ProcessedDataStage.SANITIZED);
     }
 
 }

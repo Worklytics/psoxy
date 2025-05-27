@@ -34,7 +34,7 @@ module "side_output_bucket" {
   count = local.provision_side_output_bucket ? 1 : 0
 
   project_id                     = var.project_id
-  bucket_write_role_id           = "" # TODO : get this
+  bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
   bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence[0].result}-"
   bucket_name_suffix             = "sideoutput"
@@ -51,7 +51,7 @@ locals {
     SOURCE_AUTH_STRATEGY_IDENTIFIER = var.source_auth_strategy
     OAUTH_SCOPES                    = join(" ", var.oauth_scopes)
     SIDE_OUTPUT                     = try(var.side_output.bucket, module.side_output_bucket.bucket_name, null)
-    SIDE_OUTPUT_CONTENT             = var.side_output != null ? var.side_output.content : null
+    SIDE_OUTPUT_STAGE               = var.side_output != null ? var.side_output.stage : null
     }
     : k => v if v != null
   }

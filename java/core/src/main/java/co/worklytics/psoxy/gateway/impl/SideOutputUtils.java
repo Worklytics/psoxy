@@ -144,13 +144,13 @@ public class SideOutputUtils {
 
 
     /**
-     * helper method to interpret config, as to whether there's a side output for the given content format or not
+     * helper method to interpret config, as to whether there's a side output for the given content stage or not
      *
      * @param sideOutput        to use if config calls for it
      * @param sideOutputContent the type of content to be written to the side output
      */
-    public SideOutput forContent(Provider<SideOutput> sideOutput, SideOutputContent sideOutputContent) {
-        boolean sanitizedSideOutput = configService.getConfigPropertyAsOptional(ProxyConfigProperty.SIDE_OUTPUT_CONTENT).map(SideOutputContent::valueOf)
+    public SideOutput forContent(Provider<SideOutput> sideOutput, ProcessedDataStage sideOutputContent) {
+        boolean sanitizedSideOutput = configService.getConfigPropertyAsOptional(ProxyConfigProperty.SIDE_OUTPUT_STAGE).map(ProcessedDataStage::valueOf)
             .filter(content -> content == sideOutputContent)
             .isPresent();
         if (sanitizedSideOutput) {
