@@ -55,6 +55,7 @@ public class SideOutputUtils {
             + "_"
             + request.getHeader("Host").orElse("")
             + normalizePath(request.getPath())
+           + "_"
             + request.getQuery().map(this::hashQueryString).orElse("");
     }
 
