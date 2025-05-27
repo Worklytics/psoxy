@@ -10,6 +10,7 @@ import com.google.cloud.ServiceOptions;
 
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
@@ -23,7 +24,11 @@ import java.util.Optional;
 /**
  * defines how to fulfill dependencies that need platform-specific implementations for GCP platform
  */
-@Module
+@Module(
+    includes = {
+        GcpModule.Bindings.class,
+    }
+)
 public interface GcpModule {
 
 
@@ -116,32 +121,17 @@ public interface GcpModule {
         return tokenRequestBuilder;
     }
 
-
-    @Provides @Singleton @Named("forOriginal")
-    static SideOutput sideOutputForOriginal(ConfigService configService, NoSideOutput noSideOutput, Provider<SideOutput> sideOutput) {
-        return SideOutputUtils.forContent(configService, noSideOutput, sideOutput, SideOutputContent.ORIGINAL);
+    @Provides
+    static SideOutput sideOutput(SideOutputFactory<GCSSideOutput> sideOutputFactory, SideOutputUtils sideOutputUtils) {
+        //q: can avoid by injecting SideOutputFactory<GCSSideOutput> into SideOutputUtils? the parameter is tricky ...
+        return sideOutputUtils.createSideOutput( sideOutputFactory);
     }
 
-    @Provides @Singleton @Named("forSanitized")
-    static SideOutput sideOutputForSanitized(ConfigService configService, NoSideOutput noSideOutput, Provider<SideOutput> sideOutput) {
-        return SideOutputUtils.forContent(configService, noSideOutput, sideOutput, SideOutputContent.SANITIZED);
-    }
+    @Module
+    abstract class Bindings {
 
-    /**
-     * atm, gcs is the ONLY supported side output type
-     */
-    String EXPECTED_SIDE_OUTPUT_PREFIX = "gs://";
+        @Binds
+        abstract SideOutputFactory<GCSSideOutput> sideOutputFactory(GCSSideOutputFactory sideOutputFactory);
 
-    @Provides @Singleton
-    static SideOutput sideOutput(NoSideOutput noSideOutput, GCSSideOutputFactory sideOutputFactory, ConfigService configService) {
-        Optional<String> sideOutputBucket = configService.getConfigPropertyAsOptional(ProxyConfigProperty.SIDE_OUTPUT);
-        if (sideOutputBucket.isPresent()) {
-            if (!sideOutputBucket.get().startsWith(EXPECTED_SIDE_OUTPUT_PREFIX)) {
-                throw new IllegalArgumentException("Side output bucket must start with " + EXPECTED_SIDE_OUTPUT_PREFIX);
-            }
-            return sideOutputFactory.create(sideOutputBucket.get().substring(EXPECTED_SIDE_OUTPUT_PREFIX.length()));
-        } else {
-            return noSideOutput;
-        }
     }
 }

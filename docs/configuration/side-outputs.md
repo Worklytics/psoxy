@@ -45,7 +45,9 @@ See `SideOutputUtils::canonicalResponseKey` for details.
 
 
 ## Future Work
-  - support for multiple side outputs
+  - support for multiple side outputs ??
+      - or tbh, combine them into a single bucket probably, right??
+  - support that `SIDE_OUTPUT` could have a prefix, eg, `s3://bucket-name/prefix/`
   - support for other targets (BQ, https endpoint, cloud watch, etc)
   - as a caching solution
   - as a buffer for slow/large responses (eg, proxy responds with token, which client can later use to fetch the data)

@@ -14,13 +14,16 @@ import java.io.*;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 
+/**
+ * utility methods for working with side output
+ *
+ * - eg, to create a canonical key for the response to be stored in the side output
+ * - or to build metadata for the side output
+ */
 @NoArgsConstructor(onConstructor_ = {@Inject})
 @Singleton
 public class SideOutputUtils {
@@ -35,7 +38,13 @@ public class SideOutputUtils {
     }
 
     @Inject
+    HostEnvironment hostEnvironment;
+    @Inject
     HealthCheckRequestHandler healthCheckRequestHandler;
+    @Inject
+    ConfigService configService;
+    @Inject
+    Provider<NoSideOutput> noSideOutputProvider;
 
     /**
      * get a canonical key for the response to be stored in the side output
@@ -106,6 +115,52 @@ public class SideOutputUtils {
         return pipedInputStream;
     }
 
+    /**
+     * create a side output, based on the configuration
+     *
+     * @param sideOutputFactory to use to create the side output
+     * @param <T>               type of side output to create
+     * @return a side output, or no side output if not configured
+     */
+    public <T extends SideOutput> SideOutput createSideOutput(
+            SideOutputFactory<T> sideOutputFactory) {
+
+        // read the side output bucket from config
+        Optional<String> sideOutputBucket = configService.getConfigPropertyAsOptional(ProxyConfigProperty.SIDE_OUTPUT);
+        if (sideOutputBucket.isPresent()) {
+
+            // validate that the side output bucket starts with the expected protocol
+            String prefix = hostEnvironment.getSupportedSideOutputUriProtocols()
+                .stream()
+                .filter(sideOutputBucket.get()::startsWith)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Side output bucket must start with one of: " + hostEnvironment.getSupportedSideOutputUriProtocols()));
+
+            return sideOutputFactory.create(sideOutputBucket.get().substring(prefix.length()));
+        } else {
+            return noSideOutputProvider.get();
+        }
+    }
+
+
+    /**
+     * helper method to interpret config, as to whether there's a side output for the given content format or not
+     *
+     * @param sideOutput        to use if config calls for it
+     * @param sideOutputContent the type of content to be written to the side output
+     */
+    public SideOutput forContent(Provider<SideOutput> sideOutput, SideOutputContent sideOutputContent) {
+        boolean sanitizedSideOutput = configService.getConfigPropertyAsOptional(ProxyConfigProperty.SIDE_OUTPUT_CONTENT).map(SideOutputContent::valueOf)
+            .filter(content -> content == sideOutputContent)
+            .isPresent();
+        if (sanitizedSideOutput) {
+            return sideOutput.get();
+        } else {
+            return noSideOutputProvider.get();
+        }
+    }
+
+
 
     private String normalizePath(String rawPath) {
         // Remove leading/trailing slashes and URL-decode
@@ -133,22 +188,6 @@ public class SideOutputUtils {
         return DigestUtils.md5Hex(canonicalQuery);
     }
 
-    /**
-     * helper method to interpret config, as to whether there's a side output for the given content format or not
-     *
-     * @param configService to read
-     * @param noSideOutput to use if config doesn't call for a side output in the case
-     * @param sideOutput to use if config calls for it
-     * @param sideOutputContent the type of content to be written to the side output
-     */
-    public static SideOutput forContent(ConfigService configService, NoSideOutput noSideOutput, Provider<SideOutput> sideOutput, SideOutputContent sideOutputContent) {
-        boolean sanitizedSideOutput = configService.getConfigPropertyAsOptional(ProxyConfigProperty.SIDE_OUTPUT_CONTENT).map(SideOutputContent::valueOf)
-            .filter(content -> content == sideOutputContent)
-            .isPresent();
-        if (sanitizedSideOutput) {
-            return sideOutput.get();
-        } else {
-            return noSideOutput;
-        }
-    }
+
+
 }

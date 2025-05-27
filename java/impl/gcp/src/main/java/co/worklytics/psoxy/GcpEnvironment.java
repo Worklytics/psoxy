@@ -4,6 +4,7 @@ import co.worklytics.psoxy.gateway.HostEnvironment;
 import lombok.NoArgsConstructor;
 
 import javax.inject.Inject;
+import java.util.Set;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class GcpEnvironment implements HostEnvironment {
@@ -19,4 +20,8 @@ public class GcpEnvironment implements HostEnvironment {
     }
 
 
+    @Override
+    public Set<String> getSupportedSideOutputUriProtocols() {
+        return Set.of("gs://");
+    }
 }

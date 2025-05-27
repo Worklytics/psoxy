@@ -3,12 +3,13 @@ package co.worklytics.psoxy.aws;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
-import co.worklytics.psoxy.gateway.impl.output.NoSideOutput;
+
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
@@ -22,16 +23,17 @@ import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
 import javax.inject.Named;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.time.Duration;
-import java.util.Optional;
-
 
 /**
  * defines how to fulfill dependencies that need platform-specific implementations for GCP platform
  */
-@Module
+@Module(
+    includes = {
+        AwsModule.Bindings.class,
+    }
+)
 public interface AwsModule {
 
     @Provides
@@ -183,7 +185,6 @@ public interface AwsModule {
                 .build();
     }
 
-
     //TODO: should be a Binding ?
     @Provides
     @IntoSet
@@ -191,31 +192,16 @@ public interface AwsModule {
         return tokenRequestBuilder;
     }
 
-    @Provides @Singleton @Named("forOriginal")
-    static SideOutput sideOutputForOriginal(ConfigService configService, NoSideOutput noSideOutput, Provider<SideOutput> sideOutput) {
-        return SideOutputUtils.forContent(configService, noSideOutput, sideOutput, SideOutputContent.ORIGINAL);
-    }
-
-    @Provides @Singleton @Named("forSanitized")
-    static SideOutput sideOutputForSanitized(ConfigService configService, NoSideOutput noSideOutput, Provider<SideOutput> sideOutput) {
-        return SideOutputUtils.forContent(configService, noSideOutput, sideOutput, SideOutputContent.SANITIZED);
-    }
-
-    /**
-     * atm, s3 is the ONLY supported side output type
-     */
-     String EXPECTED_SIDE_OUTPUT_PREFIX = "s3://";
-
     @Provides @Singleton
-    static SideOutput sideOutput(NoSideOutput noSideOutput, S3SideOutputFactory sideOutputFactory, ConfigService configService) {
-        Optional<String> sideOutputBucket = configService.getConfigPropertyAsOptional(ProxyConfigProperty.SIDE_OUTPUT);
-        if (sideOutputBucket.isPresent()) {
-            if (!sideOutputBucket.get().startsWith(EXPECTED_SIDE_OUTPUT_PREFIX)) {
-                throw new IllegalArgumentException("Side output bucket must start with " + EXPECTED_SIDE_OUTPUT_PREFIX);
-            }
-            return sideOutputFactory.create(sideOutputBucket.get().substring(EXPECTED_SIDE_OUTPUT_PREFIX.length()));
-        } else {
-            return noSideOutput;
-        }
+    static SideOutput sideOutput(SideOutputFactory<S3SideOutput> sideOutputFactory, SideOutputUtils sideOutputUtils) {
+        //q: can avoid by injecting SideOutputFactory<GCSSideOutput> into SideOutputUtils? the parameter is tricky ...
+        return sideOutputUtils.createSideOutput(sideOutputFactory);
+    }
+
+    @Module
+    abstract class Bindings {
+
+        @Binds
+        abstract SideOutputFactory<S3SideOutput> sideOutputFactory(S3SideOutputFactory sideOutputFactory);
     }
 }
