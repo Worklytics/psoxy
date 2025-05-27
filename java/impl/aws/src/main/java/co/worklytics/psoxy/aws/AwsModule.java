@@ -192,12 +192,6 @@ public interface AwsModule {
         return tokenRequestBuilder;
     }
 
-    @Provides @Singleton
-    static SideOutput sideOutput(SideOutputFactory<S3SideOutput> sideOutputFactory, SideOutputUtils sideOutputUtils) {
-        //q: can avoid by injecting SideOutputFactory<GCSSideOutput> into SideOutputUtils? the parameter is tricky ...
-        return sideOutputUtils.createSideOutput(sideOutputFactory);
-    }
-
     @Module
     abstract class Bindings {
 

@@ -186,21 +186,24 @@ variable "secrets_store_implementation" {
   default     = "aws_ssm_parameter_store"
 }
 
-variable "side_output" {
-  type = object({
-    bucket     = string                       # assumed to be an s3 bucket
-    date_stage = optional(string, "ORIGINAL") # 'ORIGINAL' or 'SANITIZED'
-  })
-  description = "Where to write the output of the function. If not provided, no output will be written."
+variable "side_output_original" {
+  type        = string
+  description = "If provided, the function will write a copy of the original API response (unprocessed) output to this S3 URL."
   default     = null
 
   validation {
-    condition     = var.side_output == null || can(regex("^[a-zA-Z][a-zA-Z0-9-_ ]*[a-zA-Z0-9]$", var.side_output.target))
-    error_message = "The `side_output` target must start with a letter, can contain alphanumeric characters, hyphens, underscores, and spaces, and must end with a letter or number."
+    condition     = var.side_output_original == null || can(regex("^s3://[a-zA-Z][a-zA-Z0-9-_ ]*[a-zA-Z0-9](/.*)?$", var.side_output_original))
+    error_message = "The `side_output_original` target must be s3 bucket address. May include a path within the bucket, in which case we highly recommend you end it with a slash (`/`)."
   }
+}
+
+variable "side_output_sanitized" {
+  type        = string
+  description = "If set, the function will write sanitized output to this S3 path."
+  default     = null
 
   validation {
-    condition     = var.side_output == null || var.side_output.content_to_output == "ORIGINAL" || var.side_output.content_to_output == "SANITIZED"
-    error_message = "side_output.content must be either 'ORIGINAL' or 'SANITIZED', if specified."
+    condition     = var.side_output_sanitized == null || can(regex("^s3://[a-zA-Z][a-zA-Z0-9-_ ]*[a-zA-Z0-9](/.*)?$", var.side_output_sanitized))
+    error_message = "The `side_output_sanitized` target must be s3 bucket address. May include a path within the bucket, in which case we highly recommend you end it with a slash (`/`)."
   }
 }

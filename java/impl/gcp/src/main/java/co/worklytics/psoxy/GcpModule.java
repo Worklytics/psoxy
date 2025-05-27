@@ -121,13 +121,6 @@ public interface GcpModule {
         return tokenRequestBuilder;
     }
 
-    // NOTE: coupled to idea that there is AT MOST one side output
-    @Provides
-    static SideOutput sideOutput(SideOutputFactory<GCSSideOutput> sideOutputFactory, SideOutputUtils sideOutputUtils) {
-        //q: can avoid by injecting SideOutputFactory<GCSSideOutput> into SideOutputUtils? the parameter is tricky ...
-        return sideOutputUtils.createSideOutput( sideOutputFactory);
-    }
-
     @Module
     abstract class Bindings {
 

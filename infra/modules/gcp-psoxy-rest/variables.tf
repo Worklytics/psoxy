@@ -146,19 +146,22 @@ variable "gcp_principals_authorized_to_test" {
   default     = []
 }
 
-variable "side_output" {
+variable "side_output_original" {
   type = object({
-    stage           = optional(string, "SANITIZED"),
     bucket          = optional(string, null),     # if omitted, a bucket will be created
     allowed_readers = optional(list(string), []), # a list of GCP principals that should be allowed to read the bucket
   })
-  description = "Defines a side output from the instance."
+  description = "Defines a side output from the instance for original data, as it was received from API."
   default     = null
+}
 
-  validation {
-    condition     = var.side_output == null || var.side_output.stage == "ORIGINAL" || var.side_output.stage == "SANITIZED"
-    error_message = "The `stage` must be either 'ORIGINAL' or 'SANITIZED'."
-  }
+variable "side_output_sanitized" {
+  type = object({
+    bucket          = optional(string, null),     # if omitted, a bucket will be created
+    allowed_readers = optional(list(string), []), # a list of GCP principals that should be allowed to read the bucket
+  })
+  description = "Defines a side output from the instance for sanitized data."
+  default     = null
 }
 
 variable "bucket_write_role_id" {

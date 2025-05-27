@@ -10,7 +10,9 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
+import lombok.NonNull;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -23,6 +25,7 @@ public class GCSSideOutput implements SideOutput {
     static final int BUFFER_SIZE = 8192; // 8KB buffer size for writing
 
     final String bucket;
+    final String pathPrefix;
 
     @Inject
     Provider<Storage> storageProvider;
@@ -31,8 +34,10 @@ public class GCSSideOutput implements SideOutput {
     SideOutputUtils sideOutputUtils;
 
     @AssistedInject
-    public GCSSideOutput(@Assisted  String bucket) {
+    public GCSSideOutput(@Assisted  @NonNull String bucket,
+                         @Assisted String pathPrefix) {
         this.bucket = bucket;
+        this.pathPrefix = StringUtils.trimToEmpty(pathPrefix);
     }
 
 
@@ -43,7 +48,7 @@ public class GCSSideOutput implements SideOutput {
             Storage storageClient = storageProvider.get();
 
             try (WriteChannel writeChannel = storageClient.writer(
-                    BlobInfo.newBuilder(bucket, sideOutputUtils.canonicalResponseKey(request))
+                    BlobInfo.newBuilder(bucket, pathPrefix + sideOutputUtils.canonicalResponseKey(request))
                         .setContentType(content.getContentType())
                         .setContentEncoding("gzip")
                         .setMetadata(sideOutputUtils.buildMetadata(request))

@@ -7,5 +7,5 @@ import dagger.assisted.AssistedFactory;
 @AssistedFactory
 public interface S3SideOutputFactory extends SideOutputFactory<S3SideOutput> {
 
-    S3SideOutput create(String bucket);
+    S3SideOutput create(String bucket, String pathPrefix);
 }

@@ -45,6 +45,8 @@ public class SideOutputUtils {
     ConfigService configService;
     @Inject
     Provider<NoSideOutput> noSideOutputProvider;
+    @Inject
+    SideOutputFactory<? extends SideOutput> sideOutputFactory;
 
     /**
      * get a canonical key for the response to be stored in the side output
@@ -116,48 +118,40 @@ public class SideOutputUtils {
     }
 
     /**
-     * create a side output, based on the configuration
-     *
-     * @param sideOutputFactory to use to create the side output
-     * @param <T>               type of side output to create
-     * @return a side output, or no side output if not configured
-     */
-    public <T extends SideOutput> SideOutput createSideOutput(
-            SideOutputFactory<T> sideOutputFactory) {
-
-        // read the side output bucket from config
-        Optional<String> sideOutputBucket = configService.getConfigPropertyAsOptional(ProxyConfigProperty.SIDE_OUTPUT);
-        if (sideOutputBucket.isPresent()) {
-
-            // validate that the side output bucket starts with the expected protocol
-            String prefix = hostEnvironment.getSupportedSideOutputUriProtocols()
-                .stream()
-                .filter(sideOutputBucket.get()::startsWith)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Side output bucket must start with one of: " + hostEnvironment.getSupportedSideOutputUriProtocols()));
-
-            return sideOutputFactory.create(sideOutputBucket.get().substring(prefix.length()));
-        } else {
-            return noSideOutputProvider.get();
-        }
-    }
-
-
-    /**
      * helper method to interpret config, as to whether there's a side output for the given content stage or not
      *
-     * @param sideOutput        to use if config calls for it
-     * @param sideOutputContent the type of content to be written to the side output
+     * @param processedDataStage the stage of processed data to be written to the side output
      */
-    public SideOutput forContent(Provider<SideOutput> sideOutput, ProcessedDataStage sideOutputContent) {
-        boolean sanitizedSideOutput = configService.getConfigPropertyAsOptional(ProxyConfigProperty.SIDE_OUTPUT_STAGE).map(ProcessedDataStage::valueOf)
-            .filter(content -> content == sideOutputContent)
-            .isPresent();
-        if (sanitizedSideOutput) {
-            return sideOutput.get();
-        } else {
-            return noSideOutputProvider.get();
-        }
+    public SideOutput forStage(ProcessedDataStage processedDataStage) {
+
+        ProxyConfigProperty configProperty = switch (processedDataStage) {
+            case ORIGINAL -> ProxyConfigProperty.SIDE_OUTPUT_ORIGINAL;
+            case SANITIZED -> ProxyConfigProperty.SIDE_OUTPUT_SANITIZED;
+        };
+
+         return configService.getConfigPropertyAsOptional(configProperty)
+             .map(bucket -> {
+                 // validate that the side output bucket starts with the expected protocol
+                 String prefix = hostEnvironment.getSupportedSideOutputUriProtocols()
+                     .stream()
+                     .filter(bucket::startsWith)
+                     .findFirst()
+                     .orElseThrow(() -> new IllegalArgumentException("Side output bucket must start with one of: " + hostEnvironment.getSupportedSideOutputUriProtocols()));
+
+                 // TODO: split out the path portion from the bucket URI
+                 String pathWithoutPrefix = bucket.substring(prefix.length());
+                 if (pathWithoutPrefix.isEmpty()) {
+                     throw new IllegalArgumentException("Side output bucket path cannot be empty");
+                 }
+
+                 // split pathWithoutPrefix into bucket name and optional path
+                 String[] parts = pathWithoutPrefix.split("/", 2);
+                 String bucketName = parts[0];
+                 String path = parts.length > 1 ? parts[1] : "";
+
+                 return (SideOutput) sideOutputFactory.create(bucketName, path);
+             })
+             .orElseGet(noSideOutputProvider::get);
     }
 
 

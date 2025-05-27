@@ -39,6 +39,18 @@ locals {
   bundle_filename = try(regex(".*/([^/]+)", var.path_to_function_zip)[0], var.path_to_function_zip)
 }
 
+# side output stuff
+locals {
+  side_output_environment_variables = merge(
+    var.side_output_original == null ? {} : {
+      SIDE_OUTPUT_ORIGINAL = var.side_output_original.bucket,
+    },
+    var.side_output_sanitized == null ? {} : {
+      SIDE_OUTPUT_SANITIZED = var.side_output_sanitized.bucket,
+    }
+  )
+}
+
 
 resource "aws_lambda_function" "instance" {
   function_name                  = local.function_name
@@ -83,13 +95,10 @@ resource "aws_lambda_function" "instance" {
         BUNDLE_FILENAME = local.bundle_filename
         SECRETS_STORE   = upper(var.secrets_store_implementation)
       },
+      local.side_output_environment_variables,
       # only set env vars for config paths if non-default values
       length(var.path_to_shared_ssm_parameters) > 1 ? { PATH_TO_SHARED_CONFIG = var.path_to_shared_ssm_parameters } : {},
       local.is_instance_ssm_prefix_default ? {} : { PATH_TO_INSTANCE_CONFIG = var.path_to_instance_ssm_parameters },
-      var.side_output == null ? {} : {
-        SIDE_OUTPUT       = var.side_output.bucket,
-        SIDE_OUTPUT_STAGE = var.side_output.stage
-      }
     )
   }
 
@@ -98,6 +107,19 @@ resource "aws_lambda_function" "instance" {
       tags
     ]
   }
+}
+
+module "side_output_iam_statements" {
+  source = "../aws-bucket-read-write-iam-policy-statement"
+
+  for_each = {
+    for k, v in {
+      original  = var.side_output_original == null ? var.side_output_original : null
+      sanitized = var.side_output_sanitized != null ? var.side_output_sanitized : null
+    } : k => v if v != null
+  }
+
+  s3_path = each.value
 }
 
 # cloudwatch group per lambda function
@@ -244,28 +266,13 @@ locals {
     Resource = local.kms_keys_to_allow_arns
   }] : []
 
-  s3_side_output_statements = var.side_output == null ? [] : [{
-    Sid = "AllowS3SideOutput"
-    Action = [
-      "s3:PutObject",
-      "s3:GetObject",
-      "s3:DeleteObject",
-      "s3:ListBucket"
-    ]
-    Effect = "Allow"
-    Resource = [
-      "arn:aws:s3:::${var.side_output.bucket}",
-      "arn:aws:s3:::${var.side_output.bucket}/*"
-    ]
-  }]
-
   policy_statements = concat(
     local.global_ssm_param_statements,
     local.global_secretsmanager_statements,
     local.local_ssm_param_statements,
     local.local_secrets_manager_statements,
     local.key_statements,
-    local.s3_side_output_statements
+    try(module.side_output_iam_statements[*].iam_statements, [])
   )
 }
 

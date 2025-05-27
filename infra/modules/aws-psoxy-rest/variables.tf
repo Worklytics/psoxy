@@ -231,23 +231,24 @@ variable "secrets_store_implementation" {
   default     = "aws_ssm_parameter_store"
 }
 
-variable "side_output" {
-  # NOTE: this behavior is rather odd; if you pass side_output={}, it a side_output bucket will be provisioned, writing original data to it
-  # without any readers allowed to read it ...
-
+variable "side_output_original" {
   type = object({
-    stage           = optional(string, "ORIGINAL"),
     bucket          = optional(string, null),     # if omitted, a bucket will be created
     allowed_readers = optional(list(string), []), # a list of ARNs of aws principals that should be allowed to read the bucket
   })
   description = "Configures the side output to create. If not bucket provided, one will be provisioned."
   default     = null
-
-  validation {
-    condition     = var.side_output == null || var.side_output.stage == "ORIGINAL" || var.side_output.stage == "SANITIZED"
-    error_message = "The `stage` must be either 'ORIGINAL' or 'SANITIZED'."
-  }
 }
+
+variable "side_output_sanitized" {
+  type = object({
+    bucket          = optional(string, null),     # if omitted, a bucket will be created
+    allowed_readers = optional(list(string), []), # a list of ARNs of aws principals that should be allowed to read the bucket
+  })
+  description = "Configures the side output to create. If not bucket provided, one will be provisioned."
+  default     = null
+}
+
 
 variable "todos_as_local_files" {
   type        = bool

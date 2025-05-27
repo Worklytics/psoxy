@@ -9,6 +9,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -18,6 +19,7 @@ import java.util.logging.Level;
 public class S3SideOutput implements SideOutput {
 
     final String bucket;
+    final String pathPrefix;
 
     @Inject
     Provider<AmazonS3> s3ClientProvider;
@@ -26,8 +28,10 @@ public class S3SideOutput implements SideOutput {
     SideOutputUtils sideOutputUtils;
 
     @AssistedInject
-    public S3SideOutput(@Assisted  String bucket) {
+    public S3SideOutput(@Assisted  String bucket,
+                        @Assisted String pathPrefix) {
         this.bucket = bucket;
+        this.pathPrefix = StringUtils.trimToEmpty(pathPrefix);
     }
 
     @Override
@@ -41,7 +45,7 @@ public class S3SideOutput implements SideOutput {
             metadata.setUserMetadata(sideOutputUtils.buildMetadata(request));
 
             s3Client.putObject(bucket,
-                sideOutputUtils.canonicalResponseKey(request),
+                pathPrefix + sideOutputUtils.canonicalResponseKey(request),
                 sideOutputUtils.toGzippedStream(content.getContent(), content.getContentCharset()),
                 metadata);
         } catch (Exception e) {

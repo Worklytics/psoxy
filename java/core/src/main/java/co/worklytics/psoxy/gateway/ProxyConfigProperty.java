@@ -102,18 +102,15 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
 
     /**
      * **ALPHA**
-     * a 'side output' to which to write data, pre/post-sanitization
+     * if provided, a target side output to write original data to
      */
-    SIDE_OUTPUT,
+    SIDE_OUTPUT_ORIGINAL,
 
     /**
      * **ALPHA**
-     * the stage of data processing after which to write content to side output
-     *  - ORIGINAL
-     *  - SANITIZED (q: better to call this 'PROCESSED' or 'TRANSFORMED'?)
-     *
+     * if provided, a target side output to write sanitized data to
      */
-    SIDE_OUTPUT_STAGE,
+    SIDE_OUTPUT_SANITIZED,
 
     SOURCE,
     SOURCE_AUTH_STRATEGY_IDENTIFIER,

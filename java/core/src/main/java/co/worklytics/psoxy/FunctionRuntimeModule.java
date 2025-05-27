@@ -88,13 +88,13 @@ public class FunctionRuntimeModule {
 
 
     @Provides @Singleton @Named("forOriginal")
-    static SideOutput sideOutputForOriginal(SideOutputUtils sideOutputUtils, Provider<SideOutput> sideOutputProvider) {
-        return sideOutputUtils.forContent(sideOutputProvider, ProcessedDataStage.ORIGINAL);
+    static SideOutput sideOutputForOriginal(SideOutputUtils sideOutputUtil) {
+        return sideOutputUtil.forStage(ProcessedDataStage.ORIGINAL);
     }
 
     @Provides @Singleton @Named("forSanitized")
-    static SideOutput sideOutputForSanitized(SideOutputUtils sideOutputUtils, Provider<SideOutput> sideOutputProvider) {
-        return sideOutputUtils.forContent(sideOutputProvider, ProcessedDataStage.SANITIZED);
+    static SideOutput sideOutputForSanitized(SideOutputUtils sideOutputUtils) {
+        return sideOutputUtils.forStage(ProcessedDataStage.SANITIZED);
     }
 
 }

@@ -22,13 +22,35 @@ return just the status code / headers back to the client.
 
 Use the following configuration properties to configure the side outputs from a proxy instance in API connector mode. These should
 be set as environment variables in the proxy instance:
-  - `SIDE_OUTPUT` - defines the target of the side output. Eg `s3://bucket-name/`, `gs://bucket-name/`, etc;
+  - `SIDE_OUTPUT_ORIGINAL`/`SIDE_OUTPUT_SANITIZED` - defines the target of the side output. Eg `s3://bucket-name/`, `gs://bucket-name/`, etc;
       - in the future, we might support `bq://dataset.table`, etc.
-  - `SIDE_OUTPUT_STAGE` - defines the stage at which to write the data (content) to the side output.
-      - `ORIGINAL` - the original content as retrieved from the source API, before processing
-      - `SANITIZED` - the content after it has been processed by the proxy
+      - `ORIGINAL`/`SANITIZED` - the **stage** of the data to be written to the side output.
+        - `ORIGINAL` - the original response from the source API, before any processing by the proxy
+        - `SANITIZED` - the response after it has been processed by the proxy (eg, sanitized, transformed, etc)
 
-Only a single side output is supported, at least for now.
+
+Setting this up in terraform:
+
+Approaches:
+    1. `custom_side_outputs` in gcp/aws host modules; add key ==> configuration to that variable.
+
+Use case: you want a back-up of the data, or to have all the requests and responses otherwise available.
+
+```hcl
+custom_side_outputs = {
+    "zoom" = {
+        'ORIGINAL'  = "s3://my-bucket/original-outputs/"
+        'SANITIZED' = "s3://my-bucket/side-outputs/"
+    }
+}
+```
+   2. connector specs. a `provision_side_output` in the connector spec, which will cause the bucket to be provisioned.
+
+Use case: some responses from source API expected to be too large/too slow to return directly to the client, so you want to write them to a side output instead.
+
+```hcl
+provision_side_output = true
+```
 
 ## Details
 For bucket use-cases, each response will be written as a single object in the bucket, with the following naming convention:
@@ -43,15 +65,28 @@ These components are:
 
 See `SideOutputUtils::canonicalResponseKey` for details.
 
+### Passing between Terraform Modules
+
+ - down to the per-instance modules:
+
+`side_output` variable?
+
+`side_outputs` - list of the above?
+
+`side_output_sanitized`, `side_output_original` - one per stage?
+
+
+
 
 ## Future Work
-  - support for multiple side outputs ??
-      - or tbh, combine them into a single bucket probably, right??
-  - support that `SIDE_OUTPUT` could have a prefix, eg, `s3://bucket-name/prefix/`
+  - support for multiple side outputs ?? ( probably unavoidable, and should do ASAP )
+      - or tbh, combine them into a single bucket probably, right??  depends
   - support for other targets (BQ, https endpoint, cloud watch, etc)
   - as a caching solution
   - as a buffer for slow/large responses (eg, proxy responds with token, which client can later use to fetch the data)
   - export `SideOutputUtils::canonicalResponseKey` to other languages; or document a standard with Java as reference implementation,
      so side output buckets can be used as a cache for API access by other systems.
+  - support for additional transforms on side outputs? What's the use-case exactly?
+  - support for side output sampling rate?
 
 

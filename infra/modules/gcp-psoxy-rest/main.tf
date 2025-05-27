@@ -15,11 +15,16 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
 }
 
 locals {
-  provision_side_output_bucket = var.side_output != null && var.side_output.bucket == null
+  side_outputs = { for k, v in {
+    sanitized = var.side_output_sanitized != null ? var.side_output_sanitized : null
+    original  = var.side_output_original != null ? var.side_output_original : null
+  } : k => v if v != null }
+
+  side_outputs_to_provision = { for k, v in local.side_outputs : k => v if v.bucket == null }
 }
 
 resource "random_string" "bucket_name_random_sequence" {
-  count = local.provision_side_output_bucket ? 1 : 0
+  count = length(local.side_outputs_to_provision) > 0 ? 1 : 0
 
   length  = 8
   special = false
@@ -31,17 +36,21 @@ resource "random_string" "bucket_name_random_sequence" {
 module "side_output_bucket" {
   source = "../../modules/gcp-output-bucket"
 
-  count = local.provision_side_output_bucket ? 1 : 0
+  for_each = local.side_outputs_to_provision
 
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
   bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence[0].result}-"
   bucket_name_suffix             = "sideoutput"
-  sanitizer_accessor_principals  = var.side_output.allowed_readers
+  sanitizer_accessor_principals  = each.value.allowed_readers
 }
 
 locals {
+  side_output_env_vars = { for k, v in local.side_outputs :
+    "SIDE_OUTPUT_${upper(k)}" => try(v.bucket, "gs://${module.side_output_bucket[k].bucket_name}")
+  }
+
   # from v0.5, these will be required; for now, allow `null` but filter out so taken from config yaml
   # these are 'standard' env vars, expected from most connectors
   # any 'non-standard' ones can just be passed through var.environment_variables
@@ -50,8 +59,6 @@ locals {
     TARGET_HOST                     = var.target_host
     SOURCE_AUTH_STRATEGY_IDENTIFIER = var.source_auth_strategy
     OAUTH_SCOPES                    = join(" ", var.oauth_scopes)
-    SIDE_OUTPUT                     = try(var.side_output.bucket, module.side_output_bucket.bucket_name, null)
-    SIDE_OUTPUT_STAGE               = var.side_output != null ? var.side_output.stage : null
     }
     : k => v if v != null
   }
@@ -106,6 +113,7 @@ resource "google_cloudfunctions2_function" "function" {
       var.environment_variables,
       var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
       var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${replace(upper(var.instance_id), "-", "_")}_" },
+      local.side_output_env_vars
     )
 
     dynamic "secret_environment_variables" {
