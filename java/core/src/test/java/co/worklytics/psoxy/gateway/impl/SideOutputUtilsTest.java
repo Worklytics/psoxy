@@ -13,10 +13,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.zip.GZIPInputStream;
+import java.util.Map;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class SideOutputUtilsTest {
 
@@ -24,13 +24,55 @@ class SideOutputUtilsTest {
 
     @Test
     void canonicalResponseKey() {
-        // Mock HttpEventRequest
-        HttpEventRequest request = mock(HttpEventRequest.class);
-        when(request.getHttpMethod()).thenReturn("GET");
-        when(request.getHeader("Host")).thenReturn(Optional.of("example.com"));
-        when(request.getHeaders()).thenReturn(Collections.emptyMap());
-        when(request.getPath()).thenReturn("/api/v1/resource/");
-        when(request.getQuery()).thenReturn(Optional.of("b=2&a=1"));
+        // Stub HttpEventRequest
+        HttpEventRequest request = new HttpEventRequest() {
+
+            @Override
+            public byte[] getBody() {
+                return new byte[0]; // Not relevant for this test
+            }
+
+            @Override
+            public Optional<String> getClientIp() {
+                return Optional.empty();
+            }
+
+            @Override
+            public Optional<Boolean> isHttps() {
+                return Optional.ofNullable(false); // Not relevant for this test
+            }
+
+            @Override
+            public String getHttpMethod() {
+                return "GET";
+            }
+
+            @Override
+            public Optional<String> getHeader(String name) {
+                if ("Host".equals(name)) return Optional.of("example.com");
+                return Optional.empty();
+            }
+
+            @Override
+            public Map<String, List<String>> getHeaders() {
+                return Collections.emptyMap();
+            }
+
+            @Override
+            public String getPath() {
+                return "/api/v1/resource/";
+            }
+
+            @Override
+            public Optional<String> getQuery() {
+                return Optional.of("b=2&a=1");
+            }
+
+            @Override
+            public Optional<List<String>> getMultiValueHeader(String headerName) {
+                return Optional.empty(); // Not relevant for this test
+            }
+        };
 
         String key = utils.canonicalResponseKey(request);
 
