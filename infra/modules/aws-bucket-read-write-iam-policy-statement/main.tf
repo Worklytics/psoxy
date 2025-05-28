@@ -8,7 +8,7 @@ locals {
 
   # AWS IAM policy Sids allow only alphanumeric characters; no hyphens, despite error message ...
   path_fragments = split("/", replace(local.without_protocol, "-", "/"))
-  pascalcase   = join("", [ for w in local.path_fragments : "${upper(substr(w, 0, 1))}${lower(substr(w, 1, length(w) - 1))}" ])
+  pascalcase     = join("", [for w in local.path_fragments : "${upper(substr(w, 0, 1))}${lower(substr(w, 1, length(w) - 1))}"])
 }
 
 output "iam_statements" {
