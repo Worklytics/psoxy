@@ -480,7 +480,10 @@ endpoints:
       - !<tokenize>
         jsonPaths:
           - "$..slug"
-  - pathTemplate: "/orgs/{org}/audit-log"
+  - pathRegex: "^/orgs/[^/]+/audit-log\\?(?=[A-Za-z0-9=&%+:\\._\\-]*phrase=action:copilot(?:\\\
+    +created=[^&]+)?)(?=[A-Za-z0-9=&%+:\\._\\-]*include=web)[A-Za-z0-9=&%+:\\._\\\
+    -]+$"
+    pathTemplate: "/orgs/{org}/audit-log"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -511,7 +514,10 @@ endpoints:
           - "$..user_id"
           - "$..started_by"
         encoding: "JSON"
-  - pathTemplate: "/organizations/{installationId}/audit-log"
+  - pathRegex: "^/organizations\\/\\d+\\/audit-log\\?(?=[A-Za-z0-9=&%+:\\._\\-]*phrase=action:copilot(?:\\\
+    +created=[^&]+)?)(?=[A-Za-z0-9=&%+:\\._\\-]*include=web)[A-Za-z0-9=&%+:\\._\\\
+    -]+$"
+    pathTemplate: "/organizations/{installationId}/audit-log"
     allowedQueryParams:
       - "per_page"
       - "page"
