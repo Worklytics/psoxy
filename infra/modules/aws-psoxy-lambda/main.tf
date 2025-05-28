@@ -41,14 +41,12 @@ locals {
 
 # side output stuff
 locals {
-  side_output_environment_variables = merge(
-    var.side_output_original == null ? {} : {
-      SIDE_OUTPUT_ORIGINAL = var.side_output_original,
-    },
-    var.side_output_sanitized == null ? {} : {
-      SIDE_OUTPUT_SANITIZED = var.side_output_sanitized
-    }
-  )
+  side_outputs = { for k, v in {
+    original  = var.side_output_original
+    sanitized = var.side_output_sanitized
+  } : k => v if v != null }
+
+  side_output_environment_variables = { for k, v in local.side_outputs : "SIDE_OUTPUT_${upper(k)}" => v }
 }
 
 
@@ -112,12 +110,7 @@ resource "aws_lambda_function" "instance" {
 module "side_output_iam_statements" {
   source = "../aws-bucket-read-write-iam-policy-statement"
 
-  for_each = {
-    for k, v in {
-      original  = var.side_output_original == null ? var.side_output_original : null
-      sanitized = var.side_output_sanitized != null ? var.side_output_sanitized : null
-    } : k => v if v != null
-  }
+  for_each = local.side_outputs
 
   s3_path = each.value
 }
@@ -204,7 +197,6 @@ locals {
     Sid = "ReadInstanceSSMParameters"
     Action = [
       "ssm:GetParameter",
-      "ssm:GetParameterVersion",
       "ssm:GetParameters",
       "ssm:GetParametersByPath",
       "ssm:PutParameter",
@@ -237,7 +229,6 @@ locals {
     Action = [
       "ssm:GetParameter",
       "ssm:GetParameters",
-      "ssm:GetParameterVersion",
       "ssm:GetParametersByPath",
     ]
     Effect   = "Allow"
@@ -272,7 +263,7 @@ locals {
     local.local_ssm_param_statements,
     local.local_secrets_manager_statements,
     local.key_statements,
-    try(module.side_output_iam_statements[*].iam_statements, [])
+    flatten(values(module.side_output_iam_statements)[*].iam_statements),
   )
 }
 

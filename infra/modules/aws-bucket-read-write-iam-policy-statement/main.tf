@@ -5,10 +5,12 @@ locals {
   without_protocol = try(replace(var.s3_path, "s3://", ""), "")
 
   directory_wildcard = endswith(local.without_protocol, "/") ? "*" : "/*"
+}
 
-  iam_statements = var.s3_path == null ? [] : [
+output "iam_statements" {
+  value = var.s3_path == null ? [] : [
     {
-      Sid = "AllowS3_${replace(var.s3_path, "/", "_")}"
+      Sid = "AllowS3-${replace(local.without_protocol, "/", "-")}"
       Action = [
         "s3:PutObject",
         "s3:GetObject",
@@ -17,13 +19,9 @@ locals {
       ]
       Effect = "Allow"
       Resource = [
-        "arn:aws:s3:::${var.s3_path}",
-        "arn:aws:s3:::${var.s3_path}${local.directory_wildcard}"
+        "arn:aws:s3:::${local.without_protocol}",
+        "arn:aws:s3:::${local.without_protocol}${local.directory_wildcard}"
       ]
     }
   ]
-}
-
-output "iam_statements" {
-  value = local.iam_statements
 }
