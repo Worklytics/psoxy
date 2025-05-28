@@ -5,6 +5,8 @@ import co.worklytics.psoxy.rules.RESTRules;
 import lombok.Getter;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -193,11 +195,18 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
-    @Test
-    void org_audit_log() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "?phrase=action:copilot&include=web",
+        "?phrase=action:copilot+created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000&include=web&per_page=100",
+        "?phrase=action:copilot+created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000&include=web&per_page=100&page=0&order=asc&after=MS42OEQyOTE2MjX1MqNlJzIyfANVOHoYbUVsZ1ZjUWN6TwlZLXl6EVE%3D&before",
+        "?include=web&phrase=action:copilot",
+        "?phrase=action:copilot&include=web",
+    })
+    void org_audit_log(String query) {
         String jsonString = asJson("org_audit_log.json");
 
-        String endpoint = "https://api.github.com/orgs/{org}/audit-log";
+        String endpoint = "https://api.github.com/orgs/{org}/audit-log" + query;
 
         Collection<String> PII = Arrays.asList(
                 "octocat",
@@ -218,6 +227,21 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
         assertUrlAllowed(endpoint);
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "",
+        "?include=git",
+        "?phrase=action:something",
+        "?phrase=action:copilot&include=git",
+        "?phrase=action:copilot+action:something&include=git",
+        "?phrase=action:copilot+created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000&page=0&order=asc&after=MS42OEQyOTE2MjX1MqNlJzIyfANVOHoYbUVsZ1ZjUWN6TwlZLXl6EVE%3D&before",
+    })
+    void org_audit_log_should_block_no_copilot_stuff(String query) {
+        String endpoint = "https://api.github.com/orgs/{org}/audit-log" + query;
+
+       assertUrlBlocked(endpoint);
+    }
+
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
@@ -227,8 +251,8 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://api.github.com/graphql", "graph_api_error.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/teams", "org_teams.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/teams/TEAM/members", "team_members.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/audit-log", "org_audit_log.json"),
-                InvocationExample.of("https://api.github.com/organizations/123456789/audit-log?include=all&per_page=100&phrase=created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000&page=0&order=asc&after=MS42OEQyOTE2MjX1MqNlJzIyfANVOHoYbUVsZ1ZjUWN6TwlZLXl6EVE%3D&before", "org_audit_log.json"),
+                InvocationExample.of("https://api.github.com/orgs/FAKE/audit-log?phrase=action:copilot&include=web", "org_audit_log.json"),
+                InvocationExample.of("https://api.github.com/organizations/123456789/audit-log?include=web&per_page=100&phrase=action:copilot+created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000&page=0&order=asc&after=MS42OEQyOTE2MjX1MqNlJzIyfANVOHoYbUVsZ1ZjUWN6TwlZLXl6EVE%3D&before", "org_audit_log.json"),
                 InvocationExample.of("https://api.github.com/orgs/FAKE/copilot/billing/seats", "org_copilot_seats.json")
         );
     }

@@ -659,9 +659,13 @@ public class PrebuiltSanitizerRules {
             .endpoint(ORG_TEAMS)
             .endpoint(ORG_TEAM_MEMBERS)
             .endpoint(ORG_COPILOT_SEATS)
-            .endpoint(ORG_AUDIT_LOG)
-            .endpoint(ORG_AUDIT_LOG_WITH_INSTALLATION_ID)
-            .build();
+            .endpoint(ORG_AUDIT_LOG
+                // Only support copilot actions and web (non-git) events
+                .withPathRegex("^/orgs/[^/]+/audit-log\\?(?=[A-Za-z0-9=&%+:\\._\\-]*phrase=action:copilot(?:\\+created=[^&]+)?)(?=[A-Za-z0-9=&%+:\\._\\-]*include=web)[A-Za-z0-9=&%+:\\._\\-]+$"))
+        .endpoint(ORG_AUDIT_LOG_WITH_INSTALLATION_ID
+                // Only support copilot actions and web (non-git) events
+            .withPathRegex("^/organizations\\/\\d+\\/audit-log\\?(?=[A-Za-z0-9=&%+:\\._\\-]*phrase=action:copilot(?:\\+created=[^&]+)?)(?=[A-Za-z0-9=&%+:\\._\\-]*include=web)[A-Za-z0-9=&%+:\\._\\-]+$"))
+        .build();
 
     @VisibleForTesting
     static final RESTRules GITHUB_ENTERPRISE_SERVER = Rules2.builder()
