@@ -36,6 +36,8 @@ public class PrebuiltSanitizerRules {
             "direction"
     );
 
+    private final static String COPILOT_AUDIT_LOG_QUERY_SUPPORTED_REGEX = "\\?(?=[A-Za-z0-9=&%+:\\._\\-]*phrase=action:copilot(?:\\+created=[^&]+)?)(?=[A-Za-z0-9=&%+:\\._\\-]*include=web)[A-Za-z0-9=&%+:\\._\\-]+$";
+
     private static final List<String> orgMembersAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
                     Lists.newArrayList("filter",
                             "role").stream())
@@ -661,10 +663,10 @@ public class PrebuiltSanitizerRules {
             .endpoint(ORG_COPILOT_SEATS)
             .endpoint(ORG_AUDIT_LOG
                 // Only support copilot actions and web (non-git) events
-                .withPathRegex("^/orgs/[^/]+/audit-log\\?(?=[A-Za-z0-9=&%+:\\._\\-]*phrase=action:copilot(?:\\+created=[^&]+)?)(?=[A-Za-z0-9=&%+:\\._\\-]*include=web)[A-Za-z0-9=&%+:\\._\\-]+$"))
+                .withPathRegex("^/orgs/[^/]+/audit-log" + COPILOT_AUDIT_LOG_QUERY_SUPPORTED_REGEX))
         .endpoint(ORG_AUDIT_LOG_WITH_INSTALLATION_ID
                 // Only support copilot actions and web (non-git) events
-            .withPathRegex("^/organizations\\/\\d+\\/audit-log\\?(?=[A-Za-z0-9=&%+:\\._\\-]*phrase=action:copilot(?:\\+created=[^&]+)?)(?=[A-Za-z0-9=&%+:\\._\\-]*include=web)[A-Za-z0-9=&%+:\\._\\-]+$"))
+            .withPathRegex("^/organizations\\/\\d+\\/audit-log" + COPILOT_AUDIT_LOG_QUERY_SUPPORTED_REGEX))
         .build();
 
     @VisibleForTesting
