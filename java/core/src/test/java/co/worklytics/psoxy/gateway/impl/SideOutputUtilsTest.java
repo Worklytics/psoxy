@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 
@@ -27,6 +28,7 @@ class SideOutputUtilsTest {
         HttpEventRequest request = mock(HttpEventRequest.class);
         when(request.getHttpMethod()).thenReturn("GET");
         when(request.getHeader("Host")).thenReturn(Optional.of("example.com"));
+        when(request.getHeaders()).thenReturn(Collections.emptyMap());
         when(request.getPath()).thenReturn("/api/v1/resource/");
         when(request.getQuery()).thenReturn(Optional.of("b=2&a=1"));
 
