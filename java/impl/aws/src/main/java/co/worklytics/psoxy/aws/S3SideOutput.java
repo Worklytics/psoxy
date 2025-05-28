@@ -28,8 +28,11 @@ public class S3SideOutput implements SideOutput {
     SideOutputUtils sideOutputUtils;
 
     @AssistedInject
-    public S3SideOutput(@Assisted  String bucket,
-                        @Assisted String pathPrefix) {
+    public S3SideOutput(@Assisted("bucket") String bucket,
+                        @Assisted("pathPrefix") String pathPrefix) {
+        if (StringUtils.isBlank(bucket)) {
+            throw new IllegalArgumentException("Bucket name must not be blank");
+        }
         this.bucket = bucket;
         this.pathPrefix = StringUtils.trimToEmpty(pathPrefix);
     }

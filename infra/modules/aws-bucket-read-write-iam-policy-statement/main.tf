@@ -2,7 +2,9 @@
 
 
 locals {
-  directory_wildcard = ends_with(var.s3_path, "/") ? "*" : "/*"
+  without_protocol = try(replace(var.s3_path, "s3://", ""), "")
+
+  directory_wildcard = endswith(local.without_protocol, "/") ? "*" : "/*"
 
   iam_statements = var.s3_path == null ? [] : [
     {

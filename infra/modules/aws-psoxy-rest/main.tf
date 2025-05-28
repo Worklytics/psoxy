@@ -35,8 +35,8 @@ locals {
   # so oddly, for APIGatewayV2 we need to use 1.0 format instead of its default , even though that default is our usual case otherwise
   event_handler_implementation = local.use_api_gateway ? "APIGatewayV1Handler" : "Handler"
 
-  provision_side_output_original_bucket  = var.side_output_original == null || var.side_output_original.bucket != null ? false : true
-  provision_side_output_sanitized_bucket = var.side_output_sanitized == null || var.side_output_sanitized.bucket != null ? false : true
+  provision_side_output_original_bucket  = try(var.side_output_original != null && var.side_output_original.bucket == null, false)
+  provision_side_output_sanitized_bucket = try(var.side_output_sanitized != null && var.side_output_sanitized.bucket == null, false)
 
 }
 

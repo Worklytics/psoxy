@@ -5,7 +5,6 @@ import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.SideOutput;
 import co.worklytics.psoxy.gateway.impl.SideOutputUtils;
 import com.google.cloud.WriteChannel;
-import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import dagger.assisted.Assisted;
@@ -34,8 +33,11 @@ public class GCSSideOutput implements SideOutput {
     SideOutputUtils sideOutputUtils;
 
     @AssistedInject
-    public GCSSideOutput(@Assisted  @NonNull String bucket,
-                         @Assisted String pathPrefix) {
+    public GCSSideOutput(@Assisted("bucket") String bucket,
+                         @Assisted("pathPrefix") String pathPrefix) {
+        if (StringUtils.isBlank(bucket)) {
+            throw new IllegalArgumentException("Bucket name must not be blank");
+        }
         this.bucket = bucket;
         this.pathPrefix = StringUtils.trimToEmpty(pathPrefix);
     }

@@ -125,7 +125,7 @@ public interface GcpModule {
     abstract class Bindings {
 
         @Binds
-        abstract SideOutputFactory<GCSSideOutput> sideOutputFactory(GCSSideOutputFactory sideOutputFactory);
+        abstract SideOutputFactory<? extends SideOutput> sideOutputFactory(GCSSideOutputFactory sideOutputFactory);
 
     }
 }

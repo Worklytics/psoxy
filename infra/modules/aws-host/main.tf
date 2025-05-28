@@ -83,13 +83,15 @@ resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {
 locals {
   path_to_shared_secrets = var.secrets_store_implementation == "aws_secrets_manager" ? var.aws_secrets_manager_path : var.aws_ssm_param_root_path
 
+  # convert custom_side_outputs to the format expected by the psoxy module
   custom_original_side_outputs = { for k, v in var.custom_side_outputs :
-    k => { bucket = v.ORIGINAL } if v.ORIGINAL != null
+    k => { bucket = v.ORIGINAL, allowed_readers = [] } if v.ORIGINAL != null
   }
   custom_sanitized_side_outputs = { for k, v in var.custom_side_outputs :
-    k => { bucket = v.SANITIZED } if v.SANITIZED != null
+    k => { bucket = v.SANITIZED, allowed_readers = [] } if v.SANITIZED != null
   }
   required_side_output_config = {
+    bucket          = null
     allowed_readers = [module.psoxy.api_caller_role_arn]
   }
 

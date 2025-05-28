@@ -43,10 +43,10 @@ locals {
 locals {
   side_output_environment_variables = merge(
     var.side_output_original == null ? {} : {
-      SIDE_OUTPUT_ORIGINAL = var.side_output_original.bucket,
+      SIDE_OUTPUT_ORIGINAL = var.side_output_original,
     },
     var.side_output_sanitized == null ? {} : {
-      SIDE_OUTPUT_SANITIZED = var.side_output_sanitized.bucket,
+      SIDE_OUTPUT_SANITIZED = var.side_output_sanitized
     }
   )
 }
