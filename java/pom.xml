@@ -26,6 +26,7 @@
         <dependency.junit-jupiter.version>5.10.1</dependency.junit-jupiter.version>
         <dependency.mockito-junit-jupiter.version>5.18.0</dependency.mockito-junit-jupiter.version>
         <dependency.json-path.version>2.9.0</dependency.json-path.version>
+        <plugin.surefire.version>3.5.3</plugin.surefire.version>
     </properties>
 
     <dependencyManagement>
