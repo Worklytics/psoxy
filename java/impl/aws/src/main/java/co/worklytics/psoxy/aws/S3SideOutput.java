@@ -34,7 +34,8 @@ public class S3SideOutput implements SideOutput {
             throw new IllegalArgumentException("Bucket name must not be blank");
         }
         this.bucket = bucket;
-        this.pathPrefix = StringUtils.trimToEmpty(pathPrefix);
+        String trimmedPath = StringUtils.trimToEmpty(pathPrefix);
+        this.pathPrefix = trimmedPath.endsWith("/") ? trimmedPath : trimmedPath + "/";
     }
 
     @Override
