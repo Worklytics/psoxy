@@ -8,11 +8,13 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
+import lombok.NonNull;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.io.ByteArrayInputStream;
 import java.util.logging.Level;
 
 @Log
@@ -35,22 +37,26 @@ public class S3SideOutput implements SideOutput {
         }
         this.bucket = bucket;
         String trimmedPath = StringUtils.trimToEmpty(pathPrefix);
-        this.pathPrefix = trimmedPath.endsWith("/") ? trimmedPath : trimmedPath + "/";
+        this.pathPrefix = (trimmedPath.endsWith("/") || StringUtils.isEmpty(trimmedPath)) ? trimmedPath : trimmedPath + "/";
     }
 
     @Override
-    public void write(HttpEventRequest request, ProcessedContent content) {
+    public void write(@NonNull HttpEventRequest request, @NonNull ProcessedContent content) {
         try {
             AmazonS3 s3Client = s3ClientProvider.get();
+
+            byte[] compressedContent =
+                sideOutputUtils.gzipContent(content.getContent(), content.getContentCharset());
 
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentEncoding("gzip");
             metadata.setContentType(content.getContentType());
             metadata.setUserMetadata(sideOutputUtils.buildMetadata(request));
+            metadata.setContentLength(compressedContent.length);  //explicit length avoids S3 complaint about buffering ...
 
             s3Client.putObject(bucket,
                 pathPrefix + sideOutputUtils.canonicalResponseKey(request),
-                sideOutputUtils.toGzippedStream(content.getContent(), content.getContentCharset()),
+                new ByteArrayInputStream(compressedContent),
                 metadata);
         } catch (Exception e) {
             log.log(Level.WARNING, "Failed to write to S3 sideOutput", e);

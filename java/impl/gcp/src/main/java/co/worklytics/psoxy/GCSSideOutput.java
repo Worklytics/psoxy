@@ -15,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.io.InputStream;
 import java.util.logging.Level;
 
 @Log
@@ -41,13 +40,13 @@ public class GCSSideOutput implements SideOutput {
         this.bucket = bucket;
         String trimmedPath = StringUtils.trimToEmpty(pathPrefix);
         // Ensure the path prefix ends with a slash, if non-empty
-        this.pathPrefix = trimmedPath.endsWith("/") ? trimmedPath : trimmedPath + "/";
+        this.pathPrefix = (trimmedPath.endsWith("/") || StringUtils.isEmpty(trimmedPath)) ? trimmedPath : trimmedPath + "/";
     }
 
 
 
     @Override
-    public void write(HttpEventRequest request, ProcessedContent content) {
+    public void write(@NonNull HttpEventRequest request, @NonNull ProcessedContent content) {
         try {
             Storage storageClient = storageProvider.get();
 
@@ -56,14 +55,9 @@ public class GCSSideOutput implements SideOutput {
                         .setContentType(content.getContentType())
                         .setContentEncoding("gzip")
                         .setMetadata(sideOutputUtils.buildMetadata(request))
-                        .build());
-                 InputStream gzippedStream = sideOutputUtils.toGzippedStream(content.getContent(), content.getContentCharset())
-            ) {
-                    byte[] buffer = new byte[BUFFER_SIZE];
-                    int bytesRead;
-                    while ((bytesRead = gzippedStream.read(buffer)) != -1) {
-                        writeChannel.write(java.nio.ByteBuffer.wrap(buffer, 0, bytesRead));
-                    }
+                        .build())) {
+                 byte[] compressed = sideOutputUtils.gzipContent(content.getContent(), content.getContentCharset());
+                writeChannel.write(java.nio.ByteBuffer.wrap(compressed, 0, compressed.length));
             }
         } catch (Exception e) {
             log.log(Level.WARNING, "Failed to write to GCS sideOutput", e);

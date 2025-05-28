@@ -4,6 +4,7 @@ import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.output.NoSideOutput;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -86,35 +87,22 @@ public class SideOutputUtils {
     }
 
     /**
-     * wrap in output stream that will  have the content encoded as gzip
+     * gzip the content
      *
-     * @param content
-     * @param contentCharset
-     * @return a stream that will gzip the content
+     * @param content  to compress
+     * @param contentCharset of the content,
+     * @return a byte[] reflecting gzip-encoding of the content
      */
     @SneakyThrows
-    public InputStream toGzippedStream(String content, Charset contentCharset) {
-        final PipedInputStream pipedInputStream = new PipedInputStream(8192);
-        final PipedOutputStream pipedOutputStream = new PipedOutputStream(pipedInputStream);
-
-        Thread thread = new Thread(() -> {
-            try (OutputStream gzipStream = new GZIPOutputStream(pipedOutputStream)) {
-                gzipStream.write(content.getBytes(contentCharset));
-            } catch (IOException e) {
-                // in side output failure, I think we usually want to blow up
-                throw new RuntimeException(e);
-            } finally {
-                try {
-                    pipedOutputStream.close();
-                } catch (IOException ignored) {
-                }
-            }
-        });
-
-        thread.setDaemon(true);
-        thread.start();
-
-        return pipedInputStream;
+    public byte[] gzipContent(@NonNull String content, @NonNull Charset contentCharset) {
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+             GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream)) {
+            gzipOutputStream.write(content.getBytes(contentCharset));
+            gzipOutputStream.finish();
+            return byteArrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to gzip content", e);
+        }
     }
 
     /**

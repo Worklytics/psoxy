@@ -1,5 +1,7 @@
 package co.worklytics.psoxy.gateway;
 
+import lombok.NonNull;
+
 import java.io.IOException;
 
 /**

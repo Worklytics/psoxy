@@ -332,6 +332,8 @@ public class CommonRequestHandler {
         metadata.put(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
 
         return ProcessedContent.builder()
+            .contentType(originalContent.getContentType())
+            .contentCharset(originalContent.getContentCharset())
             .metadata(metadata)
             .content(sanitized)
             .build();
