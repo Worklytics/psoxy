@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.gateway.impl;
 
+import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.output.NoSideOutput;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -33,6 +35,7 @@ public class SideOutputUtils {
     enum ObjectMetadataKey {
         PII_SALT_SHA256("PII-Salt-Sha256"),
         PROXY_VERSION("Psoxy-Version"),
+        USER_TO_IMPERSONATE("User-To-Impersonate"),
         ;
 
         private final String key;
@@ -57,7 +60,7 @@ public class SideOutputUtils {
      *       for use as a key in S3/GCS ...
      */
     public String canonicalResponseKey(HttpEventRequest request) {
-        //q: do we need to consider response headers?
+        //q: do we need to consider response headers? YES!!!!
         // - eg, could be API responses that are NOT cacheable, so in theory we should append some of the headers that denote this
         //     eg, etag, Expires,
 
@@ -68,8 +71,7 @@ public class SideOutputUtils {
             + request.getHeader("Host").orElse("")
             + "/"
             + normalizePath(request.getPath())
-            + "_"
-            + request.getQuery().map(this::hashQueryString).orElse("");
+            + hashQueryAndHeaders(request).map(s -> "_" + s).orElse("");
     }
 
     public  Map<String, String>  buildMetadata(HttpEventRequest request) {
@@ -81,7 +83,9 @@ public class SideOutputUtils {
         // - eg, data can only be linked if/when this value is consistent
         metadata.put(ObjectMetadataKey.PII_SALT_SHA256.key, healthCheckRequestHandler.piiSaltHash());
 
-        // q: proxy instance?
+        request.getHeaders().entrySet().stream()
+            .filter(entry -> this.isParameterHeader(entry.getKey()))
+            .forEach(entry -> metadata.put(entry.getKey(), String.join(",", entry.getValue())));
 
         return metadata;
     }
@@ -153,10 +157,60 @@ public class SideOutputUtils {
             .collect(Collectors.joining("/"));
     }
 
-    private String hashQueryString(String rawQuery) {
-        if (rawQuery == null || rawQuery.isEmpty()) return "";
+    private Optional<String> hashQueryAndHeaders(HttpEventRequest httpEventRequest) {
 
-        List<String> sortedParams = Arrays.stream(rawQuery.split("&"))
+        String canonicalQuery = canonicalQuery(httpEventRequest.getQuery());
+
+        // add any headers that are relevant to response contents
+        String canonicalHeaders = httpEventRequest.getHeaders().entrySet().stream()
+            .filter(entry -> isParameterHeader(entry.getKey()))
+            .map(entry -> entry.getKey() + "=" + entry.getValue())
+            .sorted()
+            .collect(Collectors.joining(";"));
+
+         return Optional.ofNullable(StringUtils.trimToNull(canonicalQuery + canonicalHeaders))
+             .map(DigestUtils::md5Hex);
+    }
+
+    final static Set<String> HEADERS_TO_IGNORE = Set.of(
+        "Host",
+        "User-Agent",
+        "Accept",
+        "Accept-Encoding",
+        "Authorization", // not relevant to response contents, and may contain sensitive info
+        "Content-Length",
+        "Forwarded",
+        "traceparent",
+        "X-Forwarded-For",
+        "x-cloud-trace-context",
+        "X-Forwarded-Proto"
+    ).stream().map(String::toLowerCase).collect(Collectors.toSet());
+
+    /**
+     * a header that parameterizes response content.
+     *  (eg, would expect multiple possible valid values for the headers for requests through same connection,
+     *   with expectation that those requests result in different responses)
+     *
+     *  eg, stuff like 'User-Agent' is NOT expected to result in different responses, so is not a parameter header.
+     *
+     * @param headerName to test
+     * @return true if the header is a parameter header, false otherwise
+     */
+    boolean isParameterHeader(String headerName) {
+        String caseInsensitiveHeaderName = headerName.toLowerCase(Locale.ROOT);
+        return ControlHeader.USER_TO_IMPERSONATE.getHttpHeader().toLowerCase().equals(caseInsensitiveHeaderName)
+        || (!HEADERS_TO_IGNORE.contains(caseInsensitiveHeaderName) &&
+            !caseInsensitiveHeaderName.startsWith("x-psoxy-") && // ignore control headers (other than USER_TO_IMPERSONATE)
+            !caseInsensitiveHeaderName.startsWith("x-amz-") && // ignore AWS-specific headers
+            !caseInsensitiveHeaderName.startsWith("x-goog-")); // ignore GCP-specific headers
+    }
+
+
+
+    String canonicalQuery(Optional<String> rawQuery) {
+        if (rawQuery.isEmpty()) return "";
+
+        List<String> sortedParams = Arrays.stream(rawQuery.get().split("&"))
             .map(s -> s.split("=", 2))
             .map(pair -> {
                 String key = URLDecoder.decode(pair[0], StandardCharsets.UTF_8);
@@ -166,10 +220,7 @@ public class SideOutputUtils {
             .sorted()
             .collect(Collectors.toList());
 
-        String canonicalQuery = String.join("&", sortedParams);
-        return DigestUtils.md5Hex(canonicalQuery);
+     return String.join("&", sortedParams);
     }
-
-
 
 }

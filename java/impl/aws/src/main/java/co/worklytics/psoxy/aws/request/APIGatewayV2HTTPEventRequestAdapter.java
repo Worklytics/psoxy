@@ -3,11 +3,14 @@ package co.worklytics.psoxy.aws.request;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Streams;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 import java.util.Map;
@@ -83,6 +86,17 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
     @Override
     public Optional<List<String>> getMultiValueHeader(@NonNull String headerName) {
         return getHeader(headerName.toLowerCase()).map(s -> Splitter.on(',').splitToList(s));
+    }
+
+    @Override
+    public Map<String, List<String>> getHeaders() {
+        return event.getHeaders().entrySet().stream().map(entry -> Pair.of(entry.getKey(), Splitter.on(',').splitToList(entry.getValue())))
+        .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (a, b) -> {
+            // merge multi-value headers
+            List<String> merged = ObjectUtils.defaultIfNull(a, List.of());
+            merged.addAll(ObjectUtils.defaultIfNull(b, List.of()));
+            return merged;
+        }));
     }
 
     @Override

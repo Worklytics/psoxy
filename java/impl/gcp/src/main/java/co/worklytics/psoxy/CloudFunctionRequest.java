@@ -76,6 +76,11 @@ public class CloudFunctionRequest implements HttpEventRequest {
     }
 
     @Override
+    public Map<String, List<String>> getHeaders() {
+        return request.getHeaders();
+    }
+
+    @Override
     public String getHttpMethod() {
         return request.getMethod();
     }

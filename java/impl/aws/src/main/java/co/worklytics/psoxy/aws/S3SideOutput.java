@@ -60,7 +60,6 @@ public class S3SideOutput implements SideOutput {
                 metadata);
         } catch (Exception e) {
             log.log(Level.WARNING, "Failed to write to S3 sideOutput", e);
-            throw new RuntimeException(e);
         }
     }
 

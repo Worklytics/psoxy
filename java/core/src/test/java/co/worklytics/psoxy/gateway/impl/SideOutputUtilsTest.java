@@ -2,6 +2,8 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -49,5 +51,19 @@ class SideOutputUtilsTest {
                 String decompressedContent = reader.readLine();
                 assertEquals(content, decompressedContent);
             }
+    }
+
+    @ValueSource(
+        strings = {
+            "Authorization",
+            "X-Forwarded-For",
+            "User-Agent",
+            "X-Forwarded-Proto",
+            "Host",
+        }
+    )
+    @ParameterizedTest
+    void testIsParameterHeader_not(String header) {
+        assertFalse(utils.isParameterHeader(header));
     }
 }

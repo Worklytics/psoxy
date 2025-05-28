@@ -1,0 +1,102 @@
+---
+endpoints:
+  - pathTemplate: "/v2/users"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.users[*]['email','phone_number']"
+        encoding: "JSON"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.users[*]['id','pmi']"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.users[*]['display_name','first_name','last_name','pic_url','employee_unique_id']"
+  - pathTemplate: "/v2/users/{userId}/meetings"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.meetings[*]['host_id','host_email']"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$.meetings[*]['topic','join_url','start_url','agenda']"
+  - pathTemplate: "/v2/meetings/{meetingId}"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.['host_id','host_email']"
+          - "$..email"
+          - "$..contact_email"
+          - "$..participants[*]"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$.['topic','agenda','custom_keys']"
+          - "$.settings.['alternative_hosts','enforce_login_domains','approved_or_denied_countries_or_regions','audio_conference_info','name','authentication_name','authentication_option','contact_name','custom_keys','global_dial_in_countries','global_dial_in_numbers']"
+          - "$.['password','h323_password','pstn_password','encrypted_password','start_url']"
+          - "$..join_url"
+          - "$..name"
+  - pathTemplate: "/v2/meetings/{meetingId}/meeting_summary"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$['meeting_host_id','meeting_host_email', 'summary_last_modified_user_id','summary_last_modified_user_email']"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$['meeting_topic','summary_title']"
+          - "$..summary_overview"
+          - "$.summary_details[*].label"
+          - "$.summary_details[*].summary"
+          - "$.edited_summary.summary_details"
+          - "$..next_steps[*]"
+  - pathTemplate: "/v2/past_meetings/{meetingId}/instances"
+  - pathTemplate: "/v2/past_meetings/{meetingId}"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.['host_id','user_email','host_email']"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$.['user_name','topic','agenda']"
+  - pathTemplate: "/v2/past_meetings/{meetingId}/participants"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.participants[*]['id','user_email','pmi']"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$.participants[*]['name','registrant_id']"
+  - pathTemplate: "/v2/report/users/{accountId}/meetings"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.meetings[*]['host_id','user_email','host_email']"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$.meetings[*]['user_name','topic','custom_keys','tracking_fields']"
+  - pathTemplate: "/v2/report/meetings/{meetingId}"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.['host_id','user_email','host_email']"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$.['user_name','topic','custom_keys','tracking_fields']"
+  - pathTemplate: "/v2/report/meetings/{meetingId}/participants"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.participants[*]['id','user_email','user_id','pmi']"
+        encoding: "JSON"
+      - !<redact>
+        jsonPaths:
+          - "$.participants[*]['name','registrant_id','display_name']"
+

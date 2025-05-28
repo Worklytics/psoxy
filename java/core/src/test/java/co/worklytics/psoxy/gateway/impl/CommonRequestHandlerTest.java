@@ -130,6 +130,11 @@ class CommonRequestHandlerTest {
             }
 
             @Override
+            public Map<String, List<String>> getHeaders() {
+                return Map.of();
+            }
+
+            @Override
             public String getHttpMethod() {
                 return "GET";
             }

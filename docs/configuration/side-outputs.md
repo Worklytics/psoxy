@@ -78,6 +78,11 @@ See `SideOutputUtils::canonicalResponseKey` for details.
 
 
 
+## Issues
+  - headers that matter / don't matter in response content; what to do? (eg Google 'User-to-Impersonate') - that's a proprietary one.
+  - do we need to store Response headers, as well as Request headers, in object metdata?
+  - `/` in paths get split up in GCS/S3 ux, which is annoying; makes it hard to browse the bucket.
+
 ## Future Work
   - support for multiple side outputs ?? ( probably unavoidable, and should do ASAP )
       - or tbh, combine them into a single bucket probably, right??  depends

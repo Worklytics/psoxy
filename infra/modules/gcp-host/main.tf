@@ -133,12 +133,13 @@ locals {
 
 
   custom_original_side_outputs = { for k, v in var.custom_side_outputs :
-    k => { bucket = v.ORIGINAL } if v.ORIGINAL != null
+    k => { bucket = v.ORIGINAL, allowed_readers = [] } if v.ORIGINAL != null
   }
   custom_sanitized_side_outputs = { for k, v in var.custom_side_outputs :
-    k => { bucket = v.SANITIZED } if v.SANITIZED != null
+    k => { bucket = v.SANITIZED, allowed_readers = [] } if v.SANITIZED != null
   }
   required_side_output_config = {
+    bucket          = null
     allowed_readers = [for v in var.worklytics_sa_emails : "serviceAccount:${v}"]
   }
 

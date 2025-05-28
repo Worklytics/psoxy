@@ -16,11 +16,12 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
 
 locals {
   side_outputs = { for k, v in {
-    sanitized = var.side_output_sanitized != null ? var.side_output_sanitized : null
-    original  = var.side_output_original != null ? var.side_output_original : null
+    sanitized = var.side_output_sanitized
+    original  = var.side_output_original
   } : k => v if v != null }
 
-  side_outputs_to_provision = { for k, v in local.side_outputs : k => v if v.bucket == null }
+  side_outputs_to_provision    = { for k, v in local.side_outputs : k => v if v.bucket == null }
+  side_outputs_to_grant_access = { for k, v in local.side_outputs : k => v if v.bucket != null }
 }
 
 resource "random_string" "bucket_name_random_sequence" {
@@ -45,6 +46,16 @@ module "side_output_bucket" {
   bucket_name_suffix             = "sideoutput"
   sanitizer_accessor_principals  = each.value.allowed_readers
 }
+
+# TODO: will this work cross-project ?? concern would be that `bucket_write_role_id` is likely a project-level role
+resource "google_storage_bucket_iam_member" "grant_sa_accessor_on_side_output_buckets" {
+  for_each = local.side_outputs_to_grant_access
+
+  bucket = replace(each.value.bucket, "gs://", "")
+  member = "serviceAccount:${var.service_account_email}"
+  role   = var.bucket_write_role_id
+}
+
 
 locals {
   side_output_env_vars = { for k, v in local.side_outputs :

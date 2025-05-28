@@ -40,6 +40,7 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
         </processorPath>
         <module name="core" />
+        <module name="psoxy-aws" />
         <module name="gateway-core" />
         <module name="psoxy-gcp" />
         <module name="psoxy-cmd-line" />

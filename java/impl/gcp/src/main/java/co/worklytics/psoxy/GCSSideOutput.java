@@ -61,7 +61,8 @@ public class GCSSideOutput implements SideOutput {
             }
         } catch (Exception e) {
             log.log(Level.WARNING, "Failed to write to GCS sideOutput", e);
-            throw new RuntimeException(e);
+            // TODO: configurable if this is fatal??
+            // throw something an let common request handler do something?? (Eg, return an error header?? )
         }
     }
 
