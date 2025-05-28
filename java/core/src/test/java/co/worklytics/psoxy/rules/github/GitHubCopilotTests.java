@@ -200,7 +200,9 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
         "?phrase=action:copilot&include=web",
         "?phrase=action:copilot+created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000&include=web&per_page=100",
         "?phrase=action:copilot+created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000&include=web&per_page=100&page=0&order=asc&after=MS42OEQyOTE2MjX1MqNlJzIyfANVOHoYbUVsZ1ZjUWN6TwlZLXl6EVE%3D&before",
-        "?include=web&phrase=action:copilot"
+        "?include=web&phrase=action:copilot",
+        "?include=web&per_page=100&page=0&order=asc&after=MS42OEQyOTE2MjX1MqNlJzIyfANVOHoYbUVsZ1ZjUWN6TwlZLXl6EVE%3D&before&phrase=action:copilot+created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000",
+        "?per_page=100&phrase=action:copilot+created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000&include=web&page=0&order=asc&after=MS42OEQyOTE2MjX1MqNlJzIyfANVOHoYbUVsZ1ZjUWN6TwlZLXl6EVE%3D&before",
     })
     void org_audit_log(String query) {
         String jsonString = asJson("org_audit_log.json");
