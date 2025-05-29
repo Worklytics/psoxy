@@ -192,8 +192,8 @@ variable "side_output_original" {
   default     = null
 
   validation {
-    condition     = var.side_output_original == null || can(regex("^s3://[a-zA-Z][a-zA-Z0-9-_ ]*[a-zA-Z0-9](/.*)?$", var.side_output_original))
-    error_message = "The `side_output_original` target must be s3 bucket address. May include a path within the bucket, in which case we highly recommend you end it with a slash (`/`)."
+    condition     = var.side_output_original == null || can(regex("^s3://[a-z0-9][a-z0-9-]*[a-z0-9](/.*)?$", var.side_output_original))
+    error_message = "The `side_output_original` target must be a valid S3 bucket address. Bucket names must only contain lowercase letters, numbers, and hyphens, and must start and end with a lowercase letter or number. May include a path within the bucket, in which case we highly recommend you end it with a slash (`/`)."
   }
 }
 
