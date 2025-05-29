@@ -1,31 +1,32 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.http.HttpStatus;
 
 import javax.inject.Inject;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 
+/**
+ * TODO: rename this to GcpApiDataRequestHandler, or something similar in 0.6+
+ */
 @Log
 //@RequiredArgsConstructor(onConstructor_ = {@Inject})  //why doesn't this work
 public class HttpRequestHandler {
 
-    final CommonRequestHandler requestHandler;
+    final ApiDataRequestHandler requestHandler;
     final EnvVarsConfigService envVarsConfigService;
 
     @Inject
-    public HttpRequestHandler(CommonRequestHandler requestHandler, EnvVarsConfigService envVarsConfigService) {
+    public HttpRequestHandler(ApiDataRequestHandler requestHandler, EnvVarsConfigService envVarsConfigService) {
         this.requestHandler = requestHandler;
         this.envVarsConfigService = envVarsConfigService;
     }

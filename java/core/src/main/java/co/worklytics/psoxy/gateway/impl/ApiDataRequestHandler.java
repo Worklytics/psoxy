@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
-public class CommonRequestHandler {
+public class ApiDataRequestHandler {
 
     //we have ~540 total in Cloud Function connection, so can have generous values here
     private static final int SOURCE_API_REQUEST_CONNECT_TIMEOUT_MILLISECONDS = 30_000;
@@ -457,7 +457,7 @@ public class CommonRequestHandler {
      */
     @VisibleForTesting
     static Set<String> normalizeHeaders(Set<String> headers) {
-        return headers.stream().map(CommonRequestHandler::normalizeHeader).collect(Collectors.toUnmodifiableSet());
+        return headers.stream().map(ApiDataRequestHandler::normalizeHeader).collect(Collectors.toUnmodifiableSet());
     }
 
     @SneakyThrows

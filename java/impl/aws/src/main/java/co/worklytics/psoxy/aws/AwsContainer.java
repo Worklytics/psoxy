@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.*;
-import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import dagger.Component;
 
 import javax.inject.Singleton;
@@ -16,7 +16,7 @@ import javax.inject.Singleton;
 })
 public interface AwsContainer {
 
-    CommonRequestHandler createHandler();
+    ApiDataRequestHandler createHandler();
 
     S3Handler injectS3Handler(S3Handler s3Handler);
 }

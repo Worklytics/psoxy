@@ -3,10 +3,17 @@
 **ALPHA FEATURE** - This is an alpha feature, not yet available in production. Description below is for design purposes only,
 and may change or not be implemented as described.
 
-***Use case: ** on-premise / custom tools, managed in house by customers. Customers can fire webhooks from these
+***Use case: **
+   - custom tools, managed in house by customers. Customers can fire webhooks from these
 tools to webhook collectors, which sanitize the data (namely, consistently pseudonymizing any PII such that it's linkable
 to other data sources) and collect it into bulk data storage (e.g. S3, GCS, etc), from which Worklytics can later read it
  asynchronously.
+   - on-prem / self-hosted tools (JIRA) that can be configured to fire webhooks
+   - tools that fire webhooks which provide richer data than they expose via their APIs
+
+MVP will really only support the first one, where all relevant data is send as JSON body of a webhook
+request.  Webhook path, query parameters, and headers will be irrelevant to what's stored in the
+bucket.
 
 ## Concept
 
@@ -28,7 +35,7 @@ the payload.
 
 See [jwt.io](https://jwt.io/) for more details on how to generate and verify JWT tokens in general.  JWT
 are a common identity token solution, used by many OAuth2 and OpenID Connect providers - including Microsoft, Google,
-etc. 
+etc.
 
 Additional authentication checks:
    - IP range of request
@@ -55,4 +62,88 @@ This requires more extensive server-side logic in the Tool Server; and may have 
 
 In this scenario, the Tool Client sends webhook payloads directly to the Webhook Collector, which is configured
 to NOT require a JWT identity token.  This is useful when Webhook Collector can be hosted on a trusted network,
-or its trust in the Tool Client can be independently established (such as with IAM/API Gateway rules in AWS)
+or its trust in the Tool Client can be independently established (such as with IAM/API Gateway rules in AWS
+
+
+## Implementation Design
+
+A new entry point handler; `InboundWebhookHandler` that will handle incoming webhook requests to proxy instances.
+That will sanitize the payloads and write them to a bulk storage location as set in an `OUTPUT` environment variable.
+   - similar approach to API case, where there are host-platform-specific wrappers around a common handler ?? prob.
+
+Rules of type `WebhookRules`, which is a list of `WebhookRule` objects; first matching rule will be applied to the incoming
+webhook request. If none match, collector will return a 400 Bad Request response.
+
+No matching in v1, so effectively just one `WebhookRule` will have the following properties:
+ - `transforms` - a list (ordered) of transforms to apply to the incoming webhook payload before storing it.
+
+```yaml
+webhookRules:
+  - transforms:
+      - !<pseudonymize>
+         jsonPaths:
+           - "$.employeeEmail"
+           - "$.managerEmail"
+```
+
+Optionally, an `OUTPUT_ORIGINAL` environment variable can be set to store the original payloads in a different bucket/location.
+
+Terraform - `gcp-webhook-collector` and `aws-webhook-collector` modules that will deploy the necessary infrastructure. These will:
+   - provision `-output` bucket for bulk storage of webhook payloads, readable to caller IAM role/principal (e.g. Worklytics tenant)
+   - provision KMS asymmetric key-pair for verifying the webhook payloads. (optional;)
+   - `payload_verification` - `object` - configuration for payload verification, with the following options:
+        - `{ strategy: "none" }` - no verification of payloads; all payloads are accepted.
+        - `{ strategy: "managed_key" }` (default) - our tf modules provision key-pair; export it for you to use
+        - `{ strategy: "public_key", key_id  OR key_value }` - use a custom KMS key for verifying payloads.
+        - `{ strategy: "custom_key", key_id: "..." }` - use a custom KMS key for verifying payloads.
+   - hooks in aws-host/gcp-host to provision `webhook_collectors` variable; map id --> config (`payload_verification`)
+
+Add KMS services to prereqs; what we expect to have activated and perms to manage in project/account. (to support managed_key, custom_key
+
+Webhooks will always be written as NDJSON (newline-delimited JSON) to the output bucket.
+
+
+### Future
+Add FILTERS
+- `method` - HTTP method (GET, POST, etc) that the rule applies to [ do we care?? maybe security to lock to `POST` if/when possible]
+- `pathTemplate` - a path template that matches the incoming webhook request path. `null` means all paths are accepted.
+- `pathParamFilters` - if defined, request must pass these path parameter filters to be accepted.
+- `queryParamFilters` - if defined, request must pass  these query parameter filters to be accepted.
+- `format` - `payload`, `request` - only support `payload` for now, which means the payload is stored as-is.
+
+- `filters` - a list of filters to apply to the incoming webhook payload before storing it; `JSONSchemaFilter` implementation.
+
+
+Add a `REQUEST` format for writing webhooks --> storage:
+```json
+{
+    "timeReceived": "2023-10-01T12:00:00Z",
+    "path": "/webhook/path",
+    "method": "POST",
+    "queryParameters": {
+        "param1": "value1",
+        "param2": "value2"
+    },
+    "payload": {
+        "key1": "value1",
+        "key2": "value2"
+    }
+}
+```
+
+
+### Issues
+  - how should identity signature of actor be sent?? header?? in the payload?
+     - `Authorization` header is most canonical; but risk of other layers in front of collector needing to make use of it?
+     - `X-Psoxy-Authorization` header? as a fallback if `Authorization` doesn't verify
+
+  - directly include JSON payloads OR serialize?
+     - eg `"payload": "{...}"` OR `"payload": {...}` ? former more extensible, latter more concise / usable, if have polymorphic types
+  - holding open socket to file, appending NDJSON continually ... seems like this might not work due to sleeping lambdas/functions between requests?
+    let's try it, and be sure to retry-
+  - JIRA webhooks include PII in the path/query string. How to deal with this??
+      - `queryString` transforms, expecting json path stuff. [what if param included multiple times?]
+  - JIRA webhooks can mix a bunch of events of different schemas via single callback
+  - need filters of some kind? (eg, avoid storage/processing of webhook payloads that don't have expected schemas?)
+  - routing based on `method`, `path`, `queryParameters`?
+  - is there EVER a need to store headers?

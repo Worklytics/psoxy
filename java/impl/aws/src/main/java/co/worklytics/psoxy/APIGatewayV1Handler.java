@@ -4,7 +4,7 @@ import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.request.APIGatewayV1ProxyEventRequestAdapter;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
@@ -33,7 +33,7 @@ public class APIGatewayV1Handler implements com.amazonaws.services.lambda.runtim
      * {@link "https://aws.amazon.com/premiumsupport/knowledge-center/lambda-improve-java-function-performance/"}
      */
     static AwsContainer awsContainer;
-    static CommonRequestHandler requestHandler;
+    static ApiDataRequestHandler requestHandler;
 
     static ResponseCompressionHandler responseCompressionHandler;
 
