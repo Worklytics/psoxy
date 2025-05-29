@@ -86,8 +86,8 @@ public class SlackDiscoveryBulkTests {
 
     @ValueSource(
         strings = {
-            "sources/slack/discovery-bulk-hierarchical.yaml",
-            "sources/slack/discovery-bulk.yaml"
+            "sources/slack/slack-discovery-bulk/discovery-bulk-hierarchical.yaml",
+            "sources/slack/slack-discovery-bulk/discovery-bulk.yaml"
         }
 
     )
@@ -100,19 +100,19 @@ public class SlackDiscoveryBulkTests {
 
     @SneakyThrows
     @CsvSource({
-        "sources/slack/discovery-bulk-hierarchical.yaml,channels.ndjson",
-        "sources/slack/discovery-bulk-hierarchical.yaml,messages-D06TX2RP0.ndjson",
-        "sources/slack/discovery-bulk-hierarchical.yaml,users.ndjson",
-        "sources/slack/discovery-bulk.yaml,channels.ndjson",
-        "sources/slack/discovery-bulk.yaml,messages-D06TX2RP0.ndjson",
-        "sources/slack/discovery-bulk.yaml,users.ndjson",
+        "sources/slack/slack-discovery-bulk/discovery-bulk-hierarchical.yaml,channels.ndjson",
+        "sources/slack/slack-discovery-bulk/discovery-bulk-hierarchical.yaml,messages-D06TX2RP0.ndjson",
+        "sources/slack/slack-discovery-bulk/discovery-bulk-hierarchical.yaml,users.ndjson",
+        "sources/slack/slack-discovery-bulk/discovery-bulk.yaml,channels.ndjson",
+        "sources/slack/slack-discovery-bulk/discovery-bulk.yaml,messages-D06TX2RP0.ndjson",
+        "sources/slack/slack-discovery-bulk/discovery-bulk.yaml,users.ndjson",
     })
     @ParameterizedTest
     public void files(String rulesPath, String file) {
         setUp(rulesPath);
         final String objectPath = "export-20231128/" + file + ".gz";
-        final String pathToOriginal = "sources/slack/example-bulk/original/" + file;
-        final String pathToSanitized = "sources/slack/example-bulk/sanitized/" + file;
+        final String pathToOriginal = "sources/slack/slack-discovery-bulk/example-bulk/original/" + file;
+        final String pathToSanitized = "sources/slack/slack-discovery-bulk/example-bulk/sanitized/" + file;
         storageHandler.handle(BulkDataTestUtils.request(objectPath),
             BulkDataTestUtils.transform(rules),
             BulkDataTestUtils.inputStreamSupplier(pathToOriginal),

@@ -19,31 +19,32 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Getter
 public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
 
-    @Getter
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.SLACK;
 
-    @Getter
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
-            .defaultScopeId("slack")
-            .sourceKind("slack")
-            .rulesFile("discovery")
-            .checkUncompressedSSMLength(false)
-            .build();
+        .defaultScopeId("slack")
+        .sourceKind("slack")
+        .rulesFile("slack-discovery-api/discovery")
+        .exampleApiResponsesDirectoryPath("slack-discovery-api/example-api-responses/original/")
+        .exampleSanitizedApiResponsesPath("slack-discovery-api/example-api-responses/sanitized/")
+        .checkUncompressedSSMLength(false)
+        .build();
 
     @SneakyThrows
     @ValueSource(strings = {
-            "https://slack.com/api/discovery.enterprise.info",
-            "https://slack.com/api/discovery.conversations.list#fragment", // fragments get discarded
-            "https://slack.com/api/discovery.conversations.list",
-            "https://slack.com/api/discovery.conversations.list?team=X&offset=30&limit=100&only_im=true",
-            "https://slack.com/api/discovery.conversations.history",
-            "https://slack.com/api/discovery.conversations.history?channel=X&limit=10",
-            "https://slack.com/api/discovery.conversations.recent?team=X&limit=10&latest=123",
-            "https://slack.com/api/discovery.user.conversations?include_historical=true&user=X&limit=10&offset=40",
-            "https://slack.com/api/discovery.users.list",
-            "https://slack.com/api/discovery.users.list?limit=20&include_deleted=true&offset=120",
+        "https://slack.com/api/discovery.enterprise.info",
+        "https://slack.com/api/discovery.conversations.list#fragment", // fragments get discarded
+        "https://slack.com/api/discovery.conversations.list",
+        "https://slack.com/api/discovery.conversations.list?team=X&offset=30&limit=100&only_im=true",
+        "https://slack.com/api/discovery.conversations.history",
+        "https://slack.com/api/discovery.conversations.history?channel=X&limit=10",
+        "https://slack.com/api/discovery.conversations.recent?team=X&limit=10&latest=123",
+        "https://slack.com/api/discovery.user.conversations?include_historical=true&user=X&limit=10&offset=40",
+        "https://slack.com/api/discovery.users.list",
+        "https://slack.com/api/discovery.users.list?limit=20&include_deleted=true&offset=120",
     })
     @ParameterizedTest
     void allowedEndpointRegex_allowed(String url) {
@@ -52,32 +53,32 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
 
     @SneakyThrows
     @ValueSource(strings = {
-            // variations on allowed
-            "https://slack.com/api/discovery.conversations.list/",
-            "https://slack.com/api/discovery_conversations-list",
-            "https://slack.com/api/discovery-conversations-history",
-            "https://slack.com/api/discovery users list",
-            "https://slack.com/api/discovery.conversation.info/",
-            // all the rest of the discovery methods
-            "https://slack.com/api/discovery.user.info",
-            "https://slack.com/api/discovery.conversations.edits",
-            "https://slack.com/api/discovery.conversations.members",
-            "https://slack.com/api/discovery.conversations.renames",
-            "https://slack.com/api/discovery.conversations.reactions",
-            "https://slack.com/api/discovery.conversations.search",
-            "https://slack.com/api/discovery.chat.info",
-            "https://slack.com/api/discovery.chat.update",
-            "https://slack.com/api/discovery.chat.delete",
-            "https://slack.com/api/discovery.chat.tombstone",
-            "https://slack.com/api/discovery.chat.restore",
-            "https://slack.com/api/discovery.drafts.list",
-            "https://slack.com/api/discovery.draft.info",
-            "https://slack.com/api/discovery.files.list",
-            "https://slack.com/api/discovery.file.info",
-            "https://slack.com/api/discovery.file.tombstone",
-            "https://slack.com/api/discovery.file.restore",
-            "https://slack.com/api/discovery.file.delete",
-            "https://slack.com/api/discovery.files.release",
+        // variations on allowed
+        "https://slack.com/api/discovery.conversations.list/",
+        "https://slack.com/api/discovery_conversations-list",
+        "https://slack.com/api/discovery-conversations-history",
+        "https://slack.com/api/discovery users list",
+        "https://slack.com/api/discovery.conversation.info/",
+        // all the rest of the discovery methods
+        "https://slack.com/api/discovery.user.info",
+        "https://slack.com/api/discovery.conversations.edits",
+        "https://slack.com/api/discovery.conversations.members",
+        "https://slack.com/api/discovery.conversations.renames",
+        "https://slack.com/api/discovery.conversations.reactions",
+        "https://slack.com/api/discovery.conversations.search",
+        "https://slack.com/api/discovery.chat.info",
+        "https://slack.com/api/discovery.chat.update",
+        "https://slack.com/api/discovery.chat.delete",
+        "https://slack.com/api/discovery.chat.tombstone",
+        "https://slack.com/api/discovery.chat.restore",
+        "https://slack.com/api/discovery.drafts.list",
+        "https://slack.com/api/discovery.draft.info",
+        "https://slack.com/api/discovery.files.list",
+        "https://slack.com/api/discovery.file.info",
+        "https://slack.com/api/discovery.file.tombstone",
+        "https://slack.com/api/discovery.file.restore",
+        "https://slack.com/api/discovery.file.delete",
+        "https://slack.com/api/discovery.files.release",
     })
     @ParameterizedTest
     void allowedEndpointRegex_blocked(String url) {
@@ -91,14 +92,14 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
 
         //verify precondition that example actually contains something we need to pseudonymize
         Collection<String> PII = Arrays.asList(
-                "john@domain.com",
-                "felipe@domain.com",
-                "bob@domain.com"
+            "john@domain.com",
+            "felipe@domain.com",
+            "bob@domain.com"
         );
         assertNotSanitized(jsonString, PII);
 
         String sanitized =
-                sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.users.list"), jsonString);
+            sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.users.list"), jsonString);
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "John Nobody", "felipe", "bob");
@@ -116,7 +117,7 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("discovery-conversations-list.json");
 
         String sanitized =
-                sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.conversations.list"), jsonString);
+            sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.conversations.list"), jsonString);
 
         // nothing to pseudonymize
         assertRedacted(sanitized, "This is the topic", "mpdm-primary-owner--first.person--second.person");
@@ -128,47 +129,47 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("discovery-conversations-history.json");
 
         Collection<String> PIItoPseudonymize = Arrays.asList(
-                "W06CA4EAC",
-               "W0G81RDQT",
-                "W0N0ZQDED", "W0R8EBMXP", "W0G81RDQZ", "W000000", "U02DU306H0B",
-                "REPLYUSER",
-                "some parent user",
-                "U02K5LRARED"
-               // "USLACKBOT" // this is not redacted, as it is the slack bot which is not marked with is_bot=true flag
+            "W06CA4EAC",
+            "W0G81RDQT",
+            "W0N0ZQDED", "W0R8EBMXP", "W0G81RDQZ", "W000000", "U02DU306H0B",
+            "REPLYUSER",
+            "some parent user",
+            "U02K5LRARED"
+            // "USLACKBOT" // this is not redacted, as it is the slack bot which is not marked with is_bot=true flag
         );
 
         Collection<String> dataToRedact = Arrays.asList(
-                "Test message!",
-                "<@U06CA4EAC|bjin>",
-                "text with rich block",
-                "Some new text",
-                "check this out!",
-                "Jose (ENT)",
-                "Jose",
-                "This is likely a pun about the weather.",
-                "We're withholding a pun from you",
-                "Leg end nary a laugh, Ink.",
-                "Some other text",
-                "https://badpuns.example.com/puns/123.png",
-                "permalink value",
-                "huddle test topic",
-                "A huddle started",
-                "U074XMEDGUU" // one of participants; this is now redacted
+            "Test message!",
+            "<@U06CA4EAC|bjin>",
+            "text with rich block",
+            "Some new text",
+            "check this out!",
+            "Jose (ENT)",
+            "Jose",
+            "This is likely a pun about the weather.",
+            "We're withholding a pun from you",
+            "Leg end nary a laugh, Ink.",
+            "Some other text",
+            "https://badpuns.example.com/puns/123.png",
+            "permalink value",
+            "huddle test topic",
+            "A huddle started",
+            "U074XMEDGUU" // one of participants; this is now redacted
         );
 
         Collection<String> dataToKeep = Arrays.asList(
-                "R07BNSQTZSP",
-                "D075J2RKK4Y",
-                "b88ef6b8-9450-4633-83a2-dfb2cfd12713",
-                "huddle",
-                "huddle_thread"
+            "R07BNSQTZSP",
+            "D075J2RKK4Y",
+            "b88ef6b8-9450-4633-83a2-dfb2cfd12713",
+            "huddle",
+            "huddle_thread"
         );
 
         assertNotSanitized(jsonString, PIItoPseudonymize);
         assertNotSanitized(jsonString, dataToRedact);
 
         String sanitized =
-                sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.conversations.history"), jsonString);
+            sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.conversations.history"), jsonString);
 
         assertPseudonymized(sanitized, PIItoPseudonymize);
         assertRedacted(sanitized, dataToRedact);
@@ -181,7 +182,7 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("discovery-conversations-recent.json");
 
         String sanitized =
-                sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.conversations.recent"), jsonString);
+            sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.conversations.recent"), jsonString);
 
         // nothing to redact / pseudonymize
         assertJsonEquals(jsonString, sanitized);
@@ -193,7 +194,7 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("discovery-user-conversations.json");
 
         String sanitized =
-                sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.user.conversations"), jsonString);
+            sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.user.conversations"), jsonString);
 
         // nothing to redact / pseudonymize
         assertJsonEquals(jsonString, sanitized);
@@ -205,18 +206,18 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("discovery-conversations-info.json");
 
         String sanitized =
-                sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.conversations.info"), jsonString);
+            sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.conversations.info"), jsonString);
 
         Collection<String> PII = Arrays.asList(
-                "W0N9HDWUR"
+            "W0N9HDWUR"
         );
 
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Collaboration about Project X",
-                "Launch date scheduled for 07/01",
-                "project-x",
-                "project X",
-                "project-y");
+            "Launch date scheduled for 07/01",
+            "project-x",
+            "project X",
+            "project-y");
 
     }
 
@@ -226,27 +227,27 @@ public class SlackDiscoveryTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("discovery-enterprise-info.json");
 
         String sanitized =
-                sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.enterprise.info"), jsonString);
+            sanitizer.sanitize("GET", new URL("https://slack.com/api/discovery.enterprise.info"), jsonString);
 
         assertRedacted(sanitized, "icon", "image",
-                "DevGrid - W1",
-                "1st Workspace under Test Grid",
-                "DevGrid - W2",
-                "2nd Workspace under Test Grid",
-                "Test Grid");
+            "DevGrid - W1",
+            "1st Workspace under Test Grid",
+            "DevGrid - W2",
+            "2nd Workspace under Test Grid",
+            "Test Grid");
 
     }
 
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
-                InvocationExample.of("https://slack.com/api/discovery.enterprise.info", "discovery-enterprise-info.json"),
-                InvocationExample.of("https://slack.com/api/discovery.conversations.info", "discovery-conversations-info.json"),
-                InvocationExample.of("https://slack.com/api/discovery.conversations.recent", "discovery-conversations-recent.json"),
-                InvocationExample.of("https://slack.com/api/discovery.conversations.history", "discovery-conversations-history.json"),
-                InvocationExample.of("https://slack.com/api/discovery.users.list", "discovery-users-list.json"),
-                InvocationExample.of("https://slack.com/api/discovery.user.conversations", "discovery-user-conversations.json"),
-                InvocationExample.of("https://slack.com/api/discovery.conversations.list", "discovery-conversations-list.json")
+            InvocationExample.of("https://slack.com/api/discovery.enterprise.info", "discovery-enterprise-info.json"),
+            InvocationExample.of("https://slack.com/api/discovery.conversations.info", "discovery-conversations-info.json"),
+            InvocationExample.of("https://slack.com/api/discovery.conversations.recent", "discovery-conversations-recent.json"),
+            InvocationExample.of("https://slack.com/api/discovery.conversations.history", "discovery-conversations-history.json"),
+            InvocationExample.of("https://slack.com/api/discovery.users.list", "discovery-users-list.json"),
+            InvocationExample.of("https://slack.com/api/discovery.user.conversations", "discovery-user-conversations.json"),
+            InvocationExample.of("https://slack.com/api/discovery.conversations.list", "discovery-conversations-list.json")
         );
     }
 }

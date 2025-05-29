@@ -22,7 +22,7 @@ import java.util.Map;
 public class PrebuiltSanitizerRules {
 
 
-    static final RESTRules SLACK = Rules2.load("sources/slack/discovery.yaml");
+    static final RESTRules SLACK = Rules2.load("sources/slack/slack-discovery-api/discovery.yaml");
 
     static public final Map<String, RESTRules> SLACK_DEFAULT_RULES_MAP =
             ImmutableMap.<String, RESTRules>builder()
