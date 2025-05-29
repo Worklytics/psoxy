@@ -221,26 +221,6 @@ public class PrebuiltSanitizerRules {
         .transforms(generateUserTransformations("."))
         .build();
 
-    static final Endpoint GRAPHQL_FOR_USERS = Endpoint.builder()
-        .pathTemplate("/graphql")
-        .transform(Transform.Redact.builder()
-            .jsonPath("$..ssoUrl")
-            .build())
-        .transform(Transform.Pseudonymize.builder()
-            .jsonPath("$..nameId")
-            .jsonPath("$..email")
-            .jsonPath("$..emails[*].value")
-            .jsonPath("$..guid")
-            .jsonPath("$..organizationVerifiedDomainEmails[*]")
-            .build())
-        .transform(Transform.Pseudonymize.builder()
-            .includeReversible(true)
-            .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
-            .jsonPath("$..login")
-            .build())
-        .responseSchema(jsonSchemaForGraphQLQueryResult())
-        .build();
-
     static final Endpoint ORG_TEAMS = Endpoint.builder()
         .pathTemplate("/orgs/{org}/teams")
         .allowedQueryParams(commonAllowedQueryParameters)
@@ -624,7 +604,7 @@ public class PrebuiltSanitizerRules {
     static final RESTRules GITHUB_NON_ENTERPRISE = Rules2.builder()
         .endpoint(ORG_MEMBERS)
         .endpoint(USERS)
-        .endpoint(GRAPHQL_FOR_USERS)
+        .endpoint(getGraphQLEndpoint(false))
         .endpoint(ORG_TEAMS)
         .endpoint(ORG_TEAM_MEMBERS)
         .endpoint(REPOSITORIES)
@@ -653,7 +633,7 @@ public class PrebuiltSanitizerRules {
     static final RESTRules GITHUB = Rules2.builder()
         .endpoint(ORG_MEMBERS)
         .endpoint(USERS)
-        .endpoint(GRAPHQL_FOR_USERS)
+        .endpoint(getGraphQLEndpoint(true))
         .endpoint(ORG_TEAMS)
         .endpoint(ORG_TEAM_MEMBERS)
         .endpoint(ORG_AUDIT_LOG)
@@ -684,7 +664,7 @@ public class PrebuiltSanitizerRules {
     static final RESTRules GITHUB_COPILOT = Rules2.builder()
         .endpoint(ORG_MEMBERS)
         .endpoint(USERS)
-        .endpoint(GRAPHQL_FOR_USERS)
+        .endpoint(getGraphQLEndpoint(true))
         .endpoint(ORG_TEAMS)
         .endpoint(ORG_TEAM_MEMBERS)
         .endpoint(ORG_COPILOT_SEATS)
@@ -699,7 +679,7 @@ public class PrebuiltSanitizerRules {
         // Leaving {enterpriseServerVersion} in the path template open to support future versions without changing rules
         .endpoint(ORG_MEMBERS.withPathTemplate("/api/{enterpriseServerVersion}/orgs/{org}/members"))
         .endpoint(USERS.withPathTemplate("/api/{enterpriseServerVersion}/users/{username}"))
-        .endpoint(GRAPHQL_FOR_USERS.withPathTemplate("/api/graphql"))
+        .endpoint(getGraphQLEndpoint(true).withPathTemplate("/api/graphql"))
         .endpoint(ORG_TEAMS.withPathTemplate("/api/{enterpriseServerVersion}/orgs/{org}/teams"))
         .endpoint(ORG_TEAM_MEMBERS.withPathTemplate("/api/{enterpriseServerVersion}/orgs/{org}/teams/{teamSlug}/members"))
         .endpoint(ORG_AUDIT_LOG.withPathTemplate("/api/{enterpriseServerVersion}/orgs/{org}/audit-log"))
@@ -812,7 +792,7 @@ public class PrebuiltSanitizerRules {
         );
     }
 
-    private static JsonSchemaFilter jsonSchemaForGraphQLQueryResult() {
+    private static JsonSchemaFilter jsonSchemaForGraphQLQueryResult(boolean includeSAMLSupport) {
         return JsonSchemaFilter.builder()
             .type("object")
             // Using LinkedHashMap to keep the order to support same
@@ -824,7 +804,9 @@ public class PrebuiltSanitizerRules {
                         put("organization", JsonSchemaFilter.builder()
                             .type("object")
                             .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{
-                                put("samlIdentityProvider", jsonSchemaForOrganizationProperty("externalIdentities", jsonSchemaForSamlNode()));
+                                if (includeSAMLSupport) {
+                                    put("samlIdentityProvider", jsonSchemaForOrganizationProperty("externalIdentities", jsonSchemaForSamlNode()));
+                                }
                                 put("membersWithRole", jsonSchemaForQueryResult(jsonSchemaForMemberNode()));
                                 put("repository", JsonSchemaFilter.builder()
                                     .type("object")
@@ -937,5 +919,27 @@ public class PrebuiltSanitizerRules {
                             }).build()).build());
                     put("message", JsonSchemaFilter.builder().type("string").build());
                 }}).build()).build();
+    }
+
+    private static Endpoint getGraphQLEndpoint(boolean includeSAMLResponse) {
+        return Endpoint.builder()
+            .pathTemplate("/graphql")
+            .transform(Transform.Redact.builder()
+                .jsonPath("$..ssoUrl")
+                .build())
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$..nameId")
+                .jsonPath("$..email")
+                .jsonPath("$..emails[*].value")
+                .jsonPath("$..guid")
+                .jsonPath("$..organizationVerifiedDomainEmails[*]")
+                .build())
+            .transform(Transform.Pseudonymize.builder()
+                .includeReversible(true)
+                .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+                .jsonPath("$..login")
+                .build())
+            .responseSchema(jsonSchemaForGraphQLQueryResult(includeSAMLResponse))
+            .build();
     }
 }

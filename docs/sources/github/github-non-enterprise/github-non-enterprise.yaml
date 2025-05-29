@@ -338,46 +338,6 @@ endpoints:
                                       type: "string"
                                     hasNextPage:
                                       type: "boolean"
-                samlIdentityProvider:
-                  type: "object"
-                  properties:
-                    externalIdentities:
-                      type: "object"
-                      properties:
-                        edges:
-                          type: "array"
-                          items:
-                            type: "object"
-                            properties:
-                              node:
-                                type: "object"
-                                properties:
-                                  guid:
-                                    type: "string"
-                                  samlIdentity:
-                                    type: "object"
-                                    properties:
-                                      emails:
-                                        type: "array"
-                                        items:
-                                          type: "object"
-                                          properties:
-                                            value:
-                                              type: "string"
-                                      nameId:
-                                        type: "string"
-                                  user:
-                                    type: "object"
-                                    properties:
-                                      login:
-                                        type: "string"
-                        pageInfo:
-                          type: "object"
-                          properties:
-                            endCursor:
-                              type: "string"
-                            hasNextPage:
-                              type: "boolean"
         errors:
           type: "array"
           items:
