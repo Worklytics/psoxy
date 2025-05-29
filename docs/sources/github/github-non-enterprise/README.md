@@ -1,4 +1,4 @@
-# GitHub
+# GitHub Free/Pro/Teams
 
 Availability: **GA**
 
@@ -12,7 +12,7 @@ The connector uses a GitHub App to authenticate and access the data you must pro
 - Example Data : [original](example-api-responses/original) |
   [sanitized](example-api-responses/sanitized)
 
-## GitHub Enterprise: Steps to Connect
+## GitHub Cloud (Free, Teams, Professional): Steps to Connect
 
 Both share the same configuration and setup instructions except Administration permission for Audit
 Log events.
@@ -30,7 +30,6 @@ Follow the following steps:
      - Metadata: for listing repositories and branches
      - Pull requests: for listing pull requests, reviews, comments and commits
    - Organization
-     - Administration: for listing events from audit log
      - Members: for listing teams and their members
 
 NOTES:

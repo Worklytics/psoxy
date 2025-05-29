@@ -1,6 +1,6 @@
 # GitHub Enterprise Server
 
-Availability: **BETA**
+Availability: **GA**
 
 ## Authentication workflow
 
