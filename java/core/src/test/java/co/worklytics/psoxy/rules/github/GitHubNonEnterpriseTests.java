@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 @Getter
 public class GitHubNonEnterpriseTests extends JavaRulesTestBaseCase {
 
-    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GITHUB;
+    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GITHUB_NON_ENTERPRISE;
 
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
         .sourceKind("github")
