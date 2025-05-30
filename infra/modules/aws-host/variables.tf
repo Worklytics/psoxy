@@ -290,6 +290,16 @@ variable "custom_bulk_connector_arguments" {
   default     = {}
 }
 
+variable "custom_side_outputs" {
+  type = map(object({
+    ORIGINAL  = optional(string, null),
+    SANITIZED = optional(string, null),
+  }))
+
+  description = "*ALPHA* map of connector id --> side output targets"
+  default     = {}
+}
+
 variable "lookup_table_builders" {
   type = map(object({
     input_connector_id            = string

@@ -58,6 +58,7 @@ locals {
         },
       ]
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/api/1.0/workspaces",
@@ -116,6 +117,7 @@ EOT
         "GitHub Organization" = local.github_organization
       }
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/orgs/${local.github_organization}/repos",
@@ -218,6 +220,7 @@ EOT
         "GitHub Organization" = local.github_organization
       }
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/orgs/${local.github_organization}/members",
@@ -316,6 +319,7 @@ EOT
         "GitHub Organization" = local.github_organization
       }
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/api/${local.github_enterprise_server_version}/orgs/${local.github_first_organization}/repos",
@@ -428,6 +432,7 @@ EOT
         "GitHub Organization" = local.github_organization
       }
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/orgs/${local.github_organization}/repos",
@@ -525,6 +530,7 @@ EOT
         },
       ]
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/services/data/v57.0/sobjects/Account/describe",
@@ -605,6 +611,7 @@ EOT
         },
       ]
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/api/discovery.enterprise.info?include_deleted=false&limit=5",
@@ -702,6 +709,7 @@ EOT
         local.standard_config_values.oauth_refresh_token_lock,
       ],
       reserved_concurrent_executions : null # 1
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/v2/users",
@@ -812,6 +820,7 @@ EOT
         REFRESH_ENDPOINT : "https://api.dropboxapi.com/oauth2/token"
       }
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/2/team/members/list_v2",
@@ -884,6 +893,7 @@ EOT
         },
       ],
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/rest/api/2/search?maxResults=25",
@@ -952,6 +962,7 @@ EOT
       settings_to_provide = {
       }
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/oauth/token/accessible-resources", # obtain Jira Cloud ID from here

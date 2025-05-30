@@ -29,6 +29,7 @@ locals {
     ]
     environment_variables : local.msft_365_environment_variables
     external_todo : null
+    enable_side_output : false
     example_api_calls : [
       "/v1.0/users",
       "/v1.0/users/${var.example_msft_user_guid}",
@@ -63,6 +64,7 @@ locals {
       ],
       environment_variables : local.msft_365_environment_variables
       external_todo : null
+      enable_side_output : false
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}/events",
@@ -89,6 +91,7 @@ locals {
       ]
       environment_variables : local.msft_365_environment_variables
       external_todo : null
+      enable_side_output : false
       example_api_calls : [
         "/v1.0/users",
         "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
@@ -117,6 +120,7 @@ locals {
         "OnlineMeetingArtifact.Read.All"
       ],
       environment_variables : local.msft_365_environment_variables
+      enable_side_output : false
       example_api_calls : [
         "/v1.0/teams",
         "/v1.0/teams/${var.msft_teams_example_team_guid}/allChannels",
@@ -178,6 +182,7 @@ EOT
       ]
       environment_variables : local.msft_365_environment_variables
       external_todo : null
+      enable_side_output : false
       example_api_calls : [
         "/v1.0/users",
         "/beta/copilot/users/${var.example_msft_user_guid}/interactionHistory/getAllEnterpriseInteractions"

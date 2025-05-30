@@ -5,13 +5,18 @@ import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 
+import co.worklytics.psoxy.gateway.impl.output.NoSideOutput;
 import com.google.cloud.ServiceOptions;
 
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
 
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.time.Duration;
 import java.util.Optional;
@@ -19,7 +24,11 @@ import java.util.Optional;
 /**
  * defines how to fulfill dependencies that need platform-specific implementations for GCP platform
  */
-@Module
+@Module(
+    includes = {
+        GcpModule.Bindings.class,
+    }
+)
 public interface GcpModule {
 
 
@@ -60,6 +69,11 @@ public interface GcpModule {
     @Provides @Singleton
     static SecretStore secretStore(@Named("Native") SecretStore nativeSecretStore) {
         return nativeSecretStore;
+    }
+
+    @Provides @Singleton
+    static Storage storage() {
+        return StorageOptions.getDefaultInstance().getService();
     }
 
     /**
@@ -104,5 +118,13 @@ public interface GcpModule {
     @IntoSet
     static OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder providesSourceAuthStrategy(GCPWorkloadIdentityFederationGrantTokenRequestBuilder tokenRequestBuilder) {
         return tokenRequestBuilder;
+    }
+
+    @Module
+    abstract class Bindings {
+
+        @Binds
+        abstract SideOutputFactory<? extends SideOutput> sideOutputFactory(GCSSideOutputFactory sideOutputFactory);
+
     }
 }

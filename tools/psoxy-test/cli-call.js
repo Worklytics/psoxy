@@ -33,9 +33,11 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
     .option('-v, --verbose', 'Verbose output', false)
     .option('-z, --gzip [type]', 'Add gzip compression header (default: true, "-z false" to remove)', true)
     .option('--health-check', 'Health Check call: check Psoxy deploy is running')
+    .option('--request-no-response', "Request 'No response body' back from proxy (tests side-output case)", false)
     .option('-b, --body <body>', 'Body to send in request (it expects a JSON string)')
     .addOption(new Option('-d, --data-source <name>',
       'Data source to test all available endpoints').choices([
+        //TODO: pull this list from terraform console or something??
         'asana',
         'azure-ad',
         'dropbox-business',

@@ -61,6 +61,8 @@ public class HealthCheckRequestHandler {
     @Inject
     HashUtils hashUtils;
 
+    String piiSaltHash;
+
     public Optional<HttpEventResponse> handleIfHealthCheck(HttpEventRequest request) {
         if (isHealthCheckRequest(request)) {
             if (request.getClientIp().isPresent()) {
@@ -191,6 +193,18 @@ public class HealthCheckRequestHandler {
 
         return responseBuilder.build();
     }
+
+    /*
+     * @return a SHA-256 hash of the salt, to aid in detecting changes to the salt value.
+     */
+    public String piiSaltHash() {
+        if (piiSaltHash == null) {
+            piiSaltHash = config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
+                .map(salt -> hashUtils.hash(salt, SALT_FOR_SALT)).orElse("");
+        }
+        return piiSaltHash;
+    }
+
 
     private int responseStatusCode(@NonNull HealthCheckResult healthCheckResult) {
         if (healthCheckResult.passed()) {

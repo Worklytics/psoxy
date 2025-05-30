@@ -265,6 +265,16 @@ variable "custom_bulk_connector_arguments" {
   default     = {}
 }
 
+variable "custom_side_outputs" {
+  type = map(object({
+    ORIGINAL  = optional(string, null),
+    SANITIZED = optional(string, null),
+  }))
+
+  description = "*ALPHA* map of connector id --> side output targets"
+  default     = {}
+}
+
 # build lookup tables to JOIN data you receive back from Worklytics with your original data.
 #   - `join_key_column` should be the column you expect to JOIN on, usually 'employee_id'
 #   - `columns_to_include` is an optional a list of columns to include in the lookup table,

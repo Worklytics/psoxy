@@ -80,6 +80,9 @@ function getCommonHTTPHeaders(options = {}) {
     // option presence is enough, since Psoxy doesn't check header value
     headers['X-Psoxy-Health-Check'] = 'true';
   }
+  if (options.requestNoResponse) {
+    headers['X-Psoxy-No-Response-Body'] = 'true';
+  }
 
   return headers;
 }
