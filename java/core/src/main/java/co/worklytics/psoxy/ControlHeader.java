@@ -25,6 +25,7 @@ public enum ControlHeader {
     HEALTH_CHECK("Health-Check"),
 
     /**
+     * **alpha** - subject to change
      *  if sent to proxy, no response body needs to be returned to client.
      *  (eg, just write response to side output(s), if any)
      *

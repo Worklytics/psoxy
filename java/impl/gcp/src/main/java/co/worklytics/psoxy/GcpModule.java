@@ -71,8 +71,7 @@ public interface GcpModule {
         return nativeSecretStore;
     }
 
-    //q: @Singleton ??
-    @Provides
+    @Provides @Singleton
     static Storage storage() {
         return StorageOptions.getDefaultInstance().getService();
     }
