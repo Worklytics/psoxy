@@ -393,7 +393,7 @@ You will need to copy the value of the `refresh_token`.
 EOT
     }
     github-non-enterprise = {
-      source_kind : "github",
+      source_kind : "github-non-enterprise",
       availability : "ga",
       enable_by_default : false
       worklytics_connector_id : "github-free-team-psoxy"

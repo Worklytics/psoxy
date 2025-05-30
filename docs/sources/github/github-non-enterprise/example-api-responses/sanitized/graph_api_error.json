@@ -1,0 +1,23 @@
+{
+  "data":{
+    "organization":{ }
+  },
+  "errors":[
+    {
+      "type":"INVALID_CURSOR_ARGUMENTS",
+      "path":[
+        "organization",
+        "samlIdentityProvider",
+        "externalIdentities",
+        "pageInfo"
+      ],
+      "locations":[
+        {
+          "line":9,
+          "column":9
+        }
+      ],
+      "message":"`asdfasd==` does not appear to be a valid cursor."
+    }
+  ]
+}

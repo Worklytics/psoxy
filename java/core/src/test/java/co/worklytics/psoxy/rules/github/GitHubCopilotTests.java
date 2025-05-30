@@ -18,9 +18,11 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GITHUB_COPILOT;
 
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
-            .sourceKind("github")
-            .rulesFile("github-copilot")
-            .build();
+        .sourceKind("github")
+        .rulesFile("copilot/github-copilot")
+        .exampleApiResponsesDirectoryPath("copilot/example-api-responses/original/")
+        .exampleSanitizedApiResponsesPath("copilot/example-api-responses/sanitized/")
+        .build();
 
     @Disabled // not reliable; seems to have different value via IntelliJ/AWS deployment and my
     // laptop's maven, which doesn't make any sense, given that binary deployed to AWS was built via
@@ -43,8 +45,8 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/orgs/FAKE/members";
 
         Collection<String> PII = Arrays.asList(
-                "octocat",
-                "123456"
+            "octocat",
+            "123456"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -54,8 +56,8 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "octocat");
         assertPseudonymized(sanitized, "123456");
         assertRedacted(sanitized,
-                "https://api.github.com/users/octocat",
-                "https://api.github.com/users/octocat/events{/privacy}"
+            "https://api.github.com/users/octocat",
+            "https://api.github.com/users/octocat/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -66,10 +68,10 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("graph_api_users_saml.json");
 
         Collection<String> PII = Arrays.asList(
-                "fake1",
-                "fake2",
-                "fake1@contoso.com",
-                "fake2@contoso.com"
+            "fake1",
+            "fake2",
+            "fake1@contoso.com",
+            "fake2@contoso.com"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -88,10 +90,10 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
         String jsonString = asJson("graph_api_users_members.json");
 
         Collection<String> PII = Arrays.asList(
-                "fake1",
-                "fake2",
-                "fake1@contoso.com",
-                "fake2@contoso.com"
+            "fake1",
+            "fake2",
+            "fake1@contoso.com",
+            "fake2@contoso.com"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -111,9 +113,9 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/users/p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f";
 
         Collection<String> PII = Arrays.asList(
-                "monalisa octocat",
-                "octocat",
-                "monatheoctocat"
+            "monalisa octocat",
+            "octocat",
+            "monatheoctocat"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -137,8 +139,8 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
         assertNotSanitized(sanitized, "123456");
 
         assertRedacted(sanitized, "Justice League",
-                "A great team.",
-                "justice-league"
+            "A great team.",
+            "justice-league"
         );
 
         assertUrlAllowed(endpoint);
@@ -151,8 +153,8 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/orgs/FAKE/teams/TEAM/members";
 
         Collection<String> PII = Arrays.asList(
-                "some-user",
-                "12345678"
+            "some-user",
+            "12345678"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -162,8 +164,8 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "some-user");
         assertPseudonymized(sanitized, "12345678");
         assertRedacted(sanitized,
-                "https://api.github.com/users/some-user",
-                "https://api.github.com/users/some-user/events{/privacy}"
+            "https://api.github.com/users/some-user",
+            "https://api.github.com/users/some-user/events{/privacy}"
         );
 
         assertUrlAllowed(endpoint);
@@ -176,7 +178,7 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/orgs/FAKE/copilot/billing/seats";
 
         Collection<String> PII = List.of(
-                "octocat"
+            "octocat"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -186,8 +188,8 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "octocat");
         assertPseudonymized(sanitized, "octokitten");
         assertRedacted(sanitized,
-                "https://api.github.com/users/octocat",
-                "https://github.com/octokitten"
+            "https://api.github.com/users/octocat",
+            "https://github.com/octokitten"
         );
 
         assertUrlAllowed(endpoint);
@@ -200,8 +202,8 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
         String endpoint = "https://api.github.com/orgs/{org}/audit-log";
 
         Collection<String> PII = Arrays.asList(
-                "octocat",
-                "some-business"
+            "octocat",
+            "some-business"
         );
 
         assertNotSanitized(jsonString, PII);
@@ -211,8 +213,8 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "octocat");
 
         assertRedacted(sanitized,
-                "Update README.md",
-                "some-business"
+            "Update README.md",
+            "some-business"
         );
 
         assertUrlAllowed(endpoint);
@@ -221,15 +223,15 @@ public class GitHubCopilotTests extends JavaRulesTestBaseCase {
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
-                InvocationExample.of("https://api.github.com/orgs/FAKE/members", "org_members.json"),
-                InvocationExample.of("https://api.github.com/graphql", "graph_api_users_saml.json"),
-                InvocationExample.of("https://api.github.com/graphql", "graph_api_users_members.json"),
-                InvocationExample.of("https://api.github.com/graphql", "graph_api_error.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/teams", "org_teams.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/teams/TEAM/members", "team_members.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/audit-log", "org_audit_log.json"),
-                InvocationExample.of("https://api.github.com/organizations/123456789/audit-log?include=all&per_page=100&phrase=created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000&page=0&order=asc&after=MS42OEQyOTE2MjX1MqNlJzIyfANVOHoYbUVsZ1ZjUWN6TwlZLXl6EVE%3D&before", "org_audit_log.json"),
-                InvocationExample.of("https://api.github.com/orgs/FAKE/copilot/billing/seats", "org_copilot_seats.json")
+            InvocationExample.of("https://api.github.com/orgs/FAKE/members", "org_members.json"),
+            InvocationExample.of("https://api.github.com/graphql", "graph_api_users_saml.json"),
+            InvocationExample.of("https://api.github.com/graphql", "graph_api_users_members.json"),
+            InvocationExample.of("https://api.github.com/graphql", "graph_api_error.json"),
+            InvocationExample.of("https://api.github.com/orgs/FAKE/teams", "org_teams.json"),
+            InvocationExample.of("https://api.github.com/orgs/FAKE/teams/TEAM/members", "team_members.json"),
+            InvocationExample.of("https://api.github.com/orgs/FAKE/audit-log", "org_audit_log.json"),
+            InvocationExample.of("https://api.github.com/organizations/123456789/audit-log?include=all&per_page=100&phrase=created:2023-02-16T12:00:00%2B0000..2023-04-17T00:00:00%2B0000&page=0&order=asc&after=MS42OEQyOTE2MjX1MqNlJzIyfANVOHoYbUVsZ1ZjUWN6TwlZLXl6EVE%3D&before", "org_audit_log.json"),
+            InvocationExample.of("https://api.github.com/orgs/FAKE/copilot/billing/seats", "org_copilot_seats.json")
         );
     }
 }
