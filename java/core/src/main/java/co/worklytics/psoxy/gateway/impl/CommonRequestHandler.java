@@ -275,7 +275,16 @@ public class CommonRequestHandler {
             if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
                 if (clientRequestsNoResponse) {
                     // client doesn't want a response body; assume there's a side output (otherwise we don't need to do this at all)
-                    new Thread(() -> {
+                    private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+    public String handleRequest(Request request, Response sourceApiResponse, Original original) {
+        executorService.submit(() -> {
+            ProcessedContent sanitizedContent = sanitize(request, requestUrls, original);
+            writeSideOutput(request, sourceApiResponse, sanitizedContent);
+        });
+
+  return builder.build();
+    }
                        ProcessedContent sanitizedContent = sanitize(request, requestUrls, original);
                         writeSideOutput(request, sourceApiResponse, sanitizedContent);
                     }).start();
