@@ -136,6 +136,7 @@ module "psoxy" {
   provision_bucket_public_access_block = var.provision_bucket_public_access_block
   custom_bulk_connector_rules          = var.custom_bulk_connector_rules
   custom_bulk_connector_arguments      = var.custom_bulk_connector_arguments
+  custom_side_outputs                  = var.custom_side_outputs
   todo_step                            = local.max_auth_todo_step
   todos_as_local_files                 = var.todos_as_local_files
 

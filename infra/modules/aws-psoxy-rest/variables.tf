@@ -231,6 +231,25 @@ variable "secrets_store_implementation" {
   default     = "aws_ssm_parameter_store"
 }
 
+variable "side_output_original" {
+  type = object({
+    bucket          = optional(string, null),     # if omitted, a bucket will be created
+    allowed_readers = optional(list(string), []), # a list of ARNs of aws principals that should be allowed to read the bucket
+  })
+  description = "**ALPHA** Configures the side output to create. If not bucket provided, one will be provisioned."
+  default     = null
+}
+
+variable "side_output_sanitized" {
+  type = object({
+    bucket          = optional(string, null),     # if omitted, a bucket will be created
+    allowed_readers = optional(list(string), []), # a list of ARNs of aws principals that should be allowed to read the bucket
+  })
+  description = "**ALPHA** Configures the side output to create. If not bucket provided, one will be provisioned."
+  default     = null
+}
+
+
 variable "todos_as_local_files" {
   type        = bool
   description = "whether to render TODOs as flat files"

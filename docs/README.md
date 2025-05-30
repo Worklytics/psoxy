@@ -102,9 +102,10 @@ Workspace Admin will be output for you.
 | Google Directory                                                                                                               | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/directory/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/directory/directory.yaml)                                  | `admin.directory.user.readonly admin.directory.domain.readonly admin.directory.group.readonly admin.directory.orgunit.readonly` |
 | Google Drive                                                                                                                   | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gdrive/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gdrive/gdrive.yaml)                                           | `drive.metadata.readonly`                                                                                                                                                                                |
 | GMail                                                                                                                          | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gmail/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gmail/gmail.yaml)                                              | `gmail.metadata`                                                                                                                                                                                         |
-| Google Meet                                                                                                                    | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/meet/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/meet/meet.yaml)                                                 | `admin.reports.audit.readonly`                                                                                                                                                                           |
-| Gemini Bulk                                                                                                                    | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gemini-usage/example.csv)                                                                                                                                                         | n/a;  bulk export of Gemini logs |
-| Gemini for Google Workspace                                                                                                    | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gemini-for-workspace/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gemini-for-workspace/gemini-for-workspace.yaml) | `admin.reports.audit.readonly`                                                                                                                                                                           |
+| Google Meet                    
+| Gemini Bulk **alpha**                                                                                                          | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gemini-usage/example.csv)                                                                                                                                                         | n/a;  bulk export of Gemini logs |
+| Gemini for Google Workspace **alpha**                                                                                          | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gemini-for-workspace/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gemini-for-workspace/gemini-for-workspace.yaml) | `admin.reports.audit.readonly`                                                                                                                                                                           |
+
 
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](https://github.com/Worklytics/psoxy/tree/main/infra/modules/worklytics-connector-specs).
 Please refer to that module for a definitive list.
@@ -379,12 +380,12 @@ Depending on your Cloud Host / Data Sources, you will need:
 
 For testing your psoxy instance, you will need:
 
-| Tool                                                               | Version                       | Test Command      |
-|--------------------------------------------------------------------|-------------------------------|-------------------|
-| [Node.js](https://nodejs.org/en/)                                  | 16+ (ideally, an LTS version) | `node --version`  |
-| [npm](https://www.npmjs.com/package/npm) (should come with `node`) | 8+                            | `npm --version`   |
+| Tool                                                               | Version                           | Test Command      |
+|--------------------------------------------------------------------|-----------------------------------|-------------------|
+| [Node.js](https://nodejs.org/en/)                                  | 16+ (ideally, latest LTS version) | `node --version`  |
+| [npm](https://www.npmjs.com/package/npm) (should come with `node`) | 8+                                | `npm --version`   |
 
-NOTE: Node.js v16 is unmaintained since Oct 2023, so **we recommend a newer version: v18, v20**.
+NOTE: Node.js v16 is unmaintained since Oct 2023, so **we recommend a newer version: v20, v22, v24, etc ...**.
 _Some Node.js versions (e.g. v21) may display warning messages when running the test scripts_.
 
 We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](https://github.com/Worklytics/psoxy/tree/main/tools/check-prereqs.sh).

@@ -108,6 +108,7 @@ module "psoxy" {
   custom_bulk_connector_arguments   = var.custom_bulk_connector_arguments
   lookup_tables                     = var.lookup_tables
   custom_artifacts_bucket_name      = var.custom_artifacts_bucket_name
+  custom_side_outputs               = var.custom_side_outputs
   todos_as_local_files              = var.todos_as_local_files
   todo_step                         = local.max_auth_todo_step
 }
