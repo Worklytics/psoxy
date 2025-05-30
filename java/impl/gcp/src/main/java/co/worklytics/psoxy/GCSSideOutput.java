@@ -36,9 +36,7 @@ public class GCSSideOutput implements SideOutput {
             throw new IllegalArgumentException("Bucket name must not be blank");
         }
         this.bucket = bucket;
-        String trimmedPath = StringUtils.trimToEmpty(pathPrefix);
-        // Ensure the path prefix ends with a slash, if non-empty
-        this.pathPrefix = (trimmedPath.endsWith("/") || StringUtils.isEmpty(trimmedPath)) ? trimmedPath : trimmedPath + "/";
+        this.pathPrefix = SideOutputUtils.formatObjectPathPrefix(pathPrefix);
     }
 
 

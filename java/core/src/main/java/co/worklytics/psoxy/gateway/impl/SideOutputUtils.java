@@ -128,6 +128,11 @@ public class SideOutputUtils {
              .orElseGet(noSideOutputProvider::get);
     }
 
+    // Ensure the path prefix ends with a slash, if non-empty
+    public static String formatObjectPathPrefix(String rawPathPrefix) {
+        String trimmedPath = StringUtils.trimToEmpty(rawPathPrefix);
+        return (trimmedPath.endsWith("/") || StringUtils.isEmpty(trimmedPath)) ? trimmedPath : trimmedPath + "/";
+    }
 
 
     private String normalizePath(String rawPath) {
