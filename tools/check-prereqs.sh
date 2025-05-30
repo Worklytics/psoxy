@@ -61,7 +61,7 @@ printf "\n"
 # Check NPM installation
 
 if ! npm -v &> /dev/null ; then
-  printf "${RED}Node Package Manager (npm) is not installed and is required for some testing to work.${NC} See https://nodejs.org/\n"
+  printf "${RED}NodeJS (node) and Node Package Manager (npm) are not installed but are required for the local test tooling to work. ${NC} While this is optional, we recommend you install them to be able to test your instances. See https://nodejs.org/\n"
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${BLUE}brew install node${NC}\n"; fi
 fi
 
