@@ -37,6 +37,8 @@ import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -274,19 +276,14 @@ public class CommonRequestHandler {
             passThroughHeaders(builder, sourceApiResponse);
             if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
                 if (clientRequestsNoResponse) {
+                    // very ALPHA; untested!!!  worry about how threading/etc would work
                     // client doesn't want a response body; assume there's a side output (otherwise we don't need to do this at all)
-                    private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
-
-    public String handleRequest(Request request, Response sourceApiResponse, Original original) {
-        executorService.submit(() -> {
-            ProcessedContent sanitizedContent = sanitize(request, requestUrls, original);
-            writeSideOutput(request, sourceApiResponse, sanitizedContent);
-        });
-
-  return builder.build();
-    }
-                       ProcessedContent sanitizedContent = sanitize(request, requestUrls, original);
-                        writeSideOutput(request, sourceApiResponse, sanitizedContent);
+                    new Thread(() -> {
+                       final ExecutorService executorService = Executors.newFixedThreadPool(2);
+                        executorService.submit(() -> {
+                            ProcessedContent sanitizedContent = sanitize(request, requestUrls, original);
+                            writeSideOutput(request, sourceApiResponse, sanitizedContent);
+                        });
                     }).start();
 
                     return builder.build();
