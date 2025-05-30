@@ -668,8 +668,12 @@ public class PrebuiltSanitizerRules {
         .endpoint(ORG_TEAMS)
         .endpoint(ORG_TEAM_MEMBERS)
         .endpoint(ORG_COPILOT_SEATS)
-        .endpoint(ORG_AUDIT_LOG.withQueryParamSchemas(COPILOT_AUDIT_LOG_QUERY_SUPPORTED_PARAMETER_SCHEMA))
-        .endpoint(ORG_AUDIT_LOG_WITH_INSTALLATION_ID.withQueryParamSchemas(COPILOT_AUDIT_LOG_QUERY_SUPPORTED_PARAMETER_SCHEMA))
+        .endpoint(ORG_AUDIT_LOG
+            .withPathRegex("^/orgs/[^/]+/audit-log\\\\?(?=.*[\\\\?&]phrase=)(?=.*[\\\\?&]include=).*$")
+            .withQueryParamSchemas(COPILOT_AUDIT_LOG_QUERY_SUPPORTED_PARAMETER_SCHEMA))
+        .endpoint(ORG_AUDIT_LOG_WITH_INSTALLATION_ID
+            .withPathRegex("^/organizations\\/\\d+\\/audit-log\\\\?(?=.*[\\\\?&]phrase=)(?=.*[\\\\?&]include=).*$")
+            .withQueryParamSchemas(COPILOT_AUDIT_LOG_QUERY_SUPPORTED_PARAMETER_SCHEMA))
         .build();
 
     @VisibleForTesting
