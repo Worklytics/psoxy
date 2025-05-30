@@ -104,7 +104,7 @@ public class ApiDataRequestHandler {
     ));
 
     /**
-     * Patters to look for in headers to pass through
+     * Patterns to look for in headers to pass through
      *
      * @see #passThroughHeaders(HttpEventResponse.HttpEventResponseBuilder, HttpResponse)
      */

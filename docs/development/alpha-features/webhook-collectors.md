@@ -71,15 +71,36 @@ A new entry point handler; `InboundWebhookHandler` that will handle incoming web
 That will sanitize the payloads and write them to a bulk storage location as set in an `OUTPUT` environment variable.
    - similar approach to API case, where there are host-platform-specific wrappers around a common handler ?? prob.
 
-Rules of type `WebhookRules`, which is a list of `WebhookRule` objects; first matching rule will be applied to the incoming
-webhook request. If none match, collector will return a 400 Bad Request response.
+Rules of type `WebhookRules`, which includes:
+  - `jwtClaimsToVerify` - a list of any JWT claims that must be present in the JWT token sent in `Authorization` header
+    of the incoming webhook request which must be verified against webhook payload before accepting
+     the webhook payload. Keys are the JWT claim names, and value are list of places to check against that claims value
+          - eg, `queryParam`, `payloadContent`, `pathParam`, etc
+  - `endpoints` - a list of `WebhookEndpoint` objects, which define the endpoints that the webhook collector will
+which is a list of `WebhookRule` objects; first matching rule will be applied to the incoming
+webhook request. If none match, collector will return a 400 Bad Request response. Additionally
+
 
 No matching in v1, so effectively just one `WebhookRule` will have the following properties:
  - `transforms` - a list (ordered) of transforms to apply to the incoming webhook payload before storing it.
+ - `jwtClaimsToVerify` - a list of (additional) JWT claims that must be present in the JWT token sent in `Authorization` header
+    of the incoming webhook request which must be verified against webhook payload before accepting
+     the webhook payload. Keys are the JWT claim names, and value are list of places to check against that claims value
+          - eg, `queryParam`, `payloadContent`, `pathParam`, etc
 
 ```yaml
-webhookRules:
-  - transforms:
+jwtClaimsToVerify:
+    sub:
+        queryParam: "userId"
+        payloadContent: "$.user_id"
+        pathParam: "userId"
+endpoints:
+    - jwtClaimsToVerify:
+        sub:
+            queryParam: "userId"
+            payloadContent: "$.user_id"
+            pathParam: "userId"
+      transforms:
       - !<pseudonymize>
          jsonPaths:
            - "$.employeeEmail"
