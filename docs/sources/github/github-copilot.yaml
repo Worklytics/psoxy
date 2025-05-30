@@ -480,9 +480,7 @@ endpoints:
       - !<tokenize>
         jsonPaths:
           - "$..slug"
-  - pathRegex: "^/orgs/[^/]+/audit-log\\?(?=[A-Za-z0-9=&%+:\\._\\-]*phrase=action:copilot(?:\\\
-    +created=[^&]+)?)(?=[A-Za-z0-9=&%+:\\._\\-]*include=web)[A-Za-z0-9=&%+:\\._\\\
-    -]+$"
+  - pathRegex: "^/orgs/[^/]+/audit-log\\\\?(?=.*[\\\\?&]phrase=)(?=.*[\\\\?&]include=).*$"
     pathTemplate: "/orgs/{org}/audit-log"
     allowedQueryParams:
       - "per_page"
@@ -514,9 +512,15 @@ endpoints:
           - "$..user_id"
           - "$..started_by"
         encoding: "JSON"
-  - pathRegex: "^/organizations\\/\\d+\\/audit-log\\?(?=[A-Za-z0-9=&%+:\\._\\-]*phrase=action:copilot(?:\\\
-    +created=[^&]+)?)(?=[A-Za-z0-9=&%+:\\._\\-]*include=web)[A-Za-z0-9=&%+:\\._\\\
-    -]+$"
+    queryParamSchemas:
+      phrase:
+        pattern: "(action:copilot(?:\\+created:\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\\
+        d{2}Z\\.\\.\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z)?)"
+      include:
+        enum:
+          - "web"
+  - pathRegex: "^/organizations\\/\\d+\\/audit-log\\\\?(?=.*[\\\\?&]phrase=)(?=.*[\\\
+    \\?&]include=).*$"
     pathTemplate: "/organizations/{installationId}/audit-log"
     allowedQueryParams:
       - "per_page"
@@ -548,3 +552,10 @@ endpoints:
           - "$..user_id"
           - "$..started_by"
         encoding: "JSON"
+    queryParamSchemas:
+      phrase:
+        pattern: "(action:copilot(?:\\+created:\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\\
+        d{2}Z\\.\\.\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z)?)"
+      include:
+        enum:
+          - "web"
