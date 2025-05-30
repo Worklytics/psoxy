@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
  */
 public class PrebuiltSanitizerRules {
 
+    private static final  String COPILOT_AUDIT_LOG_MANDATORY_QUERY_PARAMETERS_REGEX = "\\\\?(?=.*[\\\\?&]phrase=)(?=.*[\\\\?&]include=).*$";
+
     private static final List<String> commonAllowedQueryParameters = Lists.newArrayList(
         "per_page",
         "page"
@@ -669,10 +671,10 @@ public class PrebuiltSanitizerRules {
         .endpoint(ORG_TEAM_MEMBERS)
         .endpoint(ORG_COPILOT_SEATS)
         .endpoint(ORG_AUDIT_LOG
-            .withPathRegex("^/orgs/[^/]+/audit-log\\\\?(?=.*[\\\\?&]phrase=)(?=.*[\\\\?&]include=).*$")
+            .withPathRegex("^/orgs/[^/]+/audit-log" + COPILOT_AUDIT_LOG_MANDATORY_QUERY_PARAMETERS_REGEX)
             .withQueryParamSchemas(COPILOT_AUDIT_LOG_QUERY_SUPPORTED_PARAMETER_SCHEMA))
         .endpoint(ORG_AUDIT_LOG_WITH_INSTALLATION_ID
-            .withPathRegex("^/organizations\\/\\d+\\/audit-log\\\\?(?=.*[\\\\?&]phrase=)(?=.*[\\\\?&]include=).*$")
+            .withPathRegex("^/organizations\\/\\d+\\/audit-log" + COPILOT_AUDIT_LOG_MANDATORY_QUERY_PARAMETERS_REGEX)
             .withQueryParamSchemas(COPILOT_AUDIT_LOG_QUERY_SUPPORTED_PARAMETER_SCHEMA))
         .build();
 
