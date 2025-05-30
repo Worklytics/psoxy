@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -291,7 +292,7 @@ public class CommonRequestHandler {
                     // client wants a response body
                     ProcessedContent sanitizationResult  =
                         sanitize(request, requestUrls, original);
-                    proxyResponseContent = sanitizationResult.getContent();
+                    proxyResponseContent = sanitizationResult.getContentString();
 
                     sanitizationResult.getMetadata().entrySet()
                         .forEach(e -> builder.header(e.getKey(), e.getValue()));
@@ -300,13 +301,13 @@ public class CommonRequestHandler {
                 }
 
                 if (skipSanitization) {
-                    proxyResponseContent = original.getContent();
+                    proxyResponseContent = original.getContentString();
                 }
             } else {
                 //write error, which shouldn't contain PII, directly
                 log.log(Level.WARNING, "Source API Error " + original.getContent());
                 builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.API_ERROR.name());
-                proxyResponseContent = original.getContent();
+                proxyResponseContent = original.getContentString();
             }
             builder.body(proxyResponseContent);
             return builder.build();
@@ -321,7 +322,7 @@ public class CommonRequestHandler {
             .contentCharset(sourceApiResponse.getContentCharset());
 
         try (InputStream stream = sourceApiResponse.getContent()) {
-            builder.content(new String(stream.readAllBytes(), sourceApiResponse.getContentCharset()));
+            builder.content(stream.readAllBytes());
         }
 
         return builder.build();
@@ -329,7 +330,7 @@ public class CommonRequestHandler {
 
     ProcessedContent sanitize(HttpEventRequest request, RequestUrls requestUrls, ProcessedContent originalContent) {
         RESTApiSanitizer sanitizerForRequest = getSanitizerForRequest(request);
-        String sanitized = StringUtils.trimToEmpty(sanitizerForRequest.sanitize(request.getHttpMethod(), requestUrls.getOriginal(), originalContent.getContent()));
+        String sanitized = StringUtils.trimToEmpty(sanitizerForRequest.sanitize(request.getHttpMethod(), requestUrls.getOriginal(), originalContent.getContentString()));
 
         String rulesSha = rulesUtils.sha(sanitizerForRequest.getRules());
         log.info("response sanitized with rule set " + rulesSha);
@@ -341,7 +342,7 @@ public class CommonRequestHandler {
             .contentType(originalContent.getContentType())
             .contentCharset(originalContent.getContentCharset())
             .metadata(metadata)
-            .content(sanitized)
+            .content(sanitized.getBytes(originalContent.getContentCharset()))
             .build();
     }
 

@@ -85,17 +85,7 @@ class SideOutputUtilsTest {
         assertEquals(expected, key);
     }
 
-    @Test
-    void gzipContent() throws Exception {
-        String content = "Hello, world!";
-            // Verify that the content is gzipped
-           byte[] gzipped = utils.gzipContent(content, StandardCharsets.UTF_8);
-            try (InputStream inputStream = new GZIPInputStream(new ByteArrayInputStream(gzipped));
-                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-                String decompressedContent = reader.readLine();
-                assertEquals(content, decompressedContent);
-            }
-    }
+
 
     @ValueSource(
         strings = {
