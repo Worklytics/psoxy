@@ -14,6 +14,7 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
@@ -26,9 +27,14 @@ public class GcsFileEventHandler {
 
     final StorageHandler storageHandler;
 
+    final Provider<Storage> storageProvider;
+
+
     @Inject
-    public GcsFileEventHandler(StorageHandler storageHandler) {
+    public GcsFileEventHandler(StorageHandler storageHandler,
+                               Provider<Storage> storageProvider) {
         this.storageHandler = storageHandler;
+        this.storageProvider = storageProvider;
     }
 
     public void process(GCSFileEvent.GcsEvent event, Context context) {
@@ -51,7 +57,7 @@ public class GcsFileEventHandler {
     @SneakyThrows
     private void process(String importBucket, String sourceName, StorageHandler.ObjectTransform transform) {
 
-        Storage storage = StorageOptions.getDefaultInstance().getService();
+        Storage storage = storageProvider.get();
         BlobId sourceBlobId = BlobId.of(importBucket, sourceName);
 
         BlobInfo sourceBlobInfo = storage.get(sourceBlobId);

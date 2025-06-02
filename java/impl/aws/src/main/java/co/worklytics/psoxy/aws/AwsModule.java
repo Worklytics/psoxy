@@ -3,11 +3,13 @@ package co.worklytics.psoxy.aws;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
+
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
@@ -24,11 +26,14 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.time.Duration;
 
-
 /**
  * defines how to fulfill dependencies that need platform-specific implementations for GCP platform
  */
-@Module
+@Module(
+    includes = {
+        AwsModule.Bindings.class,
+    }
+)
 public interface AwsModule {
 
     @Provides
@@ -180,10 +185,17 @@ public interface AwsModule {
                 .build();
     }
 
-
+    //TODO: should be a Binding ?
     @Provides
     @IntoSet
     static OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder providesSourceAuthStrategy(AWSWorkloadIdentityFederationGrantTokenRequestBuilder tokenRequestBuilder) {
         return tokenRequestBuilder;
+    }
+
+    @Module
+    abstract class Bindings {
+
+        @Binds
+        abstract SideOutputFactory<? extends SideOutput> sideOutputFactory(S3SideOutputFactory sideOutputFactory);
     }
 }

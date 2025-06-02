@@ -113,15 +113,22 @@ function getLogsURL(cloudFunctionURL = '') {
   }
 
   const url = new URL(cloudFunctionURL);
-  const [regionAndProjectId] = url.hostname.split('.');
-  const match = regionAndProjectId.match(/([a-z]+-[a-z0-9]+)-([a-z0-9-]+)/)
-  let region, projectId;
-  if (match && match.length >= 3) {
-    region = match[1];
-    projectId = match[2];
-  }
-  const [initial, functionName] = url.pathname.split('/');
-  return `https://console.cloud.google.com/functions/details/${region}/${functionName}?project=${projectId}&tab=logs`;
+  const [functionHostPart] = url.hostname.split('.');
+  let parts = functionHostPart.split('-');
+  let regionShortCode = parts[parts.length - 1];
+
+  // best guess hack of these ...
+  // host is something like 'https://psoxy-dev-gcal-boff2f476q-uc.a.run.app'
+  const regionMapping = {
+    uc: 'us-central1',
+    uw: 'us-west1',
+    ue: 'us-east1',
+  };
+
+  let randomCharSequence = parts[parts.length - 2];
+  let functionName = parts.slice(0, -2).join('-');
+  let projectId = ''; //TODO pass this in somehow
+  return`https://console.cloud.google.com/run/detail/${regionMapping[regionShortCode]}/${functionName}/logs`//?project=${projectId}`;
 }
 
 /**

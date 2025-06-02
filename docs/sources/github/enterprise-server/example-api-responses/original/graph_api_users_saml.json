@@ -1,0 +1,43 @@
+{
+  "data": {
+    "organization": {
+      "samlIdentityProvider": {
+        "externalIdentities": {
+          "pageInfo": {
+            "hasNextPage": false,
+            "endCursor": "Y3Vyc29yOnYyOpHOAMl1tg=="
+          },
+          "edges": [
+            {
+              "node": {
+                "guid": "abc3f758-1a88-11ee-85d2-07ac5bf201d6",
+                "samlIdentity": {
+                  "nameId": "fake1@contoso.com",
+                  "emails": [
+                    {
+                      "value": "fake1_email_value@contoso.com"
+                    }
+                  ]
+                },
+                "user": {
+                  "login": "fake1"
+                }
+              }
+            },
+            {
+              "node": {
+                "guid": "acbe9c8e-1a99-11ee-85b8-61109bf19007",
+                "samlIdentity": {
+                  "nameId": "fake2@contoso.com"
+                },
+                "user": {
+                  "login": "fake2"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

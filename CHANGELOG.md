@@ -7,6 +7,10 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
+## [0.5.3](https://github.com/Worklytics/psoxy/release/tag/v0.5.3)
+  - `aws` - removed `ssm:GetParameterVersion` perm from policies; not a thing
+  - support for Side Outputs in `gcp` and `aws` modules; see [docs/configuration/side-outputs.md](docs/configuration/side-outputs.md) for details
+
 ## [0.5.2](https://github.com/Worklytics/psoxy/release/tag/v0.5.2)
 - `slack` : discovery rules now allow names of accounts with `is_bot==true` and with user id as `USLACKBOT` to pass through; are now "default deny" on API fields, returning only data matching expected fields.
 - `GitHub Copilot`: Added new connector for supporting fetching Copilot data from GitHub.

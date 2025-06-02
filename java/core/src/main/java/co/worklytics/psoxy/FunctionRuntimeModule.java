@@ -1,26 +1,23 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.HostEnvironment;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
 import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.http.HttpTransportFactory;
 import dagger.Module;
 import dagger.Provides;
 
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -87,6 +84,17 @@ public class FunctionRuntimeModule {
             .preferred(envVarsConfigService)
             .fallback(nativeConfigService)
             .build();
+    }
+
+
+    @Provides @Singleton @Named("forOriginal")
+    static SideOutput sideOutputForOriginal(SideOutputUtils sideOutputUtil) {
+        return sideOutputUtil.forStage(ProcessedDataStage.ORIGINAL);
+    }
+
+    @Provides @Singleton @Named("forSanitized")
+    static SideOutput sideOutputForSanitized(SideOutputUtils sideOutputUtils) {
+        return sideOutputUtils.forStage(ProcessedDataStage.SANITIZED);
     }
 
 }

@@ -95,9 +95,23 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
 
     // if set, a base64-YAML encoding of rules
     RULES(SupportedSource.ENV_VAR_OR_REMOTE),
+
     // for testing - if set, allows for behavior that should only be permitted in development context,
     // such as to skip sanitizer if corresponding header is sent
     IS_DEVELOPMENT_MODE,
+
+    /**
+     * **ALPHA**
+     * if provided, a target side output to write original data to
+     */
+    SIDE_OUTPUT_ORIGINAL,
+
+    /**
+     * **ALPHA**
+     * if provided, a target side output to write sanitized data to
+     */
+    SIDE_OUTPUT_SANITIZED,
+
     SOURCE,
     SOURCE_AUTH_STRATEGY_IDENTIFIER,
     //target API endpoint to forward request to

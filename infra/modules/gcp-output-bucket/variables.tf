@@ -9,9 +9,10 @@ variable "region" {
   default     = "us-central1"
 }
 
+# TODO: combine with below; these are just being concatenated
 variable "bucket_name_prefix" {
   type        = string
-  description = "Prefix to prepend to randomized bucket name. Helpful for distinguishing resulting infrastructure"
+  description = "Prefix to prepend when constructing bucket name. Helpful for distinguishing resulting infrastructure"
   default     = ""
 
   # enforce max length to avoid bucket names that are too long
@@ -21,9 +22,10 @@ variable "bucket_name_prefix" {
   }
 }
 
+# TODO: combine with above; these are just being concatenated
 variable "bucket_name_suffix" {
   type        = string
-  description = "Suffix to prepend to randomized bucket name. Helpful for distinguishing resulting infrastructure"
+  description = "Suffix to append to randomized bucket name. Helpful for distinguishing resulting infrastructure"
   default     = "-output"
 
   # enforce max length to avoid bucket names that are too long
@@ -36,8 +38,14 @@ variable "bucket_name_suffix" {
 variable "bucket_write_role_id" {
   type        = string
   description = "The id of role to grant on bucket to enable writes"
+
+  validation {
+    error_message = "`bucket_write_role_id` must not be empty/null/blank."
+    condition     = var.bucket_write_role_id != null && var.bucket_write_role_id != ""
+  }
 }
 
+# TODO: rename this; this should be proxy service workload identity or something; not PRESUME that proxy is running as a Cloud Function
 variable "function_service_account_email" {
   type        = string
   description = "The service account of the Cloud Function that will write to this bucket"
@@ -48,6 +56,7 @@ variable "function_service_account_email" {
   }
 }
 
+# TODO : rename this ... not *necessarily* sanitized in all cases
 variable "sanitizer_accessor_principals" {
   type        = list(string)
   description = "list of names of GCP principals"
