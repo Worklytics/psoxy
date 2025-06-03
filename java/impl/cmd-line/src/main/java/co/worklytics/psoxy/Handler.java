@@ -52,7 +52,7 @@ public class Handler {
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory.create(options.build());
         BulkDataSanitizer sanitizer = fileHandlerStrategy.get(rules);
 
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in =  new BufferedReader(new FileReader(inputFile));
              Writer writer = new AppendableWriter(out)) {
             sanitizer.sanitize(in, writer, pseudonymizer);
         }
