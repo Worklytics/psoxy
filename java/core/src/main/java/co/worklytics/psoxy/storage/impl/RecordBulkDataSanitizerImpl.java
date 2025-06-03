@@ -58,9 +58,9 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
 
     @Override
-    public void sanitize(BufferedReader reader,
-                         @NonNull Writer writer,
-                         @NonNull Pseudonymizer pseudonymizer) throws IOException {
+    public int sanitize(BufferedReader reader,
+                        @NonNull Writer writer,
+                        @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
         List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms =
             rules.getTransforms().stream()
@@ -71,20 +71,24 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                 ))
                 .collect(Collectors.toList());
 
+
         if (rules.getFormat() == RecordRules.Format.NDJSON) {
-            sanitizeNdjson(reader, writer, compiledTransforms);
+            return sanitizeNdjson(reader, writer, compiledTransforms);
         } else if (rules.getFormat() == RecordRules.Format.CSV) {
-            sanitizeCsv(reader, writer, compiledTransforms);
+            return sanitizeCsv(reader, writer, compiledTransforms);
         } else {
             throw new IllegalArgumentException("Unsupported format: " + rules.getFormat());
         }
     }
 
     @VisibleForTesting
-    void sanitizeCsv(@NonNull Reader reader,
+    int sanitizeCsv(@NonNull Reader reader,
                      @NonNull Writer writer,
                      @NonNull List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms) throws IOException {
 
+        //q: why doesn't this just use ColumnarBulkDataSanitizerImpl?
+
+        int errorCount = 0;
         try (CSVParser records = CSVFormat.DEFAULT
                 .withFirstRecordAsHeader()
                 .withIgnoreHeaderCase()
@@ -113,31 +117,42 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                     printer.println();
                 } catch (UnmatchedPseudonymization e) {
                     log.warning("Skipped record due to UnmatchedPseudonymization: " + e.getPath());
+                    errorCount++;
                 }
             }
         }
+        return errorCount;
     }
 
     @VisibleForTesting
-    void sanitizeNdjson(@NonNull Reader reader,
+    int sanitizeNdjson(@NonNull Reader reader,
                         @NonNull Writer writer,
                         @NonNull List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms) throws IOException {
+        int errorCount = 0;
         try (BufferedReader bufferedReader = new BufferedReader(reader)) {
             String line;
             while ((line = StringUtils.trimToNull(bufferedReader.readLine())) != null) {
 
-                Object document = jsonConfiguration.jsonProvider().parse(line);
-
                 try {
+                    Object document = jsonConfiguration.jsonProvider().parse(line);
+
                     document = applyTransforms(document, compiledTransforms);
                     writer.append(jsonConfiguration.jsonProvider().toJson(document));
                     writer.append('\n'); // NDJSON uses newlines between records
                     writer.flush(); //after each line
                 } catch (UnmatchedPseudonymization e) {
                     log.warning("Skipped record due to UnmatchedPseudonymization: " + e.getPath());
+                    errorCount++;
+                } catch (JsonPathException e) {
+                    log.warning("Skipped record due to JsonPathException: " + e.getMessage());
+                    errorCount++;
+                } catch (Exception e) {
+                    log.warning("Skipped record due to unexpected exception: " + e.getMessage());
+                    errorCount++;
                 }
             }
         }
+        return errorCount;
     }
 
 

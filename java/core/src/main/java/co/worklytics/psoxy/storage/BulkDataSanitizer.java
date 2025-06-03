@@ -20,9 +20,10 @@ public interface BulkDataSanitizer {
      *                      implicit in records
      * @param writer        The stream writer to which sanitized content should be written.
      * @param pseudonymizer The pseudonymizer to use
-     * @throws IOException  IO problem reading or writing
+     * @return records in data which could not be processed due to errors
+     * @throws IOException IO problem reading or writing
      */
-    void sanitize(BufferedReader reader,
-                  Writer writer,
-                  Pseudonymizer pseudonymizer) throws IOException;
+    int sanitize(BufferedReader reader,
+                 Writer writer,
+                 Pseudonymizer pseudonymizer) throws IOException;
 }

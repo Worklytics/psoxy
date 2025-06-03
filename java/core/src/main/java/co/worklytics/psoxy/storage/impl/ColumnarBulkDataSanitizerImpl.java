@@ -75,9 +75,9 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
 
     @Override
-    public void sanitize(@NonNull BufferedReader reader,
-                         @NonNull Writer writer,
-                         @NonNull Pseudonymizer pseudonymizer) throws IOException {
+    public int sanitize(@NonNull BufferedReader reader,
+                        @NonNull Writer writer,
+                        @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
         CSVFormat inputCSVFormat = CSVFormat.Builder.create(CSVFormat.DEFAULT)
             .setDelimiter(rules.getDelimiter())
@@ -294,14 +294,16 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             .build();
 
 
+        int errorCount = 0;
         try (CSVPrinter printer = new CSVPrinter(writer, outputFormat)) {
             ProcessingBuffer<ProcessedRecord> buffer = getRecordsProcessingBuffer(printer);
-            processRecords(columnNamesForOutputFile, inputCsvFormat, columnTransforms, reader, buffer);
+            errorCount = processRecords(columnNamesForOutputFile, inputCsvFormat, columnTransforms, reader, buffer);
 
             if (buffer.flush()) {
                 log.info(String.format("Processed records: %d", buffer.getProcessed()));
             }
         }
+        return errorCount;
     }
 
     /**
@@ -310,13 +312,16 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
      * @param columnTransformsToApply to apply to each column in the record
      * @param bodyRecords to process; should be a CSVParser with headers
      * @param outputBuffer to write the processed records to
+     * @return number of records which could not be processed due to errors
      */
-    void processRecords(
+    int processRecords(
                                 List<String> columnNamesForOutput,
                                 CSVFormat inputCsvFormat,
                                 Map<String, Pair<String, List<Function<String, Optional<String>>>>> columnTransformsToApply,
                                 BufferedReader bodyRecords,
                                 ProcessingBuffer<ProcessedRecord> outputBuffer) throws IOException {
+
+        int errorCount = 0;
 
         // collect transforms that are MISSING mappings in the records
         Set<String> transformsWithoutMappings = new HashSet<>();
@@ -377,8 +382,10 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                 }
             } catch (IndexOutOfBoundsException | UncheckedIOException | IOException e) {
                 log.log(Level.WARNING, "Failed to process record", e);
+                errorCount++;
             }
         }
+        return errorCount;
     }
 
 

@@ -82,6 +82,7 @@ public class StorageHandler {
 
         //SHA-1 of rules
         RULES_SHA,
+        ERROR_COUNT,
         ;
 
         // aws prepends `x-amz-meta-` to this; but per documentation, that's not visible via the
@@ -106,11 +107,12 @@ public class StorageHandler {
 
         this.validate(request, transform, inputStreamSupplier);
 
-        this.process(request, transform, inputStreamSupplier, outputStreamSupplier);
+        int errorCount = this.process(request, transform, inputStreamSupplier, outputStreamSupplier);
 
         StorageEventResponse response = StorageEventResponse.builder()
             .destinationBucketName(request.getDestinationBucketName())
             .destinationObjectPath(request.getDestinationObjectPath())
+            .errorCount(errorCount)
             .build();
 
         log.info("Writing to: " + response.getDestinationBucketName() + "/" + response.getDestinationObjectPath());
@@ -371,7 +373,7 @@ public class StorageHandler {
      * @param outputStreamSupplier
      */
     @SneakyThrows
-    void process(StorageEventRequest request,
+    int process(StorageEventRequest request,
                  StorageHandler.ObjectTransform transform,
                  Supplier<InputStream> inputStreamSupplier,
                  Supplier<OutputStream> outputStreamSupplier) {
@@ -393,7 +395,7 @@ public class StorageHandler {
 
             BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules.get());
 
-            fileHandler.sanitize(reader, writer, pseudonymizer);
+            return fileHandler.sanitize(reader, writer, pseudonymizer);
         }
 
     }
