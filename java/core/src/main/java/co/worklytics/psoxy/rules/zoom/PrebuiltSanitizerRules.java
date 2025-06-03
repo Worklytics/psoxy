@@ -180,9 +180,25 @@ public class PrebuiltSanitizerRules {
                 .build())
             .build()).build();
 
+    static final Rules2 RECORDINGS_ENDPOINTS = Rules2.builder()
+        // List user recordings
+        //https://developers.zoom.us/docs/api/meetings/#tag/cloud-recording/GET/users/{userId}/recordings
+        .endpoint(Endpoint.builder()
+            .pathTemplate("/v2/users/{userId}/recordings")
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$.meetings[*]['host_id','account_id']")
+                .build())
+            .transform(Transform.Redact.builder()
+                .jsonPath("$..['topic','share_url','recording_play_passcode']")
+                .jsonPath("$..recording_files[*]['download_url','file_path','play_url','agenda']")
+                .build())
+            .build()
+        ).build();
+
     static final Rules2 ZOOM = USERS_ENDPOINTS
         .withAdditionalEndpoints(MEETINGS_ENDPOINTS.getEndpoints())
-        .withAdditionalEndpoints(REPORT_ENDPOINTS.getEndpoints());
+        .withAdditionalEndpoints(REPORT_ENDPOINTS.getEndpoints())
+        .withAdditionalEndpoints(RECORDINGS_ENDPOINTS.getEndpoints());
 
 
     static public final Map<String, RESTRules> ZOOM_PREBUILT_RULES_MAP = ImmutableMap.<String, RESTRules>builder()
