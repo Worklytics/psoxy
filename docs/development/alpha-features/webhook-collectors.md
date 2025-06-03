@@ -123,6 +123,21 @@ Add KMS services to prereqs; what we expect to have activated and perms to manag
 
 Webhooks will always be written as NDJSON (newline-delimited JSON) to the output bucket.
 
+To do this efficiently, we'd split into 2 steps: 1) webhook collector that receives webhook payload, accepts + sanitizes it, and then sends it to SQS. Then separately
+a trigger that 2) batches messages from SQS and writes them to the output bucket as NDJSON files.
+
+https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html
+
+`InboundWebhookHandler` will be the entry point for the webhook collector, which will:
+- verify the JWT identity token in the `Authorization` header
+- apply the transforms to the payload
+- write the sanitized payload to SQS
+
+`SQSBatchHandler` will be the entry point for the SQS trigger, which will:
+- read message(s) from SQS
+- batch them into NDJSON files
+- write the NDJSON files to the output bucket
+
 
 ### Future
 Add FILTERS
@@ -155,12 +170,6 @@ Add a `REQUEST` format for writing webhooks --> storage:
 Ideally, we want to batch many payloads into a single NDJSON file, which we'd then compress and store in the output bucket.
 
 To do this reliably/efficiently, I think we need to add SQS in the middle, which can batch up to 10k messages.
-
-We'd have a webhook collector that recieves webhook payload, accepts + sanitizes it, and then sends it to SQS. Then separately
-a trigger that batches messages from SQS and writes them to the output bucket as NDJSON files.
-
-
-https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html
 
 
 ### Issues
