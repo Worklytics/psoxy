@@ -270,7 +270,7 @@ public class PsoxyModule {
                 .orElseGet(() -> {
                     boolean legacy =
                     config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION)
-                        .map(PseudonymImplementation::valueOf)
+                        .map(PseudonymImplementation::parseConfigPropertyValue)
                         .map(implementation -> Objects.equals(implementation, PseudonymImplementation.LEGACY))
                         .orElse(false);
 
