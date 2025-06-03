@@ -10,6 +10,9 @@ Changes to be including in future/planned release notes will be added here.
 ## [0.5.3](https://github.com/Worklytics/psoxy/release/tag/v0.5.3)
   - `aws` - removed `ssm:GetParameterVersion` perm from policies; not a thing
   - support for Side Outputs in `gcp` and `aws` modules; see [docs/configuration/side-outputs.md](docs/configuration/side-outputs.md) for details
+  - `Zoom`:
+    - support for fetching user settings through `/v2/users/{userId}/settings` endpoint
+    - support for fetching cloud recordings through `/v2/users/{userId}/recordings` endpoint
 
 ## [0.5.2](https://github.com/Worklytics/psoxy/release/tag/v0.5.2)
 - `slack` : discovery rules now allow names of accounts with `is_bot==true` and with user id as `USLACKBOT` to pass through; are now "default deny" on API fields, returning only data matching expected fields.
