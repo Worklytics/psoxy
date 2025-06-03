@@ -64,7 +64,7 @@ class ColumnarBulkDataSanitizerImplTest {
 
     @SneakyThrows
     @Test
-    void proccessingSkipsMalformedRows() {
+    void processingSkipsMalformedRows() {
         ColumnarBulkDataSanitizerImpl columnarBulkDataSanitizer = new ColumnarBulkDataSanitizerImpl(ColumnarRules.builder()
             .columnToPseudonymize("employee_id")
             .build());
