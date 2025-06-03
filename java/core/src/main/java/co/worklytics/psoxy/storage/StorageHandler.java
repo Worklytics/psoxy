@@ -379,7 +379,7 @@ public class StorageHandler {
 
         try (
             InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
-            Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8), bufferSize);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8), bufferSize);
             OutputStream outputStream = writeOutputStream(request, bufferSize, outputStreamSupplier);
             OutputStreamWriter writer = new OutputStreamWriter(outputStream)
         ) {
