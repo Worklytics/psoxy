@@ -28,6 +28,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
     @ValueSource(strings = {
         "https://api.zoom.us/v2/users",
         "https://api.zoom.us/v2/users?status=active&page_size=200&next_page_token=TOKEN",
+        "https://api.zoom.us/v2/users/USER_ID/settings",
         "https://api.zoom.us/v2/users/USER_ID/meetings",
         "https://api.zoom.us/v2/users/USER_ID/meetings?type=scheduled&page_size=20",
         "https://api.zoom.us/v2/past_meetings/MEETING_ID",
@@ -96,6 +97,23 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, PII);
         assertRedacted(sanitized, "Taylor", "Kim", "https://example.com/photo.jpg");
         assertReversibleUrlTokenized(sanitized, Arrays.asList("111111111"));
+    }
+
+    @SneakyThrows
+    @Test
+    void get_user_settings() {
+        String jsonString = asJson("user-settings.json");
+
+        String sanitized =
+            sanitizer.sanitize("GET", new URL("https://api.zoom.us/v2/users/ANY_USER_ID/settings"), jsonString);
+
+        // topics & join_urls gone
+        assertRedacted(sanitized, "https://zoom.us", "113332424", "1213434", "46.33.24.184",
+            "The specific instructions",
+            "example.png",
+            "+86 777 777 77",
+            "777 777 77"
+        );
     }
 
     @SneakyThrows
@@ -279,6 +297,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         return Stream.of(
             InvocationExample.of("https://api.zoom.us/v2/users/USER_ID/meetings", "list-user-meetings.json"),
             InvocationExample.of("https://api.zoom.us/v2/users", "list-users.json"),
+            InvocationExample.of("https://api.zoom.us/v2/users/USER_ID/settings", "user-settings.json"),
             InvocationExample.of("https://api.zoom.us/v2/meetings/MEETING_ID", "meeting-details.json"),
             InvocationExample.of("https://api.zoom.us/v2/meetings/MEETING_ID/meeting_summary", "meeting-summary.json"),
             InvocationExample.of("https://api.zoom.us/v2/past_meetings/MEETING_ID", "past-meeting-details.json"),
