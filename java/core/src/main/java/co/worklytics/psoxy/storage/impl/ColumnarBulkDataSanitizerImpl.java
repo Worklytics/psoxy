@@ -34,12 +34,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -275,7 +277,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         List<String> columnNamesForOutputFile = columnTransforms.keySet()
             .stream()
             .sorted(originalHeadersOrRenamedFirst.thenComparing(byColumnName))
-            .collect(Collectors.toList())
+            .toList()
             .stream()
             // leave original casing for headers
             .map( h -> headers.stream().filter(h::equalsIgnoreCase).findFirst().orElse(h))
@@ -287,25 +289,56 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             .setNullString("")
             .build();
 
-        // create an empty record to fill with the transformed values, ensuring all rows have
-        // the same columns
-        // linked hash map: need predictable iteration order and null values
 
-        LinkedHashMap<String, String> newRecord = new LinkedHashMap<>();
-        columnNamesForOutputFile.forEach(h -> newRecord.put(h, null));
+
+
+
 
         try (CSVPrinter printer = new CSVPrinter(writer, csvFormat)) {
 
             ProcessingBuffer<ProcessedRecord> buffer = getRecordsProcessingBuffer(printer);
+            processRecords(columnNamesForOutputFile, columnTransforms, records, buffer);
 
-            Set<String> transformsWithoutMappings = new HashSet<>();
+            if (buffer.flush()) {
+                log.info(String.format("Processed records: %d", buffer.getProcessed()));
+            }
+        }
+    }
 
-            for (CSVRecord record : records) {
+    /**
+     * processes records into outputBuffer, applying the transformations to each
+     * @param columnNamesForOutput to render in the output buffer; so columns which DON'T have values in particular record will be filled
+     * @param columnTransformsToApply to apply to each column in the record
+     * @param recordsToProcess to process; should be a CSVParser with headers
+     * @param outputBuffer to write the processed records to
+     * @return set of transforms that were defined, but the applicable column was NOT found in the records
+     */
+    Set<String> processRecords(
+                                List<String> columnNamesForOutput,
+                                Map<String, Pair<String, List<Function<String, Optional<String>>>>> columnTransformsToApply,
+                                CSVParser recordsToProcess,
+                                ProcessingBuffer<ProcessedRecord> outputBuffer) {
+
+        // collect transforms that are MISSING mappings in the records
+        Set<String> transformsWithoutMappings = new HashSet<>();
+
+        // linked hash map: need predictable iteration order and null values
+        LinkedHashMap<String, String> newRecord = new LinkedHashMap<>();
+        // create an empty record to fill with the transformed values, ensuring all rows have
+        // the same columns
+        columnNamesForOutput.forEach(h -> newRecord.put(h, null));
+
+        Iterator<CSVRecord> iterator = recordsToProcess.iterator();
+
+        // TODO: i believe hasNext() can ALSO throw the UncheckedIOException
+        while (iterator.hasNext()) {
+            try {
+                CSVRecord record = iterator.next();
                 // clean up the record prior to use
                 newRecord.replaceAll((k, v) -> null);
                 newRecord.keySet().forEach(h -> {
 
-                    Pair<String, List<Function<String, Optional<String>>>> transforms = columnTransforms.getOrDefault(h, null);
+                    Pair<String, List<Function<String, Optional<String>>>> transforms = columnTransformsToApply.getOrDefault(h, null);
                     if (transforms == null) {
                         newRecord.put(h, null);
                     } else {
@@ -328,18 +361,18 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                             }
                         }
                     }
-
                 });
 
-                if (buffer.addAndAttemptFlush(ProcessedRecord.of(Lists.newArrayList(newRecord.values())))) {
-                    log.info(String.format("Processed records: %d", buffer.getProcessed()));
-                };
-            }
-            if (buffer.flush()) {
-                log.info(String.format("Processed records: %d", buffer.getProcessed()));
+                if (outputBuffer.addAndAttemptFlush(ProcessedRecord.of(Lists.newArrayList(newRecord.values())))) {
+                    log.info(String.format("Processed records: %d", outputBuffer.getProcessed()));
+                }
+            } catch (UncheckedIOException e) {
+                log.log(Level.WARNING, "Failed to process record", e);
             }
         }
+        return transformsWithoutMappings;
     }
+
 
     @VisibleForTesting
     Set<String> determineMissingColumnsToPseudonymize(Set<String> columnsToPseudonymize, Set<String> outputColumnsCI) {
