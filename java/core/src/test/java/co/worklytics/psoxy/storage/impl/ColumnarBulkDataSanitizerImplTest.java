@@ -81,8 +81,6 @@ class ColumnarBulkDataSanitizerImplTest {
             .build();
 
         List<ColumnarBulkDataSanitizerImpl.ProcessedRecord> processedRecords = new ArrayList<>();
-        ;
-
         BufferedReader reader = new BufferedReader(new StringReader(MALFORMED_CSV));
         reader.readLine(); // skip header
 
