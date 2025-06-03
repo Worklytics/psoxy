@@ -76,29 +76,29 @@ class ParameterSchemaUtilsTest {
 
     @Test
     public void validate_all() {
-        Map<String, ParameterSchema> parameterSchemas =
-                Map.of("string", ParameterSchema.string(),
-                        "number", ParameterSchema.builder().type("number").build(),
-                        "reversible", ParameterSchema.reversiblePseudonym());
+        Map<String, QueryParameterSchema> parameterSchemas =
+                Map.of("string", QueryParameterSchema.string(),
+                        "number", QueryParameterSchema.builder().type("number").build(),
+                        "reversible", QueryParameterSchema.reversiblePseudonym());
 
         assertTrue(parameterSchemaUtils.validateAll(parameterSchemas, Arrays.asList(
                 Pair.of("string", "string"),
                 Pair.of("number", "1.0"),
                 Pair.of("reversible", EXAMPLE_REVERSIBLE)
-        ), true));
+        )));
 
         assertFalse(
                 parameterSchemaUtils.validateAll(parameterSchemas, Arrays.asList(
                         Pair.of("string", "string"),
                         Pair.of("number", "not-a-number"),
                         Pair.of("reversible", EXAMPLE_REVERSIBLE)
-                ), true));
+                )));
         assertFalse(
                 parameterSchemaUtils.validateAll(parameterSchemas, Arrays.asList(
 
                         Pair.of("number", "not-a-number"),
                         Pair.of("reversible", "not-a-pseudonym")
-                ), true));
+                )));
     }
 
 
@@ -116,16 +116,16 @@ class ParameterSchemaUtilsTest {
 
     @Test
     public void required() {
-        ParameterSchema schema = ParameterSchema.builder()
+        QueryParameterSchema schema = QueryParameterSchema.builder()
             .type(ParameterSchema.ValueType.STRING.getEncoding())
             .required(true)
             .build();
 
-        assertTrue(parameterSchemaUtils.validateAll(Map.of("foo", schema), Arrays.asList(Pair.of("foo", "bar")), false));
+        assertTrue(parameterSchemaUtils.validateAll(Map.of("foo", schema), Arrays.asList(Pair.of("foo", "bar"))));
 
-        assertFalse(parameterSchemaUtils.validateAll(Map.of("foo", schema), Arrays.asList(Pair.of("foo", null)), false));
-        assertFalse(parameterSchemaUtils.validateAll(Map.of("foo", schema), Arrays.asList(Pair.of("foo2", "bar")), false));
-        assertFalse(parameterSchemaUtils.validateAll(Map.of("foo", schema), Collections.emptyList(), false));
+        assertFalse(parameterSchemaUtils.validateAll(Map.of("foo", schema), Arrays.asList(Pair.of("foo", null))));
+        assertFalse(parameterSchemaUtils.validateAll(Map.of("foo", schema), Arrays.asList(Pair.of("foo2", "bar"))));
+        assertFalse(parameterSchemaUtils.validateAll(Map.of("foo", schema), Collections.emptyList()));
     }
 }
 

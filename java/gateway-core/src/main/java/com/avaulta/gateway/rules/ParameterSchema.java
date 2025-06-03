@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
  * this is just subset of JsonSchema; nothing makes it specific to a 'parameter' per se
  */
 @JsonPropertyOrder({"type", "format", "pattern", "enum"})
-@Builder(toBuilder = true)
+@SuperBuilder(toBuilder = true)
 @With
 @AllArgsConstructor //for builder
 @NoArgsConstructor //for Jackson
@@ -86,15 +87,7 @@ public class ParameterSchema {
     List<ParameterSchema> ors;
 
 
-    /**
-     * whether this parameter is required
-     *
-     * this is ONLY applicable to QueryParameters;  PathParameters are always required
-     *
-     * TODO: we should probably split implementation into QueryParameterSchema and PathParameterSchema
-     */
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    Boolean required;
+
 
     public static ParameterSchema string() {
         return ParameterSchema.builder()

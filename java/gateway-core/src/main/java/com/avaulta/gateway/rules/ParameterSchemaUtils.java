@@ -74,14 +74,12 @@ public class ParameterSchemaUtils {
      * - bindings for parameters w/o defined schema are considered valid
      * - parameters with defined schemas are not required to have a binding
      *
-     * @param schemas    parameter names --> schema
-     * @param bindings   parameter names --> values
-     * @param requireAll
+     * @param schemas  parameter names --> schema
+     * @param bindings parameter names --> values
      * @return whether all bindings are valid for parameters with schema defined in schemas
      */
-    public boolean validateAll(Map<String, ParameterSchema> schemas,
-                               List<Pair<String, String>> bindings,
-                               boolean requireAll) {
+    public boolean validateAll(Map<String, QueryParameterSchema> schemas,
+                               List<Pair<String, String>> bindings) {
         return schemas.entrySet().stream()
                 // all values, for all parameters that have defined schema, are valid
                 .allMatch(paramSchema -> {
@@ -92,11 +90,15 @@ public class ParameterSchemaUtils {
                         .filter(Objects::nonNull)
                         .collect(Collectors.toUnmodifiableList());
 
-                    boolean required = requireAll || Optional.ofNullable(paramSchema.getValue().getRequired()).orElse(false) ;
+                    boolean required = Optional.ofNullable(paramSchema.getValue().getRequired()).orElse(false) ;
                     boolean hasAValue = !values.isEmpty();
 
                      return (!required || hasAValue) &&
                          values.stream().allMatch(value -> validate(paramSchema.getValue(), value));
   });
     }
+
+
+
+
 }
