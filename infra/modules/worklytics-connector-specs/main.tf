@@ -764,14 +764,14 @@ be left in development mode; it does not need to be published.
     * `meeting:read:list_past_instances:admin`
     * `meeting:read:list_meetings:admin`
     * `meeting:read:participant:admin`
+    * `meeting:read:summary:admin`
+    * `cloud_recording:read:list_user_recordings:admin`
     * `report:read:list_meeting_participants:admin`
     * `report:read:meeting:admin`
     * `report:read:user:admin`
     * `user:read:user:admin`
     * `user:read:list_users:admin`
-
-  Alternatively, the scopes: `user:read:admin`, `meeting:read:admin`, `report:read:admin` are
-  sufficient, but as of May 2024 are no longer available for newly created Zoom apps.
+    * `user:read:settings:admin`
 
   Once the scopes are added, click on `Done` and then `Continue`.
 
