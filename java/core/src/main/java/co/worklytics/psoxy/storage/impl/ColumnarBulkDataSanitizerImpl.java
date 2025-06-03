@@ -311,9 +311,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
      * @param columnTransformsToApply to apply to each column in the record
      * @param recordsToProcess to process; should be a CSVParser with headers
      * @param outputBuffer to write the processed records to
-     * @return set of transforms that were defined, but the applicable column was NOT found in the records
      */
-    Set<String> processRecords(
+    void processRecords(
                                 List<String> columnNamesForOutput,
                                 Map<String, Pair<String, List<Function<String, Optional<String>>>>> columnTransformsToApply,
                                 CSVParser recordsToProcess,
@@ -370,7 +369,6 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                 log.log(Level.WARNING, "Failed to process record", e);
             }
         }
-        return transformsWithoutMappings;
     }
 
 
