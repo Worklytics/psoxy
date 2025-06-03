@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.ProcessedContent;
 import lombok.SneakyThrows;
 import org.apache.http.HttpStatus;
 
@@ -59,7 +60,6 @@ public class InboundWebhookHandler {
         // TODO: write sanitizedBody to output
         // inject an Output implementation, by the platform.
         // for this use-case, we potentially want to stream lines into the output; how do we do so?
-
 
         return HttpEventResponse.builder()
             .statusCode(HttpStatus.SC_OK)

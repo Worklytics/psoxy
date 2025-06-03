@@ -152,6 +152,16 @@ Add a `REQUEST` format for writing webhooks --> storage:
 }
 ```
 
+Ideally, we want to batch many payloads into a single NDJSON file, which we'd then compress and store in the output bucket.
+
+To do this reliably/efficiently, I think we need to add SQS in the middle, which can batch up to 10k messages.
+
+We'd have a webhook collector that recieves webhook payload, accepts + sanitizes it, and then sends it to SQS. Then separately
+a trigger that batches messages from SQS and writes them to the output bucket as NDJSON files.
+
+
+https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html
+
 
 ### Issues
   - how should identity signature of actor be sent?? header?? in the payload?
