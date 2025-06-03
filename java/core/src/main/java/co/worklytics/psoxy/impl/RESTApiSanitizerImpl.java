@@ -592,7 +592,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             .orElse(true);
         return matchesAllowed
             && endpoint.getQueryParamSchemasOptional()
-            .map(schemas -> parameterSchemaUtils.validateAll(schemas, queryParams))
+            .map(schemas -> parameterSchemaUtils.validateAll(schemas, queryParams, false))
             .orElse(true);
     }
 

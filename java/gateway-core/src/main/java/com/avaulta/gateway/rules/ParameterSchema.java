@@ -1,5 +1,6 @@
 package com.avaulta.gateway.rules;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -83,6 +84,17 @@ public class ParameterSchema {
     @JsonProperty("or") //align to JsonSchema
     @Singular
     List<ParameterSchema> ors;
+
+
+    /**
+     * whether this parameter is required
+     *
+     * this is ONLY applicable to QueryParameters;  PathParameters are always required
+     *
+     * TODO: we should probably split implementation into QueryParameterSchema and PathParameterSchema
+     */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    Boolean required;
 
     public static ParameterSchema string() {
         return ParameterSchema.builder()

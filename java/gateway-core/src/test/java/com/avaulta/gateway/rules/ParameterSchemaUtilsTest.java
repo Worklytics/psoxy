@@ -4,6 +4,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -84,20 +85,20 @@ class ParameterSchemaUtilsTest {
                 Pair.of("string", "string"),
                 Pair.of("number", "1.0"),
                 Pair.of("reversible", EXAMPLE_REVERSIBLE)
-        )));
+        ), true));
 
         assertFalse(
                 parameterSchemaUtils.validateAll(parameterSchemas, Arrays.asList(
                         Pair.of("string", "string"),
                         Pair.of("number", "not-a-number"),
                         Pair.of("reversible", EXAMPLE_REVERSIBLE)
-                )));
+                ), true));
         assertFalse(
                 parameterSchemaUtils.validateAll(parameterSchemas, Arrays.asList(
 
                         Pair.of("number", "not-a-number"),
                         Pair.of("reversible", "not-a-pseudonym")
-                )));
+                ), true));
     }
 
 
@@ -111,6 +112,20 @@ class ParameterSchemaUtilsTest {
         assertTrue(parameterSchemaUtils.validate(schema, "all"));
         assertTrue(parameterSchemaUtils.validate(schema, "123"));
         assertFalse(parameterSchemaUtils.validate(schema, "any"));
+    }
+
+    @Test
+    public void required() {
+        ParameterSchema schema = ParameterSchema.builder()
+            .type(ParameterSchema.ValueType.STRING.getEncoding())
+            .required(true)
+            .build();
+
+        assertTrue(parameterSchemaUtils.validateAll(Map.of("foo", schema), Arrays.asList(Pair.of("foo", "bar")), false));
+
+        assertFalse(parameterSchemaUtils.validateAll(Map.of("foo", schema), Arrays.asList(Pair.of("foo", null)), false));
+        assertFalse(parameterSchemaUtils.validateAll(Map.of("foo", schema), Arrays.asList(Pair.of("foo2", "bar")), false));
+        assertFalse(parameterSchemaUtils.validateAll(Map.of("foo", schema), Collections.emptyList(), false));
     }
 }
 
