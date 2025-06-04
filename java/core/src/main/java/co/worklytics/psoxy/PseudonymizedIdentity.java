@@ -40,6 +40,19 @@ public class PseudonymizedIdentity {
      */
     String hash;
 
+    /**
+     * future-use. 0.4 hash for pseudonym, if `hash` is NOT 0.4.
+     *
+     * in the future, will be filled for LEGACY (0.3) cases; but for now, will be null (and always
+     * absent from JSON-serialized form)
+     *
+     * this will give both DEFAULT and LEGACY hashes for pseudonyms, allowing for eventual migration
+     * of LEGACY customers to DEFAULT (0.4)
+     *
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String h_4;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String original;
 
