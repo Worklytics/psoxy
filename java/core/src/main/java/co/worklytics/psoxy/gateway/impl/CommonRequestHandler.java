@@ -177,7 +177,6 @@ public class CommonRequestHandler {
         URL toLog = envVarsConfigService.isDevelopment() ? requestUrls.getTarget() : requestUrls.getOriginal();
 
         boolean skipSanitization = clientRequestsSkipSanization(request);
-        boolean clientRequestsNoResponse = clientRequestsNoResponse(request);
 
         HttpEventResponse.HttpEventResponseBuilder builder = HttpEventResponse.builder();
 
@@ -276,29 +275,15 @@ public class CommonRequestHandler {
 
             passThroughHeaders(builder, sourceApiResponse);
             if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
-                if (clientRequestsNoResponse) {
-                    // very ALPHA; untested!!!  worry about how threading/etc would work
-                    // client doesn't want a response body; assume there's a side output (otherwise we don't need to do this at all)
-                    new Thread(() -> {
-                       final ExecutorService executorService = Executors.newFixedThreadPool(2);
-                        executorService.submit(() -> {
-                            ProcessedContent sanitizedContent = sanitize(request, requestUrls, original);
-                            writeSideOutput(request, sourceApiResponse, sanitizedContent);
-                        });
-                    }).start();
+                ProcessedContent sanitizationResult =
+                    sanitize(request, requestUrls, original);
+                proxyResponseContent = sanitizationResult.getContentString();
 
-                    return builder.build();
-                } else {
-                    // client wants a response body
-                    ProcessedContent sanitizationResult  =
-                        sanitize(request, requestUrls, original);
-                    proxyResponseContent = sanitizationResult.getContentString();
+                sanitizationResult.getMetadata().entrySet()
+                    .forEach(e -> builder.header(e.getKey(), e.getValue()));
 
-                    sanitizationResult.getMetadata().entrySet()
-                        .forEach(e -> builder.header(e.getKey(), e.getValue()));
+                writeSideOutput(request, sourceApiResponse, sanitizationResult);
 
-                    writeSideOutput(request, sourceApiResponse, sanitizationResult);
-                }
 
                 if (skipSanitization) {
                     proxyResponseContent = original.getContentString();
@@ -512,20 +497,6 @@ public class CommonRequestHandler {
         } else {
             return false;
         }
-    }
-
-     /**
-      * whether client actually wants a response body
-      *
-      * use-case: API that returns very large response bodies that take too long to process synchronously within a single HTTP request (eg, < 55s)
-      *   clients can use this to indicate they don't want a response body, and will pick it up asynchronously from a side output later if they care to
-      *
-      *
-       */
-    private boolean clientRequestsNoResponse(HttpEventRequest request) {
-         return request.getHeader(ControlHeader.NO_RESPONSE_BODY.getHttpHeader())
-                    .map(Boolean::parseBoolean)
-                    .orElse(false);
     }
 
     private void logRequestIfVerbose(HttpEventRequest request) {
