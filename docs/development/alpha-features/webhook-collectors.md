@@ -71,7 +71,7 @@ A new entry point handler; `InboundWebhookHandler` that will handle incoming web
 That will sanitize the payloads and write them to a bulk storage location as set in an `OUTPUT` environment variable.
    - similar approach to API case, where there are host-platform-specific wrappers around a common handler ?? prob.
 
-Rules of type `WebhookRules`, which includes:
+Rules of type `WebhookCollectionRules`, which includes:
   - `jwtClaimsToVerify` - a list of any JWT claims that must be present in the JWT token sent in `Authorization` header
     of the incoming webhook request which must be verified against webhook payload before accepting
      the webhook payload. Keys are the JWT claim names, and value are list of places to check against that claims value

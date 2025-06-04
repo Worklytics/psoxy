@@ -239,6 +239,7 @@ public abstract class Transform {
 
     }
 
+    @With
     @SuperBuilder(toBuilder = true)
     @AllArgsConstructor //for builder
     @NoArgsConstructor //for Jackson

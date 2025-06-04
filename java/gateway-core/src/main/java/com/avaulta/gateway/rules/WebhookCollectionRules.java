@@ -11,10 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Builder
 @JsonPropertyOrder({"jwtClaimsToVerify", "endpoints"})  //deterministic serialization order
-@NoArgsConstructor
+@AllArgsConstructor //for builder
+@NoArgsConstructor //for Jackson
 @Data
-public class WebhookRules implements Serializable {
+public class WebhookCollectionRules implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -30,6 +32,7 @@ public class WebhookRules implements Serializable {
     @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
     Map<String, JwtClaimSpec> jwtClaimsToVerify;
 
+    @Singular
     List<WebhookEndpoint> endpoints;
 
 
@@ -74,6 +77,8 @@ public class WebhookRules implements Serializable {
     }
 
     @Data
+    @Builder(toBuilder = true)
+    @AllArgsConstructor
     @NoArgsConstructor
     public static class JwtClaimSpec implements Serializable {
 
@@ -100,6 +105,7 @@ public class WebhookRules implements Serializable {
          *   - eg, values that if they are present in request payload, must match the claim value VS values that MUST be present and match.
          *
          */
+        @Singular
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         List<String> payloadContents;
     }

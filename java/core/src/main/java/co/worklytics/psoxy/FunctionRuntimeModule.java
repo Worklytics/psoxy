@@ -6,7 +6,7 @@ import co.worklytics.psoxy.gateway.impl.output.LogsOutput;
 import co.worklytics.psoxy.impl.WebhookSanitizerImplFactory;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
-import com.avaulta.gateway.rules.WebhookRules;
+import com.avaulta.gateway.rules.WebhookCollectionRules;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -107,7 +107,7 @@ public class FunctionRuntimeModule {
     @Provides @Singleton WebhookSanitizer webhookSanitizer(WebhookSanitizerImplFactory webhookSanitizerFactory,
                                                            ConfigService configService,
                                                            ObjectMapper objectMapper) {
-        return webhookSanitizerFactory.create(objectMapper.readerFor(WebhookRules.class).readValue(configService.getConfigPropertyOrError(ProxyConfigProperty.RULES)));
+        return webhookSanitizerFactory.create(objectMapper.readerFor(WebhookCollectionRules.class).readValue(configService.getConfigPropertyOrError(ProxyConfigProperty.RULES)));
     }
 
     @Provides @Singleton

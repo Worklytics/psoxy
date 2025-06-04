@@ -5,7 +5,7 @@ import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.impl.WebhookSanitizer;
 import co.worklytics.psoxy.utils.email.EmailAddressParser;
-import com.avaulta.gateway.rules.WebhookRules;
+import com.avaulta.gateway.rules.WebhookCollectionRules;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
@@ -31,13 +31,13 @@ public class WebhookSanitizerImpl implements WebhookSanitizer {
     @Inject
     Configuration jsonConfiguration;
 
-    final WebhookRules webhookRules;
+    final WebhookCollectionRules webhookRules;
 
     Map<Transform, List<JsonPath>> compiledTransforms = new ConcurrentHashMap<>();
 
     @AssistedInject
-    public WebhookSanitizerImpl(@Assisted WebhookRules webhookRules) {
-        this.webhookRules = webhookRules;
+    public WebhookSanitizerImpl(@Assisted WebhookCollectionRules webhookCollectionRules) {
+        this.webhookRules = webhookCollectionRules;
     }
 
 
@@ -77,7 +77,7 @@ public class WebhookSanitizerImpl implements WebhookSanitizer {
         }
 
         // per above, we assume there is exactly one endpoint configured atm
-        WebhookRules.WebhookEndpoint endpoint = webhookRules.getEndpoints().get(0);
+        WebhookCollectionRules.WebhookEndpoint endpoint = webhookRules.getEndpoints().get(0);
 
         String sanitizedContent = new String(request.getBody(), StandardCharsets.UTF_8); //just assume UTF-8, always
         if (ObjectUtils.isNotEmpty(endpoint.getTransforms())) {
