@@ -2,8 +2,8 @@ package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.RESTApiSanitizer;
+import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.URLUtils;
 import co.worklytics.psoxy.utils.email.EmailAddressParser;
@@ -208,7 +208,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         if (targetHostPath == null) {
             synchronized ($writeLock) {
                 if (targetHostPath == null) {
-                    targetHostPath = configService.getConfigPropertyAsOptional(ProxyConfigProperty.TARGET_HOST)
+                    targetHostPath = configService.getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST)
                         .map(s -> {
                             try {
                                 if (!s.startsWith("https://")) {

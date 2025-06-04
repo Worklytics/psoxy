@@ -3,7 +3,6 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.output.LogsOutput;
-import co.worklytics.psoxy.impl.WebhookSanitizerImpl;
 import co.worklytics.psoxy.impl.WebhookSanitizerImplFactory;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
@@ -12,13 +11,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.http.HttpTransportFactory;
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import lombok.SneakyThrows;
 
 import javax.inject.Named;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -63,9 +60,9 @@ public class FunctionRuntimeModule {
     @Provides @Singleton
     HttpTransportFactory providesHttpTransportFactory(EnvVarsConfigService envVarsConfigService) {
         final String sslContextProtocol =
-            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.TLS_VERSION)
-                .orElse(ProxyConfigProperty.TlsVersions.TLSv1_3);
-        if (Arrays.stream(ProxyConfigProperty.TlsVersions.ALL).noneMatch(s -> sslContextProtocol.equals(s))) {
+            envVarsConfigService.getConfigPropertyAsOptional(ApiModeConfigProperty.TLS_VERSION)
+                .orElse(ApiModeConfigProperty.TlsVersions.TLSv1_3);
+        if (Arrays.stream(ApiModeConfigProperty.TlsVersions.ALL).noneMatch(s -> sslContextProtocol.equals(s))) {
             throw new IllegalArgumentException("Invalid TLS version: " + sslContextProtocol);
         }
 

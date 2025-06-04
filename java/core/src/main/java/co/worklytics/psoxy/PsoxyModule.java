@@ -1,9 +1,6 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
@@ -97,7 +94,7 @@ public class PsoxyModule {
 
     @Provides @Singleton
     static SourceAuthStrategy sourceAuthStrategy(ConfigService configService, Set<SourceAuthStrategy> sourceAuthStrategies) {
-        String identifier = configService.getConfigPropertyOrError(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
+        String identifier = configService.getConfigPropertyOrError(ApiModeConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
         return sourceAuthStrategies
                 .stream()
                 .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))

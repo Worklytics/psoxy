@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
+import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SecretStore;
@@ -88,7 +89,7 @@ class RESTApiSanitizerImplTest {
             ConfigService mock = MockModules.provideMock(ConfigService.class);
             when(mock.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
                 .thenReturn("gmail");
-            when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.TARGET_HOST)))
+            when(mock.getConfigPropertyAsOptional(eq(ApiModeConfigProperty.TARGET_HOST)))
                 .thenReturn(Optional.of("gmail.googleapis.com"));
 
             return mock;

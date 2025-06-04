@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
+import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -30,7 +31,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -147,7 +147,7 @@ class ApiDataRequestHandlerTest {
                 return Optional.empty();
             }
         };
-        when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.TARGET_HOST))).thenReturn("proxyhost.com");
+        when(handler.config.getConfigPropertyOrError(eq(ApiModeConfigProperty.TARGET_HOST))).thenReturn("proxyhost.com");
 
         URL url = new URL(handler.reverseTokenizedUrlComponents(handler.parseRequestedTarget(request)));
 
@@ -414,7 +414,7 @@ class ApiDataRequestHandlerTest {
                 .thenReturn(Optional.of("salt"));
         when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
                 .thenReturn(source);
-        when(handler.config.getConfigPropertyOrError(ProxyConfigProperty.TARGET_HOST))
+        when(handler.config.getConfigPropertyOrError(ApiModeConfigProperty.TARGET_HOST))
                 .thenReturn(host);
 
         reversibleTokenizationStrategy = AESReversibleTokenizationStrategy.builder()

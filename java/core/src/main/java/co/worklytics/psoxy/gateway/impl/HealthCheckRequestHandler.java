@@ -92,10 +92,10 @@ public class HealthCheckRequestHandler {
                         .collect(Collectors.toSet());
 
         try {
-            Optional<String> targetHost = config.getConfigPropertyAsOptional(ProxyConfigProperty.TARGET_HOST);
+            Optional<String> targetHost = config.getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST);
 
             if (targetHost.isEmpty() || StringUtils.isBlank(targetHost.get())) {
-                missing.add(ProxyConfigProperty.TARGET_HOST.name());
+                missing.add(ApiModeConfigProperty.TARGET_HOST.name());
             }
         } catch (Throwable ignored) {
             logInDev("Failed to add TARGET_HOST info to health check", ignored);
@@ -104,7 +104,7 @@ public class HealthCheckRequestHandler {
         HealthCheckResult.HealthCheckResultBuilder healthCheckResult = HealthCheckResult.builder()
                 .javaSourceCodeVersion(JAVA_SOURCE_CODE_VERSION)
                 .configuredSource(config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
-                .configuredHost(config.getConfigPropertyAsOptional(ProxyConfigProperty.TARGET_HOST).orElse(null))
+                .configuredHost(config.getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST).orElse(null))
                 .nonDefaultSalt(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
                 .pseudonymImplementation(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION).orElse(null))
                 .missingConfigProperties(missing)
@@ -143,7 +143,7 @@ public class HealthCheckRequestHandler {
         }
 
         try {
-            config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER)
+            config.getConfigPropertyAsOptional(ApiModeConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER)
                     .ifPresent(healthCheckResult::sourceAuthStrategy);
         } catch (Throwable e) {
             logInDev("Failed to add sourceAuthStrategy to health check", e);
