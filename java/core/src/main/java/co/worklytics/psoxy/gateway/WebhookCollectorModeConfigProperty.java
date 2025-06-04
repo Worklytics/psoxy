@@ -9,23 +9,34 @@ import lombok.NoArgsConstructor;
 public enum WebhookCollectorModeConfigProperty implements ConfigService.ConfigProperty {
 
     /**
-     * if set, output will be written to this
-     * only applicable in webhook collector mode.
+     * could be SQS, PubSub, GCS, S3, etc ..
      *
-     * full queue URL:  https://sqs.us-east-1.amazonaws.com/177715257436/MyQueue
+     *  (if expect each webhook payload small, and we want to group them into single gzipped files, than
+     *   solution is to go through queue like SQS/PubSub first, then write to S3/GCS)
      *
-     * generalize, and expect it to be a URI?
-     *   - SQS: https://sqs.us-east-1.amazonaws.com/177715257436/MyQueue
-     *   - S3: https://s3.us-east-1.amazonaws.com/bucket-name/key
-     *   - PubSub topic : https://pubsub.googleapis.com/projects/{PROJECT_ID}/topics/{TOPIC_ID}
+     * should be something URI-like, with the 'type' of the Output able to be inferred from the URI scheme.
      *
-     * TODO: ambiguiity here that single lambdas implement two stages:
-     *    webhook --> queue
-     *    queue --> output
+     *  - PubSub topic : https://pubsub.googleapis.com/projects/{PROJECT_ID}/topics/{TOPIC_ID}
+     *  - SQS: https://sqs.us-east-1.amazonaws.com/177715257436/MyQueue
      *
      */
-    OUTPUT_PROCESSED_WEBHOOKS,
-    OUTPUT_QUEUE,
+    WEBHOOK_OUTPUT,
+
+    /**
+     * if set, this is the output that webhook payloads received via queue callbacks will be written to.
+     *
+     * (q: is this ACTUALLY webhook specific? arguably not ... but for simplicity leave it here for now;
+     * could introduced a QueuedBatch collector mode in the future ...)
+     *
+     * could be S3, GCS, etc ...
+     *
+     *  s3://my-bucket/prefix/
+     *  gs://my-bucket/prefix/
+     *
+     * should be something URI-like, with the 'type' of the Output able to be inferred from the URI scheme.
+     */
+    QUEUED_WEBHOOK_OUTPUT,
+
     ;
 
 
