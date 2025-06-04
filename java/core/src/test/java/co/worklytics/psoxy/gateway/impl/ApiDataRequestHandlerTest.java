@@ -407,7 +407,7 @@ class ApiDataRequestHandlerTest {
     }
 
     private void setup(String source, String host) {
-        ApiDataRequestHandlerTest.Container container = DaggerCommonRequestHandlerTest_Container.create();
+        ApiDataRequestHandlerTest.Container container = DaggerApiDataRequestHandlerTest_Container.create();
         container.inject(this);
 
         when(handler.secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))

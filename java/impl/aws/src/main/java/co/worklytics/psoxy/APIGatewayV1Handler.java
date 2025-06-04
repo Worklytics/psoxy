@@ -43,7 +43,7 @@ public class APIGatewayV1Handler implements com.amazonaws.services.lambda.runtim
 
     private static void staticInit() {
         awsContainer = DaggerAwsContainer.create();
-        requestHandler = awsContainer.createHandler();
+        requestHandler = awsContainer.apiDataRequestHandler();
         responseCompressionHandler = new ResponseCompressionHandler();
     }
 

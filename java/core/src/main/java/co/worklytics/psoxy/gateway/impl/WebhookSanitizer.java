@@ -1,13 +1,15 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.ProcessedContent;
 
 import java.util.Map;
 
 public interface WebhookSanitizer {
 
     /**
-     *  whether this sanitizer can handle the request, based on its rules (policy)
+     *  whether this sanitizer a rule to handle the request
+     *   (Eg, match on endpoints)
      */
     boolean canAccept(HttpEventRequest request);
 
@@ -26,8 +28,8 @@ public interface WebhookSanitizer {
     /**
      *  sanitize the request, removing sensitive information according to the rules (policy) of this sanitizer.
      *
-     * @return sanitized request body as a String
+     * @return sanitized request body as ProcessedContent
      * @throws IllegalArgumentException if the request is not accepted by this sanitizer
      */
-    String sanitize(HttpEventRequest request);
+    ProcessedContent sanitize(HttpEventRequest request);
 }

@@ -138,6 +138,10 @@ https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html
 - batch them into NDJSON files
 - write the NDJSON files to the output bucket
 
+TODO:
+  - [ ] add SQS dep from pom, output that writes to SQS
+  - [ ] add `SQSBatchHandler` that will read messages from SQS and write them to the output bucket as NDJSON files
+
 
 ### Future
 Add FILTERS

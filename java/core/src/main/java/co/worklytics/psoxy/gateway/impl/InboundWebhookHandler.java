@@ -2,7 +2,9 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.Output;
 import co.worklytics.psoxy.gateway.ProcessedContent;
+import dagger.Lazy;
 import lombok.SneakyThrows;
 import org.apache.http.HttpStatus;
 
@@ -18,11 +20,14 @@ import java.util.Optional;
  */
 public class InboundWebhookHandler {
 
+    private final Output output;
     private final WebhookSanitizer webhookSanitizer;
 
     @Inject
-    public InboundWebhookHandler(WebhookSanitizer webhookSanitizer) {
-        this.webhookSanitizer = webhookSanitizer;
+    public InboundWebhookHandler(Lazy<WebhookSanitizer> webhookSanitizerProvider,
+                                 Output output) {
+        this.webhookSanitizer = webhookSanitizerProvider.get(); // avoids trying to instantiate WebhookSanitizerImpl when we don't need one
+        this.output = output;
     }
 
     @SneakyThrows
@@ -38,7 +43,6 @@ public class InboundWebhookHandler {
         // if fails, return 401 Unauthorized
 
 
-
         // TODO: if Authorization header is present, evaluate claims
         if (!webhookSanitizer.verifyClaims(request, null)) {
             return HttpEventResponse.builder()
@@ -46,20 +50,15 @@ public class InboundWebhookHandler {
                 .build();
         }
 
-
         if (!webhookSanitizer.canAccept(request)) {
             return HttpEventResponse.builder()
                 .statusCode(HttpStatus.SC_BAD_REQUEST)
                 .build();
         }
 
+        ProcessedContent sanitized = webhookSanitizer.sanitize(request);
 
-
-        String sanitizedBody = webhookSanitizer.sanitize(request);
-
-        // TODO: write sanitizedBody to output
-        // inject an Output implementation, by the platform.
-        // for this use-case, we potentially want to stream lines into the output; how do we do so?
+        output.write(sanitized);
 
         return HttpEventResponse.builder()
             .statusCode(HttpStatus.SC_OK)

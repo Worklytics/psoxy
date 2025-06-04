@@ -4,33 +4,33 @@ import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
+import co.worklytics.psoxy.gateway.impl.InboundWebhookHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * default AWS lambda handler
+ * handles lambda invocations where trigger is API Gateway V2 HTTP request event as incoming webhook
  *
- * works with 1) lambda function URL invocations, or 2) API Gateway v2 HTTP proxy invocations
+ * use cases:
+ *   - Lambda function URL invocations  (no actual API Gateway, but formats are the same)
+ *   - Lambda function behind actual v2 API Gateway
  *
- * TODO: in 0.6, rename this to AwsApiGatewayV2ApiDataRequestHandler, or something similar
+ *  this is what should be set as the entrypoint of the lambda function trigger
  */
 @Log
-public class Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
+public class APIGatewayV2HttpEventWebhookHandler implements com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
 
     /**
      * Static initialization allows reuse in containers
      * {@link "https://aws.amazon.com/premiumsupport/knowledge-center/lambda-improve-java-function-performance/"}
      */
     static AwsContainer awsContainer;
-    static ApiDataRequestHandler requestHandler;
 
-    static ResponseCompressionHandler responseCompressionHandler;
+    static InboundWebhookHandler inboundWebhookHandler;
 
     static {
         staticInit();
@@ -38,8 +38,7 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
 
     private static void staticInit() {
         awsContainer = DaggerAwsContainer.create();
-        requestHandler = awsContainer.apiDataRequestHandler();
-        responseCompressionHandler = new ResponseCompressionHandler();
+        inboundWebhookHandler = awsContainer.inboundWebhookHandler();
     }
 
     @SneakyThrows
@@ -48,29 +47,11 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
 
         //interfaces:
         // - HttpRequestEvent --> HttpResponseEvent
-
-        //q: what's the component?
-        // - request handler?? but it's abstract ...
-        //    - make it bound with interface, rather than generic? --> prob best approach
-        // - objectMapper
-        //
-
         HttpEventResponse response;
         boolean base64Encoded = false;
         try {
             APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter = new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
-            response = requestHandler.handle(httpEventRequestAdapter);
-
-            if (ResponseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
-                Pair<Boolean, HttpEventResponse> compressedResponse = responseCompressionHandler.compressIfNeeded(response);
-                base64Encoded = compressedResponse.getLeft();
-                response = compressedResponse.getRight();
-            } else {
-                response = response.toBuilder()
-                    .header(ResponseHeader.WARNING.getHttpHeader(), Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode())
-                    .build();
-            }
-
+            response = inboundWebhookHandler.handle(httpEventRequestAdapter);
         } catch (Throwable e) {
             context.getLogger().log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
@@ -95,6 +76,4 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
             throw new Error(e);
         }
     }
-
-
 }

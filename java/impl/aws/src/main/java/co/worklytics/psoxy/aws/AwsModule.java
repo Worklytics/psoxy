@@ -20,6 +20,7 @@ import software.amazon.awssdk.core.retry.backoff.BackoffStrategy;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cognitoidentity.CognitoIdentityClient;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
 import javax.inject.Named;
@@ -170,6 +171,11 @@ public interface AwsModule {
     @Provides
     static AmazonS3 getStorageClient() {
         return AmazonS3ClientBuilder.defaultClient();
+    }
+
+    @Provides
+    static SqsClient getSqsClient() {
+        return SqsClient.create();
     }
 
     @Provides

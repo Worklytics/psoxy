@@ -2,13 +2,20 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
+import co.worklytics.psoxy.gateway.impl.output.LogsOutput;
+import co.worklytics.psoxy.impl.WebhookSanitizerImpl;
+import co.worklytics.psoxy.impl.WebhookSanitizerImplFactory;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
+import com.avaulta.gateway.rules.WebhookRules;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.http.HttpTransportFactory;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import lombok.SneakyThrows;
 
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -40,6 +47,7 @@ public class FunctionRuntimeModule {
         return UUID.randomUUID();
     }
 
+    // TODO: move to Bindings
     @Provides @Singleton
     static RandomNumberGenerator randomNumberGenerator() {
         //to be clear, NOT for cryptography
@@ -95,6 +103,19 @@ public class FunctionRuntimeModule {
     @Provides @Singleton @Named("forSanitized")
     static SideOutput sideOutputForSanitized(SideOutputUtils sideOutputUtils) {
         return sideOutputUtils.forStage(ProcessedDataStage.SANITIZED);
+    }
+
+
+    @SneakyThrows
+    @Provides @Singleton WebhookSanitizer webhookSanitizer(WebhookSanitizerImplFactory webhookSanitizerFactory,
+                                                           ConfigService configService,
+                                                           ObjectMapper objectMapper) {
+        return webhookSanitizerFactory.create(objectMapper.readerFor(WebhookRules.class).readValue(configService.getConfigPropertyOrError(ProxyConfigProperty.RULES)));
+    }
+
+    @Provides @Singleton
+    Output output() {
+        return new LogsOutput();
     }
 
 }
