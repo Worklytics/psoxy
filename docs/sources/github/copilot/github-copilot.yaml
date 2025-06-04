@@ -481,7 +481,6 @@ endpoints:
         jsonPaths:
           - "$..slug"
   - pathRegex: "^/orgs/[^/]+/audit-log\\\\?(?=.*[\\\\?&]phrase=)(?=.*[\\\\?&]include=).*$"
-    pathTemplate: "/orgs/{org}/audit-log"
     allowedQueryParams:
       - "per_page"
       - "page"
@@ -521,7 +520,6 @@ endpoints:
           - "web"
   - pathRegex: "^/organizations\\/\\d+\\/audit-log\\\\?(?=.*[\\\\?&]phrase=)(?=.*[\\\
     \\?&]include=).*$"
-    pathTemplate: "/organizations/{installationId}/audit-log"
     allowedQueryParams:
       - "per_page"
       - "page"

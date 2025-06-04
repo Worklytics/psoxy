@@ -681,10 +681,12 @@ public class PrebuiltSanitizerRules {
         .endpoint(ORG_COPILOT_SEATS)
         .endpoint(ORG_AUDIT_LOG
             // Ensure that phrase and include query parameters are present
+            .withPathTemplate(null)
             .withPathRegex("^/orgs/[^/]+/audit-log" + COPILOT_AUDIT_LOG_MANDATORY_QUERY_PARAMETERS_REGEX)
             .withQueryParamSchemas(COPILOT_AUDIT_LOG_QUERY_SUPPORTED_PARAMETER_SCHEMA))
         .endpoint(ORG_AUDIT_LOG_WITH_INSTALLATION_ID
             // Ensure that phrase and include query parameters are present
+            .withPathTemplate(null)
             .withPathRegex("^/organizations\\/\\d+\\/audit-log" + COPILOT_AUDIT_LOG_MANDATORY_QUERY_PARAMETERS_REGEX)
             .withQueryParamSchemas(COPILOT_AUDIT_LOG_QUERY_SUPPORTED_PARAMETER_SCHEMA))
         .build();
