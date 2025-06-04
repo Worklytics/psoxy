@@ -647,6 +647,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             if (entry.getKey().getPathTemplate() != null) {
                 Matcher matcher = entry.getValue().matcher(stripTargetHostPath(url.getPath()));
                 if (matcher.matches()) {
+                    // this should NOT match on empty path segments; eg "/foo//bar" should not match "/foo/{param}/bar"
                     boolean allParamsValid =
                         entry.getKey().getPathParameterSchemasOptional()
                             .map(schemas -> schemas.entrySet().stream()
