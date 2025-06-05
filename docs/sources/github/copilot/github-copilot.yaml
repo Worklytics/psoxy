@@ -511,6 +511,15 @@ endpoints:
           - "$..user_id"
           - "$..started_by"
         encoding: "JSON"
+    queryParamSchemas:
+      phrase:
+        pattern: "(action:copilot(?:\\+created:\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\\
+        d{2}Z\\.\\.\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z)?)"
+        required: true
+      include:
+        enum:
+          - "web"
+        required: true
   - pathTemplate: "/organizations/{installationId}/audit-log"
     allowedQueryParams:
       - "per_page"
@@ -542,3 +551,12 @@ endpoints:
           - "$..user_id"
           - "$..started_by"
         encoding: "JSON"
+    queryParamSchemas:
+      phrase:
+        pattern: "(action:copilot(?:\\+created:\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\\
+        d{2}Z\\.\\.\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z)?)"
+        required: true
+      include:
+        enum:
+          - "web"
+        required: true
