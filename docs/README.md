@@ -208,6 +208,17 @@ so these must be pseudonymized using an equivalent algorithm and secret). See [`
 
 See also: [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
 
+
+| Source                   | Details + Examples |
+|--------------------------|--------------------|
+| Badge                    | [sources/badge](sources/badge/README.md) |
+| HRIS                     | [sources/hris](sources/hris/README.md) |
+| Miro AI Bulk **alpha**   | [sources/miro/miro-ai-bulk](sources/miro/miro-ai-bulk/README.md) |
+| Slack AI Bulk **alpha**  | [sources/slack/slack-ai-bulk](sources/slack/slack-ai-bulk/README.md) |
+| Slack Discovery Bulk     | [sources/slack/slack-discovery-bulk](sources/slack/slack-discovery-bulk/README.md) |
+| Survey                   | [sources/survey](sources/survey/README.md) |
+
+
 ## Getting Started - Customers
 
 ### Host Platform and Data Sources
