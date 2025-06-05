@@ -36,8 +36,7 @@ public class S3SideOutput implements SideOutput {
             throw new IllegalArgumentException("Bucket name must not be blank");
         }
         this.bucket = bucket;
-        String trimmedPath = StringUtils.trimToEmpty(pathPrefix);
-        this.pathPrefix = (trimmedPath.endsWith("/") || StringUtils.isEmpty(trimmedPath)) ? trimmedPath : trimmedPath + "/";
+        this.pathPrefix = SideOutputUtils.formatObjectPathPrefix(pathPrefix);
     }
 
     @Override
@@ -45,18 +44,21 @@ public class S3SideOutput implements SideOutput {
         try {
             AmazonS3 s3Client = s3ClientProvider.get();
 
-            byte[] compressedContent =
-                sideOutputUtils.gzipContent(content.getContent(), content.getContentCharset());
+            //q: correct to do the compression *inside* of every SideOutput implementation?
+            //q: why not have Content-Encoding on ProcessedContent, compress conditionally?
+            // not plainly wrong ... leaving it to the implementation to decide allows:
+            //  - SideOutput to choose if it cares about compression, or just OK writing uncompressed (compression worthless in the `NoSideOutput`case)
+            //  - SIdeOutput to compress while streaming, if it cares.
 
             ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentEncoding("gzip");
+            metadata.setContentEncoding(content.getContentEncoding());
             metadata.setContentType(content.getContentType());
-            metadata.setUserMetadata(sideOutputUtils.buildMetadata(request));
-            metadata.setContentLength(compressedContent.length);  //explicit length avoids S3 complaint about buffering ...
+            metadata.setUserMetadata(sideOutputUtils.buildMetadata(request));  //q: why isn't this passed in on the ProcessedContent.metadata??
+            metadata.setContentLength(content.getContent().length);  //explicit length avoids S3 complaint about buffering ...
 
             s3Client.putObject(bucket,
                 pathPrefix + sideOutputUtils.canonicalResponseKey(request),
-                new ByteArrayInputStream(compressedContent),
+                new ByteArrayInputStream(content.getContent()),
                 metadata);
         } catch (Exception e) {
             log.log(Level.WARNING, "Failed to write to S3 sideOutput", e);

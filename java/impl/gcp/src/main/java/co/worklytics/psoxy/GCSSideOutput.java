@@ -20,8 +20,6 @@ import java.util.logging.Level;
 @Log
 public class GCSSideOutput implements SideOutput {
 
-    static final int BUFFER_SIZE = 8192; // 8KB buffer size for writing
-
     final String bucket;
     final String pathPrefix;
 
@@ -38,11 +36,8 @@ public class GCSSideOutput implements SideOutput {
             throw new IllegalArgumentException("Bucket name must not be blank");
         }
         this.bucket = bucket;
-        String trimmedPath = StringUtils.trimToEmpty(pathPrefix);
-        // Ensure the path prefix ends with a slash, if non-empty
-        this.pathPrefix = (trimmedPath.endsWith("/") || StringUtils.isEmpty(trimmedPath)) ? trimmedPath : trimmedPath + "/";
+        this.pathPrefix = SideOutputUtils.formatObjectPathPrefix(pathPrefix);
     }
-
 
 
     @Override
@@ -53,11 +48,10 @@ public class GCSSideOutput implements SideOutput {
             try (WriteChannel writeChannel = storageClient.writer(
                     BlobInfo.newBuilder(bucket, pathPrefix + sideOutputUtils.canonicalResponseKey(request))
                         .setContentType(content.getContentType())
-                        .setContentEncoding("gzip")
+                        .setContentEncoding(content.getContentEncoding())
                         .setMetadata(sideOutputUtils.buildMetadata(request))
                         .build())) {
-                 byte[] compressed = sideOutputUtils.gzipContent(content.getContent(), content.getContentCharset());
-                writeChannel.write(java.nio.ByteBuffer.wrap(compressed, 0, compressed.length));
+                writeChannel.write(java.nio.ByteBuffer.wrap(content.getContent(), 0, content.getContent().length));
             }
         } catch (Exception e) {
             log.log(Level.WARNING, "Failed to write to GCS sideOutput", e);

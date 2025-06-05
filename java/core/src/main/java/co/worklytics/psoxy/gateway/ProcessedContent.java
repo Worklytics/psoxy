@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.NonNull;
 import lombok.Value;
+import lombok.With;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -19,6 +20,7 @@ import java.util.Map;
  *  (possibly an intermediate step in the pipeline)
  *
  */
+@With
 @Builder
 @Value
 public class ProcessedContent implements Serializable {
@@ -33,10 +35,17 @@ public class ProcessedContent implements Serializable {
     String contentType;
 
     /**
+     * the content encoding of the content, if any
+     * eg, gzip, deflate, ...
+     */
+    String contentEncoding;
+
+    /**
      * charset of the content, if any
      * eg, UTF-8, ISO-8859-1, ...
      */
-    Charset contentCharset;
+    @Builder.Default
+    Charset contentCharset = StandardCharsets.UTF_8;
 
     /**
      * metadata about the processing or the content
@@ -47,7 +56,9 @@ public class ProcessedContent implements Serializable {
     /**
      * the processed content itself
      */
-    @Builder.Default
-    @NonNull
-    String content = "";
+    byte[] content;
+
+    public String getContentString() {
+        return new String(content, contentCharset);
+    }
 }
