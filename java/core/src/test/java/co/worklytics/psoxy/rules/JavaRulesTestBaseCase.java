@@ -32,8 +32,8 @@ public abstract class JavaRulesTestBaseCase extends RulesBaseTestCase {
         // that current file-system rules are byte-wise equivalent
         assertEquals(
             yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rulesFromFilesystem),
-            yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(getRulesUnderTest()));
-
+            yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(getRulesUnderTest())
+        );
     }
 
 }

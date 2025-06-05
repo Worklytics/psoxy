@@ -136,4 +136,15 @@ class PseudonymizedIdentityTest {
 
     }
 
+    @SneakyThrows
+    @Test
+    void jsonWithH4Works() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        PseudonymizedIdentity identity = objectMapper.readerFor(PseudonymizedIdentity.class)
+            .readValue("{\"domain\":\"worklytics.co\",\"hash\":\"wGt4TmRdTGdvKJT_H8AXKLbC4XoxCDKRyyAQtKJQbHE\",\"h_4\":\"wGt4TmRdTGdvKJT_H8AXKLbC4XoxCDKRyyAQtKJQbHE\"}");
+
+        assertEquals(identity.getDomain(), "worklytics.co");
+        assertEquals(identity.getHash(), "wGt4TmRdTGdvKJT_H8AXKLbC4XoxCDKRyyAQtKJQbHE");
+    }
+
 }
