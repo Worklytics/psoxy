@@ -77,10 +77,10 @@ public class Endpoint {
      * </p>
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    Map<String, ParameterSchema> queryParamSchemas;
+    Map<String, QueryParameterSchema> queryParamSchemas;
 
     @JsonIgnore
-    public Optional<Map<String, ParameterSchema>> getQueryParamSchemasOptional() {
+    public Optional<Map<String, QueryParameterSchema>> getQueryParamSchemasOptional() {
         return Optional.ofNullable(queryParamSchemas);
     }
 

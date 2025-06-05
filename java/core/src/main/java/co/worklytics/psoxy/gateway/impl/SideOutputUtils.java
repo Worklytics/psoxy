@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gateway.impl;
 import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.output.NoSideOutput;
+import co.worklytics.psoxy.gateway.impl.output.SideOutputCompressionWrapper;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -91,25 +92,6 @@ public class SideOutputUtils {
     }
 
     /**
-     * gzip the content
-     *
-     * @param content  to compress
-     * @param contentCharset of the content,
-     * @return a byte[] reflecting gzip-encoding of the content
-     */
-    @SneakyThrows
-    public byte[] gzipContent(@NonNull String content, @NonNull Charset contentCharset) {
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-             GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream)) {
-            gzipOutputStream.write(content.getBytes(contentCharset));
-            gzipOutputStream.finish();
-            return byteArrayOutputStream.toByteArray();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to gzip content", e);
-        }
-    }
-
-    /**
      * helper method to interpret config, as to whether there's a side output for the given content stage or not
      *
      * @param processedDataStage the stage of processed data to be written to the side output
@@ -141,11 +123,16 @@ public class SideOutputUtils {
                  String bucketName = parts[0];
                  String path = parts.length > 1 ? parts[1] : "";
 
-                 return (SideOutput) sideOutputFactory.create(bucketName, path);
+                 return (SideOutput) SideOutputCompressionWrapper.wrap(sideOutputFactory.create(bucketName, path));
              })
              .orElseGet(noSideOutputProvider::get);
     }
 
+    // Ensure the path prefix ends with a slash, if non-empty
+    public static String formatObjectPathPrefix(String rawPathPrefix) {
+        String trimmedPath = StringUtils.trimToEmpty(rawPathPrefix);
+        return (trimmedPath.endsWith("/") || StringUtils.isEmpty(trimmedPath)) ? trimmedPath : trimmedPath + "/";
+    }
 
 
     private String normalizePath(String rawPath) {
