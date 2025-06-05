@@ -5,7 +5,6 @@ import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 
-import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.gateway.output.Output;
 import co.worklytics.psoxy.gateway.output.OutputFactory;
 import com.google.cloud.ServiceOptions;
@@ -124,8 +123,9 @@ public interface GcpModule {
     @Module
     abstract class Bindings {
 
+        @IntoSet
         @Binds
-        abstract OutputFactory<? extends Output> outputFactory(GCSOutputFactory outputFactory);
+        abstract OutputFactory<?> outputFactory(GCSOutputFactory outputFactory);
 
     }
 }

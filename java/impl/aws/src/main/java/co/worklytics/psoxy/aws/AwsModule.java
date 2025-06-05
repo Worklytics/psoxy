@@ -204,10 +204,10 @@ public interface AwsModule {
 
 
         @Binds @IntoSet
-        abstract OutputFactory<? extends Output> s3OutputFactory(S3OutputFactory s3OutputFactory);
+        abstract OutputFactory<?> s3OutputFactory(S3OutputFactory s3OutputFactory);
 
         @Binds @IntoSet
-        abstract OutputFactory<? extends Output> sqsOutputFactory(SQSOutputFactory sqsOutputFactory);
+        abstract OutputFactory<?> sqsOutputFactory(SQSOutputFactory sqsOutputFactory);
 
     }
 }

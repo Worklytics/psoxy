@@ -9,6 +9,7 @@ import lombok.SneakyThrows;
 import org.apache.http.HttpStatus;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.Optional;
 
 /**
@@ -25,7 +26,7 @@ public class InboundWebhookHandler {
 
     @Inject
     public InboundWebhookHandler(Lazy<WebhookSanitizer> webhookSanitizerProvider,
-                                 Output output) {
+                                 @Named("forWebhooks") Output output) {
         this.webhookSanitizer = webhookSanitizerProvider.get(); // avoids trying to instantiate WebhookSanitizerImpl when we don't need one
         this.output = output;
     }

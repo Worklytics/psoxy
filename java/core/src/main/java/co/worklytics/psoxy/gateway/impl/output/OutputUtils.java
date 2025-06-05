@@ -134,7 +134,7 @@ public class OutputUtils {
 
 
     private <T extends Output> T createOutputForLocation(OutputLocation outputLocation) {
-        Optional<OutputFactory<?>> outputFactory = outputFactories.stream()
+        Optional<OutputFactory<?>> outputFactory =  outputFactories.stream()
             .filter(factory -> factory.supports(outputLocation))
             .findFirst();
 
