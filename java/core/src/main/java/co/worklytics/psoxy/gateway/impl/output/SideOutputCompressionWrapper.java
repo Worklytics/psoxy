@@ -2,7 +2,7 @@ package co.worklytics.psoxy.gateway.impl.output;
 
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.ProcessedContent;
-import co.worklytics.psoxy.gateway.SideOutput;
+import co.worklytics.psoxy.gateway.output.SideOutput;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;

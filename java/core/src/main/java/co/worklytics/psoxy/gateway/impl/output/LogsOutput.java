@@ -1,12 +1,9 @@
 package co.worklytics.psoxy.gateway.impl.output;
 
-import co.worklytics.psoxy.gateway.Output;
+import co.worklytics.psoxy.gateway.output.Output;
 import co.worklytics.psoxy.gateway.ProcessedContent;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.java.Log;
 
-import javax.inject.Inject;
-import java.util.Collection;
 import java.util.logging.Level;
 
 /**
@@ -24,9 +21,7 @@ public class LogsOutput implements Output {
     }
 
     @Override
-    public void batchWrite(Collection<ProcessedContent> contents) {
-        for (ProcessedContent content : contents) {
-            write(content);
-        }
+    public void write(String key, ProcessedContent content) {
+        log.log(Level.INFO, key + " : " + content.toString());
     }
 }

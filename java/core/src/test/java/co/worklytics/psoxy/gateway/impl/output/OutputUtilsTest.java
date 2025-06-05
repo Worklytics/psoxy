@@ -1,26 +1,20 @@
-package co.worklytics.psoxy.gateway.impl;
+package co.worklytics.psoxy.gateway.impl.output;
 
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.zip.GZIPInputStream;
 import java.util.Map;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SideOutputUtilsTest {
+class OutputUtilsTest {
 
-    SideOutputUtils utils = new SideOutputUtils();
+    OutputUtils utils = new OutputUtils();
 
     @Test
     void canonicalResponseKey() {

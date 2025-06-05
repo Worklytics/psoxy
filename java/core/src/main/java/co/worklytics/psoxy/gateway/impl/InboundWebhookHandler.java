@@ -2,7 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.Output;
+import co.worklytics.psoxy.gateway.output.Output;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import dagger.Lazy;
 import lombok.SneakyThrows;

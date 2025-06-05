@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.output.SideOutput;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
@@ -273,7 +274,7 @@ public class ApiDataRequestHandler {
             if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
                 ProcessedContent sanitizationResult =
                     sanitize(request, requestUrls, original);
-                proxyResponseContent = sanitizationResult.getContentString();
+                proxyResponseContent = sanitizationResult.getContentAsString();
 
                 sanitizationResult.getMetadata().entrySet()
                     .forEach(e -> builder.header(e.getKey(), e.getValue()));
@@ -282,13 +283,13 @@ public class ApiDataRequestHandler {
 
 
                 if (skipSanitization) {
-                    proxyResponseContent = original.getContentString();
+                    proxyResponseContent = original.getContentAsString();
                 }
             } else {
                 //write error, which shouldn't contain PII, directly
                 log.log(Level.WARNING, "Source API Error " + original.getContent());
                 builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.API_ERROR.name());
-                proxyResponseContent = original.getContentString();
+                proxyResponseContent = original.getContentAsString();
             }
             builder.body(proxyResponseContent);
             return builder.build();
@@ -311,7 +312,7 @@ public class ApiDataRequestHandler {
 
     ProcessedContent sanitize(HttpEventRequest request, RequestUrls requestUrls, ProcessedContent originalContent) {
         RESTApiSanitizer sanitizerForRequest = getSanitizerForRequest(request);
-        String sanitized = StringUtils.trimToEmpty(sanitizerForRequest.sanitize(request.getHttpMethod(), requestUrls.getOriginal(), originalContent.getContentString()));
+        String sanitized = StringUtils.trimToEmpty(sanitizerForRequest.sanitize(request.getHttpMethod(), requestUrls.getOriginal(), originalContent.getContentAsString()));
 
         String rulesSha = rulesUtils.sha(sanitizerForRequest.getRules());
         log.info("response sanitized with rule set " + rulesSha);

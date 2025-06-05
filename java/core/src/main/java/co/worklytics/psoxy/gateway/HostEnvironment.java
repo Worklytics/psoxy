@@ -20,14 +20,11 @@ public interface HostEnvironment {
 
     /**
      * eg `s3://`, `gs://`, ... eventually more
-     *
-     * TODO: generalize to supportedOutputUriProtocols?
-     *
      * q: is Uri the right name to use here??
      *
      * @return set of URI protocols that this host environment supports for side outputs
      */
-    default Set<String> getSupportedSideOutputUriProtocols()  {
+    default Set<String> getSupportedOutputKinds()  {
         return Collections.emptySet();
     }
 }

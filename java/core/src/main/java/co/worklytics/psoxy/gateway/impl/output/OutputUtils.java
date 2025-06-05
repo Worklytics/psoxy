@@ -1,26 +1,21 @@
-package co.worklytics.psoxy.gateway.impl;
+package co.worklytics.psoxy.gateway.impl.output;
 
 import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.gateway.*;
-import co.worklytics.psoxy.gateway.impl.output.NoSideOutput;
-import co.worklytics.psoxy.gateway.impl.output.SideOutputCompressionWrapper;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.SneakyThrows;
+import co.worklytics.psoxy.gateway.impl.HealthCheckRequestHandler;
+import co.worklytics.psoxy.gateway.output.*;
+import com.google.common.annotations.VisibleForTesting;
+import lombok.*;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import java.io.*;
 import java.net.URLDecoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * utility methods for working with side output
@@ -30,7 +25,7 @@ import java.util.zip.GZIPOutputStream;
  */
 @NoArgsConstructor(onConstructor_ = {@Inject})
 @Singleton
-public class SideOutputUtils {
+public class OutputUtils {
 
     @AllArgsConstructor
     enum ObjectMetadataKey {
@@ -52,6 +47,9 @@ public class SideOutputUtils {
     Provider<NoSideOutput> noSideOutputProvider;
     @Inject
     SideOutputFactory<? extends SideOutput> sideOutputFactory;
+    @Inject
+    Set<OutputFactory<?>> outputFactories;
+
 
     /**
      * get a canonical key for the response to be stored in the side output
@@ -103,37 +101,61 @@ public class SideOutputUtils {
             case SANITIZED -> ProxyConfigProperty.SIDE_OUTPUT_SANITIZED;
         };
 
-         return configService.getConfigPropertyAsOptional(configProperty)
-             .map(bucket -> {
-                 // validate that the side output bucket starts with the expected protocol
-                 String prefix = hostEnvironment.getSupportedSideOutputUriProtocols()
-                     .stream()
-                     .filter(bucket::startsWith)
-                     .findFirst()
-                     .orElseThrow(() -> new IllegalArgumentException("Side output bucket must start with one of: " + hostEnvironment.getSupportedSideOutputUriProtocols()));
+        Optional<OutputLocation> outputLocation = configService.getConfigPropertyAsOptional(configProperty)
+            .map(OutputLocationImpl::of);
 
-                 // TODO: split out the path portion from the bucket URI
-                 String pathWithoutPrefix = bucket.substring(prefix.length());
-                 if (pathWithoutPrefix.isEmpty()) {
-                     throw new IllegalArgumentException("Side output bucket path cannot be empty");
-                 }
+        outputLocation.ifPresent(location -> {
+            if (!location.isSupported(hostEnvironment)) {
+                throw new IllegalArgumentException("Unsupported protocol for side output: " + location.getKind());
+            }});
 
-                 // split pathWithoutPrefix into bucket name and optional path
-                 String[] parts = pathWithoutPrefix.split("/", 2);
-                 String bucketName = parts[0];
-                 String path = parts.length > 1 ? parts[1] : "";
-
-                 return (SideOutput) SideOutputCompressionWrapper.wrap(sideOutputFactory.create(bucketName, path));
-             })
+        return outputLocation.map(location ->
+                (SideOutput) SideOutputCompressionWrapper.wrap(sideOutputFactory.create(location)))
              .orElseGet(noSideOutputProvider::get);
     }
+
+    public <T extends Output> T forWebhooks() {
+        return createOutputForLocation(locationForWebhooks());
+    }
+
+    public <T extends Output> T forWebhookQueue() {
+        return createOutputForLocation(locationForWebhookQueue());
+    }
+
+
+    @VisibleForTesting
+    OutputLocation locationForWebhooks() {
+        return configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.WEBHOOK_OUTPUT)
+            .map(OutputLocationImpl::of).orElseThrow(() -> new IllegalStateException("No side output configured for webhooks"));
+    }
+
+    @VisibleForTesting
+    OutputLocation locationForWebhookQueue() {
+        return configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.QUEUED_WEBHOOK_OUTPUT)
+            .map(OutputLocationImpl::of)
+            .orElseThrow(() -> new IllegalStateException("No side output configured for webhook queue"));
+    }
+
+
+    private <T extends Output> T createOutputForLocation(OutputLocation outputLocation) {
+        Optional<OutputFactory<?>> outputFactory = outputFactories.stream()
+            .filter(factory -> factory.supports(outputLocation))
+            .findFirst();
+
+        if (outputFactory.isEmpty()) {
+            throw new IllegalArgumentException("No output factory found for location: " + outputLocation);
+        }
+
+        return (T) outputFactory.get().create(outputLocation);
+    }
+
+
 
     // Ensure the path prefix ends with a slash, if non-empty
     public static String formatObjectPathPrefix(String rawPathPrefix) {
         String trimmedPath = StringUtils.trimToEmpty(rawPathPrefix);
         return (trimmedPath.endsWith("/") || StringUtils.isEmpty(trimmedPath)) ? trimmedPath : trimmedPath + "/";
     }
-
 
     private String normalizePath(String rawPath) {
         // Remove leading/trailing slashes and URL-decode
@@ -191,8 +213,6 @@ public class SideOutputUtils {
             !caseInsensitiveHeaderName.startsWith("x-amz-") && // ignore AWS-specific headers
             !caseInsensitiveHeaderName.startsWith("x-goog-")); // ignore GCP-specific headers
     }
-
-
 
     String canonicalQuery(Optional<String> rawQuery) {
         if (rawQuery.isEmpty()) return "";

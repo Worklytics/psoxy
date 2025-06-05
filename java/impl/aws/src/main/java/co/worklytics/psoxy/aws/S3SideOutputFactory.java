@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.aws;
 
-import co.worklytics.psoxy.gateway.SideOutputFactory;
+import co.worklytics.psoxy.gateway.output.SideOutputFactory;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 

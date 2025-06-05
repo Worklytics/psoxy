@@ -40,8 +40,7 @@ public class AwsEnvironment implements HostEnvironment {
     }
 
     @Override
-    public Set<String> getSupportedSideOutputUriProtocols() {
-        return Set.of("s3://");
+    public Set<String> getSupportedOutputKinds() {
+        return Set.of("s3", "sqs");
     }
-
 }

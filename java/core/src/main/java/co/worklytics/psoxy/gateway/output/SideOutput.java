@@ -1,11 +1,15 @@
-package co.worklytics.psoxy.gateway;
+package co.worklytics.psoxy.gateway.output;
 
-import lombok.NonNull;
+import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.ProcessedContent;
 
 import java.io.IOException;
 
 /**
  * a side output for the proxy
+ *
+ * why isn't this a wrapper over an Output that does the request --> metadata / object key thing??
+ *
  *
  * q: InputStream, byte[], or String for the interface??
  *  - left as String for now; byte[] arguably more flexible. InputStream could avoid copies in *some* potential scnearios?

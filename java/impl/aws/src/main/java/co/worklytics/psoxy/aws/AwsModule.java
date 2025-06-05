@@ -4,6 +4,7 @@ import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 
+import co.worklytics.psoxy.gateway.output.*;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
@@ -203,5 +204,12 @@ public interface AwsModule {
 
         @Binds
         abstract SideOutputFactory<? extends SideOutput> sideOutputFactory(S3SideOutputFactory sideOutputFactory);
+
+        @Binds @IntoSet
+        abstract OutputFactory<? extends Output> s3OutputFactory(S3OutputFactory s3OutputFactory);
+
+        @Binds @IntoSet
+        abstract OutputFactory<? extends Output> sqsOutputFactory(SQSOutputFactory sqsOutputFactory);
+
     }
 }

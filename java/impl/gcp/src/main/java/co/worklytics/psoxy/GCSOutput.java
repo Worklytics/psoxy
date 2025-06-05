@@ -1,18 +1,17 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.BucketOutputLocation;
-import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.ProcessedContent;
-import co.worklytics.psoxy.gateway.output.OutputLocation;
-import co.worklytics.psoxy.gateway.output.SideOutput;
 import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
+import co.worklytics.psoxy.gateway.output.Output;
+import co.worklytics.psoxy.gateway.output.OutputLocation;
 import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
-import lombok.NonNull;
 import lombok.extern.java.Log;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
@@ -20,7 +19,7 @@ import javax.inject.Provider;
 import java.util.logging.Level;
 
 @Log
-public class GCSSideOutput implements SideOutput {
+public class GCSOutput implements Output {
 
     final String bucket;
     final String pathPrefix;
@@ -32,7 +31,7 @@ public class GCSSideOutput implements SideOutput {
     OutputUtils outputUtils;
 
     @AssistedInject
-    public GCSSideOutput(@Assisted OutputLocation location) {
+    public GCSOutput(@Assisted OutputLocation location) {
         BucketOutputLocation bucketLocation = BucketOutputLocation.from(location.getUri());
         if (StringUtils.isBlank(bucketLocation.getBucket())) {
             throw new IllegalArgumentException("Bucket name must not be blank");
@@ -43,16 +42,24 @@ public class GCSSideOutput implements SideOutput {
 
 
     @Override
-    public void write(@NonNull HttpEventRequest request, @NonNull ProcessedContent content) {
+    public void write(String key, ProcessedContent content) {
+        // Implementation for writing a single ProcessedContent to GCS
+        // This would typically involve using the Google Cloud Storage client library
+        // to upload the content to the specified bucket and path.
+
+        if (key == null) {
+            key = DigestUtils.md5Hex(content.getContent());
+        }
+
         try {
             Storage storageClient = storageProvider.get();
 
             try (WriteChannel writeChannel = storageClient.writer(
-                    BlobInfo.newBuilder(bucket, pathPrefix + outputUtils.canonicalResponseKey(request))
-                        .setContentType(content.getContentType())
-                        .setContentEncoding(content.getContentEncoding())
-                        .setMetadata(outputUtils.buildMetadata(request))
-                        .build())) {
+                BlobInfo.newBuilder(bucket, pathPrefix + key)
+                    .setContentType(content.getContentType())
+                    .setContentEncoding(content.getContentEncoding())
+                    //.setMetadata(outputUtils.buildMetadata(request))
+                    .build())) {
                 writeChannel.write(java.nio.ByteBuffer.wrap(content.getContent(), 0, content.getContent().length));
             }
         } catch (Exception e) {
@@ -62,6 +69,11 @@ public class GCSSideOutput implements SideOutput {
         }
     }
 
-    //TODO: could add a method to write pre-compressed content directly from a stream, to essentially pipe it w/o decompressing
-    // but requires susing chunked encoding or something, which is not clear how to do
+    @Override
+    public void write(ProcessedContent content) {
+        // Generate a canonical key for the response
+        String key = DigestUtils.md5Hex(content.getContent());
+        write(key, content);
+    }
+
 }

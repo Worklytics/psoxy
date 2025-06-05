@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 @Log
 public class HealthCheckRequestHandler {
 
-    static final String JAVA_SOURCE_CODE_VERSION = "rc-v0.5.3";
+    public static final String JAVA_SOURCE_CODE_VERSION = "rc-v0.5.3";
 
     /**
      * a random UUID used to salt the hash of the salt.  Purpose of this is to invalidate any non-purpose built rainbow table solution.

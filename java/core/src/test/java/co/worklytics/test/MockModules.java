@@ -2,6 +2,7 @@ package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.output.NoSideOutput;
+import co.worklytics.psoxy.gateway.output.SideOutput;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.avaulta.gateway.rules.BulkDataRules;
@@ -22,10 +23,6 @@ import org.mockito.MockMakers;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.Random;
 
 import static org.mockito.Mockito.*;
 

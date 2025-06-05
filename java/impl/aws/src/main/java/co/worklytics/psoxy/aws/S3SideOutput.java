@@ -1,9 +1,9 @@
 package co.worklytics.psoxy.aws;
 
-import co.worklytics.psoxy.gateway.HttpEventRequest;
-import co.worklytics.psoxy.gateway.ProcessedContent;
-import co.worklytics.psoxy.gateway.SideOutput;
-import co.worklytics.psoxy.gateway.impl.SideOutputUtils;
+import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
+import co.worklytics.psoxy.gateway.output.OutputLocation;
+import co.worklytics.psoxy.gateway.output.SideOutput;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import dagger.assisted.Assisted;
@@ -27,16 +27,16 @@ public class S3SideOutput implements SideOutput {
     Provider<AmazonS3> s3ClientProvider;
 
     @Inject
-    SideOutputUtils sideOutputUtils;
+    OutputUtils outputUtils;
 
     @AssistedInject
-    public S3SideOutput(@Assisted("bucket") String bucket,
-                        @Assisted("pathPrefix") String pathPrefix) {
-        if (StringUtils.isBlank(bucket)) {
+    public S3SideOutput(@Assisted OutputLocation location) {
+        BucketOutputLocation bucketLocation = BucketOutputLocation.from(location.getUri());
+        if (StringUtils.isBlank(bucketLocation.getBucket())) {
             throw new IllegalArgumentException("Bucket name must not be blank");
         }
-        this.bucket = bucket;
-        this.pathPrefix = SideOutputUtils.formatObjectPathPrefix(pathPrefix);
+        this.bucket = bucketLocation.getBucket();
+        this.pathPrefix = OutputUtils.formatObjectPathPrefix(bucketLocation.getPathPrefix());
     }
 
     @Override
@@ -53,11 +53,11 @@ public class S3SideOutput implements SideOutput {
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentEncoding(content.getContentEncoding());
             metadata.setContentType(content.getContentType());
-            metadata.setUserMetadata(sideOutputUtils.buildMetadata(request));  //q: why isn't this passed in on the ProcessedContent.metadata??
+            metadata.setUserMetadata(outputUtils.buildMetadata(request));  //q: why isn't this passed in on the ProcessedContent.metadata??
             metadata.setContentLength(content.getContent().length);  //explicit length avoids S3 complaint about buffering ...
 
             s3Client.putObject(bucket,
-                pathPrefix + sideOutputUtils.canonicalResponseKey(request),
+                pathPrefix + outputUtils.canonicalResponseKey(request),
                 new ByteArrayInputStream(content.getContent()),
                 metadata);
         } catch (Exception e) {

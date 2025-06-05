@@ -2,7 +2,9 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
-import co.worklytics.psoxy.gateway.impl.output.LogsOutput;
+import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
+import co.worklytics.psoxy.gateway.output.Output;
+import co.worklytics.psoxy.gateway.output.SideOutput;
 import co.worklytics.psoxy.impl.WebhookSanitizerImplFactory;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
@@ -93,13 +95,23 @@ public class FunctionRuntimeModule {
 
 
     @Provides @Singleton @Named("forOriginal")
-    static SideOutput sideOutputForOriginal(SideOutputUtils sideOutputUtil) {
+    static SideOutput sideOutputForOriginal(OutputUtils sideOutputUtil) {
         return sideOutputUtil.forStage(ProcessedDataStage.ORIGINAL);
     }
 
     @Provides @Singleton @Named("forSanitized")
-    static SideOutput sideOutputForSanitized(SideOutputUtils sideOutputUtils) {
-        return sideOutputUtils.forStage(ProcessedDataStage.SANITIZED);
+    static SideOutput sideOutputForSanitized(OutputUtils outputUtils) {
+        return outputUtils.forStage(ProcessedDataStage.SANITIZED);
+    }
+
+    @Provides @Singleton  @Named("forWebhooks")
+    static Output output(OutputUtils outputUtils) {
+        return outputUtils.forWebhooks();
+    }
+
+    @Provides @Singleton @Named("forWebhookQueue")
+    static Output webhookQueueOutput(OutputUtils outputUtils) {
+        return outputUtils.forWebhookQueue();
     }
 
 
@@ -108,11 +120,6 @@ public class FunctionRuntimeModule {
                                                            ConfigService configService,
                                                            ObjectMapper objectMapper) {
         return webhookSanitizerFactory.create(objectMapper.readerFor(WebhookCollectionRules.class).readValue(configService.getConfigPropertyOrError(ProxyConfigProperty.RULES)));
-    }
-
-    @Provides @Singleton
-    Output output() {
-        return new LogsOutput();
     }
 
 }
