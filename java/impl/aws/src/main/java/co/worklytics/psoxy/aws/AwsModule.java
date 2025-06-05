@@ -202,8 +202,6 @@ public interface AwsModule {
     @Module
     abstract class Bindings {
 
-        @Binds
-        abstract SideOutputFactory<? extends SideOutput> sideOutputFactory(S3SideOutputFactory sideOutputFactory);
 
         @Binds @IntoSet
         abstract OutputFactory<? extends Output> s3OutputFactory(S3OutputFactory s3OutputFactory);

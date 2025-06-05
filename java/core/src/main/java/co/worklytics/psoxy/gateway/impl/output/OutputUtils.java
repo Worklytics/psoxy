@@ -44,11 +44,11 @@ public class OutputUtils {
     @Inject
     ConfigService configService;
     @Inject
-    Provider<NoSideOutput> noSideOutputProvider;
-    @Inject
-    SideOutputFactory<? extends SideOutput> sideOutputFactory;
+    Provider<NoOutput> noSideProvider;
     @Inject
     Set<OutputFactory<?>> outputFactories;
+    @Inject
+    OutputToSideOutputAdapterFactory outputToSideOutputAdapterFactory;
 
 
     /**
@@ -94,24 +94,20 @@ public class OutputUtils {
      *
      * @param processedDataStage the stage of processed data to be written to the side output
      */
-    public SideOutput forStage(ProcessedDataStage processedDataStage) {
+    public ApiDataSideOutput forStage(ProcessedDataStage processedDataStage) {
 
         ProxyConfigProperty configProperty = switch (processedDataStage) {
             case ORIGINAL -> ProxyConfigProperty.SIDE_OUTPUT_ORIGINAL;
             case SANITIZED -> ProxyConfigProperty.SIDE_OUTPUT_SANITIZED;
         };
 
-        Optional<OutputLocation> outputLocation = configService.getConfigPropertyAsOptional(configProperty)
-            .map(OutputLocationImpl::of);
+        Output outputToAdapt =  configService.getConfigPropertyAsOptional(configProperty)
+            .map(OutputLocationImpl::of)
+            .map(this::createOutputForLocation)
+            .map(output -> (Output) CompressedOutputWrapper.wrap((Output) output))
+            .orElseGet(noSideProvider::get);
 
-        outputLocation.ifPresent(location -> {
-            if (!location.isSupported(hostEnvironment)) {
-                throw new IllegalArgumentException("Unsupported protocol for side output: " + location.getKind());
-            }});
-
-        return outputLocation.map(location ->
-                (SideOutput) SideOutputCompressionWrapper.wrap(sideOutputFactory.create(location)))
-             .orElseGet(noSideOutputProvider::get);
+        return outputToSideOutputAdapterFactory.create(outputToAdapt);
     }
 
     public <T extends Output> T forWebhooks() {

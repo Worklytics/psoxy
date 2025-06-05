@@ -2,9 +2,10 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
+import co.worklytics.psoxy.gateway.impl.output.NoOutput;
 import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
+import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.gateway.output.Output;
-import co.worklytics.psoxy.gateway.output.SideOutput;
 import co.worklytics.psoxy.impl.WebhookSanitizerImplFactory;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
@@ -95,12 +96,12 @@ public class FunctionRuntimeModule {
 
 
     @Provides @Singleton @Named("forOriginal")
-    static SideOutput sideOutputForOriginal(OutputUtils sideOutputUtil) {
+    static ApiDataSideOutput sideOutputForOriginal(OutputUtils sideOutputUtil) {
         return sideOutputUtil.forStage(ProcessedDataStage.ORIGINAL);
     }
 
     @Provides @Singleton @Named("forSanitized")
-    static SideOutput sideOutputForSanitized(OutputUtils outputUtils) {
+    static ApiDataSideOutput sideOutputForSanitized(OutputUtils outputUtils) {
         return outputUtils.forStage(ProcessedDataStage.SANITIZED);
     }
 
@@ -114,6 +115,11 @@ public class FunctionRuntimeModule {
         return outputUtils.forWebhookQueue();
     }
 
+
+    @Provides @Singleton
+    static NoOutput noOutput() {
+        return new NoOutput();
+    }
 
     @SneakyThrows
     @Provides @Singleton WebhookSanitizer webhookSanitizer(WebhookSanitizerImplFactory webhookSanitizerFactory,

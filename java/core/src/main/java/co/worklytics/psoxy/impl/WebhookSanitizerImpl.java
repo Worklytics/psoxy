@@ -89,7 +89,7 @@ public class WebhookSanitizerImpl implements WebhookSanitizer {
         }
 
         return ProcessedContent.builder()
-                .content(sanitizedContent)
+                .content(sanitizedContent.getBytes(StandardCharsets.UTF_8))
                 .contentType(request.getHeader("Content-Type").orElse("application/json"))
                 .build();
     }

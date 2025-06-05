@@ -10,6 +10,7 @@ public interface S3OutputFactory extends OutputFactory<S3Output> {
 
     S3Output create(@Assisted OutputLocation options);
 
+    @Override
     default boolean supports(OutputLocation location) {
         return "sqs".equals(location.getKind());
     }

@@ -2,13 +2,17 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.output.OutputFactory;
 import co.worklytics.psoxy.gateway.output.OutputLocation;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
 
-public interface GCSOutputFactory implements OutputFactory<GCSOutput> {
+@AssistedFactory
+public interface GCSOutputFactory extends OutputFactory<GCSOutput> {
 
-    public GCSOutput create(OutputLocation outputLocation);
+
+    GCSOutput create(@Assisted OutputLocation outputLocation);
 
     @Override
-    default public boolean supports(OutputLocation outputLocation) {
+    default boolean supports(OutputLocation outputLocation) {
         return "gcs".equals(outputLocation.getKind());
     }
 }

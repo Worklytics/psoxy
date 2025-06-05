@@ -5,10 +5,9 @@ import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 
+import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.gateway.output.Output;
 import co.worklytics.psoxy.gateway.output.OutputFactory;
-import co.worklytics.psoxy.gateway.output.SideOutput;
-import co.worklytics.psoxy.gateway.output.SideOutputFactory;
 import com.google.cloud.ServiceOptions;
 
 import com.google.cloud.storage.Storage;
@@ -126,10 +125,7 @@ public interface GcpModule {
     abstract class Bindings {
 
         @Binds
-        abstract SideOutputFactory<? extends SideOutput> sideOutputFactory(GCSSideOutputFactory sideOutputFactory);
-
-        @Binds
-        abstract OutputFactory<? extends Output> outputFactory(GCSOutputFactory sideOutputFactory);
+        abstract OutputFactory<? extends Output> outputFactory(GCSOutputFactory outputFactory);
 
     }
 }

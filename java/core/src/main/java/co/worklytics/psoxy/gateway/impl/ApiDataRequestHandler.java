@@ -2,7 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
-import co.worklytics.psoxy.gateway.output.SideOutput;
+import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
@@ -78,9 +78,9 @@ public class ApiDataRequestHandler {
     HttpTransportFactory httpTransportFactory;
 
     @Inject @Named("forOriginal")
-    SideOutput sideOutput;
+    ApiDataSideOutput apiDataSideOutput;
     @Inject @Named("forSanitized")
-    SideOutput sideOutputSanitized;
+    ApiDataSideOutput apiDataSideOutputSanitized;
 
 
     /**
@@ -268,7 +268,7 @@ public class ApiDataRequestHandler {
 
             // TODO: if side output cases of the original, we *could* use the potentially compressed stream directly, instead of reading to a string?
             ProcessedContent original = this.asProcessedContent(sourceApiResponse);
-            sideOutput.write(request, original);
+            apiDataSideOutput.write(request, original);
 
             passThroughHeaders(builder, sourceApiResponse);
             if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
@@ -331,7 +331,7 @@ public class ApiDataRequestHandler {
 
     void writeSideOutput(HttpEventRequest request, com.google.api.client.http.HttpResponse sourceApiResponse, ProcessedContent sanitizedContent) {
         try {
-            sideOutputSanitized.write(request, sanitizedContent);
+            apiDataSideOutputSanitized.write(request, sanitizedContent);
         } catch (IOException e) {
             log.log(Level.WARNING, "Error writing to side output", e);
         }

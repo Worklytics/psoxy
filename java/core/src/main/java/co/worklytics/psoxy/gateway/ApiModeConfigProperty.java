@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
-@AllArgsConstructor
 public enum ApiModeConfigProperty implements ConfigService.ConfigProperty {
     SOURCE_AUTH_STRATEGY_IDENTIFIER, //target API endpoint to forward request to
     /**
@@ -14,7 +13,9 @@ public enum ApiModeConfigProperty implements ConfigService.ConfigProperty {
      * case there is some API supported by proxy that doesn't support TLSv1.3 (we're not aware of
      * any as of Sept 2024)
      */
-    TLS_VERSION, TARGET_HOST;
+    TLS_VERSION,
+    TARGET_HOST,
+    ;
 
 
     public static class TlsVersions {
