@@ -6,6 +6,7 @@ import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.ParameterSchema;
+import com.avaulta.gateway.rules.QueryParameterSchema;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
  */
 public class PrebuiltSanitizerRules {
 
-    private static final  String COPILOT_AUDIT_LOG_MANDATORY_QUERY_PARAMETERS_REGEX = "\\\\?(?=.*[\\\\?&]phrase=)(?=.*[\\\\?&]include=).*$";
+    private static final String COPILOT_AUDIT_LOG_MANDATORY_QUERY_PARAMETERS_REGEX = "\\\\?(?=.*[\\\\?&]phrase=)(?=.*[\\\\?&]include=).*$";
 
     private static final List<String> commonAllowedQueryParameters = Lists.newArrayList(
         "per_page",
@@ -38,12 +39,14 @@ public class PrebuiltSanitizerRules {
         "direction"
     );
 
-    private final static Map<String, ParameterSchema> COPILOT_AUDIT_LOG_QUERY_SUPPORTED_PARAMETER_SCHEMA = ImmutableMap.of(
-        "phrase", ParameterSchema.builder()
+    private final static Map<String, QueryParameterSchema> COPILOT_AUDIT_LOG_QUERY_SUPPORTED_PARAMETER_SCHEMA = ImmutableMap.of(
+        "phrase", QueryParameterSchema.builder()
             .pattern("(action:copilot(?:\\+created:\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z\\.\\.\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z)?)")
+            .required(true)
             .build(),
-        "include", ParameterSchema.builder()
+        "include", QueryParameterSchema.builder()
             .enumValues(List.of("web"))
+            .required(true)
             .build()
     );
 
@@ -680,14 +683,8 @@ public class PrebuiltSanitizerRules {
         .endpoint(ORG_TEAM_MEMBERS)
         .endpoint(ORG_COPILOT_SEATS)
         .endpoint(ORG_AUDIT_LOG
-            // Ensure that phrase and include query parameters are present
-            .withPathTemplate(null)
-            .withPathRegex("^/orgs/[^/]+/audit-log" + COPILOT_AUDIT_LOG_MANDATORY_QUERY_PARAMETERS_REGEX)
             .withQueryParamSchemas(COPILOT_AUDIT_LOG_QUERY_SUPPORTED_PARAMETER_SCHEMA))
         .endpoint(ORG_AUDIT_LOG_WITH_INSTALLATION_ID
-            // Ensure that phrase and include query parameters are present
-            .withPathTemplate(null)
-            .withPathRegex("^/organizations\\/\\d+\\/audit-log" + COPILOT_AUDIT_LOG_MANDATORY_QUERY_PARAMETERS_REGEX)
             .withQueryParamSchemas(COPILOT_AUDIT_LOG_QUERY_SUPPORTED_PARAMETER_SCHEMA))
         .build();
 
