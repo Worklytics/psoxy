@@ -6,7 +6,6 @@ import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
 import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;

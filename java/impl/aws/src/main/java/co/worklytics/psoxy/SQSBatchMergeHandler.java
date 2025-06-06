@@ -4,6 +4,7 @@ import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.SQSOutput;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.impl.BatchMergeHandler;
+import co.worklytics.psoxy.aws.DaggerAwsContainer;
 
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
