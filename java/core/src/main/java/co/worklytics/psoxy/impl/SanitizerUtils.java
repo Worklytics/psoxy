@@ -418,7 +418,15 @@ public class SanitizerUtils {
         return f;
     }
 
-    Object applyTransform(Pseudonymizer pseudonymizer, Transform transform, Object document, Map<Transform, List<JsonPath>> compiledTransforms) {
+    /**
+     * Applies a transform to a document, using the provided pseudonymizer.
+     *
+     * @param pseudonymizer to use
+     * @param transform to apply
+     * @param document will be MUTATED in place, if the transform applies
+     * @param compiledTransforms pre-compiled JsonPaths for the transforms, to avoid re-compiling them if transform is already in that list
+     */
+    void applyTransform(Pseudonymizer pseudonymizer, Transform transform, Object document, Map<Transform, List<JsonPath>> compiledTransforms) {
         List<JsonPath> paths = compiledTransforms.computeIfAbsent(transform,
             t -> t.getJsonPaths().stream()
                 .map(JsonPath::compile)
@@ -444,7 +452,6 @@ public class SanitizerUtils {
                 }
             }
         }
-        return document;
     }
 
 
