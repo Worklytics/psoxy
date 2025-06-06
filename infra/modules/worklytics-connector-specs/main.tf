@@ -714,6 +714,8 @@ EOT
       example_api_calls : [
         "/v2/users",
         "/v2/users/{USER_ID}/meetings",
+        "/v2/users/{USER_ID}/settings",
+        "/v2/users/{USER_ID}/recordings",
         "/v2/meetings/{MEETING_ID}",
         "/v2/meetings/{MEETING_ID}/meeting_summary",
         "/v2/past_meetings/{MEETING_ID}",
@@ -764,14 +766,14 @@ be left in development mode; it does not need to be published.
     * `meeting:read:list_past_instances:admin`
     * `meeting:read:list_meetings:admin`
     * `meeting:read:participant:admin`
+    * `meeting:read:summary:admin`
+    * `cloud_recording:read:list_user_recordings:admin`
     * `report:read:list_meeting_participants:admin`
     * `report:read:meeting:admin`
     * `report:read:user:admin`
     * `user:read:user:admin`
     * `user:read:list_users:admin`
-
-  Alternatively, the scopes: `user:read:admin`, `meeting:read:admin`, `report:read:admin` are
-  sufficient, but as of May 2024 are no longer available for newly created Zoom apps.
+    * `user:read:settings:admin`
 
   Once the scopes are added, click on `Done` and then `Continue`.
 

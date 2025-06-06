@@ -122,10 +122,10 @@ public class PrebuiltSanitizerRules {
                 .build()
             )
             .transform(Transform.Redact.builder()
-    // we don't care about user's name
+                // we don't care about user's name
                 .jsonPath("$.['user_name','topic','custom_keys','tracking_fields']")
                 .build())
-        .build())
+            .build())
         // Past meeting participants
         // https://marketplace.zoom.us/docs/api-reference/zoom-api/methods#operation/reportMeetingParticipants
         .endpoint(Endpoint.builder()
@@ -135,10 +135,10 @@ public class PrebuiltSanitizerRules {
                 .build()
             )
             .transform(Transform.Redact.builder()
-    // we don't care about user's name
+                // we don't care about user's name
                 .jsonPath("$.participants[*]['name','registrant_id','display_name']")
                 .build())
-        .build())
+            .build())
         .build();
 
     static final Rules2 USERS_ENDPOINTS = Rules2.builder()
@@ -162,11 +162,43 @@ public class PrebuiltSanitizerRules {
                 .build()
             )
             .build())
-        .build();
+        // Get user settings
+        // https://developers.zoom.us/docs/api/users/#tag/users/GET/users/{userId}/settings
+        .endpoint(Endpoint.builder()
+            .pathTemplate("/v2/users/{userId}/settings")
+            .transform(Transform.Redact.builder()
+                // As fields are in different sub-objects, we need to specify each one
+                .jsonPath("$..ip_addresses_or_ranges")
+                .jsonPath("$..require_password_for_pmi_meetings")
+                .jsonPath("$..pmi_password")
+                .jsonPath("$..meeting_password_requirement")
+                .jsonPath("$..virtual_background_settings")
+                .jsonPath("$..audio_conference_info")
+                .jsonPath("$..numbers")
+                .jsonPath("$..custom_service_instructions")
+                .jsonPath("$..default_password_for_scheduled_meetings")
+                .build())
+            .build()).build();
+
+    static final Rules2 RECORDINGS_ENDPOINTS = Rules2.builder()
+        // List user recordings
+        //https://developers.zoom.us/docs/api/meetings/#tag/cloud-recording/GET/users/{userId}/recordings
+        .endpoint(Endpoint.builder()
+            .pathTemplate("/v2/users/{userId}/recordings")
+            .transform(Transform.Pseudonymize.builder()
+                .jsonPath("$.meetings[*]['host_id','account_id']")
+                .build())
+            .transform(Transform.Redact.builder()
+                .jsonPath("$..['topic','share_url','recording_play_passcode']")
+                .jsonPath("$..recording_files[*]['download_url','file_path','play_url','agenda']")
+                .build())
+            .build()
+        ).build();
 
     static final Rules2 ZOOM = USERS_ENDPOINTS
         .withAdditionalEndpoints(MEETINGS_ENDPOINTS.getEndpoints())
-        .withAdditionalEndpoints(REPORT_ENDPOINTS.getEndpoints());
+        .withAdditionalEndpoints(REPORT_ENDPOINTS.getEndpoints())
+        .withAdditionalEndpoints(RECORDINGS_ENDPOINTS.getEndpoints());
 
 
     static public final Map<String, RESTRules> ZOOM_PREBUILT_RULES_MAP = ImmutableMap.<String, RESTRules>builder()
