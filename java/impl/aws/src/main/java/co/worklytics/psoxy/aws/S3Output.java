@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.ByteArrayInputStream;
+import java.util.Optional;
 import java.util.logging.Level;
 
 /**
@@ -57,10 +58,17 @@ public class S3Output implements Output {
             AmazonS3 s3Client = s3ClientProvider.get();
 
             ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentEncoding(content.getContentEncoding());
-            metadata.setContentType(content.getContentType());
-            //metadata.setUserMetadata(sideOutputUtils.buildMetadata(request));
+
+            // s3 client blows up if these are filled with 'null' values, so only set if present
+            Optional.ofNullable(content.getContentEncoding()).ifPresent(metadata::setContentEncoding);
+            Optional.ofNullable(content.getContentType()).ifPresent(metadata::setContentType);
+
             metadata.setContentLength(content.getContent().length);  //explicit length avoids S3 complaint about buffering ...
+
+
+            content.getMetadata().entrySet().stream()
+                .filter(entry -> entry.getValue() != null) // avoid null values
+                .forEach(entry -> metadata.addUserMetadata(entry.getKey(), entry.getValue()));
 
             s3Client.putObject(bucket,
                 pathPrefix + key,
