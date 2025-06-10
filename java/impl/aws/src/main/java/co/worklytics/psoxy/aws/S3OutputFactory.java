@@ -12,6 +12,6 @@ public interface S3OutputFactory extends OutputFactory<S3Output> {
 
     @Override
     default boolean supports(OutputLocation location) {
-        return "sqs".equals(location.getKind());
+        return OutputLocation.LocationKind.S3.equals(location.getKind());
     }
 }

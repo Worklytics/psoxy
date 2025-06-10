@@ -4,6 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * TODO: refactor this
+ *   WEBHOOK_OUTPUT
+ *   WEBHOOK_BATCH_OUTPUT
+ *
+ * arguably these should be per-endpoint??
+ *
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 public enum WebhookCollectorModeConfigProperty implements ConfigService.ConfigProperty {
@@ -26,7 +34,7 @@ public enum WebhookCollectorModeConfigProperty implements ConfigService.ConfigPr
      * if set, this is the output that webhook payloads received via queue callbacks will be written to.
      *
      * (q: is this ACTUALLY webhook specific? arguably not ... but for simplicity leave it here for now;
-     * could introduced a QueuedBatch collector mode in the future ...)
+     * could introduce a QueuedBatch collector mode in the future ...)
      *
      * could be S3, GCS, etc ...
      *

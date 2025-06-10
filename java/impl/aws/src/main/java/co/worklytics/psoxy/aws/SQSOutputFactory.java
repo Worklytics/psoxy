@@ -11,6 +11,6 @@ public interface SQSOutputFactory extends OutputFactory<SQSOutput> {
     SQSOutput create(@Assisted OutputLocation location);
 
     default boolean supports(OutputLocation location) {
-        return "sqs".equals(location.getKind());
+        return OutputLocation.LocationKind.SQS.equals(location.getKind());
     }
 }
