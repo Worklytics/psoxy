@@ -300,6 +300,16 @@ variable "custom_side_outputs" {
   default     = {}
 }
 
+variable "webhook_collectors" {
+  type = map(object({
+    rules_file = string
+  }))
+
+  default = {}
+
+  description = "map of webhook collector id --> webhook collector configuration"
+}
+
 variable "lookup_table_builders" {
   type = map(object({
     input_connector_id            = string

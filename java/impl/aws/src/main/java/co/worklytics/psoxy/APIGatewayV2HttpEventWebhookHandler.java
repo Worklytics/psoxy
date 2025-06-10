@@ -13,7 +13,11 @@ import lombok.extern.java.Log;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
+ * @deprecated  - not sure we ultimately want/need this case, so marking as deprecated for now
  * handles lambda invocations where trigger is API Gateway V2 HTTP request event as incoming webhook
+ *
+ *  q: use-case for this??? why not just use the `WebhookCollectionModeHandler`?
+ *
  *
  * use cases:
  *   - Lambda function URL invocations  (no actual API Gateway, but formats are the same)

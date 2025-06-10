@@ -133,6 +133,7 @@ module "psoxy" {
   bulk_input_expiration_days           = var.bulk_input_expiration_days
   api_connectors                       = local.api_connectors
   bulk_connectors                      = local.bulk_connectors
+  webhook_collectors                   = var.webhook_collectors
   provision_bucket_public_access_block = var.provision_bucket_public_access_block
   custom_bulk_connector_rules          = var.custom_bulk_connector_rules
   custom_bulk_connector_arguments      = var.custom_bulk_connector_arguments

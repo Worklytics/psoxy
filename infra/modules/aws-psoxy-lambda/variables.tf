@@ -207,3 +207,15 @@ variable "side_output_sanitized" {
     error_message = "The `side_output_sanitized` target must be s3 bucket address. May include a path within the bucket, in which case we highly recommend you end it with a slash (`/`)."
   }
 }
+
+# TODO: this is not very "inversion of control" design; arg should output the exec policy and, where we create the trigger, first create and attach the policy??
+variable "sqs_trigger_queue_arns" {
+  type        = list(string)
+  description = "**ALPHA** ARNs of SQS queues that will trigger this lambda; if provided, perms on lambda's exec rule."
+  default     = []
+
+  validation {
+    condition     = alltrue([for queue in var.sqs_trigger_queue_arns : can(regex("^arn:aws:sqs:[a-z0-9-]+:[0-9]{12}:[a-zA-Z][a-zA-Z0-9-_ ]*[a-zA-Z0-9]$", queue))])
+    error_message = "Each SQS queue ARN must be a valid ARN for an AWS SQS queue."
+  }
+}

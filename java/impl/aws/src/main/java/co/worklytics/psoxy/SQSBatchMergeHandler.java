@@ -10,7 +10,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
 /**
+ * @deprecated  - not sure we ultimately want/need this case, so marking as deprecated for now
+ *
+ *
  * entry point for AWS Lambda function that processes SQS events (merging multiple messages into a single batch write to output)
+ *
+ * q: use-case for this???
  */
 public class SQSBatchMergeHandler implements com.amazonaws.services.lambda.runtime.RequestHandler<com.amazonaws.services.lambda.runtime.events.SQSEvent, Void> {
 

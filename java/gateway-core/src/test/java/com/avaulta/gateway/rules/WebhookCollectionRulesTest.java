@@ -26,6 +26,8 @@ endpoints:
       - "$.actor.id"
   transforms:
   - !<pseudonymize>
+    jsonPaths:
+    - "$.actor.id"
     encoding: "URL_SAFE_TOKEN"
 """;
 
@@ -35,7 +37,7 @@ endpoints:
         WebhookCollectionRules rules = WebhookCollectionRules.builder()
             .endpoint(WebhookCollectionRules.WebhookEndpoint.builder()
                     .jwtClaimsToVerify(Map.of("sub", WebhookCollectionRules.JwtClaimSpec.builder().payloadContent("$.actor.id").build()))
-                .transform(Transform.Pseudonymize.ofPaths("$.actor.id").withEncoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN))
+                .transform(Transform.Pseudonymize.ofPaths("$.actor.id").toBuilder().encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).build())
                 .build())
             .build();
 
@@ -73,6 +75,28 @@ endpoints:
 
         String yaml = objectMapper.writeValueAsString(fromYaml);
         assertEquals(YAML_EXAMPLE, yaml);
+    }
+
+
+    final String NO_JWT_CLAIMS = """
+---
+endpoints:
+- transforms:
+  - !<pseudonymize>
+    jsonPaths:
+    - "$.actor.id"
+    encoding: "URL_SAFE_TOKEN"
+""";
+    @SneakyThrows
+    @Test
+    public void noTopJwtClaimsToVerify() {
+        WebhookCollectionRules rules = WebhookCollectionRules.builder()
+            .endpoint(WebhookCollectionRules.WebhookEndpoint.builder()
+                .transform(Transform.Pseudonymize.ofPaths("$.actor.id").toBuilder().encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).build())
+                .build())
+            .build();
+
+        assertEquals(NO_JWT_CLAIMS, objectMapper.writeValueAsString(rules));
     }
 
 }

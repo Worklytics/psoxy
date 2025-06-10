@@ -21,7 +21,7 @@ import static co.worklytics.psoxy.ResponseCompressionHandler.isCompressionReques
  * usage:
  *  - when configure/deploy your lambda, set entry point to `co.worklytis.psoxy.APIGatewayV1Handler`
  *  - in terraform, this is the `handler_class` variable
- *     - https://github.com/Worklytics/psoxy/blob/main/infra/modules/aws-psoxy-rest/main.tf#L15
+ *     - https://github.com/Worklytics/psoxy/blob/main/infra/modules/aws-psoxy-rest/main.tf#L36
  *     - under Lambda --> Runtime Settings via AWS console
  *
  *

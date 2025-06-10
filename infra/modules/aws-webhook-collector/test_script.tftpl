@@ -1,0 +1,6 @@
+#!/bin/bash
+echo "Quick test of ${function_name} ..."
+
+${command_cli_call} -u "${proxy_endpoint_url}/" --health-check
+
+${command_cli_call} -u "${proxy_endpoint_url}" --body '{"test": "data"}'
