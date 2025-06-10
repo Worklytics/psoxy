@@ -5,17 +5,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
-import java.util.Optional;
-import java.util.Set;
+import java.util.Arrays;
 
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Value
 public class OutputLocationImpl implements OutputLocation {
 
-    String kind;
+    LocationKind kind;
 
     String uri;
+
 
     public static OutputLocationImpl of(String uri) {
 
@@ -23,18 +23,10 @@ public class OutputLocationImpl implements OutputLocation {
             throw new IllegalArgumentException("Output location URI must not be blank");
         }
 
-        // as a convention, also do 'pubsub://` and `bq://` for Google Cloud Pub/Sub and BigQuery ??? why not
-        Set<String> bucketKinds = Set.of("s3", "gs");
-        Optional<String> bucketKind = bucketKinds.stream().filter(t -> uri.startsWith(t)).findAny();
-
-        if (bucketKind.isPresent()) {
-            return new OutputLocationImpl(bucketKind.get(), uri);
-        }
-
-        if (uri.startsWith("https://sqs.")) {
-            return new OutputLocationImpl("sqs", uri);
-        }
-
-        throw new IllegalArgumentException("Output location URI could not be parsed: " + uri);
+        return Arrays.stream(LocationKind.values())
+            .filter(kind -> uri.startsWith(kind.getUriPrefix()))
+            .findAny()
+            .map(kind -> new OutputLocationImpl(kind, uri))
+            .orElseThrow(() -> new IllegalArgumentException("Output location URI does not match any known kind: " + uri));
     }
 }

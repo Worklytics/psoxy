@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway;
 
 import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
 import co.worklytics.psoxy.gateway.output.OutputLocation;
+import co.worklytics.psoxy.gateway.output.OutputLocationImpl;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 @Value
 public class BucketOutputLocation implements OutputLocation {
 
-    String kind;
+    OutputLocation.LocationKind kind;
 
     String bucket;
 
@@ -38,10 +39,11 @@ public class BucketOutputLocation implements OutputLocation {
 
         String[] bucketParts = bucketAndPath.split("/", 2);
         String bucket = bucketParts[0];
+
         String pathPrefix = bucketParts.length > 1 ? bucketParts[1] : "";
 
         return BucketOutputLocation.builder()
-            .kind(kind)
+            .kind(OutputLocationImpl.of(uri).getKind())
             .bucket(bucket)
             .pathPrefix(OutputUtils.formatObjectPathPrefix(pathPrefix))
             .build();

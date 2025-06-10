@@ -2,15 +2,30 @@ package co.worklytics.psoxy.gateway.output;
 
 
 import co.worklytics.psoxy.gateway.HostEnvironment;
+import lombok.AccessLevel;
+import lombok.Getter;
 
 public interface OutputLocation {
 
+
+    enum LocationKind {
+        S3("s3://"),
+        GCS("gs://"),
+        SQS("https://sqs");
+
+        @Getter(AccessLevel.PACKAGE)
+        private final String uriPrefix;
+
+        LocationKind(String uriPrefix) {
+            this.uriPrefix = uriPrefix;
+        }
+    }
     /**
      * kind of location, e.g. "s3", "gcs", etc
      *
      * @return
      */
-    String getKind();
+    LocationKind getKind();
 
     /**
      * URI of the output location, e.g. "s3://bucket/path", "gcs://bucket/path", etc.
@@ -28,6 +43,6 @@ public interface OutputLocation {
    default boolean isSupported(HostEnvironment hostEnvironment) {
         return hostEnvironment.getSupportedOutputKinds()
             .stream()
-            .anyMatch(protocol -> protocol.equalsIgnoreCase(this.getKind()));
+            .anyMatch(protocol -> protocol.equalsIgnoreCase(this.getKind().name()));
     }
 }
