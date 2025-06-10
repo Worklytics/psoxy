@@ -124,7 +124,7 @@ public class FunctionRuntimeModule {
     @SneakyThrows
     @Provides @Singleton WebhookSanitizer webhookSanitizer(WebhookSanitizerImplFactory webhookSanitizerFactory,
                                                            ConfigService configService,
-                                                           ObjectMapper objectMapper) {
+                                                           @Named("ForYAML") ObjectMapper objectMapper) {
         return webhookSanitizerFactory.create(objectMapper.readerFor(WebhookCollectionRules.class).readValue(configService.getConfigPropertyOrError(ProxyConfigProperty.RULES)));
     }
 

@@ -7,6 +7,7 @@ import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.rules.RulesUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dagger.Lazy;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.java.Log;
@@ -17,9 +18,11 @@ import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
@@ -53,7 +56,7 @@ public class HealthCheckRequestHandler {
     @Inject
     SecretStore secretStore;
     @Inject
-    SourceAuthStrategy sourceAuthStrategy;
+    Lazy<SourceAuthStrategy> sourceAuthStrategy;
     @Inject
     ObjectMapper objectMapper;
     @Inject
@@ -84,12 +87,20 @@ public class HealthCheckRequestHandler {
     }
 
     private HttpEventResponse handle(HttpEventRequest request) {
-        Set<String> missing =
-                sourceAuthStrategy.getRequiredConfigProperties().stream()
-                        .filter(configProperty -> config.getConfigPropertyAsOptional(configProperty).isEmpty())
-                        .filter(configProperty -> secretStore.getConfigPropertyAsOptional(configProperty).isEmpty())
-                        .map(ConfigService.ConfigProperty::name)
-                        .collect(Collectors.toSet());
+        Set<String> missing;
+
+        try {
+            missing =
+                sourceAuthStrategy.get().getRequiredConfigProperties().stream()
+                    .filter(configProperty -> config.getConfigPropertyAsOptional(configProperty).isEmpty())
+                    .filter(configProperty -> secretStore.getConfigPropertyAsOptional(configProperty).isEmpty())
+                    .map(ConfigService.ConfigProperty::name)
+                    .collect(Collectors.toSet());
+        } catch (Throwable e) {
+            // will fail if sourceAuthStrategy is not set up properly
+            log.log(Level.WARNING, e.getMessage(), e);
+            missing = Collections.emptySet();
+        }
 
         try {
             Optional<String> targetHost = config.getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST);
@@ -123,7 +134,7 @@ public class HealthCheckRequestHandler {
             //collect toMap doesn't like null values; presumably people who see Unix-epoch will
             // recognize it means unknown/unknowable; in practice, won't be used due to filter atm
             final Instant PLACEHOLDER_FOR_NULL_LAST_MODIFIED = Instant.ofEpochMilli(0);
-            healthCheckResult.configPropertiesLastModified(sourceAuthStrategy.getAllConfigProperties().stream()
+            healthCheckResult.configPropertiesLastModified(sourceAuthStrategy.get().getAllConfigProperties().stream()
                     .map(param -> {
                         Optional<ConfigService.ConfigValueWithMetadata> fromConfig = config.getConfigPropertyWithMetadata(param);
                         if (fromConfig.isEmpty()) {
