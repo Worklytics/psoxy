@@ -68,8 +68,6 @@ resource "aws_iam_role" "api-caller" {
     )
   })
 
-
-
   lifecycle {
     ignore_changes = [
       tags
@@ -77,11 +75,21 @@ resource "aws_iam_role" "api-caller" {
   }
 }
 
-locals {
-  function_name_prefix = coalesce(var.rest_function_name_prefix, var.api_function_name_prefix)
+resource "aws_iam_role" "webhook-test-caller" {
+  count       = var.enable_webhook_testing ? 1 : 0
+  name        = "${var.deployment_id}WebhookTestCaller"
+  description = "role that may be assumed to make test calls to webhook-collector-mode instances"
+
+  assume_role_policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : concat(
+      [],
+      local.aws_caller_statements
+    )
+  })
+
+  permissions_boundary = var.iam_roles_permissions_boundary
 }
-
-
 
 # not really a 'password', but 'random_string' isn't "sensitive" by terraform, so
 # is output to console
@@ -172,6 +180,7 @@ resource "aws_iam_role_policy_attachment" "invoke_api_policy_to_role" {
   policy_arn = aws_iam_policy.invoke_api[0].arn
 }
 
+
 resource "aws_cloudwatch_log_group" "api_gatewayv2_log" {
   count = var.use_api_gateway_v2 ? 1 : 0
 
@@ -247,4 +256,8 @@ output "api_gateway_v2" {
 
 output "api_gateway_v2_stage" {
   value = var.use_api_gateway_v2 ? aws_apigatewayv2_stage.live[0] : null
+}
+
+output "webhook_test_caller_role_arn" {
+  value = var.enable_webhook_testing ? aws_iam_role.webhook-test-caller[0].arn : null
 }

@@ -173,9 +173,16 @@ variable "secrets_store_implementation" {
   default     = "aws_ssm_parameter_store"
 }
 
+variable "test_caller_role_arn" {
+  type        = string
+  description = "optional ARN of an AWS role to assume when making test calls, if any; leave `null` for none"
+  default     = null
+}
+
 variable "todos_as_local_files" {
   type        = bool
   description = "whether to render TODOs as flat files"
   default     = true
 }
+
 

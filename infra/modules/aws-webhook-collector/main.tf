@@ -24,8 +24,6 @@ locals {
     : k => v if v != null
   }
 
-  arn_for_test_calls = ""
-
   # helper to clarify conditionals throughout
   use_api_gateway = var.api_gateway_v2 != null
 
@@ -210,7 +208,7 @@ locals {
   # don't want to *require* assumption of a role for testing; while we expect it in usual case
   # (a provisioner must assume PsoxyCaller role for the test), customer could be using a single
   # admin user for everything such that it's not required
-  role_param = local.arn_for_test_calls == null ? "" : " -r \"${local.arn_for_test_calls}\""
+  role_param = var.test_caller_role_arn == null ? "" : " -r \"${var.test_caller_role_arn}\""
 
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
   command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} -re \"${data.aws_region.current.id}\""

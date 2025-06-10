@@ -25,6 +25,8 @@ locals {
 
   # VPC *requires* API Gateway v2, or calls just timeout
   use_api_gateway_v2 = var.vpc_config != null || var.use_api_gateway_v2
+
+  enable_webhook_testing = var.provision_testing_infra && length(keys(var.webhook_collectors)) > 0
 }
 
 module "psoxy" {
@@ -43,6 +45,7 @@ module "psoxy" {
   use_api_gateway_v2             = local.use_api_gateway_v2
   logs_kms_key_arn               = var.logs_kms_key_arn
   iam_roles_permissions_boundary = var.iam_roles_permissions_boundary
+  enable_webhook_testing         = local.enable_webhook_testing
 }
 
 resource "aws_iam_policy" "execution_lambda_to_caller" {
@@ -296,6 +299,7 @@ module "webhook_collectors" {
   # api_gateway_v2                        = module.psoxy.api_gateway_v2 # TODO: nonsensical to have this be the SAME api gateway as for the API connectors; should have a separate one for webhook collectors
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
+  test_caller_role_arn                 = module.psoxy.webhook_test_caller_role_arn
   rules_file                           = each.value.rules_file
 
   todos_as_local_files = var.todos_as_local_files
@@ -309,6 +313,38 @@ module "webhook_collectors" {
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
   )
+}
+
+resource "aws_iam_policy" "invoke_webhook_collector_urls" {
+  count = local.enable_webhook_testing ? 1 : 0
+
+  name        = "${module.env_id.id}InvokeWebhookCollectorLambdaUrls"
+  description = "Allow caller role to execute the webhook collector lambda url directly"
+
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Action" : ["lambda:InvokeFunctionUrl"],
+          "Effect" : "Allow",
+          "Resource" : [for k, v in module.webhook_collectors : v.function_arn]
+        }
+      ]
+  })
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "invoke_webhook_collector_urls_to_test_role" {
+  count = local.enable_webhook_testing ? 1 : 0
+
+  policy_arn = aws_iam_policy.invoke_webhook_collector_urls[0].arn
+  role       = element(split("/", module.psoxy.webhook_test_caller_role_arn), length(split("/", module.psoxy.webhook_test_caller_role_arn)) - 1)
 }
 
 # BEGIN lookup tables
