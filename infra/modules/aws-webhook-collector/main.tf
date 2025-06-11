@@ -59,7 +59,15 @@ module "rules_parameter" {
   prefix    = var.path_to_instance_ssm_parameters
 }
 
-module "psoxy_lambda" {
+moved {
+  from = module.psoxy_lambda
+  to   = module.gate_instance
+}
+
+# q: better name for this module invocation ?
+# it's an instance of a gate/gateway, implemented as a lambda function
+# and in this particular case, it's inverted in a sense, as data goes INTO it, rather than OUT (via API requests)
+module "gate_instance" {
   source = "../aws-psoxy-lambda"
 
   environment_name                     = var.environment_name
@@ -88,6 +96,9 @@ module "psoxy_lambda" {
   sqs_send_queue_arns = [
     aws_sqs_queue.sanitized_webhooks_to_batch.arn
   ]
+  s3_outputs = [
+    "s3://${module.sanitized_output.bucket_id}/"
+  ]
 
   environment_variables = merge(
     var.environment_variables,
@@ -103,11 +114,11 @@ module "psoxy_lambda" {
 resource "aws_lambda_function_url" "lambda_url" {
   count = local.use_api_gateway ? 0 : 1
 
-  function_name      = module.psoxy_lambda.function_name
+  function_name      = module.gate_instance.function_name
   authorization_type = local.authorization_type
 
   depends_on = [
-    module.psoxy_lambda
+    module.gate_instance
   ]
 }
 
@@ -119,7 +130,7 @@ resource "aws_apigatewayv2_integration" "map" {
   integration_type       = "AWS_PROXY"
   connection_type        = "INTERNET"
   integration_method     = "POST"
-  integration_uri        = module.psoxy_lambda.function_arn
+  integration_uri        = module.gate_instance.function_arn
   payload_format_version = "1.0" # must match to handler value, set in lambda
   timeout_milliseconds   = 30000 # ideally would be 55 or 60, but docs say limit is 30s
 }
@@ -128,7 +139,7 @@ resource "aws_apigatewayv2_route" "methods" {
   for_each = toset(local.use_api_gateway ? var.http_methods : [])
 
   api_id             = var.api_gateway_v2.id
-  route_key          = "${each.key} /${module.psoxy_lambda.function_name}/{proxy+}"
+  route_key          = "${each.key} /${module.gate_instance.function_name}/{proxy+}"
   authorization_type = local.authorization_type
   target             = "integrations/${aws_apigatewayv2_integration.map[0].id}"
 }
@@ -136,32 +147,30 @@ resource "aws_apigatewayv2_route" "methods" {
 resource "aws_lambda_permission" "api_gateway" {
   count = local.use_api_gateway ? 1 : 0
 
-  statement_id  = "Allow${module.psoxy_lambda.function_name}Invoke"
+  statement_id  = "Allow${module.gate_instance.function_name}Invoke"
   action        = "lambda:InvokeFunction"
-  function_name = module.psoxy_lambda.function_name
+  function_name = module.gate_instance.function_name
   principal     = "apigateway.amazonaws.com"
 
 
   # The /*/*/ part allows invocation from any stage, method and resource path
   # within API Gateway REST API.
   # TODO: limit by http method here too?
-  source_arn = "${var.api_gateway_v2.execution_arn}/*/*/${module.psoxy_lambda.function_name}/{proxy+}"
+  source_arn = "${var.api_gateway_v2.execution_arn}/*/*/${module.gate_instance.function_name}/{proxy+}"
 }
 
 
 resource "aws_lambda_event_source_mapping" "sqs_trigger" {
   event_source_arn                   = aws_sqs_queue.sanitized_webhooks_to_batch.arn
-  function_name                      = module.psoxy_lambda.function_name
+  function_name                      = module.gate_instance.function_name
   enabled                            = true
   batch_size                         = 100 # eg, merge up to 100 webhooks into a single batch (object in the S3 output)
   maximum_batching_window_in_seconds = 60  # max time to wait before combining whatever we have; could be up to 300s, but for testing let's start with 60s
 
   depends_on = [
-    module.psoxy_lambda
+    module.gate_instance
   ]
 }
-
-
 
 resource "aws_iam_policy" "sanitized_bucket_read" {
   name        = "${module.env_id.id}_BucketRead_${module.sanitized_output.bucket_id}"
@@ -199,8 +208,10 @@ resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
   policy_arn = aws_iam_policy.sanitized_bucket_read.arn
 }
 
+
+
 locals {
-  api_gateway_url = local.use_api_gateway ? "${var.api_gateway_v2.stage_invoke_url}/${module.psoxy_lambda.function_name}" : null
+  api_gateway_url = local.use_api_gateway ? "${var.api_gateway_v2.stage_invoke_url}/${module.gate_instance.function_name}" : null
 
   # lambda_url has trailing /, but our example_api_calls already have preceding /
   function_url = local.use_api_gateway ? null : substr(aws_lambda_function_url.lambda_url[0].function_url, 0, length(aws_lambda_function_url.lambda_url[0].function_url) - 1)
@@ -215,7 +226,7 @@ locals {
 
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
   command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} -re \"${data.aws_region.current.id}\""
-  command_test_logs   = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} -re \"${data.aws_region.current.id}\" -l \"${module.psoxy_lambda.log_group}\""
+  command_test_logs   = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} -re \"${data.aws_region.current.id}\" -l \"${module.gate_instance.log_group}\""
 
   todo_content = <<EOT
 
@@ -223,7 +234,7 @@ locals {
 
 Review the deployed function in AWS console:
 
-- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.id}#/functions/${module.psoxy_lambda.function_name}?tab=monitoring
+- https://console.aws.amazon.com/lambda/home?region=${data.aws_region.current.id}#/functions/${module.gate_instance.function_name}?tab=monitoring
 
 We provide some Node.js scripts to simplify testing your proxy deployment. To be able run test
 commands below, you will need
@@ -269,7 +280,7 @@ EOT
 locals {
   test_script = templatefile("${path.module}/test_script.tftpl", {
     proxy_endpoint_url = local.proxy_endpoint_url,
-    function_name      = module.psoxy_lambda.function_name,
+    function_name      = module.gate_instance.function_name,
     command_cli_call   = local.command_cli_call,
   })
 }
@@ -287,25 +298,25 @@ output "endpoint_url" {
 }
 
 output "function_arn" {
-  value = module.psoxy_lambda.function_arn
+  value = module.gate_instance.function_arn
 }
 
 # assuredly unique within AWS account
 output "function_name" {
-  value = module.psoxy_lambda.function_name
+  value = module.gate_instance.function_name
 }
 
 output "instance_role_arn" {
-  value = module.psoxy_lambda.iam_role_for_lambda_arn
+  value = module.gate_instance.iam_role_for_lambda_arn
 }
 
 output "instance_role_name" {
-  value = module.psoxy_lambda.iam_role_for_lambda_name
+  value = module.gate_instance.iam_role_for_lambda_name
 }
 
 # in practice, same as function_name; but for simplicity may want something specific to the deployment
 output "instance_id" {
-  value = module.psoxy_lambda.function_name
+  value = module.gate_instance.function_name
 }
 
 output "proxy_kind" {

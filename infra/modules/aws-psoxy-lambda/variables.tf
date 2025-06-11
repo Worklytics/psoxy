@@ -208,6 +208,17 @@ variable "side_output_sanitized" {
   }
 }
 
+variable "s3_outputs" {
+  type        = list(string)
+  description = "S3 urls to which the function will write sanitized output. If provided, the function will write sanitized output to these S3 URLs."
+  default     = []
+
+  validation {
+    condition     = alltrue([for url in var.s3_outputs : can(regex("^s3://[a-zA-Z][a-zA-Z0-9-_ ]*[a-zA-Z0-9](/.*)?$", url))])
+    error_message = "Each `s3_outputs` target must be a valid S3 bucket address. Bucket names must only contain lowercase letters, numbers, and hyphens, and must start and end with a lowercase letter or number. May include a path within the bucket, in which case we highly recommend you end it with a slash (`/`)."
+  }
+}
+
 # TODO: this is not very "inversion of control" design; arg should output the exec policy and, where we create the trigger, first create and attach the policy??
 variable "sqs_trigger_queue_arns" {
   type        = list(string)
@@ -231,3 +242,5 @@ variable "sqs_send_queue_arns" {
     error_message = "Each SQS queue ARN must be a valid ARN for an AWS SQS queue."
   }
 }
+
+
