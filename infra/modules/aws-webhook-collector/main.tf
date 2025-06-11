@@ -41,10 +41,11 @@ module "env_id" {
 
 
 module "sanitized_output" {
-  source = "../aws-side-output-s3"
+  source = "../aws-output-s3"
 
   environment_name = var.environment_name
   instance_id      = var.instance_id
+  bucket_suffix    = "sanitized-webhooks"
 }
 
 resource "aws_sqs_queue" "sanitized_webhooks_to_batch" {
@@ -57,11 +58,6 @@ module "rules_parameter" {
   source    = "../aws-ssm-rules"
   file_path = var.rules_file
   prefix    = var.path_to_instance_ssm_parameters
-}
-
-moved {
-  from = module.psoxy_lambda
-  to   = module.gate_instance
 }
 
 # q: better name for this module invocation ?
