@@ -57,8 +57,11 @@ public class BatchMergeHandler {
 
 
             batch.forEach(item -> {
+                if (item.getContentType() == null) {
+                    throw new IllegalArgumentException("Batch items must have a content type");
+                }
                 if (!SUPPORTED_INPUT_CONTENT_TYPES.contains(item.getContentType())) {
-                    throw new IllegalArgumentException("Batch items must have content type 'application/json'");
+                    throw new IllegalArgumentException("Batch items must have content type 'application/json'; was " + item.getContentType());
                 }
                 byte[] uncompressedContent;
                 if ("gzip".equals(item.getContentEncoding())) {

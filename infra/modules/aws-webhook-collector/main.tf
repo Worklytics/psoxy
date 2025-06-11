@@ -85,6 +85,9 @@ module "psoxy_lambda" {
   sqs_trigger_queue_arns = [
     aws_sqs_queue.sanitized_webhooks_to_batch.arn
   ]
+  sqs_send_queue_arns = [
+    aws_sqs_queue.sanitized_webhooks_to_batch.arn
+  ]
 
   environment_variables = merge(
     var.environment_variables,

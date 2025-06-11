@@ -13,6 +13,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -21,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 
@@ -41,6 +44,8 @@ public class WebhookCollectionModeHandler implements RequestStreamHandler {
 
     static ObjectMapper mapper;
 
+    static ObjectMapper sqsPayloadMapper;
+
     static {
         staticInit();
     }
@@ -50,6 +55,8 @@ public class WebhookCollectionModeHandler implements RequestStreamHandler {
         batchMergeHandler = awsContainer.batchMergeHandler();
         inboundWebhookHandler = awsContainer.inboundWebhookHandler();
         mapper = awsContainer.objectMapper();
+        sqsPayloadMapper = new ObjectMapper();
+        sqsPayloadMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
     }
 
 
@@ -59,7 +66,7 @@ public class WebhookCollectionModeHandler implements RequestStreamHandler {
         JsonNode rootNode = mapper.readTree(input);
 
         if (isSQSEvent(rootNode)) {
-            SQSEvent sqsEvent = mapper.treeToValue(rootNode, SQSEvent.class);
+            SQSEvent sqsEvent = sqsPayloadMapper.treeToValue(rootNode, SQSEvent.class);
             handleRequest(sqsEvent, context);
 
             // Return empty 200 response
@@ -106,13 +113,14 @@ public class WebhookCollectionModeHandler implements RequestStreamHandler {
     public void handleRequest(SQSEvent sqsEvent, Context context) {
 
         Stream<ProcessedContent> processedContentStream = sqsEvent.getRecords().stream().map(r -> ProcessedContent.builder()
-            .contentType(r.getMessageAttributes().get(SQSOutput.MessageAttributes.CONTENT_TYPE).getStringValue())
-            .contentEncoding(r.getMessageAttributes().get(SQSOutput.MessageAttributes.CONTENT_ENCODING).getStringValue())
+            .contentType(getStringValue(r.getMessageAttributes(), SQSOutput.MessageAttributes.CONTENT_TYPE))
+            .contentEncoding(getStringValue(r.getMessageAttributes(), SQSOutput.MessageAttributes.CONTENT_ENCODING))
             .content(r.getBody().getBytes(StandardCharsets.UTF_8))
             .build());
 
         batchMergeHandler.handleBatch(processedContentStream);
     }
+
 
 
     /**
@@ -154,5 +162,11 @@ public class WebhookCollectionModeHandler implements RequestStreamHandler {
             context.getLogger().log("Error writing response as Lambda return");
             throw new Error(e);
         }
+    }
+
+    private String getStringValue(Map<String, SQSEvent.MessageAttribute> messageAttributes, String key) {
+        return Optional.ofNullable(messageAttributes.get(key))
+            .map(SQSEvent.MessageAttribute::getStringValue)
+            .orElse(null);
     }
 }

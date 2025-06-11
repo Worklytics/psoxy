@@ -219,3 +219,15 @@ variable "sqs_trigger_queue_arns" {
     error_message = "Each SQS queue ARN must be a valid ARN for an AWS SQS queue."
   }
 }
+
+
+variable "sqs_send_queue_arns" {
+  type        = list(string)
+  description = "**ALPHA** ARNs of SQS queues that this lambda will SEND to; if provided, perms on lambda's exec rule."
+  default     = []
+
+  validation {
+    condition     = alltrue([for queue in var.sqs_send_queue_arns : can(regex("^arn:aws:sqs:[a-z0-9-]+:[0-9]{12}:[a-zA-Z][a-zA-Z0-9-_ ]*[a-zA-Z0-9]$", queue))])
+    error_message = "Each SQS queue ARN must be a valid ARN for an AWS SQS queue."
+  }
+}

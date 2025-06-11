@@ -8,10 +8,12 @@ import lombok.Getter;
 public interface OutputLocation {
 
 
+    // NOT ideal to have all potential implementations of OutputLocation defined here ...
     enum LocationKind {
         S3("s3://"),
         GCS("gs://"),
-        SQS("https://sqs");
+        SQS("https://sqs"),
+        ;
 
         @Getter(AccessLevel.PACKAGE)
         private final String uriPrefix;

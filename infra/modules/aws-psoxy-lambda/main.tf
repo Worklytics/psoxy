@@ -257,7 +257,7 @@ locals {
     Resource = local.kms_keys_to_allow_arns
   }] : []
 
-  sqs_statements = length(var.sqs_trigger_queue_arns) > 0 ? [{
+  sqs_consume_statements = length(var.sqs_trigger_queue_arns) > 0 ? [{
     Sid = "AllowSQSReceiveMessage"
     Action = [
       "sqs:ReceiveMessage",
@@ -268,13 +268,24 @@ locals {
     Resource = var.sqs_trigger_queue_arns
   }] : []
 
+  sqs_send_statements = length(var.sqs_send_queue_arns) > 0 ? [{
+    Sid = "AllowSQSSendMessage"
+    Action = [
+      "sqs:SendMessage",
+      "sqs:GetQueueAttributes"
+    ]
+    Effect   = "Allow"
+    Resource = var.sqs_send_queue_arns
+  }] : []
+
   policy_statements = concat(
     local.global_ssm_param_statements,
     local.global_secretsmanager_statements,
     local.local_ssm_param_statements,
     local.local_secrets_manager_statements,
     local.key_statements,
-    local.sqs_statements,
+    local.sqs_consume_statements,
+    local.sqs_send_statements,
     flatten(values(module.side_output_iam_statements)[*].iam_statements),
   )
 }
