@@ -78,7 +78,7 @@ public class WebhookCollectionModeHandler implements RequestStreamHandler {
         } else if (isHttpEvent(rootNode)) {
             // API Gateway V2 HTTP event (from Function URL, usually)
             APIGatewayV2HTTPEvent httpEvent = mapper.treeToValue(rootNode, APIGatewayV2HTTPEvent.class);
-            APIGatewayV2HTTPResponse response =handleRequest(httpEvent, context);
+            APIGatewayV2HTTPResponse response = handleRequest(httpEvent, context);
             mapper.writeValue(output, response);
         } else {
             context.getLogger().log("Unrecognized event format: " + rootNode.toString());

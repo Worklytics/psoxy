@@ -48,7 +48,6 @@ public class SQSOutput implements Output {
 
             SendMessageRequest.Builder requestBuilder = SendMessageRequest.builder()
                 .queueUrl(queueUrl)
-                .messageBody(content.getContentAsString())  // contentAsString totally F'd up if it's gzipped? Should we base64 encode it?
                 .messageAttributes(Map.of(
                     MessageAttributes.CONTENT_TYPE,  MessageAttributeValue.builder()
                             .dataType("String")
@@ -59,16 +58,10 @@ public class SQSOutput implements Output {
                             .stringValue(Optional.ofNullable(content.getContentEncoding()).orElse("identity"))
                             .build()
                     )
-                );
+                )
+                .messageBody(content.getContentAsString());  // contentAsString totally F'd up if it's gzipped? Should we base64 encode it? ;
 
-            //q : make use of `key`??
-
-            // Send each message to the SQS queue
-            client.sendMessage(builder -> builder
-                .queueUrl(queueUrl)
-                .messageBody(content.getContentAsString()).build());
-            //    .messageAttributes(sideOutputUtils.buildMetadata(content.getMetadata())));
-
+            client.sendMessage(requestBuilder.build());
         } catch (Exception e) {
             throw new RuntimeException("Failed to write batch of content to SQS", e);
         }
