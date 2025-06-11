@@ -28,7 +28,7 @@ custom_bulk_connector_rules = {
             ]
         }
         settings_to_provide = {
-            "Parser" = "miro-audit-log-ai-bulk"
+            "Parser" = "miro-audit-log-ai"
         }
     }
 }
