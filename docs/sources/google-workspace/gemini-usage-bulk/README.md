@@ -40,7 +40,7 @@ As of Feb 2025, the report includes the following fields, providing per-user usa
 
 ```hcl
 custom_bulk_connector_rules = {
-    "gemini-usage" = {
+    "gemini-usage-bulk" = {
         source_kind               = "gemini-for-workspace",
         worklytics_connector_id   = "bulk-import-psoxy"
         worklytics_connector_name = "Bulk Import - Psoxy"
