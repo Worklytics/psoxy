@@ -5,9 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * TODO: refactor this
- *   WEBHOOK_OUTPUT
- *   WEBHOOK_BATCH_OUTPUT
  *
  * arguably these should be per-endpoint??
  *
@@ -17,6 +14,8 @@ import lombok.NoArgsConstructor;
 public enum WebhookCollectorModeConfigProperty implements ConfigService.ConfigProperty {
 
     /**
+     * where any webhooks received by this collector should be sent.
+     *
      * could be SQS, PubSub, GCS, S3, etc ..
      *
      *  (if expect each webhook payload small, and we want to group them into single gzipped files, than
@@ -31,10 +30,9 @@ public enum WebhookCollectorModeConfigProperty implements ConfigService.ConfigPr
     WEBHOOK_OUTPUT,
 
     /**
-     * if set, this is the output that webhook payloads received via queue callbacks will be written to.
+     * where any *batches* of webhooks received by this collector should be sent.
      *
-     * (q: is this ACTUALLY webhook specific? arguably not ... but for simplicity leave it here for now;
-     * could introduce a QueuedBatch collector mode in the future ...)
+     * (atm, batches only received via queues, such as SQS or PubSub that support batching of messages)
      *
      * could be S3, GCS, etc ...
      *
@@ -43,7 +41,7 @@ public enum WebhookCollectorModeConfigProperty implements ConfigService.ConfigPr
      *
      * should be something URI-like, with the 'type' of the Output able to be inferred from the URI scheme.
      */
-    QUEUED_WEBHOOK_OUTPUT,
+    WEBHOOK_BATCH_OUTPUT,
 
     ;
 

@@ -107,19 +107,13 @@ endpoints:
            - "$.managerEmail"
 ```
 
-Optionally, an `OUTPUT_ORIGINAL` environment variable can be set to store the original payloads in a different bucket/location.
+Outputs will be configured as follows, using env variables:
+  -
+
 
 Terraform - `gcp-webhook-collector` and `aws-webhook-collector` modules that will deploy the necessary infrastructure. These will:
    - provision `-output` bucket for bulk storage of webhook payloads, readable to caller IAM role/principal (e.g. Worklytics tenant)
-   - provision KMS asymmetric key-pair for verifying the webhook payloads. (optional;)
-   - `payload_verification` - `object` - configuration for payload verification, with the following options:
-        - `{ strategy: "none" }` - no verification of payloads; all payloads are accepted.
-        - `{ strategy: "managed_key" }` (default) - our tf modules provision key-pair; export it for you to use
-        - `{ strategy: "public_key", key_id  OR key_value }` - use a custom KMS key for verifying payloads.
-        - `{ strategy: "custom_key", key_id: "..." }` - use a custom KMS key for verifying payloads.
-   - hooks in aws-host/gcp-host to provision `webhook_collectors` variable; map id --> config (`payload_verification`)
 
-Add KMS services to prereqs; what we expect to have activated and perms to manage in project/account. (to support managed_key, custom_key
 
 Webhooks will always be written as NDJSON (newline-delimited JSON) to the output bucket.
 
@@ -128,31 +122,47 @@ a trigger that 2) batches messages from SQS and writes them to the output bucket
 
 https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html
 
-`InboundWebhookHandler` will be the entry point for the webhook collector, which will:
+To handle both in same lambda, we need `WebhookCollectionModeHandler` to handle streams, and
+parse whether those are direct invocations of the webhook collector or SQS message batches
+
+if webhook, then logic will:
 - verify the JWT identity token in the `Authorization` header
 - apply the transforms to the payload
 - write the sanitized payload to SQS
 
-`SQSBatchHandler` will be the entry point for the SQS trigger, which will:
+if batch, then logic will:
 - read message(s) from SQS
 - batch them into NDJSON files
 - write the NDJSON files to the output bucket
 
-TODO:
-  - [ ] add SQS dep from pom, output that writes to SQS
-  - [ ] add `SQSBatchHandler` that will read messages from SQS and write them to the output bucket as NDJSON files
-
-
 ### Future
-Add FILTERS
+
+#### Auth / Signing
+- provision KMS asymmetric key-pair for verifying the webhook payloads. (optional;)
+- `payload_verification` - `object` - configuration for payload verification, with the following options:
+    - `{ strategy: "none" }` - no verification of payloads; all payloads are accepted.
+    - `{ strategy: "managed_key" }` (default) - our tf modules provision key-pair; export it for you to use
+    - `{ strategy: "public_key", key_id  OR key_value }` - use a custom KMS key for verifying payloads.
+    - `{ strategy: "custom_key", key_id: "..." }` - use a custom KMS key for verifying payloads.
+- hooks in aws-host/gcp-host to provision `webhook_collectors` variable; map id --> config (`payload_verification`)
+
+Add KMS services to prereqs; what we expect to have activated and perms to manage in project/account. (to support managed_key, custom_key)
+
+- how should identity signature of actor be sent?? header?? in the payload?
+    - `Authorization` header is most canonical; but risk of other layers in front of collector needing to make use of it?
+    - `X-Psoxy-Authorization` header? as a fallback if `Authorization` doesn't verify
+
+#### Collect Originals
+Optionally, an `OUTPUT_ORIGINAL` environment variable can be set to store the original payloads in a different bucket/location.
+
+
+#### Add FILTERS
 - `method` - HTTP method (GET, POST, etc) that the rule applies to [ do we care?? maybe security to lock to `POST` if/when possible]
 - `pathTemplate` - a path template that matches the incoming webhook request path. `null` means all paths are accepted.
 - `pathParamFilters` - if defined, request must pass these path parameter filters to be accepted.
 - `queryParamFilters` - if defined, request must pass  these query parameter filters to be accepted.
 - `format` - `payload`, `request` - only support `payload` for now, which means the payload is stored as-is.
-
 - `filters` - a list of filters to apply to the incoming webhook payload before storing it; `JSONSchemaFilter` implementation.
-
 
 Add a `REQUEST` format for writing webhooks --> storage:
 ```json
@@ -177,9 +187,7 @@ To do this reliably/efficiently, I think we need to add SQS in the middle, which
 
 
 ### Issues
-  - how should identity signature of actor be sent?? header?? in the payload?
-     - `Authorization` header is most canonical; but risk of other layers in front of collector needing to make use of it?
-     - `X-Psoxy-Authorization` header? as a fallback if `Authorization` doesn't verify
+
 
   - directly include JSON payloads OR serialize?
      - eg `"payload": "{...}"` OR `"payload": {...}` ? former more extensible, latter more concise / usable, if have polymorphic types

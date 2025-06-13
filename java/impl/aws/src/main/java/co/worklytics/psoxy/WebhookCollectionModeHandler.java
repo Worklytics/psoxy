@@ -28,7 +28,9 @@ import java.util.stream.Stream;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 
 /**
- * AWS lambda entrypoint that can handle BOTH webhook from API Gateway / Function URL invocations AND SQS events.
+ * AWS lambda entrypoint that can handle BOTH:
+ *    - webhook requests from API Gateway / Function URL invocations, AND
+ *    - SQS events (presumed to be batches of webhooks)
  */
 public class WebhookCollectionModeHandler implements RequestStreamHandler {
 

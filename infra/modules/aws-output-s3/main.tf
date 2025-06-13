@@ -8,7 +8,7 @@
 # not really needed, but nicer imho than relying on AWS to generate a random bucket suffix
 # arguably should allow it to be passed in, if we want to accommodate side output of bulk connectors
 resource "random_string" "unique_sequence" {
-  count    = var.unique_sequence == null ? 1 : 0
+  count = var.unique_sequence == null ? 1 : 0
 
   length  = 8
   lower   = true
@@ -25,7 +25,7 @@ module "env_id" {
 }
 
 locals {
-  bucket_name_prefix = "${module.env_id.id}-${replace(var.instance_id, "_", "-")}"
+  bucket_name_prefix          = "${module.env_id.id}-${replace(var.instance_id, "_", "-")}"
   bucket_name_unique_sequence = coalesce(var.unique_sequence, try(random_string.unique_sequence[0].result, ""))
 }
 

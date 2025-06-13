@@ -127,7 +127,7 @@ public class OutputUtils {
 
     @VisibleForTesting
     OutputLocation locationForWebhookQueue() {
-        return configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.QUEUED_WEBHOOK_OUTPUT)
+        return configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.WEBHOOK_BATCH_OUTPUT)
             .map(OutputLocationImpl::of)
             .orElseThrow(() -> new IllegalStateException("No side output configured for webhook queue"));
     }

@@ -100,8 +100,8 @@ module "gate_instance" {
     var.environment_variables,
     local.required_env_vars,
     {
-      WEBHOOK_OUTPUT        = aws_sqs_queue.sanitized_webhooks_to_batch.url
-      QUEUED_WEBHOOK_OUTPUT = "s3://${module.sanitized_output.bucket_id}"
+      WEBHOOK_OUTPUT       = aws_sqs_queue.sanitized_webhooks_to_batch.url
+      WEBHOOK_BATCH_OUTPUT = "s3://${module.sanitized_output.bucket_id}"
     }
   )
 }

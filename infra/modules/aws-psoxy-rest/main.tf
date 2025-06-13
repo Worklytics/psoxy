@@ -41,9 +41,9 @@ locals {
 }
 
 resource "random_string" "side_output_unique_sequence" {
-  length = 8
-  lower  = true
-  upper = false
+  length  = 8
+  lower   = true
+  upper   = false
   special = false
   numeric = true
 }
@@ -55,8 +55,8 @@ module "side_output_original" {
 
   environment_name = var.environment_name
   instance_id      = var.instance_id
-  unique_sequence = random_string.side_output_unique_sequence.result
-  bucket_suffix = "side-output-original"
+  unique_sequence  = random_string.side_output_unique_sequence.result
+  bucket_suffix    = "side-output-original"
 }
 
 module "side_output_sanitized" {
@@ -66,8 +66,8 @@ module "side_output_sanitized" {
 
   environment_name = var.environment_name
   instance_id      = var.instance_id
-  unique_sequence = random_string.side_output_unique_sequence.result
-  bucket_suffix = "side-output-sanitized"
+  unique_sequence  = random_string.side_output_unique_sequence.result
+  bucket_suffix    = "side-output-sanitized"
 }
 
 module "psoxy_lambda" {
