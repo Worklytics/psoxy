@@ -535,7 +535,7 @@ EOT
       example_api_calls : [
         "/services/data/v57.0/sobjects/Account/describe",
         "/services/data/v57.0/sobjects/ActivityHistory/describe",
-        "/services/data/v57.0/sobjects/Account/updated?start=${urlencode(timeadd(time_static.deployment.id, "-48h"))}&end=${urlencode(time_static.deployment.id)}",
+        "/services/data/v57.0/sobjects/Account/updated?start=${urlencode(timeadd(timestamp(), "-48h"))}&end=${urlencode(timestamp())}",
         "/services/data/v57.0/composite/sobjects/User?ids=${local.salesforce_example_account_id}&fields=Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType",
         "/services/data/v57.0/composite/sobjects/Account?ids=${local.salesforce_example_account_id}&fields=Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,ParentId,Rating,Sic,Type",
         "/services/data/v57.0/query?q=SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%27${local.salesforce_example_account_id}%27",
