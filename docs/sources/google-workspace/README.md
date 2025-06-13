@@ -10,6 +10,17 @@ As of August 2023, we suggest you use one of our template repos, eg:
 Within those, the `google-workspace.tf` and `google-workspace-variables.tf` files in those repos
 specify the terraform configuration to use Google Workspace sources.
 
+## Available connectors
+
+- [calendar](calendar/README.md)
+- [directory](directory/README.md)
+- [gdrive](gdrive/README.md)
+- [gemini-for-workspace](gemini-for-workspace/README.md)
+- [gemini-usage-bulk](gemini-usage-bulk/README.md)
+- [gmail](gmail/README.md)
+- [google-chat](google-chat/README.md)
+- [meet](meet/README.md)
+
 ## Required Permissions
 
 You (the user running Terraform) must have the following roles (or some of the permissions within

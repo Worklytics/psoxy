@@ -9,5 +9,5 @@ ${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param}
 
 echo "Invoke this script with any of the following as arguments to test other endpoints:"
 %{ for example_api_call in example_api_calls ~}
-  printf "\t\"${example_api_call}\"\n"
+    printf "\t'%s'\n" "${example_api_call}"
 %{ endfor ~}
