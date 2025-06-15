@@ -37,6 +37,19 @@ See [jwt.io](https://jwt.io/) for more details on how to generate and verify JWT
 are a common identity token solution, used by many OAuth2 and OpenID Connect providers - including Microsoft, Google,
 etc.
 
+`REQUIRE_AUTHORIZATION_HEADER` - env var that indicates whether the Webhook Collector requires an `Authorization` header
+  to be sent.
+
+
+`ACCEPTED_AUTH_KEYS` - env var that references all the public keys that will be tested against the JWT identity token. if JWT
+received is valid according to any of them, then the request is authenticated and authorized. Options:
+   - `aws-kms:aws-kms:arn:aws:kms:REGION:ACCOUNT_ID:alias/ALIAS_NAME`
+   - `base64:BASE64_ENCODED_PUBLIC_KEY` - must be RSA public key in base64 format
+   - `gcp-kms:projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{key}/cryptoKeyVersions/{version}`
+
+This is POTENTIALLY a CSV, if multiple keys are concurrently valid. (due to rotation/migration)
+
+
 Additional authentication checks:
    - IP range of request
    - VPC - lock collectors to ONLY being reachable from specific VPC(s)
@@ -150,7 +163,12 @@ Add KMS services to prereqs; what we expect to have activated and perms to manag
 
 - how should identity signature of actor be sent?? header?? in the payload?
     - `Authorization` header is most canonical; but risk of other layers in front of collector needing to make use of it?
-    - `X-Psoxy-Authorization` header? as a fallback if `Authorization` doesn't verify
+    - `X-Psoxy-Authorization` header? as a fallback if `Authorization` isn't sent.
+
+  - `KeyRef` - `{type}:{id}`
+  - `KeySource` interface; several defaults, plus host-specific (e.g. `AwsKmsKeySource`, `GcpKmsKeySource`)
+  - `KeySource::getPublicKey(id)` - `RSAPublicKey`
+
 
 #### Collect Originals
 Optionally, an `OUTPUT_ORIGINAL` environment variable can be set to store the original payloads in a different bucket/location.

@@ -17,13 +17,15 @@ public interface WebhookSanitizer {
     /**
      * whether the request is consistent with the claims provided (usually, from an Authorization header).
      *
-     * eg, verifies integrity of the request; that it is not forged if the claims were properly signed.
+     * does NOT check signature/expiration of claims
+     *
+     * eg, verifies integrity of the request based on Webhook Rules (policy) of this sanitizer.
      *
      * @param request to check against the claims.
      * @param claims to check against the request, according to the WebhookRules (policy) of this sanitizer.
      * @return true if the claims are consistent with the request, false otherwise.
      */
-    boolean verifyClaims(HttpEventRequest request, Map<String, String> claims);
+    boolean verifyClaims(HttpEventRequest request, Map<String, Object> claims);
 
     /**
      *  sanitize the request, removing sensitive information according to the rules (policy) of this sanitizer.

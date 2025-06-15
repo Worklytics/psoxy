@@ -1,6 +1,9 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
+import co.worklytics.psoxy.gateway.auth.PublicKeyStore;
+import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.output.NoOutput;
 import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
@@ -14,8 +17,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.http.HttpTransportFactory;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.IntoSet;
 import lombok.SneakyThrows;
 
 import javax.inject.Named;
@@ -33,7 +38,11 @@ import java.util.UUID;
  *
  *
  */
-@Module
+@Module(
+    includes = {
+        FunctionRuntimeModule.Bindings.class,
+    }
+)
 public class FunctionRuntimeModule {
 
     @Provides
@@ -128,4 +137,12 @@ public class FunctionRuntimeModule {
         return webhookSanitizerFactory.create(objectMapper.readerFor(WebhookCollectionRules.class).readValue(configService.getConfigPropertyOrError(ProxyConfigProperty.RULES)));
     }
 
+    //q: right place for this?
+    @Module
+    public abstract class Bindings {
+
+        @Binds
+        @IntoSet
+        abstract PublicKeyStoreClient base64KeyClient(Base64KeyClient base64KeyClient);
+    }
 }

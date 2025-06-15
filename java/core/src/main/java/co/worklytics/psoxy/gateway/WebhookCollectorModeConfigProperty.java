@@ -14,6 +14,29 @@ import lombok.NoArgsConstructor;
 public enum WebhookCollectorModeConfigProperty implements ConfigService.ConfigProperty {
 
     /**
+     * a CSV of keys that, if values sent with webhook as authorization header, has been signed by, will
+     * be considered valid.
+     *
+     * Examples:
+     * - `aws-kms:aws-kms:arn:aws:kms:REGION:ACCOUNT_ID:alias/ALIAS_NAME`
+     * - `base64:BASE64_ENCODED_PUBLIC_KEY` - must be RSA public key in base64 format
+     * - `gcp-kms:projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{key}/cryptoKeyVersions/{version}`
+     *
+     */
+    ACCEPTED_AUTH_KEYS,
+
+    /**
+     * if false, proxy will not require or validate any Authorization header(s) sent with webhooks.
+     *
+     * false does NOT mean there is no authentication/authorization of webhook collection; simply that it is not done within
+     * the proxy runtime itself. Other controls at API Gateway, IAM, or other layers may still be in place to perform auth.
+     *
+     *
+     * defaults to true
+     */
+    REQUIRE_AUTHORIZATION_HEADER,
+
+    /**
      * where any webhooks received by this collector should be sent.
      *
      * could be SQS, PubSub, GCS, S3, etc ..
