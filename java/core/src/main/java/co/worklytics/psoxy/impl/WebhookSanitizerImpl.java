@@ -130,7 +130,6 @@ public class WebhookSanitizerImpl implements WebhookSanitizer {
             }
 
             if (spec.getQueryParam() != null) {
-                //TODO: parse query to params, and check those
                 Optional<String> queryParamValue = request.getQuery()
                     .map(query -> {
                         String[] params = query.split("&");
