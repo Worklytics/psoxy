@@ -145,6 +145,10 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>sqs</artifactId>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>kms</artifactId>
+        </dependency>
 
         <!-- Test dependencies -->
         <!-- JUnit Jupiter API for writing tests -->

@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 
@@ -20,6 +21,7 @@ import software.amazon.awssdk.core.retry.RetryPolicy;
 import software.amazon.awssdk.core.retry.backoff.BackoffStrategy;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cognitoidentity.CognitoIdentityClient;
+import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.ssm.SsmClient;
@@ -199,6 +201,11 @@ public interface AwsModule {
         return tokenRequestBuilder;
     }
 
+    @Provides
+    static KmsClient awsKmsClient(AwsEnvironment awsEnvironment) {
+        return KmsClient.create();
+    }
+
     @Module
     abstract class Bindings {
 
@@ -208,6 +215,9 @@ public interface AwsModule {
 
         @Binds @IntoSet
         abstract OutputFactory<?> sqsOutputFactory(SQSOutputFactory sqsOutputFactory);
+
+        @Binds @IntoSet
+        abstract PublicKeyStoreClient publicKeyStoreClient(AwsKmsPublicKeyStoreClient awsKmsPublicKeyStoreClient);
 
     }
 }
