@@ -301,6 +301,8 @@ module "webhook_collectors" {
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   test_caller_role_arn                 = module.psoxy.webhook_test_caller_role_arn
   rules_file                           = each.value.rules_file
+  webhook_auth_public_keys = each.value.auth_public_keys
+  provision_auth_key = each.value.provision_auth_key
 
   todos_as_local_files = var.todos_as_local_files
 
@@ -395,7 +397,14 @@ locals {
     )
   }
 
-  all_instances = merge(local.api_instances, local.bulk_instances)
+  webhook_collector_instances = { for k, instance in module.webhook_collectors :
+    k => merge(
+      instance,
+      var.webhook_collectors[k]
+    )
+  }
+
+  all_instances = merge(local.api_instances, local.bulk_instances, local.webhook_collector_instances)
 }
 
 # script to test ALL connectors

@@ -47,14 +47,24 @@ received is valid according to any of them, then the request is authenticated an
    - `base64:BASE64_ENCODED_PUBLIC_KEY` - must be RSA public key in base64 format
    - `gcp-kms:projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{key}/cryptoKeyVersions/{version}`
 
-This is POTENTIALLY a CSV, if multiple keys are concurrently valid. (due to rotation/migration) In AWS case, we expect it to be
-two aliases (current, previous) for example; this would allow for rotation of keys with re-deploying proxy configuration (just
-change previous to point to current, then current to point to new key, and disable/destroy the one that was formerly previous).
+This is POTENTIALLY a CSV, if multiple keys are concurrently valid (due to rotation/migration).
+
+In the AWS case, asymmetric key pairs CANNOT be automatically rotated, so we expect multiple keys to be configured
+in the usual case. For simplicity, if you're using our Terraform modules to manage keys and rotation, we'll provision TWO keys
+scheduled to expire after N and N/2 days, respectively. You should encrypt payloads with the key that expires FURTHEST in
+the future (refer to the ISO-formatted timestamp in the tag `rotation_time` to determine this). You should run `terraform apply`
+at least every N/2 days to ensure that the keys are rotated and the new key is provisioned.
+
+Our module will also create a KMS key alias ending in `_signing-key`; any app you use to create auth tokens should use this alias
+when signing. If rotation is enable, this alias will be updated accordingly on every `terraform apply` to point to the correct key.  Eg,
+if your environment id is `worklytics`, and your proxy webhook collection id is `llm-portal`, then alias will be `worklytics/llm-portal_signing-key`.
+
+Alternatively, you may manage the keys yourself and pass in kms key aliases via the `auth_keys` property of the `webhook_collectors`
+variable.  Have `current` and `previous` aliases point to the current and previous keys, respectively. When you rotate,
+update these (previous --> current, then current to your new key). Ensure you're ALWAYS signing the auth tokens with the
+`current` key.
 
 
-Additional authentication checks:
-   - IP range of request
-   - VPC - lock collectors to ONLY being reachable from specific VPC(s)
 
 ## Data Flows
 
@@ -152,25 +162,10 @@ if batch, then logic will:
 
 ### Future
 
-#### Auth / Signing
-- provision KMS asymmetric key-pair for verifying the webhook payloads. (optional;)
-- `payload_verification` - `object` - configuration for payload verification, with the following options:
-    - `{ strategy: "none" }` - no verification of payloads; all payloads are accepted.
-    - `{ strategy: "managed_key" }` (default) - our tf modules provision key-pair; export it for you to use
-    - `{ strategy: "public_key", key_id  OR key_value }` - use a custom KMS key for verifying payloads.
-    - `{ strategy: "custom_key", key_id: "..." }` - use a custom KMS key for verifying payloads.
-- hooks in aws-host/gcp-host to provision `webhook_collectors` variable; map id --> config (`payload_verification`)
-
-Add KMS services to prereqs; what we expect to have activated and perms to manage in project/account. (to support managed_key, custom_key)
-
-- how should identity signature of actor be sent?? header?? in the payload?
-    - `Authorization` header is most canonical; but risk of other layers in front of collector needing to make use of it?
-    - `X-Psoxy-Authorization` header? as a fallback if `Authorization` isn't sent.
-
-  - `KeyRef` - `{type}:{id}`
-  - `KeySource` interface; several defaults, plus host-specific (e.g. `AwsKmsKeySource`, `GcpKmsKeySource`)
-  - `KeySource::getPublicKey(id)` - `RSAPublicKey`
-
+#### Authentication beyond Tokens
+Additional authentication checks:
+- IP range of request
+- VPC - lock collectors to ONLY being reachable from specific VPC(s)
 
 #### Collect Originals
 Optionally, an `OUTPUT_ORIGINAL` environment variable can be set to store the original payloads in a different bucket/location.
