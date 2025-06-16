@@ -6,7 +6,9 @@ import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import com.amazonaws.services.kms.model.KMSInvalidStateException;
 
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import lombok.NonNull;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.GetPublicKeyRequest;
 import software.amazon.awssdk.services.kms.model.GetPublicKeyResponse;
@@ -49,7 +51,13 @@ public class AwsKmsPublicKeyStoreClient implements PublicKeyStoreClient {
         CacheBuilder.newBuilder()
             .maximumSize(5)
             .expireAfterAccess(Duration.ofMinutes(10))
-            .build( keyRef -> this.getPublicKeysWrapper(keyRef) );
+            .build(new CacheLoader<>() {
+                @NonNull
+                @Override
+                public Set<RSAPublicKey> load(@NonNull PublicKeyRef keyRef) {
+                    return getPublicKeysWrapper(keyRef);
+                }
+            });
 
     /**
      * possibly empty, if key no longer valid/enabled.
