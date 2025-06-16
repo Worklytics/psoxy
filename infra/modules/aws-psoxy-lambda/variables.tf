@@ -243,4 +243,15 @@ variable "sqs_send_queue_arns" {
   }
 }
 
+variable "aws_kms_public_keys" {
+  type        = list(string)
+  description = "List of AWS KMS public keys that lambda must be able to read."
+  default     = []
+
+  validation {
+    condition     = alltrue([for key in var.aws_kms_public_keys : can(regex("^arn:aws:kms:[a-z0-9-]+:[0-9]{12}:key/[a-zA-Z0-9-]+$", key))])
+    error_message = "Each AWS KMS public key must be a valid ARN for an AWS KMS key."
+  }
+}
+
 

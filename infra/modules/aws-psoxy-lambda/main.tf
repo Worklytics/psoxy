@@ -293,6 +293,15 @@ locals {
     ]
   }] : []
 
+  aws_kms_public_key_statements = length(var.aws_kms_public_keys) > 0 ? [{
+    Sid = "AllowAWSKMSPublicKeyUse"
+    Action = [
+      "kms:GetPublicKey",
+    ]
+    Effect   = "Allow"
+    Resource = var.aws_kms_public_keys
+  }] : []
+
   policy_statements = concat(
     local.global_ssm_param_statements,
     local.global_secretsmanager_statements,
@@ -302,6 +311,7 @@ locals {
     local.sqs_consume_statements,
     local.sqs_send_statements,
     local.s3_write_statements,
+    local.aws_kms_public_key_statements,
     flatten(values(module.side_output_iam_statements)[*].iam_statements),
   )
 }

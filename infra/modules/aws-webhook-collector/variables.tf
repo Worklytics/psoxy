@@ -167,6 +167,15 @@ variable "http_methods" {
   default     = ["HEAD", "GET", "POST"]
 }
 
+# examples:
+# `aws-kms:aws-kms:arn:aws:kms:REGION:ACCOUNT_ID:alias/ALIAS_NAME`
+# `base64:BASE64_ENCODED_PUBLIC_KEY` - must be RSA public key in base64 format
+variable "webhook_auth_public_keys" {
+  type        = list(string)
+  description = "list of public keys to use for verifying webhook signatures; if empty, no signature verification will be performed. see docs for schema"
+  default     = []
+}
+
 variable "secrets_store_implementation" {
   type        = string
   description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"

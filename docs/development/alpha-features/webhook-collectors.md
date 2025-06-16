@@ -43,7 +43,7 @@ etc.
 
 `ACCEPTED_AUTH_KEYS` - env var that references all the public keys that will be tested against the JWT identity token. if JWT
 received is valid according to any of them, then the request is authenticated and authorized. Options:
-   - `aws-kms:aws-kms:arn:aws:kms:REGION:ACCOUNT_ID:alias/ALIAS_NAME`
+   - `aws-kms:arn:aws:kms:REGION:ACCOUNT_ID:alias/ALIAS_NAME`
    - `base64:BASE64_ENCODED_PUBLIC_KEY` - must be RSA public key in base64 format
    - `gcp-kms:projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{key}/cryptoKeyVersions/{version}`
 

@@ -77,7 +77,8 @@ public class AwsKmsPublicKeyStoreClient implements PublicKeyStoreClient {
         }
     }
 
-    // wraps get with something that returns a Set, considering posslbe 'null r
+    // wraps get with something that returns a Set, considering possible 'null' return value from getPublicKey,
+    // if it has been disabled or deleted in AWS KMS (expected due to rotation)
     Set<RSAPublicKey> getPublicKeysWrapper(PublicKeyRef keyRef) {
         RSAPublicKey key = this.getPublicKey(keyRef);
         if (key  == null) {

@@ -95,13 +95,18 @@ module "gate_instance" {
   s3_outputs = [
     "s3://${module.sanitized_output.bucket_id}/"
   ]
+  aws_kms_public_keys = [
+    for k in var.webhook_auth_public_keys : k if startswith(k, "aws-kms:")
+  ]
 
   environment_variables = merge(
     var.environment_variables,
     local.required_env_vars,
     {
-      WEBHOOK_OUTPUT       = aws_sqs_queue.sanitized_webhooks_to_batch.url
-      WEBHOOK_BATCH_OUTPUT = "s3://${module.sanitized_output.bucket_id}"
+      WEBHOOK_OUTPUT               = aws_sqs_queue.sanitized_webhooks_to_batch.url
+      WEBHOOK_BATCH_OUTPUT         = "s3://${module.sanitized_output.bucket_id}"
+      REQUIRE_AUTHORIZATION_HEADER = length(var.webhook_auth_public_keys) > 0
+      ACCEPTED_AUTH_KEYS           = join(",", var.webhook_auth_public_keys)
     }
   )
 }
