@@ -47,7 +47,9 @@ received is valid according to any of them, then the request is authenticated an
    - `base64:BASE64_ENCODED_PUBLIC_KEY` - must be RSA public key in base64 format
    - `gcp-kms:projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{key}/cryptoKeyVersions/{version}`
 
-This is POTENTIALLY a CSV, if multiple keys are concurrently valid. (due to rotation/migration)
+This is POTENTIALLY a CSV, if multiple keys are concurrently valid. (due to rotation/migration) In AWS case, we expect it to be
+two aliases (current, previous) for example; this would allow for rotation of keys with re-deploying proxy configuration (just
+change previous to point to current, then current to point to new key, and disable/destroy the one that was formerly previous).
 
 
 Additional authentication checks:

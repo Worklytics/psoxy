@@ -8,7 +8,6 @@ import co.worklytics.psoxy.gateway.output.Output;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
-import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import dagger.Lazy;
 import lombok.SneakyThrows;
@@ -187,12 +186,12 @@ public class InboundWebhookHandler {
             .map(String::trim)
             .filter(keyRef -> !keyRef.isEmpty())
             .map(PublicKeyRef::fromString)
-            .map(publicKeyRef -> {
+            .flatMap(publicKeyRef -> {
                 Optional<PublicKeyStoreClient> client = publicKeyStoreClients.stream().filter(c -> c.getId().equals(publicKeyRef.getStore())).findAny();
                 if (client.isEmpty()) {
                     throw new IllegalArgumentException("No public key store client found for: " + publicKeyRef.getStore());
                 }
-                return client.get().getPublicKey(publicKeyRef);
+                return client.get().getPublicKeys(publicKeyRef).stream();
             }).collect(Collectors.toList());
     }
 }

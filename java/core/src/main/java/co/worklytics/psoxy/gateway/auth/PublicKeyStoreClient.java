@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.auth;
 
 import java.security.interfaces.RSAPublicKey;
+import java.util.Set;
 
 /**
  * Client interface for accessing public keys from a key store.
@@ -12,5 +13,8 @@ public interface PublicKeyStoreClient {
 
     PublicKeyStore getId();
 
-    RSAPublicKey getPublicKey(PublicKeyRef keyRef);
+    /**
+     * Returns all enabled public keys for the given key reference (to support key rotation).
+     */
+    Set<RSAPublicKey> getPublicKeys(PublicKeyRef keyRef);
 }
