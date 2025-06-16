@@ -64,7 +64,17 @@ variable.  Have `current` and `previous` aliases point to the current and previo
 update these (previous --> current, then current to your new key). Ensure you're ALWAYS signing the auth tokens with the
 `current` key.
 
-
+Note that this scheme **enables authentication of the request**AND **partial integrity verification of the request/payload**.
+Eg, a valid signed JWT identity token ensures that it originated with a trusted client. If you control to whom you issue
+auth tokens, you can trust these as authenticated requests. Additionally, the webhook rules may validate the request/payload's
+integrity for a subset of fields against the JWT claims included in the token; since these claims were signed by your private
+key, you can trust that the fields you checked are authentic.  However, any unchecked fields in the payload/query string may
+have been forged either by the client itself OR by a malicious actor who somehow obtained the JWT identity token.  This design
+choice is intended to optimize for performance and avoid many round-trips to a trusted server to generate JWT identity tokens.
+The usual scenario is that your server issues JWT token for each client session; clients send that token directly to webhook
+collection endpoint with each payload; the webhook collector is able to authenticate the request and verify the integrity of the
+identity of the user/client.  While users/clients may be able forge aspects of the payload, they will not be able to forge the
+identity of sender of the payload.
 
 ## Data Flows
 
