@@ -97,7 +97,7 @@ module "gate_instance" {
   ]
   aws_kms_public_keys = concat([
     for k in var.webhook_auth_public_keys : k if startswith(k, "aws-kms:")
-  ],
+    ],
     aws_kms_key.auth_key[*].arn
   )
 
@@ -110,7 +110,7 @@ module "gate_instance" {
       REQUIRE_AUTHORIZATION_HEADER = length(var.webhook_auth_public_keys) > 0
     },
     length(local.accepted_auth_keys) > 0 ? {
-      ACCEPTED_AUTH_KEYS           = join(",", local.accepted_auth_keys)
+      ACCEPTED_AUTH_KEYS = join(",", local.accepted_auth_keys)
     } : {}
   )
 }
@@ -225,17 +225,17 @@ locals {
 resource "time_rotating" "auth_key_rotation" {
   count = local.keys_to_provision > 1 ? local.keys_to_provision : 0
 
-  rotation_days = (count.index +1) * floor(var.provision_auth_key.rotation_days / local.keys_to_provision)
+  rotation_days = (count.index + 1) * floor(var.provision_auth_key.rotation_days / local.keys_to_provision)
 }
 
 # provision two keys always, and rotate after N/2, and N days
 resource "aws_kms_key" "auth_key" {
   count = local.keys_to_provision
 
-  description         = "${var.instance_id} authentication key pair ${try(time_rotating.auth_key_rotation[count.index].rotation_rfc3339, "")}"
-  key_usage           = "SIGN_VERIFY"
+  description              = "${var.instance_id} authentication key pair ${try(time_rotating.auth_key_rotation[count.index].rotation_rfc3339, "")}"
+  key_usage                = "SIGN_VERIFY"
   customer_master_key_spec = var.provision_auth_key.key_spec
-  multi_region        = false
+  multi_region             = false
 
   tags = local.keys_to_provision == 1 ? {} : {
     rotation_time = time_rotating.auth_key_rotation[count.index].rotation_rfc3339
@@ -250,20 +250,20 @@ locals {
     var.provision_auth_key == null ? [] : aws_kms_key.auth_key[*].arn
   )
   auth_key_arns_sorted = values({
-    for k in aws_kms_key.auth_key[*] : try(k.tags.rotation_time, k.arn)  => k.arn
+    for k in aws_kms_key.auth_key[*] : try(k.tags.rotation_time, k.arn) => k.arn
   })
   auth_key_ids_sorted = values({
-    for k in aws_kms_key.auth_key[*] : try(k.tags.rotation_time, k.arn)  => k.key_id
+    for k in aws_kms_key.auth_key[*] : try(k.tags.rotation_time, k.arn) => k.key_id
   })
 }
 
 resource "aws_kms_alias" "auth_key_alias" {
   count = local.keys_to_provision > 0 ? 1 : 0
 
-  name          = "alias/${module.env_id.path_prefix}${var.instance_id}_signing-key"
+  name = "alias/${module.env_id.path_prefix}${var.instance_id}_signing-key"
 
   # TODO: from terraform v1.11, can simply pass -1 to `element` to get the last element
-  target_key_id = element(local.auth_key_ids_sorted, length(local.auth_key_arns_sorted)-1) # should be latest, bc sorted by rotation_time
+  target_key_id = element(local.auth_key_ids_sorted, length(local.auth_key_arns_sorted) - 1) # should be latest, bc sorted by rotation_time
 }
 
 ## end Authentication Key Pair Provisioning
@@ -397,7 +397,7 @@ output "output_sanitized_bucket_id" {
 }
 
 output "provisioned_auth_key_pairs" {
-  value = local.auth_key_arns_sorted
+  value       = local.auth_key_arns_sorted
   description = "List of ARNs of kms keys provisioned for webhook authentication purposes, if any."
 }
 

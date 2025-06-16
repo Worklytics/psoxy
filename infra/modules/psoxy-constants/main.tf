@@ -11,12 +11,12 @@ locals {
   # AWS Managed polices
   # see: https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html#aws-managed-policies
   required_aws_roles_to_provision_host = {
-    "arn:aws:iam::aws:policy/IAMFullAccess"        = "IAMFullAccess"
-    "arn:aws:iam::aws:policy/AmazonS3FullAccess"   = "AmazonS3FullAccess" # only if using bulk sources OR webhook-collection, although 95% do
-    "arn:aws:iam::aws:policy/CloudWatchFullAccess" = "CloudWatchFullAccess"
-    "arn:aws:iam::aws:policy/AmazonSSMFullAccess"  = "AmazonSSMFullAccess"
-    "arn:aws:iam::aws:policy/AWSLambda_FullAccess" = "AWSLambda_FullAccess"
-    "arn:aws:iam::aws:policy/AmazonSQS_FullAccess" = "AmazonSQS_FullAccess" # only if using webhook-collection
+    "arn:aws:iam::aws:policy/IAMFullAccess"                    = "IAMFullAccess"
+    "arn:aws:iam::aws:policy/AmazonS3FullAccess"               = "AmazonS3FullAccess" # only if using bulk sources OR webhook-collection, although 95% do
+    "arn:aws:iam::aws:policy/CloudWatchFullAccess"             = "CloudWatchFullAccess"
+    "arn:aws:iam::aws:policy/AmazonSSMFullAccess"              = "AmazonSSMFullAccess"
+    "arn:aws:iam::aws:policy/AWSLambda_FullAccess"             = "AWSLambda_FullAccess"
+    "arn:aws:iam::aws:policy/AmazonSQS_FullAccess"             = "AmazonSQS_FullAccess"             # only if using webhook-collection
     "arn:aws:iam::aws:policy/AWSKeyManagementServicePowerUser" = "AWSKeyManagementServicePowerUser" # only if using webhook-collection AND using our terraform modules to manage authentication keys
   }
   # AWS managed policy required to consume Microsoft 365 data

@@ -178,30 +178,30 @@ variable "webhook_auth_public_keys" {
 
 variable "provision_auth_key" {
   type = object({
-    rotation_days = optional(number, null) # null means no rotation; if > 0, will rotate every N days
-    key_spec = optional(string, "RSA_2048") # RSA_2048, RSA_3072, or RSA_4096; defaults to RSA_2048, which should be sufficient this use-case
+    rotation_days = optional(number, null)       # null means no rotation; if > 0, will rotate every N days
+    key_spec      = optional(string, "RSA_2048") # RSA_2048, RSA_3072, or RSA_4096; defaults to RSA_2048, which should be sufficient this use-case
   })
   description = "if provided, will module will provision a public-private key pair for authenticating webhooks and signing payloads for integrity checks. the id of the key pair will be exposed as an output, and the public-key configured as accepted auth key in the lambda"
   default     = null
 
   validation {
     condition = (
-    var.provision_auth_key == null ||
-    (
-    try(var.provision_auth_key.rotation_days, null) == null ||
-    try(var.provision_auth_key.rotation_days, 0) > 0
-    )
+      var.provision_auth_key == null ||
+      (
+        try(var.provision_auth_key.rotation_days, null) == null ||
+        try(var.provision_auth_key.rotation_days, 0) > 0
+      )
     )
     error_message = "If `provision_auth_key` is provided, `rotation_days` must be a positive number or null."
   }
 
   validation {
     condition = (
-    var.provision_auth_key == null ||
-    (
-    try(var.provision_auth_key.key_spec, null) == null ||
-    can(regex("^(RSA_2048|RSA_3072|RSA_4096)$", var.provision_auth_key.key_spec))
-    )
+      var.provision_auth_key == null ||
+      (
+        try(var.provision_auth_key.key_spec, null) == null ||
+        can(regex("^(RSA_2048|RSA_3072|RSA_4096)$", var.provision_auth_key.key_spec))
+      )
     )
     error_message = "If `provision_auth_key` is provided, `key_spec` must be one of 'RSA_2048', 'RSA_3072', or 'RSA_4096'."
   }
