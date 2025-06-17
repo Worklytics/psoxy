@@ -27,467 +27,7 @@ endpoints:
           - "$.values[*].accountId"
           - "$.values[*].emailAddress"
         encoding: "JSON"
-  - pathTemplate: "/ex/jira/{cloudId}/rest/api/2/search"
-    allowedQueryParams:
-      - "startAt"
-      - "maxResults"
-      - "jql"
-      - "fields"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.issues[*]..description"
-          - "$.issues[*]..iconUrl"
-          - "$.issues[*]..name"
-          - "$.issues[*]..avatarUrls"
-          - "$.issues[*].fields..self"
-          - "$.issues[*]..displayName"
-          - "$.issues[*]..body"
-          - "$.issues[*]..comment"
-          - "$..displayName"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.issues[*]..accountId"
-          - "$.issues[*]..emailAddress"
-        encoding: "JSON"
-    responseSchema:
-      type: "object"
-      properties:
-        startAt:
-          type: "integer"
-        maxResults:
-          type: "integer"
-        total:
-          type: "integer"
-        issues:
-          type: "array"
-          items:
-            type: "object"
-            properties:
-              id:
-                type: "string"
-              self:
-                type: "string"
-              fields:
-                type: "object"
-                properties:
-                  statuscategorychangedate:
-                    type: "string"
-                  issuetype:
-                    type: "object"
-                    properties:
-                      id:
-                        type: "string"
-                      subtask:
-                        type: "boolean"
-                      hierarchyLevel:
-                        type: "integer"
-                  parent:
-                    type: "object"
-                    properties:
-                      id:
-                        type: "string"
-                      fields:
-                        type: "object"
-                        properties:
-                          status:
-                            type: "object"
-                            properties:
-                              id:
-                                type: "string"
-                              name:
-                                type: "string"
-                              statusCategory:
-                                type: "object"
-                                properties:
-                                  id:
-                                    type: "integer"
-                                  key:
-                                    type: "string"
-                                  colorName:
-                                    type: "string"
-                                  name:
-                                    type: "string"
-                          priority:
-                            type: "object"
-                            properties:
-                              id:
-                                type: "string"
-                              name:
-                                type: "string"
-                          issuetype:
-                            type: "object"
-                            properties:
-                              id:
-                                type: "string"
-                              subtask:
-                                type: "boolean"
-                              hierarchyLevel:
-                                type: "integer"
-                  timespent:
-                    type: "integer"
-                  watches:
-                    type: "object"
-                    properties:
-                      isWatching:
-                        type: "boolean"
-                      watchCount:
-                        type: "integer"
-                      watchers:
-                        type: "array"
-                        items:
-                          type: "object"
-                          properties:
-                            accountId:
-                              type: "string"
-                            accountType:
-                              type: "string"
-                            emailAddress:
-                              type: "string"
-                            active:
-                              type: "boolean"
-                            timeZone:
-                              type: "string"
-                  attachment:
-                    type: "array"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
-                        author:
-                          type: "object"
-                          properties:
-                            accountId:
-                              type: "string"
-                            accountType:
-                              type: "string"
-                            emailAddress:
-                              type: "string"
-                            active:
-                              type: "boolean"
-                            timeZone:
-                              type: "string"
-                        created:
-                          type: "string"
-                        size:
-                          type: "integer"
-                  sub-tasks:
-                    type: "array"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
-                        type:
-                          type: "object"
-                          properties:
-                            id:
-                              type: "string"
-                            inward:
-                              type: "string"
-                            outward:
-                              type: "string"
-                        outwardIssue:
-                          type: "object"
-                          properties:
-                            id:
-                              type: "string"
-                        inwardIssue:
-                          type: "object"
-                          properties:
-                            id:
-                              type: "string"
-                  project:
-                    type: "object"
-                    properties:
-                      id:
-                        type: "string"
-                      projectCategory:
-                        type: "object"
-                        properties:
-                          id:
-                            type: "string"
-                      projectTypeKey:
-                        type: "string"
-                      simplified:
-                        type: "boolean"
-                      style:
-                        type: "string"
-                      insight:
-                        type: "object"
-                        properties:
-                          totalIssueCount:
-                            type: "integer"
-                          lastIssueUpdateTime:
-                            type: "string"
-                  comment:
-                    type: "array"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
-                        author:
-                          type: "object"
-                          properties:
-                            accountId:
-                              type: "string"
-                            accountType:
-                              type: "string"
-                            emailAddress:
-                              type: "string"
-                            active:
-                              type: "boolean"
-                            timeZone:
-                              type: "string"
-                        updateAuthor:
-                          type: "object"
-                          properties:
-                            accountId:
-                              type: "string"
-                            accountType:
-                              type: "string"
-                            emailAddress:
-                              type: "string"
-                            active:
-                              type: "boolean"
-                            timeZone:
-                              type: "string"
-                        created:
-                          type: "string"
-                        updated:
-                          type: "string"
-                        visibility:
-                          type: "object"
-                          properties:
-                            type:
-                              type: "string"
-                            value:
-                              type: "string"
-                            identifier:
-                              type: "string"
-                  issuelinks:
-                    type: "array"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
-                        type:
-                          type: "object"
-                          properties:
-                            id:
-                              type: "string"
-                            inward:
-                              type: "string"
-                            outward:
-                              type: "string"
-                        outwardIssue:
-                          type: "object"
-                          properties:
-                            id:
-                              type: "string"
-                        inwardIssue:
-                          type: "object"
-                          properties:
-                            id:
-                              type: "string"
-                  worklog:
-                    type: "object"
-                    properties:
-                      worklogs:
-                        type: "array"
-                        items:
-                          type: "object"
-                          properties:
-                            issueId:
-                              type: "string"
-                            id:
-                              type: "string"
-                            author:
-                              type: "object"
-                              properties:
-                                accountId:
-                                  type: "string"
-                                accountType:
-                                  type: "string"
-                                emailAddress:
-                                  type: "string"
-                                active:
-                                  type: "boolean"
-                                timeZone:
-                                  type: "string"
-                            created:
-                              type: "string"
-                            updateAuthor:
-                              type: "object"
-                              properties:
-                                accountId:
-                                  type: "string"
-                                accountType:
-                                  type: "string"
-                                emailAddress:
-                                  type: "string"
-                                active:
-                                  type: "boolean"
-                                timeZone:
-                                  type: "string"
-                            updated:
-                              type: "string"
-                            visibility:
-                              type: "object"
-                              properties:
-                                type:
-                                  type: "string"
-                                value:
-                                  type: "string"
-                                identifier:
-                                  type: "string"
-                            started:
-                              type: "string"
-                            timeSpent:
-                              type: "string"
-                            timeSpentSeconds:
-                              type: "integer"
-                  updated:
-                    type: "integer"
-                  timeTracking:
-                    type: "object"
-                    properties:
-                      originalEstimate:
-                        type: "string"
-                      remainingEstimate:
-                        type: "string"
-                      timeSpent:
-                        type: "string"
-                      originalEstimateSeconds:
-                        type: "integer"
-                      remainingEstimateSeconds:
-                        type: "integer"
-                      timeSpentSeconds:
-                        type: "integer"
-                  created:
-                    type: "string"
-                  resolutiondate:
-                    type: "string"
-                  lastViewed:
-                    type: "string"
-                  assignee:
-                    type: "object"
-                    properties:
-                      accountId:
-                        type: "string"
-                      accountType:
-                        type: "string"
-                      emailAddress:
-                        type: "string"
-                      active:
-                        type: "boolean"
-                      timeZone:
-                        type: "string"
-                  status:
-                    type: "object"
-                    properties:
-                      id:
-                        type: "string"
-                      name:
-                        type: "string"
-                      statusCategory:
-                        type: "object"
-                        properties:
-                          id:
-                            type: "integer"
-                          key:
-                            type: "string"
-                          colorName:
-                            type: "string"
-                          name:
-                            type: "string"
-                  creator:
-                    type: "object"
-                    properties:
-                      accountId:
-                        type: "string"
-                      accountType:
-                        type: "string"
-                      emailAddress:
-                        type: "string"
-                      active:
-                        type: "boolean"
-                      timeZone:
-                        type: "string"
-                  reporter:
-                    type: "object"
-                    properties:
-                      accountId:
-                        type: "string"
-                      accountType:
-                        type: "string"
-                      emailAddress:
-                        type: "string"
-                      active:
-                        type: "boolean"
-                      timeZone:
-                        type: "string"
-                  aggregateprogress:
-                    type: "object"
-                    properties:
-                      progress:
-                        type: "integer"
-                      total:
-                        type: "integer"
-                  duedate:
-                    type: "string"
-                  progress:
-                    type: "object"
-                    properties:
-                      progress:
-                        type: "integer"
-                      total:
-                        type: "integer"
-                  votes:
-                    type: "object"
-                    properties:
-                      votes:
-                        type: "integer"
-                      hasVoted:
-                        type: "boolean"
-              changelog:
-                type: "object"
-                properties:
-                  histories:
-                    type: "array"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
-                        author:
-                          type: "object"
-                          properties:
-                            accountId:
-                              type: "string"
-                            accountType:
-                              type: "string"
-                            emailAddress:
-                              type: "string"
-                            active:
-                              type: "boolean"
-                            timeZone:
-                              type: "string"
-                        created:
-                          type: "string"
-                        items:
-                          type: "array"
-                          items:
-                            type: "object"
-                            properties:
-                              field:
-                                type: "string"
-                              fieldtype:
-                                type: "string"
-  - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/search"
+  - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/search/jql"
     allowedQueryParams:
       - "startAt"
       - "maxResults"
@@ -513,43 +53,214 @@ endpoints:
     responseSchema:
       type: "object"
       properties:
-        startAt:
-          type: "integer"
-        maxResults:
-          type: "integer"
-        total:
-          type: "integer"
         issues:
           type: "array"
           items:
             type: "object"
             properties:
-              id:
-                type: "string"
-              self:
-                type: "string"
+              changelog:
+                type: "object"
+                properties:
+                  histories:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        author:
+                          type: "object"
+                          properties:
+                            accountId:
+                              type: "string"
+                            accountType:
+                              type: "string"
+                            active:
+                              type: "boolean"
+                            emailAddress:
+                              type: "string"
+                            timeZone:
+                              type: "string"
+                        created:
+                          type: "string"
+                        id:
+                          type: "string"
+                        items:
+                          type: "array"
+                          items:
+                            type: "object"
+                            properties:
+                              field:
+                                type: "string"
+                              fieldtype:
+                                type: "string"
               fields:
                 type: "object"
                 properties:
-                  statuscategorychangedate:
+                  aggregateprogress:
+                    type: "object"
+                    properties:
+                      progress:
+                        type: "integer"
+                      total:
+                        type: "integer"
+                  assignee:
+                    type: "object"
+                    properties:
+                      accountId:
+                        type: "string"
+                      accountType:
+                        type: "string"
+                      active:
+                        type: "boolean"
+                      emailAddress:
+                        type: "string"
+                      timeZone:
+                        type: "string"
+                  attachment:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        author:
+                          type: "object"
+                          properties:
+                            accountId:
+                              type: "string"
+                            accountType:
+                              type: "string"
+                            active:
+                              type: "boolean"
+                            emailAddress:
+                              type: "string"
+                            timeZone:
+                              type: "string"
+                        created:
+                          type: "string"
+                        id:
+                          type: "string"
+                        size:
+                          type: "integer"
+                  comment:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        author:
+                          type: "object"
+                          properties:
+                            accountId:
+                              type: "string"
+                            accountType:
+                              type: "string"
+                            active:
+                              type: "boolean"
+                            emailAddress:
+                              type: "string"
+                            timeZone:
+                              type: "string"
+                        created:
+                          type: "string"
+                        id:
+                          type: "string"
+                        updateAuthor:
+                          type: "object"
+                          properties:
+                            accountId:
+                              type: "string"
+                            accountType:
+                              type: "string"
+                            active:
+                              type: "boolean"
+                            emailAddress:
+                              type: "string"
+                            timeZone:
+                              type: "string"
+                        updated:
+                          type: "string"
+                        visibility:
+                          type: "object"
+                          properties:
+                            identifier:
+                              type: "string"
+                            type:
+                              type: "string"
+                            value:
+                              type: "string"
+                  created:
                     type: "string"
+                  creator:
+                    type: "object"
+                    properties:
+                      accountId:
+                        type: "string"
+                      accountType:
+                        type: "string"
+                      active:
+                        type: "boolean"
+                      emailAddress:
+                        type: "string"
+                      timeZone:
+                        type: "string"
+                  duedate:
+                    type: "string"
+                  issuelinks:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "string"
+                        inwardIssue:
+                          type: "object"
+                          properties:
+                            id:
+                              type: "string"
+                        outwardIssue:
+                          type: "object"
+                          properties:
+                            id:
+                              type: "string"
+                        type:
+                          type: "object"
+                          properties:
+                            id:
+                              type: "string"
+                            inward:
+                              type: "string"
+                            outward:
+                              type: "string"
                   issuetype:
                     type: "object"
                     properties:
+                      hierarchyLevel:
+                        type: "integer"
                       id:
                         type: "string"
                       subtask:
                         type: "boolean"
-                      hierarchyLevel:
-                        type: "integer"
+                  lastViewed:
+                    type: "string"
                   parent:
                     type: "object"
                     properties:
-                      id:
-                        type: "string"
                       fields:
                         type: "object"
                         properties:
+                          issuetype:
+                            type: "object"
+                            properties:
+                              hierarchyLevel:
+                                type: "integer"
+                              id:
+                                type: "string"
+                              subtask:
+                                type: "boolean"
+                          priority:
+                            type: "object"
+                            properties:
+                              id:
+                                type: "string"
+                              name:
+                                type: "string"
                           status:
                             type: "object"
                             properties:
@@ -560,32 +271,133 @@ endpoints:
                               statusCategory:
                                 type: "object"
                                 properties:
+                                  colorName:
+                                    type: "string"
                                   id:
                                     type: "integer"
                                   key:
                                     type: "string"
-                                  colorName:
-                                    type: "string"
                                   name:
                                     type: "string"
-                          priority:
-                            type: "object"
-                            properties:
-                              id:
-                                type: "string"
-                              name:
-                                type: "string"
-                          issuetype:
-                            type: "object"
-                            properties:
-                              id:
-                                type: "string"
-                              subtask:
-                                type: "boolean"
-                              hierarchyLevel:
-                                type: "integer"
+                      id:
+                        type: "string"
+                  progress:
+                    type: "object"
+                    properties:
+                      progress:
+                        type: "integer"
+                      total:
+                        type: "integer"
+                  project:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                      insight:
+                        type: "object"
+                        properties:
+                          lastIssueUpdateTime:
+                            type: "string"
+                          totalIssueCount:
+                            type: "integer"
+                      projectCategory:
+                        type: "object"
+                        properties:
+                          id:
+                            type: "string"
+                      projectTypeKey:
+                        type: "string"
+                      simplified:
+                        type: "boolean"
+                      style:
+                        type: "string"
+                  reporter:
+                    type: "object"
+                    properties:
+                      accountId:
+                        type: "string"
+                      accountType:
+                        type: "string"
+                      active:
+                        type: "boolean"
+                      emailAddress:
+                        type: "string"
+                      timeZone:
+                        type: "string"
+                  resolutiondate:
+                    type: "string"
+                  status:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                      name:
+                        type: "string"
+                      statusCategory:
+                        type: "object"
+                        properties:
+                          colorName:
+                            type: "string"
+                          id:
+                            type: "integer"
+                          key:
+                            type: "string"
+                          name:
+                            type: "string"
+                  statuscategorychangedate:
+                    type: "string"
+                  sub-tasks:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "string"
+                        inwardIssue:
+                          type: "object"
+                          properties:
+                            id:
+                              type: "string"
+                        outwardIssue:
+                          type: "object"
+                          properties:
+                            id:
+                              type: "string"
+                        type:
+                          type: "object"
+                          properties:
+                            id:
+                              type: "string"
+                            inward:
+                              type: "string"
+                            outward:
+                              type: "string"
+                  timeTracking:
+                    type: "object"
+                    properties:
+                      originalEstimate:
+                        type: "string"
+                      originalEstimateSeconds:
+                        type: "integer"
+                      remainingEstimate:
+                        type: "string"
+                      remainingEstimateSeconds:
+                        type: "integer"
+                      timeSpent:
+                        type: "string"
+                      timeSpentSeconds:
+                        type: "integer"
                   timespent:
                     type: "integer"
+                  updated:
+                    type: "integer"
+                  votes:
+                    type: "object"
+                    properties:
+                      hasVoted:
+                        type: "boolean"
+                      votes:
+                        type: "integer"
                   watches:
                     type: "object"
                     properties:
@@ -602,156 +414,11 @@ endpoints:
                               type: "string"
                             accountType:
                               type: "string"
-                            emailAddress:
-                              type: "string"
                             active:
                               type: "boolean"
-                            timeZone:
-                              type: "string"
-                  attachment:
-                    type: "array"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
-                        author:
-                          type: "object"
-                          properties:
-                            accountId:
-                              type: "string"
-                            accountType:
-                              type: "string"
                             emailAddress:
                               type: "string"
-                            active:
-                              type: "boolean"
                             timeZone:
-                              type: "string"
-                        created:
-                          type: "string"
-                        size:
-                          type: "integer"
-                  sub-tasks:
-                    type: "array"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
-                        type:
-                          type: "object"
-                          properties:
-                            id:
-                              type: "string"
-                            inward:
-                              type: "string"
-                            outward:
-                              type: "string"
-                        outwardIssue:
-                          type: "object"
-                          properties:
-                            id:
-                              type: "string"
-                        inwardIssue:
-                          type: "object"
-                          properties:
-                            id:
-                              type: "string"
-                  project:
-                    type: "object"
-                    properties:
-                      id:
-                        type: "string"
-                      projectCategory:
-                        type: "object"
-                        properties:
-                          id:
-                            type: "string"
-                      projectTypeKey:
-                        type: "string"
-                      simplified:
-                        type: "boolean"
-                      style:
-                        type: "string"
-                      insight:
-                        type: "object"
-                        properties:
-                          totalIssueCount:
-                            type: "integer"
-                          lastIssueUpdateTime:
-                            type: "string"
-                  comment:
-                    type: "array"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
-                        author:
-                          type: "object"
-                          properties:
-                            accountId:
-                              type: "string"
-                            accountType:
-                              type: "string"
-                            emailAddress:
-                              type: "string"
-                            active:
-                              type: "boolean"
-                            timeZone:
-                              type: "string"
-                        updateAuthor:
-                          type: "object"
-                          properties:
-                            accountId:
-                              type: "string"
-                            accountType:
-                              type: "string"
-                            emailAddress:
-                              type: "string"
-                            active:
-                              type: "boolean"
-                            timeZone:
-                              type: "string"
-                        created:
-                          type: "string"
-                        updated:
-                          type: "string"
-                        visibility:
-                          type: "object"
-                          properties:
-                            type:
-                              type: "string"
-                            value:
-                              type: "string"
-                            identifier:
-                              type: "string"
-                  issuelinks:
-                    type: "array"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
-                        type:
-                          type: "object"
-                          properties:
-                            id:
-                              type: "string"
-                            inward:
-                              type: "string"
-                            outward:
-                              type: "string"
-                        outwardIssue:
-                          type: "object"
-                          properties:
-                            id:
-                              type: "string"
-                        inwardIssue:
-                          type: "object"
-                          properties:
-                            id:
                               type: "string"
                   worklog:
                     type: "object"
@@ -761,10 +428,6 @@ endpoints:
                         items:
                           type: "object"
                           properties:
-                            issueId:
-                              type: "string"
-                            id:
-                              type: "string"
                             author:
                               type: "object"
                               properties:
@@ -772,14 +435,24 @@ endpoints:
                                   type: "string"
                                 accountType:
                                   type: "string"
-                                emailAddress:
-                                  type: "string"
                                 active:
                                   type: "boolean"
+                                emailAddress:
+                                  type: "string"
                                 timeZone:
                                   type: "string"
                             created:
                               type: "string"
+                            id:
+                              type: "string"
+                            issueId:
+                              type: "string"
+                            started:
+                              type: "string"
+                            timeSpent:
+                              type: "string"
+                            timeSpentSeconds:
+                              type: "integer"
                             updateAuthor:
                               type: "object"
                               properties:
@@ -787,10 +460,10 @@ endpoints:
                                   type: "string"
                                 accountType:
                                   type: "string"
-                                emailAddress:
-                                  type: "string"
                                 active:
                                   type: "boolean"
+                                emailAddress:
+                                  type: "string"
                                 timeZone:
                                   type: "string"
                             updated:
@@ -798,155 +471,22 @@ endpoints:
                             visibility:
                               type: "object"
                               properties:
+                                identifier:
+                                  type: "string"
                                 type:
                                   type: "string"
                                 value:
                                   type: "string"
-                                identifier:
-                                  type: "string"
-                            started:
-                              type: "string"
-                            timeSpent:
-                              type: "string"
-                            timeSpentSeconds:
-                              type: "integer"
-                  updated:
-                    type: "integer"
-                  timeTracking:
-                    type: "object"
-                    properties:
-                      originalEstimate:
-                        type: "string"
-                      remainingEstimate:
-                        type: "string"
-                      timeSpent:
-                        type: "string"
-                      originalEstimateSeconds:
-                        type: "integer"
-                      remainingEstimateSeconds:
-                        type: "integer"
-                      timeSpentSeconds:
-                        type: "integer"
-                  created:
-                    type: "string"
-                  resolutiondate:
-                    type: "string"
-                  lastViewed:
-                    type: "string"
-                  assignee:
-                    type: "object"
-                    properties:
-                      accountId:
-                        type: "string"
-                      accountType:
-                        type: "string"
-                      emailAddress:
-                        type: "string"
-                      active:
-                        type: "boolean"
-                      timeZone:
-                        type: "string"
-                  status:
-                    type: "object"
-                    properties:
-                      id:
-                        type: "string"
-                      name:
-                        type: "string"
-                      statusCategory:
-                        type: "object"
-                        properties:
-                          id:
-                            type: "integer"
-                          key:
-                            type: "string"
-                          colorName:
-                            type: "string"
-                          name:
-                            type: "string"
-                  creator:
-                    type: "object"
-                    properties:
-                      accountId:
-                        type: "string"
-                      accountType:
-                        type: "string"
-                      emailAddress:
-                        type: "string"
-                      active:
-                        type: "boolean"
-                      timeZone:
-                        type: "string"
-                  reporter:
-                    type: "object"
-                    properties:
-                      accountId:
-                        type: "string"
-                      accountType:
-                        type: "string"
-                      emailAddress:
-                        type: "string"
-                      active:
-                        type: "boolean"
-                      timeZone:
-                        type: "string"
-                  aggregateprogress:
-                    type: "object"
-                    properties:
-                      progress:
-                        type: "integer"
-                      total:
-                        type: "integer"
-                  duedate:
-                    type: "string"
-                  progress:
-                    type: "object"
-                    properties:
-                      progress:
-                        type: "integer"
-                      total:
-                        type: "integer"
-                  votes:
-                    type: "object"
-                    properties:
-                      votes:
-                        type: "integer"
-                      hasVoted:
-                        type: "boolean"
-              changelog:
-                type: "object"
-                properties:
-                  histories:
-                    type: "array"
-                    items:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
-                        author:
-                          type: "object"
-                          properties:
-                            accountId:
-                              type: "string"
-                            accountType:
-                              type: "string"
-                            emailAddress:
-                              type: "string"
-                            active:
-                              type: "boolean"
-                            timeZone:
-                              type: "string"
-                        created:
-                          type: "string"
-                        items:
-                          type: "array"
-                          items:
-                            type: "object"
-                            properties:
-                              field:
-                                type: "string"
-                              fieldtype:
-                                type: "string"
+              id:
+                type: "string"
+              self:
+                type: "string"
+        maxResults:
+          type: "integer"
+        startAt:
+          type: "integer"
+        total:
+          type: "integer"
   - pathTemplate: "/ex/jira/{cloudId}/rest/api/{apiVersion}/issue/{issueId}/changelog"
     allowedQueryParams:
       - "startAt"
@@ -968,25 +508,6 @@ endpoints:
           - "$.values[*]..tmpFromAccountId"
           - "$.values[*]..tmpToAccountId"
         encoding: "JSON"
-  - pathTemplate: "/ex/jira/{cloudId}/rest/api/2/issue/{issueId}/comment"
-    allowedQueryParams:
-      - "startAt"
-      - "maxResults"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.comments[*]..avatarUrls"
-          - "$.comments[*].author..self"
-          - "$.comments[*].updateAuthor..self"
-          - "$.comments[*]..displayName"
-          - "$.comments[*]..text"
-          - "$.comments[*]..body"
-          - "$.comments[*]..renderedBody"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.comments[*]..accountId"
-          - "$.comments[*]..emailAddress"
-        encoding: "JSON"
   - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/issue/{issueId}/comment"
     allowedQueryParams:
       - "startAt"
@@ -1005,24 +526,6 @@ endpoints:
           - "$.comments[*]..accountId"
           - "$.comments[*].body..id"
           - "$.comments[*]..emailAddress"
-        encoding: "JSON"
-  - pathTemplate: "/ex/jira/{cloudId}/rest/api/2/issue/{issueId}/worklog"
-    allowedQueryParams:
-      - "startAt"
-      - "maxResults"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.worklogs[*]..avatarUrls"
-          - "$.worklogs[*].author..self"
-          - "$.worklogs[*].updateAuthor..self"
-          - "$.worklogs[*]..displayName"
-          - "$.worklogs[*]..comment"
-          - "$.worklogs[*]..summary"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.worklogs[*]..accountId"
-          - "$.worklogs[*]..emailAddress"
         encoding: "JSON"
   - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/issue/{issueId}/worklog"
     allowedQueryParams:
@@ -1043,457 +546,6 @@ endpoints:
           - "$.worklogs[*]..emailAddress"
           - "$.worklogs[*]..comment..id"
         encoding: "JSON"
-  - pathTemplate: "/ex/jira/{cloudId}/rest/api/2/issue/{issueId}"
-    allowedQueryParams:
-      - "startAt"
-      - "maxResults"
-      - "jql"
-      - "fields"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..description"
-          - "$..iconUrl"
-          - "$..name"
-          - "$..avatarUrls"
-          - "$.fields..self"
-          - "$..displayName"
-          - "$..body"
-          - "$..comment"
-          - "$..attachment[*]..filename"
-          - "$..attachment[*]..content"
-          - "$..summary"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..accountId"
-          - "$..emailAddress"
-        encoding: "JSON"
-    responseSchema:
-      type: "object"
-      properties:
-        id:
-          type: "string"
-        self:
-          type: "string"
-        fields:
-          type: "object"
-          properties:
-            statuscategorychangedate:
-              type: "string"
-            issuetype:
-              type: "object"
-              properties:
-                id:
-                  type: "string"
-                subtask:
-                  type: "boolean"
-                hierarchyLevel:
-                  type: "integer"
-            parent:
-              type: "object"
-              properties:
-                id:
-                  type: "string"
-                fields:
-                  type: "object"
-                  properties:
-                    status:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
-                        name:
-                          type: "string"
-                        statusCategory:
-                          type: "object"
-                          properties:
-                            id:
-                              type: "integer"
-                            key:
-                              type: "string"
-                            colorName:
-                              type: "string"
-                            name:
-                              type: "string"
-                    priority:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
-                        name:
-                          type: "string"
-                    issuetype:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
-                        subtask:
-                          type: "boolean"
-                        hierarchyLevel:
-                          type: "integer"
-            timespent:
-              type: "integer"
-            watches:
-              type: "object"
-              properties:
-                isWatching:
-                  type: "boolean"
-                watchCount:
-                  type: "integer"
-                watchers:
-                  type: "array"
-                  items:
-                    type: "object"
-                    properties:
-                      accountId:
-                        type: "string"
-                      accountType:
-                        type: "string"
-                      emailAddress:
-                        type: "string"
-                      active:
-                        type: "boolean"
-                      timeZone:
-                        type: "string"
-            attachment:
-              type: "array"
-              items:
-                type: "object"
-                properties:
-                  id:
-                    type: "string"
-                  author:
-                    type: "object"
-                    properties:
-                      accountId:
-                        type: "string"
-                      accountType:
-                        type: "string"
-                      emailAddress:
-                        type: "string"
-                      active:
-                        type: "boolean"
-                      timeZone:
-                        type: "string"
-                  created:
-                    type: "string"
-                  size:
-                    type: "integer"
-            sub-tasks:
-              type: "array"
-              items:
-                type: "object"
-                properties:
-                  id:
-                    type: "string"
-                  type:
-                    type: "object"
-                    properties:
-                      id:
-                        type: "string"
-                      inward:
-                        type: "string"
-                      outward:
-                        type: "string"
-                  outwardIssue:
-                    type: "object"
-                    properties:
-                      id:
-                        type: "string"
-                  inwardIssue:
-                    type: "object"
-                    properties:
-                      id:
-                        type: "string"
-            project:
-              type: "object"
-              properties:
-                id:
-                  type: "string"
-                projectCategory:
-                  type: "object"
-                  properties:
-                    id:
-                      type: "string"
-                projectTypeKey:
-                  type: "string"
-                simplified:
-                  type: "boolean"
-                style:
-                  type: "string"
-                insight:
-                  type: "object"
-                  properties:
-                    totalIssueCount:
-                      type: "integer"
-                    lastIssueUpdateTime:
-                      type: "string"
-            comment:
-              type: "array"
-              items:
-                type: "object"
-                properties:
-                  id:
-                    type: "string"
-                  author:
-                    type: "object"
-                    properties:
-                      accountId:
-                        type: "string"
-                      accountType:
-                        type: "string"
-                      emailAddress:
-                        type: "string"
-                      active:
-                        type: "boolean"
-                      timeZone:
-                        type: "string"
-                  updateAuthor:
-                    type: "object"
-                    properties:
-                      accountId:
-                        type: "string"
-                      accountType:
-                        type: "string"
-                      emailAddress:
-                        type: "string"
-                      active:
-                        type: "boolean"
-                      timeZone:
-                        type: "string"
-                  created:
-                    type: "string"
-                  updated:
-                    type: "string"
-                  visibility:
-                    type: "object"
-                    properties:
-                      type:
-                        type: "string"
-                      value:
-                        type: "string"
-                      identifier:
-                        type: "string"
-            issuelinks:
-              type: "array"
-              items:
-                type: "object"
-                properties:
-                  id:
-                    type: "string"
-                  type:
-                    type: "object"
-                    properties:
-                      id:
-                        type: "string"
-                      inward:
-                        type: "string"
-                      outward:
-                        type: "string"
-                  outwardIssue:
-                    type: "object"
-                    properties:
-                      id:
-                        type: "string"
-                  inwardIssue:
-                    type: "object"
-                    properties:
-                      id:
-                        type: "string"
-            worklog:
-              type: "object"
-              properties:
-                worklogs:
-                  type: "array"
-                  items:
-                    type: "object"
-                    properties:
-                      issueId:
-                        type: "string"
-                      id:
-                        type: "string"
-                      author:
-                        type: "object"
-                        properties:
-                          accountId:
-                            type: "string"
-                          accountType:
-                            type: "string"
-                          emailAddress:
-                            type: "string"
-                          active:
-                            type: "boolean"
-                          timeZone:
-                            type: "string"
-                      created:
-                        type: "string"
-                      updateAuthor:
-                        type: "object"
-                        properties:
-                          accountId:
-                            type: "string"
-                          accountType:
-                            type: "string"
-                          emailAddress:
-                            type: "string"
-                          active:
-                            type: "boolean"
-                          timeZone:
-                            type: "string"
-                      updated:
-                        type: "string"
-                      visibility:
-                        type: "object"
-                        properties:
-                          type:
-                            type: "string"
-                          value:
-                            type: "string"
-                          identifier:
-                            type: "string"
-                      started:
-                        type: "string"
-                      timeSpent:
-                        type: "string"
-                      timeSpentSeconds:
-                        type: "integer"
-            updated:
-              type: "integer"
-            timeTracking:
-              type: "object"
-              properties:
-                originalEstimate:
-                  type: "string"
-                remainingEstimate:
-                  type: "string"
-                timeSpent:
-                  type: "string"
-                originalEstimateSeconds:
-                  type: "integer"
-                remainingEstimateSeconds:
-                  type: "integer"
-                timeSpentSeconds:
-                  type: "integer"
-            created:
-              type: "string"
-            resolutiondate:
-              type: "string"
-            lastViewed:
-              type: "string"
-            assignee:
-              type: "object"
-              properties:
-                accountId:
-                  type: "string"
-                accountType:
-                  type: "string"
-                emailAddress:
-                  type: "string"
-                active:
-                  type: "boolean"
-                timeZone:
-                  type: "string"
-            status:
-              type: "object"
-              properties:
-                id:
-                  type: "string"
-                name:
-                  type: "string"
-                statusCategory:
-                  type: "object"
-                  properties:
-                    id:
-                      type: "integer"
-                    key:
-                      type: "string"
-                    colorName:
-                      type: "string"
-                    name:
-                      type: "string"
-            creator:
-              type: "object"
-              properties:
-                accountId:
-                  type: "string"
-                accountType:
-                  type: "string"
-                emailAddress:
-                  type: "string"
-                active:
-                  type: "boolean"
-                timeZone:
-                  type: "string"
-            reporter:
-              type: "object"
-              properties:
-                accountId:
-                  type: "string"
-                accountType:
-                  type: "string"
-                emailAddress:
-                  type: "string"
-                active:
-                  type: "boolean"
-                timeZone:
-                  type: "string"
-            aggregateprogress:
-              type: "object"
-              properties:
-                progress:
-                  type: "integer"
-                total:
-                  type: "integer"
-            duedate:
-              type: "string"
-            progress:
-              type: "object"
-              properties:
-                progress:
-                  type: "integer"
-                total:
-                  type: "integer"
-            votes:
-              type: "object"
-              properties:
-                votes:
-                  type: "integer"
-                hasVoted:
-                  type: "boolean"
-        changelog:
-          type: "object"
-          properties:
-            histories:
-              type: "array"
-              items:
-                type: "object"
-                properties:
-                  id:
-                    type: "string"
-                  author:
-                    type: "object"
-                    properties:
-                      accountId:
-                        type: "string"
-                      accountType:
-                        type: "string"
-                      emailAddress:
-                        type: "string"
-                      active:
-                        type: "boolean"
-                      timeZone:
-                        type: "string"
-                  created:
-                    type: "string"
-                  items:
-                    type: "array"
-                    items:
-                      type: "object"
-                      properties:
-                        field:
-                          type: "string"
-                        fieldtype:
-                          type: "string"
   - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/issue/{issueId}"
     allowedQueryParams:
       - "startAt"
@@ -1522,32 +574,209 @@ endpoints:
     responseSchema:
       type: "object"
       properties:
-        id:
-          type: "string"
-        self:
-          type: "string"
+        changelog:
+          type: "object"
+          properties:
+            histories:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  author:
+                    type: "object"
+                    properties:
+                      accountId:
+                        type: "string"
+                      accountType:
+                        type: "string"
+                      active:
+                        type: "boolean"
+                      emailAddress:
+                        type: "string"
+                      timeZone:
+                        type: "string"
+                  created:
+                    type: "string"
+                  id:
+                    type: "string"
+                  items:
+                    type: "array"
+                    items:
+                      type: "object"
+                      properties:
+                        field:
+                          type: "string"
+                        fieldtype:
+                          type: "string"
         fields:
           type: "object"
           properties:
-            statuscategorychangedate:
+            aggregateprogress:
+              type: "object"
+              properties:
+                progress:
+                  type: "integer"
+                total:
+                  type: "integer"
+            assignee:
+              type: "object"
+              properties:
+                accountId:
+                  type: "string"
+                accountType:
+                  type: "string"
+                active:
+                  type: "boolean"
+                emailAddress:
+                  type: "string"
+                timeZone:
+                  type: "string"
+            attachment:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  author:
+                    type: "object"
+                    properties:
+                      accountId:
+                        type: "string"
+                      accountType:
+                        type: "string"
+                      active:
+                        type: "boolean"
+                      emailAddress:
+                        type: "string"
+                      timeZone:
+                        type: "string"
+                  created:
+                    type: "string"
+                  id:
+                    type: "string"
+                  size:
+                    type: "integer"
+            comment:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  author:
+                    type: "object"
+                    properties:
+                      accountId:
+                        type: "string"
+                      accountType:
+                        type: "string"
+                      active:
+                        type: "boolean"
+                      emailAddress:
+                        type: "string"
+                      timeZone:
+                        type: "string"
+                  created:
+                    type: "string"
+                  id:
+                    type: "string"
+                  updateAuthor:
+                    type: "object"
+                    properties:
+                      accountId:
+                        type: "string"
+                      accountType:
+                        type: "string"
+                      active:
+                        type: "boolean"
+                      emailAddress:
+                        type: "string"
+                      timeZone:
+                        type: "string"
+                  updated:
+                    type: "string"
+                  visibility:
+                    type: "object"
+                    properties:
+                      identifier:
+                        type: "string"
+                      type:
+                        type: "string"
+                      value:
+                        type: "string"
+            created:
               type: "string"
+            creator:
+              type: "object"
+              properties:
+                accountId:
+                  type: "string"
+                accountType:
+                  type: "string"
+                active:
+                  type: "boolean"
+                emailAddress:
+                  type: "string"
+                timeZone:
+                  type: "string"
+            duedate:
+              type: "string"
+            issuelinks:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "string"
+                  inwardIssue:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                  outwardIssue:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                  type:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                      inward:
+                        type: "string"
+                      outward:
+                        type: "string"
             issuetype:
               type: "object"
               properties:
+                hierarchyLevel:
+                  type: "integer"
                 id:
                   type: "string"
                 subtask:
                   type: "boolean"
-                hierarchyLevel:
-                  type: "integer"
+            lastViewed:
+              type: "string"
             parent:
               type: "object"
               properties:
-                id:
-                  type: "string"
                 fields:
                   type: "object"
                   properties:
+                    issuetype:
+                      type: "object"
+                      properties:
+                        hierarchyLevel:
+                          type: "integer"
+                        id:
+                          type: "string"
+                        subtask:
+                          type: "boolean"
+                    priority:
+                      type: "object"
+                      properties:
+                        id:
+                          type: "string"
+                        name:
+                          type: "string"
                     status:
                       type: "object"
                       properties:
@@ -1558,32 +787,133 @@ endpoints:
                         statusCategory:
                           type: "object"
                           properties:
+                            colorName:
+                              type: "string"
                             id:
                               type: "integer"
                             key:
                               type: "string"
-                            colorName:
-                              type: "string"
                             name:
                               type: "string"
-                    priority:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
-                        name:
-                          type: "string"
-                    issuetype:
-                      type: "object"
-                      properties:
-                        id:
-                          type: "string"
-                        subtask:
-                          type: "boolean"
-                        hierarchyLevel:
-                          type: "integer"
+                id:
+                  type: "string"
+            progress:
+              type: "object"
+              properties:
+                progress:
+                  type: "integer"
+                total:
+                  type: "integer"
+            project:
+              type: "object"
+              properties:
+                id:
+                  type: "string"
+                insight:
+                  type: "object"
+                  properties:
+                    lastIssueUpdateTime:
+                      type: "string"
+                    totalIssueCount:
+                      type: "integer"
+                projectCategory:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "string"
+                projectTypeKey:
+                  type: "string"
+                simplified:
+                  type: "boolean"
+                style:
+                  type: "string"
+            reporter:
+              type: "object"
+              properties:
+                accountId:
+                  type: "string"
+                accountType:
+                  type: "string"
+                active:
+                  type: "boolean"
+                emailAddress:
+                  type: "string"
+                timeZone:
+                  type: "string"
+            resolutiondate:
+              type: "string"
+            status:
+              type: "object"
+              properties:
+                id:
+                  type: "string"
+                name:
+                  type: "string"
+                statusCategory:
+                  type: "object"
+                  properties:
+                    colorName:
+                      type: "string"
+                    id:
+                      type: "integer"
+                    key:
+                      type: "string"
+                    name:
+                      type: "string"
+            statuscategorychangedate:
+              type: "string"
+            sub-tasks:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  id:
+                    type: "string"
+                  inwardIssue:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                  outwardIssue:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                  type:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                      inward:
+                        type: "string"
+                      outward:
+                        type: "string"
+            timeTracking:
+              type: "object"
+              properties:
+                originalEstimate:
+                  type: "string"
+                originalEstimateSeconds:
+                  type: "integer"
+                remainingEstimate:
+                  type: "string"
+                remainingEstimateSeconds:
+                  type: "integer"
+                timeSpent:
+                  type: "string"
+                timeSpentSeconds:
+                  type: "integer"
             timespent:
               type: "integer"
+            updated:
+              type: "integer"
+            votes:
+              type: "object"
+              properties:
+                hasVoted:
+                  type: "boolean"
+                votes:
+                  type: "integer"
             watches:
               type: "object"
               properties:
@@ -1600,156 +930,11 @@ endpoints:
                         type: "string"
                       accountType:
                         type: "string"
-                      emailAddress:
-                        type: "string"
                       active:
                         type: "boolean"
-                      timeZone:
-                        type: "string"
-            attachment:
-              type: "array"
-              items:
-                type: "object"
-                properties:
-                  id:
-                    type: "string"
-                  author:
-                    type: "object"
-                    properties:
-                      accountId:
-                        type: "string"
-                      accountType:
-                        type: "string"
                       emailAddress:
                         type: "string"
-                      active:
-                        type: "boolean"
                       timeZone:
-                        type: "string"
-                  created:
-                    type: "string"
-                  size:
-                    type: "integer"
-            sub-tasks:
-              type: "array"
-              items:
-                type: "object"
-                properties:
-                  id:
-                    type: "string"
-                  type:
-                    type: "object"
-                    properties:
-                      id:
-                        type: "string"
-                      inward:
-                        type: "string"
-                      outward:
-                        type: "string"
-                  outwardIssue:
-                    type: "object"
-                    properties:
-                      id:
-                        type: "string"
-                  inwardIssue:
-                    type: "object"
-                    properties:
-                      id:
-                        type: "string"
-            project:
-              type: "object"
-              properties:
-                id:
-                  type: "string"
-                projectCategory:
-                  type: "object"
-                  properties:
-                    id:
-                      type: "string"
-                projectTypeKey:
-                  type: "string"
-                simplified:
-                  type: "boolean"
-                style:
-                  type: "string"
-                insight:
-                  type: "object"
-                  properties:
-                    totalIssueCount:
-                      type: "integer"
-                    lastIssueUpdateTime:
-                      type: "string"
-            comment:
-              type: "array"
-              items:
-                type: "object"
-                properties:
-                  id:
-                    type: "string"
-                  author:
-                    type: "object"
-                    properties:
-                      accountId:
-                        type: "string"
-                      accountType:
-                        type: "string"
-                      emailAddress:
-                        type: "string"
-                      active:
-                        type: "boolean"
-                      timeZone:
-                        type: "string"
-                  updateAuthor:
-                    type: "object"
-                    properties:
-                      accountId:
-                        type: "string"
-                      accountType:
-                        type: "string"
-                      emailAddress:
-                        type: "string"
-                      active:
-                        type: "boolean"
-                      timeZone:
-                        type: "string"
-                  created:
-                    type: "string"
-                  updated:
-                    type: "string"
-                  visibility:
-                    type: "object"
-                    properties:
-                      type:
-                        type: "string"
-                      value:
-                        type: "string"
-                      identifier:
-                        type: "string"
-            issuelinks:
-              type: "array"
-              items:
-                type: "object"
-                properties:
-                  id:
-                    type: "string"
-                  type:
-                    type: "object"
-                    properties:
-                      id:
-                        type: "string"
-                      inward:
-                        type: "string"
-                      outward:
-                        type: "string"
-                  outwardIssue:
-                    type: "object"
-                    properties:
-                      id:
-                        type: "string"
-                  inwardIssue:
-                    type: "object"
-                    properties:
-                      id:
                         type: "string"
             worklog:
               type: "object"
@@ -1759,10 +944,6 @@ endpoints:
                   items:
                     type: "object"
                     properties:
-                      issueId:
-                        type: "string"
-                      id:
-                        type: "string"
                       author:
                         type: "object"
                         properties:
@@ -1770,14 +951,24 @@ endpoints:
                             type: "string"
                           accountType:
                             type: "string"
-                          emailAddress:
-                            type: "string"
                           active:
                             type: "boolean"
+                          emailAddress:
+                            type: "string"
                           timeZone:
                             type: "string"
                       created:
                         type: "string"
+                      id:
+                        type: "string"
+                      issueId:
+                        type: "string"
+                      started:
+                        type: "string"
+                      timeSpent:
+                        type: "string"
+                      timeSpentSeconds:
+                        type: "integer"
                       updateAuthor:
                         type: "object"
                         properties:
@@ -1785,10 +976,10 @@ endpoints:
                             type: "string"
                           accountType:
                             type: "string"
-                          emailAddress:
-                            type: "string"
                           active:
                             type: "boolean"
+                          emailAddress:
+                            type: "string"
                           timeZone:
                             type: "string"
                       updated:
@@ -1796,155 +987,16 @@ endpoints:
                       visibility:
                         type: "object"
                         properties:
+                          identifier:
+                            type: "string"
                           type:
                             type: "string"
                           value:
                             type: "string"
-                          identifier:
-                            type: "string"
-                      started:
-                        type: "string"
-                      timeSpent:
-                        type: "string"
-                      timeSpentSeconds:
-                        type: "integer"
-            updated:
-              type: "integer"
-            timeTracking:
-              type: "object"
-              properties:
-                originalEstimate:
-                  type: "string"
-                remainingEstimate:
-                  type: "string"
-                timeSpent:
-                  type: "string"
-                originalEstimateSeconds:
-                  type: "integer"
-                remainingEstimateSeconds:
-                  type: "integer"
-                timeSpentSeconds:
-                  type: "integer"
-            created:
-              type: "string"
-            resolutiondate:
-              type: "string"
-            lastViewed:
-              type: "string"
-            assignee:
-              type: "object"
-              properties:
-                accountId:
-                  type: "string"
-                accountType:
-                  type: "string"
-                emailAddress:
-                  type: "string"
-                active:
-                  type: "boolean"
-                timeZone:
-                  type: "string"
-            status:
-              type: "object"
-              properties:
-                id:
-                  type: "string"
-                name:
-                  type: "string"
-                statusCategory:
-                  type: "object"
-                  properties:
-                    id:
-                      type: "integer"
-                    key:
-                      type: "string"
-                    colorName:
-                      type: "string"
-                    name:
-                      type: "string"
-            creator:
-              type: "object"
-              properties:
-                accountId:
-                  type: "string"
-                accountType:
-                  type: "string"
-                emailAddress:
-                  type: "string"
-                active:
-                  type: "boolean"
-                timeZone:
-                  type: "string"
-            reporter:
-              type: "object"
-              properties:
-                accountId:
-                  type: "string"
-                accountType:
-                  type: "string"
-                emailAddress:
-                  type: "string"
-                active:
-                  type: "boolean"
-                timeZone:
-                  type: "string"
-            aggregateprogress:
-              type: "object"
-              properties:
-                progress:
-                  type: "integer"
-                total:
-                  type: "integer"
-            duedate:
-              type: "string"
-            progress:
-              type: "object"
-              properties:
-                progress:
-                  type: "integer"
-                total:
-                  type: "integer"
-            votes:
-              type: "object"
-              properties:
-                votes:
-                  type: "integer"
-                hasVoted:
-                  type: "boolean"
-        changelog:
-          type: "object"
-          properties:
-            histories:
-              type: "array"
-              items:
-                type: "object"
-                properties:
-                  id:
-                    type: "string"
-                  author:
-                    type: "object"
-                    properties:
-                      accountId:
-                        type: "string"
-                      accountType:
-                        type: "string"
-                      emailAddress:
-                        type: "string"
-                      active:
-                        type: "boolean"
-                      timeZone:
-                        type: "string"
-                  created:
-                    type: "string"
-                  items:
-                    type: "array"
-                    items:
-                      type: "object"
-                      properties:
-                        field:
-                          type: "string"
-                        fieldtype:
-                          type: "string"
+        id:
+          type: "string"
+        self:
+          type: "string"
   - pathTemplate: "/ex/jira/{cloudId}/rest/api/{apiVersion}/users"
     allowedQueryParams:
       - "startAt"

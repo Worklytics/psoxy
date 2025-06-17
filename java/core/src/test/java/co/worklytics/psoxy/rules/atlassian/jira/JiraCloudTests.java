@@ -55,8 +55,8 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "608a9b555426330072f9867d");
         assertPseudonymized(sanitized, "fake@contoso.com");
         assertRedacted(sanitized,
-                "Fake", // display name
-                "https://..." //photo url placeholders
+            "Fake", // display name
+            "https://..." //photo url placeholders
         );
 
         //ensure we allow paging of users, and passing cloud id
@@ -91,9 +91,9 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "5b10a2844c20165700ede21g");
         assertPseudonymized(sanitized, "mia@example.com");
         assertRedacted(sanitized,
-                "Mia", // display name
-                "some name", // name
-                "https://..." //photo url placeholders
+            "Mia", // display name
+            "some name", // name
+            "https://..." //photo url placeholders
         );
     }
 
@@ -101,7 +101,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
     void issues_by_jql() {
         String jsonString = asJson("issues_by_jql.json");
 
-        String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/search?jql=something&startAt=50";
+        String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/search/jql?jql=something&startAt=50";
 
         Collection<String> PII = Arrays.asList("608a9b555426330072f9867d", "fake@contoso.com", "Fake");
         assertNotSanitized(jsonString, PII);
@@ -111,8 +111,8 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "608a9b555426330072f9867d");
         assertPseudonymized(sanitized, "fake@contoso.com");
         assertRedacted(sanitized,
-                "Fake", // display name
-                "https://..." //photo url placeholders
+            "Fake", // display name
+            "https://..." //photo url placeholders
         );
 
         assertNotSanitized(sanitized, "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10709");
@@ -144,28 +144,8 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "608a9b555426330072f9867d");
         assertPseudonymized(sanitized, "fake@contoso.com");
         assertRedacted(sanitized,
-                "Fake", // display name
-                "https://..." //photo url placeholders
-        );
-    }
-
-    @Test
-    void issue_comments_v2() {
-        String jsonString = asJson("issue_comment_v2.json");
-
-        String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/comment?&startAt=50";
-
-        Collection<String> PII = Arrays.asList("608a9b555426330072f9867d", "fake@contoso.com", "Fake");
-        assertNotSanitized(jsonString, PII);
-
-        String sanitized = this.sanitize(endpoint, jsonString);
-
-        assertPseudonymized(sanitized, "608a9b555426330072f9867d");
-        assertPseudonymized(sanitized, "fake@contoso.com");
-        assertRedacted(sanitized,
-                "Fake", // display name
-                "https://...", //photo url placeholders
-                "aperez" // mention in body
+            "Fake", // display name
+            "https://..." //photo url placeholders
         );
     }
 
@@ -183,28 +163,8 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "608a9b555426330072f9867d");
         assertPseudonymized(sanitized, "fake@contoso.com");
         assertRedacted(sanitized,
-                "Fake", // display name
-                "https://..." //photo url placeholders
-        );
-    }
-
-    @Test
-    void issue_worklog_v2() {
-        String jsonString = asJson("issue_worklog_v2.json");
-
-        String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/worklog?&startAt=50";
-
-        Collection<String> PII = Arrays.asList("608a9b555426330072f9867d", "fake@contoso.com", "Fake");
-        assertNotSanitized(jsonString, PII);
-
-        String sanitized = this.sanitize(endpoint, jsonString);
-
-        assertPseudonymized(sanitized, "608a9b555426330072f9867d");
-        assertPseudonymized(sanitized, "fake@contoso.com");
-        assertRedacted(sanitized,
-                "Fake", // display name
-                "https://...", //photo url placeholders
-                "aperez"
+            "Fake", // display name
+            "https://..." //photo url placeholders
         );
     }
 
@@ -222,8 +182,8 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "608a9b555426330072f9867d");
         assertPseudonymized(sanitized, "fake@contoso.com");
         assertRedacted(sanitized,
-                "Fake", // display name
-                "https://..." //photo url placeholders
+            "Fake", // display name
+            "https://..." //photo url placeholders
         );
     }
 
@@ -235,8 +195,8 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertRedacted(sanitized,
-                "Fake", // display name
-                "https://..." //photo url placeholders
+            "Fake", // display name
+            "https://..." //photo url placeholders
         );
 
         //ensure we allow paging of users, and passing cloud id
@@ -251,25 +211,22 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertRedacted(sanitized,
-                "scopes", // display name
-                ".png" //photo url placeholders
+            "scopes", // display name
+            ".png" //photo url placeholders
         );
     }
 
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
-                InvocationExample.of("https://api.atlassian.com/oauth/token/accessible-resources", "accessible_resources.json"),
-                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/users?startAt=0&maxResults=25", "users.json"),
-                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/group/bulk", "groups.json"),
-                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/group/member?groupId=5b10ac8d82e05b22cc7d4ef5", "group_member.json"),
-                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/search?jql=something&startAt=50", "issues_by_jql.json"),
+            InvocationExample.of("https://api.atlassian.com/oauth/token/accessible-resources", "accessible_resources.json"),
+            InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/users?startAt=0&maxResults=25", "users.json"),
+            InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/group/bulk", "groups.json"),
+            InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/group/member?groupId=5b10ac8d82e05b22cc7d4ef5", "group_member.json"),
             InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/search/jql?jql=something&startAt=50", "issues_by_jql.json"),
-                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/changelog?&startAt=50", "issue_changelog.json"),
-                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/comment?&startAt=50", "issue_comment_v2.json"),
-                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/comment?&startAt=50", "issue_comment_v3.json"),
-                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/worklog?&startAt=50", "issue_worklog_v2.json"),
-                InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/worklog?&startAt=50", "issue_worklog_v3.json"),
-                InvocationExample.of("https://api.atlassian.com/ex/jira/e9224a3c-0479-4ebc-9e5f-340c81d142c1/rest/api/3/issue/247393/worklog?startAt=0&maxResults=50", "issue_worklog_v3.json"));
+            InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/changelog?&startAt=50", "issue_changelog.json"),
+            InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/comment?&startAt=50", "issue_comment_v3.json"),
+            InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/worklog?&startAt=50", "issue_worklog_v3.json"),
+            InvocationExample.of("https://api.atlassian.com/ex/jira/e9224a3c-0479-4ebc-9e5f-340c81d142c1/rest/api/3/issue/247393/worklog?startAt=0&maxResults=50", "issue_worklog_v3.json"));
     }
 }
