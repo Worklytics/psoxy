@@ -108,6 +108,7 @@ module "gate_instance" {
       WEBHOOK_OUTPUT               = aws_sqs_queue.sanitized_webhooks_to_batch.url
       WEBHOOK_BATCH_OUTPUT         = "s3://${module.sanitized_output.bucket_id}"
       REQUIRE_AUTHORIZATION_HEADER = length(local.accepted_auth_keys) > 0
+      CUSTOM_RULES_SHA             = module.rules_parameter.rules_hash
     },
     length(local.accepted_auth_keys) > 0 ? {
       ACCEPTED_AUTH_KEYS = join(",", local.accepted_auth_keys)
@@ -373,6 +374,8 @@ locals {
     function_name      = module.gate_instance.function_name,
     command_cli_call   = local.command_cli_call,
     signing_key_arn    = local.keys_to_provision > 0 ? element(local.auth_key_arns_sorted, length(local.auth_key_arns_sorted) - 1) : null,
+    example_payload    = var.example_payload
+    example_identity   = var.example_identity
   })
 }
 
@@ -436,3 +439,4 @@ output "provisioned_auth_key_pairs" {
 output "todo" {
   value = local.todo_content
 }
+

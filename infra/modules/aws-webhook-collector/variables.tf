@@ -225,4 +225,14 @@ variable "todos_as_local_files" {
   default     = true
 }
 
+variable "example_payload" {
+  type        = string
+  description = "Example payload to use for testing; if provided, will be used in the test script."
+  default     = null
+}
 
+variable "example_identity" {
+  type        = string
+  description = "Example identity to use for testing; if provided, will be used in the test script."
+  default     = null
+}
