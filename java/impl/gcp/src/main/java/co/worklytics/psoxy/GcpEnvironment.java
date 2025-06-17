@@ -22,6 +22,10 @@ public class GcpEnvironment implements HostEnvironment {
 
     @Override
     public Set<String> getSupportedOutputKinds() {
-        return Set.of("gs", "pubsub", "bq");
+        return Set.of(
+            "gs"
+            //"pubsub",
+           // "bq"
+        );
     }
 }
