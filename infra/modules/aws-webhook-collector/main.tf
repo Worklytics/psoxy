@@ -122,11 +122,13 @@ resource "aws_lambda_function_url" "lambda_url" {
   function_name      = module.gate_instance.function_name
   authorization_type = local.authorization_type
 
+  # NOTE: CORS doesn't require that we include 'OPTIONS' method, as it is added automatically
+  # message is You can use GET, PUT, POST, DELETE, HEAD, PATCH, and the wildcard character (*).",
   cors {
     allow_credentials = true
     allow_headers     = ["*"]
-    allow_methods     = [for m in local.http_methods : !(m == "OPTIONS")] # OPTIONS is added automatically? if include, get error on apply "Value '[POST, GET, OPTIONS]' at 'cors.allowMethods' failed to satisfy constraint: Member must satisfy constraint: [Member must have length less than or equal to 6," --> OPTIONS has 7 chars, so seems not allowed??
-    allow_origins     = ["*"]                                             # q: support configuration of this??
+    allow_methods     = [for m in local.http_methods : m if !(m == "OPTIONS")]
+    allow_origins     = ["*"] # q: support configuration of this??
     expose_headers    = ["*"]
   }
 
