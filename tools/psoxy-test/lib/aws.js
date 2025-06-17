@@ -21,11 +21,17 @@ import {
   DescribeLogStreamsCommand,
   GetLogEventsCommand,
 } from '@aws-sdk/client-cloudwatch-logs';
+import {
+   KMSClient,
+   SignCommand
+} from '@aws-sdk/client-kms';
+
 import fs from 'fs';
 import getLogger from './logger.js';
 import path from 'path';
 import _ from 'lodash';
 import zlib from 'node:zlib';
+import crypto from 'node:crypto';
 
 
 /**
@@ -40,6 +46,41 @@ function isValidURL(url) {
   }
   return url.hostname.endsWith('.on.aws') ||
     url.hostname.endsWith('.amazonaws.com');
+}
+
+function base64url(input) {
+  return input.toString('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+}
+
+async function signJwtWithKMS(claims, keyId, credentials, region) {
+  const client = new KMSClient({
+    region: region,
+    credentials: credentials,
+  });
+
+  const encodedHeader = base64url(Buffer.from(JSON.stringify({
+    "alg": "RS256",
+    "typ": "JWT",
+  })));
+  const encodedPayload = base64url(Buffer.from(JSON.stringify(claims)));
+  const signingInput = `${encodedHeader}.${encodedPayload}`;
+
+  const hash = crypto.createHash('sha256').update(signingInput).digest();
+
+  const command = new SignCommand({
+    KeyId: keyId,
+    SigningAlgorithm: 'RSASSA_PKCS1_V1_5_SHA_256',
+    Message: hash,
+    MessageType: 'DIGEST' // 🟢 explicitly indicate pre-hashed input
+  });
+
+  const response = await client.send(command);
+
+  const signature = base64url(Buffer.from(response.Signature));
+  return `${signingInput}.${signature}`;
 }
 
 /**
@@ -67,6 +108,25 @@ async function call(options = {}) {
     ...getCommonHTTPHeaders(options),
     ...signed.headers,
   };
+
+  if (options.signingKey) {
+
+    let signature;
+    let claims = {
+      iss: options.signingKey, // silly?
+      sub: options.identityToSign,
+      aud: url.toString(),
+      iat: Math.floor(Date.now() / 1000), // current time in seconds
+      exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
+    }
+    if (options.signingKey.startsWith('aws-kms:')) {
+      signature = await signJwtWithKMS(claims, options.signingKey.replace('aws-kms:', ''), credentials, options.region);
+    }
+
+    headers['x-psoxy-authorization'] = signature;
+    console.log(signature);
+  }
+
 
   logger.info(`Calling Psoxy and waiting response: ${options.url.toString()}`);
   logger.verbose('Request Options:', { additional: options });

@@ -18,6 +18,7 @@ import org.apache.http.ParseException;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.security.interfaces.RSAPublicKey;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -39,16 +40,19 @@ public class InboundWebhookHandler {
     private final WebhookSanitizer webhookSanitizer;
     private final ConfigService configService;
     private final Set<PublicKeyStoreClient> publicKeyStoreClients;
+    private final Clock clock;
 
     @Inject
     public InboundWebhookHandler(Lazy<WebhookSanitizer> webhookSanitizerProvider,
                                  @Named("forWebhooks") Output output,
                                  ConfigService configService,
-                                 Set<PublicKeyStoreClient> publicKeyStoreClients) {
+                                 Set<PublicKeyStoreClient> publicKeyStoreClients,
+                                 Clock clock) {
         this.webhookSanitizer = webhookSanitizerProvider.get(); // avoids trying to instantiate WebhookSanitizerImpl when we don't need one
         this.output = output;
         this.configService = configService;
         this.publicKeyStoreClients = publicKeyStoreClients;
+        this.clock = clock;
     }
 
     /**
@@ -75,6 +79,11 @@ public class InboundWebhookHandler {
     public HttpEventResponse handle(HttpEventRequest request) {
         Optional<String> authorizationHeader = getAuthorizationHeader(request);
 
+        boolean isDevelopmentMode = configService.getConfigPropertyAsOptional(ProxyConfigProperty.IS_DEVELOPMENT_MODE).map(Boolean::parseBoolean).orElse(false);
+        if (isDevelopmentMode) {
+            log.info("Development mode enabled; auth header: " + authorizationHeader.orElse("not present"));
+            log.info("Request: "  + request.prettyPrint());
+        }
 
         Optional<SignedJWT> authToken;
 
@@ -170,13 +179,20 @@ public class InboundWebhookHandler {
             return Optional.of("Auth token invalid because JWT claims set is null");
         }
 
-        Instant threshold = Instant.now().minus(MAX_TOKEN_AGE);
-        if (signedJWT.getJWTClaimsSet().getIssueTime().before(Date.from(threshold))) {
-            return Optional.of("Auth token invalid because OLDER than allowed by configuration/policy");
+        if (signedJWT.getJWTClaimsSet().getIssueTime() == null) {
+            return Optional.of("Auth token invalid because issued at time (iat) is null");
+        }
+
+        if (signedJWT.getJWTClaimsSet().getExpirationTime() == null) {
+            return Optional.of("Auth token invalid because expiration time (exp) is null");
+        }
+
+        Instant now = clock.instant();
+        if (signedJWT.getJWTClaimsSet().getExpirationTime().before(Date.from(now))) {
+            return Optional.of("Auth token invalid because its expiration time (exp) is in the past: " + signedJWT.getJWTClaimsSet().getExpirationTime());
         }
 
         // TODO: validate issuer?? do we care?
-
 
         return Optional.empty();
     }

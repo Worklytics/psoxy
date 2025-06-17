@@ -38,7 +38,16 @@ are a common identity token solution, used by many OAuth2 and OpenID Connect pro
 etc.
 
 `REQUIRE_AUTHORIZATION_HEADER` - env var that indicates whether the Webhook Collector requires an `Authorization` header
-  to be sent.
+  to be sent. This header MUST be a valid JWT identity token, signed with one of the public keys configured in `ACCEPTED_AUTH_KEYS`.
+
+It MUST contain:
+  - `iat` (issued at) claim, which indicates when the token was issued
+  - `exp` (expiration) claim, which indicates when the token expires.
+
+It MAY contain:
+  - `sub` (subject) claim, which indicates the user or entity that the token represents. (eg, user using the tool)
+  - additional claims that the Tool Server may want to include, with, as of 0.5.3, no restrictions on semantics of those.
+
 
 
 `ACCEPTED_AUTH_KEYS` - env var that references all the public keys that will be tested against the JWT identity token. if JWT
