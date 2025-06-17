@@ -12,12 +12,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
 
+@Getter
 public class JiraCloudTests extends JavaRulesTestBaseCase {
 
-    @Getter
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.JIRA_CLOUD;
 
-    @Getter
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
         .sourceFamily("atlassian")
         .sourceKind("jira")
@@ -265,6 +264,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/group/bulk", "groups.json"),
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/group/member?groupId=5b10ac8d82e05b22cc7d4ef5", "group_member.json"),
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/search?jql=something&startAt=50", "issues_by_jql.json"),
+            InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/search/jql?jql=something&startAt=50", "issues_by_jql.json"),
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/changelog?&startAt=50", "issue_changelog.json"),
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/issue/fake/comment?&startAt=50", "issue_comment_v2.json"),
                 InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/comment?&startAt=50", "issue_comment_v3.json"),
