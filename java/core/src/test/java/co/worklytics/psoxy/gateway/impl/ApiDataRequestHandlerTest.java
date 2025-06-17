@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
-import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -14,9 +14,6 @@ import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
-import com.avaulta.gateway.rules.BulkDataRules;
-import com.avaulta.gateway.rules.ColumnarRules;
-import com.avaulta.gateway.rules.RuleSet;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
@@ -28,16 +25,12 @@ import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.MockLowLevelHttpRequest;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import dagger.Component;
-import dagger.Module;
-import dagger.Provides;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -53,7 +46,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-class CommonRequestHandlerTest {
+class ApiDataRequestHandlerTest {
 
     @Singleton
     @Component(modules = {
@@ -66,11 +59,11 @@ class CommonRequestHandlerTest {
         MockModules.ForSideOutputs.class,
     })
     public interface Container {
-        void inject(CommonRequestHandlerTest test);
+        void inject(ApiDataRequestHandlerTest test);
     }
 
     @Inject
-    CommonRequestHandler handler;
+    ApiDataRequestHandler handler;
 
     @Inject
     RESTRules rules;
@@ -154,7 +147,7 @@ class CommonRequestHandlerTest {
                 return Optional.empty();
             }
         };
-        when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.TARGET_HOST))).thenReturn("proxyhost.com");
+        when(handler.config.getConfigPropertyOrError(eq(ApiModeConfigProperty.TARGET_HOST))).thenReturn("proxyhost.com");
 
         URL url = new URL(handler.reverseTokenizedUrlComponents(handler.parseRequestedTarget(request)));
 
@@ -187,7 +180,7 @@ class CommonRequestHandlerTest {
     void handleShouldUseOriginalURLWhenIsParametersAreReversed() {
         setup("gmail", "google.apis.com");
 
-        CommonRequestHandler spy = spy(handler);
+        ApiDataRequestHandler spy = spy(handler);
         String original = "blah";
         String encodedPseudonym =
                 pseudonymEncoder.encode(Pseudonym.builder()
@@ -239,7 +232,7 @@ class CommonRequestHandlerTest {
     void handleShouldUseOriginalURLWhenIsAllIsReversed() {
         setup("azure-ad", "graph.microsoft.com");
 
-        CommonRequestHandler spy = spy(handler);
+        ApiDataRequestHandler spy = spy(handler);
 
         String userId = "48d31887-5fad-4d73-a9f5-3c356e68a038";
         String query = "startDateTime=2019-12-30T00:00:00Z&endDateTime=2022-05-16T00:00:00Z&limit=1&$top=1&$skip=1";
@@ -293,7 +286,7 @@ class CommonRequestHandlerTest {
     void handleShouldUseOriginalURLWhenIsNotReversed() {
         setup("gmail", "google.apis.com");
 
-        CommonRequestHandler spy = spy(handler);
+        ApiDataRequestHandler spy = spy(handler);
         String original = "blah";
 
         HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
@@ -399,29 +392,29 @@ class CommonRequestHandlerTest {
 
         Map<String, String> headersMap = httpEventResponse.getHeaders();
 
-        Set<String> UNEXPECTED_HEADERS = CommonRequestHandler.normalizeHeaders(
+        Set<String> UNEXPECTED_HEADERS = ApiDataRequestHandler.normalizeHeaders(
                 Set.of("Set-Cookie", org.apache.http.HttpHeaders.CONNECTION, "X-CustomStuff"));
 
         // 8 headers + content-type
         assertEquals(9, headersMap.size());
         assertTrue(headersMap.keySet().stream().noneMatch(UNEXPECTED_HEADERS::contains));
 
-        assertEquals("no-cache, no-store, max-age=0, must-revalidate", headersMap.get(CommonRequestHandler.normalizeHeader(org.apache.http.HttpHeaders.CACHE_CONTROL)));
-        assertEquals("25600", headersMap.get(CommonRequestHandler.normalizeHeader("X-RateLimit-Remaining")));
-        assertEquals("ABC", headersMap.get(CommonRequestHandler.normalizeHeader("X-RateLimit-Category")));
-        assertEquals("15", headersMap.get(CommonRequestHandler.normalizeHeader(org.apache.http.HttpHeaders.RETRY_AFTER)));
-        assertEquals(Json.MEDIA_TYPE, headersMap.get(CommonRequestHandler.normalizeHeader(org.apache.http.HttpHeaders.CONTENT_TYPE)));
+        assertEquals("no-cache, no-store, max-age=0, must-revalidate", headersMap.get(ApiDataRequestHandler.normalizeHeader(org.apache.http.HttpHeaders.CACHE_CONTROL)));
+        assertEquals("25600", headersMap.get(ApiDataRequestHandler.normalizeHeader("X-RateLimit-Remaining")));
+        assertEquals("ABC", headersMap.get(ApiDataRequestHandler.normalizeHeader("X-RateLimit-Category")));
+        assertEquals("15", headersMap.get(ApiDataRequestHandler.normalizeHeader(org.apache.http.HttpHeaders.RETRY_AFTER)));
+        assertEquals(Json.MEDIA_TYPE, headersMap.get(ApiDataRequestHandler.normalizeHeader(org.apache.http.HttpHeaders.CONTENT_TYPE)));
     }
 
     private void setup(String source, String host) {
-        CommonRequestHandlerTest.Container container = DaggerCommonRequestHandlerTest_Container.create();
+        ApiDataRequestHandlerTest.Container container = DaggerApiDataRequestHandlerTest_Container.create();
         container.inject(this);
 
         when(handler.secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
                 .thenReturn(Optional.of("salt"));
         when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
                 .thenReturn(source);
-        when(handler.config.getConfigPropertyOrError(ProxyConfigProperty.TARGET_HOST))
+        when(handler.config.getConfigPropertyOrError(ApiModeConfigProperty.TARGET_HOST))
                 .thenReturn(host);
 
         reversibleTokenizationStrategy = AESReversibleTokenizationStrategy.builder()

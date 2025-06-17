@@ -1,8 +1,6 @@
 package co.worklytics.psoxy.gateway;
 
 import lombok.Builder;
-import lombok.Builder.Default;
-import lombok.NonNull;
 import lombok.Value;
 import lombok.With;
 
@@ -21,7 +19,7 @@ import java.util.Map;
  *
  */
 @With
-@Builder
+@Builder(toBuilder = true)
 @Value
 public class ProcessedContent implements Serializable {
 
@@ -58,7 +56,11 @@ public class ProcessedContent implements Serializable {
      */
     byte[] content;
 
-    public String getContentString() {
+    /**
+     * for convenience, a method to get the content as a string - rather than byte array
+     * @return the content as a string, using the specified contentCharset
+     */
+    public String getContentAsString() {
         return new String(content, contentCharset);
     }
 }

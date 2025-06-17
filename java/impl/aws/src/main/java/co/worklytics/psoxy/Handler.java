@@ -4,7 +4,7 @@ import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
@@ -18,6 +18,7 @@ import org.apache.commons.lang3.tuple.Pair;
  *
  * works with 1) lambda function URL invocations, or 2) API Gateway v2 HTTP proxy invocations
  *
+ * TODO: in 0.6, rename this to AwsApiGatewayV2ApiDataRequestHandler, or something similar
  */
 @Log
 public class Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
@@ -27,7 +28,7 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
      * {@link "https://aws.amazon.com/premiumsupport/knowledge-center/lambda-improve-java-function-performance/"}
      */
     static AwsContainer awsContainer;
-    static CommonRequestHandler requestHandler;
+    static ApiDataRequestHandler requestHandler;
 
     static ResponseCompressionHandler responseCompressionHandler;
 
@@ -37,7 +38,7 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
 
     private static void staticInit() {
         awsContainer = DaggerAwsContainer.create();
-        requestHandler = awsContainer.createHandler();
+        requestHandler = awsContainer.apiDataRequestHandler();
         responseCompressionHandler = new ResponseCompressionHandler();
     }
 

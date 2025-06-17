@@ -12,6 +12,9 @@ import lombok.NoArgsConstructor;
 public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
 
 
+
+    BUNDLE_FILENAME,
+
     /**
      * CUSTOM_RULES_SHA - sha of custom rules file, if custom rules configured via some method
      * *other* than environment vars; this is used to force re-deploy/restart of Cloud Functions
@@ -103,38 +106,27 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     /**
      * **ALPHA**
      * if provided, a target side output to write original data to
+     *
+     * q: atm, not supported for bulk mode; but could be, right?
      */
     SIDE_OUTPUT_ORIGINAL,
 
     /**
      * **ALPHA**
      * if provided, a target side output to write sanitized data to
+     *
+     * q: atm, not supported for bulk mode; but could be, right?
      */
     SIDE_OUTPUT_SANITIZED,
 
-    SOURCE,
-    SOURCE_AUTH_STRATEGY_IDENTIFIER,
-    //target API endpoint to forward request to
-    TARGET_HOST,
-
     /**
-     * control the TLS protocol version used by proxy for outbound connections (eg, to data source)
-     * OPTIONAL; default to 'TLSv1.3'
-     * only safe alternative setting would be 'TLSv1.2'; we provide option to configure this in
-     * case there is some API supported by proxy that doesn't support TLSv1.3 (we're not aware of
-     * any as of Sept 2024)
+     * the source of the data.
+     *
+     * probably really only applicable in API mode, but has historically be used to get default rules
+     * in the bulk mode cases.
      */
-    TLS_VERSION,
-
-    BUNDLE_FILENAME,
-
+    SOURCE,
     ;
-
-    public static class TlsVersions {
-        public final static String TLSv1_2 = "TLSv1.2";
-        public final static String TLSv1_3 = "TLSv1.3";
-        public final  static String[] ALL = {TLSv1_2, TLSv1_3};
-    }
 
 
     @Getter(onMethod_ = @Override)

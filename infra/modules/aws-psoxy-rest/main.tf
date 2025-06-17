@@ -40,26 +40,34 @@ locals {
 
 }
 
+resource "random_string" "side_output_unique_sequence" {
+  length  = 8
+  lower   = true
+  upper   = false
+  special = false
+  numeric = true
+}
+
 module "side_output_original" {
   count = local.provision_side_output_original_bucket ? 1 : 0
 
-  source = "../aws-side-output-s3"
+  source = "../aws-output-s3"
 
   environment_name = var.environment_name
   instance_id      = var.instance_id
-
-  # todo : readers??
+  unique_sequence  = random_string.side_output_unique_sequence.result
+  bucket_suffix    = "side-output-original"
 }
 
 module "side_output_sanitized" {
   count = local.provision_side_output_sanitized_bucket ? 1 : 0
 
-  source = "../aws-side-output-s3"
+  source = "../aws-output-s3"
 
   environment_name = var.environment_name
   instance_id      = var.instance_id
-
-  # todo : readers??
+  unique_sequence  = random_string.side_output_unique_sequence.result
+  bucket_suffix    = "side-output-sanitized"
 }
 
 module "psoxy_lambda" {

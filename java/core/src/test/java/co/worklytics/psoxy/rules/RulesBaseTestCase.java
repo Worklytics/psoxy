@@ -2,6 +2,7 @@ package co.worklytics.psoxy.rules;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
+import co.worklytics.psoxy.impl.SanitizerUtils;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
@@ -50,6 +51,8 @@ abstract public class RulesBaseTestCase {
     protected RulesUtils rulesUtils;
     @Inject
     protected Validator validator;
+    @Inject
+    protected SanitizerUtils sanitizerUtils;
 
     @Inject
     protected UrlSafeTokenPseudonymEncoder urlSafeTokenPseudonymEncoder;
@@ -287,7 +290,7 @@ abstract public class RulesBaseTestCase {
             .forEach(s -> assertFalse(content.contains(s), String.format("Sanitized content still contains: %s\n%s", s, prettyPrintJson(content))));
 
         shouldNotContain
-            .forEach(s -> assertFalse(content.contains(sanitizer.pseudonymizeToJson(s, sanitizer.getJsonConfiguration())),
+            .forEach(s -> assertFalse(content.contains(sanitizerUtils.pseudonymizeToJson(s, sanitizer.getJsonConfiguration(), sanitizer.getPseudonymizer())),
                 "Sanitized contains pseudonymized equivalent of: " + s));
     }
     protected void assertRedacted(String content, String... shouldNotContain) {
@@ -322,10 +325,10 @@ abstract public class RulesBaseTestCase {
                 assertFalse(content.contains(s), () -> String.format("Sanitized content still contains unpseudonymized: %s at %s", s, this.context(content, s))));
 
         List<MapFunction> possiblePseudonymizations = Arrays.asList(
-            sanitizer.getPseudonymize(Transform.Pseudonymize.builder().encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).build()),
-            sanitizer.getPseudonymize(Transform.Pseudonymize.builder().encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).includeReversible(true).build()),
-            sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder().regex(".*").includeReversible(false).build()),
-            sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder().regex(".*").includeReversible(true).build())
+          sanitizerUtils.getPseudonymize(sanitizer.getPseudonymizer(), Transform.Pseudonymize.builder().encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).build()),
+          sanitizerUtils.getPseudonymize(sanitizer.getPseudonymizer(), Transform.Pseudonymize.builder().encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).includeReversible(true).build()),
+          sanitizerUtils.getPseudonymizeRegexMatches(sanitizer.getPseudonymizer(), Transform.PseudonymizeRegexMatches.builder().regex(".*").includeReversible(false).build()),
+          sanitizerUtils.getPseudonymizeRegexMatches(sanitizer.getPseudonymizer(), Transform.PseudonymizeRegexMatches.builder().regex(".*").includeReversible(true).build())
         );
 
 
@@ -334,7 +337,7 @@ abstract public class RulesBaseTestCase {
             .forEach(s -> {
                 //JSON
                 String doubleJsonEncodedPseudonym =
-                    sanitizer.getJsonConfiguration().jsonProvider().toJson(sanitizer.pseudonymizeToJson(s, sanitizer.getJsonConfiguration()));
+                    sanitizer.getJsonConfiguration().jsonProvider().toJson(sanitizerUtils.pseudonymizeToJson(s, sanitizer.getJsonConfiguration(), sanitizer.getPseudonymizer()));
 
                 List<String> serializedPseudonyms =
                     possiblePseudonymizations.stream()
@@ -368,7 +371,7 @@ abstract public class RulesBaseTestCase {
 
         shouldBeTransformed
             .forEach(s -> {
-                MapFunction f = sanitizer.getTransformImpl(transform);
+                MapFunction f = sanitizerUtils.getTransformImpl(sanitizer.getPseudonymizer(), transform);
 
                 String expected = sanitizer.getJsonConfiguration().jsonProvider().toJson(f.map(s, sanitizer.getJsonConfiguration()));
 
@@ -381,7 +384,7 @@ abstract public class RulesBaseTestCase {
         shouldBePseudonymized
             .forEach(s -> {
                 String doubleJsonEncodedPseudonym =
-                    sanitizer.getJsonConfiguration().jsonProvider().toJson(sanitizer.pseudonymizeWithOriginalToJson(s, sanitizer.getJsonConfiguration()));
+                    sanitizer.getJsonConfiguration().jsonProvider().toJson(sanitizerUtils.pseudonymizeWithOriginalToJson(s, sanitizer.getJsonConfiguration(), sanitizer.getPseudonymizer()));
                 // remove wrapping
                 doubleJsonEncodedPseudonym = StringUtils.unwrap(doubleJsonEncodedPseudonym, "\"");
                 assertTrue(content.contains(doubleJsonEncodedPseudonym),

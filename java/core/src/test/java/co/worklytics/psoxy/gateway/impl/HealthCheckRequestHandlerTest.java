@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.PsoxyModule;
+import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -10,8 +11,6 @@ import dagger.Component;
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -61,7 +60,7 @@ public class HealthCheckRequestHandlerTest {
         when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
                 .thenReturn(Optional.of(""));
 
-        when(handler.config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.TARGET_HOST)))
+        when(handler.config.getConfigPropertyAsOptional(eq(ApiModeConfigProperty.TARGET_HOST)))
                 .thenReturn(Optional.of("host"));
 
         Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
@@ -77,7 +76,7 @@ public class HealthCheckRequestHandlerTest {
         when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
                 .thenReturn(Optional.of(""));
 
-        when(handler.config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.TARGET_HOST)))
+        when(handler.config.getConfigPropertyAsOptional(eq(ApiModeConfigProperty.TARGET_HOST)))
                 .thenReturn(Optional.empty());
 
         Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
@@ -93,7 +92,7 @@ public class HealthCheckRequestHandlerTest {
         when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
                 .thenReturn(Optional.of(""));
 
-        when(handler.config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.TARGET_HOST)))
+        when(handler.config.getConfigPropertyAsOptional(eq(ApiModeConfigProperty.TARGET_HOST)))
                 .thenReturn(Optional.of(""));
 
         Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);

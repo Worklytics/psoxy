@@ -1,3 +1,6 @@
+# provisions -output bucket for proxy instances
+# DEPRECaTEd; `aws-side-output-s3` module is now use
+
 module "env_id" {
   source = "../env-id"
 

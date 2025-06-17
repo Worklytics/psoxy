@@ -1,7 +1,5 @@
 package co.worklytics.psoxy;
 
-
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -12,6 +10,14 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 public enum ControlHeader {
+
+    /**
+     * alternative way to send authorization information to proxy instances
+     *
+     * as of v0.5.3, use-case if limited to Webhook-Collector mode
+     *
+     */
+    AUTHORIZATION("Authorization"),
 
     /**
      * @see co.worklytics.psoxy.impl.PseudonymImplementations

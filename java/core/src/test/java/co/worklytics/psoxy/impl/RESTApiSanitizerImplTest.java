@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.*;
+import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SecretStore;
@@ -37,11 +38,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.net.URL;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static co.worklytics.test.TestModules.withMockEncryptionKey;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -90,7 +89,7 @@ class RESTApiSanitizerImplTest {
             ConfigService mock = MockModules.provideMock(ConfigService.class);
             when(mock.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
                 .thenReturn("gmail");
-            when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.TARGET_HOST)))
+            when(mock.getConfigPropertyAsOptional(eq(ApiModeConfigProperty.TARGET_HOST)))
                 .thenReturn(Optional.of("gmail.googleapis.com"));
 
             return mock;
@@ -178,7 +177,7 @@ class RESTApiSanitizerImplTest {
         Transform.RedactRegexMatches transform = Transform.RedactRegexMatches.builder().redaction("(?i)pwd=[^&]*").build();
 
         assertTrue(StringUtils.containsIgnoreCase(source, "pwd=1234asAf"));
-        String redacted = (String) sanitizer.getRedactRegexMatches(transform).map(source, sanitizer.jsonConfiguration);
+        String redacted = (String) sanitizer.sanitizerUtils.getRedactRegexMatches(transform).map(source, sanitizer.jsonConfiguration);
         assertFalse(StringUtils.containsIgnoreCase(redacted, "pwd=1234asAf"));
     }
 
@@ -199,7 +198,7 @@ class RESTApiSanitizerImplTest {
             .allowedPhrases(Arrays.asList("phrase1", "phrase2 2", "Phrase3"))
             .build();
 
-        String redacted = (String) sanitizer.getRedactExceptPhrases(transform).map(raw, sanitizer.jsonConfiguration);
+        String redacted = (String) sanitizer.sanitizerUtils.getRedactExceptPhrases(transform).map(raw, sanitizer.jsonConfiguration);
 
         assertEquals(sanitized, StringUtils.trimToNull(redacted));
     }
@@ -220,7 +219,7 @@ class RESTApiSanitizerImplTest {
         Transform.FilterTokenByRegex transform = Transform.FilterTokenByRegex.builder()
             .filter("https://[^.]+\\.zoom\\.us/.*").build();
 
-        String redacted = (String) sanitizer.getFilterTokenByRegex(transform).map(source, sanitizer.jsonConfiguration);
+        String redacted = (String) sanitizer.sanitizerUtils.getFilterTokenByRegex(transform).map(source, sanitizer.jsonConfiguration);
 
         assertEquals("https://acme.zoom.us/12312345?pwd=1234asAf", redacted);
     }
@@ -243,7 +242,7 @@ class RESTApiSanitizerImplTest {
         Transform.FilterTokenByRegex transform = Transform.FilterTokenByRegex.builder()
             .filter("https://[^.]+\\.zoom\\.us/.*").build();
 
-        String redacted = (String) sanitizer.getFilterTokenByRegex(transform)
+        String redacted = (String) sanitizer.sanitizerUtils.getFilterTokenByRegex(transform)
             .map(source, sanitizer.jsonConfiguration);
 
         assertTrue(StringUtils.isBlank(redacted));
@@ -290,7 +289,7 @@ class RESTApiSanitizerImplTest {
     @Test
     void pseudonymizeWithReversalKey() {
         //NOTE: this is a LEGACY case
-        MapFunction f = sanitizer.getPseudonymize(Transform.Pseudonymize.builder().includeReversible(true).build());
+        MapFunction f = sanitizer.sanitizerUtils.getPseudonymize(sanitizer.getPseudonymizer(), Transform.Pseudonymize.builder().includeReversible(true).build());
 
         assertEquals("{\"hash\":\"Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0M\",\"reversible\":\"p~Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0MzTTbTCc7BcR53imT1qZgI\"}",
             f.map("asfa", sanitizer.getJsonConfiguration()));
@@ -298,7 +297,7 @@ class RESTApiSanitizerImplTest {
 
     @Test
     void reversiblePseudonym() {
-        MapFunction f = sanitizer.getPseudonymize(Transform.Pseudonymize.builder().includeReversible(true).build());
+        MapFunction f = sanitizer.sanitizerUtils.getPseudonymize(sanitizer.getPseudonymizer(),Transform.Pseudonymize.builder().includeReversible(true).build());
 
         String lcase = (String) f.map("erik@engetc.com", sanitizer.getJsonConfiguration());
         String ucaseFirst = (String) f.map("Erik@engetc.com", sanitizer.getJsonConfiguration());
@@ -312,7 +311,7 @@ class RESTApiSanitizerImplTest {
     @Test
     void tokenize() {
         String original = "blah";
-        MapFunction f = sanitizer.getTokenize(Transform.Tokenize.builder().build());
+        MapFunction f = sanitizer.sanitizerUtils.getTokenize(Transform.Tokenize.builder().build());
         String r =  (String) f.map(original, sanitizer.getJsonConfiguration());
 
         assertArrayEquals(reversibleTokenizationStrategy.getReversibleToken(original),
@@ -323,7 +322,7 @@ class RESTApiSanitizerImplTest {
     void tokenize_regex() {
         String path = "/v1.0/$metadata#users('48d31887-5fad-4d73-a9f5-3c356e68a038')/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA%3D')/events";
         String host = "https://graph.microsoft.com";
-        MapFunction f = sanitizer.getTokenize(Transform.Tokenize.builder()
+        MapFunction f = sanitizer.sanitizerUtils.getTokenize(Transform.Tokenize.builder()
                 .regex("^https://graph.microsoft.com/v1.0/(.*)$")
                 .build());
         String r = (String) f.map(host+path, sanitizer.getJsonConfiguration());
@@ -338,7 +337,7 @@ class RESTApiSanitizerImplTest {
     void tokenize_regex_on_the_middle() {
         String path = "/v1.0/users/48d31887-5fad-4d73-a9f5-3c356e68a038/calendars('AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KzowPTAAAAAAEGAAAiIsqMbYjsT5e-T7KzowPTAAABuC35AAA%3D')/events";
         String host = "https://graph.microsoft.com";
-        MapFunction f = sanitizer.getTokenize(Transform.Tokenize.builder()
+        MapFunction f = sanitizer.sanitizerUtils.getTokenize(Transform.Tokenize.builder()
                 .regex("^https://graph.microsoft.com/v1.0/users/([a-zA-Z0-9_-]+)/.*$")
                 .build());
         String r = (String) f.map(host+path, sanitizer.getJsonConfiguration());
@@ -358,7 +357,7 @@ class RESTApiSanitizerImplTest {
     })
     void textDigest(String input, int expectedWordCount, int expectedLength) {
         Transform.TextDigest transform = Transform.TextDigest.builder().build();
-        MapFunction textDigestFunction = sanitizer.getTextDigest(transform);
+        MapFunction textDigestFunction = sanitizer.sanitizerUtils.getTextDigest(transform);
 
         String resultJson = (String) textDigestFunction.map(input, sanitizer.getJsonConfiguration());
         Map<String, Integer> result = new ObjectMapper().readValue(resultJson, Map.class);
@@ -394,7 +393,7 @@ class RESTApiSanitizerImplTest {
             .isJsonEscaped(true)
             .jsonPathToProcessWhenEscaped("$..text")
             .build();
-        MapFunction textDigestFunction = sanitizer.getTextDigest(transform);
+        MapFunction textDigestFunction = sanitizer.sanitizerUtils.getTextDigest(transform);
 
         String resultJson = (String) textDigestFunction.map(input, sanitizer.getJsonConfiguration());
 
@@ -509,7 +508,7 @@ class RESTApiSanitizerImplTest {
     })
     @ParameterizedTest
     void pseudonymize_multivalueEmailHeaders(String headerValue) {
-        List<PseudonymizedIdentity> pseudonyms = sanitizer.pseudonymizeEmailHeader(headerValue);
+        List<PseudonymizedIdentity> pseudonyms = sanitizer.sanitizerUtils.pseudonymizeEmailHeader(sanitizer.getPseudonymizer(), headerValue);
         assertEquals(2, pseudonyms.size());
         assertTrue(pseudonyms.stream().allMatch(p -> Objects.equals("worklytics.co", p.getDomain())));
     }
@@ -537,7 +536,7 @@ class RESTApiSanitizerImplTest {
 
         sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"), pseudonymizer);
 
-        String r = (String) sanitizer.getPseudonymize(Transform.Pseudonymize.builder()
+        String r = (String) sanitizer.sanitizerUtils.getPseudonymize(sanitizer.getPseudonymizer(),Transform.Pseudonymize.builder()
                 //includeOriginal must be 'false' for URL_SAFE_TOKEN
                 .includeReversible(includeReversible)
                 .encoding(PseudonymEncoder.Implementations.valueOf(encoding))
@@ -633,19 +632,19 @@ class RESTApiSanitizerImplTest {
         sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"), pseudonymizer);
 
         List<MapFunction> transforms = Arrays.asList(
-            sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder()
+            sanitizer.sanitizerUtils.getPseudonymizeRegexMatches(sanitizer.getPseudonymizer(), Transform.PseudonymizeRegexMatches.builder()
                 .regex(".*")
                 .includeReversible(true)
                 .build()),
-            sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder()
+            sanitizer.sanitizerUtils.getPseudonymizeRegexMatches(sanitizer.getPseudonymizer(), Transform.PseudonymizeRegexMatches.builder()
                 .regex(".*")
                 .includeReversible(false)
                 .build()),
-            sanitizer.getPseudonymize(Transform.Pseudonymize.builder()
+            sanitizer.sanitizerUtils.getPseudonymize(sanitizer.getPseudonymizer(),Transform.Pseudonymize.builder()
                 .includeReversible(true)
                 .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
                 .build()),
-            sanitizer.getPseudonymize(Transform.Pseudonymize.builder()
+            sanitizer.sanitizerUtils.getPseudonymize(sanitizer.getPseudonymizer(),Transform.Pseudonymize.builder()
                 .includeReversible(false)
                 .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
                 .build())
@@ -687,7 +686,7 @@ class RESTApiSanitizerImplTest {
     })
     @ParameterizedTest
     public void pseudonymizeWithRegexMatches_nonMatchingRedacted(String input, String regex, String expected) {
-        MapFunction transform = sanitizer.getPseudonymizeRegexMatches(Transform.PseudonymizeRegexMatches.builder()
+        MapFunction transform = sanitizer.sanitizerUtils.getPseudonymizeRegexMatches(sanitizer.getPseudonymizer(), Transform.PseudonymizeRegexMatches.builder()
             .regex(regex)
             .includeReversible(false)
             .build());
@@ -704,7 +703,7 @@ class RESTApiSanitizerImplTest {
     })
     @ParameterizedTest
     public void hashIp(String input, String expected) {
-        MapFunction transform = sanitizer.getHashIp(HashIp.builder().build());
+        MapFunction transform = sanitizer.sanitizerUtils.getHashIp(HashIp.builder().build());
 
         assertEquals(StringUtils.trimToNull(expected),
             transform.map(input, sanitizer.getJsonConfiguration()));
@@ -719,7 +718,7 @@ class RESTApiSanitizerImplTest {
     })
     @ParameterizedTest
     public void encryptIp(String input, String expected) {
-        MapFunction transform = sanitizer.getEncryptIp(EncryptIp.builder().build());
+        MapFunction transform = sanitizer.sanitizerUtils.getEncryptIp(EncryptIp.builder().build());
 
 
         String encrypted = (String) transform.map(input, sanitizer.getJsonConfiguration());
@@ -730,7 +729,7 @@ class RESTApiSanitizerImplTest {
 
 
         if (StringUtils.isNotBlank(expected)) {
-            MapFunction hashTransform = sanitizer.getHashIp(HashIp.builder().build());
+            MapFunction hashTransform = sanitizer.sanitizerUtils.getHashIp(HashIp.builder().build());
             String formattedHash = (String) hashTransform.map(input, sanitizer.getJsonConfiguration());
 
             byte[] hash = pseudonymEncoder.decode(formattedHash).getHash();

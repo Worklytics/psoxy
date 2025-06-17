@@ -1,17 +1,29 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
+import co.worklytics.psoxy.gateway.auth.PublicKeyStore;
+import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.*;
+import co.worklytics.psoxy.gateway.impl.output.NoOutput;
+import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
+import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
+import co.worklytics.psoxy.gateway.output.Output;
+import co.worklytics.psoxy.impl.WebhookSanitizerImplFactory;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
+import com.avaulta.gateway.rules.WebhookCollectionRules;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.http.HttpTransportFactory;
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.IntoSet;
+import lombok.SneakyThrows;
 
 import javax.inject.Named;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -26,7 +38,11 @@ import java.util.UUID;
  *
  *
  */
-@Module
+@Module(
+    includes = {
+        FunctionRuntimeModule.Bindings.class,
+    }
+)
 public class FunctionRuntimeModule {
 
     @Provides
@@ -40,6 +56,7 @@ public class FunctionRuntimeModule {
         return UUID.randomUUID();
     }
 
+    // TODO: move to Bindings
     @Provides @Singleton
     static RandomNumberGenerator randomNumberGenerator() {
         //to be clear, NOT for cryptography
@@ -55,9 +72,9 @@ public class FunctionRuntimeModule {
     @Provides @Singleton
     HttpTransportFactory providesHttpTransportFactory(EnvVarsConfigService envVarsConfigService) {
         final String sslContextProtocol =
-            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.TLS_VERSION)
-                .orElse(ProxyConfigProperty.TlsVersions.TLSv1_3);
-        if (Arrays.stream(ProxyConfigProperty.TlsVersions.ALL).noneMatch(s -> sslContextProtocol.equals(s))) {
+            envVarsConfigService.getConfigPropertyAsOptional(ApiModeConfigProperty.TLS_VERSION)
+                .orElse(ApiModeConfigProperty.TlsVersions.TLSv1_3);
+        if (Arrays.stream(ApiModeConfigProperty.TlsVersions.ALL).noneMatch(s -> sslContextProtocol.equals(s))) {
             throw new IllegalArgumentException("Invalid TLS version: " + sslContextProtocol);
         }
 
@@ -88,13 +105,44 @@ public class FunctionRuntimeModule {
 
 
     @Provides @Singleton @Named("forOriginal")
-    static SideOutput sideOutputForOriginal(SideOutputUtils sideOutputUtil) {
+    static ApiDataSideOutput sideOutputForOriginal(OutputUtils sideOutputUtil) {
         return sideOutputUtil.forStage(ProcessedDataStage.ORIGINAL);
     }
 
     @Provides @Singleton @Named("forSanitized")
-    static SideOutput sideOutputForSanitized(SideOutputUtils sideOutputUtils) {
-        return sideOutputUtils.forStage(ProcessedDataStage.SANITIZED);
+    static ApiDataSideOutput sideOutputForSanitized(OutputUtils outputUtils) {
+        return outputUtils.forStage(ProcessedDataStage.SANITIZED);
     }
 
+    @Provides @Singleton  @Named("forWebhooks")
+    static Output output(OutputUtils outputUtils) {
+        return outputUtils.forWebhooks();
+    }
+
+    @Provides @Singleton @Named("forWebhookQueue")
+    static Output webhookQueueOutput(OutputUtils outputUtils) {
+        return outputUtils.forWebhookQueue();
+    }
+
+
+    @Provides @Singleton
+    static NoOutput noOutput() {
+        return new NoOutput();
+    }
+
+    @SneakyThrows
+    @Provides @Singleton WebhookSanitizer webhookSanitizer(WebhookSanitizerImplFactory webhookSanitizerFactory,
+                                                           ConfigService configService,
+                                                           @Named("ForYAML") ObjectMapper objectMapper) {
+        return webhookSanitizerFactory.create(objectMapper.readerFor(WebhookCollectionRules.class).readValue(configService.getConfigPropertyOrError(ProxyConfigProperty.RULES)));
+    }
+
+    //q: right place for this?
+    @Module
+    public abstract class Bindings {
+
+        @Binds
+        @IntoSet
+        abstract PublicKeyStoreClient base64KeyClient(Base64KeyClient base64KeyClient);
+    }
 }
