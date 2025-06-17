@@ -29,10 +29,10 @@ endpoints:
         encoding: "JSON"
   - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/search/jql"
     allowedQueryParams:
-      - "startAt"
-      - "maxResults"
       - "jql"
       - "fields"
+      - "nextPageToken"
+      - "maxResults"
     transforms:
       - !<redact>
         jsonPaths:
@@ -53,6 +53,8 @@ endpoints:
     responseSchema:
       type: "object"
       properties:
+        isLast:
+          type: "boolean"
         issues:
           type: "array"
           items:
@@ -483,8 +485,8 @@ endpoints:
                 type: "string"
         maxResults:
           type: "integer"
-        startAt:
-          type: "integer"
+        nextPageToken:
+          type: "string"
         total:
           type: "integer"
   - pathTemplate: "/ex/jira/{cloudId}/rest/api/{apiVersion}/issue/{issueId}/changelog"
@@ -548,9 +550,6 @@ endpoints:
         encoding: "JSON"
   - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/issue/{issueId}"
     allowedQueryParams:
-      - "startAt"
-      - "maxResults"
-      - "jql"
       - "fields"
     transforms:
       - !<redact>
