@@ -1,19 +1,13 @@
 package co.worklytics.psoxy.gateway.auth;
 
-import lombok.Value;
-
 /**
- * reference to a k
+ * reference to a public key
+ *
+ * @param store the public key store where this key is stored
+ *             (e.g. GCP KMS, AWS KMS, Base64 encoded key, etc.)
+ * @param id the identifier of the public key within that store; unique given the store
  */
-@Value
-public class PublicKeyRef {
-
-    PublicKeyStore store;
-
-    /**
-     * identifies the key, given its store
-     */
-    String id;
+public record PublicKeyRef(PublicKeyStore store, String id) {
 
     public String encodeAsString() {
         return store.getIdentifier() + ":" + id;

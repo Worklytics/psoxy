@@ -187,9 +187,9 @@ public class InboundWebhookHandler {
             .filter(keyRef -> !keyRef.isEmpty())
             .map(PublicKeyRef::fromString)
             .flatMap(publicKeyRef -> {
-                Optional<PublicKeyStoreClient> client = publicKeyStoreClients.stream().filter(c -> c.getId().equals(publicKeyRef.getStore())).findAny();
+                Optional<PublicKeyStoreClient> client = publicKeyStoreClients.stream().filter(c -> c.getId().equals(publicKeyRef.store())).findAny();
                 if (client.isEmpty()) {
-                    throw new IllegalArgumentException("No public key store client found for: " + publicKeyRef.getStore());
+                    throw new IllegalArgumentException("No public key store client found for: " + publicKeyRef.store());
                 }
                 return client.get().getPublicKeys(publicKeyRef).stream();
             }).collect(Collectors.toList());

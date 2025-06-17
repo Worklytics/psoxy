@@ -20,11 +20,11 @@ public class Base64KeyClient implements PublicKeyStoreClient {
     @SneakyThrows
     @Override
     public Set<RSAPublicKey> getPublicKeys(@NonNull PublicKeyRef keyRef) {
-        if (!keyRef.getStore().equals(PublicKeyStore.BASE64)) {
+        if (!keyRef.store().equals(PublicKeyStore.BASE64)) {
             throw new IllegalArgumentException("Key ref not compatible with Base64KeyClient: " + keyRef.encodeAsString());
         }
 
-        byte[] decoded = Base64.getDecoder().decode(keyRef.getId());
+        byte[] decoded = Base64.getDecoder().decode(keyRef.id());
         X509EncodedKeySpec spec = new X509EncodedKeySpec(decoded);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         return Collections.singleton((RSAPublicKey) keyFactory.generatePublic(spec));

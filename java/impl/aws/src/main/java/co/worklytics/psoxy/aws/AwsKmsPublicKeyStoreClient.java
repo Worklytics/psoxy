@@ -67,7 +67,7 @@ public class AwsKmsPublicKeyStoreClient implements PublicKeyStoreClient {
      */
     @Override
     public Set<RSAPublicKey> getPublicKeys(PublicKeyRef keyRef) {
-        if (keyRef.getStore() != PublicKeyStore.AWS_KMS) {
+        if (keyRef.store() != PublicKeyStore.AWS_KMS) {
             throw new IllegalArgumentException("KeyRef store must be AWS_KMS");
         }
         try {
@@ -89,10 +89,10 @@ public class AwsKmsPublicKeyStoreClient implements PublicKeyStoreClient {
     }
 
     RSAPublicKey getPublicKey(PublicKeyRef keyRef) {
-        if (keyRef.getStore() != PublicKeyStore.AWS_KMS) {
+        if (keyRef.store() != PublicKeyStore.AWS_KMS) {
             throw new IllegalArgumentException("KeyRef store must be AWS_KMS");
         }
-        String keyId = keyRef.getId();
+        String keyId = keyRef.id();
         GetPublicKeyRequest request = GetPublicKeyRequest.builder().keyId(keyId).build();
         try {
             GetPublicKeyResponse response = kmsClient.getPublicKey(request);
