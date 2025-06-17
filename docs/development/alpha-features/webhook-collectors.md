@@ -64,7 +64,7 @@ variable.  Have `current` and `previous` aliases point to the current and previo
 update these (previous --> current, then current to your new key). Ensure you're ALWAYS signing the auth tokens with the
 `current` key.
 
-Note that this scheme **enables authentication of the request**AND **partial integrity verification of the request/payload**.
+Note that this scheme **enables authentication of the request** AND **partial integrity verification of the request/payload**.
 Eg, a valid signed JWT identity token ensures that it originated with a trusted client. If you control to whom you issue
 auth tokens, you can trust these as authenticated requests. Additionally, the webhook rules may validate the request/payload's
 integrity for a subset of fields against the JWT claims included in the token; since these claims were signed by your private
