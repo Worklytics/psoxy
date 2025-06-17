@@ -27,8 +27,8 @@ locals {
   # helper to clarify conditionals throughout
   use_api_gateway = var.api_gateway_v2 != null
 
-  # TODO: convert this to 'NONE', once we do JWT auth in the lambda itself
-  authorization_type = "AWS_IAM"
+  authorization_type = "NONE"                                # TODO: make this configurable, if auth BEYOND function-level checks of Authorization header is desired
+  http_methods       = concat(var.http_methods, ["OPTIONS"]) # always add OPTIONS, as required by CORS
 }
 
 module "env_id" {
@@ -122,6 +122,14 @@ resource "aws_lambda_function_url" "lambda_url" {
   function_name      = module.gate_instance.function_name
   authorization_type = local.authorization_type
 
+  cors {
+    allow_credentials = true
+    allow_headers     = ["*"]
+    allow_methods     = local.http_methods
+    allow_origins     = ["*"] # q: support configuration of this??
+    expose_headers    = ["*"]
+  }
+
   depends_on = [
     module.gate_instance
   ]
@@ -141,7 +149,7 @@ resource "aws_apigatewayv2_integration" "map" {
 }
 
 resource "aws_apigatewayv2_route" "methods" {
-  for_each = toset(local.use_api_gateway ? var.http_methods : [])
+  for_each = toset(local.use_api_gateway ? local.http_methods : [])
 
   api_id             = var.api_gateway_v2.id
   route_key          = "${each.key} /${module.gate_instance.function_name}/{proxy+}"
@@ -160,7 +168,7 @@ resource "aws_lambda_permission" "api_gateway" {
 
   # The /*/*/ part allows invocation from any stage, method and resource path
   # within API Gateway REST API.
-  # TODO: limit by http method here too?
+  # TODO: limit by http method here too?  for webhooks, would need POST, OPTIONS at min
   source_arn = "${var.api_gateway_v2.execution_arn}/*/*/${module.gate_instance.function_name}/{proxy+}"
 }
 
