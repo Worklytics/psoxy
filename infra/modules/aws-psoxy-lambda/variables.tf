@@ -214,7 +214,7 @@ variable "s3_outputs" {
   default     = []
 
   validation {
-    condition     = alltrue([for url in var.s3_outputs : can(regex("^s3://[a-zA-Z][a-zA-Z0-9-_ ]*[a-zA-Z0-9](/.*)?$", url))])
+    condition     = alltrue([for url in var.s3_outputs : can(regex("^s3://[a-z][a-z0-9-]*[a-z0-9](/.*)?$", url))])
     error_message = "Each `s3_outputs` target must be a valid S3 bucket address. Bucket names must only contain lowercase letters, numbers, and hyphens, and must start and end with a lowercase letter or number. May include a path within the bucket, in which case we highly recommend you end it with a slash (`/`)."
   }
 }
