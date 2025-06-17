@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,10 +34,8 @@ public class PrebuiltSanitizerRules {
         "maxResults"
     );
 
-    private static final List<String> issuesAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
-            Lists.newArrayList("jql",
-                "fields").stream())
-        .collect(Collectors.toList());
+    private static final List<String> commonJQLAllowedParameters = Lists.newArrayList("jql",
+        "fields");
 
     private static final List<String> issueAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
             Lists.newArrayList("expand", "fields").stream())
@@ -61,30 +60,13 @@ public class PrebuiltSanitizerRules {
                 .stream())
         .collect(Collectors.toList());
 
-    static final Endpoint ISSUE_SEARCH_V2 = Endpoint.builder()
-        .pathTemplate("/ex/jira/{cloudId}/rest/api/2/search")
-        .allowedQueryParams(issuesAllowedQueryParameters)
-        .transform(Transform.Redact.builder()
-            .jsonPath("$.issues[*]..description")
-            .jsonPath("$.issues[*]..iconUrl")
-            .jsonPath("$.issues[*]..name")
-            .jsonPath("$.issues[*]..avatarUrls")
-            .jsonPath("$.issues[*].fields..self")
-            .jsonPath("$.issues[*]..displayName")
-            .jsonPath("$.issues[*]..body")
-            .jsonPath("$.issues[*]..comment")
-            .jsonPath("$..displayName")
-            .build())
-        .transform(Transform.Pseudonymize.builder()
-            .jsonPath("$.issues[*]..accountId")
-            .jsonPath("$.issues[*]..emailAddress")
-            .build())
-        .responseSchema(jsonSchemaForQueryResult(true))
-        .build();
-
     static final Endpoint ISSUE_SEARCH_V3 = Endpoint.builder()
         .pathTemplate("/ex/jira/{cloudId}/rest/api/3/search/jql")
-        .allowedQueryParams(issuesAllowedQueryParameters)
+        .allowedQueryParams(Streams.concat(
+                commonJQLAllowedParameters.stream(),
+                Lists.newArrayList("nextPageToken",
+                    "maxResults").stream())
+            .collect(Collectors.toList()))
         .transform(Transform.Redact.builder()
             .jsonPath("$.issues[*]..description")
             .jsonPath("$.issues[*]..iconUrl")
@@ -103,32 +85,9 @@ public class PrebuiltSanitizerRules {
         .responseSchema(jsonSchemaForQueryResult(true))
         .build();
 
-    static final Endpoint ISSUE_V2 = Endpoint.builder()
-        .pathTemplate("/ex/jira/{cloudId}/rest/api/2/issue/{issueId}")
-        .allowedQueryParams(issuesAllowedQueryParameters)
-        .transform(Transform.Redact.builder()
-            .jsonPath("$..description")
-            .jsonPath("$..iconUrl")
-            .jsonPath("$..name")
-            .jsonPath("$..avatarUrls")
-            .jsonPath("$.fields..self")
-            .jsonPath("$..displayName")
-            .jsonPath("$..body")
-            .jsonPath("$..comment")
-            .jsonPath("$..attachment[*]..filename")
-            .jsonPath("$..attachment[*]..content")
-            .jsonPath("$..summary")
-            .build())
-        .transform(Transform.Pseudonymize.builder()
-            .jsonPath("$..accountId")
-            .jsonPath("$..emailAddress")
-            .build())
-        .responseSchema(jsonSchemaForIssue(true))
-        .build();
-
     static final Endpoint ISSUE_V3 = Endpoint.builder()
         .pathTemplate("/ex/jira/{cloudId}/rest/api/3/issue/{issueId}")
-        .allowedQueryParams(issuesAllowedQueryParameters)
+        .allowedQueryParams(Collections.singletonList("fields"))
         .transform(Transform.Redact.builder()
             .jsonPath("$..description")
             .jsonPath("$..iconUrl")
@@ -186,7 +145,9 @@ public class PrebuiltSanitizerRules {
 
     static final Endpoint SERVER_ISSUE_SEARCH_V2 = Endpoint.builder()
         .pathTemplate("/rest/api/{apiVersion}/search")
-        .allowedQueryParams(issuesAllowedQueryParameters)
+        .allowedQueryParams(Streams.concat(commonAllowedQueryParameters.stream(),
+                commonJQLAllowedParameters.stream())
+            .collect(Collectors.toList()))
         .transform(Transform.Redact.builder()
             .jsonPath("$.issues[*]..description")
             .jsonPath("$.issues[*]..iconUrl")
@@ -225,24 +186,6 @@ public class PrebuiltSanitizerRules {
             .build())
         .build();
 
-    static final Endpoint ISSUE_COMMENT_V2 = Endpoint.builder()
-        .pathTemplate("/ex/jira/{cloudId}/rest/api/2/issue/{issueId}/comment")
-        .allowedQueryParams(commonAllowedQueryParameters)
-        .transform(Transform.Redact.builder()
-            .jsonPath("$.comments[*]..avatarUrls")
-            .jsonPath("$.comments[*].author..self")
-            .jsonPath("$.comments[*].updateAuthor..self")
-            .jsonPath("$.comments[*]..displayName")
-            .jsonPath("$.comments[*]..text")
-            .jsonPath("$.comments[*]..body")
-            .jsonPath("$.comments[*]..renderedBody")
-            .build())
-        .transform(Transform.Pseudonymize.builder()
-            .jsonPath("$.comments[*]..accountId")
-            .jsonPath("$.comments[*]..emailAddress")
-            .build())
-        .build();
-
     static final Endpoint ISSUE_COMMENT_V3 = Endpoint.builder()
         .pathTemplate("/ex/jira/{cloudId}/rest/api/3/issue/{issueId}/comment")
         .allowedQueryParams(commonAllowedQueryParameters)
@@ -277,24 +220,6 @@ public class PrebuiltSanitizerRules {
         .transform(Transform.Pseudonymize.builder()
             .jsonPath("$.comments[*]..key")
             .jsonPath("$.comments[*]..emailAddress")
-            .build())
-        .build();
-
-
-    static final Endpoint ISSUE_WORKLOG_V2 = Endpoint.builder()
-        .pathTemplate("/ex/jira/{cloudId}/rest/api/2/issue/{issueId}/worklog")
-        .allowedQueryParams(commonAllowedQueryParameters)
-        .transform(Transform.Redact.builder()
-            .jsonPath("$.worklogs[*]..avatarUrls")
-            .jsonPath("$.worklogs[*].author..self")
-            .jsonPath("$.worklogs[*].updateAuthor..self")
-            .jsonPath("$.worklogs[*]..displayName")
-            .jsonPath("$.worklogs[*]..comment")
-            .jsonPath("$.worklogs[*]..summary")
-            .build())
-        .transform(Transform.Pseudonymize.builder()
-            .jsonPath("$.worklogs[*]..accountId")
-            .jsonPath("$.worklogs[*]..emailAddress")
             .build())
         .build();
 
@@ -474,9 +399,19 @@ public class PrebuiltSanitizerRules {
             // Using LinkedHashMap to keep the order to support same
             // YAML serialization result
             .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
-                put("startAt", JsonSchemaFilter.<String, RESTRules>builder()
-                    .type("integer")
-                    .build());
+                if (isCloudVersion) {
+                    put("nextPageToken", JsonSchemaFilter.<String, RESTRules>builder()
+                        .type("string")
+                        .build());
+                    put("isLast", JsonSchemaFilter.<String, RESTRules>builder()
+                        .type("boolean")
+                        .build());
+                } else {
+                    put("startAt", JsonSchemaFilter.<String, RESTRules>builder()
+                        .type("integer")
+                        .build());
+                }
+
                 put("maxResults", JsonSchemaFilter.builder()
                     .type("integer")
                     .build());

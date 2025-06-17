@@ -1,60 +1,334 @@
 {
-  "expand": "schema,names",
-  "startAt": 0,
-  "maxResults": 50,
-  "total": 15,
   "issues": [
     {
-      "expand": "operations,versionedRepresentations,editmeta,changelog,customfield_10600.requestTypePractice,renderedFields",
-      "id": "10709",
-      "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10709",
-      "key": "ETV-15",
+      "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10600.requestTypePractice",
+      "id": "10712",
+      "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10712",
+      "key": "ETV-18",
       "fields": {
-        "statuscategorychangedate": "2022-03-02T09:00:35.928-0500",
+        "statuscategorychangedate": "2024-03-12T12:48:48.348-0400",
         "issuetype": {
-          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issuetype/10002",
-          "id": "10002",
-          "description": "A task that needs to be done.",
-          "iconUrl": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium",
-          "name": "Task",
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issuetype/10001",
+          "id": "10001",
+          "description": "A user story. Created by JIRA Software - do not edit or delete.",
+          "iconUrl": "https://worklytics.atlassian.net/images/icons/issuetypes/story.svg",
+          "name": "Story",
           "subtask": false,
-          "avatarId": 10318,
           "hierarchyLevel": 0
         },
+        "timespent": null,
+        "project": {
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/project/10000",
+          "id": "10000",
+          "key": "ETV",
+          "name": "Eval Tool V1",
+          "projectTypeKey": "software",
+          "simplified": false,
+          "avatarUrls": {
+            "48x48": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/universal_avatar/view/type/project/avatar/10011",
+            "24x24": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/universal_avatar/view/type/project/avatar/10011?size=small",
+            "16x16": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/universal_avatar/view/type/project/avatar/10011?size=xsmall",
+            "32x32": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/universal_avatar/view/type/project/avatar/10011?size=medium"
+          }
+        },
+        "fixVersions": [],
+        "statusCategory": {
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/statuscategory/4",
+          "id": 4,
+          "key": "indeterminate",
+          "colorName": "yellow",
+          "name": "In Progress"
+        },
+        "aggregatetimespent": null,
+        "resolution": null,
+        "customfield_10500": [],
+        "customfield_10700": null,
+        "customfield_10701": [],
+        "customfield_10702": null,
+        "customfield_10703": null,
+        "resolutiondate": null,
+        "customfield_10704": null,
+        "customfield_10705": null,
+        "customfield_10706": null,
+        "workratio": -1,
+        "customfield_10707": null,
+        "customfield_10708": null,
+        "customfield_10709": null,
+        "lastViewed": null,
+        "watches": {
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/ETV-18/watchers",
+          "watchCount": 1,
+          "isWatching": false
+        },
+        "created": "2024-03-12T12:47:09.993-0400",
+        "customfield_10100": null,
+        "priority": {
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/priority/1",
+          "iconUrl": "https://worklytics.atlassian.net/images/icons/priorities/highest.svg",
+          "name": "Highest",
+          "id": "1"
+        },
+        "labels": [],
+        "timeestimate": null,
+        "aggregatetimeoriginalestimate": null,
+        "versions": [],
+        "issuelinks": [],
+        "assignee": {
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/user?accountId=712020%3A4891947c-7a8e-4889-b2cc-4064669804e1",
+          "accountId": "712020:4891947c-7a8e-4889-b2cc-4064669804e1",
+          "avatarUrls": {
+            "48x48": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png",
+            "24x24": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png",
+            "16x16": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png",
+            "32x32": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png"
+          },
+          "displayName": "Valentyn Ponomarenko",
+          "active": false,
+          "timeZone": "America/New_York",
+          "accountType": "atlassian"
+        },
+        "updated": "2024-03-12T12:48:48.348-0400",
+        "status": {
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/status/3",
+          "description": "This issue is being actively worked on at the moment by the assignee.",
+          "iconUrl": "https://worklytics.atlassian.net/images/icons/statuses/inprogress.png",
+          "name": "In Progress",
+          "id": "3",
+          "statusCategory": {
+            "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/statuscategory/4",
+            "id": 4,
+            "key": "indeterminate",
+            "colorName": "yellow",
+            "name": "In Progress"
+          }
+        },
+        "components": [],
+        "timeoriginalestimate": null,
+        "description": {
+          "type": "doc",
+          "version": 1,
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Just for testing purpose."
+                }
+              ]
+            }
+          ]
+        },
+        "timetracking": {},
+        "customfield_10600": null,
+        "customfield_10721": null,
+        "security": null,
+        "customfield_10722": null,
+        "customfield_10008": null,
+        "customfield_10723": null,
+        "aggregatetimeestimate": null,
+        "attachment": [],
+        "customfield_10725": null,
+        "customfield_10726": null,
+        "summary": "New Test issue",
+        "creator": {
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/user?accountId=712020%3A4891947c-7a8e-4889-b2cc-4064669804e1",
+          "accountId": "712020:4891947c-7a8e-4889-b2cc-4064669804e1",
+          "avatarUrls": {
+            "48x48": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png",
+            "24x24": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png",
+            "16x16": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png",
+            "32x32": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png"
+          },
+          "displayName": "Bob Smith",
+          "active": false,
+          "timeZone": "America/New_York",
+          "accountType": "atlassian"
+        },
+        "subtasks": [
+          {
+            "id": "10713",
+            "key": "ETV-19",
+            "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10713",
+            "fields": {
+              "summary": "New subtask",
+              "status": {
+                "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/status/3",
+                "description": "This issue is being actively worked on at the moment by the assignee.",
+                "iconUrl": "https://worklytics.atlassian.net/images/icons/statuses/inprogress.png",
+                "name": "In Progress",
+                "id": "3",
+                "statusCategory": {
+                  "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/statuscategory/4",
+                  "id": 4,
+                  "key": "indeterminate",
+                  "colorName": "yellow",
+                  "name": "In Progress"
+                }
+              },
+              "priority": {
+                "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/priority/3",
+                "iconUrl": "https://worklytics.atlassian.net/images/icons/priorities/medium.svg",
+                "name": "Medium",
+                "id": "3"
+              },
+              "issuetype": {
+                "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issuetype/10003",
+                "id": "10003",
+                "description": "The sub-task of the issue",
+                "iconUrl": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/universal_avatar/view/type/issuetype/avatar/10316?size=medium",
+                "name": "Sub-task",
+                "subtask": true,
+                "avatarId": 10316,
+                "hierarchyLevel": -1
+              }
+            }
+          },
+          {
+            "id": "10714",
+            "key": "ETV-20",
+            "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10714",
+            "fields": {
+              "summary": "New SubTask 2",
+              "status": {
+                "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/status/10001",
+                "description": "",
+                "iconUrl": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/",
+                "name": "Done",
+                "id": "10001",
+                "statusCategory": {
+                  "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/statuscategory/3",
+                  "id": 3,
+                  "key": "done",
+                  "colorName": "green",
+                  "name": "Done"
+                }
+              },
+              "priority": {
+                "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/priority/3",
+                "iconUrl": "https://worklytics.atlassian.net/images/icons/priorities/medium.svg",
+                "name": "Medium",
+                "id": "3"
+              },
+              "issuetype": {
+                "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issuetype/10003",
+                "id": "10003",
+                "description": "The sub-task of the issue",
+                "iconUrl": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/universal_avatar/view/type/issuetype/avatar/10316?size=medium",
+                "name": "Sub-task",
+                "subtask": true,
+                "avatarId": 10316,
+                "hierarchyLevel": -1
+              }
+            }
+          }
+        ],
+        "reporter": {
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/user?accountId=712020%3A4891947c-7a8e-4889-b2cc-4064669804e1",
+          "accountId": "712020:4891947c-7a8e-4889-b2cc-4064669804e1",
+          "avatarUrls": {
+            "48x48": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png",
+            "24x24": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png",
+            "16x16": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png",
+            "32x32": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png"
+          },
+          "displayName": "Valentyn Ponomarenko",
+          "active": false,
+          "timeZone": "America/New_York",
+          "accountType": "atlassian"
+        },
+        "customfield_10000": null,
+        "aggregateprogress": {
+          "progress": 0,
+          "total": 0
+        },
+        "customfield_10001": null,
+        "customfield_10002": "0|i0003r:",
+        "customfield_10200": {
+          "hasEpicLinkFieldDependency": false,
+          "showField": false,
+          "nonEditableReason": {
+            "reason": "PLUGIN_LICENSE_ERROR",
+            "message": "The Parent Link is only available to Jira Premium users."
+          }
+        },
+        "customfield_10003": null,
+        "customfield_10004": null,
+        "customfield_10400": null,
+        "customfield_10710": null,
+        "customfield_10711": null,
+        "environment": null,
+        "customfield_10712": null,
+        "customfield_10713": null,
+        "customfield_10714": null,
+        "duedate": null,
+        "customfield_10715": null,
+        "customfield_10716": null,
+        "customfield_10717": null,
+        "progress": {
+          "progress": 0,
+          "total": 0
+        },
+        "customfield_10718": null,
+        "votes": {
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/ETV-18/votes",
+          "votes": 0,
+          "hasVoted": false
+        },
+        "customfield_10719": null
+      }
+    },
+    {
+      "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10600.requestTypePractice",
+      "id": "10714",
+      "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10714",
+      "key": "ETV-20",
+      "fields": {
+        "statuscategorychangedate": "2024-03-12T12:48:35.730-0400",
+        "issuetype": {
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issuetype/10003",
+          "id": "10003",
+          "description": "The sub-task of the issue",
+          "iconUrl": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/2/universal_avatar/view/type/issuetype/avatar/10316?size=medium",
+          "name": "Sub-task",
+          "subtask": true,
+          "avatarId": 10316,
+          "hierarchyLevel": -1
+        },
         "parent": {
-          "id": "10708",
-          "key": "ETV-14",
-          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10708",
+          "id": "10712",
+          "key": "ETV-18",
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10712",
           "fields": {
-            "summary": "test",
+            "summary": "New Test issue",
             "status": {
-              "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/status/10000",
-              "description": "",
-              "iconUrl": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/",
-              "name": "To Do",
-              "id": "10000",
+              "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/status/3",
+              "description": "This issue is being actively worked on at the moment by the assignee.",
+              "iconUrl": "https://worklytics.atlassian.net/images/icons/statuses/inprogress.png",
+              "name": "In Progress",
+              "id": "3",
               "statusCategory": {
-                "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/statuscategory/2",
-                "id": 2,
-                "key": "new",
-                "colorName": "blue-gray",
-                "name": "To Do"
+                "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/statuscategory/4",
+                "id": 4,
+                "key": "indeterminate",
+                "colorName": "yellow",
+                "name": "In Progress"
               }
             },
             "priority": {
-              "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/priority/3",
-              "iconUrl": "https://worklytics.atlassian.net/images/icons/priorities/medium.svg",
-              "name": "Medium",
-              "id": "3"
+              "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/priority/1",
+              "iconUrl": "https://worklytics.atlassian.net/images/icons/priorities/highest.svg",
+              "name": "Highest",
+              "id": "1"
             },
             "issuetype": {
-              "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issuetype/10000",
-              "id": "10000",
-              "description": "A big user story that needs to be broken down. Created by JIRA Software - do not edit or delete.",
-              "iconUrl": "https://worklytics.atlassian.net/images/icons/issuetypes/epic.svg",
-              "name": "Epic",
+              "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issuetype/10001",
+              "id": "10001",
+              "description": "A user story. Created by JIRA Software - do not edit or delete.",
+              "iconUrl": "https://worklytics.atlassian.net/images/icons/issuetypes/story.svg",
+              "name": "Story",
               "subtask": false,
-              "hierarchyLevel": 1
+              "hierarchyLevel": 0
             }
           }
         },
@@ -74,15 +348,27 @@
           }
         },
         "fixVersions": [],
+        "statusCategory": {
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/statuscategory/3",
+          "id": 3,
+          "key": "done",
+          "colorName": "green",
+          "name": "Done"
+        },
         "aggregatetimespent": null,
-        "resolution": null,
-        "customfield_10500": null,
+        "resolution": {
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/resolution/10000",
+          "id": "10000",
+          "description": "Work has been completed on this issue.",
+          "name": "Done"
+        },
+        "customfield_10500": [],
         "customfield_10700": null,
         "customfield_10701": [],
         "customfield_10702": null,
         "customfield_10703": null,
-        "resolutiondate": null,
         "customfield_10704": null,
+        "resolutiondate": "2024-03-12T12:48:35.723-0400",
         "customfield_10705": null,
         "customfield_10706": null,
         "workratio": -1,
@@ -91,11 +377,11 @@
         "customfield_10709": null,
         "lastViewed": null,
         "watches": {
-          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/ETV-15/watchers",
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/ETV-20/watchers",
           "watchCount": 1,
-          "isWatching": true
+          "isWatching": false
         },
-        "created": "2022-03-02T09:00:35.261-0500",
+        "created": "2024-03-12T12:48:26.716-0400",
         "customfield_10100": null,
         "priority": {
           "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/priority/3",
@@ -109,57 +395,61 @@
         "versions": [],
         "issuelinks": [],
         "assignee": null,
-        "updated": "2022-03-02T09:00:54.241-0500",
+        "updated": "2024-03-12T12:48:35.729-0400",
         "status": {
-          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/status/10000",
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/status/10001",
           "description": "",
           "iconUrl": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/",
-          "name": "To Do",
-          "id": "10000",
+          "name": "Done",
+          "id": "10001",
           "statusCategory": {
-            "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/statuscategory/2",
-            "id": 2,
-            "key": "new",
-            "colorName": "blue-gray",
-            "name": "To Do"
+            "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/statuscategory/3",
+            "id": 3,
+            "key": "done",
+            "colorName": "green",
+            "name": "Done"
           }
         },
         "components": [],
         "timeoriginalestimate": null,
         "description": null,
-        "customfield_10720": null,
+        "timetracking": {},
         "customfield_10600": null,
+        "customfield_10721": null,
         "security": null,
+        "customfield_10722": null,
+        "customfield_10723": null,
         "aggregatetimeestimate": null,
-        "summary": "This is an issue inside the epic",
+        "attachment": [],
+        "customfield_10725": null,
+        "customfield_10726": null,
+        "summary": "New SubTask 2",
         "creator": {
-          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/user?accountId=608a9b555426330072f9867d",
-          "accountId": "608a9b555426330072f9867d",
-          "emailAddress": "fake@contoso.com",
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/user?accountId=712020%3A4891947c-7a8e-4889-b2cc-4064669804e1",
+          "accountId": "712020:4891947c-7a8e-4889-b2cc-4064669804e1",
           "avatarUrls": {
-            "48x48": "https://secure.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FA-3.png",
-            "24x24": "https://secure.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FA-3.png",
-            "16x16": "https://secure.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FA-3.png",
-            "32x32": "https://secure.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FA-3.png"
+            "48x48": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png",
+            "24x24": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png",
+            "16x16": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png",
+            "32x32": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png"
           },
-          "displayName": "Fake",
-          "active": true,
+          "displayName": "Valentyn Ponomarenko",
+          "active": false,
           "timeZone": "America/New_York",
           "accountType": "atlassian"
         },
         "subtasks": [],
         "reporter": {
-          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/user?accountId=608a9b555426330072f9867d",
-          "accountId": "608a9b555426330072f9867d",
-          "emailAddress": "fake@contoso.com",
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/user?accountId=712020%3A4891947c-7a8e-4889-b2cc-4064669804e1",
+          "accountId": "712020:4891947c-7a8e-4889-b2cc-4064669804e1",
           "avatarUrls": {
-            "48x48": "https://secure.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FA-3.png",
-            "24x24": "https://secure.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FA-3.png",
-            "16x16": "https://secure.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FA-3.png",
-            "32x32": "https://secure.gravatar.com/avatar/ac6ffe47a35e01c2ae94a5672d52cfc7?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FA-3.png"
+            "48x48": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png",
+            "24x24": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png",
+            "16x16": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png",
+            "32x32": "https://secure.gravatar.com/avatar/5a733f351c167d389ba9419021149458?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FVP-5.png"
           },
-          "displayName": "Fake",
-          "active": true,
+          "displayName": "Valentyn Ponomarenko",
+          "active": false,
           "timeZone": "America/New_York",
           "accountType": "atlassian"
         },
@@ -168,7 +458,8 @@
           "progress": 0,
           "total": 0
         },
-        "customfield_10001": null,
+        "customfield_10001": "3_*:*_1_*:*_5073_*|*_10000_*:*_1_*:*_3967_*|*_10001_*:*_1_*:*_0",
+        "customfield_10002": "0|i00047:",
         "customfield_10200": {
           "hasEpicLinkFieldDependency": false,
           "showField": false,
@@ -177,32 +468,33 @@
             "message": "The Parent Link is only available to Jira Premium users."
           }
         },
-        "customfield_10002": "0|i0003b:",
         "customfield_10003": null,
-        "customfield_10004": "ETV-14",
+        "customfield_10004": null,
         "customfield_10400": null,
         "customfield_10710": null,
-        "environment": null,
         "customfield_10711": null,
+        "environment": null,
         "customfield_10712": null,
         "customfield_10713": null,
         "customfield_10714": null,
-        "customfield_10715": null,
         "duedate": null,
+        "customfield_10715": null,
         "customfield_10716": null,
         "customfield_10717": null,
-        "customfield_10718": null,
         "progress": {
           "progress": 0,
           "total": 0
         },
+        "customfield_10718": null,
         "customfield_10719": null,
         "votes": {
-          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/ETV-15/votes",
+          "self": "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/ETV-20/votes",
           "votes": 0,
           "hasVoted": false
         }
       }
     }
-  ]
+  ],
+  "nextPageToken": "Ckl1cGRhdGVkJnVwZGF0ZWQmT1JERVJfREVTQyNMb25nJk1UY3hNREkyTWpFeE5UY3lPUT09JVN0cmluZyZSVlJXJUludCZNakE9EAIYt-G17_cyIlR1cGRhdGVkID49ICcyMDIyLzAzLzE5IDEzOjM3JyBBTkQgdXBkYXRlZCA8ICcyMDI1LzA2LzE3IDE0OjM3JyBPUkRFUiBCWSB1cGRhdGVkIERFU0M=",
+  "isLast": false
 }

@@ -101,28 +101,27 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
     void issues_by_jql() {
         String jsonString = asJson("issues_by_jql.json");
 
-        String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/search/jql?jql=something&startAt=50";
+        String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/search/jql?jql=something";
 
-        Collection<String> PII = Arrays.asList("608a9b555426330072f9867d", "fake@contoso.com", "Fake");
+        Collection<String> PII = Arrays.asList("712020:4891947c-7a8e-4889-b2cc-4064669804e1", "Bob Smith");
         assertNotSanitized(jsonString, PII);
 
         String sanitized = this.sanitize(endpoint, jsonString);
 
-        assertPseudonymized(sanitized, "608a9b555426330072f9867d");
-        assertPseudonymized(sanitized, "fake@contoso.com");
+        assertPseudonymized(sanitized, "712020:4891947c-7a8e-4889-b2cc-4064669804e1");
         assertRedacted(sanitized,
-            "Fake", // display name
+            "Bob Smith", // display name
             "https://..." //photo url placeholders
         );
 
-        assertNotSanitized(sanitized, "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10709");
+        assertNotSanitized(sanitized, "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10712");
     }
 
     @Test
     void issue() {
         String jsonString = asJson("issue.json");
 
-        String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/ISSUE?startAt=50";
+        String endpoint = "https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/ISSUE";
 
         Collection<String> PII = Arrays.asList("608a9b555426330072f9867d", "fake@contoso.com", "Fake");
         assertNotSanitized(jsonString, PII);
@@ -223,7 +222,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/users?startAt=0&maxResults=25", "users.json"),
             InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/group/bulk", "groups.json"),
             InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/group/member?groupId=5b10ac8d82e05b22cc7d4ef5", "group_member.json"),
-            InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/search/jql?jql=something&startAt=50", "issues_by_jql.json"),
+            InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/search/jql?jql=something&nextPageToken=token", "issues_by_jql.json"),
             InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/changelog?&startAt=50", "issue_changelog.json"),
             InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/comment?&startAt=50", "issue_comment_v3.json"),
             InvocationExample.of("https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/fake/worklog?&startAt=50", "issue_worklog_v3.json"),
