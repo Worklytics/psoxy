@@ -28,7 +28,7 @@ locals {
   use_api_gateway = var.api_gateway_v2 != null
 
   authorization_type = "NONE"                                # TODO: make this configurable, if auth BEYOND function-level checks of Authorization header is desired
-  http_methods       = concat(var.http_methods, ["OPTIONS"]) # always add OPTIONS, as required by CORS
+  http_methods       = var.http_methods                      # Use http_methods directly without adding OPTIONS
 }
 
 module "env_id" {
