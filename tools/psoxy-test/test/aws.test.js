@@ -45,7 +45,7 @@ test.beforeEach(async (t) => {
   td.when(
     t.context.utils.signAWSRequestURL(
       td.matchers.isA(URL),
-      td.matchers.contains('GET'),
+      td.matchers.argThat((arg) => ['GET', 'POST'].includes(arg)),
       td.matchers.anything(),
       credentials,
       options.region,
@@ -146,3 +146,47 @@ test.serial('Psoxy call: pathless URL results 500', async (t) => {
   const result = await aws.call(options);
   t.is(result.headers['x-psoxy-error'], 'BLOCKED_BY_RULES');
 });
+
+test.serial('Psoxy call: with POST, signingKey, and identityToSign options (Webhook use-case)',
+  async(t) => {
+    const aws = t.context.subject;
+    const utils = t.context.utils;
+
+    options.url += '/foo';
+    options.method = 'POST';
+    options.body = JSON.stringify({ foo: 'bar' });
+    options.signingKey = 'aws-kms:foo';
+    options.identityToSign = 'test-identity';
+
+    const jwtSignatureExample = 'jwtSignatureExample';
+
+    td.when(
+      utils.signJwtWithKMS(
+        td.matchers.contains({
+          iss: options.signingKey,
+          sub: options.identityToSign,
+          aud: options.url,
+        }),
+        td.matchers.contains('foo'), // signingKey without 'aws-kms:' prefix
+        td.matchers.contains(credentials),
+        td.matchers.contains(options.region),
+      )
+    ).thenReturn(jwtSignatureExample);
+
+    td.when(
+      utils.request(
+        td.matchers.isA(URL),
+        td.matchers.contains('POST'),
+        td.matchers.contains({
+          ...signedRequest.headers,
+          // if signing works this header must be included in the request
+          'x-psoxy-authorization': jwtSignatureExample,
+        }),
+        td.matchers.contains(options.body)
+      )
+    ).thenReturn({ status: httpCodes.HTTP_STATUS_OK });
+
+    const result = await aws.call(options);
+
+    t.is(result.status, httpCodes.HTTP_STATUS_OK);
+  })
