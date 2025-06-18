@@ -27,7 +27,7 @@ locals {
   # helper to clarify conditionals throughout
   use_api_gateway = var.api_gateway_v2 != null
 
-  authorization_type = "IAM"
+  authorization_type = "AWS_IAM"
   http_methods       = var.http_methods # Use http_methods directly without adding OPTIONS
 }
 
