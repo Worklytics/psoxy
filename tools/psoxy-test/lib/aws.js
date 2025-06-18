@@ -124,7 +124,6 @@ async function call(options = {}) {
     }
 
     headers['x-psoxy-authorization'] = signature;
-    console.log(signature);
   }
 
 
