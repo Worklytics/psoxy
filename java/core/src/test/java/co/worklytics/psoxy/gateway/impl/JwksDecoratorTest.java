@@ -20,9 +20,9 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class WebhookJwksRequestHandlerTest {
+public class JwksDecoratorTest {
 
-    WebhookJwksRequestHandler handler;
+    JwksDecorator handler;
     ConfigService configService;
     Set<PublicKeyStoreClient> keyClients;
 
@@ -56,13 +56,12 @@ public class WebhookJwksRequestHandlerTest {
         when(configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ACCEPTED_AUTH_KEYS))
             .thenReturn(java.util.Optional.of("base64:" + generatedBase64Key));
         keyClients = Collections.singleton(new Base64KeyClient());
-        handler = new WebhookJwksRequestHandler();
-        handler.inboundWebhookHandler = new InboundWebhookHandler(
+        handler = new JwksDecorator(new InboundWebhookHandler(
             () -> mock(WebhookSanitizer.class), // Mocked WebhookSanitizer
             new NoOutput(),
             configService,
             keyClients
-        );
+        ));
     }
 
     @Test
@@ -74,11 +73,11 @@ public class WebhookJwksRequestHandlerTest {
         assertEquals(200, response.getStatusCode());
         assertEquals("application/json", response.getHeaders().get("Content-Type"));
         // Dynamically fill in kid, n, e for the expected JSON
-        java.util.Iterator<java.security.interfaces.RSAPublicKey> it = handler.inboundWebhookHandler.acceptableAuthKeys().iterator();
+        java.util.Iterator<java.security.interfaces.RSAPublicKey> it = handler.jwtAuthorizedResource.acceptableAuthKeys().iterator();
         java.security.interfaces.RSAPublicKey key = it.next();
         String kid = Integer.toHexString(key.hashCode());
-        String n = WebhookJwksRequestHandler.JWK.fromRSAPublicKey(key).n;
-        String e = WebhookJwksRequestHandler.JWK.fromRSAPublicKey(key).e;
+        String n = JwksDecorator.JWK.fromRSAPublicKey(key).n;
+        String e = JwksDecorator.JWK.fromRSAPublicKey(key).e;
         String expectedJson = String.format(EXPECTED_JSON, kid, n, e).replaceAll("\\s+", "");
         String actualJson = response.getBody().replaceAll("\\s+", "");
         assertEquals(expectedJson, actualJson);

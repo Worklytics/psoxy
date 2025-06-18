@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.auth.JwtAuthorizedResource;
 import co.worklytics.psoxy.gateway.auth.PublicKeyRef;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.output.Output;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
  *
  */
 @Log
-public class InboundWebhookHandler {
+public class InboundWebhookHandler implements JwtAuthorizedResource {
 
     static final Duration MAX_TOKEN_AGE = Duration.ofHours(1);
 
@@ -151,7 +152,6 @@ public class InboundWebhookHandler {
         }
 
 
-
         ProcessedContent sanitized = webhookSanitizer.sanitize(request);
 
         output.write(sanitized);
@@ -164,11 +164,21 @@ public class InboundWebhookHandler {
     /**
      * returns a failure message if invalid, or empty otherwise
      * @param signedJWT
+     * @return optional with the failure, if any
+     */
+    @Override
+    public Optional<String> validate(SignedJWT jwt) {
+        return validate(jwt, acceptableAuthKeys());
+    }
+
+    /**
+     * returns a failure message if invalid, or empty otherwise
+     * @param signedJWT
      * @param publicKeys
      * @return optional with the failure, if any
      */
     @SneakyThrows
-    public Optional<String> validate(SignedJWT signedJWT, Collection<RSAPublicKey> publicKeys) {
+    Optional<String> validate(SignedJWT signedJWT, Collection<RSAPublicKey> publicKeys) {
 
         boolean signatureValid = publicKeys.stream()
             .filter(k -> {
@@ -199,7 +209,7 @@ public class InboundWebhookHandler {
         return Optional.empty();
     }
 
-    Collection<RSAPublicKey> acceptableAuthKeys() {
+    public Collection<RSAPublicKey> acceptableAuthKeys() {
         return Arrays.stream(configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ACCEPTED_AUTH_KEYS).orElse("").split(","))
             .map(String::trim)
             .filter(keyRef -> !keyRef.isEmpty())

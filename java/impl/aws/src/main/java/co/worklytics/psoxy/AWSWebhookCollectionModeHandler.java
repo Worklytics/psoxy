@@ -7,7 +7,7 @@ import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.impl.BatchMergeHandler;
 import co.worklytics.psoxy.gateway.impl.InboundWebhookHandler;
-import co.worklytics.psoxy.gateway.impl.WebhookJwksRequestHandler;
+import co.worklytics.psoxy.gateway.impl.JwksDecorator;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
@@ -49,7 +49,7 @@ public class AWSWebhookCollectionModeHandler implements RequestStreamHandler {
 
     static ObjectMapper sqsPayloadMapper;
 
-    static WebhookJwksRequestHandler webhookJwksRequestHandler;
+    static JwksDecorator jwksHandler;
 
     static {
         staticInit();
@@ -62,7 +62,7 @@ public class AWSWebhookCollectionModeHandler implements RequestStreamHandler {
         mapper = awsContainer.objectMapper();
         sqsPayloadMapper = new ObjectMapper();
         sqsPayloadMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        webhookJwksRequestHandler = awsContainer.jwksHandler();
+        jwksHandler = new JwksDecorator(inboundWebhookHandler);
     }
 
 
@@ -137,19 +137,20 @@ public class AWSWebhookCollectionModeHandler implements RequestStreamHandler {
      */
     @SneakyThrows
     public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent httpEvent, Context context) {
+        //interfaces:
+        // - HttpRequestEvent --> HttpResponseEvent
 
+        APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter = new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
+        HttpEventResponse response;
+
+        boolean base64Encoded = false;
         if (httpEvent.getRawPath().endsWith(".well-known/jwks.json")) {
             // special case for JWKS endpoint, which is used by clients to fetch public keys
             // for verifying JWTs signed by the proxy
             context.getLogger().log("Handling JWKS request");
-            return awsContainer.jwksHandler().handleRequest(httpEvent, context);
+            response = jwksHandler.handle(httpEventRequestAdapter);
         } else {
-            //interfaces:
-            // - HttpRequestEvent --> HttpResponseEvent
-            HttpEventResponse response;
-            boolean base64Encoded = false;
             try {
-                APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter = new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
                 response = inboundWebhookHandler.handle(httpEventRequestAdapter);
             } catch (Throwable e) {
                 context.getLogger().log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
@@ -160,20 +161,20 @@ public class AWSWebhookCollectionModeHandler implements RequestStreamHandler {
                     .header(ResponseHeader.ERROR.getHttpHeader(), "Unknown error")
                     .build();
             }
+        }
 
-            try {
-                //NOTE: AWS seems to give 502 Bad Gateway errors without explanation or any info
-                // in the lambda logs if this is malformed somehow (Eg, missing statusCode)
-                return APIGatewayV2HTTPResponse.builder()
-                    .withStatusCode(response.getStatusCode())
-                    .withHeaders(response.getHeaders())
-                    .withBody(response.getBody())
-                    .withIsBase64Encoded(base64Encoded)
-                    .build();
-            } catch (Throwable e) {
-                context.getLogger().log("Error writing response as Lambda return");
-                throw new Error(e);
-            }
+        try {
+            //NOTE: AWS seems to give 502 Bad Gateway errors without explanation or any info
+            // in the lambda logs if this is malformed somehow (Eg, missing statusCode)
+            return APIGatewayV2HTTPResponse.builder()
+                .withStatusCode(response.getStatusCode())
+                .withHeaders(response.getHeaders())
+                .withBody(response.getBody())
+                .withIsBase64Encoded(base64Encoded)
+                .build();
+        } catch (Throwable e) {
+            context.getLogger().log("Error writing response as Lambda return");
+            throw new Error(e);
         }
     }
 

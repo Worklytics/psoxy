@@ -2,9 +2,9 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.auth.JwtAuthorizedResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import javax.inject.Inject;
 import java.math.BigInteger;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
@@ -12,20 +12,22 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 /**
- * handles requests for the JWKS (JSON Web Key Set) endpoint, to support JWT auth for webhook collection mode
- *
+ * decorates an implementation of {@link JwtAuthorizedResource} to provide a JWKS endpoint.
  */
-public class WebhookJwksRequestHandler {
+public class JwksDecorator {
 
-    @Inject
-    InboundWebhookHandler inboundWebhookHandler;
+    JwtAuthorizedResource jwtAuthorizedResource;
+
+    public JwksDecorator(JwtAuthorizedResource jwtAuthorizedResource) {
+        this.jwtAuthorizedResource = jwtAuthorizedResource;
+    }
 
     public HttpEventResponse handle(HttpEventRequest request) {
         if (!request.getPath().endsWith(".well-known/jwks.json")) {
             throw new IllegalArgumentException("Invalid JWKS request path: " + request.getPath());
         }
         try {
-            Collection<RSAPublicKey> keys = inboundWebhookHandler.acceptableAuthKeys();
+            Collection<RSAPublicKey> keys = jwtAuthorizedResource.acceptableAuthKeys();
             JWKSResponse jwks = new JWKSResponse(
                 keys.stream().map(JWK::fromRSAPublicKey).collect(Collectors.toList())
             );
