@@ -216,7 +216,7 @@ variable "secrets_store_implementation" {
 variable "allow_origins" {
   type        = list(string)
   description = "list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)"
-  default = [ "*" ]
+  default     = ["*"]
 }
 
 variable "test_caller_role_arn" {

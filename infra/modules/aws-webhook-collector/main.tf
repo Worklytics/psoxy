@@ -28,7 +28,7 @@ locals {
   use_api_gateway = var.api_gateway_v2 != null
 
   authorization_type = "IAM"
-  http_methods       = var.http_methods                      # Use http_methods directly without adding OPTIONS
+  http_methods       = var.http_methods # Use http_methods directly without adding OPTIONS
 }
 
 module "env_id" {
