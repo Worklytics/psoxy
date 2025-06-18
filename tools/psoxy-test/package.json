@@ -38,8 +38,7 @@
   },
   "ava": {
     "files": [
-      "test/psoxy-test-call.test.js",
-      "test/utils.test.js"
+      "test/*.js"
     ]
   }
 }
