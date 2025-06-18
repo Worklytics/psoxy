@@ -6,7 +6,8 @@ import {
   request,
   resolveHTTPMethod,
   resolveAWSRegion,
-  signAWSRequestURL
+  signAWSRequestURL,
+  signJwtWithKMS,
 } from './utils.js';
 import {
   S3Client,
@@ -21,10 +22,6 @@ import {
   DescribeLogStreamsCommand,
   GetLogEventsCommand,
 } from '@aws-sdk/client-cloudwatch-logs';
-import {
-   KMSClient,
-   SignCommand
-} from '@aws-sdk/client-kms';
 
 import fs from 'fs';
 import getLogger from './logger.js';
@@ -55,34 +52,6 @@ function base64url(input) {
     .replace(/\//g, '_');
 }
 
-async function signJwtWithKMS(claims, keyId, credentials, region) {
-  const client = new KMSClient({
-    region: region,
-    credentials: credentials,
-  });
-
-  const encodedHeader = base64url(Buffer.from(JSON.stringify({
-    "alg": "RS256",
-    "typ": "JWT",
-  })));
-  const encodedPayload = base64url(Buffer.from(JSON.stringify(claims)));
-  const signingInput = `${encodedHeader}.${encodedPayload}`;
-
-  const hash = crypto.createHash('sha256').update(signingInput).digest();
-
-  const command = new SignCommand({
-    KeyId: keyId,
-    SigningAlgorithm: 'RSASSA_PKCS1_V1_5_SHA_256',
-    Message: hash,
-    MessageType: 'DIGEST' // 🟢 explicitly indicate pre-hashed input
-  });
-
-  const response = await client.send(command);
-
-  const signature = base64url(Buffer.from(response.Signature));
-  return `${signingInput}.${signature}`;
-}
-
 /**
  * Psoxy test
  *
@@ -104,13 +73,13 @@ async function call(options = {}) {
 
   const signed = signAWSRequestURL(url, method, options.body, credentials,
      options.region);
+
   const headers = {
     ...getCommonHTTPHeaders(options),
     ...signed.headers,
   };
 
   if (options.signingKey) {
-
     let signature;
     let claims = {
       iss: options.signingKey, // silly?
@@ -125,7 +94,6 @@ async function call(options = {}) {
 
     headers['x-psoxy-authorization'] = signature;
   }
-
 
   logger.info(`Calling Psoxy and waiting response: ${options.url.toString()}`);
   logger.verbose('Request Options:', { additional: options });
@@ -425,4 +393,3 @@ export default {
   parseLogEvents,
   upload,
 }
-
