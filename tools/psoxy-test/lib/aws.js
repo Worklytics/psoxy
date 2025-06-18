@@ -82,7 +82,7 @@ async function call(options = {}) {
   if (options.signingKey) {
     let signature;
     let claims = {
-      iss: options.signingKey, // silly?
+      iss: "https://" + url.hostname,
       sub: options.identityToSign,
       aud: url.toString(),
       iat: Math.floor(Date.now() / 1000), // current time in seconds

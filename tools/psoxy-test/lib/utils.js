@@ -472,6 +472,7 @@ async function signJwtWithKMS(claims, keyId, credentials, region) {
 
   const encodedHeader = base64url(Buffer.from(JSON.stringify({
     "alg": "RS256",
+    "kid": keyId,
     "typ": "JWT",
   })));
   const encodedPayload = base64url(Buffer.from(JSON.stringify(claims)));
