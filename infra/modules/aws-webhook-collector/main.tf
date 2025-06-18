@@ -142,7 +142,7 @@ resource "aws_apigatewayv2_authorizer" "jwt" {
 resource "aws_apigatewayv2_route" "jwks" {
   api_id             = var.api_gateway_v2.id
   route_key          = "GET /${module.gate_instance.function_name}/.well-known/jwks.json"
-  target             = "integrations/${aws_apigatewayv2_integration.map[0].id}"
+  target             = "integrations/${aws_apigatewayv2_integration.map.id}"
   authorization_type = "NONE"
 }
 
@@ -152,7 +152,7 @@ resource "aws_apigatewayv2_route" "methods" {
 
   api_id             = var.api_gateway_v2.id
   route_key          = "${each.key} /${module.gate_instance.function_name}/{proxy+}" # q: does this need to be a {proxy+} route?? why??
-  target             = "integrations/${aws_apigatewayv2_integration.map[0].id}"
+  target             = "integrations/${aws_apigatewayv2_integration.map.id}"
   authorizer_id      = aws_apigatewayv2_authorizer.jwt.id
   authorization_type = "JWT"
 }
