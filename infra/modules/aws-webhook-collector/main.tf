@@ -24,11 +24,7 @@ locals {
     : k => v if v != null
   }
 
-  # helper to clarify conditionals throughout
-  use_api_gateway = var.api_gateway_v2 != null
-
-  authorization_type = "AWS_IAM"
-  http_methods       = var.http_methods # Use http_methods directly without adding OPTIONS
+  http_methods = var.http_methods # Use http_methods directly without adding OPTIONS
 }
 
 module "env_id" {
@@ -116,32 +112,8 @@ module "gate_instance" {
   )
 }
 
-# lambda function URL (only if NOT using API Gateway)
-resource "aws_lambda_function_url" "lambda_url" {
-  count = local.use_api_gateway ? 0 : 1
 
-  function_name      = module.gate_instance.function_name
-  authorization_type = local.authorization_type
-
-  # NOTE: CORS doesn't require that we include 'OPTIONS' method, as it is added automatically
-  # message is You can use GET, PUT, POST, DELETE, HEAD, PATCH, and the wildcard character (*).",
-  cors {
-    allow_credentials = true
-    allow_headers     = ["*"]
-    allow_methods     = [for m in local.http_methods : m if !(m == "OPTIONS")]
-    allow_origins     = var.allow_origins
-    expose_headers    = ["*"]
-  }
-
-  depends_on = [
-    module.gate_instance
-  ]
-}
-
-# API Gateway (only if NOT using lambda function URL)
 resource "aws_apigatewayv2_integration" "map" {
-  count = local.use_api_gateway ? 1 : 0
-
   api_id                 = var.api_gateway_v2.id
   integration_type       = "AWS_PROXY"
   connection_type        = "INTERNET"
@@ -151,23 +123,45 @@ resource "aws_apigatewayv2_integration" "map" {
   timeout_milliseconds   = 30000 # ideally would be 55 or 60, but docs say limit is 30s
 }
 
+resource "aws_apigatewayv2_authorizer" "jwt" {
+  name             = "jwt-authorizer"
+  api_id           = var.api_gateway_v2.id
+  authorizer_type  = "JWT"
+  identity_sources = ["$request.header.Authorization"]
+
+  jwt_configuration {
+    issuer = var.api_gateway_v2.stage_invoke_url
+    audience = [
+      var.api_gateway_v2.stage_invoke_url
+    ]
+  }
+}
+
+# serve JWKS from /{instance-id}/.well-known/jwks.json
+# q: will this work? circular, as the API is serving the JWKS that will be used to authenticate requests to other routes
+resource "aws_apigatewayv2_route" "jwks" {
+  api_id             = var.api_gateway_v2.id
+  route_key          = "GET /${module.gate_instance.function_name}/.well-known/jwks.json"
+  target             = "integrations/${aws_apigatewayv2_integration.map[0].id}"
+  authorization_type = "NONE"
+}
+
+
 resource "aws_apigatewayv2_route" "methods" {
-  for_each = toset(local.use_api_gateway ? local.http_methods : [])
+  for_each = local.http_methods
 
   api_id             = var.api_gateway_v2.id
-  route_key          = "${each.key} /${module.gate_instance.function_name}/{proxy+}"
-  authorization_type = local.authorization_type
+  route_key          = "${each.key} /${module.gate_instance.function_name}/{proxy+}" # q: does this need to be a {proxy+} route?? why??
   target             = "integrations/${aws_apigatewayv2_integration.map[0].id}"
+  authorizer_id      = aws_apigatewayv2_authorizer.jwt.id
+  authorization_type = "JWT"
 }
 
 resource "aws_lambda_permission" "api_gateway" {
-  count = local.use_api_gateway ? 1 : 0
-
   statement_id  = "Allow${module.gate_instance.function_name}Invoke"
   action        = "lambda:InvokeFunction"
   function_name = module.gate_instance.function_name
   principal     = "apigateway.amazonaws.com"
-
 
   # The /*/*/ part allows invocation from any stage, method and resource path
   # within API Gateway REST API.
@@ -281,13 +275,7 @@ resource "aws_kms_alias" "auth_key_alias" {
 
 
 locals {
-  api_gateway_url = local.use_api_gateway ? "${var.api_gateway_v2.stage_invoke_url}/${module.gate_instance.function_name}" : null
-
-  # lambda_url has trailing /, but our example_api_calls already have preceding /
-  function_url = local.use_api_gateway ? null : substr(aws_lambda_function_url.lambda_url[0].function_url, 0, length(aws_lambda_function_url.lambda_url[0].function_url) - 1)
-
-  proxy_endpoint_url = coalesce(local.api_gateway_url, local.function_url)
-
+  proxy_endpoint_url = "${var.api_gateway_v2.stage_invoke_url}/${module.gate_instance.function_name}"
 
   # don't want to *require* assumption of a role for testing; while we expect it in usual case
   # (a provisioner must assume PsoxyCaller role for the test), customer could be using a single

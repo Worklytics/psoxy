@@ -26,26 +26,29 @@ locals {
   # VPC *requires* API Gateway v2, or calls just timeout
   use_api_gateway_v2 = var.vpc_config != null || var.use_api_gateway_v2
 
-  enable_webhook_testing = var.provision_testing_infra && length(keys(var.webhook_collectors)) > 0
+  has_enabled_webhook_collectors = length(keys(var.webhook_collectors)) > 0
+  enable_webhook_testing         = var.provision_testing_infra && local.has_enabled_webhook_collectors
 }
 
 module "psoxy" {
   source = "../../modules/aws"
 
-  aws_account_id                 = var.aws_account_id
-  region                         = data.aws_region.current.id
-  psoxy_base_dir                 = var.psoxy_base_dir
-  caller_aws_arns                = var.caller_aws_arns
-  caller_gcp_service_account_ids = var.caller_gcp_service_account_ids
-  deployment_bundle              = var.deployment_bundle
-  force_bundle                   = var.force_bundle
-  install_test_tool              = var.install_test_tool
-  deployment_id                  = module.env_id.id
-  api_function_name_prefix       = "${lower(module.env_id.id)}-"
-  use_api_gateway_v2             = local.use_api_gateway_v2
-  logs_kms_key_arn               = var.logs_kms_key_arn
-  iam_roles_permissions_boundary = var.iam_roles_permissions_boundary
-  enable_webhook_testing         = local.enable_webhook_testing
+  aws_account_id                     = var.aws_account_id
+  region                             = data.aws_region.current.id
+  psoxy_base_dir                     = var.psoxy_base_dir
+  caller_aws_arns                    = var.caller_aws_arns
+  caller_gcp_service_account_ids     = var.caller_gcp_service_account_ids
+  deployment_bundle                  = var.deployment_bundle
+  force_bundle                       = var.force_bundle
+  install_test_tool                  = var.install_test_tool
+  deployment_id                      = module.env_id.id
+  api_function_name_prefix           = "${lower(module.env_id.id)}-"
+  use_api_gateway_v2                 = local.use_api_gateway_v2
+  logs_kms_key_arn                   = var.logs_kms_key_arn
+  iam_roles_permissions_boundary     = var.iam_roles_permissions_boundary
+  provision_webhook_collection_infra = local.has_enabled_webhook_collectors
+  enable_webhook_testing             = local.enable_webhook_testing
+  webhook_allow_origins              = distinct(flatten([for v in var.webhook_collectors : v.allow_origins]))
 }
 
 resource "aws_iam_policy" "execution_lambda_to_caller" {
@@ -279,24 +282,24 @@ module "webhook_collectors" {
 
   source = "../../modules/aws-webhook-collector"
 
-  environment_name                   = var.environment_name
-  instance_id                        = each.key
-  path_to_function_zip               = module.psoxy.path_to_deployment_jar
-  function_zip_hash                  = module.psoxy.deployment_package_hash
-  function_env_kms_key_arn           = var.function_env_kms_key_arn
-  logs_kms_key_arn                   = var.logs_kms_key_arn
-  log_retention_days                 = var.log_retention_days
-  sanitized_accessor_role_names      = [module.psoxy.api_caller_role_name]
-  aws_account_id                     = var.aws_account_id
-  path_to_repo_root                  = var.psoxy_base_dir
-  secrets_store_implementation       = var.secrets_store_implementation
-  global_parameter_arns              = try(module.global_secrets_ssm[0].secret_arns, [])
-  global_secrets_manager_secret_arns = try(module.global_secrets_secrets_manager[0].secret_arns, {})
-  path_to_instance_ssm_parameters    = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
-  path_to_shared_ssm_parameters      = local.path_to_shared_secrets
-  ssm_kms_key_ids                    = local.ssm_key_ids
-  vpc_config                         = var.vpc_config
-  # api_gateway_v2                        = module.psoxy.api_gateway_v2 # TODO: nonsensical to have this be the SAME api gateway as for the API connectors; should have a separate one for webhook collectors
+  environment_name                     = var.environment_name
+  instance_id                          = each.key
+  path_to_function_zip                 = module.psoxy.path_to_deployment_jar
+  function_zip_hash                    = module.psoxy.deployment_package_hash
+  function_env_kms_key_arn             = var.function_env_kms_key_arn
+  logs_kms_key_arn                     = var.logs_kms_key_arn
+  log_retention_days                   = var.log_retention_days
+  sanitized_accessor_role_names        = [module.psoxy.api_caller_role_name]
+  aws_account_id                       = var.aws_account_id
+  path_to_repo_root                    = var.psoxy_base_dir
+  secrets_store_implementation         = var.secrets_store_implementation
+  global_parameter_arns                = try(module.global_secrets_ssm[0].secret_arns, [])
+  global_secrets_manager_secret_arns   = try(module.global_secrets_secrets_manager[0].secret_arns, {})
+  path_to_instance_ssm_parameters      = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
+  path_to_shared_ssm_parameters        = local.path_to_shared_secrets
+  ssm_kms_key_ids                      = local.ssm_key_ids
+  vpc_config                           = var.vpc_config
+  api_gateway_v2                       = module.psoxy.webhook_collection_gateway
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   test_caller_role_arn                 = module.psoxy.webhook_test_caller_role_arn

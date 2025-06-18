@@ -12,6 +12,7 @@ You'll provision the following to host Psoxy in AWS:
 - [Cognito Pools and Identities](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-identity.html), if connecting to Microsoft 365 data sources
 - [Simple Query Service (SQS) queues] (https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html), if using [webhook collection mode](../../docs/development/alpha-features/webhook-collectors.md)
 - [KMS Keys and Aliases](https://docs.aws.amazon.com/kms/latest/developerguide/overview.html), if using [webhook collection mode](../../docs/development/alpha-features/webhook-collectors.md)
+- [API Gateway](https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html), if using [webhook collection mode](../../docs/development/alpha-features/webhook-collectors.md); or if desired for API connectors
 
 The diagram below provides an architecture overview of the 'API' and 'Bulk' mode use-cases.
 
