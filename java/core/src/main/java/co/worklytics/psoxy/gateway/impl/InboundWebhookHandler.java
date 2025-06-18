@@ -21,6 +21,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.TemporalAmount;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -35,7 +36,12 @@ import java.util.stream.Collectors;
 @Log
 public class InboundWebhookHandler {
 
-    static final Duration MAX_TOKEN_AGE = Duration.ofHours(1);
+    // main point of this is to ensure that servers haven't issued super-long-lived tokens by mistake
+    // for example, by setting `exp` in milliseconds since epoch, instead of seconds since epoch
+    static final Duration MAX_FUTURE_TOKEN_EXPIRATION = Duration.ofDays(365); // 1 year
+
+    // check and allow *some* clock skew in iat and exp
+    static final Duration ALLOWED_CLOCK_SKEW = Duration.ofMinutes(2);
 
     private final Output output;
     private final WebhookSanitizer webhookSanitizer;
@@ -142,8 +148,6 @@ public class InboundWebhookHandler {
                 .build();
         }
 
-
-
         ProcessedContent sanitized = webhookSanitizer.sanitize(request);
 
         output.write(sanitized);
@@ -155,28 +159,36 @@ public class InboundWebhookHandler {
 
     /**
      * returns a failure message if invalid, or empty otherwise
-     * @param signedJWT
-     * @param publicKeys
+     * @param signedJWT to validate
+     * @param publicKeys to verify the signature against; if ANY of these keys can verify the signature, the JWT is considered valid
      * @return optional with the failure, if any
      */
     @SneakyThrows
     public Optional<String> validate(SignedJWT signedJWT, Collection<RSAPublicKey> publicKeys) {
+        Instant now = clock.instant();
 
         if (signedJWT.getJWTClaimsSet() == null) {
             return Optional.of("Auth token invalid because JWT claims set is null");
         }
 
+        //q: is this worth enforcing?
         if (signedJWT.getJWTClaimsSet().getIssueTime() == null) {
             return Optional.of("Auth token invalid because issued at time (iat) is null");
+        }
+        if (signedJWT.getJWTClaimsSet().getIssueTime().after(Date.from(now.plus(ALLOWED_CLOCK_SKEW)))) {
+            return Optional.of("Auth token invalid because its issued at time (iat) is in the future: " + signedJWT.getJWTClaimsSet().getIssueTime());
         }
 
         if (signedJWT.getJWTClaimsSet().getExpirationTime() == null) {
             return Optional.of("Auth token invalid because expiration time (exp) is null");
         }
 
-        Instant now = clock.instant();
-        if (signedJWT.getJWTClaimsSet().getExpirationTime().before(Date.from(now))) {
-            return Optional.of("Auth token invalid because its expiration time (exp) is in the past: " + signedJWT.getJWTClaimsSet().getExpirationTime());
+        if (signedJWT.getJWTClaimsSet().getExpirationTime().before(Date.from(now.minus(ALLOWED_CLOCK_SKEW)))) {
+            return Optional.of("Auth token invalid because its expiration time (exp) is too far in the past: " + signedJWT.getJWTClaimsSet().getExpirationTime());
+        }
+
+        if (signedJWT.getJWTClaimsSet().getExpirationTime().after(Date.from(now.plus(MAX_FUTURE_TOKEN_EXPIRATION)))) {
+            return Optional.of("Auth token invalid because its expires too far in future: " + signedJWT.getJWTClaimsSet().getExpirationTime());
         }
 
         boolean signatureValid = publicKeys.stream()
