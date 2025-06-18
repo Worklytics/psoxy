@@ -164,7 +164,7 @@ variable "api_gateway_v2" {
 variable "http_methods" {
   type        = list(string)
   description = "HTTP methods to expose; NOTE: 'OPTIONS' is always added to this list, so you don't need to include it; if you want to allow all methods, use ['*']"
-  default     = ["GET", "POST"]
+  default     = ["POST"]
 }
 
 # examples:

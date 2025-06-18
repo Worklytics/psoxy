@@ -225,7 +225,7 @@ resource "aws_apigatewayv2_stage" "webhook_collector" {
 resource "aws_cloudwatch_log_group" "webhook_collection_api_log" {
   count = var.provision_webhook_collection_infra ? 1 : 0
 
-  name              = aws_apigatewayv2_api.proxy_api[0].name
+  name              = aws_apigatewayv2_api.webhook_collector_api[0].name
   retention_in_days = 7
   kms_key_id        = var.logs_kms_key_arn
 }

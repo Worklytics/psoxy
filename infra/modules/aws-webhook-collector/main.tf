@@ -148,7 +148,7 @@ resource "aws_apigatewayv2_route" "jwks" {
 
 
 resource "aws_apigatewayv2_route" "methods" {
-  for_each = local.http_methods
+  for_each = toset(local.http_methods) # q: should we just limit this to POST??
 
   api_id             = var.api_gateway_v2.id
   route_key          = "${each.key} /${module.gate_instance.function_name}/{proxy+}" # q: does this need to be a {proxy+} route?? why??
