@@ -111,6 +111,7 @@ module "gate_instance" {
     },
     length(local.accepted_auth_keys) > 0 ? {
       ACCEPTED_AUTH_KEYS = join(",", local.accepted_auth_keys)
+      ALLOW_ORIGINS      = join(",", var.allow_origins)
     } : {}
   )
 }

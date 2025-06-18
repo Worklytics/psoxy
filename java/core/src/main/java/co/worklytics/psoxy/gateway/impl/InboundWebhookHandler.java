@@ -71,14 +71,6 @@ public class InboundWebhookHandler {
         }
     }
 
-    static final HttpEventResponse CORS_PRE_FLIGHT_RESPONSE = HttpEventResponse.builder()
-        .statusCode(HttpStatus.SC_NO_CONTENT)
-        .header("Connection", "keep-alive") // correct??
-        .header("Access-Control-Allow-Origin", "*") // q: configurable? what's the use-case to restrict this? if auth is based on Authorization header, no way for a malicious site to obtain and forge that, right?
-        .header("Access-Control-Allow-Methods", "POST, OPTIONS") // TODO: make this configurable
-        .header("Access-Control-Allow-Headers", "*")  // TODO: make this explicit?
-        .build();
-
 
     @SneakyThrows
     public HttpEventResponse handle(HttpEventRequest request) {
@@ -87,8 +79,17 @@ public class InboundWebhookHandler {
             // at least in AWS-cases, this is redundant; AWS API Gateway / Lambda Function URLs handle CORS preflight requests using configuration set in Terraform
             // see: https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html#urls-cors
 
+            // TODO: consider if we should cache this rather than build each time, as it will always be the same;
+            // just need to do that in a thread-safe way
+
             // CORS preflight request
-            return CORS_PRE_FLIGHT_RESPONSE;
+            return HttpEventResponse.builder()
+                .statusCode(HttpStatus.SC_NO_CONTENT)
+                .header("Connection", "keep-alive") // correct??
+                .header("Access-Control-Allow-Origin", configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ALLOW_ORIGINS).orElse("*")) // q: configurable? what's the use-case to restrict this? if auth is based on Authorization header, no way for a malicious site to obtain and forge that, right?
+                .header("Access-Control-Allow-Methods", "POST, OPTIONS") // TODO: make this configurable
+                .header("Access-Control-Allow-Headers", "*")  // TODO: make this explicit?
+                .build();
         }
 
         Optional<String> authorizationHeader = getAuthorizationHeader(request);
