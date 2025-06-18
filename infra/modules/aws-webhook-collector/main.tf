@@ -27,7 +27,7 @@ locals {
   # helper to clarify conditionals throughout
   use_api_gateway = var.api_gateway_v2 != null
 
-  authorization_type = "NONE"                                # TODO: make this configurable, if auth BEYOND function-level checks of Authorization header is desired
+  authorization_type = "IAM"
   http_methods       = var.http_methods                      # Use http_methods directly without adding OPTIONS
 }
 
@@ -128,7 +128,7 @@ resource "aws_lambda_function_url" "lambda_url" {
     allow_credentials = true
     allow_headers     = ["*"]
     allow_methods     = [for m in local.http_methods : m if !(m == "OPTIONS")]
-    allow_origins     = ["*"] # q: support configuration of this??
+    allow_origins     = var.allow_origins
     expose_headers    = ["*"]
   }
 
