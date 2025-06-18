@@ -32,7 +32,7 @@ import co.worklytics.psoxy.aws.DaggerAwsContainer;
  *    - webhook requests from API Gateway / Function URL invocations, AND
  *    - SQS events (presumed to be batches of webhooks)
  */
-public class WebhookCollectionModeHandler implements RequestStreamHandler {
+public class AWSWebhookCollectionModeHandler implements RequestStreamHandler {
 
     /**
      * Static initialization allows reuse in containers
