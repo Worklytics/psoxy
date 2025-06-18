@@ -42,6 +42,7 @@ file.
 | `slack-ai-snapshot`        | Slack AI Snapshot                   | Bulk | ALPHA        |
 | `survey`                   | Survey                              | Bulk | GA           |
 | `zoom`                     | Zoom                                | API  | GA           |
+| `zoom-ai-snapshot-bulk`    | Zoom AI Snapshot Bulk               | Bulk | ALPHA        |
 
 From v0.4.58, you can confirm the availability of a connector by running the following command from
 the root of one of our examples:
