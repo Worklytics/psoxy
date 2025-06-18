@@ -80,4 +80,10 @@ class WebhookCollectionModeHandlerTest {
             fail("Deserialization of SQS batch failed: " + e.getMessage());
         }
     }
+
+    @Test
+    void readSQSEvent() {
+        new WebhookCollectionModeHandler();
+
+    }
 }

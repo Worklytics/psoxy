@@ -15,7 +15,9 @@ import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import lombok.SneakyThrows;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
@@ -64,12 +66,22 @@ public class WebhookCollectionModeHandler implements RequestStreamHandler {
 
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
-        // Read the full input stream into a tree
-        JsonNode rootNode = mapper.readTree(input);
 
-        if (isSQSEvent(rootNode)) {
-            SQSEvent sqsEvent = sqsPayloadMapper.treeToValue(rootNode, SQSEvent.class);
-            handleRequest(sqsEvent, context);
+        // should we cut this? no auth checks done yet, so potentially large unauthorized payload could be DoS vector
+        String body = IOUtils.toString(input, StandardCharsets.UTF_8);
+
+
+        // try for incoming webhook event first; it's the more common and performance sensitive case
+        Optional<APIGatewayV2HTTPEvent> httpEvent = tryReadHttpEvent(mapper, body);
+        if (httpEvent.isPresent()) {
+            APIGatewayV2HTTPResponse response = handleRequest(httpEvent.get(), context);
+            mapper.writeValue(output, response);
+            return;
+        }
+
+        Optional<SQSEvent> sqsEvent = tryReadSQSEvent(sqsPayloadMapper, body);
+        if (sqsEvent.isPresent()) {
+            handleRequest(sqsEvent.get(), context);
 
             // Return empty 200 response
             APIGatewayV2HTTPResponse resp = APIGatewayV2HTTPResponse.builder()
@@ -77,33 +89,36 @@ public class WebhookCollectionModeHandler implements RequestStreamHandler {
                 .withBody("SQS event processed")
                 .build();
             mapper.writeValue(output, resp);
-        } else if (isHttpEvent(rootNode)) {
-            // API Gateway V2 HTTP event (from Function URL, usually)
-            APIGatewayV2HTTPEvent httpEvent = mapper.treeToValue(rootNode, APIGatewayV2HTTPEvent.class);
-            APIGatewayV2HTTPResponse response = handleRequest(httpEvent, context);
-            mapper.writeValue(output, response);
-        } else {
-            context.getLogger().log("Unrecognized event format: " + rootNode.toString());
-            APIGatewayV2HTTPResponse resp = APIGatewayV2HTTPResponse.builder()
-                .withStatusCode(400)
-                .withBody("Unsupported event type")
-                .build();
-            mapper.writeValue(output, resp);
+            return;
+        }
+
+
+        context.getLogger().log("Unrecognized event format: " +body);
+        APIGatewayV2HTTPResponse resp = APIGatewayV2HTTPResponse.builder()
+            .withStatusCode(400)
+            .withBody("Unsupported event type")
+            .build();
+        mapper.writeValue(output, resp);
+    }
+
+    @VisibleForTesting
+    Optional<SQSEvent> tryReadSQSEvent(ObjectMapper mapper, String input) throws IOException {
+        try {
+            return Optional.of(mapper.readerFor(SQSEvent.class).readValue(input));
+        } catch (Exception e) {
+            // If reading as SQSEvent fails, we assume it's not an SQS event
+            return Optional.empty();
         }
     }
 
-    private boolean isSQSEvent(JsonNode node) {
-        return node.has("Records") &&
-            node.get("Records").isArray() &&
-            node.get("Records").get(0).has("eventSource") &&
-            "aws:sqs".equals(node.get("Records").get(0).get("eventSource").asText());
-    }
-
-    private boolean isHttpEvent(JsonNode node) {
-        // TODO: consider possibility of a 1.0 format, which avoids url-decoding of path parameters
-
-        return node.has("version") && node.get("version").asText().startsWith("2.0")
-            && node.has("requestContext") && node.get("requestContext").has("http");
+    @VisibleForTesting
+    Optional<APIGatewayV2HTTPEvent> tryReadHttpEvent(ObjectMapper mapper, String input) throws IOException {
+        try {
+            return Optional.of(mapper.readerFor(APIGatewayV2HTTPEvent.class).readValue(input));
+        } catch (Exception e) {
+            // If reading as APIGatewayV2HTTPEvent fails, we assume it's not an HTTP event
+            return Optional.empty();
+        }
     }
 
     /**

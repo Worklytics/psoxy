@@ -22,6 +22,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 /**
@@ -161,20 +162,6 @@ public class InboundWebhookHandler {
     @SneakyThrows
     public Optional<String> validate(SignedJWT signedJWT, Collection<RSAPublicKey> publicKeys) {
 
-        boolean signatureValid = publicKeys.stream()
-            .filter(k -> {
-                JWSVerifier verifier = new RSASSAVerifier(k);
-                try {
-                    return signedJWT.verify(verifier);
-                } catch (JOSEException e) {
-                    throw new RuntimeException(e);
-                }
-            })
-            .findFirst().isPresent();
-
-        if (!signatureValid ) {
-            return Optional.of("JWT verification failed due to invalid signature");
-        }
         if (signedJWT.getJWTClaimsSet() == null) {
             return Optional.of("Auth token invalid because JWT claims set is null");
         }
@@ -192,7 +179,23 @@ public class InboundWebhookHandler {
             return Optional.of("Auth token invalid because its expiration time (exp) is in the past: " + signedJWT.getJWTClaimsSet().getExpirationTime());
         }
 
-        // TODO: validate issuer?? do we care?
+        boolean signatureValid = publicKeys.stream()
+            .filter(k -> {
+                JWSVerifier verifier = new RSASSAVerifier(k);
+                try {
+                    return signedJWT.verify(verifier);
+                } catch (JOSEException e) {
+                    log.log(Level.WARNING, "Failed to verify signature, will try other keys; " + e.getMessage(), e);
+                    return false;
+                }
+            })
+            .findFirst().isPresent();
+
+        if (!signatureValid ) {
+            return Optional.of("JWT verification failed due to invalid signature");
+        }
+
+        // TODO: validate issuer?? do we care? doesn't exactly help a lot, unless they give multiple tools access to use the same signing keys
 
         return Optional.empty();
     }
