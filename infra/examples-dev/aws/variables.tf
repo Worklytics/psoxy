@@ -344,8 +344,8 @@ variable "webhook_collectors" {
       rotation_days = optional(number, null)       # null means no rotation; if > 0, will rotate every N days
       key_spec      = optional(string, "RSA_2048") # RSA_2048, RSA_3072, or RSA_4096; defaults to RSA_2048, which should be sufficient this use-case
     }), null)
-    auth_public_keys = optional(list(string), []) # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
-    allow_origins = optional(list(string), [ "*" ]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
+    auth_public_keys = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
+    allow_origins    = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
   }))
 
   default = {}
