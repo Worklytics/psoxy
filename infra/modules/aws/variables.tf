@@ -117,3 +117,9 @@ variable "iam_roles_permissions_boundary" {
   description = "*beta* ARN of the permissions boundary to attach to IAM roles created by this module."
   default     = null
 }
+
+variable "enable_webhook_testing" {
+  type        = bool
+  description = "whether to provision/enable webhook testing functionality"
+  default     = true
+}

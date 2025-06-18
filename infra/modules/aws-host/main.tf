@@ -25,6 +25,8 @@ locals {
 
   # VPC *requires* API Gateway v2, or calls just timeout
   use_api_gateway_v2 = var.vpc_config != null || var.use_api_gateway_v2
+
+  enable_webhook_testing = var.provision_testing_infra && length(keys(var.webhook_collectors)) > 0
 }
 
 module "psoxy" {
@@ -43,6 +45,7 @@ module "psoxy" {
   use_api_gateway_v2             = local.use_api_gateway_v2
   logs_kms_key_arn               = var.logs_kms_key_arn
   iam_roles_permissions_boundary = var.iam_roles_permissions_boundary
+  enable_webhook_testing         = local.enable_webhook_testing
 }
 
 resource "aws_iam_policy" "execution_lambda_to_caller" {
@@ -271,6 +274,81 @@ module "bulk_connector" {
 }
 
 
+module "webhook_collectors" {
+  for_each = var.webhook_collectors
+
+  source = "../../modules/aws-webhook-collector"
+
+  environment_name                   = var.environment_name
+  instance_id                        = each.key
+  path_to_function_zip               = module.psoxy.path_to_deployment_jar
+  function_zip_hash                  = module.psoxy.deployment_package_hash
+  function_env_kms_key_arn           = var.function_env_kms_key_arn
+  logs_kms_key_arn                   = var.logs_kms_key_arn
+  log_retention_days                 = var.log_retention_days
+  sanitized_accessor_role_names      = [module.psoxy.api_caller_role_name]
+  aws_account_id                     = var.aws_account_id
+  path_to_repo_root                  = var.psoxy_base_dir
+  secrets_store_implementation       = var.secrets_store_implementation
+  global_parameter_arns              = try(module.global_secrets_ssm[0].secret_arns, [])
+  global_secrets_manager_secret_arns = try(module.global_secrets_secrets_manager[0].secret_arns, {})
+  path_to_instance_ssm_parameters    = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
+  path_to_shared_ssm_parameters      = local.path_to_shared_secrets
+  ssm_kms_key_ids                    = local.ssm_key_ids
+  vpc_config                         = var.vpc_config
+  # api_gateway_v2                        = module.psoxy.api_gateway_v2 # TODO: nonsensical to have this be the SAME api gateway as for the API connectors; should have a separate one for webhook collectors
+  aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
+  iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
+  test_caller_role_arn                 = module.psoxy.webhook_test_caller_role_arn
+  rules_file                           = each.value.rules_file
+  webhook_auth_public_keys             = each.value.auth_public_keys
+  provision_auth_key                   = each.value.provision_auth_key
+
+  todos_as_local_files = var.todos_as_local_files
+
+  environment_variables = merge(
+    var.general_environment_variables,
+    ## try(each.value.environment_variables, {}),
+    {
+      EMAIL_CANONICALIZATION = var.email_canonicalization
+      ##CUSTOM_RULES_SHA       = try(var.custom_api_connector_rules[each.key], null) != null ? filesha1(var.custom_api_connector_rules[each.key]) : null
+      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+    }
+  )
+}
+
+resource "aws_iam_policy" "invoke_webhook_collector_urls" {
+  count = local.enable_webhook_testing ? 1 : 0
+
+  name        = "${module.env_id.id}InvokeWebhookCollectorLambdaUrls"
+  description = "Allow caller role to execute the webhook collector lambda url directly"
+
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Action" : ["lambda:InvokeFunctionUrl"],
+          "Effect" : "Allow",
+          "Resource" : [for k, v in module.webhook_collectors : v.function_arn]
+        }
+      ]
+  })
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "invoke_webhook_collector_urls_to_test_role" {
+  count = local.enable_webhook_testing ? 1 : 0
+
+  policy_arn = aws_iam_policy.invoke_webhook_collector_urls[0].arn
+  role       = element(split("/", module.psoxy.webhook_test_caller_role_arn), length(split("/", module.psoxy.webhook_test_caller_role_arn)) - 1)
+}
+
 # BEGIN lookup tables
 module "lookup_output" {
   for_each = var.lookup_table_builders
@@ -319,7 +397,14 @@ locals {
     )
   }
 
-  all_instances = merge(local.api_instances, local.bulk_instances)
+  webhook_collector_instances = { for k, instance in module.webhook_collectors :
+    k => merge(
+      instance,
+      var.webhook_collectors[k]
+    )
+  }
+
+  all_instances = merge(local.api_instances, local.bulk_instances, local.webhook_collector_instances)
 }
 
 # script to test ALL connectors

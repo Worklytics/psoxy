@@ -1,9 +1,11 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 
+import co.worklytics.psoxy.gateway.output.*;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
@@ -19,7 +21,9 @@ import software.amazon.awssdk.core.retry.RetryPolicy;
 import software.amazon.awssdk.core.retry.backoff.BackoffStrategy;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cognitoidentity.CognitoIdentityClient;
+import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
 import javax.inject.Named;
@@ -173,6 +177,11 @@ public interface AwsModule {
     }
 
     @Provides
+    static SqsClient getSqsClient() {
+        return SqsClient.create();
+    }
+
+    @Provides
     static SecretsManagerClient secretsManagerClient(AwsEnvironment awsEnvironment) {
         return SecretsManagerClient.builder()
                 .overrideConfiguration(ClientOverrideConfiguration.builder()
@@ -192,10 +201,23 @@ public interface AwsModule {
         return tokenRequestBuilder;
     }
 
+    @Provides
+    static KmsClient awsKmsClient(AwsEnvironment awsEnvironment) {
+        return KmsClient.create();
+    }
+
     @Module
     abstract class Bindings {
 
-        @Binds
-        abstract SideOutputFactory<? extends SideOutput> sideOutputFactory(S3SideOutputFactory sideOutputFactory);
+
+        @Binds @IntoSet
+        abstract OutputFactory<?> s3OutputFactory(S3OutputFactory s3OutputFactory);
+
+        @Binds @IntoSet
+        abstract OutputFactory<?> sqsOutputFactory(SQSOutputFactory sqsOutputFactory);
+
+        @Binds @IntoSet
+        abstract PublicKeyStoreClient publicKeyStoreClient(AwsKmsPublicKeyStoreClient awsKmsPublicKeyStoreClient);
+
     }
 }

@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
@@ -43,7 +44,7 @@ import java.util.stream.Collectors;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
-public class CommonRequestHandler {
+public class ApiDataRequestHandler {
 
     //we have ~540 total in Cloud Function connection, so can have generous values here
     private static final int SOURCE_API_REQUEST_CONNECT_TIMEOUT_MILLISECONDS = 30_000;
@@ -77,9 +78,9 @@ public class CommonRequestHandler {
     HttpTransportFactory httpTransportFactory;
 
     @Inject @Named("forOriginal")
-    SideOutput sideOutput;
+    ApiDataSideOutput apiDataSideOutput;
     @Inject @Named("forSanitized")
-    SideOutput sideOutputSanitized;
+    ApiDataSideOutput apiDataSideOutputSanitized;
 
 
     /**
@@ -101,7 +102,7 @@ public class CommonRequestHandler {
     ));
 
     /**
-     * Patters to look for in headers to pass through
+     * Patterns to look for in headers to pass through
      *
      * @see #passThroughHeaders(HttpEventResponse.HttpEventResponseBuilder, HttpResponse)
      */
@@ -267,13 +268,13 @@ public class CommonRequestHandler {
 
             // TODO: if side output cases of the original, we *could* use the potentially compressed stream directly, instead of reading to a string?
             ProcessedContent original = this.asProcessedContent(sourceApiResponse);
-            sideOutput.write(request, original);
+            apiDataSideOutput.write(request, original);
 
             passThroughHeaders(builder, sourceApiResponse);
             if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
                 ProcessedContent sanitizationResult =
                     sanitize(request, requestUrls, original);
-                proxyResponseContent = sanitizationResult.getContentString();
+                proxyResponseContent = sanitizationResult.getContentAsString();
 
                 sanitizationResult.getMetadata().entrySet()
                     .forEach(e -> builder.header(e.getKey(), e.getValue()));
@@ -282,13 +283,13 @@ public class CommonRequestHandler {
 
 
                 if (skipSanitization) {
-                    proxyResponseContent = original.getContentString();
+                    proxyResponseContent = original.getContentAsString();
                 }
             } else {
                 //write error, which shouldn't contain PII, directly
                 log.log(Level.WARNING, "Source API Error " + original.getContent());
                 builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.API_ERROR.name());
-                proxyResponseContent = original.getContentString();
+                proxyResponseContent = original.getContentAsString();
             }
             builder.body(proxyResponseContent);
             return builder.build();
@@ -311,7 +312,7 @@ public class CommonRequestHandler {
 
     ProcessedContent sanitize(HttpEventRequest request, RequestUrls requestUrls, ProcessedContent originalContent) {
         RESTApiSanitizer sanitizerForRequest = getSanitizerForRequest(request);
-        String sanitized = StringUtils.trimToEmpty(sanitizerForRequest.sanitize(request.getHttpMethod(), requestUrls.getOriginal(), originalContent.getContentString()));
+        String sanitized = StringUtils.trimToEmpty(sanitizerForRequest.sanitize(request.getHttpMethod(), requestUrls.getOriginal(), originalContent.getContentAsString()));
 
         String rulesSha = rulesUtils.sha(sanitizerForRequest.getRules());
         log.info("response sanitized with rule set " + rulesSha);
@@ -330,7 +331,7 @@ public class CommonRequestHandler {
 
     void writeSideOutput(HttpEventRequest request, com.google.api.client.http.HttpResponse sourceApiResponse, ProcessedContent sanitizedContent) {
         try {
-            sideOutputSanitized.write(request, sanitizedContent);
+            apiDataSideOutputSanitized.write(request, sanitizedContent);
         } catch (IOException e) {
             log.log(Level.WARNING, "Error writing to side output", e);
         }
@@ -439,7 +440,7 @@ public class CommonRequestHandler {
      */
     @VisibleForTesting
     static Set<String> normalizeHeaders(Set<String> headers) {
-        return headers.stream().map(CommonRequestHandler::normalizeHeader).collect(Collectors.toUnmodifiableSet());
+        return headers.stream().map(ApiDataRequestHandler::normalizeHeader).collect(Collectors.toUnmodifiableSet());
     }
 
     @SneakyThrows
@@ -511,7 +512,7 @@ public class CommonRequestHandler {
         // Construct URL directly concatenating instead of URIBuilder as it may re-encode.
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("https");
-        uriBuilder.setHost(config.getConfigPropertyOrError(ProxyConfigProperty.TARGET_HOST));
+        uriBuilder.setHost(config.getConfigPropertyOrError(ApiModeConfigProperty.TARGET_HOST));
         URL hostURL = uriBuilder.build().toURL();
         String hostPlusPath =
                 StringUtils.stripEnd(hostURL.toString(), "/") + "/" +

@@ -1,43 +1,55 @@
 package co.worklytics.psoxy.gateway.impl.output;
 
-import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.ProcessedContent;
-import co.worklytics.psoxy.gateway.SideOutput;
+import co.worklytics.psoxy.gateway.output.Output;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * decorator for SideOutput that compresses the content before writing it to the underlying SideOutput.
+ * decorator for Output that compresses the content before writing it to the underlying SideOutput.
  *
  *
  */
 @AllArgsConstructor(staticName = "wrap")
-public class SideOutputCompressionWrapper implements SideOutput {
+public class CompressedOutputWrapper implements Output {
+
+    static final String COMPRESSION_TYPE = "gzip";
 
     @NonNull
-    SideOutput delegate;
+    Output delegate;
 
+    @SneakyThrows
     @Override
-    public void write(HttpEventRequest request, ProcessedContent content) throws IOException {
+    public void write(ProcessedContent content) {
+        write(null, content);
+    }
 
-        byte[] compressedContent = gzipContent(content.getContent());
+    @SneakyThrows
+    @Override
+    public void write(String key, ProcessedContent content) {
 
-        delegate.write(request, content.withContentEncoding("gzip").withContent(compressedContent));
+        if (!Objects.equals(COMPRESSION_TYPE, content.getContentEncoding())) {
+            byte[] compressedContent = gzipContent(content.getContent());
+            content = content.withContentEncoding("gzip").withContent(compressedContent);
+        }
+
+        delegate.write(key, content);
     }
 
     /**
      * gzip the content
      *
-     * @param content  to compress
+     * @param content to compress
      * @return a byte[] reflecting gzip-encoding of the content
      */
     @SneakyThrows
-    public byte[] gzipContent(@NonNull byte[] content) {
+    byte[] gzipContent(@NonNull byte[] content) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
              GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream)) {
             gzipOutputStream.write(content);
@@ -47,5 +59,4 @@ public class SideOutputCompressionWrapper implements SideOutput {
             throw new RuntimeException("Failed to gzip content", e);
         }
     }
-
 }

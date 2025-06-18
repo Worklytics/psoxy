@@ -1,7 +1,7 @@
 package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.*;
-import co.worklytics.psoxy.gateway.impl.output.NoSideOutput;
+import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.avaulta.gateway.rules.BulkDataRules;
@@ -15,17 +15,15 @@ import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.JavaVersion;
 import org.apache.commons.lang3.SystemUtils;
 import org.mockito.MockMakers;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.Random;
 
 import static org.mockito.Mockito.*;
 
@@ -147,13 +145,32 @@ public class MockModules {
     }
 
     @Module
-    public abstract class ForSideOutputs {
+    public interface ForSideOutputs {
 
-        @Binds @Named("forOriginal")
-        abstract SideOutput sideOutputForOriginal(NoSideOutput sideOutput);
+        // so actually, not mocks ...
 
-        @Binds @Named("forSanitized")
-        abstract SideOutput sideOutputForSanitized(NoSideOutput sideOutput);
+        @Provides @Named("forOriginal")
+        static ApiDataSideOutput sideOutputForOriginal() {
+            return new NoApiDataSideOutput();
+        }
+
+        @Provides @Named("forSanitized")
+        static ApiDataSideOutput sideOutputForSanitized() {
+            return new NoApiDataSideOutput();
+        }
+
+        /**
+         * a no-op implementation of SideOutput that does nothing.
+         */
+        @NoArgsConstructor(onConstructor_ = {@Inject})
+        class NoApiDataSideOutput implements ApiDataSideOutput {
+
+            @Override
+            public void write(HttpEventRequest request, ProcessedContent content) {
+                // no-op
+            }
+        }
+
     }
 }
 

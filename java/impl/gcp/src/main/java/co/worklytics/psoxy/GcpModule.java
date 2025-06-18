@@ -5,7 +5,8 @@ import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 
-import co.worklytics.psoxy.gateway.impl.output.NoSideOutput;
+import co.worklytics.psoxy.gateway.output.Output;
+import co.worklytics.psoxy.gateway.output.OutputFactory;
 import com.google.cloud.ServiceOptions;
 
 import com.google.cloud.storage.Storage;
@@ -16,7 +17,6 @@ import dagger.Provides;
 import dagger.multibindings.IntoSet;
 
 import javax.inject.Named;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.time.Duration;
 import java.util.Optional;
@@ -123,8 +123,9 @@ public interface GcpModule {
     @Module
     abstract class Bindings {
 
+        @IntoSet
         @Binds
-        abstract SideOutputFactory<? extends SideOutput> sideOutputFactory(GCSSideOutputFactory sideOutputFactory);
+        abstract OutputFactory<?> outputFactory(GCSOutputFactory outputFactory);
 
     }
 }

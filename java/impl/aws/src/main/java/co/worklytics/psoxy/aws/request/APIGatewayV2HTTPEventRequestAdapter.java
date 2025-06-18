@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.aws.request;
 
 import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Streams;
@@ -18,7 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Adapter for the APIGatewayV2HTTPEvent to the interface the {@link co.worklytics.psoxy.gateway.impl.CommonRequestHandler}
+ * Adapter for the APIGatewayV2HTTPEvent to the interface the {@link ApiDataRequestHandler}
  * understands
  * Lambda calls use this very same adapter, but some fields differ as the nature of the service is
  * different.

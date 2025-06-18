@@ -207,3 +207,51 @@ variable "side_output_sanitized" {
     error_message = "The `side_output_sanitized` target must be s3 bucket address. May include a path within the bucket, in which case we highly recommend you end it with a slash (`/`)."
   }
 }
+
+variable "s3_outputs" {
+  type        = list(string)
+  description = "S3 urls to which the function will write sanitized output. If provided, the function will write sanitized output to these S3 URLs."
+  default     = []
+
+  validation {
+    condition     = alltrue([for url in var.s3_outputs : can(regex("^s3://[a-z][a-z0-9-]*[a-z0-9](/.*)?$", url))])
+    error_message = "Each `s3_outputs` target must be a valid S3 bucket address. Bucket names must only contain lowercase letters, numbers, and hyphens, and must start and end with a lowercase letter or number. May include a path within the bucket, in which case we highly recommend you end it with a slash (`/`)."
+  }
+}
+
+# TODO: this is not very "inversion of control" design; arg should output the exec policy and, where we create the trigger, first create and attach the policy??
+variable "sqs_trigger_queue_arns" {
+  type        = list(string)
+  description = "**ALPHA** ARNs of SQS queues that will trigger this lambda; if provided, perms on lambda's exec rule."
+  default     = []
+
+  validation {
+    condition     = alltrue([for queue in var.sqs_trigger_queue_arns : can(regex("^arn:aws:sqs:[a-z0-9-]+:[0-9]{12}:[a-zA-Z][a-zA-Z0-9-_ ]*[a-zA-Z0-9]$", queue))])
+    error_message = "Each SQS queue ARN must be a valid ARN for an AWS SQS queue."
+  }
+}
+
+
+variable "sqs_send_queue_arns" {
+  type        = list(string)
+  description = "**ALPHA** ARNs of SQS queues that this lambda will SEND to; if provided, perms on lambda's exec rule."
+  default     = []
+
+  validation {
+    condition     = alltrue([for queue in var.sqs_send_queue_arns : can(regex("^arn:aws:sqs:[a-z0-9-]+:[0-9]{12}:[a-zA-Z][a-zA-Z0-9-_ ]*[a-zA-Z0-9]$", queue))])
+    error_message = "Each SQS queue ARN must be a valid ARN for an AWS SQS queue."
+  }
+}
+
+variable "aws_kms_public_keys" {
+  type        = list(string)
+  description = "List of AWS KMS public keys that lambda must be able to read."
+  default     = []
+
+  validation {
+    condition     = alltrue([for key in var.aws_kms_public_keys : can(regex("^arn:aws:kms:[a-z0-9-]+:[0-9]{12}:key/[a-zA-Z0-9-]+$", key))])
+    error_message = "Each AWS KMS public key must be a valid ARN for an AWS KMS key."
+  }
+}
+
+

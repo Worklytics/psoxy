@@ -11,11 +11,13 @@ locals {
   # AWS Managed polices
   # see: https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html#aws-managed-policies
   required_aws_roles_to_provision_host = {
-    "arn:aws:iam::aws:policy/IAMFullAccess"        = "IAMFullAccess"
-    "arn:aws:iam::aws:policy/AmazonS3FullAccess"   = "AmazonS3FullAccess" # only if using bulk sources, although 95% do
-    "arn:aws:iam::aws:policy/CloudWatchFullAccess" = "CloudWatchFullAccess"
-    "arn:aws:iam::aws:policy/AmazonSSMFullAccess"  = "AmazonSSMFullAccess"
-    "arn:aws:iam::aws:policy/AWSLambda_FullAccess" = "AWSLambda_FullAccess"
+    "arn:aws:iam::aws:policy/IAMFullAccess"                    = "IAMFullAccess"
+    "arn:aws:iam::aws:policy/AmazonS3FullAccess"               = "AmazonS3FullAccess" # only if using bulk sources OR webhook-collection, although 95% do
+    "arn:aws:iam::aws:policy/CloudWatchFullAccess"             = "CloudWatchFullAccess"
+    "arn:aws:iam::aws:policy/AmazonSSMFullAccess"              = "AmazonSSMFullAccess"
+    "arn:aws:iam::aws:policy/AWSLambda_FullAccess"             = "AWSLambda_FullAccess"
+    "arn:aws:iam::aws:policy/AmazonSQS_FullAccess"             = "AmazonSQS_FullAccess"             # only if using webhook-collection
+    "arn:aws:iam::aws:policy/AWSKeyManagementServicePowerUser" = "AWSKeyManagementServicePowerUser" # only if using webhook-collection AND using our terraform modules to manage authentication keys
   }
   # AWS managed policy required to consume Microsoft 365 data
   # (in addition to above)
@@ -379,6 +381,45 @@ locals {
 
         ]
         Resource = "arn:aws:lambda:*:${local.account_id_resource_pattern}:function:${module.env_id.id}*"
+      },
+      {
+        Sid    = "SQSAccess"
+        Effect = "Allow"
+        Action = [
+          "sqs:CreateQueue",
+          "sqs:DeleteQueue",
+          "sqs:GetQueueAttributes",
+          "sqs:GetQueueUrl",
+          "sqs:ListQueues",
+          "sqs:ListQueueTags",
+          "sqs:SetQueueAttributes",
+          "sqs:AddPermission",
+          "sqs:RemovePermission",
+          "sqs:TagQueue",
+          "sqs:UntagQueue"
+        ]
+        Resource = "arn:aws:sqs:*:${local.account_id_resource_pattern}:${module.env_id.id}*"
+      },
+      { # need to provision KMS keys, aliases
+        Sid    = "KMSAccess"
+        Effect = "Allow"
+        Action = [
+          "kms:CreateKey",
+          "kms:ScheduleKeyDeletion",
+          "kms:CancelKeyDeletion",
+          "kms:DescribeKey",
+          "kms:GetKeyPolicy",
+          "kms:PutKeyPolicy",
+          "kms:ListKeyPolicies",
+          "kms:ListResourceTags",
+          "kms:TagResource",
+          "kms:UntagResource",
+          "kms:CreateAlias",
+          "kms:UpdateAlias",
+          "kms:DeleteAlias",
+          "kms:ListAliases"
+        ]
+        Resource = "arn:aws:kms:*:${local.account_id_resource_pattern}:*" # kms key ids are random UUIDs, so can't use env_id prefix to constrain
       }
     ]
   })

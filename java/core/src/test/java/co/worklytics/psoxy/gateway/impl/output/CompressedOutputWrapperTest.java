@@ -11,14 +11,14 @@ import java.util.zip.GZIPInputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SideOutputCompressionWrapperTest {
+class CompressedOutputWrapperTest {
 
     @Test
     void gzipContent() throws Exception {
         String content = "Hello, world!";
         // Verify that the content is gzipped
 
-        SideOutputCompressionWrapper utils = SideOutputCompressionWrapper.wrap(new NoSideOutput());
+        CompressedOutputWrapper utils = CompressedOutputWrapper.wrap(new NoOutput());
         byte[] gzipped = utils.gzipContent(content.getBytes(StandardCharsets.UTF_8));
         try (InputStream inputStream = new GZIPInputStream(new ByteArrayInputStream(gzipped));
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
