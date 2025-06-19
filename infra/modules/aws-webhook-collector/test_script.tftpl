@@ -5,7 +5,7 @@ ${command_cli_call} -u "${proxy_endpoint_url}/.well-known/openid-configuration"
 
 ${command_cli_call} -u "${proxy_endpoint_url}/.well-known/jwks.json"
 
-${command_cli_call} -u "${proxy_endpoint_url}" --method POST \
+${command_cli_call} -u "${proxy_endpoint_url}/collect" --method POST \
 %{ if signing_key_arn != null ~}
 --signing-key="aws-kms:${signing_key_arn}" \
 %{ endif ~}

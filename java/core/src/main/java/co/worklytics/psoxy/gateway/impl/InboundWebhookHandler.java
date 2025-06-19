@@ -23,6 +23,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -132,7 +133,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
             }
 
             // verify authorization header is signed with one of the acceptable public keys
-            Optional<String> validationError = this.validate(authToken.get(), acceptableAuthKeys());
+            Optional<String> validationError = this.validate(authToken.get(), acceptableAuthKeys().values());
 
             if (validationError.isPresent()) {
                 return HttpEventResponse.builder()
@@ -182,7 +183,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
      */
     @Override
     public Optional<String> validate(SignedJWT jwt) {
-        return validate(jwt, acceptableAuthKeys());
+        return validate(jwt, acceptableAuthKeys().values());
     }
 
     @Override
@@ -244,7 +245,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
         return Optional.empty();
     }
 
-    public Collection<RSAPublicKey> acceptableAuthKeys() {
+    public Map<String, RSAPublicKey> acceptableAuthKeys() {
         return Arrays.stream(configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ACCEPTED_AUTH_KEYS).orElse("").split(","))
             .map(String::trim)
             .filter(keyRef -> !keyRef.isEmpty())
@@ -254,7 +255,10 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
                 if (client.isEmpty()) {
                     throw new IllegalArgumentException("No public key store client found for: " + publicKeyRef.store());
                 }
-                return client.get().getPublicKeys(publicKeyRef).stream();
-            }).collect(Collectors.toList());
+                // Map each key to its id (keyRef.id())
+                return client.get().getPublicKeys(publicKeyRef).stream()
+                    .map(key -> new java.util.AbstractMap.SimpleEntry<>(publicKeyRef.id(), key));
+            })
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

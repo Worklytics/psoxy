@@ -16,6 +16,7 @@ import java.math.BigInteger;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -72,9 +73,11 @@ public class JwksDecorator {
     }
 
     JWKSResponse serveJwks() {
-        Collection<RSAPublicKey> keys = jwtAuthorizedResource.acceptableAuthKeys();
+        Map<String, RSAPublicKey> keys = jwtAuthorizedResource.acceptableAuthKeys();
         return new JWKSResponse(
-            keys.stream().map(JWK::fromRSAPublicKey).collect(Collectors.toList())
+            keys.entrySet().stream()
+                    .map(entry -> JWK.fromRSAPublicKey(entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toList())
         );
     }
 
@@ -117,11 +120,10 @@ public class JwksDecorator {
             this.e = e;
         }
 
-        public static JWK fromRSAPublicKey(RSAPublicKey key) {
-            String kid = Integer.toHexString(key.hashCode()); // or use a better key id
+        public static JWK fromRSAPublicKey(String id, RSAPublicKey key) {
             String n = base64UrlEncode(key.getModulus());
             String e = base64UrlEncode(key.getPublicExponent());
-            return new JWK(kid, n, e);
+            return new JWK(id, n, e);
         }
 
         private static String base64UrlEncode(BigInteger value) {

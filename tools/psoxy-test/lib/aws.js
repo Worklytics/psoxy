@@ -73,12 +73,16 @@ async function call(options = {}) {
     ...signed.headers,
   };
 
+
   if (options.signingKey) {
+    let issuer = url.toString().replace("/collect", "").toString(); // remove /collect from URL,
+
+    console.log(issuer)
     let signature;
     let claims = {
-      iss: "https://" + url.hostname,
+      iss: issuer,
       sub: options.identityToSign,
-      aud: url.toString(),
+      aud: issuer,
       iat: Math.floor(Date.now() / 1000), // current time in seconds
       exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
     }

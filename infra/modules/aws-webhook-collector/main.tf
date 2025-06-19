@@ -136,7 +136,7 @@ resource "aws_apigatewayv2_authorizer" "jwt" {
   jwt_configuration {
     issuer = local.auth_issuer
     audience = [
-      var.api_gateway_v2.stage_invoke_url
+      local.auth_issuer
     ]
   }
 
@@ -157,7 +157,8 @@ resource "aws_apigatewayv2_route" "well_known" {
 }
 
 
-resource "aws_apigatewayv2_route" "methods" {
+// q: change this route to /collect instead of /{proxy+}?  any need for {proxy+} here?
+resource "aws_apigatewayv2_route" "collect" {
   for_each = toset(local.http_methods) # q: should we just limit this to POST??
 
   api_id             = var.api_gateway_v2.id
