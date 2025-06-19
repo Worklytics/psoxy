@@ -85,12 +85,14 @@ public class InboundWebhookHandler {
 
     @SneakyThrows
     public HttpEventResponse handle(HttpEventRequest request) {
+        Optional<String> authorizationHeader = getAuthorizationHeader(request);
 
         boolean isDevelopmentMode = configService.getConfigPropertyAsOptional(ProxyConfigProperty.IS_DEVELOPMENT_MODE).map(Boolean::parseBoolean).orElse(false);
         if (isDevelopmentMode) {
             log.info("Development mode enabled; auth header: " + authorizationHeader.orElse("not present"));
             log.info("Request: "  + request.prettyPrint());
         }
+
         if (request.getHttpMethod().equals("OPTIONS")) {
             // at least in AWS-cases, this is redundant; AWS API Gateway / Lambda Function URLs handle CORS preflight requests using configuration set in Terraform
             // see: https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html#urls-cors
@@ -107,8 +109,6 @@ public class InboundWebhookHandler {
                 .header("Access-Control-Allow-Headers", "*")  // TODO: make this explicit?
                 .build();
         }
-
-        Optional<String> authorizationHeader = getAuthorizationHeader(request);
 
         Optional<SignedJWT> authToken;
 
