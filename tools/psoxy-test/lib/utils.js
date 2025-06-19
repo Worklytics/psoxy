@@ -457,6 +457,13 @@ async function getAWSCredentials(role, region) {
   return credentials;
 }
 
+function base64url(input) {
+  return input.toString('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+}
+
 /**
  * @param {object} claims - the usual JWT ones, iss, sub, etc. will be stringified
  * @param {string} keyId

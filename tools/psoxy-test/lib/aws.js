@@ -45,12 +45,6 @@ function isValidURL(url) {
     url.hostname.endsWith('.amazonaws.com');
 }
 
-function base64url(input) {
-  return input.toString('base64')
-    .replace(/=/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_');
-}
 
 /**
  * Psoxy test
@@ -92,6 +86,7 @@ async function call(options = {}) {
       signature = await signJwtWithKMS(claims, options.signingKey.replace('aws-kms:', ''), credentials, options.region);
     }
 
+    headers['Authorization'] = signature;
     headers['x-psoxy-authorization'] = signature;
   }
 
