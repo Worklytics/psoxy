@@ -98,7 +98,7 @@ public class JwksDecoratorTest {
         when(request.getPath()).thenReturn("/.well-known/openid-configuration");
 
         // Mock JwtAuthorizedResource
-        JwtAuthorizedResource jwtAuthorizedResource = mock(JwtAuthorizedResource.class);
+        JwtAuthorizedResource jwtAuthorizedResource = MockModules.provideMock(JwtAuthorizedResource.class);
         String issuer = "https://issuer.example.com";
         when(jwtAuthorizedResource.getIssuer()).thenReturn(issuer);
         JwksDecorator decorator = new JwksDecorator(jwtAuthorizedResource);
