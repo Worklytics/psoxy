@@ -163,7 +163,7 @@ test.serial('Psoxy call: with POST, signingKey, and identityToSign options (Webh
     td.when(
       utils.signJwtWithKMS(
         td.matchers.contains({
-          iss: `https://${new URL(options.url).hostname}`,
+          iss: options.url,
           sub: options.identityToSign,
           aud: options.url,
         }),
@@ -179,7 +179,8 @@ test.serial('Psoxy call: with POST, signingKey, and identityToSign options (Webh
         td.matchers.contains('POST'),
         td.matchers.contains({
           ...signedRequest.headers,
-          // if signing works this header must be included in the request
+          // if signing works this header must be included in the request,
+          'Authorization': jwtSignatureExample,
           'x-psoxy-authorization': jwtSignatureExample,
         }),
         td.matchers.contains(options.body)
