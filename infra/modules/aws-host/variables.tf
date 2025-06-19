@@ -308,10 +308,11 @@ variable "webhook_collectors" {
       key_spec      = optional(string, "RSA_2048") # RSA_2048, RSA_3072, or RSA_4096; defaults to RSA_2048, which should be sufficient this use-case
     }), null)
     auth_public_keys = optional(list(string), []) # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
+    allow_origins    = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
+
     example_identity = optional(string, null)     # example identity to use in test payloads
     example_payload  = optional(string, null)     # example payload to use in test payloads
   }))
-
   default = {}
 
   description = "map of webhook collector id --> webhook collector configuration"

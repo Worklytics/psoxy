@@ -163,8 +163,8 @@ variable "api_gateway_v2" {
 
 variable "http_methods" {
   type        = list(string)
-  description = "HTTP methods to expose; has no effect unless api_gateway is also provided"
-  default     = ["HEAD", "GET", "POST"]
+  description = "HTTP methods to expose; NOTE: 'OPTIONS' is always added to this list, so you don't need to include it; if you want to allow all methods, use ['*']"
+  default     = ["GET", "POST"]
 }
 
 # examples:
@@ -211,6 +211,12 @@ variable "secrets_store_implementation" {
   type        = string
   description = "one of 'aws_ssm_parameter_store' (default) or 'aws_secrets_manager'"
   default     = "aws_ssm_parameter_store"
+}
+
+variable "allow_origins" {
+  type        = list(string)
+  description = "list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)"
+  default     = ["*"]
 }
 
 variable "test_caller_role_arn" {

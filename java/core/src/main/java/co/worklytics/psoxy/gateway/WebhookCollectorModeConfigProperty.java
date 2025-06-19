@@ -26,6 +26,13 @@ public enum WebhookCollectorModeConfigProperty implements ConfigService.ConfigPr
     ACCEPTED_AUTH_KEYS,
 
     /**
+     * a CSV of origins that are allowed to send webhooks to this collector. aligned with CORS standards
+     *
+     *default to "*", meaning all origins are allowed.
+     */
+    ALLOW_ORIGINS,
+
+    /**
      * if false, proxy will not require or validate any Authorization header(s) sent with webhooks.
      *
      * false does NOT mean there is no authentication/authorization of webhook collection; simply that it is not done within
