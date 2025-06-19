@@ -8,6 +8,7 @@ import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
 import co.worklytics.psoxy.gateway.auth.JwtAuthorizedResource;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.output.NoOutput;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -77,11 +78,12 @@ public class JwksDecoratorTest {
         assertEquals(200, response.getStatusCode());
         assertEquals("application/json", response.getHeaders().get("Content-Type"));
         // Dynamically fill in kid, n, e for the expected JSON
-        java.util.Iterator<java.security.interfaces.RSAPublicKey> it = handler.jwtAuthorizedResource.acceptableAuthKeys().iterator();
+        java.util.Iterator<java.security.interfaces.RSAPublicKey> it =
+                handler.jwtAuthorizedResource.acceptableAuthKeys().values().iterator();
         java.security.interfaces.RSAPublicKey key = it.next();
-        String kid = Integer.toHexString(key.hashCode());
-        String n = JwksDecorator.JWK.fromRSAPublicKey(key).n;
-        String e = JwksDecorator.JWK.fromRSAPublicKey(key).e;
+        String kid = Base64.getEncoder().encodeToString((key.getEncoded()));
+        String n = JwksDecorator.JWK.fromRSAPublicKey(kid, key).n;
+        String e = JwksDecorator.JWK.fromRSAPublicKey(kid, key).e;
         String expectedJson = String.format(EXPECTED_JSON, kid, n, e).replaceAll("\\s+", "");
         String actualJson = response.getBody().replaceAll("\\s+", "");
         assertEquals(expectedJson, actualJson);
