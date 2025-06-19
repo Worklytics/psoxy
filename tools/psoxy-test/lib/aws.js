@@ -6,7 +6,8 @@ import {
   request,
   resolveHTTPMethod,
   resolveAWSRegion,
-  signAWSRequestURL
+  signAWSRequestURL,
+  signJwtWithKMS,
 } from './utils.js';
 import {
   S3Client,
@@ -21,11 +22,13 @@ import {
   DescribeLogStreamsCommand,
   GetLogEventsCommand,
 } from '@aws-sdk/client-cloudwatch-logs';
+
 import fs from 'fs';
 import getLogger from './logger.js';
 import path from 'path';
 import _ from 'lodash';
 import zlib from 'node:zlib';
+import crypto from 'node:crypto';
 
 
 /**
@@ -40,6 +43,13 @@ function isValidURL(url) {
   }
   return url.hostname.endsWith('.on.aws') ||
     url.hostname.endsWith('.amazonaws.com');
+}
+
+function base64url(input) {
+  return input.toString('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
 }
 
 /**
@@ -63,10 +73,27 @@ async function call(options = {}) {
 
   const signed = signAWSRequestURL(url, method, options.body, credentials,
      options.region);
+
   const headers = {
     ...getCommonHTTPHeaders(options),
     ...signed.headers,
   };
+
+  if (options.signingKey) {
+    let signature;
+    let claims = {
+      iss: "https://" + url.hostname,
+      sub: options.identityToSign,
+      aud: url.toString(),
+      iat: Math.floor(Date.now() / 1000), // current time in seconds
+      exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
+    }
+    if (options.signingKey.startsWith('aws-kms:')) {
+      signature = await signJwtWithKMS(claims, options.signingKey.replace('aws-kms:', ''), credentials, options.region);
+    }
+
+    headers['x-psoxy-authorization'] = signature;
+  }
 
   logger.info(`Calling Psoxy and waiting response: ${options.url.toString()}`);
   logger.verbose('Request Options:', { additional: options });
@@ -366,4 +393,3 @@ export default {
   parseLogEvents,
   upload,
 }
-

@@ -134,15 +134,12 @@ public class OutputUtils {
 
 
     private <T extends Output> T createOutputForLocation(OutputLocation outputLocation) {
-        Optional<OutputFactory<?>> outputFactory =  outputFactories.stream()
+        OutputFactory<?> outputFactory =  outputFactories.stream()
             .filter(factory -> factory.supports(outputLocation))
-            .findFirst();
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("No output factory found for location: " + outputLocation));
 
-        if (outputFactory.isEmpty()) {
-            throw new IllegalArgumentException("No output factory found for location: " + outputLocation);
-        }
-
-        return (T) outputFactory.get().create(outputLocation);
+        return (T) outputFactory.create(outputLocation);
     }
 
 

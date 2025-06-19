@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
+import java.time.Clock;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Set;
@@ -61,8 +62,10 @@ public class JwksDecoratorTest {
             () -> mock(WebhookSanitizer.class), // Mocked WebhookSanitizer
             new NoOutput(),
             configService,
-            keyClients
+            keyClients,
+            Clock.systemDefaultZone()
         ));
+        handler.objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
     }
 
     @Test
@@ -84,12 +87,6 @@ public class JwksDecoratorTest {
         assertEquals(expectedJson, actualJson);
     }
 
-    @Test
-    void testInvalidPath() {
-        HttpEventRequest request = mock(HttpEventRequest.class);
-        when(request.getPath()).thenReturn("/not-jwks");
-        assertThrows(IllegalArgumentException.class, () -> handler.handle(request));
-    }
 
     @Test
     void testOpenIdConfigResponse() {

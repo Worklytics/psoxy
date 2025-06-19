@@ -16,6 +16,8 @@ import isgzipBuffer from '@stdlib/assert-is-gzip-buffer';
 import path from 'path';
 import spec from '../data-sources/spec.js';
 import zlib from 'node:zlib';
+import {KMSClient, SignCommand} from '@aws-sdk/client-kms';
+import crypto from 'node:crypto';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // In case Psoxy is slow to respond (Lambda can take up to 20s+ to bootstrap),
@@ -178,7 +180,7 @@ function requestWrapper(url, method = 'GET', headers, body = {}) {
  * @param {URL} url
  * @param {String} method
  * @param {Object} body
- * @param {Object} credentials
+ * @param {Credentials} credentials
  * @param {String} region
  * @return {Object}
  */
@@ -456,6 +458,42 @@ async function getAWSCredentials(role, region) {
 }
 
 /**
+ * @param {object} claims - the usual JWT ones, iss, sub, etc. will be stringified
+ * @param {string} keyId
+ * @param {Credentials} credentials
+ * @param {string} region
+ * @returns {Promise<string>}
+ */
+async function signJwtWithKMS(claims, keyId, credentials, region) {
+  const client = new KMSClient({
+    region: region,
+    credentials: credentials,
+  });
+
+  const encodedHeader = base64url(Buffer.from(JSON.stringify({
+    "alg": "RS256",
+    "kid": keyId,
+    "typ": "JWT",
+  })));
+  const encodedPayload = base64url(Buffer.from(JSON.stringify(claims)));
+  const signingInput = `${encodedHeader}.${encodedPayload}`;
+
+  const hash = crypto.createHash('sha256').update(signingInput).digest();
+
+  const command = new SignCommand({
+    KeyId: keyId,
+    SigningAlgorithm: 'RSASSA_PKCS1_V1_5_SHA_256',
+    Message: hash,
+    MessageType: 'DIGEST' // 🟢 explicitly indicate pre-hashed input
+  });
+
+  const response = await client.send(command);
+
+  const signature = base64url(Buffer.from(response.Signature));
+  return `${signingInput}.${signature}`;
+}
+
+/**
  * Append suffix to filename (before extension)
  * @param {string} filename
  * @param {string} suffix
@@ -510,5 +548,6 @@ export {
   resolveHTTPMethod,
   saveToFile,
   signAWSRequestURL,
+  signJwtWithKMS,
   transformSpecWithResponse,
 };

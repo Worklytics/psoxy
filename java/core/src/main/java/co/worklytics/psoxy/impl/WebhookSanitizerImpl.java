@@ -85,6 +85,11 @@ public class WebhookSanitizerImpl implements WebhookSanitizer {
     @VisibleForTesting
      boolean verifyClaims(HttpEventRequest request, Map<String, Object> claims, WebhookCollectionRules.WebhookEndpoint endpoint) {
 
+        if (ObjectUtils.isEmpty(endpoint.getJwtClaimsToVerify())) {
+            // no claims to verify, so just return true
+            return true;
+        }
+
         Object document = null;
 
         for (String claimToVerify : endpoint.getJwtClaimsToVerify().keySet()) {

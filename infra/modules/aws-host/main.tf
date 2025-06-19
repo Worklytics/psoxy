@@ -306,6 +306,8 @@ module "webhook_collectors" {
   rules_file                           = each.value.rules_file
   webhook_auth_public_keys             = each.value.auth_public_keys
   provision_auth_key                   = each.value.provision_auth_key
+  example_payload                      = try(each.value.example_payload, null)
+  example_identity                     = try(each.value.example_identity, null)
 
   todos_as_local_files = var.todos_as_local_files
 
@@ -432,3 +434,4 @@ echo "Testing Bulk Connectors ..."
 %{endfor}
 EOF
 }
+

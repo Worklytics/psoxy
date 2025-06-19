@@ -108,8 +108,7 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
     }
 
     private boolean isHttpEvent(JsonNode node) {
-        // TODO: consider possibility of a 1.0 format, which avoids url-decoding of path parameters
-
+        // TODO: consider possibility of a 1.0 format, which avoids url-decoding of path parameters??
         return node.has("version") && node.get("version").asText().startsWith("2.0")
             && node.has("requestContext") && node.get("requestContext").has("http");
     }
@@ -130,8 +129,6 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
 
         batchMergeHandler.handleBatch(processedContentStream);
     }
-
-
 
     /**
      * Handles lambda invocations where trigger is API Gateway V2 HTTP request event as incoming webhook
