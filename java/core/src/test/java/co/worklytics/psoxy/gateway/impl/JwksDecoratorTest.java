@@ -8,6 +8,7 @@ import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
 import co.worklytics.psoxy.gateway.auth.JwtAuthorizedResource;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.output.NoOutput;
+import co.worklytics.test.MockModules;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,12 +56,12 @@ public class JwksDecoratorTest {
         PublicKey publicKey = keyPair.getPublic();
         generatedBase64Key = Base64.getEncoder().encodeToString(publicKey.getEncoded());
 
-        configService = mock(ConfigService.class);
+        configService = MockModules.ForConfigService.configService();
         when(configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ACCEPTED_AUTH_KEYS))
             .thenReturn(java.util.Optional.of("base64:" + generatedBase64Key));
         keyClients = Collections.singleton(new Base64KeyClient());
         handler = new JwksDecorator(new InboundWebhookHandler(
-            () -> mock(WebhookSanitizer.class), // Mocked WebhookSanitizer
+            () -> MockModules.provideMock(WebhookSanitizer.class),
             new NoOutput(),
             configService,
             keyClients,
