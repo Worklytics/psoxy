@@ -221,7 +221,8 @@ See also: [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
 ### Other Data Sources via Webhook Collection
 
 Some data sources may support **webhooks** to send data to a URL endpoint, often in response to
-a user-performed action.  These 'events' can be collected by psoxy instances in "webhook collector" mode.
+a user-performed action.  These 'events' can be collected by psoxy instances in "webhook collector" mode, to
+later be transferred to Worklytics for analysis.
 
 On-prem/in-house-build data sources can be insturmented to produce webhooks, using the [Worklytics Work Events JS SDK](https://github.com/Worklytics/Work-Events-JS).
 

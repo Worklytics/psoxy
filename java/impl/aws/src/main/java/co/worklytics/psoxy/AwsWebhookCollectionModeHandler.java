@@ -144,6 +144,8 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
         HttpEventRequest httpEventRequest = new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
         HttpEventResponse response;
 
+        log.info("Request path: " + httpEventRequest.prettyPrint());
+
         boolean base64Encoded = false;
         if (httpEvent.getRequestContext().getRouteKey().endsWith("/.well-known/{proxy+}")) {
             // special case for JWKS endpoint, which is used by clients to fetch public keys
