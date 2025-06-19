@@ -87,7 +87,10 @@ async function call(options = {}) {
     }
 
     headers['Authorization'] = signature;
-    headers['x-psoxy-authorization'] = signature; // still needed? will API gateway pass 'Authorization' through or consume it??
+
+    // possibly we'll need this for fallback, if target service has auth layer that consumes 'Authorization' header and doesn't pass it on
+    // but API Gateway v2 appears to be passing it as well as verifying it, so think we're OK
+    //headers['x-psoxy-authorization'] = signature;
   }
 
   logger.info(`Calling Psoxy and waiting response: ${options.url.toString()}`);
