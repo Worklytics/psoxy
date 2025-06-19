@@ -198,15 +198,24 @@ resource "aws_apigatewayv2_api" "webhook_collector_api" {
   protocol_type = "HTTP"
   description   = "API to expose ${var.deployment_id} webhook collectors"
 
-
   # leverage AWS's native CORS support
   # alternatively, each webhook collector can implement its own CORS support (eg, handle OPTIONS requests)
   cors_configuration {
-    allow_credentials = true
-    allow_headers     = ["*"]
-    allow_methods     = ["GET", "POST"]
-    expose_headers    = ["*"]
-    allow_origins     = var.webhook_allow_origins
+    allow_credentials = false # only 'Authorization' header is allowed explicitly below; JS clients must explicitly set 'Authorization' header and call fetch with credentials: 'omit' or leave unset
+    allow_headers = [
+      # if allow_origins == ['*'], we must set 'allow_credentials = false' and then set an explicit list here to allow 'Authorization' header through
+      "Authorization",
+      "Content-Type",
+      "X-Requested-With",
+      "X-Psoxy-Authorization",
+      "User-Agent",
+    ]
+    allow_methods = [
+      # "GET",  # JWKS ... so maybe this doesn't matter?? exposing JWKS to JS client would allow client to detect rotation of the key proactively
+      "POST" # webhook themselves
+    ]
+    expose_headers = ["*"]
+    allow_origins  = var.webhook_allow_origins
   }
 }
 
@@ -222,6 +231,7 @@ resource "aws_apigatewayv2_stage" "webhook_collector" {
     format          = "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] \"$context.httpMethod $context.path $context.protocol\" $context.status $context.responseLength $context.requestId $context.extendedRequestId $context.error.messageString $context.integrationErrorMessage"
   }
 }
+
 resource "aws_cloudwatch_log_group" "webhook_collection_api_log" {
   count = var.provision_webhook_collection_infra ? 1 : 0
 

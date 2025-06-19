@@ -104,10 +104,11 @@ module "gate_instance" {
       WEBHOOK_OUTPUT               = aws_sqs_queue.sanitized_webhooks_to_batch.url
       WEBHOOK_BATCH_OUTPUT         = "s3://${module.sanitized_output.bucket_id}"
       REQUIRE_AUTHORIZATION_HEADER = length(var.webhook_auth_public_keys) > 0
+      ALLOW_ORIGINS                = join(",", var.allow_origins)
     },
     length(local.accepted_auth_keys) > 0 ? {
+      AUTH_ISSUER        = "${var.api_gateway_v2.stage_invoke_url}/${module.gate_instance.function_name}"
       ACCEPTED_AUTH_KEYS = join(",", local.accepted_auth_keys)
-      ALLOW_ORIGINS      = join(",", var.allow_origins)
     } : {}
   )
 }
@@ -135,13 +136,18 @@ resource "aws_apigatewayv2_authorizer" "jwt" {
       var.api_gateway_v2.stage_invoke_url
     ]
   }
+
+  depends_on = [
+    aws_apigatewayv2_integration.map,
+    aws_apigatewayv2_route.well_known # potential circular dependency here? seems that in order to provision the authorizer, AWS checks that issuer responds at .well-known
+  ]
 }
 
 # serve JWKS from /{instance-id}/.well-known/jwks.json
 # q: will this work? circular, as the API is serving the JWKS that will be used to authenticate requests to other routes
-resource "aws_apigatewayv2_route" "jwks" {
+resource "aws_apigatewayv2_route" "well_known" {
   api_id             = var.api_gateway_v2.id
-  route_key          = "GET /${module.gate_instance.function_name}/.well-known/jwks.json"
+  route_key          = "GET /${module.gate_instance.function_name}/.well-known/{proxy+}"
   target             = "integrations/${aws_apigatewayv2_integration.map.id}"
   authorization_type = "NONE"
 }

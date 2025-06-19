@@ -30,4 +30,5 @@ public interface AwsContainer {
 
     S3Handler injectS3Handler(S3Handler s3Handler);
 
+    JwksDecorator.Factory jwksDecoratorFactory();
 }

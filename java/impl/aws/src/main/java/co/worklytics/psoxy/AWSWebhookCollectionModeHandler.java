@@ -62,7 +62,7 @@ public class AWSWebhookCollectionModeHandler implements RequestStreamHandler {
         mapper = awsContainer.objectMapper();
         sqsPayloadMapper = new ObjectMapper();
         sqsPayloadMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        jwksHandler = new JwksDecorator(inboundWebhookHandler);
+        jwksHandler = awsContainer.jwksDecoratorFactory().create(inboundWebhookHandler);
     }
 
 

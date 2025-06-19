@@ -21,4 +21,9 @@ public interface JwtAuthorizedResource {
      */
     @SneakyThrows
     Optional<String> validate(SignedJWT signedJWT);
+
+    /**
+     * @return  the issuer of the JWTs that this resource accepts, without trailing /
+     */
+    String getIssuer();
 }

@@ -4,7 +4,14 @@ import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.auth.JwtAuthorizedResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
+import lombok.SneakyThrows;
+import lombok.extern.java.Log;
+import org.apache.http.HttpStatus;
 
+import javax.inject.Inject;
 import java.math.BigInteger;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
@@ -14,35 +21,74 @@ import java.util.stream.Collectors;
 /**
  * decorates an implementation of {@link JwtAuthorizedResource} to provide a JWKS endpoint.
  */
+@Log
 public class JwksDecorator {
 
-    JwtAuthorizedResource jwtAuthorizedResource;
+    final JwtAuthorizedResource jwtAuthorizedResource;
 
-    public JwksDecorator(JwtAuthorizedResource jwtAuthorizedResource) {
+    @Inject
+    ObjectMapper objectMapper;
+
+    @AssistedInject
+    public JwksDecorator(@Assisted JwtAuthorizedResource jwtAuthorizedResource) {
         this.jwtAuthorizedResource = jwtAuthorizedResource;
     }
 
+    static final String JWKS_PATH = ".well-known/jwks.json";
+    static final String OPENID_CONFIG_PATH = ".well-known/openid-configuration";
+
+    @SneakyThrows
     public HttpEventResponse handle(HttpEventRequest request) {
-        if (!request.getPath().endsWith(".well-known/jwks.json")) {
-            throw new IllegalArgumentException("Invalid JWKS request path: " + request.getPath());
-        }
+        Object content = null;
         try {
-            Collection<RSAPublicKey> keys = jwtAuthorizedResource.acceptableAuthKeys();
-            JWKSResponse jwks = new JWKSResponse(
-                keys.stream().map(JWK::fromRSAPublicKey).collect(Collectors.toList())
-            );
-            ObjectMapper mapper = new ObjectMapper();
-            String json = mapper.writeValueAsString(jwks);
-            return HttpEventResponse.builder()
-                .statusCode(200)
+            if (request.getPath().endsWith(JWKS_PATH)) {
+                content = serveJwks();
+            } else if (request.getPath().endsWith(OPENID_CONFIG_PATH)) {
+                content = serveOpenIdConfig();
+            } else {
+                return HttpEventResponse.builder()
+                .statusCode(HttpStatus.SC_BAD_REQUEST)
                 .header("Content-Type", "application/json")
-                .body(json)
+                .body("{\"error\": \"Invalid request path\"}")
                 .build();
+            }
         } catch (Exception e) {
+            log.severe("Error serving JWKS or OpenID config: " + e.getMessage());
             return HttpEventResponse.builder()
-                .statusCode(500)
-                .body("{\"error\":\"Failed to generate JWKS: " + e.getMessage() + "\"}")
+                .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                .header("Content-Type", "application/json")
+                .body("{\"error\": \"Internal Server Error\"}")
                 .build();
+        }
+
+        return HttpEventResponse.builder()
+            .statusCode(HttpStatus.SC_OK)
+            .header("Content-Type", "application/json")
+            .body(objectMapper.writeValueAsString(content))
+            .build();
+    }
+
+    private JWKSResponse serveJwks() {
+        Collection<RSAPublicKey> keys = jwtAuthorizedResource.acceptableAuthKeys();
+        return new JWKSResponse(
+            keys.stream().map(JWK::fromRSAPublicKey).collect(Collectors.toList())
+        );
+    }
+
+    private OpenIdConfig serveOpenIdConfig() {
+        return new OpenIdConfig(
+            jwtAuthorizedResource.getIssuer(),
+            jwtAuthorizedResource.getIssuer() + "/" + JWKS_PATH
+        );
+    }
+
+    static class OpenIdConfig {
+        public final String issuer;
+        public final String jwks_uri;
+
+        public OpenIdConfig(String issuer, String jwksUri) {
+            this.issuer = issuer;
+            this.jwks_uri = jwksUri;
         }
     }
 
@@ -78,5 +124,10 @@ public class JwksDecorator {
         private static String base64UrlEncode(BigInteger value) {
             return Base64.getUrlEncoder().withoutPadding().encodeToString(value.toByteArray());
         }
+    }
+
+    @AssistedFactory
+    public interface Factory {
+        JwksDecorator create(JwtAuthorizedResource jwtAuthorizedResource);
     }
 }

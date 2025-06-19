@@ -163,12 +163,17 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
 
     /**
      * returns a failure message if invalid, or empty otherwise
-     * @param signedJWT
+     * @param jwt to validate
      * @return optional with the failure, if any
      */
     @Override
     public Optional<String> validate(SignedJWT jwt) {
         return validate(jwt, acceptableAuthKeys());
+    }
+
+    @Override
+    public String getIssuer() {
+        return configService.getConfigPropertyOrError(WebhookCollectorModeConfigProperty.AUTH_ISSUER);
     }
 
     /**
