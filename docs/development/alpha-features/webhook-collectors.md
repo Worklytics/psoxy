@@ -33,22 +33,25 @@ distributed to the Tool Client. It should be held by the Tool Client as a secret
 The Tool Client will include this token in the webhook payload, and the Webhook Collector will verify it before accepting
 the payload.
 
-See [jwt.io](https://jwt.io/) for more details on how to generate and verify JWT tokens in general.  JWT
-are a common identity token solution, used by many OAuth2 and OpenID Connect providers - including Microsoft, Google,
-etc.
+See [jwt.io](https://jwt.io/) for more details on how to generate and verify JWT tokens in general.
 
 `REQUIRE_AUTHORIZATION_HEADER` - env var that indicates whether the Webhook Collector requires an `Authorization` header
   to be sent. This header MUST be a valid JWT identity token, signed with one of the public keys configured in `ACCEPTED_AUTH_KEYS`.
 
 It MUST contain:
-  - `iat` (issued at) claim, which indicates when the token was issued
-  - `exp` (expiration) claim, which indicates when the token expires.
+  - `typ` (type) claim, which indicates the type of the token. This should be `JWT`.
+  - `alg` (algorithm) claim, which indicates the algorithm used to sign the token. This should be `RS256`.
+  - `aud` (audience) claim, which indicates the audience for which the token is intended. This should be the collector endpoint URL, eg `https://jr2e4x60sa.execute-api.us-east-1.amazonaws.com/webhook_collectors/llm-portal`.
+  - `iss` (issuer) claim, which indicates the issuer of the token. This should ALSO be the collector endpoint URL.
+  - `iat` (issued at) claim, which indicates when the token was issued, in seconds since the epoch. Must not be in the future.
+  - `exp` (expiration) claim, which indicates when the token expires, in seconds since the epoch. Must not be more than 365 days in the future.
+  - `kid` (key ID) claim, which indicates the key that was used to sign the token. This should match one of the keys in `ACCEPTED_AUTH_KEYS`.
 
 It MAY contain:
   - `sub` (subject) claim, which indicates the user or entity that the token represents. (eg, user using the tool)
   - additional claims that the Tool Server may want to include, with, as of 0.5.3, no restrictions on semantics of those.
 
-
+All of the above claims have their standard semantics per OpenID Connect and JWT specifications.
 
 `ACCEPTED_AUTH_KEYS` - env var that references all the public keys that will be tested against the JWT identity token. if JWT
 received is valid according to any of them, then the request is authenticated and authorized. Options:
@@ -65,7 +68,7 @@ the future (refer to the ISO-formatted timestamp in the tag `rotation_time` to d
 at least every N/2 days to ensure that the keys are rotated and the new key is provisioned.
 
 Our module will also create a KMS key alias ending in `_signing-key`; any app you use to create auth tokens should use this alias
-when signing. If rotation is enable, this alias will be updated accordingly on every `terraform apply` to point to the correct key.  Eg,
+when signing. If rotation is enabled, this alias will be updated accordingly on every `terraform apply` to point to the correct key.  Eg,
 if your environment id is `worklytics`, and your proxy webhook collection id is `llm-portal`, then alias will be `worklytics/llm-portal_signing-key`.
 
 Alternatively, you may manage the keys yourself and pass in kms key aliases via the `auth_keys` property of the `webhook_collectors`

@@ -7,10 +7,11 @@ ${command_cli_call} -u "${proxy_endpoint_url}/.well-known/jwks.json"
 
 ${command_cli_call} -u "${proxy_endpoint_url}/collect" --method POST \
 %{ if signing_key_arn != null ~}
---signing-key="aws-kms:${signing_key_arn}" \
+--signing-key "aws-kms:${signing_key_arn}" \
+--identity-issuer "${proxy_endpoint_url}" \
 %{ endif ~}
 %{ if example_identity != null ~}
---identity-to-sign '${example_identity}' \
+--identity-subject '${example_identity}' \
 %{ endif ~}
 --body '${example_payload != null ? example_payload : "{\"test\": \"data\"}"}'
 

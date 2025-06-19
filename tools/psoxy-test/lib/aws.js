@@ -73,16 +73,12 @@ async function call(options = {}) {
     ...signed.headers,
   };
 
-
   if (options.signingKey) {
-    let issuer = url.toString().replace("/collect", "").toString(); // remove /collect from URL,
-
-    console.log(issuer)
     let signature;
     let claims = {
-      iss: issuer,
-      sub: options.identityToSign,
-      aud: issuer,
+      iss: options.identityIssuer,
+      sub: options.identitySubject,
+      aud: options.identityIssuer,
       iat: Math.floor(Date.now() / 1000), // current time in seconds
       exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
     }
@@ -91,7 +87,7 @@ async function call(options = {}) {
     }
 
     headers['Authorization'] = signature;
-    headers['x-psoxy-authorization'] = signature;
+    headers['x-psoxy-authorization'] = signature; // still needed? will API gateway pass 'Authorization' through or consume it??
   }
 
   logger.info(`Calling Psoxy and waiting response: ${options.url.toString()}`);
