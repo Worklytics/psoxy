@@ -698,8 +698,14 @@ class RESTApiSanitizerImplTest {
     @CsvSource(value = {
         "123.234.252.12,t~7USliSM4GiS0Xfk1DXIAH-4nK-UkLJlSAA_5ZqQh_CI",
         "10.0.0.1,t~3BU4goNN07w3ofq8v5ig2enxSWj9xnAnPOThel4mHTk",
-        ",",
-        "not an ip," // redact
+        //some IPv6 cases
+        "2001:0db8::1,t~njBikXo6n6-7z6JEg8zs_E89aJQ0lje1vW3O9EkS__8", //compressed zeros
+        "2001:db8:0:0:0:0:2:1,t~I8-OlnbGQkV5ClnMrM_O79TR_r8JroRmUbd056Hs2x4", //uncompressed zeros
+        "0:0:0:0:0:ffff:c000:0280,t~SUZ6xYqAE2gCw90EnrhS7ait6lh2xPKj2-SSQVm8o9A", //IPv4-mapped IPv6 address
+        "::ffff:192.0.2.128,t~SUZ6xYqAE2gCw90EnrhS7ait6lh2xPKj2-SSQVm8o9A", //IPv4-mapped IPv6 address
+        "not an ip,", // redact
+        "notanip,", // redact
+        //"aaaa,aaaa", // permits hex strings that *may* be IPv6 ....
     })
     @ParameterizedTest
     public void hashIp(String input, String expected) {
