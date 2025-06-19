@@ -163,7 +163,7 @@ test.serial('Psoxy call: with POST, signingKey, and identityToSign options (Webh
     td.when(
       utils.signJwtWithKMS(
         td.matchers.contains({
-          iss: options.signingKey,
+          iss: `https://${new URL(options.url).hostname}`,
           sub: options.identityToSign,
           aud: options.url,
         }),
