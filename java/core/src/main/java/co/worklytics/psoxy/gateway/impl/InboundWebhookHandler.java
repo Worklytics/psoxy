@@ -18,9 +18,12 @@ import org.apache.http.ParseException;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.security.interfaces.RSAPublicKey;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.TemporalAmount;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 /**
@@ -33,22 +36,30 @@ import java.util.stream.Collectors;
 @Log
 public class InboundWebhookHandler {
 
-    static final Duration MAX_TOKEN_AGE = Duration.ofHours(1);
+    // main point of this is to ensure that servers haven't issued super-long-lived tokens by mistake
+    // for example, by setting `exp` in milliseconds since epoch, instead of seconds since epoch
+    static final Duration MAX_FUTURE_TOKEN_EXPIRATION = Duration.ofDays(365); // 1 year
+
+    // check and allow *some* clock skew in iat and exp
+    static final Duration ALLOWED_CLOCK_SKEW = Duration.ofMinutes(2);
 
     private final Output output;
     private final WebhookSanitizer webhookSanitizer;
     private final ConfigService configService;
     private final Set<PublicKeyStoreClient> publicKeyStoreClients;
+    private final Clock clock;
 
     @Inject
     public InboundWebhookHandler(Lazy<WebhookSanitizer> webhookSanitizerProvider,
                                  @Named("forWebhooks") Output output,
                                  ConfigService configService,
-                                 Set<PublicKeyStoreClient> publicKeyStoreClients) {
+                                 Set<PublicKeyStoreClient> publicKeyStoreClients,
+                                 Clock clock) {
         this.webhookSanitizer = webhookSanitizerProvider.get(); // avoids trying to instantiate WebhookSanitizerImpl when we don't need one
         this.output = output;
         this.configService = configService;
         this.publicKeyStoreClients = publicKeyStoreClients;
+        this.clock = clock;
     }
 
     /**
@@ -74,6 +85,13 @@ public class InboundWebhookHandler {
 
     @SneakyThrows
     public HttpEventResponse handle(HttpEventRequest request) {
+        Optional<String> authorizationHeader = getAuthorizationHeader(request);
+
+        boolean isDevelopmentMode = configService.getConfigPropertyAsOptional(ProxyConfigProperty.IS_DEVELOPMENT_MODE).map(Boolean::parseBoolean).orElse(false);
+        if (isDevelopmentMode) {
+            log.info("Development mode enabled; auth header: " + authorizationHeader.orElse("not present"));
+            log.info("Request: "  + request.prettyPrint());
+        }
 
         if (request.getHttpMethod().equals("OPTIONS")) {
             // at least in AWS-cases, this is redundant; AWS API Gateway / Lambda Function URLs handle CORS preflight requests using configuration set in Terraform
@@ -91,8 +109,6 @@ public class InboundWebhookHandler {
                 .header("Access-Control-Allow-Headers", "*")  // TODO: make this explicit?
                 .build();
         }
-
-        Optional<String> authorizationHeader = getAuthorizationHeader(request);
 
         Optional<SignedJWT> authToken;
 
@@ -150,8 +166,6 @@ public class InboundWebhookHandler {
                 .build();
         }
 
-
-
         ProcessedContent sanitized = webhookSanitizer.sanitize(request);
 
         output.write(sanitized);
@@ -163,12 +177,37 @@ public class InboundWebhookHandler {
 
     /**
      * returns a failure message if invalid, or empty otherwise
-     * @param signedJWT
-     * @param publicKeys
+     * @param signedJWT to validate
+     * @param publicKeys to verify the signature against; if ANY of these keys can verify the signature, the JWT is considered valid
      * @return optional with the failure, if any
      */
     @SneakyThrows
     public Optional<String> validate(SignedJWT signedJWT, Collection<RSAPublicKey> publicKeys) {
+        Instant now = clock.instant();
+
+        if (signedJWT.getJWTClaimsSet() == null) {
+            return Optional.of("Auth token invalid because JWT claims set is null");
+        }
+
+        //q: is this worth enforcing?
+        if (signedJWT.getJWTClaimsSet().getIssueTime() == null) {
+            return Optional.of("Auth token invalid because issued at time (iat) is null");
+        }
+        if (signedJWT.getJWTClaimsSet().getIssueTime().after(Date.from(now.plus(ALLOWED_CLOCK_SKEW)))) {
+            return Optional.of("Auth token invalid because its issued at time (iat) is in the future: " + signedJWT.getJWTClaimsSet().getIssueTime());
+        }
+
+        if (signedJWT.getJWTClaimsSet().getExpirationTime() == null) {
+            return Optional.of("Auth token invalid because expiration time (exp) is null");
+        }
+
+        if (signedJWT.getJWTClaimsSet().getExpirationTime().before(Date.from(now.minus(ALLOWED_CLOCK_SKEW)))) {
+            return Optional.of("Auth token invalid because its expiration time (exp) is too far in the past: " + signedJWT.getJWTClaimsSet().getExpirationTime());
+        }
+
+        if (signedJWT.getJWTClaimsSet().getExpirationTime().after(Date.from(now.plus(MAX_FUTURE_TOKEN_EXPIRATION)))) {
+            return Optional.of("Auth token invalid because its expires too far in future: " + signedJWT.getJWTClaimsSet().getExpirationTime());
+        }
 
         boolean signatureValid = publicKeys.stream()
             .filter(k -> {
@@ -176,7 +215,8 @@ public class InboundWebhookHandler {
                 try {
                     return signedJWT.verify(verifier);
                 } catch (JOSEException e) {
-                    throw new RuntimeException(e);
+                    log.log(Level.WARNING, "Failed to verify signature, will try other keys; " + e.getMessage(), e);
+                    return false;
                 }
             })
             .findFirst().isPresent();
@@ -184,17 +224,8 @@ public class InboundWebhookHandler {
         if (!signatureValid ) {
             return Optional.of("JWT verification failed due to invalid signature");
         }
-        if (signedJWT.getJWTClaimsSet() == null) {
-            return Optional.of("Auth token invalid because JWT claims set is null");
-        }
 
-        Instant threshold = Instant.now().minus(MAX_TOKEN_AGE);
-        if (signedJWT.getJWTClaimsSet().getIssueTime().before(Date.from(threshold))) {
-            return Optional.of("Auth token invalid because OLDER than allowed by configuration/policy");
-        }
-
-        // TODO: validate issuer?? do we care?
-
+        // TODO: validate issuer?? do we care? doesn't exactly help a lot, unless they give multiple tools access to use the same signing keys
 
         return Optional.empty();
     }

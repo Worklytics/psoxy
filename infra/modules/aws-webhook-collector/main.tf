@@ -107,7 +107,8 @@ module "gate_instance" {
     {
       WEBHOOK_OUTPUT               = aws_sqs_queue.sanitized_webhooks_to_batch.url
       WEBHOOK_BATCH_OUTPUT         = "s3://${module.sanitized_output.bucket_id}"
-      REQUIRE_AUTHORIZATION_HEADER = length(var.webhook_auth_public_keys) > 0
+      REQUIRE_AUTHORIZATION_HEADER = length(local.accepted_auth_keys) > 0
+      CUSTOM_RULES_SHA             = module.rules_parameter.rules_hash
     },
     length(local.accepted_auth_keys) > 0 ? {
       ACCEPTED_AUTH_KEYS = join(",", local.accepted_auth_keys)
@@ -258,7 +259,7 @@ resource "aws_kms_key" "auth_key" {
 locals {
   accepted_auth_keys = concat(
     var.webhook_auth_public_keys,
-    var.provision_auth_key == null ? [] : aws_kms_key.auth_key[*].arn
+    var.provision_auth_key == null ? [] : [for arn in aws_kms_key.auth_key[*].arn : "aws-kms:${arn}"]
   )
   auth_key_arns_sorted = values({
     for k in aws_kms_key.auth_key[*] : try(k.tags.rotation_time, k.arn) => k.arn
@@ -266,6 +267,7 @@ locals {
   auth_key_ids_sorted = values({
     for k in aws_kms_key.auth_key[*] : try(k.tags.rotation_time, k.arn) => k.key_id
   })
+  allow_test_role_to_sign = var.test_caller_role_arn != null && local.keys_to_provision > 0
 }
 
 resource "aws_kms_alias" "auth_key_alias" {
@@ -275,6 +277,36 @@ resource "aws_kms_alias" "auth_key_alias" {
 
   # TODO: from terraform v1.11, can simply pass -1 to `element` to get the last element
   target_key_id = element(local.auth_key_ids_sorted, length(local.auth_key_arns_sorted) - 1) # should be latest, bc sorted by rotation_time
+}
+
+## if testing, we need test caller to be able to use the signing-key role
+resource "aws_iam_policy" "kms_signing_policy" {
+  count = local.allow_test_role_to_sign ? 1 : 0
+
+  name        = "${module.env_id.id}_${var.instance_id}_testCallerPolicy"
+  description = "Allows test caller role to sign webhook requests with the key to allow for testing webhook collection. Only for testing; can be detached once production ready."
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Sign",
+          "kms:GetPublicKey",
+          "kms:DescribeKey"
+        ]
+        Resource = aws_kms_key.auth_key[*].arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "auth_key_to_test_caller_role" {
+  count = local.allow_test_role_to_sign ? 1 : 0
+
+  role       = regex("arn:aws:iam::[0-9]+:role/(.+)", var.test_caller_role_arn)[0]
+  policy_arn = aws_iam_policy.kms_signing_policy[0].arn
 }
 
 ## end Authentication Key Pair Provisioning
@@ -352,6 +384,9 @@ locals {
     proxy_endpoint_url = local.proxy_endpoint_url,
     function_name      = module.gate_instance.function_name,
     command_cli_call   = local.command_cli_call,
+    signing_key_arn    = local.keys_to_provision > 0 ? element(local.auth_key_arns_sorted, length(local.auth_key_arns_sorted) - 1) : null,
+    example_payload    = var.example_payload
+    example_identity   = var.example_identity
   })
 }
 
@@ -415,3 +450,4 @@ output "provisioned_auth_key_pairs" {
 output "todo" {
   value = local.todo_content
 }
+

@@ -1,6 +1,11 @@
 #!/bin/bash
 echo "Quick test of ${function_name} ..."
 
-${command_cli_call} -u "${proxy_endpoint_url}/" --health-check
-
-${command_cli_call} -u "${proxy_endpoint_url}" --method POST --body '{"test": "data"}'
+${command_cli_call} -u "${proxy_endpoint_url}" --method POST \
+%{ if signing_key_arn != null ~}
+--signing-key="aws-kms:${signing_key_arn}" \
+%{ endif ~}
+%{ if example_identity != null ~}
+--identity-to-sign '${example_identity}' \
+%{ endif ~}
+--body '${example_payload != null ? example_payload : "{\"test\": \"data\"}"}'

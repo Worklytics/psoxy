@@ -98,7 +98,7 @@ public class HealthCheckRequestHandler {
                     .collect(Collectors.toSet());
         } catch (Throwable e) {
             // will fail if sourceAuthStrategy is not set up properly
-            log.log(Level.WARNING, e.getMessage(), e);
+            logInDev(e.getMessage(), e);
             missing = Collections.emptySet();
         }
 
