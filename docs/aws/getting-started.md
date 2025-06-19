@@ -68,8 +68,8 @@ The diagram below provides an architecture overview of the 'API' and 'Bulk' mode
    in place that deny this by default, even if you have an IAM role that allows it at an account
    level.
 
-   NOTE: using AWS API Gateway, VPC, or Secrets Manager (not used by default in our examples) will
-   require additional permissions beyond the above.
+   NOTE: using AWS API Gateway (required for webhook collection), VPC, or Secrets Manager (not
+   used by default in our examples) will require additional permissions beyond the above.
 
    See: [protips.md](protips.md) for guide to create a least-privileged iam policy for provisioning.
 

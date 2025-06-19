@@ -171,7 +171,7 @@ Please refer to that module for a definitive list.
 
 See details: [sources/github/README.md](sources/github/README.md)
 
-### Other Data Sources via REST APIs
+### Other Data Sources via  APIs
 
 These sources will typically require some kind of "Admin" within the tool to create an API key or
 client, grant the client access to your organization's data, and provide you with the API key/secret
@@ -191,7 +191,7 @@ The API key/secret will be used to authenticate with the source's REST API and a
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](https://github.com/Worklytics/psoxy/tree/main/infra/modules/worklytics-connector-specs).
 Please refer to that module for a definitive list.
 
-### Other Data Sources without REST APIs
+### Other Data Sources via Bulk Data Exports
 
 Other data sources, such as Human Resource Information System (HRIS), Badge, or Survey data can be
 exported to a CSV file. The "bulk" mode of the proxy can be used to pseudonymize these files by
@@ -218,6 +218,14 @@ See also: [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
 | Slack Discovery Bulk     | [sources/slack/slack-discovery-bulk](sources/slack/slack-discovery-bulk/README.md) |
 | Survey                   | [sources/survey](sources/survey/README.md) |
 
+### Other Data Sources via Webhook Collection
+
+Some data sources may support **webhooks** to send data to a URL endpoint, often in response to
+a user-performed action.  These 'events' can be collected by psoxy instances in "webhook collector" mode.
+
+On-prem/in-house-build data sources can be insturmented to produce webhooks, using the [Worklytics Work Events JS SDK](https://github.com/Worklytics/Work-Events-JS).
+
+See also: [Webhook Collectors](development/alpha-features/webhook-collectors.md)
 
 ## Getting Started - Customers
 
