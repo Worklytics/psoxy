@@ -65,7 +65,7 @@ test('Psoxy Logs: parse log entries', (t) => {
   t.true(_.isString(result[nestedMessageEntryIndex].message))
 });
 
-test('Psoxy Call: get identity token when option missing', async (t) => {
+test.serial('Psoxy Call: get identity token when option missing', async (t) => {
   const gcp = t.context.subject;
   const utils = t.context.utils;
 
