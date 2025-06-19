@@ -267,9 +267,10 @@
                         <configuration>
                             <licensesOutputDirectory>${project.build.directory}/generated-resources/licenses</licensesOutputDirectory>
                             <cleanLicensesOutputDirectory>true</cleanLicensesOutputDirectory>
+                            <licenseMerges>${project.parent.basedir}/license-mapping.xml</licenseMerges>
                             <includeTransitiveDependencies>true</includeTransitiveDependencies>
-                            <includeOptional>false</includeOptional>
-                            <licensesConfigFile>${project.basedir}/src/license-mapping.xml</licensesConfigFile>
+                            <excludedScopes>test,provided</excludedScopes>
+                            <failOnMissing>true</failOnMissing>
                         </configuration>
                     </execution>
                     <execution>
@@ -281,10 +282,10 @@
                         <configuration>
                             <outputDirectory>${project.build.directory}/generated-resources/licenses</outputDirectory>
                             <thirdPartyFilename>THIRD-PARTY-LICENSE-LIST.txt</thirdPartyFilename>
+                            <licenseMerges>${project.parent.basedir}/license-mapping.xml</licenseMerges>
                             <includeTransitiveDependencies>true</includeTransitiveDependencies>
                             <excludedScopes>test,provided</excludedScopes>
-                            <!--<failIfWarning>true</failIfWarning>-->
-                            <licenseMerges>${project.basedir}/license-mapping.xml</licenseMerges>
+                            <failOnMissing>true</failOnMissing>
                         </configuration>
                     </execution>
                 </executions>

@@ -2,20 +2,48 @@
   <licenseMerge>
     <match>
       <groupId>co.worklytics.psoxy</groupId>
+        <artifactId>psoxy-core</artifactId>
     </match>
     <mergedLicense>
-      <name>Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <name>Worklytics Commercial License</name>
+      <url>https://github.com/Worklytics/psoxy/blob/main/LICENSE.md</url>
     </mergedLicense>
   </licenseMerge>
 
   <licenseMerge>
     <match>
       <groupId>com.avaulta.gateway</groupId>
+        <artifactId>gateway-core</artifactId>
     </match>
     <mergedLicense>
-      <name>Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <name>Worklytics Commercial License</name>
+      <url>https://github.com/Worklytics/psoxy/blob/main/LICENSE.md</url>
     </mergedLicense>
   </licenseMerge>
+
+    <!-- External deps with known licenses but broken/unavailable URLs -->
+
+    <!-- error-prone javac shaded -->
+    <licenseMerge>
+        <match>
+            <groupId>com.google.errorprone</groupId>
+            <artifactId>javac-shaded</artifactId>
+        </match>
+        <mergedLicense>
+            <name>GPLv2 with Classpath Exception</name>
+            <url>https://openjdk.org/legal/gplv2+ce.html</url>
+        </mergedLicense>
+    </licenseMerge>
+
+    <!-- checker-compat-qual -->
+    <licenseMerge>
+        <match>
+            <groupId>org.checkerframework</groupId>
+            <artifactId>checker-compat-qual</artifactId>
+        </match>
+        <mergedLicense>
+            <name>GPLv2 with Classpath Exception</name>
+            <url>https://www.gnu.org/software/classpath/license.html</url>
+        </mergedLicense>
+    </licenseMerge>
 </licenseMerges>
