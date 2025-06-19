@@ -77,7 +77,7 @@ variable "log_retention_days" {
 variable "handler_class" {
   type        = string
   description = "Class to handle the request"
-  default     = "co.worklytics.psoxy.AWSWebhookCollectionModeHandler"
+  default     = "co.worklytics.psoxy.AwsWebhookCollectionModeHandler"
 }
 
 variable "reserved_concurrent_executions" {
