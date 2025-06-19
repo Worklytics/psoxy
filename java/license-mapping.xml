@@ -1,0 +1,21 @@
+<licenseMerges>
+  <licenseMerge>
+    <match>
+      <groupId>co.worklytics.psoxy</groupId>
+    </match>
+    <mergedLicense>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </mergedLicense>
+  </licenseMerge>
+
+  <licenseMerge>
+    <match>
+      <groupId>com.avaulta.gateway</groupId>
+    </match>
+    <mergedLicense>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </mergedLicense>
+  </licenseMerge>
+</licenseMerges>

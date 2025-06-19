@@ -254,10 +254,40 @@
             <!-- add license plugin -->
             <!-- use mvn goal license:aggregate-third-party-report to get report on licenses about
                  dependencies, to facilitate eventual distribution of built JAR -->
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>2.0.0</version>
+                <version>2.5.0</version>
+                <executions>
+                    <execution>
+                        <id>download-dependency-licenses</id>
+                        <goals><goal>download-licenses</goal></goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <licensesOutputDirectory>${project.build.directory}/generated-resources/licenses</licensesOutputDirectory>
+                            <cleanLicensesOutputDirectory>true</cleanLicensesOutputDirectory>
+                            <includeTransitiveDependencies>true</includeTransitiveDependencies>
+                            <includeOptional>false</includeOptional>
+                            <licensesConfigFile>${project.basedir}/src/license-mapping.xml</licensesConfigFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-third-party-license</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>add-third-party</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/generated-resources/licenses</outputDirectory>
+                            <thirdPartyFilename>THIRD-PARTY-LICENSE-LIST.txt</thirdPartyFilename>
+                            <includeTransitiveDependencies>true</includeTransitiveDependencies>
+                            <excludedScopes>test,provided</excludedScopes>
+                            <!--<failIfWarning>true</failIfWarning>-->
+                            <licenseMerges>${project.basedir}/license-mapping.xml</licenseMerges>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
