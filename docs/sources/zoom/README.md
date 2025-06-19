@@ -86,15 +86,15 @@ Once the scopes are added, click on `Done` and then `Continue`.
 
 Psoxy can pseudonymize Zoom AI Metrics Snapshot CSV data.
 
-The default proxy rules for `zoom-ai-snapshot-bulk` will pseudonymize `User Name` and `Email`, redacting `Department`
+The default proxy rules for `zoom-ai-metrics` will pseudonymize `User Name` and `Email`, redacting `Department`
 
 ```hcl
 custom_bulk_connector_rules = {
-    "zoom-ai-snapshot-bulk" = {
-        source_kind               = "zoom-ai-snapshot",
+    "zoom-ai-metrics" = {
+        source_kind               = "zoom",
         worklytics_connector_id   = "bulk-import-psoxy"
         worklytics_connector_name = "Bulk Import - Psoxy"
-        display_name              = "Zoom AI Metrics Snapshot - Miro AI Bulk"
+        display_name              = "Zoom AI Metrics"
         rules = {
             columnsToPseudonymize = [
                 "User Name",
