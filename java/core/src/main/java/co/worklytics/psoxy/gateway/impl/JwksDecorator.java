@@ -19,7 +19,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 /**
- * decorates an implementation of {@link JwtAuthorizedResource} to provide a JWKS endpoint.
+ * decorates an implementation of {@link JwtAuthorizedResource} to provide a JWKS/OIDC config endpoint.
  */
 @Log
 public class JwksDecorator {
@@ -34,8 +34,11 @@ public class JwksDecorator {
         this.jwtAuthorizedResource = jwtAuthorizedResource;
     }
 
-    static final String JWKS_PATH = ".well-known/jwks.json";
-    static final String OPENID_CONFIG_PATH = ".well-known/openid-configuration";
+    // just for reference,
+    static final String PATH_TO_RESOURCE = ".well-known";
+
+    static final String JWKS_PATH = "/jwks.json";
+    static final String OPENID_CONFIG_PATH = "/openid-configuration";
 
     @SneakyThrows
     public HttpEventResponse handle(HttpEventRequest request) {
@@ -68,17 +71,17 @@ public class JwksDecorator {
             .build();
     }
 
-    private JWKSResponse serveJwks() {
+    JWKSResponse serveJwks() {
         Collection<RSAPublicKey> keys = jwtAuthorizedResource.acceptableAuthKeys();
         return new JWKSResponse(
             keys.stream().map(JWK::fromRSAPublicKey).collect(Collectors.toList())
         );
     }
 
-    private OpenIdConfig serveOpenIdConfig() {
+     OpenIdConfig serveOpenIdConfig() {
         return new OpenIdConfig(
             jwtAuthorizedResource.getIssuer(),
-            jwtAuthorizedResource.getIssuer() + "/" + JWKS_PATH
+            jwtAuthorizedResource.getIssuer() + "/" + PATH_TO_RESOURCE + JWKS_PATH
         );
     }
 

@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfigProperty;
 import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
+import co.worklytics.psoxy.gateway.auth.JwtAuthorizedResource;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.output.NoOutput;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,5 +89,31 @@ public class JwksDecoratorTest {
         HttpEventRequest request = mock(HttpEventRequest.class);
         when(request.getPath()).thenReturn("/not-jwks");
         assertThrows(IllegalArgumentException.class, () -> handler.handle(request));
+    }
+
+    @Test
+    void testOpenIdConfigResponse() {
+        // Arrange
+        HttpEventRequest request = mock(HttpEventRequest.class);
+        when(request.getPath()).thenReturn("/.well-known/openid-configuration");
+
+        // Mock JwtAuthorizedResource
+        JwtAuthorizedResource jwtAuthorizedResource = mock(JwtAuthorizedResource.class);
+        String issuer = "https://issuer.example.com";
+        when(jwtAuthorizedResource.getIssuer()).thenReturn(issuer);
+        JwksDecorator decorator = new JwksDecorator(jwtAuthorizedResource);
+        decorator.objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+
+        // Act
+        HttpEventResponse response = decorator.handle(request);
+
+        // Assert
+        assertEquals(200, response.getStatusCode());
+        assertEquals("application/json", response.getHeaders().get("Content-Type"));
+        String expectedJson = String.format("{" +
+            "\"issuer\":\"%s\"," +
+            "\"jwks_uri\":\"%s/.well-known/jwks.json\"}", issuer, issuer);
+        // Remove whitespace for comparison
+        assertEquals(expectedJson.replaceAll("\\s+", ""), response.getBody().replaceAll("\\s+", ""));
     }
 }

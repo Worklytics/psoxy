@@ -19,7 +19,7 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class AWSWebhookCollectionModeHandlerTest {
+class AwsWebhookCollectionModeHandlerTest {
 
     static final String EXAMPLE_SQS_BATCH = """
 {

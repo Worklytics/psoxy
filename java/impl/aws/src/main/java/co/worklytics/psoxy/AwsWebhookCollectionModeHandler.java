@@ -3,6 +3,7 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.SQSOutput;
 import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
+import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.impl.BatchMergeHandler;
@@ -17,6 +18,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import lombok.extern.java.Log;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
@@ -27,13 +29,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
+import org.apache.http.HttpStatus;
 
 /**
  * AWS lambda entrypoint that can handle BOTH:
  *    - webhook requests from API Gateway / Function URL invocations, AND
  *    - SQS events (presumed to be batches of webhooks)
  */
-public class AWSWebhookCollectionModeHandler implements RequestStreamHandler {
+@Log
+public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
 
     /**
      * Static initialization allows reuse in containers
@@ -140,25 +144,24 @@ public class AWSWebhookCollectionModeHandler implements RequestStreamHandler {
         //interfaces:
         // - HttpRequestEvent --> HttpResponseEvent
 
-        APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter = new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
+        HttpEventRequest httpEventRequest = new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
         HttpEventResponse response;
 
         boolean base64Encoded = false;
-        if (httpEvent.getRawPath().endsWith(".well-known/jwks.json")) {
+        if (httpEvent.getRequestContext().getRouteKey().endsWith("/.well-known/{proxy+}")) {
             // special case for JWKS endpoint, which is used by clients to fetch public keys
             // for verifying JWTs signed by the proxy
-            context.getLogger().log("Handling JWKS request");
-            response = jwksHandler.handle(httpEventRequestAdapter);
+            response = jwksHandler.handle(httpEventRequest);
         } else {
             try {
-                response = inboundWebhookHandler.handle(httpEventRequestAdapter);
+                response = inboundWebhookHandler.handle(httpEventRequest);
             } catch (Throwable e) {
                 context.getLogger().log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
                 context.getLogger().log(ExceptionUtils.getStackTrace(e));
                 response = HttpEventResponse.builder()
-                    .statusCode(500)
-                    .body("Unknown error: " + e.getClass().getName())
+                    .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
                     .header(ResponseHeader.ERROR.getHttpHeader(), "Unknown error")
+                    .body("Unknown error: " + e.getClass().getName())
                     .build();
             }
         }

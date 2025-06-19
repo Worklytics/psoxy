@@ -25,6 +25,8 @@ locals {
   }
 
   http_methods = var.http_methods # Use http_methods directly without adding OPTIONS
+
+  auth_issuer = "${var.api_gateway_v2.stage_invoke_url}/${module.gate_instance.function_name}"
 }
 
 module "env_id" {
@@ -107,7 +109,7 @@ module "gate_instance" {
       ALLOW_ORIGINS                = join(",", var.allow_origins)
     },
     length(local.accepted_auth_keys) > 0 ? {
-      AUTH_ISSUER        = "${var.api_gateway_v2.stage_invoke_url}/${module.gate_instance.function_name}"
+      AUTH_ISSUER        = local.auth_issuer
       ACCEPTED_AUTH_KEYS = join(",", local.accepted_auth_keys)
     } : {}
   )
@@ -120,7 +122,7 @@ resource "aws_apigatewayv2_integration" "map" {
   connection_type        = "INTERNET"
   integration_method     = "POST"
   integration_uri        = module.gate_instance.function_arn
-  payload_format_version = "1.0" # must match to handler value, set in lambda
+  payload_format_version = "2.0"
   timeout_milliseconds   = 30000 # ideally would be 55 or 60, but docs say limit is 30s
 }
 
@@ -131,7 +133,7 @@ resource "aws_apigatewayv2_authorizer" "jwt" {
   identity_sources = ["$request.header.Authorization"]
 
   jwt_configuration {
-    issuer = var.api_gateway_v2.stage_invoke_url
+    issuer = local.auth_issuer
     audience = [
       var.api_gateway_v2.stage_invoke_url
     ]
@@ -145,6 +147,7 @@ resource "aws_apigatewayv2_authorizer" "jwt" {
 
 # serve JWKS from /{instance-id}/.well-known/jwks.json
 # q: will this work? circular, as the API is serving the JWKS that will be used to authenticate requests to other routes
+# this MUST be stood-up before the other route, which rely on it as the issuer for the JWT authorizer
 resource "aws_apigatewayv2_route" "well_known" {
   api_id             = var.api_gateway_v2.id
   route_key          = "GET /${module.gate_instance.function_name}/.well-known/{proxy+}"
@@ -172,7 +175,7 @@ resource "aws_lambda_permission" "api_gateway" {
   # The /*/*/ part allows invocation from any stage, method and resource path
   # within API Gateway REST API.
   # TODO: limit by http method here too?  for webhooks, would need POST, OPTIONS at min
-  source_arn = "${var.api_gateway_v2.execution_arn}/*/*/${module.gate_instance.function_name}/{proxy+}"
+  source_arn = "${var.api_gateway_v2.execution_arn}/*/*/${module.gate_instance.function_name}/*"
 }
 
 
