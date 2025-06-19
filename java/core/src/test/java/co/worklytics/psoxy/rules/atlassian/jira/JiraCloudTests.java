@@ -110,6 +110,7 @@ public class JiraCloudTests extends JavaRulesTestBaseCase {
 
         assertPseudonymized(sanitized, "712020:4891947c-7a8e-4889-b2cc-4064669804e1");
         assertRedacted(sanitized,
+            "Fake", // display name
             "Bob Smith", // display name
             "https://..." //photo url placeholders
         );
