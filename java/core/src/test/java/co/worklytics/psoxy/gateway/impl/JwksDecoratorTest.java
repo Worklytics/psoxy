@@ -72,7 +72,7 @@ public class JwksDecoratorTest {
 
     @Test
     void testJwksResponse() {
-        HttpEventRequest request = mock(HttpEventRequest.class);
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
         when(request.getPath()).thenReturn("/.well-known/jwks.json");
 
         HttpEventResponse response = handler.handle(request);
@@ -94,7 +94,7 @@ public class JwksDecoratorTest {
     @Test
     void testOpenIdConfigResponse() {
         // Arrange
-        HttpEventRequest request = mock(HttpEventRequest.class);
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
         when(request.getPath()).thenReturn("/.well-known/openid-configuration");
 
         // Mock JwtAuthorizedResource
