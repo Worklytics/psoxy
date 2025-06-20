@@ -27,6 +27,8 @@ locals {
   http_methods = var.http_methods # Use http_methods directly without adding OPTIONS
 
   auth_issuer = "${var.api_gateway_v2.stage_invoke_url}/${module.gate_instance.function_name}"
+
+  collection_path = "/collect"
 }
 
 module "env_id" {
@@ -162,7 +164,7 @@ resource "aws_apigatewayv2_route" "collect" {
   for_each = toset(local.http_methods) # q: should we just limit this to POST??
 
   api_id             = var.api_gateway_v2.id
-  route_key          = "${each.key} /${module.gate_instance.function_name}/{proxy+}" # q: does this need to be a {proxy+} route?? why??
+  route_key          = "${each.key} /${module.gate_instance.function_name}${local.collection_path}"
   target             = "integrations/${aws_apigatewayv2_integration.map.id}"
   authorizer_id      = aws_apigatewayv2_authorizer.jwt.id
   authorization_type = "JWT"
@@ -379,12 +381,13 @@ EOT
 
 locals {
   test_script = templatefile("${path.module}/test_script.tftpl", {
-    proxy_endpoint_url = local.proxy_endpoint_url,
-    function_name      = module.gate_instance.function_name,
-    command_cli_call   = local.command_cli_call,
-    signing_key_arn    = local.keys_to_provision > 0 ? element(local.auth_key_arns_sorted, length(local.auth_key_arns_sorted) - 1) : null,
-    example_payload    = var.example_payload
-    example_identity   = var.example_identity
+    collector_endpoint_url = local.proxy_endpoint_url,
+    function_name          = module.gate_instance.function_name,
+    command_cli_call       = local.command_cli_call,
+    signing_key_arn        = local.keys_to_provision > 0 ? element(local.auth_key_arns_sorted, length(local.auth_key_arns_sorted) - 1) : null,
+    example_payload        = var.example_payload
+    example_identity       = var.example_identity
+    collection_path        = local.collection_path
   })
 }
 
