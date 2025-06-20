@@ -13,6 +13,6 @@ public interface GCSOutputFactory extends OutputFactory<GCSOutput> {
 
     @Override
     default boolean supports(OutputLocation outputLocation) {
-        return "gcs".equals(outputLocation.getKind());
+        return OutputLocation.LocationKind.GCS.equals(outputLocation.getKind());
     }
 }

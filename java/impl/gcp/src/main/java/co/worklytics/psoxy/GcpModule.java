@@ -5,7 +5,6 @@ import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 
-import co.worklytics.psoxy.gateway.output.Output;
 import co.worklytics.psoxy.gateway.output.OutputFactory;
 import com.google.cloud.ServiceOptions;
 
