@@ -705,7 +705,7 @@ class RESTApiSanitizerImplTest {
         "::ffff:192.0.2.128,t~SUZ6xYqAE2gCw90EnrhS7ait6lh2xPKj2-SSQVm8o9A", //IPv4-mapped IPv6 address
         "not an ip,", // redact
         "notanip,", // redact
-        //"aaaa,aaaa", // permits hex strings that *may* be IPv6 ....
+// Line removed as the test case is no longer needed.
     })
     @ParameterizedTest
     public void hashIp(String input, String expected) {
