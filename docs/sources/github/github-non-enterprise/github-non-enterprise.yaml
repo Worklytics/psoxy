@@ -625,6 +625,8 @@ endpoints:
       - "milestone"
       - "state"
       - "labels"
+      - "after"
+      - "before"
       - "since"
     transforms:
       - !<redact>
