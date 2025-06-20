@@ -427,9 +427,17 @@ echo "Testing API Connectors ..."
 %{if test_script != null}./${test_script}%{endif}
 %{endfor}
 
+%{if length(values(module.bulk_connector)) > 0~}
 echo "Testing Bulk Connectors ..."
-
+%{endif~}
 %{for test_script in values(module.bulk_connector)[*].test_script~}
+%{if test_script != null}./${test_script}%{endif}
+%{endfor}
+
+%{if local.enable_webhook_testing && local.has_enabled_webhook_collectors}
+echo "Testing Webhook Collectors ..."
+%{endif~}
+%{for test_script in values(module.webhook_collectors)[*].test_script~}
 %{if test_script != null}./${test_script}%{endif}
 %{endfor}
 EOF
