@@ -457,22 +457,32 @@ async function getAWSCredentials(role, region) {
   return credentials;
 }
 
+function base64url(input) {
+  return input.toString('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+}
+
 /**
  * @param {object} claims - the usual JWT ones, iss, sub, etc. will be stringified
- * @param {string} keyId
+ * @param {string} keyArn
  * @param {Credentials} credentials
  * @param {string} region
  * @returns {Promise<string>}
  */
-async function signJwtWithKMS(claims, keyId, credentials, region) {
+async function signJwtWithKMS(claims, keyArn, credentials, region) {
   const client = new KMSClient({
     region: region,
     credentials: credentials,
   });
 
+  // Extract keyId from keyArn, e.g. `arn:aws:kms:us-east-1:123456789012:key/abcd1234-56ef-78gh-90ij-klmnopqrstuv`
+  //let keyId = keyArn.split(":")[5].split("/")[1];
+
   const encodedHeader = base64url(Buffer.from(JSON.stringify({
     "alg": "RS256",
-    "kid": keyId,
+    "kid": keyArn,
     "typ": "JWT",
   })));
   const encodedPayload = base64url(Buffer.from(JSON.stringify(claims)));
@@ -481,7 +491,7 @@ async function signJwtWithKMS(claims, keyId, credentials, region) {
   const hash = crypto.createHash('sha256').update(signingInput).digest();
 
   const command = new SignCommand({
-    KeyId: keyId,
+    KeyId: keyArn,
     SigningAlgorithm: 'RSASSA_PKCS1_V1_5_SHA_256',
     Message: hash,
     MessageType: 'DIGEST' // 🟢 explicitly indicate pre-hashed input

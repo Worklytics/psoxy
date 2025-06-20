@@ -147,7 +147,7 @@ test.serial('Psoxy call: pathless URL results 500', async (t) => {
   t.is(result.headers['x-psoxy-error'], 'BLOCKED_BY_RULES');
 });
 
-test.serial('Psoxy call: with POST, signingKey, and identityToSign options (Webhook use-case)',
+test.serial('Psoxy call: with POST, signingKey, and identitySubject options (Webhook use-case)',
   async(t) => {
     const aws = t.context.subject;
     const utils = t.context.utils;
@@ -156,15 +156,16 @@ test.serial('Psoxy call: with POST, signingKey, and identityToSign options (Webh
     options.method = 'POST';
     options.body = JSON.stringify({ foo: 'bar' });
     options.signingKey = 'aws-kms:foo';
-    options.identityToSign = 'test-identity';
+    options.identitySubject = 'test-identity';
+    options.identityIssuer = options.url;
 
     const jwtSignatureExample = 'jwtSignatureExample';
 
     td.when(
       utils.signJwtWithKMS(
         td.matchers.contains({
-          iss: `https://${new URL(options.url).hostname}`,
-          sub: options.identityToSign,
+          iss: options.url,
+          sub: options.identitySubject,
           aud: options.url,
         }),
         td.matchers.contains('foo'), // signingKey without 'aws-kms:' prefix
@@ -179,8 +180,8 @@ test.serial('Psoxy call: with POST, signingKey, and identityToSign options (Webh
         td.matchers.contains('POST'),
         td.matchers.contains({
           ...signedRequest.headers,
-          // if signing works this header must be included in the request
-          'x-psoxy-authorization': jwtSignatureExample,
+          // if signing works this header must be included in the request,
+          'Authorization': jwtSignatureExample,
         }),
         td.matchers.contains(options.body)
       )

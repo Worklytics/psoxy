@@ -12,6 +12,7 @@ You'll provision the following to host Psoxy in AWS:
 - [Cognito Pools and Identities](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-identity.html), if connecting to Microsoft 365 data sources
 - [Simple Query Service (SQS) queues] (https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html), if using [webhook collection mode](../../docs/development/alpha-features/webhook-collectors.md)
 - [KMS Keys and Aliases](https://docs.aws.amazon.com/kms/latest/developerguide/overview.html), if using [webhook collection mode](../../docs/development/alpha-features/webhook-collectors.md)
+- [API Gateway](https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html), if using [webhook collection mode](../../docs/development/alpha-features/webhook-collectors.md); or if desired for API connectors
 
 The diagram below provides an architecture overview of the 'API' and 'Bulk' mode use-cases.
 
@@ -67,8 +68,8 @@ The diagram below provides an architecture overview of the 'API' and 'Bulk' mode
    in place that deny this by default, even if you have an IAM role that allows it at an account
    level.
 
-   NOTE: using AWS API Gateway, VPC, or Secrets Manager (not used by default in our examples) will
-   require additional permissions beyond the above.
+   NOTE: using AWS API Gateway (required for webhook collection), VPC, or Secrets Manager (not
+   used by default in our examples) will require additional permissions beyond the above.
 
    See: [protips.md](protips.md) for guide to create a least-privileged iam policy for provisioning.
 

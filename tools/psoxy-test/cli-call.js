@@ -34,7 +34,8 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
     .option('-z, --gzip [type]', 'Add gzip compression header (default: true, "-z false" to remove)', true)
     .option('--health-check', 'Health Check call: check Psoxy deploy is running')
     .option('--signing-key <key-ref>', 'Signing key reference to use for signing requests (e.g. "aws-kms:arn:aws:kms:us-east-1:123456789012:key/abcd1234-12ab-34cd-56ef-1234567890ab")')
-    .option('--identity-to-sign <identity>', 'Identity to include as sub in JWT claims to be signed')
+    .option('--identity-issuer <issuer>', 'issuer of JWT (iss claim)')
+    .option('--identity-subject <sub>', 'subject (sub) claim to include in JWT claims to be signed')
     .option('--request-no-response', "Request 'No response body' back from proxy (tests side-output case)", false)
     .option('-b, --body <body>', 'Body to send in request (it expects a JSON string)')
     .addOption(new Option('-d, --data-source <name>',

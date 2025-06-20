@@ -102,7 +102,7 @@ variable "api_function_name_prefix" {
 
 variable "use_api_gateway_v2" {
   type        = bool
-  description = "whether to use API Gateway (v2); if not lambdas exposed via function URLs."
+  description = "whether to use API Gateway (v2); if not, API Connector lambdas will be exposed via function URLs. This pertains ONLY to API Connectors, not webhook collectors / bulk data connectors."
   default     = false
 }
 
@@ -116,6 +116,18 @@ variable "iam_roles_permissions_boundary" {
   type        = string
   description = "*beta* ARN of the permissions boundary to attach to IAM roles created by this module."
   default     = null
+}
+
+variable "provision_webhook_collection_infra" {
+  type        = bool
+  description = "whether to provision the common infra needed by all webhook collectors (eg, should be 'true' if planning to have ANY webhook-collector instances). NOTE: this will provision API Gateway v2 stuff, whether you're using it for th API connectors or NOT."
+  default     = false
+}
+
+variable "webhook_allow_origins" {
+  type        = list(string)
+  description = "list of allowed origins for webhook collectors; should be super-set of origins you're collecting webhooks from, or '*' to allow all origins (default)."
+  default     = ["*"]
 }
 
 variable "enable_webhook_testing" {
