@@ -156,7 +156,7 @@ test.serial('Psoxy call: with POST, signingKey, and identityToSign options (Webh
     options.method = 'POST';
     options.body = JSON.stringify({ foo: 'bar' });
     options.signingKey = 'aws-kms:foo';
-    options.identityToSign = 'test-identity';
+    options.identitySubject = 'test-identity';
 
     const jwtSignatureExample = 'jwtSignatureExample';
 
@@ -164,7 +164,7 @@ test.serial('Psoxy call: with POST, signingKey, and identityToSign options (Webh
       utils.signJwtWithKMS(
         td.matchers.contains({
           iss: options.url,
-          sub: options.identityToSign,
+          sub: options.identitySubject,
           aud: options.url,
         }),
         td.matchers.contains('foo'), // signingKey without 'aws-kms:' prefix
@@ -181,7 +181,6 @@ test.serial('Psoxy call: with POST, signingKey, and identityToSign options (Webh
           ...signedRequest.headers,
           // if signing works this header must be included in the request,
           'Authorization': jwtSignatureExample,
-          'x-psoxy-authorization': jwtSignatureExample,
         }),
         td.matchers.contains(options.body)
       )
