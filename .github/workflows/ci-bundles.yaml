@@ -35,7 +35,7 @@ jobs:
           mvn clean -f pom.xml
           mvn package install -f "gateway-core/pom.xml" -Dmaven.test.skip=true
           mvn package install -f "core/pom.xml" -Dmaven.test.skip=true
-          mvn package -f "impl/${{ matrix.implementation }}/pom.xml"
+          mvn package -f "impl/${{ matrix.implementation }}/pom.xml" -Pdistribution 
       - name: Verify license artifacts are in the uber jar
         working-directory: java/impl/${{ matrix.implementation }}
         run: |
