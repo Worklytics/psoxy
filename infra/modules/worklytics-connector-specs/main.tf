@@ -968,16 +968,15 @@ EOT
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/oauth/token/accessible-resources", # obtain Jira Cloud ID from here
-        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/users",
-        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/users",
-        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/group/bulk",
-        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/search?maxResults=25",
-        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
-        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/comment?maxResults=25",
-        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/users",
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/group/bulk",
-        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/search?maxResults=25",
+        "/services/data/v57.0/sobjects/Account/updated?start=${urlencode(timeadd(timestamp(), "-48h"))}&end=${urlencode(timestamp())}",
+        format(
+          "/ex/jira/%s/rest/api/3/search/jql?jql=updated >= '%s' AND updated < '%s' ORDER BY updated DESC&fields=*all,-comment,-worklog&maxResults=25",
+          local.jira_example_cloud_id,
+          formatdate("YYYY/MM/DD hh:mm", timeadd(timestamp(), "-96h")),
+          formatdate("YYYY/MM/DD hh:mm", timestamp())
+        ),
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/comment?maxResults=25",
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/worklog?maxResults=25",

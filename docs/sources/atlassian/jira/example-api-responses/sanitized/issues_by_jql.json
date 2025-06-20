@@ -1,38 +1,14 @@
 {
-  "startAt":0,
-  "maxResults":50,
-  "total":15,
   "issues":[
     {
-      "id":"10709",
-      "self":"https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10709",
+      "id":"10712",
+      "self":"https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10712",
       "fields":{
-        "statuscategorychangedate":"2022-03-02T09:00:35.928-0500",
+        "statuscategorychangedate":"2024-03-12T12:48:48.348-0400",
         "issuetype":{
-          "id":"10002",
+          "id":"10001",
           "subtask":false,
           "hierarchyLevel":0
-        },
-        "parent":{
-          "id":"10708",
-          "fields":{
-            "status":{
-              "id":"10000",
-              "statusCategory":{
-                "id":2,
-                "key":"new",
-                "colorName":"blue-gray"
-              }
-            },
-            "priority":{
-              "id":"3"
-            },
-            "issuetype":{
-              "id":"10000",
-              "subtask":false,
-              "hierarchyLevel":1
-            }
-          }
         },
         "timespent":0,
         "project":{
@@ -44,31 +20,118 @@
         "lastViewed":null,
         "watches":{
           "watchCount":1,
-          "isWatching":true
+          "isWatching":false
         },
-        "created":"2022-03-02T09:00:35.261-0500",
+        "created":"2024-03-12T12:47:09.993-0400",
         "issuelinks":[ ],
-        "assignee":null,
+        "assignee":{
+          "accountId":"{\"hash\":\"pMlZlJa1msrJ2n9jecAYzfkc6KU83KSBWDTjT5Exm58\"}",
+          "active":false,
+          "timeZone":"America/New_York",
+          "accountType":"atlassian"
+        },
         "updated":null,
         "status":{
-          "id":"10000",
+          "id":"3",
           "statusCategory":{
-            "id":2,
-            "key":"new",
-            "colorName":"blue-gray"
+            "id":4,
+            "key":"indeterminate",
+            "colorName":"yellow"
           }
         },
+        "attachment":[ ],
         "creator":{
-          "accountId":"{\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
-          "emailAddress":"{\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
-          "active":true,
+          "accountId":"{\"hash\":\"pMlZlJa1msrJ2n9jecAYzfkc6KU83KSBWDTjT5Exm58\"}",
+          "active":false,
           "timeZone":"America/New_York",
           "accountType":"atlassian"
         },
         "reporter":{
-          "accountId":"{\"hash\":\"7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\"}",
-          "emailAddress":"{\"domain\":\"contoso.com\",\"hash\":\"7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI\"}",
-          "active":true,
+          "accountId":"{\"hash\":\"pMlZlJa1msrJ2n9jecAYzfkc6KU83KSBWDTjT5Exm58\"}",
+          "active":false,
+          "timeZone":"America/New_York",
+          "accountType":"atlassian"
+        },
+        "aggregateprogress":{
+          "progress":0,
+          "total":0
+        },
+        "duedate":null,
+        "progress":{
+          "progress":0,
+          "total":0
+        },
+        "votes":{
+          "votes":0,
+          "hasVoted":false
+        }
+      }
+    },
+    {
+      "id":"10714",
+      "self":"https://api.atlassian.com/ex/jira/f6eef702-e05d-43ba-bd5c-75fce47d560e/rest/api/3/issue/10714",
+      "fields":{
+        "statuscategorychangedate":"2024-03-12T12:48:35.730-0400",
+        "issuetype":{
+          "id":"10003",
+          "subtask":true,
+          "hierarchyLevel":-1
+        },
+        "parent":{
+          "id":"10712",
+          "fields":{
+            "status":{
+              "id":"3",
+              "statusCategory":{
+                "id":4,
+                "key":"indeterminate",
+                "colorName":"yellow"
+              }
+            },
+            "priority":{
+              "id":"1"
+            },
+            "issuetype":{
+              "id":"10001",
+              "subtask":false,
+              "hierarchyLevel":0
+            }
+          }
+        },
+        "timespent":0,
+        "project":{
+          "id":"10000",
+          "projectTypeKey":"software",
+          "simplified":false
+        },
+        "resolutiondate":"2024-03-12T12:48:35.723-0400",
+        "lastViewed":null,
+        "watches":{
+          "watchCount":1,
+          "isWatching":false
+        },
+        "created":"2024-03-12T12:48:26.716-0400",
+        "issuelinks":[ ],
+        "assignee":null,
+        "updated":null,
+        "status":{
+          "id":"10001",
+          "statusCategory":{
+            "id":3,
+            "key":"done",
+            "colorName":"green"
+          }
+        },
+        "attachment":[ ],
+        "creator":{
+          "accountId":"{\"hash\":\"pMlZlJa1msrJ2n9jecAYzfkc6KU83KSBWDTjT5Exm58\"}",
+          "active":false,
+          "timeZone":"America/New_York",
+          "accountType":"atlassian"
+        },
+        "reporter":{
+          "accountId":"{\"hash\":\"pMlZlJa1msrJ2n9jecAYzfkc6KU83KSBWDTjT5Exm58\"}",
+          "active":false,
           "timeZone":"America/New_York",
           "accountType":"atlassian"
         },
@@ -87,5 +150,7 @@
         }
       }
     }
-  ]
+  ],
+  "nextPageToken":"Ckl1cGRhdGVkJnVwZGF0ZWQmT1JERVJfREVTQyNMb25nJk1UY3hNREkyTWpFeE5UY3lPUT09JVN0cmluZyZSVlJXJUludCZNakE9EAIYt-G17_cyIlR1cGRhdGVkID49ICcyMDIyLzAzLzE5IDEzOjM3JyBBTkQgdXBkYXRlZCA8ICcyMDI1LzA2LzE3IDE0OjM3JyBPUkRFUiBCWSB1cGRhdGVkIERFU0M=",
+  "isLast":false
 }
