@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.auth.JwtAuthorizedResource;
 import co.worklytics.psoxy.gateway.auth.PublicKeyRef;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.output.Output;
@@ -21,8 +22,8 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.TemporalAmount;
 import java.util.*;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
  *
  */
 @Log
-public class InboundWebhookHandler {
+public class InboundWebhookHandler implements JwtAuthorizedResource {
 
     // main point of this is to ensure that servers haven't issued super-long-lived tokens by mistake
     // for example, by setting `exp` in milliseconds since epoch, instead of seconds since epoch
@@ -132,7 +133,7 @@ public class InboundWebhookHandler {
             }
 
             // verify authorization header is signed with one of the acceptable public keys
-            Optional<String> validationError = this.validate(authToken.get(), acceptableAuthKeys());
+            Optional<String> validationError = this.validate(authToken.get(), acceptableAuthKeys().values());
 
             if (validationError.isPresent()) {
                 return HttpEventResponse.builder()
@@ -177,6 +178,20 @@ public class InboundWebhookHandler {
 
     /**
      * returns a failure message if invalid, or empty otherwise
+     * @param jwt to validate
+     * @return optional with the failure, if any
+     */
+    @Override
+    public Optional<String> validate(SignedJWT jwt) {
+        return validate(jwt, acceptableAuthKeys().values());
+    }
+
+    @Override
+    public String getIssuer() {
+        return configService.getConfigPropertyOrError(WebhookCollectorModeConfigProperty.AUTH_ISSUER);
+    }
+
+    /**
      * @param signedJWT to validate
      * @param publicKeys to verify the signature against; if ANY of these keys can verify the signature, the JWT is considered valid
      * @return optional with the failure, if any
@@ -230,7 +245,7 @@ public class InboundWebhookHandler {
         return Optional.empty();
     }
 
-    Collection<RSAPublicKey> acceptableAuthKeys() {
+    public Map<String, RSAPublicKey> acceptableAuthKeys() {
         return Arrays.stream(configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ACCEPTED_AUTH_KEYS).orElse("").split(","))
             .map(String::trim)
             .filter(keyRef -> !keyRef.isEmpty())
@@ -240,7 +255,10 @@ public class InboundWebhookHandler {
                 if (client.isEmpty()) {
                     throw new IllegalArgumentException("No public key store client found for: " + publicKeyRef.store());
                 }
-                return client.get().getPublicKeys(publicKeyRef).stream();
-            }).collect(Collectors.toList());
+                // Map each key to its id (keyRef.id())
+                return client.get().getPublicKeys(publicKeyRef).stream()
+                    .map(key -> new java.util.AbstractMap.SimpleEntry<>(publicKeyRef.id(), key));
+            })
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

@@ -24,11 +24,11 @@ locals {
     : k => v if v != null
   }
 
-  # helper to clarify conditionals throughout
-  use_api_gateway = var.api_gateway_v2 != null
+  http_methods = var.http_methods # Use http_methods directly without adding OPTIONS
 
-  authorization_type = "AWS_IAM"
-  http_methods       = var.http_methods # Use http_methods directly without adding OPTIONS
+  auth_issuer = "${var.api_gateway_v2.stage_invoke_url}/${module.gate_instance.function_name}"
+
+  collection_path = "/collect"
 }
 
 module "env_id" {
@@ -108,72 +108,78 @@ module "gate_instance" {
       WEBHOOK_OUTPUT               = aws_sqs_queue.sanitized_webhooks_to_batch.url
       WEBHOOK_BATCH_OUTPUT         = "s3://${module.sanitized_output.bucket_id}"
       REQUIRE_AUTHORIZATION_HEADER = length(local.accepted_auth_keys) > 0
+      ALLOW_ORIGINS                = join(",", var.allow_origins)
       CUSTOM_RULES_SHA             = module.rules_parameter.rules_hash
     },
     length(local.accepted_auth_keys) > 0 ? {
+      AUTH_ISSUER        = local.auth_issuer
       ACCEPTED_AUTH_KEYS = join(",", local.accepted_auth_keys)
-      ALLOW_ORIGINS      = join(",", var.allow_origins)
     } : {}
   )
 }
 
-# lambda function URL (only if NOT using API Gateway)
-resource "aws_lambda_function_url" "lambda_url" {
-  count = local.use_api_gateway ? 0 : 1
 
-  function_name      = module.gate_instance.function_name
-  authorization_type = local.authorization_type
-
-  # NOTE: CORS doesn't require that we include 'OPTIONS' method, as it is added automatically
-  # message is You can use GET, PUT, POST, DELETE, HEAD, PATCH, and the wildcard character (*).",
-  cors {
-    allow_credentials = true
-    allow_headers     = ["*"]
-    allow_methods     = [for m in local.http_methods : m if !(m == "OPTIONS")]
-    allow_origins     = var.allow_origins
-    expose_headers    = ["*"]
-  }
-
-  depends_on = [
-    module.gate_instance
-  ]
-}
-
-# API Gateway (only if NOT using lambda function URL)
 resource "aws_apigatewayv2_integration" "map" {
-  count = local.use_api_gateway ? 1 : 0
-
   api_id                 = var.api_gateway_v2.id
   integration_type       = "AWS_PROXY"
   connection_type        = "INTERNET"
   integration_method     = "POST"
   integration_uri        = module.gate_instance.function_arn
-  payload_format_version = "1.0" # must match to handler value, set in lambda
+  payload_format_version = "2.0"
   timeout_milliseconds   = 30000 # ideally would be 55 or 60, but docs say limit is 30s
 }
 
-resource "aws_apigatewayv2_route" "methods" {
-  for_each = toset(local.use_api_gateway ? local.http_methods : [])
+resource "aws_apigatewayv2_authorizer" "jwt" {
+  name             = "jwt-authorizer"
+  api_id           = var.api_gateway_v2.id
+  authorizer_type  = "JWT"
+  identity_sources = ["$request.header.Authorization"]
+
+  jwt_configuration {
+    issuer = local.auth_issuer
+    audience = [
+      local.auth_issuer
+    ]
+  }
+
+  depends_on = [
+    aws_apigatewayv2_integration.map,
+    aws_apigatewayv2_route.well_known # potential circular dependency here? seems that in order to provision the authorizer, AWS checks that issuer responds at .well-known
+  ]
+}
+
+# serve JWKS from /{instance-id}/.well-known/jwks.json
+# q: will this work? circular, as the API is serving the JWKS that will be used to authenticate requests to other routes
+# this MUST be stood-up before the other route, which rely on it as the issuer for the JWT authorizer
+resource "aws_apigatewayv2_route" "well_known" {
+  api_id             = var.api_gateway_v2.id
+  route_key          = "GET /${module.gate_instance.function_name}/.well-known/{proxy+}"
+  target             = "integrations/${aws_apigatewayv2_integration.map.id}"
+  authorization_type = "NONE"
+}
+
+
+// q: change this route to /collect instead of /{proxy+}?  any need for {proxy+} here?
+resource "aws_apigatewayv2_route" "collect" {
+  for_each = toset(local.http_methods) # q: should we just limit this to POST??
 
   api_id             = var.api_gateway_v2.id
-  route_key          = "${each.key} /${module.gate_instance.function_name}/{proxy+}"
-  authorization_type = local.authorization_type
-  target             = "integrations/${aws_apigatewayv2_integration.map[0].id}"
+  route_key          = "${each.key} /${module.gate_instance.function_name}${local.collection_path}"
+  target             = "integrations/${aws_apigatewayv2_integration.map.id}"
+  authorizer_id      = aws_apigatewayv2_authorizer.jwt.id
+  authorization_type = "JWT"
 }
 
 resource "aws_lambda_permission" "api_gateway" {
-  count = local.use_api_gateway ? 1 : 0
-
   statement_id  = "Allow${module.gate_instance.function_name}Invoke"
   action        = "lambda:InvokeFunction"
   function_name = module.gate_instance.function_name
   principal     = "apigateway.amazonaws.com"
 
-
   # The /*/*/ part allows invocation from any stage, method and resource path
   # within API Gateway REST API.
   # TODO: limit by http method here too?  for webhooks, would need POST, OPTIONS at min
-  source_arn = "${var.api_gateway_v2.execution_arn}/*/*/${module.gate_instance.function_name}/{proxy+}"
+  source_arn = "${var.api_gateway_v2.execution_arn}/*/*/${module.gate_instance.function_name}/*"
 }
 
 
@@ -313,13 +319,7 @@ resource "aws_iam_role_policy_attachment" "auth_key_to_test_caller_role" {
 
 
 locals {
-  api_gateway_url = local.use_api_gateway ? "${var.api_gateway_v2.stage_invoke_url}/${module.gate_instance.function_name}" : null
-
-  # lambda_url has trailing /, but our example_api_calls already have preceding /
-  function_url = local.use_api_gateway ? null : substr(aws_lambda_function_url.lambda_url[0].function_url, 0, length(aws_lambda_function_url.lambda_url[0].function_url) - 1)
-
-  proxy_endpoint_url = coalesce(local.api_gateway_url, local.function_url)
-
+  proxy_endpoint_url = "${var.api_gateway_v2.stage_invoke_url}/${module.gate_instance.function_name}"
 
   # don't want to *require* assumption of a role for testing; while we expect it in usual case
   # (a provisioner must assume PsoxyCaller role for the test), customer could be using a single
@@ -381,12 +381,13 @@ EOT
 
 locals {
   test_script = templatefile("${path.module}/test_script.tftpl", {
-    proxy_endpoint_url = local.proxy_endpoint_url,
-    function_name      = module.gate_instance.function_name,
-    command_cli_call   = local.command_cli_call,
-    signing_key_arn    = local.keys_to_provision > 0 ? element(local.auth_key_arns_sorted, length(local.auth_key_arns_sorted) - 1) : null,
-    example_payload    = var.example_payload
-    example_identity   = var.example_identity
+    collector_endpoint_url = local.proxy_endpoint_url,
+    function_name          = module.gate_instance.function_name,
+    command_cli_call       = local.command_cli_call,
+    signing_key_arn        = local.keys_to_provision > 0 ? element(local.auth_key_arns_sorted, length(local.auth_key_arns_sorted) - 1) : null,
+    example_payload        = var.example_payload
+    example_identity       = var.example_identity
+    collection_path        = local.collection_path
   })
 }
 

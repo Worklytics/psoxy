@@ -3,10 +3,12 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.SQSOutput;
 import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
+import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.impl.BatchMergeHandler;
 import co.worklytics.psoxy.gateway.impl.InboundWebhookHandler;
+import co.worklytics.psoxy.gateway.impl.JwksDecorator;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
@@ -15,9 +17,8 @@ import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.annotations.VisibleForTesting;
 import lombok.SneakyThrows;
-import org.apache.commons.io.IOUtils;
+import lombok.extern.java.Log;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
@@ -28,13 +29,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
+import org.apache.http.HttpStatus;
 
 /**
  * AWS lambda entrypoint that can handle BOTH:
  *    - webhook requests from API Gateway / Function URL invocations, AND
  *    - SQS events (presumed to be batches of webhooks)
  */
-public class WebhookCollectionModeHandler implements RequestStreamHandler {
+@Log
+public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
 
     /**
      * Static initialization allows reuse in containers
@@ -50,6 +53,8 @@ public class WebhookCollectionModeHandler implements RequestStreamHandler {
 
     static ObjectMapper sqsPayloadMapper;
 
+    static JwksDecorator jwksHandler;
+
     static {
         staticInit();
     }
@@ -61,27 +66,23 @@ public class WebhookCollectionModeHandler implements RequestStreamHandler {
         mapper = awsContainer.objectMapper();
         sqsPayloadMapper = new ObjectMapper();
         sqsPayloadMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        jwksHandler = awsContainer.jwksDecoratorFactory().create(inboundWebhookHandler);
     }
 
 
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
+        // Read the full input stream into a tree
+        JsonNode rootNode = mapper.readTree(input);
 
-        // should we cut this? no auth checks done yet, so potentially large unauthorized payload could be DoS vector
-        String body = IOUtils.toString(input, StandardCharsets.UTF_8);
-
-
-        // try for incoming webhook event first; it's the more common and performance sensitive case
-        Optional<APIGatewayV2HTTPEvent> httpEvent = tryReadHttpEvent(mapper, body);
-        if (httpEvent.isPresent()) {
-            APIGatewayV2HTTPResponse response = handleRequest(httpEvent.get(), context);
+        if (isHttpEvent(rootNode)) {
+            // API Gateway V2 HTTP event (from Function URL, usually)
+            APIGatewayV2HTTPEvent httpEvent = mapper.treeToValue(rootNode, APIGatewayV2HTTPEvent.class);
+            APIGatewayV2HTTPResponse response = handleRequest(httpEvent, context);
             mapper.writeValue(output, response);
-            return;
-        }
-
-        Optional<SQSEvent> sqsEvent = tryReadSQSEvent(sqsPayloadMapper, body);
-        if (sqsEvent.isPresent()) {
-            handleRequest(sqsEvent.get(), context);
+        } else if (isSQSEvent(rootNode)) {
+            SQSEvent sqsEvent = sqsPayloadMapper.treeToValue(rootNode, SQSEvent.class);
+            handleRequest(sqsEvent, context);
 
             // Return empty 200 response
             APIGatewayV2HTTPResponse resp = APIGatewayV2HTTPResponse.builder()
@@ -89,36 +90,27 @@ public class WebhookCollectionModeHandler implements RequestStreamHandler {
                 .withBody("SQS event processed")
                 .build();
             mapper.writeValue(output, resp);
-            return;
-        }
-
-
-        context.getLogger().log("Unrecognized event format: " +body);
-        APIGatewayV2HTTPResponse resp = APIGatewayV2HTTPResponse.builder()
-            .withStatusCode(400)
-            .withBody("Unsupported event type")
-            .build();
-        mapper.writeValue(output, resp);
-    }
-
-    @VisibleForTesting
-    Optional<SQSEvent> tryReadSQSEvent(ObjectMapper mapper, String input) throws IOException {
-        try {
-            return Optional.of(mapper.readerFor(SQSEvent.class).readValue(input));
-        } catch (Exception e) {
-            // If reading as SQSEvent fails, we assume it's not an SQS event
-            return Optional.empty();
+        } else {
+            context.getLogger().log("Unrecognized event format: " + rootNode.toString());
+            APIGatewayV2HTTPResponse resp = APIGatewayV2HTTPResponse.builder()
+                .withStatusCode(400)
+                .withBody("Unsupported event type")
+                .build();
+            mapper.writeValue(output, resp);
         }
     }
 
-    @VisibleForTesting
-    Optional<APIGatewayV2HTTPEvent> tryReadHttpEvent(ObjectMapper mapper, String input) throws IOException {
-        try {
-            return Optional.of(mapper.readerFor(APIGatewayV2HTTPEvent.class).readValue(input));
-        } catch (Exception e) {
-            // If reading as APIGatewayV2HTTPEvent fails, we assume it's not an HTTP event
-            return Optional.empty();
-        }
+    private boolean isSQSEvent(JsonNode node) {
+        return node.has("Records") &&
+            node.get("Records").isArray() &&
+            node.get("Records").get(0).has("eventSource") &&
+            "aws:sqs".equals(node.get("Records").get(0).get("eventSource").asText());
+    }
+
+    private boolean isHttpEvent(JsonNode node) {
+        // TODO: consider possibility of a 1.0 format, which avoids url-decoding of path parameters??
+        return node.has("version") && node.get("version").asText().startsWith("2.0")
+            && node.has("requestContext") && node.get("requestContext").has("http");
     }
 
     /**
@@ -138,8 +130,6 @@ public class WebhookCollectionModeHandler implements RequestStreamHandler {
         batchMergeHandler.handleBatch(processedContentStream);
     }
 
-
-
     /**
      * Handles lambda invocations where trigger is API Gateway V2 HTTP request event as incoming webhook
      *
@@ -148,22 +138,31 @@ public class WebhookCollectionModeHandler implements RequestStreamHandler {
      */
     @SneakyThrows
     public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent httpEvent, Context context) {
-
         //interfaces:
         // - HttpRequestEvent --> HttpResponseEvent
+
+        HttpEventRequest httpEventRequest = new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
         HttpEventResponse response;
+
+        log.info("Request path: " + httpEventRequest.prettyPrint());
+
         boolean base64Encoded = false;
-        try {
-            APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter = new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
-            response = inboundWebhookHandler.handle(httpEventRequestAdapter);
-        } catch (Throwable e) {
-            context.getLogger().log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
-            context.getLogger().log(ExceptionUtils.getStackTrace(e));
-            response = HttpEventResponse.builder()
-                .statusCode(500)
-                .body("Unknown error: " + e.getClass().getName())
-                .header(ResponseHeader.ERROR.getHttpHeader(),"Unknown error")
-                .build();
+        if (httpEvent.getRequestContext().getRouteKey().endsWith("/.well-known/{proxy+}")) {
+            // special case for JWKS endpoint, which is used by clients to fetch public keys
+            // for verifying JWTs signed by the proxy
+            response = jwksHandler.handle(httpEventRequest);
+        } else {
+            try {
+                response = inboundWebhookHandler.handle(httpEventRequest);
+            } catch (Throwable e) {
+                context.getLogger().log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
+                context.getLogger().log(ExceptionUtils.getStackTrace(e));
+                response = HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .header(ResponseHeader.ERROR.getHttpHeader(), "Unknown error")
+                    .body("Unknown error: " + e.getClass().getName())
+                    .build();
+            }
         }
 
         try {

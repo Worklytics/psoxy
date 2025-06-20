@@ -45,12 +45,6 @@ function isValidURL(url) {
     url.hostname.endsWith('.amazonaws.com');
 }
 
-function base64url(input) {
-  return input.toString('base64')
-    .replace(/=/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_');
-}
 
 /**
  * Psoxy test
@@ -82,9 +76,9 @@ async function call(options = {}) {
   if (options.signingKey) {
     let signature;
     let claims = {
-      iss: "https://" + url.hostname,
-      sub: options.identityToSign,
-      aud: url.toString(),
+      iss: options.identityIssuer,
+      sub: options.identitySubject,
+      aud: options.identityIssuer,
       iat: Math.floor(Date.now() / 1000), // current time in seconds
       exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
     }
@@ -92,7 +86,11 @@ async function call(options = {}) {
       signature = await signJwtWithKMS(claims, options.signingKey.replace('aws-kms:', ''), credentials, options.region);
     }
 
-    headers['x-psoxy-authorization'] = signature;
+    headers['Authorization'] = signature;
+
+    // possibly we'll need this for fallback, if target service has auth layer that consumes 'Authorization' header and doesn't pass it on
+    // but API Gateway v2 appears to be passing it as well as verifying it, so think we're OK
+    //headers['x-psoxy-authorization'] = signature;
   }
 
   logger.info(`Calling Psoxy and waiting response: ${options.url.toString()}`);

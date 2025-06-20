@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Streams;
+import lombok.Builder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -32,8 +33,16 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
     @NonNull
     final APIGatewayV2HTTPEvent event;
 
+
+
     private Map<String, String> caseInsensitiveHeaders;
 
+    /**
+     * @return the path relative to the ROUTE, not the full path from either the API Gateway host or stage.
+     *
+     * TODO: too much hackiness in this method; should be refactored to be clearer about when we want the proxy path param,
+     * vs when we want to strip the stage segment or route
+     */
     @Override
     public String getPath() {
 

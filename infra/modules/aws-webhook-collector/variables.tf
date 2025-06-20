@@ -77,7 +77,7 @@ variable "log_retention_days" {
 variable "handler_class" {
   type        = string
   description = "Class to handle the request"
-  default     = "co.worklytics.psoxy.WebhookCollectionModeHandler"
+  default     = "co.worklytics.psoxy.AwsWebhookCollectionModeHandler"
 }
 
 variable "reserved_concurrent_executions" {
@@ -164,7 +164,7 @@ variable "api_gateway_v2" {
 variable "http_methods" {
   type        = list(string)
   description = "HTTP methods to expose; NOTE: 'OPTIONS' is always added to this list, so you don't need to include it; if you want to allow all methods, use ['*']"
-  default     = ["GET", "POST"]
+  default     = ["POST"]
 }
 
 # examples:

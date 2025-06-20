@@ -189,6 +189,64 @@ resource "aws_cloudwatch_log_group" "api_gatewayv2_log" {
   kms_key_id        = var.logs_kms_key_arn
 }
 
+## Begin Webhook Collector API Gateway
+
+resource "aws_apigatewayv2_api" "webhook_collector_api" {
+  count = var.provision_webhook_collection_infra ? 1 : 0
+
+  name          = "${var.deployment_id}-webhook-collector-api"
+  protocol_type = "HTTP"
+  description   = "API to expose ${var.deployment_id} webhook collectors"
+
+  # leverage AWS's native CORS support
+  # alternatively, each webhook collector can implement its own CORS support (eg, handle OPTIONS requests)
+  cors_configuration {
+    allow_credentials = false # only 'Authorization' header is allowed explicitly below; JS clients must explicitly set 'Authorization' header and call fetch with credentials: 'omit' or leave unset
+    allow_headers = [
+      # if allow_origins == ['*'], we must set 'allow_credentials = false' and then set an explicit list here to allow 'Authorization' header through
+      "Authorization",
+      "Content-Type",
+      "X-Requested-With",
+      "X-Psoxy-Authorization",
+      "User-Agent",
+    ]
+    allow_methods = [
+      # "GET",  # JWKS ... so maybe this doesn't matter?? exposing JWKS to JS client would allow client to detect rotation of the key proactively
+      "POST" # webhook themselves
+    ]
+    expose_headers = ["*"]
+    allow_origins  = var.webhook_allow_origins
+  }
+}
+
+# must have a stage deployed
+resource "aws_apigatewayv2_stage" "webhook_collector" {
+  count = var.provision_webhook_collection_infra ? 1 : 0
+
+  api_id      = aws_apigatewayv2_api.webhook_collector_api[0].id
+  name        = "webhook_collectors" # q: what name?
+  auto_deploy = true
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.webhook_collection_api_log[0].arn
+    format          = "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] \"$context.httpMethod $context.path $context.protocol\" $context.status $context.responseLength $context.requestId $context.extendedRequestId $context.error.messageString $context.integrationErrorMessage"
+  }
+}
+
+resource "aws_cloudwatch_log_group" "webhook_collection_api_log" {
+  count = var.provision_webhook_collection_infra ? 1 : 0
+
+  name              = aws_apigatewayv2_api.webhook_collector_api[0].name
+  retention_in_days = 7
+  kms_key_id        = var.logs_kms_key_arn
+}
+
+# routes will be deployed in the 'aws-webhook-collector' module; expect TWO routes per collector:
+# - one for the webhook collector itself (eg, `{instance-id}/*`, or something similar; everything that's NOT  jwks) - auth == JWT
+# - one for jwks (eg, `{instance-id}/.well-known/jwks.json`) - auth == NONE
+
+## End Webhook Collector API Gateway
+
+
 # install test tool, if it exists in expected location
 module "test_tool" {
   count = var.install_test_tool ? 1 : 0
@@ -260,4 +318,17 @@ output "api_gateway_v2_stage" {
 
 output "webhook_test_caller_role_arn" {
   value = var.enable_webhook_testing ? aws_iam_role.webhook-test-caller[0].arn : null
+}
+
+output "webhook_collection_gateway" {
+  value = var.provision_webhook_collection_infra ? merge(
+    {
+      stage_invoke_url = aws_apigatewayv2_stage.webhook_collector[0].invoke_url
+    },
+    aws_apigatewayv2_api.webhook_collector_api[0]
+  ) : null
+}
+
+output "webhook_collection_gateway_stage" {
+  value = var.provision_webhook_collection_infra ? aws_apigatewayv2_stage.webhook_collector[0] : null
 }

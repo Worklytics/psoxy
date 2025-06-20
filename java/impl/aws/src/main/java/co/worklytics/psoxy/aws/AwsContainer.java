@@ -4,6 +4,7 @@ import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import co.worklytics.psoxy.gateway.impl.BatchMergeHandler;
 import co.worklytics.psoxy.gateway.impl.InboundWebhookHandler;
+import co.worklytics.psoxy.gateway.impl.JwksDecorator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.Component;
 
@@ -28,4 +29,6 @@ public interface AwsContainer {
     ObjectMapper objectMapper();
 
     S3Handler injectS3Handler(S3Handler s3Handler);
+
+    JwksDecorator.Factory jwksDecoratorFactory();
 }

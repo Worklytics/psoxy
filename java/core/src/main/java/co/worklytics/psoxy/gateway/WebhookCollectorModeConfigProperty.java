@@ -33,6 +33,13 @@ public enum WebhookCollectorModeConfigProperty implements ConfigService.ConfigPr
     ALLOW_ORIGINS,
 
     /**
+     * this should actually be URL to collector itself, to be used to produce OpenID Connect Discovery Document
+     *
+     */
+    AUTH_ISSUER,
+
+
+    /**
      * if false, proxy will not require or validate any Authorization header(s) sent with webhooks.
      *
      * false does NOT mean there is no authentication/authorization of webhook collection; simply that it is not done within

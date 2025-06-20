@@ -35,4 +35,32 @@ jobs:
           mvn clean -f pom.xml
           mvn package install -f "gateway-core/pom.xml" -Dmaven.test.skip=true
           mvn package install -f "core/pom.xml" -Dmaven.test.skip=true
-          mvn package -f "impl/${{ matrix.implementation }}/pom.xml"
+          mvn package -f "impl/${{ matrix.implementation }}/pom.xml" -Pdistribution 
+      - name: Verify license artifacts are in the uber jar
+        working-directory: java/impl/${{ matrix.implementation }}
+        run: |
+          JAR_FILE=$(find target -name "*.jar" | head -n1)
+
+          echo "Inspecting $JAR_FILE for required license files"
+
+          unzip -l "$JAR_FILE" | tee jar-contents.txt
+
+          # Check summary file
+          grep -q 'THIRD-PARTY-LICENSE-LIST.txt' jar-contents.txt || {
+            echo "::error::Missing THIRD-PARTY-LICENSE-LIST.txt in $JAR_FILE"
+            exit 1
+          }
+
+          # Check for at least one LICENSE or NOTICE file at root
+#          grep -Eq '/(LICENSE|NOTICE)$' jar-contents.txt || {
+#            echo "::error::Missing LICENSE or NOTICE at root of $JAR_FILE"
+#            exit 1
+#          }
+
+          # Check for license texts from dependencies (in licenses/)
+          grep -q '^ *[0-9].*licenses/' jar-contents.txt || {
+            echo "::error::No license texts from dependencies found in licenses/ folder"
+            exit 1
+          }
+
+          echo "✅ License artifacts verified in $JAR_FILE"

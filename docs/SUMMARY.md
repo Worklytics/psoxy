@@ -49,6 +49,7 @@
   * [Alpha Features](development/alpha-features/README.md)
     * [AWS Secrets Manager Support](development/alpha-features/aws-secrets-manager.md)
     * [New Relic Monitoring](development/alpha-features/new-relic-monitoring.md)
+    * [Webhook Collectors](development/alpha-features/webhook-collectors.md)
 * [Data Sources](sources/README.md)
   * [Asana](sources/asana/README.md)
   * [Atlassian](sources/atlassian/README.md)
