@@ -10,6 +10,7 @@ Changes to be including in future/planned release notes will be added here.
 ## [0.5.3](https://github.com/Worklytics/psoxy/release/tag/v0.5.3)
   - `aws` - removed `ssm:GetParameterVersion` perm from policies; not a thing
   - support for Side Outputs in `gcp` and `aws` modules; see [docs/configuration/side-outputs.md](docs/configuration/side-outputs.md) for details
+  - `GitHub`: allowing `before` and `after` query parameters while fetching issues through *org/repo/issues* endpoint
   - `Jira`: Adding support for `search/jql` endpoint to fetch issues using JQL queries.
   - `Zoom`:
     - support for fetching user settings through `/v2/users/{userId}/settings` endpoint

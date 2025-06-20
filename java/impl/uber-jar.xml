@@ -22,4 +22,25 @@
             <handlerName>metaInf-services</handlerName>
         </containerDescriptorHandler>
     </containerDescriptorHandlers>
+
+    <!-- include license file -->
+    <fileSets>
+        <fileSet>
+            <directory>${project.build.directory}/generated-resources/licenses</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>THIRD-PARTY-LICENSE-LIST.txt</include>
+            </includes>
+            <filtered>false</filtered>
+        </fileSet>
+
+        <fileSet>
+            <directory>${project.build.directory}/generated-resources/dependency-licenses</directory>
+            <outputDirectory>licenses</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+            <filtered>false</filtered>
+        </fileSet>
+    </fileSets>
 </assembly>

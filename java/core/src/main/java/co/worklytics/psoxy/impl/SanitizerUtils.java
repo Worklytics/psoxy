@@ -269,9 +269,28 @@ public class SanitizerUtils {
         };
     }
 
+
+    // Matches valid IPv4 addresses
+    private static final Pattern IPV4_PATTERN = Pattern.compile(
+        "^([0-9]{1,3}\\.){3}[0-9]{1,3}$"
+    );
+
+    // Matches unbracketed IPv6 addresses
+    private static final Pattern IPV6_PATTERN = Pattern.compile(
+        "^[0-9a-fA-F:.]+$"  // q: too permissive? this is what's rec'd by
+    );
+
+
     String canonicalizeIp(String ip) {
         try {
-            //TODO: force to textual IP address, and never permit hostnames?
+            boolean maybeIpv4 = IPV4_PATTERN.matcher(ip).matches();
+            boolean maybeIpv6 = IPV6_PATTERN.matcher(ip).matches();
+
+            if (!maybeIpv4 && !maybeIpv6) {
+                //not a valid IP address
+                log.warning("value matched by HashIP transform not a valid IP address: " + ip);
+                return null;
+            }
             InetAddress address = InetAddress.getByName(ip);
             return address.getHostAddress();
         } catch (UnknownHostException e) {
