@@ -147,7 +147,7 @@ test.serial('Psoxy call: pathless URL results 500', async (t) => {
   t.is(result.headers['x-psoxy-error'], 'BLOCKED_BY_RULES');
 });
 
-test.serial('Psoxy call: with POST, signingKey, and identityToSign options (Webhook use-case)',
+test.serial('Psoxy call: with POST, signingKey, and identitySubject options (Webhook use-case)',
   async(t) => {
     const aws = t.context.subject;
     const utils = t.context.utils;
@@ -157,6 +157,7 @@ test.serial('Psoxy call: with POST, signingKey, and identityToSign options (Webh
     options.body = JSON.stringify({ foo: 'bar' });
     options.signingKey = 'aws-kms:foo';
     options.identitySubject = 'test-identity';
+    options.identityIssuer = options.url;
 
     const jwtSignatureExample = 'jwtSignatureExample';
 
