@@ -700,7 +700,7 @@ public class GitHubEnterpriseServerTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/comments/COMMENT_ID/reactions", "comment_reactions.json"),
                 InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE", "issue.json"),
                 InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues", "issues.json"),
-                InvocationExample.of("https://api.github.com/repos/FAKE/REPO/issues?after=some_token", "issues.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues?after=some_token", "issues.json"),
                 InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE/comments", "issues_comments.json"),
                 InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE/events", "issue_events.json"),
                 InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE/timeline", "issue_timeline.json"),
