@@ -35,6 +35,29 @@ tab_width = 2
 indent_style = space
 tab_width = 2
 
+
+# Recommended settings for Markdown files in IntelliJ when publishing to GitBook
+# These settings assume Markdown is soft-wrapped visually at 100 columns,
+# with no hard wraps inserted by the IDE or formatter.
+
+[*.md]
+
+# Show visual guide at 100 characters in IntelliJ
+# Set in: Preferences → Editor → Code Style → Markdown → Right margin (columns)
+# (This value is visual only; it does not cause hard wrapping)
+# Suggested value: 100
+
+# Enable soft wrap in IntelliJ
+# Set in: Preferences → Editor → General → Soft Wraps
+# Add pattern: *.md
+
+# Prevent IntelliJ from inserting line breaks when reformatting
+# Set in: Preferences → Editor → Code Style → Markdown → Wrapping and Braces
+# Disable "Wrap on typing" and any force wrap rules
+
+max_line_length = off
+
+
 # TODO: use intellij specific controls?? can't find explicit docs on them exactly
 #ij_hcl-terraform_keep_line_breaks = true
 #ij_hcl_keep_line_breaks = true
