@@ -160,11 +160,11 @@ See details: [sources/github/README.md](sources/github/README.md)
 
 ### Slack
 
-| Source                  | Examples                                                                                                                                                                                                                                                                                                                                                                                              | Scope                                                                     |
-|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
-| Slack Discovery API     | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-api/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-api/discovery.yaml)                                                                                                                                                                     | `discovery:read`                                                          |
-| Slack Discovery Bulk    | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-bulk/example-bulk) - [discovery bulk rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-bulk/discovery-bulk.yaml),[discovery hierarchical rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-bulk/discovery-bulk-hierarchical.yaml) | N/A                                                                       |
-| Slack AI Snapshot       | N/A                                                                                                                                                                                                                                                                                                                                                                                                   | N/A |
+| Source                 | Examples                                                                                                                                                                                                                                                                                                                                                                          | Scope                                                                     |
+|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| Slack via Discovery API | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-api/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-api/discovery.yaml)                                                                                                                                                 | `discovery:read`                                                          |
+| Slack Bulk    | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-bulk/example-bulk) - [bulk rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-bulk/discovery-bulk.yaml),[hierarchical rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-bulk/discovery-bulk-hierarchical.yaml) | N/A                                                                       |
+| Slack AI Snapshot      | N/A                                                                                                                                                                                                                                                                                                                                                                               | N/A |
 
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs)./
 Please refer to that module for a definitive list.
@@ -209,14 +209,14 @@ so these must be pseudonymized using an equivalent algorithm and secret). See [`
 See also: [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
 
 
-| Source                   | Details + Examples |
-|--------------------------|--------------------|
-| Badge                    | [sources/badge](sources/badge/README.md) |
-| HRIS                     | [sources/hris](sources/hris/README.md) |
-| Miro AI Bulk **alpha**   | [sources/miro/miro-ai-bulk](sources/miro/miro-ai-bulk/README.md) |
-| Slack AI Bulk **alpha**  | [sources/slack/slack-ai-bulk](sources/slack/slack-ai-bulk/README.md) |
-| Slack Discovery Bulk     | [sources/slack/slack-discovery-bulk](sources/slack/slack-discovery-bulk/README.md) |
-| Survey                   | [sources/survey](sources/survey/README.md) |
+| Source                 | Details + Examples |
+|------------------------|--------------------|
+| Badge                  | [sources/badge](sources/badge/README.md) |
+| HRIS                   | [sources/hris](sources/hris/README.md) |
+| Miro AI Bulk **alpha** | [sources/miro/miro-ai-bulk](sources/miro/miro-ai-bulk/README.md) |
+| Slack AI Bulk **alpha** | [sources/slack/slack-ai-bulk](sources/slack/slack-ai-bulk/README.md) |
+| Slack Bulk             | [sources/slack/slack-discovery-bulk](sources/slack/slack-discovery-bulk/README.md) |
+| Survey                 | [sources/survey](sources/survey/README.md) |
 
 ### Other Data Sources via Webhook Collection
 
