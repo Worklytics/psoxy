@@ -621,7 +621,10 @@ EOT
         "/api/discovery.conversations.history?reactions=1&team={WORKSPACE_ID}&channel={CHANNEL_ID}&limit=10",
         "/api/discovery.users.list?limit=5",
       ]
-      external_token_todo : file("docs/slack/discovery-api/instructions.md")
+      external_token_todo : templatefile("docs/slack/discovery-api/instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_SLACK_DISCOVERY_API_"
+      })
+      instructions_template = "${path.module}/docs/slack/discovery-api/instructions.tftpl"
     }
     zoom = {
       source_kind : "zoom"

@@ -17,11 +17,11 @@ Use this step if you want to install in the whole org, across multiple workspace
 3. Generate the following URL replacing the placeholder for *YOUR_CLIENT_ID* and save it for later:
 4. Go to "OAuth & Permissions" and add the previous URL as "Redirect URLs"
 5. Go to "Settings > Install App", and choose "Install to Organization". A Slack admin should grant the app the permissions and the app will be installed.
-6. Copy the "User OAuth Token" (also listed under "OAuth & Permissions") and store as `PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN` in the proxy's Secret Manager. Otherwise, share the token with the AWS/GCP administrator completing the implementation.
+6. Copy the "User OAuth Token" (also listed under "OAuth & Permissions") and store as `${path_to_instance_parameters}ACCESS_TOKEN` in the proxy's Secret Manager. Otherwise, share the token with the AWS/GCP administrator completing the implementation.
 
 #### Workspace install
 
 Use this steps if you intend to install in just one workspace within your org.
 
 1. Go to "Settings > Install App", click on "Install into *workspace*"
-2. Copy the "User OAuth Token" (also listed under "OAuth & Permissions") and store as `PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN` in the psoxy's Secret Manager. Otherwise, share the token with the AWS/GCP administrator completing the implementation.
+2. Copy the "User OAuth Token" (also listed under "OAuth & Permissions") and store as `${path_to_instance_parameters}ACCESS_TOKEN` in the psoxy's Secret Manager. Otherwise, share the token with the AWS/GCP administrator completing the implementation.
