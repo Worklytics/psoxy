@@ -102,12 +102,12 @@ if [[ "$REPLY" =~ ^[Yy][Ee]?[Ss]?$ ]]; then
     git push origin "docs-$RELEASE"
     git checkout main
     printf "Docs branch ${GREEN}docs-$RELEASE${NC} created and pushed. View it at: ${BLUE}https://github.com/Worklytics/psoxy/tree/docs-$RELEASE${NC}\n"
-    printf "Manual steps to publish docs in GitBook: \n"
+    printf "Manual steps to publish docs in GitBook. (YMMV, gitbook seems to change this *weekly**): \n"
     printf "1. Login to gitbook ( ${BLUE}https://app.gitbook.com/o/bJjt4PjVnmXkP0Z3ui04/sites/site_m0IOi${NC} ) \n"
     printf "2. Navigate to 'Structure -> Manage'  under the Psoxy site \n"
-    printf "3. Create a new 'variant' in the list (copy existing), with the same name as the release ${GREEN}X.Y.Z${NC}\n"
-    printf "4. Click on the new variant's link icon; edit GitHub Sync settings to point to the branch: ${GREEN}docs-$RELEASE${NC}\n"
-    printf "5. Set the new 'variant' as the 'default' for the site\n"
+    printf "3. Create a new 'variant' (or space??) in the list (copy existing?), with the same name as the release ${GREEN}X.Y.Z${NC}\n"
+    printf "4. Click on the new variant/spaces's link icon; edit GitHub Sync settings to point to the branch: ${GREEN}docs-$RELEASE${NC}\n"
+    printf "5. Set the new 'variant'/'space' as the 'Home' for the site\n"
     printf "6. Visit ${BLUE}https://docs.worklytics.co/psoxy${NC} to confirm it points to the latest release\n"
   fi
 fi
