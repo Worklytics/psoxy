@@ -1,13 +1,17 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
+
+import co.worklytics.psoxy.gateway.output.*;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
@@ -17,18 +21,23 @@ import software.amazon.awssdk.core.retry.RetryPolicy;
 import software.amazon.awssdk.core.retry.backoff.BackoffStrategy;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cognitoidentity.CognitoIdentityClient;
+import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.ssm.SsmClient;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.time.Duration;
 
-
 /**
  * defines how to fulfill dependencies that need platform-specific implementations for GCP platform
  */
-@Module
+@Module(
+    includes = {
+        AwsModule.Bindings.class,
+    }
+)
 public interface AwsModule {
 
     @Provides
@@ -168,6 +177,11 @@ public interface AwsModule {
     }
 
     @Provides
+    static SqsClient getSqsClient() {
+        return SqsClient.create();
+    }
+
+    @Provides
     static SecretsManagerClient secretsManagerClient(AwsEnvironment awsEnvironment) {
         return SecretsManagerClient.builder()
                 .overrideConfiguration(ClientOverrideConfiguration.builder()
@@ -180,10 +194,30 @@ public interface AwsModule {
                 .build();
     }
 
-
+    //TODO: should be a Binding ?
     @Provides
     @IntoSet
     static OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder providesSourceAuthStrategy(AWSWorkloadIdentityFederationGrantTokenRequestBuilder tokenRequestBuilder) {
         return tokenRequestBuilder;
+    }
+
+    @Provides
+    static KmsClient awsKmsClient(AwsEnvironment awsEnvironment) {
+        return KmsClient.create();
+    }
+
+    @Module
+    abstract class Bindings {
+
+
+        @Binds @IntoSet
+        abstract OutputFactory<?> s3OutputFactory(S3OutputFactory s3OutputFactory);
+
+        @Binds @IntoSet
+        abstract OutputFactory<?> sqsOutputFactory(SQSOutputFactory sqsOutputFactory);
+
+        @Binds @IntoSet
+        abstract PublicKeyStoreClient publicKeyStoreClient(AwsKmsPublicKeyStoreClient awsKmsPublicKeyStoreClient);
+
     }
 }

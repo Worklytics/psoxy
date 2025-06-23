@@ -58,6 +58,7 @@ locals {
         },
       ]
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/api/1.0/workspaces",
@@ -116,6 +117,7 @@ EOT
         "GitHub Organization" = local.github_organization
       }
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/orgs/${local.github_organization}/repos",
@@ -218,6 +220,7 @@ EOT
         "GitHub Organization" = local.github_organization
       }
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/orgs/${local.github_organization}/members",
@@ -230,18 +233,18 @@ EOT
   2. From your organization, register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
     with following permissions with **Read Only**:
     - Organization
-      - Administration: for listing events from audit log
+      - Administration: for listing "copilot" events from audit log
       - Members: for listing teams and their members
-      - Github Copilot Business: for listing Copilot usage
+      - GitHub Copilot Business: for listing Copilot usage
 
   NOTES:
     - Enterprise Cloud is required for this connector.
 
-  Apart from Github instructions please review the following:
+  Apart from GitHub instructions please review the following:
   - "Homepage URL" can be anything, not required in this flow but required by GitHub.
   - Webhooks check can be disabled as this connector is not using them
   - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
-  3. Once is created please generate a new `Private Key`.
+  3. Once created, please generate a new `Private Key`.
   4. It is required to convert the format of the certificate downloaded from PKCS#1 in previous step to PKCS#8. Please run following command:
 ```shell
 openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out gh_copilot_pk_pkcs8.pem -nocrypt
@@ -252,7 +255,7 @@ openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE F
  - Command proposed has been successfully tested on Ubuntu; it may differ for other operating systems.
 
   5. Install the application in your organization.
-     Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "Github App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
+     Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "GitHub App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
   6. Once installed, the `installationId` is required as it needs to be provided in the proxy as parameter for the connector in your Terraform module. You can go to your organization settings and
 click on `Third Party Access`. Click on `Configure` the application you have installed in previous step and you will find the `installationId` at the URL of the browser:
 ```
@@ -276,8 +279,8 @@ EOT
       availability : "ga",
       enable_by_default : false
       worklytics_connector_id : "github-enterprise-server-psoxy"
-      display_name : "Github Enterprise Server"
-      worklytics_connector_name : "Github Enterprise Server via Psoxy"
+      display_name : "GitHub Enterprise Server"
+      worklytics_connector_name : "GitHub Enterprise Server via Psoxy"
       target_host : local.github_enterprise_server_host
       source_auth_strategy : "oauth2_refresh_token"
       secured_variables : [
@@ -316,6 +319,7 @@ EOT
         "GitHub Organization" = local.github_organization
       }
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/api/${local.github_enterprise_server_version}/orgs/${local.github_first_organization}/repos",
@@ -331,9 +335,9 @@ EOT
 You can use a [guided script](../../../tools/github-enterprise-server-auth.sh) to setup the connector. In any case, you can follow here the manual steps that needs to be done.
 
   1. You have to populate:
-     - `github_enterprise_server_host` variable in Terraform with the hostname of your Github Enterprise Server (example: `github.your-company.com`).
+     - `github_enterprise_server_host` variable in Terraform with the hostname of your GitHub Enterprise Server (example: `github.your-company.com`).
 This host should be accessible from the psoxy function, as the connector will need to reach it.
-     - `github_organization` variable in Terraform with the name of your organization in Github Enterprise Server. You can put more than one, just split them in commas (example: `org1,org2`).
+     - `github_organization` variable in Terraform with the name of your organization in GitHub Enterprise Server. You can put more than one, just split them in commas (example: `org1,org2`).
   2. From your organization, register a [GitHub App](https://docs.github.com/en/enterprise-server@3.11/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
     with following permissions with **Read Only**:
     - Repository:
@@ -348,7 +352,7 @@ This host should be accessible from the psoxy function, as the connector will ne
   NOTES:
     - We assume that ALL the repositories are going to be listed **should be owned by the organization, not the users**.
 
-  Apart from Github instructions please review the following:
+  Apart from GitHub instructions please review the following:
   - "Homepage URL" can be anything, not required in this flow but required by GitHub.
   - "Callback URL" can be anything, but we recommend something like `http://localhost` as we will need it for the redirect as part of the authentication.
   - Webhooks check can be disabled as this connector is not using them
@@ -389,12 +393,12 @@ You will need to copy the value of the `refresh_token`.
 EOT
     }
     github-non-enterprise = {
-      source_kind : "github",
+      source_kind : "github-non-enterprise",
       availability : "ga",
       enable_by_default : false
       worklytics_connector_id : "github-free-team-psoxy"
-      display_name : "Github"
-      worklytics_connector_name : "Github Free/Professional/Team via Psoxy"
+      display_name : "GitHub"
+      worklytics_connector_name : "GitHub Free/Professional/Team via Psoxy"
       target_host : "api.github.com"
       source_auth_strategy : "oauth2_refresh_token"
       secured_variables : [
@@ -428,6 +432,7 @@ EOT
         "GitHub Organization" = local.github_organization
       }
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/orgs/${local.github_organization}/repos",
@@ -453,7 +458,7 @@ EOT
   NOTES:
     - We assume that ALL the repositories are going to be listed **should be owned by the organization, not the users**.
 
-  Apart from Github instructions please review the following:
+  Apart from GitHub instructions please review the following:
   - "Homepage URL" can be anything, not required in this flow but required by GitHub.
   - Webhooks check can be disabled as this connector is not using them
   - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
@@ -468,7 +473,7 @@ openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE F
  - Command proposed has been successfully tested on Ubuntu; it may differ for other operating systems.
 
   5. Install the application in your organization.
-     Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "Github App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
+     Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "GitHub App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
   6. Once installed, the `installationId` is required as it needs to be provided in the proxy as parameter for the connector in your Terraform module. You can go to your organization settings and
 click on `Third Party Access`. Click on `Configure` the application you have installed in previous step and you will find the `installationId` at the URL of the browser:
 ```
@@ -525,11 +530,12 @@ EOT
         },
       ]
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/services/data/v57.0/sobjects/Account/describe",
         "/services/data/v57.0/sobjects/ActivityHistory/describe",
-        "/services/data/v57.0/sobjects/Account/updated?start=${urlencode(timeadd(time_static.deployment.id, "-48h"))}&end=${urlencode(time_static.deployment.id)}",
+        "/services/data/v57.0/sobjects/Account/updated?start=${urlencode(timeadd(timestamp(), "-48h"))}&end=${urlencode(timestamp())}",
         "/services/data/v57.0/composite/sobjects/User?ids=${local.salesforce_example_account_id}&fields=Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType",
         "/services/data/v57.0/composite/sobjects/Account?ids=${local.salesforce_example_account_id}&fields=Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,ParentId,Rating,Sic,Type",
         "/services/data/v57.0/query?q=SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%27${local.salesforce_example_account_id}%27",
@@ -605,6 +611,7 @@ EOT
         },
       ]
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/api/discovery.enterprise.info?include_deleted=false&limit=5",
@@ -702,10 +709,13 @@ EOT
         local.standard_config_values.oauth_refresh_token_lock,
       ],
       reserved_concurrent_executions : null # 1
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/v2/users",
         "/v2/users/{USER_ID}/meetings",
+        "/v2/users/{USER_ID}/settings",
+        "/v2/users/{USER_ID}/recordings",
         "/v2/meetings/{MEETING_ID}",
         "/v2/meetings/{MEETING_ID}/meeting_summary",
         "/v2/past_meetings/{MEETING_ID}",
@@ -756,14 +766,14 @@ be left in development mode; it does not need to be published.
     * `meeting:read:list_past_instances:admin`
     * `meeting:read:list_meetings:admin`
     * `meeting:read:participant:admin`
+    * `meeting:read:summary:admin`
+    * `cloud_recording:read:list_user_recordings:admin`
     * `report:read:list_meeting_participants:admin`
     * `report:read:meeting:admin`
     * `report:read:user:admin`
     * `user:read:user:admin`
     * `user:read:list_users:admin`
-
-  Alternatively, the scopes: `user:read:admin`, `meeting:read:admin`, `report:read:admin` are
-  sufficient, but as of May 2024 are no longer available for newly created Zoom apps.
+    * `user:read:settings:admin`
 
   Once the scopes are added, click on `Done` and then `Continue`.
 
@@ -812,6 +822,7 @@ EOT
         REFRESH_ENDPOINT : "https://api.dropboxapi.com/oauth2/token"
       }
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/2/team/members/list_v2",
@@ -884,6 +895,7 @@ EOT
         },
       ],
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/rest/api/2/search?maxResults=25",
@@ -952,19 +964,19 @@ EOT
       settings_to_provide = {
       }
       reserved_concurrent_executions : null
+      enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/oauth/token/accessible-resources", # obtain Jira Cloud ID from here
-        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/users",
-        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/users",
-        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/group/bulk",
-        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/search?maxResults=25",
-        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
-        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/comment?maxResults=25",
-        "/ex/jira/${local.jira_example_cloud_id}/rest/api/2/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/users",
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/group/bulk",
-        "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/search?maxResults=25",
+        "/services/data/v57.0/sobjects/Account/updated?start=${urlencode(timeadd(timestamp(), "-48h"))}&end=${urlencode(timestamp())}",
+        format(
+          "/ex/jira/%s/rest/api/3/search/jql?jql=updated >= '%s' AND updated < '%s' ORDER BY updated DESC&fields=*all,-comment,-worklog&maxResults=25",
+          local.jira_example_cloud_id,
+          formatdate("YYYY/MM/DD hh:mm", timeadd(timestamp(), "-96h")),
+          formatdate("YYYY/MM/DD hh:mm", timestamp())
+        ),
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/comment?maxResults=25",
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/worklog?maxResults=25",

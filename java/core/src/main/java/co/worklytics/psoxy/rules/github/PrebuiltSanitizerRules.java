@@ -6,6 +6,7 @@ import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.ParameterSchema;
+import com.avaulta.gateway.rules.QueryParameterSchema;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -21,6 +22,8 @@ import java.util.stream.Collectors;
  */
 public class PrebuiltSanitizerRules {
 
+    private static final String COPILOT_AUDIT_LOG_MANDATORY_QUERY_PARAMETERS_REGEX = "\\\\?(?=.*[\\\\?&]phrase=)(?=.*[\\\\?&]include=).*$";
+
     private static final List<String> commonAllowedQueryParameters = Lists.newArrayList(
             "per_page",
             "page"
@@ -34,6 +37,17 @@ public class PrebuiltSanitizerRules {
     private static final List<String> commonDirectionAllowedQueryParameters = Lists.newArrayList(
             "sort",
             "direction"
+    );
+
+    private final static Map<String, QueryParameterSchema> COPILOT_AUDIT_LOG_QUERY_SUPPORTED_PARAMETER_SCHEMA = ImmutableMap.of(
+            "phrase", QueryParameterSchema.builder()
+                    .pattern("(action:copilot(?:\\+created:\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z\\.\\.\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z)?)")
+                    .required(true)
+                    .build(),
+            "include", QueryParameterSchema.builder()
+                    .enumValues(List.of("web"))
+                    .required(true)
+                    .build()
     );
 
     private static final List<String> orgMembersAllowedQueryParameters = Streams.concat(commonAllowedQueryParameters.stream(),
@@ -54,6 +68,8 @@ public class PrebuiltSanitizerRules {
                     Lists.newArrayList("milestone",
                             "state",
                             "labels",
+                            "after",
+                            "before",
                             "since").stream())
             .collect(Collectors.toList());
 
@@ -219,26 +235,6 @@ public class PrebuiltSanitizerRules {
             .pathParameterSchemas(ImmutableMap.of("username", ParameterSchema.reversiblePseudonym()))
             .allowedQueryParams(userAllowedQueryParameters)
             .transforms(generateUserTransformations("."))
-            .build();
-
-    static final Endpoint GRAPHQL_FOR_USERS = Endpoint.builder()
-            .pathTemplate("/graphql")
-            .transform(Transform.Redact.builder()
-                    .jsonPath("$..ssoUrl")
-                    .build())
-            .transform(Transform.Pseudonymize.builder()
-                    .jsonPath("$..nameId")
-                    .jsonPath("$..email")
-                    .jsonPath("$..emails[*].value")
-                    .jsonPath("$..guid")
-                    .jsonPath("$..organizationVerifiedDomainEmails[*]")
-                    .build())
-            .transform(Transform.Pseudonymize.builder()
-                    .includeReversible(true)
-                    .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
-                    .jsonPath("$..login")
-                    .build())
-            .responseSchema(jsonSchemaForGraphQLQueryResult())
             .build();
 
     static final Endpoint ORG_TEAMS = Endpoint.builder()
@@ -621,10 +617,39 @@ public class PrebuiltSanitizerRules {
             .build();
 
     @VisibleForTesting
+    static final RESTRules GITHUB_NON_ENTERPRISE = Rules2.builder()
+            .endpoint(ORG_MEMBERS)
+            .endpoint(USERS)
+            .endpoint(getGraphQLEndpoint(false))
+            .endpoint(ORG_TEAMS)
+            .endpoint(ORG_TEAM_MEMBERS)
+            .endpoint(REPOSITORIES)
+            .endpoint(REPO_BRANCHES)
+            .endpoint(REPO_COMMITS)
+            .endpoint(REPO_COMMIT)
+            .endpoint(REPO_EVENTS)
+            .endpoint(COMMIT_COMMENTS)
+            .endpoint(COMMIT_COMMENT_REACTIONS)
+            .endpoint(ISSUE)
+            .endpoint(ISSUES)
+            .endpoint(ISSUE_COMMENTS)
+            .endpoint(ISSUE_EVENTS)
+            .endpoint(ISSUE_TIMELINE)
+            .endpoint(ISSUE_REACTIONS)
+            .endpoint(ISSUE_COMMENT_REACTIONS)
+            .endpoint(PULL_REVIEWS)
+            .endpoint(PULLS)
+            .endpoint(PULL_COMMENTS)
+            .endpoint(PULL_REVIEW_COMMENTS)
+            .endpoint(PULL_COMMITS)
+            .endpoint(PULL)
+            .build();
+
+    @VisibleForTesting
     static final RESTRules GITHUB = Rules2.builder()
             .endpoint(ORG_MEMBERS)
             .endpoint(USERS)
-            .endpoint(GRAPHQL_FOR_USERS)
+            .endpoint(getGraphQLEndpoint(true))
             .endpoint(ORG_TEAMS)
             .endpoint(ORG_TEAM_MEMBERS)
             .endpoint(ORG_AUDIT_LOG)
@@ -655,12 +680,14 @@ public class PrebuiltSanitizerRules {
     static final RESTRules GITHUB_COPILOT = Rules2.builder()
             .endpoint(ORG_MEMBERS)
             .endpoint(USERS)
-            .endpoint(GRAPHQL_FOR_USERS)
+            .endpoint(getGraphQLEndpoint(true))
             .endpoint(ORG_TEAMS)
             .endpoint(ORG_TEAM_MEMBERS)
             .endpoint(ORG_COPILOT_SEATS)
-            .endpoint(ORG_AUDIT_LOG)
-            .endpoint(ORG_AUDIT_LOG_WITH_INSTALLATION_ID)
+            .endpoint(ORG_AUDIT_LOG
+                    .withQueryParamSchemas(COPILOT_AUDIT_LOG_QUERY_SUPPORTED_PARAMETER_SCHEMA))
+            .endpoint(ORG_AUDIT_LOG_WITH_INSTALLATION_ID
+                    .withQueryParamSchemas(COPILOT_AUDIT_LOG_QUERY_SUPPORTED_PARAMETER_SCHEMA))
             .build();
 
     @VisibleForTesting
@@ -670,7 +697,7 @@ public class PrebuiltSanitizerRules {
             // Leaving {enterpriseServerVersion} in the path template open to support future versions without changing rules
             .endpoint(ORG_MEMBERS.withPathTemplate("/api/{enterpriseServerVersion}/orgs/{org}/members"))
             .endpoint(USERS.withPathTemplate("/api/{enterpriseServerVersion}/users/{username}"))
-            .endpoint(GRAPHQL_FOR_USERS.withPathTemplate("/api/graphql"))
+            .endpoint(getGraphQLEndpoint(true).withPathTemplate("/api/graphql"))
             .endpoint(ORG_TEAMS.withPathTemplate("/api/{enterpriseServerVersion}/orgs/{org}/teams"))
             .endpoint(ORG_TEAM_MEMBERS.withPathTemplate("/api/{enterpriseServerVersion}/orgs/{org}/teams/{teamSlug}/members"))
             .endpoint(ORG_AUDIT_LOG.withPathTemplate("/api/{enterpriseServerVersion}/orgs/{org}/audit-log"))
@@ -700,6 +727,7 @@ public class PrebuiltSanitizerRules {
     public static final Map<String, RESTRules> RULES_MAP =
             ImmutableMap.<String, RESTRules>builder()
                     .put("github", GITHUB)
+                    .put("github-non-enterprise", GITHUB_NON_ENTERPRISE)
                     .put("github-copilot", GITHUB_COPILOT)
                     .put("github-enterprise-server", GITHUB_ENTERPRISE_SERVER)
                     .build();
@@ -782,7 +810,7 @@ public class PrebuiltSanitizerRules {
         );
     }
 
-    private static JsonSchemaFilter jsonSchemaForGraphQLQueryResult() {
+    private static JsonSchemaFilter jsonSchemaForGraphQLQueryResult(boolean includeSAMLSupport) {
         return JsonSchemaFilter.builder()
                 .type("object")
                 // Using LinkedHashMap to keep the order to support same
@@ -794,7 +822,9 @@ public class PrebuiltSanitizerRules {
                                 put("organization", JsonSchemaFilter.builder()
                                         .type("object")
                                         .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{
-                                            put("samlIdentityProvider", jsonSchemaForOrganizationProperty("externalIdentities", jsonSchemaForSamlNode()));
+                                            if (includeSAMLSupport) {
+                                                put("samlIdentityProvider", jsonSchemaForOrganizationProperty("externalIdentities", jsonSchemaForSamlNode()));
+                                            }
                                             put("membersWithRole", jsonSchemaForQueryResult(jsonSchemaForMemberNode()));
                                             put("repository", JsonSchemaFilter.builder()
                                                     .type("object")
@@ -907,5 +937,27 @@ public class PrebuiltSanitizerRules {
                                             }).build()).build());
                             put("message", JsonSchemaFilter.builder().type("string").build());
                         }}).build()).build();
+    }
+
+    private static Endpoint getGraphQLEndpoint(boolean includeSAMLResponse) {
+        return Endpoint.builder()
+                .pathTemplate("/graphql")
+                .transform(Transform.Redact.builder()
+                        .jsonPath("$..ssoUrl")
+                        .build())
+                .transform(Transform.Pseudonymize.builder()
+                        .jsonPath("$..nameId")
+                        .jsonPath("$..email")
+                        .jsonPath("$..emails[*].value")
+                        .jsonPath("$..guid")
+                        .jsonPath("$..organizationVerifiedDomainEmails[*]")
+                        .build())
+                .transform(Transform.Pseudonymize.builder()
+                        .includeReversible(true)
+                        .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+                        .jsonPath("$..login")
+                        .build())
+                .responseSchema(jsonSchemaForGraphQLQueryResult(includeSAMLResponse))
+                .build();
     }
 }

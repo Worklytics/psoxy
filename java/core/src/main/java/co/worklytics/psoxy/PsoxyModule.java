@@ -1,9 +1,8 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
+import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
@@ -29,6 +28,7 @@ import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.IntoSet;
 import lombok.extern.java.Log;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -97,7 +97,7 @@ public class PsoxyModule {
 
     @Provides @Singleton
     static SourceAuthStrategy sourceAuthStrategy(ConfigService configService, Set<SourceAuthStrategy> sourceAuthStrategies) {
-        String identifier = configService.getConfigPropertyOrError(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
+        String identifier = configService.getConfigPropertyOrError(ApiModeConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
         return sourceAuthStrategies
                 .stream()
                 .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))
@@ -313,4 +313,8 @@ public class PsoxyModule {
         return Stream.of(optionals).filter(Optional::isPresent).findFirst().orElse(Optional.empty());
     }
 
+    @Provides
+    Base64KeyClient base64KeyClient() {
+        return new Base64KeyClient();
+    }
 }

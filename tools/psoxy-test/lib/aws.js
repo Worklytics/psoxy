@@ -6,7 +6,8 @@ import {
   request,
   resolveHTTPMethod,
   resolveAWSRegion,
-  signAWSRequestURL
+  signAWSRequestURL,
+  signJwtWithKMS,
 } from './utils.js';
 import {
   S3Client,
@@ -21,11 +22,13 @@ import {
   DescribeLogStreamsCommand,
   GetLogEventsCommand,
 } from '@aws-sdk/client-cloudwatch-logs';
+
 import fs from 'fs';
 import getLogger from './logger.js';
 import path from 'path';
 import _ from 'lodash';
 import zlib from 'node:zlib';
+import crypto from 'node:crypto';
 
 
 /**
@@ -41,6 +44,7 @@ function isValidURL(url) {
   return url.hostname.endsWith('.on.aws') ||
     url.hostname.endsWith('.amazonaws.com');
 }
+
 
 /**
  * Psoxy test
@@ -63,10 +67,31 @@ async function call(options = {}) {
 
   const signed = signAWSRequestURL(url, method, options.body, credentials,
      options.region);
+
   const headers = {
     ...getCommonHTTPHeaders(options),
     ...signed.headers,
   };
+
+  if (options.signingKey) {
+    let signature;
+    let claims = {
+      iss: options.identityIssuer,
+      sub: options.identitySubject,
+      aud: options.identityIssuer,
+      iat: Math.floor(Date.now() / 1000), // current time in seconds
+      exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
+    }
+    if (options.signingKey.startsWith('aws-kms:')) {
+      signature = await signJwtWithKMS(claims, options.signingKey.replace('aws-kms:', ''), credentials, options.region);
+    }
+
+    headers['Authorization'] = signature;
+
+    // possibly we'll need this for fallback, if target service has auth layer that consumes 'Authorization' header and doesn't pass it on
+    // but API Gateway v2 appears to be passing it as well as verifying it, so think we're OK
+    //headers['x-psoxy-authorization'] = signature;
+  }
 
   logger.info(`Calling Psoxy and waiting response: ${options.url.toString()}`);
   logger.verbose('Request Options:', { additional: options });
@@ -366,4 +391,3 @@ export default {
   parseLogEvents,
   upload,
 }
-

@@ -28,6 +28,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
     @ValueSource(strings = {
         "https://api.zoom.us/v2/users",
         "https://api.zoom.us/v2/users?status=active&page_size=200&next_page_token=TOKEN",
+        "https://api.zoom.us/v2/users/USER_ID/settings",
         "https://api.zoom.us/v2/users/USER_ID/meetings",
         "https://api.zoom.us/v2/users/USER_ID/meetings?type=scheduled&page_size=20",
         "https://api.zoom.us/v2/past_meetings/MEETING_ID",
@@ -100,6 +101,23 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
 
     @SneakyThrows
     @Test
+    void get_user_settings() {
+        String jsonString = asJson("user-settings.json");
+
+        String sanitized =
+            sanitizer.sanitize("GET", new URL("https://api.zoom.us/v2/users/ANY_USER_ID/settings"), jsonString);
+
+        // topics & join_urls gone
+        assertRedacted(sanitized, "https://zoom.us", "113332424", "1213434", "46.33.24.184",
+            "The specific instructions",
+            "example.png",
+            "+86 777 777 77",
+            "777 777 77"
+        );
+    }
+
+    @SneakyThrows
+    @Test
     void list_user_meetings() {
         String jsonString = asJson("list-user-meetings.json");
 
@@ -117,7 +135,32 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         assertRedacted(sanitized, "https://zoom.us", "Zoom Meeting", "TestMeeting", "My Meeting", "MyTestPollMeeting",
             "?pwd=1234567890",
             "SHOULD BE REDACTED"
-            );
+        );
+    }
+
+    @SneakyThrows
+    @Test
+    void list_user_cloud_recordings() {
+        String jsonString = asJson("user-recordings.json");
+
+        //verify precondition that example actually contains something we need to pseudonymize
+        Collection<String> PII = Arrays.asList(
+            "_0ctZtY0REqWalTmwvrdIw",
+            "Cx3wERazSgup7ZWRHQM8-w" // host id
+        );
+        assertNotSanitized(jsonString, PII);
+
+        String sanitized =
+            sanitizer.sanitize("GET", new URL("https://api.zoom.us/v2/users/ANY_USER_ID/recordings"), jsonString);
+
+        assertPseudonymized(sanitized, PII);
+        // topics & join_urls gone
+        assertRedacted(sanitized, "https://example.com/rec/download/Qg75t7xZBtEbAkjdlgbfdngBBBB",
+            "/9090876528/path01/demo.mp4",
+            "https://example.com/rec/play", "My Meeting", "MyTestPollMeeting",
+            "some passcode",
+            "My Personal Meeting"
+        );
     }
 
     @SneakyThrows
@@ -197,7 +240,7 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
 
         assertPseudonymized(sanitized, PII);
 
-        assertRedacted(sanitized, "Joe Surname", "My Meeting",            "?pwd=1234567890",
+        assertRedacted(sanitized, "Joe Surname", "My Meeting", "?pwd=1234567890",
             "SHOULD BE REDACTED");
     }
 
@@ -272,13 +315,13 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
         assertRedacted(sanitized, "example name", "example registrant id");
     }
 
-
-
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
             InvocationExample.of("https://api.zoom.us/v2/users/USER_ID/meetings", "list-user-meetings.json"),
             InvocationExample.of("https://api.zoom.us/v2/users", "list-users.json"),
+            InvocationExample.of("https://api.zoom.us/v2/users/USER_ID/settings", "user-settings.json"),
+            InvocationExample.of("https://api.zoom.us/v2/users/USER_ID/recordings", "user-recordings.json"),
             InvocationExample.of("https://api.zoom.us/v2/meetings/MEETING_ID", "meeting-details.json"),
             InvocationExample.of("https://api.zoom.us/v2/meetings/MEETING_ID/meeting_summary", "meeting-summary.json"),
             InvocationExample.of("https://api.zoom.us/v2/past_meetings/MEETING_ID", "past-meeting-details.json"),

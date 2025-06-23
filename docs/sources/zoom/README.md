@@ -67,20 +67,49 @@ be left in development mode; it does not need to be published.
 * `meeting:read:list_past_instances:admin`
 * `meeting:read:list_meetings:admin`
 * `meeting:read:participant:admin`
+* `meeting:read:summary:admin`
+* `cloud_recording:read:list_user_recordings:admin`
 * `report:read:list_meeting_participants:admin`
 * `report:read:meeting:admin`
 * `report:read:user:admin`
 * `user:read:user:admin`
 * `user:read:list_users:admin`
+* `user:read:settings:admin`
 
     ![Scopes](scopes.png)
-
-Alternatively, the scopes: `user:read:admin`, `meeting:read:admin`, `report:read:admin` are
-sufficient, but as of May 2024 are no longer available for newly created Zoom apps.
 
 Once the scopes are added, click on `Done` and then `Continue`.
 
 6. Activate the app
+
+## Zoom AI Metric Snapshot Bulk
+
+Psoxy can pseudonymize Zoom AI Metrics Snapshot CSV data.
+
+The default proxy rules for `zoom-ai-metrics` will pseudonymize `User Name` and `Email`, redacting `Department`
+
+```hcl
+custom_bulk_connector_rules = {
+    "zoom-ai-metrics" = {
+        source_kind               = "zoom",
+        worklytics_connector_id   = "bulk-import-psoxy"
+        worklytics_connector_name = "Bulk Import - Psoxy"
+        display_name              = "Zoom AI Metrics"
+        rules = {
+            columnsToPseudonymize = [
+                "User Name",
+                "Email"
+            ],
+            columnsToRedact = [
+                "Department",
+            ]
+        }
+        settings_to_provide = {
+            "Parser" = "zoom-ai-metrics-bulk"
+        }
+    }
+}
+```
 
 ## Troubleshooting
 

@@ -2,6 +2,7 @@ package co.worklytics.psoxy.aws.request;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Streams;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @RequiredArgsConstructor(staticName = "of")
 public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy.gateway.HttpEventRequest {
@@ -61,6 +63,19 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
     @Override
     public Optional<List<String>> getMultiValueHeader(String headerName) {
         return getHeader(headerName.toLowerCase()).map(s -> Splitter.on(',').splitToList(s));
+    }
+
+    @Override
+    public Map<String, List<String>> getHeaders() {
+        return Streams.concat(
+            event.getMultiValueHeaders().entrySet().stream().map(entry -> Pair.of(entry.getKey(), entry.getValue())),
+            event.getHeaders().entrySet().stream().map(entry -> Pair.of(entry.getKey(), List.of(entry.getValue())))
+        ).collect(Collectors.toMap(Pair::getKey, Pair::getValue, (a, b) -> {
+            // merge multi-value headers
+            List<String> merged = ObjectUtils.defaultIfNull(a, List.of());
+            merged.addAll(ObjectUtils.defaultIfNull(b, List.of()));
+            return merged;
+        }));
     }
 
     @Override

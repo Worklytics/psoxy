@@ -1,13 +1,18 @@
 package co.worklytics.psoxy.aws.request;
 
 import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Streams;
+import lombok.Builder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +20,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Adapter for the APIGatewayV2HTTPEvent to the interface the {@link co.worklytics.psoxy.gateway.impl.CommonRequestHandler}
+ * Adapter for the APIGatewayV2HTTPEvent to the interface the {@link ApiDataRequestHandler}
  * understands
  * Lambda calls use this very same adapter, but some fields differ as the nature of the service is
  * different.
@@ -28,8 +33,16 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
     @NonNull
     final APIGatewayV2HTTPEvent event;
 
+
+
     private Map<String, String> caseInsensitiveHeaders;
 
+    /**
+     * @return the path relative to the ROUTE, not the full path from either the API Gateway host or stage.
+     *
+     * TODO: too much hackiness in this method; should be refactored to be clearer about when we want the proxy path param,
+     * vs when we want to strip the stage segment or route
+     */
     @Override
     public String getPath() {
 
@@ -83,6 +96,17 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
     @Override
     public Optional<List<String>> getMultiValueHeader(@NonNull String headerName) {
         return getHeader(headerName.toLowerCase()).map(s -> Splitter.on(',').splitToList(s));
+    }
+
+    @Override
+    public Map<String, List<String>> getHeaders() {
+        return event.getHeaders().entrySet().stream().map(entry -> Pair.of(entry.getKey(), Splitter.on(',').splitToList(entry.getValue())))
+        .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (a, b) -> {
+            // merge multi-value headers
+            List<String> merged = ObjectUtils.defaultIfNull(a, List.of());
+            merged.addAll(ObjectUtils.defaultIfNull(b, List.of()));
+            return merged;
+        }));
     }
 
     @Override

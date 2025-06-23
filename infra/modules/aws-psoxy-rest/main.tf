@@ -34,6 +34,40 @@ locals {
   # but in latter case, seems to urldecode the path; such that /foo%25/bar becomes /foo//bar, which is not what we want
   # so oddly, for APIGatewayV2 we need to use 1.0 format instead of its default , even though that default is our usual case otherwise
   event_handler_implementation = local.use_api_gateway ? "APIGatewayV1Handler" : "Handler"
+
+  provision_side_output_original_bucket  = try(var.side_output_original != null && var.side_output_original.bucket == null, false)
+  provision_side_output_sanitized_bucket = try(var.side_output_sanitized != null && var.side_output_sanitized.bucket == null, false)
+
+}
+
+resource "random_string" "side_output_unique_sequence" {
+  length  = 8
+  lower   = true
+  upper   = false
+  special = false
+  numeric = true
+}
+
+module "side_output_original" {
+  count = local.provision_side_output_original_bucket ? 1 : 0
+
+  source = "../aws-output-s3"
+
+  environment_name = var.environment_name
+  instance_id      = var.instance_id
+  unique_sequence  = random_string.side_output_unique_sequence.result
+  bucket_suffix    = "side-output-original"
+}
+
+module "side_output_sanitized" {
+  count = local.provision_side_output_sanitized_bucket ? 1 : 0
+
+  source = "../aws-output-s3"
+
+  environment_name = var.environment_name
+  instance_id      = var.instance_id
+  unique_sequence  = random_string.side_output_unique_sequence.result
+  bucket_suffix    = "side-output-sanitized"
 }
 
 module "psoxy_lambda" {
@@ -62,7 +96,8 @@ module "psoxy_lambda" {
   secrets_store_implementation         = var.secrets_store_implementation
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
-
+  side_output_original                 = local.provision_side_output_original_bucket ? "s3://${module.side_output_original[0].bucket_id}" : try(var.side_output_original.bucket, null)
+  side_output_sanitized                = local.provision_side_output_sanitized_bucket ? "s3://${module.side_output_sanitized[0].bucket_id}" : try(var.side_output_sanitized.bucket, null)
 
   environment_variables = merge(
     var.environment_variables,
@@ -236,7 +271,6 @@ resource "local_file" "test_script" {
   content         = local.test_script
 }
 
-
 output "endpoint_url" {
   value = "${local.proxy_endpoint_url}/"
 }
@@ -264,7 +298,7 @@ output "instance_id" {
 }
 
 output "proxy_kind" {
-  value       = "rest"
+  value       = "rest" # TODO: revisit; this makes assumption about nature of the API that is overly restrictive and unnecessary
   description = "The kind of proxy instance this is."
 }
 
@@ -274,6 +308,16 @@ output "test_script" {
 
 output "test_script_content" {
   value = local.test_script
+}
+
+output "side_output_original_bucket_id" {
+  value       = try(module.side_output_original[0].bucket_id, var.side_output_original.bucket, null)
+  description = "Bucket ID of the side output bucket for original data, if any. May have been provided by the user, or provisioned by this module."
+}
+
+output "side_output_sanitized_bucket_id" {
+  value       = try(module.side_output_sanitized[0].bucket_id, var.side_output_sanitized.bucket, null)
+  description = "Bucket ID of the side output bucket for sanitized data, if any. May have been provided by the user, or provisioned by this module."
 }
 
 output "todo" {

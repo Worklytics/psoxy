@@ -15,6 +15,14 @@ import _ from 'lodash';
 const GCP_CLOUD_FUNCTION_GEN1_DOMAIN='cloudfunctions.net';
 const GCP_CLOUD_FUNCTION_GEN2_DOMAIN='run.app';
 
+function isCloudFunctionGen1(url) {
+  return url?.hostname.endsWith(GCP_CLOUD_FUNCTION_GEN1_DOMAIN);
+}
+
+function isCloudFunctionGen2(url) {
+  return url?.hostname.endsWith(GCP_CLOUD_FUNCTION_GEN2_DOMAIN);
+}
+
 /**
  * Helper: check url deploy type
  *
@@ -25,7 +33,7 @@ function isValidURL(url) {
   if (typeof url === 'string') {
     url = new URL(url);
   }
-  return url.hostname.endsWith(GCP_CLOUD_FUNCTION_GEN1_DOMAIN) || url.hostname.endsWith(GCP_CLOUD_FUNCTION_GEN2_DOMAIN)
+  return isCloudFunctionGen1(url) || isCloudFunctionGen2(url);
 }
 
 /**
@@ -113,15 +121,46 @@ function getLogsURL(cloudFunctionURL = '') {
   }
 
   const url = new URL(cloudFunctionURL);
-  const [regionAndProjectId] = url.hostname.split('.');
-  const match = regionAndProjectId.match(/([a-z]+-[a-z0-9]+)-([a-z0-9-]+)/)
-  let region, projectId;
-  if (match && match.length >= 3) {
-    region = match[1];
-    projectId = match[2];
+  let region = '';
+  let functionName = '';
+  let projectId = '';
+
+  if (isCloudFunctionGen1(url)) {
+    const re = /^([a-z]+(?:-[a-z]+)*\d)-([a-z0-9-]+)\.cloudfunctions\.net$/;
+    const parts = url.hostname.match(re);
+    if (!_.isEmpty(parts)) {
+      region = parts[1];
+      projectId = parts[2];
+      functionName = url.pathname.replace(/^\/+/, '')
+    }
+  } else if (isCloudFunctionGen2(url)) {  // best guess hack of these ...
+    // host is something like 'https://psoxy-dev-gcal-boff2f476q-uc.a.run.app'
+    const regionMapping = {
+      uc: 'us-central1',
+      uw: 'us-west1',
+      ue: 'us-east1',
+    };
+    const re = /^(.+)-([a-z0-9]+)-([a-z]{2})\.a\.run\.app$/;
+    const parts = url.hostname.match(re);
+    if (!_.isEmpty(parts)) {
+      const [, service, hash, shortCode] = parts;
+      region = regionMapping[shortCode];
+      functionName = service;
+    }
   }
-  const [initial, functionName] = url.pathname.split('/');
-  return `https://console.cloud.google.com/functions/details/${region}/${functionName}?project=${projectId}&tab=logs`;
+
+  let googleConsoleURL = 'https://console.cloud.google.com';
+  if (!_.isEmpty(region) && !_.isEmpty(functionName)) {
+    googleConsoleURL += `/run/detail/${region}/${functionName}/logs`;
+    // TODO
+    //  should pass `projectId` somehow and append to the resulting URL as query param `project`
+    //  in gen 2 use-case
+    if (!_.isEmpty(projectId)) {
+      googleConsoleURL += `?project=${projectId}`;
+    }
+  }
+
+  return googleConsoleURL;
 }
 
 /**

@@ -1,7 +1,11 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.*;
-import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
+import co.worklytics.psoxy.gateway.impl.BatchMergeHandler;
+import co.worklytics.psoxy.gateway.impl.InboundWebhookHandler;
+import co.worklytics.psoxy.gateway.impl.JwksDecorator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.Component;
 
 import javax.inject.Singleton;
@@ -16,7 +20,15 @@ import javax.inject.Singleton;
 })
 public interface AwsContainer {
 
-    CommonRequestHandler createHandler();
+    ApiDataRequestHandler apiDataRequestHandler();
+
+    InboundWebhookHandler inboundWebhookHandler();
+
+    BatchMergeHandler batchMergeHandler();
+
+    ObjectMapper objectMapper();
 
     S3Handler injectS3Handler(S3Handler s3Handler);
+
+    JwksDecorator.Factory jwksDecoratorFactory();
 }

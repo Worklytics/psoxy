@@ -4,7 +4,7 @@ import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.request.APIGatewayV1ProxyEventRequestAdapter;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.impl.CommonRequestHandler;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
@@ -21,7 +21,7 @@ import static co.worklytics.psoxy.ResponseCompressionHandler.isCompressionReques
  * usage:
  *  - when configure/deploy your lambda, set entry point to `co.worklytis.psoxy.APIGatewayV1Handler`
  *  - in terraform, this is the `handler_class` variable
- *     - https://github.com/Worklytics/psoxy/blob/main/infra/modules/aws-psoxy-rest/main.tf#L15
+ *     - https://github.com/Worklytics/psoxy/blob/main/infra/modules/aws-psoxy-rest/main.tf#L36
  *     - under Lambda --> Runtime Settings via AWS console
  *
  *
@@ -33,7 +33,7 @@ public class APIGatewayV1Handler implements com.amazonaws.services.lambda.runtim
      * {@link "https://aws.amazon.com/premiumsupport/knowledge-center/lambda-improve-java-function-performance/"}
      */
     static AwsContainer awsContainer;
-    static CommonRequestHandler requestHandler;
+    static ApiDataRequestHandler requestHandler;
 
     static ResponseCompressionHandler responseCompressionHandler;
 
@@ -43,7 +43,7 @@ public class APIGatewayV1Handler implements com.amazonaws.services.lambda.runtim
 
     private static void staticInit() {
         awsContainer = DaggerAwsContainer.create();
-        requestHandler = awsContainer.createHandler();
+        requestHandler = awsContainer.apiDataRequestHandler();
         responseCompressionHandler = new ResponseCompressionHandler();
     }
 

@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.zip.GZIPOutputStream;
 
+//q: why is this aws-specific??  GCP handles gzip natively, perhaps??
 class ResponseCompressionHandler {
 
     static final String GZIP = "gzip";
@@ -33,14 +34,14 @@ class ResponseCompressionHandler {
     /**
      * Compresses content as binary base64
      *
-     * @param body
+     * @param body to compress
      * @return optional with content if compression has been applied
      */
     Optional<String> compressBodyAndConvertToBase64(String body) {
         if (compressionOutweighOverhead(body)) {
             try (ByteArrayOutputStream bos = new ByteArrayOutputStream(DEFAULT_COMPRESSION_BUFFER_SIZE)) {
                 try (GZIPOutputStream output = new GZIPOutputStream(bos)) {
-                    output.write(body.getBytes(StandardCharsets.UTF_8.name()));
+                    output.write(body.getBytes(StandardCharsets.UTF_8));
                 }
                 return Optional.ofNullable(Base64.encodeBase64String(bos.toByteArray()));
             } catch (IOException ignored) {
@@ -51,7 +52,7 @@ class ResponseCompressionHandler {
     }
 
     /**
-     * @param response
+     * @param response to compress if needed
      * @return (bool, response) - bool indicates if the response has been compressed or not
      */
     Pair<Boolean, HttpEventResponse> compressIfNeeded(HttpEventResponse response) {

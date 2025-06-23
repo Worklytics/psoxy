@@ -30,6 +30,10 @@ output "bulk_connector_instances" {
   value = local.bulk_instances
 }
 
+output "webhook_collector_instances" {
+  value = local.webhook_collector_instances
+}
+
 output "lookup_output_buckets" {
   description = "Output buckets for any lookup tables."
   value       = { for k, v in module.lookup_output : k => v.output_bucket }

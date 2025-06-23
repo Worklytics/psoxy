@@ -135,6 +135,13 @@
             <version>${dependency.apache-httpcore.version}</version>
         </dependency>
 
+        <!-- JWT verification of incoming webhooks / requests -->
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>10.3</version>
+        </dependency>
+
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
@@ -177,8 +184,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.2</version>
+                <version>${plugin.surefire.version}</version>
                 <configuration>
+                    <!-- forces loading of Mockito agent during test execution; this avoids some warnings seen in console during test execution, but unlcear that it fixes anything -->
+                    <!-- specfically, warning was "Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3 WARNING: A Java agent has been loaded dynamically (/Users/erik/.m2/repository/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar) WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information WARNING: Dynamic loading of agents will be disallowed by default in a future release" -->
+                    <argLine>-javaagent:"${settings.localRepository}/org/mockito/mockito-core/${dependency.mockito-junit-jupiter.version}/mockito-core-${dependency.mockito-junit-jupiter.version}.jar"</argLine> <!-- enable inline mocking -->
                     <!-- rerun failing tests twice more -->
                     <rerunFailingTestsCount>2</rerunFailingTestsCount>
                     <systemProperties>

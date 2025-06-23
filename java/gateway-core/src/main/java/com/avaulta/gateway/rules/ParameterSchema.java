@@ -1,9 +1,11 @@
 package com.avaulta.gateway.rules;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
@@ -13,12 +15,13 @@ import java.util.List;
  * this is just subset of JsonSchema; nothing makes it specific to a 'parameter' per se
  */
 @JsonPropertyOrder({"type", "format", "pattern", "enum"})
-@Builder(toBuilder = true)
+@SuperBuilder(toBuilder = true)
 @With
 @AllArgsConstructor //for builder
 @NoArgsConstructor //for Jackson
 @Getter
 public class ParameterSchema {
+
 
     public enum ValueType {
         STRING,
@@ -75,6 +78,17 @@ public class ParameterSchema {
     @JsonProperty("enum") //align to JsonSchema
     List<String> enumValues;
 
+    /**
+     * values matching any schema in this list are valid
+     */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonProperty("or") //align to JsonSchema
+    @Singular
+    List<ParameterSchema> ors;
+
+
+
+
     public static ParameterSchema string() {
         return ParameterSchema.builder()
                 .type(ValueType.STRING.getEncoding())
@@ -87,4 +101,11 @@ public class ParameterSchema {
                 .format(StringFormat.REVERSIBLE_PSEUDONYM.getStringEncoding())
                 .build();
     }
+
+    public static ParameterSchema integer() {
+        return ParameterSchema.builder()
+                .type(ValueType.INTEGER.getEncoding())
+                .build();
+    }
+
 }

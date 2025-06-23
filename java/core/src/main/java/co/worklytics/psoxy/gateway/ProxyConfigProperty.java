@@ -12,6 +12,9 @@ import lombok.NoArgsConstructor;
 public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
 
 
+
+    BUNDLE_FILENAME,
+
     /**
      * CUSTOM_RULES_SHA - sha of custom rules file, if custom rules configured via some method
      * *other* than environment vars; this is used to force re-deploy/restart of Cloud Functions
@@ -95,32 +98,35 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
 
     // if set, a base64-YAML encoding of rules
     RULES(SupportedSource.ENV_VAR_OR_REMOTE),
+
     // for testing - if set, allows for behavior that should only be permitted in development context,
     // such as to skip sanitizer if corresponding header is sent
     IS_DEVELOPMENT_MODE,
-    SOURCE,
-    SOURCE_AUTH_STRATEGY_IDENTIFIER,
-    //target API endpoint to forward request to
-    TARGET_HOST,
 
     /**
-     * control the TLS protocol version used by proxy for outbound connections (eg, to data source)
-     * OPTIONAL; default to 'TLSv1.3'
-     * only safe alternative setting would be 'TLSv1.2'; we provide option to configure this in
-     * case there is some API supported by proxy that doesn't support TLSv1.3 (we're not aware of
-     * any as of Sept 2024)
+     * **ALPHA**
+     * if provided, a target side output to write original data to
+     *
+     * q: atm, not supported for bulk mode; but could be, right?
      */
-    TLS_VERSION,
+    SIDE_OUTPUT_ORIGINAL,
 
-    BUNDLE_FILENAME,
+    /**
+     * **ALPHA**
+     * if provided, a target side output to write sanitized data to
+     *
+     * q: atm, not supported for bulk mode; but could be, right?
+     */
+    SIDE_OUTPUT_SANITIZED,
 
+    /**
+     * the source of the data.
+     *
+     * probably really only applicable in API mode, but has historically be used to get default rules
+     * in the bulk mode cases.
+     */
+    SOURCE,
     ;
-
-    public static class TlsVersions {
-        public final static String TLSv1_2 = "TLSv1.2";
-        public final static String TLSv1_3 = "TLSv1.3";
-        public final  static String[] ALL = {TLSv1_2, TLSv1_3};
-    }
 
 
     @Getter(onMethod_ = @Override)

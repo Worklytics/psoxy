@@ -130,6 +130,22 @@ locals {
   long_default_sa_prefix = "psoxy-${local.environment_id_prefix}${local.function_qualifier}"
 
   sa_prefix = length(local.default_sa_prefix) < local.SA_NAME_MIN_LENGTH ? local.long_default_sa_prefix : local.default_sa_prefix
+
+
+  custom_original_side_outputs = { for k, v in var.custom_side_outputs :
+    k => { bucket = v.ORIGINAL, allowed_readers = [] } if v.ORIGINAL != null
+  }
+  custom_sanitized_side_outputs = { for k, v in var.custom_side_outputs :
+    k => { bucket = v.SANITIZED, allowed_readers = [] } if v.SANITIZED != null
+  }
+  required_side_output_config = {
+    bucket          = null
+    allowed_readers = [for v in var.worklytics_sa_emails : "serviceAccount:${v}"]
+  }
+
+  sanitized_side_outputs = { for k, v in var.api_connectors :
+    k => try(v.enable_side_output, false) ? local.required_side_output_config : try(local.custom_sanitized_side_outputs[k], null)
+  }
 }
 
 module "api_connector" {
@@ -158,6 +174,9 @@ module "api_connector" {
   invoker_sa_emails                     = var.worklytics_sa_emails
   default_labels                        = var.default_labels
   gcp_principals_authorized_to_test     = var.gcp_principals_authorized_to_test
+  bucket_write_role_id                  = module.psoxy.bucket_write_role_id
+  side_output_original                  = try(local.custom_original_side_outputs[each.key], null)
+  side_output_sanitized                 = try(local.sanitized_side_outputs[each.key], null)
   todos_as_local_files                  = var.todos_as_local_files
 
 

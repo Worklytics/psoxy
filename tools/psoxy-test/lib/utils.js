@@ -16,6 +16,8 @@ import isgzipBuffer from '@stdlib/assert-is-gzip-buffer';
 import path from 'path';
 import spec from '../data-sources/spec.js';
 import zlib from 'node:zlib';
+import {KMSClient, SignCommand} from '@aws-sdk/client-kms';
+import crypto from 'node:crypto';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // In case Psoxy is slow to respond (Lambda can take up to 20s+ to bootstrap),
@@ -79,6 +81,12 @@ function getCommonHTTPHeaders(options = {}) {
   if (options.healthCheck) {
     // option presence is enough, since Psoxy doesn't check header value
     headers['X-Psoxy-Health-Check'] = 'true';
+  }
+  if (options.requestNoResponse) {
+    headers['X-Psoxy-No-Response-Body'] = 'true';
+  }
+  if (options.body) {
+    headers['Content-Type'] = 'application/json';
   }
 
   return headers;
@@ -172,7 +180,7 @@ function requestWrapper(url, method = 'GET', headers, body = {}) {
  * @param {URL} url
  * @param {String} method
  * @param {Object} body
- * @param {Object} credentials
+ * @param {Credentials} credentials
  * @param {String} region
  * @return {Object}
  */
@@ -209,36 +217,25 @@ function signAWSRequestURL(url, method = 'GET', body = {}, credentials, region) 
 }
 
 /**
- * Check environment and warn if Node.js version is not LTS. As of 2024-08 deprecation
- * warning messages are expected for Node.js v21 due to @google-cloud/storage dependency.
+ * Check environment: as of 2024-08 deprecation warning messages are expected for Node.js v21 due
+ * to @google-cloud/storage dependency.
  * Ref: https://github.com/googleapis/nodejs-storage/issues/1907#issuecomment-1817620435
- *
- * > After six months, odd-numbered releases (9, 11, etc.) become unsupported, and even-numbered
- * releases (10, 12, etc.) move to Active LTS status and are ready for general use.
  *
  * @param logger
  */
 function environmentCheck(logger = getLogger()) {
   const [major] = process.versions.node.split('.').map(Number);
-  const isNotLTS = major % 2 !== 0;
-  if (isNotLTS) {
-    let warningMessage = `
-      Please, consider using a LTS release of Node.js (v18, v20, etc.):
-      https://nodejs.org/en/about/previous-releases
-    `
 
-    if (major === 21) {
-      warningMessage = `
+  if (major === 21) {
+    const deprecationWarningMessage = `
       Your Node.js version may display ${chalk.yellow("deprecation warnings")} related to an
       official Google dependency used by this tool. These warnings are not
       the direct responsibility of this tool and ${chalk.green('do not compromise its functionality')}.
-      ${warningMessage}
-      `
-    }
-
-    logger.info(warningMessage);
+      `;
+    logger.info(deprecationWarningMessage);
   }
 }
+
 
 /**
  * Simple wrapper around node's `execSync` to ease testing.
@@ -460,6 +457,52 @@ async function getAWSCredentials(role, region) {
   return credentials;
 }
 
+function base64url(input) {
+  return input.toString('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+}
+
+/**
+ * @param {object} claims - the usual JWT ones, iss, sub, etc. will be stringified
+ * @param {string} keyArn
+ * @param {Credentials} credentials
+ * @param {string} region
+ * @returns {Promise<string>}
+ */
+async function signJwtWithKMS(claims, keyArn, credentials, region) {
+  const client = new KMSClient({
+    region: region,
+    credentials: credentials,
+  });
+
+  // Extract keyId from keyArn, e.g. `arn:aws:kms:us-east-1:123456789012:key/abcd1234-56ef-78gh-90ij-klmnopqrstuv`
+  //let keyId = keyArn.split(":")[5].split("/")[1];
+
+  const encodedHeader = base64url(Buffer.from(JSON.stringify({
+    "alg": "RS256",
+    "kid": keyArn,
+    "typ": "JWT",
+  })));
+  const encodedPayload = base64url(Buffer.from(JSON.stringify(claims)));
+  const signingInput = `${encodedHeader}.${encodedPayload}`;
+
+  const hash = crypto.createHash('sha256').update(signingInput).digest();
+
+  const command = new SignCommand({
+    KeyId: keyArn,
+    SigningAlgorithm: 'RSASSA_PKCS1_V1_5_SHA_256',
+    Message: hash,
+    MessageType: 'DIGEST' // 🟢 explicitly indicate pre-hashed input
+  });
+
+  const response = await client.send(command);
+
+  const signature = base64url(Buffer.from(response.Signature));
+  return `${signingInput}.${signature}`;
+}
+
 /**
  * Append suffix to filename (before extension)
  * @param {string} filename
@@ -515,5 +558,6 @@ export {
   resolveHTTPMethod,
   saveToFile,
   signAWSRequestURL,
+  signJwtWithKMS,
   transformSpecWithResponse,
 };

@@ -3,6 +3,8 @@ package co.worklytics.psoxy.aws;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 
+import java.util.Set;
+
 
 public class AwsEnvironment implements HostEnvironment {
 
@@ -37,5 +39,8 @@ public class AwsEnvironment implements HostEnvironment {
         ;
     }
 
-
+    @Override
+    public Set<String> getSupportedOutputKinds() {
+        return Set.of("s3", "sqs");
+    }
 }

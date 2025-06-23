@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.generics;
 
 import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
+import co.worklytics.psoxy.impl.SanitizerUtils;
 import co.worklytics.psoxy.utils.email.EmailAddressParser;
 import com.jayway.jsonpath.Configuration;
 import org.junit.jupiter.api.Disabled;
@@ -11,13 +12,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class CalendarTest {
 
+    // TODO: add DI instead of this garbage
+    SanitizerUtils sanitizerUtils = new SanitizerUtils(null, null, null, new EmailAddressParser(), null, null);
     RESTApiSanitizerImpl restApiSanitizer = new RESTApiSanitizerImpl(null, null, new EmailAddressParser());
 
     @CsvSource(value = {
@@ -47,7 +48,7 @@ class CalendarTest {
     @ParameterizedTest
     public void transformPreserves(String input, String expected) {
         assertEquals(expected,
-            restApiSanitizer.getTransformImpl(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS)
+            sanitizerUtils.getTransformImpl(restApiSanitizer.getPseudonymizer(), Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS)
                 .map(input, Configuration.defaultConfiguration()));
 
     }
@@ -59,14 +60,14 @@ class CalendarTest {
     @ParameterizedTest
     public void transformDrops(String input) {
         assertEquals("",
-            restApiSanitizer.getTransformImpl(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS)
+            sanitizerUtils.getTransformImpl(restApiSanitizer.getPseudonymizer(),  Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS)
                 .map(input, Configuration.defaultConfiguration()));
     }
 
     @Test
     public void biweekly() {
         assertEquals("bi-weekly,weekly",
-            restApiSanitizer.getTransformImpl(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS)
+            sanitizerUtils.getTransformImpl(restApiSanitizer.getPseudonymizer(), Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS)
                 .map("bi-weekly", Configuration.defaultConfiguration()));
     }
 
@@ -84,7 +85,7 @@ class CalendarTest {
         )) {
             for (String token : set) {
                 assertEquals(token,
-                    restApiSanitizer.getTransformImpl(Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS)
+                    sanitizerUtils.getTransformImpl(restApiSanitizer.getPseudonymizer(), Calendar.PRESERVE_CONVENTIONAL_PHRASE_SNIPPETS)
                         .map(token, Configuration.defaultConfiguration()));
             }
         }

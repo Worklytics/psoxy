@@ -23,7 +23,9 @@ public class GitHubEnterpriseServerTests extends JavaRulesTestBaseCase {
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
             //.sourceFamily("github")
             .sourceKind("github")
-            .rulesFile("github-enterprise-server")
+            .rulesFile("/enterprise-server/github-enterprise-server")
+            .exampleApiResponsesDirectoryPath("enterprise-server/example-api-responses/original/")
+            .exampleSanitizedApiResponsesPath("enterprise-server/example-api-responses/sanitized/")
             .build();
 
     @Disabled // not reliable; seems to have different value via IntelliJ/AWS deployment and my
@@ -698,6 +700,7 @@ public class GitHubEnterpriseServerTests extends JavaRulesTestBaseCase {
                 InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/comments/COMMENT_ID/reactions", "comment_reactions.json"),
                 InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE", "issue.json"),
                 InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues", "issues.json"),
+                InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues?after=some_token", "issues.json"),
                 InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE/comments", "issues_comments.json"),
                 InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE/events", "issue_events.json"),
                 InvocationExample.of("https://git.your-company.com/api/v3/repos/FAKE/REPO/issues/ISSUE/timeline", "issue_timeline.json"),

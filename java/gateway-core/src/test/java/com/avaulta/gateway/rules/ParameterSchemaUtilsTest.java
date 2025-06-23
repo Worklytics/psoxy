@@ -4,6 +4,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -75,10 +76,10 @@ class ParameterSchemaUtilsTest {
 
     @Test
     public void validate_all() {
-        Map<String, ParameterSchema> parameterSchemas =
-                Map.of("string", ParameterSchema.string(),
-                        "number", ParameterSchema.builder().type("number").build(),
-                        "reversible", ParameterSchema.reversiblePseudonym());
+        Map<String, QueryParameterSchema> parameterSchemas =
+                Map.of("string", QueryParameterSchema.string(),
+                        "number", QueryParameterSchema.builder().type("number").build(),
+                        "reversible", QueryParameterSchema.reversiblePseudonym());
 
         assertTrue(parameterSchemaUtils.validateAll(parameterSchemas, Arrays.asList(
                 Pair.of("string", "string"),
@@ -98,6 +99,33 @@ class ParameterSchemaUtilsTest {
                         Pair.of("number", "not-a-number"),
                         Pair.of("reversible", "not-a-pseudonym")
                 )));
+    }
+
+
+    @Test
+    public void validate_or(){
+        ParameterSchema schema = ParameterSchema.builder()
+            .or(ParameterSchema.builder().pattern("^all$").build())
+            .or(ParameterSchema.integer())
+            .build();
+
+        assertTrue(parameterSchemaUtils.validate(schema, "all"));
+        assertTrue(parameterSchemaUtils.validate(schema, "123"));
+        assertFalse(parameterSchemaUtils.validate(schema, "any"));
+    }
+
+    @Test
+    public void required() {
+        QueryParameterSchema schema = QueryParameterSchema.builder()
+            .type(ParameterSchema.ValueType.STRING.getEncoding())
+            .required(true)
+            .build();
+
+        assertTrue(parameterSchemaUtils.validateAll(Map.of("foo", schema), Arrays.asList(Pair.of("foo", "bar"))));
+
+        assertFalse(parameterSchemaUtils.validateAll(Map.of("foo", schema), Arrays.asList(Pair.of("foo", null))));
+        assertFalse(parameterSchemaUtils.validateAll(Map.of("foo", schema), Arrays.asList(Pair.of("foo2", "bar"))));
+        assertFalse(parameterSchemaUtils.validateAll(Map.of("foo", schema), Collections.emptyList()));
     }
 }
 

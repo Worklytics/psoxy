@@ -327,6 +327,34 @@ variable "custom_bulk_connector_arguments" {
   default     = {}
 }
 
+variable "custom_side_outputs" {
+  type = map(object({
+    ORIGINAL  = optional(string, null),
+    SANITIZED = optional(string, null),
+  }))
+
+  description = "*ALPHA* map of connector id --> side output targets"
+  default     = {}
+}
+
+variable "webhook_collectors" {
+  type = map(object({
+    rules_file = string
+    provision_auth_key = optional(object({         # whether to provision auth keys for webhook collector; if not provided, will not provision any
+      rotation_days = optional(number, null)       # null means no rotation; if > 0, will rotate every N days
+      key_spec      = optional(string, "RSA_2048") # RSA_2048, RSA_3072, or RSA_4096; defaults to RSA_2048, which should be sufficient this use-case
+    }), null)
+    auth_public_keys     = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
+    allow_origins        = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
+    example_payload_file = optional(string, null)        # path to example payload file to use for testing; if provided, will be used in the test script
+    example_identity     = optional(string, null)        # example identity to use for testing; if provided, will be used to test the collector
+  }))
+
+  default = {}
+
+  description = "map of webhook collector id --> webhook collector configuration"
+}
+
 variable "lookup_table_builders" {
   type = map(object({
     input_connector_id            = string

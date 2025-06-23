@@ -1,7 +1,6 @@
 package co.worklytics.psoxy.rules;
 
 
-import co.worklytics.psoxy.rules.slack.PrebuiltSanitizerRules;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.transforms.Transform;

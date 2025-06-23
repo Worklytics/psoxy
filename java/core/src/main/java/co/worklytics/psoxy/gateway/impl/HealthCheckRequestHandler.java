@@ -7,6 +7,7 @@ import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.rules.RulesUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dagger.Lazy;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.java.Log;
@@ -17,9 +18,11 @@ import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
@@ -32,7 +35,7 @@ import java.util.stream.Collectors;
 @Log
 public class HealthCheckRequestHandler {
 
-    static final String JAVA_SOURCE_CODE_VERSION = "v0.5.2";
+    public static final String JAVA_SOURCE_CODE_VERSION = "v0.5.3";
 
     /**
      * a random UUID used to salt the hash of the salt.  Purpose of this is to invalidate any non-purpose built rainbow table solution.
@@ -53,13 +56,15 @@ public class HealthCheckRequestHandler {
     @Inject
     SecretStore secretStore;
     @Inject
-    SourceAuthStrategy sourceAuthStrategy;
+    Lazy<SourceAuthStrategy> sourceAuthStrategy;
     @Inject
     ObjectMapper objectMapper;
     @Inject
     RulesUtils rulesUtils;
     @Inject
     HashUtils hashUtils;
+
+    String piiSaltHash;
 
     public Optional<HttpEventResponse> handleIfHealthCheck(HttpEventRequest request) {
         if (isHealthCheckRequest(request)) {
@@ -82,18 +87,26 @@ public class HealthCheckRequestHandler {
     }
 
     private HttpEventResponse handle(HttpEventRequest request) {
-        Set<String> missing =
-                sourceAuthStrategy.getRequiredConfigProperties().stream()
-                        .filter(configProperty -> config.getConfigPropertyAsOptional(configProperty).isEmpty())
-                        .filter(configProperty -> secretStore.getConfigPropertyAsOptional(configProperty).isEmpty())
-                        .map(ConfigService.ConfigProperty::name)
-                        .collect(Collectors.toSet());
+        Set<String> missing;
 
         try {
-            Optional<String> targetHost = config.getConfigPropertyAsOptional(ProxyConfigProperty.TARGET_HOST);
+            missing =
+                sourceAuthStrategy.get().getRequiredConfigProperties().stream()
+                    .filter(configProperty -> config.getConfigPropertyAsOptional(configProperty).isEmpty())
+                    .filter(configProperty -> secretStore.getConfigPropertyAsOptional(configProperty).isEmpty())
+                    .map(ConfigService.ConfigProperty::name)
+                    .collect(Collectors.toSet());
+        } catch (Throwable e) {
+            // will fail if sourceAuthStrategy is not set up properly
+            logInDev(e.getMessage(), e);
+            missing = Collections.emptySet();
+        }
+
+        try {
+            Optional<String> targetHost = config.getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST);
 
             if (targetHost.isEmpty() || StringUtils.isBlank(targetHost.get())) {
-                missing.add(ProxyConfigProperty.TARGET_HOST.name());
+                missing.add(ApiModeConfigProperty.TARGET_HOST.name());
             }
         } catch (Throwable ignored) {
             logInDev("Failed to add TARGET_HOST info to health check", ignored);
@@ -102,7 +115,7 @@ public class HealthCheckRequestHandler {
         HealthCheckResult.HealthCheckResultBuilder healthCheckResult = HealthCheckResult.builder()
                 .javaSourceCodeVersion(JAVA_SOURCE_CODE_VERSION)
                 .configuredSource(config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
-                .configuredHost(config.getConfigPropertyAsOptional(ProxyConfigProperty.TARGET_HOST).orElse(null))
+                .configuredHost(config.getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST).orElse(null))
                 .nonDefaultSalt(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
                 .pseudonymImplementation(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION).orElse(null))
                 .missingConfigProperties(missing)
@@ -121,7 +134,7 @@ public class HealthCheckRequestHandler {
             //collect toMap doesn't like null values; presumably people who see Unix-epoch will
             // recognize it means unknown/unknowable; in practice, won't be used due to filter atm
             final Instant PLACEHOLDER_FOR_NULL_LAST_MODIFIED = Instant.ofEpochMilli(0);
-            healthCheckResult.configPropertiesLastModified(sourceAuthStrategy.getAllConfigProperties().stream()
+            healthCheckResult.configPropertiesLastModified(sourceAuthStrategy.get().getAllConfigProperties().stream()
                     .map(param -> {
                         Optional<ConfigService.ConfigValueWithMetadata> fromConfig = config.getConfigPropertyWithMetadata(param);
                         if (fromConfig.isEmpty()) {
@@ -141,7 +154,7 @@ public class HealthCheckRequestHandler {
         }
 
         try {
-            config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER)
+            config.getConfigPropertyAsOptional(ApiModeConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER)
                     .ifPresent(healthCheckResult::sourceAuthStrategy);
         } catch (Throwable e) {
             logInDev("Failed to add sourceAuthStrategy to health check", e);
@@ -191,6 +204,18 @@ public class HealthCheckRequestHandler {
 
         return responseBuilder.build();
     }
+
+    /*
+     * @return a SHA-256 hash of the salt, to aid in detecting changes to the salt value.
+     */
+    public String piiSaltHash() {
+        if (piiSaltHash == null) {
+            piiSaltHash = config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
+                .map(salt -> hashUtils.hash(salt, SALT_FOR_SALT)).orElse("");
+        }
+        return piiSaltHash;
+    }
+
 
     private int responseStatusCode(@NonNull HealthCheckResult healthCheckResult) {
         if (healthCheckResult.passed()) {

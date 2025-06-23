@@ -1,6 +1,5 @@
 package co.worklytics.psoxy;
 
-
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -13,6 +12,14 @@ import lombok.RequiredArgsConstructor;
 public enum ControlHeader {
 
     /**
+     * alternative way to send authorization information to proxy instances
+     *
+     * as of v0.5.3, use-case if limited to Webhook-Collector mode
+     *
+     */
+    AUTHORIZATION("Authorization"),
+
+    /**
      * @see co.worklytics.psoxy.impl.PseudonymImplementations
      */
     PSEUDONYM_IMPLEMENTATION("Pseudonym-Implementation"),
@@ -22,6 +29,7 @@ public enum ControlHeader {
      * intended to be forwarded to source
      */
     HEALTH_CHECK("Health-Check"),
+
     /**
      * whether to skip sanitizer (for testing purposes, to obtain unsanitized baseline to compare
      *  with sanitized output)
@@ -29,10 +37,13 @@ public enum ControlHeader {
      * @see co.worklytics.psoxy.gateway.ProxyConfigProperty.SKIP_SANITIZER
      */
     SKIP_SANITIZER("Skip-Sanitizer"),
+
     /**
      * which user to impersonate when calling Source API
      *
      * q: specific to Google? generalizable??
+     *
+     * this is a header, but NOT something we forward to the source API. rather used
      */
     USER_TO_IMPERSONATE("User-To-Impersonate"),
     ;

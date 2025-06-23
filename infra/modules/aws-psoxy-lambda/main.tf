@@ -39,6 +39,16 @@ locals {
   bundle_filename = try(regex(".*/([^/]+)", var.path_to_function_zip)[0], var.path_to_function_zip)
 }
 
+# side output stuff
+locals {
+  side_outputs = { for k, v in {
+    original  = var.side_output_original
+    sanitized = var.side_output_sanitized
+  } : k => v if v != null }
+
+  side_output_environment_variables = { for k, v in local.side_outputs : "SIDE_OUTPUT_${upper(k)}" => v }
+}
+
 
 resource "aws_lambda_function" "instance" {
   function_name                  = local.function_name
@@ -83,9 +93,10 @@ resource "aws_lambda_function" "instance" {
         BUNDLE_FILENAME = local.bundle_filename
         SECRETS_STORE   = upper(var.secrets_store_implementation)
       },
+      local.side_output_environment_variables,
       # only set env vars for config paths if non-default values
       length(var.path_to_shared_ssm_parameters) > 1 ? { PATH_TO_SHARED_CONFIG = var.path_to_shared_ssm_parameters } : {},
-      local.is_instance_ssm_prefix_default ? {} : { PATH_TO_INSTANCE_CONFIG = var.path_to_instance_ssm_parameters }
+      local.is_instance_ssm_prefix_default ? {} : { PATH_TO_INSTANCE_CONFIG = var.path_to_instance_ssm_parameters },
     )
   }
 
@@ -94,6 +105,14 @@ resource "aws_lambda_function" "instance" {
       tags
     ]
   }
+}
+
+module "side_output_iam_statements" {
+  source = "../aws-bucket-read-write-iam-policy-statement"
+
+  for_each = local.side_outputs
+
+  s3_path = each.value
 }
 
 # cloudwatch group per lambda function
@@ -178,7 +197,6 @@ locals {
     Sid = "ReadInstanceSSMParameters"
     Action = [
       "ssm:GetParameter",
-      "ssm:GetParameterVersion",
       "ssm:GetParameters",
       "ssm:GetParametersByPath",
       "ssm:PutParameter",
@@ -211,7 +229,6 @@ locals {
     Action = [
       "ssm:GetParameter",
       "ssm:GetParameters",
-      "ssm:GetParameterVersion",
       "ssm:GetParametersByPath",
     ]
     Effect   = "Allow"
@@ -240,20 +257,70 @@ locals {
     Resource = local.kms_keys_to_allow_arns
   }] : []
 
+  sqs_consume_statements = length(var.sqs_trigger_queue_arns) > 0 ? [{
+    Sid = "AllowSQSReceiveMessage"
+    Action = [
+      "sqs:ReceiveMessage",
+      "sqs:DeleteMessage",
+      "sqs:GetQueueAttributes"
+    ]
+    Effect   = "Allow"
+    Resource = var.sqs_trigger_queue_arns
+  }] : []
+
+  sqs_send_statements = length(var.sqs_send_queue_arns) > 0 ? [{
+    Sid = "AllowSQSSendMessage"
+    Action = [
+      "sqs:SendMessage",
+      "sqs:GetQueueAttributes"
+    ]
+    Effect   = "Allow"
+    Resource = var.sqs_send_queue_arns
+  }] : []
+
+  s3_write_statements = length(var.s3_outputs) > 0 ? [{
+    Sid = "AllowS3Write"
+    Action = [
+      "s3:PutObject"
+    ]
+    Effect = "Allow"
+    Resource = [
+      for s3_output in var.s3_outputs : (
+        can(regex("^s3://([^/]+)/(.+)", s3_output))
+        ? "arn:aws:s3:::${regex("^s3://([^/]+)/(.+)", s3_output)[0]}/${regex("^s3://([^/]+)/(.+)", s3_output)[1]}*"
+        : "arn:aws:s3:::${regex("s3://([^/]+)", s3_output)[0]}/*"
+      )
+    ]
+  }] : []
+
+  aws_kms_public_key_statements = length(var.aws_kms_public_keys) > 0 ? [{
+    Sid = "AllowAWSKMSPublicKeyUse"
+    Action = [
+      "kms:GetPublicKey",
+    ]
+    Effect   = "Allow"
+    Resource = var.aws_kms_public_keys
+  }] : []
+
   policy_statements = concat(
     local.global_ssm_param_statements,
     local.global_secretsmanager_statements,
     local.local_ssm_param_statements,
     local.local_secrets_manager_statements,
     local.key_statements,
+    local.sqs_consume_statements,
+    local.sqs_send_statements,
+    local.s3_write_statements,
+    local.aws_kms_public_key_statements,
+    flatten(values(module.side_output_iam_statements)[*].iam_statements),
   )
 }
 
-resource "aws_iam_policy" "ssm_param_policy" {
-  name = "${local.function_name}_ssmParameters"
+# what the lambda function needs to operate (fulfill its use-case)
+resource "aws_iam_policy" "required_resource_access" {
+  name = "${local.function_name}_resourceAccess"
 
-  # description here not accurate any more, but changing it will destroy and re-create the policy
-  description = "Allow SSM parameter access needed by ${local.function_name}"
+  description = "Allow access to AWS resources needed by ${local.function_name}; specific resources depend on the use-case of the instance"
 
   policy = jsonencode(
     {
@@ -264,6 +331,8 @@ resource "aws_iam_policy" "ssm_param_policy" {
 
   lifecycle {
     ignore_changes = [
+      name,        # drop this in v0.6.x; name as of 0.5.2 was "${local.function_name}_ssmParameters"; but it's potentially broader than that
+      description, # drop this in v0.6.x; description as of 0.5.2 was "Allow infra access parameter access needed by ${local.function_name}"
       tags
     ]
   }
@@ -271,7 +340,7 @@ resource "aws_iam_policy" "ssm_param_policy" {
 
 resource "aws_iam_role_policy_attachment" "attach_policy" {
   role       = aws_iam_role.iam_for_lambda.name
-  policy_arn = aws_iam_policy.ssm_param_policy.arn
+  policy_arn = aws_iam_policy.required_resource_access.arn
 }
 
 output "function_arn" {

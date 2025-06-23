@@ -1,5 +1,8 @@
 package co.worklytics.psoxy.gateway;
 
+import java.util.Collections;
+import java.util.Set;
+
 /**
  * encapsulates host-environment (eg, cloud platform) specific information
  *
@@ -14,4 +17,14 @@ public interface HostEnvironment {
      * @return id of this proxy instance, eg `psoxy-gcal`
      */
     String getInstanceId();
+
+    /**
+     * eg `s3://`, `gs://`, ... eventually more
+     * q: is Uri the right name to use here??
+     *
+     * @return set of URI protocols that this host environment supports for side outputs
+     */
+    default Set<String> getSupportedOutputKinds()  {
+        return Collections.emptySet();
+    }
 }

@@ -1,13 +1,16 @@
 package com.avaulta.gateway.rules;
 
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * utils for validating values conform to parameter schemas
@@ -56,6 +59,11 @@ public class ParameterSchemaUtils {
                     return false;
                 }
             }
+
+            if (ObjectUtils.isNotEmpty(schema.getOrs())) {
+                return schema.getOrs().stream().anyMatch(
+                    orSubSchema -> validate(orSubSchema, value));
+            }
         }
         return true;
     }
@@ -63,22 +71,34 @@ public class ParameterSchemaUtils {
     /**
      * validate that all binding of a parameter defined in bindings for a parameter with a defined schema in schemas
      * is valid per that schema.
-     *   - bindings for parameters w/o defined schema are considered valid
-     *   - parameters with defined schemas are not required to have a binding
+     * - bindings for parameters w/o defined schema are considered valid
+     * - parameters with defined schemas are not required to have a binding
      *
-     *
-     * @param schemas parameter names --> schema
+     * @param schemas  parameter names --> schema
      * @param bindings parameter names --> values
      * @return whether all bindings are valid for parameters with schema defined in schemas
      */
-    public boolean validateAll(Map<String, ParameterSchema> schemas, List<Pair<String, String>> bindings) {
+    public boolean validateAll(Map<String, QueryParameterSchema> schemas,
+                               List<Pair<String, String>> bindings) {
         return schemas.entrySet().stream()
                 // all values, for all parameters that have defined schema, are valid
-                .allMatch(paramSchema ->
-                        // possibly multi-valued
-                        bindings.stream()
-                                .filter(p -> p.getKey().equals(paramSchema.getKey()))
-                                .map(Pair::getValue)
-                                .allMatch(value -> validate(paramSchema.getValue(), value)));
+                .allMatch(paramSchema -> {
+
+                    List<String> values = bindings.stream()
+                        .filter(p -> p.getKey().equals(paramSchema.getKey()))
+                        .map(Pair::getValue)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toUnmodifiableList());
+
+                    boolean required = Optional.ofNullable(paramSchema.getValue().getRequired()).orElse(false) ;
+                    boolean hasAValue = !values.isEmpty();
+
+                     return (!required || hasAValue) &&
+                         values.stream().allMatch(value -> validate(paramSchema.getValue(), value));
+  });
     }
+
+
+
+
 }

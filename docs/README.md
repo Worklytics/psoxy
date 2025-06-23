@@ -102,9 +102,10 @@ Workspace Admin will be output for you.
 | Google Directory                                                                                                               | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/directory/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/directory/directory.yaml)                                  | `admin.directory.user.readonly admin.directory.domain.readonly admin.directory.group.readonly admin.directory.orgunit.readonly` |
 | Google Drive                                                                                                                   | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gdrive/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gdrive/gdrive.yaml)                                           | `drive.metadata.readonly`                                                                                                                                                                                |
 | GMail                                                                                                                          | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gmail/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gmail/gmail.yaml)                                              | `gmail.metadata`                                                                                                                                                                                         |
-| Google Meet                                                                                                                    | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/meet/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/meet/meet.yaml)                                                 | `admin.reports.audit.readonly`                                                                                                                                                                           |
-| Gemini Bulk                                                                                                                    | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gemini-usage/example.csv)                                                                                                                                                         | n/a;  bulk export of Gemini logs |
-| Gemini for Google Workspace                                                                                                    | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gemini_for_workspace/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gemini_for_workspace/gemini_for_workspace.yaml) | `admin.reports.audit.readonly`                                                                                                                                                                           |
+| Google Meet
+| Gemini Bulk **alpha**                                                                                                          | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gemini-usage/example.csv)                                                                                                                                                         | n/a;  bulk export of Gemini logs |
+| Gemini for Google Workspace **alpha**                                                                                          | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gemini-for-workspace/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/google-workspace/gemini-for-workspace/gemini-for-workspace.yaml) | `admin.reports.audit.readonly`                                                                                                                                                                           |
+
 
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](https://github.com/Worklytics/psoxy/tree/main/infra/modules/worklytics-connector-specs).
 Please refer to that module for a definitive list.
@@ -132,6 +133,7 @@ modules, specific instructions that you can pass to the Microsoft 365 Admin will
 | Calendar                                                                                               | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/outlook-cal/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/outlook-cal/outlook-cal.yaml)    | [`User.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall) [`Group.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall) [`Calendars.Read`](https://learn.microsoft.com/en-us/graph/permissions-reference#calendarsread) [`MailboxSettings.Read`](https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxsettingsread)                                                                                                                                                                                                                                       |
 | Mail                                                                                                   | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/outlook-mail/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/outlook-mail/outlook-mail.yaml) | [`User.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall) [`Group.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall) [`Mail.ReadBasic.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#mailreadbasicall) [`MailboxSettings.Read`](https://learn.microsoft.com/en-us/graph/permissions-reference#mailboxsettingsread)                                                                                                                                                                                                                                                                                                                                                |
 | Teams (**__beta__**)                                                                                   | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/msft-teams/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/msft-teams/msft-teams.yaml)       | [`User.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall) [`Team.ReadBasic.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#teamreadbasicall) [`Channel.ReadBasic.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#channelreadbasicall) [`Chat.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#chatreadall) [`ChannelMessage.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#channelmessagereadall) [`CallRecords.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#channelmessagereadall) [`OnlineMeetings.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#onlinemeetingsreadall) |
+| Copilot (** alpha **)                                                                                  | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/msft-copilot/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/microsoft-365/msft-copilot/msft-copilot.yaml) | [`User.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#userreadall) [`AiEnterpriseInteraction.Read.All`](https://learn.microsoft.com/en-us/graph/permissions-reference#aienterpriseinteractionreadall) |
 
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs)./
 Please refer to that module for a definitive list.
@@ -140,7 +142,36 @@ NOTE: usage of the Microsoft Teams APIs may be billable, depending on your Micro
 
 See details: [sources/microsoft-365/README.md](sources/microsoft-365/README.md)
 
-### Other Data Sources via REST APIs
+### Github
+
+Check the documentation to use the right permissions and the right authentication flow per connector.
+
+| Source                         | Examples                                                                                                                                                                                         | Permissions (read only)                                                                          |
+|--------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
+| GitHub Copilot (**__alpha__**) | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/github/copilot/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/github/copilot/github-copilot.yaml)                               | Organization: `Administration`, `Members`, `GitHub Copilot Business`                                |
+| GitHub - Enterprise Server     | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/github/enterprise-server/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/github/enterprise-server/github-enterprise-server.yaml) | Repository: `Contents, Issues, Metadata`,`Pull requests`,  Organization: `Administration`, `Members` |
+| GitHub - GitHub                | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/github/github/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/github/github/github.yaml)                                         | Repository: `Contents, Issues, Metadata`,`Pull requests`, Organization: `Administration`, `Members` |
+| GitHub - Non-Enterprise        | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/github/github-non-enterprise/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/github/github-non-enterprise/github-non-enterprise.yaml)                                          | Repository: `Contents, Issues, Metadata`,`Pull requests`, Organization: `Members`                   |
+
+NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs)./
+Please refer to that module for a definitive list.
+
+See details: [sources/github/README.md](sources/github/README.md)
+
+### Slack
+
+| Source                  | Examples                                                                                                                                                                                                                                                                                                                                                                                              | Scope                                                                     |
+|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| Slack Discovery API     | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-api/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-api/discovery.yaml)                                                                                                                                                                     | `discovery:read`                                                          |
+| Slack Discovery Bulk    | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-bulk/example-bulk) - [discovery bulk rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-bulk/discovery-bulk.yaml),[discovery hierarchical rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-bulk/discovery-bulk-hierarchical.yaml) | N/A                                                                       |
+| Slack AI Snapshot       | N/A                                                                                                                                                                                                                                                                                                                                                                                                   | N/A |
+
+NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs)./
+Please refer to that module for a definitive list.
+
+See details: [sources/github/README.md](sources/github/README.md)
+
+### Other Data Sources via  APIs
 
 These sources will typically require some kind of "Admin" within the tool to create an API key or
 client, grant the client access to your organization's data, and provide you with the API key/secret
@@ -149,20 +180,18 @@ which you must provide as a configuration value in your proxy deployment.
 The API key/secret will be used to authenticate with the source's REST API and access the data.
 
 
-| Source                    | Details + Examples                                                               | API Permissions / Scopes                                                                                                                                                                                                                                                                                                                                                       |
-|---------------------------|----------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Asana                     | [sources/asana](sources/asana/README.md)                               | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace)                                                                                                                                                                                                                                                                 |
-| GitHub                    | [sources/github](sources/github/README.md)                             | **Read Only** permissions for: <br/>Repository: Contents, Issues, Metadata, Pull requests<br/>Organization: Administration, Members                                                                                                                                                                                                                                            |
-| Jira Cloud                | [sources/atlassian/jira-cloud](sources/atlassian/jira/README.md)   | "Classic Scopes": `read:jira-user` `read:jira-work` "Granular Scopes": `read:group:jira` `read:user:jira`  "User Identity API" `read:account`                                                                                                                                                                                                                                  |
-| Jira Server / Data Center | [sources/atlassian/jira-server](sources/atlassian/jira/jira-server.md) | Personal Acccess Token on behalf of user with access to equivalent of above scopes for entire instance                                                                                                                                                                                                                                                                         |
-| Salesforce                | [sources/salesforce](sources/salesforce/README.md)                     | `api` `chatter_api` `refresh_token` `offline_access` `openid` `lightning` `content` `cdp_query_api`                                                                                                                                                                                                                                                                            |                                                                                                       |
-| Slack                     | [sources/slack](sources/slack/README.md)                               | `discovery:read`                                                                                                                                                                                                                                                                                                                                                               |
-| Zoom                      | [sources/zoom](sources/zoom/README.md)                                 | `meeting:read:past_meeting:admin` `meeting:read:meeting:admin` `meeting:read:list_past_participants:admin` `meeting:read:list_past_instances:admin` `meeting:read:list_meetings:admin` `meeting:read:participant:admin` `report:read:list_meeting_participants:admin` `report:read:meeting:admin` `report:read:user:admin` `user:read:user:admin` `user:read:list_users:admin` |
+| Source                    | Details + Examples                                                               | API Permissions / Scopes                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+|---------------------------|----------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Asana                     | [sources/asana](sources/asana/README.md)                               | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace)                                                                                                                                                                                                                                                                                                                                                 |
+| Jira Cloud                | [sources/atlassian/jira-cloud](sources/atlassian/jira/README.md)   | "Classic Scopes": `read:jira-user` `read:jira-work` "Granular Scopes": `read:group:jira` `read:user:jira`  "User Identity API" `read:account`                                                                                                                                                                                                                                                                                                                  |
+| Jira Server / Data Center | [sources/atlassian/jira-server](sources/atlassian/jira/jira-server.md) | Personal Acccess Token on behalf of user with access to equivalent of above scopes for entire instance                                                                                                                                                                                                                                                                                                                                                         |
+| Salesforce                | [sources/salesforce](sources/salesforce/README.md)                     | `api` `chatter_api` `refresh_token` `offline_access` `openid` `lightning` `content` `cdp_query_api`                                                                                                                                                                                                                                                                                                                                                            |                                                                                                       |
+| Zoom                      | [sources/zoom](sources/zoom/README.md)                                 | `meeting:read:past_meeting:admin` `meeting:read:meeting:admin` `meeting:read:list_past_participants:admin` `meeting:read:list_past_instances:admin` `meeting:read:list_meetings:admin` `meeting:read:participant:admin` `meeting:read:summary:admin` `cloud_recording:read:list_user_recordings:admin` `report:read:list_meeting_participants:admin` `report:read:meeting:admin` `report:read:user:admin` `user:read:user:admin` `user:read:list_users:admin` `user:read:settings:admin` |
 
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](https://github.com/Worklytics/psoxy/tree/main/infra/modules/worklytics-connector-specs).
 Please refer to that module for a definitive list.
 
-### Other Data Sources without REST APIs
+### Other Data Sources via Bulk Data Exports
 
 Other data sources, such as Human Resource Information System (HRIS), Badge, or Survey data can be
 exported to a CSV file. The "bulk" mode of the proxy can be used to pseudonymize these files by
@@ -178,6 +207,26 @@ so these must be pseudonymized using an equivalent algorithm and secret). See [`
  for details.
 
 See also: [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
+
+
+| Source                   | Details + Examples |
+|--------------------------|--------------------|
+| Badge                    | [sources/badge](sources/badge/README.md) |
+| HRIS                     | [sources/hris](sources/hris/README.md) |
+| Miro AI Bulk **alpha**   | [sources/miro/miro-ai-bulk](sources/miro/miro-ai-bulk/README.md) |
+| Slack AI Bulk **alpha**  | [sources/slack/slack-ai-bulk](sources/slack/slack-ai-bulk/README.md) |
+| Slack Discovery Bulk     | [sources/slack/slack-discovery-bulk](sources/slack/slack-discovery-bulk/README.md) |
+| Survey                   | [sources/survey](sources/survey/README.md) |
+
+### Other Data Sources via Webhook Collection
+
+Some data sources may support **webhooks** to send data to a URL endpoint, often in response to
+a user-performed action.  These 'events' can be collected by psoxy instances in "webhook collector" mode, to
+later be transferred to Worklytics for analysis.
+
+On-prem/in-house-build data sources can be insturmented to produce webhooks, using the [Worklytics Work Events JS SDK](https://github.com/Worklytics/Work-Events-JS).
+
+See also: [Webhook Collectors](development/alpha-features/webhook-collectors.md)
 
 ## Getting Started - Customers
 
@@ -351,12 +400,12 @@ Depending on your Cloud Host / Data Sources, you will need:
 
 For testing your psoxy instance, you will need:
 
-| Tool                                                               | Version                       | Test Command      |
-|--------------------------------------------------------------------|-------------------------------|-------------------|
-| [Node.js](https://nodejs.org/en/)                                  | 16+ (ideally, an LTS version) | `node --version`  |
-| [npm](https://www.npmjs.com/package/npm) (should come with `node`) | 8+                            | `npm --version`   |
+| Tool                                                               | Version                           | Test Command      |
+|--------------------------------------------------------------------|-----------------------------------|-------------------|
+| [Node.js](https://nodejs.org/en/)                                  | 16+ (ideally, latest LTS version) | `node --version`  |
+| [npm](https://www.npmjs.com/package/npm) (should come with `node`) | 8+                                | `npm --version`   |
 
-NOTE: Node.js v16 is unmaintained since Oct 2023, so **we recommend a newer version: v18, v20**.
+NOTE: Node.js v16 is unmaintained since Oct 2023, so **we recommend a newer version: v20, v22, v24, etc ...**.
 _Some Node.js versions (e.g. v21) may display warning messages when running the test scripts_.
 
 We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](https://github.com/Worklytics/psoxy/tree/main/tools/check-prereqs.sh).
