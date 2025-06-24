@@ -11,7 +11,8 @@ on:
     branches:
       - 'main'
       - 'rc-*'
-
+  workflow_dispatch:
+  
 jobs:
   bundle:
     runs-on: ubuntu-latest
@@ -35,10 +36,11 @@ jobs:
           mvn clean -f pom.xml
           mvn package install -f "gateway-core/pom.xml" -Dmaven.test.skip=true
           mvn package install -f "core/pom.xml" -Dmaven.test.skip=true
-          mvn package -f "impl/${{ matrix.implementation }}/pom.xml" -Pdistribution 
+          mvn package   -Pdistribution -f "impl/${{ matrix.implementation }}/pom.xml"
       - name: Verify license artifacts are in the uber jar
-        working-directory: java/impl/${{ matrix.implementation }}
+        working-directory: java/impl/
         run: |
+           cd ${{ matrix.implementation }}
           JAR_FILE=$(find target -name "*.jar" | head -n1)
 
           echo "Inspecting $JAR_FILE for required license files"
