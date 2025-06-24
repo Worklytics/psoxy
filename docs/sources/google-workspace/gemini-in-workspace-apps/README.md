@@ -11,5 +11,5 @@ in April 2025, but Google has pulled them back as of May 2025.  We anticipate th
 
 - [Example Rules](gemini-in-workspace-apps.yaml)
 - Example Data:
-    - [original/admin_reports_v1_activity_users_{userKey}_applications_gemini_for_workspace.json](example-api-responses/original/admin_reports_v1_activity_users_{userKey}_applications_gemini_for_workspace.json) |
-      [sanitized/admin_reports_v1_activity_users_{userKey}_applications_gemini_for_workspace.json](example-api-responses/sanitized/admin_reports_v1_activity_users_{userKey}_applications_gemini_for_workspace.json)
+    - [original/admin_reports_v1_activity_users_{userKey}_applications_gemini_in_workspace_apps.json](example-api-responses/original/admin_reports_v1_activity_users_{userKey}_applications_gemini_in_workspace_apps.json) |
+      [sanitized/admin_reports_v1_activity_users_{userKey}_applications_gemini_in_workspace_apps.json](example-api-responses/sanitized/admin_reports_v1_activity_users_{userKey}_applications_gemini_in_workspace_apps.json)

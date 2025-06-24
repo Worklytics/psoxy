@@ -1,32 +1,5 @@
 ---
 endpoints:
-  - pathTemplate: "/admin/reports/v1/activity/users/all/applications/gemini_in_workspace_apps"
-    allowedQueryParams:
-      - "customerId"
-      - "maxResults"
-      - "pageToken"
-      - "startTime"
-      - "endTime"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.items[*].actor.email"
-          - "$.items[*].resourceDetails[*]..email"
-        encoding: "URL_SAFE_TOKEN"
-      - !<hashIp>
-        jsonPaths:
-          - "$.items[*].ipAddress"
-    responseSchema:
-      type: "object"
-      properties:
-        items:
-          type: "array"
-          items:
-            $ref: "#/definitions/Activity"
-        kind:
-          type: "string"
-        nextPageToken:
-          type: "string"
   - pathTemplate: "/admin/reports/v1/activity/users/{userKey}/applications/gemini_in_workspace_apps"
     allowedQueryParams:
       - "customerId"
@@ -45,7 +18,12 @@ endpoints:
           - "$.items[*].ipAddress"
     pathParameterSchemas:
       userKey:
-        type: "integer"
+        or:
+          - type: "string"
+            enum:
+              - "all"
+          - type: "integer"
+            pattern: "^[0-9]+$"
     responseSchema:
       type: "object"
       properties:
