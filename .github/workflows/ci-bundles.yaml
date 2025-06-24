@@ -12,7 +12,7 @@ on:
       - 'main'
       - 'rc-*'
   workflow_dispatch:
-  
+
 jobs:
   bundle:
     runs-on: ubuntu-latest
@@ -40,7 +40,7 @@ jobs:
       - name: Verify license artifacts are in the uber jar
         working-directory: java/impl/
         run: |
-           cd ${{ matrix.implementation }}
+          cd ${{ matrix.implementation }}
           JAR_FILE=$(find target -name "*.jar" | head -n1)
 
           echo "Inspecting $JAR_FILE for required license files"
@@ -66,3 +66,21 @@ jobs:
           }
 
           echo "✅ License artifacts verified in $JAR_FILE"
+      - name: Configure AWS credentials via OIDC
+        if: matrix.implementation == 'aws'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::908404960471:role/GithubActionCIAgent
+          aws-region: us-west-2
+      - name: Upload uber-jar to S3
+        if: matrix.implementation == 'aws'
+        working-directory: java/impl/aws/target/
+        env:
+          AWS_REGION: us-west-2
+          S3_BUCKET: psoxy-public-artifacts
+        run: |
+          # uber-jar should be something like: psoxy-aws-{VERSION}.jar
+          JAR_FILE=$(find target -name "*.jar" | head -n1) 
+          echo "Uploading $JAR_FILE to s3://$S3_BUCKET/"
+
+          aws s3 cp "$JAR_FILE" "s3://$S3_BUCKET/" --region "$AWS_REGION"
