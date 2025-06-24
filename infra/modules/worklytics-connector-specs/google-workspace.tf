@@ -153,7 +153,7 @@ locals {
     },
     "gemini-in-workspace-apps" : {
       source_kind : "gemini-in-workspace-apps"
-      availability : "alpha",
+      availability : "beta",
       enable_by_default : false
       worklytics_connector_id : "gemini-in-workspace-apps-psoxy"
       display_name : "Google Gemini in Workspace Apps"
