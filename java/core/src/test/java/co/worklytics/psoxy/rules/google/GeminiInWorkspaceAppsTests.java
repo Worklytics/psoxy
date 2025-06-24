@@ -49,6 +49,7 @@ class GeminiInWorkspaceAppsTests extends JavaRulesTestBaseCase {
 
         assertUrlAllowed(endpoint);
         assertUrlAllowed("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/gemini_in_workspace_apps");
+        assertUrlAllowed("https://admin.googleapis.com/admin/reports/v1/activity/users/all/applications/gemini_in_workspace_apps?maxResults=10");
         assertUrlAllowed("https://admin.googleapis.com/admin/reports/v1/activity/users/12341/applications/gemini_in_workspace_apps");
         assertUrlBlocked("https://admin.googleapis.com/admin/reports/v1/activity/users/alice@acme.com/applications/gemini_in_workspace_apps");
     }

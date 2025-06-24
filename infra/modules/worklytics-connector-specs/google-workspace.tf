@@ -167,7 +167,7 @@ locals {
       ]
       environment_variables : {}
       example_api_calls : [
-        "/admin/reports/v1/activity/users/all/applications/gemini-in-workspace-apps?maxResults=10"
+        "/admin/reports/v1/activity/users/all/applications/gemini_in_workspace_apps?maxResults=10"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     }
