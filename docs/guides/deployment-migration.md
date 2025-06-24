@@ -53,13 +53,13 @@ The following is a rough guide on the steps you need to take to migrate your dep
    `terraform output --raw pseudonym_salt` On macOS, you can copy the value to your clipboard with:
    `terraform output --raw pseudonym_salt | pbcopy`
 2. **Microsoft 365 API client**, if any:
-   - Find the resource ids: `terraform state list | grep "\.azuread_application\."`
-   - For each, obtain it's `objectId`:
+   - Find the resource ids: `terraform state list | grep ".azuread_application."`
+   - For each, obtain its `objectId`:
      `terraform state show 'module.psoxy.module.msft-connection["azure-ad"].azuread_application.connector'`
    - Prepare import command for each client for your new configuration, eg:
      `terraform import 'module.psoxy.module.msft-connection["azure-ad"].azuread_application.connector' '<objectId>'`
 3. **Google Workspace API clients**, if any:
-   - Find the resource ids: `tf state list | grep 'google_service_account\.connector-sa'`
+   - Find the resource ids: `tf state list | grep 'google_service_account.connector-sa'`
    - For each, obtain its `unique_id`:
      `terraform state show 'module.worklytics_connectors_google_workspace.module.google_workspace_connection["gdirectory"].google_service_account.connector-sa'`
    - Prepare import command for each client for your new configuration, eg:
@@ -76,20 +76,14 @@ The following is a rough guide on the steps you need to take to migrate your dep
 
 ### Phase 3: Migrate
 
-1.  Look at the `TODO 3` files/output variables for all your connectors. Make a mapping between the old values and the new values. Send this to Worklytics. It should include for each the proxy URLs, AWS Role to use, and any other values that are changing.
-2.  Wait for confirmation that Worklytics has migrated all your connections to the new values. This may take 1-2 days.
+1. Look at the `TODO 3` files/output variables for all your connectors. Make a mapping between the old values and the new values. Send this to Worklytics. It should include for each the proxy URLs, AWS Role to use, and any other values that are changing.
+2. Wait for confirmation that Worklytics has migrated all your connections to the new values. This may take 1-2 days.
 
 ### Phase 4: Destroy Old Environment
 
 1. Remove references to any API Clients you migrated in Phase 1:
-   - eg,
-     `terraform state rm 'module.psoxy.module.msft-connection["azure-ad"].azuread_application.connector'`
+   - eg, `terraform state rm 'module.psoxy.module.msft-connection["azure-ad"].azuread_application.connector'`
 2. run `terraform destroy` in the old configuration. Carefully review the plan before confirming.
-   - if you're using Google Workspace sources, you may see destruction of `google_project_service`
-     resources; if you allow these to be destroyed, these APIS will be disabled; if you are using
-     the same GCP project in your other configuration, you should run `terraform apply` there again
-     to re-enable them.
-3. You may also destroy any API clients/etc that are managed outside of Terraform and which you did
-   not migrate to the new environment.
-4. You may clean up any configuration values, such as SSM Parameters / GCP Secrets to customize the
-   proxy rules sets, that you may have created in your old host environment.
+   - if you're using Google Workspace sources, you may see destruction of `google_project_service` resources; if you allow these to be destroyed, these APIS will be disabled; if you are using the same GCP project in your other configuration, you should run `terraform apply` there again to re-enable them.
+3. You may also destroy any API clients/etc that are managed outside of Terraform and which you did not migrate to the new environment.
+4. You may clean up any configuration values, such as SSM Parameters / GCP Secrets to customize the proxy rules sets, that you may have created in your old host environment.

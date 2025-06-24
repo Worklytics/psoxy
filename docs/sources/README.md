@@ -1,14 +1,10 @@
 # Data Sources
 
-This section describes many of the pre-configured data sources that can be connected to Worklytics
-via Psoxy.
+This section describes many of the pre-configured data sources that can be connected to Worklytics via Psoxy.
 
-The table below enumerates the available connectors, provided via the `worklytics-connector-specs`
-Terraform module (
-see [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs)).
+The table below enumerates the available connectors, provided via the `worklytics-connector-specs` Terraform module (see [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs)).
 
-To add a source, add its Connector ID to the `enabled_connectors` list in your `terraform.tfvars`
-file.
+To add a source, add its Connector ID to the `enabled_connectors` list in your `terraform.tfvars` file.
 
 | Connector ID               | Data Source                         | Type | Availability |
 |----------------------------|-------------------------------------|------|--------------|
@@ -44,15 +40,13 @@ file.
 | `zoom`                     | Zoom                                | API  | GA           |
 | `zoom-ai-snapshot-bulk`    | Zoom AI Snapshot Bulk               | Bulk | ALPHA        |
 
-From v0.4.58, you can confirm the availability of a connector by running the following command from
-the root of one of our examples:
+From v0.4.58, you can confirm the availability of a connector by running the following command from the root of one of our examples:
 
 ```shell
 ./available-connectors
 ```
 
-If your using v0.4.58+ of our terraform modules, but don't have the above script in your example,
-try
+If you are using v0.4.58+ of our terraform modules, but don't have the above script in your example, try:
 
 ```shell
 cp .terraform/modules/psoxy/tools/available-connectors.sh available-connectors
