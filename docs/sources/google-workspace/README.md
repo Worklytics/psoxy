@@ -15,7 +15,7 @@ specify the terraform configuration to use Google Workspace sources.
 - [calendar](calendar/README.md)
 - [directory](directory/README.md)
 - [gdrive](gdrive/README.md)
-- [gemini-for-workspace](gemini-for-workspace/README.md)
+- [gemini-in-workspace-apps](gemini-in-workspace-apps/README.md)
 - [gemini-usage-bulk](gemini-usage-bulk/README.md)
 - [gmail](gmail/README.md)
 - [google-chat](google-chat/README.md)
