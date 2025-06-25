@@ -38,9 +38,8 @@ jobs:
           mvn package install -f "core/pom.xml" -Dmaven.test.skip=true
           mvn package   -Pdistribution -f "impl/${{ matrix.implementation }}/pom.xml"
       - name: Verify license artifacts are in the uber jar
-        working-directory: java/impl/
+        working-directory: java/impl/${{ matrix.implementation }}
         run: |
-          cd ${{ matrix.implementation }}
           JAR_FILE=$(find target -name "*.jar" | head -n1)
 
           echo "Inspecting $JAR_FILE for required license files"
