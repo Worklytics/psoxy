@@ -1,6 +1,8 @@
 # Slack via Discovery API
 
+{% hint style="info" %}
 NOTE: While access to your Slack data via the Discovery API has required a sufficiently high level Slack subscription, as of May 2025 Slack is by default imposing highly restrictive rate limits on new Discovery API clients. If you did not create your Discovery API client before May 2025, you may need to contact your Slack account representative to ensure your organization can use this method to obtain a copy of your Slack data.
+{% endhint %}
 
 ## Examples
 
@@ -13,20 +15,16 @@ of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
 ## Steps to Connect
 
-For enabling Slack via Discovery API with the Psoxy you must first set up an app on your Slack Enterprise
-instance.
+For enabling Slack via Discovery API with the Psoxy you must first set up an app on your Slack Enterprise instance.
 
 1. Go to https://api.slack.com/apps and create an app.
-   - Select "From scratch", choose a name (for example "Worklytics connector") and a development
-     workspace
+   - Select "From scratch", choose a name (for example "Worklytics connector") and a development workspace
 
 ![](./img/slack-step-1.png)
 
 ![](./img/slack-step-2.png)
 
-2. Take note of your App ID (listed in "App Credentials"), contact your Slack representative and ask
-   them to enable `discovery:read` scope for that App ID. If they also enable `discovery:write` then
-   delete it for safety, the app just needs read access.
+2. Take note of your App ID (listed in "App Credentials"), contact your Slack representative and ask them to enable `discovery:read` scope for that App ID. If they also enable `discovery:write` then delete it for safety, the app just needs read access.
 
 ![](./img/slack-step-3.png)
 
@@ -41,9 +39,7 @@ Use this step if you want to install in the whole org, across multiple workspace
 
 ![](./img/slack-step-scopes.png)
 
-2. Under "Settings > Manage Distribution > Enable Org-Wide App installation", click on "Opt into Org
-   Level Apps", agree and continue. This allows to distribute the app internally on your
-   organization, to be clear it has nothing to do with public distribution or Slack app directory.
+2. Under "Settings > Manage Distribution > Enable Org-Wide App installation", click on "Opt into Org Level Apps", agree and continue. This allows to distribute the app internally on your organization, to be clear it has nothing to do with public distribution or Slack app directory.
 
 ![](./img/slack-step-distribution.png)
 
@@ -55,20 +51,15 @@ Use this step if you want to install in the whole org, across multiple workspace
 
 ![](./img/slack-step-redirect-urls.png)
 
-5. Go to "Settings > Install App", and choose "Install to Organization". A Slack admin should grant
-   the app the permissions and the app will be installed.
+5. Go to "Settings > Install App", and choose "Install to Organization". A Slack admin should grant the app the permissions and the app will be installed.
 
 ![](./img/slack-step-install-org.png)
 
-6. Copy the "User OAuth Token" (also listed under "OAuth & Permissions") and store as
-   `PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN` in the psoxy's Secret Manager. Otherwise, share the
-   token with the AWS/GCP administrator completing the implementation.
+6. Copy the "User OAuth Token" (also listed under "OAuth & Permissions") and store as  `PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN` in the psoxy's Secret Manager. Otherwise, share the token with the AWS/GCP administrator completing the implementation.
 
 #### Workspace install
 
 Use this steps if you intend to install in just one workspace within your org.
 
 1. Go to "Settings > Install App", click on "Install into _workspace_"
-2. Copy the "User OAuth Token" (also listed under "OAuth & Permissions") and store as
-   `PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN` in the psoxy's Secret Manager. Otherwise, share the
-   token with the AWS/GCP administrator completing the implementation.
+2. Copy the "User OAuth Token" (also listed under "OAuth & Permissions") and store as`PSOXY_SLACK_DISCOVERY_API_ACCESS_TOKEN` in the psoxy's Secret Manager. Otherwise, share the token with the AWS/GCP administrator completing the implementation.
