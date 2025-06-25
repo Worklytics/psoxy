@@ -1,6 +1,5 @@
 package com.avaulta.gateway.rules;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -40,6 +39,7 @@ public class ParameterSchema {
 
     public enum StringFormat {
         REVERSIBLE_PSEUDONYM,
+        PSEUDONYM, // alias to REVERSIBLE_PSEUDONYM
         ;
 
         public String getStringEncoding() {
