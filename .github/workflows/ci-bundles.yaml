@@ -80,7 +80,7 @@ jobs:
           S3_BUCKET: psoxy-public-artifacts
         run: |
           # uber-jar should be something like: psoxy-aws-{VERSION}.jar
-          JAR_FILE=$(find target -name "*.jar" | head -n1) 
+          JAR_FILE=$(find . -name "*.jar" | head -n1) 
           echo "Uploading $JAR_FILE to s3://$S3_BUCKET/"
 
           aws s3 cp "$JAR_FILE" "s3://$S3_BUCKET/" --region "$AWS_REGION"
