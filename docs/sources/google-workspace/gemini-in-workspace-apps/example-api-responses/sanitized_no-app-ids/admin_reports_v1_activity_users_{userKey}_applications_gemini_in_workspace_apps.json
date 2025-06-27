@@ -1,0 +1,359 @@
+{
+  "kind" : "admin#reports#activities",
+  "nextPageToken" : "R:AYGBytKrR8S7vm3TMNzcyw6Ce-wlT_tmEt9Yvs3EReyT36SHhEBmgvPYIJeOLVK4SXkBNg37-zucBXbrbVS4mjnypl__mOgPbC9EpA",
+  "items" : [
+    {
+      "id" : {
+        "time" : "2025-06-24T17:17:07.741Z",
+        "uniqueQualifier" : "224139806931547641",
+        "applicationName" : "gemini_in_workspace_apps",
+        "customerId" : "C00000000"
+      },
+      "actor" : {
+        "callerType" : "USER",
+        "email" : "t~_Mqo2yH0QgDytVpmJhxPaE36fR9YYF4mJyAMtmlLUAY@example.com",
+        "profileId" : "t~ukOZef0oynB9TBuiuwsJf_uuhNWl5VtBI45j4ycgQSQ"
+      },
+      "events" : [
+        {
+          "type" : "ai_usage_event",
+          "name" : "feature_utilization",
+          "parameters" : [
+            {
+              "name" : "app_name",
+              "value" : "gmail"
+            },
+            {
+              "name" : "action",
+              "value" : "summarize_snippet"
+            },
+            {
+              "name" : "event_category",
+              "value" : "unknown"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id" : {
+        "time" : "2025-06-24T16:05:33.674Z",
+        "uniqueQualifier" : "5406676673860923630",
+        "applicationName" : "gemini_in_workspace_apps",
+        "customerId" : "C00000000"
+      },
+      "actor" : {
+        "callerType" : "USER",
+        "email" : "t~_Mqo2yH0QgDytVpmJhxPaE36fR9YYF4mJyAMtmlLUAY@example.com",
+        "profileId" : "t~ukOZef0oynB9TBuiuwsJf_uuhNWl5VtBI45j4ycgQSQ"
+      },
+      "ipAddress" : "t~ZPX-PsI1AmRKP0WUP-H_Cu_f2ZFvbhKRGgj1RDKgcA0",
+      "events" : [
+        {
+          "type" : "ai_usage_event",
+          "name" : "feature_utilization",
+          "parameters" : [
+            {
+              "name" : "app_name",
+              "value" : "drive"
+            },
+            {
+              "name" : "feature_source",
+              "value" : "side_panel"
+            },
+            {
+              "name" : "action",
+              "value" : "generate_apps_search_overlay_suggestions"
+            },
+            {
+              "name" : "event_category",
+              "value" : "inactive"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id" : {
+        "time" : "2025-06-24T16:05:16.863Z",
+        "uniqueQualifier" : "2767536151838035062",
+        "applicationName" : "gemini_in_workspace_apps",
+        "customerId" : "C00000000"
+      },
+      "actor" : {
+        "callerType" : "USER",
+        "email" : "t~_Mqo2yH0QgDytVpmJhxPaE36fR9YYF4mJyAMtmlLUAY@example.com",
+        "profileId" : "t~ukOZef0oynB9TBuiuwsJf_uuhNWl5VtBI45j4ycgQSQ"
+      },
+      "ipAddress" : "t~ZPX-PsI1AmRKP0WUP-H_Cu_f2ZFvbhKRGgj1RDKgcA0",
+      "events" : [
+        {
+          "type" : "ai_usage_event",
+          "name" : "feature_utilization",
+          "parameters" : [
+            {
+              "name" : "app_name",
+              "value" : "drive"
+            },
+            {
+              "name" : "feature_source",
+              "value" : "side_panel"
+            },
+            {
+              "name" : "action",
+              "value" : "generate_apps_search_overlay_suggestions"
+            },
+            {
+              "name" : "event_category",
+              "value" : "inactive"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id" : {
+        "time" : "2025-06-24T16:05:15.152Z",
+        "uniqueQualifier" : "-1962341000854370485",
+        "applicationName" : "gemini_in_workspace_apps",
+        "customerId" : "C00000000"
+      },
+      "actor" : {
+        "callerType" : "USER",
+        "email" : "t~_Mqo2yH0QgDytVpmJhxPaE36fR9YYF4mJyAMtmlLUAY@example.com",
+        "profileId" : "t~ukOZef0oynB9TBuiuwsJf_uuhNWl5VtBI45j4ycgQSQ"
+      },
+      "ipAddress" : "t~ZPX-PsI1AmRKP0WUP-H_Cu_f2ZFvbhKRGgj1RDKgcA0",
+      "events" : [
+        {
+          "type" : "ai_usage_event",
+          "name" : "feature_utilization",
+          "parameters" : [
+            {
+              "name" : "app_name",
+              "value" : "drive"
+            },
+            {
+              "name" : "feature_source",
+              "value" : "side_panel"
+            },
+            {
+              "name" : "action",
+              "value" : "generate_apps_search_overlay_suggestions"
+            },
+            {
+              "name" : "event_category",
+              "value" : "inactive"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id" : {
+        "time" : "2025-06-24T15:57:08.839Z",
+        "uniqueQualifier" : "6293459599117535343",
+        "applicationName" : "gemini_in_workspace_apps",
+        "customerId" : "C00000000"
+      },
+      "actor" : {
+        "callerType" : "USER",
+        "email" : "t~_Mqo2yH0QgDytVpmJhxPaE36fR9YYF4mJyAMtmlLUAY@example.com",
+        "profileId" : "t~ukOZef0oynB9TBuiuwsJf_uuhNWl5VtBI45j4ycgQSQ"
+      },
+      "events" : [
+        {
+          "type" : "ai_usage_event",
+          "name" : "feature_utilization",
+          "parameters" : [
+            {
+              "name" : "app_name",
+              "value" : "gmail"
+            },
+            {
+              "name" : "action",
+              "value" : "summarize_snippet"
+            },
+            {
+              "name" : "event_category",
+              "value" : "unknown"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id" : {
+        "time" : "2025-06-24T12:46:53.592Z",
+        "uniqueQualifier" : "-7245792351419815355",
+        "applicationName" : "gemini_in_workspace_apps",
+        "customerId" : "C00000000"
+      },
+      "actor" : {
+        "callerType" : "USER",
+        "email" : "t~_Mqo2yH0QgDytVpmJhxPaE36fR9YYF4mJyAMtmlLUAY@example.com",
+        "profileId" : "t~ukOZef0oynB9TBuiuwsJf_uuhNWl5VtBI45j4ycgQSQ"
+      },
+      "events" : [
+        {
+          "type" : "ai_usage_event",
+          "name" : "feature_utilization",
+          "parameters" : [
+            {
+              "name" : "app_name",
+              "value" : "gmail"
+            },
+            {
+              "name" : "feature_source",
+              "value" : "side_panel"
+            },
+            {
+              "name" : "action",
+              "value" : "summarize_proactive"
+            },
+            {
+              "name" : "event_category",
+              "value" : "inactive"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id" : {
+        "time" : "2025-06-24T12:34:12.780Z",
+        "uniqueQualifier" : "-9146302975196477950",
+        "applicationName" : "gemini_in_workspace_apps",
+        "customerId" : "C00000000"
+      },
+      "actor" : {
+        "callerType" : "USER",
+        "email" : "t~_Mqo2yH0QgDytVpmJhxPaE36fR9YYF4mJyAMtmlLUAY@example.com",
+        "profileId" : "t~ukOZef0oynB9TBuiuwsJf_uuhNWl5VtBI45j4ycgQSQ"
+      },
+      "events" : [
+        {
+          "type" : "ai_usage_event",
+          "name" : "feature_utilization",
+          "parameters" : [
+            {
+              "name" : "app_name",
+              "value" : "gmail"
+            },
+            {
+              "name" : "action",
+              "value" : "summarize_snippet"
+            },
+            {
+              "name" : "event_category",
+              "value" : "unknown"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id" : {
+        "time" : "2025-06-23T22:40:51.257Z",
+        "uniqueQualifier" : "-7918430678994483089",
+        "applicationName" : "gemini_in_workspace_apps",
+        "customerId" : "C00000000"
+      },
+      "actor" : {
+        "callerType" : "USER",
+        "email" : "t~_Mqo2yH0QgDytVpmJhxPaE36fR9YYF4mJyAMtmlLUAY@example.com",
+        "profileId" : "t~ukOZef0oynB9TBuiuwsJf_uuhNWl5VtBI45j4ycgQSQ"
+      },
+      "events" : [
+        {
+          "type" : "ai_usage_event",
+          "name" : "feature_utilization",
+          "parameters" : [
+            {
+              "name" : "app_name",
+              "value" : "gmail"
+            },
+            {
+              "name" : "action",
+              "value" : "summarize_snippet"
+            },
+            {
+              "name" : "event_category",
+              "value" : "unknown"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id" : {
+        "time" : "2025-06-23T22:40:50.360Z",
+        "uniqueQualifier" : "1419353675602651192",
+        "applicationName" : "gemini_in_workspace_apps",
+        "customerId" : "C00000000"
+      },
+      "actor" : {
+        "callerType" : "USER",
+        "email" : "t~_Mqo2yH0QgDytVpmJhxPaE36fR9YYF4mJyAMtmlLUAY@example.com",
+        "profileId" : "t~ukOZef0oynB9TBuiuwsJf_uuhNWl5VtBI45j4ycgQSQ"
+      },
+      "events" : [
+        {
+          "type" : "ai_usage_event",
+          "name" : "feature_utilization",
+          "parameters" : [
+            {
+              "name" : "app_name",
+              "value" : "gmail"
+            },
+            {
+              "name" : "feature_source",
+              "value" : "side_panel"
+            },
+            {
+              "name" : "action",
+              "value" : "summarize_proactive"
+            },
+            {
+              "name" : "event_category",
+              "value" : "inactive"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id" : {
+        "time" : "2025-06-23T22:40:50.003Z",
+        "uniqueQualifier" : "7168255135300205447",
+        "applicationName" : "gemini_in_workspace_apps",
+        "customerId" : "C00000000"
+      },
+      "actor" : {
+        "callerType" : "USER",
+        "email" : "t~_Mqo2yH0QgDytVpmJhxPaE36fR9YYF4mJyAMtmlLUAY@example.com",
+        "profileId" : "t~ukOZef0oynB9TBuiuwsJf_uuhNWl5VtBI45j4ycgQSQ"
+      },
+      "events" : [
+        {
+          "type" : "ai_usage_event",
+          "name" : "feature_utilization",
+          "parameters" : [
+            {
+              "name" : "app_name",
+              "value" : "gmail"
+            },
+            {
+              "name" : "action",
+              "value" : "suggest_reply_prompts"
+            },
+            {
+              "name" : "event_category",
+              "value" : "unknown"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

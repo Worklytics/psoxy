@@ -277,7 +277,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     }
 
 
-    private Optional<Pair<Pattern, Endpoint>> getEndpoint(String httpMethod, URL url) {
+    @VisibleForTesting
+    Optional<Pair<Pattern, Endpoint>> getEndpoint(String httpMethod, URL url) {
         String relativeUrl = stripTargetHostPath(URLUtils.relativeURL(url));
 
         Predicate<Map.Entry<Endpoint, Pattern>> hasPathRegexMatchingUrl =

@@ -42,6 +42,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.assertArg;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -769,5 +770,25 @@ class RESTApiSanitizerImplTest {
        assertEquals("/path/api/v1", sanitizer.stripTargetHostPath("/path/api/v1"));
     }
 
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "https://admin.googleapis.com/admin/reports/v1/activity/users/p~nVPSMYD7ZO_ptGIMJ65TAFo5_vVVQQ2af5Bfg7bW0Jq9JIOXfBWhts_zA5Ns0r4m/applications/gemini_in_workspace_apps",
+    })
+    public void pseudonymsInPath(String url) throws Exception {
+        Endpoint endpoint = Endpoint.builder()
+            .pathTemplate("/admin/reports/v1/activity/users/{userKey}/applications/gemini_in_workspace_apps")
+            .allowedQueryParams(List.of("foo"))
+            .build();
+
+        Map.Entry<Endpoint, Pattern> entry = Map.entry(endpoint, Pattern.compile(sanitizer.effectiveRegex(endpoint)));
+
+        sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gemini-in-workspace-apps" + ConfigRulesModule.NO_APP_IDS_SUFFIX), sanitizer.pseudonymizer);
+
+        assertTrue(sanitizer.getHasPathTemplateMatchingUrl(new URL(url)).test(entry));
+
+        assertTrue(sanitizer.getEndpoint("GET", new URL(url)).isPresent());
+
+    }
 
 }

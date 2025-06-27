@@ -151,12 +151,12 @@ locals {
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     },
-    "gemini-for-workspace" : {
-      source_kind : "gemini-for-workspace"
-      availability : "alpha",
+    "gemini-in-workspace-apps" : {
+      source_kind : "gemini-in-workspace-apps"
+      availability : "beta",
       enable_by_default : false
-      worklytics_connector_id : "gemini-for-workspace-psoxy"
-      display_name : "Google Gemini for Workspace"
+      worklytics_connector_id : "gemini-in-workspace-apps-psoxy"
+      display_name : "Google Gemini in Workspace Apps"
       apis_consumed : [
         "admin.googleapis.com"
       ]
@@ -167,7 +167,7 @@ locals {
       ]
       environment_variables : {}
       example_api_calls : [
-        "/admin/reports/v1/activity/users/all/applications/gemini_for_workspace?maxResults=10"
+        "/admin/reports/v1/activity/users/all/applications/gemini_in_workspace_apps?maxResults=10"
       ]
       example_api_calls_user_to_impersonate : local.google_workspace_example_admin
     }

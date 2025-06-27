@@ -8,11 +8,9 @@ import co.worklytics.psoxy.rules.Rules2;
 import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -379,10 +377,10 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
-    static final  RESTRules GEMINI_FOR_WORKSPACE =
-        Rules2.load("sources/google-workspace/gemini-for-workspace/gemini-for-workspace.yaml");
-    static final RESTRules GEMINI_FOR_WORKSPACE_NO_APP_IDS =
-        Rules2.load("sources/google-workspace/gemini-for-workspace/gemini-for-workspace_no-app-ids.yaml");
+    static final  RESTRules GEMINI_IN_WORKSPACE_APPS =
+        Rules2.load("sources/google-workspace/gemini-in-workspace-apps/gemini-in-workspace-apps.yaml");
+    static final RESTRules GEMINI_IN_WORKSPACE_APPS_NO_APP_IDS =
+        Rules2.load("sources/google-workspace/gemini-in-workspace-apps/gemini-in-workspace-apps_no-app-ids.yaml");
 
     static public final Map<String, RESTRules> GOOGLE_DEFAULT_RULES_MAP = ImmutableMap.<String, RESTRules>builder()
             .put("gcal", GCAL)
@@ -392,7 +390,7 @@ public class PrebuiltSanitizerRules {
             .put("gmail", GMAIL)
             .put("google-chat", GOOGLE_CHAT)
             .put("google-meet", GOOGLE_MEET)
-            .put("gemini-for-workspace", GEMINI_FOR_WORKSPACE)
-            .put("gemini-for-workspace" + ConfigRulesModule.NO_APP_IDS_SUFFIX, GEMINI_FOR_WORKSPACE_NO_APP_IDS)
+            .put("gemini-in-workspace-apps", GEMINI_IN_WORKSPACE_APPS)
+            .put("gemini-in-workspace-apps" + ConfigRulesModule.NO_APP_IDS_SUFFIX, GEMINI_IN_WORKSPACE_APPS_NO_APP_IDS)
             .build();
 }

@@ -14,7 +14,7 @@ Within those, the `google-workspace.tf` and `google-workspace-variables.tf` file
 - [calendar](calendar/README.md)
 - [directory](directory/README.md)
 - [gdrive](gdrive/README.md)
-- [gemini-for-workspace](gemini-for-workspace/README.md)
+- [gemini-in-workspace-apps](gemini-in-workspace-apps/README.md)
 - [gemini-usage-bulk](gemini-usage-bulk/README.md)
 - [gmail](gmail/README.md)
 - [google-chat](google-chat/README.md)
