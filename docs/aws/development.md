@@ -8,11 +8,8 @@ Required:
 
 Optional:
 
-- AWS SAM CLI
-  ([macOS](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-mac.html))
-  for local testing, if desired
-- [awscurl](https://github.com/okigan/awscurl) for direct testing of deployed AWS lambda from a
-  terminal
+- AWS SAM CLI ([macOS](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install-mac.html)) for local testing, if desired
+- [awscurl](https://github.com/okigan/awscurl) for direct testing of deployed AWS lambda from a terminal
 
 ## Build
 
@@ -27,16 +24,13 @@ mvn clean package
 
 ## Run Locally
 
-Locally, you can test function's behavior from invocation on a JSON payload (but not how the API
-gateway will map HTTP requests to that JSON payload):
+Locally, you can test function's behavior from invocation on a JSON payload (but not how the API gateway will map HTTP requests to that JSON payload):
 
 https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-using-invoke.html
 
 ## Deploy to AWS
 
-We recommend deploying your Psoxy code into AWS using the terraform modules found in
-[`infra/modules/`](../../infra/modules/] for AWS. These modules both provision the required AWS
-infrastructure, as well as deploying the built binaries for Psoxy as lambdas in the target account.
+We recommend deploying your Psoxy code into AWS using the terraform modules found in [`infra/modules/`](../../infra/modules/] for AWS. These modules both provision the required AWS infrastructure, as well as deploying the built binaries for Psoxy as lambdas in the target account.
 
 Example configurations using those modules can be found in [`infra/examples/](../../infra/examples).
 

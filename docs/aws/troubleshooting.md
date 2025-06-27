@@ -140,21 +140,11 @@ java.lang.Error: missing config. no value for PSOXY_SALT
 Check:
 
 - the SSM parameter exists in the AWS account
-- the SSM parameter can be read by the lambda's execution rule (eg, has an attached IAM policy that
-  allows the SSM parameter to be read; can test this with the
-  [AWS Policy Simulator](https://policysim.aws.amazon.com/home/index.jsp), setting 'Role' to your
-  lambda's execution role, 'Service' to 'AWS Systems Manager', 'Action' to 'Get Parameter' and
-  'Resource' to the SSM parameter's ARN.
-- the SSM parameter can be decrypted by the lambda's execution role (if it's encrypted with a KMS
-  key)
+- the SSM parameter can be read by the lambda's execution rule (eg, has an attached IAM policy that allows the SSM parameter to be read; can test this with the [AWS Policy Simulator](https://policysim.aws.amazon.com/home/index.jsp), setting 'Role' to your lambda's execution role, 'Service' to 'AWS Systems Manager', 'Action' to 'Get Parameter' and 'Resource' to the SSM parameter's ARN.
+- the SSM parameter can be decrypted by the lambda's execution rule (if it's encrypted with a KMS key)
 
-Setting `IS_DEVELOPMENT_MODE` to "true" in the Lambda's Env Vars via the console can enable some
-additional logging with detailed SSM error messages that will be helpful; but note that some of
-these errors will be expected in certain configurations.
+Setting `IS_DEVELOPMENT_MODE` to "true" in the Lambda's Env Vars via the console can enable some additional logging with detailed SSM error messages that will be helpful; but note that some of these errors will be expected in certain configurations.
 
 Our Terraform examples should provide both of the above for you, but worth double-checking.
 
-If those are present, yet the error persists, it's possible that you have some org-level security
-constraint/policy preventing SSM parameters from being used / read. For example, you have a "default
-deny" policy set for SSM GET actions/etc. In such a case, you need to add the execute roles for each
-lambda as exceptions to such policies (find these under AWS --> IAM --> Roles).
+If those are present, yet the error persists, it's possible that you have some org-level security constraint/policy preventing SSM parameters from being used / read. For example, you have a "default deny" policy set for SSM GET actions/etc. In such a case, you need to add the execute roles for each lambda as exceptions to such policies (find these under AWS --> IAM --> Roles).

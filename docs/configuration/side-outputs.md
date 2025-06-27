@@ -7,27 +7,20 @@ The **Side Outputs** feature allows you to configure additional outputs from you
   - target API has rate limits; and you have another use for the desired response content
   - having extra copy of all data coming through the proxy, pre- or post-processing
 
-If a **side output** is configured for an instance, a copy of each API response will be written to the side output. By default, this
-will be the copy of the content AFTER it has been processed by the proxy, but you can also configure it to be the original content
-exactly as returned by the source API.
+If a **side output** is configured for an instance, a copy of each API response will be written to the side output. By default, this will be the copy of the content AFTER it has been processed by the proxy, but you can also configure it to be the original content exactly as returned by the source API.
 
-By default, the response body will also be returned to the client (caller) of the proxy. But if client (caller) sends a
-`X-Psoxy-No-Response-Body` header with request, then the proxy will not send a response body back to the client. Instead, it will
-return just the status code / headers back to the client.
+By default, the response body will also be returned to the client (caller) of the proxy. But if client (caller) sends a `X-Psoxy-No-Response-Body` header with request, then the proxy will not send a response body back to the client. Instead, it will return just the status code / headers back to the client.
 
 <!-- TODO : add data flow diagram of this case here -->
 
-
 ## Configuration
 
-Use the following configuration properties to configure the side outputs from a proxy instance in API connector mode. These should
-be set as environment variables in the proxy instance:
+Use the following configuration properties to configure the side outputs from a proxy instance in API connector mode. These should be set as environment variables in the proxy instance:
   - `SIDE_OUTPUT_ORIGINAL`/`SIDE_OUTPUT_SANITIZED` - defines the target of the side output. Eg `s3://bucket-name/`, `gs://bucket-name/`, etc;
       - in the future, we might support `bq://dataset.table`, etc.
       - `ORIGINAL`/`SANITIZED` - the **stage** of the data to be written to the side output.
         - `ORIGINAL` - the original response from the source API, before any processing by the proxy
         - `SANITIZED` - the response after it has been processed by the proxy (eg, sanitized, transformed, etc)
-
 
 Setting this up in terraform:
 
@@ -93,5 +86,3 @@ See `SideOutputUtils::canonicalResponseKey` for details.
      so side output buckets can be used as a cache for API access by other systems.
   - support for additional transforms on side outputs? What's the use-case exactly?
   - support for side output sampling rate?
-
-
