@@ -6,7 +6,7 @@
     </match>
     <mergedLicense>
       <name>Worklytics Commercial License</name>
-      <url>https://github.com/Worklytics/psoxy/blob/main/LICENSE.md</url>
+      <url>https://raw.githubusercontent.com/Worklytics/psoxy/refs/heads/main/LICENSE.md</url>
     </mergedLicense>
   </licenseMerge>
 
@@ -17,7 +17,7 @@
     </match>
     <mergedLicense>
       <name>Worklytics Commercial License</name>
-      <url>https://github.com/Worklytics/psoxy/blob/main/LICENSE.md</url>
+      <url>https://raw.githubusercontent.com/Worklytics/psoxy/refs/heads/main/LICENSE.md</url>
     </mergedLicense>
   </licenseMerge>
 
