@@ -13,13 +13,11 @@ import com.google.api.client.util.SecurityUtils;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.IOException;
@@ -33,7 +31,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -155,8 +152,7 @@ public class ClientCredentialsGrantTokenRequestBuilder
 
         JsonWebToken.Payload payload = buildPayload(clientId, audience);
 
-        return JsonWebSignature.signUsingRsaSha256(
-                getServiceAccountPrivateKey(), jsonFactory, header, payload);
+        return JsonWebSignature.signUsingRsaSha256(getPrivateKey(), jsonFactory, header, payload);
     }
 
     @VisibleForTesting
@@ -235,7 +231,12 @@ public class ClientCredentialsGrantTokenRequestBuilder
         return Base64.getUrlEncoder().encodeToString(fromHex);
     }
 
-    private PrivateKey getServiceAccountPrivateKey() throws IOException {
+    /**
+     * get private key to be used to sign the JWT assertion
+     * @return the private key
+     * @throws IOException if cannot read/parse
+     */
+    private PrivateKey getPrivateKey() throws IOException {
 
         ConfigService.ConfigValueWithMetadata value = secretStore.getConfigPropertyWithMetadata(ConfigProperty.PRIVATE_KEY)
             .orElseThrow(() -> new NoSuchElementException("No PRIVATE_KEY found in secret store"));
