@@ -59,7 +59,6 @@ public class OutputUtils {
         return createOutputForLocation(locationForWebhookQueue());
     }
 
-
     @VisibleForTesting
     OutputLocation locationForWebhooks() {
         return configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.WEBHOOK_OUTPUT)
@@ -73,7 +72,6 @@ public class OutputUtils {
             .orElseThrow(() -> new IllegalStateException("No side output configured for webhook queue"));
     }
 
-
     private <T extends Output> T createOutputForLocation(OutputLocation outputLocation) {
         OutputFactory<?> outputFactory =  outputFactories.stream()
             .filter(factory -> factory.supports(outputLocation))
@@ -82,8 +80,6 @@ public class OutputUtils {
 
         return (T) outputFactory.create(outputLocation);
     }
-
-
 
     // Ensure the path prefix ends with a slash, if non-empty
     public static String formatObjectPathPrefix(String rawPathPrefix) {

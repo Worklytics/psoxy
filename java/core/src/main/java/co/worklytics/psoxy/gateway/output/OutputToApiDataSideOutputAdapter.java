@@ -7,6 +7,7 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHeaders;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -25,7 +26,7 @@ public class OutputToApiDataSideOutputAdapter implements ApiDataSideOutput {
         HOST,
 
         /**
-         * the HTTP method of the request, eg, GET, POST, PUT, DELETE
+         * the HTTP method of the request, eg, GET, POST, ...
          */
         HTTP_METHOD,
 
@@ -81,7 +82,7 @@ public class OutputToApiDataSideOutputAdapter implements ApiDataSideOutput {
 
         return request.getHttpMethod()
             + "_"
-            + request.getHeader("Host").orElse("")
+            + request.getHeader(HttpHeaders.HOST).orElse("")
             + "/"
             + normalizePath(request.getPath())
             + hashQueryAndHeaders(request).map(s -> "_" + s).orElse("");
@@ -106,7 +107,7 @@ public class OutputToApiDataSideOutputAdapter implements ApiDataSideOutput {
             .filter(entry -> this.isParameterHeader(entry.getKey()))
             .forEach(entry -> metadata.put(entry.getKey(), String.join(",", entry.getValue())));
 
-        metadata.put(SideOutputObjectMetadata.HOST.name(), request.getHeader("Host").orElse(""));
+        metadata.put(SideOutputObjectMetadata.HOST.name(), request.getHeader(HttpHeaders.HOST).orElse(""));
         metadata.put(SideOutputObjectMetadata.HTTP_METHOD.name(), request.getHttpMethod());
         metadata.put(SideOutputObjectMetadata.PATH.name(), request.getPath());
         request.getQuery().ifPresent(query -> metadata.put(SideOutputObjectMetadata.QUERY_STRING.name(), query));
@@ -120,12 +121,12 @@ public class OutputToApiDataSideOutputAdapter implements ApiDataSideOutput {
 
 
     final static Set<String> HEADERS_TO_IGNORE = Set.of(
-        "Host",
-        "User-Agent",
-        "Accept",
-        "Accept-Encoding",
-        "Authorization", // not relevant to response contents, and may contain sensitive info
-        "Content-Length",
+        HttpHeaders.HOST,
+        HttpHeaders.USER_AGENT,
+        HttpHeaders.ACCEPT,
+        HttpHeaders.ACCEPT_ENCODING,
+        HttpHeaders.AUTHORIZATION, // not relevant to response contents, and may contain sensitive info
+        HttpHeaders.CONTENT_LENGTH,
         "Forwarded",
         "traceparent",
         "X-Forwarded-For",
