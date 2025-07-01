@@ -2,7 +2,6 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
-import co.worklytics.psoxy.gateway.auth.PublicKeyStore;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.output.NoOutput;
@@ -116,12 +115,12 @@ public class FunctionRuntimeModule {
 
     @Provides @Singleton  @Named("forWebhooks")
     static Output output(OutputUtils outputUtils) {
-        return outputUtils.forWebhooks();
+        return outputUtils.forIncomingWebhooks();
     }
 
     @Provides @Singleton @Named("forWebhookQueue")
     static Output webhookQueueOutput(OutputUtils outputUtils) {
-        return outputUtils.forWebhookQueue();
+        return outputUtils.forBatchedWebhookContent();
     }
 
 

@@ -2,12 +2,15 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
+import co.worklytics.psoxy.gateway.output.Output;
+import lombok.extern.java.Log;
 
 import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
@@ -24,6 +27,7 @@ import java.util.zip.GZIPOutputStream;
  *
  *
  */
+@Log
 public class BatchMergeHandler {
 
 
@@ -94,7 +98,9 @@ public class BatchMergeHandler {
                 .contentType("application/x-ndjson")  // suggested, but not yet an official standard IANA type
                 .build();
 
-            outputUtils.forWebhookQueue().write(combined);
+            outputUtils.forBatchedWebhookContent().write(combined);
+        } catch (Output.WriteFailure e) {
+            log.log(Level.SEVERE, "Failed to write batched webhooks to output", e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

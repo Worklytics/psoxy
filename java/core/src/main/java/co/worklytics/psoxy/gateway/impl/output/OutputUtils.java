@@ -110,11 +110,11 @@ public class OutputUtils {
         return outputToSideOutputAdapterFactory.create(outputToAdapt);
     }
 
-    public <T extends Output> T forWebhooks() {
+    public <T extends Output> T forIncomingWebhooks() {
         return createOutputForLocation(locationForWebhooks());
     }
 
-    public <T extends Output> T forWebhookQueue() {
+    public <T extends Output> T forBatchedWebhookContent() {
         return createOutputForLocation(locationForWebhookQueue());
     }
 
