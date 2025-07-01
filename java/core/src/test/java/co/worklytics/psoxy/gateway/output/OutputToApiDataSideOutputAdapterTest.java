@@ -1,20 +1,36 @@
-package co.worklytics.psoxy.gateway.impl.output;
+package co.worklytics.psoxy.gateway.output;
 
 import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.impl.output.NoOutput;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Collections;
-import java.util.Optional;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class OutputUtilsTest {
+class OutputToApiDataSideOutputAdapterTest {
 
-    OutputUtils utils = new OutputUtils();
+    OutputToApiDataSideOutputAdapter adapter = new OutputToApiDataSideOutputAdapter(new NoOutput());
+
+    @ValueSource(
+        strings = {
+            "Authorization",
+            "X-Forwarded-For",
+            "User-Agent",
+            "X-Forwarded-Proto",
+            "Host",
+        }
+    )
+    @ParameterizedTest
+    void testIsParameterHeader_not(String header) {
+        assertFalse(adapter.isParameterHeader(header));
+    }
+
 
     @Test
     void canonicalResponseKey() {
@@ -68,7 +84,7 @@ class OutputUtilsTest {
             }
         };
 
-        String key = utils.canonicalResponseKey(request);
+        String key = adapter.canonicalResponseKey(request);
 
         // The expected key is: GET_example.com/api/v1/resource_a hash of the sorted query string
         // Since hashQueryString sorts and hashes, let's compute it here for assertion
@@ -77,21 +93,5 @@ class OutputUtilsTest {
         String expected = "GET_example.com/api/v1/resource_" + expectedQueryHash;
 
         assertEquals(expected, key);
-    }
-
-
-
-    @ValueSource(
-        strings = {
-            "Authorization",
-            "X-Forwarded-For",
-            "User-Agent",
-            "X-Forwarded-Proto",
-            "Host",
-        }
-    )
-    @ParameterizedTest
-    void testIsParameterHeader_not(String header) {
-        assertFalse(utils.isParameterHeader(header));
     }
 }

@@ -319,6 +319,8 @@ public class ApiDataRequestHandler {
 
         Map<String, String> metadata = new HashMap<>(originalContent.getMetadata());
         metadata.put(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
+        metadata.put(ResponseHeader.PROXY_VERSION.getHttpHeader(), HealthCheckRequestHandler.JAVA_SOURCE_CODE_VERSION);
+        metadata.put(ResponseHeader.PII_SALT_SHA256.getHttpHeader(), healthCheckRequestHandler.piiSaltHash());
 
         return ProcessedContent.builder()
             .contentType(originalContent.getContentType())

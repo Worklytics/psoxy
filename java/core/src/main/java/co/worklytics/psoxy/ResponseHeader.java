@@ -19,6 +19,10 @@ public enum ResponseHeader {
     ERROR("Error"),
 
     WARNING("Warning"),
+
+    PROXY_VERSION("Psoxy-Version"),
+
+    PII_SALT_SHA256("PII-Salt-Sha256"),
     ;
 
     @NonNull
