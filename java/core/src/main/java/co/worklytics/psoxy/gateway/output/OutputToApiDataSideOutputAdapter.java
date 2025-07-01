@@ -78,12 +78,19 @@ public class OutputToApiDataSideOutputAdapter implements ApiDataSideOutput {
     }
 
     @Override
+    public void write(HttpEventRequest request, ProcessedContent content, String sideOutputKey) throws IOException {
+        // exploits mutability of content.metadata; could copy first if we want to be certain
+        buildMetadata(request).forEach(content.getMetadata()::put);
+
+        wrappedOutput.write(sideOutputKey, content);
+    }
+
+    @Override
     public String sideOutputObjectKey(HttpEventRequest request) {
         // issues with this:
         //  - path may contain pseudonyms, etc.
-        // - path may be highly repetitive, even just a single one per API connector
-
-
+        //  - path may be highly repetitive, even just a single one per API connect
+        //  - probably not what we want, as this is the request to the Proxy, not the request to the API
         return request.getHeader(HttpHeaders.HOST).map(h -> h + "/").orElse("")
             + normalizePath(request.getPath()).replace("/", "_") // replace slashes with underscores to avoid LOTS of nesting in S3/GCS ux
             + "/"
@@ -127,6 +134,9 @@ public class OutputToApiDataSideOutputAdapter implements ApiDataSideOutput {
     }
 
     /**
+     * TODO: debatable.  this is metadata based on the request --> proxy, not request to source API
+     *   - Host? no point, this is the proxy itself
+     *
      * builds metadata for output object based on request, which intended for writing to GCS/S3 metadata
      *
      * (Azure Blob Storage metadata support is more limited, so likely this will not work there)

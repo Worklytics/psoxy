@@ -50,7 +50,7 @@ public class APIGatewayV1Handler implements com.amazonaws.services.lambda.runtim
         boolean base64Encoded = false;
         try {
             APIGatewayV1ProxyEventRequestAdapter httpEventRequestAdapter = APIGatewayV1ProxyEventRequestAdapter.of(input);
-            response = requestHandler.handle(httpEventRequestAdapter);
+            response = requestHandler.handle(httpEventRequestAdapter, ApiDataRequestHandler.ProcessingContext.synchronous());
 
             context.getLogger().log(httpEventRequestAdapter.getHeader(HttpHeaders.ACCEPT_ENCODING).orElse("accept-encoding not found"));
             if (responseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {

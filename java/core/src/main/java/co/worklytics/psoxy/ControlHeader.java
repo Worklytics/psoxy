@@ -20,11 +20,6 @@ public enum ControlHeader {
     AUTHORIZATION("Authorization"),
 
     /**
-     * @see co.worklytics.psoxy.impl.PseudonymImplementations
-     */
-    PSEUDONYM_IMPLEMENTATION("Pseudonym-Implementation"),
-
-    /**
      * this header - sent with any value - means the request is a health check, not actually
      * intended to be forwarded to source
      */
@@ -32,12 +27,15 @@ public enum ControlHeader {
 
 
     /**
-     * client does NOT want a response; proxy should ACK request with 204 No Content, continue API call
-     * in background, then write response to side output
-     *
-     * q: better to call this 'HANDLE_ASYNC'?  really in this case the "side output" is just the "output"
+     * @see co.worklytics.psoxy.impl.PseudonymImplementations
      */
-    SIDE_OUTPUT_ONLY("Side-Output-Only"),
+    PSEUDONYM_IMPLEMENTATION("Pseudonym-Implementation"),
+
+    /**
+     * client does NOT want a response; proxy should ACK request with 204 No Content, continue API call
+     * in background, then write response to side output (assuming it's enabled)
+     */
+    PROCESS_ASYNC("Process-Async"),
 
     /**
      * whether to skip sanitizer (for testing purposes, to obtain unsanitized baseline to compare

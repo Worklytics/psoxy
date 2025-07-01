@@ -46,7 +46,7 @@ public class HttpRequestHandler {
 
         try {
             HttpEventResponse abstractResponse =
-                requestHandler.handle(cloudFunctionRequest);
+                requestHandler.handle(cloudFunctionRequest, ApiDataRequestHandler.ProcessingContext.synchronous());
 
             abstractResponse.getHeaders()
                 .forEach(response::appendHeader);

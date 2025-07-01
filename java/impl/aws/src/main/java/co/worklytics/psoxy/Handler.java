@@ -59,7 +59,7 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
         boolean base64Encoded = false;
         try {
             APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter = new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
-            response = requestHandler.handle(httpEventRequestAdapter);
+            response = requestHandler.handle(httpEventRequestAdapter, ApiDataRequestHandler.ProcessingContext.synchronous());
 
             if (responseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
                 Pair<Boolean, HttpEventResponse> compressedResponse = responseCompressionHandler.compressIfNeeded(response);

@@ -141,13 +141,13 @@ public class ApiDataRequestHandler {
     }
 
     @SneakyThrows
-    public HttpEventResponse handle(HttpEventRequest request) {
+    public HttpEventResponse handle(HttpEventRequest requestToProxy, ProcessingContext processingContext) {
 
-        logRequestIfVerbose(request);
+        logRequestIfVerbose(requestToProxy);
 
         // application-level enforcement of HTTPS
         // (NOTE: should be redundant with infrastructure-level configuration)
-        if (!request.isHttps().orElse(true)) {
+        if (!requestToProxy.isHttps().orElse(true)) {
             return HttpEventResponse.builder()
                     .statusCode(HttpStatus.SC_BAD_REQUEST)
                     .header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.HTTPS_REQUIRED.name())
@@ -155,39 +155,16 @@ public class ApiDataRequestHandler {
                     .build();
         }
 
-        Optional<HttpEventResponse> healthCheckResponse = healthCheckRequestHandler.handleIfHealthCheck(request);
+        Optional<HttpEventResponse> healthCheckResponse = healthCheckRequestHandler.handleIfHealthCheck(requestToProxy);
         if (healthCheckResponse.isPresent()) {
             return healthCheckResponse.get();
         }
 
-        // check if request is side output only case, if so pass to AsyncApiDataRequestHandler, implementation of which will vary by platform
-        if (request.getHeader(ControlHeader.SIDE_OUTPUT_ONLY.getHttpHeader()).map(Boolean::parseBoolean).orElse(false)) {
-            log.info("Side output only request, passing to async handler");
 
-            AsyncProcessingMetaData.AsyncProcessingMetaDataBuilder asyncMetaData = AsyncProcessingMetaData.builder();
-
-            asyncMetaData.rawOutputKey(apiDataSideOutput.sideOutputObjectKey(request));
-            asyncMetaData.sanitizedOutputKey(apiDataSideOutputSanitized.sideOutputObjectKey(request));
-
-            try {
-                asyncApiDataRequestHandler.get().handle(request);
-            } catch (Throwable e) {
-                log.log(Level.WARNING, "Failure to dispatch async processing of request", e);
-                return HttpEventResponse.builder()
-                        .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-                        .header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.ASYNC_HANDLER_DISPATCH.name())
-                        .body("Error processing side output only request: " + e.getMessage())
-                        .build();
-            }
-            return HttpEventResponse.builder()
-                    .statusCode(HttpStatus.SC_ACCEPTED)  //proper response code indicating payload accepted for asynchronous processing
-                    .body(objectMapper.writeValueAsString(asyncMetaData.build()))
-                    .build();
-        }
 
         RequestUrls requestUrls;
         try {
-            requestUrls = buildRequestedUrls(request);
+            requestUrls = buildRequestedUrls(requestToProxy);
         } catch (Throwable e) {
             //really shouldn't happen ... parsing one url from another, so would be a bad bug in our canonicalization code for this to go wrong
             log.log(Level.WARNING, "Error parsing  / building request URL", e);
@@ -201,7 +178,7 @@ public class ApiDataRequestHandler {
         // avoid logging clear URL outside of dev
         URL toLog = envVarsConfigService.isDevelopment() ? requestUrls.getTarget() : requestUrls.getOriginal();
 
-        boolean skipSanitization = clientRequestsSkipSanization(request);
+        boolean skipSanitization = clientRequestsSkipSanization(requestToProxy);
 
         HttpEventResponse.HttpEventResponseBuilder builder = HttpEventResponse.builder();
 
@@ -217,16 +194,16 @@ public class ApiDataRequestHandler {
         }
 
         //build log entry
-        String logEntry = String.format("%s %s TokenInUrlDecrypted=%b", request.getHttpMethod(), URLUtils.relativeURL(toLog), requestUrls.hasDecryptedTokens());
-        if (request.getClientIp().isPresent()) {
+        String logEntry = String.format("%s %s TokenInUrlDecrypted=%b", requestToProxy.getHttpMethod(), URLUtils.relativeURL(toLog), requestUrls.hasDecryptedTokens());
+        if (requestToProxy.getClientIp().isPresent()) {
             // client IP is NOT available for direct AWS Lambda calls; only for API Gateway.
             // don't want to put blank/unknown in direct case, so log IP conditionally
-            logEntry += String.format(" ClientIP=%s", request.getClientIp().get());
+            logEntry += String.format(" ClientIP=%s", requestToProxy.getClientIp().get());
         }
 
         if (skipSanitization) {
             log.info(String.format("%s. Skipping sanitization.", logEntry));
-        } else if (sanitizer.isAllowed(request.getHttpMethod(), requestUrls.getOriginal())) {
+        } else if (sanitizer.isAllowed(requestToProxy.getHttpMethod(), requestUrls.getOriginal())) {
             log.info(String.format("%s. Rules allowed call.", logEntry));
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
@@ -235,25 +212,25 @@ public class ApiDataRequestHandler {
             return builder.build();
         }
 
-        com.google.api.client.http.HttpRequest sourceApiRequest;
+        com.google.api.client.http.HttpRequest requestToSourceApi;
         try {
-            HttpRequestFactory requestFactory = getRequestFactory(request);
+            HttpRequestFactory requestFactory = getRequestFactory(requestToProxy);
 
             HttpContent content = null;
 
-            if (request.getBody() != null) {
-                String contentType = request.getHeader(HttpHeaders.CONTENT_TYPE)
+            if (requestToProxy.getBody() != null) {
+                String contentType = requestToProxy.getHeader(HttpHeaders.CONTENT_TYPE)
                         .orElse("application/json");
-                content = new ByteArrayContent(contentType, request.getBody());
+                content = new ByteArrayContent(contentType, requestToProxy.getBody());
             }
 
-            sourceApiRequest = requestFactory.buildRequest(request.getHttpMethod(), new GenericUrl(requestUrls.getTarget()), content);
+            requestToSourceApi = requestFactory.buildRequest(requestToProxy.getHttpMethod(), new GenericUrl(requestUrls.getTarget()), content);
 
             //TODO: what headers to forward???
-            populateHeadersFromSource(sourceApiRequest, request, requestUrls.getTarget());
+            populateHeadersFromSource(requestToSourceApi, requestToProxy, requestUrls.getTarget());
 
             //setup request
-            sourceApiRequest
+            requestToSourceApi
                 .setThrowExceptionOnExecuteError(false)
                 .setConnectTimeout(SOURCE_API_REQUEST_CONNECT_TIMEOUT_MS)
                 .setReadTimeout(SOURCE_API_REQUEST_READ_TIMEOUT_MS);
@@ -274,11 +251,45 @@ public class ApiDataRequestHandler {
             return builder.build();
         }
 
+        // check if request is side output only case, if so pass to AsyncApiDataRequestHandler, implementation of which will vary by platform
+        if (!processingContext.getAsync() && requestToProxy.getHeader(ControlHeader.PROCESS_ASYNC.getHttpHeader()).map(Boolean::parseBoolean).orElse(false)) {
+            log.info("Requested for async processing");
+
+            // create a
+            ProcessingContext.ProcessingContextBuilder processingContextBuilder = ProcessingContext.builder()
+                .async(true);
+            processingContextBuilder.rawOutputKey(Optional.ofNullable(processingContext.getRawOutputKey())
+                .orElseGet(() -> apiDataSideOutput.sideOutputObjectKey(requestToProxy)));
+
+            processingContextBuilder.sanitizedOutputKey(Optional.ofNullable(processingContext.getSanitizedOutputKey())
+                .orElseGet(() -> apiDataSideOutputSanitized.sideOutputObjectKey(requestToProxy)));
+
+            ProcessingContext asyncProcessingContext = processingContextBuilder.build();
+            try {
+                // TODO: refactor so that we pass requestToSourceApi to the async handler, rather than requestToProxy;
+                // requestToProxy has already been authenticated/validated/authorized, so no need to repeat all that
+                // problem is that we don't have a direct entry-point into ApiDataRequestHandler using that requestToSourceApi as argument
+                asyncApiDataRequestHandler.get().handle(requestToProxy, asyncProcessingContext);
+            } catch (Throwable e) {
+                log.log(Level.WARNING, "Failure to dispatch async processing of request", e);
+                return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.ASYNC_HANDLER_DISPATCH.name())
+                    .body("Error processing side output only request: " + e.getMessage())
+                    .build();
+            }
+            return HttpEventResponse.builder()
+                .statusCode(HttpStatus.SC_ACCEPTED)  //proper response code indicating payload accepted for asynchronous processing
+                .body(objectMapper.writeValueAsString(asyncProcessingContext))
+                .build();
+        }
+
+
         final com.google.api.client.http.HttpResponse sourceApiResponse;
         try {
             //q: add exception handlers for IOExceptions / HTTP error responses, so those retries
             // happen in proxy rather than on Worklytics-side?
-            sourceApiResponse = sourceApiRequest.execute();
+            sourceApiResponse = requestToSourceApi.execute();
         } catch (ConnectException e) {
             //connectivity problems
             builder.statusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
@@ -296,18 +307,18 @@ public class ApiDataRequestHandler {
 
             // TODO: if side output cases of the original, we *could* use the potentially compressed stream directly, instead of reading to a string?
             ProcessedContent original = this.asProcessedContent(sourceApiResponse);
-            apiDataSideOutput.write(request, original);
+            apiDataSideOutput.write(requestToProxy, original);
 
             passThroughHeaders(builder, sourceApiResponse);
             if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
                 ProcessedContent sanitizationResult =
-                    sanitize(request, requestUrls, original);
+                    sanitize(requestToProxy, requestUrls, original);
                 proxyResponseContent = sanitizationResult.getContentAsString();
 
                 sanitizationResult.getMetadata().entrySet()
                     .forEach(e -> builder.header(e.getKey(), e.getValue()));
 
-                writeSideOutput(request, sourceApiResponse, sanitizationResult);
+                writeSideOutput(requestToProxy, sourceApiResponse, sanitizationResult);
 
 
                 if (skipSanitization) {
@@ -349,6 +360,8 @@ public class ApiDataRequestHandler {
         metadata.put(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
         metadata.put(ResponseHeader.PROXY_VERSION.getHttpHeader(), HealthCheckRequestHandler.JAVA_SOURCE_CODE_VERSION);
         metadata.put(ResponseHeader.PII_SALT_SHA256.getHttpHeader(), healthCheckRequestHandler.piiSaltHash());
+
+        // q: add instance id to the metadata??
 
         return ProcessedContent.builder()
             .contentType(originalContent.getContentType())
@@ -554,24 +567,6 @@ public class ApiDataRequestHandler {
         return targetURLString;
     }
 
-    @AllArgsConstructor
-    @Builder
-    @Value
-    public static class AsyncProcessingMetaData {
-
-        /**
-         * the side output key for the raw response
-         */
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        String rawOutputKey;
-
-        /**
-         * the side output key for the sanitized response
-         */
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        String sanitizedOutputKey;
-    }
-
 
     // NOTE: not 'decrypt', as that is only one possible implementation of reversible tokenization
     String reverseTokenizedUrlComponents(String encodedURL) {
@@ -597,5 +592,36 @@ public class ApiDataRequestHandler {
                         logIfDevelopmentMode(() -> String.format("Header %s included", h));
                         headers.set(h, headerValue);
                 })));
+    }
+
+    /**
+     * Context for processing an API data request
+     */
+    @AllArgsConstructor
+    @Builder
+    @Value
+    public static class ProcessingContext {
+
+        @NonNull
+        @Builder.Default
+        Boolean async = false;
+
+        /**
+         * the side output key for the raw response
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        String rawOutputKey;
+
+        /**
+         * the side output key for the sanitized response
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        String sanitizedOutputKey;
+
+        public static ProcessingContext synchronous() {
+            return ProcessingContext.builder()
+                .async(false)
+                .build();
+        }
     }
 }

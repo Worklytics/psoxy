@@ -10,13 +10,9 @@ import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.java.Log;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -30,6 +26,7 @@ import java.io.OutputStream;
  *   - API Gateway events
  *   - SQS events ( asynchronous processing of API data requests, that originally came from one of the above)
  */
+@Log
 public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
 
     /**
@@ -61,11 +58,13 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
         // Read the full input stream into a tree
         JsonNode rootNode = lambdaEventUtils.read(input);
 
+        ApiDataRequestHandler.ProcessingContext processingContext;
 
         boolean base64Encoded = false;
 
         // whatever the event is, convert to HttpEventRequest and invoke the request handler
         if (lambdaEventUtils.isSQSEvent(rootNode)) {
+
             JsonNode records = rootNode.get("Records");
             if (records == null || records.isEmpty()) {
                 throw new IllegalArgumentException("SQS event has no records");
@@ -74,7 +73,18 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
                 // well, tbh - why have this limitation? we certainly could batch in future if there's a use case
                 throw new IllegalArgumentException("SQS event has more than one record; in async case, we expect exactly one record per invocation");
             }
+
+            // TODO: special case where side-output key is pre-determined? as was allocated when the request was sent to SQS
+            // pull it from a message attribute ... but then how to pass down to the handler??
+            // - special header? (opens security issue, where proxy client could overwrite artibrary objects, if it can pass that header to the proxy)
+            // change requestHandler signature to handle(HttpEventRequest request, AsyncProcessingContext asyncProcessingContext); or something like that??
+
             rootNode = payloadMapper.readTree(records.get(0).get("body").asText());
+
+            processingContext = payloadMapper.readValue(records.get(0).get("messageAttributes").get("processingContext").get("stringValue").asText(),
+                ApiDataRequestHandler.ProcessingContext.class);
+        } else {
+            processingContext = ApiDataRequestHandler.ProcessingContext.builder().build();
         }
 
         HttpEventRequest request;
@@ -88,7 +98,7 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
 
         HttpEventResponse response;
         try {
-            response = requestHandler.handle(request);
+            response = requestHandler.handle(request, processingContext);
 
             if (responseCompressionHandler.isCompressionRequested(request)) {
                 Pair<Boolean, HttpEventResponse> compressedResponse = responseCompressionHandler.compressIfNeeded(response);
@@ -106,12 +116,18 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
                 .build();
         }
 
-        if (lambdaEventUtils.isApiGatewayV1Event(rootNode)) {
-            lambdaEventUtils.writeAsApiGatewayV1Response(response, output, base64Encoded);
-        } else if (lambdaEventUtils.isApiGatewayV2Event(rootNode)) {
-            lambdaEventUtils.writeAsApiGatewayV2Response(response, output, base64Encoded);
+        if (processingContext.getAsync()) {
+            // async case - SQS; no response is needed
+            log.info("Processed async API data request: " + payloadMapper.writeValueAsString(processingContext));
         } else {
-            throw new IllegalArgumentException("Unsupported event type: " + rootNode.getNodeType());
+            // need to send the proper response
+            if (lambdaEventUtils.isApiGatewayV1Event(rootNode)) {
+                lambdaEventUtils.writeAsApiGatewayV1Response(response, output, base64Encoded);
+            } else if (lambdaEventUtils.isApiGatewayV2Event(rootNode)) {
+                lambdaEventUtils.writeAsApiGatewayV2Response(response, output, base64Encoded);
+            } else {
+                throw new IllegalArgumentException("Unsupported event type: " + rootNode.getNodeType());
+            }
         }
     }
 }

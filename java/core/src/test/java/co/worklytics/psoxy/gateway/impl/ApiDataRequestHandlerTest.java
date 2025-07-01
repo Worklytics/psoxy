@@ -208,7 +208,7 @@ class ApiDataRequestHandlerTest {
         spy.sanitizer = sanitizer;
 
         try {
-            spy.handle(request);
+            spy.handle(request, ApiDataRequestHandler.ProcessingContext.synchronous());
         } catch (Exception ignored) {
             // it should raise an exception due missing configuration
         }
@@ -262,7 +262,7 @@ class ApiDataRequestHandlerTest {
         spy.sanitizer = sanitizer;
 
         try {
-            spy.handle(request);
+            spy.handle(request, ApiDataRequestHandler.ProcessingContext.synchronous());
         } catch (Exception ignored) {
             // it should raise an exception due missing configuration
         }
@@ -311,7 +311,7 @@ class ApiDataRequestHandlerTest {
         spy.sanitizer = sanitizer;
 
         try {
-            spy.handle(request);
+            spy.handle(request, ApiDataRequestHandler.ProcessingContext.synchronous());
         } catch (Exception ignored) {
             // it should raise an exception due missing configuration
         }

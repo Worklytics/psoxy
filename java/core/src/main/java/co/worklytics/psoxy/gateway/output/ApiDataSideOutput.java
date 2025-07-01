@@ -18,8 +18,8 @@ public interface ApiDataSideOutput {
 
 
     /**
-     *
-     * @param request
+     * generate a side output key for the given request.
+     * @param request to generate a key for
      * @return a key that can be used to retrieve the side output object for this request.
      */
     String sideOutputObjectKey(HttpEventRequest request);
@@ -32,6 +32,16 @@ public interface ApiDataSideOutput {
      */
     void write(HttpEventRequest request, ProcessedContent content) throws IOException;
 
+
+    /**
+     * writes content, retrieved in response to the request, to this side output with given side output key, if enabled
+     *
+     * @param request
+     * @param content
+     * @param sideOutputKey
+     * @throws IOException
+     */
+    void write(HttpEventRequest request, ProcessedContent content, String sideOutputKey) throws IOException;
 
     //q: do we need an InputStream version of write()??
 
