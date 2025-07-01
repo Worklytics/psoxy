@@ -326,7 +326,10 @@ public class ClientCredentialsGrantTokenRequestBuilder
         }
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 6056bd56 (try to get keys as part of health check, output warnings)
     @Override
     public List<String> validateConfigValues() {
         List<String> errors = new ArrayList<>();

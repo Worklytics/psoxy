@@ -87,7 +87,9 @@ public class HealthCheckRequestHandler {
     }
 
     private HttpEventResponse handle(HttpEventRequest request) {
+
         Set<String> missing;
+
 
         try {
             missing =
@@ -186,7 +188,6 @@ public class HealthCheckRequestHandler {
         // will be inconsistent with the prior ones)
         config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
                 .ifPresent(salt -> healthCheckResult.saltSha256Hash(hashUtils.hash(salt, SALT_FOR_SALT)));
-
 
         try {
             sourceAuthStrategy.get().validateConfigValues().forEach(healthCheckResult::warningMessage);
