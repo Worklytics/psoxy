@@ -34,6 +34,8 @@ public enum ControlHeader {
     /**
      * client does NOT want a response; proxy should ACK request with 204 No Content, continue API call
      * in background, then write response to side output
+     *
+     * q: better to call this 'HANDLE_ASYNC'?  really in this case the "side output" is just the "output"
      */
     SIDE_OUTPUT_ONLY("Side-Output-Only"),
 

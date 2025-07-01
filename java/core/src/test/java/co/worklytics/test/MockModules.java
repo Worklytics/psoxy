@@ -166,6 +166,11 @@ public class MockModules {
         class NoApiDataSideOutput implements ApiDataSideOutput {
 
             @Override
+            public String sideOutputObjectKey(HttpEventRequest request) {
+                return null;
+            }
+
+            @Override
             public void write(HttpEventRequest request, ProcessedContent content) {
                 // no-op
             }

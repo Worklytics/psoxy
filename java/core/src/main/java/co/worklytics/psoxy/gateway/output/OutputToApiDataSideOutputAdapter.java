@@ -77,7 +77,8 @@ public class OutputToApiDataSideOutputAdapter implements ApiDataSideOutput {
         wrappedOutput.write(sideOutputObjectKey(request), content);
     }
 
-    String sideOutputObjectKey(HttpEventRequest request) {
+    @Override
+    public String sideOutputObjectKey(HttpEventRequest request) {
         // issues with this:
         //  - path may contain pseudonyms, etc.
         // - path may be highly repetitive, even just a single one per API connector

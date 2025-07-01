@@ -16,6 +16,14 @@ import java.io.IOException;
  */
 public interface ApiDataSideOutput {
 
+
+    /**
+     *
+     * @param request
+     * @return a key that can be used to retrieve the side output object for this request.
+     */
+    String sideOutputObjectKey(HttpEventRequest request);
+
     /**
      * writes content, retrieved in response to the request, to this side output, if enabled
      *
@@ -25,6 +33,7 @@ public interface ApiDataSideOutput {
     void write(HttpEventRequest request, ProcessedContent content) throws IOException;
 
 
-    //q: do we need an InputStream version of this,
+    //q: do we need an InputStream version of write()??
+
 
 }

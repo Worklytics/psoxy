@@ -11,6 +11,7 @@ import co.worklytics.psoxy.utils.URLUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.*;
 import com.google.auth.Credentials;
@@ -21,9 +22,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import dagger.Lazy;
-import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.Value;
+import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.HttpHeaders;
@@ -164,10 +163,25 @@ public class ApiDataRequestHandler {
         // check if request is side output only case, if so pass to AsyncApiDataRequestHandler, implementation of which will vary by platform
         if (request.getHeader(ControlHeader.SIDE_OUTPUT_ONLY.getHttpHeader()).map(Boolean::parseBoolean).orElse(false)) {
             log.info("Side output only request, passing to async handler");
-            asyncApiDataRequestHandler.get().handle(request);
+
+            AsyncProcessingMetaData.AsyncProcessingMetaDataBuilder asyncMetaData = AsyncProcessingMetaData.builder();
+
+            asyncMetaData.rawOutputKey(apiDataSideOutput.sideOutputObjectKey(request));
+            asyncMetaData.sanitizedOutputKey(apiDataSideOutputSanitized.sideOutputObjectKey(request));
+
+            try {
+                asyncApiDataRequestHandler.get().handle(request);
+            } catch (Throwable e) {
+                log.log(Level.WARNING, "Failure to dispatch async processing of request", e);
+                return HttpEventResponse.builder()
+                        .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                        .header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.ASYNC_HANDLER_DISPATCH.name())
+                        .body("Error processing side output only request: " + e.getMessage())
+                        .build();
+            }
             return HttpEventResponse.builder()
-                    .statusCode(HttpStatus.SC_NO_CONTENT)
-                    .body("Request for side output only will be handled asynchronously")
+                    .statusCode(HttpStatus.SC_ACCEPTED)  //proper response code indicating payload accepted for asynchronous processing
+                    .body(objectMapper.writeValueAsString(asyncMetaData.build()))
                     .build();
         }
 
@@ -538,6 +552,24 @@ public class ApiDataRequestHandler {
             targetURLString = hostPlusPath + "?" + request.getQuery().get();
         }
         return targetURLString;
+    }
+
+    @AllArgsConstructor
+    @Builder
+    @Value
+    public static class AsyncProcessingMetaData {
+
+        /**
+         * the side output key for the raw response
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        String rawOutputKey;
+
+        /**
+         * the side output key for the sanitized response
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        String sanitizedOutputKey;
     }
 
 
