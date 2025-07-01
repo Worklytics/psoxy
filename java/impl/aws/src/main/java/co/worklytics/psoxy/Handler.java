@@ -61,7 +61,7 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
             APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter = new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
             response = requestHandler.handle(httpEventRequestAdapter);
 
-            if (ResponseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
+            if (responseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
                 Pair<Boolean, HttpEventResponse> compressedResponse = responseCompressionHandler.compressIfNeeded(response);
                 base64Encoded = compressedResponse.getLeft();
                 response = compressedResponse.getRight();

@@ -3,6 +3,7 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.SQSOutput;
 import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
+import co.worklytics.psoxy.aws.request.LambdaEventUtils;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProcessedContent;
@@ -49,11 +50,9 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
 
     static InboundWebhookHandler inboundWebhookHandler;
 
-    static ObjectMapper mapper;
-
-    static ObjectMapper sqsPayloadMapper;
-
     static JwksDecorator jwksHandler;
+
+    static LambdaEventUtils lambdaEventUtils;
 
     static {
         staticInit();
@@ -63,9 +62,6 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
         awsContainer = DaggerAwsContainer.create();
         batchMergeHandler = awsContainer.batchMergeHandler();
         inboundWebhookHandler = awsContainer.inboundWebhookHandler();
-        mapper = awsContainer.objectMapper();
-        sqsPayloadMapper = new ObjectMapper();
-        sqsPayloadMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
         jwksHandler = awsContainer.jwksDecoratorFactory().create(inboundWebhookHandler);
     }
 
@@ -73,15 +69,15 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
         // Read the full input stream into a tree
-        JsonNode rootNode = mapper.readTree(input);
+        JsonNode rootNode = lambdaEventUtils.read(input);
 
-        if (isHttpEvent(rootNode)) {
+        if (lambdaEventUtils.isApiGatewayV2Event(rootNode)) {
             // API Gateway V2 HTTP event (from Function URL, usually)
-            APIGatewayV2HTTPEvent httpEvent = mapper.treeToValue(rootNode, APIGatewayV2HTTPEvent.class);
+            APIGatewayV2HTTPEvent httpEvent = lambdaEventUtils.toAPIGatewayV2HTTPEvent(rootNode);
             APIGatewayV2HTTPResponse response = handleRequest(httpEvent, context);
-            mapper.writeValue(output, response);
-        } else if (isSQSEvent(rootNode)) {
-            SQSEvent sqsEvent = sqsPayloadMapper.treeToValue(rootNode, SQSEvent.class);
+            lambdaEventUtils.write(output, response);
+        } else if (lambdaEventUtils.isSQSEvent(rootNode)) {
+            SQSEvent sqsEvent = lambdaEventUtils.toSQSEvent(rootNode);
             handleRequest(sqsEvent, context);
 
             // Return empty 200 response
@@ -89,29 +85,18 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
                 .withStatusCode(200)
                 .withBody("SQS event processed")
                 .build();
-            mapper.writeValue(output, resp);
+            lambdaEventUtils.write(output, resp);
         } else {
             context.getLogger().log("Unrecognized event format: " + rootNode.toString());
             APIGatewayV2HTTPResponse resp = APIGatewayV2HTTPResponse.builder()
                 .withStatusCode(400)
                 .withBody("Unsupported event type")
                 .build();
-            mapper.writeValue(output, resp);
+            lambdaEventUtils.write(output, resp);
         }
     }
 
-    private boolean isSQSEvent(JsonNode node) {
-        return node.has("Records") &&
-            node.get("Records").isArray() &&
-            node.get("Records").get(0).has("eventSource") &&
-            "aws:sqs".equals(node.get("Records").get(0).get("eventSource").asText());
-    }
 
-    private boolean isHttpEvent(JsonNode node) {
-        // TODO: consider possibility of a 1.0 format, which avoids url-decoding of path parameters??
-        return node.has("version") && node.get("version").asText().startsWith("2.0")
-            && node.has("requestContext") && node.get("requestContext").has("http");
-    }
 
     /**
      * SQS event is presumed to be a batch of messages that need to be merged into a single output object in the output

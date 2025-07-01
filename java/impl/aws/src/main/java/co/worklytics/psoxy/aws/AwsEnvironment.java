@@ -28,6 +28,7 @@ public class AwsEnvironment implements HostEnvironment {
 
     enum AwsConfigProperty implements ConfigService.ConfigProperty {
         SECRETS_STORE,
+        ASYNC_API_REQUEST_QUEUE_URL,
         ;
     }
 

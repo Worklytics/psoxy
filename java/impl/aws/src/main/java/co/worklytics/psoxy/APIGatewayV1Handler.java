@@ -12,19 +12,15 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 
-import static co.worklytics.psoxy.ResponseCompressionHandler.isCompressionRequested;
 
 /**
- * *ALPHA support* handler to use for API Gateway V1 configurations
- *  - this is NOT going to be subject routine QA as part of release process, so YMMV
+ * handler to use for API Gateway V1 configurations
  *
  * usage:
- *  - when configure/deploy your lambda, set entry point to `co.worklytis.psoxy.APIGatewayV1Handler`
+ *  - when configure/deploy your lambda, set entry point to `co.worklytics.psoxy.APIGatewayV1Handler`
  *  - in terraform, this is the `handler_class` variable
  *     - https://github.com/Worklytics/psoxy/blob/main/infra/modules/aws-psoxy-rest/main.tf#L36
  *     - under Lambda --> Runtime Settings via AWS console
- *
- *
  */
 public class APIGatewayV1Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
@@ -57,7 +53,7 @@ public class APIGatewayV1Handler implements com.amazonaws.services.lambda.runtim
             response = requestHandler.handle(httpEventRequestAdapter);
 
             context.getLogger().log(httpEventRequestAdapter.getHeader(HttpHeaders.ACCEPT_ENCODING).orElse("accept-encoding not found"));
-            if (isCompressionRequested(httpEventRequestAdapter)) {
+            if (responseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
                 Pair<Boolean, HttpEventResponse> compressedResponse = responseCompressionHandler.compressIfNeeded(response);
                 base64Encoded = compressedResponse.getLeft();
                 response = compressedResponse.getRight();

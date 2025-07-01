@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.aws;
 
+import co.worklytics.psoxy.aws.request.LambdaEventUtils;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.*;
@@ -11,6 +12,7 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
@@ -206,6 +208,22 @@ public interface AwsModule {
         return KmsClient.create();
     }
 
+    @Provides
+    static ApiDataRequestViaSQS apiDataRequestViaSQS(
+        ConfigService configService,
+        ApiDataRequestViaSQSFactory apiDataRequestViaSQSFactory
+    ) {
+        return apiDataRequestViaSQSFactory.create(configService.getConfigPropertyOrError(AwsEnvironment.AwsConfigProperty.ASYNC_API_REQUEST_QUEUE_URL));
+    }
+
+    @Provides @Named("lambdaEventMapper")
+    static ObjectMapper provideLambdaEventMapper() {
+        ObjectMapper lambdaEventMapper = new ObjectMapper();
+        // Configure the mapper to accept case-insensitive properties
+        lambdaEventMapper.configure(com.fasterxml.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        return lambdaEventMapper;
+    }
+
     @Module
     abstract class Bindings {
 
@@ -218,6 +236,9 @@ public interface AwsModule {
 
         @Binds @IntoSet
         abstract PublicKeyStoreClient publicKeyStoreClient(AwsKmsPublicKeyStoreClient awsKmsPublicKeyStoreClient);
+
+        @Binds
+        abstract AsyncApiDataRequestHandler asyncApiDataRequestHandler(ApiDataRequestViaSQS asyncApiDataRequestViaSQS);
 
     }
 }

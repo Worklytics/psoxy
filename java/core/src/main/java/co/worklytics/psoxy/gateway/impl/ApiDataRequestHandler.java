@@ -20,6 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import dagger.Lazy;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.Value;
@@ -47,8 +48,8 @@ import java.util.stream.Collectors;
 public class ApiDataRequestHandler {
 
     //we have ~540 total in Cloud Function connection, so can have generous values here
-    private static final int SOURCE_API_REQUEST_CONNECT_TIMEOUT_MILLISECONDS = 30_000;
-    private static final int SOURCE_API_REQUEST_READ_TIMEOUT = 300_000;
+    private static final int SOURCE_API_REQUEST_CONNECT_TIMEOUT_MS = 30_000; // 30 seconds
+    private static final int SOURCE_API_REQUEST_READ_TIMEOUT_MS = 300_000; // 5 minutes
 
     @Inject
     EnvVarsConfigService envVarsConfigService;
@@ -82,6 +83,9 @@ public class ApiDataRequestHandler {
     @Inject @Named("forSanitized")
     ApiDataSideOutput apiDataSideOutputSanitized;
 
+    // lazy-loaded, to avoid circular dependency issues; and bc unused in 99.9% of situations
+    @Inject
+    Lazy<AsyncApiDataRequestHandler> asyncApiDataRequestHandler;
 
     /**
      * Basic headers to pass: content, caching, retries. Can be expanded by connection later.
@@ -157,6 +161,16 @@ public class ApiDataRequestHandler {
             return healthCheckResponse.get();
         }
 
+        // check if request is side output only case, if so pass to AsyncApiDataRequestHandler, implementation of which will vary by platform
+        if (request.getHeader(ControlHeader.SIDE_OUTPUT_ONLY.getHttpHeader()).map(Boolean::parseBoolean).orElse(false)) {
+            log.info("Side output only request, passing to async handler");
+            asyncApiDataRequestHandler.get().handle(request);
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_NO_CONTENT)
+                    .body("Request for side output only will be handled asynchronously")
+                    .build();
+        }
+
         RequestUrls requestUrls;
         try {
             requestUrls = buildRequestedUrls(request);
@@ -227,8 +241,8 @@ public class ApiDataRequestHandler {
             //setup request
             sourceApiRequest
                 .setThrowExceptionOnExecuteError(false)
-                .setConnectTimeout(SOURCE_API_REQUEST_CONNECT_TIMEOUT_MILLISECONDS)
-                .setReadTimeout(SOURCE_API_REQUEST_READ_TIMEOUT);
+                .setConnectTimeout(SOURCE_API_REQUEST_CONNECT_TIMEOUT_MS)
+                .setReadTimeout(SOURCE_API_REQUEST_READ_TIMEOUT_MS);
 
         } catch (IOException e) {
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);

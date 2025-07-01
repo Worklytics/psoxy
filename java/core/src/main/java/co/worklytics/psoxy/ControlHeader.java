@@ -30,6 +30,13 @@ public enum ControlHeader {
      */
     HEALTH_CHECK("Health-Check"),
 
+
+    /**
+     * client does NOT want a response; proxy should ACK request with 204 No Content, continue API call
+     * in background, then write response to side output
+     */
+    SIDE_OUTPUT_ONLY("Side-Output-Only"),
+
     /**
      * whether to skip sanitizer (for testing purposes, to obtain unsanitized baseline to compare
      *  with sanitized output)
