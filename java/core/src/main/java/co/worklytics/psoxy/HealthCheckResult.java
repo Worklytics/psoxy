@@ -8,6 +8,7 @@ import lombok.*;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -69,6 +70,17 @@ public class HealthCheckResult {
     Boolean pseudonymizeAppIds;
 
     String callerIp;
+
+    /**
+     *  A SHA-256 hash of the salt, to aid in detecting changes to the salt value.
+     *
+     *  If salt changes, client needs to know; as all subsequent pseudonyms produced by proxy instance from that point
+     *  will be inconsistent with the prior ones.
+     */
+    String saltSha256Hash;
+
+    @Singular
+    List<String> warningMessages;
 
     public boolean passed() {
         return getConfiguredSource() != null

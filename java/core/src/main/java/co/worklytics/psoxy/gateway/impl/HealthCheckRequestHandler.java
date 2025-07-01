@@ -6,6 +6,7 @@ import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.rules.RulesUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dagger.Lazy;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.java.Log;
@@ -40,7 +41,7 @@ public class HealthCheckRequestHandler {
     @Inject
     SecretStore secretStore;
     @Inject
-    SourceAuthStrategy sourceAuthStrategy;
+    Lazy<SourceAuthStrategy> sourceAuthStrategy;
     @Inject
     ObjectMapper objectMapper;
     @Inject
@@ -68,7 +69,7 @@ public class HealthCheckRequestHandler {
 
     private HttpEventResponse handle(HttpEventRequest request) {
         Set<String> missing =
-                sourceAuthStrategy.getRequiredConfigProperties().stream()
+                sourceAuthStrategy.get().getRequiredConfigProperties().stream()
                         .filter(configProperty -> config.getConfigPropertyAsOptional(configProperty).isEmpty())
                         .filter(configProperty -> secretStore.getConfigPropertyAsOptional(configProperty).isEmpty())
                         .map(ConfigService.ConfigProperty::name)
@@ -106,7 +107,7 @@ public class HealthCheckRequestHandler {
             //collect toMap doesn't like null values; presumably people who see Unix-epoch will
             // recognize it means unknown/unknowable; in practice, won't be used due to filter atm
             final Instant PLACEHOLDER_FOR_NULL_LAST_MODIFIED = Instant.ofEpochMilli(0);
-            healthCheckResult.configPropertiesLastModified(sourceAuthStrategy.getAllConfigProperties().stream()
+            healthCheckResult.configPropertiesLastModified(sourceAuthStrategy.get().getAllConfigProperties().stream()
                     .map(param -> {
                         Optional<ConfigService.ConfigValueWithMetadata> fromConfig = config.getConfigPropertyWithMetadata(param);
                         if (fromConfig.isEmpty()) {
@@ -151,6 +152,12 @@ public class HealthCheckRequestHandler {
                     .ifPresent(rules -> healthCheckResult.rules(rulesUtils.asYaml(rules)));
         } catch (Throwable e) {
             logInDev("Failed to add rules to health check", e);
+        }
+
+        try {
+            sourceAuthStrategy.get().validateConfigValues().forEach(healthCheckResult::warningMessage);
+        } catch (Throwable e) {
+            logInDev("Failed to add warnings from sourceAuthStrategy to health check", e);
         }
 
         HttpEventResponse.HttpEventResponseBuilder responseBuilder = HttpEventResponse.builder();
