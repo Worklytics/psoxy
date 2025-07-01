@@ -87,6 +87,7 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
             return APIGatewayV2HTTPResponse.builder()
                 .withStatusCode(response.getStatusCode())
                 .withHeaders(response.getHeaders())
+                .withMultiValueHeaders(response.getMultivaluedHeaders())
                 .withBody(response.getBody())
                 .withIsBase64Encoded(base64Encoded)
                 .build();

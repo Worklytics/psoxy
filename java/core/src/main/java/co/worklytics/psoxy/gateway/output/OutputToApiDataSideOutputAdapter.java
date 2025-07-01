@@ -22,7 +22,7 @@ public class OutputToApiDataSideOutputAdapter implements ApiDataSideOutput {
     }
 
     @Override
-    public void write(HttpEventRequest request, ProcessedContent content) throws IOException {
+    public void write(HttpEventRequest request, ProcessedContent content) throws Output.WriteFailure {
         wrappedOutput.write(outputUtils.canonicalResponseKey(request), content);
     }
 }

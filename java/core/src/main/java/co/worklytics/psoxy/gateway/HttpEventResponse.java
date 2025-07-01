@@ -4,7 +4,9 @@ import lombok.Builder;
 import lombok.Singular;
 import lombok.ToString;
 import lombok.Value;
+import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,4 +25,18 @@ public class HttpEventResponse {
     Map<String, String> headers;
 
     String body;
+
+    @Singular
+    List<Pair<String, String>> multivaluedHeaders;
+
+    public Map<String, List<String>> getMultivaluedHeaders() {
+        return multivaluedHeaders.stream()
+            .collect(
+                java.util.stream.Collectors.groupingBy(
+                    Pair::getLeft,
+                    java.util.stream.Collectors.mapping(Pair::getRight, java.util.stream.Collectors.toList())
+                )
+            );
+    }
+
 }

@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gateway.impl;
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
+import co.worklytics.psoxy.gateway.output.Output;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
@@ -25,6 +26,7 @@ import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URIBuilder;
@@ -268,7 +270,12 @@ public class ApiDataRequestHandler {
 
             // TODO: if side output cases of the original, we *could* use the potentially compressed stream directly, instead of reading to a string?
             ProcessedContent original = this.asProcessedContent(sourceApiResponse);
-            apiDataSideOutput.write(request, original);
+            try {
+                apiDataSideOutput.write(request, original);
+            } catch (Output.WriteFailure e) {
+                log.log(Level.WARNING, "Error writing to side output for original content", e);
+                builder.multivaluedHeader(Pair.of(ResponseHeader.WARNING.getHttpHeader(), ErrorCauses.SIDE_OUTPUT_FAILURE_SANITIZED.name()));
+            }
 
             passThroughHeaders(builder, sourceApiResponse);
             if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
@@ -279,8 +286,12 @@ public class ApiDataRequestHandler {
                 sanitizationResult.getMetadata().entrySet()
                     .forEach(e -> builder.header(e.getKey(), e.getValue()));
 
-                writeSideOutput(request, sourceApiResponse, sanitizationResult);
-
+                try {
+                    writeSideOutput(request, sourceApiResponse, sanitizationResult);
+                } catch (Output.WriteFailure e) {
+                    log.log(Level.WARNING, "Error writing to side output for sanitized content", e);
+                    builder.multivaluedHeader(Pair.of(ResponseHeader.WARNING.getHttpHeader(), ErrorCauses.SIDE_OUTPUT_FAILURE_SANITIZED.name()));
+                }
 
                 if (skipSanitization) {
                     proxyResponseContent = original.getContentAsString();
@@ -329,12 +340,9 @@ public class ApiDataRequestHandler {
     }
 
 
-    void writeSideOutput(HttpEventRequest request, com.google.api.client.http.HttpResponse sourceApiResponse, ProcessedContent sanitizedContent) {
-        try {
+    void writeSideOutput(HttpEventRequest request, com.google.api.client.http.HttpResponse sourceApiResponse,
+                         ProcessedContent sanitizedContent) throws Output.WriteFailure {
             apiDataSideOutputSanitized.write(request, sanitizedContent);
-        } catch (IOException e) {
-            log.log(Level.WARNING, "Error writing to side output", e);
-        }
     }
 
 

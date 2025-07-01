@@ -80,6 +80,7 @@ public class APIGatewayV1Handler implements com.amazonaws.services.lambda.runtim
             return new APIGatewayProxyResponseEvent()
                 .withStatusCode(response.getStatusCode())
                 .withHeaders(response.getHeaders())
+                .withMultiValueHeaders(response.getMultivaluedHeaders())
                 .withBody(response.getBody())
                 .withIsBase64Encoded(base64Encoded);
         } catch (Throwable e) {

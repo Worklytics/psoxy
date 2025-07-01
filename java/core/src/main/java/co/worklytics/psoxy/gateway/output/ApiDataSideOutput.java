@@ -22,7 +22,7 @@ public interface ApiDataSideOutput {
      * @param request content is in response to
      * @param content to write to side output (maybe modified form of the response)
      */
-    void write(HttpEventRequest request, ProcessedContent content) throws IOException;
+    void write(HttpEventRequest request, ProcessedContent content) throws Output.WriteFailure;
 
 
     //q: do we need an InputStream version of this,
