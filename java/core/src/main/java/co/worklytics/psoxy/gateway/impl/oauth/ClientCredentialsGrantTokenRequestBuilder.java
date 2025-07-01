@@ -79,8 +79,9 @@ public class ClientCredentialsGrantTokenRequestBuilder
         }
     }
 
-    // 'client_credentials' is MSFT
-    //for Google, this is "urn:ietf:params:oauth:grant-type:jwt-bearer"
+    // 'client_credentials' is MSFT (this is also the 'default' per RFC 6749 4.4)
+    //for Google, this is "urn:ietf:params:oauth:grant-type:jwt-bearer" - a legit 'extension' to the RFC, allowed under RFC 6749 4.5
+    // see: https://datatracker.ietf.org/doc/html/rfc6749#section-4.5
     @Getter(onMethod_ = @Override)
     private final String grantType = GRANT_TYPE;
 
