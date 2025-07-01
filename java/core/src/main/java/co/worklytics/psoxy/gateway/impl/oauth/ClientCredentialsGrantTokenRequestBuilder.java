@@ -65,7 +65,20 @@ public class ClientCredentialsGrantTokenRequestBuilder
         // https://www.rfc-editor.org/rfc/rfc6749
         CLIENT_SECRET,
         // https://www.rfc-editor.org/rfc/rfc7523
-        JWT_ASSERTION
+        JWT_ASSERTION,
+        ;
+
+        static Optional<CredentialFlowType> parse(String configValue) {
+            if (configValue == null || configValue.isEmpty()) {
+                return Optional.empty();
+            }
+            return switch (configValue.toLowerCase(Locale.ROOT)) {
+                case "client_secret" -> Optional.of(CLIENT_SECRET);
+                case "jwt_assertion" -> Optional.of(JWT_ASSERTION);
+                default ->
+                    throw new IllegalArgumentException("Unknown credential flow type configured: " + configValue);
+            };
+        }
     }
 
     // 'client_credentials' is MSFT
@@ -263,18 +276,9 @@ public class ClientCredentialsGrantTokenRequestBuilder
     }
 
     private CredentialFlowType getCredentialsType() {
-        AtomicReference<CredentialFlowType> result = new AtomicReference<>(CredentialFlowType.JWT_ASSERTION);
-
-        config.getConfigPropertyAsOptional(ConfigProperty.CREDENTIALS_FLOW)
-                .ifPresent(i -> {
-                    if (i.equalsIgnoreCase("client_secret")) {
-                        result.set(CredentialFlowType.CLIENT_SECRET);
-                    } else {
-                        result.set(CredentialFlowType.JWT_ASSERTION);
-                    }
-                });
-
-        return result.get();
+        return config.getConfigPropertyAsOptional(ConfigProperty.CREDENTIALS_FLOW)
+            .map(v -> CredentialFlowType.parse(v).orElse(CredentialFlowType.JWT_ASSERTION))
+            .orElse(CredentialFlowType.JWT_ASSERTION);
     }
 
     private String getClientId() {
