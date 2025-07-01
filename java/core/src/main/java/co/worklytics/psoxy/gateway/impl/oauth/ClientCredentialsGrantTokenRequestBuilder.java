@@ -136,6 +136,8 @@ public class ClientCredentialsGrantTokenRequestBuilder
     public HttpContent buildPayload() {
 
         Map<String, String> data;
+
+        // TODO: refactor, to avoid this "mode" thing
         if (getCredentialsType().equals(CredentialFlowType.CLIENT_SECRET)) {
             data = buildClientSecretPayload();
         } else {
@@ -277,6 +279,34 @@ public class ClientCredentialsGrantTokenRequestBuilder
             throw new IOException("Private key spec couldn't be read", e);
         }
     }
+
+    @Override
+    public List<String> validateConfigValues() {
+        List<String> errors = new ArrayList<>();
+
+        if (getCredentialsType() == CredentialFlowType.CLIENT_SECRET) {
+            if (StringUtils.isBlank(secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET))) {
+                errors.add("Blank CLIENT_SECRET in secret store");
+            }
+        } else {
+            if (StringUtils.isBlank(secretStore.getConfigPropertyOrError(ConfigProperty.PRIVATE_KEY_ID))) {
+                errors.add("Blank PRIVATE_KEY_ID in secret store");
+            }
+            if (StringUtils.isBlank(secretStore.getConfigPropertyOrError(ConfigProperty.PRIVATE_KEY))) {
+                errors.add("Blank PRIVATE_KEY in secret store");
+            }
+
+            // parse the private key to ensure it is valid
+            try {
+                getPrivateKey();
+            } catch (IOException e) {
+                errors.add("Invalid PRIVATE_KEY in secret store: " + e.getMessage());
+            }
+        }
+
+        return errors;
+    }
+
 
     private CredentialFlowType getCredentialsType() {
         return config.getConfigPropertyAsOptional(ConfigProperty.CREDENTIALS_FLOW)
