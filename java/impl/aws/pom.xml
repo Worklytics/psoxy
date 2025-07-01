@@ -155,12 +155,12 @@
         <dependency>
             <groupId>com.newrelic.opentracing</groupId>
             <artifactId>java-aws-lambda</artifactId>
-            <version>2.1.0</version>
+            <version>2.1.1</version>
         </dependency>
         <dependency>
             <groupId>com.newrelic.opentracing</groupId>
             <artifactId>newrelic-java-lambda</artifactId>
-            <version>2.2.1</version>
+            <version>2.2.3</version>
         </dependency>
         <dependency>
             <groupId>io.opentracing</groupId>
