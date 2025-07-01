@@ -17,7 +17,40 @@ import java.util.stream.Collectors;
 public class OutputToApiDataSideOutputAdapter implements ApiDataSideOutput {
 
 
+    public enum SideOutputObjectMetadata {
+
+        /**
+         * the host to which the request was sent, eg, api.saas-tool.com
+         */
+        HOST,
+
+        /**
+         * the HTTP method of the request, eg, GET, POST, PUT, DELETE
+         */
+        HTTP_METHOD,
+
+        /**
+         * the path of the request
+         */
+        PATH,
+
+        /**
+         * query string of the request, if any
+         */
+        QUERY_STRING,
+
+        /**
+         * base64-encoded body of the request, if any (eg, for POST requests)
+         */
+        BODY,
+
+        ;
+    }
+
+
     final Output wrappedOutput;
+
+    final Base64.Encoder encoder = Base64.getEncoder();
 
     @AssistedInject
     public OutputToApiDataSideOutputAdapter(@Assisted Output wrappedOutput) {
@@ -26,7 +59,7 @@ public class OutputToApiDataSideOutputAdapter implements ApiDataSideOutput {
 
     @Override
     public void write(HttpEventRequest request, ProcessedContent content) throws IOException {
-        // exploits mutability of content.metadata ...
+        // exploits mutability of content.metadata; could copy first if we want to be certain
         buildMetadata(request).forEach(content.getMetadata()::put);
 
         wrappedOutput.write(canonicalResponseKey(request), content);
@@ -54,12 +87,33 @@ public class OutputToApiDataSideOutputAdapter implements ApiDataSideOutput {
             + hashQueryAndHeaders(request).map(s -> "_" + s).orElse("");
     }
 
+    /**
+     * builds metadata for output object based on request, which intended for writing to GCS/S3 metadata
+     *
+     * (Azure Blob Storage metadata support is more limited, so likely this will not work there)
+     *
+     * does NOT enforce platform-specific constraints on metadata keys/values; we leave it to the platform
+     * implementation to truncate/warn/encode as desired.
+     *
+     * @param request
+     * @return
+     */
     Map<String, String> buildMetadata(HttpEventRequest request) {
+
         Map<String, String> metadata = new HashMap<>();
 
         request.getHeaders().entrySet().stream()
             .filter(entry -> this.isParameterHeader(entry.getKey()))
             .forEach(entry -> metadata.put(entry.getKey(), String.join(",", entry.getValue())));
+
+        metadata.put(SideOutputObjectMetadata.HOST.name(), request.getHeader("Host").orElse(""));
+        metadata.put(SideOutputObjectMetadata.HTTP_METHOD.name(), request.getHttpMethod());
+        metadata.put(SideOutputObjectMetadata.PATH.name(), request.getPath());
+        request.getQuery().ifPresent(query -> metadata.put(SideOutputObjectMetadata.QUERY_STRING.name(), query));
+
+        Optional.ofNullable(request.getBody())
+                .map(encoder::encodeToString)
+                 .ifPresent(body -> metadata.put(SideOutputObjectMetadata.BODY.name(), body));
 
         return metadata;
     }
