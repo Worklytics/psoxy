@@ -245,6 +245,7 @@ public class ClientCredentialsGrantTokenRequestBuilder
      * get private key to be used to sign the JWT assertion
      * @return the private key
      * @throws IOException if cannot read/parse
+     * @throws NoSuchElementException if no private key is configured in the secret store
      */
     private PrivateKey getPrivateKey() throws IOException {
 
@@ -257,6 +258,9 @@ public class ClientCredentialsGrantTokenRequestBuilder
             }
         });
 
+        // TODO: flexibility to base64-encode the private key, or not
+
+
         Reader reader = new StringReader(value.getValue());
         PemReader.Section section = PemReader.readFirstSectionAndClose(reader, "PRIVATE KEY");
         if (section == null) {
@@ -267,8 +271,10 @@ public class ClientCredentialsGrantTokenRequestBuilder
         try {
             KeyFactory keyFactory = SecurityUtils.getRsaKeyFactory();
             return keyFactory.generatePrivate(keySpec);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException exception) {
-            throw new IOException("Unexpected exception reading PKCS data", exception);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IOException("Private key uses unrecognized/unsupported encryption algorithm", e);
+        } catch (InvalidKeySpecException e) {
+            throw new IOException("Private key spec couldn't be read", e);
         }
     }
 
