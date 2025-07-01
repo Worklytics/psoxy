@@ -9,15 +9,23 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * an adapter that takes an {@link Output} and wraps it to be used as an {@link ApiDataSideOutput}.
+ */
 public class OutputToApiDataSideOutputAdapter implements ApiDataSideOutput {
 
 
+    /**
+     * keys for metadata that will be added to API Data side output objects.
+     */
     public enum SideOutputObjectMetadata {
 
         /**
@@ -48,6 +56,9 @@ public class OutputToApiDataSideOutputAdapter implements ApiDataSideOutput {
         ;
     }
 
+    @Inject
+    Provider<UUID> uuidProvider;
+
 
     final Output wrappedOutput;
 
@@ -63,10 +74,25 @@ public class OutputToApiDataSideOutputAdapter implements ApiDataSideOutput {
         // exploits mutability of content.metadata; could copy first if we want to be certain
         buildMetadata(request).forEach(content.getMetadata()::put);
 
-        wrappedOutput.write(canonicalResponseKey(request), content);
+        wrappedOutput.write(sideOutputObjectKey(request), content);
+    }
+
+    String sideOutputObjectKey(HttpEventRequest request) {
+        // issues with this:
+        //  - path may contain pseudonyms, etc.
+        // - path may be highly repetitive, even just a single one per API connector
+
+
+        return request.getHeader(HttpHeaders.HOST).map(h -> h + "/").orElse("")
+            + normalizePath(request.getPath()).replace("/", "_") // replace slashes with underscores to avoid LOTS of nesting in S3/GCS ux
+            + "/"
+            + uuidProvider.get().toString();
     }
 
     /**
+     * TODO: drop this?? unused atm except for tests ... left for now in case want to revert to that approach instead host + path + uuid
+     *
+     *
      * get a canonical key for the response to be stored in the side output
      *
      * @param request the request for which the response is being written
@@ -80,6 +106,17 @@ public class OutputToApiDataSideOutputAdapter implements ApiDataSideOutput {
 
         // note: if this exceeds 1024 bytes, we should probably hash it again
 
+        // issues with this
+        //  - httpMethod will mostly be GET, and always be the same in practice
+        //  - host will be the same for all requests to the same API, so not very useful
+        // - semantics of most storage implementations will treat / as a directory separator, so in UX experience
+        //   will be poor in typical case, with 3-4 levels of nesting, before the actual content:
+        //   GET_host/ --> api --> v1 --> resource --> { list of responses }
+
+        // so options:
+        //  - use a UUID instead
+        //  - append a timestamp
+        //  - host + path + query + UUID
         return request.getHttpMethod()
             + "_"
             + request.getHeader(HttpHeaders.HOST).orElse("")
