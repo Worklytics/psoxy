@@ -15,7 +15,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
@@ -33,7 +32,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
 /**
@@ -239,8 +237,7 @@ public class ClientCredentialsGrantTokenRequestBuilder
     @SneakyThrows
     @VisibleForTesting
     String encodeKeyId(String hexKey) {
-        //TODO: replace with java.util.HexFormat.of().parseHex(s) ... but that's only from Java 17
-        byte[] fromHex = Hex.decodeHex(hexKey);
+        byte[] fromHex =  HexFormat.of().parseHex(hexKey);
         return Base64.getUrlEncoder().encodeToString(fromHex);
     }
 
