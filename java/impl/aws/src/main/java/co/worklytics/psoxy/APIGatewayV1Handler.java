@@ -11,6 +11,9 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import java.security.Security;
 
 import static co.worklytics.psoxy.ResponseCompressionHandler.isCompressionRequested;
 
@@ -45,6 +48,7 @@ public class APIGatewayV1Handler implements com.amazonaws.services.lambda.runtim
         awsContainer = DaggerAwsContainer.create();
         requestHandler = awsContainer.createHandler();
         responseCompressionHandler = new ResponseCompressionHandler();
+        Security.addProvider(new BouncyCastleProvider());
     }
 
     @Override

@@ -9,11 +9,13 @@ import com.google.cloud.functions.HttpResponse;
 
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.RandomUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.Security;
 import java.util.logging.Level;
 
 @Log
@@ -23,6 +25,10 @@ public class Route implements HttpFunction {
     CommonRequestHandler requestHandler;
     @Inject
     EnvVarsConfigService envVarsConfigService;
+
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
 
     @Override
     public void service(HttpRequest request, HttpResponse response)

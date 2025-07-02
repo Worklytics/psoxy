@@ -15,6 +15,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import io.opentracing.util.GlobalTracer;
 import com.newrelic.opentracing.aws.LambdaTracing;
 import com.newrelic.opentracing.LambdaTracer;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import java.security.Security;
 
 /**
  * default AWS lambda handler
@@ -45,6 +48,8 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
         // Register the New Relic OpenTracing LambdaTracer as the Global Tracer
         GlobalTracer.registerIfAbsent(LambdaTracer.INSTANCE);
         responseCompressionHandler = new ResponseCompressionHandler();
+
+        Security.addProvider(new BouncyCastleProvider());
     }
 
     @SneakyThrows

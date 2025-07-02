@@ -62,6 +62,36 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
         "VYvh13TyCO+EUuJ2js2zcn30Ug==\n" +
         "-----END PRIVATE KEY-----";
 
+
+    // example of what github generates, w/o openssl command to reformat
+    private final String EXAMPLE_PKCS1 = "-----BEGIN RSA PRIVATE KEY-----\n" +
+        "MIIEowIBAAKCAQEAyydvcAkQ4qRWENCouaURHjgKqX2kLCD0MHqjuay9nkDSXTQ/\n" +
+        "j5yg/nd/QFNHtVtAG/XdRXPVrpQ11eFWi5/2uEQndUqh+jc52+2dxRllaiDR3D1r\n" +
+        "s53SGf8cZ1bdlV+llBLU3e2kTZW/whwQkhT5HXb4yVUPuFEHJ18TVoXeNWjbbLUs\n" +
+        "qyjTElB0f3P/W6wBMhk+bb78+Ch1mq4DVrZEV9DlGLCJkBQrtW3EOv0GocScYwRH\n" +
+        "XHHK0Dm6Qe6nufRFnmyaHpQElns0RGhkSKgqh/75RbhnW2hrP26I40wD8uDOUEI1\n" +
+        "MW8CGOsy47FAy6mhN/0LFNRY45s2Y1D4bWJvCQIDAQABAoIBABTKZWIu21aGgPRZ\n" +
+        "llrhZL4V+CleXVXSzYrEkkrnPcSbV6wIM9ULr4I7Un+Pxk/uFcKGx+1arGygaF4K\n" +
+        "IKRLa6FyACPFzovf6QDz8WiBb9qLn06Nzp7kMONOM2b0AdtOnZBo2PYZYu45vBUu\n" +
+        "cBezI8d7LHzWQrSXPkcuOLlrG9GVSdgBOQW10rTMtFl0mg1HJdhIi7s1nRIbKgO6\n" +
+        "zA/DClNzVFo+IT9jEQEj7cRraoJ5Xf+pFMm2pDDPfEfysVi5hNURXGZUGSorwmMa\n" +
+        "pggAVIyznfUSrMVcizKVNCcRKlD0pQrbSwkwDTQK8dkiAJFjyBxZxfpw6wbYER2e\n" +
+        "DGDTQzECgYEA8OOdWiL5y0Upu9m/vjS1EFOqhMYWzwbZxAvIpHh4QNIdhIoMP6to\n" +
+        "LxkHqYtNWR2WxdiVgZUI2FDBEB41ZVn0RJDBVyujQb3cTkyteqXMhyP2hKQgsbPo\n" +
+        "GFSdT3auz0tg+zoAjWTJfw1luA7R1ycaRau73bhtrI1PklngfjhSUx0CgYEA1+XX\n" +
+        "ZFckcRYJ3Bmp5C1LBc6nXhi9H6PQsV8Tysn4d2KFnrZ4y5w3BZKhTtmghwIG9sEg\n" +
+        "Pd3gCdcU7OF2kRBO4Nq+exuIimwIVpJaCMulm6QmlYGygp7we0HT1HTsPTzbPVSc\n" +
+        "p5cXi9H+tX6UAIKdRSz9L31/Y47IOeaVsUB9O90CgYAxnvF+682A7dJW+9ffmoPh\n" +
+        "xRpPF28DXmnlVHgUSSycTav+7WDwjKJ9cS5+4k8gmFPClYbWlpin1pquc0qUgh8r\n" +
+        "MJZjGn4awL1s86aYqSakf+f8EsMZV/HrcSKmh9Aiq2hi1+PdPHG1VlEpxQO8yjVD\n" +
+        "PMkKNz+AV+uYPiNcXMW4kQKBgF6HlVqqyRr2slR7rCZrKnkdday+mjg7SsoOviTB\n" +
+        "cBgdvDG05YkJGhJHlHdo1F+opJHwF4TfHBRS5yecxIRZpp/PRy2x7YPmL3RwWhmV\n" +
+        "ySovonE9u4JzwwnE1dIla7aYacodvQWoIzgmNycSiAz9I41BWI4tndRilQq9Cnf0\n" +
+        "q6DFAoGBAJhcljXoVimdRzyU4YjzgXvscvO8Hr8Dm+NkFWDot5DPqBbuW2oula03\n" +
+        "3iWLdz+cZPzqVN3wMcCss8bZACYT+ZLVaNlI4fvUYJISCw4NqoWyXEaux4uFsZu8\n" +
+        "BGU+vEfLdZg58u5GOZ6gwxEFu0tx8mX3TdbRYhuXtY7P0zgUrzTs\n" +
+        "-----END RSA PRIVATE KEY-----";
+
     @Inject
     ConfigService configService;
     @Inject
@@ -256,6 +286,50 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
         when(secretStore.getConfigPropertyWithMetadata(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
             .thenReturn(Optional.of(ConfigService.ConfigValueWithMetadata.builder().value(withNewlines).build()));
         assertNotNull(payloadBuilder.getPrivateKey(), "Should parse private key with extra new lines");
+    }
+
+
+    @SneakyThrows
+    @Test
+    public void getPkcs1Key_variousFormats() {
+
+        // 0. Plain private key
+        when(secretStore.getConfigPropertyWithMetadata(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
+            .thenReturn(Optional.empty());
+        String plain = EXAMPLE_PKCS1;
+        when(secretStore.getConfigPropertyWithMetadata(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
+            .thenReturn(Optional.of(ConfigService.ConfigValueWithMetadata.builder().value(plain).build()));
+        assertNotNull(payloadBuilder.getPrivateKey(), "Should parse base64-encoded private key");
+
+        // 1. Base64-encoded private key
+        String base64Encoded = java.util.Base64.getEncoder().encodeToString(EXAMPLE_PKCS1.getBytes());
+        when(secretStore.getConfigPropertyWithMetadata(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
+            .thenReturn(Optional.of(ConfigService.ConfigValueWithMetadata.builder().value(base64Encoded).build()));
+        assertNotNull(payloadBuilder.getPrivateKey(), "Should parse base64-encoded private key");
+
+        // 2. Private key with extra whitespace
+        String withWhitespace = "   " + EXAMPLE_PKCS1 + "   ";
+        when(secretStore.getConfigPropertyWithMetadata(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
+            .thenReturn(Optional.of(ConfigService.ConfigValueWithMetadata.builder().value(withWhitespace).build()));
+        assertNotNull(payloadBuilder.getPrivateKey(), "Should parse private key with extra whitespace");
+
+        // 3. Private key with extra new lines
+        String withNewlines = "\r\n  \r\n " + EXAMPLE_PKCS1 + "  \n\r\n";
+        when(secretStore.getConfigPropertyWithMetadata(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
+            .thenReturn(Optional.of(ConfigService.ConfigValueWithMetadata.builder().value(withNewlines).build()));
+        assertNotNull(payloadBuilder.getPrivateKey(), "Should parse private key with extra new lines");
+    }
+
+    @SneakyThrows
+    @Test
+    public void parsePKCS1() {
+        assertNotNull(payloadBuilder.parsePrivateKey(EXAMPLE_PKCS1));
+    }
+
+    @SneakyThrows
+    @Test
+    public void parsePKCS8() {
+        assertNotNull(payloadBuilder.parsePrivateKey(EXAMPLE_PRIVATE_KEY));
     }
 
 }

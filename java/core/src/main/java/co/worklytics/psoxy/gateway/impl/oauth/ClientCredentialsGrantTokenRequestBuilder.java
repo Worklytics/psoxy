@@ -8,7 +8,6 @@ import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.webtoken.JsonWebSignature;
 import com.google.api.client.json.webtoken.JsonWebToken;
-import com.google.api.client.util.PemReader;
 import com.google.api.client.util.SecurityUtils;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
@@ -17,16 +16,20 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
-
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.pkcs.RSAPrivateKey;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.StringReader;
 import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Clock;
 import java.time.Duration;
@@ -35,6 +38,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * implementation of an Access Token Request (per RFC6749 4.4.2) authenticated by an assertion (RFC 7521)
@@ -236,7 +241,6 @@ public class ClientCredentialsGrantTokenRequestBuilder
 
     @VisibleForTesting
     PrivateKey getPrivateKey() throws IOException {
-
         ConfigService.ConfigValueWithMetadata value = secretStore.getConfigPropertyWithMetadata(ConfigProperty.PRIVATE_KEY)
             .orElseThrow(() -> new NoSuchElementException("No PRIVATE_KEY found in secret store"));
 
@@ -251,38 +255,56 @@ public class ClientCredentialsGrantTokenRequestBuilder
         }
 
         String keyAsString = StringUtils.trimToEmpty(value.getValue());
-
-        PKCS8EncodedKeySpec keySpec;
+        String base64DecodedKey;
         try {
-            //attempt parsing directly
-            keySpec = parseToKeySpec(keyAsString);
-        } catch (IOException e) {
-            //failed, try base64-decoding first
+            base64DecodedKey = new String(Base64.getDecoder().decode(keyAsString.getBytes()));
+        } catch (IllegalArgumentException e) {
+            base64DecodedKey = null;
+        }
+
+        List<String> possibleKeys =
+        Stream.of(keyAsString, base64DecodedKey)
+            .filter(StringUtils::isNotBlank)
+            .collect(Collectors.toList());
+
+        for (String possibleKey : possibleKeys) {
             try {
-                String decoded = new String(Base64.getDecoder().decode(keyAsString.getBytes()));
-                keySpec = parseToKeySpec(decoded);
-            } catch (IOException exceptionParsingBase64EncodedKey) {
-                throw new IOException("Failed to parse secret value directlly to key spec, or via base64-decoding", exceptionParsingBase64EncodedKey);
+                PrivateKey privateKey = parsePrivateKey(possibleKey);
+                return privateKey;
+            } catch (Exception pkcs1e) {
+                //suppress
             }
         }
-
-
-        try {
-            KeyFactory keyFactory = SecurityUtils.getRsaKeyFactory();
-            return keyFactory.generatePrivate(keySpec);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException exception) {
-            throw new IOException("Unexpected exception reading PKCS data", exception);
-        }
+        throw new IllegalArgumentException("Could not parse value of private key found in secret store");
     }
 
-    PKCS8EncodedKeySpec parseToKeySpec(String keyString) throws IOException {
-        Reader reader = new StringReader(keyString);
-        PemReader.Section section = PemReader.readFirstSectionAndClose(reader, "PRIVATE KEY");
-        if (section == null) {
-            throw new IOException("Invalid PKCS8 data - could not find 'PRIVATE KEY' section");
+    @VisibleForTesting
+    PrivateKey parsePrivateKey(String pemString) throws Exception {
+        try (PEMParser pemParser = new PEMParser(new StringReader(pemString))) {
+            Object object = pemParser.readObject();
+            if (object == null) {
+                throw new IllegalArgumentException("PEMParser returned null");
+            }
+
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+
+            if (object instanceof PEMKeyPair) {
+                return converter.getKeyPair((PEMKeyPair) object).getPrivate();
+            } else if (object instanceof PrivateKeyInfo) {
+                return converter.getPrivateKey((PrivateKeyInfo) object);
+            } else if (object instanceof RSAPrivateKey) {
+                // Convert PKCS#1 to PKCS#8
+                RSAPrivateKey rsa = (RSAPrivateKey) object;
+                ASN1Primitive primitive = rsa.toASN1Primitive();
+                byte[] encoded = primitive.getEncoded();
+                PrivateKeyInfo pkcs8 = new PrivateKeyInfo(
+                    new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption),
+                    ASN1Primitive.fromByteArray(encoded));
+                return converter.getPrivateKey(pkcs8);
+            } else {
+                throw new IllegalArgumentException("Unsupported key format: " + object.getClass());
+            }
         }
-        byte[] bytes = section.getBase64DecodedBytes();
-        return new PKCS8EncodedKeySpec(bytes);
     }
 
 
