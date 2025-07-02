@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
+
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
@@ -255,7 +256,6 @@ public class ClientCredentialsGrantTokenRequestBuilder
      * @throws IOException if cannot read/parse
      * @throws NoSuchElementException if no private key is configured in the secret store
      */
-
     @VisibleForTesting
     PrivateKey getPrivateKey() throws IOException {
         ConfigService.ConfigValueWithMetadata value = secretStore.getConfigPropertyWithMetadata(ConfigProperty.PRIVATE_KEY)
@@ -268,7 +268,12 @@ public class ClientCredentialsGrantTokenRequestBuilder
         });
 
 
+        if (StringUtils.isBlank(value.getValue())) {
+            throw new IOException("Private key is blank in secret store");
+        }
+
         String keyAsString = StringUtils.trimToEmpty(value.getValue());
+
         String base64DecodedKey;
         try {
             base64DecodedKey = new String(Base64.getDecoder().decode(keyAsString.getBytes()));

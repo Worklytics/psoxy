@@ -257,9 +257,36 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
             .setX509Thumbprint(eq(payloadBuilder.encodeKeyId("6FCC8E28F6A63B4E994ED62F52BDF3C3B0B7E88B")));
     }
 
+    @SneakyThrows
+    @Test
+    public void getPrivateKey_variousFormats() {
 
+        // 0. Plain private key
+        when(secretStore.getConfigPropertyWithMetadata(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
+            .thenReturn(Optional.empty());
+        String plain = EXAMPLE_PRIVATE_KEY;
+        when(secretStore.getConfigPropertyWithMetadata(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
+            .thenReturn(Optional.of(ConfigService.ConfigValueWithMetadata.builder().value(plain).build()));
+        assertNotNull(payloadBuilder.getPrivateKey(), "Should parse base64-encoded private key");
 
+        // 1. Base64-encoded private key
+        String base64Encoded = java.util.Base64.getEncoder().encodeToString(EXAMPLE_PRIVATE_KEY.getBytes());
+        when(secretStore.getConfigPropertyWithMetadata(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
+            .thenReturn(Optional.of(ConfigService.ConfigValueWithMetadata.builder().value(base64Encoded).build()));
+        assertNotNull(payloadBuilder.getPrivateKey(), "Should parse base64-encoded private key");
 
+        // 2. Private key with extra whitespace
+        String withWhitespace = "   " + EXAMPLE_PRIVATE_KEY + "   ";
+        when(secretStore.getConfigPropertyWithMetadata(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
+            .thenReturn(Optional.of(ConfigService.ConfigValueWithMetadata.builder().value(withWhitespace).build()));
+        assertNotNull(payloadBuilder.getPrivateKey(), "Should parse private key with extra whitespace");
+
+        // 3. Private key with extra new lines
+        String withNewlines = "\r\n  \r\n " + EXAMPLE_PRIVATE_KEY + "  \n\r\n";
+        when(secretStore.getConfigPropertyWithMetadata(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.PRIVATE_KEY))
+            .thenReturn(Optional.of(ConfigService.ConfigValueWithMetadata.builder().value(withNewlines).build()));
+        assertNotNull(payloadBuilder.getPrivateKey(), "Should parse private key with extra new lines");
+    }
 
 
     @SneakyThrows
