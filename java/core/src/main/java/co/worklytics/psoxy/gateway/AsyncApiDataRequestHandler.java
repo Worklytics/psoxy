@@ -17,8 +17,14 @@ public interface AsyncApiDataRequestHandler {
     /**
      * handles an API data request asynchronously
      *
-     * @param request to handle asynchronously
+     * TODO: refactor this; if we're parsing HttpEventRequest --> sourceApiRequest before "accepting" it for processing, then pass that in here instead
+     * of requestToProxy ??
+     *    - drawback is that makes flow for sync/async handling different
+     *
+     *    but esp in GCP case, if that's handled in-process, then *re-processing* the requestToProxy --> sourceApiRequest is painful.
+     *
+     * @param requestToProxy to handle asynchronously
      */
-    void handle(HttpEventRequest request, ApiDataRequestHandler.ProcessingContext processingContext);
+    void handle(HttpEventRequest requestToProxy, ApiDataRequestHandler.ProcessingContext processingContext);
 
 }
