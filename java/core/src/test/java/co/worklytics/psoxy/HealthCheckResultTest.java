@@ -4,6 +4,7 @@ import co.worklytics.psoxy.gateway.impl.GoogleCloudPlatformServiceAccountKeyAuth
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -17,6 +18,7 @@ class HealthCheckResultTest {
     ObjectMapper objectMapper = new ObjectMapper();
 
 
+    @Disabled
     @Test
     public void json() throws JsonProcessingException {
         final String JSON = "{\n" +

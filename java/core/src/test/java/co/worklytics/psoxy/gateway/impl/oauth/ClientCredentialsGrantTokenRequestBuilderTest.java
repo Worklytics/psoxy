@@ -12,6 +12,8 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.webtoken.JsonWebSignature;
 import dagger.Component;
 import lombok.SneakyThrows;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import java.io.ByteArrayOutputStream;
+import java.security.Security;
 import java.time.Clock;
 import java.util.Optional;
 
@@ -116,6 +119,11 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
         void inject(ClientCredentialsGrantTokenRequestBuilderTest test);
     }
 
+    @BeforeAll
+    public static void registerProvider() {
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
     @BeforeEach
     public void setup() {
         ClientCredentialsGrantTokenRequestBuilderTest.Container container =
@@ -129,7 +137,6 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
         when(configService.getConfigPropertyAsOptional(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.TOKEN_SCOPE))
             .thenReturn(Optional.of("https://graph.microsoft.com/.default"));
     }
-
 
 
     @SneakyThrows
