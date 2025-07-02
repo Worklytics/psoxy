@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.gateway.output;
 
-import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.ProcessedContent;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 
 import java.io.IOException;
 
@@ -16,34 +16,17 @@ import java.io.IOException;
  */
 public interface ApiDataSideOutput {
 
-
     /**
-     * generate a side output key for the given request.
-     * @param request to generate a key for
-     * @return a key that can be used to retrieve the side output object for this request.
-     */
-    String sideOutputObjectKey(HttpEventRequest request);
-
-    /**
-     * writes content, retrieved in response to the request, to this side output, if enabled
+     * writes raw content, retrieved in response to the request, to this side output, if enabled
      *
-     * @param request content is in response to
      * @param content to write to side output (maybe modified form of the response)
      */
-    void write(HttpEventRequest request, ProcessedContent content) throws IOException;
-
+    void writeRaw(ProcessedContent content, ApiDataRequestHandler.ProcessingContext processingContext) throws IOException;
 
     /**
-     * writes content, retrieved in response to the request, to this side output with given side output key, if enabled
+     * writes sanitized content, retrieved in response to the request, to this side output, if enabled
      *
-     * @param request
-     * @param content
-     * @param sideOutputKey
-     * @throws IOException
+     * @param content to write to side output (maybe modified form of the response)
      */
-    void write(HttpEventRequest request, ProcessedContent content, String sideOutputKey) throws IOException;
-
-    //q: do we need an InputStream version of write()??
-
-
+    void writeSanitized(ProcessedContent content, ApiDataRequestHandler.ProcessingContext processingContext) throws IOException;
 }

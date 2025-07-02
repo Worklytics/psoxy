@@ -10,6 +10,7 @@ import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.rules.msft.PrebuiltSanitizerRules;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
@@ -57,6 +58,8 @@ class ApiDataRequestHandlerTest {
             MockModules.ForSourceAuthStrategySet.class,
            MockModules.ForHttpTransportFactory.class,
         MockModules.ForSideOutputs.class,
+        MockModules.ForAsyncApiDataRequestHandler.class,
+        TestModules.ForFixedUUID.class,
     })
     public interface Container {
         void inject(ApiDataRequestHandlerTest test);

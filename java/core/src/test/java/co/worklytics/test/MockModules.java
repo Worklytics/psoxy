@@ -1,6 +1,7 @@
 package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
@@ -24,6 +25,8 @@ import org.mockito.MockMakers;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+
+import java.io.IOException;
 
 import static org.mockito.Mockito.*;
 
@@ -166,16 +169,26 @@ public class MockModules {
         class NoApiDataSideOutput implements ApiDataSideOutput {
 
             @Override
-            public String sideOutputObjectKey(HttpEventRequest request) {
-                return null;
+            public void writeRaw(ProcessedContent content, ApiDataRequestHandler.ProcessingContext processingContext) throws IOException {
+
             }
 
             @Override
-            public void write(HttpEventRequest request, ProcessedContent content) {
-                // no-op
+            public void writeSanitized(ProcessedContent content, ApiDataRequestHandler.ProcessingContext processingContext) throws IOException {
+
             }
         }
 
+    }
+
+    @Module
+    public interface ForAsyncApiDataRequestHandler {
+
+        @Provides
+        @Singleton
+        static AsyncApiDataRequestHandler asyncApiDataRequestHandler() {
+            return mock(AsyncApiDataRequestHandler.class);
+        }
     }
 }
 

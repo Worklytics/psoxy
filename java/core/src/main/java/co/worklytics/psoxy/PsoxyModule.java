@@ -34,9 +34,7 @@ import lombok.extern.java.Log;
 import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -316,5 +314,10 @@ public class PsoxyModule {
     @Provides
     Base64KeyClient base64KeyClient() {
         return new Base64KeyClient();
+    }
+
+    @Provides
+    Base64.Encoder provideBase64Encoder() {
+        return Base64.getEncoder();
     }
 }

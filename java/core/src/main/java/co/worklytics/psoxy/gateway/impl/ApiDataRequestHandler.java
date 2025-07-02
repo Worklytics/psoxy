@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.output.ApiDataOutputUtils;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
@@ -33,9 +34,10 @@ import org.apache.http.entity.ContentType;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -76,11 +78,12 @@ public class ApiDataRequestHandler {
     UrlSafeTokenPseudonymEncoder pseudonymEncoder;
     @Inject
     HttpTransportFactory httpTransportFactory;
-
     @Inject @Named("forOriginal")
     ApiDataSideOutput apiDataSideOutput;
     @Inject @Named("forSanitized")
     ApiDataSideOutput apiDataSideOutputSanitized;
+    @Inject
+    ApiDataOutputUtils apiDataOutputUtils;
 
     // lazy-loaded, to avoid circular dependency issues; and bc unused in 99.9% of situations
     @Inject
@@ -255,14 +258,14 @@ public class ApiDataRequestHandler {
         if (!processingContext.getAsync() && requestToProxy.getHeader(ControlHeader.PROCESS_ASYNC.getHttpHeader()).map(Boolean::parseBoolean).orElse(false)) {
             log.info("Requested for async processing");
 
-            // create a
+            // create an async processing context
             ProcessingContext.ProcessingContextBuilder processingContextBuilder = ProcessingContext.builder()
                 .async(true);
             processingContextBuilder.rawOutputKey(Optional.ofNullable(processingContext.getRawOutputKey())
-                .orElseGet(() -> apiDataSideOutput.sideOutputObjectKey(requestToProxy)));
+                .orElseGet(() -> apiDataOutputUtils.buildRawOutputKey(requestToSourceApi)));
 
             processingContextBuilder.sanitizedOutputKey(Optional.ofNullable(processingContext.getSanitizedOutputKey())
-                .orElseGet(() -> apiDataSideOutputSanitized.sideOutputObjectKey(requestToProxy)));
+                .orElseGet(() -> apiDataOutputUtils.buildSanitizedOutputKey(requestToProxy)));
 
             ProcessingContext asyncProcessingContext = processingContextBuilder.build();
             try {
@@ -306,20 +309,18 @@ public class ApiDataRequestHandler {
             builder.statusCode(sourceApiResponse.getStatusCode());
 
             // TODO: if side output cases of the original, we *could* use the potentially compressed stream directly, instead of reading to a string?
-            ProcessedContent original = this.asProcessedContent(sourceApiResponse);
-            apiDataSideOutput.write(requestToProxy, original);
+            ProcessedContent original = apiDataOutputUtils.responseAsRawProcessedContent(requestToSourceApi, sourceApiResponse);
+            apiDataSideOutput.writeRaw(original, processingContext);
 
             passThroughHeaders(builder, sourceApiResponse);
             if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
-                ProcessedContent sanitizationResult =
-                    sanitize(requestToProxy, requestUrls, original);
+                ProcessedContent sanitizationResult = sanitize(requestToProxy, requestUrls, original);
                 proxyResponseContent = sanitizationResult.getContentAsString();
 
                 sanitizationResult.getMetadata().entrySet()
                     .forEach(e -> builder.header(e.getKey(), e.getValue()));
 
-                writeSideOutput(requestToProxy, sourceApiResponse, sanitizationResult);
-
+                apiDataSideOutputSanitized.writeSanitized(sanitizationResult, processingContext);
 
                 if (skipSanitization) {
                     proxyResponseContent = original.getContentAsString();
@@ -335,18 +336,6 @@ public class ApiDataRequestHandler {
         } finally {
             sourceApiResponse.disconnect();
         }
-    }
-
-    ProcessedContent asProcessedContent(HttpResponse sourceApiResponse) throws IOException {
-        ProcessedContent.ProcessedContentBuilder builder = ProcessedContent.builder()
-            .contentType(sourceApiResponse.getContentType())
-            .contentCharset(sourceApiResponse.getContentCharset());
-
-        try (InputStream stream = sourceApiResponse.getContent()) {
-            builder.content(stream.readAllBytes());
-        }
-
-        return builder.build();
     }
 
     ProcessedContent sanitize(HttpEventRequest request, RequestUrls requestUrls, ProcessedContent originalContent) {
@@ -371,14 +360,6 @@ public class ApiDataRequestHandler {
             .build();
     }
 
-
-    void writeSideOutput(HttpEventRequest request, com.google.api.client.http.HttpResponse sourceApiResponse, ProcessedContent sanitizedContent) {
-        try {
-            apiDataSideOutputSanitized.write(request, sanitizedContent);
-        } catch (IOException e) {
-            log.log(Level.WARNING, "Error writing to side output", e);
-        }
-    }
 
 
     @Value
@@ -623,5 +604,16 @@ public class ApiDataRequestHandler {
                 .async(false)
                 .build();
         }
+    }
+
+
+
+    private String normalizePath(String rawPath) {
+        // Remove leading/trailing slashes and URL-decode
+        if (rawPath == null || rawPath.isEmpty()) return "";
+        return Arrays.stream(rawPath.split("/"))
+            .filter(s -> !s.isEmpty())
+            .map(part -> URLDecoder.decode(part, StandardCharsets.UTF_8))
+            .collect(Collectors.joining("/"));
     }
 }

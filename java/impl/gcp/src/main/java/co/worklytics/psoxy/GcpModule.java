@@ -126,5 +126,8 @@ public interface GcpModule {
         @Binds
         abstract OutputFactory<?> outputFactory(GCSOutputFactory outputFactory);
 
+        @Binds
+        abstract AsyncApiDataRequestHandler asyncApiDataRequestHandler(GcpAsyncApiDataRequestHandler asyncApiDataRequestHandler);
+
     }
 }
