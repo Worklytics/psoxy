@@ -21,8 +21,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.Security;
 import java.time.Instant;
 import java.util.logging.Level;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  * AWS lambda entrypoint that can handle API data requests via any of:
@@ -55,6 +57,7 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
         requestHandler = awsContainer.apiDataRequestHandler();
         responseCompressionHandler = new ResponseCompressionHandler();
         lambdaEventUtils = awsContainer.lambdaEventUtils();
+        Security.addProvider(new BouncyCastleProvider());
     }
 
     @Override
