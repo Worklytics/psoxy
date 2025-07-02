@@ -13,13 +13,11 @@ import com.google.api.client.util.SecurityUtils;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.IOException;
@@ -33,7 +31,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -158,7 +155,7 @@ public class ClientCredentialsGrantTokenRequestBuilder
         JsonWebToken.Payload payload = buildPayload(clientId, audience);
 
         return JsonWebSignature.signUsingRsaSha256(
-                getServiceAccountPrivateKey(), jsonFactory, header, payload);
+                getPrivateKey(), jsonFactory, header, payload);
     }
 
     @VisibleForTesting
@@ -237,7 +234,8 @@ public class ClientCredentialsGrantTokenRequestBuilder
         return Base64.getUrlEncoder().encodeToString(fromHex);
     }
 
-    private PrivateKey getServiceAccountPrivateKey() throws IOException {
+    @VisibleForTesting
+    PrivateKey getPrivateKey() throws IOException {
 
         ConfigService.ConfigValueWithMetadata value = secretStore.getConfigPropertyWithMetadata(ConfigProperty.PRIVATE_KEY)
             .orElseThrow(() -> new NoSuchElementException("No PRIVATE_KEY found in secret store"));
@@ -248,13 +246,27 @@ public class ClientCredentialsGrantTokenRequestBuilder
             }
         });
 
-        Reader reader = new StringReader(value.getValue());
-        PemReader.Section section = PemReader.readFirstSectionAndClose(reader, "PRIVATE KEY");
-        if (section == null) {
-            throw new IOException("Invalid PKCS8 data.");
+        if (StringUtils.isBlank(value.getValue())) {
+            throw new IOException("Private key is blank in secret store");
         }
-        byte[] bytes = section.getBase64DecodedBytes();
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(bytes);
+
+        String keyAsString = StringUtils.trimToEmpty(value.getValue());
+
+        PKCS8EncodedKeySpec keySpec;
+        try {
+            //attempt parsing directly
+            keySpec = parseToKeySpec(keyAsString);
+        } catch (IOException e) {
+            //failed, try base64-decoding first
+            try {
+                String decoded = new String(Base64.getDecoder().decode(keyAsString.getBytes()));
+                keySpec = parseToKeySpec(decoded);
+            } catch (IOException exceptionParsingBase64EncodedKey) {
+                throw new IOException("Failed to parse secret value directlly to key spec, or via base64-decoding", exceptionParsingBase64EncodedKey);
+            }
+        }
+
+
         try {
             KeyFactory keyFactory = SecurityUtils.getRsaKeyFactory();
             return keyFactory.generatePrivate(keySpec);
@@ -262,6 +274,17 @@ public class ClientCredentialsGrantTokenRequestBuilder
             throw new IOException("Unexpected exception reading PKCS data", exception);
         }
     }
+
+    PKCS8EncodedKeySpec parseToKeySpec(String keyString) throws IOException {
+        Reader reader = new StringReader(keyString);
+        PemReader.Section section = PemReader.readFirstSectionAndClose(reader, "PRIVATE KEY");
+        if (section == null) {
+            throw new IOException("Invalid PKCS8 data - could not find 'PRIVATE KEY' section");
+        }
+        byte[] bytes = section.getBase64DecodedBytes();
+        return new PKCS8EncodedKeySpec(bytes);
+    }
+
 
     @Override
     public List<String> validateConfigValues() {
