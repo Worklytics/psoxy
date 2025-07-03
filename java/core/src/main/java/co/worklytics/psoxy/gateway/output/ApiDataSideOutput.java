@@ -14,7 +14,7 @@ import java.io.IOException;
  *      - concern with this is 1) @Named injection is tedious to deal with, dependent on magic strings, hard to trace usage
  *  - SideOutputForOriginal, SideOutputForSanitized, interfaces; inject those?  almost equivalent/better than Named, just bc no magic strings to hunt for
  */
-public interface ApiDataSideOutput {
+public interface ApiDataSideOutput extends ApiSanitizedDataOutput {
 
     /**
      * writes raw content, retrieved in response to the request, to this side output, if enabled
@@ -23,10 +23,4 @@ public interface ApiDataSideOutput {
      */
     void writeRaw(ProcessedContent content, ApiDataRequestHandler.ProcessingContext processingContext) throws IOException;
 
-    /**
-     * writes sanitized content, retrieved in response to the request, to this side output, if enabled
-     *
-     * @param content to write to side output (maybe modified form of the response)
-     */
-    void writeSanitized(ProcessedContent content, ApiDataRequestHandler.ProcessingContext processingContext) throws IOException;
 }

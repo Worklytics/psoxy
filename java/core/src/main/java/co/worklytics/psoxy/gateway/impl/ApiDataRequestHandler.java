@@ -4,6 +4,7 @@ import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.output.ApiDataOutputUtils;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
+import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
@@ -78,6 +79,8 @@ public class ApiDataRequestHandler {
     UrlSafeTokenPseudonymEncoder pseudonymEncoder;
     @Inject
     HttpTransportFactory httpTransportFactory;
+    @Inject@Named("async")
+    ApiSanitizedDataOutput asyncSanitizedDataOutput;
     @Inject @Named("forOriginal")
     ApiDataSideOutput apiDataSideOutput;
     @Inject @Named("forSanitized")
@@ -320,7 +323,10 @@ public class ApiDataRequestHandler {
                 sanitizationResult.getMetadata().entrySet()
                     .forEach(e -> builder.header(e.getKey(), e.getValue()));
 
+                asyncSanitizedDataOutput.writeSanitized(sanitizationResult, processingContext);
+
                 apiDataSideOutputSanitized.writeSanitized(sanitizationResult, processingContext);
+
 
                 if (skipSanitization) {
                     proxyResponseContent = original.getContentAsString();
@@ -330,6 +336,9 @@ public class ApiDataRequestHandler {
                 log.log(Level.WARNING, "Source API Error " + original.getContent());
                 builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.API_ERROR.name());
                 proxyResponseContent = original.getContentAsString();
+
+                //q: in async case, perhaps we should write the error to the async output, too, for clarity??? could do it with metadata indicating the error to the caller, so it doesn't wait forever???
+                // if versioning is enabled in the bucket, then subsequent successful calls will overwrite the error response
             }
             builder.body(proxyResponseContent);
             return builder.build();

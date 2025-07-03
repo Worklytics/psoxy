@@ -51,6 +51,16 @@ public class OutputUtils {
         return outputToSideOutputAdapterFactory.create(outputToAdapt);
     }
 
+    public ApiSanitizedDataOutput asyncOutput() {
+        Output asyncOutput = configService.getConfigPropertyAsOptional(ProxyConfigProperty.ASYNC_OUTPUT_DESTINATION)
+            .map(OutputLocationImpl::of)
+            .map(this::createOutputForLocation)
+            .map(output -> (Output) CompressedOutputWrapper.wrap((Output) output))
+            .orElseGet(noSideProvider::get);
+
+        return outputToSideOutputAdapterFactory.create(asyncOutput);
+    }
+
     public <T extends Output> T forWebhooks() {
         return createOutputForLocation(locationForWebhooks());
     }
