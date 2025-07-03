@@ -12,7 +12,16 @@ import lombok.NoArgsConstructor;
 public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
 
 
+    /**
+     * if provided, requests to proxy with `Process-Async` header will be processed asynchronously and responses output to the target
+     * ONLY applicable in API Data Connector mode ONLY
+     *
+     */
+    ASYNC_OUTPUT_DESTINATION,
 
+    /**
+     * file name of the proxy's code bundle; helpful for monitoring and debugging purposes.
+     */
     BUNDLE_FILENAME,
 
     /**
@@ -102,6 +111,8 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     // for testing - if set, allows for behavior that should only be permitted in development context,
     // such as to skip sanitizer if corresponding header is sent
     IS_DEVELOPMENT_MODE,
+
+
 
     /**
      * **ALPHA**

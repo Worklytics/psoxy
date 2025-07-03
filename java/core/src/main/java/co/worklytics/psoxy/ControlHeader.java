@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
  * headers that control how Psoxy works
  *
  * anything passed as headers like this shouldn't have info-sec implications.
+ *
+ * NOTE: all of these are applicable ONLY in API Data Connector mode.
  */
 @RequiredArgsConstructor
 public enum ControlHeader {

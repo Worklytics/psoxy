@@ -25,6 +25,10 @@ public class ApiDataOutputUtils {
 
     /**
      * keys for metadata that will be added to API Data output objects.
+     *
+     * in all of these cases, except API_HOST, the values will be as follows:
+     *    - original (raw) case, will be the ACTUAL value sent with the request to the source API
+     *    - sanitized case, will be the value as it was sent to the proxy, which is presumably sanitized to reduce exposure of sensitive data
      */
     public enum OutputObjectMetadata {
 
@@ -52,6 +56,11 @@ public class ApiDataOutputUtils {
          * base64-encoded body of the request, if any (eg, for POST requests)
          */
         REQUEST_BODY,
+
+        //q: include response info??
+        // status code? other headers?
+
+
         ;
     }
 
