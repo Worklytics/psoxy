@@ -8,7 +8,7 @@ You'll provision the following to host Psoxy in AWS:
 - [IAM Roles and Policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html)
 - [System Manager Parameter Store Parameters](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html)
 - [CloudWatch Log Groups](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html)
-- S3 buckets, if using the 'bulk' mode to sanitize file data (such as CSVs); or [webhook collection mode](../development/alpha-features/webhook-collectors.md). see [S3 docs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html)
+- S3 buckets, if using the 'bulk' mode to sanitize file data (such as CSVs); [async API connectors](../configuration/async-api-data.md), or [webhook collection mode](../development/alpha-features/webhook-collectors.md). see [S3 docs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html)
 - [Cognito Pools and Identities](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-identity.html), if connecting to Microsoft 365 data sources
 - [Simple Query Service (SQS) queues] (https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html), if using [webhook collection mode](../development/alpha-features/webhook-collectors.md) *or* [async API connectors](../configuration/async-api-data.md)
 - [KMS Keys and Aliases](https://docs.aws.amazon.com/kms/latest/developerguide/overview.html), if using [webhook collection mode](../../docs/development/alpha-features/webhook-collectors.md)
