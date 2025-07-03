@@ -216,6 +216,17 @@ public interface AwsModule {
         return apiDataRequestViaSQSFactory.create(configService.getConfigPropertyOrError(AwsEnvironment.AwsConfigProperty.ASYNC_API_REQUEST_QUEUE_URL));
     }
 
+    @Provides
+    static AsyncApiDataRequestHandler asyncApiDataRequestHandler(ApiDataRequestViaSQS asyncApiDataRequestViaSQS) {
+
+        // tried @Binds, but:
+        // Error:  Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project psoxy-aws: Compilation failure: Compilation failure:
+        //Error:  /home/runner/work/psoxy/psoxy/java/impl/aws/src/main/java/co/worklytics/psoxy/aws/AwsModule.java:[212,33] [co.worklytics.psoxy.aws.ApiDataRequestViaSQS] Dagger does not support providing @AssistedInject types.
+        //Error:  /home/runner/work/psoxy/psoxy/java/impl/aws/src/main/java/co/worklytics/psoxy/aws/AwsModule.java:[40,27] co.worklytics.psoxy.aws.AwsModule.Bindings has errors
+        //Error:  /home/runner/work/psoxy/psoxy/java/impl/aws/src/main/java/co/worklytics/psoxy/aws/AwsModule.java:[241,93] Dagger does not support injecting @AssistedInject type, co.worklytics.psoxy.aws.ApiDataRequestViaSQS. Did you mean to inject its assisted factory type instead?
+        return asyncApiDataRequestViaSQS;
+    }
+
     @Provides @Named("lambdaEventMapper")
     static ObjectMapper provideLambdaEventMapper() {
         ObjectMapper lambdaEventMapper = new ObjectMapper();
@@ -237,8 +248,7 @@ public interface AwsModule {
         @Binds @IntoSet
         abstract PublicKeyStoreClient publicKeyStoreClient(AwsKmsPublicKeyStoreClient awsKmsPublicKeyStoreClient);
 
-        @Binds
-        abstract AsyncApiDataRequestHandler asyncApiDataRequestHandler(ApiDataRequestViaSQS asyncApiDataRequestViaSQS);
+
 
     }
 }
