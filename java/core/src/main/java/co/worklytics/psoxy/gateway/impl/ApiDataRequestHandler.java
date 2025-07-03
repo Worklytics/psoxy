@@ -79,8 +79,8 @@ public class ApiDataRequestHandler {
     UrlSafeTokenPseudonymEncoder pseudonymEncoder;
     @Inject
     HttpTransportFactory httpTransportFactory;
-    @Inject@Named("async")
-    ApiSanitizedDataOutput asyncSanitizedDataOutput;
+    @Inject @Named("async")
+    Lazy<ApiSanitizedDataOutput> asyncSanitizedDataOutput;
     @Inject @Named("forOriginal")
     ApiDataSideOutput apiDataSideOutput;
     @Inject @Named("forSanitized")
@@ -323,7 +323,9 @@ public class ApiDataRequestHandler {
                 sanitizationResult.getMetadata().entrySet()
                     .forEach(e -> builder.header(e.getKey(), e.getValue()));
 
-                asyncSanitizedDataOutput.writeSanitized(sanitizationResult, processingContext);
+                if (processingContext.getAsync()) {
+                    asyncSanitizedDataOutput.get().writeSanitized(sanitizationResult, processingContext);
+                }
 
                 apiDataSideOutputSanitized.writeSanitized(sanitizationResult, processingContext);
 
