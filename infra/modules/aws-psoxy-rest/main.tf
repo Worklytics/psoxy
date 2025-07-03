@@ -40,13 +40,36 @@ locals {
 
 }
 
-resource "random_string" "side_output_unique_sequence" {
+# a unique sequence to commonly name this instance's buckets, but distinguish them globally
+resource "random_string" "bucket_unique_sequence" {
   length  = 8
   lower   = true
   upper   = false
   special = false
   numeric = true
 }
+
+module "async_output" {
+  count = var.enable_async_processing ? 1 : 0
+
+  source = "../aws-output-s3"
+
+  environment_name = var.environment_name
+  instance_id      = var.instance_id
+  unique_sequence  = random_string.bucket_unique_sequence.result
+  bucket_suffix    = "async-output"
+}
+
+module "async_output_iam_statements" {
+  source = "../aws-bucket-read-write-iam-policy-statement"
+
+  count = var.enable_async_processing ? 1 : 0
+
+  s3_path = "s3://${module.async_output[0].bucket_id}"
+}
+
+
+# TODO: add IAM statements to allow invoker to read from async output bucket
 
 module "side_output_original" {
   count = local.provision_side_output_original_bucket ? 1 : 0
@@ -55,7 +78,7 @@ module "side_output_original" {
 
   environment_name = var.environment_name
   instance_id      = var.instance_id
-  unique_sequence  = random_string.side_output_unique_sequence.result
+  unique_sequence  = random_string.bucket_unique_sequence.result
   bucket_suffix    = "side-output-original"
 }
 
@@ -66,7 +89,7 @@ module "side_output_sanitized" {
 
   environment_name = var.environment_name
   instance_id      = var.instance_id
-  unique_sequence  = random_string.side_output_unique_sequence.result
+  unique_sequence  = random_string.bucket_unique_sequence.result
   bucket_suffix    = "side-output-sanitized"
 }
 
@@ -98,10 +121,12 @@ module "psoxy_lambda" {
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   side_output_original                 = local.provision_side_output_original_bucket ? "s3://${module.side_output_original[0].bucket_id}" : try(var.side_output_original.bucket, null)
   side_output_sanitized                = local.provision_side_output_sanitized_bucket ? "s3://${module.side_output_sanitized[0].bucket_id}" : try(var.side_output_sanitized.bucket, null)
+  lambda_role_iam_statements           = var.enable_async_processing ? module.async_output_iam_statements[0].iam_statements : []
 
   environment_variables = merge(
     var.environment_variables,
-    local.required_env_vars
+    local.required_env_vars,
+    var.enable_async_processing ? { ASYNC_OUTPUT_DESTINATION = "s3://${module.async_output[0].bucket_id}" } : {},
   )
 }
 
@@ -308,6 +333,11 @@ output "test_script" {
 
 output "test_script_content" {
   value = local.test_script
+}
+
+output "async_output_bucket_id" {
+  value       = try(module.async_output[0].bucket_id, null)
+  description = "Bucket ID of the async output bucket, if any. May have been provided by the user, or provisioned by this module."
 }
 
 output "side_output_original_bucket_id" {
