@@ -66,13 +66,13 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
           "Effect" : "Allow",
           "Resource" : [for k, v in module.api_connector : v.function_arn]
         }
-      ], 
-      # allow caller to read from async output buckets
-      [ for k, v in module.api_connector : {
-        "Action" : ["s3:GetObject", "s3:ListBucket"],
-        "Effect" : "Allow",
-        "Resource" : ["arn:aws:s3:::${v.async_output_bucket_id}", "arn:aws:s3:::${v.async_output_bucket_id}/*"]
-      } if v.async_output_bucket_id != null ]
+        ],
+        # allow caller to read from async output buckets
+        [for k, v in module.api_connector : {
+          "Action" : ["s3:GetObject", "s3:ListBucket"],
+          "Effect" : "Allow",
+          "Resource" : ["arn:aws:s3:::${v.async_output_bucket_id}", "arn:aws:s3:::${v.async_output_bucket_id}/*"]
+        } if v.async_output_bucket_id != null]
       )
   })
 
@@ -206,7 +206,7 @@ module "api_connector" {
   iam_roles_permissions_boundary        = var.iam_roles_permissions_boundary
   side_output_original                  = try(local.custom_original_side_outputs[each.key], null)
   side_output_sanitized                 = try(local.sanitized_side_outputs[each.key], null)
-  enable_async_processing             = each.value.enable_async_processing
+  enable_async_processing               = each.value.enable_async_processing
 
   todos_as_local_files = var.todos_as_local_files
   todo_step            = var.todo_step
