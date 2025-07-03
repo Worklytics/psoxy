@@ -177,6 +177,7 @@ module "api_connector" {
   bucket_write_role_id                  = module.psoxy.bucket_write_role_id
   side_output_original                  = try(local.custom_original_side_outputs[each.key], null)
   side_output_sanitized                 = try(local.sanitized_side_outputs[each.key], null)
+  enable_async_processing               = try(each.value.enable_async_processing, false)
   todos_as_local_files                  = var.todos_as_local_files
 
 

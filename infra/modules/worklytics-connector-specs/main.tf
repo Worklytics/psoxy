@@ -58,6 +58,7 @@ locals {
         },
       ]
       reserved_concurrent_executions : null
+      enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
@@ -117,6 +118,7 @@ EOT
         "GitHub Organization" = local.github_organization
       }
       reserved_concurrent_executions : null
+      enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
@@ -220,6 +222,7 @@ EOT
         "GitHub Organization" = local.github_organization
       }
       reserved_concurrent_executions : null
+      enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
