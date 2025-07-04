@@ -38,7 +38,7 @@ resource "aws_s3_bucket" "bucket" {
 resource "aws_s3_bucket_public_access_block" "output" {
   count = var.provision_bucket_public_access_block ? 1 : 0
 
-  bucket = aws_s3_bucket.output.bucket
+  bucket = aws_s3_bucket.bucket.bucket
 
   block_public_acls       = true
   block_public_policy     = true
@@ -49,7 +49,7 @@ resource "aws_s3_bucket_public_access_block" "output" {
 resource "aws_s3_bucket_lifecycle_configuration" "ttl" {
   count = (var.lifecycle_ttl_days == null || var.lifecycle_ttl_days == 0) ? 0 : 1
 
-  bucket = aws_s3_bucket.output.bucket
+  bucket = aws_s3_bucket.bucket.bucket
 
   rule {
     id     = "expire-after-${var.lifecycle_ttl_days}-days"

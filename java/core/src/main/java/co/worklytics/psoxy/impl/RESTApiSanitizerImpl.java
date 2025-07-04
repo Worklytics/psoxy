@@ -26,6 +26,7 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +39,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -123,6 +124,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             .orElse(Optional.empty());
     }
 
+    @SneakyThrows
     @Override
     public String sanitize(String httpMethod, URL url, String jsonResponse) {
         if (StringUtils.isEmpty(jsonResponse)) {
@@ -130,20 +132,27 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             return jsonResponse;
         }
         // Convert input String to InputStream (UTF-8 encoding)
-        try (InputStream input = new ByteArrayInputStream(jsonResponse.getBytes(StandardCharsets.UTF_8));
-             InputStream sanitizedStream = sanitize(httpMethod, url, input)) {
+        try (InputStream input = new ByteArrayInputStream(jsonResponse.getBytes(StandardCharsets.UTF_8))) {
+             final ProcessedStream processedStream = sanitize(httpMethod, url, input);
 
             // Read all bytes from the sanitized stream
-            byte[] sanitizedBytes = sanitizedStream.readAllBytes();
+            byte[] sanitizedBytes = processedStream.getStream().readAllBytes();
+
+            // ensure NOTHING threw an exception while processing the stream
+            processedStream.complete();
+
             return new String(sanitizedBytes, StandardCharsets.UTF_8);
         } catch (IOException e) {
             // Wrap IOException in unchecked exception, or handle as needed
             throw new UncheckedIOException("Failed to sanitize content", e);
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
+    @SneakyThrows
     @Override
-    public InputStream sanitize(String httpMethod, URL url, InputStream response) throws IOException {
+    public ProcessedStream sanitize(String httpMethod, URL url, InputStream response) throws IOException {
         //extra check ...
         if (!isAllowed(httpMethod, url)) {
             throw new IllegalStateException(String.format("Sanitizer called to sanitize response that should not have been retrieved: %s", url));
@@ -152,7 +161,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
         if (matchingEndpoint.isEmpty()) {
             // No matching endpoint found, return the original response
-            return response;
+            return new ProcessedStream(response, CompletableFuture.completedFuture(null));
         }
 
         //q: overkill for NON-ndjson case?
@@ -162,7 +171,11 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         PipedInputStream inPipe = new PipedInputStream(outPipe);
 
         Endpoint endpoint = matchingEndpoint.get().getValue();
-        new Thread(() -> {
+        Future<?> future;
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        future = executor.submit(() -> {
             JsonFactory factory = objectMapper.getFactory();
 
             try (JsonParser parser = factory.createParser(response);
@@ -189,16 +202,18 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 // Propagate error by closing the pipe
                 try {
                     outPipe.close();
-                } catch (IOException ignore) {}
+                } catch (IOException ignore) {
+                }
                 throw new UncheckedIOException(e);
             } finally {
                 try {
                     outPipe.close();
-                } catch (IOException ignore) {}
+                } catch (IOException ignore) {
+                }
             }
-        }).start();
+        });
 
-        return inPipe;
+        return new ProcessedStream(inPipe, future);
     }
 
     /**

@@ -34,16 +34,18 @@ import org.apache.http.entity.ContentType;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.ConnectException;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
@@ -319,21 +321,23 @@ public class ApiDataRequestHandler {
 
             passThroughHeaders(builder, sourceApiResponse);
             if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
-                ProcessedContent sanitizationResult = sanitize(requestToProxy, requestUrls, original);
-                proxyResponseContent = sanitizationResult.getContentAsString();
-
-                sanitizationResult.getMetadata().entrySet()
-                    .forEach(e -> builder.header(e.getKey(), e.getValue()));
-
-                if (processingContext.getAsync()) {
-                    asyncSanitizedDataOutput.get().writeSanitized(sanitizationResult, processingContext);
-                }
-
-                apiDataSideOutputSanitized.writeSanitized(sanitizationResult, processingContext);
-
 
                 if (skipSanitization) {
                     proxyResponseContent = original.getContentAsString();
+                } else {
+                    ProcessedContent forSanitization = decompressIfNeeded(original);
+                    ProcessedContent sanitizationResult = sanitize(requestToProxy, requestUrls, forSanitization);
+
+                    if (processingContext.getAsync()) {
+                        asyncSanitizedDataOutput.get().writeSanitized(sanitizationResult, processingContext);
+                    } else {
+                        proxyResponseContent = sanitizationResult.getContentAsString();
+                        sanitizationResult.getMetadata().entrySet()
+                            .forEach(e -> builder.header(e.getKey(), e.getValue()));
+                    }
+
+                    apiDataSideOutputSanitized.writeSanitized(sanitizationResult, processingContext);
+
                 }
             } else {
                 //write error, which shouldn't contain PII, directly
@@ -617,5 +621,31 @@ public class ApiDataRequestHandler {
                 .async(false)
                 .build();
         }
+    }
+
+
+    ProcessedContent decompressIfNeeded(ProcessedContent original) throws IOException {
+        if (Objects.equals(original.getContentType(), "application/gzip")) {
+            log.info("Decompressing gzip response from source API");
+
+            byte[] decompressed;
+            try (ByteArrayInputStream bais = new ByteArrayInputStream(original.getContent());
+                 GZIPInputStream gzipIn = new GZIPInputStream(bais);
+                 ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+
+                byte[] buffer = new byte[8192];
+                int len;
+                while ((len = gzipIn.read(buffer)) != -1) {
+                    baos.write(buffer, 0, len);
+                }
+                decompressed = baos.toByteArray();
+            }
+            original = original.toBuilder()
+                .content(decompressed)
+                .contentType("application/x-ndjson")
+                .contentEncoding(null) // no longer gzip-encoded
+                .build();
+        }
+        return original;
     }
 }
