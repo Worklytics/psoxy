@@ -61,9 +61,9 @@ module "async_output" {
 }
 
 module "async_output_iam_statements" {
-  source = "../aws-bucket-read-write-iam-policy-statement"
-
   count = var.enable_async_processing ? 1 : 0
+
+  source = "../aws-bucket-read-write-iam-policy-statement"
 
   s3_path = "s3://${module.async_output[0].bucket_id}"
 }
