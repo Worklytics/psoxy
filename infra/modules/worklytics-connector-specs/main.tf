@@ -594,7 +594,7 @@ EOT
     }
     # https://api.slack.com/methods/admin.analytics.getFile
     slack-analytics = {
-      source_kind : "slack"
+      source_kind : "slack",
       availability : "alpha",
       enable_by_default : false
       worklytics_connector_id : "slack-analytics-psoxy"
@@ -619,7 +619,7 @@ EOT
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/api/admin.analytics.getFile"
+        "/api/admin.analytics.getFile?type=member&date=2025-04-01"
       ]
       instructions_template = "${path.module}/docs/slack/analytics/instructions.tftpl"
       external_token_todo : templatefile("${path.module}/docs/slack/analytics/instructions.tftpl", {

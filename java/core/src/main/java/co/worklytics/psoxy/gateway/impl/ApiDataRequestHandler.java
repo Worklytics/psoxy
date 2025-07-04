@@ -311,6 +311,8 @@ public class ApiDataRequestHandler {
             // return response
             builder.statusCode(sourceApiResponse.getStatusCode());
 
+            // TODO: in slack-analytics use-case, this is NDJSON
+            //sourceApiResponse.getContent()
             // TODO: if side output cases of the original, we *could* use the potentially compressed stream directly, instead of reading to a string?
             ProcessedContent original = apiDataOutputUtils.responseAsRawProcessedContent(requestToSourceApi, sourceApiResponse);
             apiDataSideOutput.writeRaw(original, processingContext);
@@ -615,16 +617,5 @@ public class ApiDataRequestHandler {
                 .async(false)
                 .build();
         }
-    }
-
-
-
-    private String normalizePath(String rawPath) {
-        // Remove leading/trailing slashes and URL-decode
-        if (rawPath == null || rawPath.isEmpty()) return "";
-        return Arrays.stream(rawPath.split("/"))
-            .filter(s -> !s.isEmpty())
-            .map(part -> URLDecoder.decode(part, StandardCharsets.UTF_8))
-            .collect(Collectors.joining("/"));
     }
 }

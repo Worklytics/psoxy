@@ -68,9 +68,10 @@ public class PsoxyModule {
                                             JacksonMappingProvider jacksonMappingProvider) {
         //jackson here because it's our common JSON stack, but adds dependency beyond the one pkg'd
         // with JsonPath.
-        return Configuration.defaultConfiguration()
+        return Configuration.builder()
                 .jsonProvider(jacksonJsonProvider)
-                .mappingProvider(jacksonMappingProvider);
+                .mappingProvider(jacksonMappingProvider)
+            .build();
     }
 
     @Provides @Singleton
