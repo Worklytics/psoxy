@@ -18,7 +18,6 @@ import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.jayway.jsonpath.Configuration;
@@ -143,6 +142,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         }
     }
 
+    @Override
     public InputStream sanitize(String httpMethod, URL url, InputStream response) throws IOException {
         //extra check ...
         if (!isAllowed(httpMethod, url)) {
