@@ -54,12 +54,12 @@ module "async_output" {
 
   source = "../aws-output-s3"
 
-  environment_name = var.environment_name
-  instance_id      = var.instance_id
-  unique_sequence  = random_string.bucket_unique_sequence.result
-  bucket_suffix    = "async-output"
+  environment_name                     = var.environment_name
+  instance_id                          = var.instance_id
+  unique_sequence                      = random_string.bucket_unique_sequence.result
+  bucket_suffix                        = "async-output"
   provision_bucket_public_access_block = true
-  lifecycle_ttl_days = 90 # 3 months, more than enough
+  lifecycle_ttl_days                   = 90 # 3 months, more than enough
 }
 
 module "async_output_iam_statements" {
@@ -75,12 +75,12 @@ module "side_output_original" {
 
   source = "../aws-output-s3"
 
-  environment_name = var.environment_name
-  instance_id      = var.instance_id
-  unique_sequence  = random_string.bucket_unique_sequence.result
-  bucket_suffix    = "side-output-original"
+  environment_name                     = var.environment_name
+  instance_id                          = var.instance_id
+  unique_sequence                      = random_string.bucket_unique_sequence.result
+  bucket_suffix                        = "side-output-original"
   provision_bucket_public_access_block = true
-  lifecycle_ttl_days = 720 # 2 years
+  lifecycle_ttl_days                   = 720 # 2 years
 }
 
 module "side_output_sanitized" {
@@ -88,12 +88,12 @@ module "side_output_sanitized" {
 
   source = "../aws-output-s3"
 
-  environment_name = var.environment_name
-  instance_id      = var.instance_id
-  unique_sequence  = random_string.bucket_unique_sequence.result
-  bucket_suffix    = "side-output-sanitized"
+  environment_name                     = var.environment_name
+  instance_id                          = var.instance_id
+  unique_sequence                      = random_string.bucket_unique_sequence.result
+  bucket_suffix                        = "side-output-sanitized"
   provision_bucket_public_access_block = true
-  lifecycle_ttl_days = 720 # 2 years
+  lifecycle_ttl_days                   = 720 # 2 years
 }
 
 module "psoxy_lambda" {

@@ -47,7 +47,7 @@ resource "aws_s3_bucket_public_access_block" "output" {
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "ttl" {
-  count = (var.lifecycle_ttl_days == null || var.lifecycle_ttl_days == 0 ) ? 0 : 1
+  count = (var.lifecycle_ttl_days == null || var.lifecycle_ttl_days == 0) ? 0 : 1
 
   bucket = aws_s3_bucket.output.bucket
 
