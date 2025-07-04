@@ -38,6 +38,8 @@ locals {
   provision_side_output_original_bucket  = try(var.side_output_original != null && var.side_output_original.bucket == null, false)
   provision_side_output_sanitized_bucket = try(var.side_output_sanitized != null && var.side_output_sanitized.bucket == null, false)
 
+
+
 }
 
 # a unique sequence to commonly name this instance's buckets, but distinguish them globally
@@ -70,6 +72,53 @@ module "async_output_iam_statements" {
   s3_path = "s3://${module.async_output[0].bucket_id}"
 }
 
+# SQS queue for async API requests
+resource "aws_sqs_queue" "async_api_request_queue" {
+  count = var.enable_async_processing ? 1 : 0
+
+  name = "${var.environment_name}-${var.instance_id}-async-request-queue"
+
+  # Standard queue for better reliability
+  fifo_queue = false
+
+  # Message retention: 14 days (maximum)
+  message_retention_seconds = 1209600
+
+  visibility_timeout_seconds = 30 # Visibility timeout: 30 seconds (should be less than Lambda timeout)
+
+  # Receive message wait time: 20 seconds (long polling)
+  receive_wait_time_seconds = 20
+
+  # Dead letter queue configuration
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.async_api_request_dlq[0].arn
+    maxReceiveCount     = 3
+  })
+
+  tags = {
+    InstanceId = var.instance_id
+    Purpose    = "async-api-request-queue"
+  }
+}
+
+# Dead letter queue for failed async API requests
+resource "aws_sqs_queue" "async_api_request_dlq" {
+  count = var.enable_async_processing ? 1 : 0
+
+  name = "${var.environment_name}-${var.instance_id}-async-request-dlq"
+
+  # Standard queue for better reliability
+  fifo_queue = false
+
+  # Message retention: 14 days (maximum)
+  message_retention_seconds = 1209600
+
+  tags = {
+    InstanceId = var.instance_id
+    Purpose    = "async-api-request-dlq"
+  }
+}
+
 module "side_output_original" {
   count = local.provision_side_output_original_bucket ? 1 : 0
 
@@ -94,6 +143,24 @@ module "side_output_sanitized" {
   bucket_suffix                        = "side-output-sanitized"
   provision_bucket_public_access_block = true
   lifecycle_ttl_days                   = 720 # 2 years
+}
+
+locals {
+  # SQS IAM statements for async processing
+  sqs_iam_statements = var.enable_async_processing ? [
+    {
+      Sid    = "AllowSQSAsyncApiRequest"
+      Effect = "Allow"
+      Action = [
+        "sqs:SendMessage",
+        "sqs:GetQueueAttributes",
+        "sqs:GetQueueUrl"
+      ]
+      Resource = [
+        aws_sqs_queue.async_api_request_queue[0].arn
+      ]
+    }
+  ] : []
 }
 
 module "psoxy_lambda" {
@@ -124,12 +191,18 @@ module "psoxy_lambda" {
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   side_output_original                 = local.provision_side_output_original_bucket ? "s3://${module.side_output_original[0].bucket_id}" : try(var.side_output_original.bucket, null)
   side_output_sanitized                = local.provision_side_output_sanitized_bucket ? "s3://${module.side_output_sanitized[0].bucket_id}" : try(var.side_output_sanitized.bucket, null)
-  lambda_role_iam_statements           = var.enable_async_processing ? module.async_output_iam_statements[0].iam_statements : []
+  lambda_role_iam_statements = concat(
+    var.enable_async_processing ? module.async_output_iam_statements[0].iam_statements : [],
+    local.sqs_iam_statements
+  )
 
   environment_variables = merge(
     var.environment_variables,
     local.required_env_vars,
-    var.enable_async_processing ? { ASYNC_OUTPUT_DESTINATION = "s3://${module.async_output[0].bucket_id}" } : {},
+    var.enable_async_processing ? {
+      ASYNC_OUTPUT_DESTINATION    = "s3://${module.async_output[0].bucket_id}",
+      ASYNC_API_REQUEST_QUEUE_URL = aws_sqs_queue.async_api_request_queue[0].url
+    } : {},
   )
 }
 
@@ -359,4 +432,24 @@ output "todo" {
 
 output "next_todo_step" {
   value = var.todo_step + 1
+}
+
+output "async_api_request_queue_url" {
+  value       = var.enable_async_processing ? aws_sqs_queue.async_api_request_queue[0].url : null
+  description = "URL of the SQS queue for async API requests"
+}
+
+output "async_api_request_queue_arn" {
+  value       = var.enable_async_processing ? aws_sqs_queue.async_api_request_queue[0].arn : null
+  description = "ARN of the SQS queue for async API requests"
+}
+
+output "async_api_request_dlq_url" {
+  value       = var.enable_async_processing ? aws_sqs_queue.async_api_request_dlq[0].url : null
+  description = "URL of the SQS dead letter queue for failed async API requests"
+}
+
+output "async_api_request_dlq_arn" {
+  value       = var.enable_async_processing ? aws_sqs_queue.async_api_request_dlq[0].arn : null
+  description = "ARN of the SQS dead letter queue for failed async API requests"
 }
