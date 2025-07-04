@@ -3,6 +3,7 @@ package co.worklytics.test;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
+import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.avaulta.gateway.rules.BulkDataRules;
@@ -147,18 +148,26 @@ public class MockModules {
         }
     }
 
+
+
     @Module
     public interface ForSideOutputs {
 
         // so actually, not mocks ...
 
-        @Provides @Named("forOriginal")
+        @Provides @Named("forOriginal") @Singleton
         static ApiDataSideOutput sideOutputForOriginal() {
             return new NoApiDataSideOutput();
         }
 
-        @Provides @Named("forSanitized")
+        @Provides @Named("forSanitized") @Singleton
         static ApiDataSideOutput sideOutputForSanitized() {
+            return new NoApiDataSideOutput();
+        }
+
+
+        @Provides @Named("async") @Singleton
+        static ApiSanitizedDataOutput apiSanitizedDataOutput() {
             return new NoApiDataSideOutput();
         }
 
