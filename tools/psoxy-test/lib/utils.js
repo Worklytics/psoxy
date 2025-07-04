@@ -85,6 +85,9 @@ function getCommonHTTPHeaders(options = {}) {
   if (options.requestNoResponse) {
     headers['X-Psoxy-No-Response-Body'] = 'true';
   }
+  if (options.async) {
+    headers['X-Psoxy-Process-Async'] = 'true';
+  }
   if (options.body) {
     headers['Content-Type'] = 'application/json';
   }
