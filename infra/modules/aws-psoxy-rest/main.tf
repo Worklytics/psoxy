@@ -58,6 +58,8 @@ module "async_output" {
   instance_id      = var.instance_id
   unique_sequence  = random_string.bucket_unique_sequence.result
   bucket_suffix    = "async-output"
+  provision_bucket_public_access_block = true
+  lifecycle_ttl_days = 90 # 3 months, more than enough
 }
 
 module "async_output_iam_statements" {
@@ -68,9 +70,6 @@ module "async_output_iam_statements" {
   s3_path = "s3://${module.async_output[0].bucket_id}"
 }
 
-
-# TODO: add IAM statements to allow invoker to read from async output bucket
-
 module "side_output_original" {
   count = local.provision_side_output_original_bucket ? 1 : 0
 
@@ -80,6 +79,8 @@ module "side_output_original" {
   instance_id      = var.instance_id
   unique_sequence  = random_string.bucket_unique_sequence.result
   bucket_suffix    = "side-output-original"
+  provision_bucket_public_access_block = true
+  lifecycle_ttl_days = 720 # 2 years
 }
 
 module "side_output_sanitized" {
@@ -91,6 +92,8 @@ module "side_output_sanitized" {
   instance_id      = var.instance_id
   unique_sequence  = random_string.bucket_unique_sequence.result
   bucket_suffix    = "side-output-sanitized"
+  provision_bucket_public_access_block = true
+  lifecycle_ttl_days = 720 # 2 years
 }
 
 module "psoxy_lambda" {
