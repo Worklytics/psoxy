@@ -1,3 +1,12 @@
 #!/bin/bash
 
-terraform apply -auto-approve
+# prompt if user wants to force_bundle or not; default to Y
+read -p "Do you want to force rebuild of the bundle? (Y/n): " force_bundle
+
+if [ "$force_bundle" == "y" ] || [ "$force_bundle" == "Y" ] || [ "$force_bundle" == "" ]; then
+  force_bundle="true"
+else
+  force_bundle="false"
+fi
+
+terraform apply -auto-approve -var="force_bundle=$force_bundle"
