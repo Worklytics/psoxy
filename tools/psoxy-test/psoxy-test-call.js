@@ -35,6 +35,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  * @param {string} options.method - HTTP request method
  * @param {string} options.body - HTTP request body (JSON string, GitHub use-case)
  * @param {boolean} options.healthCheck - Run "Health Check" call against Psoxy deploy
+ * @param {boolean} options.async - Process request asynchronously (adds X-Psoxy-Process-Async header)
  * @return {PsoxyResponse}
  */
 export default async function (options = {}) {
@@ -98,7 +99,7 @@ export default async function (options = {}) {
     }
   }
 
-  if (result.status === httpCodes.HTTP_STATUS_OK) {
+  if (result.status === httpCodes.HTTP_STATUS_OK || (options.async && result.status === httpCodes.HTTP_STATUS_ACCEPTED)) {
 
     if (options.saveToFile) {
       const filename = getFileNameFromURL(url);
