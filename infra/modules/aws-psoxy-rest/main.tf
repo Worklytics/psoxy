@@ -33,7 +33,11 @@ locals {
   # payload 2.0 format is used by function URL invocation AND APIGatewayV2 by default.
   # but in latter case, seems to urldecode the path; such that /foo%25/bar becomes /foo//bar, which is not what we want
   # so oddly, for APIGatewayV2 we need to use 1.0 format instead of its default , even though that default is our usual case otherwise
-  event_handler_implementation = local.use_api_gateway ? "APIGatewayV1Handler" : "Handler"
+  # AwsApiDataModeHybridHandler can apigateway v1, v2, or SQS events - but has to do the parsing itself
+  # Handler is for v2; APIGatewayV1Handler is for v1
+
+  sync_event_handler_implementation = local.use_api_gateway ? "APIGatewayV1Handler" : "Handler"
+  event_handler_implementation = var.enable_async_processing ? "AwsApiDataModeHybridHandler" : local.sync_event_handler_implementation
 
   provision_side_output_original_bucket  = try(var.side_output_original != null && var.side_output_original.bucket == null, false)
   provision_side_output_sanitized_bucket = try(var.side_output_sanitized != null && var.side_output_sanitized.bucket == null, false)
@@ -81,10 +85,9 @@ resource "aws_sqs_queue" "async_api_request_queue" {
   # Standard queue for better reliability
   fifo_queue = false
 
-  # Message retention: 14 days (maximum)
-  message_retention_seconds = 1209600
+  message_retention_seconds = 86400 # 1 day, max; tbh, prob could be shorter
 
-  visibility_timeout_seconds = 30 # Visibility timeout: 30 seconds (should be less than Lambda timeout)
+  visibility_timeout_seconds = 120 # how long after attempt begins until message is visible to another consumer for re-processing
 
   # Receive message wait time: 20 seconds (long polling)
   receive_wait_time_seconds = 20
@@ -191,6 +194,7 @@ module "psoxy_lambda" {
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   side_output_original                 = local.provision_side_output_original_bucket ? "s3://${module.side_output_original[0].bucket_id}" : try(var.side_output_original.bucket, null)
   side_output_sanitized                = local.provision_side_output_sanitized_bucket ? "s3://${module.side_output_sanitized[0].bucket_id}" : try(var.side_output_sanitized.bucket, null)
+  sqs_trigger_queue_arns               = var.enable_async_processing ? [aws_sqs_queue.async_api_request_queue[0].arn] : []
   lambda_role_iam_statements = concat(
     var.enable_async_processing ? module.async_output_iam_statements[0].iam_statements : [],
     local.sqs_iam_statements
@@ -204,6 +208,21 @@ module "psoxy_lambda" {
       ASYNC_API_REQUEST_QUEUE_URL = aws_sqs_queue.async_api_request_queue[0].url
     } : {},
   )
+}
+
+# if async processing is enabled, trigger the lambda from the SQS queue
+resource "aws_lambda_event_source_mapping" "async_api_request_queue_trigger" {
+  count = var.enable_async_processing ? 1 : 0
+
+  event_source_arn                   = aws_sqs_queue.async_api_request_queue[0].arn
+  function_name                      = module.psoxy_lambda.function_name
+  enabled                            = true
+  batch_size                         = 10 # eg, merge up to X messages into a single batch before invoking lambda
+  maximum_batching_window_in_seconds = 60  # max time to wait before combining whatever we have; could be up to 300s, but for testing let's start with 60s
+
+  depends_on = [
+    module.psoxy_lambda
+  ]
 }
 
 # lambda function URL (only if NOT using API Gateway)
