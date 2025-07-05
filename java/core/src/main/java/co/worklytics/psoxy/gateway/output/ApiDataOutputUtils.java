@@ -17,6 +17,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -66,49 +72,31 @@ public class ApiDataOutputUtils {
 
     Provider<UUID> uuidProvider;
     Base64.Encoder base64encoder;
+    Clock clock;
 
 
     public String buildRawOutputKey(HttpRequest requestToSourceApi) {
-        Map<String, String> metadata = buildRawMetadata(requestToSourceApi);
-        return buildRawOutputKey(metadata);
+        String date = LocalDate.ofInstant(Instant.now(clock), ZoneOffset.UTC)
+            .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        return date + "/" + uuidProvider.get().toString();
     }
 
     public String buildRawOutputKey(ProcessedContent content) {
-        return buildRawOutputKey(content.getMetadata());
-    }
-
-    private String buildRawOutputKey(Map<String, String> metadata) {
-
-        String host = metadata.get(OutputObjectMetadata.API_HOST.name());
-        String path = metadata.get(OutputObjectMetadata.PATH.name());
-
-        String pathSegment = Optional.ofNullable(path).map(s -> "/" + s.replace("/", "_")).orElse("");
-
-        return host + pathSegment + "/" + uuidProvider.get().toString();
+        String date = LocalDate.ofInstant(Instant.now(clock), ZoneOffset.UTC)
+            .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        return date + "/" + uuidProvider.get().toString();
     }
 
     public String buildSanitizedOutputKey(HttpEventRequest requestToProxy) {
-        //TODO: host here is going to be the proxy host, not the source API host.
-        //TODO: path may include some additional segments, unless properly stripped by adapters before call into ApiDataHandler ...
-        Map<String, String> metadata = buildMetadata(requestToProxy);
-        return buildSanitizedOutputKey(metadata);
+        String date = LocalDate.ofInstant(Instant.now(clock), ZoneOffset.UTC)
+            .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        return date + "/" + uuidProvider.get().toString();
     }
 
     public String buildSanitizedOutputKey(ProcessedContent content) {
-        return buildSanitizedOutputKey(content.getMetadata());
-    }
-
-    private String buildSanitizedOutputKey(Map<String, String> metadata) {
-
-        String host = metadata.get(OutputObjectMetadata.API_HOST.name());
-        String path = metadata.get(OutputObjectMetadata.PATH.name());
-
-        String sanitizedPath = Optional.ofNullable(path)
-            .map(this::normalizePath)
-            .map(s -> s.replace("/", "_") + "/")
-            .orElse("");
-
-        return host + "/" + sanitizedPath + uuidProvider.get().toString();
+        String date = LocalDate.ofInstant(Instant.now(clock), ZoneOffset.UTC)
+            .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        return date + "/" + uuidProvider.get().toString();
     }
 
 
