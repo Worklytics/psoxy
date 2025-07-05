@@ -149,6 +149,11 @@ class ApiDataRequestHandlerTest {
             public Optional<Boolean> isHttps() {
                 return Optional.empty();
             }
+
+            @Override
+            public Object getUnderlyingRepresentation() {
+                return this;
+            }
         };
         when(handler.config.getConfigPropertyOrError(eq(ApiModeConfigProperty.TARGET_HOST))).thenReturn("proxyhost.com");
 

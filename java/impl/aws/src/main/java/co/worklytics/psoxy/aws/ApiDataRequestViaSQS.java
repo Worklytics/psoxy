@@ -46,7 +46,7 @@ public class ApiDataRequestViaSQS implements AsyncApiDataRequestHandler {
                         .dataType("String")
                     .stringValue(objectMapper.writeValueAsString(processingContext))
                         .build()))
-                .messageBody(objectMapper.writeValueAsString(request));
+                .messageBody(objectMapper.writeValueAsString(request.getUnderlyingRepresentation()));
 
             client.sendMessage(requestBuilder.build());
         } catch (JsonProcessingException e) {

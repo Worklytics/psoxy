@@ -605,6 +605,10 @@ public class ApiDataRequestHandler {
         Boolean async = false;
 
         /**
+         * request id; does not change for sync v async processing of the same request
+         */
+
+        /**
          * the side output key for the raw response
          */
         @JsonInclude(JsonInclude.Include.NON_NULL)
