@@ -37,7 +37,7 @@ locals {
   # Handler is for v2; APIGatewayV1Handler is for v1
 
   sync_event_handler_implementation = local.use_api_gateway ? "APIGatewayV1Handler" : "Handler"
-  event_handler_implementation = var.enable_async_processing ? "AwsApiDataModeHybridHandler" : local.sync_event_handler_implementation
+  event_handler_implementation      = var.enable_async_processing ? "AwsApiDataModeHybridHandler" : local.sync_event_handler_implementation
 
   provision_side_output_original_bucket  = try(var.side_output_original != null && var.side_output_original.bucket == null, false)
   provision_side_output_sanitized_bucket = try(var.side_output_sanitized != null && var.side_output_sanitized.bucket == null, false)
@@ -218,7 +218,7 @@ resource "aws_lambda_event_source_mapping" "async_api_request_queue_trigger" {
   function_name                      = module.psoxy_lambda.function_name
   enabled                            = true
   batch_size                         = 10 # eg, merge up to X messages into a single batch before invoking lambda
-  maximum_batching_window_in_seconds = 60  # max time to wait before combining whatever we have; could be up to 300s, but for testing let's start with 60s
+  maximum_batching_window_in_seconds = 60 # max time to wait before combining whatever we have; could be up to 300s, but for testing let's start with 60s
 
   depends_on = [
     module.psoxy_lambda

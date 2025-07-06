@@ -26,19 +26,15 @@ public class OutputToApiDataSideOutputAdapter implements ApiDataSideOutput {
 
     @Override
     public void writeRaw(ProcessedContent content, ApiDataRequestHandler.ProcessingContext processingContext) throws IOException {
-        String key = Optional.ofNullable(processingContext.getRawOutputKey())
-                .orElseGet(() -> apiDataOutputUtils.buildRawOutputKey(content));
-
+        String key = apiDataOutputUtils.buildRawOutputKey(content, processingContext);
         wrappedOutput.write(key, content);
     }
 
     @Override
     public void writeSanitized(ProcessedContent sanitizedContent, ApiDataRequestHandler.ProcessingContext processingContext) throws IOException {
-        String key = Optional.ofNullable(processingContext.getSanitizedOutputKey())
-            .orElseGet(() -> apiDataOutputUtils.buildSanitizedOutputKey(sanitizedContent));
+        String key = apiDataOutputUtils.buildSanitizedOutputKey(sanitizedContent, processingContext);
 
         // TODO: enforce no sensitive data in sanitized output metadata ??
-
 
         wrappedOutput.write(key, sanitizedContent);
     }

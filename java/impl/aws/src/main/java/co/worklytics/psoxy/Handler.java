@@ -13,6 +13,8 @@ import lombok.extern.java.Log;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.time.Instant;
+
 /**
  * default AWS lambda handler
  *
@@ -59,7 +61,11 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
         boolean base64Encoded = false;
         try {
             APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter = new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
-            response = requestHandler.handle(httpEventRequestAdapter, ApiDataRequestHandler.ProcessingContext.synchronous());
+            response = requestHandler.handle(httpEventRequestAdapter, ApiDataRequestHandler.ProcessingContext.builder()
+                    .async(false)
+                .requestReceivedAt(Instant.parse(httpEvent.getRequestContext().getTime()))
+                .requestId(httpEvent.getRequestContext().getRequestId())
+                .build());
 
             if (responseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
                 Pair<Boolean, HttpEventResponse> compressedResponse = responseCompressionHandler.compressIfNeeded(response);

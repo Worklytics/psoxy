@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.gateway.output;
 
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,26 +16,21 @@ import com.google.api.client.http.HttpResponse;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.*;
 
 class ApiDataOutputUtilsTest {
 
     ApiDataOutputUtils utils;
+    Clock clock;
 
     @BeforeEach
     public void setup() {
        utils = new ApiDataOutputUtils(() -> UUID.fromString("123e4567-e89b-12d3-a456-426614174000"), Base64.getEncoder());
+       clock = Clock.fixed(Instant.parse("2024-10-01T10:15:30Z"), java.time.ZoneOffset.UTC);
     }
 
-    @Test
-    void buildRawOutputKey() {
-        HttpRequest mockRequest = mock(HttpRequest.class);
-        when(mockRequest.getUrl()).thenReturn(new com.google.api.client.http.GenericUrl("https://api.example.com/v1/resource"));
-        when(mockRequest.getRequestMethod()).thenReturn("GET");
-        String key = utils.buildRawOutputKey(mockRequest);
-
-        assertEquals("api.example.com/v1_resource/123e4567-e89b-12d3-a456-426614174000", key);
-    }
 
     @Test
     void testBuildRawOutputKey() {
@@ -42,21 +38,13 @@ class ApiDataOutputUtilsTest {
         metadata.put("API_HOST", "api.example.com");
         metadata.put("PATH", "v1/resource");
         ProcessedContent content = ProcessedContent.builder().metadata(metadata).build();
-        String key = utils.buildRawOutputKey(content);
+        ApiDataRequestHandler.ProcessingContext processingContext = ApiDataRequestHandler.ProcessingContext.builder()
+            .requestReceivedAt(clock.instant())
+            .requestId("123e4567-e89b-12d3-a456-426614174000").build();
+        String key = utils.buildRawOutputKey(content, processingContext);
         assertEquals("api.example.com/v1_resource/123e4567-e89b-12d3-a456-426614174000", key);
     }
 
-    @Test
-    void buildSanitizedOutputKey() {
-        HttpEventRequest mockRequest = mock(HttpEventRequest.class);
-        when(mockRequest.getHeaders()).thenReturn(Collections.emptyMap());
-        when(mockRequest.getHttpMethod()).thenReturn("GET");
-        when(mockRequest.getPath()).thenReturn("v1/resource");
-        when(mockRequest.getQuery()).thenReturn(Optional.empty());
-        when(mockRequest.getBody()).thenReturn(null);
-        String key = utils.buildSanitizedOutputKey(mockRequest);
-        assertTrue(key.contains("v1_resource"));
-    }
 
     @Test
     void testBuildSanitizedOutputKey() {
@@ -64,7 +52,9 @@ class ApiDataOutputUtilsTest {
         metadata.put("API_HOST", "api.example.com");
         metadata.put("PATH", "v1/resource");
         ProcessedContent content = ProcessedContent.builder().metadata(metadata).build();
-        String key = utils.buildSanitizedOutputKey(content);
+
+        ApiDataRequestHandler.ProcessingContext processingContext = ApiDataRequestHandler.ProcessingContext.builder().requestId("123e4567-e89b-12d3-a456-426614174000").build();
+        String key = utils.buildSanitizedOutputKey(content, processingContext);
         assertTrue(key.contains("v1_resource"));
         assertEquals("api.example.com/v1_resource/123e4567-e89b-12d3-a456-426614174000", key);
     }

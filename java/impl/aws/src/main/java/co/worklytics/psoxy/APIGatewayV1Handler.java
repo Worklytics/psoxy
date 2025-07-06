@@ -8,6 +8,9 @@ import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+
+import java.time.Instant;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
@@ -50,7 +53,11 @@ public class APIGatewayV1Handler implements com.amazonaws.services.lambda.runtim
         boolean base64Encoded = false;
         try {
             APIGatewayV1ProxyEventRequestAdapter httpEventRequestAdapter = APIGatewayV1ProxyEventRequestAdapter.of(input);
-            response = requestHandler.handle(httpEventRequestAdapter, ApiDataRequestHandler.ProcessingContext.synchronous());
+            response = requestHandler.handle(httpEventRequestAdapter, ApiDataRequestHandler.ProcessingContext.builder()
+                    .async(false)
+                .requestReceivedAt(Instant.parse(input.getRequestContext().getRequestTime()))
+                .requestId(input.getRequestContext().getRequestId())
+                .build());
 
             context.getLogger().log(httpEventRequestAdapter.getHeader(HttpHeaders.ACCEPT_ENCODING).orElse("accept-encoding not found"));
             if (responseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {

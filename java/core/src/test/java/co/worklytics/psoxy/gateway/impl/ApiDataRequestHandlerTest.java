@@ -37,6 +37,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.net.URL;
+import java.time.Clock;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -60,6 +61,7 @@ class ApiDataRequestHandlerTest {
         MockModules.ForSideOutputs.class,
         MockModules.ForAsyncApiDataRequestHandler.class,
         TestModules.ForFixedUUID.class,
+        TestModules.ForFixedClock.class,
     })
     public interface Container {
         void inject(ApiDataRequestHandlerTest test);
@@ -85,6 +87,9 @@ class ApiDataRequestHandlerTest {
 
     @Inject
     PseudonymizerImplFactory pseudonymizerImplFactory;
+
+    @Inject
+    Clock clock;
 
     private static Stream<Arguments> provideRequestToBuildTarget() {
         return Stream.of(
@@ -216,7 +221,7 @@ class ApiDataRequestHandlerTest {
         spy.sanitizer = sanitizer;
 
         try {
-            spy.handle(request, ApiDataRequestHandler.ProcessingContext.synchronous());
+            spy.handle(request, ApiDataRequestHandler.ProcessingContext.synchronous(clock.instant()));
         } catch (Exception ignored) {
             // it should raise an exception due missing configuration
         }
@@ -270,7 +275,7 @@ class ApiDataRequestHandlerTest {
         spy.sanitizer = sanitizer;
 
         try {
-            spy.handle(request, ApiDataRequestHandler.ProcessingContext.synchronous());
+            spy.handle(request, ApiDataRequestHandler.ProcessingContext.synchronous(clock.instant()));
         } catch (Exception ignored) {
             // it should raise an exception due missing configuration
         }
@@ -319,7 +324,7 @@ class ApiDataRequestHandlerTest {
         spy.sanitizer = sanitizer;
 
         try {
-            spy.handle(request, ApiDataRequestHandler.ProcessingContext.synchronous());
+            spy.handle(request, ApiDataRequestHandler.ProcessingContext.synchronous(clock.instant()));
         } catch (Exception ignored) {
             // it should raise an exception due missing configuration
         }

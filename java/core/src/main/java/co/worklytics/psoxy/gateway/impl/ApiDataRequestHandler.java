@@ -34,12 +34,14 @@ import org.apache.http.entity.ContentType;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ConnectException;
 import java.net.URL;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -93,6 +95,8 @@ public class ApiDataRequestHandler {
     // lazy-loaded, to avoid circular dependency issues; and bc unused in 99.9% of situations
     @Inject
     Lazy<AsyncApiDataRequestHandler> asyncApiDataRequestHandler;
+    @Inject
+    Provider<UUID> uuidProvider;
 
     /**
      * Basic headers to pass: content, caching, retries. Can be expanded by connection later.
@@ -264,13 +268,8 @@ public class ApiDataRequestHandler {
             log.info("Requested for async processing");
 
             // create an async processing context
-            ProcessingContext.ProcessingContextBuilder processingContextBuilder = ProcessingContext.builder()
+            ProcessingContext.ProcessingContextBuilder processingContextBuilder = processingContext.toBuilder()
                 .async(true);
-            processingContextBuilder.rawOutputKey(Optional.ofNullable(processingContext.getRawOutputKey())
-                .orElseGet(() -> apiDataOutputUtils.buildRawOutputKey(requestToSourceApi)));
-
-            processingContextBuilder.sanitizedOutputKey(Optional.ofNullable(processingContext.getSanitizedOutputKey())
-                .orElseGet(() -> apiDataOutputUtils.buildSanitizedOutputKey(requestToProxy)));
 
             ProcessingContext asyncProcessingContext = processingContextBuilder.build();
             try {
@@ -595,9 +594,10 @@ public class ApiDataRequestHandler {
     /**
      * Context for processing an API data request
      */
+    @NoArgsConstructor // for jackson
     @AllArgsConstructor
-    @Builder
-    @Value
+    @Builder(toBuilder = true)
+    @Data
     public static class ProcessingContext {
 
         @NonNull
@@ -605,8 +605,16 @@ public class ApiDataRequestHandler {
         Boolean async = false;
 
         /**
-         * request id; does not change for sync v async processing of the same request
+         * request id; does not change for sync v async processing of the same request; so it's the processing request
          */
+        @NonNull
+        String requestId;
+
+        /**
+         * when the request was received; used for logging and metrics
+         */
+        @NonNull
+        Instant requestReceivedAt;
 
         /**
          * the side output key for the raw response
@@ -620,9 +628,11 @@ public class ApiDataRequestHandler {
         @JsonInclude(JsonInclude.Include.NON_NULL)
         String sanitizedOutputKey;
 
-        public static ProcessingContext synchronous() {
+        public static ProcessingContext synchronous(Instant requestReceivedAt) {
             return ProcessingContext.builder()
                 .async(false)
+                .requestId(UUID.randomUUID().toString())
+                .requestReceivedAt(requestReceivedAt)
                 .build();
         }
     }

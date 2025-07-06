@@ -40,13 +40,16 @@ public class ApiDataRequestViaSQS implements AsyncApiDataRequestHandler {
     public void handle(HttpEventRequest request, ApiDataRequestHandler.ProcessingContext processingContext) {
         try {
             SqsClient client = sqsClient.get();
+
+            String payload = objectMapper.writeValueAsString(request.getUnderlyingRepresentation());
+
             SendMessageRequest.Builder requestBuilder = SendMessageRequest.builder()
                 .queueUrl(queueUrl)
                 .messageAttributes(Map.of(PROCESSING_CONTEXT_ATTRIBUTE, MessageAttributeValue.builder()
                         .dataType("String")
                     .stringValue(objectMapper.writeValueAsString(processingContext))
                         .build()))
-                .messageBody(objectMapper.writeValueAsString(request.getUnderlyingRepresentation()));
+                .messageBody(payload);
 
             client.sendMessage(requestBuilder.build());
         } catch (JsonProcessingException e) {

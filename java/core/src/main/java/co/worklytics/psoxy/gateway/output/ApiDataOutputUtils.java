@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gateway.output;
 import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.ProcessedContent;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
 import lombok.AllArgsConstructor;
@@ -22,7 +23,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -72,31 +72,17 @@ public class ApiDataOutputUtils {
 
     Provider<UUID> uuidProvider;
     Base64.Encoder base64encoder;
-    Clock clock;
 
-
-    public String buildRawOutputKey(HttpRequest requestToSourceApi) {
-        String date = LocalDate.ofInstant(Instant.now(clock), ZoneOffset.UTC)
+    public String buildRawOutputKey(ProcessedContent content, ApiDataRequestHandler.ProcessingContext processingContext) {
+        String date = LocalDate.ofInstant(processingContext.getRequestReceivedAt(), ZoneOffset.UTC)
             .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        return date + "/" + uuidProvider.get().toString();
+        return date + "/" + Optional.ofNullable(processingContext.getRequestId()).orElse(uuidProvider.get().toString());
     }
 
-    public String buildRawOutputKey(ProcessedContent content) {
-        String date = LocalDate.ofInstant(Instant.now(clock), ZoneOffset.UTC)
+    public String buildSanitizedOutputKey(ProcessedContent content, ApiDataRequestHandler.ProcessingContext processingContext) {
+        String date = LocalDate.ofInstant(processingContext.getRequestReceivedAt(), ZoneOffset.UTC)
             .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        return date + "/" + uuidProvider.get().toString();
-    }
-
-    public String buildSanitizedOutputKey(HttpEventRequest requestToProxy) {
-        String date = LocalDate.ofInstant(Instant.now(clock), ZoneOffset.UTC)
-            .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        return date + "/" + uuidProvider.get().toString();
-    }
-
-    public String buildSanitizedOutputKey(ProcessedContent content) {
-        String date = LocalDate.ofInstant(Instant.now(clock), ZoneOffset.UTC)
-            .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        return date + "/" + uuidProvider.get().toString();
+        return date + "/" +  Optional.ofNullable(processingContext.getRequestId()).orElse(uuidProvider.get().toString());
     }
 
 

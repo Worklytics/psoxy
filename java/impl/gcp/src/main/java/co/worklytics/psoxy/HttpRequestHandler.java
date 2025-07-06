@@ -13,6 +13,8 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.UUID;
 import java.util.logging.Level;
 
 /**
@@ -46,7 +48,11 @@ public class HttpRequestHandler {
 
         try {
             HttpEventResponse abstractResponse =
-                requestHandler.handle(cloudFunctionRequest, ApiDataRequestHandler.ProcessingContext.synchronous());
+                requestHandler.handle(cloudFunctionRequest, ApiDataRequestHandler.ProcessingContext.builder()
+                    .async(false)
+                    .requestId(UUID.randomUUID().toString())
+                    .requestReceivedAt(Instant.now())
+                    .build());
 
             abstractResponse.getHeaders()
                 .forEach(response::appendHeader);
