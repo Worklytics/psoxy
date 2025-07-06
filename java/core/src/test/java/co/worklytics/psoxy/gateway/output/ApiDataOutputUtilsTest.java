@@ -43,7 +43,7 @@ class ApiDataOutputUtilsTest {
             .requestReceivedAt(clock.instant())
             .requestId("123e4567-e89b-12d3-a456-426614174000").build();
         String key = utils.buildRawOutputKey(processingContext);
-        assertEquals("api.example.com/v1_resource/123e4567-e89b-12d3-a456-426614174000", key);
+        assertEquals("20241001/123e4567-e89b-12d3-a456-426614174000", key);
     }
 
 
@@ -54,10 +54,12 @@ class ApiDataOutputUtilsTest {
         metadata.put("PATH", "v1/resource");
         ProcessedContent content = ProcessedContent.builder().metadata(metadata).build();
 
-        ApiDataRequestHandler.ProcessingContext processingContext = ApiDataRequestHandler.ProcessingContext.builder().requestId("123e4567-e89b-12d3-a456-426614174000").build();
+        ApiDataRequestHandler.ProcessingContext processingContext = ApiDataRequestHandler.ProcessingContext.builder()
+            .requestReceivedAt(Instant.parse("2024-10-01T10:15:30Z"))
+            .requestId("123e4567-e89b-12d3-a456-426614174000").build();
         String key = utils.buildSanitizedOutputKey(processingContext);
         assertTrue(key.contains("v1_resource"));
-        assertEquals("api.example.com/v1_resource/123e4567-e89b-12d3-a456-426614174000", key);
+        assertEquals("20241001/123e4567-e89b-12d3-a456-426614174000", key);
     }
 
     @Test
