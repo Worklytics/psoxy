@@ -15,6 +15,12 @@ public enum ApiModeConfigProperty implements ConfigService.ConfigProperty {
      */
     TLS_VERSION,
     TARGET_HOST,
+    /**
+     * if provided, requests to proxy with `Process-Async` header will be processed asynchronously and responses output to the target
+     * ONLY applicable in API Data Connector mode ONLY
+     *
+     */
+    ASYNC_OUTPUT_DESTINATION,
     ;
 
 

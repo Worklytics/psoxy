@@ -1,8 +1,7 @@
 package co.worklytics.psoxy.gateway.output;
 
 import co.worklytics.psoxy.ControlHeader;
-import co.worklytics.psoxy.gateway.HttpEventRequest;
-import co.worklytics.psoxy.gateway.ProcessedContent;
+import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
@@ -18,8 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -65,24 +62,38 @@ public class ApiDataOutputUtils {
 
         //q: include response info??
         // status code? other headers?
-
-
         ;
     }
 
+    ConfigService config;
     Provider<UUID> uuidProvider;
     Base64.Encoder base64encoder;
 
-    public String buildRawOutputKey(ProcessedContent content, ApiDataRequestHandler.ProcessingContext processingContext) {
+    public String buildRawOutputKey(ApiDataRequestHandler.ProcessingContext processingContext) {
         String date = LocalDate.ofInstant(processingContext.getRequestReceivedAt(), ZoneOffset.UTC)
             .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         return date + "/" + Optional.ofNullable(processingContext.getRequestId()).orElse(uuidProvider.get().toString());
     }
 
-    public String buildSanitizedOutputKey(ProcessedContent content, ApiDataRequestHandler.ProcessingContext processingContext) {
+    public String buildSanitizedOutputKey(ApiDataRequestHandler.ProcessingContext processingContext) {
         String date = LocalDate.ofInstant(processingContext.getRequestReceivedAt(), ZoneOffset.UTC)
             .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         return date + "/" +  Optional.ofNullable(processingContext.getRequestId()).orElse(uuidProvider.get().toString());
+    }
+
+    public ApiDataRequestHandler.ProcessingContext fillOutputContext(ApiDataRequestHandler.ProcessingContext processingContext) {
+        ApiDataRequestHandler.ProcessingContext.ProcessingContextBuilder builder = processingContext.toBuilder()
+            .asyncOutputDestination(config.getConfigPropertyAsOptional(ApiModeConfigProperty.ASYNC_OUTPUT_DESTINATION).orElse(null));
+
+        if (config.getConfigPropertyAsOptional(ProxyConfigProperty.SIDE_OUTPUT_ORIGINAL).isPresent()) {
+            builder.rawOutputKey(this.buildRawOutputKey(processingContext));
+        }
+        // async *or* sanitized output
+        if (config.getConfigPropertyAsOptional(ProxyConfigProperty.SIDE_OUTPUT_SANITIZED).isPresent()
+            || config.getConfigPropertyAsOptional(ApiModeConfigProperty.ASYNC_OUTPUT_DESTINATION).isPresent()) {
+            builder.sanitizedOutputKey(this.buildSanitizedOutputKey(processingContext));
+        }
+        return builder.build();
     }
 
 

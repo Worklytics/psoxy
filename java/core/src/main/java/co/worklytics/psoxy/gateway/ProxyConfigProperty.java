@@ -13,13 +13,6 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
 
 
     /**
-     * if provided, requests to proxy with `Process-Async` header will be processed asynchronously and responses output to the target
-     * ONLY applicable in API Data Connector mode ONLY
-     *
-     */
-    ASYNC_OUTPUT_DESTINATION,
-
-    /**
      * file name of the proxy's code bundle; helpful for monitoring and debugging purposes.
      */
     BUNDLE_FILENAME,

@@ -52,7 +52,7 @@ public class OutputUtils {
     }
 
     public ApiSanitizedDataOutput asyncOutput() {
-        Output asyncOutput = configService.getConfigPropertyAsOptional(ProxyConfigProperty.ASYNC_OUTPUT_DESTINATION)
+        Output asyncOutput = configService.getConfigPropertyAsOptional(ApiModeConfigProperty.ASYNC_OUTPUT_DESTINATION)
             .map(OutputLocationImpl::of)
             .map(this::createOutputForLocation)
             .map(output -> (Output) CompressedOutputWrapper.wrap((Output) output))

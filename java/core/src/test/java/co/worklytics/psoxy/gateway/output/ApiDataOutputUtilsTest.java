@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.gateway.output;
 
+import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ class ApiDataOutputUtilsTest {
 
     @BeforeEach
     public void setup() {
-       utils = new ApiDataOutputUtils(() -> UUID.fromString("123e4567-e89b-12d3-a456-426614174000"), Base64.getEncoder());
+       utils = new ApiDataOutputUtils(mock(ConfigService.class), () -> UUID.fromString("123e4567-e89b-12d3-a456-426614174000"), Base64.getEncoder());
        clock = Clock.fixed(Instant.parse("2024-10-01T10:15:30Z"), java.time.ZoneOffset.UTC);
     }
 
@@ -41,7 +42,7 @@ class ApiDataOutputUtilsTest {
         ApiDataRequestHandler.ProcessingContext processingContext = ApiDataRequestHandler.ProcessingContext.builder()
             .requestReceivedAt(clock.instant())
             .requestId("123e4567-e89b-12d3-a456-426614174000").build();
-        String key = utils.buildRawOutputKey(content, processingContext);
+        String key = utils.buildRawOutputKey(processingContext);
         assertEquals("api.example.com/v1_resource/123e4567-e89b-12d3-a456-426614174000", key);
     }
 
@@ -54,7 +55,7 @@ class ApiDataOutputUtilsTest {
         ProcessedContent content = ProcessedContent.builder().metadata(metadata).build();
 
         ApiDataRequestHandler.ProcessingContext processingContext = ApiDataRequestHandler.ProcessingContext.builder().requestId("123e4567-e89b-12d3-a456-426614174000").build();
-        String key = utils.buildSanitizedOutputKey(content, processingContext);
+        String key = utils.buildSanitizedOutputKey(processingContext);
         assertTrue(key.contains("v1_resource"));
         assertEquals("api.example.com/v1_resource/123e4567-e89b-12d3-a456-426614174000", key);
     }

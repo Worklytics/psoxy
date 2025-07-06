@@ -600,34 +600,49 @@ public class ApiDataRequestHandler {
     @Data
     public static class ProcessingContext {
 
-        @NonNull
-        @Builder.Default
-        Boolean async = false;
-
         /**
          * request id; does not change for sync v async processing of the same request; so it's the processing request
+         * NOTE: a request originally received synchronously, but then processed asynchronously - this value should remain constant
+         * it is NOT necessarily the same the request ID of any http request for the current execution; it identifiers the request for the API
+         * data itself.
          */
         @NonNull
         String requestId;
 
         /**
          * when the request was received; used for logging and metrics
+         * NOTE: a request originally received synchronously, but then processed asynchronously - this value should remain constant
          */
         @NonNull
         Instant requestReceivedAt;
 
         /**
-         * the side output key for the raw response
+         * whether this API data request is processed asynchronously
+         */
+        @NonNull
+        @Builder.Default
+        Boolean async = false;
+
+        /**
+         * the destination configured for async output, if any
+         */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        String asyncOutputDestination;
+
+        /**
+         * the key to which any raw output should be written, if any configure; will be relative to the raw output destination
          */
         @JsonInclude(JsonInclude.Include.NON_NULL)
         String rawOutputKey;
 
         /**
-         * the side output key for the sanitized response
+         * the key to which any sanitized output should be written, if any configured; will be relative to the sanitized output destination;
+         * this could be an async output destination, or a side output destination
          */
         @JsonInclude(JsonInclude.Include.NON_NULL)
         String sanitizedOutputKey;
 
+        @Deprecated // use a full builder for this; it generates a requestId, when we might as well use the platform-generated one
         public static ProcessingContext synchronous(Instant requestReceivedAt) {
             return ProcessingContext.builder()
                 .async(false)
@@ -662,4 +677,6 @@ public class ApiDataRequestHandler {
         }
         return original;
     }
+
+
 }
