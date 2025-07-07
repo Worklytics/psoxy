@@ -292,9 +292,15 @@ locals {
 
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
   command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} -re \"${data.aws_region.current.id}\""
-  command_test_calls = [for path in var.example_api_calls :
+  sync_test_calls = [for path in var.example_api_calls :
     "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
   ]
+
+  command_test_calls = concat(local.sync_test_calls,
+    var.enable_async_processing ? [for call in local.sync_test_calls : "${call} --async"] : []
+  )
+
+
   command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} -re \"${data.aws_region.current.id}\" -l \"${module.psoxy_lambda.log_group}\""
 
   awscurl_test_call = "${var.path_to_repo_root}tools/test-psoxy.sh -a ${local.role_param} -e \"${data.aws_region.current.id}\""
@@ -375,11 +381,12 @@ resource "local_file" "todo" {
 
 locals {
   test_script = templatefile("${path.module}/test_script.tftpl", {
-    proxy_endpoint_url  = local.proxy_endpoint_url,
-    function_name       = module.psoxy_lambda.function_name,
-    impersonation_param = local.impersonation_param,
-    command_cli_call    = local.command_cli_call,
-    example_api_calls   = var.example_api_calls,
+    proxy_endpoint_url      = local.proxy_endpoint_url,
+    function_name           = module.psoxy_lambda.function_name,
+    impersonation_param     = local.impersonation_param,
+    command_cli_call        = local.command_cli_call,
+    example_api_calls       = var.example_api_calls,
+    enable_async_processing = var.enable_async_processing,
   })
 }
 
