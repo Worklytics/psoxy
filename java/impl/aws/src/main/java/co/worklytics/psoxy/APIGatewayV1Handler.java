@@ -8,23 +8,22 @@ import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+
+import java.time.Instant;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 
-import static co.worklytics.psoxy.ResponseCompressionHandler.isCompressionRequested;
 
 /**
- * *ALPHA support* handler to use for API Gateway V1 configurations
- *  - this is NOT going to be subject routine QA as part of release process, so YMMV
+ * handler to use for API Gateway V1 configurations
  *
  * usage:
- *  - when configure/deploy your lambda, set entry point to `co.worklytis.psoxy.APIGatewayV1Handler`
+ *  - when configure/deploy your lambda, set entry point to `co.worklytics.psoxy.APIGatewayV1Handler`
  *  - in terraform, this is the `handler_class` variable
  *     - https://github.com/Worklytics/psoxy/blob/main/infra/modules/aws-psoxy-rest/main.tf#L36
  *     - under Lambda --> Runtime Settings via AWS console
- *
- *
  */
 public class APIGatewayV1Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
@@ -54,10 +53,14 @@ public class APIGatewayV1Handler implements com.amazonaws.services.lambda.runtim
         boolean base64Encoded = false;
         try {
             APIGatewayV1ProxyEventRequestAdapter httpEventRequestAdapter = APIGatewayV1ProxyEventRequestAdapter.of(input);
-            response = requestHandler.handle(httpEventRequestAdapter);
+            response = requestHandler.handle(httpEventRequestAdapter, ApiDataRequestHandler.ProcessingContext.builder()
+                    .async(false)
+                .requestReceivedAt(Instant.parse(input.getRequestContext().getRequestTime()))
+                .requestId(input.getRequestContext().getRequestId())
+                .build());
 
             context.getLogger().log(httpEventRequestAdapter.getHeader(HttpHeaders.ACCEPT_ENCODING).orElse("accept-encoding not found"));
-            if (isCompressionRequested(httpEventRequestAdapter)) {
+            if (responseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
                 Pair<Boolean, HttpEventResponse> compressedResponse = responseCompressionHandler.compressIfNeeded(response);
                 base64Encoded = compressedResponse.getLeft();
                 response = compressedResponse.getRight();
@@ -69,7 +72,7 @@ public class APIGatewayV1Handler implements com.amazonaws.services.lambda.runtim
             response = HttpEventResponse.builder()
                 .statusCode(500)
                 .body("Unknown error: " + e.getClass().getName())
-                .header(ResponseHeader.ERROR.getHttpHeader(),"Unknown error")
+                .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),"Unknown error")
                 .build();
         }
 

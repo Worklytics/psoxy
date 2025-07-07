@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.aws;
 
+import co.worklytics.psoxy.aws.request.LambdaEventUtils;
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.*;
@@ -11,6 +12,7 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
@@ -206,6 +208,34 @@ public interface AwsModule {
         return KmsClient.create();
     }
 
+
+    @Provides
+    static AsyncApiDataRequestHandler providesAsyncApiDataRequestHandler(
+        ConfigService configService,
+        ApiDataRequestViaSQSFactory apiDataRequestViaSQSFactory
+    ) {
+
+        // tried @Binds, but:
+        // Error:  Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project psoxy-aws: Compilation failure: Compilation failure:
+        //Error:  /home/runner/work/psoxy/psoxy/java/impl/aws/src/main/java/co/worklytics/psoxy/aws/AwsModule.java:[212,33] [co.worklytics.psoxy.aws.ApiDataRequestViaSQS] Dagger does not support providing @AssistedInject types.
+        //Error:  /home/runner/work/psoxy/psoxy/java/impl/aws/src/main/java/co/worklytics/psoxy/aws/AwsModule.java:[40,27] co.worklytics.psoxy.aws.AwsModule.Bindings has errors
+        //Error:  /home/runner/work/psoxy/psoxy/java/impl/aws/src/main/java/co/worklytics/psoxy/aws/AwsModule.java:[241,93] Dagger does not support injecting @AssistedInject type, co.worklytics.psoxy.aws.ApiDataRequestViaSQS. Did you mean to inject its assisted factory type instead?
+
+        // also tried @Provides that's equivalent to the Binds (instance as arg, return it as the value for the interface) - but same issue
+
+
+        return apiDataRequestViaSQSFactory.create(configService.getConfigPropertyOrError(AwsEnvironment.AwsConfigProperty.ASYNC_API_REQUEST_QUEUE_URL));
+
+    }
+
+    @Provides @Named("lambdaEventMapper")
+    static ObjectMapper provideLambdaEventMapper() {
+        ObjectMapper lambdaEventMapper = new ObjectMapper();
+        // Configure the mapper to accept case-insensitive properties
+        lambdaEventMapper.configure(com.fasterxml.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        return lambdaEventMapper;
+    }
+
     @Module
     abstract class Bindings {
 
@@ -218,6 +248,8 @@ public interface AwsModule {
 
         @Binds @IntoSet
         abstract PublicKeyStoreClient publicKeyStoreClient(AwsKmsPublicKeyStoreClient awsKmsPublicKeyStoreClient);
+
+
 
     }
 }

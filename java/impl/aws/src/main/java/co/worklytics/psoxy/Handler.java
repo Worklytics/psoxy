@@ -13,6 +13,8 @@ import lombok.extern.java.Log;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.time.Instant;
+
 /**
  * default AWS lambda handler
  *
@@ -59,15 +61,19 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
         boolean base64Encoded = false;
         try {
             APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter = new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
-            response = requestHandler.handle(httpEventRequestAdapter);
+            response = requestHandler.handle(httpEventRequestAdapter, ApiDataRequestHandler.ProcessingContext.builder()
+                    .async(false)
+                .requestReceivedAt(Instant.parse(httpEvent.getRequestContext().getTime()))
+                .requestId(httpEvent.getRequestContext().getRequestId())
+                .build());
 
-            if (ResponseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
+            if (responseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
                 Pair<Boolean, HttpEventResponse> compressedResponse = responseCompressionHandler.compressIfNeeded(response);
                 base64Encoded = compressedResponse.getLeft();
                 response = compressedResponse.getRight();
             } else {
                 response = response.toBuilder()
-                    .header(ResponseHeader.WARNING.getHttpHeader(), Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode())
+                    .header(ProcessedDataMetadataFields.WARNING.getHttpHeader(), Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode())
                     .build();
             }
 
@@ -77,7 +83,7 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
             response = HttpEventResponse.builder()
                 .statusCode(500)
                 .body("Unknown error: " + e.getClass().getName())
-                .header(ResponseHeader.ERROR.getHttpHeader(),"Unknown error")
+                .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),"Unknown error")
                 .build();
         }
 

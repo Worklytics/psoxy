@@ -256,6 +256,12 @@ variable "todos_as_local_files" {
   default     = true
 }
 
+variable "enable_async_processing" {
+  type        = bool
+  description = "whether to enable async processing for this connector"
+  default     = false
+}
+
 variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"

@@ -1,7 +1,12 @@
 package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
+import co.worklytics.psoxy.gateway.impl.output.NoOutput;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
+import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
+import co.worklytics.psoxy.gateway.output.OutputFactory;
+import co.worklytics.psoxy.gateway.output.OutputLocation;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.avaulta.gateway.rules.BulkDataRules;
@@ -24,6 +29,8 @@ import org.mockito.MockMakers;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+
+import java.io.IOException;
 
 import static org.mockito.Mockito.*;
 
@@ -144,20 +151,49 @@ public class MockModules {
         }
     }
 
+
+
     @Module
     public interface ForSideOutputs {
 
         // so actually, not mocks ...
 
-        @Provides @Named("forOriginal")
+        @Provides @Named("forOriginal") @Singleton
         static ApiDataSideOutput sideOutputForOriginal() {
             return new NoApiDataSideOutput();
         }
 
-        @Provides @Named("forSanitized")
+        @Provides @Named("forSanitized") @Singleton
         static ApiDataSideOutput sideOutputForSanitized() {
             return new NoApiDataSideOutput();
         }
+
+
+        @Provides @Named("async") @Singleton
+        static ApiSanitizedDataOutput apiSanitizedDataOutput() {
+            return new NoApiDataSideOutput();
+        }
+
+        @Provides
+        static NoOutput providesNoOutput() {
+            return new NoOutput();
+        }
+
+        @Provides @IntoSet
+        static OutputFactory<?> providesOutputFactory() {
+            return new OutputFactory<NoOutput>() {
+                @Override
+                public NoOutput create(OutputLocation outputLocation) {
+                    return new NoOutput();
+                }
+
+                @Override
+                public boolean supports(OutputLocation outputLocation) {
+                    return true;
+                }
+            };
+        }
+
 
         /**
          * a no-op implementation of SideOutput that does nothing.
@@ -166,11 +202,25 @@ public class MockModules {
         class NoApiDataSideOutput implements ApiDataSideOutput {
 
             @Override
-            public void write(HttpEventRequest request, ProcessedContent content) {
-                // no-op
+            public void writeRaw(ProcessedContent content, ApiDataRequestHandler.ProcessingContext processingContext) throws IOException {
+
+            }
+
+            @Override
+            public void writeSanitized(ProcessedContent content, ApiDataRequestHandler.ProcessingContext processingContext) throws IOException {
+
             }
         }
+    }
 
+    @Module
+    public interface ForAsyncApiDataRequestHandler {
+
+        @Provides
+        @Singleton
+        static AsyncApiDataRequestHandler asyncApiDataRequestHandler() {
+            return mock(AsyncApiDataRequestHandler.class);
+        }
     }
 }
 

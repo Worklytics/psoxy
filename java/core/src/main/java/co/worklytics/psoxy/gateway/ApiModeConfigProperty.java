@@ -1,11 +1,21 @@
 package co.worklytics.psoxy.gateway;
 
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public enum ApiModeConfigProperty implements ConfigService.ConfigProperty {
-    SOURCE_AUTH_STRATEGY_IDENTIFIER, //target API endpoint to forward request to
+    /**
+     * if provided, requests to proxy with `Prefer: respond-async` header will be processed asynchronously and responses output to the target
+     * ONLY applicable in API Data Connector mode ONLY
+     */
+    ASYNC_OUTPUT_DESTINATION,
+
+
+    /**
+     * identifies the SourceAuthStrategy to use f
+     */
+    SOURCE_AUTH_STRATEGY_IDENTIFIER,
+
     /**
      * control the TLS protocol version used by proxy for outbound connections (eg, to data source)
      * OPTIONAL; default to 'TLSv1.3'
@@ -14,7 +24,13 @@ public enum ApiModeConfigProperty implements ConfigService.ConfigProperty {
      * any as of Sept 2024)
      */
     TLS_VERSION,
+
+    /**
+     * target Host to forward requests to
+     */
     TARGET_HOST,
+
+
     ;
 
 

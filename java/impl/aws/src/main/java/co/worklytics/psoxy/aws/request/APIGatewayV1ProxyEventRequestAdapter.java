@@ -114,6 +114,11 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
             .map(p -> p.equals("https"));
     }
 
+    @Override
+    public Object getUnderlyingRepresentation() {
+        return event;
+    }
+
     /**
      * @return view of Headers with lower-case names
      *

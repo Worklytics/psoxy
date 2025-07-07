@@ -1,0 +1,18 @@
+---
+endpoints:
+  - pathTemplate: "/api/admin.analytics.getFile"
+    allowedQueryParams:
+      - "type"
+      - "date"
+      - "metadata_only"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths: # these are actually NDJSON, not JSON response
+          - "$.user_id" # tbd - don't think we do this by default in other slack
+          - "$.email_address"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths: # all for public_channel case; could split into two endpoints to deal with this
+          - "$.topic"
+          - "$.name"
+          - "$.description"

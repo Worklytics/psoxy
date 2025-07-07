@@ -29,3 +29,16 @@ variable "bucket_suffix" {
   description = "An optional suffix to append to the bucket name. This can be used to further differentiate bucket names, especially if multiple side outputs are expected. If not provided, the default suffix will be used."
   default     = "side-output"
 }
+
+
+variable "provision_bucket_public_access_block" {
+  type        = bool
+  description = "Whether to provision a public access block for the bucket. Usually should be 'true'; support 'false' if manage externally, or bucket secured via alternative means."
+  default     = true
+}
+
+variable "lifecycle_ttl_days" {
+  type        = number
+  description = "The number of days after which to expire files in the bucket; default 5 years. Pass 'null' or '0' to disable."
+  default     = 1825 # 5 years
+}

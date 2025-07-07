@@ -1,0 +1,27 @@
+### Slack Analytics API Connector Setup
+
+For enabling Slack Analytics via API via the Psoxy you must first create an app on your Slack Enterprise instance.
+
+1. Go to https://api.slack.com/apps and create an app.
+   - Select "From scratch", choose a name (for example "Slack Analytics Connector") and a workspace.
+
+2. Under "Features" --> "OAuth & Permissions", add the following scopes under "User Token Scopes":
+   - `admin.analytics:read`
+
+#### Workspace install
+
+Use this steps if you intend to install in just one workspace within your org.
+
+1. Go to "Settings > Install App", click on "Install into *workspace*"
+2. Copy the "User OAuth Token" (also listed under "OAuth & Permissions") and store as `${path_to_instance_parameters}ACCESS_TOKEN` in the psoxy's Secret Manager. Otherwise, share the token with the AWS/GCP administrator completing the implementation.
+
+#### Org wide install
+
+Use this step if you want to install in the whole org, across multiple workspaces.
+
+1. Add a bot scope (not really used, but Slack doesn't allow org-wide installations without a bot scope). The app won't use it at all. Just add for example the `users:read` scope, read-only.
+2. Under "Settings > Manage Distribution > Enable Org-Wide App installation", click on "Opt into Org Level Apps" agree and continue. This allows to distribute the app internally  on your organization, to be clear it has nothing to do with public distribution or Slack app directory.
+3. Generate the following URL replacing the placeholder for *YOUR_CLIENT_ID* and save it for later:
+4. Go to "OAuth & Permissions" and add the previous URL as "Redirect URLs"
+5. Go to "Settings > Install App", and choose "Install to Organization". A Slack admin should grant the app the permissions and the app will be installed.
+6. Copy the "User OAuth Token" (also listed under "OAuth & Permissions") and store as `${path_to_instance_parameters}ACCESS_TOKEN` in the proxy's Secret Manager. Otherwise, share the token with the AWS/GCP administrator completing the implementation.

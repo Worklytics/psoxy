@@ -58,6 +58,7 @@ locals {
         },
       ]
       reserved_concurrent_executions : null
+      enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
@@ -117,6 +118,7 @@ EOT
         "GitHub Organization" = local.github_organization
       }
       reserved_concurrent_executions : null
+      enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
@@ -220,6 +222,7 @@ EOT
         "GitHub Organization" = local.github_organization
       }
       reserved_concurrent_executions : null
+      enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
@@ -588,6 +591,40 @@ EOT
      However, if running any of the queries you receive a 401/403/500/512. A 401/403 it might be related to some misconfiguration in the Salesforce Application due lack of permissions;
      a 500/512 it could be related to missing parameter in the function configuration (for example, a missing value for `salesforce_domain` variable in your terraform vars)
 EOT
+    }
+    # https://api.slack.com/methods/admin.analytics.getFile
+    slack-analytics = {
+      source_kind : "slack",
+      availability : "alpha",
+      enable_by_default : false
+      worklytics_connector_id : "slack-analytics-psoxy"
+      worklytics_connector_name : "Slack Analytics via Psoxy"
+      display_name : "Slack Analytics via Psoxy"
+      target_host : "www.slack.com"
+      source_auth_strategy : "oauth2_access_token"
+      oauth_scopes_needed : [
+        "admin.analytics:read",
+      ]
+      enable_async_processing : true
+      environment_variables : {}
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        },
+      ]
+      reserved_concurrent_executions : null
+      enable_side_output : false
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/api/admin.analytics.getFile?type=member&date=2025-04-01"
+      ]
+      instructions_template = "${path.module}/docs/slack/analytics/instructions.tftpl"
+      external_token_todo : templatefile("${path.module}/docs/slack/analytics/instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_SLACK_ANALYTICS_"
+      })
     }
     slack-discovery-api = {
       source_kind : "slack"
