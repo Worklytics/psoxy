@@ -37,7 +37,7 @@ custom_side_outputs = {
     }
 }
 ```
-   2. connector specs. a `provision_side_output` in the connector spec, which will cause the bucket to be provisioned.
+   2. connector specs. a `provision_side_output` in the connector spec, which will cause the bucket to be provisioned. **NOT YET IMPLEMENTED**.
 
 Use case: some responses from source API expected to be too large/too slow to return directly to the client, so you want to write them to a side output instead.
 
@@ -48,15 +48,32 @@ provision_side_output = true
 ## Details
 For bucket use-cases, each response will be written as a single object in the bucket, with the following naming convention:
 
-`GET_api.google.com/v1/some/endpoint_{SHA256(query-params)}`
+`api.google.com/v1_some_endpoint/{random-uuid}`
 
 These components are:
-  - `GET` - the HTTP method used for the request
   - `api.google.com` - the host
-  - `/v1/some/endpoint` the path of the API endpoint that was called (normalized)
-  - `{SHA256(query-params)}` - a SHA256 hash of the (normalized) query parameters used in the request, to ensure uniqueness of the object name
+  - `v1_some_endpoint` the path of the API endpoint that was called (normalized, and replacing `/` with `_` to avoid semanticis of directory structure in bucket UX)
+  - `{random-uuid}` - a random UUID, to ensure uniqueness of the object name.
 
-See `SideOutputUtils::canonicalResponseKey` for details.
+Additionally, a bunch of metadata will be populated on the object, including:
+- `API_HOST` - the host of the API from which the response was received
+- `PATH` - the path that was called
+- `HTTP_METHOD` - the HTTP method that was used to call the API
+- `QUERY_STRING` - the query string that was used to call the API
+- `REQUEST_BODY` - base64-encoded request body that was sent to the API, if any (eg, only applicable for `POST`/`PUT` requests)
+- all http headers from the request to the proxy for the API data EXCEPT for
+    - `host`
+    - `user-agent`
+    - `accept`
+    - `accept-encoding`
+    - `authorization`
+    - `content-length`
+    - `Forwarded`
+    - `traceparent`
+    - `X-Forwarded-For`
+    - `x-cloud-trace-context`
+    - `X-Forwarded-Proto`
+
 
 ### Passing between Terraform Modules
 
@@ -68,13 +85,13 @@ See `SideOutputUtils::canonicalResponseKey` for details.
 
 `side_output_sanitized`, `side_output_original` - one per stage?
 
-
-
-
 ## Issues
+  - async mode WITHOUT side output; atm, can't have both; async implies side output, to which data is written regardless of context
+
   - headers that matter / don't matter in response content; what to do? (eg Google 'User-to-Impersonate') - that's a proprietary one.
-  - do we need to store Response headers, as well as Request headers, in object metdata?
+  - do we need to store Response headers, as well as Request headers, in object metadata?
   - `/` in paths get split up in GCS/S3 ux, which is annoying; makes it hard to browse the bucket.
+  - allow customization of side-output object naming?? can see how some query parameters/etc might make them more readable
 
 ## Future Work
   - support for multiple side outputs ?? ( probably unavoidable, and should do ASAP )
@@ -82,7 +99,5 @@ See `SideOutputUtils::canonicalResponseKey` for details.
   - support for other targets (BQ, https endpoint, cloud watch, etc)
   - as a caching solution
   - as a buffer for slow/large responses (eg, proxy responds with token, which client can later use to fetch the data)
-  - export `SideOutputUtils::canonicalResponseKey` to other languages; or document a standard with Java as reference implementation,
-     so side output buckets can be used as a cache for API access by other systems.
   - support for additional transforms on side outputs? What's the use-case exactly?
   - support for side output sampling rate?

@@ -1,10 +1,22 @@
 package co.worklytics.psoxy;
 
+
 /**
  * Enumeration of errors that cause a not 200 OK response from Psoxy
  * Values of response header {@see co.worklytics.psoxy.ResponseHeader.ERROR}
  */
 public enum ErrorCauses {
+
+    /**
+     * Third party call returned error, that is not obviously something that falls under 'CONNECTION_SETUP' case
+     * eg - not obvious to use that its an authentication or authorization issue
+     */
+    API_ERROR,
+
+    /**
+     *  some error dispatching request to an async handler
+     */
+    ASYNC_HANDLER_DISPATCH,
 
     /**
      * Sanitization rules blocked the call
@@ -19,16 +31,9 @@ public enum ErrorCauses {
     CONNECTION_SETUP,
 
     /**
-     * Third party call returned error, that is not obviously something that falls under 'CONNECTION_SETUP' case
-     * eg - not obvious to use that its an authentication or authorization issue
+     *  failed to get configuration data; or misconfigured.
      */
-    API_ERROR,
-
-    /**
-     * request was not sent over HTTPS
-     */
-    HTTPS_REQUIRED,
-
+    CONFIGURATION_FAILURE,
     /**
      *  indicates failure to connect from proxy instance to source
      */
@@ -40,9 +45,9 @@ public enum ErrorCauses {
     FAILED_TO_BUILD_URL,
 
     /**
-     *  failed to get configuration data; or misconfigured.
+     * request was not sent over HTTPS
      */
-    CONFIGURATION_FAILURE,
+    HTTPS_REQUIRED,
 
     /**
      *  An error internal to proxy's application logic, but not handled such that it could be mapped into one of the above.
@@ -50,5 +55,4 @@ public enum ErrorCauses {
      */
     UNKNOWN,
     ;
-
 }

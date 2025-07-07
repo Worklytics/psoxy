@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.aws;
 
 import co.worklytics.psoxy.*;
+import co.worklytics.psoxy.aws.request.LambdaEventUtils;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import co.worklytics.psoxy.gateway.impl.BatchMergeHandler;
 import co.worklytics.psoxy.gateway.impl.InboundWebhookHandler;
@@ -31,4 +32,6 @@ public interface AwsContainer {
     S3Handler injectS3Handler(S3Handler s3Handler);
 
     JwksDecorator.Factory jwksDecoratorFactory();
+
+    LambdaEventUtils lambdaEventUtils();
 }

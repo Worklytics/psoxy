@@ -113,6 +113,11 @@
             <artifactId>jackson-dataformat-yaml</artifactId>
             <version>${dependency.jackson.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
+            <version>${dependency.jackson.version}</version>
+        </dependency>
 
         <!-- Communications with source API endpoints, including transport + auth -->
         <!-- for familiarity sake, use Google HTTP / OAuth clients -->

@@ -16,6 +16,9 @@ import com.avaulta.gateway.rules.PathTemplateUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
@@ -23,6 +26,7 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,10 +34,12 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -101,6 +107,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     @Named("ipHashStrategy")
     DeterministicTokenizationStrategy ipHashStrategy;
 
+    @Inject
+    ObjectMapper objectMapper;
+
 
     @Override
     public boolean isAllowed(@NonNull String httpMethod, @NonNull URL url) {
@@ -115,51 +124,123 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             .orElse(Optional.empty());
     }
 
+    @SneakyThrows
     @Override
-    public String sanitize(String httpMethod, URL url, String jsonResponse) {        //extra check ...
-        if (!isAllowed(httpMethod, url)) {
-            throw new IllegalStateException(String.format("Sanitizer called to sanitize response that should not have been retrieved: %s", url));
-        }
+    public String sanitize(String httpMethod, URL url, String jsonResponse) {
         if (StringUtils.isEmpty(jsonResponse)) {
             // Nothing to do
             return jsonResponse;
         }
+        // Convert input String to InputStream (UTF-8 encoding)
+        try (InputStream input = new ByteArrayInputStream(jsonResponse.getBytes(StandardCharsets.UTF_8))) {
+             final ProcessedStream processedStream = sanitize(httpMethod, url, input);
 
-        return transform(httpMethod, url, jsonResponse);
+            // Read all bytes from the sanitized stream
+            byte[] sanitizedBytes = processedStream.getStream().readAllBytes();
+
+            // ensure NOTHING threw an exception while processing the stream
+            processedStream.complete();
+
+            return new String(sanitizedBytes, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            // Wrap IOException in unchecked exception, or handle as needed
+            throw new UncheckedIOException("Failed to sanitize content", e);
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    String transform(@NonNull String httpMethod, @NonNull URL url, @NonNull String jsonResponse) {
-        return getEndpoint(httpMethod, url).map(match -> {
-            String filteredJson = match.getValue().getResponseSchemaOptional()
+    @SneakyThrows
+    @Override
+    public ProcessedStream sanitize(String httpMethod, URL url, InputStream response) throws IOException {
+        //extra check ...
+        if (!isAllowed(httpMethod, url)) {
+            throw new IllegalStateException(String.format("Sanitizer called to sanitize response that should not have been retrieved: %s", url));
+        }
+        Optional<Pair<Pattern, Endpoint>> matchingEndpoint = getEndpoint(httpMethod, url);
+
+        if (matchingEndpoint.isEmpty()) {
+            // No matching endpoint found, return the original response
+            return new ProcessedStream(response, CompletableFuture.completedFuture(null));
+        }
+
+        //q: overkill for NON-ndjson case?
+
+        // Create piped stream pair
+        PipedOutputStream outPipe = new PipedOutputStream();
+        PipedInputStream inPipe = new PipedInputStream(outPipe);
+
+        Endpoint endpoint = matchingEndpoint.get().getValue();
+        Future<?> future;
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        future = executor.submit(() -> {
+            JsonFactory factory = objectMapper.getFactory();
+
+            try (JsonParser parser = factory.createParser(response);
+                 OutputStreamWriter writer = new OutputStreamWriter(outPipe, StandardCharsets.UTF_8);
+                 BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
+
+                boolean first = true;
+
+                while (parser.nextToken() != null) {
+                    // in theory, should parse only the 'next' JSON object from the stream, such that NDJSON, or even "{}{}" works
+                    // string --> jackson jsonNode --> string -> jayway object  for compatibility with jayway jsonpath
+                    // despite jackson provider underneath, Jayway JSONPath seems not do deal with native jackson JsonNode
+                    // TODO: figure out a way to streamline this parsing
+                    Object node = jsonConfiguration.jsonProvider().parse(
+                        objectMapper.writeValueAsString(objectMapper.readTree(parser)));
+
+                    Object sanitized = sanitize(endpoint, node);
+                    if (!first) bufferedWriter.write("\n");
+                    bufferedWriter.write(jsonConfiguration.jsonProvider().toJson(sanitized));
+                    first = false;
+                }
+                bufferedWriter.flush();
+            } catch (IOException e) {
+                // Propagate error by closing the pipe
+                try {
+                    outPipe.close();
+                } catch (IOException ignore) {
+                }
+                throw new UncheckedIOException(e);
+            } finally {
+                try {
+                    outPipe.close();
+                } catch (IOException ignore) {
+                }
+            }
+        });
+
+        return new ProcessedStream(inPipe, future);
+    }
+
+    /**
+     * sanitized a response JSON by applying the endpoint's response schema and transforms
+     *
+     * if endpoint allows for ndjson, we expect this to be just a single JSON object at a time, and you call this once per row in the response
+     */
+    private Object sanitize(Endpoint endpoint, Object jsonResponse) {
+        Object document = endpoint.getResponseSchemaOptional()
                 .map(schema -> {
                     //q: this read
                     try {
-                        return jsonSchemaFilterUtils.filterJsonBySchema(jsonResponse, schema, getRootDefinitions());
+                        //TODO: jayway jsonpath Object --> String --> jayway jsonpath Object here is needlessly inefficient
+                        String json = jsonConfiguration.jsonProvider().toJson(jsonResponse);
+                        return jsonConfiguration.jsonProvider().parse(jsonSchemaFilterUtils.filterJsonBySchema(json, schema, getRootDefinitions()));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 })
                 .orElse(jsonResponse);
 
-            //q: more efficient to filter on `document` directly? problem is that our json path
-            // library contract only specifies 'Object' for it's parsed document type; but in
-            // practice, both it and our SchemaRuleUtils are using Jackson underneath - so expect
-            // everything to work OK.
-
-            //NOTE: `document` here is a `LinkedHashMap`
-
-            if (ObjectUtils.isNotEmpty(match.getValue().getTransforms())) {
-                Object document = jsonConfiguration.jsonProvider().parse(filteredJson);
-
-                for (Transform transform : match.getValue().getTransforms()) {
+            if (ObjectUtils.isNotEmpty(endpoint.getTransforms())) {
+                for (Transform transform : endpoint.getTransforms()) {
                     sanitizerUtils.applyTransform(getPseudonymizer(), transform, document, this.compiledTransforms);
                 }
-
-                filteredJson = jsonConfiguration.jsonProvider().toJson(document);
             }
-            return filteredJson;
-
-        }).orElse(jsonResponse);
+            return document;
     }
 
 
@@ -277,7 +358,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     }
 
 
-    private Optional<Pair<Pattern, Endpoint>> getEndpoint(String httpMethod, URL url) {
+    @VisibleForTesting
+    Optional<Pair<Pattern, Endpoint>> getEndpoint(String httpMethod, URL url) {
         String relativeUrl = stripTargetHostPath(URLUtils.relativeURL(url));
 
         Predicate<Map.Entry<Endpoint, Pattern>> hasPathRegexMatchingUrl =

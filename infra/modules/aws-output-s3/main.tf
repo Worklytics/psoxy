@@ -1,20 +1,12 @@
-# This module creates an S3 bucket for  output data from a proxy instance.
+# This module creates an S3 bucket for output data from a proxy instance.
 #
 # TODO: unify with aws-psoxy-output-bucket module? why is that different?
+#  - that carries implicit policy, which is not ideal vs combining single unified policies
+#
 #
 # NOTE: this will provision NEITHER read nor write permissions to the bucket; to reduce number of IAM policies
 # + attachments, we're going to architect things as policy per principal/role, rather than per resource
 #
-# not really needed, but nicer imho than relying on AWS to generate a random bucket suffix
-# arguably should allow it to be passed in, if we want to accommodate side output of bulk connectors
-resource "random_string" "unique_sequence" {
-  count = var.unique_sequence == null ? 1 : 0
-
-  length  = 8
-  lower   = true
-  upper   = false
-  special = false
-}
 
 module "env_id" {
   source = "../env-id"
@@ -26,7 +18,7 @@ module "env_id" {
 
 locals {
   bucket_name_prefix          = "${module.env_id.id}-${replace(var.instance_id, "_", "-")}"
-  bucket_name_unique_sequence = coalesce(var.unique_sequence, try(random_string.unique_sequence[0].result, ""))
+  bucket_name_unique_sequence = coalesce(var.unique_sequence, uuid())
 }
 
 resource "aws_s3_bucket" "bucket" {
@@ -34,13 +26,36 @@ resource "aws_s3_bucket" "bucket" {
 
   lifecycle {
     ignore_changes = [
-      # bucket, # avoid re-creating bucket if our naming conventions change
-      tags # avoid churning tags that may be managed outside of this terraform module
+      bucket, # avoid re-creating bucket if our naming conventions change *or*, if relying on uuid() for uniqueness, as that value changes on every plan/apply
+      tags    # avoid churning tags that may be managed outside of this terraform module
     ]
   }
 }
 
-#  - public access block?
-#  - lifecycle policy with expiration? (eg 720 days)
 #  - versioning?
-# or invert-control for all of the above, and let caller do it if they care??
+
+
+resource "aws_s3_bucket_public_access_block" "output" {
+  count = var.provision_bucket_public_access_block ? 1 : 0
+
+  bucket = aws_s3_bucket.bucket.bucket
+
+  block_public_acls       = true
+  block_public_policy     = true
+  restrict_public_buckets = true
+  ignore_public_acls      = true
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "ttl" {
+  count = (var.lifecycle_ttl_days == null || var.lifecycle_ttl_days == 0) ? 0 : 1
+
+  bucket = aws_s3_bucket.bucket.bucket
+
+  rule {
+    id     = "expire-after-${var.lifecycle_ttl_days}-days"
+    status = "Enabled"
+    expiration {
+      days = var.lifecycle_ttl_days
+    }
+  }
+}

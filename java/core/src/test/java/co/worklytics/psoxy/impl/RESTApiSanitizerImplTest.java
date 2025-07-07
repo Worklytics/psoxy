@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.test.TestModules;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
@@ -42,6 +43,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.assertArg;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -135,6 +137,46 @@ class RESTApiSanitizerImplTest {
         assertFalse(sanitized.contains("Subject"));
         assertFalse(sanitized.contains("null"));
     }
+
+    @SneakyThrows
+    @Test
+    void sanitize_ndjson() {
+
+        String jsonPart = "{\n" +
+            "        \"name\": \"To\",\n" +
+            "        \"value\": \"ops@worklytics.co\"\n" +
+            "      }";
+
+        String jsonString = new String(TestUtils.getData("sources/google-workspace/gmail/example-api-responses/original/message.json"));
+
+        //verify precondition that example actually contains something we need to pseudonymize
+        assertTrue(jsonString.contains(jsonPart));
+        assertTrue(jsonString.contains("alice@worklytics.co"));
+        assertTrue(jsonString.contains("Subject"));
+
+
+        // convert to canonical json, double it
+        jsonString = jsonString.replaceAll("\\s","");
+        jsonString = jsonString + "\n" + jsonString;
+
+        String sanitized = sanitizer.sanitize("GET", new URL("https", "gmail.googleapis.com", "/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata"), jsonString);
+
+        //email address should disappear
+        assertFalse(sanitized.contains(jsonPart));
+        assertFalse(sanitized.contains(jsonPart.replaceAll("\\s","")));
+        assertFalse(sanitized.contains("alice@worklytics.co"));
+
+        //redaction should remove 'Subject' header entirely; and NOT just replace it with `null`
+        assertFalse(sanitized.contains("Subject"));
+        assertFalse(sanitized.contains("null"));
+
+        //test that two lines of ndjson output, match two rows of expected output
+        String expected = new String(TestUtils.getData("sources/google-workspace/gmail/example-api-responses/sanitized/message.json"));
+        expected = expected.replaceAll("\\s","");
+        expected = expected + "\n" + expected;
+        assertEquals(expected, sanitized);
+    }
+
 
 
 
@@ -769,5 +811,25 @@ class RESTApiSanitizerImplTest {
        assertEquals("/path/api/v1", sanitizer.stripTargetHostPath("/path/api/v1"));
     }
 
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "https://admin.googleapis.com/admin/reports/v1/activity/users/p~nVPSMYD7ZO_ptGIMJ65TAFo5_vVVQQ2af5Bfg7bW0Jq9JIOXfBWhts_zA5Ns0r4m/applications/gemini_in_workspace_apps",
+    })
+    public void pseudonymsInPath(String url) throws Exception {
+        Endpoint endpoint = Endpoint.builder()
+            .pathTemplate("/admin/reports/v1/activity/users/{userKey}/applications/gemini_in_workspace_apps")
+            .allowedQueryParams(List.of("foo"))
+            .build();
+
+        Map.Entry<Endpoint, Pattern> entry = Map.entry(endpoint, Pattern.compile(sanitizer.effectiveRegex(endpoint)));
+
+        sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gemini-in-workspace-apps" + ConfigRulesModule.NO_APP_IDS_SUFFIX), sanitizer.pseudonymizer);
+
+        assertTrue(sanitizer.getHasPathTemplateMatchingUrl(new URL(url)).test(entry));
+
+        assertTrue(sanitizer.getEndpoint("GET", new URL(url)).isPresent());
+
+    }
 
 }

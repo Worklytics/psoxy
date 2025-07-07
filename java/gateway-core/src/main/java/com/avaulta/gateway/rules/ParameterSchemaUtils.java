@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.avaulta.gateway.rules.ParameterSchema.StringFormat.PSEUDONYM;
+
 /**
  * utils for validating values conform to parameter schemas
  *
@@ -42,9 +44,23 @@ public class ParameterSchemaUtils {
                 }
             }
 
-            if (Objects.equals(schema.getFormat(), ParameterSchema.StringFormat.REVERSIBLE_PSEUDONYM.getStringEncoding())) {
-                if (!UrlSafeTokenPseudonymEncoder.REVERSIBLE_PSEUDONYM_PATTERN.matcher(value).matches()) {
-                    return false;
+            if (schema.getFormat() != null) {
+                // must be a string
+                try {
+                    ParameterSchema.StringFormat parsed = ParameterSchema.StringFormat.parse(schema.getFormat());
+                    switch (parsed) {
+                        case PSEUDONYM:
+                        case REVERSIBLE_PSEUDONYM:
+                            if (!UrlSafeTokenPseudonymEncoder.REVERSIBLE_PSEUDONYM_PATTERN.matcher(value).matches()) {
+                                return false;
+                            }
+                            break;
+                        default:
+                            // no other formats supported
+                            return false;
+                    }
+                } catch (IllegalArgumentException e) {
+                    throw new Error("Invalid format '" + schema.getFormat() + "' in schema for parameter", e);
                 }
             }
 

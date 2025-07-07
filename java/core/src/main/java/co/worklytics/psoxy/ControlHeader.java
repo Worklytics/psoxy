@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
  * headers that control how Psoxy works
  *
  * anything passed as headers like this shouldn't have info-sec implications.
+ *
+ * NOTE: all of these are applicable ONLY in API Data Connector mode.
  */
 @RequiredArgsConstructor
 public enum ControlHeader {
@@ -20,15 +22,16 @@ public enum ControlHeader {
     AUTHORIZATION("Authorization"),
 
     /**
-     * @see co.worklytics.psoxy.impl.PseudonymImplementations
-     */
-    PSEUDONYM_IMPLEMENTATION("Pseudonym-Implementation"),
-
-    /**
      * this header - sent with any value - means the request is a health check, not actually
      * intended to be forwarded to source
      */
     HEALTH_CHECK("Health-Check"),
+
+
+    /**
+     * @see co.worklytics.psoxy.impl.PseudonymImplementations
+     */
+    PSEUDONYM_IMPLEMENTATION("Pseudonym-Implementation"),
 
     /**
      * whether to skip sanitizer (for testing purposes, to obtain unsanitized baseline to compare

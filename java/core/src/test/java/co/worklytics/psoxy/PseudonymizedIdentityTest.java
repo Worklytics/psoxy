@@ -1,19 +1,15 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.test.MockModules;
-import co.worklytics.test.TestModules;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.Component;
-import dagger.Module;
-import dagger.Provides;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

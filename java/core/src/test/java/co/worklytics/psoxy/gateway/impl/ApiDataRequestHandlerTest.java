@@ -10,6 +10,7 @@ import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.rules.msft.PrebuiltSanitizerRules;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
@@ -36,6 +37,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.net.URL;
+import java.time.Clock;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -57,6 +59,9 @@ class ApiDataRequestHandlerTest {
             MockModules.ForSourceAuthStrategySet.class,
            MockModules.ForHttpTransportFactory.class,
         MockModules.ForSideOutputs.class,
+        MockModules.ForAsyncApiDataRequestHandler.class,
+        TestModules.ForFixedUUID.class,
+        TestModules.ForFixedClock.class,
     })
     public interface Container {
         void inject(ApiDataRequestHandlerTest test);
@@ -82,6 +87,9 @@ class ApiDataRequestHandlerTest {
 
     @Inject
     PseudonymizerImplFactory pseudonymizerImplFactory;
+
+    @Inject
+    Clock clock;
 
     private static Stream<Arguments> provideRequestToBuildTarget() {
         return Stream.of(
@@ -146,6 +154,11 @@ class ApiDataRequestHandlerTest {
             public Optional<Boolean> isHttps() {
                 return Optional.empty();
             }
+
+            @Override
+            public Object getUnderlyingRepresentation() {
+                return this;
+            }
         };
         when(handler.config.getConfigPropertyOrError(eq(ApiModeConfigProperty.TARGET_HOST))).thenReturn("proxyhost.com");
 
@@ -208,7 +221,7 @@ class ApiDataRequestHandlerTest {
         spy.sanitizer = sanitizer;
 
         try {
-            spy.handle(request);
+            spy.handle(request, ApiDataRequestHandler.ProcessingContext.synchronous(clock.instant()));
         } catch (Exception ignored) {
             // it should raise an exception due missing configuration
         }
@@ -262,7 +275,7 @@ class ApiDataRequestHandlerTest {
         spy.sanitizer = sanitizer;
 
         try {
-            spy.handle(request);
+            spy.handle(request, ApiDataRequestHandler.ProcessingContext.synchronous(clock.instant()));
         } catch (Exception ignored) {
             // it should raise an exception due missing configuration
         }
@@ -311,7 +324,7 @@ class ApiDataRequestHandlerTest {
         spy.sanitizer = sanitizer;
 
         try {
-            spy.handle(request);
+            spy.handle(request, ApiDataRequestHandler.ProcessingContext.synchronous(clock.instant()));
         } catch (Exception ignored) {
             // it should raise an exception due missing configuration
         }

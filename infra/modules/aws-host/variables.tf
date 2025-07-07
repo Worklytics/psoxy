@@ -177,6 +177,7 @@ variable "api_connectors" {
     target_host                           = string
     oauth_scopes_needed                   = optional(list(string), [])
     environment_variables                 = optional(map(string), {})
+    enable_async_processing               = optional(bool, false)
     example_api_calls                     = optional(list(string), [])
     example_api_calls_user_to_impersonate = optional(string)
     secured_variables = optional(list(object({

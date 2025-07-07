@@ -1,10 +1,18 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
 import co.worklytics.psoxy.rules.RESTRules;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public interface RESTApiSanitizer {
     /**
@@ -44,4 +52,30 @@ public interface RESTApiSanitizer {
 
     RESTRules getRules();
 
+    /**
+     * sanitize response stream received from url, according any options set on Sanitizer
+     * <p>
+     * bc of streaming interface, this is preferred when expect large responses
+     * <p>
+     * q: compression; do we return gzipped stream out of here, or have consumer choose that??
+     *
+     * @param httpMethod
+     * @param url
+     * @param response
+     * @return
+     * @throws IOException
+     */
+    RESTApiSanitizerImpl.ProcessedStream sanitize(String httpMethod, URL url, InputStream response) throws IOException;
+
+    @RequiredArgsConstructor
+    class ProcessedStream {
+
+        @Getter
+        private final InputStream stream;
+        private final Future<?> future;
+
+        public void complete() throws ExecutionException, InterruptedException {
+            future.get();
+        }
+    }
 }

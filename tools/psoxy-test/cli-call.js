@@ -37,6 +37,7 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
     .option('--identity-issuer <issuer>', 'issuer of JWT (iss claim)')
     .option('--identity-subject <sub>', 'subject (sub) claim to include in JWT claims to be signed')
     .option('--request-no-response', "Request 'No response body' back from proxy (tests side-output case)", false)
+    .option('--async', 'Process request asynchronously (adds X-Psoxy-Process-Async header)', false)
     .option('-b, --body <body>', 'Body to send in request (it expects a JSON string)')
     .addOption(new Option('-d, --data-source <name>',
       'Data source to test all available endpoints').choices([

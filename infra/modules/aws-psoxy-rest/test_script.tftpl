@@ -7,7 +7,12 @@ ${command_cli_call} -u "${proxy_endpoint_url}/" --health-check
 
 ${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param}
 
+%{ if enable_async_processing ~}
+${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param} --async
+%{ endif ~}
+
 echo "Invoke this script with any of the following as arguments to test other endpoints:"
 %{ for example_api_call in example_api_calls ~}
     printf "\t'%s'\n" "${example_api_call}"
 %{ endfor ~}
+
