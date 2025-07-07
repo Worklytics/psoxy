@@ -2,8 +2,11 @@ package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
+import co.worklytics.psoxy.gateway.impl.output.NoOutput;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
+import co.worklytics.psoxy.gateway.output.OutputFactory;
+import co.worklytics.psoxy.gateway.output.OutputLocation;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.avaulta.gateway.rules.BulkDataRules;
@@ -171,6 +174,27 @@ public class MockModules {
             return new NoApiDataSideOutput();
         }
 
+        @Provides
+        static NoOutput providesNoOutput() {
+            return new NoOutput();
+        }
+
+        @Provides @IntoSet
+        static OutputFactory<NoOutput> providesOutputFactory() {
+            return new OutputFactory<NoOutput>() {
+                @Override
+                public NoOutput create(OutputLocation outputLocation) {
+                    return new NoOutput();
+                }
+
+                @Override
+                public boolean supports(OutputLocation outputLocation) {
+                    return true;
+                }
+            };
+        }
+
+
         /**
          * a no-op implementation of SideOutput that does nothing.
          */
@@ -187,7 +211,6 @@ public class MockModules {
 
             }
         }
-
     }
 
     @Module
