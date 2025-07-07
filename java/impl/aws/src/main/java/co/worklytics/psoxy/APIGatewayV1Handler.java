@@ -72,7 +72,7 @@ public class APIGatewayV1Handler implements com.amazonaws.services.lambda.runtim
             response = HttpEventResponse.builder()
                 .statusCode(500)
                 .body("Unknown error: " + e.getClass().getName())
-                .header(ResponseHeader.ERROR.getHttpHeader(),"Unknown error")
+                .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),"Unknown error")
                 .build();
         }
 

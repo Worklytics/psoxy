@@ -36,10 +36,7 @@ import org.apache.http.entity.ContentType;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.ConnectException;
 import java.net.URL;
 import java.time.Instant;
@@ -48,7 +45,6 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
@@ -165,7 +161,7 @@ public class ApiDataRequestHandler {
         if (!requestToProxy.isHttps().orElse(true)) {
             return HttpEventResponse.builder()
                     .statusCode(HttpStatus.SC_BAD_REQUEST)
-                    .header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.HTTPS_REQUIRED.name())
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), ErrorCauses.HTTPS_REQUIRED.name())
                     .body("Requests MUST be sent over HTTPS")
                     .build();
         }
@@ -185,7 +181,7 @@ public class ApiDataRequestHandler {
             log.log(Level.WARNING, "Error parsing  / building request URL", e);
             return HttpEventResponse.builder()
                     .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-                    .header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.FAILED_TO_BUILD_URL.name())
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), ErrorCauses.FAILED_TO_BUILD_URL.name())
                     .body("Error parsing request URL")
                     .build();
         }
@@ -203,7 +199,7 @@ public class ApiDataRequestHandler {
             log.log(Level.SEVERE, "Error loading sanitizer rules", e);
             return HttpEventResponse.builder()
                     .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-                    .header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.CONFIGURATION_FAILURE.name())
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), ErrorCauses.CONFIGURATION_FAILURE.name())
                     .body("Error loading sanitizer rules")
                     .build();
         }
@@ -222,7 +218,7 @@ public class ApiDataRequestHandler {
             log.info(String.format("%s. Rules allowed call.", logEntry));
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
-            builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.BLOCKED_BY_RULES.name());
+            builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), ErrorCauses.BLOCKED_BY_RULES.name());
             log.warning(String.format("%s. Blocked call by rules %s", logEntry, objectMapper.writeValueAsString(rules)));
             return builder.build();
         }
@@ -253,7 +249,7 @@ public class ApiDataRequestHandler {
         } catch (IOException e) {
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             builder.body("Failed to parse request; review logs");
-            builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.CONNECTION_SETUP.name());
+            builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), ErrorCauses.CONNECTION_SETUP.name());
             log.log(Level.WARNING, e.getMessage(), e);
             //something like "Error getting access token for service account: 401 Unauthorized POST https://oauth2.googleapis.com/token,"
             log.log(Level.WARNING, "Confirm oauth scopes set in config.yaml match those granted in data source");
@@ -261,7 +257,7 @@ public class ApiDataRequestHandler {
         } catch (java.util.NoSuchElementException e) {
             // missing config, such as ACCESS_TOKEN
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-            builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.CONNECTION_SETUP.name());
+            builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), ErrorCauses.CONNECTION_SETUP.name());
             log.log(Level.WARNING, e.getMessage(), e);
             return builder.build();
         }
@@ -284,7 +280,7 @@ public class ApiDataRequestHandler {
                 log.log(Level.WARNING, "Failure to dispatch async processing of request", e);
                 return HttpEventResponse.builder()
                     .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-                    .header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.ASYNC_HANDLER_DISPATCH.name())
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), ErrorCauses.ASYNC_HANDLER_DISPATCH.name())
                     .body("Error processing side output only request: " + e.getMessage())
                     .build();
             }
@@ -303,7 +299,7 @@ public class ApiDataRequestHandler {
         } catch (ConnectException e) {
             //connectivity problems
             builder.statusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
-            builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.CONNECTION_TO_SOURCE.name());
+            builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), ErrorCauses.CONNECTION_TO_SOURCE.name());
             builder.body("Error connecting to source API: " + e.getMessage());
             log.log(Level.SEVERE, "Error connecting to source API: " + e.getMessage(), e);
             return builder.build();
@@ -342,7 +338,7 @@ public class ApiDataRequestHandler {
             } else {
                 //write error, which shouldn't contain PII, directly
                 log.log(Level.WARNING, "Source API Error " + original.getContent());
-                builder.header(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.API_ERROR.name());
+                builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), ErrorCauses.API_ERROR.name());
                 proxyResponseContent = original.getContentAsString();
 
                 //q: in async case, perhaps we should write the error to the async output, too, for clarity??? could do it with metadata indicating the error to the caller, so it doesn't wait forever???
@@ -363,9 +359,9 @@ public class ApiDataRequestHandler {
         log.info("response sanitized with rule set " + rulesSha);
 
         Map<String, String> metadata = new HashMap<>(originalContent.getMetadata());
-        metadata.put(ResponseHeader.RULES_SHA.getHttpHeader(), rulesSha);
-        metadata.put(ResponseHeader.PROXY_VERSION.getHttpHeader(), HealthCheckRequestHandler.JAVA_SOURCE_CODE_VERSION);
-        metadata.put(ResponseHeader.PII_SALT_SHA256.getHttpHeader(), healthCheckRequestHandler.piiSaltHash());
+        metadata.put(ProcessedDataMetadataFields.RULES_SHA.getMetadataKey(), rulesSha);
+        metadata.put(ProcessedDataMetadataFields.PROXY_VERSION.getMetadataKey(), HealthCheckRequestHandler.JAVA_SOURCE_CODE_VERSION);
+        metadata.put(ProcessedDataMetadataFields.PII_SALT_SHA256.getMetadataKey(), healthCheckRequestHandler.piiSaltHash());
 
         // q: add instance id to the metadata??
 

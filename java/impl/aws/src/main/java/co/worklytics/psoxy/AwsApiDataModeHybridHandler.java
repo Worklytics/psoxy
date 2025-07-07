@@ -144,7 +144,7 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
             return Pair.of(false, HttpEventResponse.builder()
                 .statusCode(500)
                 .body("Unknown error: " + e.getClass().getName())
-                .header(ResponseHeader.ERROR.getHttpHeader(),"Unknown error")
+                .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),"Unknown error")
                 .build());
         }
     }

@@ -142,7 +142,7 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
                 context.getLogger().log(ExceptionUtils.getStackTrace(e));
                 response = HttpEventResponse.builder()
                     .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-                    .header(ResponseHeader.ERROR.getHttpHeader(), "Unknown error")
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), "Unknown error")
                     .body("Unknown error: " + e.getClass().getName())
                     .build();
             }

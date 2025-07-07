@@ -73,7 +73,7 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
                 response = compressedResponse.getRight();
             } else {
                 response = response.toBuilder()
-                    .header(ResponseHeader.WARNING.getHttpHeader(), Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode())
+                    .header(ProcessedDataMetadataFields.WARNING.getHttpHeader(), Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode())
                     .build();
             }
 
@@ -83,7 +83,7 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
             response = HttpEventResponse.builder()
                 .statusCode(500)
                 .body("Unknown error: " + e.getClass().getName())
-                .header(ResponseHeader.ERROR.getHttpHeader(),"Unknown error")
+                .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),"Unknown error")
                 .build();
         }
 
