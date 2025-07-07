@@ -180,7 +180,7 @@ public class MockModules {
         }
 
         @Provides @IntoSet
-        static OutputFactory<NoOutput> providesOutputFactory() {
+        static OutputFactory<?> providesOutputFactory() {
             return new OutputFactory<NoOutput>() {
                 @Override
                 public NoOutput create(OutputLocation outputLocation) {
