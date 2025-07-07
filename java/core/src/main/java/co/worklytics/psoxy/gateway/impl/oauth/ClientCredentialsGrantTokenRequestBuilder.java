@@ -8,7 +8,6 @@ import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.webtoken.JsonWebSignature;
 import com.google.api.client.json.webtoken.JsonWebToken;
-import com.google.api.client.util.SecurityUtils;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,9 +27,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.IOException;
 import java.io.StringReader;
-import java.security.KeyFactory;
 import java.security.PrivateKey;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -326,10 +323,6 @@ public class ClientCredentialsGrantTokenRequestBuilder
         }
     }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 6056bd56 (try to get keys as part of health check, output warnings)
     @Override
     public List<String> validateConfigValues() {
         List<String> errors = new ArrayList<>();
