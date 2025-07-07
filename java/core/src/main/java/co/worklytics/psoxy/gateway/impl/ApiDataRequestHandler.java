@@ -270,7 +270,9 @@ public class ApiDataRequestHandler {
             ProcessingContext.ProcessingContextBuilder processingContextBuilder = processingContext.toBuilder()
                 .async(true);
 
-            ProcessingContext asyncProcessingContext = processingContextBuilder.build();
+
+            ProcessingContext asyncProcessingContext =
+                apiDataOutputUtils.fillOutputContext(processingContextBuilder.build());
             try {
                 // TODO: refactor so that we pass requestToSourceApi to the async handler, rather than requestToProxy;
                 // requestToProxy has already been authenticated/validated/authorized, so no need to repeat all that
@@ -284,10 +286,21 @@ public class ApiDataRequestHandler {
                     .body("Error processing side output only request: " + e.getMessage())
                     .build();
             }
-            return HttpEventResponse.builder()
+            HttpEventResponse.HttpEventResponseBuilder responseBuilder = HttpEventResponse.builder()
                 .statusCode(HttpStatus.SC_ACCEPTED)  //proper response code indicating payload accepted for asynchronous processing
-                .body(objectMapper.writeValueAsString(asyncProcessingContext))
-                .build();
+                .body(objectMapper.writeValueAsString(asyncProcessingContext));
+
+            // TODO: generate host-platform specific signed URL for the async output
+            // destination + object
+            // - or - create a generic endpoint in the proxy that retrieves the file
+
+            // fill location in accordance with
+            // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Prefer#respond-async
+            // RFC : https://www.rfc-editor.org/rfc/rfc7240#section-4.1
+            // well, this is s3:// *not* https:// URL, so it is NOT standard compliant
+            responseBuilder.header(HttpHeaders.LOCATION, asyncProcessingContext.getAsyncOutputLocation());
+
+            return responseBuilder.build();
         }
 
 
@@ -621,10 +634,10 @@ public class ApiDataRequestHandler {
         Boolean async = false;
 
         /**
-         * the destination configured for async output, if any
+         * the location for async response output, if any
          */
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        String asyncOutputDestination;
+        String asyncOutputLocation;
 
         /**
          * the key to which any raw output should be written, if any configure; will be relative to the raw output destination

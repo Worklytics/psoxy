@@ -83,15 +83,13 @@ public class ApiDataOutputUtils {
 
     public ApiDataRequestHandler.ProcessingContext fillOutputContext(ApiDataRequestHandler.ProcessingContext processingContext) {
         ApiDataRequestHandler.ProcessingContext.ProcessingContextBuilder builder = processingContext.toBuilder()
-            .asyncOutputDestination(config.getConfigPropertyAsOptional(ApiModeConfigProperty.ASYNC_OUTPUT_DESTINATION).orElse(null));
+            .asyncOutputLocation(
+                config.getConfigPropertyAsOptional(ApiModeConfigProperty.ASYNC_OUTPUT_DESTINATION)
+                .map(s -> s + "/" + this.buildSanitizedOutputKey(processingContext))
+                .orElse(null));
 
         if (config.getConfigPropertyAsOptional(ProxyConfigProperty.SIDE_OUTPUT_ORIGINAL).isPresent()) {
             builder.rawOutputKey(this.buildRawOutputKey(processingContext));
-        }
-        // async *or* sanitized output
-        if (config.getConfigPropertyAsOptional(ProxyConfigProperty.SIDE_OUTPUT_SANITIZED).isPresent()
-            || config.getConfigPropertyAsOptional(ApiModeConfigProperty.ASYNC_OUTPUT_DESTINATION).isPresent()) {
-            builder.sanitizedOutputKey(this.buildSanitizedOutputKey(processingContext));
         }
         return builder.build();
     }
