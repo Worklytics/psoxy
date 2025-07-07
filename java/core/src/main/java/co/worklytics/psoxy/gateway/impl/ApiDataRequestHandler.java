@@ -263,7 +263,7 @@ public class ApiDataRequestHandler {
         }
 
         // check if request is side output only case, if so pass to AsyncApiDataRequestHandler, implementation of which will vary by platform
-        if (!processingContext.getAsync() && requestToProxy.getHeader(ControlHeader.PROCESS_ASYNC.getHttpHeader()).map(Boolean::parseBoolean).orElse(false)) {
+        if (!processingContext.getAsync() && isAsyncRequested(requestToProxy)) {
             log.info("Requested for async processing");
 
             // create an async processing context
@@ -647,5 +647,13 @@ public class ApiDataRequestHandler {
                 .requestReceivedAt(requestReceivedAt)
                 .build();
         }
+    }
+
+    boolean isAsyncRequested(HttpEventRequest request) {
+        // follows 'proposed' standard RFC 7240 - https://www.rfc-editor.org/rfc/rfc7240.html
+        // not actually adopted
+        return request.getHeader("Prefer")
+            .filter(s -> s.equalsIgnoreCase("respond-async"))
+            .isPresent();
     }
 }

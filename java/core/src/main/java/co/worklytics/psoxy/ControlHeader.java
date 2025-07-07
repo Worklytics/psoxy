@@ -34,12 +34,6 @@ public enum ControlHeader {
     PSEUDONYM_IMPLEMENTATION("Pseudonym-Implementation"),
 
     /**
-     * client does NOT want a response; proxy should ACK request with 204 No Content, continue API call
-     * in background, then write response to side output (assuming it's enabled)
-     */
-    PROCESS_ASYNC("Process-Async"),
-
-    /**
      * whether to skip sanitizer (for testing purposes, to obtain unsanitized baseline to compare
      *  with sanitized output)
      * this is respected ONLY if env var SKIP_SANITIZER is also set:
