@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.output;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
+import co.worklytics.test.MockModules;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -92,7 +93,7 @@ class ApiDataOutputUtilsTest {
 
     @Test
     void buildMetadata() {
-        HttpEventRequest mockRequest = mock(HttpEventRequest.class);
+        HttpEventRequest mockRequest = MockModules.provideMock(HttpEventRequest.class);
         Map<String, List<String>> headers = new HashMap<>();
         headers.put("Authorization", List.of("Bearer token"));
         when(mockRequest.getHeaders()).thenReturn(headers);
