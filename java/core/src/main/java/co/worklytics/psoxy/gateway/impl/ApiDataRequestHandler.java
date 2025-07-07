@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.*;
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
 import co.worklytics.psoxy.gateway.output.ApiDataOutputUtils;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
@@ -91,6 +92,8 @@ public class ApiDataRequestHandler {
     ApiDataSideOutput apiDataSideOutputSanitized;
     @Inject
     ApiDataOutputUtils apiDataOutputUtils;
+    @Inject
+    OutputUtils outputUtils;
 
     // lazy-loaded, to avoid circular dependency issues; and bc unused in 99.9% of situations
     @Inject
@@ -322,7 +325,7 @@ public class ApiDataRequestHandler {
                 if (skipSanitization) {
                     proxyResponseContent = original.getContentAsString();
                 } else {
-                    ProcessedContent forSanitization = decompressIfNeeded(original);
+                    ProcessedContent forSanitization = outputUtils.decompressIfNeeded(original);
                     ProcessedContent sanitizationResult = sanitize(requestToProxy, requestUrls, forSanitization);
 
                     if (processingContext.getAsync()) {
@@ -649,32 +652,4 @@ public class ApiDataRequestHandler {
                 .build();
         }
     }
-
-
-    ProcessedContent decompressIfNeeded(ProcessedContent original) throws IOException {
-        if (Objects.equals(original.getContentType(), "application/gzip")) {
-            log.info("Decompressing gzip response from source API");
-
-            byte[] decompressed;
-            try (ByteArrayInputStream bais = new ByteArrayInputStream(original.getContent());
-                 GZIPInputStream gzipIn = new GZIPInputStream(bais);
-                 ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-
-                byte[] buffer = new byte[8192];
-                int len;
-                while ((len = gzipIn.read(buffer)) != -1) {
-                    baos.write(buffer, 0, len);
-                }
-                decompressed = baos.toByteArray();
-            }
-            original = original.toBuilder()
-                .content(decompressed)
-                .contentType("application/x-ndjson")
-                .contentEncoding(null) // no longer gzip-encoded
-                .build();
-        }
-        return original;
-    }
-
-
 }

@@ -4,12 +4,17 @@ import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.output.*;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.*;
+import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 /**
  * utility methods for working with side output
@@ -17,6 +22,7 @@ import java.util.*;
  * - eg, to create a canonical key for the response to be stored in the side output
  * - or to build metadata for the side output
  */
+@Log
 @NoArgsConstructor(onConstructor_ = {@Inject})
 @Singleton
 public class OutputUtils {
@@ -82,6 +88,31 @@ public class OutputUtils {
             .orElseThrow(() -> new IllegalStateException("No side output configured for webhook queue"));
     }
 
+    public ProcessedContent decompressIfNeeded(ProcessedContent original) throws IOException {
+        if (Objects.equals(original.getContentType(), "application/gzip")) {
+            log.info("Decompressing gzip response from source API");
+
+            byte[] decompressed;
+            try (ByteArrayInputStream bais = new ByteArrayInputStream(original.getContent());
+                 GZIPInputStream gzipIn = new GZIPInputStream(bais);
+                 ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+
+                byte[] buffer = new byte[8192];
+                int len;
+                while ((len = gzipIn.read(buffer)) != -1) {
+                    baos.write(buffer, 0, len);
+                }
+                decompressed = baos.toByteArray();
+            }
+            original = original.toBuilder()
+                .content(decompressed)
+                .contentType("application/x-ndjson")
+                .contentEncoding(null) // no longer gzip-encoded
+                .build();
+        }
+        return original;
+    }
+
     private <T extends Output> T createOutputForLocation(OutputLocation outputLocation) {
         OutputFactory<?> outputFactory =  outputFactories.stream()
             .filter(factory -> factory.supports(outputLocation))
@@ -96,5 +127,4 @@ public class OutputUtils {
         String trimmedPath = StringUtils.trimToEmpty(rawPathPrefix);
         return (trimmedPath.endsWith("/") || StringUtils.isEmpty(trimmedPath)) ? trimmedPath : trimmedPath + "/";
     }
-
 }
