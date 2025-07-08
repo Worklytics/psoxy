@@ -36,37 +36,28 @@ Apart from GitHub instructions, please review the following:
 - Webhooks check can be disabled as this connector is not using them
 - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
 
-3. Once is created please generate a new `Private Key`.
+3. Once created, generate a new `Private Key`.
 
-4. It is required to convert the format of the certificate downloaded from PKCS#1 in previous step to PKCS#8. Please run following command:
+4. Install the application in your organization.  Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "GitHub App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
 
-```shell
-openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out gh_pk_pkcs8.pem -nocrypt
-```
-
-**NOTES**:
-
-- If the certificate is not converted to PKCS#8 connector will NOT work. You might see in logs a Java error `Invalid PKCS8 data.` if the format is not correct.
-- Command proposed has been successfully tested on Ubuntu; it may differ for other operating systems.
-
-5. Install the application in your organization. Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "GitHub App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
-6. Once installed, the `installationId` is required as it needs to be provided in the proxy as parameter for the connector in your Terraform module. You can go to your organization settings and click on `Third Party Access`. Click on `Configure` the application you have installed in previous step and you will find the `installationId` at the URL of the browser:
-
+5. Once installed, the `installationId` is required as it needs to be provided in the proxy as parameter for the connector in your Terraform module. You can go to your organization settings and click on `Third Party Access`. Click on `Configure` the application you have installed in previous step and you will find the `installationId` at the URL of the browser:
 ```
 https://github.com/organizations/{YOUR ORG}/settings/installations/{INSTALLATION_ID}
 ```
-
 Copy the value of `installationId` and assign it to the `github_installation_id` variable in Terraform. You will need to redeploy the proxy again if that value was not populated before.
 
 **NOTE**:
+- If `github_cinstallation_id` is not set, authentication URL will not be properly formatted and you will see *401: Unauthorized* when trying to get an access token.
+- If you see *404: Not found* in logs please review the *IP restriction policies* that your organization might have; that could cause connections from psoxy AWS Lambda/GCP Cloud Functions be rejected.
 
-- If `github_installation_id` is not set, authentication URL will not be properly formatted and you will see _401: Unauthorized_ when trying to get an access token.
-- If you see _404: Not found_ in logs please review the _IP restriction policies_ that your organization might have; that could cause connections from psoxy AWS Lambda/GCP Cloud Functions be rejected.
+6. Update the configuration parameters in your host platform with values obtained in previous step:
+    - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
+    - `PSOXY_GITHUB_PRIVATE_KEY` with content of the key file downloaded in step 4. In a terminal on MacOS, run `cat key_file.pem | pbcopy` to copy the key to your clipboard, then paste it as the value of the parameter via the web console of your host platforms parameter store.
 
-8. Update the variables with values obtained in previous step:
-   - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** _client_id_.
-   - `PSOXY_GITHUB_PRIVATE_KEY` with content of the `gh_pk_pkcs8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content _as-is_ into this variable.
-9. Once the certificate has been uploaded, please remove {YOUR DOWNLOADED CERTIFICATE FILE} and `gh_pk_pkcs8.pem` from your computer or store it in a safe place.
+7. Once your key value has been filled in the parameter store, you should DELETE the key file from your machine.
+
+You can repeat steps 3,6,7 at any time to rotate your key.
+
 
 ## Reference
 
