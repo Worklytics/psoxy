@@ -1,4 +1,6 @@
 {
     "java.configuration.updateBuildConfiguration": "interactive",
-    "java.compile.nullAnalysis.mode": "automatic"
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.format.settings.url": ".vscode/eclipse-java-google-style.xml", // if using Google style
+    "java.format.settings.profile": "GoogleStyle"
 }
