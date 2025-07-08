@@ -594,7 +594,7 @@ EOT
     }
     # https://api.slack.com/methods/admin.analytics.getFile
     slack-analytics = {
-      source_kind : "slack",
+      source_kind : "slack-analytics",
       availability : "alpha",
       enable_by_default : false
       worklytics_connector_id : "slack-analytics-psoxy"
