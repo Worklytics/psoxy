@@ -336,6 +336,7 @@ public class ApiDataRequestHandler {
                 } else {
                     ProcessedContent forSanitization = outputUtils.decompressIfNeeded(original);
                     ProcessedContent sanitizationResult = sanitize(requestToProxy, requestUrls, forSanitization);
+                    sanitizationResult = outputUtils.compressIfNeeded(original, sanitizationResult);
 
                     if (processingContext.getAsync()) {
                         asyncSanitizedDataOutput.get().writeSanitized(sanitizationResult, processingContext);
