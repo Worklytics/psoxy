@@ -15,6 +15,15 @@
     <packaging>jar</packaging>
     <description>Code that's core to both Psoxy clients and implementations</description>
 
+    <licenses>
+        <license>
+            <name>Worklytics Commercial License</name>
+            <url>https://github.com/Worklytics/psoxy/blob/main/LICENSE.md</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+
     <properties>
         <!-- empty for default java builds  (17 as of Dec 2024) -->
         <artifactSuffix></artifactSuffix>
