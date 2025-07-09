@@ -1,0 +1,3 @@
+EMPLOYEE_ID, employee_EMAIL  ,  MANAGER_id  ,  Manager_Email,JOIN_DATE,ROLE,
+1  ,alice@worklytics.co  ,2,  karen@worklytics.co,2021-01-01,Accounting Manager,
+  2,  karen@worklytics.co,,,2020-01-01,CEO,
