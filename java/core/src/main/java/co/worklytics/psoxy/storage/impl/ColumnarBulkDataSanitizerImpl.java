@@ -84,7 +84,9 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             .setHeader() // needed, indicates needs to be parsed from input
             .setSkipHeaderRecord(true)
             .setIgnoreHeaderCase(true)
-            .setTrim(true)
+            .setTrim(true) //removes whitespace potentially inside encapsulated values, eg ` " valA " , " valB " ` becomes `"valA","valB"`
+            .setIgnoreSurroundingSpaces(true)  // removes whitespace around delimiters, eg ` "valA"  , "valB"  ` becomes `"valA","valB"`
+            .setAllowMissingColumnNames(true) // so we'll ALLOW unnamed columns, which is theoretically allowed in CSV
             .build();
 
 
@@ -108,12 +110,24 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             columnTransforms.computeIfAbsent(newColumn, (s) -> Pair.of(sourceColumn, new ArrayList<>())).getValue().add(transform);
 
         Set<String> columnsToRedact = asSetWithCaseInsensitiveComparator(rules.getColumnsToRedact());
+        if (columnsToRedact.stream().anyMatch(StringUtils::isBlank)) {
+            throw new IllegalArgumentException("Columns to redact must not contain a blank entry");
+        }
+
 
         Set<String> columnsToPseudonymize =
             asSetWithCaseInsensitiveComparator(rules.getColumnsToPseudonymize());
 
+        if (columnsToPseudonymize.stream().anyMatch(StringUtils::isBlank)) {
+            throw new IllegalArgumentException("Columns to pseudonymize must not contain a blank entry");
+        }
+
         Set<String> columnsToPseudonymizeIfPresent =
             asSetWithCaseInsensitiveComparator(rules.getColumnsToPseudonymizeIfPresent());
+
+        if (columnsToPseudonymizeIfPresent.stream().anyMatch(StringUtils::isBlank)) {
+            throw new IllegalArgumentException("Columns to pseudonymize if present must not contain a blank entry");
+        }
 
 
         Map<String, List<FieldTransformPipeline>> columnsToTransform =
@@ -128,9 +142,19 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                 },
                 () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)));
 
+        if (columnsToTransform.keySet().stream().anyMatch(StringUtils::isBlank)) {
+            throw new IllegalArgumentException("Fields to transform must not contain a blank reference to a column");
+        }
+
         Optional<Set<String>> columnsToInclude =
             Optional.ofNullable(rules.getColumnsToInclude())
                 .map(this::asSetWithCaseInsensitiveComparator);
+
+        if (columnsToInclude.isPresent()) {
+            if (columnsToInclude.get().stream().anyMatch(StringUtils::isBlank)) {
+                throw new IllegalArgumentException("Columns to include must not contain a blank entry");
+            }
+        }
 
         final Map<String, String> columnsToRename =
             Optional.ofNullable(rules.getColumnsToRename()).orElse(Collections.emptyMap())
@@ -140,6 +164,13 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                 entry -> entry.getValue().trim(),
                 (a, b) -> a,
                 () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)));
+
+        if (columnsToRename.keySet().stream().anyMatch(StringUtils::isBlank)) {
+            throw new IllegalArgumentException("Referencing blank/empty columns is not allowed");
+        }
+        if (columnsToRename.values().stream().anyMatch(StringUtils::isBlank)) {
+            throw new IllegalArgumentException("Renaming columns to blank/empty is not allowed");
+        }
 
         Set<String> newColumnNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 

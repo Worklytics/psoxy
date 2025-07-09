@@ -254,6 +254,32 @@ public class BulkDataSanitizerImplTest {
 
     @Test
     @SneakyThrows
+    void defaultRules_trailingCommas() {
+        final String TEST_EXAMPLE_FILE = "/csv/hris-default-rules_trailing-commas.csv";
+        final String EXPECTED = EXPECTED_HRIS_DEFAULT_RULES.replace("\n", ",\n");
+
+        //padded case (eg, 001 instead of 1 for employee_id), should result in different hashes
+        assertNotEquals(EXPECTED, EXPECTED_HRIS_DEFAULT_RULES);
+
+        ConfigService config = MockModules.provideMock(ConfigService.class);
+        when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
+            .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("sources/hris/csv.yaml"))));
+
+        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config, new EnvVarsConfigService()).orElseThrow();
+
+        File inputFile = new File(getClass().getResource(TEST_EXAMPLE_FILE).getFile());
+        columnarFileSanitizerImpl.setRules(rules);
+
+        try (FileReader in = new FileReader(inputFile);
+             StringWriter out = new StringWriter()) {
+            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            assertEquals(EXPECTED, out.toString());
+        }
+    }
+
+
+    @Test
+    @SneakyThrows
     void defaultRules_padded() {
 
         final String EXPECTED = "EMPLOYEE_ID,employee_EMAIL,MANAGER_id,Manager_Email,JOIN_DATE,ROLE\n" +
