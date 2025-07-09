@@ -39,10 +39,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.File;
-import java.io.FileReader;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -124,14 +124,15 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .build();
 
-        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
         columnarFileSanitizerImpl.setRules(rules);
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile("/csv/hris-example.csv");
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
     }
+
+
 
     @ParameterizedTest
     @ValueSource(strings = {"EMPLOYEE_EMAIL", "employee_email", "Employee_Email"})
@@ -148,9 +149,8 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymizeIfPresent("EXTRA_EMAIL") //unlike 'columnToPseudonymize', this doesn't throw error
             .build();
 
-        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
         columnarFileSanitizerImpl.setRules(rules);
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile("/csv/hris-example.csv");
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -171,10 +171,9 @@ public class BulkDataSanitizerImplTest {
             .columnToRedact("DEPARTMENT")
             .build();
 
-        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
         columnarFileSanitizerImpl.setRules(rules);
 
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile("/csv/hris-example.csv");
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -191,10 +190,9 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnToPseudonymize("AN EMAIL").build();
 
-        File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
         columnarFileSanitizerImpl.setRules(rules);
 
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile("/csv/hris-example-headers-w-spaces.csv");
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -211,10 +209,9 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymize("EMPLOYEE_ID")
             .columnToPseudonymize("EMAIL")
             .build();
-        File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
         columnarFileSanitizerImpl.setRules(rules);
 
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile("/csv/hris-example-quotes.csv");
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -242,10 +239,9 @@ public class BulkDataSanitizerImplTest {
 
         ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config, new EnvVarsConfigService()).orElseThrow();
 
-        File inputFile = new File(getClass().getResource(exampleFile).getFile());
         columnarFileSanitizerImpl.setRules(rules);
 
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile(exampleFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -269,10 +265,9 @@ public class BulkDataSanitizerImplTest {
 
         ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config, new EnvVarsConfigService()).orElseThrow();
 
-        File inputFile = new File(getClass().getResource("/csv/hris-default-rules_padded-employee-id.csv").getFile());
         columnarFileSanitizerImpl.setRules(rules);
 
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile("/csv/hris-default-rules_padded-employee-id.csv");
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -290,10 +285,7 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymize(" an EMAIL ")
             .build();
         columnarFileSanitizerImpl.setRules(rules);
-
-        File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
-
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile("/csv/hris-example-headers-w-spaces.csv");
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -312,9 +304,7 @@ public class BulkDataSanitizerImplTest {
             .build();
         columnarFileSanitizerImpl.setRules(rules);
 
-        File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
-
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile("/csv/hris-example-quotes.csv");
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -346,9 +336,7 @@ public class BulkDataSanitizerImplTest {
             .build();
         columnarFileSanitizerImpl.setRules(rules);
 
-        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
-
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile("/csv/hris-example.csv");
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, defaultPseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -385,9 +373,7 @@ public class BulkDataSanitizerImplTest {
             .build();
         columnarFileSanitizerImpl.setRules(rules);
 
-        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
-
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile("/csv/hris-example.csv");
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, defaultPseudonymizer);
             String output = out.toString();
@@ -420,9 +406,7 @@ public class BulkDataSanitizerImplTest {
             .build();
         columnarFileSanitizerImpl.setRules(rules);
 
-        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
-
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile("/csv/hris-example.csv");
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, defaultPseudonymizer);
             String output = out.toString();
@@ -456,11 +440,7 @@ public class BulkDataSanitizerImplTest {
             pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
                 .build());
 
-
-        File inputFile = new File(getClass().getResource("/csv/example_acme_20220901.csv").getFile());
-
-
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile("/csv/example_acme_20220901.csv");
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, defaultPseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -478,9 +458,7 @@ public class BulkDataSanitizerImplTest {
             .build();
         columnarFileSanitizerImpl.setRules(rules);
 
-        File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
-
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile("/csv/hris-example-quotes.csv");
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -502,15 +480,11 @@ public class BulkDataSanitizerImplTest {
             .columnToPseudonymize("EMPLOYEE_EMAIL")
             .build();
         columnarFileSanitizerImpl.setRules(rules);
-
-        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
-
-
         // replace shuffler implementation with one that reverses the list, so deterministic
         columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
         columnarFileSanitizerImpl.makeShuffleDeterministic();
 
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile("/csv/hris-example.csv");
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -570,14 +544,12 @@ public class BulkDataSanitizerImplTest {
                 .build();
         columnarFileSanitizerImpl.setRules(rules);
 
-        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
-
         // replace shuffler implementation with one that reverses the list, so deterministic
         columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
         columnarFileSanitizerImpl.makeShuffleDeterministic();
 
 
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile("/csv/hris-example.csv");
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -637,7 +609,7 @@ public class BulkDataSanitizerImplTest {
 
 
         String resultString;
-        try (StringReader in = new StringReader(INITIAL);
+        try (BufferedReader in = new BufferedReader(new StringReader(INITIAL));
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
 
@@ -669,15 +641,13 @@ public class BulkDataSanitizerImplTest {
             "\"{\"\"hash\"\":\"\"4_hashed\"\"}\",\"{\"\"hash\"\":\"\"dave@worklytics.co_hashed\"\"}\",Engineering,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2018-06-03,,\"{\"\"hash\"\":\"\"dave_hashed\"\"}\",\"{\"\"hash\"\":\"\"dave_alternate_hashed\"\"}\",dave\n" +
             "\"{\"\"hash\"\":\"\"3_hashed\"\"}\",\"{\"\"hash\"\":\"\"charles.clark@workltycis.co_hashed\"\"}\",Engineering,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2019-10-06,2022-12-08,\"{\"\"hash\"\":\"\"charles_clark_hashed\"\"}\",\"{\"\"hash\"\":\"\"charles_clark_alternate_hashed\"\"}\",charles_clark\n";
 
-        File inputFile = new File(getClass().getResource("/csv/hris-example-split-email-usernames.csv").getFile());
-
         columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
         columnarFileSanitizerImpl.makeShuffleDeterministic();
 
         // use stub for easy check on values
         Pseudonymizer pseudonymizer = new StubPseudonymizer();
 
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile("/csv/hris-example-split-email-usernames.csv");
             StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -709,14 +679,14 @@ public class BulkDataSanitizerImplTest {
             "\"{\"\"hash\"\":\"\"1_hashed\"\"}\",\"{\"\"hash\"\":\"\"alice@worklytics.co_hashed\"\"}\",Engineering,2023-01-06,,2019-11-11,,\"{\"\"hash\"\":\"\"alice_acme_hashed\"\"}\"\n" +
             "\"{\"\"hash\"\":\"\"4_hashed\"\"}\",,Engineering,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2018-06-03,,\n" +
             "\"{\"\"hash\"\":\"\"3_hashed\"\"}\",\"{\"\"hash\"\":\"\"charles@workltycis.co_hashed\"\"}\",Engineering,2023-01-06,\"{\"\"hash\"\":\"\"1_hashed\"\"}\",2019-10-06,2022-12-08,\"{\"\"hash\"\":\"\"charles_acme_hashed\"\"}\"\n";
-        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
+
 
         columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
         columnarFileSanitizerImpl.makeShuffleDeterministic();
 
         Pseudonymizer pseudonymizer = new StubPseudonymizer();
 
-        try (FileReader in = new FileReader(inputFile);
+        try (BufferedReader in = forFile("/csv/hris-example.csv");
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -747,9 +717,7 @@ public class BulkDataSanitizerImplTest {
             .build();
         columnarFileSanitizerImpl.setRules(rules);
 
-        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
-
-        try (StringReader in = new StringReader(SOURCE);
+        try (BufferedReader in = new BufferedReader(new StringReader(SOURCE));
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -769,7 +737,7 @@ public class BulkDataSanitizerImplTest {
             .build();
         columnarFileSanitizerImpl.setRules(rules);
 
-        try (StringReader in = new StringReader(SOURCE);
+        try (BufferedReader in = new BufferedReader(new StringReader(SOURCE));
              StringWriter out = new StringWriter()) {
             assertThrows(IllegalArgumentException.class, () -> columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer), "Non-ASCII characters found in headers, inspect file with cat -v for control characters");
         }
@@ -797,5 +765,14 @@ public class BulkDataSanitizerImplTest {
             return ConfigurationOptions.builder().build();
         }
 
+    }
+
+    BufferedReader forFile(String file) {
+        File inputFile = new File(getClass().getResource(file).getFile());
+        try {
+            return Files.newBufferedReader(Paths.get(inputFile.toURI()), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read file: " + file, e);
+        }
     }
 }

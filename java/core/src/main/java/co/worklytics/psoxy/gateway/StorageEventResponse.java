@@ -27,4 +27,10 @@ public class StorageEventResponse {
      */
     @NonNull
     String destinationObjectPath;
+
+    /**
+     * how many records errored during processing
+     */
+    @Builder.Default
+    Integer errorCount = 0;
 }

@@ -120,9 +120,9 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
                 Optional.ofNullable(sourceMetadata.getContentEncoding())
                     .ifPresent(destinationMetadata::setContentEncoding);
             }
-
-            destinationMetadata.setUserMetadata(storageHandler.buildObjectMetadata(importBucket, sourceKey, transform));
-
+            Map<String, String> metadata = new HashMap<>(storageHandler.buildObjectMetadata(importBucket, sourceKey, transform));
+            metadata.put(StorageHandler.BulkMetaData.ERROR_COUNT.getMetaDataKey(), String.valueOf(storageEventResponse.getErrorCount()));
+            destinationMetadata.setUserMetadata(metadata);
 
             s3Client.putObject(storageEventResponse.getDestinationBucketName(),
                 storageEventResponse.getDestinationObjectPath(),

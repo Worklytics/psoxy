@@ -32,14 +32,13 @@ import org.apache.commons.lang3.function.TriFunction;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.inject.Inject;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -74,10 +73,11 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         this.rules = rules;
     }
 
+
     @Override
-    public void sanitize(@NonNull Reader reader,
-                         @NonNull Writer writer,
-                         @NonNull Pseudonymizer pseudonymizer) throws IOException {
+    public int sanitize(@NonNull BufferedReader reader,
+                        @NonNull Writer writer,
+                        @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
         CSVFormat inputCSVFormat = CSVFormat.Builder.create(CSVFormat.DEFAULT)
             .setDelimiter(rules.getDelimiter())
@@ -87,8 +87,9 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             .setTrim(true)
             .build();
 
+        ParsedFirstLine parsedFirstLine = parseFirstLine(reader);
 
-        CSVParser records = inputCSVFormat.parse(reader);
+        CSVParser records = inputCSVFormat.parse(new StringReader(parsedFirstLine.contents));
 
         Preconditions.checkArgument(records.getHeaderMap() != null, "Failed to parse header from file");
 
@@ -275,44 +276,90 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         List<String> columnNamesForOutputFile = columnTransforms.keySet()
             .stream()
             .sorted(originalHeadersOrRenamedFirst.thenComparing(byColumnName))
-            .collect(Collectors.toList())
+            .toList()
             .stream()
             // leave original casing for headers
             .map( h -> headers.stream().filter(h::equalsIgnoreCase).findFirst().orElse(h))
             .collect(Collectors.toList());
 
-        CSVFormat csvFormat = CSVFormat.Builder.create()
+        CSVFormat inputCsvFormat = CSVFormat.DEFAULT.builder()
+            .setHeader(records.getHeaderNames().toArray(new String[0]))
+            .build();
+
+
+        CSVFormat outputFormat = CSVFormat.Builder.create()
             .setHeader(columnNamesForOutputFile.toArray(new String[0]))
-            .setRecordSeparator(records.getFirstEndOfLine())
+            .setRecordSeparator(parsedFirstLine.getEndOfLine()) // use the same EOL as in the input file
             .setNullString("")
             .build();
 
+
+        int errorCount = 0;
+        try (CSVPrinter printer = new CSVPrinter(writer, outputFormat)) {
+            ProcessingBuffer<ProcessedRecord> buffer = getRecordsProcessingBuffer(printer);
+            errorCount = processRecords(columnNamesForOutputFile, inputCsvFormat, columnTransforms, reader, buffer);
+
+            if (buffer.flush()) {
+                log.info(String.format("Processed records: %d", buffer.getProcessed()));
+            }
+        }
+        return errorCount;
+    }
+
+    /**
+     * processes records into outputBuffer, applying the transformations to each
+     * @param columnNamesForOutput to render in the output buffer; so columns which DON'T have values in particular record will be filled
+     * @param columnTransformsToApply to apply to each column in the record
+     * @param bodyRecords to process; should be a CSVParser with headers
+     * @param outputBuffer to write the processed records to
+     * @return number of records which could not be processed due to errors
+     */
+    int processRecords(
+                                List<String> columnNamesForOutput,
+                                CSVFormat inputCsvFormat,
+                                Map<String, Pair<String, List<Function<String, Optional<String>>>>> columnTransformsToApply,
+                                BufferedReader bodyRecords,
+                                ProcessingBuffer<ProcessedRecord> outputBuffer) throws IOException {
+
+        int errorCount = 0;
+
+        // collect transforms that are MISSING mappings in the records
+        Set<String> transformsWithoutMappings = new HashSet<>();
+
+        // we're going to read line-by-line, so we need to ensure that the CSVFormat is set to not skip the header record
+        CSVFormat perLineFormat = CSVFormat.DEFAULT.builder()
+            .setDelimiter(inputCsvFormat.getDelimiter())
+            .setSkipHeaderRecord(false).build();
+
+        Map<String, Integer> headerMap = new HashMap<>(inputCsvFormat.getHeader().length);
+        for (int i = 0; i < inputCsvFormat.getHeader().length; i++) {
+            headerMap.put(inputCsvFormat.getHeader()[i].toLowerCase(), i);
+        }
+
+        // linked hash map: need predictable iteration order and null values
+        LinkedHashMap<String, String> newRecord = new LinkedHashMap<>();
         // create an empty record to fill with the transformed values, ensuring all rows have
         // the same columns
-        // linked hash map: need predictable iteration order and null values
+        columnNamesForOutput.forEach(h -> newRecord.put(h, null));
 
-        LinkedHashMap<String, String> newRecord = new LinkedHashMap<>();
-        columnNamesForOutputFile.forEach(h -> newRecord.put(h, null));
-
-        try (CSVPrinter printer = new CSVPrinter(writer, csvFormat)) {
-
-            ProcessingBuffer<ProcessedRecord> buffer = getRecordsProcessingBuffer(printer);
-
-            Set<String> transformsWithoutMappings = new HashSet<>();
-
-            for (CSVRecord record : records) {
-                // clean up the record prior to use
+        String line;
+        while ((line = bodyRecords.readLine()) != null) {
+            try (CSVParser parser = CSVParser.parse(line, perLineFormat)) {
+                CSVRecord record = parser.getRecords().get(0);
                 newRecord.replaceAll((k, v) -> null);
                 newRecord.keySet().forEach(h -> {
-
-                    Pair<String, List<Function<String, Optional<String>>>> transforms = columnTransforms.getOrDefault(h, null);
+                    Pair<String, List<Function<String, Optional<String>>>> transforms = columnTransformsToApply.getOrDefault(h, null);
                     if (transforms == null) {
                         newRecord.put(h, null);
                     } else {
                         // apply all transformations in insertion order
                         // key holds the original column
-                        if (record.isMapped(transforms.getKey())) {
-                            String v = record.get(transforms.getKey());
+
+                        //TODO: build this into columnTransformsToApply, so don't need to call lowerCase on every loop
+                        String lcKey = transforms.getKey().toLowerCase();
+
+                        if (headerMap.containsKey(lcKey)) {
+                            String v = StringUtils.trim(record.get(headerMap.get(lcKey)));
                             if (StringUtils.isNotBlank(v)) {
                                 for (Function<String, Optional<String>> transform : transforms.getValue()) {
                                     v = transform.apply(v).orElse(null);
@@ -328,18 +375,19 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                             }
                         }
                     }
-
                 });
 
-                if (buffer.addAndAttemptFlush(ProcessedRecord.of(Lists.newArrayList(newRecord.values())))) {
-                    log.info(String.format("Processed records: %d", buffer.getProcessed()));
-                };
-            }
-            if (buffer.flush()) {
-                log.info(String.format("Processed records: %d", buffer.getProcessed()));
+                if (outputBuffer.addAndAttemptFlush(ProcessedRecord.of(Lists.newArrayList(newRecord.values())))) {
+                    log.info(String.format("Processed records: %d", outputBuffer.getProcessed()));
+                }
+            } catch (IndexOutOfBoundsException | UncheckedIOException | IOException e) {
+                log.log(Level.WARNING, "Failed to process record", e);
+                errorCount++;
             }
         }
+        return errorCount;
     }
+
 
     @VisibleForTesting
     Set<String> determineMissingColumnsToPseudonymize(Set<String> columnsToPseudonymize, Set<String> outputColumnsCI) {
@@ -375,7 +423,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Value
     @RequiredArgsConstructor(staticName = "of")
-    private static class ProcessedRecord {
+   static class ProcessedRecord {
         Collection<String> values;
     }
 
@@ -436,4 +484,65 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         };
     }
 
+
+
+    @Value
+    static class ParsedFirstLine {
+        String contents;
+        /**
+         * one of the following:
+         * - "\n" (LF)
+         * - "\r\n" (CRLF)
+         * - "\r" (CR)
+         *
+         */
+        String endOfLine;
+    }
+
+    /**
+     * helper to parse the first line from a BufferedReader
+     * @param reader to parse
+     * @return ParsedFirstLine with the contents of the first line and the end of line character(s) used
+     */
+    ParsedFirstLine parseFirstLine(BufferedReader reader) {
+        String line = null, endOfLine = null;
+        try {
+            StringBuilder sb = new StringBuilder();
+            int ch;
+            boolean foundEOL = false;
+            while ((ch = reader.read()) != -1) {
+                char c = (char) ch;
+                sb.append(c);
+                if (c == '\r') {
+                    reader.mark(1);
+                    int next = reader.read();
+                    if (next == '\n') {
+                        sb.append('\n');
+                        endOfLine = "\r\n";
+                    } else {
+                        if (next != -1) {
+                            reader.reset();
+                        }
+                        endOfLine = "\r";
+                    }
+                    foundEOL = true;
+                    break;
+                } else if (c == '\n') {
+                    endOfLine = "\n";
+                    foundEOL = true;
+                    break;
+                }
+            }
+            if (sb.isEmpty() && !foundEOL) {
+                throw new IllegalArgumentException("Empty file, no header found");
+            }
+            line = sb.toString().replaceAll("(\r\n|\r|\n)$", "");
+            if (endOfLine == null) {
+                endOfLine = "\n"; // default
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return new ParsedFirstLine(line, endOfLine);
+    }
 }
