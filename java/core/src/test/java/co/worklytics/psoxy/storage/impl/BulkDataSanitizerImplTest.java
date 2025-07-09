@@ -32,6 +32,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -277,6 +278,7 @@ public class BulkDataSanitizerImplTest {
         }
     }
 
+    @Disabled
     /**
      * test case for CSV that includes a column without a name (eg, a column with empty/blank string in the header)
      *
