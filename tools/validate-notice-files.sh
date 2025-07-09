@@ -12,7 +12,7 @@ echo "🔍 Validating NOTICE and LICENSE files in Psoxy JARs..."
 
 validate_jar() {
     local module=$1
-    local jar_path="$PROJECT_ROOT/java/impl/$module/target/psoxy-$module-*.jar"
+    local jar_path="$PROJECT_ROOT/java/impl/$module/target/psoxy-$module-*-uber.jar"
     
     echo ""
     echo "📦 Checking $module module..."
