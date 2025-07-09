@@ -619,7 +619,7 @@ EOT
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/api/admin.analytics.getFile?type=member&date=2025-04-01"
+        "/api/admin.analytics.getFile?type=member&date=${urlencode(formatdate("YYYY-MM-DD", timeadd(timestamp(), "-72h")))}"
       ]
       instructions_template = "${path.module}/docs/slack/analytics/instructions.tftpl"
       external_token_todo : templatefile("${path.module}/docs/slack/analytics/instructions.tftpl", {
