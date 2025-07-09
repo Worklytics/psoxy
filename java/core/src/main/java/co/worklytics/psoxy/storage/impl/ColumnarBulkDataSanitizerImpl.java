@@ -110,24 +110,17 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             columnTransforms.computeIfAbsent(newColumn, (s) -> Pair.of(sourceColumn, new ArrayList<>())).getValue().add(transform);
 
         Set<String> columnsToRedact = asSetWithCaseInsensitiveComparator(rules.getColumnsToRedact());
-        if (columnsToRedact.stream().anyMatch(StringUtils::isBlank)) {
-            throw new IllegalArgumentException("Columns to redact must not contain a blank entry");
-        }
-
+        validateNoBlankColumns(columnsToRedact, "columnsToRedact must not contain a blank entry");
 
         Set<String> columnsToPseudonymize =
             asSetWithCaseInsensitiveComparator(rules.getColumnsToPseudonymize());
 
-        if (columnsToPseudonymize.stream().anyMatch(StringUtils::isBlank)) {
-            throw new IllegalArgumentException("Columns to pseudonymize must not contain a blank entry");
-        }
+        validateNoBlankColumns(columnsToPseudonymize, "columnsToPseudonymize must not contain a blank entry");
 
         Set<String> columnsToPseudonymizeIfPresent =
             asSetWithCaseInsensitiveComparator(rules.getColumnsToPseudonymizeIfPresent());
 
-        if (columnsToPseudonymizeIfPresent.stream().anyMatch(StringUtils::isBlank)) {
-            throw new IllegalArgumentException("Columns to pseudonymize if present must not contain a blank entry");
-        }
+        validateNoBlankColumns(columnsToPseudonymizeIfPresent, "columnsToPseudonymizeIfPresent must not contain a blank entry");
 
 
         Map<String, List<FieldTransformPipeline>> columnsToTransform =
@@ -142,19 +135,13 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                 },
                 () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)));
 
-        if (columnsToTransform.keySet().stream().anyMatch(StringUtils::isBlank)) {
-            throw new IllegalArgumentException("Fields to transform must not contain a blank reference to a column");
-        }
+        validateNoBlankColumns(columnsToTransform.keySet(), "Fields to transform must not contain a blank reference to a column");
 
         Optional<Set<String>> columnsToInclude =
             Optional.ofNullable(rules.getColumnsToInclude())
                 .map(this::asSetWithCaseInsensitiveComparator);
 
-        if (columnsToInclude.isPresent()) {
-            if (columnsToInclude.get().stream().anyMatch(StringUtils::isBlank)) {
-                throw new IllegalArgumentException("Columns to include must not contain a blank entry");
-            }
-        }
+        columnsToInclude.ifPresent(includeSet -> validateNoBlankColumns(includeSet, "Columns to include must not contain a blank entry"));
 
         final Map<String, String> columnsToRename =
             Optional.ofNullable(rules.getColumnsToRename()).orElse(Collections.emptyMap())
@@ -165,12 +152,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                 (a, b) -> a,
                 () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER)));
 
-        if (columnsToRename.keySet().stream().anyMatch(StringUtils::isBlank)) {
-            throw new IllegalArgumentException("Referencing blank/empty columns is not allowed");
-        }
-        if (columnsToRename.values().stream().anyMatch(StringUtils::isBlank)) {
-            throw new IllegalArgumentException("Renaming columns to blank/empty is not allowed");
-        }
+        validateNoBlankColumns(columnsToRename.keySet(), "Renaming columns from blank/empty is not supported");
+        validateNoBlankColumns(columnsToRename.values(), "Renaming columns to blank/empty is not allowed");
 
         Set<String> newColumnNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 
@@ -369,6 +352,12 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             if (buffer.flush()) {
                 log.info(String.format("Processed records: %d", buffer.getProcessed()));
             }
+        }
+    }
+
+    private void validateNoBlankColumns(Collection<String> columns, String errorMessage) {
+        if (columns.stream().anyMatch(StringUtils::isBlank)) {
+            throw new IllegalArgumentException(errorMessage);
         }
     }
 
