@@ -395,6 +395,9 @@ resource "aws_ssm_parameter" "additional_transforms" {
 locals {
   api_instances = { for k, instance in module.api_connector :
     k => merge(
+      {
+        sanitized_bucket_name : instance.sanitized_bucket
+      },
       instance,
       var.api_connectors[k]
     )

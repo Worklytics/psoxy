@@ -452,6 +452,10 @@ output "side_output_sanitized_bucket_id" {
   description = "Bucket ID of the side output bucket for sanitized data, if any. May have been provided by the user, or provisioned by this module."
 }
 
+output "sanitized_bucket" {
+  value = try(module.side_output_sanitized[0].bucket, var.side_output_sanitized.bucket, module.async_output[0].bucket, null)
+}
+
 output "todo" {
   value = local.todo_content
 }
