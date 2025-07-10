@@ -114,36 +114,6 @@ public class OutputUtils {
         return original;
     }
 
-    public ProcessedContent compressIfNeeded(ProcessedContent original, ProcessedContent processedContent) throws IOException {
-        if (Objects.equals(original.getContentType(), "application/gzip")) {
-            log.info("Compressing response into gzip");
-
-            byte[] compressed;
-
-            try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                 GZIPOutputStream gzipOut = new GZIPOutputStream(baos);
-                 ByteArrayInputStream bais = new ByteArrayInputStream(processedContent.getContent())) {
-
-                byte[] buffer = new byte[8192];
-
-                int len;
-                while ((len = bais.read(buffer)) != -1) {
-                    gzipOut.write(buffer, 0, len);
-                }
-                gzipOut.finish();
-                compressed = baos.toByteArray();
-            }
-
-            return processedContent.toBuilder()
-                .content(compressed)
-                .contentType(original.getContentType())
-                .contentEncoding(original.getContentEncoding())
-                .build();
-        }
-
-        return processedContent;
-    }
-
     private <T extends Output> T createOutputForLocation(OutputLocation outputLocation) {
         OutputFactory<?> outputFactory = outputFactories.stream()
             .filter(factory -> factory.supports(outputLocation))

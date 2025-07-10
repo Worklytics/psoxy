@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.output.Output;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import lombok.extern.java.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.util.zip.GZIPOutputStream;
  *
  */
 @AllArgsConstructor(staticName = "wrap")
+@Log
 public class CompressedOutputWrapper implements Output {
 
     static final String COMPRESSION_TYPE = "gzip";
@@ -33,8 +35,8 @@ public class CompressedOutputWrapper implements Output {
     @SneakyThrows
     @Override
     public void write(String key, ProcessedContent content) {
-
         if (!Objects.equals(COMPRESSION_TYPE, content.getContentEncoding())) {
+            log.info("Wrapping Compressing response into gzip");
             byte[] compressedContent = gzipContent(content.getContent());
             content = content.withContentEncoding(COMPRESSION_TYPE).withContent(compressedContent);
         }
