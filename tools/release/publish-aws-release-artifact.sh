@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Publish Psoxy AWS JAR to multiple S3 buckets across regions
-# Usage: ./publish-release-artifacts.sh [version]
+# Usage: ./publish-aws-release-artifact.sh [version]
 # If version not provided, reads from java/pom.xml
 
 set -e

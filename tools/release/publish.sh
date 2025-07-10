@@ -129,7 +129,7 @@ printf "    ${BLUE}./tools/release/example-create-release-pr.sh . aws ${AWS_EXAM
 printf "    ${BLUE}./tools/release/example-create-release-pr.sh . gcp ${GCP_EXAMPLE_DIR}${NC}\n"
 
 printf "Publish release artifacts: \n"
-printf "    ${BLUE}./tools/release/publish-release-artifacts.sh ${RELEASE}${NC}\n"
+printf "    ${BLUE}./tools/release/publish-aws-release-artifact.sh ${RELEASE}${NC}\n"
 
 printf "Finally, update stable demo deployment to point to it: \n"
 printif "In ${BLUE}psoxy-demos${NC} repo, run:\n"
