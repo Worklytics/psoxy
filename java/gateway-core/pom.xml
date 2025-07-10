@@ -13,7 +13,7 @@
     <groupId>com.avaulta.gateway</groupId>
     <artifactId>gateway-core${artifactSuffix}</artifactId>
     <packaging>jar</packaging>
-    <description>Core gateway library, intended for potential by both implementations and clients</description>
+    <description>Core gateway library intended for use by both implementations and clients</description>
 
     <licenses>
         <license>
