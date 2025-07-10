@@ -27,6 +27,13 @@ REGIONS=(
     "us-west-2"
 )
 
+# ensure current directory is the project root
+if [ ! -f "java/pom.xml" ]; then
+    echo -e "${RED}Error: java/pom.xml not found. Run this script from the psoxy root directory.${NC}"
+    exit 1
+fi
+
+
 # Get version from argument or pom.xml
 if [ -n "$1" ]; then
     VERSION="$1"
@@ -43,6 +50,9 @@ else
     fi
 fi
 
+# run build with distribution profile
+./tools/build.sh -d aws java
+
 # Construct JAR filename
 JAR_FILENAME="${JAR_NAME}-${VERSION}.jar"
 JAR_PATH="java/impl/aws/target/deployment/${JAR_FILENAME}"
@@ -54,6 +64,7 @@ if [ ! -f "$JAR_PATH" ]; then
     echo -e "  cd java/impl/aws && mvn clean package -Dmaven.test.skip=true"
     exit 1
 fi
+
 
 echo -e "${BLUE}Publishing Psoxy AWS JAR version ${GREEN}${VERSION}${BLUE} to S3 buckets...${NC}"
 echo -e "${BLUE}JAR file: ${GREEN}${JAR_PATH}${NC}"
