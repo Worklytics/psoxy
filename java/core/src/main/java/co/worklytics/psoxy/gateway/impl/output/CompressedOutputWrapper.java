@@ -36,7 +36,7 @@ public class CompressedOutputWrapper implements Output {
     @Override
     public void write(String key, ProcessedContent content) {
         if (!Objects.equals(COMPRESSION_TYPE, content.getContentEncoding())) {
-            log.info("Wrapping Compressing response into gzip");
+            log.info("Compressing response with gzip encoding through wrapper");
             byte[] compressedContent = gzipContent(content.getContent());
             content = content.withContentEncoding(COMPRESSION_TYPE).withContent(compressedContent);
         }
