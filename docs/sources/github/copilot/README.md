@@ -44,7 +44,7 @@ Copy the value of `installationId` and assign it to the `github_copilot_installa
 - If you see *404: Not found* in logs please review the *IP restriction policies* that your organization might have; that could cause connections from psoxy AWS Lambda/GCP Cloud Functions be rejected.
 
 6. Update the configuration parameters in your host platform with values obtained in previous step:
-    - `PSOXY_GITHUB_COPILOT_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
+    - `PSOXY_GITHUB_COPILOT_CLIENT_ID` with `Client ID` value from the application you have created.
     - `PSOXY_GITHUB_COPILOT_PRIVATE_KEY` with content of the key file downloaded in step 4. In a terminal on MacOS, run `cat key_file.pem | pbcopy` to copy the key to your clipboard, then paste it as the value of the parameter via the web console of your host platforms parameter store.
 7. Once your key value has been filled in the parameter store, you should DELETE the key file from your machine.
 
