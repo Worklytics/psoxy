@@ -1,0 +1,24 @@
+{
+    "teamMembers": [
+        {
+            "name": "",
+            "email": "t~YxpQlV1gzukfVx5cPhRVzYGRnDkb5n1_d-tt6rnsKP4@company.com",
+            "role": "member"
+        },
+        {
+            "name": "",
+            "email": "t~K9mNpQ2hAxlwGy6dRjWsEZnFkb6o2_e-uu7sotlLQ5@company.com",
+            "role": "owner"
+        },
+        {
+            "name": "",
+            "email": "t~L0nOqR3iBymxHz7eSkXtFaoGlc7p3_f-vv8tpuMlR6@company.com",
+            "role": "member"
+        },
+        {
+            "name": "",
+            "email": "t~M1oPrS4jCznyI8fTlYuGbpHmd8q4_g-ww9uqvNmS7@company.com",
+            "role": "admin"
+        }
+    ]
+}
