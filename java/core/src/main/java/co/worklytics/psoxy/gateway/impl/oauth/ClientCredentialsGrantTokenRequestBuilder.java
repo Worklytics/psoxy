@@ -8,36 +8,34 @@ import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.webtoken.JsonWebSignature;
 import com.google.api.client.json.webtoken.JsonWebToken;
-import com.google.api.client.util.PemReader;
-import com.google.api.client.util.SecurityUtils;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.annotation.Nullable;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.pkcs.RSAPrivateKey;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.StringReader;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * implementation of an Access Token Request (per RFC6749 4.4.2) authenticated by an assertion (RFC 7521)
@@ -68,11 +66,25 @@ public class ClientCredentialsGrantTokenRequestBuilder
         // https://www.rfc-editor.org/rfc/rfc6749
         CLIENT_SECRET,
         // https://www.rfc-editor.org/rfc/rfc7523
-        JWT_ASSERTION
+        JWT_ASSERTION,
+        ;
+
+        static Optional<CredentialFlowType> parse(String configValue) {
+            if (configValue == null || configValue.isEmpty()) {
+                return Optional.empty();
+            }
+            return switch (configValue.toLowerCase(Locale.ROOT)) {
+                case "client_secret" -> Optional.of(CLIENT_SECRET);
+                case "jwt_assertion" -> Optional.of(JWT_ASSERTION);
+                default ->
+                    throw new IllegalArgumentException("Unknown credential flow type configured: " + configValue);
+            };
+        }
     }
 
-    // 'client_credentials' is MSFT
-    //for Google, this is "urn:ietf:params:oauth:grant-type:jwt-bearer"
+    // 'client_credentials' is MSFT (this is also the 'default' per RFC 6749 4.4)
+    //for Google, this is "urn:ietf:params:oauth:grant-type:jwt-bearer" - a legit 'extension' to the RFC, allowed under RFC 6749 4.5
+    // see: https://datatracker.ietf.org/doc/html/rfc6749#section-4.5
     @Getter(onMethod_ = @Override)
     private final String grantType = GRANT_TYPE;
 
@@ -128,6 +140,8 @@ public class ClientCredentialsGrantTokenRequestBuilder
     public HttpContent buildPayload() {
 
         Map<String, String> data;
+
+        // TODO: refactor, to avoid this "mode" thing
         if (getCredentialsType().equals(CredentialFlowType.CLIENT_SECRET)) {
             data = buildClientSecretPayload();
         } else {
@@ -155,8 +169,7 @@ public class ClientCredentialsGrantTokenRequestBuilder
 
         JsonWebToken.Payload payload = buildPayload(clientId, audience);
 
-        return JsonWebSignature.signUsingRsaSha256(
-                getServiceAccountPrivateKey(), jsonFactory, header, payload);
+        return JsonWebSignature.signUsingRsaSha256(getPrivateKey(), jsonFactory, header, payload);
     }
 
     @VisibleForTesting
@@ -230,13 +243,18 @@ public class ClientCredentialsGrantTokenRequestBuilder
     @SneakyThrows
     @VisibleForTesting
     String encodeKeyId(String hexKey) {
-        //TODO: replace with java.util.HexFormat.of().parseHex(s) ... but that's only from Java 17
-        byte[] fromHex = Hex.decodeHex(hexKey);
+        byte[] fromHex =  HexFormat.of().parseHex(hexKey);
         return Base64.getUrlEncoder().encodeToString(fromHex);
     }
 
-    private PrivateKey getServiceAccountPrivateKey() throws IOException {
-
+    /**
+     * get private key to be used to sign the JWT assertion
+     * @return the private key
+     * @throws IOException if cannot read/parse
+     * @throws NoSuchElementException if no private key is configured in the secret store
+     */
+    @VisibleForTesting
+    PrivateKey getPrivateKey() throws IOException {
         ConfigService.ConfigValueWithMetadata value = secretStore.getConfigPropertyWithMetadata(ConfigProperty.PRIVATE_KEY)
             .orElseThrow(() -> new NoSuchElementException("No PRIVATE_KEY found in secret store"));
 
@@ -246,34 +264,97 @@ public class ClientCredentialsGrantTokenRequestBuilder
             }
         });
 
-        Reader reader = new StringReader(value.getValue());
-        PemReader.Section section = PemReader.readFirstSectionAndClose(reader, "PRIVATE KEY");
-        if (section == null) {
-            throw new IOException("Invalid PKCS8 data.");
+
+        if (StringUtils.isBlank(value.getValue())) {
+            throw new IOException("Private key is blank in secret store");
         }
-        byte[] bytes = section.getBase64DecodedBytes();
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(bytes);
+
+        String keyAsString = StringUtils.trimToEmpty(value.getValue());
+
+        String base64DecodedKey;
         try {
-            KeyFactory keyFactory = SecurityUtils.getRsaKeyFactory();
-            return keyFactory.generatePrivate(keySpec);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException exception) {
-            throw new IOException("Unexpected exception reading PKCS data", exception);
+            base64DecodedKey = new String(Base64.getDecoder().decode(keyAsString.getBytes()));
+        } catch (IllegalArgumentException e) {
+            base64DecodedKey = null;
+        }
+
+        List<String> possibleKeys =
+        Stream.of(keyAsString, base64DecodedKey)
+            .filter(StringUtils::isNotBlank)
+            .collect(Collectors.toList());
+
+        for (String possibleKey : possibleKeys) {
+            try {
+                PrivateKey privateKey = parsePrivateKey(possibleKey);
+                return privateKey;
+            } catch (Exception pkcs1e) {
+                //suppress
+            }
+        }
+        throw new IllegalArgumentException("Could not parse value of private key found in secret store");
+    }
+
+    @VisibleForTesting
+    PrivateKey parsePrivateKey(String pemString) throws Exception {
+        try (PEMParser pemParser = new PEMParser(new StringReader(pemString))) {
+            Object object = pemParser.readObject();
+            if (object == null) {
+                throw new IllegalArgumentException("PEMParser returned null");
+            }
+
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+
+            if (object instanceof PEMKeyPair) {
+                return converter.getKeyPair((PEMKeyPair) object).getPrivate();
+            } else if (object instanceof PrivateKeyInfo) {
+                return converter.getPrivateKey((PrivateKeyInfo) object);
+            } else if (object instanceof RSAPrivateKey) {
+                // Convert PKCS#1 to PKCS#8
+                RSAPrivateKey rsa = (RSAPrivateKey) object;
+                ASN1Primitive primitive = rsa.toASN1Primitive();
+                byte[] encoded = primitive.getEncoded();
+                PrivateKeyInfo pkcs8 = new PrivateKeyInfo(
+                    new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption),
+                    ASN1Primitive.fromByteArray(encoded));
+                return converter.getPrivateKey(pkcs8);
+            } else {
+                throw new IllegalArgumentException("Unsupported key format: " + object.getClass());
+            }
         }
     }
 
+    @Override
+    public List<String> validateConfigValues() {
+        List<String> errors = new ArrayList<>();
+
+        if (getCredentialsType() == CredentialFlowType.CLIENT_SECRET) {
+            if (StringUtils.isBlank(secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET))) {
+                errors.add("Blank CLIENT_SECRET in secret store");
+            }
+        } else {
+            if (StringUtils.isBlank(secretStore.getConfigPropertyOrError(ConfigProperty.PRIVATE_KEY_ID))) {
+                errors.add("Blank PRIVATE_KEY_ID in secret store");
+            }
+            if (StringUtils.isBlank(secretStore.getConfigPropertyOrError(ConfigProperty.PRIVATE_KEY))) {
+                errors.add("Blank PRIVATE_KEY in secret store");
+            }
+
+            // parse the private key to ensure it is valid
+            try {
+                getPrivateKey();
+            } catch (IOException e) {
+                errors.add("Invalid PRIVATE_KEY in secret store: " + e.getMessage());
+            }
+        }
+
+        return errors;
+    }
+
+
     private CredentialFlowType getCredentialsType() {
-        AtomicReference<CredentialFlowType> result = new AtomicReference<>(CredentialFlowType.JWT_ASSERTION);
-
-        config.getConfigPropertyAsOptional(ConfigProperty.CREDENTIALS_FLOW)
-                .ifPresent(i -> {
-                    if (i.equalsIgnoreCase("client_secret")) {
-                        result.set(CredentialFlowType.CLIENT_SECRET);
-                    } else {
-                        result.set(CredentialFlowType.JWT_ASSERTION);
-                    }
-                });
-
-        return result.get();
+        return config.getConfigPropertyAsOptional(ConfigProperty.CREDENTIALS_FLOW)
+            .map(v -> CredentialFlowType.parse(v).orElse(CredentialFlowType.JWT_ASSERTION))
+            .orElse(CredentialFlowType.JWT_ASSERTION);
     }
 
     private String getClientId() {
