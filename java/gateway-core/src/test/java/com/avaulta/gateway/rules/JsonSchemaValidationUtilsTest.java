@@ -127,7 +127,19 @@ public class JsonSchemaValidationUtilsTest {
     void testPseudonymFormat(String value, boolean expected) {
         testSchema = com.avaulta.gateway.rules.JsonSchema.builder()
                 .type("string").format("pseudonym").build();
-        assertEquals(expected, validationUtils.validateJsonBySchema("\"${value}\"", testSchema));
+        String jsonString = "\"" + value + "\"";
+        assertEquals(expected, validationUtils.validateJsonBySchema(jsonString, testSchema));
     }
 
+    @ParameterizedTest
+    @CsvSource({
+            "p~asdfasdfasdfasdfasdfasdfasdfsadfasdfasdfasdfasdf, true",
+            "alice@acme.com, false"
+    })
+    void testPseudonymPattern(String value, boolean expected) {
+        testSchema = com.avaulta.gateway.rules.JsonSchema.builder()
+                .type("string").pattern("^p~[a-zA-Z0-9_-]{43}$").build();
+        String jsonString = "\"" + value + "\"";
+        assertEquals(expected, validationUtils.validateJsonBySchema(jsonString, testSchema));
+    }
 }

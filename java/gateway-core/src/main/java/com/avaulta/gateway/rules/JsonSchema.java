@@ -3,6 +3,7 @@ package com.avaulta.gateway.rules;
 
 import java.util.List;
 import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,7 @@ import lombok.NoArgsConstructor;
  * This is a simplified implementation that supports basic object validation
  * without deep nesting or complex JSON Schema features.
  */
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor // for builder
 @Data
@@ -27,6 +28,7 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 
 public class JsonSchema {
+
 
     String type;
 
