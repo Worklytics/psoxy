@@ -32,7 +32,7 @@ variable "psoxy_base_dir" {
 
 variable "deployment_bundle" {
   type        = string
-  description = "path to deployment bundle to use (if not provided, will build one)"
+  description = "path to deployment bundle to use (if not provided, will build one). Can be a local file path or GCS URL (e.g., 'gs://psoxy-public-artifacts/psoxy-0.4.28.zip')."
   default     = null
 }
 
