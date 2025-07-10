@@ -7,6 +7,11 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
+## [0.5.4](https://github.com/Worklytics/psoxy/release/tag/v0.5.4)
+  - `Slack Analytics`: added new connector for supporting fetching Slack Analytics data, through `api/admin.analytics.getFile` endpoint
+  - Side Outputs: added support; see [docs/configuration/side-outputs.md](docs/configuration/side-outputs.md) for details
+  - Supported async responses; see [docs/configuration/async-responses.md](docs/configuration/async-api-data.md) for details
+
 ## [0.5.3](https://github.com/Worklytics/psoxy/release/tag/v0.5.3)
   - `aws` - removed `ssm:GetParameterVersion` perm from policies; not a thing
   - support for Side Outputs in `gcp` and `aws` modules; see [docs/configuration/side-outputs.md](docs/configuration/side-outputs.md) for details
