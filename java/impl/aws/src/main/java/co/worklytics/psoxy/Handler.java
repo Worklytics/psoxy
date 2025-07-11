@@ -14,7 +14,9 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.time.Instant;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import java.security.Security;
 /**
  * default AWS lambda handler
  *
@@ -42,6 +44,8 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
         awsContainer = DaggerAwsContainer.create();
         requestHandler = awsContainer.apiDataRequestHandler();
         responseCompressionHandler = new ResponseCompressionHandler();
+
+        Security.addProvider(new BouncyCastleProvider());
     }
 
     @SneakyThrows

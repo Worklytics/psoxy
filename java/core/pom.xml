@@ -140,6 +140,21 @@
             <version>${dependency.apache-httpcore.version}</version>
         </dependency>
 
+        <!-- BouncyCastle used to broaden set of key encodings we can support -->
+        <!-- this has non-trivial cost in JAR size, so TBD if we should include longer term vs some middleware to re-encode keys -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>${dependency.bouncycastle.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
+            <version>${dependency.bouncycastle.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- JWT verification of incoming webhooks / requests -->
         <dependency>
             <groupId>com.nimbusds</groupId>
@@ -180,6 +195,7 @@
             <version>${dependency.json-path.version}</version>
             <scope>test</scope>
         </dependency>
+
 
     </dependencies>
 
