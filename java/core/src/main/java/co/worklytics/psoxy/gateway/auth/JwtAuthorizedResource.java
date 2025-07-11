@@ -16,14 +16,14 @@ public interface JwtAuthorizedResource {
 
     /**
      * returns a failure message if invalid, or empty otherwise
+     * 
      * @param signedJWT
      * @return optional with the failure, if any
      */
-    @SneakyThrows
     Optional<String> validate(SignedJWT signedJWT);
 
     /**
-     * @return  the issuer of the JWTs that this resource accepts, without trailing /
+     * @return the issuer of the JWTs that this resource accepts, without trailing /
      */
     String getIssuer();
 }
