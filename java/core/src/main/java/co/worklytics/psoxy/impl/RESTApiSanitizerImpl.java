@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.commons.lang3.ObjectUtils;
@@ -135,13 +136,15 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     }
 
     @Override
-    public boolean isAllowed(String httpMethod, URL url, String contentType, String requestBody) {
+    public boolean isAllowed(String httpMethod, URL url, @Nullable String contentType,
+            @Nullable String requestBody) {
         if (rules.getAllowAllEndpoints()) {
             return true;
         }
         Optional<Pair<Pattern, Endpoint>> matchingEndpoint = getEndpoint(httpMethod, url);
 
         if (matchingEndpoint.isEmpty()) {
+            log.warning(String.format("No endpoint found for %s %s", httpMethod, url));
             return false;
         }
 
@@ -151,20 +154,30 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             return true;
         } else {
             if (endpoint.getRequestBody().getRequired() && StringUtils.isEmpty(requestBody)) {
+                log.warning(String.format("Request body required for %s %s, but none provided",
+                        httpMethod, url));
                 return false;
             }
             if (endpoint.getRequestBody().getContent() == null) {
                 // no schemas defined for request body, so we allow it
                 return true;
+            } else if (StringUtils.isEmpty(requestBody)) {
+                // empty request body, and none required, so we allow it
+                return true;
             } else {
-                JsonSchema schema = endpoint.getRequestBody().getContent().get(contentType);
+                // default content-type to application/json (tbh, is this right?? it's just our
+                // historical default)
+                String parsedContentType =
+                        Optional.ofNullable(contentType).orElse("application/json");
+
+                JsonSchema schema = endpoint.getRequestBody().getContent().get(parsedContentType);
                 if (schema == null) {
                     // no schema defined for request body, so we allow it
                     return true;
                 } else {
-                    if (contentType.equals("application/json")) {
+                    if (parsedContentType.equals("application/json")) {
                         return jsonSchemaValidationUtils.validateJsonBySchema(requestBody, schema);
-                    } else if (contentType.equals("application/x-www-form-urlencoded")) {
+                    } else if (parsedContentType.equals("application/x-www-form-urlencoded")) {
                         return jsonSchemaValidationUtils.validateFormUrlEncodedBySchema(requestBody,
                                 schema);
                     } else {
