@@ -396,7 +396,7 @@ locals {
   api_instances = { for k, instance in module.api_connector :
     k => merge(
       {
-        sanitized_bucket_name : instance.sanitized_bucket
+        sanitized_bucket : try(instance.async_output_bucket_id, null),
       },
       instance,
       var.api_connectors[k]

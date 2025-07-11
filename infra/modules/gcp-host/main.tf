@@ -355,7 +355,7 @@ locals {
     instance.instance_id => merge(
       {
         endpoint_url : instance.cloud_function_url,
-        sanitized_bucket_name : instance.sanitized_bucket
+        sanitized_bucket : try(instance.async_output_bucket_name, null),
       },
       instance,
       var.api_connectors[instance.instance_id]

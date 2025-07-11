@@ -308,8 +308,9 @@ output "side_output_original_bucket_id" {
   description = "Bucket ID of the original side output bucket, if any. May have been provided by the user, or provisioned by this module."
 }
 
-output "sanitized_bucket" {
-  value = try(module.side_output_bucket["sanitized"].bucket_name, var.side_output_sanitized.bucket, module.async_output[0].bucket_name, null)
+output "async_output_bucket_name" {
+  value       = try(module.async_output[0].bucket_name, null)
+  description = "Name of the async output bucket, if any. May have been provided by the user, or provisioned by this module."
 }
 
 output "todo" {
