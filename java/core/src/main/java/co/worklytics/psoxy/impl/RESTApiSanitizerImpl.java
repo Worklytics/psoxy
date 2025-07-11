@@ -1,14 +1,41 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.Pseudonymizer;
-import co.worklytics.psoxy.RESTApiSanitizer;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.utils.URLUtils;
-import co.worklytics.psoxy.utils.email.EmailAddressParser;
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.inject.Named;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.JsonSchema;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
 import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
@@ -23,32 +50,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
+import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.RESTApiSanitizer;
+import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.rules.RESTRules;
+import co.worklytics.psoxy.utils.URLUtils;
+import co.worklytics.psoxy.utils.email.EmailAddressParser;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 @Log
 public class RESTApiSanitizerImpl implements RESTApiSanitizer {
@@ -143,10 +157,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 // no schemas defined for request body, so we allow it
                 return true;
             } else {
-                // TODO: support something OTHER than 'application/json' ???
-                // text/plain, application/x-www-form-urlencoded, ... OpenAPI 3 does this, still
-                // using JsonSchema
-                JsonSchemaFilter schema = endpoint.getRequestBody().getContent().get(contentType);
+                JsonSchema schema = endpoint.getRequestBody().getContent().get(contentType);
                 if (schema == null) {
                     // no schema defined for request body, so we allow it
                     return true;
@@ -154,11 +165,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                     if (contentType.equals("application/json")) {
                         return jsonSchemaValidationUtils.validateJsonBySchema(requestBody, schema);
                     } else if (contentType.equals("application/x-www-form-urlencoded")) {
-                        // TODO: support this. it's defined in OpenAPI 3.0, but basically we'd need
-                        // to deserialize x-www-form-urlencoded into a java POJO, and validate that
-                        // ... not sure how nested stuff works, etc.
-                        throw new UnsupportedOperationException(
-                                "application/x-www-form-urlencoded not supported");
+                        return jsonSchemaValidationUtils.validateFormUrlEncodedBySchema(requestBody,
+                                schema);
                     } else {
                         throw new UnsupportedOperationException(
                                 "content type not supported: " + contentType);

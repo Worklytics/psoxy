@@ -2,6 +2,7 @@ package com.avaulta.gateway.rules;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.HashMap;
 import java.util.Map;
@@ -141,5 +142,113 @@ public class JsonSchemaValidationUtilsTest {
                 .type("string").pattern("^p~[a-zA-Z0-9_-]{43}$").build();
         String jsonString = "\"" + value + "\"";
         assertEquals(expected, validationUtils.validateJsonBySchema(jsonString, testSchema));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "'', true",
+            "startDate=1640995200000, true",
+            "email=test@example.com, true",
+            "startDate=1640995200000&email=test@example.com, true",
+            "userId=p~asdfasdfasdfasdfasdfasdfasdfsadfasdfasdfasdfasdf&name=John, true",
+            "startDate=notANumber, false",
+            "startDate=1640995200000&extraField=shouldNotBeAllowed, false",
+            "userId=invalid-pseudonym&name=John, false",
+            "unknownField=value, false"
+    })
+    void testValidateFormUrlEncodedBySchema_StrictValidation(String formBody, boolean expected) {
+        com.avaulta.gateway.rules.JsonSchema formSchema =
+                com.avaulta.gateway.rules.JsonSchema.builder()
+                        .type("object")
+                        .properties(Map.of(
+                                "startDate", com.avaulta.gateway.rules.JsonSchema.builder()
+                                        .type("string")
+                                        .pattern("^[0-9]+$") // the soln for numbers in
+                                                             // x-www-form-urlencoded case
+                                        .build(),
+                                "email", com.avaulta.gateway.rules.JsonSchema.builder()
+                                        .type("string")
+                                        .build(),
+                                "userId", com.avaulta.gateway.rules.JsonSchema.builder()
+                                        .type("string")
+                                        .format("pseudonym")
+                                        .build(),
+                                "name", com.avaulta.gateway.rules.JsonSchema.builder()
+                                        .type("string")
+                                        .build()))
+                        .additionalProperties(false)
+                        .build();
+
+        assertEquals(expected,
+                validationUtils.validateFormUrlEncodedBySchema(formBody, formSchema));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "'', true",
+            "startDate=1640995200000, true",
+            "email=test@example.com, true",
+            "startDate=1640995200000&email=test@example.com, true",
+            "startDate=1640995200000&extraField=allowed, true",
+            "unknownField=value, true"
+    })
+    void testValidateFormUrlEncodedBySchema_AdditionalPropertiesTrue(String formBody,
+            boolean expected) {
+        com.avaulta.gateway.rules.JsonSchema formSchema =
+                com.avaulta.gateway.rules.JsonSchema.builder()
+                        .type("object")
+                        .properties(Map.of(
+                                "startDate", com.avaulta.gateway.rules.JsonSchema.builder()
+                                        .type("string")
+                                        .build(),
+                                "email", com.avaulta.gateway.rules.JsonSchema.builder()
+                                        .type("string")
+                                        .build()))
+                        .additionalProperties(true)
+                        .build();
+
+        assertEquals(expected,
+                validationUtils.validateFormUrlEncodedBySchema(formBody, formSchema));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "'', true",
+            "startDate=1640995200000, true",
+            "email=test@example.com, true",
+            "startDate=1640995200000&email=test@example.com, true",
+            "startDate=1640995200000&extraField=allowed, true",
+            "unknownField=value, true"
+    })
+    void testValidateFormUrlEncodedBySchema_AdditionalPropertiesNotSpecified(String formBody,
+            boolean expected) {
+        com.avaulta.gateway.rules.JsonSchema formSchema =
+                com.avaulta.gateway.rules.JsonSchema.builder()
+                        .type("object")
+                        .properties(Map.of(
+                                "startDate", com.avaulta.gateway.rules.JsonSchema.builder()
+                                        .type("string")
+                                        .build(),
+                                "email", com.avaulta.gateway.rules.JsonSchema.builder()
+                                        .type("string")
+                                        .build()))
+                        .build();
+
+        assertEquals(expected,
+                validationUtils.validateFormUrlEncodedBySchema(formBody, formSchema));
+    }
+
+    @Test
+    void testValidateFormUrlEncodedBySchema_InvalidNonObjectSchema() {
+        com.avaulta.gateway.rules.JsonSchema nonObjectSchema =
+                com.avaulta.gateway.rules.JsonSchema.builder()
+                        .type("string")
+                        .build();
+
+        String formBody = "test=value";
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            validationUtils.validateFormUrlEncodedBySchema(formBody, nonObjectSchema);
+        });
     }
 }
