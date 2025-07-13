@@ -165,6 +165,7 @@ module "api_connector" {
   path_to_config                        = null
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
+  example_api_requests                  = each.value.example_api_requests
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = var.todo_step
   target_host                           = each.value.target_host

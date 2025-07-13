@@ -190,8 +190,21 @@ locals {
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
   command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js"
-  command_test_calls = [for path in var.example_api_calls :
-    "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+
+  # Merge example_api_calls into example_api_requests for unified processing
+  all_example_api_requests = concat(
+    [for path in var.example_api_calls : {
+      method       = "GET"
+      path         = path
+      content_type = "application/json"
+      body         = null
+    }],
+    var.example_api_requests
+  )
+
+  # Generate test calls from all example requests
+  command_test_calls = [for request in local.all_example_api_requests :
+    "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${request.path}\" -m ${request.method}${request.body != null ? " -b \"${request.body}\"" : ""}${local.impersonation_param}"
   ]
   command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${google_cloudfunctions2_function.function.project}\" -f \"${google_cloudfunctions2_function.function.name}\""
 }
@@ -253,11 +266,12 @@ resource "local_file" "test_script" {
   filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
   file_permission = "755"
   content = templatefile("${path.module}/test_script.tftpl", {
-    proxy_endpoint_url  = local.proxy_endpoint_url,
-    function_name       = var.instance_id,
-    impersonation_param = local.impersonation_param,
-    command_cli_call    = local.command_cli_call,
-    example_api_calls   = var.example_api_calls,
+    proxy_endpoint_url      = local.proxy_endpoint_url,
+    function_name           = var.instance_id,
+    impersonation_param     = local.impersonation_param,
+    command_cli_call        = local.command_cli_call,
+    all_example_requests    = local.all_example_api_requests,
+    enable_async_processing = var.enable_async_processing
   })
 }
 

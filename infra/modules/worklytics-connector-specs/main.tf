@@ -131,6 +131,24 @@ EOT
         "/repos/${local.github_organization}/${local.github_example_repository}/issues",
         "/repos/${local.github_organization}/${local.github_example_repository}/pulls",
       ]
+      example_api_requests : [
+        {
+          method = "GET"
+          path   = "/orgs/${local.github_organization}/repos"
+        },
+        {
+          method = "GET"
+          path   = "/orgs/${local.github_organization}/members"
+        },
+        {
+          method = "GET"
+          path   = "/orgs/${local.github_organization}/teams"
+        },
+        {
+          method = "GET"
+          path   = "/orgs/${local.github_organization}/audit-log"
+        }
+      ]
       external_token_todo : <<EOT
   1. Populate `github_organization` variable in Terraform with the name of your GitHub organization.
   2. From your organization, register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
