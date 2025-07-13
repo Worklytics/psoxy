@@ -78,6 +78,45 @@ locals {
   2. Update the content of PSOXY_ASANA_ACCESS_TOKEN variable with the previous token value obtained
 EOT
     }
+    cursor = {
+      source_kind : "cursor",
+      availability : "alpha",
+      enable_by_default : false,
+      worklytics_connector_id : "cursor-psoxy"
+      display_name : "Cursor"
+      worklytics_connector_name : "Cursor via Psoxy"
+      target_host : "api.cursor.com"
+      source_auth_strategy : "basic_auth" # cursor API uses basic auth (RFC 7617 Section 2, with API key as 'user-id' and no password
+      secured_variables : [
+        {
+          name : "BASIC_AUTH_USER_ID" # cursor's UX calls this an 'API Key', but it's actually a Basic Auth 'user-id'; should we have aliases or something?
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      example_api_requests : [
+        {
+          method = "GET"
+          path   = "/teams/members"
+        },
+        {
+          method = "POST"
+          path   = "/teams/daily-usage-data"
+          # june 1st to july 1st, in epoch ms
+          body = "startDate=${timestamp("2025-06-01T00:00:00Z") * 1000}&endDate=${timestamp("2025-07-01T00:00:00Z") * 1000}"
+        },
+        {
+          method = "POST"
+          path   = "/teams/filtered-usage-events"
+          body   = "startDate=${timestamp("2025-06-01T00:00:00Z") * 1000}&endDate=${timestamp("2025-07-01T00:00:00Z") * 1000}"
+        }
+      ]
+      external_token_todo : templatefile("${path.module}/docs/cursor/instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_CURSOR_"
+      })
+
+    }
     github = {
       source_kind : "github",
       availability : "ga",
@@ -130,24 +169,6 @@ EOT
         "/repos/${local.github_organization}/${local.github_example_repository}/commits",
         "/repos/${local.github_organization}/${local.github_example_repository}/issues",
         "/repos/${local.github_organization}/${local.github_example_repository}/pulls",
-      ]
-      example_api_requests : [
-        {
-          method = "GET"
-          path   = "/orgs/${local.github_organization}/repos"
-        },
-        {
-          method = "GET"
-          path   = "/orgs/${local.github_organization}/members"
-        },
-        {
-          method = "GET"
-          path   = "/orgs/${local.github_organization}/teams"
-        },
-        {
-          method = "GET"
-          path   = "/orgs/${local.github_organization}/audit-log"
-        }
       ]
       external_token_todo : <<EOT
   1. Populate `github_organization` variable in Terraform with the name of your GitHub organization.
