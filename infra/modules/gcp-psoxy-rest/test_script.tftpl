@@ -2,8 +2,8 @@
 #!/bin/bash
 METHOD=$${1:-}
 API_PATH=$${2:-${try(example_api_requests[0].path, "")}}
-CONTENT_TYPE=${{3:-${try(example_api_requests[0].content_type, "")}}}
-BODY=${{4:-${try(example_api_requests[0].body, "")}}}
+CONTENT_TYPE=$${3:-${try(example_api_requests[0].content_type, "")}}
+BODY=$${4:-${try(example_api_requests[0].body, "")}}
 echo "Quick test of ${function_name} ..."
 
 ${command_cli_call} -u "${proxy_endpoint_url}/" --health-check
