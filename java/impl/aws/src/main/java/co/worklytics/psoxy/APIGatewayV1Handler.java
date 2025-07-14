@@ -1,32 +1,28 @@
 package co.worklytics.psoxy;
 
+import java.security.Security;
+import java.time.Instant;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.HttpHeaders;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.request.APIGatewayV1ProxyEventRequestAdapter;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-
-import java.time.Instant;
-
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.HttpHeaders;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-import java.security.Security;
 
 
 /**
  * handler to use for API Gateway V1 configurations
  *
- * usage:
- * - when configure/deploy your lambda, set entry point to `co.worklytics.psoxy.APIGatewayV1Handler`
- * - in terraform, this is the `handler_class` variable
- * - https://github.com/Worklytics/psoxy/blob/main/infra/modules/aws-psoxy-rest/main.tf#L36
- * - under Lambda --> Runtime Settings via AWS console
+ * usage: - when configure/deploy your lambda, set entry point to
+ * `co.worklytics.psoxy.APIGatewayV1Handler` - in terraform, this is the `handler_class` variable -
+ * https://github.com/Worklytics/psoxy/blob/main/infra/modules/aws-psoxy-rest/main.tf#L36 - under
+ * Lambda --> Runtime Settings via AWS console
  */
 public class APIGatewayV1Handler implements
         com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
@@ -61,12 +57,10 @@ public class APIGatewayV1Handler implements
             APIGatewayV1ProxyEventRequestAdapter httpEventRequestAdapter =
                     APIGatewayV1ProxyEventRequestAdapter.of(invocationEvent);
             response = requestHandler.handle(httpEventRequestAdapter,
-                    ApiDataRequestHandler.ProcessingContext.builder()
-                            .async(false)
+                    ApiDataRequestHandler.ProcessingContext.builder().async(false)
                             .requestReceivedAt(Instant.ofEpochMilli(
                                     invocationEvent.getRequestContext().getRequestTimeEpoch()))
-                            .requestId(invocationEvent.getRequestContext().getRequestId())
-                            .build());
+                            .requestId(invocationEvent.getRequestContext().getRequestId()).build());
 
             context.getLogger().log(httpEventRequestAdapter.getHeader(HttpHeaders.ACCEPT_ENCODING)
                     .orElse("accept-encoding not found"));
@@ -81,8 +75,7 @@ public class APIGatewayV1Handler implements
             context.getLogger()
                     .log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
-            response = HttpEventResponse.builder()
-                    .statusCode(500)
+            response = HttpEventResponse.builder().statusCode(500)
                     .body("Unknown error: " + e.getClass().getName())
                     .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), "Unknown error")
                     .build();
@@ -92,11 +85,10 @@ public class APIGatewayV1Handler implements
             // NOTE: AWS seems to give 502 Bad Gateway errors without explanation or any info
             // in the lambda logs if this is malformed somehow (Eg, missing statusCode)
 
-            return new APIGatewayProxyResponseEvent()
-                    .withStatusCode(response.getStatusCode())
+            return new APIGatewayProxyResponseEvent().withStatusCode(response.getStatusCode())
                     .withHeaders(response.getHeaders())
-                    .withBody(response.getBody())
-                    .withIsBase64Encoded(base64Encoded);
+                    .withMultiValueHeaders(response.getMultivaluedHeaders())
+                    .withBody(response.getBody()).withIsBase64Encoded(base64Encoded);
         } catch (Throwable e) {
             context.getLogger().log("Error writing response as Lambda return");
             throw new Error(e);

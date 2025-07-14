@@ -1,22 +1,21 @@
 package co.worklytics.psoxy;
 
+import java.security.Security;
+import java.time.Instant;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
-import java.time.Instant;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-import java.security.Security;
 /**
  * default AWS lambda handler
  *
@@ -69,12 +68,10 @@ public class Handler implements
             APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter =
                     new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
             response = requestHandler.handle(httpEventRequestAdapter,
-                    ApiDataRequestHandler.ProcessingContext.builder()
-                            .async(false)
+                    ApiDataRequestHandler.ProcessingContext.builder().async(false)
                             .requestReceivedAt(Instant
                                     .ofEpochMilli(httpEvent.getRequestContext().getTimeEpoch()))
-                            .requestId(httpEvent.getRequestContext().getRequestId())
-                            .build());
+                            .requestId(httpEvent.getRequestContext().getRequestId()).build());
 
             if (responseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
                 Pair<Boolean, HttpEventResponse> compressedResponse =
@@ -82,18 +79,18 @@ public class Handler implements
                 base64Encoded = compressedResponse.getLeft();
                 response = compressedResponse.getRight();
             } else {
-                response = response.toBuilder()
-                        .header(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
-                                Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode())
-                        .build();
+                response =
+                        response.toBuilder()
+                                .header(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
+                                        Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode())
+                                .build();
             }
 
         } catch (Throwable e) {
             context.getLogger()
                     .log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
-            response = HttpEventResponse.builder()
-                    .statusCode(500)
+            response = HttpEventResponse.builder().statusCode(500)
                     .body("Unknown error: " + e.getClass().getName())
                     .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), "Unknown error")
                     .build();
@@ -102,12 +99,10 @@ public class Handler implements
         try {
             // NOTE: AWS seems to give 502 Bad Gateway errors without explanation or any info
             // in the lambda logs if this is malformed somehow (Eg, missing statusCode)
-            return APIGatewayV2HTTPResponse.builder()
-                    .withStatusCode(response.getStatusCode())
+            return APIGatewayV2HTTPResponse.builder().withStatusCode(response.getStatusCode())
                     .withHeaders(response.getHeaders())
-                    .withBody(response.getBody())
-                    .withIsBase64Encoded(base64Encoded)
-                    .build();
+                    .withMultiValueHeaders(response.getMultivaluedHeaders())
+                    .withBody(response.getBody()).withIsBase64Encoded(base64Encoded).build();
         } catch (Throwable e) {
             context.getLogger().log("Error writing response as Lambda return");
             throw new Error(e);

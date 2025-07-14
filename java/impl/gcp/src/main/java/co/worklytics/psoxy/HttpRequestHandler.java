@@ -57,6 +57,9 @@ public class HttpRequestHandler {
             abstractResponse.getHeaders()
                 .forEach(response::appendHeader);
 
+            abstractResponse.getMultivaluedHeaders()
+                .forEach((key, valueList) -> valueList.forEach(value -> response.appendHeader(key, value)));
+
             // sample 1% of requests, warning if compression not requested
             if (RandomUtils.nextInt(0, 99) == 0 && !cloudFunctionRequest.getWarnings().isEmpty()) {
                 response.appendHeader(ProcessedDataMetadataFields.WARNING.getHttpHeader(),

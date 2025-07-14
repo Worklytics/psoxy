@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.ByteArrayInputStream;
 import java.util.Optional;
-import java.util.logging.Level;
 
 /**
  * S3-backed implementation of {@link Output}.
@@ -47,12 +46,11 @@ public class S3Output implements Output {
 
 
     @Override
-    public void write(String key, ProcessedContent content) {
+    public void write(String key, ProcessedContent content) throws WriteFailure {
 
         if (key == null) {
             key = DigestUtils.md5Hex(content.getContent());
         }
-
 
         try {
             AmazonS3 s3Client = s3ClientProvider.get();
@@ -75,12 +73,12 @@ public class S3Output implements Output {
                 new ByteArrayInputStream(content.getContent()),
                 metadata);
         } catch (Exception e) {
-            log.log(Level.WARNING, "Failed to write to S3 output", e);
+            throw new WriteFailure("Failed to write to S3 output", e);
         }
     }
 
     @Override
-    public void write(ProcessedContent content) {
+    public void write(ProcessedContent content) throws WriteFailure {
         // Generate a canonical key based on the content's hash
         // random UUID better??
         String key = DigestUtils.sha256Hex(content.getContent());
