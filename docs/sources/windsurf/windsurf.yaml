@@ -1,0 +1,29 @@
+---
+endpoints:
+  - pathTemplate: "/api/v1/UserPageAnalytics"
+    allowedQueryParams: []
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.userTableStats[*].email"
+          - "$.userTableStats[*].apiKey"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        userTableStats:
+          type: "array"
+          items:
+            $ref: "#/definitions/UserPageStat"
+definitions:
+  UserPageStat:
+    type: "object"
+    properties:
+      activeDays:
+        type: "integer"
+      apiKey:
+        type: "string"
+      email:
+        type: "string"
+      lastUpdateTime:
+        type: "string"

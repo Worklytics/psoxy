@@ -1,0 +1,22 @@
+{
+  "userTableStats" : [
+    {
+      "email" : "t~AZ5dXTrTNPRC8V6ucn_nDz-SccxkD1lrdmwopS3-83s@windsurf.com",
+      "lastUpdateTime" : "2024-10-10T22:56:10.771591Z",
+      "apiKey" : "t~ojuWSAzoQYd8GQWFTNQ0tHcSBhTTRU_H6ecZCxys-2o",
+      "activeDays" : 178
+    },
+    {
+      "email" : "t~OEslQdK5nEaCNMQDtQi7lQ8ueJ9RWPaOd_hRi-adBYA@windsurf.com",
+      "lastUpdateTime" : "2024-10-10T18:11:23.980237Z",
+      "apiKey" : "t~tz-unavITnWiCjlNelLZku27RpkBCbagZYcuc9dKikM",
+      "activeDays" : 462
+    },
+    {
+      "email" : "t~bou-QMn0h31ryjAhD4HmO-MU1wJxsBn0iHBGtSJS6tU@windsurf.com",
+      "lastUpdateTime" : "2024-10-10T16:43:46.117870Z",
+      "apiKey" : "t~GVziU7R4KIPPFZgEM207vwiHDeBktwBxml2M4lKYbJA",
+      "activeDays" : 237
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "userTableStats": [
+    {
+      "name": "Alice",
+      "email": "alice@windsurf.com",
+      "lastUpdateTime": "2024-10-10T22:56:10.771591Z",
+      "apiKey": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "activeDays": 178
+    },
+    {
+      "name": "Bob",
+      "email": "bob@windsurf.com",
+      "lastUpdateTime": "2024-10-10T18:11:23.980237Z",
+      "apiKey": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+      "activeDays": 462
+    },
+    {
+      "name": "Charlie",
+      "email": "charlie@windsurf.com",
+      "lastUpdateTime": "2024-10-10T16:43:46.117870Z",
+      "apiKey": "cccccccc-cccc-cccc-cccc-cccccccccccc",
+      "activeDays": 237
+    }
+  ]
+}
+
