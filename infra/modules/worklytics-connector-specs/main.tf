@@ -27,6 +27,10 @@ locals {
     }
   }
 
+  # in the absence of terraform functions to convert RFC3339 to epoch ms, we hardcode these values
+  JULY_01_2025_MS = 1751328000000
+  JUNE_01_2025_MS = local.JULY_01_2025_MS - 30 * 24 * 60 * 60 * 1000
+
   jira_example_cloud_id            = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   jira_example_issue_id            = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
   github_installation_id           = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
@@ -103,13 +107,12 @@ EOT
         {
           method = "POST"
           path   = "/teams/daily-usage-data"
-          # june 1st to july 1st, in epoch ms
-          body = "startDate=${timestamp("2025-06-01T00:00:00Z") * 1000}&endDate=${timestamp("2025-07-01T00:00:00Z") * 1000}"
+          body   = "startDate=${local.JUNE_01_2025_MS}&endDate=${local.JULY_01_2025_MS}"
         },
         {
           method = "POST"
           path   = "/teams/filtered-usage-events"
-          body   = "startDate=${timestamp("2025-06-01T00:00:00Z") * 1000}&endDate=${timestamp("2025-07-01T00:00:00Z") * 1000}"
+          body   = "startDate=${local.JUNE_01_2025_MS}&endDate=${local.JULY_01_2025_MS}"
         }
       ]
       external_token_todo : templatefile("${path.module}/docs/cursor/instructions.tftpl", {
