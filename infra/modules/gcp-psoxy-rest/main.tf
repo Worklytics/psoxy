@@ -270,7 +270,7 @@ resource "local_file" "test_script" {
     function_name           = var.instance_id,
     impersonation_param     = local.impersonation_param,
     command_cli_call        = local.command_cli_call,
-    all_example_requests    = local.all_example_api_requests,
+    example_api_requests    = local.all_example_api_requests,
     enable_async_processing = var.enable_async_processing
   })
 }
