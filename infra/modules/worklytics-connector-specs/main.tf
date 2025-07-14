@@ -717,13 +717,17 @@ EOT
           sensitive : true
         }
       ]
-      example_api_calls_user_to_impersonate : null
-      example_api_calls : [
-        "/api/v1/UserPageAnalytics"
-      ]
+      example_api_requests : [
+        {
+          method : "POST"
+          path : "/api/v1/UserPageAnalytics"
+        }
+      ],
       external_token_todo : templatefile("${path.module}/docs/windsurf/instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_WINDSURF_"
+      })
+      instructions_template = "${path.module}/docs/windsurf/instructions.tftpl"
     }
-
     zoom = {
       source_kind : "zoom"
       availability : "ga",
