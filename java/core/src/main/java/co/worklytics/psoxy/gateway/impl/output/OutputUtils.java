@@ -29,9 +29,10 @@ import lombok.extern.java.Log;
 
 /**
  * utility methods for working with side output
- *
- * - eg, to create a canonical key for the response to be stored in the side output - or to build
- * metadata for the side output
+ * <p>
+ * - eg, to create a canonical key for the response to be stored in the side output
+ * - or to build metadata for the side output
+ * </p>
  */
 @Log
 @NoArgsConstructor(onConstructor_ = {@Inject})
@@ -61,9 +62,10 @@ public class OutputUtils {
         };
 
         Output outputToAdapt = configService.getConfigPropertyAsOptional(configProperty)
-                .map(OutputLocationImpl::of).map(this::createOutputForLocation)
-                .map(output -> (Output) CompressedOutputWrapper.wrap((Output) output))
-                .orElseGet(noSideProvider::get);
+            .map(OutputLocationImpl::of)
+            .map(this::createOutputForLocation)
+            .map(output -> (Output) CompressedOutputWrapper.wrap((Output) output))
+            .orElseGet(noSideProvider::get);
 
         return outputToSideOutputAdapterFactory.create(outputToAdapt);
     }
@@ -128,10 +130,10 @@ public class OutputUtils {
     }
 
     private <T extends Output> T createOutputForLocation(OutputLocation outputLocation) {
-        OutputFactory<?> outputFactory =
-                outputFactories.stream().filter(factory -> factory.supports(outputLocation))
-                        .findFirst().orElseThrow(() -> new IllegalArgumentException(
-                                "No output factory found for location: " + outputLocation));
+        OutputFactory<?> outputFactory = outputFactories.stream()
+            .filter(factory -> factory.supports(outputLocation))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("No output factory found for location: " + outputLocation));
 
         return (T) outputFactory.create(outputLocation);
     }

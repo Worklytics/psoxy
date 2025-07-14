@@ -14,9 +14,11 @@ public class PrebuiltSanitizerRules {
 
 
     static final RESTRules SLACK = Rules2.load("sources/slack/slack-discovery-api/discovery.yaml");
+    static final RESTRules SLACK_ANALYTICS = Rules2.load("sources/slack/slack-analytics/slack-analytics.yaml");
 
     static public final Map<String, RESTRules> SLACK_DEFAULT_RULES_MAP =
-            ImmutableMap.<String, RESTRules>builder()
-                    .put("slack", SLACK)
-                    .build();
+        ImmutableMap.<String, RESTRules>builder()
+            .put("slack", SLACK)
+            .put("slack-analytics", SLACK_ANALYTICS)
+            .build();
 }

@@ -354,7 +354,8 @@ locals {
   api_instances = { for instance in module.api_connector :
     instance.instance_id => merge(
       {
-        endpoint_url : instance.cloud_function_url
+        endpoint_url : instance.cloud_function_url,
+        sanitized_bucket : try(instance.async_output_bucket_name, null),
       },
       instance,
       var.api_connectors[instance.instance_id]
