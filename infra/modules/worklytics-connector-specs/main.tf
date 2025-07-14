@@ -115,7 +115,6 @@ EOT
       external_token_todo : templatefile("${path.module}/docs/cursor/instructions.tftpl", {
         path_to_instance_parameters = "PSOXY_CURSOR_"
       })
-
     }
     github = {
       source_kind : "github",
@@ -702,6 +701,29 @@ EOT
       })
       instructions_template = "${path.module}/docs/slack/discovery-api/instructions.tftpl"
     }
+    windsurf = {
+      source_kind : "windsurf"
+      availability : "alpha",
+      enable_by_default : false
+      worklytics_connector_id : "windsurf-psoxy"
+      display_name : "Windsurf",
+      worklytics_connector_name : "Windsurf via Psoxy"
+      target_host : "server.codeium.com"
+      source_auth_strategy : "windsurf_service_key"
+      secured_variables : [
+        {
+          name : "SERVICE_KEY"
+          writable : false
+          sensitive : true
+        }
+      ]
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/api/v1/UserPageAnalytics"
+      ]
+      external_token_todo : templatefile("${path.module}/docs/windsurf/instructions.tftpl", {
+    }
+
     zoom = {
       source_kind : "zoom"
       availability : "ga",

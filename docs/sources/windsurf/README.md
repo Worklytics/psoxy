@@ -10,7 +10,7 @@ https://docs.windsurf.com/windsurf/accounts/analytics-api#overview
 
 ## Steps to Connect
 
-See Windsurf's documentation for the latest, but as of July 10, 2025, you must create an API key and fill that as a secret in your host platform. The Proxy will then use Basic Authentication when connecting to Windsurf.
+See Windsurf's documentation for the latest, but as of July 10, 2025, you must create an Service Key with "Teams Read-only" permissions and fill that as a secret in your host platform. The Proxy will then this value as the `service_key` parameter when connecting to Windsurf's API.
 
 1. An admin user must navigate to the "service key section" of the Settings page, and create a Service Key with a role that has the "Teams Read-only" permissions.
 
