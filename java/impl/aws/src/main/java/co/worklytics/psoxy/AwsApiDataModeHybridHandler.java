@@ -10,6 +10,8 @@ import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,9 +30,10 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  * AWS lambda entrypoint that can handle API data requests via any of:
- *   - cloud function URL invocations
- *   - API Gateway events
- *   - SQS events ( asynchronous processing of API data requests, that originally came from one of the above)
+ * - cloud function URL invocations
+ * - API Gateway events
+ * - SQS events ( asynchronous processing of API data requests, that originally came from one of the
+ * above)
  */
 @Log
 public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
@@ -61,7 +64,8 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
     }
 
     @Override
-    public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
+    public void handleRequest(InputStream input, OutputStream output, Context context)
+            throws IOException {
         // Read the full input stream into a tree
         JsonNode rootNode = lambdaEventUtils.read(input);
 
@@ -78,35 +82,43 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
             for (SQSMessage message : sqsEvent.getRecords()) {
                 try {
                     if (!message.getMessageAttributes().containsKey("processingContext")) {
-                        throw new IllegalArgumentException("SQS event record has no processingContext message attribute");
+                        throw new IllegalArgumentException(
+                                "SQS event record has no processingContext message attribute");
                     }
 
-                    String processingContextJson = message.getMessageAttributes().get("processingContext").getStringValue();
+                    String processingContextJson = message.getMessageAttributes()
+                            .get("processingContext").getStringValue();
 
-                    processingContext = payloadMapper.readValue(processingContextJson, ApiDataRequestHandler.ProcessingContext.class);
+                    processingContext = payloadMapper.readValue(processingContextJson,
+                            ApiDataRequestHandler.ProcessingContext.class);
                     rootNode = payloadMapper.readTree(message.getBody());
 
                     handleSingleRequest(rootNode, processingContext, context);
 
                     // async case - SQS; no response is needed
-                    log.info("Processed async API data request: " + payloadMapper.writeValueAsString(processingContext));
+                    log.info("Processed async API data request: "
+                            + payloadMapper.writeValueAsString(processingContext));
                 } catch (Throwable e) {
-                    log.log(Level.WARNING, "Error processing async API data request: " + e.getMessage(), e);
+                    log.log(Level.WARNING,
+                            "Error processing async API data request: " + e.getMessage(), e);
                     // TODO: send JUST this message to the dead letter queue ??
                     failedMessageCount++;
                 }
             }
-            log.info("Processed " + messageCount + " async API data requests; " + failedMessageCount + " failed");
+            log.info("Processed " + messageCount + " async API data requests; " + failedMessageCount
+                    + " failed");
             if (failedMessageCount > 0) {
-                throw new RuntimeException("Failed to process " + failedMessageCount + " async API data requests");
+                throw new RuntimeException(
+                        "Failed to process " + failedMessageCount + " async API data requests");
             }
         } else {
             // synchronous invocation case - API Gateway or cloud function URL invocation
             processingContext = ApiDataRequestHandler.ProcessingContext.builder()
-                .requestId(context.getAwsRequestId())
-                .requestReceivedAt(Instant.now())
-                .build();
-            Pair<Boolean, HttpEventResponse> responsePair = handleSingleRequest(rootNode, processingContext, context);
+                    .requestId(context.getAwsRequestId())
+                    .requestReceivedAt(Instant.now())
+                    .build();
+            Pair<Boolean, HttpEventResponse> responsePair =
+                    handleSingleRequest(rootNode, processingContext, context);
             response = responsePair.getRight();
             Boolean base64Encoded = responsePair.getLeft();
 
@@ -116,19 +128,42 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
             } else if (lambdaEventUtils.isApiGatewayV2Event(rootNode)) {
                 lambdaEventUtils.writeAsApiGatewayV2Response(response, output, base64Encoded);
             } else {
-                throw new IllegalArgumentException("Unsupported event type: " + rootNode.getNodeType());
+                throw new IllegalArgumentException(
+                        "Unsupported event type: " + rootNode.getNodeType());
             }
         }
     }
 
-    private Pair<Boolean, HttpEventResponse> handleSingleRequest(JsonNode rootNode, ApiDataRequestHandler.ProcessingContext processingContext, Context context) throws IOException {
+    private Pair<Boolean, HttpEventResponse> handleSingleRequest(JsonNode rootNode,
+            ApiDataRequestHandler.ProcessingContext processingContext, Context context)
+            throws IOException {
         HttpEventRequest request;
         if (lambdaEventUtils.isApiGatewayV1Event(rootNode)) {
-            request = APIGatewayV1ProxyEventRequestAdapter.of(lambdaEventUtils.toAPIGatewayProxyRequestEvent(rootNode));
+            APIGatewayProxyRequestEvent v1Event =
+                    lambdaEventUtils.toAPIGatewayProxyRequestEvent(rootNode);
+            if (!processingContext.getAsync()) {
+                // for consistency, take the requestId and requestReceivedAt from the event
+                processingContext = processingContext.toBuilder()
+                        .requestId(v1Event.getRequestContext().getRequestId())
+                        .requestReceivedAt(Instant
+                                .ofEpochMilli(v1Event.getRequestContext().getRequestTimeEpoch()))
+                        .build();
+            }
+            request = APIGatewayV1ProxyEventRequestAdapter.of(v1Event);
         } else if (lambdaEventUtils.isApiGatewayV2Event(rootNode)) {
-            request = new APIGatewayV2HTTPEventRequestAdapter(lambdaEventUtils.toAPIGatewayV2HTTPEvent(rootNode));
+            APIGatewayV2HTTPEvent v2Event = lambdaEventUtils.toAPIGatewayV2HTTPEvent(rootNode);
+            if (!processingContext.getAsync()) {
+                // for consistency, take the requestId and requestReceivedAt from the event
+                processingContext = processingContext.toBuilder()
+                        .requestId(v2Event.getRequestContext().getRequestId())
+                        .requestReceivedAt(
+                                Instant.ofEpochMilli(v2Event.getRequestContext().getTimeEpoch()))
+                        .build();
+            }
+            request = new APIGatewayV2HTTPEventRequestAdapter(v2Event);
         } else {
-            throw new IllegalArgumentException("Unsupported event: " + payloadMapper.writeValueAsString(rootNode));
+            throw new IllegalArgumentException(
+                    "Unsupported event: " + payloadMapper.writeValueAsString(rootNode));
         }
 
         HttpEventResponse response;
@@ -136,19 +171,20 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
             response = requestHandler.handle(request, processingContext);
 
             if (responseCompressionHandler.isCompressionRequested(request)) {
-                return  responseCompressionHandler.compressIfNeeded(response);
-            } else{
+                return responseCompressionHandler.compressIfNeeded(response);
+            } else {
                 return Pair.of(false, response);
             }
         } catch (Throwable e) {
 
-            context.getLogger().log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
+            context.getLogger()
+                    .log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
             return Pair.of(false, HttpEventResponse.builder()
-                .statusCode(500)
-                .body("Unknown error: " + e.getClass().getName())
-                .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),"Unknown error")
-                .build());
+                    .statusCode(500)
+                    .body("Unknown error: " + e.getClass().getName())
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), "Unknown error")
+                    .build());
         }
     }
 }
