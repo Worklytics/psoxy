@@ -1082,7 +1082,7 @@ EOT
   }
 
   oauth_long_access_connectors_backwards = { for k, v in local.oauth_long_access_connectors :
-  k => merge(v, { example_calls : v.example_api_calls }) }
+  k => merge(v, { example_calls : try(v.example_api_calls, []) }) }
 
 
   all_default_connectors = merge(
