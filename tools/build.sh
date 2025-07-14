@@ -16,6 +16,9 @@ while getopts ":q" opt; do
     q)
       QUIET_OPTIONS="-q -Dmaven.test.skip=true"
       ;;
+    d)
+      DISTRIBUTION_PROFILE="-Pdistribution"
+      ;;
     *)
       printf "Usage: build.sh [-q] <IMPLEMENTATION> <JAVA_SOURCE_ROOT>\n"
       printf "  -q: Skip tests during build\n"
@@ -49,7 +52,7 @@ mvn package install $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}gateway-core/pom.xml"
 
 mvn package install $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}core/pom.xml"
 
-mvn package $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/pom.xml"
+mvn package $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/pom.xml" $DISTRIBUTION_PROFILE
 
 DEPLOYMENT_ARTIFACT=$(ls "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment" | grep -E "^psoxy-.*\.jar$" | head -1)
 

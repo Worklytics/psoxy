@@ -25,7 +25,8 @@ import java.security.Security;
  * TODO: in 0.6, rename this to AwsApiGatewayV2ApiDataRequestHandler, or something similar
  */
 @Log
-public class Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
+public class Handler implements
+        com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
 
     /**
      * Static initialization allows reuse in containers
@@ -50,56 +51,63 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
 
     @SneakyThrows
     @Override
-    public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent httpEvent, Context context) {
+    public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent httpEvent,
+            Context context) {
 
-        //interfaces:
+        // interfaces:
         // - HttpRequestEvent --> HttpResponseEvent
 
-        //q: what's the component?
+        // q: what's the component?
         // - request handler?? but it's abstract ...
-        //    - make it bound with interface, rather than generic? --> prob best approach
+        // - make it bound with interface, rather than generic? --> prob best approach
         // - objectMapper
         //
 
         HttpEventResponse response;
         boolean base64Encoded = false;
         try {
-            APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter = new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
-            response = requestHandler.handle(httpEventRequestAdapter, ApiDataRequestHandler.ProcessingContext.builder()
-                    .async(false)
-                .requestReceivedAt(Instant.parse(httpEvent.getRequestContext().getTime()))
-                .requestId(httpEvent.getRequestContext().getRequestId())
-                .build());
+            APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter =
+                    new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
+            response = requestHandler.handle(httpEventRequestAdapter,
+                    ApiDataRequestHandler.ProcessingContext.builder()
+                            .async(false)
+                            .requestReceivedAt(Instant
+                                    .ofEpochMilli(httpEvent.getRequestContext().getTimeEpoch()))
+                            .requestId(httpEvent.getRequestContext().getRequestId())
+                            .build());
 
             if (responseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
-                Pair<Boolean, HttpEventResponse> compressedResponse = responseCompressionHandler.compressIfNeeded(response);
+                Pair<Boolean, HttpEventResponse> compressedResponse =
+                        responseCompressionHandler.compressIfNeeded(response);
                 base64Encoded = compressedResponse.getLeft();
                 response = compressedResponse.getRight();
             } else {
                 response = response.toBuilder()
-                    .header(ProcessedDataMetadataFields.WARNING.getHttpHeader(), Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode())
-                    .build();
+                        .header(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
+                                Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode())
+                        .build();
             }
 
         } catch (Throwable e) {
-            context.getLogger().log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
+            context.getLogger()
+                    .log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
             response = HttpEventResponse.builder()
-                .statusCode(500)
-                .body("Unknown error: " + e.getClass().getName())
-                .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),"Unknown error")
-                .build();
+                    .statusCode(500)
+                    .body("Unknown error: " + e.getClass().getName())
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), "Unknown error")
+                    .build();
         }
 
         try {
-            //NOTE: AWS seems to give 502 Bad Gateway errors without explanation or any info
+            // NOTE: AWS seems to give 502 Bad Gateway errors without explanation or any info
             // in the lambda logs if this is malformed somehow (Eg, missing statusCode)
             return APIGatewayV2HTTPResponse.builder()
-                .withStatusCode(response.getStatusCode())
-                .withHeaders(response.getHeaders())
-                .withBody(response.getBody())
-                .withIsBase64Encoded(base64Encoded)
-                .build();
+                    .withStatusCode(response.getStatusCode())
+                    .withHeaders(response.getHeaders())
+                    .withBody(response.getBody())
+                    .withIsBase64Encoded(base64Encoded)
+                    .build();
         } catch (Throwable e) {
             context.getLogger().log("Error writing response as Lambda return");
             throw new Error(e);
