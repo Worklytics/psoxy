@@ -79,7 +79,7 @@ variable "psoxy_base_dir" {
 
 variable "deployment_bundle" {
   type        = string
-  description = "path to deployment bundle to use (if not provided, will build one). Can be GCS url, eg 'gs://artifacts-bucket/psoxy-0.4.28.zip'."
+  description = "path to deployment bundle to use (if not provided, will build one). Can be GCS url, eg 'gs://psoxy-public-artifacts/psoxy-0.4.28.zip'."
   default     = null
 
   validation {

@@ -7,6 +7,7 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Objects;
@@ -14,8 +15,6 @@ import java.util.zip.GZIPOutputStream;
 
 /**
  * decorator for Output that compresses the content before writing it to the underlying SideOutput.
- *
- *
  */
 @AllArgsConstructor(staticName = "wrap")
 @Log
@@ -26,22 +25,23 @@ public class CompressedOutputWrapper implements Output {
     @NonNull
     Output delegate;
 
-    @SneakyThrows
     @Override
-    public void write(ProcessedContent content) {
+    public void write(ProcessedContent content) throws WriteFailure {
         write(null, content);
     }
 
-    @SneakyThrows
     @Override
-    public void write(String key, ProcessedContent content) {
-        if (!Objects.equals(COMPRESSION_TYPE, content.getContentEncoding())) {
-            log.info("Compressing response with gzip encoding through wrapper");
-            byte[] compressedContent = gzipContent(content.getContent());
-            content = content.withContentEncoding(COMPRESSION_TYPE).withContent(compressedContent);
+    public void write(String key, ProcessedContent content) throws WriteFailure {
+        try {
+            if (!Objects.equals(COMPRESSION_TYPE, content.getContentEncoding())) {             
+                log.info("Compressing response with gzip encoding through wrapper");
+                byte[] compressedContent = gzipContent(content.getContent());
+                content = content.withContentEncoding(COMPRESSION_TYPE).withContent(compressedContent);
+            }
+            delegate.write(key, content);
+        } catch (Exception e) {
+            throw new WriteFailure("Failed to write compressed content", e);
         }
-
-        delegate.write(key, content);
     }
 
     /**
@@ -50,15 +50,14 @@ public class CompressedOutputWrapper implements Output {
      * @param content to compress
      * @return a byte[] reflecting gzip-encoding of the content
      */
-    @SneakyThrows
-    byte[] gzipContent(@NonNull byte[] content) {
+    byte[] gzipContent(@NonNull byte[] content) throws WriteFailure {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
              GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream)) {
             gzipOutputStream.write(content);
             gzipOutputStream.finish();
             return byteArrayOutputStream.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to gzip content", e);
+            throw new WriteFailure("Failed to gzip content", e);
         }
     }
 }

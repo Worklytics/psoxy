@@ -166,14 +166,30 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
                 .statusCode(HttpStatus.SC_BAD_REQUEST)
                 .build();
         }
+        ProcessedContent sanitized;
+        try {
+            sanitized = webhookSanitizer.sanitize(request);
+        } catch (Throwable e) {
+            log.log(Level.WARNING, "Failed to sanitize incoming webhook request", e);
+            return HttpEventResponse.builder()
+                .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                .body("Failed to sanitize incoming webhook")
+                .build();
+        }
 
-        ProcessedContent sanitized = webhookSanitizer.sanitize(request);
+        try {
+            output.write(sanitized);
+            return HttpEventResponse.builder()
+                .statusCode(HttpStatus.SC_OK)
+                .build();
+        } catch (Output.WriteFailure e) {
+            log.log(Level.WARNING, "Failed to write sanitized webhook payload to output", e);
+            return HttpEventResponse.builder()
+                .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                .body("Failed to ingest incoming webhook")
+                .build();
+        }
 
-        output.write(sanitized);
-
-        return HttpEventResponse.builder()
-            .statusCode(HttpStatus.SC_OK)
-            .build();
     }
 
     /**

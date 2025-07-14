@@ -50,6 +50,18 @@ public enum ErrorCauses {
     HTTPS_REQUIRED,
 
     /**
+     *  failed to write to side output (response may have otherwise been successful)
+     *  clients can ignore this if they choose.
+     */
+    SIDE_OUTPUT_FAILURE_SANITIZED,
+
+    /**
+     *  failed to write to side output, for original response (not sanitized)
+     *  clients can ignore this if they choose.
+     */
+    SIDE_OUTPUT_FAILURE_ORIGINAL,
+
+    /**
      *  An error internal to proxy's application logic, but not handled such that it could be mapped into one of the above.
      *  eg, something very unexpected, or a bug in the code.
      */
