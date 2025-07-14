@@ -1,21 +1,13 @@
 ---
 endpoints:
   - pathTemplate: "/teams/daily-usage-data"
-    allowedQueryParams:
-      - "startDate"
-      - "endDate"
+    allowedQueryParams: []
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..email"
+          - "$.data[].email"
+        includeReversible: true
         encoding: "URL_SAFE_TOKEN"
-      - !<redactRegexMatches>
-        jsonPaths:
-          - "$.data[*].email"
-        redactions:
-          - "(?i)password=[^&]*"
-          - "(?i)token=[^&]*"
-          - "(?i)key=[^&]*"
     responseSchema:
       type: "object"
       properties:
@@ -25,19 +17,33 @@ endpoints:
             $ref: "#/definitions/AccountUsageData"
         period:
           $ref: "#/definitions/DataPeriod"
-
+  - pathTemplate: "/teams/filtered-usage-events"
+    allowedQueryParams: []
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.usageEvents[].userEmail"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        pagination:
+          $ref: "#/definitions/Pagination"
+        period:
+          $ref: "#/definitions/DataPeriod"
+        totalUsageEventsCount:
+          type: "integer"
+        usageEvents:
+          type: "array"
+          items:
+            $ref: "#/definitions/UsageEvent"
   - pathTemplate: "/teams/members"
     allowedQueryParams: []
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..email"
+          - "$.teamMembers[].email"
         encoding: "URL_SAFE_TOKEN"
-      - !<redactRegexMatches>
-        jsonPaths:
-          - "$.teamMembers[*].name"
-        redactions:
-          - ".*"
     responseSchema:
       type: "object"
       properties:
@@ -45,168 +51,116 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/TeamMember"
-
-  - pathTemplate: "/teams/filtered-usage-events"
-    allowedQueryParams:
-      - "startDate"
-      - "endDate"
-      - "page"
-      - "pageSize"
-      - "model"
-      - "kindLabel"
-      - "userEmail"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..userEmail"
-          - "$..email"
-        encoding: "URL_SAFE_TOKEN"
-      - !<redactRegexMatches>
-        jsonPaths:
-          - "$.usageEvents[*].userEmail"
-        redactions:
-          - "(?i)password=[^&]*"
-          - "(?i)token=[^&]*"
-          - "(?i)key=[^&]*"
-    responseSchema:
-      type: "object"
-      properties:
-        totalUsageEventsCount:
-          type: "integer"
-        pagination:
-          $ref: "#/definitions/Pagination"
-        usageEvents:
-          type: "array"
-          items:
-            $ref: "#/definitions/UsageEvent"
-        period:
-          $ref: "#/definitions/DataPeriod"
-
 definitions:
   AccountUsageData:
     type: "object"
     properties:
-      date:
-        type: "integer"
-        format: "int64"
-      isActive:
-        type: "boolean"
-      totalLinesAdded:
-        type: "integer"
-      totalLinesDeleted:
-        type: "integer"
       acceptedLinesAdded:
         type: "integer"
       acceptedLinesDeleted:
         type: "integer"
-      totalApplies:
-        type: "integer"
-      totalAccepts:
-        type: "integer"
-      totalRejects:
-        type: "integer"
-      totalTabsShown:
-        type: "integer"
-      totalTabsAccepted:
-        type: "integer"
-      composerRequests:
-        type: "integer"
-      chatRequests:
-        type: "integer"
       agentRequests:
-        type: "integer"
-      cmdkUsages:
-        type: "integer"
-      subscriptionIncludedReqs:
         type: "integer"
       apiKeyReqs:
         type: "integer"
-      usageBasedReqs:
-        type: "integer"
-      bugbotUsages:
-        type: "integer"
-      mostUsedModel:
-        type: "string"
       applyMostUsedExtension:
         type: "string"
-      tabMostUsedExtension:
-        type: "string"
+      bugbotUsages:
+        type: "integer"
+      chatRequests:
+        type: "integer"
       clientVersion:
         type: "string"
+      cmdkUsages:
+        type: "integer"
+      composerRequests:
+        type: "integer"
+      date:
+        type: "integer"
       email:
         type: "string"
-        format: "email"
-
-  TeamMember:
+      isActive:
+        type: "boolean"
+      mostUsedModel:
+        type: "string"
+      subscriptionIncludedReqs:
+        type: "integer"
+      tabMostUsedExtension:
+        type: "string"
+      totalAccepts:
+        type: "integer"
+      totalApplies:
+        type: "integer"
+      totalLinesAdded:
+        type: "integer"
+      totalLinesDeleted:
+        type: "integer"
+      totalRejects:
+        type: "integer"
+      totalTabsAccepted:
+        type: "integer"
+      totalTabsShown:
+        type: "integer"
+      usageBasedReqs:
+        type: "integer"
+  DataPeriod:
     type: "object"
     properties:
-      name:
-        type: "string"
-      email:
-        type: "string"
-        format: "email"
-      role:
-        type: "string"
-        enum: ["member", "admin", "owner"]
-
+      endDate:
+        type: "integer"
+      startDate:
+        type: "integer"
   Pagination:
     type: "object"
     properties:
-      numPages:
-        type: "integer"
       currentPage:
-        type: "integer"
-      pageSize:
         type: "integer"
       hasNextPage:
         type: "boolean"
       hasPreviousPage:
         type: "boolean"
-
-  UsageEvent:
+      numPages:
+        type: "integer"
+      pageSize:
+        type: "integer"
+  TeamMember:
     type: "object"
     properties:
-      timestamp:
+      email:
         type: "string"
-        format: "date-time"
-      model:
+      role:
         type: "string"
-      kindLabel:
-        type: "string"
-      maxMode:
-        type: "boolean"
-      requestsCosts:
-        type: "number"
-      isTokenBasedCall:
-        type: "boolean"
-      tokenUsage:
-        $ref: "#/definitions/TokenUsage"
-      isFreeBugbot:
-        type: "boolean"
-      userEmail:
-        type: "string"
-        format: "email"
-
   TokenUsage:
     type: "object"
     properties:
+      cacheReadTokens:
+        type: "integer"
+      cacheWriteTokens:
+        type: "integer"
       inputTokens:
         type: "integer"
       outputTokens:
         type: "integer"
-      cacheWriteTokens:
-        type: "integer"
-      cacheReadTokens:
-        type: "integer"
       totalCents:
         type: "integer"
-
-  DataPeriod:
+  UsageEvent:
     type: "object"
     properties:
-      startDate:
+      isFreeBugbot:
+        type: "boolean"
+      isTokenBasedCall:
+        type: "boolean"
+      kindLabel:
+        type: "string"
+      maxMode:
+        type: "boolean"
+      model:
+        type: "string"
+      requestsCosts:
+        type: "number"
+      timestamp:
         type: "integer"
-        format: "int64"
-      endDate:
-        type: "integer"
-        format: "int64" 
+      tokenUsage:
+        $ref: "#/definitions/TokenUsage"
+      userEmail:
+        type: "string"

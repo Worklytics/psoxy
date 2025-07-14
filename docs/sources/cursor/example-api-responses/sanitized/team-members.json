@@ -1,24 +1,20 @@
 {
-    "teamMembers": [
-        {
-            "name": "",
-            "email": "t~YxpQlV1gzukfVx5cPhRVzYGRnDkb5n1_d-tt6rnsKP4@company.com",
-            "role": "member"
-        },
-        {
-            "name": "",
-            "email": "t~K9mNpQ2hAxlwGy6dRjWsEZnFkb6o2_e-uu7sotlLQ5@company.com",
-            "role": "owner"
-        },
-        {
-            "name": "",
-            "email": "t~L0nOqR3iBymxHz7eSkXtFaoGlc7p3_f-vv8tpuMlR6@company.com",
-            "role": "member"
-        },
-        {
-            "name": "",
-            "email": "t~M1oPrS4jCznyI8fTlYuGbpHmd8q4_g-ww9uqvNmS7@company.com",
-            "role": "admin"
-        }
-    ]
+  "teamMembers" : [
+    {
+      "email" : "t~bSkdfjBTY24htUdeLzDD8hBKsXGprapgKEXQFW5AFPU@company.com",
+      "role" : "member"
+    },
+    {
+      "email" : "t~JYdSZrv6Gmaj3htiQnFhB89WYPFcw7pp-Kv9h0nOsbc@company.com",
+      "role" : "owner"
+    },
+    {
+      "email" : "t~I3fHxUsK2qMysD_fKva0I3q09GP06Uqw4G6RKUylNPY@company.com",
+      "role" : "member"
+    },
+    {
+      "email" : "t~mvJ8o_KqSDQW-u-6-7QvE2XwKKf_uMCaJizbbupY03k@company.com",
+      "role" : "admin"
+    }
+  ]
 }
