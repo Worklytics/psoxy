@@ -69,6 +69,11 @@ public class JsonSchemaFilterUtils {
     @SneakyThrows
     public String filterJsonBySchema(String jsonString, JsonSchemaFilter schema, JsonSchemaFilter root) {
         JsonNode provisionalOutput = objectMapper.readTree(jsonString);
+        return filterJsonBySchema(provisionalOutput, schema, root);
+    }
+
+    @SneakyThrows
+     public String filterJsonBySchema(JsonNode provisionalOutput, JsonSchemaFilter schema, JsonSchemaFilter root) {
         List<String> redactions = new LinkedList<>();
         String r = objectMapper.writeValueAsString(filterBySchema("$", provisionalOutput, schema, root, redactions));
         if (options.getLogRedactions()) {

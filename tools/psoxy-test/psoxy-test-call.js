@@ -6,7 +6,7 @@ import path from 'path';
 import _ from 'lodash';
 import { constants as httpCodes } from 'http2';
 import { fileURLToPath } from 'url';
-import { environmentCheck, saveToFile, getFileNameFromURL } from './lib/utils.js';
+import { environmentCheck, saveToFile, getFileNameFromURL, pollAsyncResponse } from './lib/utils.js';
 
 // Since we're using ESM modules, we need to make `__dirname` available
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -35,6 +35,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  * @param {string} options.method - HTTP request method
  * @param {string} options.body - HTTP request body (JSON string, GitHub use-case)
  * @param {boolean} options.healthCheck - Run "Health Check" call against Psoxy deploy
+ * @param {boolean} options.async - Process request asynchronously (adds X-Psoxy-Process-Async header)
  * @return {PsoxyResponse}
  */
 export default async function (options = {}) {
@@ -99,10 +100,11 @@ export default async function (options = {}) {
   }
 
   if (result.status === httpCodes.HTTP_STATUS_OK) {
+    // Handle sync response
 
     if (options.saveToFile) {
       const filename = getFileNameFromURL(url);
-      await saveToFile(__dirname, filename, JSON.stringify(jsonCallResult, undefined, 2));
+      await saveToFile(__dirname, filename, JSON.stringify(result, undefined, 2));
       logger.success(`Results saved to: ${__dirname}/${filename}`);
     } else {
       // Response potentially long, let's remind to check logs for complete results
@@ -111,7 +113,38 @@ export default async function (options = {}) {
 
     logger.success(`${resultMessagePrefix} ${result.statusMessage} - ${result.status}`,
       { additional: result.data });
+  } else if (options.async && result.status === httpCodes.HTTP_STATUS_ACCEPTED) {
+    // Handle async response with polling
 
+    const locationHeader = result.headers['location'];
+    if (locationHeader) {
+      logger.info(`Async request accepted. Location: ${locationHeader}`);
+      
+      try {
+        const polledContent = await pollAsyncResponse(locationHeader, {
+          role: options.role,
+          region: options.region,
+          token: options.token,
+          verbose: options.verbose
+        });
+        
+        logger.success('Async response content:');
+        console.log(polledContent);
+        
+        if (options.saveToFile) {
+          const filename = getFileNameFromURL(url, true, '-async.json');
+          await saveToFile(__dirname, filename, polledContent);
+          logger.success(`Async results saved to: ${__dirname}/${filename}`);
+        }
+        
+        return result;
+      } catch (error) {
+        logger.error(`Failed to poll async response: ${error.message}`);
+        throw error;
+      }
+    } else {
+      logger.warn('Async request accepted but no Location header found');
+    }
   } else {
     let errorMessage = result.statusMessage || 'Unknown';
 

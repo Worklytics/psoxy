@@ -8,6 +8,7 @@ import lombok.*;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -77,6 +78,9 @@ public class HealthCheckResult {
      *  will be inconsistent with the prior ones.
      */
     String saltSha256Hash;
+
+    @Singular
+    List<String> warningMessages;
 
     public boolean passed() {
         return getConfiguredSource() != null

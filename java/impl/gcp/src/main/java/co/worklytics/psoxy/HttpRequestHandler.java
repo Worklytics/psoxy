@@ -13,6 +13,8 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.UUID;
 import java.util.logging.Level;
 
 /**
@@ -46,7 +48,11 @@ public class HttpRequestHandler {
 
         try {
             HttpEventResponse abstractResponse =
-                requestHandler.handle(cloudFunctionRequest);
+                requestHandler.handle(cloudFunctionRequest, ApiDataRequestHandler.ProcessingContext.builder()
+                    .async(false)
+                    .requestId(UUID.randomUUID().toString())
+                    .requestReceivedAt(Instant.now())
+                    .build());
 
             abstractResponse.getHeaders()
                 .forEach(response::appendHeader);
@@ -56,7 +62,7 @@ public class HttpRequestHandler {
 
             // sample 1% of requests, warning if compression not requested
             if (RandomUtils.nextInt(0, 99) == 0 && !cloudFunctionRequest.getWarnings().isEmpty()) {
-                response.appendHeader(ResponseHeader.WARNING.getHttpHeader(),
+                response.appendHeader(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
                     Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode());
             }
 
@@ -74,7 +80,7 @@ public class HttpRequestHandler {
             log.log(Level.SEVERE, "Error while handling request", e);
             try {
                 response.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-                response.appendHeader(ResponseHeader.ERROR.getHttpHeader(), ErrorCauses.UNKNOWN.name());
+                response.appendHeader(ProcessedDataMetadataFields.ERROR.getHttpHeader(), ErrorCauses.UNKNOWN.name());
                 response.getWriter().write("Unknown internal proxy error; review logs");
             } catch (IOException ioException) {
                 log.log(Level.SEVERE, "Error writing error response", ioException);

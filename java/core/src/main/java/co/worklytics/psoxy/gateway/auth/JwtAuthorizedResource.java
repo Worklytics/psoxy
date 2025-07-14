@@ -1,7 +1,6 @@
 package co.worklytics.psoxy.gateway.auth;
 
 import com.nimbusds.jwt.SignedJWT;
-import lombok.SneakyThrows;
 
 import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
@@ -19,7 +18,6 @@ public interface JwtAuthorizedResource {
      * @param signedJWT
      * @return optional with the failure, if any
      */
-    @SneakyThrows
     Optional<String> validate(SignedJWT signedJWT);
 
     /**

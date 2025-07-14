@@ -18,6 +18,8 @@ import spec from '../data-sources/spec.js';
 import zlib from 'node:zlib';
 import {KMSClient, SignCommand} from '@aws-sdk/client-kms';
 import crypto from 'node:crypto';
+import { Storage } from '@google-cloud/storage';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // In case Psoxy is slow to respond (Lambda can take up to 20s+ to bootstrap),
@@ -84,6 +86,9 @@ function getCommonHTTPHeaders(options = {}) {
   }
   if (options.requestNoResponse) {
     headers['X-Psoxy-No-Response-Body'] = 'true';
+  }
+  if (options.async) {
+    headers['Prefer'] = 'respond-async';
   }
   if (options.body) {
     headers['Content-Type'] = 'application/json';
@@ -542,6 +547,214 @@ async function isGzipped(filePath) {
   return isgzipBuffer(await fs.readFile(filePath));
 }
 
+/**
+ * Poll for async response at the given URL (S3 or GCS)
+ * Checks every 10 seconds for up to 120 seconds
+ * 
+ * @param {string} locationUrl - S3 or GCS URL to poll
+ * @param {Object} options - Options for authentication and polling
+ * @param {string} options.role - AWS role ARN (for S3)
+ * @param {string} options.region - AWS region (for S3)
+ * @param {string} options.token - GCP token (for GCS)
+ * @param {boolean} options.verbose - Verbose logging
+ * @returns {Promise<string>} - Unzipped content as string
+ */
+async function pollAsyncResponse(locationUrl, options = {}) {
+  const logger = getLogger(options.verbose);
+
+  // Support s3:// and gs:// schemes as well as https://
+  let url;
+  let isS3 = false;
+  let isGCS = false;
+  let bucketName, keyOrFile;
+
+  if (locationUrl.startsWith('s3://')) {
+    isS3 = true;
+    // s3://bucket/key
+    const match = locationUrl.match(/^s3:\/\/([^\/]+)\/(.+)$/);
+    if (!match) throw new Error(`Invalid S3 URL: ${locationUrl}`);
+    bucketName = match[1];
+    keyOrFile = match[2];
+  } else if (locationUrl.startsWith('gs://')) {
+    isGCS = true;
+    // gs://bucket/file
+    const match = locationUrl.match(/^gs:\/\/([^\/]+)\/(.+)$/);
+    if (!match) throw new Error(`Invalid GCS URL: ${locationUrl}`);
+    bucketName = match[1];
+    keyOrFile = match[2];
+  } else {
+    url = new URL(locationUrl);
+    isS3 = url.hostname.includes('s3.amazonaws.com') || url.hostname.includes('s3.');
+    isGCS = url.hostname.includes('storage.googleapis.com');
+    if (isS3) {
+      // https://bucket.s3.region.amazonaws.com/key
+      bucketName = url.hostname.split('.')[0];
+      keyOrFile = url.pathname.substring(1);
+    } else if (isGCS) {
+      // https://storage.googleapis.com/bucket/file
+      const pathParts = url.pathname.split('/');
+      bucketName = pathParts[1];
+      keyOrFile = pathParts.slice(2).join('/');
+    }
+  }
+
+  if (!isS3 && !isGCS) {
+    throw new Error(`Unsupported storage URL: ${locationUrl}. Only S3, GCS, and their HTTPS URLs are supported.`);
+  }
+
+  logger.info(`Polling for async response at: ${locationUrl}`);
+  logger.info(`Polling every 10 seconds for up to 120 seconds...`);
+
+  const maxAttempts = 12; // 120 seconds / 10 seconds
+  let attempt = 0;
+
+  while (attempt < maxAttempts) {
+    attempt++;
+    logger.verbose(`Polling attempt ${attempt}/${maxAttempts}...`);
+
+    try {
+      let content;
+      let contentEncoding;
+      
+      if (isS3) {
+        const credentials = await getAWSCredentials(options.role, options.region);
+        const s3Client = new S3Client({
+          region: options.region || 'us-east-1',
+          credentials: credentials,
+        });
+        const response = await s3Client.send(new GetObjectCommand({
+          Bucket: bucketName,
+          Key: keyOrFile
+        }));
+        
+        // Handle different types of response bodies from AWS SDK v3
+        let contentBuffer;
+        if (response.Body && typeof response.Body.transformToString === 'function') {
+          // If it has transformToString, use it but get the raw bytes first
+          const rawContent = await response.Body.transformToString('binary');
+          contentBuffer = Buffer.from(rawContent, 'binary');
+        } else if (response.Body && response.Body.pipe) {
+          // If it's a readable stream
+          const chunks = [];
+          for await (const chunk of response.Body) {
+            chunks.push(chunk);
+          }
+          contentBuffer = Buffer.concat(chunks);
+        } else {
+          // Fallback
+          contentBuffer = Buffer.from(response.Body);
+        }
+        
+        contentEncoding = response.ContentEncoding;
+        logger.verbose(`S3 response Content-Encoding: ${contentEncoding}`);
+        
+        logger.success(`Content found after ${attempt * 10} seconds!`);
+        
+        // Check if content is gzipped using multiple methods
+        const isGzippedByHeader = contentEncoding === 'gzip';
+        const isGzippedByBuffer = isgzipBuffer(contentBuffer);
+        
+        if (isGzippedByHeader || isGzippedByBuffer) {
+          logger.verbose('Content appears to be compressed, attempting decompression...');
+          
+          // Try different decompression methods
+          try {
+            const decompressed = await new Promise((resolve, reject) => {
+              zlib.gunzip(contentBuffer, (err, result) => {
+                if (err) {
+                  logger.verbose(`Gunzip failed: ${err.message}, trying inflate...`);
+                  // Try inflate as fallback (for deflate compression)
+                  zlib.inflate(contentBuffer, (inflateErr, inflateResult) => {
+                    if (inflateErr) {
+                      reject(new Error(`Decompression failed: gunzip error: ${err.message}, inflate error: ${inflateErr.message}`));
+                    } else {
+                      resolve(inflateResult.toString());
+                    }
+                  });
+                } else {
+                  resolve(result.toString());
+                }
+              });
+            });
+            return decompressed;
+          } catch (decompressError) {
+            logger.error(`All decompression methods failed: ${decompressError.message}`);
+            logger.verbose('Returning raw content as fallback');
+            return contentBuffer.toString();
+          }
+        } else {
+          logger.verbose('Content appears to be uncompressed, returning as-is');
+          return contentBuffer.toString();
+        }
+      } else if (isGCS) {
+        const storage = new Storage();
+        const bucket = storage.bucket(bucketName);
+        const file = bucket.file(keyOrFile);
+        const [fileContent] = await file.download();
+        content = fileContent.toString();
+        // GCS doesn't return Content-Encoding in the same way, so we'll rely on buffer detection
+        logger.verbose('GCS response - checking buffer for gzip signature');
+        
+        logger.success(`Content found after ${attempt * 10} seconds!`);
+        
+        // Check if content is gzipped using multiple methods
+        const contentBuffer = Buffer.from(content, 'binary');
+        const isGzippedByBuffer = isgzipBuffer(contentBuffer);
+        
+        // Check if content looks like JSON (starts with { or [)
+        const contentStart = content.trim().substring(0, 1);
+        const looksLikeJson = contentStart === '{' || contentStart === '[';
+        
+        // Only attempt decompression if we have strong indicators
+        if (isGzippedByBuffer && !looksLikeJson) {
+          logger.verbose('Content appears to be compressed, attempting decompression...');
+          
+          // Try different decompression methods
+          try {
+            const decompressed = await new Promise((resolve, reject) => {
+              zlib.gunzip(contentBuffer, (err, result) => {
+                if (err) {
+                  logger.verbose(`Gunzip failed: ${err.message}, trying inflate...`);
+                  // Try inflate as fallback (for deflate compression)
+                  zlib.inflate(contentBuffer, (inflateErr, inflateResult) => {
+                    if (inflateErr) {
+                      reject(new Error(`Decompression failed: gunzip error: ${err.message}, inflate error: ${inflateErr.message}`));
+                    } else {
+                      resolve(inflateResult.toString());
+                    }
+                  });
+                } else {
+                  resolve(result.toString());
+                }
+              });
+            });
+            return decompressed;
+          } catch (decompressError) {
+            logger.error(`All decompression methods failed: ${decompressError.message}`);
+            logger.verbose('Returning raw content as fallback');
+            return content;
+          }
+        } else {
+          logger.verbose('Content appears to be uncompressed, returning as-is');
+          return content;
+        }
+      }
+    } catch (error) {
+      if (error.name === 'NoSuchKey' || error.code === 404) {
+        logger.verbose(`File not ready yet (attempt ${attempt}/${maxAttempts})`);
+      } else {
+        logger.verbose(`Unexpected error during polling: ${error.message}`);
+      }
+    }
+
+    if (attempt < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 10000));
+    }
+  }
+
+  throw new Error(`Timeout: File not available after ${maxAttempts * 10} seconds of polling`);
+}
+
 export {
   addFilenameSuffix,
   unzip,
@@ -560,4 +773,5 @@ export {
   signAWSRequestURL,
   signJwtWithKMS,
   transformSpecWithResponse,
+  pollAsyncResponse,
 };

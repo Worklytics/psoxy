@@ -23,11 +23,16 @@ import java.util.Set;
  * see
  * - <a href="https://datatracker.ietf.org/doc/html/rfc7521">...</a>
  * - <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2">...</a>
+ *
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class CertificateGrantTokenRequestBuilder
         extends ClientCredentialsGrantTokenRequestBuilder {
 
+    // TODO: this is *NOT* an RFC-standard value for 'grant_type'
+    // as of 2025-07-01, this is GitHub-specific
+    // per RFC 6749, the value of 'grant_type' should be 'authorization_code', 'password', 'client_credentials' OR a full URI, eg 'urn:ietf:params:oauth:grant-type:client-credentials'
+    // to deal with extension cases (section 4.5 of RFC 6749)
     public static final String GRANT_TYPE = "certificate_credentials";
 
     enum ConfigProperty implements ConfigService.ConfigProperty {

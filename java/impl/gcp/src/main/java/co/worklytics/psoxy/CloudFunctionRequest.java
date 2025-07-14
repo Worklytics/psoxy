@@ -112,6 +112,11 @@ public class CloudFunctionRequest implements HttpEventRequest {
             .map(values -> values.get(0).equals("https"));
     }
 
+    @Override
+    public Object getUnderlyingRepresentation() {
+        return request;
+    }
+
 
     public List<String> getWarnings() {
         List<String> warnings = new LinkedList<>();

@@ -58,6 +58,7 @@ locals {
         },
       ]
       reserved_concurrent_executions : null
+      enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
@@ -117,6 +118,7 @@ EOT
         "GitHub Organization" = local.github_organization
       }
       reserved_concurrent_executions : null
+      enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
@@ -129,56 +131,12 @@ EOT
         "/repos/${local.github_organization}/${local.github_example_repository}/issues",
         "/repos/${local.github_organization}/${local.github_example_repository}/pulls",
       ]
-      external_token_todo : <<EOT
-  1. Populate `github_organization` variable in Terraform with the name of your GitHub organization.
-  2. From your organization, register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
-    with following permissions with **Read Only**:
-    - Repository:
-      - Contents: for reading commits and comments
-      - Issues: for listing issues, comments, assignees, etc.
-      - Metadata: for listing repositories and branches
-      - Pull requests: for listing pull requests, reviews, comments and commits
-    - Organization
-      - Administration: for listing events from audit log
-      - Members: for listing teams and their members
-
-  NOTES:
-    - We assume that ALL the repositories are going to be listed **should be owned by the organization, not the users**.
-    - Enterprise Cloud is required for this connector.
-
-  Apart from Github instructions please review the following:
-  - "Homepage URL" can be anything, not required in this flow but required by GitHub.
-  - Webhooks check can be disabled as this connector is not using them
-  - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
-  3. Once is created please generate a new `Private Key`.
-  4. It is required to convert the format of the certificate downloaded from PKCS#1 in previous step to PKCS#8. Please run following command:
-```shell
-openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out gh_pk_pkcs8.pem -nocrypt
-```
-
-**NOTES**:
- - If the certificate is not converted to PKCS#8 connector will NOT work. You might see in logs a Java error `Invalid PKCS8 data.` if the format is not correct.
- - Command proposed has been successfully tested on Ubuntu; it may differ for other operating systems.
-
-  5. Install the application in your organization.
-     Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "Github App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
-  6. Once installed, the `installationId` is required as it needs to be provided in the proxy as parameter for the connector in your Terraform module. You can go to your organization settings and
-click on `Third Party Access`. Click on `Configure` the application you have installed in previous step and you will find the `installationId` at the URL of the browser:
-```
-https://github.com/organizations/{YOUR ORG}/settings/installations/{INSTALLATION_ID}
-```
-  Copy the value of `installationId` and assign it to the `github_installation_id` variable in Terraform. You will need to redeploy the proxy again if that value was not populated before.
-
-**NOTE**:
- - If `github_installation_id` is not set, authentication URL will not be properly formatted and you will see *401: Unauthorized* when trying to get an access token.
- - If you see *404: Not found* in logs please review the *IP restriction policies* that your organization might have; that could cause connections from psoxy AWS Lambda/GCP Cloud Functions be rejected.
-
-  7. Update the variables with values obtained in previous step:
-     - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
-     - `PSOXY_GITHUB_PRIVATE_KEY` with content of the `gh_pk_pkcs8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content *as-is* into this variable.
-  8. Once the certificate has been uploaded, please remove {YOUR DOWNLOADED CERTIFICATE FILE} and `gh_pk_pkcs8.pem` from your computer or store it in a safe place.
-
-EOT
+      external_token_todo : templatefile("${path.module}/docs/github/enterprise-cloud-instructions.tftpl", {
+        github_organization         = local.github_organization,
+        path_to_instance_parameters = "PSOXY_GITHUB_"
+      })
+      # q: what to do with this?  unlike other general template case, it requires `github_organization` to be set somehow ...
+      # instructions_template = "${path.module}/docs/github/enterprise-cloud-instructions.tftpl"
     }
     github-copilot = {
       source_kind : "github-copilot",
@@ -220,6 +178,7 @@ EOT
         "GitHub Organization" = local.github_organization
       }
       reserved_concurrent_executions : null
+      enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
@@ -228,51 +187,10 @@ EOT
         "/orgs/${local.github_organization}/audit-log",
         "/orgs/${local.github_organization}/copilot/billing/seats"
       ]
-      external_token_todo : <<EOT
-  1. Populate `github_organization` variable in Terraform with the name of your GitHub organization.
-  2. From your organization, register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
-    with following permissions with **Read Only**:
-    - Organization
-      - Administration: for listing "copilot" events from audit log
-      - Members: for listing teams and their members
-      - GitHub Copilot Business: for listing Copilot usage
-
-  NOTES:
-    - Enterprise Cloud is required for this connector.
-
-  Apart from GitHub instructions please review the following:
-  - "Homepage URL" can be anything, not required in this flow but required by GitHub.
-  - Webhooks check can be disabled as this connector is not using them
-  - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
-  3. Once created, please generate a new `Private Key`.
-  4. It is required to convert the format of the certificate downloaded from PKCS#1 in previous step to PKCS#8. Please run following command:
-```shell
-openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out gh_copilot_pk_pkcs8.pem -nocrypt
-```
-
-**NOTES**:
- - If the certificate is not converted to PKCS#8 connector will NOT work. You might see in logs a Java error `Invalid PKCS8 data.` if the format is not correct.
- - Command proposed has been successfully tested on Ubuntu; it may differ for other operating systems.
-
-  5. Install the application in your organization.
-     Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "GitHub App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
-  6. Once installed, the `installationId` is required as it needs to be provided in the proxy as parameter for the connector in your Terraform module. You can go to your organization settings and
-click on `Third Party Access`. Click on `Configure` the application you have installed in previous step and you will find the `installationId` at the URL of the browser:
-```
-https://github.com/organizations/{YOUR ORG}/settings/installations/{INSTALLATION_ID}
-```
-  Copy the value of `installationId` and assign it to the `github_copilot_installation_id` variable in Terraform. You will need to redeploy the proxy again if that value was not populated before.
-
-**NOTE**:
- - If `github_copilot_installation_id` is not set, authentication URL will not be properly formatted and you will see *401: Unauthorized* when trying to get an access token.
- - If you see *404: Not found* in logs please review the *IP restriction policies* that your organization might have; that could cause connections from psoxy AWS Lambda/GCP Cloud Functions be rejected.
-
-  7. Update the variables with values obtained in previous step:
-     - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
-     - `PSOXY_GITHUB_PRIVATE_KEY` with content of the `gh_pk_pkcs8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content *as-is* into this variable.
-  8. Once the certificate has been uploaded, please remove {YOUR DOWNLOADED CERTIFICATE FILE} and `gh_copilot_pk_pkcs8.pem` from your computer or store it in a safe place.
-
-EOT
+      external_token_todo : templatefile("${path.module}/docs/github/copilot-instructions.tftpl", {
+        github_organization         = local.github_organization,
+        path_to_instance_parameters = "PSOXY_GITHUB_COPILOT_"
+      })
     }
     github-enterprise-server = {
       source_kind : "github-enterprise-server",
@@ -331,66 +249,10 @@ EOT
         "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/issues",
         "/api/${local.github_enterprise_server_version}/repos/${local.github_first_organization}/${local.github_example_repository}/pulls",
       ]
-      external_token_todo : <<EOT
-You can use a [guided script](../../../tools/github-enterprise-server-auth.sh) to setup the connector. In any case, you can follow here the manual steps that needs to be done.
-
-  1. You have to populate:
-     - `github_enterprise_server_host` variable in Terraform with the hostname of your GitHub Enterprise Server (example: `github.your-company.com`).
-This host should be accessible from the psoxy function, as the connector will need to reach it.
-     - `github_organization` variable in Terraform with the name of your organization in GitHub Enterprise Server. You can put more than one, just split them in commas (example: `org1,org2`).
-  2. From your organization, register a [GitHub App](https://docs.github.com/en/enterprise-server@3.11/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
-    with following permissions with **Read Only**:
-    - Repository:
-      - Contents: for reading commits and comments
-      - Issues: for listing issues, comments, assignees, etc.
-      - Metadata: for listing repositories and branches
-      - Pull requests: for listing pull requests, reviews, comments and commits
-    - Organization
-      - Administration: for listing events from audit log
-      - Members: for listing teams and their members
-
-  NOTES:
-    - We assume that ALL the repositories are going to be listed **should be owned by the organization, not the users**.
-
-  Apart from GitHub instructions please review the following:
-  - "Homepage URL" can be anything, not required in this flow but required by GitHub.
-  - "Callback URL" can be anything, but we recommend something like `http://localhost` as we will need it for the redirect as part of the authentication.
-  - Webhooks check can be disabled as this connector is not using them
-  - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
-  3. Once is created please generate a new `Client Secret`.
-  4. Copy the `Client ID` and copy in your browser following URL, replacing the `CLIENT_ID` with the value you have just copied:
-```
-https://${local.github_enterprise_server_host}/login/oauth/authorize?client_id={YOUR CLIENT ID}
-```
-  5. The browser will ask you to accept permissions and then it will redirect you with to the previous `Callback URL` set as part of the application.
-The URL should look like this: `https://localhost/?code=69d0f5bd0d82282b9a11`.
-  6. Copy the value of `code` and run the following URL replacing in the placeholders the values of `Client ID` and `Client Secret`:
-```
-curl --location --request POST 'https://${local.github_enterprise_server_host}/login/oauth/access_token?client_id={YOUR CLIENT ID}&client_secret={YOUR CLIENT SECRET}&code={YOUR CODE}' --header 'Content-Type: application/json' --header 'Accept: application/json'
-```
-The response will be something like:
-
-```json
-{
-  "access_token":"ghu_...",
-  "expires_in":28800,
-  "refresh_token":"ghr_...",
-  "refresh_token_expires_in":15724800,
-  "token_type":"bearer",
-  "scope":""
-}
-```
-You will need to copy the value of the `refresh_token`.
-
-**NOTES**:
- - `Code` can be used once, so if you need to repeat the process you will need to generate a new one.
-
-  7. Update the variables with values obtained in previous step:
-     - `psoxy_GITHUB_ENTERPRISE_SERVER_CLIENT_ID` with `Client Id` value.
-     - `psoxy_GITHUB_ENTERPRISE_SERVER_CLIENT_SECRET` with `Client Secret` value.
-     - `psoxy_GITHUB_ENTERPRISE_SERVER_REFRESH_TOKEN` with the `refresh_token`.
-
-EOT
+      external_token_todo : templatefile("${path.module}/docs/github/enterprise-server-instructions.tftpl", {
+        github_enterprise_server_host = local.github_enterprise_server_host,
+        path_to_instance_parameters   = "PSOXY_GITHUB_ENTERPRISE_SERVER_"
+      })
     }
     github-non-enterprise = {
       source_kind : "github-non-enterprise",
@@ -443,54 +305,10 @@ EOT
         "/repos/${local.github_organization}/${local.github_example_repository}/issues",
         "/repos/${local.github_organization}/${local.github_example_repository}/pulls",
       ]
-      external_token_todo : <<EOT
-  1. Populate `github_organization` variable in Terraform with the name of your GitHub organization.
-  2. From your organization, register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app)
-    with following permissions with **Read Only**:
-    - Repository:
-      - Contents: for reading commits and comments
-      - Issues: for listing issues, comments, assignees, etc.
-      - Metadata: for listing repositories and branches
-      - Pull requests: for listing pull requests, reviews, comments and commits
-    - Organization
-      - Members: for listing teams and their members
-
-  NOTES:
-    - We assume that ALL the repositories are going to be listed **should be owned by the organization, not the users**.
-
-  Apart from GitHub instructions please review the following:
-  - "Homepage URL" can be anything, not required in this flow but required by GitHub.
-  - Webhooks check can be disabled as this connector is not using them
-  - Keep `Expire user authorization tokens` enabled, as GitHub documentation recommends
-  3. Once is created please generate a new `Private Key`.
-  4. It is required to convert the format of the certificate downloaded from PKCS#1 in previous step to PKCS#8. Please run following command:
-```shell
-openssl pkcs8 -topk8 -inform PEM -outform PEM -in {YOUR DOWNLOADED CERTIFICATE FILE} -out gh_pk_pkcs8.pem -nocrypt
-```
-
-**NOTES**:
- - If the certificate is not converted to PKCS#8 connector will NOT work. You might see in logs a Java error `Invalid PKCS8 data.` if the format is not correct.
- - Command proposed has been successfully tested on Ubuntu; it may differ for other operating systems.
-
-  5. Install the application in your organization.
-     Go to your organization settings and then in "Developer Settings". Then, click on "Edit" for your "GitHub App" and once you are in the app settings, click on "Install App" and click on the "Install" button. Accept the permissions to install it in your whole organization.
-  6. Once installed, the `installationId` is required as it needs to be provided in the proxy as parameter for the connector in your Terraform module. You can go to your organization settings and
-click on `Third Party Access`. Click on `Configure` the application you have installed in previous step and you will find the `installationId` at the URL of the browser:
-```
-https://github.com/organizations/{YOUR ORG}/settings/installations/{INSTALLATION_ID}
-```
-  Copy the value of `installationId` and assign it to the `github_installation_id` variable in Terraform. You will need to redeploy the proxy again if that value was not populated before.
-
-**NOTE**:
- - If `github_installation_id` is not set, authentication URL will not be properly formatted and you will see *401: Unauthorized* when trying to get an access token.
- - If you see *404: Not found* in logs please review the *IP restriction policies* that your organization might have; that could cause connections from psoxy AWS Lambda/GCP Cloud Functions be rejected.
-
-  7. Update the variables with values obtained in previous step:
-     - `PSOXY_GITHUB_CLIENT_ID` with `App ID` value. **NOTE**: It should be `App Id` value as we are going to use authentication through the App and **not** *client_id*.
-     - `PSOXY_GITHUB_PRIVATE_KEY` with content of the `gh_pk_pkcs8.pem` from previous step. You could open the certificate with VS Code or any other editor and copy all the content *as-is* into this variable.
-  8. Once the certificate has been uploaded, please remove {YOUR DOWNLOADED CERTIFICATE FILE} and `gh_pk_pkcs8.pem` from your computer or store it in a safe place.
-
-EOT
+      external_token_todo : templatefile("${path.module}/docs/github/non-enterprise-cloud-instructions.tftpl", {
+        github_organization         = local.github_organization,
+        path_to_instance_parameters = "PSOXY_GITHUB_NON_ENTERPRISE_"
+      })
     }
     salesforce = {
       source_kind : "salesforce",
@@ -588,6 +406,40 @@ EOT
      However, if running any of the queries you receive a 401/403/500/512. A 401/403 it might be related to some misconfiguration in the Salesforce Application due lack of permissions;
      a 500/512 it could be related to missing parameter in the function configuration (for example, a missing value for `salesforce_domain` variable in your terraform vars)
 EOT
+    }
+    # https://api.slack.com/methods/admin.analytics.getFile
+    slack-analytics = {
+      source_kind : "slack",
+      availability : "alpha",
+      enable_by_default : false
+      worklytics_connector_id : "slack-analytics-psoxy"
+      worklytics_connector_name : "Slack Analytics via Psoxy"
+      display_name : "Slack Analytics via Psoxy"
+      target_host : "www.slack.com"
+      source_auth_strategy : "oauth2_access_token"
+      oauth_scopes_needed : [
+        "admin.analytics:read",
+      ]
+      enable_async_processing : true
+      environment_variables : {}
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        },
+      ]
+      reserved_concurrent_executions : null
+      enable_side_output : false
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/api/admin.analytics.getFile?type=member&date=2025-04-01"
+      ]
+      instructions_template = "${path.module}/docs/slack/analytics/instructions.tftpl"
+      external_token_todo : templatefile("${path.module}/docs/slack/analytics/instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_SLACK_ANALYTICS_"
+      })
     }
     slack-discovery-api = {
       source_kind : "slack"

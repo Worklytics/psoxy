@@ -19,6 +19,7 @@ import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.json.JsonFactory;
@@ -34,9 +35,7 @@ import lombok.extern.java.Log;
 import javax.crypto.spec.SecretKeySpec;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -54,6 +53,8 @@ public class PsoxyModule {
     ObjectMapper providesObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.registerModule(new Jdk8Module());
+        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         return objectMapper;
     }
 
@@ -70,9 +71,10 @@ public class PsoxyModule {
                                             JacksonMappingProvider jacksonMappingProvider) {
         //jackson here because it's our common JSON stack, but adds dependency beyond the one pkg'd
         // with JsonPath.
-        return Configuration.defaultConfiguration()
+        return Configuration.builder()
                 .jsonProvider(jacksonJsonProvider)
-                .mappingProvider(jacksonMappingProvider);
+                .mappingProvider(jacksonMappingProvider)
+            .build();
     }
 
     @Provides @Singleton
@@ -316,5 +318,10 @@ public class PsoxyModule {
     @Provides
     Base64KeyClient base64KeyClient() {
         return new Base64KeyClient();
+    }
+
+    @Provides
+    Base64.Encoder provideBase64Encoder() {
+        return Base64.getEncoder();
     }
 }

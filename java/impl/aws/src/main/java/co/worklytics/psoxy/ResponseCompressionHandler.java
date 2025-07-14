@@ -23,7 +23,7 @@ class ResponseCompressionHandler {
     static final int MIN_BYTES_TO_COMPRESS = 2048;
 
 
-    static boolean isCompressionRequested(HttpEventRequest request) {
+    boolean isCompressionRequested(HttpEventRequest request) {
         return request.getHeader(HttpHeaders.ACCEPT_ENCODING).orElse("none").contains(ResponseCompressionHandler.GZIP);
     }
 

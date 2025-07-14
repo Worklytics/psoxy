@@ -7,6 +7,7 @@ import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.output.NoOutput;
 import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
+import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
 import co.worklytics.psoxy.gateway.output.Output;
 import co.worklytics.psoxy.impl.WebhookSanitizerImplFactory;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
@@ -100,6 +101,11 @@ public class FunctionRuntimeModule {
             .preferred(envVarsConfigService)
             .fallback(nativeConfigService)
             .build();
+    }
+
+    @Provides @Singleton @Named("async")
+    static ApiSanitizedDataOutput apiSanitizedDataOutput(OutputUtils outputUtils) {
+        return outputUtils.asyncOutput();
     }
 
 
