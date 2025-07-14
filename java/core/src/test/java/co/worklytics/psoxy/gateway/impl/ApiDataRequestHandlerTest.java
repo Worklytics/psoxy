@@ -1,6 +1,58 @@
 package co.worklytics.psoxy.gateway.impl;
 
-import co.worklytics.psoxy.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import java.io.IOException;
+import java.net.URL;
+import java.time.Clock;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Stream;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.LowLevelHttpRequest;
+import com.google.api.client.http.LowLevelHttpResponse;
+import com.google.api.client.json.Json;
+import com.google.api.client.testing.http.HttpTesting;
+import com.google.api.client.testing.http.MockHttpTransport;
+import com.google.api.client.testing.http.MockLowLevelHttpRequest;
+import com.google.api.client.testing.http.MockLowLevelHttpResponse;
+import co.worklytics.psoxy.ConfigRulesModule;
+import co.worklytics.psoxy.ControlHeader;
+import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.PseudonymizerImplFactory;
+import co.worklytics.psoxy.PsoxyModule;
+import co.worklytics.psoxy.RESTApiSanitizer;
+import co.worklytics.psoxy.RESTApiSanitizerFactory;
 import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
@@ -12,57 +64,18 @@ import co.worklytics.psoxy.rules.msft.PrebuiltSanitizerRules;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
-import com.avaulta.gateway.pseudonyms.Pseudonym;
-import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
-import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
-import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
-import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
-import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
-import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
-import com.google.api.client.http.*;
-import com.google.api.client.json.Json;
-import com.google.api.client.testing.http.HttpTesting;
-import com.google.api.client.testing.http.MockHttpTransport;
-import com.google.api.client.testing.http.MockLowLevelHttpRequest;
-import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import dagger.Component;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.ArgumentCaptor;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.IOException;
-import java.net.URL;
-import java.time.Clock;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 class ApiDataRequestHandlerTest {
 
         @Singleton
-        @Component(modules = {
-                        PsoxyModule.class,
-                        MockModules.ForConfigService.class,
-                        MockModules.ForSecretStore.class,
-                        MockModules.ForRules.class,
+        @Component(modules = {PsoxyModule.class, MockModules.ForConfigService.class,
+                        MockModules.ForSecretStore.class, MockModules.ForRules.class,
                         MockModules.ForSourceAuthStrategySet.class,
-                        MockModules.ForHttpTransportFactory.class,
-                        MockModules.ForSideOutputs.class,
+                        MockModules.ForHttpTransportFactory.class, MockModules.ForSideOutputs.class,
                         MockModules.ForAsyncApiDataRequestHandler.class,
-                        TestModules.ForFixedUUID.class,
-                        TestModules.ForFixedClock.class,
-        })
+                        TestModules.ForFixedUUID.class, TestModules.ForFixedClock.class,})
         public interface Container {
                 void inject(ApiDataRequestHandlerTest test);
         }
@@ -181,10 +194,8 @@ class ApiDataRequestHandlerTest {
                 setup("gmail", "google.apis.com");
 
                 // verify precondition that defaults != LEGACY
-                assertEquals(
-                                PseudonymImplementation.DEFAULT,
-                                Pseudonymizer.ConfigurationOptions.builder().build()
-                                                .getPseudonymImplementation());
+                assertEquals(PseudonymImplementation.DEFAULT, Pseudonymizer.ConfigurationOptions
+                                .builder().build().getPseudonymImplementation());
 
                 // prep mock request
                 HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
@@ -207,35 +218,28 @@ class ApiDataRequestHandlerTest {
 
                 ApiDataRequestHandler spy = spy(handler);
                 String original = "blah";
-                String encodedPseudonym =
-                                pseudonymEncoder.encode(Pseudonym.builder()
-                                                .hash(deterministicTokenizationStrategy.getToken(
-                                                                original, Function.identity()))
-                                                .reversible(reversibleTokenizationStrategy
-                                                                .getReversibleToken(original,
-                                                                                Function.identity()))
-                                                .build());
+                String encodedPseudonym = pseudonymEncoder.encode(Pseudonym.builder()
+                                .hash(deterministicTokenizationStrategy.getToken(original,
+                                                Function.identity()))
+                                .reversible(reversibleTokenizationStrategy
+                                                .getReversibleToken(original, Function.identity()))
+                                .build());
 
                 HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
                 when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
                                 .thenReturn(Optional.of(PseudonymImplementation.DEFAULT
                                                 .getHttpHeaderValue()));
-                when(request.getHttpMethod())
-                                .thenReturn("GET");
-                when(request.getPath())
-                                .thenReturn("/admin/directory/v1/users/" + encodedPseudonym);
-                when(request.getQuery())
-                                .thenReturn(Optional.of(
-                                                "%24select=proxyAddresses%2CotherMails%2ChireDate%2CisResourceAccount%2Cmail%2CemployeeId%2Cid%2CuserType%2CmailboxSettings%2CaccountEnabled"));
+                when(request.getHttpMethod()).thenReturn("GET");
+                when(request.getPath()).thenReturn("/admin/directory/v1/users/" + encodedPseudonym);
+                when(request.getQuery()).thenReturn(Optional.of(
+                                "%24select=proxyAddresses%2CotherMails%2ChireDate%2CisResourceAccount%2Cmail%2CemployeeId%2Cid%2CuserType%2CmailboxSettings%2CaccountEnabled"));
 
                 HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
-                when(requestFactory.buildRequest(anyString(), any(), any()))
-                                .thenReturn(null);
+                when(requestFactory.buildRequest(anyString(), any(), any())).thenReturn(null);
                 doReturn(requestFactory).when(spy).getRequestFactory(any());
 
                 RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
-                when(sanitizer.isAllowed(anyString(), any()))
-                                .thenReturn(true);
+                when(sanitizer.isAllowed(anyString(), any(), anyString(), any())).thenReturn(true);
                 spy.sanitizer = sanitizer;
 
                 try {
@@ -250,7 +254,7 @@ class ApiDataRequestHandlerTest {
                                 ArgumentCaptor.forClass(GenericUrl.class);
 
                 verify(sanitizer).isAllowed(anyString(), urlArgumentCaptor.capture(), anyString(),
-                                anyString());
+                                any());
                 verify(requestFactory).buildRequest(anyString(), targetUrlArgumentCaptor.capture(),
                                 any());
 
@@ -274,31 +278,25 @@ class ApiDataRequestHandlerTest {
                 String userId = "48d31887-5fad-4d73-a9f5-3c356e68a038";
                 String query = "startDateTime=2019-12-30T00:00:00Z&endDateTime=2022-05-16T00:00:00Z&limit=1&$top=1&$skip=1";
 
-                String encodedPseudonym =
-                                pseudonymEncoder.encode(Pseudonym.builder()
-                                                .hash(deterministicTokenizationStrategy.getToken(
-                                                                userId, Function.identity()))
-                                                .reversible(reversibleTokenizationStrategy
-                                                                .getReversibleToken(userId, Function
-                                                                                .identity()))
-                                                .build());
+                String encodedPseudonym = pseudonymEncoder.encode(Pseudonym.builder()
+                                .hash(deterministicTokenizationStrategy.getToken(userId,
+                                                Function.identity()))
+                                .reversible(reversibleTokenizationStrategy
+                                                .getReversibleToken(userId, Function.identity()))
+                                .build());
 
                 String originalPath = "/v1.0/users/" + userId + "/calendar/calendarView?" + query;
                 HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
                 when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
                                 .thenReturn(Optional.of(PseudonymImplementation.DEFAULT
                                                 .getHttpHeaderValue()));
-                when(request.getHttpMethod())
-                                .thenReturn("GET");
-                when(request.getPath())
-                                .thenReturn("/v1.0/users/" + encodedPseudonym
-                                                + "/calendar/calendarView");
-                when(request.getQuery())
-                                .thenReturn(Optional.of(query));
+                when(request.getHttpMethod()).thenReturn("GET");
+                when(request.getPath()).thenReturn(
+                                "/v1.0/users/" + encodedPseudonym + "/calendar/calendarView");
+                when(request.getQuery()).thenReturn(Optional.of(query));
 
                 HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
-                when(requestFactory.buildRequest(anyString(), any(), any()))
-                                .thenReturn(null);
+                when(requestFactory.buildRequest(anyString(), any(), any())).thenReturn(null);
                 doReturn(requestFactory).when(spy).getRequestFactory(any());
 
                 RESTApiSanitizer sanitizer = spy(buildSanitizer(
@@ -308,8 +306,7 @@ class ApiDataRequestHandlerTest {
 
                 try {
                         spy.handle(request, ApiDataRequestHandler.ProcessingContext.builder()
-                                        .async(false)
-                                        .requestId("r")
+                                        .async(false).requestId("r")
                                         .requestReceivedAt(clock.instant()).build());
                 } catch (Exception ignored) {
                         // it should raise an exception due missing configuration
@@ -320,7 +317,7 @@ class ApiDataRequestHandlerTest {
                                 ArgumentCaptor.forClass(GenericUrl.class);
 
                 verify(sanitizer, times(1)).isAllowed(anyString(), urlArgumentCaptor.capture(),
-                                anyString(), anyString());
+                                anyString(), any());
                 verify(requestFactory).buildRequest(anyString(), targetUrlArgumentCaptor.capture(),
                                 any());
 
@@ -346,22 +343,17 @@ class ApiDataRequestHandlerTest {
                 when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
                                 .thenReturn(Optional.of(PseudonymImplementation.DEFAULT
                                                 .getHttpHeaderValue()));
-                when(request.getHttpMethod())
-                                .thenReturn("GET");
-                when(request.getPath())
-                                .thenReturn("/admin/directory/v1/users/" + original);
-                when(request.getQuery())
-                                .thenReturn(Optional.of(
-                                                "%24select=proxyAddresses%2CotherMails%2ChireDate%2CisResourceAccount%2Cmail%2CemployeeId%2Cid%2CuserType%2CmailboxSettings%2CaccountEnabled"));
+                when(request.getHttpMethod()).thenReturn("GET");
+                when(request.getPath()).thenReturn("/admin/directory/v1/users/" + original);
+                when(request.getQuery()).thenReturn(Optional.of(
+                                "%24select=proxyAddresses%2CotherMails%2ChireDate%2CisResourceAccount%2Cmail%2CemployeeId%2Cid%2CuserType%2CmailboxSettings%2CaccountEnabled"));
 
                 HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
-                when(requestFactory.buildRequest(anyString(), any(), any()))
-                                .thenReturn(null);
+                when(requestFactory.buildRequest(anyString(), any(), any())).thenReturn(null);
                 doReturn(requestFactory).when(spy).getRequestFactory(any());
 
                 RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
-                when(sanitizer.isAllowed(anyString(), any(), anyString(), anyString()))
-                                .thenReturn(true);
+                when(sanitizer.isAllowed(anyString(), any(), anyString(), any())).thenReturn(true);
 
                 spy.sanitizer = sanitizer;
 
@@ -377,7 +369,7 @@ class ApiDataRequestHandlerTest {
                                 ArgumentCaptor.forClass(GenericUrl.class);
 
                 verify(sanitizer).isAllowed(anyString(), urlArgumentCaptor.capture(), anyString(),
-                                anyString());
+                                any());
                 verify(requestFactory).buildRequest(anyString(), targetUrlArgumentCaptor.capture(),
                                 any());
 
@@ -396,10 +388,8 @@ class ApiDataRequestHandlerTest {
                 setup("gmail", "google.apis.com");
 
                 // verify precondition that defaults != LEGACY
-                assertEquals(
-                                PseudonymImplementation.DEFAULT,
-                                Pseudonymizer.ConfigurationOptions.builder().build()
-                                                .getPseudonymImplementation());
+                assertEquals(PseudonymImplementation.DEFAULT, Pseudonymizer.ConfigurationOptions
+                                .builder().build().getPseudonymImplementation());
 
                 // prep mock request
                 HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
@@ -407,9 +397,8 @@ class ApiDataRequestHandlerTest {
                                 .thenReturn(Optional.of(PseudonymImplementation.LEGACY
                                                 .getHttpHeaderValue()));
 
-                assertEquals(PseudonymImplementation.LEGACY,
-                                handler.getSanitizerForRequest(request).getPseudonymizer()
-                                                .getOptions().getPseudonymImplementation());
+                assertEquals(PseudonymImplementation.LEGACY, handler.getSanitizerForRequest(request)
+                                .getPseudonymizer().getOptions().getPseudonymImplementation());
 
                 assertEquals(PseudonymImplementation.DEFAULT,
                                 handler.getSanitizerForRequest(mock(HttpEventRequest.class))
@@ -510,18 +499,18 @@ class ApiDataRequestHandlerTest {
                 when(handler.config.getConfigPropertyOrError(ApiModeConfigProperty.TARGET_HOST))
                                 .thenReturn(host);
 
-                reversibleTokenizationStrategy = AESReversibleTokenizationStrategy.builder()
-                                .cipherSuite(AESReversibleTokenizationStrategy.CBC)
-                                .key(TestUtils.testKey())
-                                .deterministicTokenizationStrategy(
-                                                deterministicTokenizationStrategy)
-                                .build();
+                reversibleTokenizationStrategy =
+                                AESReversibleTokenizationStrategy.builder()
+                                                .cipherSuite(AESReversibleTokenizationStrategy.CBC)
+                                                .key(TestUtils.testKey())
+                                                .deterministicTokenizationStrategy(
+                                                                deterministicTokenizationStrategy)
+                                                .build();
         }
 
         private RESTApiSanitizer buildSanitizer(RESTRules rules) {
-                Pseudonymizer defaultPseudonymizer =
-                                pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions
-                                                .builder()
+                Pseudonymizer defaultPseudonymizer = pseudonymizerImplFactory
+                                .create(Pseudonymizer.ConfigurationOptions.builder()
                                                 .pseudonymImplementation(
                                                                 PseudonymImplementation.DEFAULT)
                                                 .build());
