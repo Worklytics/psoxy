@@ -13,7 +13,15 @@
     <groupId>com.avaulta.gateway</groupId>
     <artifactId>gateway-core${artifactSuffix}</artifactId>
     <packaging>jar</packaging>
-    <description>Code for pseuydonymizations</description>
+    <description>Core gateway library intended for use by both implementations and clients</description>
+
+    <licenses>
+        <license>
+            <name>Worklytics Commercial License</name>
+            <url>https://github.com/Worklytics/psoxy/blob/main/LICENSE.md</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <properties>
         <!-- empty for default java builds  (1 7 as of v0.5.0 )-->

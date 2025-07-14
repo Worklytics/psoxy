@@ -152,5 +152,5 @@ variable "github_example_repository" {
 variable "salesforce_example_account_id" {
   type        = string
   default     = null
-  description = "(Only required if using Salesforce connector) Id of the account id for usign as an example calls for Salesforce (ex: 0015Y00002c7g95QAA)"
+  description = "(Only required if using Salesforce connector) Id of the account id for using as an example calls for Salesforce (ex: 0015Y00002c7g95QAA)"
 }

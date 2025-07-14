@@ -71,7 +71,7 @@ class BatchMergeHandlerTest {
         }
         handler.handleBatch(Stream.of(pcs));
         ArgumentCaptor<ProcessedContent> captor = ArgumentCaptor.forClass(ProcessedContent.class);
-        verify( (Output) outputUtils.forWebhookQueue(), times(1)).write(captor.capture());
+        verify( (Output) outputUtils.forBatchedWebhookContent(), times(1)).write(captor.capture());
         ProcessedContent result = captor.getValue();
         assertEquals("gzip", result.getContentEncoding());
         assertEquals("application/x-ndjson", result.getContentType());

@@ -27,9 +27,6 @@ public class GCSOutput implements Output {
     @Inject
     Provider<Storage> storageProvider;
 
-    @Inject
-    OutputUtils outputUtils;
-
     @AssistedInject
     public GCSOutput(@Assisted OutputLocation location) {
         BucketOutputLocation bucketLocation = BucketOutputLocation.from(location.getUri());
@@ -42,18 +39,13 @@ public class GCSOutput implements Output {
 
 
     @Override
-    public void write(String key, ProcessedContent content) {
-        // Implementation for writing a single ProcessedContent to GCS
-        // This would typically involve using the Google Cloud Storage client library
-        // to upload the content to the specified bucket and path.
-
+    public void write(String key, ProcessedContent content) throws WriteFailure {
         if (key == null) {
             key = DigestUtils.md5Hex(content.getContent());
         }
 
         try {
             Storage storageClient = storageProvider.get();
-
             try (WriteChannel writeChannel = storageClient.writer(
                 BlobInfo.newBuilder(bucket, pathPrefix + key)
                     .setContentType(content.getContentType())
@@ -64,13 +56,12 @@ public class GCSOutput implements Output {
             }
         } catch (Exception e) {
             log.log(Level.WARNING, "Failed to write to GCS sideOutput", e);
-            // TODO: configurable if this is fatal??
-            // throw something an let common request handler do something?? (Eg, return an error header?? )
+            throw new WriteFailure("Failed to write to GCS output", e);
         }
     }
 
     @Override
-    public void write(ProcessedContent content) {
+    public void write(ProcessedContent content) throws WriteFailure {
         // Generate a canonical key for the response
         String key = DigestUtils.md5Hex(content.getContent());
         write(key, content);

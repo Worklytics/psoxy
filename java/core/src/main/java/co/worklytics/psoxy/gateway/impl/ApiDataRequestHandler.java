@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
+
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -22,10 +23,13 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
+
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.net.WWWFormCodec;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
@@ -35,6 +39,7 @@ import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.api.client.http.ByteArrayContent;
@@ -70,6 +75,8 @@ import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
 import co.worklytics.psoxy.gateway.output.ApiDataOutputUtils;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
+import co.worklytics.psoxy.gateway.output.Output;
+
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
@@ -165,11 +172,10 @@ public class ApiDataRequestHandler {
             Pattern.compile(normalizeHeader("X-RateLimit.*")));
 
     /**
-     * <a href="https://www.rfc-editor.org/rfc/rfc7230#section-3.2.2">rfc7230</a>
-     * "... A recipient MAY combine multiple header fields with the same field
-     * name into one "field-name: field-value" pair, without changing the
-     * semantics of the message, by appending each subsequent field value to
-     * the combined field value in order, separated by a comma."
+     * <a href="https://www.rfc-editor.org/rfc/rfc7230#section-3.2.2">rfc7230</a> "... A recipient
+     * MAY combine multiple header fields with the same field name into one "field-name:
+     * field-value" pair, without changing the semantics of the message, by appending each
+     * subsequent field value to the combined field value in order, separated by a comma."
      */
     private static final Joiner HEADER_JOINER = Joiner.on(",");
 
@@ -224,6 +230,7 @@ public class ApiDataRequestHandler {
             // really shouldn't happen ... parsing one url from another, so would be a bad bug in
             // our canonicalization code for this to go wrong
             log.log(Level.WARNING, "Error parsing  / building request URL", e);
+
             return HttpEventResponse.builder()
                     .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
                     .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
@@ -350,8 +357,8 @@ public class ApiDataRequestHandler {
 
             // create an async processing context
             ProcessingContext.ProcessingContextBuilder processingContextBuilder =
-                    processingContext.toBuilder()
-                            .async(true);
+                    processingContext.toBuilder().async(true);
+
 
 
             ProcessingContext asyncProcessingContext =
@@ -377,6 +384,7 @@ public class ApiDataRequestHandler {
                     .statusCode(HttpStatus.SC_ACCEPTED) // proper response code indicating payload
                                                         // accepted for asynchronous processing
                     .body(objectMapper.writeValueAsString(asyncProcessingContext));
+
 
             // TODO: generate host-platform specific signed URL for the async output
             // destination + object
@@ -418,7 +426,14 @@ public class ApiDataRequestHandler {
             // stream directly, instead of reading to a string?
             ProcessedContent original = apiDataOutputUtils
                     .responseAsRawProcessedContent(requestToSourceApi, sourceApiResponse);
-            apiDataSideOutput.writeRaw(original, processingContext);
+            try {
+                apiDataSideOutput.writeRaw(original, processingContext);
+            } catch (Output.WriteFailure e) {
+                log.log(Level.WARNING, "Error writing to side output for original content", e);
+                builder.multivaluedHeader(
+                        Pair.of(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
+                                ErrorCauses.SIDE_OUTPUT_FAILURE_SANITIZED.name()));
+            }
 
             passThroughHeaders(builder, sourceApiResponse);
             if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
@@ -439,9 +454,17 @@ public class ApiDataRequestHandler {
                                 .forEach(e -> builder.header(e.getKey(), e.getValue()));
                     }
 
-                    apiDataSideOutputSanitized.writeSanitized(sanitizationResult,
-                            processingContext);
 
+                    try {
+                        apiDataSideOutputSanitized.writeSanitized(sanitizationResult,
+                                processingContext);
+                    } catch (Output.WriteFailure e) {
+                        log.log(Level.WARNING, "Error writing to side output for sanitized content",
+                                e);
+                        builder.multivaluedHeader(
+                                Pair.of(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
+                                        ErrorCauses.SIDE_OUTPUT_FAILURE_SANITIZED.name()));
+                    }
                 }
             } else {
                 // write error, which shouldn't contain PII, directly
@@ -481,7 +504,6 @@ public class ApiDataRequestHandler {
                 healthCheckRequestHandler.piiSaltHash());
 
         // q: add instance id to the metadata??
-
         return ProcessedContent.builder()
                 .contentType(originalContent.getContentType())
                 .contentCharset(originalContent.getContentCharset())
@@ -489,8 +511,6 @@ public class ApiDataRequestHandler {
                 .content(sanitized.getBytes(originalContent.getContentCharset()))
                 .build();
     }
-
-
 
     @Value
     static class RequestUrls {
@@ -572,8 +592,9 @@ public class ApiDataRequestHandler {
             com.google.api.client.http.HttpResponse response) {
         Set<String> availableHeaders = normalizeHeaders(response.getHeaders().keySet());
 
-        Sets.intersection(availableHeaders, DEFAULT_HEADERS_PASS_THROUGH).forEach(
-                h -> responseBuilder.header(h,
+
+        Sets.intersection(availableHeaders, DEFAULT_HEADERS_PASS_THROUGH)
+                .forEach(h -> responseBuilder.header(h,
                         HEADER_JOINER.join(response.getHeaders().getHeaderStringValues(h))));
 
         for (String availableHeader : availableHeaders) {
@@ -636,9 +657,8 @@ public class ApiDataRequestHandler {
         // do we capture the new one?? ideally do this with listener/handler/trigger in Credential
         // itself, if that's possible
 
-        ComposedHttpRequestInitializer initializer =
-                ComposedHttpRequestInitializer.of(initializeWithCredentials,
-                        new GzipedContentHttpRequestInitializer("Psoxy"));
+        ComposedHttpRequestInitializer initializer = ComposedHttpRequestInitializer
+                .of(initializeWithCredentials, new GzipedContentHttpRequestInitializer("Psoxy"));
 
         return transport.createRequestFactory(initializer);
     }
@@ -678,9 +698,8 @@ public class ApiDataRequestHandler {
         uriBuilder.setScheme("https");
         uriBuilder.setHost(config.getConfigPropertyOrError(ApiModeConfigProperty.TARGET_HOST));
         URL hostURL = uriBuilder.build().toURL();
-        String hostPlusPath =
-                StringUtils.stripEnd(hostURL.toString(), "/") + "/" +
-                        StringUtils.stripStart(request.getPath(), "/");
+        String hostPlusPath = StringUtils.stripEnd(hostURL.toString(), "/") + "/"
+                + StringUtils.stripStart(request.getPath(), "/");
         String targetURLString = hostPlusPath;
         if (StringUtils.isNotBlank(request.getQuery().orElse(null))) {
             targetURLString = hostPlusPath + "?" + request.getQuery().get();
@@ -770,8 +789,8 @@ public class ApiDataRequestHandler {
 
         /**
          * the key to which any sanitized output should be written, if any configured; will be
-         * relative to the sanitized output destination;
-         * this could be an async output destination, or a side output destination
+         * relative to the sanitized output destination; this could be an async output destination,
+         * or a side output destination
          */
         @JsonInclude(JsonInclude.Include.NON_NULL)
         String sanitizedOutputKey;
