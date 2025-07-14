@@ -1114,11 +1114,11 @@ locals {
 
   # backwards-compatible for v0.4.x; remove in v0.5.x
   google_workspace_sources_backwards = { for k, v in local.google_workspace_sources :
-  k => merge(v, { example_calls : v.example_api_calls }) }
+  k => merge(v, { example_calls : try(v.example_api_calls, []) }) }
 
   # backwards-compatible for v0.4.x; remove in v0.5.x
   msft_365_connectors_backwards = { for k, v in local.msft_365_connectors :
-  k => merge(v, { example_calls : v.example_api_calls }) }
+  k => merge(v, { example_calls : try(v.example_api_calls, []) }) }
 
   enabled_google_workspace_connectors = {
     for k, v in local.google_workspace_sources_backwards : k => v if contains(var.enabled_connectors, k)
