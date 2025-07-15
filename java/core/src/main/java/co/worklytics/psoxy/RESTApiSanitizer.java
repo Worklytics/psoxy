@@ -1,11 +1,5 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
-import co.worklytics.psoxy.rules.RESTRules;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -13,6 +7,10 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
+import co.worklytics.psoxy.rules.RESTRules;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 public interface RESTApiSanitizer {
     /**
@@ -34,7 +32,11 @@ public interface RESTApiSanitizer {
      *         pseudonymization/redaction (eg, pseudonymize(jsonPAths, content); redact(jsonPaths,
      *         content))
      *         - just invariably that's quite coupled, per above
+     * 
+     * 
+     * TODO: migrate to isAllowed(String httpMethod, URL url, String contentType, String requestBody)
      */
+    @Deprecated // use isAllowed(String httpMethod, URL url, String contentType, String requestBody) instead, as more general; this version assumes GET/HEAD request method
     boolean isAllowed(String httpMethod, URL url);
 
     /**
