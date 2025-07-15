@@ -533,6 +533,7 @@ EOT
           name : "SERVICE_KEY"
           writable : false
           sensitive : true
+          value_managed_by_tf : false
         }
       ]
       example_api_requests : [
