@@ -34,6 +34,7 @@ import javax.inject.Named;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hc.core5.http.ContentType;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchema;
@@ -168,16 +169,16 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 // default content-type to application/json (tbh, is this right?? it's just our
                 // historical default)
                 String parsedContentType =
-                        Optional.ofNullable(contentType).orElse("application/json");
+                        Optional.ofNullable(contentType).orElse(ContentType.APPLICATION_JSON.toString());
 
                 JsonSchema schema = endpoint.getRequestBody().getContent().get(parsedContentType);
                 if (schema == null) {
                     // no schema defined for request body, so we allow it
                     return true;
                 } else {
-                    if (parsedContentType.equals("application/json")) {
+                    if (parsedContentType.equals(ContentType.APPLICATION_JSON.toString())) {
                         return jsonSchemaValidationUtils.validateJsonBySchema(requestBody, schema);
-                    } else if (parsedContentType.equals("application/x-www-form-urlencoded")) {
+                    } else if (parsedContentType.equals(ContentType.APPLICATION_FORM_URLENCODED.toString())) {
                         return jsonSchemaValidationUtils.validateFormUrlEncodedBySchema(requestBody,
                                 schema);
                     } else {
