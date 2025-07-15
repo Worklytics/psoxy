@@ -30,7 +30,7 @@ import lombok.extern.java.Log;
 public class JsonSchemaValidationUtils {
 
     final ObjectMapper objectMapper;
-    final JsonMetaSchema metaSchema = JsonMetaSchema.builder(JsonMetaSchema.getV202012())
+    private final static JsonMetaSchema metaSchema = JsonMetaSchema.builder(JsonMetaSchema.getV202012())
             // .format(PatternFormat.of("pseudonym",
             // "^p~[a-zA-Z0-9_-]{43,}$",
             // null))
