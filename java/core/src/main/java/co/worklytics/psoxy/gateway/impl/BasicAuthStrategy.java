@@ -13,10 +13,10 @@ import com.google.auth.Credentials;
 import com.google.common.collect.ImmutableMap;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.java.Log;
-import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 
 /**
  * HTTP Basic Auth strategy, with user-id + password as credentials.
@@ -24,6 +24,8 @@ import co.worklytics.psoxy.gateway.SourceAuthStrategy;
  * They get base64 encoded, and sent in the Authorization header as a 'Basic' token.
  * 
  * This is RFC 7617 Section 2
+ * 
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc7617#section-2">RFC 7617 Section 2</a>
  */
 @Log
 @AllArgsConstructor(onConstructor_ = @Inject)
