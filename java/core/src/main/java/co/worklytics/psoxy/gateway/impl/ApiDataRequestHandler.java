@@ -23,7 +23,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
-
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
@@ -32,7 +32,6 @@ import org.apache.hc.core5.net.WWWFormCodec;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.ContentType;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
@@ -270,7 +269,7 @@ public class ApiDataRequestHandler {
         }
 
         String requestBodyContentType =
-                requestToProxy.getHeader(HttpHeaders.CONTENT_TYPE).orElse("application/json");
+                requestToProxy.getHeader(HttpHeaders.CONTENT_TYPE).orElse(ContentType.APPLICATION_JSON.toString());
         String requestBodyContentEncoding =
                 requestToProxy.getHeader(HttpHeaders.CONTENT_ENCODING)
                         .orElse(StandardCharsets.UTF_8.name());
@@ -868,14 +867,14 @@ public class ApiDataRequestHandler {
     @SneakyThrows
     ByteArrayContent reverseRequestBodyTokenization(@NonNull String contentType, String body) {
         // JSON case: use ObjectMapper to parse request body and map decode ON every string value
-        if (contentType.equals("application/json")) {
+        if (contentType.equals(ContentType.APPLICATION_JSON.toString())) {
             JsonNode jsonNode = objectMapper.readTree(body);
             JsonNode transformedNode = applyStringTransformToTree(jsonNode, this::decode);
             String decodedRequestBody = objectMapper.writeValueAsString(transformedNode);
 
             return new ByteArrayContent(contentType,
                     decodedRequestBody.getBytes(StandardCharsets.UTF_8));
-        } else if (contentType.equals("application/x-www-form-urlencoded")) {
+        } else if (contentType.equals(ContentType.APPLICATION_FORM_URLENCODED.toString())) {
             // Form-urlencoded case: use WWWFormCodec to parse request body and map decode ON every
             // value
 
