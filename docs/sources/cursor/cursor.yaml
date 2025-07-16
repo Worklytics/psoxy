@@ -5,7 +5,7 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.data[].email"
+          - "$.data[*].email"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
@@ -22,7 +22,7 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.usageEvents[].userEmail"
+          - "$.usageEvents[*].userEmail"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
@@ -42,7 +42,7 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.teamMembers[].email"
+          - "$.teamMembers[*].email"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
@@ -159,7 +159,7 @@ definitions:
       requestsCosts:
         type: "number"
       timestamp:
-        type: "integer"
+        type: "string"
       tokenUsage:
         $ref: "#/definitions/TokenUsage"
       userEmail:

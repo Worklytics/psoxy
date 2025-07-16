@@ -9,7 +9,7 @@
     },
     "usageEvents": [
         {
-            "timestamp": "2024-03-19T10:30:00Z",
+            "timestamp" : "1710720000000",
             "model": "gpt-4",
             "kindLabel": "Usage-based",
             "maxMode": false,
@@ -26,7 +26,7 @@
             "userEmail": "developer@company.com"
         },
         {
-            "timestamp": "2024-03-19T11:15:00Z",
+            "timestamp" : "1710720000000",
             "model": "claude-3-opus",
             "kindLabel": "Included in Business",
             "maxMode": true,
@@ -36,7 +36,7 @@
             "userEmail": "senior.dev@company.com"
         },
         {
-            "timestamp": "2024-03-19T12:00:00Z",
+            "timestamp" : "1710720000000",
             "model": "gpt-4",
             "kindLabel": "Usage-based",
             "maxMode": false,
