@@ -3,6 +3,7 @@ package co.worklytics.psoxy;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.BasicAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.GoogleCloudPlatformServiceAccountKeyAuthStrategy;
+import co.worklytics.psoxy.gateway.impl.WindsurfServiceKeyAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.oauth.*;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
 import dagger.Module;
@@ -41,6 +42,13 @@ public class SourceAuthModule {
     @IntoSet
     SourceAuthStrategy providesBasicAuthStrategy(BasicAuthStrategy basicAuthStrategy) {
         return basicAuthStrategy;
+    }
+
+    @Provides
+    @IntoSet
+    SourceAuthStrategy providesWindsurfServiceKeyAuthStrategy(
+        WindsurfServiceKeyAuthStrategy windsurfServiceKeyAuthStrategy) {
+        return windsurfServiceKeyAuthStrategy;
     }
 
     @Provides
@@ -90,4 +98,5 @@ public class SourceAuthModule {
             GithubAccessTokenResponseParserImpl instance) {
         return instance;
     }
+
 }

@@ -317,8 +317,17 @@ public class ApiDataRequestHandler {
                 content = this.reverseRequestBodyTokenization(requestBodyContentType, requestBody);
             }
 
+            // complete hack for Windsurf case, which unlike other sources requires mutation of request body
+            // TODO: consider generalizing, if Windsurf lives/continues this authentication interface; and/or we find other sources that require approach
+            if (this.sourceAuthStrategy instanceof WindsurfServiceKeyAuthStrategy) {
+                content = ((WindsurfServiceKeyAuthStrategy) this.sourceAuthStrategy)
+                        .addServiceKeyToRequestBody(content);
+            }
+
             requestToSourceApi = requestFactory.buildRequest(requestToProxy.getHttpMethod(),
                     new GenericUrl(requestUrls.getTarget()), content);
+
+
 
             // TODO: what headers to forward???
             populateHeadersFromSource(requestToSourceApi, requestToProxy, requestUrls.getTarget());
@@ -855,11 +864,11 @@ public class ApiDataRequestHandler {
 
     /**
      * Reverse tokenization of request body
-     * 
+     *
      * - request body MUST be Content-Type application/json or application/x-www-form-urlencoded
      * - request body encoding MUST be UTF-8 compatible
-     * 
-     * 
+     *
+     *
      * @param contentType
      * @param body
      * @return as ByteArrayContent, for forwarding to source API
@@ -901,7 +910,7 @@ public class ApiDataRequestHandler {
     /**
      * Applies a string transformation function to all textual nodes in a JSON tree.
      * Uses Jackson's JsonNode API to recursively traverse the tree and transform all string values.
-     * 
+     *
      * @param jsonNode The JSON node to transform
      * @param stringTransform Function to apply to each string value
      * @return Transformed JSON node
