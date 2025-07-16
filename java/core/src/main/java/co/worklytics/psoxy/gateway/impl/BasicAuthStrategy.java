@@ -20,11 +20,11 @@ import lombok.extern.java.Log;
 
 /**
  * HTTP Basic Auth strategy, with user-id + password as credentials.
- * 
+ *
  * They get base64 encoded, and sent in the Authorization header as a 'Basic' token.
- * 
+ *
  * This is RFC 7617 Section 2
- * 
+ *
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc7617#section-2">RFC 7617 Section 2</a>
  */
 @Log
@@ -37,7 +37,8 @@ public class BasicAuthStrategy implements SourceAuthStrategy {
     private final String configIdentifier = "basic_auth";
 
     enum ConfigProperty implements ConfigService.ConfigProperty {
-        BASIC_AUTH_USER_ID, BASIC_AUTH_PASSWORD,
+        BASIC_AUTH_USER_ID,
+        BASIC_AUTH_PASSWORD,
         ;
     }
 
@@ -54,8 +55,8 @@ public class BasicAuthStrategy implements SourceAuthStrategy {
 
     @Override
     public Credentials getCredentials(Optional<String> userToImpersonate) {
-        String userId = secretStore.getConfigPropertyOrError(ConfigProperty.BASIC_AUTH_USER_ID);
-        String password = secretStore.getConfigPropertyOrError(ConfigProperty.BASIC_AUTH_PASSWORD);
+        String userId = secretStore.getConfigPropertyAsOptional(ConfigProperty.BASIC_AUTH_USER_ID).orElse("");
+        String password = secretStore.getConfigPropertyAsOptional(ConfigProperty.BASIC_AUTH_PASSWORD).orElse("");
         return new BasicCredentials(userId, password);
     }
 
