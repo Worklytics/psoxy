@@ -11,6 +11,8 @@ Changes to be including in future/planned release notes will be added here.
   - `Slack Analytics`: added new connector for supporting fetching Slack Analytics data, through `api/admin.analytics.getFile` endpoint
   - Side Outputs: added support; see [docs/configuration/side-outputs.md](docs/configuration/side-outputs.md) for details
   - Supported async responses; see [docs/configuration/async-responses.md](docs/configuration/async-api-data.md) for details
+  - added `windsurf` connector in **alpha**; see [docs/sources/windsurf/README.md](docs/connectors/windsurf/README.md)
+  - added `cursor` connector in **alpha**; see [docs/sources/cursor/README.md](docs/connectors/cursor/README.md)
 
 ## [0.5.3](https://github.com/Worklytics/psoxy/release/tag/v0.5.3)
   - `aws` - removed `ssm:GetParameterVersion` perm from policies; not a thing
