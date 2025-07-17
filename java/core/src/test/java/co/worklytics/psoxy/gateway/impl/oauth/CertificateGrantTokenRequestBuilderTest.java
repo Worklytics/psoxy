@@ -11,12 +11,15 @@ import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import dagger.Component;
 import lombok.SneakyThrows;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.security.Security;
 import java.time.Clock;
 import java.util.Optional;
 
@@ -84,6 +87,11 @@ class CertificateGrantTokenRequestBuilderTest {
         void inject(CertificateGrantTokenRequestBuilderTest test);
 
         void inject(GithubAccessTokenResponseParserImpl test);
+    }
+
+    @BeforeAll
+    public static void staticSetup() {
+        Security.addProvider(new BouncyCastleProvider());
     }
 
     @BeforeEach

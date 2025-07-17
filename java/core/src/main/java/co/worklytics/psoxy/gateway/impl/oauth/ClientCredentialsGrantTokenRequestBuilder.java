@@ -9,6 +9,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.webtoken.JsonWebSignature;
 import com.google.api.client.json.webtoken.JsonWebToken;
 import com.google.common.annotations.VisibleForTesting;
+import io.opencensus.trace.Link;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -283,15 +284,17 @@ public class ClientCredentialsGrantTokenRequestBuilder
             .filter(StringUtils::isNotBlank)
             .collect(Collectors.toList());
 
+        List<Exception> exceptionsSeen = new LinkedList<>();
         for (String possibleKey : possibleKeys) {
             try {
                 PrivateKey privateKey = parsePrivateKey(possibleKey);
                 return privateKey;
             } catch (Exception pkcs1e) {
-                //suppress
+                // suppress, but capture in case ALL fail
+                exceptionsSeen.add(pkcs1e);
             }
         }
-        throw new IllegalArgumentException("Could not parse value of private key found in secret store");
+        throw new IllegalArgumentException("Could not parse value of private key found in secret store", exceptionsSeen.stream().findAny().orElse(null));
     }
 
     @VisibleForTesting
@@ -307,9 +310,10 @@ public class ClientCredentialsGrantTokenRequestBuilder
             if (object instanceof PEMKeyPair) {
                 return converter.getKeyPair((PEMKeyPair) object).getPrivate();
             } else if (object instanceof PrivateKeyInfo) {
+                // Convert PKCS#8 (header '-----BEGIN PRIVATE KEY-----') to PrivateKey
                 return converter.getPrivateKey((PrivateKeyInfo) object);
             } else if (object instanceof RSAPrivateKey) {
-                // Convert PKCS#1 to PKCS#8
+                // Convert PKCS#1 (header '-----BEGIN RSA PRIVATE KEY-----') to PKCS#8 (header '-----BEGIN PRIVATE KEY-----')
                 RSAPrivateKey rsa = (RSAPrivateKey) object;
                 ASN1Primitive primitive = rsa.toASN1Primitive();
                 byte[] encoded = primitive.getEncoded();
