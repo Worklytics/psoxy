@@ -4,6 +4,9 @@ import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.output.Output;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.extern.java.Log;
+
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,6 +17,7 @@ import java.util.zip.GZIPOutputStream;
  * decorator for Output that compresses the content before writing it to the underlying SideOutput.
  */
 @AllArgsConstructor(staticName = "wrap")
+@Log
 public class CompressedOutputWrapper implements Output {
 
     static final String COMPRESSION_TYPE = "gzip";
@@ -29,7 +33,8 @@ public class CompressedOutputWrapper implements Output {
     @Override
     public void write(String key, ProcessedContent content) throws WriteFailure {
         try {
-            if (!Objects.equals(COMPRESSION_TYPE, content.getContentEncoding())) {
+            if (!Objects.equals(COMPRESSION_TYPE, content.getContentEncoding())) {             
+                log.info("Compressing response with gzip encoding through wrapper");
                 byte[] compressedContent = gzipContent(content.getContent());
                 content = content.withContentEncoding(COMPRESSION_TYPE).withContent(compressedContent);
             }

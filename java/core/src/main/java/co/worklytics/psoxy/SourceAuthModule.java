@@ -1,7 +1,9 @@
 package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.impl.BasicAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.GoogleCloudPlatformServiceAccountKeyAuthStrategy;
+import co.worklytics.psoxy.gateway.impl.WindsurfServiceKeyAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.oauth.*;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
 import dagger.Module;
@@ -17,53 +19,84 @@ public class SourceAuthModule {
 
     @Provides
     @IntoSet
-    SourceAuthStrategy providesOAuthAccessTokenSourceAuthStrategy(OAuthAccessTokenSourceAuthStrategy oAuthAccessTokenSourceAuthStrategy) {
+    SourceAuthStrategy providesOAuthAccessTokenSourceAuthStrategy(
+            OAuthAccessTokenSourceAuthStrategy oAuthAccessTokenSourceAuthStrategy) {
         return oAuthAccessTokenSourceAuthStrategy;
     }
 
-    @Provides @IntoSet
-    SourceAuthStrategy providesOAuthRefreshTokenSourceAuthStrategy(OAuthRefreshTokenSourceAuthStrategy oAuthRefreshTokenSourceAuthStrategy) {
+    @Provides
+    @IntoSet
+    SourceAuthStrategy providesOAuthRefreshTokenSourceAuthStrategy(
+            OAuthRefreshTokenSourceAuthStrategy oAuthRefreshTokenSourceAuthStrategy) {
         return oAuthRefreshTokenSourceAuthStrategy;
     }
 
     @Provides
     @IntoSet
-    SourceAuthStrategy providesSourceAuthStrategy(GoogleCloudPlatformServiceAccountKeyAuthStrategy googleCloudPlatformServiceAccountKeyAuthStrategy) {
+    SourceAuthStrategy providesSourceAuthStrategy(
+            GoogleCloudPlatformServiceAccountKeyAuthStrategy googleCloudPlatformServiceAccountKeyAuthStrategy) {
         return googleCloudPlatformServiceAccountKeyAuthStrategy;
     }
 
     @Provides
-    OAuth2CredentialsWithRefresh.OAuth2RefreshHandler providesOAuth2RefreshHandler(OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl refreshHandler) {
+    @IntoSet
+    SourceAuthStrategy providesBasicAuthStrategy(BasicAuthStrategy basicAuthStrategy) {
+        return basicAuthStrategy;
+    }
+
+    @Provides
+    @IntoSet
+    SourceAuthStrategy providesWindsurfServiceKeyAuthStrategy(
+        WindsurfServiceKeyAuthStrategy windsurfServiceKeyAuthStrategy) {
+        return windsurfServiceKeyAuthStrategy;
+    }
+
+    @Provides
+    OAuth2CredentialsWithRefresh.OAuth2RefreshHandler providesOAuth2RefreshHandler(
+            OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl refreshHandler) {
         return refreshHandler;
     }
 
-    @Provides @IntoSet
-    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder refreshTokenPayloadBuilder(RefreshTokenTokenRequestBuilder refreshTokenPayloadBuilder) {
+    @Provides
+    @IntoSet
+    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder refreshTokenPayloadBuilder(
+            RefreshTokenTokenRequestBuilder refreshTokenPayloadBuilder) {
         return refreshTokenPayloadBuilder;
     }
 
-    @Provides @IntoSet
-    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder clientCredentialsGrantTokenRequestPayloadBuilder(ClientCredentialsGrantTokenRequestBuilder clientCredentialsGrantTokenRequestBuilder) {
+    @Provides
+    @IntoSet
+    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder clientCredentialsGrantTokenRequestPayloadBuilder(
+            ClientCredentialsGrantTokenRequestBuilder clientCredentialsGrantTokenRequestBuilder) {
         return clientCredentialsGrantTokenRequestBuilder;
     }
 
-    @Provides @IntoSet
-    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder accountCredentialsGrantTokenRequestPayloadBuilder(AccountCredentialsGrantTokenRequestBuilder refreshTokenPayloadBuilder) {
+    @Provides
+    @IntoSet
+    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder accountCredentialsGrantTokenRequestPayloadBuilder(
+            AccountCredentialsGrantTokenRequestBuilder refreshTokenPayloadBuilder) {
         return refreshTokenPayloadBuilder;
     }
 
-    @Provides @IntoSet
-    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder certificateCredentialsGrantTokenRequestPayloadBuilder(CertificateGrantTokenRequestBuilder certificateGrantTokenRequestBuilder) {
+    @Provides
+    @IntoSet
+    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder certificateCredentialsGrantTokenRequestPayloadBuilder(
+            CertificateGrantTokenRequestBuilder certificateGrantTokenRequestBuilder) {
         return certificateGrantTokenRequestBuilder;
     }
 
-    @Provides @IntoSet
-    OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser tokenResponseParser(OAuthRefreshTokenSourceAuthStrategy.TokenResponseParserImpl instance) {
+    @Provides
+    @IntoSet
+    OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser tokenResponseParser(
+            OAuthRefreshTokenSourceAuthStrategy.TokenResponseParserImpl instance) {
         return instance;
     }
 
-    @Provides @IntoSet
-    OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser githubResponseParser(GithubAccessTokenResponseParserImpl instance) {
+    @Provides
+    @IntoSet
+    OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser githubResponseParser(
+            GithubAccessTokenResponseParserImpl instance) {
         return instance;
     }
+
 }

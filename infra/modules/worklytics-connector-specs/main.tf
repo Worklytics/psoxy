@@ -78,6 +78,49 @@ locals {
   2. Update the content of PSOXY_ASANA_ACCESS_TOKEN variable with the previous token value obtained
 EOT
     }
+    cursor = {
+      source_kind : "cursor",
+      availability : "alpha",
+      enable_by_default : false,
+      worklytics_connector_id : "cursor-psoxy"
+      display_name : "Cursor"
+      worklytics_connector_name : "Cursor via Psoxy"
+      target_host : "api.cursor.com"
+      source_auth_strategy : "basic_auth" # cursor API uses basic auth (RFC 7617 Section 2, with API key as 'user-id' and no password
+      secured_variables : [
+        {
+          name : "BASIC_AUTH_USER_ID" # cursor's UX calls this an 'API Key', but it's actually a Basic Auth 'user-id'; should we have aliases or something?
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      example_api_requests : [
+        {
+          method = "GET"
+          path   = "/teams/members"
+        },
+        {
+          method = "POST"
+          path   = "/teams/daily-usage-data"
+          body = jsonencode({
+            startDate = (time_static.deployment.unix - 86400 * 30) - 1000,
+            endDate   = time_static.deployment.unix * 1000
+          })
+        },
+        {
+          method = "POST"
+          path   = "/teams/filtered-usage-events"
+          body = jsonencode({
+            startDate = (time_static.deployment.unix - 86400 * 30) - 1000,
+            endDate   = time_static.deployment.unix * 1000
+          })
+        }
+      ]
+      external_token_todo : templatefile("${path.module}/docs/cursor/instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_CURSOR_"
+      })
+    }
     github = {
       source_kind : "github",
       availability : "ga",
@@ -409,7 +452,7 @@ EOT
     }
     # https://api.slack.com/methods/admin.analytics.getFile
     slack-analytics = {
-      source_kind : "slack",
+      source_kind : "slack-analytics",
       availability : "alpha",
       enable_by_default : false
       worklytics_connector_id : "slack-analytics-psoxy"
@@ -434,7 +477,7 @@ EOT
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/api/admin.analytics.getFile?type=member&date=2025-04-01"
+        "/api/admin.analytics.getFile?type=member&date=${urlencode(formatdate("YYYY-MM-DD", timeadd(timestamp(), "-72h")))}"
       ]
       instructions_template = "${path.module}/docs/slack/analytics/instructions.tftpl"
       external_token_todo : templatefile("${path.module}/docs/slack/analytics/instructions.tftpl", {
@@ -477,6 +520,34 @@ EOT
         path_to_instance_parameters = "PSOXY_SLACK_DISCOVERY_API_"
       })
       instructions_template = "${path.module}/docs/slack/discovery-api/instructions.tftpl"
+    }
+    windsurf = {
+      source_kind : "windsurf"
+      availability : "alpha",
+      enable_by_default : false
+      worklytics_connector_id : "windsurf-psoxy"
+      display_name : "Windsurf",
+      worklytics_connector_name : "Windsurf via Psoxy"
+      target_host : "server.codeium.com"
+      source_auth_strategy : "windsurf_service_key"
+      secured_variables : [
+        {
+          name : "SERVICE_KEY"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ]
+      example_api_requests : [
+        {
+          method : "POST"
+          path : "/api/v1/UserPageAnalytics"
+        }
+      ],
+      external_token_todo : templatefile("${path.module}/docs/windsurf/instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_WINDSURF_"
+      })
+      instructions_template = "${path.module}/docs/windsurf/instructions.tftpl"
     }
     zoom = {
       source_kind : "zoom"
@@ -1014,7 +1085,7 @@ EOT
   }
 
   oauth_long_access_connectors_backwards = { for k, v in local.oauth_long_access_connectors :
-  k => merge(v, { example_calls : v.example_api_calls }) }
+  k => merge(v, { example_calls : try(v.example_api_calls, []) }) }
 
 
   all_default_connectors = merge(
@@ -1046,11 +1117,11 @@ locals {
 
   # backwards-compatible for v0.4.x; remove in v0.5.x
   google_workspace_sources_backwards = { for k, v in local.google_workspace_sources :
-  k => merge(v, { example_calls : v.example_api_calls }) }
+  k => merge(v, { example_calls : try(v.example_api_calls, []) }) }
 
   # backwards-compatible for v0.4.x; remove in v0.5.x
   msft_365_connectors_backwards = { for k, v in local.msft_365_connectors :
-  k => merge(v, { example_calls : v.example_api_calls }) }
+  k => merge(v, { example_calls : try(v.example_api_calls, []) }) }
 
   enabled_google_workspace_connectors = {
     for k, v in local.google_workspace_sources_backwards : k => v if contains(var.enabled_connectors, k)

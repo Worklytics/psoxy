@@ -292,8 +292,21 @@ locals {
 
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
   command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} -re \"${data.aws_region.current.id}\""
-  sync_test_calls = [for path in var.example_api_calls :
-    "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+
+  # Merge example_api_calls into example_api_requests for unified processing
+  all_example_api_requests = concat(
+    [for path in var.example_api_calls : {
+      method       = "GET"
+      path         = path
+      content_type = "application/json"
+      body         = null
+    }],
+    var.example_api_requests
+  )
+
+  # Generate test calls from all example requests
+  sync_test_calls = [for request in local.all_example_api_requests :
+    "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${request.path}\" -m ${request.method}${request.body != null ? " -b \"${request.body}\"" : ""}${local.impersonation_param}"
   ]
 
   command_test_calls = concat(local.sync_test_calls,
@@ -385,7 +398,7 @@ locals {
     function_name           = module.psoxy_lambda.function_name,
     impersonation_param     = local.impersonation_param,
     command_cli_call        = local.command_cli_call,
-    example_api_calls       = var.example_api_calls,
+    example_api_requests    = local.all_example_api_requests,
     enable_async_processing = var.enable_async_processing,
   })
 }

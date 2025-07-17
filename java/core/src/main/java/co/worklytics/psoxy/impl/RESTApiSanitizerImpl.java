@@ -33,6 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.commons.lang3.ObjectUtils;
@@ -49,6 +50,9 @@ import com.avaulta.gateway.rules.ParameterSchemaUtils;
 import com.avaulta.gateway.rules.PathTemplateUtils;
 import com.avaulta.gateway.rules.transforms.EncryptIp;
 import com.avaulta.gateway.rules.transforms.HashIp;
+import org.apache.hc.core5.http.ContentType;
+import com.avaulta.gateway.rules.JsonSchema;
+import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
@@ -102,8 +106,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     String targetHostPath;
 
     @AssistedInject
-    public RESTApiSanitizerImpl(@Assisted RESTRules rules, @Assisted Pseudonymizer pseudonymizer,
-            EmailAddressParser emailAddressParser) {
+    public RESTApiSanitizerImpl(@Assisted RESTRules rules,
+                                @Assisted Pseudonymizer pseudonymizer,
+                                EmailAddressParser emailAddressParser) {
         this.rules = rules;
         this.pseudonymizer = pseudonymizer;
         this.emailAddressParser = emailAddressParser;
@@ -127,6 +132,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     ConfigService configService;
     @Inject
     SanitizerUtils sanitizerUtils;
+    @Inject
+    JsonSchemaValidationUtils jsonSchemaValidationUtils;
 
     @Inject
     @Named("ipEncryptionStrategy")
@@ -145,8 +152,63 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     }
 
     @Override
+    public boolean isAllowed(String httpMethod, URL url, @Nullable String contentType,
+            @Nullable String requestBody) {
+        if (rules.getAllowAllEndpoints()) {
+            return true;
+        }
+        Optional<Pair<Pattern, Endpoint>> matchingEndpoint = getEndpoint(httpMethod, url);
+
+        if (matchingEndpoint.isEmpty()) {
+            log.warning(String.format("No endpoint found for %s %s", httpMethod, url));
+            return false;
+        }
+
+        Endpoint endpoint = matchingEndpoint.get().getValue();
+
+        if (endpoint.getRequestBody() == null) {
+            return true;
+        } else {
+            if (endpoint.getRequestBody().getRequired() && StringUtils.isEmpty(requestBody)) {
+                log.warning(String.format("Request body required for %s %s, but none provided",
+                        httpMethod, url));
+                return false;
+            }
+            if (endpoint.getRequestBody().getContent() == null) {
+                // no schemas defined for request body, so we allow it
+                return true;
+            } else if (StringUtils.isEmpty(requestBody)) {
+                // empty request body, and none required, so we allow it
+                return true;
+            } else {
+                // default content-type to application/json (tbh, is this right?? it's just our
+                // historical default)
+                String parsedContentType =
+                        Optional.ofNullable(contentType).orElse(ContentType.APPLICATION_JSON.toString());
+
+                JsonSchema schema = endpoint.getRequestBody().getContent().get(parsedContentType);
+                if (schema == null) {
+                    // no schema defined for request body, so we allow it
+                    return true;
+                } else {
+                    if (parsedContentType.equals(ContentType.APPLICATION_JSON.toString())) {
+                        return jsonSchemaValidationUtils.validateJsonBySchema(requestBody, schema);
+                    } else if (parsedContentType.equals(ContentType.APPLICATION_FORM_URLENCODED.toString())) {
+                        return jsonSchemaValidationUtils.validateFormUrlEncodedBySchema(requestBody,
+                                schema);
+                    } else {
+                        throw new UnsupportedOperationException(
+                                "content type not supported: " + contentType);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
     public Optional<Collection<String>> getAllowedHeadersToForward(String httpMethod, URL url) {
-        return getEndpoint(httpMethod, url).map(Pair::getRight)
+        return getEndpoint(httpMethod, url)
+                .map(Pair::getRight)
                 .map(endpoint -> endpoint.getAllowedRequestHeadersToForward())
                 .orElse(Optional.empty());
     }
@@ -685,8 +747,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             synchronized ($writeLock) {
                 if (compiledAllowedEndpoints == null) {
                     compiledAllowedEndpoints = rules.getEndpoints().stream()
-                            .collect(Collectors.toMap(Function.identity(), endpoint -> Pattern
-                                    .compile(effectiveRegex(endpoint), CASE_INSENSITIVE)));
+                            .collect(Collectors.toMap(Function.identity(),
+                                    endpoint -> Pattern.compile(effectiveRegex(endpoint),
+                                            CASE_INSENSITIVE)));
                 }
             }
         }
@@ -704,9 +767,11 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 .map(allowedParams -> allowedParams.containsAll(
                         queryParams.stream().map(Pair::getKey).collect(Collectors.toList())))
                 .orElse(true);
-        return matchesAllowed && endpoint.getQueryParamSchemasOptional()
-                .map(schemas -> parameterSchemaUtils.validateAll(schemas, queryParams))
-                .orElse(true);
+
+        return matchesAllowed
+                && endpoint.getQueryParamSchemasOptional()
+                        .map(schemas -> parameterSchemaUtils.validateAll(schemas, queryParams))
+                        .orElse(true);
     }
 
     JsonSchemaFilter getRootDefinitions() {
@@ -739,7 +804,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                                     // shouldn't happen
                                     return "";
                                 }
-                            }).orElse("");
+                            })
+                            .orElse("");
+
                 }
             }
         }
@@ -763,17 +830,17 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 if (matcher.matches()) {
                     // this should NOT match on empty path segments; eg "/foo//bar" should not match
                     // "/foo/{param}/bar"
-                    boolean allParamsValid = entry.getKey().getPathParameterSchemasOptional()
-                            .map(schemas -> schemas.entrySet().stream()
-                                    .allMatch(paramSchema -> parameterSchemaUtils.validate(
-                                            paramSchema.getValue(),
-                                            matcher.group(paramSchema.getKey()))))
-                            .orElse(true);
+                    boolean allParamsValid =
+                            entry.getKey().getPathParameterSchemasOptional()
+                                    .map(schemas -> schemas.entrySet().stream()
+                                            .allMatch(paramSchema -> parameterSchemaUtils.validate(
+                                                    paramSchema.getValue(),
+                                                    matcher.group(paramSchema.getKey()))))
+                                    .orElse(true);
 
                     // q: need to catch possible IllegalArgumentException if path parameter defined
                     // in `pathParameterSchemas`
                     // not in the path template??
-
                     return allParamsValid
                             && allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url));
                 }
@@ -786,7 +853,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     Predicate<Endpoint> allowsHttpMethod(@NonNull String httpMethod) {
         return (endpoint) -> endpoint.getAllowedMethods()
                 .map(methods -> methods.stream().map(String::toUpperCase)
-                        .collect(Collectors.toList()).contains(httpMethod.toUpperCase()))
+                        .collect(Collectors.toList())
+                        .contains(httpMethod.toUpperCase()))
                 .orElse(true);
     }
 
@@ -812,12 +880,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         return getCompiledAllowedEndpoints().entrySet().stream()
                 .filter(entry -> hasPathRegexMatchingUrl.test(entry)
                         || hasPathTemplateMatchingUrl.test(entry))
-                .filter(entry -> allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url))) // redundant
-                                                                                                     // in
-                                                                                                     // the
-                                                                                                     // pathTemplate
-                                                                                                     // case
-                .filter(entry -> allowsHttpMethod.test(entry.getKey())).findAny()
+                .filter(entry -> allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url))) // redundant in the path template case
+                .filter(entry -> allowsHttpMethod.test(entry.getKey()))
+                .findAny()
                 .map(entry -> Pair.of(entry.getValue(), entry.getKey()));
     }
 
