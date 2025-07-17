@@ -17,7 +17,6 @@ There are THREE components to auth:
 
 Common pitfalls:
   - creating a OAuth App instead of a GitHub App ; these are NOT the same thing.
-  -
 
 ### 401 Unauthorized, No JSON body
 
