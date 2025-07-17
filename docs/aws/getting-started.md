@@ -41,6 +41,10 @@ The diagram below provides an architecture overview of the 'API' and 'Bulk' mode
 
    You will need the ARN of this role.
 
+   Ensure that any [Permissions Boundary](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html) that may be applied to this role allow the above actions.
+
+   If your organization uses [Service Control Policies](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html), ensure that these allow the above actions.
+
    NOTE: if you're connecting to Microsoft 365 (Azure AD) data sources, you'll also need permissions to create AWS Cognito Identity Pools and add Identities to them, such as [arn:aws:iam::aws:policy/AmazonCognitoPowerUser](https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/policies/arn:aws:iam::aws:policy/AmazonCognitoPowerUser$serviceLevelSummary). Some AWS Organizations have [Service Control Policies](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html) in place that deny this by default, even if you have an IAM role that allows it at an account level.
 
    NOTE: using AWS API Gateway (required for webhook collection), VPC, or Secrets Manager (not used by default in our examples) will require additional permissions beyond the above.

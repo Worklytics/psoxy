@@ -62,6 +62,16 @@ Options:
 - use a script such as [aws-mfa](https://github.com/broamski/aws-mfa) to get short-lived key+secret
   for your user.
 
+## Permissions Problems
+
+Apart from ensuring that the AWS principal you're using to run Terraform has the necessary permissions, ensure that the following either do not apply to your AWS Organization, or are properly configured to allow your Terraform user/role to provision the necessary resources:
+- [Service Control Policies](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html)
+- [Permissions Boundaries](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html)
+
+Usually an issue with the above will cause an error in the `terraform apply` step; but on occasion we've seen infra fail to be properly linked where this linkage is implicit, rather than a specifc "resource" in Terraform (eg, attaching Cloud Watch Log groups to Lambda functions).
+
+You should contact your AWS team if in doubt.
+
 ## Logs via Cloud Watch
 
 ### via Web Console
