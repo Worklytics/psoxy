@@ -13,7 +13,7 @@ There are several connectors available for GitHub:
 There are THREE components to auth:
   - `PRIVATE_KEY` --> filled by you directly in your host's secret/parameter store,
   - `CLIENT_ID` --> filled by you directly in your host's secret/parameter store,
-  - `github_copilot_installation_id` --> fill in your `terraform.tfvars` file with the installation id of your GitHub App, which is used to generate the `REFRESH_URL` env var on the lambda/cloud function.
+  - `github_copilot_installation_id` / `github_installation_id` --> fill in your `terraform.tfvars` file with the installation id of your GitHub App, which is used to generate the `REFRESH_URL` env var on the lambda/cloud function.
 
 Common pitfalls:
   - creating a OAuth App instead of a GitHub App ; these are NOT the same thing.
