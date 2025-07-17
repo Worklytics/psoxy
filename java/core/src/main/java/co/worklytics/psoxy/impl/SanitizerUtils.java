@@ -320,8 +320,43 @@ public class SanitizerUtils {
         };
     }
 
-    String pseudonymizeEmailHeaderToJson(@NonNull Configuration configuration, Pseudonymizer pseudonymizer, @NonNull Object value) {
-        return configuration.jsonProvider().toJson(pseudonymizeEmailHeader(pseudonymizer, value));
+    @VisibleForTesting
+    MapFunction getPseudonymizeEmailHeaderToJson(Pseudonymizer pseudonymizer, Transform.PseudonymizeEmailHeader transformOptions) {
+        return (Object value, Configuration jsonConfiguration) -> {
+            if (value == null) {
+                return null;
+            }
+
+            com.google.api.client.util.Preconditions.checkArgument(value instanceof String, "Value must be string");
+
+            if (StringUtils.isBlank((String) value)) {
+                return new ArrayList<>();
+            } else {
+                // NOTE: this does NOT seem to work for lists containing empty values (eg ",,"),
+                // which
+                // per RFC should be allowed ....
+                if (emailAddressParser.isValidAddressList((String) value)) {
+                    List<EmailAddress> addresses =
+                        emailAddressParser.parseEmailAddressesFromHeader((String) value);
+
+                    return jsonConfiguration.jsonProvider()
+                        .toJson(addresses.stream().map(EmailAddress::asFormattedString)
+                            .map(pseudonymizer::pseudonymize).map(pseudonymizedIdentity -> {
+                                if (transformOptions
+                                    .getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
+                                    return urlSafePseudonymEncoder
+                                        .encode(pseudonymizedIdentity.asPseudonym());
+                                } else {
+                                    return pseudonymizedIdentity;
+                                }
+                            }).collect(Collectors.toList()));
+                } else {
+                    log.log(Level.WARNING,
+                        "Valued matched by emailHeader rule is not valid address list, but not blank");
+                    return null;
+                }
+            }
+        };
     }
 
     public MapFunction getPseudonymize(Pseudonymizer pseudonymizer, Transform.Pseudonymize transformOptions) {
@@ -412,7 +447,7 @@ public class SanitizerUtils {
             //curry the defaultScopeId from the transform into the pseudonymization method
             f = getPseudonymize(pseudonymizer, (Transform.Pseudonymize) transform);
         } else if (transform instanceof Transform.PseudonymizeEmailHeader) {
-            f = (value, configuration) -> pseudonymizeEmailHeaderToJson(configuration, pseudonymizer, value);
+            f = getPseudonymizeEmailHeaderToJson(pseudonymizer, (Transform.PseudonymizeEmailHeader) transform);
         } else if (transform instanceof Transform.PseudonymizeRegexMatches) {
             f = getPseudonymizeRegexMatches(pseudonymizer, (Transform.PseudonymizeRegexMatches) transform);
         } else if (transform instanceof Transform.RedactRegexMatches) {
