@@ -1,16 +1,46 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.Pseudonymizer;
-import co.worklytics.psoxy.RESTApiSanitizer;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.utils.URLUtils;
-import co.worklytics.psoxy.utils.email.EmailAddressParser;
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Named;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hc.core5.http.ContentType;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.JsonSchema;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
+import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.avaulta.gateway.rules.ParameterSchemaUtils;
 import com.avaulta.gateway.rules.PathTemplateUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
@@ -22,32 +52,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
+import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.RESTApiSanitizer;
+import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.rules.RESTRules;
+import co.worklytics.psoxy.utils.URLUtils;
+import co.worklytics.psoxy.utils.email.EmailAddressParser;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 @Log
 public class RESTApiSanitizerImpl implements RESTApiSanitizer {
@@ -59,9 +76,10 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     final EmailAddressParser emailAddressParser;
 
 
-    //NOTE: JsonPath seems to be threadsafe
-    //  - https://github.com/json-path/JsonPath/issues/384
-    //  - https://github.com/json-path/JsonPath/issues/187 (earlier issue fixing stuff that wasn't thread-safe)
+    // NOTE: JsonPath seems to be threadsafe
+    // - https://github.com/json-path/JsonPath/issues/384
+    // - https://github.com/json-path/JsonPath/issues/187 (earlier issue fixing stuff that wasn't
+    // thread-safe)
 
     Map<Endpoint, Pattern> compiledAllowedEndpoints;
 
@@ -74,8 +92,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @AssistedInject
     public RESTApiSanitizerImpl(@Assisted RESTRules rules,
-                                @Assisted Pseudonymizer pseudonymizer,
-                                EmailAddressParser emailAddressParser) {
+            @Assisted Pseudonymizer pseudonymizer,
+            EmailAddressParser emailAddressParser) {
         this.rules = rules;
         this.pseudonymizer = pseudonymizer;
         this.emailAddressParser = emailAddressParser;
@@ -99,6 +117,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     ConfigService configService;
     @Inject
     SanitizerUtils sanitizerUtils;
+    @Inject
+    JsonSchemaValidationUtils jsonSchemaValidationUtils;
 
     @Inject
     @Named("ipEncryptionStrategy")
@@ -117,11 +137,65 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     }
 
     @Override
+    public boolean isAllowed(String httpMethod, URL url, @Nullable String contentType,
+            @Nullable String requestBody) {
+        if (rules.getAllowAllEndpoints()) {
+            return true;
+        }
+        Optional<Pair<Pattern, Endpoint>> matchingEndpoint = getEndpoint(httpMethod, url);
+
+        if (matchingEndpoint.isEmpty()) {
+            log.warning(String.format("No endpoint found for %s %s", httpMethod, url));
+            return false;
+        }
+
+        Endpoint endpoint = matchingEndpoint.get().getValue();
+
+        if (endpoint.getRequestBody() == null) {
+            return true;
+        } else {
+            if (endpoint.getRequestBody().getRequired() && StringUtils.isEmpty(requestBody)) {
+                log.warning(String.format("Request body required for %s %s, but none provided",
+                        httpMethod, url));
+                return false;
+            }
+            if (endpoint.getRequestBody().getContent() == null) {
+                // no schemas defined for request body, so we allow it
+                return true;
+            } else if (StringUtils.isEmpty(requestBody)) {
+                // empty request body, and none required, so we allow it
+                return true;
+            } else {
+                // default content-type to application/json (tbh, is this right?? it's just our
+                // historical default)
+                String parsedContentType =
+                        Optional.ofNullable(contentType).orElse(ContentType.APPLICATION_JSON.toString());
+
+                JsonSchema schema = endpoint.getRequestBody().getContent().get(parsedContentType);
+                if (schema == null) {
+                    // no schema defined for request body, so we allow it
+                    return true;
+                } else {
+                    if (parsedContentType.equals(ContentType.APPLICATION_JSON.toString())) {
+                        return jsonSchemaValidationUtils.validateJsonBySchema(requestBody, schema);
+                    } else if (parsedContentType.equals(ContentType.APPLICATION_FORM_URLENCODED.toString())) {
+                        return jsonSchemaValidationUtils.validateFormUrlEncodedBySchema(requestBody,
+                                schema);
+                    } else {
+                        throw new UnsupportedOperationException(
+                                "content type not supported: " + contentType);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
     public Optional<Collection<String>> getAllowedHeadersToForward(String httpMethod, URL url) {
         return getEndpoint(httpMethod, url)
-            .map(Pair::getRight)
-            .map(endpoint -> endpoint.getAllowedRequestHeadersToForward())
-            .orElse(Optional.empty());
+                .map(Pair::getRight)
+                .map(endpoint -> endpoint.getAllowedRequestHeadersToForward())
+                .orElse(Optional.empty());
     }
 
     @SneakyThrows
@@ -132,8 +206,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             return jsonResponse;
         }
         // Convert input String to InputStream (UTF-8 encoding)
-        try (InputStream input = new ByteArrayInputStream(jsonResponse.getBytes(StandardCharsets.UTF_8))) {
-             final ProcessedStream processedStream = sanitize(httpMethod, url, input);
+        try (InputStream input =
+                new ByteArrayInputStream(jsonResponse.getBytes(StandardCharsets.UTF_8))) {
+            final ProcessedStream processedStream = sanitize(httpMethod, url, input);
 
             // Read all bytes from the sanitized stream
             byte[] sanitizedBytes = processedStream.getStream().readAllBytes();
@@ -152,10 +227,13 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @SneakyThrows
     @Override
-    public ProcessedStream sanitize(String httpMethod, URL url, InputStream response) throws IOException {
-        //extra check ...
+    public ProcessedStream sanitize(String httpMethod, URL url, InputStream response)
+            throws IOException {
+        // extra check ...
         if (!isAllowed(httpMethod, url)) {
-            throw new IllegalStateException(String.format("Sanitizer called to sanitize response that should not have been retrieved: %s", url));
+            throw new IllegalStateException(String.format(
+                    "Sanitizer called to sanitize response that should not have been retrieved: %s",
+                    url));
         }
         Optional<Pair<Pattern, Endpoint>> matchingEndpoint = getEndpoint(httpMethod, url);
 
@@ -164,7 +242,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             return new ProcessedStream(response, CompletableFuture.completedFuture(null));
         }
 
-        //q: overkill for NON-ndjson case?
+        // q: overkill for NON-ndjson case?
 
         // Create piped stream pair
         PipedOutputStream outPipe = new PipedOutputStream();
@@ -179,21 +257,26 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             JsonFactory factory = objectMapper.getFactory();
 
             try (JsonParser parser = factory.createParser(response);
-                 OutputStreamWriter writer = new OutputStreamWriter(outPipe, StandardCharsets.UTF_8);
-                 BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
+                    OutputStreamWriter writer =
+                            new OutputStreamWriter(outPipe, StandardCharsets.UTF_8);
+                    BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
 
                 boolean first = true;
 
                 while (parser.nextToken() != null) {
-                    // in theory, should parse only the 'next' JSON object from the stream, such that NDJSON, or even "{}{}" works
-                    // string --> jackson jsonNode --> string -> jayway object  for compatibility with jayway jsonpath
-                    // despite jackson provider underneath, Jayway JSONPath seems not do deal with native jackson JsonNode
+                    // in theory, should parse only the 'next' JSON object from the stream, such
+                    // that NDJSON, or even "{}{}" works
+                    // string --> jackson jsonNode --> string -> jayway object for compatibility
+                    // with jayway jsonpath
+                    // despite jackson provider underneath, Jayway JSONPath seems not do deal with
+                    // native jackson JsonNode
                     // TODO: figure out a way to streamline this parsing
                     Object node = jsonConfiguration.jsonProvider().parse(
-                        objectMapper.writeValueAsString(objectMapper.readTree(parser)));
+                            objectMapper.writeValueAsString(objectMapper.readTree(parser)));
 
                     Object sanitized = sanitize(endpoint, node);
-                    if (!first) bufferedWriter.write("\n");
+                    if (!first)
+                        bufferedWriter.write("\n");
                     bufferedWriter.write(jsonConfiguration.jsonProvider().toJson(sanitized));
                     first = false;
                 }
@@ -219,28 +302,32 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     /**
      * sanitized a response JSON by applying the endpoint's response schema and transforms
      *
-     * if endpoint allows for ndjson, we expect this to be just a single JSON object at a time, and you call this once per row in the response
+     * if endpoint allows for ndjson, we expect this to be just a single JSON object at a time, and
+     * you call this once per row in the response
      */
     private Object sanitize(Endpoint endpoint, Object jsonResponse) {
         Object document = endpoint.getResponseSchemaOptional()
                 .map(schema -> {
-                    //q: this read
+                    // q: this read
                     try {
-                        //TODO: jayway jsonpath Object --> String --> jayway jsonpath Object here is needlessly inefficient
+                        // TODO: jayway jsonpath Object --> String --> jayway jsonpath Object here
+                        // is needlessly inefficient
                         String json = jsonConfiguration.jsonProvider().toJson(jsonResponse);
-                        return jsonConfiguration.jsonProvider().parse(jsonSchemaFilterUtils.filterJsonBySchema(json, schema, getRootDefinitions()));
+                        return jsonConfiguration.jsonProvider().parse(jsonSchemaFilterUtils
+                                .filterJsonBySchema(json, schema, getRootDefinitions()));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 })
                 .orElse(jsonResponse);
 
-            if (ObjectUtils.isNotEmpty(endpoint.getTransforms())) {
-                for (Transform transform : endpoint.getTransforms()) {
-                    sanitizerUtils.applyTransform(getPseudonymizer(), transform, document, this.compiledTransforms);
-                }
+        if (ObjectUtils.isNotEmpty(endpoint.getTransforms())) {
+            for (Transform transform : endpoint.getTransforms()) {
+                sanitizerUtils.applyTransform(getPseudonymizer(), transform, document,
+                        this.compiledTransforms);
             }
-            return document;
+        }
+        return document;
     }
 
 
@@ -249,8 +336,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             synchronized ($writeLock) {
                 if (compiledAllowedEndpoints == null) {
                     compiledAllowedEndpoints = rules.getEndpoints().stream()
-                        .collect(Collectors.toMap(Function.identity(),
-                            endpoint -> Pattern.compile(effectiveRegex(endpoint), CASE_INSENSITIVE)));
+                            .collect(Collectors.toMap(Function.identity(),
+                                    endpoint -> Pattern.compile(effectiveRegex(endpoint),
+                                            CASE_INSENSITIVE)));
                 }
             }
         }
@@ -260,24 +348,26 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     @VisibleForTesting
     String effectiveRegex(Endpoint endpoint) {
         return Optional.ofNullable(endpoint.getPathRegex())
-            .orElseGet(() -> pathTemplateUtils.asRegex(endpoint.getPathTemplate()));
+                .orElseGet(() -> pathTemplateUtils.asRegex(endpoint.getPathTemplate()));
     }
 
     boolean allowedQueryParams(Endpoint endpoint, List<Pair<String, String>> queryParams) {
         boolean matchesAllowed = endpoint.getAllowedQueryParamsOptional()
-            .map(allowedParams -> allowedParams.containsAll(queryParams.stream().map(Pair::getKey).collect(Collectors.toList())))
-            .orElse(true);
+                .map(allowedParams -> allowedParams.containsAll(
+                        queryParams.stream().map(Pair::getKey).collect(Collectors.toList())))
+                .orElse(true);
         return matchesAllowed
-            && endpoint.getQueryParamSchemasOptional()
-            .map(schemas -> parameterSchemaUtils.validateAll(schemas, queryParams))
-            .orElse(true);
+                && endpoint.getQueryParamSchemasOptional()
+                        .map(schemas -> parameterSchemaUtils.validateAll(schemas, queryParams))
+                        .orElse(true);
     }
 
     JsonSchemaFilter getRootDefinitions() {
         if (rootDefinitions == null) {
             synchronized ($writeLock) {
                 if (rootDefinitions == null) {
-                    rootDefinitions = JsonSchemaFilter.builder().definitions(rules.getDefinitions()).build();
+                    rootDefinitions =
+                            JsonSchemaFilter.builder().definitions(rules.getDefinitions()).build();
                 }
             }
         }
@@ -289,20 +379,21 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         if (targetHostPath == null) {
             synchronized ($writeLock) {
                 if (targetHostPath == null) {
-                    targetHostPath = configService.getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST)
-                        .map(s -> {
-                            try {
-                                if (!s.startsWith("https://")) {
-                                    s = "https://" + s;
+                    targetHostPath = configService
+                            .getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST)
+                            .map(s -> {
+                                try {
+                                    if (!s.startsWith("https://")) {
+                                        s = "https://" + s;
+                                    }
+                                    return new URL(s).getPath();
+                                } catch (MalformedURLException e) {
+                                    log.log(Level.WARNING, "Invalid API_HOST: " + s, e);
+                                    // shouldn't happen
+                                    return "";
                                 }
-                                return new URL(s).getPath();
-                            } catch (MalformedURLException e) {
-                                log.log(Level.WARNING, "Invalid API_HOST: " + s, e);
-                                //shouldn't happen
-                                return "";
-                            }
-                        })
-                        .orElse("");
+                            })
+                            .orElse("");
                 }
             }
         }
@@ -324,18 +415,22 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             if (entry.getKey().getPathTemplate() != null) {
                 Matcher matcher = entry.getValue().matcher(stripTargetHostPath(url.getPath()));
                 if (matcher.matches()) {
-                    // this should NOT match on empty path segments; eg "/foo//bar" should not match "/foo/{param}/bar"
+                    // this should NOT match on empty path segments; eg "/foo//bar" should not match
+                    // "/foo/{param}/bar"
                     boolean allParamsValid =
-                        entry.getKey().getPathParameterSchemasOptional()
-                            .map(schemas -> schemas.entrySet().stream()
-                                .allMatch(paramSchema -> parameterSchemaUtils.validate(paramSchema.getValue(), matcher.group(paramSchema.getKey()))))
-                            .orElse(true);
+                            entry.getKey().getPathParameterSchemasOptional()
+                                    .map(schemas -> schemas.entrySet().stream()
+                                            .allMatch(paramSchema -> parameterSchemaUtils.validate(
+                                                    paramSchema.getValue(),
+                                                    matcher.group(paramSchema.getKey()))))
+                                    .orElse(true);
 
-                    //q: need to catch possible IllegalArgumentException if path parameter defined in `pathParameterSchemas`
+                    // q: need to catch possible IllegalArgumentException if path parameter defined
+                    // in `pathParameterSchemas`
                     // not in the path template??
 
                     return allParamsValid &&
-                        allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url));
+                            allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url));
                 }
             }
             return false;
@@ -344,17 +439,17 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @VisibleForTesting
     Predicate<Endpoint> allowsHttpMethod(@NonNull String httpMethod) {
-        return (endpoint) ->
-            endpoint.getAllowedMethods()
-                .map(methods -> methods.stream().map(String::toUpperCase).collect(Collectors.toList())
-                    .contains(httpMethod.toUpperCase()))
+        return (endpoint) -> endpoint.getAllowedMethods()
+                .map(methods -> methods.stream().map(String::toUpperCase)
+                        .collect(Collectors.toList())
+                        .contains(httpMethod.toUpperCase()))
                 .orElse(true);
     }
 
     @VisibleForTesting
     Predicate<Map.Entry<Endpoint, Pattern>> getHasPathRegexMatchingUrl(String relativeUrl) {
-        return (entry) ->
-            entry.getKey().getPathRegex() != null && entry.getValue().matcher(relativeUrl).matches();
+        return (entry) -> entry.getKey().getPathRegex() != null
+                && entry.getValue().matcher(relativeUrl).matches();
     }
 
 
@@ -363,19 +458,24 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         String relativeUrl = stripTargetHostPath(URLUtils.relativeURL(url));
 
         Predicate<Map.Entry<Endpoint, Pattern>> hasPathRegexMatchingUrl =
-            getHasPathRegexMatchingUrl(relativeUrl);
+                getHasPathRegexMatchingUrl(relativeUrl);
 
         Predicate<Map.Entry<Endpoint, Pattern>> hasPathTemplateMatchingUrl =
-            getHasPathTemplateMatchingUrl(url);
+                getHasPathTemplateMatchingUrl(url);
 
         Predicate<Endpoint> allowsHttpMethod = allowsHttpMethod(httpMethod);
 
         return getCompiledAllowedEndpoints().entrySet().stream()
-            .filter(entry -> hasPathRegexMatchingUrl.test(entry) || hasPathTemplateMatchingUrl.test(entry))
-            .filter(entry -> allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url))) // redundant in the pathTemplate case
-            .filter(entry -> allowsHttpMethod.test(entry.getKey()))
-            .findAny()
-            .map(entry -> Pair.of(entry.getValue(), entry.getKey()));
+                .filter(entry -> hasPathRegexMatchingUrl.test(entry)
+                        || hasPathTemplateMatchingUrl.test(entry))
+                .filter(entry -> allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url))) // redundant
+                                                                                                     // in
+                                                                                                     // the
+                                                                                                     // pathTemplate
+                                                                                                     // case
+                .filter(entry -> allowsHttpMethod.test(entry.getKey()))
+                .findAny()
+                .map(entry -> Pair.of(entry.getValue(), entry.getKey()));
     }
 
 }

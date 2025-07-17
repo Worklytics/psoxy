@@ -3,14 +3,18 @@ package co.worklytics.psoxy.gateway.impl;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
+
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -19,16 +23,24 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.hc.core5.net.WWWFormCodec;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.ContentType;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpContent;
@@ -63,6 +75,7 @@ import co.worklytics.psoxy.gateway.output.ApiDataOutputUtils;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
 import co.worklytics.psoxy.gateway.output.Output;
+
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
@@ -140,18 +153,22 @@ public class ApiDataRequestHandler {
      * @see <a href="https://flaviocopes.com/http-response-headers/"></a>
      * @see <a href="https://developer.mozilla.org/en-US/docs/Glossary/Response_header"></a>
      */
-    public static Set<String> DEFAULT_HEADERS_PASS_THROUGH =
-            normalizeHeaders(Set.of(HttpHeaders.CONTENT_TYPE, HttpHeaders.CACHE_CONTROL,
-                    HttpHeaders.ETAG, HttpHeaders.LINK, HttpHeaders.EXPIRES,
-                    HttpHeaders.LAST_MODIFIED, HttpHeaders.RETRY_AFTER));
+    public static Set<String> DEFAULT_HEADERS_PASS_THROUGH = normalizeHeaders(Set.of(
+            HttpHeaders.CONTENT_TYPE,
+            HttpHeaders.CACHE_CONTROL,
+            HttpHeaders.ETAG,
+            HttpHeaders.LINK,
+            HttpHeaders.EXPIRES,
+            HttpHeaders.LAST_MODIFIED,
+            HttpHeaders.RETRY_AFTER));
 
     /**
      * Patterns to look for in headers to pass through
      *
      * @see #passThroughHeaders(HttpEventResponse.HttpEventResponseBuilder, HttpResponse)
      */
-    public Set<Pattern> RE_MATCH_HEADERS_PASS_THROUGH =
-            ImmutableSet.of(Pattern.compile(normalizeHeader("X-RateLimit.*")));
+    public Set<Pattern> RE_MATCH_HEADERS_PASS_THROUGH = ImmutableSet.of(
+            Pattern.compile(normalizeHeader("X-RateLimit.*")));
 
     /**
      * <a href="https://www.rfc-editor.org/rfc/rfc7230#section-3.2.2">rfc7230</a> "... A recipient
@@ -189,10 +206,12 @@ public class ApiDataRequestHandler {
         // application-level enforcement of HTTPS
         // (NOTE: should be redundant with infrastructure-level configuration)
         if (!requestToProxy.isHttps().orElse(true)) {
-            return HttpEventResponse.builder().statusCode(HttpStatus.SC_BAD_REQUEST)
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_BAD_REQUEST)
                     .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                             ErrorCauses.HTTPS_REQUIRED.name())
-                    .body("Requests MUST be sent over HTTPS").build();
+                    .body("Requests MUST be sent over HTTPS")
+                    .build();
         }
 
         Optional<HttpEventResponse> healthCheckResponse =
@@ -210,10 +229,13 @@ public class ApiDataRequestHandler {
             // really shouldn't happen ... parsing one url from another, so would be a bad bug in
             // our canonicalization code for this to go wrong
             log.log(Level.WARNING, "Error parsing  / building request URL", e);
-            return HttpEventResponse.builder().statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
                     .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                             ErrorCauses.FAILED_TO_BUILD_URL.name())
-                    .body("Error parsing request URL").build();
+                    .body("Error parsing request URL")
+                    .build();
         }
 
         // avoid logging clear URL outside of dev
@@ -228,10 +250,12 @@ public class ApiDataRequestHandler {
             this.sanitizer = loadSanitizerRules();
         } catch (Throwable e) {
             log.log(Level.SEVERE, "Error loading sanitizer rules", e);
-            return HttpEventResponse.builder().statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
                     .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                             ErrorCauses.CONFIGURATION_FAILURE.name())
-                    .body("Error loading sanitizer rules").build();
+                    .body("Error loading sanitizer rules")
+                    .build();
         }
 
         // build log entry
@@ -244,9 +268,35 @@ public class ApiDataRequestHandler {
             logEntry += String.format(" ClientIP=%s", requestToProxy.getClientIp().get());
         }
 
+        String requestBodyContentType =
+                requestToProxy.getHeader(HttpHeaders.CONTENT_TYPE).orElse(ContentType.APPLICATION_JSON.toString());
+        String requestBodyContentEncoding =
+                requestToProxy.getHeader(HttpHeaders.CONTENT_ENCODING)
+                        .orElse(StandardCharsets.UTF_8.name());
+
+        // ensure utf-8 or some otherwise compatible encoding, so we can convert body --> String
+        // without fancier decoding atm
+        // TODO: support gzip/compressed; and perhaps some non-utf8 encodings??
+        if (!isUtf8CompatibleEncoding(requestBodyContentEncoding)) {
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_BAD_REQUEST)
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                            ErrorCauses.INVALID_REQUEST.name())
+                    .body(String.format(
+                            "Content encoding %s not supported; only UTF-8 compatible encodings are supported (utf-8, ascii, iso-8859-1, us-ascii)",
+                            requestBodyContentEncoding))
+                    .build();
+        }
+
+
+        String requestBody = Optional.ofNullable(requestToProxy.getBody())
+                .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
+                .orElse(null);
+
         if (skipSanitization) {
             log.info(String.format("%s. Skipping sanitization.", logEntry));
-        } else if (sanitizer.isAllowed(requestToProxy.getHttpMethod(), requestUrls.getOriginal())) {
+        } else if (sanitizer.isAllowed(requestToProxy.getHttpMethod(), requestUrls.getOriginal(),
+                requestBodyContentType, requestBody)) {
             log.info(String.format("%s. Rules allowed call.", logEntry));
         } else {
             builder.statusCode(HttpStatus.SC_FORBIDDEN);
@@ -263,20 +313,28 @@ public class ApiDataRequestHandler {
 
             HttpContent content = null;
 
-            if (requestToProxy.getBody() != null) {
-                String contentType = requestToProxy.getHeader(HttpHeaders.CONTENT_TYPE)
-                        .orElse("application/json");
-                content = new ByteArrayContent(contentType, requestToProxy.getBody());
+            if (requestBody != null) {
+                content = this.reverseRequestBodyTokenization(requestBodyContentType, requestBody);
+            }
+
+            // complete hack for Windsurf case, which unlike other sources requires mutation of request body
+            // TODO: consider generalizing, if Windsurf lives/continues this authentication interface; and/or we find other sources that require approach
+            if (this.sourceAuthStrategy instanceof WindsurfServiceKeyAuthStrategy) {
+                content = ((WindsurfServiceKeyAuthStrategy) this.sourceAuthStrategy)
+                        .addServiceKeyToRequestBody(content);
             }
 
             requestToSourceApi = requestFactory.buildRequest(requestToProxy.getHttpMethod(),
                     new GenericUrl(requestUrls.getTarget()), content);
 
+
+
             // TODO: what headers to forward???
             populateHeadersFromSource(requestToSourceApi, requestToProxy, requestUrls.getTarget());
 
             // setup request
-            requestToSourceApi.setThrowExceptionOnExecuteError(false)
+            requestToSourceApi
+                    .setThrowExceptionOnExecuteError(false)
                     .setConnectTimeout(SOURCE_API_REQUEST_CONNECT_TIMEOUT_MS)
                     .setReadTimeout(SOURCE_API_REQUEST_READ_TIMEOUT_MS);
 
@@ -310,6 +368,7 @@ public class ApiDataRequestHandler {
                     processingContext.toBuilder().async(true);
 
 
+
             ProcessingContext asyncProcessingContext =
                     apiDataOutputUtils.fillOutputContext(processingContextBuilder.build());
             try {
@@ -322,21 +381,18 @@ public class ApiDataRequestHandler {
                 asyncApiDataRequestHandler.get().handle(requestToProxy, asyncProcessingContext);
             } catch (Throwable e) {
                 log.log(Level.WARNING, "Failure to dispatch async processing of request", e);
-                return HttpEventResponse.builder().statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                return HttpEventResponse.builder()
+                        .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
                         .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                                 ErrorCauses.ASYNC_HANDLER_DISPATCH.name())
                         .body("Error processing side output only request: " + e.getMessage())
                         .build();
             }
-            HttpEventResponse.HttpEventResponseBuilder responseBuilder =
-                    HttpEventResponse.builder().statusCode(HttpStatus.SC_ACCEPTED) // proper
-                                                                                   // response code
-                                                                                   // indicating
-                                                                                   // payload
-                                                                                   // accepted for
-                                                                                   // asynchronous
-                                                                                   // processing
-                            .body(objectMapper.writeValueAsString(asyncProcessingContext));
+            HttpEventResponse.HttpEventResponseBuilder responseBuilder = HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_ACCEPTED) // proper response code indicating payload
+                                                        // accepted for asynchronous processing
+                    .body(objectMapper.writeValueAsString(asyncProcessingContext));
+
 
             // TODO: generate host-platform specific signed URL for the async output
             // destination + object
@@ -376,7 +432,6 @@ public class ApiDataRequestHandler {
 
             // TODO: if side output cases of the original, we *could* use the potentially compressed
             // stream directly, instead of reading to a string?
-
             ProcessedContent original = apiDataOutputUtils
                     .responseAsRawProcessedContent(requestToSourceApi, sourceApiResponse);
             try {
@@ -407,6 +462,7 @@ public class ApiDataRequestHandler {
                                 .forEach(e -> builder.header(e.getKey(), e.getValue()));
                     }
 
+
                     try {
                         apiDataSideOutputSanitized.writeSanitized(sanitizationResult,
                                 processingContext);
@@ -417,7 +473,6 @@ public class ApiDataRequestHandler {
                                 Pair.of(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
                                         ErrorCauses.SIDE_OUTPUT_FAILURE_SANITIZED.name()));
                     }
-
                 }
             } else {
                 // write error, which shouldn't contain PII, directly
@@ -457,10 +512,12 @@ public class ApiDataRequestHandler {
                 healthCheckRequestHandler.piiSaltHash());
 
         // q: add instance id to the metadata??
-
-        return ProcessedContent.builder().contentType(originalContent.getContentType())
-                .contentCharset(originalContent.getContentCharset()).metadata(metadata)
-                .content(sanitized.getBytes(originalContent.getContentCharset())).build();
+        return ProcessedContent.builder()
+                .contentType(originalContent.getContentType())
+                .contentCharset(originalContent.getContentCharset())
+                .metadata(metadata)
+                .content(sanitized.getBytes(originalContent.getContentCharset()))
+                .build();
     }
 
     @Value
@@ -543,6 +600,7 @@ public class ApiDataRequestHandler {
             com.google.api.client.http.HttpResponse response) {
         Set<String> availableHeaders = normalizeHeaders(response.getHeaders().keySet());
 
+
         Sets.intersection(availableHeaders, DEFAULT_HEADERS_PASS_THROUGH)
                 .forEach(h -> responseBuilder.header(h,
                         HEADER_JOINER.join(response.getHeaders().getHeaderStringValues(h))));
@@ -596,8 +654,9 @@ public class ApiDataRequestHandler {
         accountToImpersonate.ifPresent(user -> log.info("Impersonating user"));
         // TODO: warn here for Google Workspace connectors, which expect user??
 
-        accountToImpersonate = accountToImpersonate.map(s -> pseudonymEncoder
-                .decodeAndReverseAllContainedKeyedPseudonyms(s, reversibleTokenizationStrategy));
+        accountToImpersonate = accountToImpersonate
+                .map(s -> pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(s,
+                        reversibleTokenizationStrategy));
 
         Credentials credentials = sourceAuthStrategy.getCredentials(accountToImpersonate);
         HttpCredentialsAdapter initializeWithCredentials = new HttpCredentialsAdapter(credentials);
@@ -622,7 +681,8 @@ public class ApiDataRequestHandler {
         if (envVarsConfigService.isDevelopment()) {
             // caller requested to skip
             return request.getHeader(ControlHeader.SKIP_SANITIZER.getHttpHeader())
-                    .map(Boolean::parseBoolean).orElse(false);
+                    .map(Boolean::parseBoolean)
+                    .orElse(false);
         } else {
             return false;
         }
@@ -697,18 +757,20 @@ public class ApiDataRequestHandler {
 
         /**
          * request id; does not change for sync v async processing of the same request; so it's the
-         * processing request NOTE: a request originally received synchronously, but then processed
-         * asynchronously - this value should remain constant it is NOT necessarily the same the
-         * request ID of any http request for the current execution; it identifiers the request for
-         * the API data itself.
+         * processing request
+         * NOTE: a request originally received synchronously, but then processed asynchronously -
+         * this value should remain constant
+         * it is NOT necessarily the same the request ID of any http request for the current
+         * execution; it identifiers the request for the API
+         * data itself.
          */
         @NonNull
         String requestId;
 
         /**
-         * when the request was received; used for logging and metrics NOTE: a request originally
-         * received synchronously, but then processed asynchronously - this value should remain
-         * constant
+         * when the request was received; used for logging and metrics
+         * NOTE: a request originally received synchronously, but then processed asynchronously -
+         * this value should remain constant
          */
         @NonNull
         Instant requestReceivedAt;
@@ -744,15 +806,151 @@ public class ApiDataRequestHandler {
         @Deprecated // use a full builder for this; it generates a requestId, when we might as well
                     // use the platform-generated one
         public static ProcessingContext synchronous(Instant requestReceivedAt) {
-            return ProcessingContext.builder().async(false).requestId(UUID.randomUUID().toString())
-                    .requestReceivedAt(requestReceivedAt).build();
+            return ProcessingContext.builder()
+                    .async(false)
+                    .requestId(UUID.randomUUID().toString())
+                    .requestReceivedAt(requestReceivedAt)
+                    .build();
         }
     }
 
     boolean isAsyncRequested(HttpEventRequest request) {
         // follows 'proposed' standard RFC 7240 - https://www.rfc-editor.org/rfc/rfc7240.html
         // not actually adopted
-        return request.getHeader("Prefer").filter(s -> s.equalsIgnoreCase("respond-async"))
+        return request.getHeader("Prefer")
+                .filter(s -> s.equalsIgnoreCase("respond-async"))
                 .isPresent();
     }
+
+    /**
+     * Checks if the given encoding is compatible with UTF-8 decoding.
+     * Compatible encodings are those where bytes can be safely decoded as UTF-8
+     * without data loss or corruption.
+     *
+     * @param encoding The encoding to check (case-insensitive)
+     * @return true if the encoding is UTF-8 compatible, false otherwise
+     */
+    private boolean isUtf8CompatibleEncoding(String encoding) {
+        if (encoding == null) {
+            return false;
+        }
+
+        String normalizedEncoding = encoding.toLowerCase(Locale.ROOT);
+
+        // UTF-8 variants
+        if (normalizedEncoding.equals("utf-8") ||
+                normalizedEncoding.equals("utf8") ||
+                normalizedEncoding.equals("utf_8")) {
+            return true;
+        }
+
+        // ASCII variants - ASCII is a subset of UTF-8
+        if (normalizedEncoding.equals("ascii") ||
+                normalizedEncoding.equals("us-ascii") ||
+                normalizedEncoding.equals("us_ascii")) {
+            return true;
+        }
+
+        // ISO-8859-1 (Latin-1) - compatible with UTF-8 for first 256 code points
+        if (normalizedEncoding.equals("iso-8859-1") ||
+                normalizedEncoding.equals("iso_8859_1") ||
+                normalizedEncoding.equals("latin1") ||
+                normalizedEncoding.equals("latin-1")) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Reverse tokenization of request body
+     *
+     * - request body MUST be Content-Type application/json or application/x-www-form-urlencoded
+     * - request body encoding MUST be UTF-8 compatible
+     *
+     *
+     * @param contentType
+     * @param body
+     * @return as ByteArrayContent, for forwarding to source API
+     */
+    @SneakyThrows
+    ByteArrayContent reverseRequestBodyTokenization(@NonNull String contentType, String body) {
+        // JSON case: use ObjectMapper to parse request body and map decode ON every string value
+        if (contentType.equals(ContentType.APPLICATION_JSON.toString())) {
+            JsonNode jsonNode = objectMapper.readTree(body);
+            JsonNode transformedNode = applyStringTransformToTree(jsonNode, this::decode);
+            String decodedRequestBody = objectMapper.writeValueAsString(transformedNode);
+
+            return new ByteArrayContent(contentType,
+                    decodedRequestBody.getBytes(StandardCharsets.UTF_8));
+        } else if (contentType.equals(ContentType.APPLICATION_FORM_URLENCODED.toString())) {
+            // Form-urlencoded case: use WWWFormCodec to parse request body and map decode ON every
+            // value
+
+            List<NameValuePair> nameValuePairs =
+                    WWWFormCodec.parse(body, StandardCharsets.UTF_8).stream()
+                            .map(pair -> new BasicNameValuePair(pair.getName(),
+                                    this.decode(pair.getValue())))
+                            .collect(Collectors.toList());
+
+            String decodedRequestBody = WWWFormCodec.format(nameValuePairs, StandardCharsets.UTF_8);
+
+            return new ByteArrayContent(contentType,
+                    decodedRequestBody.getBytes(StandardCharsets.UTF_8));
+        } else {
+            throw new IllegalArgumentException("Unsupported content type: " + contentType);
+        }
+    }
+
+    String decode(String possiblyEncodedString) {
+        return pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(possiblyEncodedString,
+                reversibleTokenizationStrategy);
+    }
+
+    /**
+     * Applies a string transformation function to all textual nodes in a JSON tree.
+     * Uses Jackson's JsonNode API to recursively traverse the tree and transform all string values.
+     *
+     * @param jsonNode The JSON node to transform
+     * @param stringTransform Function to apply to each string value
+     * @return Transformed JSON node
+     */
+    @SneakyThrows
+    JsonNode applyStringTransformToTree(JsonNode jsonNode,
+            Function<String, String> stringTransform) {
+        if (jsonNode.isObject()) {
+            ObjectNode objectNode = (ObjectNode) jsonNode;
+            ObjectNode transformedNode = objectMapper.createObjectNode();
+
+            // Iterate through all fields in the object
+            objectNode.fields().forEachRemaining(field -> {
+                String fieldName = field.getKey();
+                JsonNode fieldValue = field.getValue();
+
+                // Recursively transform child nodes
+                transformedNode.set(fieldName,
+                        applyStringTransformToTree(fieldValue, stringTransform));
+            });
+            return transformedNode;
+        } else if (jsonNode.isArray()) {
+            ArrayNode arrayNode = (ArrayNode) jsonNode;
+            ArrayNode transformedArray = objectMapper.createArrayNode();
+
+            // Traverse each element in the array
+            for (JsonNode element : arrayNode) {
+                transformedArray.add(applyStringTransformToTree(element, stringTransform));
+            }
+            return transformedArray;
+        } else if (jsonNode.isTextual()) {
+            // Apply transformation to string values
+            String originalValue = jsonNode.asText();
+            String transformedValue = stringTransform.apply(originalValue);
+            return objectMapper.valueToTree(transformedValue);
+        } else {
+            // Return leaf nodes unchanged (numbers, booleans, null)
+            return jsonNode;
+        }
+    }
+
+
 }

@@ -9,11 +9,12 @@ import lombok.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@JsonPropertyOrder({"pathRegex", "pathTemplate", "allowedQueryParams", "supportedHeaders", "transforms"})
+@JsonPropertyOrder({"pathRegex", "pathTemplate", "allowedQueryParams", "supportedHeaders",
+        "transforms"})
 @Builder(toBuilder = true)
 @With
-@AllArgsConstructor //for builder
-@NoArgsConstructor //for Jackson
+@AllArgsConstructor // for builder
+@NoArgsConstructor // for Jackson
 @Getter
 public class Endpoint {
 
@@ -21,8 +22,8 @@ public class Endpoint {
      * path template, eg, /api/v1/{id}/foo/{bar}
      *
      * @see "https://swagger.io/docs/specification/paths-and-operations/"
-     * <p>
-     * if provided, has the effect of pathRegex = "^/api/v1/[^/]+/foo/[^/]+$"
+     *      <p>
+     *      if provided, has the effect of pathRegex = "^/api/v1/[^/]+/foo/[^/]+$"
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String pathTemplate;
@@ -45,9 +46,9 @@ public class Endpoint {
      * schemas used to validate path parameters
      *
      * <p>
-     *   - if provided, values matched to a named parameter in the pathTemplate will be validated
-     *     against the schema provided here.
-     *   - if no schema is provided for a given parameter, any values is permitted.
+     * - if provided, values matched to a named parameter in the pathTemplate will be validated
+     * against the schema provided here.
+     * - if no schema is provided for a given parameter, any values is permitted.
      * </p>
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -58,7 +59,7 @@ public class Endpoint {
         return Optional.ofNullable(pathParameterSchemas);
     }
 
-    //if provided, only query params in this list will be allowed
+    // if provided, only query params in this list will be allowed
     @JsonInclude(JsonInclude.Include.NON_NULL)
     List<String> allowedQueryParams;
 
@@ -71,9 +72,9 @@ public class Endpoint {
      * schemas used to validate query parameters
      *
      * <p>
-     *   - if a schema is provided for a named parameter here, the value for this parameter in the
-     *     request will be validated against the schema.
-     *   - if no scheam provided for the named parameter, any value is permitted.
+     * - if a schema is provided for a named parameter here, the value for this parameter in the
+     * request will be validated against the schema.
+     * - if no scheam provided for the named parameter, any value is permitted.
      * </p>
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -83,6 +84,8 @@ public class Endpoint {
     public Optional<Map<String, QueryParameterSchema>> getQueryParamSchemasOptional() {
         return Optional.ofNullable(queryParamSchemas);
     }
+
+
 
     /**
      * if provided, only HTTP methods in this list will be allowed (eg, GET, HEAD, etc)
@@ -112,11 +115,19 @@ public class Endpoint {
     }
 
     /**
+     * schema used to validate the request body, if any
+     * if provided, the request body will be validated against the schema provided here.
+     * if no schema is provided, any request body is permitted.
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    RequestBodySchema requestBody;
+
+    /**
      * if provided HTTP response will be *filtered* against this schema, with any nodes in the JSON
      * that are not present in the schema being removed.
      *
      * (do not confuse this with plain JSON Schema, which is typically used for validation rather
-     *  than filtering)
+     * than filtering)
      *
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -136,8 +147,10 @@ public class Endpoint {
     public Endpoint clone() {
         return this.toBuilder()
                 .clearTransforms()
-                .transforms(this.transforms.stream().map(Transform::clone).collect(Collectors.toList()))
-                .allowedQueryParams(this.getAllowedQueryParamsOptional().map(ArrayList::new).orElse(null))
+                .transforms(
+                        this.transforms.stream().map(Transform::clone).collect(Collectors.toList()))
+                .allowedQueryParams(
+                        this.getAllowedQueryParamsOptional().map(ArrayList::new).orElse(null))
                 .pathTemplate(this.pathTemplate)
                 .allowedMethods(this.allowedMethods)
                 .allowedRequestHeadersToForward(this.allowedRequestHeadersToForward)

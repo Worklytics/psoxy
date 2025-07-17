@@ -110,6 +110,17 @@ variable "example_api_calls" {
   default     = []
 }
 
+variable "example_api_requests" {
+  type = list(object({
+    method       = optional(string, "GET")
+    path         = string
+    content_type = optional(string, "application/json")
+    body         = optional(string, null)
+  }))
+  description = "example API requests with method, content_type and body parameters that can be called via proxy"
+  default     = []
+}
+
 variable "example_api_calls_user_to_impersonate" {
   type        = string
   description = "if example endpoints require impersonation of a specific user, use this id"

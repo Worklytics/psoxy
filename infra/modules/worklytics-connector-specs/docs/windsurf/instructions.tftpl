@@ -1,0 +1,5 @@
+See Windsurf's documentation for the latest, but as of July 10, 2025, you must create a Service Key and fill that as a secret in your host platform. The Proxy will then use this value as the `service_key` parameter when connecting to Windsurf's API.
+
+1. An admin user must navigate to the "service key section" of the Settings page, and create a Service Key with a role that has the "Teams Read-only" permissions.
+
+2. Copy the service key into the proxy, as `${path_to_instance_parameters}SERVICE_KEY` parameter value in your proxy's host platform. 
