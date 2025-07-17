@@ -16,7 +16,7 @@ There are THREE components to auth:
   - `github_copilot_installation_id` / `github_installation_id` --> fill in your `terraform.tfvars` file with the installation id of your GitHub App, which is used to generate the `REFRESH_URL` env var on the lambda/cloud function.
 
 Common pitfalls:
-  - creating a OAuth App instead of a GitHub App ; these are NOT the same thing.
+  - creating a OAuth App instead of a GitHub App ; these are NOT the same thing; we use GitHub app as it acts independently of the user. Check this [link](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps) with more information about its differences. 
 
 ### 401 Unauthorized, No JSON body
 
