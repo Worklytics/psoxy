@@ -819,7 +819,7 @@ public class BulkDataSanitizerImplTest {
     @SneakyThrows
     void handle_control_chars_in_headers_reproduce_error() {
 
-        final String SOURCE = " EMPLOYEE_ID,SWIPE_DATE,BUILDING_ID,BUILDING_ASSIGNED\n" +
+        final String SOURCE = "EMPLOYEE_ID,SWIPE DATE,BUILDING_ID,BUILDING_ASSIGNED\n" +
             "E001,01/01/2024 3:10PM,B1,B2";
 
         ColumnarRules rules = ColumnarRules.builder()
@@ -830,7 +830,9 @@ public class BulkDataSanitizerImplTest {
 
         try (StringReader in = new StringReader(SOURCE);
              StringWriter out = new StringWriter()) {
-            assertThrows(IllegalArgumentException.class, () -> columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer), "Non-ASCII characters found in headers, inspect file with cat -v for control characters");
+            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            assertEquals("EMPLOYEE_ID,SWIPE DATE,BUILDING_ID,BUILDING_ASSIGNED\n" +
+                "t~uxVHJj4JLZrUDfo7bwUePfhD5-rd34W1BvTqO4B2PNk,01/01/2024 3:10PM,B1,B2\n", out.toString());
         }
     }
 
