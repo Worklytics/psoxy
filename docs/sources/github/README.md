@@ -16,7 +16,7 @@ There are THREE components to auth:
   - `github_copilot_installation_id` / `github_installation_id` --> fill in your `terraform.tfvars` file with the installation id of your GitHub App, which is used to generate the `REFRESH_URL` env var on the lambda/cloud function.
 
 Common pitfalls:
-  - creating a OAuth App instead of a GitHub App ; these are NOT the same thing; we use GitHub app as it acts independently of the user. Check this [link](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps) with more information about its differences. 
+  - creating a OAuth App instead of a GitHub App ; these are NOT the same thing; we use GitHub app as it acts independently of the user. Check this [link](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps) with more information about its differences.
 
 ### 401 Unauthorized, No JSON body
 
@@ -34,6 +34,8 @@ Seen when installation id is wrong. Double check that your URL of the installati
 `https://github.com/organizations/Acme-org/settings/installations/12341234`
 
 Then the installation id is `12341234`. You should fill this in your `terraform.tfvars` file as `github_copilot_installation_id`, which is then used to generate the `REFRESH_URL` env var on the lambda/cloud function.
+
+Also seen when your enterprise has IP Restriction policies in place; modify these policies to allow the IPs of your proxy instances to reach the GitHub API.
 
 ### 404 Not Found
 
