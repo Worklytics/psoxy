@@ -901,6 +901,27 @@ public class BulkDataSanitizerImplTest {
         }
     }
 
+    @Test
+    @SneakyThrows
+    void handle_trailing_commas_and_windows_newlines() {
+
+        final String SOURCE = "EMPLOYEE_ID,SWIPE_DATE,BUILDING_ID,BUILDING_ASSIGNED,\r\n" +
+            "E001,01/01/2024 3:10PM,B1,B2,\r\n";
+
+        ColumnarRules rules = ColumnarRules.builder()
+            .pseudonymFormat(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+            .columnToPseudonymize("EMPLOYEE_ID")
+            .build();
+        columnarFileSanitizerImpl.setRules(rules);
+
+        try (StringReader in = new StringReader(SOURCE);
+             StringWriter out = new StringWriter()) {
+            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            assertEquals("EMPLOYEE_ID,SWIPE_DATE,BUILDING_ID,BUILDING_ASSIGNED,\r\n" +
+                "t~uxVHJj4JLZrUDfo7bwUePfhD5-rd34W1BvTqO4B2PNk,01/01/2024 3:10PM,B1,B2,\r\n", out.toString());
+        }
+    }
+
 
     class StubPseudonymizer implements Pseudonymizer {
 
