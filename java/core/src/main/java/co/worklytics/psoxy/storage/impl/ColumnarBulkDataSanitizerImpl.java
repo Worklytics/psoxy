@@ -95,14 +95,15 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
         Preconditions.checkArgument(records.getHeaderMap() != null, "Failed to parse header from file");
 
-        List<String> nonAsciiHeaders = records.getHeaderMap().keySet().stream().filter(s -> !StringUtils.isAsciiPrintable(s)).collect(Collectors.toList());
+        List<String> nonAsciiHeaders = records.getHeaderMap().keySet().stream().filter(s -> !StringUtils.isAsciiPrintable(s)).map(s -> "\"" + s + "\"").collect(Collectors.toList());
         if (!nonAsciiHeaders.isEmpty()) {
-            log.warning("CSV file has header(s) with non-ASCII characters: " + String.join(", ", nonAsciiHeaders));
+            log.warning("CSV file has header(s) with non-ASCII characters, which is unusual and may cause issues: " + String.join(", ", nonAsciiHeaders));
             List<String> withNonBreakingSpace = nonAsciiHeaders.stream()
                 .filter(s -> s.contains(" "))
                 .collect(Collectors.toList());
             if (!withNonBreakingSpace.isEmpty()) {
-                log.warning("CSV file has header(s) with non-breaking space character (U+00A0): " + String.join("\",\"", withNonBreakingSpace));
+                // try `cat -v` on linux, `vis` on mac to be able to see the non-breaking space character in the raw files
+                log.warning("CSV file has header(s) with non-breaking space character (U+00A0); any references to these columns in your rules must use the same: " + String.join("\",\"", withNonBreakingSpace));
             }
         }
 
