@@ -13,7 +13,6 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.messages.payload.headers[?(!(@.name =~ /^From|To|Cc|Bcc|X-Original-Sender|Delivered-To|Sender|Message-ID|Date|In-Reply-To|Original-Message-ID|References$/i))]"
-        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/gmail/v1/users/{mailboxId}/messages/{messageId}"
     transforms:
       - !<pseudonymizeEmailHeader>
