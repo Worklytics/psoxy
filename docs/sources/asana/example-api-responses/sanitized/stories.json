@@ -8,11 +8,11 @@
       "resource_subtype":"comment_added",
       "sticker_name":"dancing_unicorn",
       "assignee":{
-        "gid":"{\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
+        "gid":"t~r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE",
         "resource_type":"user"
       },
       "created_by":{
-        "gid":"{\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
+        "gid":"t~r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE",
         "resource_type":"user"
       },
       "custom_field":{
@@ -60,7 +60,7 @@
         "resource_type":"task"
       },
       "follower":{
-        "gid":"{\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
+        "gid":"t~r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE",
         "resource_type":"user"
       },
       "hearted":false,
@@ -68,7 +68,7 @@
         {
           "gid":"12345",
           "user":{
-            "gid":"{\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
+            "gid":"t~r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE",
             "resource_type":"user"
           }
         }
@@ -79,7 +79,7 @@
         {
           "gid":"12345",
           "user":{
-            "gid":"{\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
+            "gid":"t~r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE",
             "resource_type":"user"
           }
         }
@@ -148,7 +148,7 @@
         "resource_type":"story",
         "created_at":"2012-02-22T02:06:58.147Z",
         "created_by":{
-          "gid":"{\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\"}",
+          "gid":"t~r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE",
           "resource_type":"user"
         },
         "resource_subtype":"comment_added",

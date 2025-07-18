@@ -152,7 +152,7 @@ class SanitizerUtilsTest {
             Transform.Pseudonymize.builder().includeReversible(true).build());
 
         assertEquals(
-            "{\"hash\":\"Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0M\",\"reversible\":\"p~Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0MzTTbTCc7BcR53imT1qZgI\"}",
+            "p~Z7Bnl_VVOwSmfP9kuT0_Ub-5ic4cCVI4wCHArL1hU0MzTTbTCc7BcR53imT1qZgI",
             f.map("asfa", jsonConfiguration));
     }
 

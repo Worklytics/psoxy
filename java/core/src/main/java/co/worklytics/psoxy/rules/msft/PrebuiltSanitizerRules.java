@@ -115,6 +115,7 @@ public class PrebuiltSanitizerRules {
             .build())
         .transform(Transform.Pseudonymize.builder()
             .includeOriginal(true)
+            .encoding(PseudonymEncoder.Implementations.JSON)
             .jsonPath("$..mail")
             .build())
         .build();

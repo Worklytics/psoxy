@@ -32,7 +32,7 @@ endpoints:
           - "$..id"
           - "$..node_id"
           - "$..email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..login"
@@ -68,7 +68,7 @@ endpoints:
           - "$..id"
           - "$..node_id"
           - "$..email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..login"
@@ -90,7 +90,7 @@ endpoints:
           - "$..emails[*].value"
           - "$..guid"
           - "$..organizationVerifiedDomainEmails[*]"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..login"
@@ -406,7 +406,7 @@ endpoints:
           - "$..id"
           - "$..node_id"
           - "$..email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..login"
@@ -430,7 +430,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['owner'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['owner'].login"
@@ -463,7 +463,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['author','committer'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['author','committer'].login"
@@ -487,7 +487,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['author','committer'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['author','committer'].login"
@@ -513,14 +513,14 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..author.email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$..['requested_reviewers[*]','owner','user','closed_by','actor','assignee','creator','merged_by'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
       - !<pseudonymize>
         jsonPaths:
           - "$..['requested_reviewers[*]','owner','user','closed_by','actor','assignee','creator','merged_by'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['requested_reviewers[*]','owner','user','closed_by','actor','assignee','creator','merged_by'].login"
@@ -532,7 +532,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].login"
@@ -560,7 +560,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].login"
@@ -577,7 +577,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].login"
@@ -598,7 +598,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user','closed_by','assignee','creator'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['user','closed_by','assignee','creator'].login"
@@ -610,7 +610,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].login"
@@ -641,7 +641,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['owner','user','closed_by','assignee','creator'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['owner','user','closed_by','assignee','creator'].login"
@@ -653,7 +653,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].login"
@@ -676,7 +676,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].login"
@@ -705,7 +705,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['author','committer','review_requester','owner','user','requested_reviewer','closed_by','assigner','actor','assignee','creator'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['author','committer','review_requester','owner','user','requested_reviewer','closed_by','assigner','actor','assignee','creator'].login"
@@ -734,7 +734,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['author','committer','review_requester','owner','user','requested_reviewer','closed_by','assigner','actor','assignee','creator'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['author','committer','review_requester','owner','user','requested_reviewer','closed_by','assigner','actor','assignee','creator'].login"
@@ -751,7 +751,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].login"
@@ -768,7 +768,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].login"
@@ -790,7 +790,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].login"
@@ -822,7 +822,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['owner','user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['owner','user','closed_by','enabled_by','actor','assignee','creator','merged_by'].login"
@@ -834,7 +834,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..requested_reviewers[*].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..requested_reviewers[*].login"
@@ -846,7 +846,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].login"
@@ -871,7 +871,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].login"
@@ -893,7 +893,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['user'].login"
@@ -917,7 +917,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['author','committer'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['author','committer'].login"
@@ -940,7 +940,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..['owner','user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..['owner','user','closed_by','enabled_by','actor','assignee','creator','merged_by'].login"
@@ -952,7 +952,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..requested_reviewers[*].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..requested_reviewers[*].login"
@@ -964,7 +964,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].['id','node_id','email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..assignees[*].login"
