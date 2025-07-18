@@ -2,13 +2,13 @@
 METHOD=$${1:-}
 API_PATH=$${2:-${try(example_api_requests[0].path, "")}}
 CONTENT_TYPE=$${3:-${try(example_api_requests[0].content_type, "")}}
-BODY=$${4:-${try(example_api_requests[0].body, "")}}
+BODY=$${4:-${example_api_requests[0].body != null ? example_api_requests[0].body : ""}}
 echo "Quick test of ${function_name} ..."
 
 ${command_cli_call} -u "${proxy_endpoint_url}/" --health-check
 
 
-${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param} -m $METHOD -b $BODY 
+${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param} -m $METHOD -b $BODY
 
 %{ if enable_async_processing ~}
 ${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param} -m $METHOD -b $BODY --async
@@ -16,5 +16,5 @@ ${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param} -
 
 echo "Invoke this script with any of the following as arguments to test other endpoints:"
 %{ for example_api_request in example_api_requests ~}
-    printf "\t'%s'\n" ${example_api_request.method} "${example_api_request.path}" "${example_api_request.content_type}" "${example_api_request.body}"
+    printf "\t'%s'\n" ${example_api_request.method} "${example_api_request.path}" "${example_api_request.content_type}" "${example_api_request.body != null ? example_api_request.body : ""}"
 %{ endfor ~}
