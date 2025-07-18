@@ -2,8 +2,8 @@
 
 METHOD=$${1:-"GET"}
 API_PATH=$${2:-${try(example_api_get_requests[0].path, "")}}
-CONTENT_TYPE=$${3:-${try(example_api_requests[0].content_type, "")}}
-BODY=$${4:-${example_api_requests[0].body != null ? example_api_requests[0].body : ""}}
+CONTENT_TYPE=$${3:-""}
+BODY=$${4:-""}}
 
 echo "Quick test of ${function_name} ..."
 
