@@ -3,7 +3,7 @@
     "id":"22249084964",
     "type":"PushEvent",
     "actor":{
-      "id":"{\"hash\":\"mWRxENiVY9pLcd6BNoiho4FRSI8ytk5pGMyIw3YOR6g\"}",
+      "id":"t~mWRxENiVY9pLcd6BNoiho4FRSI8ytk5pGMyIw3YOR6g",
       "login":"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f"
     },
     "repo":{
@@ -20,7 +20,7 @@
         {
           "sha":"7a8f3ac80e2ad2f6842cb86f576d4bfe2c03e300",
           "author":{
-            "email":"{\"domain\":\"github.com\",\"hash\":\"Zy85rjj9DKgAEgGc-2A540W7Iw-hy-4WhX7rIm3374U\"}"
+            "email":"t~Zy85rjj9DKgAEgGc-2A540W7Iw-hy-4WhX7rIm3374U@github.com"
           },
           "distinct":true
         }
@@ -33,7 +33,7 @@
     "id":"22237752260",
     "type":"WatchEvent",
     "actor":{
-      "id":"{\"hash\":\"mWRxENiVY9pLcd6BNoiho4FRSI8ytk5pGMyIw3YOR6g\"}",
+      "id":"t~mWRxENiVY9pLcd6BNoiho4FRSI8ytk5pGMyIw3YOR6g",
       "login":"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f"
     },
     "repo":{

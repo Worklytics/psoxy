@@ -7,9 +7,9 @@
   "total_records":1,
   "meetings":[
     {
-      "account_id":"{\"hash\":\"nlHiScGfMS77p24PutB76lkjtLRxGYPTM7PC4dTqfD0\"}",
+      "account_id":"t~nlHiScGfMS77p24PutB76lkjtLRxGYPTM7PC4dTqfD0",
       "duration":20,
-      "host_id":"{\"hash\":\"kmx5HeZ7_H2oGMiEqydwvmXf9VxzbgyOYBKUresy3Ws\"}",
+      "host_id":"t~kmx5HeZ7_H2oGMiEqydwvmXf9VxzbgyOYBKUresy3Ws",
       "id":6840331990,
       "recording_count":22,
       "start_time":"2021-03-18T05:41:36Z",

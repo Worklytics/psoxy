@@ -7,7 +7,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<textDigest>
         jsonPaths:
           - "$..attachments[*].content"
@@ -76,4 +76,4 @@ endpoints:
           - "$..onPremisesDistinguishedName"
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"

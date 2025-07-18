@@ -12,14 +12,14 @@
       "endDateTime":"2023-09-25T09:28:41Z",
       "organizer":{
         "user":{
-          "id":"{\"hash\":\"_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU\"}",
+          "id":"t~_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU",
           "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
         }
       },
       "organizer_v2":{
         "identity":{
           "user":{
-            "id":"{\"hash\":\"_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU\"}",
+            "id":"t~_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU",
             "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
           }
         }
@@ -37,7 +37,7 @@
       "endDateTime":"2023-09-25T14:03:40Z",
       "organizer":{
         "user":{
-          "id":"{\"hash\":\"_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU\"}",
+          "id":"t~_NMipkQ9Oebtrm7A33WQtT_wp1HCdXFRkhibMxTZGpU",
           "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
         }
       },

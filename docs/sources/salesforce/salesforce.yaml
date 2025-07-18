@@ -18,7 +18,7 @@ endpoints:
           - "$..CreatedById"
           - "$..LastModifiedById"
           - "$..OwnerId"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/composite/sobjects/User[?][^/]*"
     allowedQueryParams:
       - "ids"
@@ -39,7 +39,7 @@ endpoints:
           - "$..ManagerId"
           - "$..Email"
           - "$..Id"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)User(%20|\\\
     +)WHERE(%20|\\+)LastModifiedDate.*$"
     transforms:
@@ -57,14 +57,10 @@ endpoints:
           - "$.records[*].Email"
           - "$.records[*].Id"
         applyOnlyWhen: "$.records[?(@.attributes.type == \"User\")]"
-        encoding: "JSON"
-    allowedRequestHeadersToForward:
-      - "Sforce-Query-Options"
+        encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
       properties:
-        totalSize:
-          type: "integer"
         done:
           type: "boolean"
         nextRecordsUrl:
@@ -84,20 +80,15 @@ endpoints:
                       constant: "User"
             _then:
               properties:
-                attributes:
-                  type: "object"
-                  properties:
-                    type:
-                      type: "string"
-                Alias:
-                  type: "string"
                 AccountId:
+                  type: "string"
+                Alias:
                   type: "string"
                 ContactId:
                   type: "string"
-                CreatedDate:
-                  type: "string"
                 CreatedById:
+                  type: "string"
+                CreatedDate:
                   type: "string"
                 Email:
                   type: "string"
@@ -117,12 +108,19 @@ endpoints:
                   type: "string"
                 TimeZoneSidKey:
                   type: "string"
-                Username:
-                  type: "string"
                 UserRoleId:
                   type: "string"
                 UserType:
                   type: "string"
+                Username:
+                  type: "string"
+                attributes:
+                  type: "object"
+                  properties:
+                    type:
+                      type: "string"
+        totalSize:
+          type: "integer"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)Account(%20|\\\
     +)WHERE(%20|\\+)LastModifiedDate.*$"
     transforms:
@@ -132,14 +130,10 @@ endpoints:
           - "$.records[*].LastModifiedById"
           - "$.records[*].OwnerId"
         applyOnlyWhen: "$.records[?(@.attributes.type == \"Account\")]"
-        encoding: "JSON"
-    allowedRequestHeadersToForward:
-      - "Sforce-Query-Options"
+        encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
       properties:
-        totalSize:
-          type: "integer"
         done:
           type: "boolean"
         nextRecordsUrl:
@@ -159,26 +153,98 @@ endpoints:
                       constant: "Account"
             _then:
               properties:
-                attributes:
+                ActivityHistories:
                   type: "object"
                   properties:
-                    type:
+                    done:
+                      type: "boolean"
+                    nextRecordsUrl:
                       type: "string"
-                Id:
-                  type: "string"
+                    records:
+                      type: "array"
+                      items:
+                        type: "object"
+                        properties: {}
+                        _if:
+                          properties:
+                            attributes:
+                              type: "object"
+                              properties:
+                                type:
+                                  type: "string"
+                                  constant: "ActivityHistory"
+                        _then:
+                          properties:
+                            AccountId:
+                              type: "string"
+                            ActivityDate:
+                              type: "string"
+                            ActivityDateTime:
+                              type: "string"
+                            ActivitySubtype:
+                              type: "string"
+                            ActivityType:
+                              type: "string"
+                            CallDurationInSeconds:
+                              type: "integer"
+                            CallType:
+                              type: "string"
+                            CreatedById:
+                              type: "string"
+                            CreatedDate:
+                              type: "string"
+                            DurationInMinutes:
+                              type: "integer"
+                            EndDateTime:
+                              type: "string"
+                            Id:
+                              type: "string"
+                            IsAllDayEvent:
+                              type: "boolean"
+                            IsDeleted:
+                              type: "boolean"
+                            IsHighPriority:
+                              type: "boolean"
+                            IsTask:
+                              type: "boolean"
+                            LastModifiedById:
+                              type: "string"
+                            LastModifiedDate:
+                              type: "string"
+                            OwnerId:
+                              type: "string"
+                            Priority:
+                              type: "string"
+                            StartDateTime:
+                              type: "string"
+                            Status:
+                              type: "string"
+                            WhatId:
+                              type: "string"
+                            WhoId:
+                              type: "string"
+                            attributes:
+                              type: "object"
+                              properties:
+                                type:
+                                  type: "string"
+                    totalSize:
+                      type: "integer"
                 AnnualRevenue:
                   type: "number"
+                CreatedById:
+                  type: "string"
                 CreatedDate:
                   type: "string"
-                CreatedById:
+                Id:
                   type: "string"
                 IsDeleted:
                   type: "string"
                 LastActivityDate:
                   type: "string"
-                LastModifiedDate:
-                  type: "string"
                 LastModifiedById:
+                  type: "string"
+                LastModifiedDate:
                   type: "string"
                 NumberOfEmployees:
                   type: "integer"
@@ -194,83 +260,13 @@ endpoints:
                   type: "string"
                 Type:
                   type: "string"
-                ActivityHistories:
+                attributes:
                   type: "object"
                   properties:
-                    totalSize:
-                      type: "integer"
-                    done:
-                      type: "boolean"
-                    nextRecordsUrl:
+                    type:
                       type: "string"
-                    records:
-                      type: "array"
-                      items:
-                        type: "object"
-                        properties: {}
-                        _if:
-                          properties:
-                            attributes:
-                              type: "object"
-                              properties:
-                                type:
-                                  type: "string"
-                                  constant: "ActivityHistory"
-                        _then:
-                          properties:
-                            attributes:
-                              type: "object"
-                              properties:
-                                type:
-                                  type: "string"
-                            AccountId:
-                              type: "string"
-                            ActivityDate:
-                              type: "string"
-                            ActivityDateTime:
-                              type: "string"
-                            ActivitySubtype:
-                              type: "string"
-                            ActivityType:
-                              type: "string"
-                            CallDurationInSeconds:
-                              type: "integer"
-                            CallType:
-                              type: "string"
-                            CreatedDate:
-                              type: "string"
-                            CreatedById:
-                              type: "string"
-                            DurationInMinutes:
-                              type: "integer"
-                            EndDateTime:
-                              type: "string"
-                            Id:
-                              type: "string"
-                            IsAllDayEvent:
-                              type: "boolean"
-                            IsDeleted:
-                              type: "boolean"
-                            IsHighPriority:
-                              type: "boolean"
-                            IsTask:
-                              type: "boolean"
-                            LastModifiedDate:
-                              type: "string"
-                            LastModifiedById:
-                              type: "string"
-                            OwnerId:
-                              type: "string"
-                            Priority:
-                              type: "string"
-                            StartDateTime:
-                              type: "string"
-                            Status:
-                              type: "string"
-                            WhatId:
-                              type: "string"
-                            WhoId:
-                              type: "string"
+        totalSize:
+          type: "integer"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)ActivityHistories.*$"
     transforms:
       - !<pseudonymize>
@@ -279,14 +275,10 @@ endpoints:
           - "$.records[*].ActivityHistories.records[*].LastModifiedById"
           - "$.records[*].ActivityHistories.records[*].OwnerId"
           - "$.records[*].ActivityHistories.records[*].WhoId"
-        encoding: "JSON"
-    allowedRequestHeadersToForward:
-      - "Sforce-Query-Options"
+        encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
       properties:
-        totalSize:
-          type: "integer"
         done:
           type: "boolean"
         nextRecordsUrl:
@@ -306,16 +298,9 @@ endpoints:
                       constant: "Account"
             _then:
               properties:
-                attributes:
-                  type: "object"
-                  properties:
-                    type:
-                      type: "string"
                 ActivityHistories:
                   type: "object"
                   properties:
-                    totalSize:
-                      type: "integer"
                     done:
                       type: "boolean"
                     nextRecordsUrl:
@@ -335,11 +320,6 @@ endpoints:
                                   constant: "ActivityHistory"
                         _then:
                           properties:
-                            attributes:
-                              type: "object"
-                              properties:
-                                type:
-                                  type: "string"
                             AccountId:
                               type: "string"
                             ActivityDate:
@@ -354,9 +334,9 @@ endpoints:
                               type: "integer"
                             CallType:
                               type: "string"
-                            CreatedDate:
-                              type: "string"
                             CreatedById:
+                              type: "string"
+                            CreatedDate:
                               type: "string"
                             DurationInMinutes:
                               type: "integer"
@@ -372,9 +352,9 @@ endpoints:
                               type: "boolean"
                             IsTask:
                               type: "boolean"
-                            LastModifiedDate:
-                              type: "string"
                             LastModifiedById:
+                              type: "string"
+                            LastModifiedDate:
                               type: "string"
                             OwnerId:
                               type: "string"
@@ -388,6 +368,20 @@ endpoints:
                               type: "string"
                             WhoId:
                               type: "string"
+                            attributes:
+                              type: "object"
+                              properties:
+                                type:
+                                  type: "string"
+                    totalSize:
+                      type: "integer"
+                attributes:
+                  type: "object"
+                  properties:
+                    type:
+                      type: "string"
+        totalSize:
+          type: "integer"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/query/.*"
     transforms:
       - !<redact>
@@ -404,14 +398,14 @@ endpoints:
           - "$.records[*].Email"
           - "$.records[*].Id"
         applyOnlyWhen: "$.records[?(@.attributes.type == \"User\")]"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$.records[*].CreatedById"
           - "$.records[*].LastModifiedById"
           - "$.records[*].OwnerId"
         applyOnlyWhen: "$.records[?(@.attributes.type == \"Account\")]"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$.records[*].ActivityHistories.records[*].CreatedById"
@@ -420,14 +414,10 @@ endpoints:
           - "$.records[*].ActivityHistories.records[*].WhoId"
         applyOnlyWhen: "$.records[*].ActivityHistories.records[?(@.attributes.type ==\
       \ \"ActivityHistory\")]"
-        encoding: "JSON"
-    allowedRequestHeadersToForward:
-      - "Sforce-Query-Options"
+        encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
       properties:
-        totalSize:
-          type: "integer"
         done:
           type: "boolean"
         nextRecordsUrl:
@@ -448,20 +438,15 @@ endpoints:
                           constant: "User"
                 _then:
                   properties:
-                    attributes:
-                      type: "object"
-                      properties:
-                        type:
-                          type: "string"
-                    Alias:
-                      type: "string"
                     AccountId:
+                      type: "string"
+                    Alias:
                       type: "string"
                     ContactId:
                       type: "string"
-                    CreatedDate:
-                      type: "string"
                     CreatedById:
+                      type: "string"
+                    CreatedDate:
                       type: "string"
                     Email:
                       type: "string"
@@ -481,12 +466,17 @@ endpoints:
                       type: "string"
                     TimeZoneSidKey:
                       type: "string"
-                    Username:
-                      type: "string"
                     UserRoleId:
                       type: "string"
                     UserType:
                       type: "string"
+                    Username:
+                      type: "string"
+                    attributes:
+                      type: "object"
+                      properties:
+                        type:
+                          type: "string"
               - type: "object"
                 properties: {}
                 _if:
@@ -499,46 +489,9 @@ endpoints:
                           constant: "Account"
                 _then:
                   properties:
-                    attributes:
-                      type: "object"
-                      properties:
-                        type:
-                          type: "string"
-                    Id:
-                      type: "string"
-                    AnnualRevenue:
-                      type: "number"
-                    CreatedDate:
-                      type: "string"
-                    CreatedById:
-                      type: "string"
-                    IsDeleted:
-                      type: "string"
-                    LastActivityDate:
-                      type: "string"
-                    LastModifiedDate:
-                      type: "string"
-                    LastModifiedById:
-                      type: "string"
-                    NumberOfEmployees:
-                      type: "integer"
-                    OwnerId:
-                      type: "string"
-                    Ownership:
-                      type: "string"
-                    ParentId:
-                      type: "string"
-                    Rating:
-                      type: "string"
-                    Sic:
-                      type: "string"
-                    Type:
-                      type: "string"
                     ActivityHistories:
                       type: "object"
                       properties:
-                        totalSize:
-                          type: "integer"
                         done:
                           type: "boolean"
                         nextRecordsUrl:
@@ -558,11 +511,6 @@ endpoints:
                                       constant: "ActivityHistory"
                             _then:
                               properties:
-                                attributes:
-                                  type: "object"
-                                  properties:
-                                    type:
-                                      type: "string"
                                 AccountId:
                                   type: "string"
                                 ActivityDate:
@@ -577,9 +525,9 @@ endpoints:
                                   type: "integer"
                                 CallType:
                                   type: "string"
-                                CreatedDate:
-                                  type: "string"
                                 CreatedById:
+                                  type: "string"
+                                CreatedDate:
                                   type: "string"
                                 DurationInMinutes:
                                   type: "integer"
@@ -595,9 +543,9 @@ endpoints:
                                   type: "boolean"
                                 IsTask:
                                   type: "boolean"
-                                LastModifiedDate:
-                                  type: "string"
                                 LastModifiedById:
+                                  type: "string"
+                                LastModifiedDate:
                                   type: "string"
                                 OwnerId:
                                   type: "string"
@@ -611,3 +559,47 @@ endpoints:
                                   type: "string"
                                 WhoId:
                                   type: "string"
+                                attributes:
+                                  type: "object"
+                                  properties:
+                                    type:
+                                      type: "string"
+                        totalSize:
+                          type: "integer"
+                    AnnualRevenue:
+                      type: "number"
+                    CreatedById:
+                      type: "string"
+                    CreatedDate:
+                      type: "string"
+                    Id:
+                      type: "string"
+                    IsDeleted:
+                      type: "string"
+                    LastActivityDate:
+                      type: "string"
+                    LastModifiedById:
+                      type: "string"
+                    LastModifiedDate:
+                      type: "string"
+                    NumberOfEmployees:
+                      type: "integer"
+                    OwnerId:
+                      type: "string"
+                    Ownership:
+                      type: "string"
+                    ParentId:
+                      type: "string"
+                    Rating:
+                      type: "string"
+                    Sic:
+                      type: "string"
+                    Type:
+                      type: "string"
+                    attributes:
+                      type: "object"
+                      properties:
+                        type:
+                          type: "string"
+        totalSize:
+          type: "integer"

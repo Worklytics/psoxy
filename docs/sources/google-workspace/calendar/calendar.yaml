@@ -8,13 +8,13 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.id"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/calendar/v3/calendars/{accountId}/events"
     transforms:
       - !<pseudonymize>
         jsonPaths:
           - "$..email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.summary"
@@ -176,7 +176,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/calendar/v3/users/{accountId}/settings"
   - pathTemplate: "/calendar/v3/users/{accountId}/calendarList"
     transforms:

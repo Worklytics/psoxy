@@ -42,7 +42,7 @@ endpoints:
           - "$..onPremisesDistinguishedName"
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..id"
@@ -116,8 +116,8 @@ endpoints:
           - "$..onPremisesDistinguishedName"
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..id"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"

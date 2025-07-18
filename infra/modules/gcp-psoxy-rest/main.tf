@@ -266,12 +266,13 @@ resource "local_file" "test_script" {
   filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
   file_permission = "755"
   content = templatefile("${path.module}/test_script.tftpl", {
-    proxy_endpoint_url      = local.proxy_endpoint_url,
-    function_name           = var.instance_id,
-    impersonation_param     = local.impersonation_param,
-    command_cli_call        = local.command_cli_call,
-    example_api_requests    = local.all_example_api_requests,
-    enable_async_processing = var.enable_async_processing
+    proxy_endpoint_url        = local.proxy_endpoint_url,
+    function_name             = var.instance_id,
+    impersonation_param       = local.impersonation_param,
+    command_cli_call          = local.command_cli_call,
+    example_api_get_requests  = [for r in local.all_example_api_requests : r if r.method == "GET"],
+    example_api_post_requests = [for r in local.all_example_api_requests : r if r.method == "POST" && r.body != null], # body being null will blow up the templating
+    enable_async_processing   = var.enable_async_processing
   })
 }
 

@@ -20,12 +20,12 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.data[*].email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$.data[*].gid"
         includeReversible: true
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/api/1.0/workspaces/{workspaceId}/teams"
     allowedQueryParams:
       - "limit"
@@ -83,7 +83,7 @@ endpoints:
           - "$.data[*].custom_fields[*].people_value[*].gid"
           - "$.data[*].followers[*].gid"
           - "$.data[*]..email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/api/1.0/tasks/{taskId}"
     allowedQueryParams:
       - "limit"
@@ -111,7 +111,7 @@ endpoints:
           - "$.data.custom_fields[*].people_value[*].gid"
           - "$.data.followers[*].gid"
           - "$.data..email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/api/1.0/tasks/{taskId}/stories"
     allowedQueryParams:
       - "limit"
@@ -137,7 +137,7 @@ endpoints:
           - "$.data[*].likes[*].user.gid"
           - "$.data[*].story.created_by.gid"
           - "$.data[*]..email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/api/1.0/tasks/{taskId}/subtasks"
     allowedQueryParams:
       - "limit"
@@ -165,7 +165,7 @@ endpoints:
           - "$.data[*].custom_fields[*].people_value[*].gid"
           - "$.data[*].followers[*].gid"
           - "$.data[*]..email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/api/1.0/workspaces/{workspaceId}/tasks/search"
     allowedQueryParams:
       - "limit"
@@ -193,4 +193,4 @@ endpoints:
           - "$.data[*].custom_fields[*].people_value[*].gid"
           - "$.data[*].followers[*].gid"
           - "$.data[*]..email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"

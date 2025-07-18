@@ -4,8 +4,8 @@
   "members":[
     {
       "profile":{
-        "account_id":"{\"hash\":\"jZhmTOhV_8tNq3E_tPSJblmnPYNERff__TX5uh6HBG8\"}",
-        "email":"{\"domain\":\"seagull.com\",\"hash\":\"3hBvYidwm7M3dr99AXtSl-XoLLdz7zv7Q6wAoLQlCVU\"}",
+        "account_id":"t~jZhmTOhV_8tNq3E_tPSJblmnPYNERff__TX5uh6HBG8",
+        "email":"t~3hBvYidwm7M3dr99AXtSl-XoLLdz7zv7Q6wAoLQlCVU@seagull.com",
         "email_verified":false,
         "external_id":"244423",
         "groups":[
@@ -19,11 +19,11 @@
         "name":{ },
         "secondary_emails":[
           {
-            "email":"{\"domain\":\"strawberry.com\",\"hash\":\"SDocf39ydRQwm4B-qkfkodf8vgjoY_ormOShRpnPExs\"}",
+            "email":"t~SDocf39ydRQwm4B-qkfkodf8vgjoY_ormOShRpnPExs@strawberry.com",
             "is_verified":false
           },
           {
-            "email":"{\"domain\":\"orange.com\",\"hash\":\"oJHymm_W3TQ9P3nUA3Ef9DuQE_7D2uiedo68_yL03oM\"}",
+            "email":"t~oJHymm_W3TQ9P3nUA3Ef9DuQE_7D2uiedo68_yL03oM@orange.com",
             "is_verified":true
           }
         ],

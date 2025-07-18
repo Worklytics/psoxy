@@ -34,15 +34,15 @@ import javax.inject.Named;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.hc.core5.http.ContentType;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
-import com.avaulta.gateway.rules.JsonSchema;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.JsonSchemaFilterUtils;
-import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.avaulta.gateway.rules.ParameterSchemaUtils;
 import com.avaulta.gateway.rules.PathTemplateUtils;
+import org.apache.hc.core5.http.ContentType;
+import com.avaulta.gateway.rules.JsonSchema;
+import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
@@ -92,8 +92,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @AssistedInject
     public RESTApiSanitizerImpl(@Assisted RESTRules rules,
-            @Assisted Pseudonymizer pseudonymizer,
-            EmailAddressParser emailAddressParser) {
+                                @Assisted Pseudonymizer pseudonymizer,
+                                EmailAddressParser emailAddressParser) {
         this.rules = rules;
         this.pseudonymizer = pseudonymizer;
         this.emailAddressParser = emailAddressParser;
@@ -271,8 +271,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                     // despite jackson provider underneath, Jayway JSONPath seems not do deal with
                     // native jackson JsonNode
                     // TODO: figure out a way to streamline this parsing
-                    Object node = jsonConfiguration.jsonProvider().parse(
-                            objectMapper.writeValueAsString(objectMapper.readTree(parser)));
+                    Object node = jsonConfiguration.jsonProvider()
+                            .parse(objectMapper.writeValueAsString(objectMapper.readTree(parser)));
 
                     Object sanitized = sanitize(endpoint, node);
                     if (!first)
@@ -306,20 +306,18 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
      * you call this once per row in the response
      */
     private Object sanitize(Endpoint endpoint, Object jsonResponse) {
-        Object document = endpoint.getResponseSchemaOptional()
-                .map(schema -> {
-                    // q: this read
-                    try {
-                        // TODO: jayway jsonpath Object --> String --> jayway jsonpath Object here
-                        // is needlessly inefficient
-                        String json = jsonConfiguration.jsonProvider().toJson(jsonResponse);
-                        return jsonConfiguration.jsonProvider().parse(jsonSchemaFilterUtils
-                                .filterJsonBySchema(json, schema, getRootDefinitions()));
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .orElse(jsonResponse);
+        Object document = endpoint.getResponseSchemaOptional().map(schema -> {
+            // q: this read
+            try {
+                // TODO: jayway jsonpath Object --> String --> jayway jsonpath Object here is
+                // needlessly inefficient
+                String json = jsonConfiguration.jsonProvider().toJson(jsonResponse);
+                return jsonConfiguration.jsonProvider().parse(jsonSchemaFilterUtils
+                        .filterJsonBySchema(json, schema, getRootDefinitions()));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }).orElse(jsonResponse);
 
         if (ObjectUtils.isNotEmpty(endpoint.getTransforms())) {
             for (Transform transform : endpoint.getTransforms()) {
@@ -356,6 +354,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 .map(allowedParams -> allowedParams.containsAll(
                         queryParams.stream().map(Pair::getKey).collect(Collectors.toList())))
                 .orElse(true);
+
         return matchesAllowed
                 && endpoint.getQueryParamSchemasOptional()
                         .map(schemas -> parameterSchemaUtils.validateAll(schemas, queryParams))
@@ -394,6 +393,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                                 }
                             })
                             .orElse("");
+
                 }
             }
         }
@@ -428,9 +428,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                     // q: need to catch possible IllegalArgumentException if path parameter defined
                     // in `pathParameterSchemas`
                     // not in the path template??
-
-                    return allParamsValid &&
-                            allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url));
+                    return allParamsValid
+                            && allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url));
                 }
             }
             return false;
@@ -468,11 +467,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         return getCompiledAllowedEndpoints().entrySet().stream()
                 .filter(entry -> hasPathRegexMatchingUrl.test(entry)
                         || hasPathTemplateMatchingUrl.test(entry))
-                .filter(entry -> allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url))) // redundant
-                                                                                                     // in
-                                                                                                     // the
-                                                                                                     // pathTemplate
-                                                                                                     // case
+                .filter(entry -> allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url))) // redundant in the path template case
                 .filter(entry -> allowsHttpMethod.test(entry.getKey()))
                 .findAny()
                 .map(entry -> Pair.of(entry.getValue(), entry.getKey()));

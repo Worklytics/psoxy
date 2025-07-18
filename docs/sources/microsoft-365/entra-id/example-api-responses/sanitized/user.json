@@ -1,13 +1,13 @@
 {
   "@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users/$entity",
   "businessPhones":[ ],
-  "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg\"}",
+  "mail":"t~aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg@M365x214355.onmicrosoft.com",
   "officeLocation":"12/1110",
   "preferredLanguage":"en-US",
-  "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg\"}",
+  "userPrincipalName":"t~aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg@M365x214355.onmicrosoft.com",
   "id":"48d31887-5fad-4d73-a9f5-3c356e68a038",
   "otherMails":[
-    "{\"domain\":\"gmail.com\",\"hash\":\"9hOtJuGJwqk4-lnsJ2csmTnmD9R_Y28iXox85gjemWU\"}"
+    "t~9hOtJuGJwqk4-lnsJ2csmTnmD9R_Y28iXox85gjemWU@gmail.com"
   ],
   "proxyAddresses":[
     "SMTP:t~aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg@M365x214355.onmicrosoft.com",

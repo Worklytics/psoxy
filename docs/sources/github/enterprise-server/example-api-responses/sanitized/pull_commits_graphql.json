@@ -27,14 +27,14 @@
                       ]
                     },
                     "author":{
-                      "email":"{\"domain\":\"hotmail.com\",\"hash\":\"p55sgYXAXqQ5cPaiWD02wA8QGsHVGIZE4DoktSv_RIg\"}",
+                      "email":"t~p55sgYXAXqQ5cPaiWD02wA8QGsHVGIZE4DoktSv_RIg@hotmail.com",
                       "date":"2023-07-06T18:23:43.000Z",
                       "user":{
                         "login":"p~yvO70vceGcC0rWoqIcpUI1nidEhPRkOc7T-wRE3T2GRz2sUJN9w9nhKdRRaZ4BQMLrvEU4mmUqQtzQiQOXxlxw"
                       }
                     },
                     "committer":{
-                      "email":"{\"domain\":\"github.com\",\"hash\":\"MIHgBni75cZjiHCpj2v957zYWWKML5xc_Zu-0HvVQ2w\"}",
+                      "email":"t~MIHgBni75cZjiHCpj2v957zYWWKML5xc_Zu-0HvVQ2w@github.com",
                       "date":"2023-07-06T18:23:43.000Z",
                       "user":null
                     },

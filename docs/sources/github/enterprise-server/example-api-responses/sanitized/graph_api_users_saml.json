@@ -10,12 +10,12 @@
           "edges":[
             {
               "node":{
-                "guid":"{\"hash\":\"5yFLE9_eWMz8YE8Fp1Li0TuYIh_eP5WfzjogeJVfLsg\"}",
+                "guid":"t~5yFLE9_eWMz8YE8Fp1Li0TuYIh_eP5WfzjogeJVfLsg",
                 "samlIdentity":{
-                  "nameId":"{\"domain\":\"contoso.com\",\"hash\":\"2cclTmgvAaaNoY_a3YFJVu1UUmwFw1MX9nrrF6oH9tM\"}",
+                  "nameId":"t~2cclTmgvAaaNoY_a3YFJVu1UUmwFw1MX9nrrF6oH9tM@contoso.com",
                   "emails":[
                     {
-                      "value":"{\"domain\":\"contoso.com\",\"hash\":\"tJeMjd4Zz84TzbzdvLTpWPg1z3gf-5Icpqv7Cbg_c2c\"}"
+                      "value":"t~tJeMjd4Zz84TzbzdvLTpWPg1z3gf-5Icpqv7Cbg_c2c@contoso.com"
                     }
                   ]
                 },
@@ -26,9 +26,9 @@
             },
             {
               "node":{
-                "guid":"{\"hash\":\"rhadwfw52P0hheXmNWvS3KkJavv5p_7Zx7fAac0BjHw\"}",
+                "guid":"t~rhadwfw52P0hheXmNWvS3KkJavv5p_7Zx7fAac0BjHw",
                 "samlIdentity":{
-                  "nameId":"{\"domain\":\"contoso.com\",\"hash\":\"OS0ifbJZXKTBbeGUlEbyacwWGTxBMkrAWSSbcy2OKmA\"}"
+                  "nameId":"t~OS0ifbJZXKTBbeGUlEbyacwWGTxBMkrAWSSbcy2OKmA@contoso.com"
                 },
                 "user":{
                   "login":"p~IfCQZlVaWKPjwpZn6GtislWJJ2ehfSnlyyONl2LdgTAaP2EggmLxGUnmFuzNnZlY"

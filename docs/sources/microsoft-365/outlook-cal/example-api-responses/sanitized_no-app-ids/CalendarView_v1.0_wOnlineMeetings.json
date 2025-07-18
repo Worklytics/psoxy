@@ -69,13 +69,13 @@
             "time":"0001-01-01T00:00:00Z"
           },
           "emailAddress":{
-            "address":"{\"hash\":\"Kshk8GObYWiFkaMaAioYqdhQKjXdMgx6RhdrNGkgMLs\"}"
+            "address":"t~Kshk8GObYWiFkaMaAioYqdhQKjXdMgx6RhdrNGkgMLs"
           }
         }
       ],
       "organizer":{
         "emailAddress":{
-          "address":"{\"hash\":\"kCA4MOkfvB_IwP_zwJlJRXMUW0lcMbzxOk_lt6fLsik\"}"
+          "address":"t~kCA4MOkfvB_IwP_zwJlJRXMUW0lcMbzxOk_lt6fLsik"
         }
       },
       "onlineMeeting":{
@@ -151,7 +151,7 @@
             "time":"0001-01-01T00:00:00Z"
           },
           "emailAddress":{
-            "address":"{\"hash\":\"CUARac-vheJg290qudQM5oFzsQx4arPOS4nfy5dpoNc\"}"
+            "address":"t~CUARac-vheJg290qudQM5oFzsQx4arPOS4nfy5dpoNc"
           }
         },
         {
@@ -161,13 +161,13 @@
             "time":"0001-01-01T00:00:00Z"
           },
           "emailAddress":{
-            "address":"{\"hash\":\"kCA4MOkfvB_IwP_zwJlJRXMUW0lcMbzxOk_lt6fLsik\"}"
+            "address":"t~kCA4MOkfvB_IwP_zwJlJRXMUW0lcMbzxOk_lt6fLsik"
           }
         }
       ],
       "organizer":{
         "emailAddress":{
-          "address":"{\"hash\":\"CUARac-vheJg290qudQM5oFzsQx4arPOS4nfy5dpoNc\"}"
+          "address":"t~CUARac-vheJg290qudQM5oFzsQx4arPOS4nfy5dpoNc"
         }
       },
       "onlineMeeting":{
@@ -238,7 +238,7 @@
       "attendees":[ ],
       "organizer":{
         "emailAddress":{
-          "address":"{\"hash\":\"kCA4MOkfvB_IwP_zwJlJRXMUW0lcMbzxOk_lt6fLsik\"}"
+          "address":"t~kCA4MOkfvB_IwP_zwJlJRXMUW0lcMbzxOk_lt6fLsik"
         }
       },
       "onlineMeeting":{

@@ -5,13 +5,13 @@
   "next_page_token":"DHJsM2Ymfeqp5pggMCgAtUmuRZFT7AtG5pXHgMB6yYuE8uav2u4",
   "participants":[
     {
-      "id":"{\"hash\":\"HhryFcaMsI6okt2OKXNk4oZMIc28htFpliKBztjwCUE\"}",
-      "user_email":"{\"domain\":\"example.com\",\"hash\":\"PFsxS8oxlBJ9dZkL1zNMvRIajvbO3VzZpbdT-ty6Gm0\"}"
+      "id":"t~HhryFcaMsI6okt2OKXNk4oZMIc28htFpliKBztjwCUE",
+      "user_email":"t~PFsxS8oxlBJ9dZkL1zNMvRIajvbO3VzZpbdT-ty6Gm0@example.com"
     },
     {
-      "id":"{\"hash\":\"Ww6eCgduxKK6I_l2nqOvpafSKCskTO62IzmY-CAbeEo\"}",
-      "user_email":"{\"domain\":\"example.com\",\"hash\":\"jgT11iw7JOUdn6TMyoDssjtXrXGpy31m38W_Uv-rric\"}",
-      "pmi":"{\"hash\":\"LKW3WIP3bZzEQFelvQBi0lpLDZtk-1qJbWe3rHfhYhc\"}"
+      "id":"t~Ww6eCgduxKK6I_l2nqOvpafSKCskTO62IzmY-CAbeEo",
+      "user_email":"t~jgT11iw7JOUdn6TMyoDssjtXrXGpy31m38W_Uv-rric@example.com",
+      "pmi":"t~LKW3WIP3bZzEQFelvQBi0lpLDZtk-1qJbWe3rHfhYhc"
     }
   ]
 }

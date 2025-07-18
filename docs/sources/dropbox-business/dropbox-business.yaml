@@ -11,7 +11,7 @@ endpoints:
           - "$.events[*].origin.geo_location.ip_address"
           - "$.events[*].context.email"
           - "$.events[*].participants[*].user.email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$.events[*].details.shared_content_owner.account_id"
@@ -19,7 +19,7 @@ endpoints:
           - "$.events[*].actor.admin.account_id"
           - "$.events[*].context.account_id"
           - "$.events[*].participants[*].user.account_id"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.events[*].details.shared_content_owner['display_name']"
@@ -31,81 +31,71 @@ endpoints:
           - "$.events[*].assets[*]['display_name', 'doc_title', 'folder_title', 'showcase_title']"
           - "$.events[*].assets[*].path['contextual']"
           - "$.events[*].assets[*].path.namespace_relative['relative_path']"
-    allowedRequestHeadersToForward:
-      - "Dropbox-API-Select-User"
   - pathRegex: "^/2/files/list_folder(/continue)?$"
     transforms:
       - !<pseudonymize>
         jsonPaths:
           - "$.entries[*].details.shared_content_owner.email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$.entries[*].sharing_info.modified_by"
           - "$.entries[*].file_lock_info.lockholder_account_id"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.entries[*]['name', 'path_lower', 'path_display', 'preview_url', 'content_hash']"
           - "$.entries[*].export_info['export_as']"
           - "$.entries[*].file_lock_info['lockholder_name']"
-    allowedRequestHeadersToForward:
-      - "Dropbox-API-Select-User"
   - pathRegex: "^/2/files/list_revisions$"
     transforms:
       - !<pseudonymize>
         jsonPaths:
           - "$.entries[*].details.shared_content_owner.email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$.entries[*].sharing_info.modified_by"
           - "$.entries[*].file_lock_info.lockholder_account_id"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.entries[*]['name', 'path_lower', 'path_display', 'preview_url', 'content_hash']"
           - "$.entries[*].export_info['export_as']"
           - "$.entries[*].file_lock_info['lockholder_name']"
-    allowedRequestHeadersToForward:
-      - "Dropbox-API-Select-User"
   - pathRegex: "^/2/team/groups/members/list(/continue)?$"
     transforms:
       - !<pseudonymize>
         jsonPaths:
           - "$.members[*].profile.email"
           - "$.members[*].profile.secondary_emails[*].email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$.members[*].profile.account_id"
           - "$.members[*].profile.persistent_id"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.members[*].profile.name['abbreviated_name', 'display_name', 'familiar_name',\
       \ 'given_name', 'surname']"
           - "$.members[*].profile['profile_photo_url']"
           - "$.members[*].roles[*]['description', 'name']"
-    allowedRequestHeadersToForward:
-      - "Dropbox-API-Select-User"
   - pathRegex: "^/2/team/members/list(/continue)?_v2$"
     transforms:
       - !<pseudonymize>
         jsonPaths:
           - "$.members[*].profile.email"
           - "$.members[*].profile.secondary_emails[*].email"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$.members[*].profile.account_id"
           - "$.members[*].profile.persistent_id"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.members[*].profile.name['abbreviated_name', 'display_name', 'familiar_name',\
       \ 'given_name', 'surname']"
           - "$.members[*].profile['profile_photo_url']"
           - "$.members[*].roles[*]['description', 'name']"
-    allowedRequestHeadersToForward:
-      - "Dropbox-API-Select-User"

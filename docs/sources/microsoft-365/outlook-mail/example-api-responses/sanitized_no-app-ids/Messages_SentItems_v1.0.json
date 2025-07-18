@@ -23,18 +23,18 @@
       "inferenceClassification":"focused",
       "sender":{
         "emailAddress":{
-          "address":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg\"}"
+          "address":"t~aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg@M365x214355.onmicrosoft.com"
         }
       },
       "from":{
         "emailAddress":{
-          "address":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg\"}"
+          "address":"t~aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg@M365x214355.onmicrosoft.com"
         }
       },
       "toRecipients":[
         {
           "emailAddress":{
-            "address":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"Obq2eJM8H6PaBmbsLgcx0lmrKetFS9OTpk2LuaA-goI\"}"
+            "address":"t~Obq2eJM8H6PaBmbsLgcx0lmrKetFS9OTpk2LuaA-goI@M365x214355.onmicrosoft.com"
           }
         }
       ],

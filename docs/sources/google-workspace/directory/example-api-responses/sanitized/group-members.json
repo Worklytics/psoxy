@@ -6,7 +6,7 @@
       "kind":"admin#directory#member",
       "etag":"\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/cClGlnUTD66mPh1UYN596quOzEo\"",
       "id":"11792741172342342390794",
-      "email":"{\"domain\":\"acme.com\",\"hash\":\"ariUpTh_cLRE8xlCKjv8WQU9RJ15hsKGZ00dvk9zsg8\"}",
+      "email":"t~ariUpTh_cLRE8xlCKjv8WQU9RJ15hsKGZ00dvk9zsg8@acme.com",
       "role":"MEMBER",
       "type":"USER",
       "status":"ACTIVE"
@@ -15,7 +15,7 @@
       "kind":"admin#directory#member",
       "etag":"\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/msEQv4CMx2P7EiwQUAjOY6p4QWU\"",
       "id":"1006538123423423910644",
-      "email":"{\"domain\":\"acme.com\",\"hash\":\"TxHAHtCVcT1oMo4koEB2lLPK5Lxw9y9SBs4DJ85-TBQ\"}",
+      "email":"t~TxHAHtCVcT1oMo4koEB2lLPK5Lxw9y9SBs4DJ85-TBQ@acme.com",
       "role":"MEMBER",
       "type":"USER",
       "status":"ACTIVE"
@@ -24,7 +24,7 @@
       "kind":"admin#directory#member",
       "etag":"\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/GaG-VcDm4WBDI7XDLhClnr3QXUY\"",
       "id":"11112342342354233489959",
-      "email":"{\"domain\":\"acme.com\",\"hash\":\"JTawMucaPUT7BB_sebdkjujmoZT57KW3nt2PG1KUQS0\"}",
+      "email":"t~JTawMucaPUT7BB_sebdkjujmoZT57KW3nt2PG1KUQS0@acme.com",
       "role":"OWNER",
       "type":"USER",
       "status":"ACTIVE"
@@ -33,7 +33,7 @@
       "kind":"admin#directory#member",
       "etag":"\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/aZle5ohKQ9w1HjfzJYKkeV57qpI\"",
       "id":"114342345234523452345850",
-      "email":"{\"domain\":\"acme.com\",\"hash\":\"CLvQNR1KMpLcz_v3fJuXX9IiNiF360SlRBNmPAiWY-w\"}",
+      "email":"t~CLvQNR1KMpLcz_v3fJuXX9IiNiF360SlRBNmPAiWY-w@acme.com",
       "role":"MEMBER",
       "type":"USER",
       "status":"ACTIVE"
@@ -42,7 +42,7 @@
       "kind":"admin#directory#member",
       "etag":"\"nqbsbhvoIENh0WbZEZYWTG7mnk2phHz4rrCEo-rHT2k/OXyW7YpfbUxYBHjHX3Br9lIQdmg\"",
       "id":"1005323452345234623456356",
-      "email":"{\"domain\":\"acme.com\",\"hash\":\"TQ7vhOBwM8Jra92dAsaazqMJYGE5fo3GkZPDCubSA-c\"}",
+      "email":"t~TQ7vhOBwM8Jra92dAsaazqMJYGE5fo3GkZPDCubSA-c@acme.com",
       "role":"OWNER",
       "type":"USER",
       "status":"ACTIVE"
