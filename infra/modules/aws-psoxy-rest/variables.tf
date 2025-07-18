@@ -149,6 +149,17 @@ variable "example_api_calls" {
   description = "example endpoints that can be called via proxy"
 }
 
+variable "example_api_requests" {
+  type = list(object({
+    method       = optional(string, "GET")
+    path         = string
+    content_type = optional(string, "application/json")
+    body         = optional(string, null)
+  }))
+  description = "example API requests with method, content_type and body parameters that can be called via proxy"
+  default     = []
+}
+
 variable "example_api_calls_user_to_impersonate" {
   type        = string
   description = "if example endpoints require impersonation of a specific user, use this id"
@@ -254,6 +265,12 @@ variable "todos_as_local_files" {
   type        = bool
   description = "whether to render TODOs as flat files"
   default     = true
+}
+
+variable "enable_async_processing" {
+  type        = bool
+  description = "whether to enable async processing for this connector"
+  default     = false
 }
 
 variable "todo_step" {

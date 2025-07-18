@@ -26,7 +26,7 @@ endpoints:
         jsonPaths:
           - "$.values[*].accountId"
           - "$.values[*].emailAddress"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/search/jql"
     allowedQueryParams:
       - "jql"
@@ -49,7 +49,7 @@ endpoints:
           - "$.issues[*]..accountId"
           - "$.issues[*]..emailAddress"
           - "$.issues[*]..body..id"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
       properties:
@@ -509,7 +509,7 @@ endpoints:
           - "$.values[*]..emailAddress"
           - "$.values[*]..tmpFromAccountId"
           - "$.values[*]..tmpToAccountId"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/issue/{issueId}/comment"
     allowedQueryParams:
       - "startAt"
@@ -528,7 +528,7 @@ endpoints:
           - "$.comments[*]..accountId"
           - "$.comments[*].body..id"
           - "$.comments[*]..emailAddress"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/issue/{issueId}/worklog"
     allowedQueryParams:
       - "startAt"
@@ -547,7 +547,7 @@ endpoints:
           - "$.worklogs[*]..accountId"
           - "$.worklogs[*]..emailAddress"
           - "$.worklogs[*]..comment..id"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/ex/jira/{cloudId}/rest/api/3/issue/{issueId}"
     allowedQueryParams:
       - "fields"
@@ -569,7 +569,7 @@ endpoints:
           - "$..accountId"
           - "$..emailAddress"
           - "$..body..id"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
       properties:
@@ -1010,7 +1010,7 @@ endpoints:
         jsonPaths:
           - "$..accountId"
           - "$..emailAddress"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/ex/jira/{cloudId}/rest/api/{apiVersion}/project/search"
     allowedQueryParams:
       - "startAt"
@@ -1029,7 +1029,7 @@ endpoints:
           - "$.values[*]..emailAddress"
           - "$.values[*]..email"
           - "$.values[*]..leadAccountId"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/oauth/token/accessible-resources"
     transforms:
       - !<redact>

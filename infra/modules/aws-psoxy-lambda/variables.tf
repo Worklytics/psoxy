@@ -186,6 +186,7 @@ variable "secrets_store_implementation" {
   default     = "aws_ssm_parameter_store"
 }
 
+
 variable "side_output_original" {
   type        = string
   description = "**ALPHA** If provided, the function will write a copy of the original API response (unprocessed) output to this S3 URL."
@@ -254,4 +255,9 @@ variable "aws_kms_public_keys" {
   }
 }
 
+variable "lambda_role_iam_statements" {
+  type        = list(any)
+  description = "Additional IAM statements to add to the lambda execution role."
+  default     = []
+}
 

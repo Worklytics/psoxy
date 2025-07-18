@@ -1,17 +1,20 @@
 package co.worklytics.psoxy;
 
+import java.security.Security;
+import java.time.Instant;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * default AWS lambda handler
@@ -21,7 +24,8 @@ import org.apache.commons.lang3.tuple.Pair;
  * TODO: in 0.6, rename this to AwsApiGatewayV2ApiDataRequestHandler, or something similar
  */
 @Log
-public class Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
+public class Handler implements
+        com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
 
     /**
      * Static initialization allows reuse in containers
@@ -40,56 +44,65 @@ public class Handler implements com.amazonaws.services.lambda.runtime.RequestHan
         awsContainer = DaggerAwsContainer.create();
         requestHandler = awsContainer.apiDataRequestHandler();
         responseCompressionHandler = new ResponseCompressionHandler();
+
+        Security.addProvider(new BouncyCastleProvider());
     }
 
     @SneakyThrows
     @Override
-    public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent httpEvent, Context context) {
+    public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent httpEvent,
+            Context context) {
 
-        //interfaces:
+        // interfaces:
         // - HttpRequestEvent --> HttpResponseEvent
 
-        //q: what's the component?
+        // q: what's the component?
         // - request handler?? but it's abstract ...
-        //    - make it bound with interface, rather than generic? --> prob best approach
+        // - make it bound with interface, rather than generic? --> prob best approach
         // - objectMapper
         //
 
         HttpEventResponse response;
         boolean base64Encoded = false;
         try {
-            APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter = new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
-            response = requestHandler.handle(httpEventRequestAdapter);
+            APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter =
+                    new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
+            response = requestHandler.handle(httpEventRequestAdapter,
+                    ApiDataRequestHandler.ProcessingContext.builder().async(false)
+                            .requestReceivedAt(Instant
+                                    .ofEpochMilli(httpEvent.getRequestContext().getTimeEpoch()))
+                            .requestId(httpEvent.getRequestContext().getRequestId()).build());
 
-            if (ResponseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
-                Pair<Boolean, HttpEventResponse> compressedResponse = responseCompressionHandler.compressIfNeeded(response);
+            if (responseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
+                Pair<Boolean, HttpEventResponse> compressedResponse =
+                        responseCompressionHandler.compressIfNeeded(response);
                 base64Encoded = compressedResponse.getLeft();
                 response = compressedResponse.getRight();
             } else {
-                response = response.toBuilder()
-                    .header(ResponseHeader.WARNING.getHttpHeader(), Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode())
-                    .build();
+                response =
+                        response.toBuilder()
+                                .header(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
+                                        Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode())
+                                .build();
             }
 
         } catch (Throwable e) {
-            context.getLogger().log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
+            context.getLogger()
+                    .log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
-            response = HttpEventResponse.builder()
-                .statusCode(500)
-                .body("Unknown error: " + e.getClass().getName())
-                .header(ResponseHeader.ERROR.getHttpHeader(),"Unknown error")
-                .build();
+            response = HttpEventResponse.builder().statusCode(500)
+                    .body("Unknown error: " + e.getClass().getName())
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), "Unknown error")
+                    .build();
         }
 
         try {
-            //NOTE: AWS seems to give 502 Bad Gateway errors without explanation or any info
+            // NOTE: AWS seems to give 502 Bad Gateway errors without explanation or any info
             // in the lambda logs if this is malformed somehow (Eg, missing statusCode)
-            return APIGatewayV2HTTPResponse.builder()
-                .withStatusCode(response.getStatusCode())
-                .withHeaders(response.getHeaders())
-                .withBody(response.getBody())
-                .withIsBase64Encoded(base64Encoded)
-                .build();
+            return APIGatewayV2HTTPResponse.builder().withStatusCode(response.getStatusCode())
+                    .withHeaders(response.getHeaders())
+                    .withMultiValueHeaders(response.getMultivaluedHeaders())
+                    .withBody(response.getBody()).withIsBase64Encoded(base64Encoded).build();
         } catch (Throwable e) {
             context.getLogger().log("Error writing response as Lambda return");
             throw new Error(e);

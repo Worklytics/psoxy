@@ -313,6 +313,7 @@ locals {
     local.s3_write_statements,
     local.aws_kms_public_key_statements,
     flatten(values(module.side_output_iam_statements)[*].iam_statements),
+    var.lambda_role_iam_statements,
   )
 }
 

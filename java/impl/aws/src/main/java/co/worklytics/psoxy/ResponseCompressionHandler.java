@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 
 //q: why is this aws-specific??  GCP handles gzip natively, perhaps??
@@ -22,7 +23,7 @@ class ResponseCompressionHandler {
     static final int MIN_BYTES_TO_COMPRESS = 2048;
 
 
-    static boolean isCompressionRequested(HttpEventRequest request) {
+    boolean isCompressionRequested(HttpEventRequest request) {
         return request.getHeader(HttpHeaders.ACCEPT_ENCODING).orElse("none").contains(ResponseCompressionHandler.GZIP);
     }
 
@@ -64,6 +65,9 @@ class ResponseCompressionHandler {
             returnResponse = HttpEventResponse.builder()
                 .body(compressedBody.get())
                 .statusCode(response.getStatusCode())
+                .multivaluedHeaders(response.getMultivaluedHeaders().entrySet().stream()
+                    .flatMap(entry -> entry.getValue().stream().map(v -> Pair.of(entry.getKey(), v)))
+                    .collect(Collectors.toList()))
                 .headers(response.getHeaders())
                 .header(HttpHeaders.CONTENT_ENCODING, GZIP)
                 .build();

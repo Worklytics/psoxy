@@ -1,0 +1,60 @@
+{
+  "totalUsageEventsCount" : 1250,
+  "pagination" : {
+    "numPages" : 25,
+    "currentPage" : 1,
+    "pageSize" : 50,
+    "hasNextPage" : true,
+    "hasPreviousPage" : false
+  },
+  "usageEvents" : [
+    {
+      "timestamp" : "1710720000000",
+      "model" : "gpt-4",
+      "kindLabel" : "Usage-based",
+      "maxMode" : false,
+      "requestsCosts" : 0.05,
+      "isTokenBasedCall" : true,
+      "tokenUsage" : {
+        "inputTokens" : 1500,
+        "outputTokens" : 750,
+        "cacheWriteTokens" : 0,
+        "cacheReadTokens" : 0,
+        "totalCents" : 25
+      },
+      "isFreeBugbot" : false,
+      "userEmail" : "t~bSkdfjBTY24htUdeLzDD8hBKsXGprapgKEXQFW5AFPU@company.com"
+    },
+    {
+      "timestamp" : "1710720000000",
+      "model" : "claude-3-opus",
+      "kindLabel" : "Included in Business",
+      "maxMode" : true,
+      "requestsCosts" : 0.0,
+      "isTokenBasedCall" : false,
+      "isFreeBugbot" : false,
+      "userEmail" : "t~I3fHxUsK2qMysD_fKva0I3q09GP06Uqw4G6RKUylNPY@company.com"
+    },
+    {
+      "timestamp" : "1710720000000",
+      "model" : "gpt-4",
+      "kindLabel" : "Usage-based",
+      "maxMode" : false,
+      "requestsCosts" : 0.03,
+      "isTokenBasedCall" : true,
+      "tokenUsage" : {
+        "inputTokens" : 800,
+        "outputTokens" : 400,
+        "cacheWriteTokens" : 0,
+        "cacheReadTokens" : 0,
+        "totalCents" : 15
+      },
+      "isFreeBugbot" : true,
+      "userEmail" : "t~JYdSZrv6Gmaj3htiQnFhB89WYPFcw7pp-Kv9h0nOsbc@company.com"
+    }
+  ],
+  "period" : {
+    "startDate" : 1710720000000,
+    "endDate" : 1710806400000
+  }
+}

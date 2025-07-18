@@ -42,7 +42,7 @@ endpoints:
           - "$..onPremisesDistinguishedName"
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..id"
@@ -116,11 +116,11 @@ endpoints:
           - "$..onPremisesDistinguishedName"
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$..id"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/v1.0/users(/p~[a-zA-Z0-9_-]+?)?[^/]*/mailboxSettings"
     transforms:
       - !<redact>
@@ -145,7 +145,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress.address"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"
@@ -169,7 +169,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress.address"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<tokenize>
         jsonPaths:
           - "$.['@odata.nextLink', '@odata.prevLink', 'sessions@odata.nextLink']"

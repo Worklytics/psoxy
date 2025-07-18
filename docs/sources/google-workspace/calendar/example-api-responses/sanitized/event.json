@@ -7,10 +7,10 @@
   "created":"2015-07-02T22:54:23.000Z",
   "updated":"2015-07-03T11:24:21.213Z",
   "creator":{
-    "email":"{\"domain\":\"imagine.com\",\"hash\":\"aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI\"}"
+    "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com"
   },
   "organizer":{
-    "email":"{\"domain\":\"imagine.com\",\"hash\":\"aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI\"}"
+    "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com"
   },
   "start":{
     "dateTime":"2015-07-06T10:00:00-07:00",
@@ -24,16 +24,16 @@
   "sequence":0,
   "attendees":[
     {
-      "email":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}",
+      "email":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co",
       "self":true,
       "responseStatus":"accepted"
     },
     {
-      "email":"{\"domain\":\"imagine.com\",\"hash\":\"zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs\"}",
+      "email":"t~zFQdzW2XNVkbRC1rsruylhQnOtFF7pCrqZ9VoHQt-cs@imagine.com",
       "responseStatus":"accepted"
     },
     {
-      "email":"{\"domain\":\"imagine.com\",\"hash\":\"aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI\"}",
+      "email":"t~aT3usZghgyWmDoXRncq5qhmQJQMjY49xDJylpM4TyYI@imagine.com",
       "organizer":true,
       "responseStatus":"accepted"
     }

@@ -1,0 +1,4 @@
+[*.tftpl]
+# goal is that these be soft-wrapped too, ~100 columns; equivalent to how we handle markdown generally
+# bc common case will be to render into markdown
+max_line_length = off

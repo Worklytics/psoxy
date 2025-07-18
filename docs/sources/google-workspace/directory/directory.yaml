@@ -17,7 +17,7 @@ endpoints:
           - "$.users[*].posixAccounts[*].username"
           - "$.users[*].locations[*].deskCode"
           - "$.users[*].relations[*].value"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.users[*].name"
@@ -44,7 +44,7 @@ endpoints:
           - "$.posixAccounts[*].username"
           - "$.locations[*].deskCode"
           - "$.relations[*].value"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.name"
@@ -86,7 +86,7 @@ endpoints:
           - "$..email"
           - "$..aliases[*]"
           - "$..nonEditableAliases[*]"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/admin/directory/v1/customer/{customerId}/orgunits"
     transforms:
       - !<redact>

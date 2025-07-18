@@ -25,7 +25,7 @@
         "created":"2024-03-12T12:47:09.993-0400",
         "issuelinks":[ ],
         "assignee":{
-          "accountId":"{\"hash\":\"pMlZlJa1msrJ2n9jecAYzfkc6KU83KSBWDTjT5Exm58\"}",
+          "accountId":"t~pMlZlJa1msrJ2n9jecAYzfkc6KU83KSBWDTjT5Exm58",
           "active":false,
           "timeZone":"America/New_York",
           "accountType":"atlassian"
@@ -41,13 +41,13 @@
         },
         "attachment":[ ],
         "creator":{
-          "accountId":"{\"hash\":\"pMlZlJa1msrJ2n9jecAYzfkc6KU83KSBWDTjT5Exm58\"}",
+          "accountId":"t~pMlZlJa1msrJ2n9jecAYzfkc6KU83KSBWDTjT5Exm58",
           "active":false,
           "timeZone":"America/New_York",
           "accountType":"atlassian"
         },
         "reporter":{
-          "accountId":"{\"hash\":\"pMlZlJa1msrJ2n9jecAYzfkc6KU83KSBWDTjT5Exm58\"}",
+          "accountId":"t~pMlZlJa1msrJ2n9jecAYzfkc6KU83KSBWDTjT5Exm58",
           "active":false,
           "timeZone":"America/New_York",
           "accountType":"atlassian"
@@ -124,13 +124,13 @@
         },
         "attachment":[ ],
         "creator":{
-          "accountId":"{\"hash\":\"pMlZlJa1msrJ2n9jecAYzfkc6KU83KSBWDTjT5Exm58\"}",
+          "accountId":"t~pMlZlJa1msrJ2n9jecAYzfkc6KU83KSBWDTjT5Exm58",
           "active":false,
           "timeZone":"America/New_York",
           "accountType":"atlassian"
         },
         "reporter":{
-          "accountId":"{\"hash\":\"pMlZlJa1msrJ2n9jecAYzfkc6KU83KSBWDTjT5Exm58\"}",
+          "accountId":"t~pMlZlJa1msrJ2n9jecAYzfkc6KU83KSBWDTjT5Exm58",
           "active":false,
           "timeZone":"America/New_York",
           "accountType":"atlassian"

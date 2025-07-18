@@ -33,14 +33,21 @@ locals {
   # payload 2.0 format is used by function URL invocation AND APIGatewayV2 by default.
   # but in latter case, seems to urldecode the path; such that /foo%25/bar becomes /foo//bar, which is not what we want
   # so oddly, for APIGatewayV2 we need to use 1.0 format instead of its default , even though that default is our usual case otherwise
-  event_handler_implementation = local.use_api_gateway ? "APIGatewayV1Handler" : "Handler"
+  # AwsApiDataModeHybridHandler can apigateway v1, v2, or SQS events - but has to do the parsing itself
+  # Handler is for v2; APIGatewayV1Handler is for v1
+
+  sync_event_handler_implementation = local.use_api_gateway ? "APIGatewayV1Handler" : "Handler"
+  event_handler_implementation      = var.enable_async_processing ? "AwsApiDataModeHybridHandler" : local.sync_event_handler_implementation
 
   provision_side_output_original_bucket  = try(var.side_output_original != null && var.side_output_original.bucket == null, false)
   provision_side_output_sanitized_bucket = try(var.side_output_sanitized != null && var.side_output_sanitized.bucket == null, false)
 
+
+
 }
 
-resource "random_string" "side_output_unique_sequence" {
+# a unique sequence to commonly name this instance's buckets, but distinguish them globally
+resource "random_string" "bucket_unique_sequence" {
   length  = 8
   lower   = true
   upper   = false
@@ -48,15 +55,84 @@ resource "random_string" "side_output_unique_sequence" {
   numeric = true
 }
 
+module "async_output" {
+  count = var.enable_async_processing ? 1 : 0
+
+  source = "../aws-output-s3"
+
+  environment_name                     = var.environment_name
+  instance_id                          = var.instance_id
+  unique_sequence                      = random_string.bucket_unique_sequence.result
+  bucket_suffix                        = "async-output"
+  provision_bucket_public_access_block = true
+  lifecycle_ttl_days                   = 90 # 3 months, more than enough
+}
+
+module "async_output_iam_statements" {
+  count = var.enable_async_processing ? 1 : 0
+
+  source = "../aws-bucket-read-write-iam-policy-statement"
+
+  s3_path = "s3://${module.async_output[0].bucket_id}"
+}
+
+# SQS queue for async API requests
+resource "aws_sqs_queue" "async_api_request_queue" {
+  count = var.enable_async_processing ? 1 : 0
+
+  name = "${var.environment_name}-${var.instance_id}-async-request-queue"
+
+  # Standard queue for better reliability
+  fifo_queue = false
+
+  message_retention_seconds = 86400 # 1 day, max; tbh, prob could be shorter
+
+  visibility_timeout_seconds = 120 # how long after attempt begins until message is visible to another consumer for re-processing
+
+  # Receive message wait time: 20 seconds (long polling)
+  receive_wait_time_seconds = 20
+
+  # Dead letter queue configuration
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.async_api_request_dlq[0].arn
+    maxReceiveCount     = 3
+  })
+
+  tags = {
+    InstanceId = var.instance_id
+    Purpose    = "async-api-request-queue"
+  }
+}
+
+# Dead letter queue for failed async API requests
+resource "aws_sqs_queue" "async_api_request_dlq" {
+  count = var.enable_async_processing ? 1 : 0
+
+  name = "${var.environment_name}-${var.instance_id}-async-request-dlq"
+
+  # Standard queue for better reliability
+  fifo_queue = false
+
+  # Message retention: 14 days (maximum)
+  message_retention_seconds = 1209600
+
+  tags = {
+    InstanceId = var.instance_id
+    Purpose    = "async-api-request-dlq"
+  }
+}
+
 module "side_output_original" {
   count = local.provision_side_output_original_bucket ? 1 : 0
 
   source = "../aws-output-s3"
 
-  environment_name = var.environment_name
-  instance_id      = var.instance_id
-  unique_sequence  = random_string.side_output_unique_sequence.result
-  bucket_suffix    = "side-output-original"
+  environment_name                     = var.environment_name
+  instance_id                          = var.instance_id
+  unique_sequence                      = random_string.bucket_unique_sequence.result
+  bucket_suffix                        = "side-output-original"
+  provision_bucket_public_access_block = true
+  lifecycle_ttl_days                   = 720 # 2 years
 }
 
 module "side_output_sanitized" {
@@ -64,10 +140,30 @@ module "side_output_sanitized" {
 
   source = "../aws-output-s3"
 
-  environment_name = var.environment_name
-  instance_id      = var.instance_id
-  unique_sequence  = random_string.side_output_unique_sequence.result
-  bucket_suffix    = "side-output-sanitized"
+  environment_name                     = var.environment_name
+  instance_id                          = var.instance_id
+  unique_sequence                      = random_string.bucket_unique_sequence.result
+  bucket_suffix                        = "side-output-sanitized"
+  provision_bucket_public_access_block = true
+  lifecycle_ttl_days                   = 720 # 2 years
+}
+
+locals {
+  # SQS IAM statements for async processing
+  sqs_iam_statements = var.enable_async_processing ? [
+    {
+      Sid    = "AllowSQSAsyncApiRequest"
+      Effect = "Allow"
+      Action = [
+        "sqs:SendMessage",
+        "sqs:GetQueueAttributes",
+        "sqs:GetQueueUrl"
+      ]
+      Resource = [
+        aws_sqs_queue.async_api_request_queue[0].arn
+      ]
+    }
+  ] : []
 }
 
 module "psoxy_lambda" {
@@ -98,11 +194,35 @@ module "psoxy_lambda" {
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   side_output_original                 = local.provision_side_output_original_bucket ? "s3://${module.side_output_original[0].bucket_id}" : try(var.side_output_original.bucket, null)
   side_output_sanitized                = local.provision_side_output_sanitized_bucket ? "s3://${module.side_output_sanitized[0].bucket_id}" : try(var.side_output_sanitized.bucket, null)
+  sqs_trigger_queue_arns               = var.enable_async_processing ? [aws_sqs_queue.async_api_request_queue[0].arn] : []
+  lambda_role_iam_statements = concat(
+    var.enable_async_processing ? module.async_output_iam_statements[0].iam_statements : [],
+    local.sqs_iam_statements
+  )
 
   environment_variables = merge(
     var.environment_variables,
-    local.required_env_vars
+    local.required_env_vars,
+    var.enable_async_processing ? {
+      ASYNC_OUTPUT_DESTINATION    = "s3://${module.async_output[0].bucket_id}",
+      ASYNC_API_REQUEST_QUEUE_URL = aws_sqs_queue.async_api_request_queue[0].url
+    } : {},
   )
+}
+
+# if async processing is enabled, trigger the lambda from the SQS queue
+resource "aws_lambda_event_source_mapping" "async_api_request_queue_trigger" {
+  count = var.enable_async_processing ? 1 : 0
+
+  event_source_arn                   = aws_sqs_queue.async_api_request_queue[0].arn
+  function_name                      = module.psoxy_lambda.function_name
+  enabled                            = true
+  batch_size                         = 10 # eg, merge up to X messages into a single batch before invoking lambda
+  maximum_batching_window_in_seconds = 60 # max time to wait before combining whatever we have; could be up to 300s, but for testing let's start with 60s
+
+  depends_on = [
+    module.psoxy_lambda
+  ]
 }
 
 # lambda function URL (only if NOT using API Gateway)
@@ -172,9 +292,28 @@ locals {
 
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
   command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} -re \"${data.aws_region.current.id}\""
-  command_test_calls = [for path in var.example_api_calls :
-    "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+
+  # Merge example_api_calls into example_api_requests for unified processing
+  all_example_api_requests = concat(
+    [for path in var.example_api_calls : {
+      method       = "GET"
+      path         = path
+      content_type = "application/json"
+      body         = null
+    }],
+    var.example_api_requests
+  )
+
+  # Generate test calls from all example requests
+  sync_test_calls = [for request in local.all_example_api_requests :
+    "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${request.path}\" -m ${request.method}${request.body != null ? " -b \"${request.body}\"" : ""}${local.impersonation_param}"
   ]
+
+  command_test_calls = concat(local.sync_test_calls,
+    var.enable_async_processing ? [for call in local.sync_test_calls : "${call} --async"] : []
+  )
+
+
   command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} -re \"${data.aws_region.current.id}\" -l \"${module.psoxy_lambda.log_group}\""
 
   awscurl_test_call = "${var.path_to_repo_root}tools/test-psoxy.sh -a ${local.role_param} -e \"${data.aws_region.current.id}\""
@@ -255,11 +394,13 @@ resource "local_file" "todo" {
 
 locals {
   test_script = templatefile("${path.module}/test_script.tftpl", {
-    proxy_endpoint_url  = local.proxy_endpoint_url,
-    function_name       = module.psoxy_lambda.function_name,
-    impersonation_param = local.impersonation_param,
-    command_cli_call    = local.command_cli_call,
-    example_api_calls   = var.example_api_calls,
+    proxy_endpoint_url        = local.proxy_endpoint_url,
+    function_name             = module.psoxy_lambda.function_name,
+    impersonation_param       = local.impersonation_param,
+    command_cli_call          = local.command_cli_call,
+    example_api_get_requests  = [for r in local.all_example_api_requests : r if r.method == "GET"],
+    example_api_post_requests = [for r in local.all_example_api_requests : r if r.method == "POST" && r.body != null], # body being null will blow up the templating
+    enable_async_processing   = var.enable_async_processing,
   })
 }
 
@@ -310,6 +451,11 @@ output "test_script_content" {
   value = local.test_script
 }
 
+output "async_output_bucket_id" {
+  value       = try(module.async_output[0].bucket_id, null)
+  description = "Bucket ID of the async output bucket, if any. May have been provided by the user, or provisioned by this module."
+}
+
 output "side_output_original_bucket_id" {
   value       = try(module.side_output_original[0].bucket_id, var.side_output_original.bucket, null)
   description = "Bucket ID of the side output bucket for original data, if any. May have been provided by the user, or provisioned by this module."
@@ -326,4 +472,24 @@ output "todo" {
 
 output "next_todo_step" {
   value = var.todo_step + 1
+}
+
+output "async_api_request_queue_url" {
+  value       = var.enable_async_processing ? aws_sqs_queue.async_api_request_queue[0].url : null
+  description = "URL of the SQS queue for async API requests"
+}
+
+output "async_api_request_queue_arn" {
+  value       = var.enable_async_processing ? aws_sqs_queue.async_api_request_queue[0].arn : null
+  description = "ARN of the SQS queue for async API requests"
+}
+
+output "async_api_request_dlq_url" {
+  value       = var.enable_async_processing ? aws_sqs_queue.async_api_request_dlq[0].url : null
+  description = "URL of the SQS dead letter queue for failed async API requests"
+}
+
+output "async_api_request_dlq_arn" {
+  value       = var.enable_async_processing ? aws_sqs_queue.async_api_request_dlq[0].arn : null
+  description = "ARN of the SQS dead letter queue for failed async API requests"
 }

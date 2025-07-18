@@ -165,6 +165,7 @@ module "api_connector" {
   path_to_config                        = null
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
+  example_api_requests                  = each.value.example_api_requests
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = var.todo_step
   target_host                           = each.value.target_host
@@ -177,6 +178,7 @@ module "api_connector" {
   bucket_write_role_id                  = module.psoxy.bucket_write_role_id
   side_output_original                  = try(local.custom_original_side_outputs[each.key], null)
   side_output_sanitized                 = try(local.sanitized_side_outputs[each.key], null)
+  enable_async_processing               = try(each.value.enable_async_processing, false)
   todos_as_local_files                  = var.todos_as_local_files
 
 
@@ -353,7 +355,8 @@ locals {
   api_instances = { for instance in module.api_connector :
     instance.instance_id => merge(
       {
-        endpoint_url : instance.cloud_function_url
+        endpoint_url : instance.cloud_function_url,
+        sanitized_bucket : try(instance.async_output_bucket_name, null),
       },
       instance,
       var.api_connectors[instance.instance_id]

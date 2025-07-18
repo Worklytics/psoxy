@@ -4,8 +4,6 @@ import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Streams;
-import lombok.Builder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -32,8 +30,6 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
 
     @NonNull
     final APIGatewayV2HTTPEvent event;
-
-
 
     private Map<String, String> caseInsensitiveHeaders;
 
@@ -143,6 +139,12 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
     public Optional<Boolean> isHttps() {
         return Optional.ofNullable(this.getCaseInsensitiveHeaders().get(HTTP_HEADER_X_FORWARDED_PROTO.toLowerCase()))
             .map(p -> p.equals("https"));
+    }
+
+    @SneakyThrows
+    @Override
+    public Object getUnderlyingRepresentation() {
+        return event;
     }
 
     /**

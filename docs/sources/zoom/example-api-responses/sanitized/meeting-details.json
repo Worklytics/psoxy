@@ -1,8 +1,8 @@
 {
   "created_at":"2019-09-09T15:54:24Z",
   "duration":60,
-  "host_id":"{\"hash\":\"vo5kKWepk7kE9KmMkB_ETGinPpXTv1uqiwMwwypWZoc\"}",
-  "host_email":"{\"domain\":\"example.com\",\"hash\":\"H53zSk2P3-D_iGoG9l_KxsD84BJoSCtzfQVAYTQ5CxU\"}",
+  "host_id":"t~vo5kKWepk7kE9KmMkB_ETGinPpXTv1uqiwMwwypWZoc",
+  "host_email":"t~H53zSk2P3-D_iGoG9l_KxsD84BJoSCtzfQVAYTQ5CxU@example.com",
   "id":1234555466,
   "settings":{
     "allow_multiple_devices":true,
@@ -13,7 +13,7 @@
     "authentication_domains":"example.com",
     "authentication_exception":[
       {
-        "email":"{\"domain\":\"example.com\",\"hash\":\"cT4rXK7pXh_praaHEyRWzkSHVY6wBNEwngSXsuQ7fTQ\"}"
+        "email":"t~cT4rXK7pXh_praaHEyRWzkSHVY6wBNEwngSXsuQ7fTQ@example.com"
       }
     ],
     "auto_recording":"cloud",
@@ -22,7 +22,7 @@
       "rooms":[
         {
           "participants":[
-            "{\"domain\":\"example.com\",\"hash\":\"cT4rXK7pXh_praaHEyRWzkSHVY6wBNEwngSXsuQ7fTQ\"}"
+            "t~cT4rXK7pXh_praaHEyRWzkSHVY6wBNEwngSXsuQ7fTQ@example.com"
           ]
         }
       ]
@@ -30,7 +30,7 @@
     "calendar_type":1,
     "close_registration":false,
     "cn_meeting":false,
-    "contact_email":"{\"domain\":\"example.com\",\"hash\":\"cT4rXK7pXh_praaHEyRWzkSHVY6wBNEwngSXsuQ7fTQ\"}",
+    "contact_email":"t~cT4rXK7pXh_praaHEyRWzkSHVY6wBNEwngSXsuQ7fTQ@example.com",
     "email_notification":true,
     "encryption_type":"enhanced_encryption",
     "enforce_login":true,
@@ -51,7 +51,7 @@
       "enable":true,
       "interpreters":[
         {
-          "email":"{\"domain\":\"example.com\",\"hash\":\"VQ61wxvULcve1u_UNLgL11GsBudLREReUYjI-TiyeGg\"}",
+          "email":"t~VQ61wxvULcve1u_UNLgL11GsBudLREReUYjI-TiyeGg@example.com",
           "languages":"US,FR",
           "interpreter_languages":"English,French"
         }
@@ -61,7 +61,7 @@
       "enable":true,
       "interpreters":[
         {
-          "email":"{\"domain\":\"example.com\",\"hash\":\"VQ61wxvULcve1u_UNLgL11GsBudLREReUYjI-TiyeGg\"}",
+          "email":"t~VQ61wxvULcve1u_UNLgL11GsBudLREReUYjI-TiyeGg@example.com",
           "sign_language":"American"
         }
       ]
@@ -81,7 +81,7 @@
     "internal_meeting":false,
     "meeting_invitees":[
       {
-        "email":"{\"domain\":\"example.com\",\"hash\":\"cT4rXK7pXh_praaHEyRWzkSHVY6wBNEwngSXsuQ7fTQ\"}",
+        "email":"t~cT4rXK7pXh_praaHEyRWzkSHVY6wBNEwngSXsuQ7fTQ@example.com",
         "internal_user":false
       }
     ],

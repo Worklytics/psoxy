@@ -254,6 +254,65 @@ public class BulkDataSanitizerImplTest {
 
     @Test
     @SneakyThrows
+    void defaultRules_trailingCommas() {
+        final String TEST_EXAMPLE_FILE = "/csv/hris-default-rules_trailing-commas.csv";
+        final String EXPECTED = EXPECTED_HRIS_DEFAULT_RULES.replace("\n", ",\n");
+
+        //padded case (eg, 001 instead of 1 for employee_id), should result in different hashes
+        assertNotEquals(EXPECTED, EXPECTED_HRIS_DEFAULT_RULES);
+
+        ConfigService config = MockModules.provideMock(ConfigService.class);
+        when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
+            .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("sources/hris/csv.yaml"))));
+
+        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config, new EnvVarsConfigService()).orElseThrow();
+
+        File inputFile = new File(getClass().getResource(TEST_EXAMPLE_FILE).getFile());
+        columnarFileSanitizerImpl.setRules(rules);
+
+        try (FileReader in = new FileReader(inputFile);
+             StringWriter out = new StringWriter()) {
+            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            assertEquals(EXPECTED, out.toString());
+        }
+    }
+
+    /**
+     * test case for CSV that includes a column without a name (eg, a column with empty/blank string in the header)
+     *
+     * such cases are not strictly invalid CSV, so we will not blow up; but we will generally fail if anyone really attempts to do anything with them.
+     * so the only supported use case is to just preserve the column as-is, and not apply any rules to it.
+     */
+    @Test
+    @SneakyThrows
+    void defaultRules_anonColumn() {
+        final String TEST_EXAMPLE_FILE = "/csv/hris-default-rules_anon-column.csv";
+        final String EXPECTED = "EMPLOYEE_ID,,employee_EMAIL,MANAGER_id,Manager_Email,JOIN_DATE,ROLE\n" +
+            "\"{\"\"hash\"\":\"\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"\"}\",anon1,\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"\"}\",\"{\"\"hash\"\":\"\"-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\"\"}\",\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",2021-01-01,Accounting Manager\n" +
+            "\"{\"\"hash\"\":\"\"-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\"\"}\",anon2,\"{\"\"domain\"\":\"\"worklytics.co\"\",\"\"hash\"\":\"\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"\"}\",,,2020-01-01,CEO\n";
+
+        //padded case (eg, 001 instead of 1 for employee_id), should result in different hashes
+        assertNotEquals(EXPECTED, EXPECTED_HRIS_DEFAULT_RULES);
+
+        ConfigService config = MockModules.provideMock(ConfigService.class);
+        when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
+            .thenReturn(Optional.of(Base64.encodeBase64String(TestUtils.getData("sources/hris/csv.yaml"))));
+
+        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config, new EnvVarsConfigService()).orElseThrow();
+
+        File inputFile = new File(getClass().getResource(TEST_EXAMPLE_FILE).getFile());
+        columnarFileSanitizerImpl.setRules(rules);
+
+        try (FileReader in = new FileReader(inputFile);
+             StringWriter out = new StringWriter()) {
+            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            assertEquals(EXPECTED, out.toString());
+        }
+    }
+
+
+    @Test
+    @SneakyThrows
     void defaultRules_padded() {
 
         final String EXPECTED = "EMPLOYEE_ID,employee_EMAIL,MANAGER_id,Manager_Email,JOIN_DATE,ROLE\n" +
@@ -760,7 +819,7 @@ public class BulkDataSanitizerImplTest {
     @SneakyThrows
     void handle_control_chars_in_headers_reproduce_error() {
 
-        final String SOURCE = " EMPLOYEE_ID,SWIPE_DATE,BUILDING_ID,BUILDING_ASSIGNED\n" +
+        final String SOURCE = "EMPLOYEE_ID,SWIPE DATE,BUILDING_ID,BUILDING_ASSIGNED\n" +
             "E001,01/01/2024 3:10PM,B1,B2";
 
         ColumnarRules rules = ColumnarRules.builder()
@@ -771,7 +830,9 @@ public class BulkDataSanitizerImplTest {
 
         try (StringReader in = new StringReader(SOURCE);
              StringWriter out = new StringWriter()) {
-            assertThrows(IllegalArgumentException.class, () -> columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer), "Non-ASCII characters found in headers, inspect file with cat -v for control characters");
+            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            assertEquals("EMPLOYEE_ID,SWIPE DATE,BUILDING_ID,BUILDING_ASSIGNED\n" +
+                "t~uxVHJj4JLZrUDfo7bwUePfhD5-rd34W1BvTqO4B2PNk,01/01/2024 3:10PM,B1,B2\n", out.toString());
         }
     }
 

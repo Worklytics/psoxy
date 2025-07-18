@@ -15,6 +15,15 @@
     <packaging>jar</packaging>
     <description>Code that's core to both Psoxy clients and implementations</description>
 
+    <licenses>
+        <license>
+            <name>Worklytics Commercial License</name>
+            <url>https://github.com/Worklytics/psoxy/blob/main/LICENSE.md</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+
     <properties>
         <!-- empty for default java builds  (17 as of Dec 2024) -->
         <artifactSuffix></artifactSuffix>
@@ -113,6 +122,11 @@
             <artifactId>jackson-dataformat-yaml</artifactId>
             <version>${dependency.jackson.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
+            <version>${dependency.jackson.version}</version>
+        </dependency>
 
         <!-- Communications with source API endpoints, including transport + auth -->
         <!-- for familiarity sake, use Google HTTP / OAuth clients -->
@@ -133,6 +147,21 @@
             <groupId>org.apache.httpcomponents.core5</groupId>
             <artifactId>httpcore5</artifactId>
             <version>${dependency.apache-httpcore.version}</version>
+        </dependency>
+
+        <!-- BouncyCastle used to broaden set of key encodings we can support -->
+        <!-- this has non-trivial cost in JAR size, so TBD if we should include longer term vs some middleware to re-encode keys -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>${dependency.bouncycastle.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
+            <version>${dependency.bouncycastle.version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <!-- JWT verification of incoming webhooks / requests -->
@@ -175,6 +204,7 @@
             <version>${dependency.json-path.version}</version>
             <scope>test</scope>
         </dependency>
+
 
     </dependencies>
 

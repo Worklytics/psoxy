@@ -5,172 +5,172 @@
       "@odata.type":"#microsoft.graph.user",
       "id":"87d349ed-44d7-43e1-9a83-5f2406dee5bd",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"1ZU-v2EwymdtJwCKzuncgUnOxX8V-MbE-FgKEvcj6J8\"}",
+      "mail":"t~1ZU-v2EwymdtJwCKzuncgUnOxX8V-MbE-FgKEvcj6J8@M365x214355.onmicrosoft.com",
       "officeLocation":"18/2111",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"1ZU-v2EwymdtJwCKzuncgUnOxX8V-MbE-FgKEvcj6J8\"}"
+      "userPrincipalName":"t~1ZU-v2EwymdtJwCKzuncgUnOxX8V-MbE-FgKEvcj6J8@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"626cbf8c-5dde-46b0-8385-9e40d64736fe",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"KDHHtwETokpIrd-0CMxrNe2pku8bSufS9D5ZG5gdKrg\"}",
+      "mail":"t~KDHHtwETokpIrd-0CMxrNe2pku8bSufS9D5ZG5gdKrg@M365x214355.onmicrosoft.com",
       "officeLocation":"23/2102",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"KDHHtwETokpIrd-0CMxrNe2pku8bSufS9D5ZG5gdKrg\"}"
+      "userPrincipalName":"t~KDHHtwETokpIrd-0CMxrNe2pku8bSufS9D5ZG5gdKrg@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"40079818-3808-4585-903b-02605f061225",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"yXsuWvjfGM2Okdqi_8ytlEfiN7dNqY_IfJEyzEE9jWo\"}",
+      "mail":"t~yXsuWvjfGM2Okdqi_8ytlEfiN7dNqY_IfJEyzEE9jWo@M365x214355.onmicrosoft.com",
       "officeLocation":"15/1102",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"yXsuWvjfGM2Okdqi_8ytlEfiN7dNqY_IfJEyzEE9jWo\"}"
+      "userPrincipalName":"t~yXsuWvjfGM2Okdqi_8ytlEfiN7dNqY_IfJEyzEE9jWo@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"074e56ea-0b50-4461-89e5-c67ae14a2c0b",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"ozJYl2KkP4ztQiof64QWgNtS5hx1czNS6pawH3v0AZw\"}",
+      "mail":"t~ozJYl2KkP4ztQiof64QWgNtS5hx1czNS6pawH3v0AZw@M365x214355.onmicrosoft.com",
       "officeLocation":"23/3101",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"ozJYl2KkP4ztQiof64QWgNtS5hx1czNS6pawH3v0AZw\"}"
+      "userPrincipalName":"t~ozJYl2KkP4ztQiof64QWgNtS5hx1czNS6pawH3v0AZw@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"16cfe710-1625-4806-9990-91b8f0afee35",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"MVn_bPW8RmDL-2W6UHPPtKjrI0KVxRk08ZNvfUOnSjg\"}",
+      "mail":"t~MVn_bPW8RmDL-2W6UHPPtKjrI0KVxRk08ZNvfUOnSjg@M365x214355.onmicrosoft.com",
       "officeLocation":"14/1102",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"MVn_bPW8RmDL-2W6UHPPtKjrI0KVxRk08ZNvfUOnSjg\"}"
+      "userPrincipalName":"t~MVn_bPW8RmDL-2W6UHPPtKjrI0KVxRk08ZNvfUOnSjg@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"089a6bb8-e8cb-492c-aa41-c078aa0b5120",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"DUyi5q8wChUJyCkMpodc7ASWD4pD-dW9GgQd6xLZQL4\"}",
+      "mail":"t~DUyi5q8wChUJyCkMpodc7ASWD4pD-dW9GgQd6xLZQL4@M365x214355.onmicrosoft.com",
       "officeLocation":"36/2121",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"DUyi5q8wChUJyCkMpodc7ASWD4pD-dW9GgQd6xLZQL4\"}"
+      "userPrincipalName":"t~DUyi5q8wChUJyCkMpodc7ASWD4pD-dW9GgQd6xLZQL4@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"2804bc07-1e1f-4938-9085-ce6d756a32d2",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"uTOzTJCFx4Qkj3_IAlznPQcud3ixYia6avTR52T-Cy4\"}",
+      "mail":"t~uTOzTJCFx4Qkj3_IAlznPQcud3ixYia6avTR52T-Cy4@M365x214355.onmicrosoft.com",
       "officeLocation":"97/2302",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"uTOzTJCFx4Qkj3_IAlznPQcud3ixYia6avTR52T-Cy4\"}"
+      "userPrincipalName":"t~uTOzTJCFx4Qkj3_IAlznPQcud3ixYia6avTR52T-Cy4@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"b66ecf79-a093-4d51-86e0-efcc4531f37a",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"xrI7EzSIq--CC6P9nUMgEfPMi4Op5rBR66-6nr1QwUI\"}",
+      "mail":"t~xrI7EzSIq--CC6P9nUMgEfPMi4Op5rBR66-6nr1QwUI@M365x214355.onmicrosoft.com",
       "officeLocation":"131/2105",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"xrI7EzSIq--CC6P9nUMgEfPMi4Op5rBR66-6nr1QwUI\"}"
+      "userPrincipalName":"t~xrI7EzSIq--CC6P9nUMgEfPMi4Op5rBR66-6nr1QwUI@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"8b209ac8-08ff-4ef1-896d-3b9fde0bbf04",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"yUp1exGSyddJ3c1HtMLtAg4YSVUlV3s5VSyz8iWgCiY\"}",
+      "mail":"t~yUp1exGSyddJ3c1HtMLtAg4YSVUlV3s5VSyz8iWgCiY@M365x214355.onmicrosoft.com",
       "officeLocation":"20/1109",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"yUp1exGSyddJ3c1HtMLtAg4YSVUlV3s5VSyz8iWgCiY\"}"
+      "userPrincipalName":"t~yUp1exGSyddJ3c1HtMLtAg4YSVUlV3s5VSyz8iWgCiY@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"4782e723-f4f4-4af3-a76e-25e3bab0d896",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"Obq2eJM8H6PaBmbsLgcx0lmrKetFS9OTpk2LuaA-goI\"}",
+      "mail":"t~Obq2eJM8H6PaBmbsLgcx0lmrKetFS9OTpk2LuaA-goI@M365x214355.onmicrosoft.com",
       "officeLocation":"131/1104",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"Obq2eJM8H6PaBmbsLgcx0lmrKetFS9OTpk2LuaA-goI\"}"
+      "userPrincipalName":"t~Obq2eJM8H6PaBmbsLgcx0lmrKetFS9OTpk2LuaA-goI@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"08fa38e4-cbfa-4488-94ed-c834da6539df",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"mMw0NyWtsdA7ZqfNWAc63W4_UOAAS9wxZZAEzIsOkAw\"}",
+      "mail":"t~mMw0NyWtsdA7ZqfNWAc63W4_UOAAS9wxZZAEzIsOkAw@M365x214355.onmicrosoft.com",
       "officeLocation":"131/2103",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"mMw0NyWtsdA7ZqfNWAc63W4_UOAAS9wxZZAEzIsOkAw\"}"
+      "userPrincipalName":"t~mMw0NyWtsdA7ZqfNWAc63W4_UOAAS9wxZZAEzIsOkAw@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"24fcbca3-c3e2-48bf-9ffc-c7f81b81483d",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"VzIqpdtScbANlMr2k0A3A2IqLLBFnoDu7gtw90wPEJc\"}",
+      "mail":"t~VzIqpdtScbANlMr2k0A3A2IqLLBFnoDu7gtw90wPEJc@M365x214355.onmicrosoft.com",
       "officeLocation":"14/1108",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"VzIqpdtScbANlMr2k0A3A2IqLLBFnoDu7gtw90wPEJc\"}"
+      "userPrincipalName":"t~VzIqpdtScbANlMr2k0A3A2IqLLBFnoDu7gtw90wPEJc@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"2ed03dfd-01d8-4005-a9ef-fa8ee546dc6c",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"HRu855Q5bqB3kj1bf9LTO_ykCwHLiAklcYWUdvvIZU8\"}",
+      "mail":"t~HRu855Q5bqB3kj1bf9LTO_ykCwHLiAklcYWUdvvIZU8@M365x214355.onmicrosoft.com",
       "officeLocation":"20/2107",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"HRu855Q5bqB3kj1bf9LTO_ykCwHLiAklcYWUdvvIZU8\"}"
+      "userPrincipalName":"t~HRu855Q5bqB3kj1bf9LTO_ykCwHLiAklcYWUdvvIZU8@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"df043ff1-49d5-414e-86a4-0c7f239c36cf",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"PS5V_GyzVyXk6jjkY-cKVd9UubD2yEntUABT3W6PyT0\"}",
+      "mail":"t~PS5V_GyzVyXk6jjkY-cKVd9UubD2yEntUABT3W6PyT0@M365x214355.onmicrosoft.com",
       "officeLocation":"19/2109",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"PS5V_GyzVyXk6jjkY-cKVd9UubD2yEntUABT3W6PyT0\"}"
+      "userPrincipalName":"t~PS5V_GyzVyXk6jjkY-cKVd9UubD2yEntUABT3W6PyT0@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"ec63c778-24e1-4240-bea3-d12a167d5232",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"sQ8f9DihI2g9i17LxQ_GdZsNkUYpKp5A82AXup1YDwQ\"}",
+      "mail":"t~sQ8f9DihI2g9i17LxQ_GdZsNkUYpKp5A82AXup1YDwQ@M365x214355.onmicrosoft.com",
       "officeLocation":"98/2202",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"sQ8f9DihI2g9i17LxQ_GdZsNkUYpKp5A82AXup1YDwQ\"}"
+      "userPrincipalName":"t~sQ8f9DihI2g9i17LxQ_GdZsNkUYpKp5A82AXup1YDwQ@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"48d31887-5fad-4d73-a9f5-3c356e68a038",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg\"}",
+      "mail":"t~aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg@M365x214355.onmicrosoft.com",
       "officeLocation":"12/1110",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg\"}"
+      "userPrincipalName":"t~aUhZDS0Tjei4n0wfbt9bej85CgpSsYc73vYezVh5mVg@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"e8a02cc7-df4d-4778-956d-784cc9506e5a",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"35oOumhzn8j-tFjW0z9p4J4Qn1R7MNx-ueJ0l_nbl2Q\"}",
+      "mail":"t~35oOumhzn8j-tFjW0z9p4J4Qn1R7MNx-ueJ0l_nbl2Q@M365x214355.onmicrosoft.com",
       "officeLocation":"20/1104",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"35oOumhzn8j-tFjW0z9p4J4Qn1R7MNx-ueJ0l_nbl2Q\"}"
+      "userPrincipalName":"t~35oOumhzn8j-tFjW0z9p4J4Qn1R7MNx-ueJ0l_nbl2Q@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"c8913c86-ceea-4d39-b1ea-f63a5b675166",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"xzuczado8k_3rlH_zDVGqdQF2xvtCsyfe50ss4MR280\"}",
+      "mail":"t~xzuczado8k_3rlH_zDVGqdQF2xvtCsyfe50ss4MR280@M365x214355.onmicrosoft.com",
       "officeLocation":"18/1106",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"xzuczado8k_3rlH_zDVGqdQF2xvtCsyfe50ss4MR280\"}"
+      "userPrincipalName":"t~xzuczado8k_3rlH_zDVGqdQF2xvtCsyfe50ss4MR280@M365x214355.onmicrosoft.com"
     },
     {
       "@odata.type":"#microsoft.graph.user",
       "id":"e3d0513b-449e-4198-ba6f-bd97ae7cae85",
       "businessPhones":[ ],
-      "mail":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"wOJLeblkCPz-4kzW9KSFa2VafQ4IBEankxalIWAN6J8\"}",
+      "mail":"t~wOJLeblkCPz-4kzW9KSFa2VafQ4IBEankxalIWAN6J8@M365x214355.onmicrosoft.com",
       "officeLocation":"20/1101",
       "preferredLanguage":"en-US",
-      "userPrincipalName":"{\"domain\":\"M365x214355.onmicrosoft.com\",\"hash\":\"wOJLeblkCPz-4kzW9KSFa2VafQ4IBEankxalIWAN6J8\"}"
+      "userPrincipalName":"t~wOJLeblkCPz-4kzW9KSFa2VafQ4IBEankxalIWAN6J8@M365x214355.onmicrosoft.com"
     }
   ]
 }

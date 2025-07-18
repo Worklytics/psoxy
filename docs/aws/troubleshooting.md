@@ -62,6 +62,16 @@ Options:
 - use a script such as [aws-mfa](https://github.com/broamski/aws-mfa) to get short-lived key+secret
   for your user.
 
+## Permissions Problems
+
+Apart from ensuring that the AWS principal you're using to run Terraform has the necessary permissions, ensure that the following either do not apply to your AWS Organization, or are properly configured to allow your Terraform user/role to provision the necessary resources:
+- [Service Control Policies](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html)
+- [Permissions Boundaries](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html)
+
+Usually an issue with the above will cause an error in the `terraform apply` step; but on occasion we've seen infra fail to be properly linked where this linkage is implicit, rather than a specifc "resource" in Terraform (eg, attaching Cloud Watch Log groups to Lambda functions).
+
+You should contact your AWS team if in doubt.
+
 ## Logs via Cloud Watch
 
 ### via Web Console
@@ -140,21 +150,11 @@ java.lang.Error: missing config. no value for PSOXY_SALT
 Check:
 
 - the SSM parameter exists in the AWS account
-- the SSM parameter can be read by the lambda's execution rule (eg, has an attached IAM policy that
-  allows the SSM parameter to be read; can test this with the
-  [AWS Policy Simulator](https://policysim.aws.amazon.com/home/index.jsp), setting 'Role' to your
-  lambda's execution role, 'Service' to 'AWS Systems Manager', 'Action' to 'Get Parameter' and
-  'Resource' to the SSM parameter's ARN.
-- the SSM parameter can be decrypted by the lambda's execution role (if it's encrypted with a KMS
-  key)
+- the SSM parameter can be read by the lambda's execution rule (eg, has an attached IAM policy that allows the SSM parameter to be read; can test this with the [AWS Policy Simulator](https://policysim.aws.amazon.com/home/index.jsp), setting 'Role' to your lambda's execution role, 'Service' to 'AWS Systems Manager', 'Action' to 'Get Parameter' and 'Resource' to the SSM parameter's ARN.
+- the SSM parameter can be decrypted by the lambda's execution rule (if it's encrypted with a KMS key)
 
-Setting `IS_DEVELOPMENT_MODE` to "true" in the Lambda's Env Vars via the console can enable some
-additional logging with detailed SSM error messages that will be helpful; but note that some of
-these errors will be expected in certain configurations.
+Setting `IS_DEVELOPMENT_MODE` to "true" in the Lambda's Env Vars via the console can enable some additional logging with detailed SSM error messages that will be helpful; but note that some of these errors will be expected in certain configurations.
 
 Our Terraform examples should provide both of the above for you, but worth double-checking.
 
-If those are present, yet the error persists, it's possible that you have some org-level security
-constraint/policy preventing SSM parameters from being used / read. For example, you have a "default
-deny" policy set for SSM GET actions/etc. In such a case, you need to add the execute roles for each
-lambda as exceptions to such policies (find these under AWS --> IAM --> Roles).
+If those are present, yet the error persists, it's possible that you have some org-level security constraint/policy preventing SSM parameters from being used / read. For example, you have a "default deny" policy set for SSM GET actions/etc. In such a case, you need to add the execute roles for each lambda as exceptions to such policies (find these under AWS --> IAM --> Roles).

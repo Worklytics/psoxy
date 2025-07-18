@@ -2,25 +2,15 @@
 
 Node.js testing tool for Worklytics Psoxy.
 
-We provide a collection of Node.js scripts to help you test your Worklytics Psoxy deploy. The
-requirements to be able to run the scripts are [Node.js] (version >=16) and [npm] (version >=8).
-First of all, install the npm dependencies: `npm i`.
+We provide a collection of Node.js scripts to help you test your Worklytics Psoxy deploy. The requirements to be able to run the scripts are [Node.js] (version >=16) and [npm] (version >=8). First of all, install the npm dependencies: `npm i`.
 
-The primary tool is a command line interface (CLI) script that allows you to execute
-"Psoxy Test Calls" to your Worklytics Psoxy instance. Check all the available options by
-running `node cli-call.js -h` (*).
+The primary tool is a command line interface (CLI) script that allows you to execute "Psoxy Test Calls" to your Worklytics Psoxy instance. Check all the available options by running `node cli-call.js -h` (*).
 
-We also provide a script to test "Psoxy bulk instances": they consist of an input bucket, an
-output one, and the Psoxy instance itself. The script allows you to upload a comma-separated
-values file (CSV) to the input bucket, it will check that the Psoxy has processed the file and
-have written it to the output bucket removing all Personal Identifiable Information (PII) from
-the file (as per Psoxy rules). Check available options by running `node cli-file-upload.js -h` (*).
+We also provide a script to test "Psoxy bulk instances": they consist of an input bucket, an output one, and the Psoxy instance itself. The script allows you to upload a comma-separated values file (CSV) to the input bucket, it will check that the Psoxy has processed the file and have written it to the output bucket removing all Personal Identifiable Information (PII) from the file (as per Psoxy rules). Check available options by running `node cli-file-upload.js -h` (*).
 
-A third script lets you check your Psoxy instance logs: `node cli-logs.js -h`
-(*).
+A third script lets you check your Psoxy instance logs: `node cli-logs.js -h` (*).
 
-(*) Options may vary depending on whether you've deployed the Worklytics Psoxy to Amazon Web
-Services ([AWS]) or Google Cloud Platform ([GCP]).
+(*) Options may vary depending on whether you've deployed the Worklytics Psoxy to Amazon Web Services ([AWS]) or Google Cloud Platform ([GCP]).
 
 ## Psoxy Test Call: AWS
 Assuming that you've successfully deployed the Psoxy to AWS, and you've configured [Google Calendar] as data source, let's see an example:
@@ -40,9 +30,7 @@ As you can see, the differences are:
 (*) Requests to AWS API need to be [signed], so you must ensure that the machine running these scripts have the appropriate AWS credentials for the role you've selected.
 
 ## Psoxy Test Call: GCP
-For GCP, every call needs an "identity token" (`-t, --token` option in the examples below) for the account
-that has access to the Cloud Platform (*). If you omit the token, the script will try to get it automatically,
-so you must [authorize gcloud first].
+For GCP, every call needs an "identity token" (`-t, --token` option in the examples below) for the account that has access to the Cloud Platform (*). If you omit the token, the script will try to get it automatically, so you must [authorize gcloud first].
 
 Google Calendar example:
 ```shell
@@ -111,8 +99,7 @@ node cli-logs.js -r <role> -re <region> -l <logGroupName>
 ```
 
 ## Psoxy Logs: GCP
-Use the following command to review the runtime logs of your Psoxy deploy to
-GCP:
+Use the following command to review the runtime logs of your Psoxy deploy to GCP:
 
 ```shell
 node cli-logs.js -p <projectId> -f <functionName>

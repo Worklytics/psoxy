@@ -54,7 +54,7 @@ variable "psoxy_base_dir" {
 
 variable "deployment_bundle" {
   type        = string
-  description = "path to deployment bundle to use (if not provided, will build one)"
+  description = "path to deployment bundle to use (if not provided, will build one). Can be a local file path or GCS URL (e.g., 'gs://psoxy-public-artifacts/psoxy-0.4.28.zip')."
   default     = null
 }
 
@@ -117,12 +117,19 @@ variable "custom_artifacts_bucket_name" {
 
 variable "api_connectors" {
   type = map(object({
-    source_kind                           = string
-    source_auth_strategy                  = string
-    target_host                           = string
-    oauth_scopes_needed                   = optional(list(string), [])
-    environment_variables                 = optional(map(string), {})
-    example_api_calls                     = optional(list(string), [])
+    source_kind             = string
+    source_auth_strategy    = string
+    target_host             = string
+    oauth_scopes_needed     = optional(list(string), [])
+    environment_variables   = optional(map(string), {})
+    enable_async_processing = optional(bool, false)
+    example_api_calls       = optional(list(string), [])
+    example_api_requests = optional(list(object({
+      method       = optional(string, "GET")
+      path         = string
+      content_type = optional(string, "application/json")
+      body         = optional(string, null)
+    })), [])
     example_api_calls_user_to_impersonate = optional(string)
     secured_variables = optional(list(object({
       name                = string

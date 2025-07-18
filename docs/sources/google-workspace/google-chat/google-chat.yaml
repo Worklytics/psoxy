@@ -6,7 +6,7 @@ endpoints:
         jsonPaths:
           - "$..email"
           - "$.items[*].events[*].parameters[?(@.name in ['actor'])].value"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.items[*].events[*].parameters[?(!(@.name =~ /^actor|room_id|timestamp_ms|message_id|room_name$/i))]"

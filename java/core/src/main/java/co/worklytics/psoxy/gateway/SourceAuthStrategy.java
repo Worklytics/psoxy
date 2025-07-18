@@ -29,7 +29,7 @@ import java.util.Set;
  *      - Microsoft/Atlassian have flows that are similar, but differ a bit in the protocol vs
  *        Google and we have to implement more of it
  *   - encapsulating this way might make it *less* reusable. May need two parts:
- *      - CredentialStrategy - how to obtain/maintailln credential
+ *      - CredentialStrategy - how to obtain/maintain credential
  *      - RequestAuthStrategy - given credential, how to use it to auth the request
  *         - any api that DOESN'T simply append token via Authorization header as a 'Bearer {{token}}'?
  *         - atlassian I guess, bc signing every request with unique JWT? (never obtaining an access

@@ -37,12 +37,12 @@ public class SQSOutput implements Output {
     Provider<SqsClient> sqsClient;
 
     @Override
-    public void write(ProcessedContent content) {
+    public void write(ProcessedContent content) throws WriteFailure {
         write(null, content);
     }
 
     @Override
-    public void write(@Nullable String key, ProcessedContent content) {
+    public void write(@Nullable String key, ProcessedContent content) throws WriteFailure {
         try {
             SqsClient client = sqsClient.get();
 
@@ -63,7 +63,7 @@ public class SQSOutput implements Output {
 
             client.sendMessage(requestBuilder.build());
         } catch (Exception e) {
-            throw new RuntimeException("Failed to write batch of content to SQS", e);
+            throw new WriteFailure("Failed to write batch of content to SQS", e);
         }
 
     }

@@ -30,7 +30,7 @@ variable "bucket_name_suffix" {
 
   # enforce max length to avoid bucket names that are too long
   validation {
-    condition     = can(regex("^[a-z0-9\\-_]{0,10}$", var.bucket_name_suffix))
+    condition     = can(regex("^[a-z0-9\\-_]{0,12}$", var.bucket_name_suffix))
     error_message = "The `bucket_name_suffix` must be at most 10 characters."
   }
 }

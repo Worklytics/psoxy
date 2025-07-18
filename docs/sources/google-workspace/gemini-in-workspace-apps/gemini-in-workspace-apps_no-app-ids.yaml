@@ -1,0 +1,108 @@
+---
+endpoints:
+  - pathTemplate: "/admin/reports/v1/activity/users/{userKey}/applications/gemini_in_workspace_apps"
+    allowedQueryParams:
+      - "customerId"
+      - "maxResults"
+      - "pageToken"
+      - "startTime"
+      - "endTime"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.items[*].actor.profileId"
+          - "$.items[*].actor.email"
+          - "$.items[*].resourceDetails[*]..email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<hashIp>
+        jsonPaths:
+          - "$.items[*].ipAddress"
+    pathParameterSchemas:
+      userKey:
+        or:
+          - type: "string"
+            enum:
+              - "all"
+          - type: "string"
+            format: "pseudonym"
+    responseSchema:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            $ref: "#/definitions/Activity"
+        kind:
+          type: "string"
+        nextPageToken:
+          type: "string"
+definitions:
+  Activity:
+    type: "object"
+    properties:
+      actor:
+        $ref: "#/definitions/Actor"
+      events:
+        type: "array"
+        items:
+          $ref: "#/definitions/Event"
+      id:
+        $ref: "#/definitions/Id"
+      ipAddress:
+        type: "string"
+      resourceDetails:
+        type: "array"
+        items:
+          $ref: "#/definitions/ResourceDetail"
+  Actor:
+    type: "object"
+    properties:
+      callerType:
+        type: "string"
+      email:
+        type: "string"
+      profileId:
+        type: "string"
+  Event:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      parameters:
+        type: "array"
+        items:
+          $ref: "#/definitions/Parameter"
+      type:
+        type: "string"
+  Id:
+    type: "object"
+    properties:
+      applicationName:
+        type: "string"
+      customerId:
+        type: "string"
+      time:
+        type: "string"
+        format: "date-time"
+      uniqueQualifier:
+        type: "string"
+  Parameter:
+    type: "object"
+    properties:
+      boolValue:
+        type: "boolean"
+      intValue:
+        type: "integer"
+      name:
+        type: "string"
+      value:
+        type: "string"
+  ResourceDetail:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      relation:
+        type: "string"
+      type:
+        type: "string"

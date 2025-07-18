@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>0.5.3</revision>
+        <revision>0.5.4</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.36</dependency.lombok.version> <!-- 1.18.30 is min compatible with jdk 21+ -->
         <dependency.dagger.version>2.40.5</dependency.dagger.version>
@@ -26,6 +26,7 @@
         <dependency.junit-jupiter.version>5.10.1</dependency.junit-jupiter.version>
         <dependency.mockito-junit-jupiter.version>5.18.0</dependency.mockito-junit-jupiter.version>
         <dependency.json-path.version>2.9.0</dependency.json-path.version>
+        <dependency.bouncycastle.version>1.81</dependency.bouncycastle.version>
         <plugin.surefire.version>3.5.3</plugin.surefire.version>
     </properties>
 

@@ -3,12 +3,13 @@ endpoints:
   - pathTemplate: "/gmail/v1/users/{mailboxId}/messages"
     transforms:
       - !<pseudonymizeEmailHeader>
+        encoding: "URL_SAFE_TOKEN"
         jsonPaths:
           - "$.messages.payload.headers[?(@.name =~ /^(From|To|Cc|Bcc)$/i)].value"
       - !<pseudonymize>
         jsonPaths:
           - "$.messages.payload.headers[?(@.name =~ /^(X-Original-Sender|Delivered-To|Sender)$/i)].value"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.messages.payload.headers[?(!(@.name =~ /^From|To|Cc|Bcc|X-Original-Sender|Delivered-To|Sender|Message-ID|Date|In-Reply-To|Original-Message-ID|References$/i))]"
@@ -17,10 +18,11 @@ endpoints:
       - !<pseudonymizeEmailHeader>
         jsonPaths:
           - "$.payload.headers[?(@.name =~ /^(From|To|Cc|Bcc)$/i)].value"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$.payload.headers[?(@.name =~ /^(X-Original-Sender|Delivered-To|Sender)$/i)].value"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.payload.headers[?(!(@.name =~ /^From|To|Cc|Bcc|X-Original-Sender|Delivered-To|Sender|Message-ID|Date|In-Reply-To|Original-Message-ID|References$/i))]"

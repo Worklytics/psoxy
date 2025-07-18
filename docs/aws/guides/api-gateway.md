@@ -1,29 +1,19 @@
 # Using API Gateway (V2)
 
-Some organizations require use of API Gateway. This is not the default approach for Psoxy since AWS
-added support for Lambda Function URLs (March 2022), which are a simpler and more direct way to
-expose lambdas via HTTPS.
+Some organizations require use of API Gateway. This is not the default approach for Psoxy since AWS added support for Lambda Function URLs (March 2022), which are a simpler and more direct way to expose lambdas via HTTPS.
 
-Nonetheless, should you wish to use API Gateway we provide **beta** support for this. It is needed
-if you wish to put your Lambda functions on a VPC (See `lambdas-on-vpc.md`).
+Nonetheless, should you wish to use API Gateway we provide **beta** support for this. It is needed if you wish to put your Lambda functions on a VPC (See `lambdas-on-vpc.md`).
 
 In particular:
 
-- IAM policy that allows api gateway methods to be invoked by the proxy caller role is defined once,
-  using wildcards, and exposes GET/HEAD/POST methods for all resources. While methods are further
-  constrained by routes and the proxy rules themselves, this could be another enforcement point at
-  the infrastructure level - at expense of N policies + attachments in your terraform plan instead
-  of 1.
-- proxy instances exposed as lambda function urls have 55s timeout, but API Gateway seems to support
-  30s as max - so this may cause timeouts in certain APIs
+- IAM policy that allows api gateway methods to be invoked by the proxy caller role is defined once, using wildcards, and exposes GET/HEAD/POST methods for all resources. While methods are further constrained by routes and the proxy rules themselves, this could be another enforcement point at the infrastructure level - at expense of N policies + attachments in your terraform plan instead of 1.
+- proxy instances exposed as lambda function urls have 55s timeout, but API Gateway seems to support 30s as max - so this may cause timeouts in certain APIs
 
 ## Usage
 
 Prerequisites:
 
-- the AWS principal (user or role) to provision API gateways. The AWS managed policy
-  [`AmazonAPIGatewayAdministrator`](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AmazonAPIGatewayAdministrator.html)
-  provides this.
+- the AWS principal (user or role) to provision API gateways. The AWS managed policy [`AmazonAPIGatewayAdministrator`](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AmazonAPIGatewayAdministrator.html) provides this.
 
 Add the following to your `terraform.tfvars` file:
 
@@ -31,14 +21,11 @@ Add the following to your `terraform.tfvars` file:
 use_api_gateway_v2=true
 ```
 
-Then `terraform apply` should create of API gateway-related resources, including policies/etc; and
-destroy lambda function urls (if you've previously applied with `use_api_gateway=false`, which is
-the default).
+Then `terraform apply` should create of API gateway-related resources, including policies/etc; and destroy lambda function urls (if you've previously applied with `use_api_gateway=false`, which is the default).
 
 ## API Gateway v1 - not supported, but FWIW
 
-If you wish to use API Gateway V1, you will not be able to use the flag above. Instead, you'll have
-to do something like the following:
+If you wish to use API Gateway V1, you will not be able to use the flag above. Instead, you'll have to do something like the following:
 
 ```hcl
 
@@ -70,7 +57,6 @@ resource "aws_apigatewayv2_stage" "live" {
   }
 }
 
-
 resource "aws_apigateway_integration" "map" {
   for_each = local.rest_instances
 
@@ -83,7 +69,6 @@ resource "aws_apigateway_integration" "map" {
   request_parameters        = {}
   request_templates         = {}
 }
-
 
 resource "aws_apigateway_route" "get_route" {
   for_each = local.rest_instances
@@ -111,7 +96,6 @@ resource "aws_lambda_permission" "lambda_permission" {
   action        = "lambda:InvokeFunction"
   function_name = each.value.function_name
   principal     = "apigateway.amazonaws.com"
-
 
   # The /*/*/ part allows invocation from any stage, method and resource path
   # within API Gateway REST API.
@@ -145,6 +129,4 @@ resource "aws_iam_role_policy_attachment" "invoke_api_policy_to_role" {
 
 ```
 
-Additionally, you'll need to set a different handler class to be invoked instead of the default
-(`co.workltyics.psoxy.Handler`, should be `co.worklytics.psoxy.APIGatewayV1Handler`). This can be
-done in Terraform or by modifying configuration via AWS Console.
+Additionally, you'll need to set a different handler class to be invoked instead of the default (`co.workltyics.psoxy.Handler`, should be `co.worklytics.psoxy.APIGatewayV1Handler`). This can be done in Terraform or by modifying configuration via AWS Console.

@@ -34,6 +34,22 @@ resource "random_string" "bucket_name_random_sequence" {
   numeric = true
 }
 
+module "async_output" {
+  source = "../gcp-output-bucket"
+
+  count = var.enable_async_processing ? 1 : 0
+
+  project_id                     = var.project_id
+  bucket_write_role_id           = var.bucket_write_role_id
+  function_service_account_email = var.service_account_email
+  bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence[0].result}-"
+  bucket_name_suffix             = "async-output"
+  sanitizer_accessor_principals = concat(
+    var.gcp_principals_authorized_to_test,
+    [for email in var.invoker_sa_emails : "serviceAccount:${email}"]
+  )
+}
+
 module "side_output_bucket" {
   source = "../../modules/gcp-output-bucket"
 
@@ -43,7 +59,7 @@ module "side_output_bucket" {
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
   bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence[0].result}-"
-  bucket_name_suffix             = "sideoutput"
+  bucket_name_suffix             = "side-output"
   sanitizer_accessor_principals  = each.value.allowed_readers
 }
 
@@ -124,7 +140,8 @@ resource "google_cloudfunctions2_function" "function" {
       var.environment_variables,
       var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
       var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${replace(upper(var.instance_id), "-", "_")}_" },
-      local.side_output_env_vars
+      local.side_output_env_vars,
+      var.enable_async_processing ? { ASYNC_OUTPUT_DESTINATION = "gs://${module.async_output[0].bucket_name}" } : {},
     )
 
     dynamic "secret_environment_variables" {
@@ -173,8 +190,21 @@ locals {
   impersonation_param = var.example_api_calls_user_to_impersonate == null ? "" : " -i \"${var.example_api_calls_user_to_impersonate}\""
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
   command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js"
-  command_test_calls = [for path in var.example_api_calls :
-    "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${path}\"${local.impersonation_param}"
+
+  # Merge example_api_calls into example_api_requests for unified processing
+  all_example_api_requests = concat(
+    [for path in var.example_api_calls : {
+      method       = "GET"
+      path         = path
+      content_type = "application/json"
+      body         = null
+    }],
+    var.example_api_requests
+  )
+
+  # Generate test calls from all example requests
+  command_test_calls = [for request in local.all_example_api_requests :
+    "${local.command_cli_call} -u \"${local.proxy_endpoint_url}${request.path}\" -m ${request.method}${request.body != null ? " -b \"${request.body}\"" : ""}${local.impersonation_param}"
   ]
   command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${google_cloudfunctions2_function.function.project}\" -f \"${google_cloudfunctions2_function.function.name}\""
 }
@@ -236,11 +266,13 @@ resource "local_file" "test_script" {
   filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
   file_permission = "755"
   content = templatefile("${path.module}/test_script.tftpl", {
-    proxy_endpoint_url  = local.proxy_endpoint_url,
-    function_name       = var.instance_id,
-    impersonation_param = local.impersonation_param,
-    command_cli_call    = local.command_cli_call,
-    example_api_calls   = var.example_api_calls,
+    proxy_endpoint_url        = local.proxy_endpoint_url,
+    function_name             = var.instance_id,
+    impersonation_param       = local.impersonation_param,
+    command_cli_call          = local.command_cli_call,
+    example_api_get_requests  = [for r in local.all_example_api_requests : r if r.method == "GET"],
+    example_api_post_requests = [for r in local.all_example_api_requests : r if r.method == "POST" && r.body != null], # body being null will blow up the templating
+    enable_async_processing   = var.enable_async_processing
   })
 }
 
@@ -274,6 +306,26 @@ output "proxy_kind" {
 
 output "test_script" {
   value = try(local_file.test_script[0].filename, null)
+}
+
+output "async_output_bucket_id" {
+  value       = try(module.async_output[0].bucket_id, null)
+  description = "Bucket ID of the async output bucket, if any. May have been provided by the user, or provisioned by this module."
+}
+
+output "side_output_sanitized_bucket_id" {
+  value       = try(module.side_output_bucket["sanitized"].bucket_id, null)
+  description = "Bucket ID of the sanitized side output bucket, if any. May have been provided by the user, or provisioned by this module."
+}
+
+output "side_output_original_bucket_id" {
+  value       = try(module.side_output_bucket["original"].bucket_id, null)
+  description = "Bucket ID of the original side output bucket, if any. May have been provided by the user, or provisioned by this module."
+}
+
+output "async_output_bucket_name" {
+  value       = try(module.async_output[0].bucket_name, null)
+  description = "Name of the async output bucket, if any. May have been provided by the user, or provisioned by this module."
 }
 
 output "todo" {

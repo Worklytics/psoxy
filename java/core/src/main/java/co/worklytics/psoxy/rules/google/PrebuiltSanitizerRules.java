@@ -8,11 +8,9 @@ import co.worklytics.psoxy.rules.Rules2;
 import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -186,6 +184,7 @@ public class PrebuiltSanitizerRules {
                 .pathTemplate("/admin/directory/v1/groups")
                     .transform(Transform.Pseudonymize.builder()
                             .includeOriginal(true)
+                            .encoding(PseudonymEncoder.Implementations.JSON)
                             .jsonPath("$..email")
                             .jsonPath("$..aliases[*]")
                             .jsonPath("$..nonEditableAliases[*]")
@@ -200,6 +199,7 @@ public class PrebuiltSanitizerRules {
                     .pathTemplate("/admin/directory/v1/groups/{groupId}")
                     .transform(Transform.Pseudonymize.builder()
                             .includeOriginal(true)
+                            .encoding(PseudonymEncoder.Implementations.JSON)
                             .jsonPath("$..email")
                             .jsonPath("$..aliases[*]")
                             .jsonPath("$..nonEditableAliases[*]")
@@ -307,42 +307,7 @@ public class PrebuiltSanitizerRules {
             .build();
 
 
-    static final RESTRules GMAIL = Rules2.builder()
-            .endpoint(Endpoint.builder()
-                .pathTemplate("/gmail/v1/users/{mailboxId}/messages")
-                .transform(
-                    Transform.PseudonymizeEmailHeader.builder()
-                        .jsonPath("$.messages.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS) + ")$/i)].value")
-                        .build())
-                .transform(
-                    Transform.Pseudonymize.builder()
-                        .jsonPath("$.messages.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_SINGLE_EMAILS) + ")$/i)].value")
-                        .build())
-                .transform(
-                    Transform.Redact.builder()
-                        // this build a negated JsonPath predicate for all allowed headers, so anything other
-                        // than expected headers will be redacted.
-                        .jsonPath("$.messages.payload.headers[?(!(@.name =~ /^" + String.join("|", ALLOWED_EMAIL_HEADERS) + "$/i))]")
-                        .build())
-            .build())
-            .endpoint(Endpoint.builder()
-                .pathTemplate("/gmail/v1/users/{mailboxId}/messages/{messageId}")
-                .transform(
-                    Transform.PseudonymizeEmailHeader.builder()
-                    .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_MULTIPLE_EMAILS) + ")$/i)].value")
-                    .build())
-                .transform(
-                    Transform.Pseudonymize.builder()
-                    .jsonPath("$.payload.headers[?(@.name =~ /^(" + String.join("|", EMAIL_HEADERS_CONTAINING_SINGLE_EMAILS) + ")$/i)].value")
-                    .build())
-                .transform(
-                    Transform.Redact.builder()
-                    // this build a negated JsonPath predicate for all allowed headers, so anything other
-                    // than expected headers will be redacted.
-                    .jsonPath("$.payload.headers[?(!(@.name =~ /^" + String.join("|", ALLOWED_EMAIL_HEADERS) + "$/i))]")
-                    .build())
-                .build())
-        .build();
+    static final RESTRules GMAIL = Rules2.load("sources/google-workspace/gmail/gmail.yaml");
 
     static final Set<String> GOOGLE_MEET_EVENT_PARAMETERS_PII = ImmutableSet.of(
             "organizer_email",
@@ -379,10 +344,10 @@ public class PrebuiltSanitizerRules {
                     .build())
             .build();
 
-    static final  RESTRules GEMINI_FOR_WORKSPACE =
-        Rules2.load("sources/google-workspace/gemini-for-workspace/gemini-for-workspace.yaml");
-    static final RESTRules GEMINI_FOR_WORKSPACE_NO_APP_IDS =
-        Rules2.load("sources/google-workspace/gemini-for-workspace/gemini-for-workspace_no-app-ids.yaml");
+    static final  RESTRules GEMINI_IN_WORKSPACE_APPS =
+        Rules2.load("sources/google-workspace/gemini-in-workspace-apps/gemini-in-workspace-apps.yaml");
+    static final RESTRules GEMINI_IN_WORKSPACE_APPS_NO_APP_IDS =
+        Rules2.load("sources/google-workspace/gemini-in-workspace-apps/gemini-in-workspace-apps_no-app-ids.yaml");
 
     static public final Map<String, RESTRules> GOOGLE_DEFAULT_RULES_MAP = ImmutableMap.<String, RESTRules>builder()
             .put("gcal", GCAL)
@@ -392,7 +357,7 @@ public class PrebuiltSanitizerRules {
             .put("gmail", GMAIL)
             .put("google-chat", GOOGLE_CHAT)
             .put("google-meet", GOOGLE_MEET)
-            .put("gemini-for-workspace", GEMINI_FOR_WORKSPACE)
-            .put("gemini-for-workspace" + ConfigRulesModule.NO_APP_IDS_SUFFIX, GEMINI_FOR_WORKSPACE_NO_APP_IDS)
+            .put("gemini-in-workspace-apps", GEMINI_IN_WORKSPACE_APPS)
+            .put("gemini-in-workspace-apps" + ConfigRulesModule.NO_APP_IDS_SUFFIX, GEMINI_IN_WORKSPACE_APPS_NO_APP_IDS)
             .build();
 }
