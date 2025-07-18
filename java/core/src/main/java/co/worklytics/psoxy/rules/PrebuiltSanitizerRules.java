@@ -15,6 +15,7 @@ public class PrebuiltSanitizerRules {
         .putAll(co.worklytics.psoxy.rules.msft.PrebuiltSanitizerRules.MSFT_DEFAULT_RULES_MAP)
         .put("salesforce", co.worklytics.psoxy.rules.salesforce.PrebuiltSanitizerRules.SALESFORCE)
         .putAll(co.worklytics.psoxy.rules.slack.PrebuiltSanitizerRules.SLACK_DEFAULT_RULES_MAP)
+        .putAll(co.worklytics.psoxy.rules.windsurf.PrebuiltSanitizerRules.WINDSURF_DEFAULT_RULES_MAP)
         .putAll(co.worklytics.psoxy.rules.zoom.PrebuiltSanitizerRules.ZOOM_PREBUILT_RULES_MAP)
         .putAll(co.worklytics.psoxy.rules.dropbox.PrebuiltSanitizerRules.DROPBOX_PREBUILT_RULES_MAP)
         .build();
