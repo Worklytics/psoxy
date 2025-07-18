@@ -99,7 +99,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
         if (!nonAsciiHeaders.isEmpty()) {
             log.warning("CSV file has header(s) with non-ASCII characters, which is unusual and may cause issues: " + String.join(", ", nonAsciiHeaders));
             List<String> withNonBreakingSpace = nonAsciiHeaders.stream()
-                .filter(s -> s.contains(" "))
+                .filter(s -> s.contains("\u00A0"))
                 .collect(Collectors.toList());
             if (!withNonBreakingSpace.isEmpty()) {
                 // try `cat -v` on linux, `vis` on mac to be able to see the non-breaking space character in the raw files
