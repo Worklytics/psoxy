@@ -25,7 +25,7 @@
         "kind":"drive#user",
         "isAuthenticatedUser":false,
         "permissionId":"02185925293822571813",
-        "emailAddress":"{\"domain\":\"worklytics.co\",\"hash\":\"ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4\"}"
+        "emailAddress":"t~ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4@worklytics.co"
       }
     },
     {
@@ -50,7 +50,7 @@
         "kind":"drive#user",
         "isAuthenticatedUser":false,
         "permissionId":"02185925293822571813",
-        "emailAddress":"{\"domain\":\"worklytics.co\",\"hash\":\"ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4\"}"
+        "emailAddress":"t~ANg5l6XVBpn-KyO-ivYDGQwZViEvM2uhytCnKiB0qr4@worklytics.co"
       }
     }
   ]

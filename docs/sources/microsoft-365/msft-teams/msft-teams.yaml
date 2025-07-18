@@ -11,7 +11,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -24,7 +24,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -41,7 +41,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -68,7 +68,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$..user.displayName"
@@ -89,7 +89,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$..user.displayName"
@@ -114,7 +114,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$..user.displayName"
@@ -132,7 +132,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -146,7 +146,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$..user.displayName"
@@ -170,7 +170,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$..value[*].userPrincipalName"
@@ -184,7 +184,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<tokenize>
         jsonPaths:
           - "$..callId"
@@ -213,7 +213,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -241,7 +241,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -269,7 +269,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -320,4 +320,4 @@ endpoints:
           - "$..onPremisesDistinguishedName"
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"

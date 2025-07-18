@@ -5,11 +5,11 @@
   "meetingEndDateTime":"2021-10-05T04:43:49.77Z",
   "attendanceRecords":[
     {
-      "emailAddress":"{\"domain\":\"contoso.com\",\"hash\":\"vmFS5ryxySBiEUyJMW5ZaT6Om1EFFke7j1Srx0mZAxs\"}",
+      "emailAddress":"t~vmFS5ryxySBiEUyJMW5ZaT6Om1EFFke7j1Srx0mZAxs@contoso.com",
       "totalAttendanceInSeconds":1152,
       "role":"Presenter",
       "identity":{
-        "id":"{\"hash\":\"MwYK48L-UYMIsFrz1EHA4xX8hwfxJQfyg_L-vtEV1Mc\"}",
+        "id":"t~MwYK48L-UYMIsFrz1EHA4xX8hwfxJQfyg_L-vtEV1Mc",
         "tenantId":null
       },
       "attendanceIntervals":[

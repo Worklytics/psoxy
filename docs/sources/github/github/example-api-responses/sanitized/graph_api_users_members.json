@@ -1,1 +1,44 @@
-sources/github/github/example-api-responses/sanitized/graph_api_users_members.json
+{
+  "data":{
+    "organization":{
+      "membersWithRole":{
+        "edges":[
+          {
+            "node":{
+              "email":"t~2cclTmgvAaaNoY_a3YFJVu1UUmwFw1MX9nrrF6oH9tM@contoso.com",
+              "login":"p~MsZ4qsVoj0TU_io4Cz9mnMBWrZkfI89B-8qznWvl83mYA56fU9HQ_fR3fOvcTHkx",
+              "organizationVerifiedDomainEmails":[
+                "t~_4ek18OM1Bqzf9GAql4c5Aj5q_QL8twXPufhwABSztg@verified.contoso.com"
+              ]
+            }
+          },
+          {
+            "node":{
+              "email":"t~OS0ifbJZXKTBbeGUlEbyacwWGTxBMkrAWSSbcy2OKmA@contoso.com",
+              "login":"p~IfCQZlVaWKPjwpZn6GtislWJJ2ehfSnlyyONl2LdgTAaP2EggmLxGUnmFuzNnZlY",
+              "organizationVerifiedDomainEmails":[ ]
+            }
+          },
+          {
+            "node":{
+              "email":"null",
+              "login":"p~YApDiI-sRY0bcFNlFUSSZfmkHIvlSIxBeU2yQopk2-opOAI0wX0s19aLmyjUAzBI",
+              "organizationVerifiedDomainEmails":[ ]
+            }
+          },
+          {
+            "node":{
+              "email":"null",
+              "login":"p~-IiOodmZnOLV0ID_LxNJUG31hhAEOnCGGz5M0M4Rue3Lih--OSGn-5XAkalHEvk9",
+              "organizationVerifiedDomainEmails":[ ]
+            }
+          }
+        ],
+        "pageInfo":{
+          "hasNextPage":true,
+          "endCursor":"Y3Vyc29yOnYyOpHOANUliA=="
+        }
+      }
+    }
+  }
+}

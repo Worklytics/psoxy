@@ -77,7 +77,7 @@
         "application":null,
         "device":null,
         "user":{
-          "id":"{\"hash\":\"sMxhtJVS27r5MC4y2Z_akFQRDkAHruk6R5wDIq6powY\"}",
+          "id":"t~sMxhtJVS27r5MC4y2Z_akFQRDkAHruk6R5wDIq6powY",
           "userIdentityType":"aadUser",
           "tenantId":"061ea7c2-cc15-418b-bfc0-9f6a7d98011c"
         }

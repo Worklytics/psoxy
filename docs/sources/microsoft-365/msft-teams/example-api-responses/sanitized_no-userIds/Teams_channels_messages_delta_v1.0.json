@@ -25,7 +25,7 @@
         "conversation":null,
         "user":{
           "@odata.type":"#microsoft.graph.teamworkUserIdentity",
-          "id":"{\"hash\":\"B9mIayvpLlXmJS0UFmhvp06dDj9WoxgJ9Dc7zS9Dc90\"}",
+          "id":"t~B9mIayvpLlXmJS0UFmhvp06dDj9WoxgJ9Dc7zS9Dc90",
           "userIdentityType":"aadUser",
           "tenantId":"e61ef81e-8bd8-476a-92e8-4a62f8426fca"
         }
@@ -65,7 +65,7 @@
         "conversation":null,
         "user":{
           "@odata.type":"#microsoft.graph.teamworkUserIdentity",
-          "id":"{\"hash\":\"B9mIayvpLlXmJS0UFmhvp06dDj9WoxgJ9Dc7zS9Dc90\"}",
+          "id":"t~B9mIayvpLlXmJS0UFmhvp06dDj9WoxgJ9Dc7zS9Dc90",
           "userIdentityType":"aadUser",
           "tenantId":"e61ef81e-8bd8-476a-92e8-4a62f8426fca"
         }
