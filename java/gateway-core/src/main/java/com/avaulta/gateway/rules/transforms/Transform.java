@@ -54,7 +54,7 @@ public abstract class Transform {
     List<String> jsonPaths;
 
     /**
-     * specifies fields within content that identify value to be transformed
+     * specifies fields within content that identify value to be transformed:q
      * <p>
      * supported for CSV
      *
@@ -222,7 +222,7 @@ public abstract class Transform {
          */
         @JsonInclude(JsonInclude.Include.NON_DEFAULT) //doesn't work for enums ...
         @Builder.Default
-        PseudonymEncoder.Implementations encoding = PseudonymEncoder.Implementations.JSON;
+        PseudonymEncoder.Implementations encoding = PseudonymEncoder.Implementations.URL_SAFE_TOKEN;
 
         public static PseudonymizeEmailHeader ofPaths(String... jsonPaths) {
             return PseudonymizeEmailHeader.builder().jsonPaths(Arrays.asList(jsonPaths)).build();
@@ -299,7 +299,7 @@ public abstract class Transform {
          */
         @JsonInclude(JsonInclude.Include.NON_DEFAULT) //doesn't work for enums ...
         @Builder.Default
-        PseudonymEncoder.Implementations encoding = PseudonymEncoder.Implementations.JSON;
+        PseudonymEncoder.Implementations encoding = PseudonymEncoder.Implementations.URL_SAFE_TOKEN;
 
         public static Pseudonymize ofPaths(String... jsonPaths) {
             return Pseudonymize.builder().jsonPaths(Arrays.asList(jsonPaths)).build();
