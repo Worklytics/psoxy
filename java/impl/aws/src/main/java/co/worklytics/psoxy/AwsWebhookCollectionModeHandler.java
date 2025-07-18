@@ -61,6 +61,7 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
         batchMergeHandler = awsContainer.batchMergeHandler();
         inboundWebhookHandler = awsContainer.inboundWebhookHandler();
         jwksHandler = awsContainer.jwksDecoratorFactory().create(inboundWebhookHandler);
+        lambdaEventUtils = awsContainer.lambdaEventUtils();
     }
 
 
