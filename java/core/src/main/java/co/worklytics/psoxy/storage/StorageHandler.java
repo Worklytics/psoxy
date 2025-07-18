@@ -12,6 +12,7 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.*;
 import lombok.extern.java.Log;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
@@ -351,7 +352,7 @@ public class StorageHandler {
         int bufferSize = getBufferSize();
 
         try (
-            InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
+            InputStream inputStream = new BOMInputStream(readInputStream(request, bufferSize, inputStreamSupplier));
             Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8), bufferSize);
             OutputStream outputStream = writeOutputStream(request, bufferSize, outputStreamSupplier);
             OutputStreamWriter writer = new OutputStreamWriter(outputStream)

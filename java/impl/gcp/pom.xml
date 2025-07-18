@@ -85,11 +85,7 @@
             <artifactId>commons-lang3</artifactId>
             <version>${dependency.apache-commons-lang3.version}</version>
         </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${dependency.commons-io.version}</version>
-        </dependency>
+
 
         <!-- platform stuff (eg, GCP Cloud Function support) -->
         <dependency>

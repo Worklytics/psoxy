@@ -79,8 +79,6 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     public void sanitize(@NonNull Reader reader,
                          @NonNull Writer writer,
                          @NonNull Pseudonymizer pseudonymizer) throws IOException {
-
-
         CSVFormat inputCSVFormat = CSVFormat.Builder.create(CSVFormat.DEFAULT)
             .setDelimiter(rules.getDelimiter())
             .setHeader() // needed, indicates needs to be parsed from input
@@ -480,5 +478,4 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             }
         };
     }
-
 }
