@@ -23,7 +23,7 @@
         "application":null,
         "device":null,
         "user":{
-          "id":"{\"hash\":\"B9mIayvpLlXmJS0UFmhvp06dDj9WoxgJ9Dc7zS9Dc90\"}",
+          "id":"t~B9mIayvpLlXmJS0UFmhvp06dDj9WoxgJ9Dc7zS9Dc90",
           "userIdentityType":"aadUser"
         }
       },
@@ -56,7 +56,7 @@
         "application":null,
         "device":null,
         "user":{
-          "id":"{\"hash\":\"B9mIayvpLlXmJS0UFmhvp06dDj9WoxgJ9Dc7zS9Dc90\"}",
+          "id":"t~B9mIayvpLlXmJS0UFmhvp06dDj9WoxgJ9Dc7zS9Dc90",
           "userIdentityType":"aadUser"
         }
       },
@@ -98,7 +98,7 @@
           "application":null,
           "device":null,
           "user":{
-            "id":"{\"hash\":\"_f_lwH_zqYVtech_dnZSTmXzYq4pDo8vsGQ51YNjrY4\"}",
+            "id":"t~_f_lwH_zqYVtech_dnZSTmXzYq4pDo8vsGQ51YNjrY4",
             "userIdentityType":"aadUser"
           }
         }

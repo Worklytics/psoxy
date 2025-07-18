@@ -42,7 +42,7 @@ endpoints:
           - "$..onPremisesDistinguishedName"
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/v1.0/groups/?[^/]*"
     transforms:
       - !<pseudonymizeRegexMatches>
@@ -111,7 +111,7 @@ endpoints:
           - "$..onPremisesDistinguishedName"
           - "$..onPremisesImmutableId"
           - "$..identities[*].issuerAssignedId"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/v1.0/users/[^/]*/mailboxSettings"
     transforms:
       - !<redact>
@@ -133,7 +133,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress.address"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
   - pathRegex: "^/v1.0/users/[^/]*/mailFolders(/SentItems|\\('SentItems'\\))/messages.*"
     transforms:
       - !<redact>
@@ -149,4 +149,4 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress.address"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"

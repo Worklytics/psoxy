@@ -2,7 +2,7 @@
   {
     "@timestamp":1688668100859,
     "action":"git.push",
-    "actor":"{\"hash\":\"IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbM\"}",
+    "actor":"t~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbM",
     "actor_location":{
       "country_code":"GB"
     },
@@ -12,12 +12,12 @@
     "repository":"some-org/test",
     "repository_public":false,
     "user":"null",
-    "user_id":"{\"hash\":\"uXY-rAXeOzg_TOxA3id5pRgzfCc7sMGRAnsZJK0Ds0U\"}"
+    "user_id":"t~uXY-rAXeOzg_TOxA3id5pRgzfCc7sMGRAnsZJK0Ds0U"
   },
   {
     "@timestamp":1688668100244,
     "action":"git.push",
-    "actor":"{\"hash\":\"IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbM\"}",
+    "actor":"t~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbM",
     "actor_location":{
       "country_code":"GB"
     },
@@ -27,13 +27,13 @@
     "repository":"some-org/test",
     "repository_public":false,
     "user":"null",
-    "user_id":"{\"hash\":\"uXY-rAXeOzg_TOxA3id5pRgzfCc7sMGRAnsZJK0Ds0U\"}"
+    "user_id":"t~uXY-rAXeOzg_TOxA3id5pRgzfCc7sMGRAnsZJK0Ds0U"
   },
   {
     "@timestamp":1688667848231,
     "_document_id":"wNeUMoUP4j8RgRjpMg6YaQ",
     "action":"pull_request.merge",
-    "actor":"{\"hash\":\"IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbM\"}",
+    "actor":"t~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbM",
     "actor_id":13968776,
     "actor_location":{
       "country_code":"ES"
@@ -47,8 +47,8 @@
     "pull_request_url":"https://github.com/some-org/test/pull/1",
     "repo":"some-org/test",
     "repository":"some-org/test",
-    "user":"{\"hash\":\"IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbM\"}",
-    "user_id":"{\"hash\":\"S3Nh4slc2XnLp5Qy1CD-pQew9-j0cePbX3U7-DE56Co\"}"
+    "user":"t~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbM",
+    "user_id":"t~S3Nh4slc2XnLp5Qy1CD-pQew9-j0cePbX3U7-DE56Co"
   },
   {
     "repo":[
@@ -65,7 +65,7 @@
     "operation_type":"remove",
     "data":{
       "public_repo":true,
-      "started_by":"{\"hash\":\"IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbM\"}",
+      "started_by":"t~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbM",
       "started_by_id":42,
       "category_type":"Resource Management"
     }

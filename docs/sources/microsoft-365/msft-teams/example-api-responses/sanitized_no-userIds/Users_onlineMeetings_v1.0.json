@@ -19,7 +19,7 @@
       {
         "identity":{
           "user":{
-            "id":"{\"hash\":\"KvrBhIhPrAEMwI320CqhyGSfgVmKedObWZ5X380uX04\"}"
+            "id":"t~KvrBhIhPrAEMwI320CqhyGSfgVmKedObWZ5X380uX04"
           }
         }
       }
@@ -27,7 +27,7 @@
     "organizer":{
       "identity":{
         "user":{
-          "id":"{\"hash\":\"OkGYJKhA8lYaD0IJw3YHj8cB9qiSMw6MA_70P99wa3o\"}"
+          "id":"t~OkGYJKhA8lYaD0IJw3YHj8cB9qiSMw6MA_70P99wa3o"
         }
       }
     }

@@ -10,8 +10,8 @@
       "plan_type":"business",
       "assignee":{
         "login":"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f",
-        "id":"{\"hash\":\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"}",
-        "node_id":"{\"hash\":\"4YTpKVPu-74u-26baOFgVjym_0UMqn6D8A3cWAjmJ0U\"}",
+        "id":"t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc",
+        "node_id":"t~4YTpKVPu-74u-26baOFgVjym_0UMqn6D8A3cWAjmJ0U",
         "type":"User",
         "site_admin":false
       },
@@ -33,8 +33,8 @@
       "last_activity_editor":"vscode/1.77.3/copilot/1.86.82",
       "assignee":{
         "login":"p~zwsXxNZ9LdvyEczAd9xgpSTUbGXT5QAZ3dVk5GSxJTvijeDoorFum3wH62YAAsNk",
-        "id":"{\"hash\":\"0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc\"}",
-        "node_id":"{\"hash\":\"MqNktVmgWyI0R_A_TmwdAe0GOhmJCdxJPr-8wT-MHv0\"}",
+        "id":"t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc",
+        "node_id":"t~MqNktVmgWyI0R_A_TmwdAe0GOhmJCdxJPr-8wT-MHv0",
         "type":"User",
         "site_admin":false
       }

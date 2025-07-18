@@ -1,8 +1,8 @@
 [
   {
     "login":"p~E9mJyHvRHfGqXxImuUuTlHddbcjrRSOBItcF2cUkFUAH5Z9Z3LdF2qUAzaGcl-9Q",
-    "id":"{\"hash\":\"H77wUJKd7KSkBy8isl5E1cTCBWBW8cG5uYE87NYu7To\"}",
-    "node_id":"{\"hash\":\"YaWGzupY-9UvnQ6MF2VX0cuOsqqQ6zZZabQxKqYIjT4\"}",
+    "id":"t~H77wUJKd7KSkBy8isl5E1cTCBWBW8cG5uYE87NYu7To",
+    "node_id":"t~YaWGzupY-9UvnQ6MF2VX0cuOsqqQ6zZZabQxKqYIjT4",
     "type":"User",
     "site_admin":false
   }

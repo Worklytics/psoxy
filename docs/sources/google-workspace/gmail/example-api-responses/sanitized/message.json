@@ -12,7 +12,7 @@
     "headers":[
       {
         "name":"Delivered-To",
-        "value":"{\"domain\":\"worklytics.co\",\"hash\":\"Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA\"}"
+        "value":"t~Qf4dLJ4jfqZLn9ef4VirvYjvOnRaVI5tf5oLnM65YOA@worklytics.co"
       },
       {
         "name":"Date",
@@ -20,7 +20,7 @@
       },
       {
         "name":"From",
-        "value":"[{\"domain\":\"worklytics.co\",\"hash\":\"EsXNVTaSltmDUIO4v8CixL66qkCKLlpLB_RHysHbQSQ\"}]"
+        "value":"[\"t~EsXNVTaSltmDUIO4v8CixL66qkCKLlpLB_RHysHbQSQ@worklytics.co\"]"
       },
       {
         "name":"Message-ID",
@@ -28,19 +28,19 @@
       },
       {
         "name":"To",
-        "value":"[{\"domain\":\"worklytics.co\",\"hash\":\"t9en8zJVP-3M_f0Zce7WRyACl2EWLeGy_fSnrtJpHm4\"}]"
+        "value":"[\"t~t9en8zJVP-3M_f0Zce7WRyACl2EWLeGy_fSnrtJpHm4@worklytics.co\"]"
       },
       {
         "name":"Cc",
-        "value":"[{\"domain\":\"worklytics.co\",\"hash\":\"vZ8I4uZkcdXvnp57XCjVY_bJKr9vZpkDsWBDY3m-qTs\"},{\"domain\":\"worklytics.co\",\"hash\":\"FRffHsKrFsvq64VMg84_x1stbyhhFwldLDdV6-8F-No\"}]"
+        "value":"[\"t~vZ8I4uZkcdXvnp57XCjVY_bJKr9vZpkDsWBDY3m-qTs@worklytics.co\",\"t~FRffHsKrFsvq64VMg84_x1stbyhhFwldLDdV6-8F-No@worklytics.co\"]"
       },
       {
         "name":"bcC",
-        "value":"[{\"domain\":\"worklytics.co\",\"hash\":\"TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4\"},{\"domain\":\"worklytics.co\",\"hash\":\"p4EqhPet-p2vhJbMJD5jrbrlJtF21L0TOl8bBtjrNpk\"}]"
+        "value":"[\"t~TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4@worklytics.co\",\"t~p4EqhPet-p2vhJbMJD5jrbrlJtF21L0TOl8bBtjrNpk@worklytics.co\"]"
       },
       {
         "name":"X-Original-Sender",
-        "value":"{\"domain\":\"worklytics.co\",\"hash\":\"EsXNVTaSltmDUIO4v8CixL66qkCKLlpLB_RHysHbQSQ\"}"
+        "value":"t~EsXNVTaSltmDUIO4v8CixL66qkCKLlpLB_RHysHbQSQ@worklytics.co"
       }
     ]
   },

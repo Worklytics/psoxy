@@ -5,7 +5,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.users[*]['email','phone_number']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
           - "$.users[*]['id','pmi']"
@@ -32,7 +32,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.meetings[*]['host_id','host_email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.meetings[*]['topic','join_url','start_url','agenda']"
@@ -44,7 +44,7 @@ endpoints:
           - "$..email"
           - "$..contact_email"
           - "$..participants[*]"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.['topic','agenda','custom_keys']"
@@ -57,7 +57,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$['meeting_host_id','meeting_host_email', 'summary_last_modified_user_id','summary_last_modified_user_email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<textDigest>
         jsonPaths:
           - "$..summary_overview"
@@ -74,7 +74,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.['host_id','user_email','host_email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.['user_name','topic','agenda']"
@@ -83,7 +83,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.participants[*]['id','user_email','pmi']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.participants[*]['name','registrant_id']"
@@ -92,7 +92,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.meetings[*]['host_id','user_email','host_email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.meetings[*]['user_name','topic','custom_keys','tracking_fields']"
@@ -101,7 +101,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.['host_id','user_email','host_email']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.['user_name','topic','custom_keys','tracking_fields']"
@@ -110,7 +110,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.participants[*]['id','user_email','user_id','pmi']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.participants[*]['name','registrant_id','display_name']"
@@ -119,7 +119,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.meetings[*]['host_id','account_id']"
-        encoding: "JSON"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$..['topic','share_url','recording_play_passcode']"

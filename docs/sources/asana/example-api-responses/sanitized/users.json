@@ -1,9 +1,9 @@
 {
   "data":[
     {
-      "gid":"{\"hash\":\"r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaE\",\"reversible\":\"p~r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaGzFatT5PGvb7S57rNnHGwT\"}",
+      "gid":"p~r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaGzFatT5PGvb7S57rNnHGwT",
       "resource_type":"user",
-      "email":"{\"domain\":\"example.com\",\"hash\":\"j-MVT2zWPkD22C8GXQVj1aWjS0DGVErUaRim930Sitw\"}",
+      "email":"t~j-MVT2zWPkD22C8GXQVj1aWjS0DGVErUaRim930Sitw@example.com",
       "workspaces":[
         {
           "gid":"12345",

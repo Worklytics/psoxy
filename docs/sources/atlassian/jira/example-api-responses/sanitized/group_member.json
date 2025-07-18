@@ -8,16 +8,16 @@
   "values":[
     {
       "key":"",
-      "accountId":"{\"hash\":\"nrSd0Q7Yg81NfVbwLq6FUnyOBL7lunEWD-2Raiuy9HI\"}",
-      "emailAddress":"{\"domain\":\"example.com\",\"hash\":\"UltPZuWYQhKbkt6c-42zy9-Fn2K9TKXJrySsEkApt58\"}",
+      "accountId":"t~nrSd0Q7Yg81NfVbwLq6FUnyOBL7lunEWD-2Raiuy9HI",
+      "emailAddress":"t~UltPZuWYQhKbkt6c-42zy9-Fn2K9TKXJrySsEkApt58@example.com",
       "active":true,
       "timeZone":"Australia/Sydney",
       "accountType":"atlassian"
     },
     {
       "key":"",
-      "accountId":"{\"hash\":\"R2MoDHOKLMjyo0mcmJkEHExyoMWcr1luvoB4IZEZlDQ\"}",
-      "emailAddress":"{\"domain\":\"example.com\",\"hash\":\"gNFNvSKDH7Fur6w-eDDOFy_oNi69ZmKLWijejL6TFe0\"}",
+      "accountId":"t~R2MoDHOKLMjyo0mcmJkEHExyoMWcr1luvoB4IZEZlDQ",
+      "emailAddress":"t~gNFNvSKDH7Fur6w-eDDOFy_oNi69ZmKLWijejL6TFe0@example.com",
       "active":false,
       "timeZone":"Australia/Sydney",
       "accountType":"atlassian"
