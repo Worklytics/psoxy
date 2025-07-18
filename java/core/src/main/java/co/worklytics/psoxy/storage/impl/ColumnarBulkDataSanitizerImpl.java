@@ -79,6 +79,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                          @NonNull Writer writer,
                          @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
+
         CSVFormat inputCSVFormat = CSVFormat.Builder.create(CSVFormat.DEFAULT)
             .setDelimiter(rules.getDelimiter())
             .setHeader() // needed, indicates needs to be parsed from input
@@ -94,7 +95,17 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
 
         Preconditions.checkArgument(records.getHeaderMap() != null, "Failed to parse header from file");
 
-        Preconditions.checkArgument( records.getHeaderMap().keySet().stream().allMatch(StringUtils::isAsciiPrintable), "Non-ASCII characters found in headers, inspect file with cat -v for control characters");
+        List<String> nonAsciiHeaders = records.getHeaderMap().keySet().stream().filter(s -> !StringUtils.isAsciiPrintable(s)).map(s -> "\"" + s + "\"").collect(Collectors.toList());
+        if (!nonAsciiHeaders.isEmpty()) {
+            log.warning("CSV file has header(s) with non-ASCII characters, which is unusual and may cause issues: " + String.join(", ", nonAsciiHeaders));
+            List<String> withNonBreakingSpace = nonAsciiHeaders.stream()
+                .filter(s -> s.contains("\u00A0"))
+                .collect(Collectors.toList());
+            if (!withNonBreakingSpace.isEmpty()) {
+                // try `cat -v` on linux, `vis` on mac to be able to see the non-breaking space character in the raw files
+                log.warning("CSV file has header(s) with non-breaking space character (U+00A0); any references to these columns in your rules must use the same: " + String.join("\",\"", withNonBreakingSpace));
+            }
+        }
 
         /*
          * Table to store the transformation to be applied to each column
