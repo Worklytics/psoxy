@@ -92,12 +92,7 @@
             <artifactId>commons-lang3</artifactId>
             <version>${dependency.apache-commons-lang3.version}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${dependency.commons-io.version}</version>
-        </dependency>
+
 
 
         <!-- from BOM - https://mvnrepository.com/artifact/software.amazon.awssdk/bom -->

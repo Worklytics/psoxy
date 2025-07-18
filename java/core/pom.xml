@@ -77,6 +77,14 @@
             <artifactId>commons-csv</artifactId>
             <version>${dependency.apache-commons-csv.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${dependency.commons-io.version}</version>
+        </dependency>
+
+
         <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -149,6 +157,16 @@
             <version>${dependency.apache-httpcore.version}</version>
         </dependency>
 
+        <!-- commons-io used for some advance file readers in bulk file processing case -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.19.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+
+
         <!-- BouncyCastle used to broaden set of key encodings we can support -->
         <!-- this has non-trivial cost in JAR size, so TBD if we should include longer term vs some middleware to re-encode keys -->
         <dependency>
@@ -204,7 +222,6 @@
             <version>${dependency.json-path.version}</version>
             <scope>test</scope>
         </dependency>
-
 
     </dependencies>
 
