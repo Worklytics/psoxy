@@ -11,14 +11,15 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `asana`                    | Asana                               | API  | GA           |
 | `azure-ad`                 | Azure Active Directory              | API  | DEPRECATED   |
 | `badge`                    | Badge                               | Bulk | GA           |
+| `cursor`                   | Cursor                              | API  | ALPHA        |
 | `dropbox-business`         | Dropbox Business                    | API  | DEPRECATED   |
 | `gcal`                     | Google Calendar                     | API  | GA           |
 | `gdrive`                   | Google Drive                        | API  | GA           |
 | `gdirectory`               | Google Directory                    | API  | GA           |
-| `gemini-for-workspace`     | Google Gemini for Workspace         | API  | ALPHA        |
+| `gemini-in-workspace-apps` | Google Gemini in Workspace Apps     | API  | BETA         |
 | `gemini-usage`             | Gemini Usage                        | Bulk | ALPHA        |
 | `github`                   | GitHub                              | API  | GA           |
-| `github-copilot`           | GitHub                              | API  | ALPHA        |
+| `github-copilot`           | GitHub                              | API  | BETA         |
 | `github-enterprise-server` | GitHub Enterprise Server            | API  | GA           |
 | `github-non-enterprise`    | GitHub Non-Enterprise               | API  | GA           |
 | `gmail`                    | Gmail                               | API  | GA           |
@@ -34,9 +35,11 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `msft-teams`               | Microsoft Teams                     | API  | BETA         |
 | `qualtrics`                | Qualtrics (survey)                  | API  | GA           |
 | `salesforce`               | Salesforce                          | API  | GA           |
-| `slack-discovery-api`      | Slack Discovery API                 | API  | GA           |
+| `slack-discovery-api`      | Slack via Discovery API             | API  | DEPRECATED   |
+| `slack-analytics`          | Slack Analytics                     | API  | ALPHA        |
 | `slack-ai-snapshot`        | Slack AI Snapshot                   | Bulk | ALPHA        |
 | `survey`                   | Survey                              | Bulk | GA           |
+| `windsurf`                 | Windsurf                            | API  | ALPHA        |
 | `zoom`                     | Zoom                                | API  | GA           |
 | `zoom-ai-snapshot-bulk`    | Zoom AI Snapshot Bulk               | Bulk | ALPHA        |
 

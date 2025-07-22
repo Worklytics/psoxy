@@ -207,6 +207,7 @@ module "api_connector" {
   side_output_original                  = try(local.custom_original_side_outputs[each.key], null)
   side_output_sanitized                 = try(local.sanitized_side_outputs[each.key], null)
   enable_async_processing               = each.value.enable_async_processing
+  memory_size_mb                        = each.value.enable_async_processing ? 1024 : 512 # default is 512; double it for async case, to give additional margin
 
   todos_as_local_files = var.todos_as_local_files
   todo_step            = var.todo_step
