@@ -112,7 +112,7 @@ public class JsonSchemaFilterUtils {
                 // cases like URLs relative to schema URI are not supported
                 throw new RuntimeException("unsupported ref: " + schema.getRef());
             }
-        } else if (schema.hashOneOf()) {
+        } else if (schema.hasOneOf()) {
             // Get first schema with matches its inner condition.
             // See https://json-schema.org/understanding-json-schema/reference/combining.html#oneof
             // NOTE: If is expected that the "oneOf" candidate should hava an if-else-then or
@@ -120,6 +120,7 @@ public class JsonSchemaFilterUtils {
             // inside, otherwise the condition will not be evaluated and only the first occurrence
             // appearing in the list
             // will be chosen
+            // DEPRECATED, bc case above is weird to me
             for (JsonSchemaFilter oneOfCandidate : schema.getOneOf()) {
                 Object result = filterBySchema(path, provisionalOutput, oneOfCandidate, root,
                         redactionsMade);
@@ -130,6 +131,25 @@ public class JsonSchemaFilterUtils {
             }
 
             return null;
+        } else if (schema.hasAnyOf()) {
+            // Get first schema with matches its inner condition.
+            // See https://json-schema.org/understanding-json-schema/reference/combining.html#oneof
+            // NOTE: If is expected that the "oneOf" candidate should hava an if-else-then or
+            // if-then nodes
+            // inside, otherwise the condition will not be evaluated and only the first occurrence
+            // appearing in the list
+            // will be chosen
+            for (JsonSchemaFilter anyOfCandidate : schema.getAnyOf()) {
+                Object result = filterBySchema(path, provisionalOutput, anyOfCandidate, root, redactionsMade);
+
+                //short-circuit on first match
+                if (!(result instanceof NotMatchedConstant)) {
+                    return result;
+                }
+            }
+
+            return null;
+
         } else if (schema instanceof ConditionJsonSchema) {
             // Conditions are schemas without no type definition
             // Only one property are supported by conditions. See
