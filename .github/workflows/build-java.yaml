@@ -35,7 +35,7 @@ jobs:
           # https://github.com/actions/setup-java#supported-distributions
           distribution: ${{ inputs.java-distribution }}
       - name: Setup Maven Action
-        uses: s4u/setup-maven-action@v1
+        uses: s4u/setup-maven-action@v1.18.0
         with:
           java-version: ${{ inputs.java-version }}
           maven-version: ${{ inputs.maven-version }}
