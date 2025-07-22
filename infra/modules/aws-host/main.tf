@@ -207,6 +207,7 @@ module "api_connector" {
   side_output_original                  = try(local.custom_original_side_outputs[each.key], null)
   side_output_sanitized                 = try(local.sanitized_side_outputs[each.key], null)
   enable_async_processing               = each.value.enable_async_processing
+  memory_size_mb                        = each.value.enable_async_processing ? 1024 : 512 # default is 512; double it for async case, to give additional margin
 
   todos_as_local_files = var.todos_as_local_files
   todo_step            = var.todo_step
@@ -330,6 +331,7 @@ module "webhook_collectors" {
   )
 }
 
+# Policy to allow test caller to invoke webhook collector urls and sign webhook requests
 resource "aws_iam_policy" "invoke_webhook_collector_urls" {
   count = local.enable_webhook_testing ? 1 : 0
 
@@ -340,19 +342,25 @@ resource "aws_iam_policy" "invoke_webhook_collector_urls" {
     {
       "Version" : "2012-10-17",
       "Statement" : [
-        {
-          "Action" : ["lambda:InvokeFunctionUrl"],
+        { # allow test caller to invoke each webhook collector via its function url
+          "Action" : [
+            "lambda:InvokeFunctionUrl"
+          ],
           "Effect" : "Allow",
           "Resource" : [for k, v in module.webhook_collectors : v.function_arn]
+        },
+        { # need to allow test caller to sign webhook requests using the auth key(s)
+          "Action" : [
+            "kms:Sign",
+            "kms:GetPublicKey",
+            "kms:DescribeKey"
+          ],
+          "Effect" : "Allow",
+          "Resource" : flatten([for k, v in module.webhook_collectors : v.provisioned_auth_key_pairs])
         }
       ]
-  })
-
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
-  }
+    }
+  )
 }
 
 resource "aws_iam_role_policy_attachment" "invoke_webhook_collector_urls_to_test_role" {

@@ -18,7 +18,9 @@ module "env_id" {
 
 locals {
   bucket_name_prefix          = "${module.env_id.id}-${replace(var.instance_id, "_", "-")}"
-  bucket_name_unique_sequence = coalesce(var.unique_sequence, uuid())
+  MAX_S3_BUCKET_NAME_LENGTH   = 63 # external constant; outside of our control
+  max_unique_sequence_length  = local.MAX_S3_BUCKET_NAME_LENGTH - length(local.bucket_name_prefix) - length(var.bucket_suffix) - 2
+  bucket_name_unique_sequence = substr(coalesce(var.unique_sequence, uuid()), 0, local.max_unique_sequence_length)
 }
 
 resource "aws_s3_bucket" "bucket" {

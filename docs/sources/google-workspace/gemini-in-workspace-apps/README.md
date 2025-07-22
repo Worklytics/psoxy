@@ -1,10 +1,9 @@
-# Gemini for Google Workspace
-**alpha**
+# Gemini in Workspace Apps
+**beta**
 Please review the [Google Workspace README](../README.md) for general information applicable to
 all Google Workspace connectors.
 
-This connector pulls Gemini-events from the Google Workspace audit log. These events were briefly available
-in April 2025, but Google has pulled them back as of May 2025.  We anticipate them being available later in 2025.
+This connector pulls Gemini-events from the Google Workspace audit log.
 
 
 ## Examples
