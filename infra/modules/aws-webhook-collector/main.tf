@@ -268,7 +268,7 @@ locals {
     var.provision_auth_key == null ? [] : [for arn in aws_kms_key.auth_key[*].arn : "aws-kms:${arn}"]
   )
 
-  # these ARE sorted, bc maps in tf are always iterated in lexagraphic order of the keys
+  # these ARE sorted, bc maps in tf are always iterated in lexicographic order of the keys
   auth_key_arns_sorted = values({
     for k in aws_kms_key.auth_key[*] : try(k.tags.rotation_time, k.arn) => k.arn
   })
