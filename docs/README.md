@@ -214,11 +214,10 @@ You will need all the following in your deployment environment (eg, your laptop)
 | Tool                                         | Version              | Test Command          |
 |----------------------------------------------|----------------------|-----------------------|
 | [git](https://git-scm.com/)                  | 2.17+                | `git --version`       |
-| [Maven](https://maven.apache.org/)           | 3.6+                 | `mvn -v`              |
-| [Java JDK 17+](https://openjdk.org/install/) | 17, 21 (see notes) | `mvn -v \| grep Java` |
+| [Maven](https://maven.apache.org/)           | 3.6+ ; 3.9.10+ required for java 24  | `mvn -v`              |
+| [Java JDK 17+](https://openjdk.org/install/) | 17, 21, 24 (see notes) | `mvn -v \| grep Java` |
 | [Terraform](https://www.terraform.io/)       | 1.6+, < 2.0          | `terraform version`   |
 
-NOTE: as of Apr 8, 2024, although Java 24 has been released Maven 3.9.9 is not compatible with it. Maven has fixed this, but has yet to release a version 3.9.10 or 4.0.x with the fix. Until then, we don't officially support Java 24.
 
 NOTE: we will support Java versions for duration of official support windows, in particular the LTS versions. Minor versions, such as 18-20, 22-23 which are out of official support, may work but are not routinely tested.
 
