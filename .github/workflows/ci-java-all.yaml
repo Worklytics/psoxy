@@ -19,6 +19,7 @@ jobs:
     uses: ./.github/workflows/build-java.yaml
     with:
       java-version: '17'
+      maven-version: '3.6.3' # just for interests sake
 
   # Java 21 - released 19 Sept 2023, supported until Sept 2028 (LTS)
   ci_java21:
