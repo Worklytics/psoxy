@@ -355,7 +355,7 @@ resource "aws_iam_policy" "invoke_webhook_collector_urls" {
             "kms:DescribeKey"
           ],
           "Effect" : "Allow",
-          "Resource" : flatten([for k, v in module.webhook_collectors : values(v.provisioned_auth_key_pairs)])
+          "Resource" : flatten([for k, v in module.webhook_collectors : v.provisioned_auth_key_pairs])
         }
       ]
     }
