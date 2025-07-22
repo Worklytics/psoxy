@@ -1,8 +1,6 @@
 # Webhook Collectors Spec
 
-
-
-***Use case: **
+**Use cases:**
    - custom tools, managed in house by customers. Customers can fire webhooks from these tools to webhook collectors, which sanitize the data (namely, consistently pseudonymizing any PII such that it's linkable to other data sources) and collect it into bulk data storage (e.g. S3, GCS, etc), from which it can later be transferred to Worklytics (asynchronously) for analysis.
    - on-prem / self-hosted tools (JIRA) that can be configured to fire webhooks
    - tools that fire webhooks which provide richer data than they expose via their APIs
@@ -56,6 +54,20 @@ Our module will also create a KMS key alias ending in `_signing-key`; any app yo
 Alternatively, you may manage the keys yourself and pass in kms key aliases via the `auth_keys` property of the `webhook_collectors` variable.  Have `current` and `previous` aliases point to the current and previous keys, respectively. When you rotate, update these (previous --> current, then current to your new key). Ensure you're ALWAYS signing the auth tokens with the `current` key.
 
 Note that this scheme **enables authentication of the request** AND **partial integrity verification of the request/payload**. Eg, a valid signed JWT identity token ensures that it originated with a trusted client. If you control to whom you issue auth tokens, you can trust these as authenticated requests. Additionally, the webhook rules may validate the request/payload's integrity for a subset of fields against the JWT claims included in the token; since these claims were signed by your private key, you can trust that the fields you checked are authentic.  However, any unchecked fields in the payload/query string may have been forged either by the client itself OR by a malicious actor who somehow obtained the JWT identity token.  This design choice is intended to optimize for performance and avoid many round-trips to a trusted server to generate JWT identity tokens. The usual scenario is that your server issues JWT token for each client session; clients send that token directly to webhook collection endpoint with each payload; the webhook collector is able to authenticate the request and verify the integrity of the identity of the user/client.  While users/clients may be able forge aspects of the payload, they will not be able to forge the identity of sender of the payload.
+
+`ALLOW_ORIGINS` environment variable can be used to control what origins are allowed to send webhooks to the collection; defaults to `*`, which is all. This is aligned to CORS standard.
+
+`AUTH_ISSUER` environment variable that is 
+
+
+`WEBHOOK_OUTPUT` - an env var that directs webhooks recieved by this collector should be sent; typically a queueing service (eg, SQS, PubSub, Cloud Tasks) to *batch* processing.
+
+`WEBHOOK_BATCH_OUTPUT` - the env var that controls where final output of the batched webhooks is sent; typically a cloud storage bucket (eg, S3, GCS). This output would be expected to be NDJSON files, gzipped.
+
+
+The webhook collector instance itself provides OIDC endpoints:
+  - `/.well-known/openid-configuration` - standard return of OIDC configuration, including `issuer` and `jwks_uri`; see [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html)
+  - `/.well-known/jwks.json` - public keys for the auth key pairs that collector will accept as JWTs. see [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html)
 
 ### AWS KMS Keys + NodeJS Example
 As an example, if you're using AWS KMS keys to sign the JWT identity tokens (the default using our Terraform modules) and have a server (backend) for your Tool in NodeJS, you might create a JWT identity token as follows:
@@ -149,17 +161,12 @@ In this scenario, the Tool Client sends webhook payloads directly to the Webhook
 
 ## Implementation Design
 
-A new entry point handler; `InboundWebhookHandler` that will handle incoming webhook requests to proxy instances. That will sanitize the payloads and write them to a bulk storage location as set in an `OUTPUT` environment variable.
-   - similar approach to API case, where there are host-platform-specific wrappers around a common handler ?? prob.
+A new entry point handler; `InboundWebhookHandler` that will handle incoming webhook requests to proxy instances. That will sanitize the payloads and write them to a queue set in `WEBHOOK_OUTPUT` environment variable. From that queue, they'll be ingested in batches and written to the location configured in `WEBHOOK_BATCH_OUTPUT` (see `BatchMergeHandler`).
 
 Rules of type `WebhookCollectionRules`, which includes:
-  - `jwtClaimsToVerify` - a list of any JWT claims that must be present in the JWT token sent in `Authorization` header
-    of the incoming webhook request which must be verified against webhook payload before accepting
-     the webhook payload. Keys are the JWT claim names, and value are list of places to check against that claims value
+  - `jwtClaimsToVerify` - a list of any JWT claims that must be present in the JWT token sent in `Authorization` header of the incoming webhook request which must be verified against webhook payload before accepting the webhook payload. Keys are the JWT claim names, and value are list of places to check against that claims value
           - eg, `queryParam`, `payloadContent`, `pathParam`, etc
-  - `endpoints` - a list of `WebhookEndpoint` objects, which define the endpoints that the webhook collector will
-which is a list of `WebhookRule` objects; first matching rule will be applied to the incoming
-webhook request. If none match, collector will return a 400 Bad Request response. Additionally
+  - `endpoints` - a list of `WebhookEndpoint` objects, which define the endpoints that the webhook collector will which is a list of `WebhookRule` objects; first matching rule will be applied to the incoming webhook request. If none match, collector will return a 400 Bad Request response. Additionally
 
 
 No matching in v1, so effectively just one `WebhookRule` will have the following properties:
@@ -188,15 +195,10 @@ endpoints:
            - "$.managerEmail"
 ```
 
-Outputs will be configured as follows, using env variables:
-  -
-
-
 Terraform - `gcp-webhook-collector` and `aws-webhook-collector` modules that will deploy the necessary infrastructure. These will:
-   - provision `-output` bucket for bulk storage of webhook payloads, readable to caller IAM role/principal (e.g. Worklytics tenant)
+   - provision `-sanitized-webhooks` bucket for bulk storage of webhook payloads, readable to caller IAM role/principal (e.g. Worklytics tenant)
 
-
-Webhooks will always be written as NDJSON (newline-delimited JSON) to the output bucket.
+Webhooks will always be written as NDJSON (newline-delimited JSON) to the output bucket; gzipped.
 
 To do this efficiently, we'd split into 2 steps: 1) webhook collector that receives webhook payload, accepts + sanitizes it, and then sends it to SQS. Then separately a trigger that 2) batches messages from SQS and writes them to the output bucket as NDJSON files.
 
@@ -216,6 +218,16 @@ if batch, then logic will:
 
 ### Future
 
+#### Full Request Case
+
+Use cases:
+  - JIRA / Atlassian:JIRA webhooks include PII in the path/query string. How to deal with this??
+      - `queryString` transforms, expecting json path stuff. [what if param included multiple times?]
+
+ 1. `collectionFormat` flag on `WebhookEndpoint`; enum of `PAYLOAD` (default) or `REQUEST`; in latter case, all json paths are relative to doc, 
+ 2. `WebhookRequest` DTO; in REQUEST case, transform body of request to that and send whole thing in.
+
+
 #### Authentication beyond Tokens
 Additional authentication checks:
 - IP range of request
@@ -224,21 +236,26 @@ Additional authentication checks:
 #### Collect Originals
 Optionally, an `OUTPUT_ORIGINAL` environment variable can be set to store the original payloads in a different bucket/location.
 
-
 #### Add FILTERS
 - `method` - HTTP method (GET, POST, etc) that the rule applies to [ do we care?? maybe security to lock to `POST` if/when possible]
 - `pathTemplate` - a path template that matches the incoming webhook request path. `null` means all paths are accepted.
 - `pathParamFilters` - if defined, request must pass these path parameter filters to be accepted.
 - `queryParamFilters` - if defined, request must pass  these query parameter filters to be accepted.
-- `format` - `payload`, `request` - only support `payload` for now, which means the payload is stored as-is.
+- `format` - `PAYLOAD`, `REQUEST` - only support `payload` for now, which means the payload is stored as-is.
 - `filters` - a list of filters to apply to the incoming webhook payload before storing it; `JSONSchemaFilter` implementation.
 
 Add a `REQUEST` format for writing webhooks --> storage:
-```json
+```jsonc
 {
     "timeReceived": "2023-10-01T12:00:00Z",
     "path": "/webhook/path",
     "method": "POST",
+    "headers": [ // - is there EVER a need to store headers?
+      {
+        "name": "Header1",
+        "value": "Value1",
+      }
+    ],
     "queryParameters": {
         "param1": "value1",
         "param2": "value2"
@@ -250,14 +267,7 @@ Add a `REQUEST` format for writing webhooks --> storage:
 }
 ```
 
-
 ### Issues
-
-  - directly include JSON payloads OR serialize?
-     - eg `"payload": "{...}"` OR `"payload": {...}` ? former more extensible, latter more concise / usable, if have polymorphic types
-  - JIRA webhooks include PII in the path/query string. How to deal with this??
-      - `queryString` transforms, expecting json path stuff. [what if param included multiple times?]
   - JIRA webhooks can mix a bunch of events of different schemas via single callback
   - need filters of some kind? (eg, avoid storage/processing of webhook payloads that don't have expected schemas?)
   - routing based on `method`, `path`, `queryParameters`?
-  - is there EVER a need to store headers?
