@@ -285,36 +285,6 @@ resource "aws_kms_alias" "auth_key_alias" {
   target_key_id = element(local.auth_key_ids_sorted, length(local.auth_key_arns_sorted) - 1) # should be latest, bc sorted by rotation_time
 }
 
-## if testing, we need test caller to be able to use the signing-key role
-resource "aws_iam_policy" "kms_signing_policy" {
-  count = local.allow_test_role_to_sign ? 1 : 0
-
-  name        = "${module.env_id.id}_${var.instance_id}_testCallerPolicy"
-  description = "Allows test caller role to sign webhook requests with the key to allow for testing webhook collection. Only for testing; can be detached once production ready."
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "kms:Sign",
-          "kms:GetPublicKey",
-          "kms:DescribeKey"
-        ]
-        Resource = aws_kms_key.auth_key[*].arn
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "auth_key_to_test_caller_role" {
-  count = local.allow_test_role_to_sign ? 1 : 0
-
-  role       = regex("arn:aws:iam::[0-9]+:role/(.+)", var.test_caller_role_arn)[0]
-  policy_arn = aws_iam_policy.kms_signing_policy[0].arn
-}
-
 ## end Authentication Key Pair Provisioning
 
 
