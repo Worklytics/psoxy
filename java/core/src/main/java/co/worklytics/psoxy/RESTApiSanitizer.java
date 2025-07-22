@@ -5,8 +5,11 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import javax.annotation.Nullable;
 import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
 import co.worklytics.psoxy.rules.RESTRules;
 import lombok.Getter;
@@ -89,9 +92,22 @@ public interface RESTApiSanitizer {
         @Getter
         private final InputStream stream;
         private final Future<?> future;
+        @Nullable
+        private final ExecutorService executor;
 
         public void complete() throws ExecutionException, InterruptedException {
             future.get();
+            if (executor != null) {
+                executor.shutdown();
+            }
+        }
+
+        /**
+         * a stream that's already completed
+         * @param stream
+         */
+        public static ProcessedStream completed(InputStream stream) {
+            return new ProcessedStream(stream,  CompletableFuture.completedFuture(null), null);
         }
     }
 }

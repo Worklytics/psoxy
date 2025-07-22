@@ -239,7 +239,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
         if (matchingEndpoint.isEmpty()) {
             // No matching endpoint found, return the original response
-            return new ProcessedStream(response, CompletableFuture.completedFuture(null));
+            return ProcessedStream.completed(response);
         }
 
         // q: overkill for NON-ndjson case?
@@ -296,7 +296,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             }
         });
 
-        return new ProcessedStream(inPipe, future);
+        return new ProcessedStream(inPipe, future, executor);
     }
 
     /**
