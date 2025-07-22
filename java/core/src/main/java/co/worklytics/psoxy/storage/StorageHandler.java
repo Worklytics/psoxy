@@ -1,30 +1,54 @@
 package co.worklytics.psoxy.storage;
 
-import co.worklytics.psoxy.Pseudonymizer;
-import co.worklytics.psoxy.gateway.*;
-import co.worklytics.psoxy.rules.RulesUtils;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.input.BOMInputStream;
+import org.apache.commons.lang3.StringUtils;
 import com.avaulta.gateway.rules.BulkDataRules;
 import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
 import com.avaulta.gateway.rules.PathTemplateUtils;
 import com.avaulta.gateway.rules.PathTemplateUtils.Match;
 import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.annotations.VisibleForTesting;
-import lombok.*;
+import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.HostEnvironment;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.StorageEventRequest;
+import co.worklytics.psoxy.gateway.StorageEventResponse;
+import co.worklytics.psoxy.rules.RulesUtils;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.input.BOMInputStream;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * solves a DaggerMissingBinding exception in tests
@@ -379,7 +403,7 @@ public class StorageHandler {
         int bufferSize = getBufferSize();
 
         try (
-            InputStream inputStream = new BOMInputStream(readInputStream(request, bufferSize, inputStreamSupplier));
+            InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
             Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8), bufferSize);
             OutputStream outputStream = writeOutputStream(request, bufferSize, outputStreamSupplier);
             OutputStreamWriter writer = new OutputStreamWriter(outputStream)
@@ -396,11 +420,14 @@ public class StorageHandler {
 
             fileHandler.sanitize(reader, writer, pseudonymizer);
         }
-
     }
 
+
+
     /**
-     * Reads an input stream, decompressing if necessary
+     * Reads an input stream, decompressing if necessary; and stripping BOM if present
+     * 
+     * 
      * @param request
      * @param bufferSize
      * @param inputStreamSupplier
@@ -408,7 +435,13 @@ public class StorageHandler {
      * @throws IOException
      */
     private InputStream readInputStream(StorageEventRequest request, int bufferSize, Supplier<InputStream> inputStreamSupplier) throws IOException {
-        return request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
+        InputStream decompressed = request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
+
+        // BOMInputStream is a wrapper around InputStream, which strips byte order mark (BOM) if present
+
+        // this in effect results in a transformation; an input file with a BOM will be read as a stream without BOM, and output will be written without it
+
+        return BOMInputStream.builder().setInputStream(decompressed).get();
     }
 
     /**
