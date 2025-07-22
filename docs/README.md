@@ -47,26 +47,22 @@ But Psoxy ensures Worklytics only sees:
 }
 ```
 
-These pseudonyms leverage SHA-256 hashing / AES encryption, with salt/keys that are known only to
-your organization and never transferred to Worklytics.
+These pseudonyms leverage SHA-256 hashing / AES encryption, with salt/keys that are known only to your organization and never transferred to Worklytics.
 
-Psoxy enforces that Worklytics can only access API endpoints you've configured ([principle of least
-privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege)) using HTTP methods you allow (eg, limit to `GET` to enforce read-only for RESTful APIs).
+Psoxy enforces that Worklytics can only access API endpoints you've configured ([principle of least privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege)) using HTTP methods you allow (eg, limit to `GET` to enforce read-only for RESTful APIs).
 
-For data sources APIs which require keys/secrets for authentication, such values remain stored in
-your premises and are never accessible to Worklytics.
+For data sources APIs which require keys/secrets for authentication, such values remain stored in your premises and are never accessible to Worklytics.
 
-You authorize your Worklytics tenant to access your proxy instance(s) via the IAM platform of your
-cloud host.
+You authorize your Worklytics tenant to access your proxy instance(s) via the IAM platform of your cloud host.
 
 Worklytics authenticates your tenant with your cloud host via [Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation). This eliminates the need for any secrets to be exchanged between your organization and Worklytics, or the use any API keys/certificates for Worklytics which you would need to rotate.
 
 See also: [API Data Sanitization](configuration/api-data-sanitization.md)
 
 ## Supported Data Sources
-As of March 2023, the following sources can be connected to Worklytics via psoxy.
+As of July 2025, the following sources can be connected to Worklytics via psoxy.
 
-Note: Some sources require specific licenses to transfer data via the APIs/endpoints used by Worklytics, or impose some per API request costs for such transfers.
+Note: Some sources require specific licenses to transfer data via the APIs/endpoints used by Worklytics, or impose some per API request costs/rate limits for such transfers. Inclusion of the source in the list below does not represent or warrant retrieval of your data using Psoxy from the source via our provided connectors.
 
 ### Google Workspace (formerly GSuite)
 
@@ -114,7 +110,7 @@ NOTE: usage of the Microsoft Teams APIs may be billable, depending on your Micro
 
 See details: [sources/microsoft-365/README.md](sources/microsoft-365/README.md)
 
-### Github
+### GitHub
 
 Check the documentation to use the right permissions and the right authentication flow per connector.
 

@@ -331,6 +331,7 @@ module "webhook_collectors" {
   )
 }
 
+# Policy to allow test caller to invoke webhook collector urls and sign webhook requests
 resource "aws_iam_policy" "invoke_webhook_collector_urls" {
   count = local.enable_webhook_testing ? 1 : 0
 
@@ -341,19 +342,25 @@ resource "aws_iam_policy" "invoke_webhook_collector_urls" {
     {
       "Version" : "2012-10-17",
       "Statement" : [
-        {
-          "Action" : ["lambda:InvokeFunctionUrl"],
+        { # allow test caller to invoke each webhook collector via its function url
+          "Action" : [
+            "lambda:InvokeFunctionUrl"
+          ],
           "Effect" : "Allow",
           "Resource" : [for k, v in module.webhook_collectors : v.function_arn]
+        },
+        { # need to allow test caller to sign webhook requests using the auth key(s)
+          "Action" : [
+            "kms:Sign",
+            "kms:GetPublicKey",
+            "kms:DescribeKey"
+          ],
+          "Effect" : "Allow",
+          "Resource" : flatten([for k, v in module.webhook_collectors : v.provisioned_auth_key_pairs])
         }
       ]
-  })
-
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
-  }
+    }
+  )
 }
 
 resource "aws_iam_role_policy_attachment" "invoke_webhook_collector_urls_to_test_role" {
