@@ -859,12 +859,13 @@ public class BulkDataSanitizerImplTest {
     @SneakyThrows
     void zoomCase() {
         final String TEST_EXAMPLE_FILE = "/csv/zoom_example.csv";
-        final String EXPECTED = "User Name,Email,Action,Feature used,Department,\r\n" +
-            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"GI144xrPnMS9IwneeTEzMfcC2zowYSHHhVaReTIDXeo\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"acme.com\"\",\"\"hash\"\":\"\".MFHtQFQtPUXyclPE.B71x_F4jJStaMz9ZN.kWFE4_o\"\",\"\"h_4\"\":\"\"-MFHtQFQtPUXyclPE-B71x_F4jJStaMz9ZN-kWFE4_o\"\"}\",13,AI Companion in Zoom Workplace App;Meeting summary;Meeting questions;,Product PMO,\r\n" +
-            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"Wl-yMZGcKhwYgI4D4oBEyh3tAo-6CsZlI0Sm5e2HJIw\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"acme.com\"\",\"\"hash\"\":\"\"dJD_mwEzDZdxpdKYwzpkG0k1u5eE9mL6RG2Z5G5VMQw\"\",\"\"h_4\"\":\"\"dJD_mwEzDZdxpdKYwzpkG0k1u5eE9mL6RG2Z5G5VMQw\"\"}\",2,Meeting summary;,Payroll,\r\n" +
-            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"WiO0pP6Lj25eMqiXLbL3AX6uBi5MRMT34BgaIuSEwQs\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"acme.com\"\",\"\"hash\"\":\"\"45SVSXnRsVfIVUBXcn_TOBFHzpiC09JMO2h33QK.nrc\"\",\"\"h_4\"\":\"\"45SVSXnRsVfIVUBXcn_TOBFHzpiC09JMO2h33QK-nrc\"\"}\",5,Meeting summary;,Product Management,\r\n" +
-            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"otJtA1m_38S10LrW1bYLMA4D8wsNQoXp7Ow66WnffFc\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"acme.com\"\",\"\"hash\"\":\"\"K1rUA4gXPMXXLH1Uu.as2TatFznGTlUnRICUpfI7sto\"\",\"\"h_4\"\":\"\"K1rUA4gXPMXXLH1Uu-as2TatFznGTlUnRICUpfI7sto\"\"}\",1,Smart recording;,Business Development,\r\n";
-
+        final String EXPECTED = """
+User Name,Email,Action,Feature used,Department,\r
+"{""hash"":""GI144xrPnMS9IwneeTEzMfcC2zowYSHHhVaReTIDXeo""}","{""domain"":""acme.com"",""hash"":""-MFHtQFQtPUXyclPE-B71x_F4jJStaMz9ZN-kWFE4_o""}",13,AI Companion in Zoom Workplace App;Meeting summary;Meeting questions;,Product PMO,\r
+"{""hash"":""Wl-yMZGcKhwYgI4D4oBEyh3tAo-6CsZlI0Sm5e2HJIw""}","{""domain"":""acme.com"",""hash"":""dJD_mwEzDZdxpdKYwzpkG0k1u5eE9mL6RG2Z5G5VMQw""}",2,Meeting summary;,Payroll,\r
+"{""hash"":""WiO0pP6Lj25eMqiXLbL3AX6uBi5MRMT34BgaIuSEwQs""}","{""domain"":""acme.com"",""hash"":""45SVSXnRsVfIVUBXcn_TOBFHzpiC09JMO2h33QK-nrc""}",5,Meeting summary;,Product Management,\r
+"{""hash"":""otJtA1m_38S10LrW1bYLMA4D8wsNQoXp7Ow66WnffFc""}","{""domain"":""acme.com"",""hash"":""K1rUA4gXPMXXLH1Uu-as2TatFznGTlUnRICUpfI7sto""}",1,Smart recording;,Business Development,\r
+""";
         ConfigService config = MockModules.provideMock(ConfigService.class);
         when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
             .thenReturn(Optional.of(Base64.encodeBase64String((
