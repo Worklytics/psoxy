@@ -334,7 +334,7 @@ public class PrebuiltSanitizerRules {
                     put("records", JsonSchemaFilter.builder()
                             .type("array")
                             .items(JsonSchemaFilter.builder()
-                                    .oneOf(Arrays.asList(
+                                    .anyOf(Arrays.asList(
                                                     JsonSchemaFilter.builder().type("object")
                                                             .properties(Collections.emptyMap())._if(JsonSchemaFilterUtils.ConditionJsonSchema.builder().properties(new LinkedHashMap<String, JsonSchemaFilter>() {{ //req for java8-backwards compatibility
                                                                 put("attributes", buildAttributeWithType("User"));
