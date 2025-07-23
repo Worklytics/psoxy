@@ -848,6 +848,42 @@ public class BulkDataSanitizerImplTest {
         }
     }
 
+    /**
+     * zoom AI metrics has a number of exotic things
+     *   - BOM at the start of the file (this is a problem)
+     *   - encapsulated whitespace in column names (should be ok ...)
+     *   - trailing commas on each line (problematic out-of-the-box with apache commons csv)
+     *   - multi-valued values delimited by semicolons (non-issue)
+     */
+    @Test
+    @SneakyThrows
+    void zoomCase() {
+        final String TEST_EXAMPLE_FILE = "/csv/zoom_example.csv";
+        final String EXPECTED = "User Name,Email,Action,Feature used,Department,\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"GI144xrPnMS9IwneeTEzMfcC2zowYSHHhVaReTIDXeo\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"acme.com\"\",\"\"hash\"\":\"\".MFHtQFQtPUXyclPE.B71x_F4jJStaMz9ZN.kWFE4_o\"\",\"\"h_4\"\":\"\"-MFHtQFQtPUXyclPE-B71x_F4jJStaMz9ZN-kWFE4_o\"\"}\",13,AI Companion in Zoom Workplace App;Meeting summary;Meeting questions;,Product PMO,\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"Wl-yMZGcKhwYgI4D4oBEyh3tAo-6CsZlI0Sm5e2HJIw\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"acme.com\"\",\"\"hash\"\":\"\"dJD_mwEzDZdxpdKYwzpkG0k1u5eE9mL6RG2Z5G5VMQw\"\",\"\"h_4\"\":\"\"dJD_mwEzDZdxpdKYwzpkG0k1u5eE9mL6RG2Z5G5VMQw\"\"}\",2,Meeting summary;,Payroll,\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"WiO0pP6Lj25eMqiXLbL3AX6uBi5MRMT34BgaIuSEwQs\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"acme.com\"\",\"\"hash\"\":\"\"45SVSXnRsVfIVUBXcn_TOBFHzpiC09JMO2h33QK.nrc\"\",\"\"h_4\"\":\"\"45SVSXnRsVfIVUBXcn_TOBFHzpiC09JMO2h33QK-nrc\"\"}\",5,Meeting summary;,Product Management,\r\n" +
+            "\"{\"\"scope\"\":\"\"hris\"\",\"\"hash\"\":\"\"otJtA1m_38S10LrW1bYLMA4D8wsNQoXp7Ow66WnffFc\"\"}\",\"{\"\"scope\"\":\"\"email\"\",\"\"domain\"\":\"\"acme.com\"\",\"\"hash\"\":\"\"K1rUA4gXPMXXLH1Uu.as2TatFznGTlUnRICUpfI7sto\"\",\"\"h_4\"\":\"\"K1rUA4gXPMXXLH1Uu-as2TatFznGTlUnRICUpfI7sto\"\"}\",1,Smart recording;,Business Development,\r\n";
+
+        ConfigService config = MockModules.provideMock(ConfigService.class);
+        when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
+            .thenReturn(Optional.of(Base64.encodeBase64String((
+                    "columnsToPseudonymize:\n" +
+                    "  - \"User Name\"\n" +
+                    "  - \"Email\"\n").getBytes(StandardCharsets.UTF_8))));
+
+        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config, new EnvVarsConfigService()).orElseThrow();
+
+        File inputFile = new File(getClass().getResource(TEST_EXAMPLE_FILE).getFile());
+        columnarFileSanitizerImpl.setRules(rules);
+
+        try (Reader in = safeFileReader(inputFile);
+             StringWriter out = new StringWriter()) {
+            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            assertEquals(EXPECTED, out.toString());
+        }
+    }
+
 
     class StubPseudonymizer implements Pseudonymizer {
 
@@ -880,9 +916,10 @@ public class BulkDataSanitizerImplTest {
      * @return
      * @throws FileNotFoundException
      */
+    @SneakyThrows
     Reader safeFileReader(File inputFile) throws FileNotFoundException {
         // BOMInputStream is used to handle files with BOM (Byte Order Mark) at the start
         // which can cause issues with CSV parsing
-        return new InputStreamReader(new BOMInputStream(new FileInputStream(inputFile)), StandardCharsets.UTF_8);
+        return new InputStreamReader(BOMInputStream.builder().setInputStream(new FileInputStream(inputFile)).get(), StandardCharsets.UTF_8);
     }
 }
