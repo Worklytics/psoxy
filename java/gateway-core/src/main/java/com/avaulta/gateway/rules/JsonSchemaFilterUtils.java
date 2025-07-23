@@ -134,7 +134,7 @@ public class JsonSchemaFilterUtils {
         } else if (schema.hasAnyOf()) {
             // Get first schema with matches its inner condition.
             // See https://json-schema.org/understanding-json-schema/reference/combining#anyOf
-            // NOTE: If is expected that the "oneOf" candidate should hava an if-else-then or
+            // NOTE: If is expected that the "anyOf" candidate should hava an if-else-then or
             // if-then nodes
             // inside, otherwise the condition will not be evaluated and only the first occurrence
             // appearing in the list
