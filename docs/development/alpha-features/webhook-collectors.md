@@ -57,7 +57,7 @@ Note that this scheme **enables authentication of the request** AND **partial in
 
 `ALLOW_ORIGINS` environment variable can be used to control what origins are allowed to send webhooks to the collection; defaults to `*`, which is all. This is aligned to CORS standard.
 
-`AUTH_ISSUER` environment variable that is 
+`AUTH_ISSUER` environment variable that is
 
 
 `WEBHOOK_OUTPUT` - an env var that directs webhooks recieved by this collector should be sent; typically a queueing service (eg, SQS, PubSub, Cloud Tasks) to *batch* processing.
@@ -216,6 +216,13 @@ if batch, then logic will:
 - batch them into NDJSON files
 - write the NDJSON files to the output bucket
 
+#### GCP
+PubSub/Cloud Tasks doesn't natively support batching messages. We need to use PubSub Pull queues, and pull messages in batches; and then trigger the Cloud Function on a schedule to do those pulls.
+
+Tasks:
+  - PubSub implementation of output (passing the 'topic' to the `WEBHOOK_OUTPUT` env var)
+  -
+
 ### Future
 
 #### Full Request Case
@@ -224,7 +231,7 @@ Use cases:
   - JIRA / Atlassian:JIRA webhooks include PII in the path/query string. How to deal with this??
       - `queryString` transforms, expecting json path stuff. [what if param included multiple times?]
 
- 1. `collectionFormat` flag on `WebhookEndpoint`; enum of `PAYLOAD` (default) or `REQUEST`; in latter case, all json paths are relative to doc, 
+ 1. `collectionFormat` flag on `WebhookEndpoint`; enum of `PAYLOAD` (default) or `REQUEST`; in latter case, all json paths are relative to doc,
  2. `WebhookRequest` DTO; in REQUEST case, transform body of request to that and send whole thing in.
 
 

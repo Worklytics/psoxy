@@ -119,12 +119,18 @@ public interface GcpModule {
         return tokenRequestBuilder;
     }
 
+
+
     @Module
     abstract class Bindings {
 
-        @IntoSet
         @Binds
+        @IntoSet
         abstract OutputFactory<?> outputFactory(GCSOutputFactory outputFactory);
+
+        @Binds
+        @IntoSet
+        abstract OutputFactory<?> pubsubOutputFactory(PubSubOutputFactory pubSubOutputFactory);
 
         @Binds
         abstract AsyncApiDataRequestHandler asyncApiDataRequestHandler(GcpAsyncApiDataRequestHandler asyncApiDataRequestHandler);

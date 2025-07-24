@@ -111,6 +111,11 @@
             <artifactId>google-cloud-secretmanager</artifactId>
         </dependency>
 
+        <dependency> <!-- only for Webhook Collector mode, atm -->
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-pubsub</artifactId>
+        </dependency>
+
 
         <!-- JUnit Jupiter API for writing tests -->
         <dependency>

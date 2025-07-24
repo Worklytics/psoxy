@@ -5,14 +5,16 @@ import co.worklytics.psoxy.gateway.output.OutputLocation;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 
+
 @AssistedFactory
-public interface GCSOutputFactory extends OutputFactory<GCSOutput> {
+public interface PubSubOutputFactory extends OutputFactory<PubSubOutput> {
 
     @Override
-    GCSOutput create(@Assisted OutputLocation outputLocation);
+    PubSubOutput create(@Assisted OutputLocation location);
 
     @Override
     default boolean supports(OutputLocation outputLocation) {
-        return OutputLocation.LocationKind.GCS.equals(outputLocation.getKind());
+        return outputLocation.getUri() != null && outputLocation.getUri().startsWith("https://pubsub.googleapis.com/");
     }
 }
+

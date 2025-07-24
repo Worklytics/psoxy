@@ -54,26 +54,12 @@ public class HttpRequestHandler {
                     .requestReceivedAt(Instant.now())
                     .build());
 
-            abstractResponse.getHeaders()
-                .forEach(response::appendHeader);
-
-            abstractResponse.getMultivaluedHeaders()
-                .forEach((key, valueList) -> valueList.forEach(value -> response.appendHeader(key, value)));
+            fillGcpResponseFromGenericResponse(response, abstractResponse);
 
             // sample 1% of requests, warning if compression not requested
             if (RandomUtils.nextInt(0, 99) == 0 && !cloudFunctionRequest.getWarnings().isEmpty()) {
                 response.appendHeader(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
                     Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode());
-            }
-
-            response.setStatusCode(abstractResponse.getStatusCode());
-
-            if (abstractResponse.getBody() != null) {
-                try (OutputStream outputStream = response.getOutputStream()) {
-                    outputStream.write(abstractResponse.getBody().getBytes(StandardCharsets.UTF_8));
-                } catch (IOException e) {
-                    log.log(Level.WARNING, "Error writing response body", e);
-                }
             }
         } catch (Throwable e) {
             // unhandled exception while handling request
@@ -86,6 +72,20 @@ public class HttpRequestHandler {
                 log.log(Level.SEVERE, "Error writing error response", ioException);
             }
         }
+    }
 
+    static void fillGcpResponseFromGenericResponse(HttpResponse response, HttpEventResponse genericResponse) throws IOException {
+        response.setStatusCode(genericResponse.getStatusCode());
+
+        genericResponse.getHeaders().forEach(response::appendHeader);
+        genericResponse.getMultivaluedHeaders().forEach((key, valueList) -> valueList.forEach(value -> response.appendHeader(key, value)));
+
+        if (genericResponse.getBody() != null) {
+            try (OutputStream outputStream = response.getOutputStream()) {
+                outputStream.write(genericResponse.getBody().getBytes(StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                log.log(Level.WARNING, "Error writing response body", e);
+            }
+        }
     }
 }
