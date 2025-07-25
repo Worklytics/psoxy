@@ -8,17 +8,19 @@ You'll provision infrastructure that ultimately looks as follows:
 
 This includes:
 
-- Cloud Functions
-- Service Accounts
-- Secret Manager Secrets, to hold pseudonymization salt, encryption keys, and data source API keys
-- Cloud Storage Buckets (GCS), if using psoxy to sanitize bulk file data, such as CSVs
+- [Cloud Run Functions](https://cloud.google.com/run/docs) - serverless containerized applications
+- [Service Accounts](https://cloud.google.com/iam/docs/service-accounts) - identity and access management
+- [Secret Manager](https://cloud.google.com/secret-manager/docs) - to hold pseudonymization salt, encryption keys, and data source API keys
+- [Cloud Storage Buckets](https://cloud.google.com/storage/docs) (GCS), if using psoxy to sanitize bulk file data, such as CSVs; or collecting data via webhooks
+- [Cloud KMS Keys](https://cloud.google.com/kms/docs) for webhook authentication (if using webhook collectors)
+- [Pub/Sub Topics and Subscriptiosn](https://cloud.google.com/pubsub/docs), for webhook message queuing and batch processing (if using webhook collectors)
 
 NOTE: if you're connecting to Google Workspace as a data source, you'll also need to provision Service Account Keys and activate Google Workspace APIs.
 
 ## Prerequisites
 
 - a Google Project (we recommend a _dedicated_ GCP project for your deployment, to provide an implicit security boundary around your infrastructure as well as simplify monitoring/cleanup)
-- a GCP (Google) user or Service Account with permissions to provision Service Accounts, Secrets, Storage Buckets, Cloud Functions, and enable APIs within that project. eg:
+- a GCP (Google) user or Service Account with permissions to provision Service Accounts, Secrets, Storage Buckets, Cloud Run Functions, KMS Keys, Pub/Sub Topics/Subscriptions, and enable APIs within that project. eg:
   - [Cloud Functions Developer](https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.developer) - proxy instances are deployed as GCP cloud functions
   - [Cloud Run Developer](https://cloud.google.com/iam/docs/understanding-roles#cloudrun.developer) - cloud function deployment requires Cloud Run Developer role
   - [Cloud Storage Admin](https://cloud.google.com/iam/docs/understanding-roles#storage.admin) - processing of bulk data (such as HRIS exports) uses GCS buckets
@@ -26,6 +28,8 @@ NOTE: if you're connecting to Google Workspace as a data source, you'll also nee
   - [Secret Manager Admin](https://cloud.google.com/iam/docs/understanding-roles#secretmanager.admin) - your API keys and pseudonymization salt is stored in Secret Manager
   - [Service Account Admin](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountAdmin) - admin Service Accounts that personify Cloud Functions or are used as Google Workspace API connections
   - [Service Usage Admin](https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin) - you will need to enable various GCP APIs
+  - [Cloud KMS Admin](https://cloud.google.com/iam/docs/understanding-roles#cloudkms.admin) - webhook authentication keys are provisioned as KMS asymmetric signing keys
+  - [Pub/Sub Admin](https://cloud.google.com/iam/docs/understanding-roles#pubsub.admin) - webhook messages are queued in Pub/Sub topics and subscriptions for batch processing
 - the following APIs enabled in the project: (via [GCP Console](https://console.cloud.google.com/projectselector2/apis/dashboard))
   - [IAM Service Account Credentials API](https://console.cloud.google.com/apis/library/iamcredentials.googleapis.com) (`iamcredentials.googleapis.com`) - generally needed to support authenticating Terraform. May not be needed if you're running `terraform` within a GCP environment.
   - [Service Usage API](https://console.cloud.google.com/apis/library/serviceusage.googleapis.com) (`serviceusage.googleapis.com`)
