@@ -6,8 +6,8 @@ ${command_cli_call} -u "${collector_endpoint_url}/.well-known/openid-configurati
 ${command_cli_call} -u "${collector_endpoint_url}/.well-known/jwks.json"
 
 ${command_cli_call} -u "${collector_endpoint_url}${collection_path}" --method POST \
-%{ if signing_key_arn != null ~}
---signing-key "aws-kms:${signing_key_arn}" \
+%{ if signing_key_id != null ~}
+--signing-key "gcp-kms:${signing_key_id}" \
 --identity-issuer "${collector_endpoint_url}" \
 %{ endif ~}
 %{ if example_identity != null ~}

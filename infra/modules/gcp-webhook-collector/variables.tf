@@ -1,0 +1,210 @@
+variable "project_id" {
+  type        = string
+  description = "name of the gcp project"
+}
+
+variable "region" {
+  type        = string
+  description = "region into which to deploy function"
+  default     = "us-central1"
+}
+
+variable "environment_id_prefix" {
+  type        = string
+  description = "A prefix to give to all resources created/consumed by this module."
+  default     = "psoxy-"
+}
+
+variable "default_labels" {
+  type        = map(string)
+  description = "*Alpha* in v0.4, only respected for new resources. Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
+  default     = {}
+}
+
+variable "instance_id" {
+  type        = string
+  description = "kind of source (eg, 'gmail', 'google-chat', etc)"
+}
+
+variable "config_parameter_prefix" {
+  type        = string
+  description = "Prefix for psoxy config parameters"
+  default     = null
+}
+
+variable "service_account_email" {
+  type        = string
+  description = "email of the service account that the cloud function will run as"
+}
+
+variable "secret_bindings" {
+  type = map(object({
+    secret_id      = string # NOT the full resource ID; just the secret_id within GCP project
+    version_number = string # could be 'latest'
+  }))
+  description = "map of Secret Manager Secrets to expose to cloud function by ENV_VAR_NAME"
+  default     = {}
+}
+
+variable "artifacts_bucket_name" {
+  type        = string
+  description = "Name of the bucket where artifacts are stored"
+}
+
+variable "deployment_bundle_object_name" {
+  type        = string
+  description = "Name of the object containing the deployment bundle"
+}
+
+variable "artifact_repository_id" {
+  type        = string
+  description = "(NOTE: it will be available since 0.5 psoxy version) ID of the artifact repository"
+  default     = null
+}
+
+variable "path_to_repo_root" {
+  type        = string
+  description = "the path where your psoxy repo resides"
+  default     = "../../.."
+}
+
+variable "environment_variables" {
+  type        = map(string)
+  description = "Non-sensitive values to add to functions environment variables; NOTE: will override anything in `path_to_config`"
+  default     = {}
+}
+
+variable "source_kind" {
+  type        = string
+  description = "kind of source to which you're connecting"
+  default     = "unknown"
+}
+
+variable "invoker_sa_emails" {
+  type        = list(string)
+  description = "emails of GCP service accounts to allow to invoke this proxy instance via HTTP"
+  default     = []
+}
+
+variable "available_memory_mb" {
+  type        = number
+  description = "Memory (in MB), available to the function. Default value is 1024. Possible values include 128, 256, 512, 1024, etc."
+  default     = 1024
+}
+
+variable "gcp_principals_authorized_to_test" {
+  type        = list(string)
+  description = "list of GCP principals authorized to test this deployment - eg 'user:alice@acme.com', 'group:devs@acme.com'; if omitted, up to you to configure necessary perms for people to test if desired."
+  default     = []
+}
+
+variable "side_output_original" {
+  type = object({
+    bucket          = optional(string, null),     # if omitted, a bucket will be created
+    allowed_readers = optional(list(string), []), # a list of GCP principals that should be allowed to read the bucket
+  })
+  description = "**ALPHA** Defines a side output from the instance for original data, as it was received from API."
+  default     = null
+}
+
+variable "side_output_sanitized" {
+  type = object({
+    bucket          = optional(string, null),     # if omitted, a bucket will be created
+    allowed_readers = optional(list(string), []), # a list of GCP principals that should be allowed to read the bucket
+  })
+  description = "**ALPHA** Defines a side output from the instance for sanitized data."
+  default     = null
+}
+
+variable "bucket_write_role_id" {
+  type        = string
+  description = "The id of role to grant on bucket to enable writes. REQUIRED if configuring `side_output`"
+  default     = null
+}
+
+
+variable "todos_as_local_files" {
+  type        = bool
+  description = "whether to render TODOs as flat files"
+  default     = true
+}
+
+
+# examples:
+# `gcp-kms:projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{key}/cryptoKeyVersions/{version}`
+# `base64:BASE64_ENCODED_PUBLIC_KEY` - must be RSA public key in base64 format
+variable "webhook_auth_public_keys" {
+  type        = list(string)
+  description = "list of public keys to use for verifying webhook signatures; if empty, no signature verification will be performed. see docs for schema"
+  default     = []
+}
+
+variable "provision_auth_key" {
+  type = object({
+    rotation_days = optional(number, null)                         # null means no rotation; if > 0, will rotate every N days
+    key_spec      = optional(string, "RSA_SIGN_PKCS1_2048_SHA256") # see https://cloud.google.com/kms/docs/reference/rest/v1/CryptoKeyVersionAlgorithm
+  })
+  description = "if provided, will module will provision a public-private key pair for authenticating webhooks and signing payloads for integrity checks. the id of the key pair will be exposed as an output, and the public-key configured as accepted auth key in the lambda"
+  default     = null
+
+  validation {
+    condition = (
+      var.provision_auth_key == null ||
+      (
+        try(var.provision_auth_key.rotation_days, null) == null ||
+        try(var.provision_auth_key.rotation_days, 0) > 0
+      )
+    )
+    error_message = "If `provision_auth_key` is provided, `rotation_days` must be a positive number or null."
+  }
+
+  validation {
+    condition = (
+      var.provision_auth_key == null ||
+      (
+        try(var.provision_auth_key.key_spec, null) == null ||
+        can(regex("^(RSA_2048|RSA_3072|RSA_4096)$", var.provision_auth_key.key_spec))
+      )
+    )
+    error_message = "If `provision_auth_key` is provided, `key_spec` must be one of 'RSA_2048', 'RSA_3072', or 'RSA_4096'."
+  }
+}
+
+variable "key_ring" {
+  type        = string
+  description = "name of KMS key ring on which to provision any required KMS keys; REQUIRED if `provision_auth_key` is provided"
+  default     = null
+}
+
+
+variable "http_methods" {
+  type        = list(string)
+  description = "HTTP methods to expose; NOTE: 'OPTIONS' is always added to this list, so you don't need to include it; if you want to allow all methods, use ['*']"
+  default     = ["POST"]
+}
+
+
+variable "allow_origins" {
+  type        = list(string)
+  description = "list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)"
+  default     = ["*"]
+}
+
+variable "example_payload" {
+  type        = string
+  description = "Example payload to use for testing; if provided, will be used in the test script."
+  default     = null
+}
+
+variable "example_identity" {
+  type        = string
+  description = "Example identity to use for testing; if provided, will be used in the test script."
+  default     = null
+}
+
+
+variable "todo_step" {
+  type        = number
+  description = "of all todos, where does this one logically fall in sequence"
+  default     = 1
+}

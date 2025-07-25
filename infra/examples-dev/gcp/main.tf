@@ -97,6 +97,7 @@ module "psoxy" {
   secret_replica_locations          = var.secret_replica_locations
   api_connectors                    = local.api_connectors
   bulk_connectors                   = local.bulk_connectors
+  webhook_collectors                = var.webhook_collectors
   non_production_connectors         = var.non_production_connectors
   custom_api_connector_rules        = var.custom_api_connector_rules
   general_environment_variables     = var.general_environment_variables

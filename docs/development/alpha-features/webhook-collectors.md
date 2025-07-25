@@ -225,6 +225,33 @@ Tasks:
 
 ### Future
 
+#### Support Issuing Identity Tokens
+
+1. Global, long-lived token
+
+Allow some principal to sign tokens with auth key, nodejs script:
+
+
+Put resulting JWT
+
+2. User-specific, long-lived tokens
+
+Allow some principal to sign tokens with the auth key, run nodejs script on a CSV of user identities to sign:
+
+3. Global, short-lived token
+
+
+4. User-specific, short-lived token
+
+Allow your server's principal to sign tokens with auth key, run code like the following on each identity
+
+
+TODO:
+  - terraform support for passing in authorized signers (beyond just testers)
+  - nodejs tooling to sign a CSV
+  - endpoint in function/lambda that can be invoked by authorized signer, to get a signature??
+
+
 #### Full Request Case
 
 Use cases:

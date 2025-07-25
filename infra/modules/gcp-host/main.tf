@@ -212,8 +212,70 @@ module "custom_api_connector_rules" {
   default_labels    = var.default_labels
   instance_sa_email = module.api_connector[each.key].service_account_email
 }
-
 # END API CONNECTORS
+
+# BEGIN WEBHOOK COLLECTORS
+locals {
+  webhook_collectors_needing_keys = { for k, v in var.webhook_collectors : k => v if v.provision_auth_key != null }
+  key_ring_needed                 = var.kms_key_ring == null && length(local.webhook_collectors_needing_keys) > 0
+}
+
+# key ring on which to provision required KMS keys; atm, only needed to support webhook collector case, but not 
+# necessarily exclusive to that use-case
+resource "google_kms_key_ring" "proxy_key_ring" {
+  count = local.key_ring_needed ? 1 : 0
+
+  project  = var.gcp_project_id
+  name     = local.environment_id_prefix
+  location = var.gcp_region
+}
+
+
+module "webhook_collector" {
+  for_each = var.webhook_collectors
+
+  source = "../../modules/gcp-webhook-collector"
+
+  project_id                        = var.gcp_project_id
+  region                            = var.gcp_region
+  source_kind                       = each.value.source_kind
+  environment_id_prefix             = local.environment_id_prefix
+  instance_id                       = each.key
+  service_account_email             = google_service_account.api_connectors[each.key].email
+  artifacts_bucket_name             = module.psoxy.artifacts_bucket_name
+  deployment_bundle_object_name     = module.psoxy.deployment_bundle_object_name
+  artifact_repository_id            = module.psoxy.artifact_repository
+  path_to_repo_root                 = var.psoxy_base_dir
+  config_parameter_prefix           = local.config_parameter_prefix
+  invoker_sa_emails                 = var.worklytics_sa_emails
+  default_labels                    = var.default_labels
+  gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
+  bucket_write_role_id              = module.psoxy.bucket_write_role_id
+  side_output_original              = try(local.custom_original_side_outputs[each.key], null)
+  side_output_sanitized             = try(local.sanitized_side_outputs[each.key], null)
+  todos_as_local_files              = var.todos_as_local_files
+  example_identity                  = each.value.example_identity
+  example_payload                   = each.value.example_payload
+  key_ring                          = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].name : var.kms_key_ring
+
+  environment_variables = merge(
+    var.general_environment_variables,
+    try(each.value.environment_variables, {}),
+    {
+      BUNDLE_FILENAME        = module.psoxy.filename
+      IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
+      EMAIL_CANONICALIZATION = var.email_canonicalization
+    }
+  )
+
+  secret_bindings = merge(
+    local.secrets_bound_as_env_vars[each.key],
+    module.psoxy.secrets,
+    module.psoxy.artifact_repository
+  )
+}
+
+# END WEBHOOK COLLECTORS
 
 # BEGIN BULK CONNECTORS
 module "bulk_connector" {
