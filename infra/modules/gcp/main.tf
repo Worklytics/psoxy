@@ -11,6 +11,12 @@ locals {
     "eventarc.googleapis.com", # required for eventarc triggers to functions gen2
     "pubsub.googleapis.com",   # needed for cloud run gen2
   ]
+
+  # additional services required for webhook collectors
+  services_required_for_webhook_collectors = [
+    "cloudkms.googleapis.com",
+    "pubsub.googleapis.com",
+  ]
 }
 
 
@@ -31,7 +37,8 @@ resource "google_project_service" "gcp_infra_api" {
     "storage.googleapis.com", # required for both API and bulk modes, bc gcs used to stage bundles (artifacts) for function deployment
     # "serviceusage.googleapis.com", # manage service APIs via terraform (prob already
     ],
-    var.support_bulk_mode ? local.services_required_for_bulk_mode : []
+    var.support_bulk_mode ? local.services_required_for_bulk_mode : [],
+    var.support_webhook_collectors ? local.services_required_for_webhook_collectors : []
   ))
 
   service                    = each.key

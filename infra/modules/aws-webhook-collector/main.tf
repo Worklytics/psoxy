@@ -261,7 +261,6 @@ resource "aws_kms_key" "auth_key" {
 }
 
 
-
 locals {
   accepted_auth_keys = concat(
     var.webhook_auth_public_keys,

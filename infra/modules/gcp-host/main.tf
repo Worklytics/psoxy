@@ -22,6 +22,8 @@ module "psoxy" {
   install_test_tool            = var.install_test_tool
   custom_artifacts_bucket_name = var.custom_artifacts_bucket_name
   default_labels               = var.default_labels
+  support_bulk_mode            = length(var.bulk_connectors) > 0
+  support_webhook_collectors   = length(var.webhook_collectors) > 0
 }
 
 # constants
@@ -222,6 +224,7 @@ locals {
 
 # key ring on which to provision required KMS keys; atm, only needed to support webhook collector case, but not 
 # necessarily exclusive to that use-case
+# q: should this go into the gcp module? so long as we have that, arguably yes ...
 resource "google_kms_key_ring" "proxy_key_ring" {
   count = local.key_ring_needed ? 1 : 0
 
@@ -230,6 +233,14 @@ resource "google_kms_key_ring" "proxy_key_ring" {
   location = var.gcp_region
 }
 
+resource "google_service_account" "webhook_collector" {
+  for_each = var.webhook_collectors
+
+  project      = var.gcp_project_id
+  account_id   = substr("${local.sa_prefix}${replace(each.key, "_", "-")}", 0, local.SA_NAME_MAX_LENGTH)
+  display_name = "${local.environment_id_display_name_qualifier} ${each.key} Webhook Collector"
+  description  = "Service account that cloud run function for ${each.key} Webhook Collector will run as"
+}
 
 module "webhook_collector" {
   for_each = var.webhook_collectors
@@ -238,10 +249,9 @@ module "webhook_collector" {
 
   project_id                        = var.gcp_project_id
   region                            = var.gcp_region
-  source_kind                       = each.value.source_kind
   environment_id_prefix             = local.environment_id_prefix
   instance_id                       = each.key
-  service_account_email             = google_service_account.api_connectors[each.key].email
+  service_account_email             = google_service_account.webhook_collector[each.key].email
   artifacts_bucket_name             = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name     = module.psoxy.deployment_bundle_object_name
   artifact_repository_id            = module.psoxy.artifact_repository
@@ -254,9 +264,11 @@ module "webhook_collector" {
   side_output_original              = try(local.custom_original_side_outputs[each.key], null)
   side_output_sanitized             = try(local.sanitized_side_outputs[each.key], null)
   todos_as_local_files              = var.todos_as_local_files
+  key_ring_id                       = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
+  provision_auth_key                = each.value.provision_auth_key
+  rules_file                        = each.value.rules_file
   example_identity                  = each.value.example_identity
   example_payload                   = each.value.example_payload
-  key_ring                          = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].name : var.kms_key_ring
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -268,11 +280,7 @@ module "webhook_collector" {
     }
   )
 
-  secret_bindings = merge(
-    local.secrets_bound_as_env_vars[each.key],
-    module.psoxy.secrets,
-    module.psoxy.artifact_repository
-  )
+  secret_bindings = module.psoxy.secrets
 }
 
 # END WEBHOOK COLLECTORS

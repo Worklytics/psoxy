@@ -13,6 +13,7 @@ public interface OutputLocation {
         S3("s3://"),
         GCS("gs://"),
         SQS("https://sqs"),
+        PUBSUB("https://pubsub"),
         ;
 
         @Getter(AccessLevel.PACKAGE)

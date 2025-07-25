@@ -1,25 +1,26 @@
-import { createReadStream, createWriteStream } from 'fs';
-import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
-import { pipeline } from 'node:stream/promises';
+import { KMSClient, SignCommand } from '@aws-sdk/client-kms';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import {
   fromNodeProviderChain,
   fromTemporaryCredentials
 } from "@aws-sdk/credential-providers";
-import _ from 'lodash';
+import { KeyManagementServiceClient } from '@google-cloud/kms';
+import { Storage } from '@google-cloud/storage';
+import isgzipBuffer from '@stdlib/assert-is-gzip-buffer';
 import aws4 from 'aws4';
 import chalk from 'chalk';
-import fs from 'node:fs/promises';
-import getLogger from './logger.js';
+import { execSync } from 'child_process';
+import { createReadStream, createWriteStream } from 'fs';
 import https from 'https';
-import isgzipBuffer from '@stdlib/assert-is-gzip-buffer';
-import path from 'path';
-import spec from '../data-sources/spec.js';
-import zlib from 'node:zlib';
-import {KMSClient, SignCommand} from '@aws-sdk/client-kms';
+import _ from 'lodash';
 import crypto from 'node:crypto';
-import { Storage } from '@google-cloud/storage';
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import fs from 'node:fs/promises';
+import { pipeline } from 'node:stream/promises';
+import zlib from 'node:zlib';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import spec from '../data-sources/spec.js';
+import getLogger from './logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // In case Psoxy is slow to respond (Lambda can take up to 20s+ to bootstrap),
@@ -476,7 +477,7 @@ function base64url(input) {
  * @param {string} region
  * @returns {Promise<string>}
  */
-async function signJwtWithKMS(claims, keyArn, credentials, region) {
+async function signJwtWithAWSKMS(claims, keyArn, credentials, region) {
   const client = new KMSClient({
     region: region,
     credentials: credentials,
@@ -505,6 +506,55 @@ async function signJwtWithKMS(claims, keyArn, credentials, region) {
   const response = await client.send(command);
 
   const signature = base64url(Buffer.from(response.Signature));
+  return `${signingInput}.${signature}`;
+}
+
+/**
+ * @param {object} claims - the usual JWT ones, iss, sub, etc. will be stringified
+ * @param {string} keyId - GCP KMS key ID (e.g., "projects/my-project/locations/us-central1/keyRings/my-keyring/cryptoKeys/my-key")
+ * @returns {Promise<string>}
+ */
+async function signJwtWithGCPKMS(claims, keyId) {
+  const client = new KeyManagementServiceClient();
+
+  const encodedHeader = base64url(Buffer.from(JSON.stringify({
+    "alg": "RS256",
+    "kid": keyId,
+    "typ": "JWT",
+  })));
+  const encodedPayload = base64url(Buffer.from(JSON.stringify(claims)));
+  const signingInput = `${encodedHeader}.${encodedPayload}`;
+
+  const hash = crypto.createHash('sha256').update(signingInput).digest();
+
+  // Get the latest enabled version of the key
+  const [versions] = await client.listCryptoKeyVersions({
+    parent: keyId,
+    filter: 'state = ENABLED'
+  });
+
+  if (!versions || versions.length === 0) {
+    throw new Error(`No enabled versions found for key: ${keyId}`);
+  }
+
+  // Sort by creation time to get the latest version
+  const sortedVersions = versions.sort((a, b) => {
+    const timeA = new Date(a.createTime);
+    const timeB = new Date(b.createTime);
+    return timeB - timeA; // Descending order (latest first)
+  });
+
+  const latestVersion = sortedVersions[0];
+  const versionName = `${keyId}/cryptoKeyVersions/${latestVersion.name.split('/').pop()}`;
+
+  const [result] = await client.asymmetricSign({
+    name: versionName,
+    digest: {
+      sha256: hash
+    }
+  });
+
+  const signature = base64url(Buffer.from(result.signature));
   return `${signingInput}.${signature}`;
 }
 
@@ -756,22 +806,20 @@ async function pollAsyncResponse(locationUrl, options = {}) {
 }
 
 export {
-  addFilenameSuffix,
-  unzip,
-  environmentCheck,
+  addFilenameSuffix, environmentCheck,
   executeCommand,
   executeWithRetry,
   getAWSCredentials,
   getCommonHTTPHeaders,
   getFileNameFromURL,
   isGzipped,
-  parseBucketOption,
-  requestWrapper as request,
+  parseBucketOption, pollAsyncResponse, requestWrapper as request,
   resolveAWSRegion,
   resolveHTTPMethod,
   saveToFile,
   signAWSRequestURL,
-  signJwtWithKMS,
-  transformSpecWithResponse,
-  pollAsyncResponse,
+  signJwtWithAWSKMS,
+  signJwtWithGCPKMS,
+  transformSpecWithResponse, unzip
 };
+

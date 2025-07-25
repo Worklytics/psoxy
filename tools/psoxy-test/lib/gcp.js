@@ -1,15 +1,16 @@
+import { Logging } from '@google-cloud/logging';
+import { Storage } from '@google-cloud/storage';
+import _ from 'lodash';
+import getLogger from './logger.js';
 import {
+  executeCommand,
   executeWithRetry,
   getCommonHTTPHeaders,
   isGzipped,
   request,
-  executeCommand,
   resolveHTTPMethod,
+  signJwtWithGCPKMS,
 } from './utils.js';
-import { Logging } from '@google-cloud/logging';
-import { Storage } from '@google-cloud/storage';
-import getLogger from './logger.js';
-import _ from 'lodash';
 
 
 const GCP_CLOUD_FUNCTION_GEN1_DOMAIN='cloudfunctions.net';
@@ -67,6 +68,24 @@ async function call(options = {}) {
     ...getCommonHTTPHeaders(options),
     Authorization: `Bearer ${options.token}`,
   };
+
+
+  if (options.signingKey) {
+    let signature;
+    let claims = {
+      iss: options.identityIssuer,
+      sub: options.identitySubject,
+      aud: options.identityIssuer,
+      iat: Math.floor(Date.now() / 1000), // current time in seconds
+      exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
+    }
+    if (options.signingKey.startsWith('gcp-kms:')) {
+      signature = await signJwtWithGCPKMS(claims, options.signingKey.replace('gcp-kms:', ''));
+    }
+
+    headers['Authorization'] = signature;
+    console.log(signature);
+  }
 
   logger.info(`Calling Psoxy and waiting response: ${options.url}`);
   logger.verbose('Request Options:', { additional: options });

@@ -14,18 +14,7 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
   role      = "roles/secretmanager.secretAccessor"
 }
 
-resource "google_kms_crypto_key" "webhook_auth_key" {
-  count = var.provision_auth_key != null ? 1 : 0
 
-  key_ring        = var.key_ring
-  name            = "${var.environment_id_prefix}${var.instance_id}-webhook-auth-key"
-  purpose         = "ASYMMETRIC_SIGN"
-  rotation_period = var.provision_auth_key.rotation_days == null ? null : "${var.provision_auth_key.rotation_days}d"
-
-  version_template {
-    algorithm = var.provision_auth_key.key_spec
-  }
-}
 
 locals {
   side_outputs = { for k, v in {
@@ -36,13 +25,43 @@ locals {
   side_outputs_to_provision    = { for k, v in local.side_outputs : k => v if v.bucket == null }
   side_outputs_to_grant_access = { for k, v in local.side_outputs : k => v if v.bucket != null }
 
+  path_to_instance_config_parameters = "${coalesce(var.config_parameter_prefix, "")}${replace(upper(var.instance_id), "-", "_")}_"
+}
+
+# BEGIN AUTH KEYS
+locals {
+  allow_test_principals_to_sign = length(var.gcp_principals_authorized_to_test) > 0 && var.provision_auth_key != null
+}
+
+
+resource "google_kms_crypto_key" "webhook_auth_key" {
+  count = var.provision_auth_key == null ? 0 : 1
+
+  key_ring = var.key_ring_id
+  name     = "${var.environment_id_prefix}${var.instance_id}-webhook-auth-key"
+  purpose  = "ASYMMETRIC_SIGN"
+
+  # just like aws, gcp will not auto-rotate ASYMMETRIC_SIGN keys; you will need to rotate them OUTSIDE of terraform, at your desired cadence
+
+  version_template {
+    algorithm = var.provision_auth_key.key_spec
+  }
+
+  labels = var.default_labels
+}
+
+locals {
   accepted_auth_keys = concat(
     var.webhook_auth_public_keys,
     var.provision_auth_key == null ? [] : [for key_id in google_kms_crypto_key.webhook_auth_key[*].id : "gcp-kms:${key_id}"]
   )
 
-  allow_test_principals_to_sign = length(var.gcp_principals_authorized_to_test) > 0 && var.provision_auth_key != null
+  # these ARE sorted, bc maps in tf are always iterated in lexicographic order of the keys
+  auth_key_ids_sorted = values({
+    for k in google_kms_crypto_key.webhook_auth_key[*] : try(k.labels.rotation_time, k.id) => k.id
+  })
 }
+
 
 resource "google_kms_crypto_key_iam_member" "allow_test_principals_to_sign" {
   for_each = local.allow_test_principals_to_sign ? toset(var.gcp_principals_authorized_to_test) : toset([])
@@ -52,18 +71,29 @@ resource "google_kms_crypto_key_iam_member" "allow_test_principals_to_sign" {
   member        = each.key
 }
 
+
 # the webhook collector function needs to 1) be able to verify signatures, and 2) expose public key via JWKS endpoint (potentially???)
 resource "google_kms_crypto_key_iam_member" "allow_function_to_access_public_key" {
-  count = var.provision_auth_key != null ? 1 : 0
-  
+  count = var.provision_auth_key == null ? 0 : 1
+
   crypto_key_id = google_kms_crypto_key.webhook_auth_key[0].id
   role          = "roles/cloudkms.publicKeyViewer"
   member        = "serviceAccount:${var.service_account_email}"
 }
 
-resource "random_string" "bucket_name_random_sequence" {
-  count = length(local.side_outputs_to_provision) > 0 ? 1 : 0
+# END AUTH KEYS
 
+module "rules_parameter" {
+  source = "../gcp-sm-rules"
+
+  project_id        = var.project_id
+  instance_sa_email = var.service_account_email
+  file_path         = var.rules_file
+  prefix            = local.path_to_instance_config_parameters
+}
+
+
+resource "random_string" "bucket_name_random_sequence" {
   length  = 8
   special = false
   upper   = false
@@ -78,7 +108,7 @@ module "sanitized_webhook_output" {
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
-  bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence[0].result}-"
+  bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence.result}-"
   bucket_name_suffix             = "sanitized"
   sanitizer_accessor_principals = concat(
     var.gcp_principals_authorized_to_test,
@@ -95,7 +125,7 @@ module "side_output_bucket" {
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
-  bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence[0].result}-"
+  bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence.result}-"
   bucket_name_suffix             = "side-output"
   sanitizer_accessor_principals  = each.value.allowed_readers
 }
@@ -125,7 +155,7 @@ locals {
     REQUIRE_AUTHORIZATION_HEADER = "true"
     WEBHOOK_OUTPUT               = "https://pubsub.googleapis.com/${google_pubsub_topic.webhook_topic.id}"
     BATCH_MERGE_SUBSCRIPTION     = google_pubsub_subscription.webhook_subscription.id
-    WEBHOOK_BATCH_OUTPUT         = "gs://${module.sanitized_webhook_output[0].bucket_name}"
+    WEBHOOK_BATCH_OUTPUT         = "gs://${module.sanitized_webhook_output.bucket_name}"
     }
     : k => v if v != null
   }
@@ -177,8 +207,10 @@ resource "google_cloudfunctions2_function" "function" {
     environment_variables = merge(
       local.required_env_vars,
       var.environment_variables,
-      var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
-      var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${replace(upper(var.instance_id), "-", "_")}_" },
+      {
+        PATH_TO_SHARED_CONFIG   = coalesce(var.config_parameter_prefix, ""),
+        PATH_TO_INSTANCE_CONFIG = local.path_to_instance_config_parameters
+      },
       local.side_output_env_vars,
     )
 
@@ -325,10 +357,10 @@ resource "local_file" "test_script" {
   filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
   file_permission = "755"
   content = templatefile("${path.module}/test_script.tftpl", {
-    collector_endpoint_url        = local.proxy_endpoint_url,
-    function_name             = var.instance_id,
-    command_cli_call          = local.command_cli_call,
-    signing_key_id           = var.provision_auth_key == null ? null : google_kms_crypto_key.webhook_auth_key[0].id,
+    collector_endpoint_url = local.proxy_endpoint_url,
+    function_name          = var.instance_id,
+    command_cli_call       = local.command_cli_call,
+    signing_key_id         = var.provision_auth_key == null ? null : google_kms_crypto_key.webhook_auth_key[0].id,
     example_payload        = coalesce(var.example_payload, "{\"test\": \"data\"}")
     example_identity       = var.example_identity
     collection_path        = "/"
@@ -380,6 +412,12 @@ output "side_output_sanitized_bucket_id" {
 output "side_output_original_bucket_id" {
   value       = try(module.side_output_bucket["original"].bucket_id, null)
   description = "Bucket ID of the original side output bucket, if any. May have been provided by the user, or provisioned by this module."
+}
+
+
+output "provisioned_auth_key_pairs" {
+  value       = local.auth_key_ids_sorted
+  description = "List of IDs of kms keys provisioned for webhook authentication purposes, if any."
 }
 
 output "todo" {

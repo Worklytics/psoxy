@@ -157,23 +157,19 @@ variable "provision_auth_key" {
     )
     error_message = "If `provision_auth_key` is provided, `rotation_days` must be a positive number or null."
   }
+}
+
+variable "key_ring_id" {
+  type        = string
+  description = "id of KMS key ring on which to provision any required KMS keys; REQUIRED if `provision_auth_key` is provided"
+  default     = null
 
   validation {
     condition = (
-      var.provision_auth_key == null ||
-      (
-        try(var.provision_auth_key.key_spec, null) == null ||
-        can(regex("^(RSA_2048|RSA_3072|RSA_4096)$", var.provision_auth_key.key_spec))
-      )
+      var.key_ring_id == null || can(regex("^projects/[^/]+/locations/[^/]+/keyRings/[^/]+$", var.key_ring_id))
     )
-    error_message = "If `provision_auth_key` is provided, `key_spec` must be one of 'RSA_2048', 'RSA_3072', or 'RSA_4096'."
+    error_message = "If `key_ring_id` is provided, it must be a valid long-form KMS key ring ID (matching `^projects/[^/]+/locations/[^/]+/keyRings/[^/]+$`)."
   }
-}
-
-variable "key_ring" {
-  type        = string
-  description = "name of KMS key ring on which to provision any required KMS keys; REQUIRED if `provision_auth_key` is provided"
-  default     = null
 }
 
 
@@ -188,6 +184,11 @@ variable "allow_origins" {
   type        = list(string)
   description = "list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)"
   default     = ["*"]
+}
+
+variable "rules_file" {
+  type        = string
+  description = "Path to the file containing the rules for the webhook collector"
 }
 
 variable "example_payload" {

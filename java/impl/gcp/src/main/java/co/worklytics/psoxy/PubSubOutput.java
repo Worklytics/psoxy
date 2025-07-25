@@ -30,7 +30,7 @@ public class PubSubOutput implements Output {
     @AssistedInject
     public PubSubOutput(@Assisted OutputLocation location) {
         // expects location.getUri() to be a PubSub topic URL
-        this.topicName = location.getUri().replace("https://pubsub.googleapis.com/v1/", "");
+        this.topicName = location.getUri().replace("https://pubsub.googleapis.com/", "");
     }
 
     @Override

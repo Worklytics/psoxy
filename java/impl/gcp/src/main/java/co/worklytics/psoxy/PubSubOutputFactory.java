@@ -14,7 +14,8 @@ public interface PubSubOutputFactory extends OutputFactory<PubSubOutput> {
 
     @Override
     default boolean supports(OutputLocation outputLocation) {
-        return outputLocation.getUri() != null && outputLocation.getUri().startsWith("https://pubsub.googleapis.com/");
+        return outputLocation.getUri() != null 
+        && outputLocation.getUri().startsWith("https://pubsub.googleapis.com/");
     }
 }
 

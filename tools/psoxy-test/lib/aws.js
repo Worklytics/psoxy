@@ -1,34 +1,32 @@
 import {
+  CloudWatchLogsClient,
+  DescribeLogStreamsCommand,
+  GetLogEventsCommand,
+} from '@aws-sdk/client-cloudwatch-logs';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  ListBucketsCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  S3Client
+} from '@aws-sdk/client-s3';
+import {
   executeWithRetry,
   getAWSCredentials,
   getCommonHTTPHeaders,
   isGzipped,
   request,
-  resolveHTTPMethod,
   resolveAWSRegion,
-  signAWSRequestURL,
-  signJwtWithKMS,
+  resolveHTTPMethod,
+  signAWSRequestURL
 } from './utils.js';
-import {
-  S3Client,
-  GetObjectCommand,
-  DeleteObjectCommand,
-  PutObjectCommand,
-  ListBucketsCommand,
-  ListObjectsV2Command
-} from '@aws-sdk/client-s3';
-import {
-  CloudWatchLogsClient,
-  DescribeLogStreamsCommand,
-  GetLogEventsCommand,
-} from '@aws-sdk/client-cloudwatch-logs';
 
 import fs from 'fs';
-import getLogger from './logger.js';
-import path from 'path';
 import _ from 'lodash';
 import zlib from 'node:zlib';
-import crypto from 'node:crypto';
+import path from 'path';
+import getLogger from './logger.js';
 
 
 /**
@@ -83,7 +81,7 @@ async function call(options = {}) {
       exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
     }
     if (options.signingKey.startsWith('aws-kms:')) {
-      signature = await signJwtWithKMS(claims, options.signingKey.replace('aws-kms:', ''), credentials, options.region);
+      signature = await signJwtWithAWSKMS(claims, options.signingKey.replace('aws-kms:', ''), credentials, options.region);
     }
 
     headers['Authorization'] = signature;
