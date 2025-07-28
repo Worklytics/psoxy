@@ -307,7 +307,7 @@ resource "google_project_iam_custom_role" "oidc_token_verifier" {
   permissions = [
     "cloudkms.cryptoKeys.get",
     "cloudkms.cryptoKeyVersions.get",
-    "cloudkms.cryptoKeyVersions.list", # need to list versions, as possibly ANY enabled version might have been used to sign the token
+    "cloudkms.cryptoKeyVersions.list",         # need to list versions, as possibly ANY enabled version might have been used to sign the token
     "cloudkms.cryptoKeyVersions.viewPublicKey" # need to view public key, to verify signature
   ]
 }
@@ -414,6 +414,6 @@ output "artifact_repository" {
 }
 
 output "oidc_token_verifier_role_id" {
-  value = try(google_project_iam_custom_role.oidc_token_verifier[0].id, null)
+  value       = try(google_project_iam_custom_role.oidc_token_verifier[0].id, null)
   description = "Role to grant on crypto key(s) used to sign OIDC tokens (used to authenticate requests to webhook collectors). Only provisioned if support_webhook_collectors is true."
 }

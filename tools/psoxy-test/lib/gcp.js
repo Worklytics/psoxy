@@ -79,7 +79,6 @@ async function call(options = {}) {
     }
 
     authorizationHeader = `Bearer ${signature}`;
-    console.log(signature);
   } else {
     authorizationHeader = `Bearer ${options.token}`;
   }

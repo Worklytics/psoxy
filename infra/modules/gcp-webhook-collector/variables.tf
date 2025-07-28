@@ -183,10 +183,10 @@ variable "http_methods" {
 variable "secret_replica_locations" {
   type        = list(string)
   description = "list of locations to replicate secrets to. See https://cloud.google.com/secret-manager/docs/locations"
-  default     = [
+  default = [
     "us-central1",
     "us-west1"
-    ]
+  ]
 }
 
 variable "allow_origins" {

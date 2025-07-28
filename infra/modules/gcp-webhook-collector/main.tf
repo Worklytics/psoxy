@@ -147,9 +147,9 @@ locals {
   # these are 'standard' env vars, expected from most connectors
   # any 'non-standard' ones can just be passed through var.environment_variables
   required_env_vars = { for k, v in {
-    SOURCE                       = var.source_kind
-    ACCEPTED_AUTH_KEYS           = join(",", local.accepted_auth_keys)
-    ALLOW_ORIGINS                = "*" # TODO make configurable
+    SOURCE             = var.source_kind
+    ACCEPTED_AUTH_KEYS = join(",", local.accepted_auth_keys)
+    ALLOW_ORIGINS      = "*" # TODO make configurable
     # AUTH_ISSUER                  = ""  # TODO: URL to collector itself, to be used to produce OpenID Connect Discovery Document
     REQUIRE_AUTHORIZATION_HEADER = "true"
     WEBHOOK_OUTPUT               = "https://pubsub.googleapis.com/${google_pubsub_topic.webhook_topic.id}"
@@ -166,12 +166,12 @@ locals {
 module "auth_issuer_secret" {
   source = "../../modules/gcp-secrets"
 
-  secret_project = var.project_id
-  path_prefix = local.path_to_instance_config_parameters
+  secret_project    = var.project_id
+  path_prefix       = local.path_to_instance_config_parameters
   replica_locations = var.secret_replica_locations
   secrets = {
     AUTH_ISSUER = {
-      value = google_cloudfunctions2_function.function.service_config[0].uri
+      value       = google_cloudfunctions2_function.function.service_config[0].uri
       description = "URL of the webhook collector function"
     }
   }
