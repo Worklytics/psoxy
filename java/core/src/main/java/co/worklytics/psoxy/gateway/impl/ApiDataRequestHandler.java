@@ -313,7 +313,7 @@ public class ApiDataRequestHandler {
 
             HttpContent content = null;
 
-            if (requestBody != null) {
+            if (StringUtils.isNotBlank(requestBody)) {
                 content = this.reverseRequestBodyTokenization(requestBodyContentType, requestBody);
             }
 
@@ -886,7 +886,6 @@ public class ApiDataRequestHandler {
         } else if (contentType.equals(ContentType.APPLICATION_FORM_URLENCODED.toString())) {
             // Form-urlencoded case: use WWWFormCodec to parse request body and map decode ON every
             // value
-
             List<NameValuePair> nameValuePairs =
                     WWWFormCodec.parse(body, StandardCharsets.UTF_8).stream()
                             .map(pair -> new BasicNameValuePair(pair.getName(),
