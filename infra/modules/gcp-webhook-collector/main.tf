@@ -15,7 +15,6 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
 }
 
 
-
 locals {
   side_outputs = { for k, v in {
     sanitized = var.side_output_sanitized
@@ -77,7 +76,7 @@ resource "google_kms_crypto_key_iam_member" "allow_function_to_access_public_key
   count = var.provision_auth_key == null ? 0 : 1
 
   crypto_key_id = google_kms_crypto_key.webhook_auth_key[0].id
-  role          = "roles/cloudkms.publicKeyViewer"
+  role          = var.oidc_token_verifier_role_id
   member        = "serviceAccount:${var.service_account_email}"
 }
 
@@ -151,7 +150,7 @@ locals {
     SOURCE                       = var.source_kind
     ACCEPTED_AUTH_KEYS           = join(",", local.accepted_auth_keys)
     ALLOW_ORIGINS                = "*" # TODO make configurable
-    AUTH_ISSUER                  = ""  # TODO: URL to collector itself, to be used to produce OpenID Connect Discovery Document
+    # AUTH_ISSUER                  = ""  # TODO: URL to collector itself, to be used to produce OpenID Connect Discovery Document
     REQUIRE_AUTHORIZATION_HEADER = "true"
     WEBHOOK_OUTPUT               = "https://pubsub.googleapis.com/${google_pubsub_topic.webhook_topic.id}"
     BATCH_MERGE_SUBSCRIPTION     = google_pubsub_subscription.webhook_subscription.id
@@ -160,6 +159,32 @@ locals {
     : k => v if v != null
   }
 }
+
+# TODO: in 0.6, make this a 'google_parameter_manager_parameter' (requires google provide 6.25+)
+# bc AUTH_ISSUER is the url of function, and not known at deploy-time, we cannot fill it in ENV VARS
+# similarly, bc version number is not known at deploy-time, we cannot bind it via secret env vars
+module "auth_issuer_secret" {
+  source = "../../modules/gcp-secrets"
+
+  secret_project = var.project_id
+  path_prefix = local.path_to_instance_config_parameters
+  replica_locations = var.secret_replica_locations
+  secrets = {
+    AUTH_ISSUER = {
+      value = google_cloudfunctions2_function.function.service_config[0].uri
+      description = "URL of the webhook collector function"
+    }
+  }
+  default_labels = var.default_labels
+}
+
+resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_auth_issuer" {
+  project   = var.project_id
+  secret_id = module.auth_issuer_secret.secret_ids_within_project["AUTH_ISSUER"]
+  member    = "serviceAccount:${var.service_account_email}"
+  role      = "roles/secretmanager.secretAccessor"
+}
+
 
 module "tf_runner" {
   source = "../../modules/gcp-tf-runner"
@@ -177,7 +202,6 @@ resource "google_service_account_iam_member" "act_as" {
   role               = "roles/iam.serviceAccountUser"
   service_account_id = data.google_service_account.function.id
 }
-
 
 resource "google_cloudfunctions2_function" "function" {
   name        = "${var.environment_id_prefix}${var.instance_id}"

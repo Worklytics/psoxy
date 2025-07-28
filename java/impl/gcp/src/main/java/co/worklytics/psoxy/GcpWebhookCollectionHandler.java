@@ -5,7 +5,7 @@ import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.impl.BatchMergeHandler;
 import co.worklytics.psoxy.gateway.impl.InboundWebhookHandler;
-
+import co.worklytics.psoxy.gateway.impl.JwksDecorator;
 import javax.inject.Inject;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
@@ -18,7 +18,7 @@ import com.google.pubsub.v1.*;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.hc.core5.http.HttpHeaders;
-
+import org.apache.hc.core5.http.HttpStatus;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
@@ -35,6 +35,7 @@ public class GcpWebhookCollectionHandler {
     GcpEnvironment gcpEnvironment;
     BatchMergeHandler batchMergeHandler;
     ConfigService configService;
+    JwksDecorator jwksResource;
 
     // TODO: arg should be configurable via env vars; could expose generally, bc although not used in AWS, may be useful logging (eg, how often is AWS invoked with 'full' batch)
     static final Duration BATCH_TIMEOUT = Duration.ofSeconds(30);
@@ -45,16 +46,21 @@ public class GcpWebhookCollectionHandler {
                                        GoogleIdTokenVerifierFactory googleIdTokenVerifierFactory,
                                        GcpEnvironment gcpEnvironment,
                                        BatchMergeHandler batchMergeHandler,
+                                       JwksDecorator.Factory jwksDecoratorFactory,
                                        ConfigService configService) {
         this.gcpEnvironment = gcpEnvironment;
         this.inboundWebhookHandler = inboundWebhookHandler;
         this.googleIdTokenVerifierFactory = googleIdTokenVerifierFactory;
         this.batchMergeHandler = batchMergeHandler;
+        this.jwksResource = jwksDecoratorFactory.create(inboundWebhookHandler);
         this.configService = configService;
     }
 
     /**
-     * route request based on headers ... arg fits better up in Route class
+     * route request based on headers ... arg fits better up in Route class. 3 possible routes:
+     * 1. inbound webhook request (from 'authorized' client)
+     * 2. JWKS request (publicly accessible)
+     * 3. batch merge request (from pubsub)
      * @param request
      * @param response
      */
@@ -63,11 +69,17 @@ public class GcpWebhookCollectionHandler {
             // purporting to be a cloud scheduler request, so assume it's a request to process a batch
             handleBatch(request, response);
         } else {
-            // assume it's a direct inbound webhook request
             CloudFunctionRequest cloudFunctionRequest = CloudFunctionRequest.of(request);
-
-            // inboundWebhookHandler *generically* checks 'Authorization' header
-            HttpEventResponse genericResponse = inboundWebhookHandler.handle(cloudFunctionRequest);
+            HttpEventResponse genericResponse;
+            if (request.getPath().startsWith("/" + JwksDecorator.PATH_TO_RESOURCE)) {
+                // JWKS resources are *publically* accessible
+                genericResponse = jwksResource.handle(cloudFunctionRequest);
+            } else {
+                // inboundWebhookHandler *generically* checks 'Authorization' header
+                // assume it's a direct inbound webhook request
+                genericResponse = inboundWebhookHandler.handle(cloudFunctionRequest);
+            }
+            
             try {
                 HttpRequestHandler.fillGcpResponseFromGenericResponse(response, genericResponse);
             } catch (IOException e) {
@@ -87,9 +99,8 @@ public class GcpWebhookCollectionHandler {
         //  --push-auth-token-audience=https://<cloud-run-url>
         Optional<String> jwt = request.getFirstHeader("Authorization");
 
-        if (jwt.isPresent()) {
-            response.setStatusCode(401);
-            response.setStatusCode(401, "Unauthorized : no authorization header included");
+        if (!jwt.isPresent()) {
+            response.setStatusCode(HttpStatus.SC_UNAUTHORIZED, "Unauthorized : no authorization header included");
             return;
         }
 
@@ -103,17 +114,17 @@ public class GcpWebhookCollectionHandler {
             idToken = internalServiceVerifier.verify(jwt.get());
         } catch (IOException | GeneralSecurityException | IllegalArgumentException e) {
             log.log(Level.WARNING, "Failed to verify JWT: " + jwt.get(), e);
-            response.setStatusCode(401, "Unauthorized : invalid JWT");
+            response.setStatusCode(HttpStatus.SC_UNAUTHORIZED, "Unauthorized : invalid JWT");
             return;
         }
 
         if (idToken == null) {
-            response.setStatusCode(401, "Unauthorized - no Authorization jwt sent");
+            response.setStatusCode(HttpStatus.SC_UNAUTHORIZED, "Unauthorized - no Authorization jwt sent");
         } else if (idToken.getPayload().getIssuer().equals(gcpEnvironment.getInternalServiceAuthIssuer())) {
             this.handleBatch(request);
-            response.setStatusCode(200, "OK - batch processed");
+            response.setStatusCode(HttpStatus.SC_OK, "OK - batch processed");
         } else {
-            response.setStatusCode(401, "Unauthorized - unacceptable issuer");
+            response.setStatusCode(HttpStatus.SC_UNAUTHORIZED, "Unauthorized - unacceptable issuer");
         }
     }
 

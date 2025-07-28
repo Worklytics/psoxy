@@ -36,7 +36,7 @@ public class JwksDecorator {
     }
 
     // just for reference,
-    static final String PATH_TO_RESOURCE = ".well-known";
+    public static final String PATH_TO_RESOURCE = ".well-known";
 
     static final String JWKS_PATH = "/jwks.json";
     static final String OPENID_CONFIG_PATH = "/openid-configuration";

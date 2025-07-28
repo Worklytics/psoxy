@@ -116,6 +116,11 @@
             <artifactId>google-cloud-pubsub</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-kms</artifactId>
+        </dependency>
+
 
         <!-- JUnit Jupiter API for writing tests -->
         <dependency>

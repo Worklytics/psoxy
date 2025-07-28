@@ -107,7 +107,7 @@ variable "secret_replica_locations" {
     "us-central1",
     "us-west1",
   ]
-}
+}yes
 
 variable "kms_key_ring" {
   type        = string

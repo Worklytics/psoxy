@@ -1,33 +1,36 @@
 package co.worklytics.psoxy.gateway.impl;
 
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
-import co.worklytics.psoxy.gateway.impl.output.NoOutput;
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.RSASSASigner;
-import com.nimbusds.jwt.SignedJWT;
-import dagger.Lazy;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-
-import javax.inject.Named;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.text.ParseException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jwt.SignedJWT;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.impl.output.NoOutput;
+import dagger.Lazy;
 
 class InboundWebhookHandlerTest {
     private InboundWebhookHandler handler;
@@ -125,6 +128,16 @@ class InboundWebhookHandlerTest {
         } else {
             assertFalse(result.isPresent(), "Expected no error but got: " + result.orElse(""));
         }
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InByb2plY3RzL3Bzb3h5LWRldi1lcmlrL2xvY2F0aW9ucy91cy1jZW50cmFsMS9rZXlSaW5ncy9wc294eS1kZXYtZXJpay0vY3J5cHRvS2V5cy9wc294eS1kZXYtZXJpay1sbG0tcG9ydGFsLXdlYmhvb2stYXV0aC1rZXkiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3Bzb3h5LWRldi1lcmlrLWxsbS1wb3J0YWwtYm92djNmcjI2cS11Yy5hLnJ1bi5hcHAiLCJzdWIiOiJlcmlrQHdvcmtseXRpY3MuY28iLCJhdWQiOiJodHRwczovL3Bzb3h5LWRldi1lcmlrLWxsbS1wb3J0YWwtYm92djNmcjI2cS11Yy5hLnJ1bi5hcHAiLCJpYXQiOjE3NTM3MjM4MDgsImV4cCI6MTc1MzcyNzQwOH0.Yq4_7OBOxs-WprsncVq_CFn_5fnVffQYdwNEqyM5GRDhbHKnCQNPDeW9Ilunw39xRUM0tYRFyd6ktnwuCkuSLaqlO_UkA5fLkVKAEOpYF9o3_inobhFSFV4JSjYNvspUSdnBJ9TMhcLX0I8MgX6p3xn61TRFFedUy4BAaAqjJd5FQQO0Udt8CQomr3sbld5Z2iY0zO-UzjmXChD7UCA1QVm_S0mPxGj0X25C9Nqj8nWx-mV2Vy0i2qGA-hNDPwFnMxjTDkHu_EPSLmTgbqeFi7uu_HJAOcFXEbz3ReyeobBA3OGxP4igl_4qDKwPmmmPAw4fPmwFGL42VjjbE6-gZw",
+        "eyJhbGciOiJSUzI1NiIsImtpZCI6InByb2plY3RzL3Bzb3h5LWRldi1lcmlrL2xvY2F0aW9ucy91cy1jZW50cmFsMS9rZXlSaW5ncy9wc294eS1kZXYtZXJpay0vY3J5cHRvS2V5cy9wc294eS1kZXYtZXJpay1sbG0tcG9ydGFsLXdlYmhvb2stYXV0aC1rZXkiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3Bzb3h5LWRldi1lcmlrLWxsbS1wb3J0YWwtYm92djNmcjI2cS11Yy5hLnJ1bi5hcHAiLCJzdWIiOiJlcmlrQHdvcmtseXRpY3MuY28iLCJhdWQiOiJodHRwczovL3Bzb3h5LWRldi1lcmlrLWxsbS1wb3J0YWwtYm92djNmcjI2cS11Yy5hLnJ1bi5hcHAiLCJpYXQiOjE3NTM3MjM4MDgsImV4cCI6MTc1MzcyNzQwOH0.Yq4_7OBOxs-WprsncVq_CFn_5fnVffQYdwNEqyM5GRDhbHKnCQNPDeW9Ilunw39xRUM0tYRFyd6ktnwuCkuSLaqlO_UkA5fLkVKAEOpYF9o3_inobhFSFV4JSjYNvspUSdnBJ9TMhcLX0I8MgX6p3xn61TRFFedUy4BAaAqjJd5FQQO0Udt8CQomr3sbld5Z2iY0zO-UzjmXChD7UCA1QVm_S0mPxGj0X25C9Nqj8nWx-mV2Vy0i2qGA-hNDPwFnMxjTDkHu_EPSLmTgbqeFi7uu_HJAOcFXEbz3ReyeobBA3OGxP4igl_4qDKwPmmmPAw4fPmwFGL42VjjbE6-gZw"
+    })
+    void testParseJwt(String authorizationHeader) throws ParseException {
+        SignedJWT jwt = handler.parseJwt(authorizationHeader);
     }
 
     static class TestCase {

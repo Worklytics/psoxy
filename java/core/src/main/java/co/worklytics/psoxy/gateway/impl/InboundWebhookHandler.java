@@ -123,8 +123,11 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
                     .build();
             }
         } else {
+
+            log.info("Authorization header: " + authorizationHeader.get());
             try {
-                authToken = Optional.of(SignedJWT.parse(authorizationHeader.get()));
+                SignedJWT jwt = this.parseJwt(authorizationHeader.get());
+                authToken = Optional.of(jwt);
             } catch (ParseException e) {
                 return HttpEventResponse.builder()
                     .statusCode(HttpStatus.SC_BAD_REQUEST)
@@ -189,7 +192,17 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
                 .body("Failed to ingest incoming webhook")
                 .build();
         }
+    }
 
+    static final String BEARER_PREFIX = "Bearer ";
+
+    SignedJWT parseJwt(String authorizationHeader) throws java.text.ParseException {
+        if (authorizationHeader.startsWith(BEARER_PREFIX)) {
+            return SignedJWT.parse(authorizationHeader.substring(BEARER_PREFIX.length()));
+        } else {
+            log.warning("Authorization header does not start with Bearer prefix: " + authorizationHeader + "; will attempt to parse as JWT, but this is not standard OIDC");
+            return SignedJWT.parse(authorizationHeader);
+        }
     }
 
     /**

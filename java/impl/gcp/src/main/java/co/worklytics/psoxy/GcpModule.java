@@ -2,18 +2,22 @@ package co.worklytics.psoxy;
 
 
 import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.*;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 
 import co.worklytics.psoxy.gateway.output.OutputFactory;
+import co.worklytics.psoxy.gcp.GcpKmsPublicKeyStoreClient;
 import com.google.cloud.ServiceOptions;
 
+import com.google.cloud.kms.v1.KeyManagementServiceClient;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
+import lombok.SneakyThrows;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -119,10 +123,17 @@ public interface GcpModule {
         return tokenRequestBuilder;
     }
 
-
+    @SneakyThrows
+    @Provides
+    static KeyManagementServiceClient providesKeyManagementServiceClient() {
+        return KeyManagementServiceClient.create();
+    }
 
     @Module
     abstract class Bindings {
+
+        @Binds
+        abstract AsyncApiDataRequestHandler asyncApiDataRequestHandler(GcpAsyncApiDataRequestHandler asyncApiDataRequestHandler);
 
         @Binds
         @IntoSet
@@ -133,7 +144,7 @@ public interface GcpModule {
         abstract OutputFactory<?> pubsubOutputFactory(PubSubOutputFactory pubSubOutputFactory);
 
         @Binds
-        abstract AsyncApiDataRequestHandler asyncApiDataRequestHandler(GcpAsyncApiDataRequestHandler asyncApiDataRequestHandler);
-
+        @IntoSet
+        abstract PublicKeyStoreClient gcpKmsPublicKeyStoreClient(GcpKmsPublicKeyStoreClient impl);
     }
 }

@@ -296,6 +296,22 @@ resource "google_project_iam_member" "grant_gcs-sa_pub-sub-publisher" {
 }
 
 
+resource "google_project_iam_custom_role" "oidc_token_verifier" {
+  count = var.support_webhook_collectors ? 1 : 0
+
+  project     = var.project_id
+  role_id     = "${local.environment_id_role_prefix}OIDCTokenVerifier"
+  title       = "${local.environment_id_prefix_display} OIDC Token Verifier"
+  description = "Role to verify OIDC tokens used to authenticate requests to the webhook collectors; grant this to GCP principals that need to verify OIDC tokens, on the KMS key that is used to sign the tokens"
+
+  permissions = [
+    "cloudkms.cryptoKeys.get",
+    "cloudkms.cryptoKeyVersions.get",
+    "cloudkms.cryptoKeyVersions.list", # need to list versions, as possibly ANY enabled version might have been used to sign the token
+    "cloudkms.cryptoKeyVersions.viewPublicKey" # need to view public key, to verify signature
+  ]
+}
+
 
 
 # Deprecated; only keep to support old installations
@@ -395,4 +411,9 @@ output "artifact_repository" {
     # If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry., forbidden"
     google_project_service.gcp_infra_api
   ]
+}
+
+output "oidc_token_verifier_role_id" {
+  value = try(google_project_iam_custom_role.oidc_token_verifier[0].id, null)
+  description = "Role to grant on crypto key(s) used to sign OIDC tokens (used to authenticate requests to webhook collectors). Only provisioned if support_webhook_collectors is true."
 }

@@ -64,12 +64,7 @@ async function call(options = {}) {
     options.token = getIdentityToken();
   }
 
-  const headers = {
-    ...getCommonHTTPHeaders(options),
-    Authorization: `Bearer ${options.token}`,
-  };
-
-
+  let authorizationHeader;
   if (options.signingKey) {
     let signature;
     let claims = {
@@ -83,9 +78,16 @@ async function call(options = {}) {
       signature = await signJwtWithGCPKMS(claims, options.signingKey.replace('gcp-kms:', ''));
     }
 
-    headers['Authorization'] = signature;
+    authorizationHeader = `Bearer ${signature}`;
     console.log(signature);
+  } else {
+    authorizationHeader = `Bearer ${options.token}`;
   }
+
+  let headers = {
+    ...getCommonHTTPHeaders(options),
+    Authorization: authorizationHeader,
+  };
 
   logger.info(`Calling Psoxy and waiting response: ${options.url}`);
   logger.verbose('Request Options:', { additional: options });

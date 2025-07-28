@@ -180,6 +180,15 @@ variable "http_methods" {
 }
 
 
+variable "secret_replica_locations" {
+  type        = list(string)
+  description = "list of locations to replicate secrets to. See https://cloud.google.com/secret-manager/docs/locations"
+  default     = [
+    "us-central1",
+    "us-west1"
+    ]
+}
+
 variable "allow_origins" {
   type        = list(string)
   description = "list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)"
@@ -189,6 +198,11 @@ variable "allow_origins" {
 variable "rules_file" {
   type        = string
   description = "Path to the file containing the rules for the webhook collector"
+}
+
+variable "oidc_token_verifier_role_id" {
+  type        = string
+  description = "Role to grant on crypto key(s) used to sign OIDC tokens (used to authenticate requests to webhook collectors). Only provisioned if support_webhook_collectors is true."
 }
 
 variable "example_payload" {

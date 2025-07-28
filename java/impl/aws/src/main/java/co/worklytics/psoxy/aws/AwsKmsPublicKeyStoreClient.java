@@ -36,6 +36,7 @@ public class AwsKmsPublicKeyStoreClient implements PublicKeyStoreClient {
 
     private final KmsClient kmsClient;
 
+    //TODO: prob we're failing to clean-up kmsClient here
     @Inject
     public AwsKmsPublicKeyStoreClient(KmsClient kmsClient) {
         this.kmsClient = kmsClient;

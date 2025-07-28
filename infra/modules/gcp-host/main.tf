@@ -265,6 +265,7 @@ module "webhook_collector" {
   side_output_sanitized             = try(local.sanitized_side_outputs[each.key], null)
   todos_as_local_files              = var.todos_as_local_files
   key_ring_id                       = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
+  oidc_token_verifier_role_id       = module.psoxy.oidc_token_verifier_role_id
   provision_auth_key                = each.value.provision_auth_key
   rules_file                        = each.value.rules_file
   example_identity                  = each.value.example_identity

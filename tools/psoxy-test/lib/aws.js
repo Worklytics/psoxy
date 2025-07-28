@@ -84,7 +84,7 @@ async function call(options = {}) {
       signature = await signJwtWithAWSKMS(claims, options.signingKey.replace('aws-kms:', ''), credentials, options.region);
     }
 
-    headers['Authorization'] = signature;
+    headers['Authorization'] = `Bearer ${signature}`;
 
     // possibly we'll need this for fallback, if target service has auth layer that consumes 'Authorization' header and doesn't pass it on
     // but API Gateway v2 appears to be passing it as well as verifying it, so think we're OK
