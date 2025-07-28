@@ -229,7 +229,7 @@ resource "google_kms_key_ring" "proxy_key_ring" {
   count = local.key_ring_needed ? 1 : 0
 
   project  = var.gcp_project_id
-  name     = local.environment_id_prefix
+  name     = replace(replace(var.environment_name, "/[^a-zA-Z0-9_-]/", "-"), "/-+/", "-")
   location = var.gcp_region
 }
 
