@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,10 @@ import javax.inject.Singleton;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
@@ -385,9 +389,14 @@ class ApiDataRequestHandlerTest {
             targetUrlArgumentCaptor.getValue().toString());
     }
 
-    @Test
+    @ParameterizedTest
     @SneakyThrows
-    void handleShouldNotIncludeNullOrEmptyOrBlankBody() {
+    @NullSource
+    @ValueSource(strings = {
+        "",
+        " "
+    })
+    void handleShouldNotIncludeNullOrEmptyOrBlankBody(String body) {
         setup("azure-ad", "graph.microsoft.com");
 
         ApiDataRequestHandler spy = spy(handler);
@@ -402,7 +411,6 @@ class ApiDataRequestHandlerTest {
                 .getReversibleToken(userId, Function.identity()))
             .build());
 
-        String originalPath = "/v1.0/users/" + userId + "/calendar/calendarView?" + query;
         HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
         when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
             .thenReturn(Optional.of(PseudonymImplementation.DEFAULT
@@ -411,7 +419,7 @@ class ApiDataRequestHandlerTest {
         when(request.getPath()).thenReturn(
             "/v1.0/users/" + encodedPseudonym + "/calendar/calendarView");
         when(request.getQuery()).thenReturn(Optional.of(query));
-        when(request.getBody()).thenReturn(new byte[]{}); // empty body
+        when(request.getBody()).thenReturn(body == null ? null: body.getBytes(StandardCharsets.UTF_8)); // empty body
 
         HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
         when(requestFactory.buildRequest(anyString(), any(), any())).thenReturn(null);
