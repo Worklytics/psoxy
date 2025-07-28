@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gateway.impl;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.auth.JwtAuthorizedResource;
+import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient.PublicKeyVersionId;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
@@ -13,6 +14,7 @@ import org.apache.http.HttpStatus;
 
 import javax.inject.Inject;
 import java.math.BigInteger;
+import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
 import java.util.Collection;
@@ -73,10 +75,10 @@ public class JwksDecorator {
     }
 
     JWKSResponse serveJwks() {
-        Map<String, RSAPublicKey> keys = jwtAuthorizedResource.acceptableAuthKeys();
+        Map<PublicKeyVersionId, RSAPublicKey> keys = jwtAuthorizedResource.acceptableAuthKeys();
         return new JWKSResponse(
             keys.entrySet().stream()
-                    .map(entry -> JWK.fromRSAPublicKey(entry.getKey(), entry.getValue()))
+                    .map(entry -> JWK.fromRSAPublicKey(entry.getKey().toString(), entry.getValue()))
                     .collect(Collectors.toList())
         );
     }

@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.auth.JwtAuthorizedResource;
 import co.worklytics.psoxy.gateway.auth.PublicKeyRef;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
+import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient.PublicKeyVersionId;
 import co.worklytics.psoxy.gateway.output.Output;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
@@ -274,20 +275,28 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
         return Optional.empty();
     }
 
-    public Map<String, RSAPublicKey> acceptableAuthKeys() {
-        return Arrays.stream(configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ACCEPTED_AUTH_KEYS).orElse("").split(","))
-            .map(String::trim)
-            .filter(keyRef -> !keyRef.isEmpty())
-            .map(PublicKeyRef::fromString)
-            .flatMap(publicKeyRef -> {
-                Optional<PublicKeyStoreClient> client = publicKeyStoreClients.stream().filter(c -> c.getId().equals(publicKeyRef.store())).findAny();
-                if (client.isEmpty()) {
-                    throw new IllegalArgumentException("No public key store client found for: " + publicKeyRef.store());
-                }
-                // Map each key to its id (keyRef.id())
-                return client.get().getPublicKeys(publicKeyRef).stream()
-                    .map(key -> new java.util.AbstractMap.SimpleEntry<>(publicKeyRef.id(), key));
-            })
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    public Map<PublicKeyVersionId, RSAPublicKey> acceptableAuthKeys() {
+        return Arrays.stream(
+                    configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ACCEPTED_AUTH_KEYS)
+                        .orElse("")
+                        .split(",")
+                )
+                .map(String::trim)
+                .filter(keyRef -> !keyRef.isEmpty())
+                .map(PublicKeyRef::fromString)
+                .flatMap(publicKeyRef -> {
+                    Optional<PublicKeyStoreClient> client = publicKeyStoreClients.stream()
+                            .filter(c -> c.getId().equals(publicKeyRef.store()))
+                            .findAny();
+                    if (client.isEmpty()) {
+                        throw new IllegalArgumentException("No public key store client found for: " + publicKeyRef.store());
+                    }
+                    // getPublicKeys returns Map<PublicKeyVersionId, RSAPublicKey>
+                    Map<PublicKeyVersionId, RSAPublicKey> keys = client.get().getPublicKeys(publicKeyRef);
+
+                    // Fix: iterate over entrySet, not keys.stream()
+                    return keys.entrySet().stream();
+                })
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

@@ -9,6 +9,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import lombok.NonNull;
+import lombok.extern.java.Log;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.GetPublicKeyRequest;
 import software.amazon.awssdk.services.kms.model.GetPublicKeyResponse;
@@ -20,9 +21,10 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.Duration;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.Map;
 
 /**
  * AWS KMS implementation of PublicKeyStoreClient using AWS SDK v2
@@ -32,6 +34,7 @@ import java.util.concurrent.ExecutionException;
  * and pointing it to that. so for webhook collector purposes we will have to configure TWO keys for aws:kms, a
  * "current" and a "previous" alias, and attempt verification with both, if they're valid.
  */
+@Log
 public class AwsKmsPublicKeyStoreClient implements PublicKeyStoreClient {
 
     private final KmsClient kmsClient;
@@ -48,14 +51,14 @@ public class AwsKmsPublicKeyStoreClient implements PublicKeyStoreClient {
     }
 
     // Cache for individual public keys
-    LoadingCache<PublicKeyRef, Set<RSAPublicKey>> publicKeysCache =
+    LoadingCache<PublicKeyRef, Map<PublicKeyVersionId, RSAPublicKey>> publicKeysCache =
         CacheBuilder.newBuilder()
             .maximumSize(5)
             .expireAfterAccess(Duration.ofMinutes(10))
             .build(new CacheLoader<>() {
                 @NonNull
                 @Override
-                public Set<RSAPublicKey> load(@NonNull PublicKeyRef keyRef) {
+                public Map<PublicKeyVersionId, RSAPublicKey> load(@NonNull PublicKeyRef keyRef) {
                     return getPublicKeysWrapper(keyRef);
                 }
             });
@@ -67,7 +70,7 @@ public class AwsKmsPublicKeyStoreClient implements PublicKeyStoreClient {
      * @return
      */
     @Override
-    public Set<RSAPublicKey> getPublicKeys(PublicKeyRef keyRef) {
+    public Map<PublicKeyVersionId, RSAPublicKey> getPublicKeys(PublicKeyRef keyRef) {
         if (keyRef.store() != PublicKeyStore.AWS_KMS) {
             throw new IllegalArgumentException("KeyRef store must be AWS_KMS");
         }
@@ -80,12 +83,12 @@ public class AwsKmsPublicKeyStoreClient implements PublicKeyStoreClient {
 
     // wraps get with something that returns a Set, considering possible 'null' return value from getPublicKey,
     // if it has been disabled or deleted in AWS KMS (expected due to rotation)
-    Set<RSAPublicKey> getPublicKeysWrapper(PublicKeyRef keyRef) {
+    Map<PublicKeyVersionId, RSAPublicKey> getPublicKeysWrapper(PublicKeyRef keyRef) {
         RSAPublicKey key = this.getPublicKey(keyRef);
-        if (key  == null) {
-            return Collections.emptySet();
+        if (key == null) {
+            return Collections.emptyMap();
         } else {
-            return new HashSet<>(Collections.singletonList(key));
+            return new HashMap<>(Collections.singletonMap(new PublicKeyVersionId(keyRef.store(), keyRef.id(), "0"), key));
         }
     }
 
@@ -107,6 +110,7 @@ public class AwsKmsPublicKeyStoreClient implements PublicKeyStoreClient {
                 throw new RuntimeException("Failed to parse public key from KMS", e);
             }
         } catch (KMSInvalidStateException e) {
+            log.log(Level.SEVERE, "Failed to get public key from KMS", e);
             return null;
         }
     }
