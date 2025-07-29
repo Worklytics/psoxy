@@ -49,7 +49,7 @@ public class GcpWebhookCollectionHandler {
 
     // TODO: arg should be configurable via env vars; could expose generally, bc although not used in AWS, may be useful logging (eg, how often is AWS invoked with 'full' batch)
     static final Duration BATCH_TIMEOUT = Duration.ofSeconds(30);
-    static final Integer BATCH_SIZE = 100;
+    static final int BATCH_SIZE = 100;
 
     // standard Bearer token prefix on Authorization header
     static final String BEARER_PREFIX = "Bearer ";
