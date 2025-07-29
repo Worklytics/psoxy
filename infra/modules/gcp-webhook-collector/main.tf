@@ -5,13 +5,24 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
+# perms for secrets
+# TODO: imho, would be cleaner to combine into a custom project role??
+resource "google_secret_manager_secret_iam_member" "grant_sa_viewer_on_secret" {
+  for_each = var.secret_bindings
+
+  project   = var.project_id
+  secret_id = each.value.secret_id
+  member    = "serviceAccount:${var.service_account_email}"
+  role      = "roles/secretmanager.viewer"
+}
+
 resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret" {
   for_each = var.secret_bindings
 
   project   = var.project_id
   secret_id = each.value.secret_id
   member    = "serviceAccount:${var.service_account_email}"
-  role      = "roles/secretmanager.secretAccessor"
+  role      = "roles/secretmanager.secretAccessor" # this is ONLY accessing payload of a secret version
 }
 
 
@@ -180,11 +191,33 @@ module "auth_issuer_secret" {
   default_labels = var.default_labels
 }
 
-resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_auth_issuer" {
+# grant access to secrets known AFTER function is deployed
+# (eg, AUTH_ISSUER)
+# distinct from var.secret_bindings; bc those are bound into the function's ENV VARS at deploy-time, grants must be done BEFORE deploy
+locals {
+  secrets_to_grant_access_to = {
+    AUTH_ISSUER = {
+      secret_id = module.auth_issuer_secret.secret_ids_within_project["AUTH_ISSUER"]
+    }
+  }
+}
+
+resource "google_secret_manager_secret_iam_member" "grant_sa_viewer_on_parameter" {
+  for_each = local.secrets_to_grant_access_to
+
   project   = var.project_id
-  secret_id = module.auth_issuer_secret.secret_ids_within_project["AUTH_ISSUER"]
+  secret_id = each.value.secret_id
   member    = "serviceAccount:${var.service_account_email}"
-  role      = "roles/secretmanager.secretAccessor"
+  role      = "roles/secretmanager.viewer"
+}
+
+resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_parameter" {
+  for_each = local.secrets_to_grant_access_to
+
+  project   = var.project_id
+  secret_id = each.value.secret_id
+  member    = "serviceAccount:${var.service_account_email}"
+  role      = "roles/secretmanager.secretAccessor" # this is ONLY accessing payload of a secret version
 }
 
 
