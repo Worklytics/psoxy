@@ -198,6 +198,11 @@ public class GcpWebhookCollectionHandler {
 
             PullResponse response = subscriber.pullCallable().call(pullRequest);
 
+            if (response.getReceivedMessagesCount() == 0) {
+                log.log(Level.INFO, "No messages to process");
+                return;
+            }
+
             Stream<ProcessedContent> processedContentStream = response.getReceivedMessagesList().stream()
                 .map(this::mapMessageToProcessedContent);
 
@@ -206,16 +211,13 @@ public class GcpWebhookCollectionHandler {
             List<String> ackIds = response.getReceivedMessagesList().stream()
                 .map(ReceivedMessage::getAckId).toList();
 
-            if (!ackIds.isEmpty()) {
-                AcknowledgeRequest ackRequest = AcknowledgeRequest.newBuilder()
-                    .setSubscription(subscriptionName.toString())
-                    .addAllAckIds(ackIds)
-                    .build();
-                subscriber.acknowledgeCallable().call(ackRequest);
-                log.log(Level.INFO, "Processed " + ackIds.size() + " messages");
-            } else {
-                log.log(Level.INFO, "No messages to process");
-            }
+            AcknowledgeRequest ackRequest = AcknowledgeRequest.newBuilder()
+                .setSubscription(subscriptionName.toString())
+                .addAllAckIds(ackIds)
+                .build();
+            subscriber.acknowledgeCallable().call(ackRequest);
+            log.log(Level.INFO, "Processed " + ackIds.size() + " messages");
+
 
             if (ackIds.size() == BATCH_SIZE) {
                 log.log(Level.WARNING, "Processed a full batch; if happens repeatedly, consider increasing BATCH_SIZE or running multiple batches per cron invocation");
