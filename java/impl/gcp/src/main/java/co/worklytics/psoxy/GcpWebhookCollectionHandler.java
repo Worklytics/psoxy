@@ -1,31 +1,35 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.ProcessedContent;
-import co.worklytics.psoxy.gateway.impl.BatchMergeHandler;
-import co.worklytics.psoxy.gateway.impl.InboundWebhookHandler;
-import co.worklytics.psoxy.gateway.impl.JwksDecorator;
+import java.io.IOException;
+import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.stream.Stream;
 import javax.inject.Inject;
-
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpStatus;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 import com.google.cloud.pubsub.v1.stub.SubscriberStub;
 import com.google.cloud.pubsub.v1.stub.SubscriberStubSettings;
-import com.google.pubsub.v1.*;
+import com.google.pubsub.v1.AcknowledgeRequest;
+import com.google.pubsub.v1.ProjectSubscriptionName;
+import com.google.pubsub.v1.PullRequest;
+import com.google.pubsub.v1.PullResponse;
+import com.google.pubsub.v1.ReceivedMessage;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.ProcessedContent;
+import co.worklytics.psoxy.gateway.WebhookCollectorModeConfigProperty;
+import co.worklytics.psoxy.gateway.impl.BatchMergeHandler;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.impl.InboundWebhookHandler;
+import co.worklytics.psoxy.gateway.impl.JwksDecorator;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.hc.core5.http.HttpHeaders;
-import org.apache.hc.core5.http.HttpStatus;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.time.Duration;
-import java.util.List;
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.stream.Stream;
 
 @Log
 public class GcpWebhookCollectionHandler {
@@ -36,10 +40,14 @@ public class GcpWebhookCollectionHandler {
     BatchMergeHandler batchMergeHandler;
     ConfigService configService;
     JwksDecorator jwksResource;
+    EnvVarsConfigService envVarsConfigService;
 
     // TODO: arg should be configurable via env vars; could expose generally, bc although not used in AWS, may be useful logging (eg, how often is AWS invoked with 'full' batch)
     static final Duration BATCH_TIMEOUT = Duration.ofSeconds(30);
     static final Integer BATCH_SIZE = 100;
+
+    // standard Bearer token prefix on Authorization header
+    static final String BEARER_PREFIX = "Bearer ";
 
     @Inject
     public GcpWebhookCollectionHandler(InboundWebhookHandler inboundWebhookHandler,
@@ -47,13 +55,15 @@ public class GcpWebhookCollectionHandler {
                                        GcpEnvironment gcpEnvironment,
                                        BatchMergeHandler batchMergeHandler,
                                        JwksDecorator.Factory jwksDecoratorFactory,
-                                       ConfigService configService) {
+                                       ConfigService configService,
+                                       EnvVarsConfigService envVarsConfigService) {
         this.gcpEnvironment = gcpEnvironment;
         this.inboundWebhookHandler = inboundWebhookHandler;
         this.googleIdTokenVerifierFactory = googleIdTokenVerifierFactory;
         this.batchMergeHandler = batchMergeHandler;
         this.jwksResource = jwksDecoratorFactory.create(inboundWebhookHandler);
         this.configService = configService;
+        this.envVarsConfigService = envVarsConfigService;
     }
 
     /**
@@ -71,8 +81,8 @@ public class GcpWebhookCollectionHandler {
             .map(s -> s.contains(gcpEnvironment.getCloudSchedulerUserAgent()))
             .orElse(false);
         Boolean cloudSchedulerHeaderTrue = request.getFirstHeader("x-cloudscheduler")
-        .map(Boolean::parseBoolean)
-        .orElse(false);
+            .map(Boolean::parseBoolean)
+            .orElse(false);
 
 
         if (userAgentIsCloudSchedulerOrPubSub || cloudSchedulerHeaderTrue) {
@@ -101,42 +111,61 @@ public class GcpWebhookCollectionHandler {
     }
 
     void handleBatch(HttpRequest request, HttpResponse response) {
-   
-        Optional<String> jwt = request.getFirstHeader("Authorization");
-
-        if (!jwt.isPresent()) {
-            response.setStatusCode(HttpStatus.SC_UNAUTHORIZED, "Unauthorized : no authorization header included");
-            return;
-        }
-
-        String endpointUrl = endpointUrl(request);
-        GoogleIdTokenVerifier internalServiceVerifier = googleIdTokenVerifierFactory.getVerifierForAudience(endpointUrl);
-
-
-        GoogleIdToken idToken = null;
-
         try {
-            idToken = internalServiceVerifier.verify(jwt.get());
-        } catch (IOException | GeneralSecurityException | IllegalArgumentException e) {
-            log.log(Level.WARNING, "Failed to verify JWT: " + jwt.get(), e);
-            response.setStatusCode(HttpStatus.SC_UNAUTHORIZED, "Unauthorized : invalid JWT");
-            return;
-        }
-
-        if (idToken == null) {
-            response.setStatusCode(HttpStatus.SC_UNAUTHORIZED, "Unauthorized - no Authorization jwt sent");
-        } else if (idToken.getPayload().getIssuer().equals(gcpEnvironment.getInternalServiceAuthIssuer())) {
+            verifyAuthorization(request);
             this.processBatch();
             response.setStatusCode(HttpStatus.SC_OK, "OK - batch processed");
-        } else {
-            response.setStatusCode(HttpStatus.SC_UNAUTHORIZED, "Unauthorized - unacceptable issuer");
+        } catch (AuthorizationException e) {
+            log.log(Level.WARNING, "Unauthorized : " + e.getMessage());
+            response.setStatusCode(HttpStatus.SC_UNAUTHORIZED, e.getMessage());
+        }
+    }
+
+    /**
+     * authorization verification extracted to facilitate testing
+     * @throws AuthorizationException if authorization fails; potentially wrapping IOException or IllegalArgumentException if getting public key fails, etc.
+     */
+    void verifyAuthorization(HttpRequest request) throws AuthorizationException {
+        Optional<String> jwt = request.getFirstHeader("Authorization")
+            .map(s -> s.replace(BEARER_PREFIX, ""));
+
+        if (envVarsConfigService.isDevelopment()) {
+            log.log(Level.INFO, "Authorization header: " + jwt.get());
+        }
+
+        if (!jwt.isPresent()) {
+            log.log(Level.WARNING, "Unauthorized : no authorization header included");
+            throw new AuthorizationException("Unauthorized : no authorization header included");
+        }
+
+        // TODO: hack; exploits that audience happens to be the same as the issuer in the inbound webhook context
+        // would perhaps be *better* to hack this in the reverse; put the endpoint URL into config, and then
+        // use that as Issuer in the inbound webhook context, Audience in the internal service context
+        String endpointUrl = configService.getConfigPropertyOrError(WebhookCollectorModeConfigProperty.AUTH_ISSUER);
+
+        GoogleIdTokenVerifier internalServiceVerifier = googleIdTokenVerifierFactory.getVerifierForAudience(endpointUrl);
+       
+        GoogleIdToken idToken = null;
+        try {
+            idToken = GoogleIdToken.parse(internalServiceVerifier.getJsonFactory(), jwt.get());
+            if (idToken == null) {
+                throw new AuthorizationException("Unauthorized - failed to parse JWT");
+            }
+            
+            if (!idToken.getPayload().getIssuer().equals(gcpEnvironment.getInternalServiceAuthIssuer())) {
+                log.log(Level.WARNING, "Unauthorized - unacceptable issuer: " + idToken.getPayload().getIssuer());
+                throw new AuthorizationException("Unauthorized - unacceptable issuer");
+            }
+    
+            internalServiceVerifier.verifyOrThrow(idToken);
+            return; // success
+        } catch (IOException | IllegalArgumentException e) {
+            log.log(Level.WARNING, "Failed to verify JWT: " + jwt.get(), e);
+            throw new AuthorizationException("Unauthorized : invalid JWT", e);
         }
     }
 
 
-
-
-    // TODO: this is a bit of a hack, as it's not clear how to test this.
     /**
      * processes a batch of webhooks from Pub/Sub topic, via subscription.
      */
@@ -175,12 +204,29 @@ public class GcpWebhookCollectionHandler {
                     .addAllAckIds(ackIds)
                     .build();
                 subscriber.acknowledgeCallable().call(ackRequest);
+                log.log(Level.INFO, "Processed " + ackIds.size() + " messages");
+            } else {
+                log.log(Level.INFO, "No messages to process");
             }
+
             if (ackIds.size() == BATCH_SIZE) {
                 log.log(Level.WARNING, "Processed a full batch; if happens repeatedly, consider increasing BATCH_SIZE or running multiple batches per cron invocation");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+
+    /**
+     * exception thrown when authorization fails, to force handling outside verifyAuthorization()
+     */
+    static class AuthorizationException extends RuntimeException {
+        public AuthorizationException(String message) {
+            super(message);
+        }
+        public AuthorizationException(String message, Exception e) {
+            super(message, e);
         }
     }
 
