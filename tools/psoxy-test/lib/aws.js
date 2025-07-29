@@ -19,7 +19,8 @@ import {
   request,
   resolveAWSRegion,
   resolveHTTPMethod,
-  signAWSRequestURL
+  signAWSRequestURL,
+  signJwtWithAWSKMS
 } from './utils.js';
 
 import fs from 'fs';
