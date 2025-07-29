@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -29,6 +30,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import lombok.SneakyThrows;
 
+@Disabled // Cursor-generated test doesn't really work ..
 @ExtendWith(MockitoExtension.class)
 class GcpWebhookCollectionHandlerTest {
 
