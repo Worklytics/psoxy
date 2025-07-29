@@ -1,7 +1,6 @@
 package co.worklytics.psoxy.gateway.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -25,6 +24,8 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.api.client.http.ByteArrayContent;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -443,6 +444,54 @@ class ApiDataRequestHandlerTest {
             ArgumentCaptor.forClass(GenericUrl.class);
 
         verify(spy, times(0)).reverseRequestBodyTokenization(anyString(), anyString());
+    }
+
+    @SneakyThrows
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "application/json",
+        "application/json; charset=utf-8",
+        "application/x-www-form-urlencoded",
+        "application/json;application/xml",
+    })
+    void handleShouldDetectContentType(String contentType) {
+        setup("azure-ad", "graph.microsoft.com");
+
+        ApiDataRequestHandler spy = spy(handler);
+
+        String userId = "48d31887-5fad-4d73-a9f5-3c356e68a038";
+        String query = "startDateTime=2019-12-30T00:00:00Z&endDateTime=2022-05-16T00:00:00Z&limit=1&$top=1&$skip=1";
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
+            .thenReturn(Optional.of(PseudonymImplementation.DEFAULT
+                .getHttpHeaderValue()));
+        when(request.getHttpMethod()).thenReturn("POST");
+        when(request.getHeader(HttpHeaders.CONTENT_TYPE)).thenReturn(Optional.of(contentType));
+        when(request.getPath()).thenReturn(
+            "/graphql");
+        when(request.getQuery()).thenReturn(Optional.of(query));
+        when(request.getBody()).thenReturn("some content".getBytes(StandardCharsets.UTF_8)); // empty body
+
+        HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
+        when(requestFactory.buildRequest(anyString(), any(), any())).thenReturn(null);
+        doReturn(requestFactory).when(spy).getRequestFactory(any());
+
+        RESTApiSanitizer sanitizer = spy(buildSanitizer(
+            co.worklytics.psoxy.rules.github.PrebuiltSanitizerRules.RULES_MAP.get("github")));
+        spy.sanitizer = sanitizer;
+
+        try {
+            spy.handle(request, ApiDataRequestHandler.ProcessingContext.builder()
+                .async(false).requestId("r")
+                .requestReceivedAt(clock.instant()).build());
+        } catch(IllegalArgumentException e) {
+            fail(e);
+        } catch (Exception ignored) {
+            // it should raise an exception due missing configuration
+        }
+
+        verify(spy, times(1)).reverseRequestBodyTokenization(anyString(), anyString());
     }
 
     @Test
