@@ -876,14 +876,14 @@ public class ApiDataRequestHandler {
     @SneakyThrows
     ByteArrayContent reverseRequestBodyTokenization(@NonNull String contentType, String body) {
         // JSON case: use ObjectMapper to parse request body and map decode ON every string value
-        if (contentType.equals(ContentType.APPLICATION_JSON.getMimeType())) {
+        if (contentType.contains(ContentType.APPLICATION_JSON.getMimeType())) {
             JsonNode jsonNode = objectMapper.readTree(body);
             JsonNode transformedNode = applyStringTransformToTree(jsonNode, this::decode);
             String decodedRequestBody = objectMapper.writeValueAsString(transformedNode);
 
             return new ByteArrayContent(contentType,
                     decodedRequestBody.getBytes(StandardCharsets.UTF_8));
-        } else if (contentType.equals(ContentType.APPLICATION_FORM_URLENCODED.getMimeType())) {
+        } else if (contentType.contains(ContentType.APPLICATION_FORM_URLENCODED.getMimeType())) {
             // Form-urlencoded case: use WWWFormCodec to parse request body and map decode ON every
             // value
             List<NameValuePair> nameValuePairs =
