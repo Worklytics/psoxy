@@ -13,8 +13,6 @@ import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 

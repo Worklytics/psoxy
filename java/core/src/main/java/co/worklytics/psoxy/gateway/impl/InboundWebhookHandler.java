@@ -124,8 +124,6 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
                     .build();
             }
         } else {
-
-            log.info("Authorization header: " + authorizationHeader.get());
             try {
                 SignedJWT jwt = this.parseJwt(authorizationHeader.get());
                 authToken = Optional.of(jwt);

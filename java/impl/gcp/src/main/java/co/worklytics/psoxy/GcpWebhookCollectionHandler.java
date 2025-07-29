@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 import javax.inject.Inject;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpStatus;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
@@ -166,6 +167,17 @@ public class GcpWebhookCollectionHandler {
     }
 
 
+    ProcessedContent mapMessageToProcessedContent(ReceivedMessage message) {
+        ProcessedContent.ProcessedContentBuilder builder = ProcessedContent.builder()
+            .contentType(PubSubOutput.MessageAttributes.CONTENT_TYPE.getValue(message).orElse( ContentType.APPLICATION_JSON.getMimeType()))
+            .content(message.getMessage().getData().toByteArray());
+
+        PubSubOutput.MessageAttributes.CONTENT_ENCODING.getValue(message)
+            .ifPresent(builder::contentEncoding);
+
+        return builder.build();
+    }
+
     /**
      * processes a batch of webhooks from Pub/Sub topic, via subscription.
      */
@@ -186,12 +198,8 @@ public class GcpWebhookCollectionHandler {
 
             PullResponse response = subscriber.pullCallable().call(pullRequest);
 
-            Stream<ProcessedContent> processedContentStream =
-            response.getReceivedMessagesList().stream().map(m -> ProcessedContent.builder()
-                .contentType(m.getMessage().getAttributesMap().getOrDefault("Content-Type", "application/json"))
-                .contentEncoding(m.getMessage().getAttributesMap().getOrDefault("Content-Encoding", "gzip"))
-                .content(m.getMessage().getData().toByteArray())
-                .build());
+            Stream<ProcessedContent> processedContentStream = response.getReceivedMessagesList().stream()
+                .map(this::mapMessageToProcessedContent);
 
             batchMergeHandler.handleBatch(processedContentStream);
 
