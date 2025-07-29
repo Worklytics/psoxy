@@ -121,10 +121,13 @@ public class GcpWebhookCollectionHandler {
         try {
             verifyAuthorization(request);
             this.processBatch();
-            response.setStatusCode(HttpStatus.SC_OK, "OK - batch processed");
+            response.setStatusCode(HttpStatus.SC_OK, "batch processed");
         } catch (AuthorizationException e) {
             log.log(Level.WARNING, "Unauthorized : " + e.getMessage());
             response.setStatusCode(HttpStatus.SC_UNAUTHORIZED, e.getMessage());
+        } catch (Exception e) {
+            log.log(Level.WARNING, "Exception while processing batch", e);
+            response.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Internal Server Error");
         }
     }
 

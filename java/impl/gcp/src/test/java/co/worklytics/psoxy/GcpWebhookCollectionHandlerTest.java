@@ -81,6 +81,13 @@ class GcpWebhookCollectionHandlerTest {
         when(mockEnvVarsConfigService.isDevelopment())
             .thenReturn(false);
 
+
+        GcpEnvironment.WebhookCollectorModeConfig webhookCollectorModeConfig = GcpEnvironment.WebhookCollectorModeConfig.builder()
+            .batchMergeSubscription("projects/my-project/subscriptions/my-subscription")
+            .batchSize(100)
+            .batchInvocationTimeoutSeconds(60)
+            .build();
+
         // Create handler with mocked dependencies
         handler = new GcpWebhookCollectionHandler(
             null, // inboundWebhookHandler - not needed for these tests
@@ -89,7 +96,8 @@ class GcpWebhookCollectionHandlerTest {
             null, // batchMergeHandler - not needed for these tests
             null, // jwksDecoratorFactory - not needed for these tests
             mockConfigService,
-            mockEnvVarsConfigService
+            mockEnvVarsConfigService,
+            () -> webhookCollectorModeConfig
         );
     }
 
