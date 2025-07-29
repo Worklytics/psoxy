@@ -247,31 +247,31 @@ module "webhook_collector" {
 
   source = "../../modules/gcp-webhook-collector"
 
-  project_id                        = var.gcp_project_id
-  region                            = var.gcp_region
-  environment_id_prefix             = local.environment_id_prefix
-  instance_id                       = each.key
-  service_account_email             = google_service_account.webhook_collector[each.key].email
-  artifacts_bucket_name             = module.psoxy.artifacts_bucket_name
-  deployment_bundle_object_name     = module.psoxy.deployment_bundle_object_name
-  artifact_repository_id            = module.psoxy.artifact_repository
-  path_to_repo_root                 = var.psoxy_base_dir
-  config_parameter_prefix           = local.config_parameter_prefix
-  invoker_sa_emails                 = var.worklytics_sa_emails
-  default_labels                    = var.default_labels
-  gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
-  bucket_write_role_id              = module.psoxy.bucket_write_role_id
-  side_output_original              = try(local.custom_original_side_outputs[each.key], null)
-  side_output_sanitized             = try(local.sanitized_side_outputs[each.key], null)
-  todos_as_local_files              = var.todos_as_local_files
-  key_ring_id                       = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
-  oidc_token_verifier_role_id       = module.psoxy.oidc_token_verifier_role_id
-  provision_auth_key                = each.value.provision_auth_key
-  rules_file                        = each.value.rules_file
-  webhook_batch_invoker_sa_email    = module.psoxy.webhook_batch_invoker_sa_email
+  project_id                         = var.gcp_project_id
+  region                             = var.gcp_region
+  environment_id_prefix              = local.environment_id_prefix
+  instance_id                        = each.key
+  service_account_email              = google_service_account.webhook_collector[each.key].email
+  artifacts_bucket_name              = module.psoxy.artifacts_bucket_name
+  deployment_bundle_object_name      = module.psoxy.deployment_bundle_object_name
+  artifact_repository_id             = module.psoxy.artifact_repository
+  path_to_repo_root                  = var.psoxy_base_dir
+  config_parameter_prefix            = local.config_parameter_prefix
+  invoker_sa_emails                  = var.worklytics_sa_emails
+  default_labels                     = var.default_labels
+  gcp_principals_authorized_to_test  = var.gcp_principals_authorized_to_test
+  bucket_write_role_id               = module.psoxy.bucket_write_role_id
+  side_output_original               = try(local.custom_original_side_outputs[each.key], null)
+  side_output_sanitized              = try(local.sanitized_side_outputs[each.key], null)
+  todos_as_local_files               = var.todos_as_local_files
+  key_ring_id                        = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
+  oidc_token_verifier_role_id        = module.psoxy.oidc_token_verifier_role_id
+  provision_auth_key                 = each.value.provision_auth_key
+  rules_file                         = each.value.rules_file
+  webhook_batch_invoker_sa_email     = module.psoxy.webhook_batch_invoker_sa_email
   batch_processing_frequency_minutes = try(each.value.batch_processing_frequency_minutes, 5)
-  example_identity                  = each.value.example_identity
-  example_payload                   = each.value.example_payload
+  example_identity                   = each.value.example_identity
+  example_payload                    = each.value.example_payload
 
   environment_variables = merge(
     var.general_environment_variables,

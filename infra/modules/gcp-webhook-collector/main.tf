@@ -227,18 +227,18 @@ resource "google_cloudfunctions2_function" "function" {
 
   service_config {
     service_account_email = var.service_account_email
-    available_memory                 = "${var.available_memory_mb}M"
-    ingress_settings                 = "ALLOW_ALL"
-    timeout_seconds                  = 60 # TODO: what should this be? 60 for reg webhooks is more than enough, I'm concerned with batches
-    
+    available_memory      = "${var.available_memory_mb}M"
+    ingress_settings      = "ALLOW_ALL"
+    timeout_seconds       = 60 # TODO: what should this be? 60 for reg webhooks is more than enough, I'm concerned with batches
+
     # TODO: setting this > 1 gives error: │ Error: Error updating function: googleapi: Error 400: Could not update Cloud Run service projects/psoxy-dev-erik/locations/us-central1/services/psoxy-dev-erik-llm-portal. spec.template.spec.containers.resources.limits.cpu: Invalid value specified for cpu. Total cpu < 1 is not supported with concurrency > 1.
     # max_instance_request_concurrency = 5 # q: make configurable? default is 1
 
     # would hope this is plenty, but could make configurable
     # 5x5 = 25 concurrent requests; if taking 200ms to parse, sanitized, publish to Pub-Sub - then that's 125 events/s
     # seems like a lot ...
-    max_instance_count               = 5 
-    
+    max_instance_count = 5
+
     environment_variables = merge(
       local.required_env_vars,
       var.environment_variables,
@@ -331,11 +331,11 @@ resource "google_pubsub_subscription_iam_member" "subscriber" {
 
 
 resource "google_cloud_scheduler_job" "trigger_batch_processing" {
-  project   = var.project_id
-  region    = var.region
-  name      = "${var.environment_id_prefix}${var.instance_id}-batch-processing"
-  schedule  = "*/${var.batch_processing_frequency_minutes} * * * *" 
-  time_zone = "UTC"
+  project     = var.project_id
+  region      = var.region
+  name        = "${var.environment_id_prefix}${var.instance_id}-batch-processing"
+  schedule    = "*/${var.batch_processing_frequency_minutes} * * * *"
+  time_zone   = "UTC"
   description = "trigger batch consumption of webhooks from Pub/Sub: ${google_pubsub_subscription.webhook_subscription.id}"
 
   http_target {

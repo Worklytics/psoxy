@@ -14,9 +14,9 @@ locals {
 
   # additional services required for webhook collectors
   services_required_for_webhook_collectors = [
-    "cloudkms.googleapis.com", # signing webhooks
+    "cloudkms.googleapis.com",       # signing webhooks
     "cloudscheduler.googleapis.com", # triggering batches
-    "pubsub.googleapis.com", # webhooks batched via pubsub
+    "pubsub.googleapis.com",         # webhooks batched via pubsub
   ]
 }
 
