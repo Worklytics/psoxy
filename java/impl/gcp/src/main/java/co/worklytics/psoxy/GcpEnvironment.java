@@ -1,9 +1,11 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
+import lombok.Value;
 import javax.inject.Inject;
 import java.util.Set;
 
@@ -17,6 +19,39 @@ public class GcpEnvironment implements HostEnvironment {
         ;
     }
 
+    @Builder
+    @Value
+    static class WebhookCollectorModeConfig {
+         /**
+         * subscription name from which to pull webhooks
+         *
+         * eg, "projects/my-project/subscriptions/my-webhook-collector-subscription"
+         */
+        private String batchMergeSubscription;
+
+        /**
+         * number of webhooks to process in a batch
+         * 
+         * default: 100
+         */
+        private int batchSize;
+
+        /**
+         * timeout for a batch invocation, in seconds
+         * 
+         * default: 60
+         */
+        private int batchInvocationTimeoutSeconds;
+
+        static WebhookCollectorModeConfig fromConfigService(ConfigService configService) {
+            return WebhookCollectorModeConfig.builder()
+                .batchMergeSubscription(configService.getConfigPropertyOrError(WebhookCollectorModeConfigProperty.BATCH_MERGE_SUBSCRIPTION))
+                .batchSize(configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.BATCH_SIZE).map(Integer::parseInt).orElse(100))
+                .batchInvocationTimeoutSeconds(configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.BATCH_INVOCATION_TIMEOUT_SECONDS).map(Integer::parseInt).orElse(60))
+                .build();
+        }
+    }
+
     enum WebhookCollectorModeConfigProperty implements co.worklytics.psoxy.gateway.ConfigService.ConfigProperty {
         /**
          * subscription name from which to pull webhooks
@@ -24,6 +59,20 @@ public class GcpEnvironment implements HostEnvironment {
          * eg, "projects/my-project/subscriptions/my-webhook-collector-subscription"
          */
         BATCH_MERGE_SUBSCRIPTION,
+
+        /**
+         * number of webhooks to process in a batch
+         * 
+         * default: 100
+         */
+        BATCH_SIZE,
+
+        /**
+         * timeout for a batch invocation, in seconds
+         * 
+         * default: 60
+         */
+        BATCH_INVOCATION_TIMEOUT_SECONDS,
     }
 
     @Override

@@ -129,6 +129,12 @@ public interface GcpModule {
         return KeyManagementServiceClient.create();
     }
 
+    @Provides
+    @Singleton
+    static GcpEnvironment.WebhookCollectorModeConfig webhookCollectorModeConfig(ConfigService configService) {
+        return GcpEnvironment.WebhookCollectorModeConfig.fromConfigService(configService);
+    }
+
     @Module
     abstract class Bindings {
 

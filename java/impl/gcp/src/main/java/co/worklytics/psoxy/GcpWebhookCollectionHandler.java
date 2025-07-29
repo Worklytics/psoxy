@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 import javax.inject.Inject;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpStatus;
@@ -29,6 +31,7 @@ import co.worklytics.psoxy.gateway.impl.BatchMergeHandler;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.InboundWebhookHandler;
 import co.worklytics.psoxy.gateway.impl.JwksDecorator;
+import dagger.Lazy;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
@@ -42,6 +45,7 @@ public class GcpWebhookCollectionHandler {
     ConfigService configService;
     JwksDecorator jwksResource;
     EnvVarsConfigService envVarsConfigService;
+    Lazy<GcpEnvironment.WebhookCollectorModeConfig> webhookCollectorModeConfig;
 
     // TODO: arg should be configurable via env vars; could expose generally, bc although not used in AWS, may be useful logging (eg, how often is AWS invoked with 'full' batch)
     static final Duration BATCH_TIMEOUT = Duration.ofSeconds(30);
@@ -57,7 +61,8 @@ public class GcpWebhookCollectionHandler {
                                        BatchMergeHandler batchMergeHandler,
                                        JwksDecorator.Factory jwksDecoratorFactory,
                                        ConfigService configService,
-                                       EnvVarsConfigService envVarsConfigService) {
+                                       EnvVarsConfigService envVarsConfigService,
+                                       Lazy<GcpEnvironment.WebhookCollectorModeConfig> webhookCollectorModeConfig) {
         this.gcpEnvironment = gcpEnvironment;
         this.inboundWebhookHandler = inboundWebhookHandler;
         this.googleIdTokenVerifierFactory = googleIdTokenVerifierFactory;
@@ -65,6 +70,7 @@ public class GcpWebhookCollectionHandler {
         this.jwksResource = jwksDecoratorFactory.create(inboundWebhookHandler);
         this.configService = configService;
         this.envVarsConfigService = envVarsConfigService;
+        this.webhookCollectorModeConfig = webhookCollectorModeConfig;
     }
 
     /**
@@ -184,47 +190,59 @@ public class GcpWebhookCollectionHandler {
     @SneakyThrows
     void processBatch() {
         ProjectSubscriptionName subscriptionName  =
-            ProjectSubscriptionName.parse(configService.getConfigPropertyOrError(GcpEnvironment.WebhookCollectorModeConfigProperty.BATCH_MERGE_SUBSCRIPTION));
+            ProjectSubscriptionName.parse(webhookCollectorModeConfig.get().getBatchMergeSubscription());
 
         SubscriberStubSettings settings = SubscriberStubSettings.newBuilder().build();
 
-        // TODO: start a stopwatch, process for up to a BATCH_TIMEOUT, and then stop.
+        // stop watch to track how long we've been processing batch(s)
+        boolean possibleAdditionalMessagesWaiting = false;
+        StopWatch stopWatch = StopWatch.createStarted();
         try (SubscriberStub subscriber = settings.createStub()) {
+            do {
+                PullRequest pullRequest = PullRequest.newBuilder()
+                    .setMaxMessages(webhookCollectorModeConfig.get().getBatchSize())
+                    .setSubscription(subscriptionName.toString())
+                    .build();
 
-            PullRequest pullRequest = PullRequest.newBuilder()
-                .setMaxMessages(BATCH_SIZE)
-                .setSubscription(subscriptionName.toString())
-                .build();
+                PullResponse response = subscriber.pullCallable().call(pullRequest);
 
-            PullResponse response = subscriber.pullCallable().call(pullRequest);
+                if (response.getReceivedMessagesCount() == 0) {
+                    log.log(Level.INFO, "No messages to process");
+                    return;
+                }
 
-            if (response.getReceivedMessagesCount() == 0) {
-                log.log(Level.INFO, "No messages to process");
-                return;
-            }
+                Stream<ProcessedContent> processedContentStream = response.getReceivedMessagesList().stream()
+                    .map(this::mapMessageToProcessedContent);
 
-            Stream<ProcessedContent> processedContentStream = response.getReceivedMessagesList().stream()
-                .map(this::mapMessageToProcessedContent);
+                batchMergeHandler.handleBatch(processedContentStream);
 
-            batchMergeHandler.handleBatch(processedContentStream);
+                List<String> ackIds = response.getReceivedMessagesList().stream()
+                    .map(ReceivedMessage::getAckId).toList();
 
-            List<String> ackIds = response.getReceivedMessagesList().stream()
-                .map(ReceivedMessage::getAckId).toList();
+                AcknowledgeRequest ackRequest = AcknowledgeRequest.newBuilder()
+                    .setSubscription(subscriptionName.toString())
+                    .addAllAckIds(ackIds)
+                    .build();
+                subscriber.acknowledgeCallable().call(ackRequest);
+                log.log(Level.INFO, "Processed " + ackIds.size() + " messages");
 
-            AcknowledgeRequest ackRequest = AcknowledgeRequest.newBuilder()
-                .setSubscription(subscriptionName.toString())
-                .addAllAckIds(ackIds)
-                .build();
-            subscriber.acknowledgeCallable().call(ackRequest);
-            log.log(Level.INFO, "Processed " + ackIds.size() + " messages");
+                if (ackIds.size() == webhookCollectorModeConfig.get().getBatchSize()) {
+                    possibleAdditionalMessagesWaiting = true;
+                    log.log(Level.INFO, "Processed a full batch; if timeout NOT reached, will attempt to process another batch");
+                } else {
+                    possibleAdditionalMessagesWaiting = false;
+                }
+            } while (possibleAdditionalMessagesWaiting 
+                && stopWatch.getTime(TimeUnit.SECONDS) < webhookCollectorModeConfig.get().getBatchInvocationTimeoutSeconds());
 
-
-            if (ackIds.size() == BATCH_SIZE) {
-                log.log(Level.WARNING, "Processed a full batch; if happens repeatedly, consider increasing BATCH_SIZE or running multiple batches per cron invocation");
+            if (possibleAdditionalMessagesWaiting) {
+                log.log(Level.WARNING, "Batch processed stopped due to timeout; consider increasing BATCH_SIZE, cron frequency and concurrency, or batch timeout if this happens repeatedly");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+
     }
 
 
