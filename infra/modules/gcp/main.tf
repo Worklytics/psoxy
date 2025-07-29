@@ -14,8 +14,9 @@ locals {
 
   # additional services required for webhook collectors
   services_required_for_webhook_collectors = [
-    "cloudkms.googleapis.com",
-    "pubsub.googleapis.com",
+    "cloudkms.googleapis.com", # signing webhooks
+    "cloudscheduler.googleapis.com", # triggering batches
+    "pubsub.googleapis.com", # webhooks batched via pubsub
   ]
 }
 
@@ -314,6 +315,31 @@ resource "google_project_iam_custom_role" "oidc_token_verifier" {
 
 
 
+# q: is there a default Cloud Scheduler service account, that needs tokencreator role on the webhook_batch_invoker SA?
+# GCP docs don't show one, and ChatGPT didn't say one needed until I asked - at which point it gave me example email for the SA that doesn't look to follow usual pattern ...
+resource "google_service_account" "webhook_batch_invoker" {
+  project      = var.project_id
+  account_id   = "${var.environment_id_prefix}webhook-batch"
+  display_name = "${local.environment_id_prefix_display} Webhook Batch Invoker"
+  description  = "Service account that will invoke the batch processing of webhooks"
+}
+
+data "google_project" "project" {
+  project_id = var.project_id
+}
+
+# q: is this needed????
+# doubt is, without it, what is allowing the scheduler to generate OIDC tokens on behalf of the webhook_batch_invoker SA?
+# but admittedly, I'm unclear if it's this SA that needs the grant, or if  instead granting `roles/iam.serviceAccountUser`
+# to the GCP principal terraform is running as is the proper approach (eg, idea is that terraform is 'scheduling' the job
+# as the service account's identity) 
+resource "google_service_account_iam_member" "allow_scheduler_impersonation" {
+  service_account_id = google_service_account.webhook_batch_invoker.id
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudscheduler.iam.gserviceaccount.com"
+}
+
+# TODO: remove in v0.6.x
 # Deprecated; only keep to support old installations
 resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
   project     = var.project_id
@@ -336,6 +362,8 @@ resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
     "secretmanager.versions.list"
   ]
 }
+
+
 
 output "artifacts_bucket_name" {
   value = local.artifact_bucket_name
@@ -416,4 +444,8 @@ output "artifact_repository" {
 output "oidc_token_verifier_role_id" {
   value       = try(google_project_iam_custom_role.oidc_token_verifier[0].id, null)
   description = "Role to grant on crypto key(s) used to sign OIDC tokens (used to authenticate requests to webhook collectors). Only provisioned if support_webhook_collectors is true."
+}
+
+output "webhook_batch_invoker_sa_email" {
+  value = google_service_account.webhook_batch_invoker.email
 }

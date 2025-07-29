@@ -86,6 +86,12 @@ variable "invoker_sa_emails" {
   default     = []
 }
 
+variable "webhook_batch_invoker_sa_email" {
+  type        = string
+  description = "email of the service account that will invoke the batch processing function"
+  default     = null
+}
+
 variable "available_memory_mb" {
   type        = number
   description = "Memory (in MB), available to the function. Default value is 1024. Possible values include 128, 256, 512, 1024, etc."
@@ -203,6 +209,19 @@ variable "rules_file" {
 variable "oidc_token_verifier_role_id" {
   type        = string
   description = "Role to grant on crypto key(s) used to sign OIDC tokens (used to authenticate requests to webhook collectors). Only provisioned if support_webhook_collectors is true."
+}
+
+variable "batch_processing_frequency_minutes" {
+  type        = number
+  description = "Frequency (in minutes) at which to batch process webhooks"
+  default     = 5
+
+  validation {
+    condition = (
+      var.batch_processing_frequency_minutes >= 1 && var.batch_processing_frequency_minutes <= 30
+    )
+    error_message = "`batch_processing_frequency_minutes` must be between 1 and 30."
+  }
 }
 
 variable "example_payload" {

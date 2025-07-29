@@ -268,6 +268,8 @@ module "webhook_collector" {
   oidc_token_verifier_role_id       = module.psoxy.oidc_token_verifier_role_id
   provision_auth_key                = each.value.provision_auth_key
   rules_file                        = each.value.rules_file
+  webhook_batch_invoker_sa_email    = module.psoxy.webhook_batch_invoker_sa_email
+  batch_processing_frequency_minutes = try(each.value.batch_processing_frequency_minutes, 5)
   example_identity                  = each.value.example_identity
   example_payload                   = each.value.example_payload
 

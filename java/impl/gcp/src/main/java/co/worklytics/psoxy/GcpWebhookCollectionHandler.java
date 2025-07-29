@@ -65,8 +65,19 @@ public class GcpWebhookCollectionHandler {
      * @param response
      */
     public void handle(HttpRequest request, HttpResponse response) {
-        if (request.getFirstHeader(HttpHeaders.USER_AGENT).map(s -> s.contains(gcpEnvironment.getCloudSchedulerUserAgent())).orElse(false)) {
+
+        // see: https://cloud.google.com/scheduler/docs/reference/rpc/google.cloud.scheduler.v1#httptarget
+        Boolean userAgentIsCloudSchedulerOrPubSub = request.getFirstHeader(HttpHeaders.USER_AGENT)
+            .map(s -> s.contains(gcpEnvironment.getCloudSchedulerUserAgent()))
+            .orElse(false);
+        Boolean cloudSchedulerHeaderTrue = request.getFirstHeader("x-cloudscheduler")
+        .map(Boolean::parseBoolean)
+        .orElse(false);
+
+
+        if (userAgentIsCloudSchedulerOrPubSub || cloudSchedulerHeaderTrue) {
             // purporting to be a cloud scheduler request, so assume it's a request to process a batch
+            // request SHOULD Contain Authorization header, which handleBatch should check
             handleBatch(request, response);
         } else {
             CloudFunctionRequest cloudFunctionRequest = CloudFunctionRequest.of(request);
@@ -90,13 +101,7 @@ public class GcpWebhookCollectionHandler {
     }
 
     void handleBatch(HttpRequest request, HttpResponse response) {
-        // Authorization header should either come from inbound webhook OR via pubsub.
-        // eg
-        //gcloud pubsub subscriptions create my-sub \
-        //  --topic=my-topic \
-        //  --push-endpoint=https://<cloud-run-url>/pubsub \
-        //  --push-auth-service-account=your-service-account@project.iam.gserviceaccount.com \
-        //  --push-auth-token-audience=https://<cloud-run-url>
+   
         Optional<String> jwt = request.getFirstHeader("Authorization");
 
         if (!jwt.isPresent()) {
@@ -121,7 +126,7 @@ public class GcpWebhookCollectionHandler {
         if (idToken == null) {
             response.setStatusCode(HttpStatus.SC_UNAUTHORIZED, "Unauthorized - no Authorization jwt sent");
         } else if (idToken.getPayload().getIssuer().equals(gcpEnvironment.getInternalServiceAuthIssuer())) {
-            this.handleBatch(request);
+            this.processBatch();
             response.setStatusCode(HttpStatus.SC_OK, "OK - batch processed");
         } else {
             response.setStatusCode(HttpStatus.SC_UNAUTHORIZED, "Unauthorized - unacceptable issuer");
@@ -131,17 +136,22 @@ public class GcpWebhookCollectionHandler {
 
 
 
+    // TODO: this is a bit of a hack, as it's not clear how to test this.
+    /**
+     * processes a batch of webhooks from Pub/Sub topic, via subscription.
+     */
     @SneakyThrows
-    void handleBatch(HttpRequest request) {
+    void processBatch() {
         ProjectSubscriptionName subscriptionName  =
             ProjectSubscriptionName.parse(configService.getConfigPropertyOrError(GcpEnvironment.WebhookCollectorModeConfigProperty.BATCH_MERGE_SUBSCRIPTION));
 
         SubscriberStubSettings settings = SubscriberStubSettings.newBuilder().build();
 
-        try (
-            SubscriberStub subscriber = settings.createStub()) {
+        // TODO: start a stopwatch, process for up to a BATCH_TIMEOUT, and then stop.
+        try (SubscriberStub subscriber = settings.createStub()) {
+
             PullRequest pullRequest = PullRequest.newBuilder()
-                .setMaxMessages(100)
+                .setMaxMessages(BATCH_SIZE)
                 .setSubscription(subscriptionName.toString())
                 .build();
 
@@ -166,11 +176,12 @@ public class GcpWebhookCollectionHandler {
                     .build();
                 subscriber.acknowledgeCallable().call(ackRequest);
             }
+            if (ackIds.size() == BATCH_SIZE) {
+                log.log(Level.WARNING, "Processed a full batch; if happens repeatedly, consider increasing BATCH_SIZE or running multiple batches per cron invocation");
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        //TODO: if found 100, loop again??
     }
 
     private String endpointUrl(HttpRequest httpRequest) {

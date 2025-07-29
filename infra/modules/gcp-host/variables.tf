@@ -169,6 +169,7 @@ variable "webhook_collectors" {
     }), null)
     auth_public_keys = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
     allow_origins    = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
+    batch_processing_frequency_minutes = optional(number, 5)         # frequency (in minutes) at which to batch process webhooks
 
     example_identity = optional(string, null) # example identity to use in test payloads
     example_payload  = optional(string, null) # example payload to use in test payloads
