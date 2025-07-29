@@ -1,3 +1,23 @@
+
+locals {
+
+  # various values that are constants / sensible to expose as variables in the future
+
+  # exec timeout for function, as set in infra level. GCP runtime should *kill* function execution if it exceeds this timeout
+  function_exec_timeout_seconds = 300 # 5 minutes, at least avoids cron running MULTIPLE batches concurrenct, if that frequence is ALSO 5 minutes
+
+  # timeout for batch processing, in seconds; must be LESS than function_exec_timeout, otherwise function might get killed by the runtime 
+  batch_invocation_timeout_seconds = 240 # 4 minutes
+
+  # number of webhooks to process in a batch; dictates MAX messages pulled from pubsub in one-shot, as well as MAX webhooks written to GCS object
+  batch_size = 100
+
+  # would hope this is plenty, but could make configurable
+  # if we assume each inbound webhook takes 200ms to parse, sanitized, publish to Pub-Sub, then
+  # we can doe 5 req/s per instance, with concurrency == 1
+  # 5 instances, gives us 25 req/s ... OK place to start
+  max_instance_count = 5
+}
 # deployment for a single Psoxy instance in GCP project that has be initialized for Psoxy.
 # project itself may hold MULTIPLE psoxy instances
 
@@ -164,10 +184,12 @@ locals {
     ACCEPTED_AUTH_KEYS = join(",", local.accepted_auth_keys)
     ALLOW_ORIGINS      = "*" # TODO make configurable
     # AUTH_ISSUER                  = ""  # TODO: URL to collector itself, to be used to produce OpenID Connect Discovery Document
-    REQUIRE_AUTHORIZATION_HEADER = "true"
-    WEBHOOK_OUTPUT               = "https://pubsub.googleapis.com/${google_pubsub_topic.webhook_topic.id}"
-    BATCH_MERGE_SUBSCRIPTION     = google_pubsub_subscription.webhook_subscription.id
-    WEBHOOK_BATCH_OUTPUT         = "gs://${module.sanitized_webhook_output.bucket_name}"
+    REQUIRE_AUTHORIZATION_HEADER     = "true"
+    WEBHOOK_OUTPUT                   = "https://pubsub.googleapis.com/${google_pubsub_topic.webhook_topic.id}"
+    BATCH_MERGE_SUBSCRIPTION         = google_pubsub_subscription.webhook_subscription.id
+    BATCH_SIZE                       = local.batch_size
+    BATCH_INVOCATION_TIMEOUT_SECONDS = local.batch_invocation_timeout_seconds
+    WEBHOOK_BATCH_OUTPUT             = "gs://${module.sanitized_webhook_output.bucket_name}"
     }
     : k => v if v != null
   }
@@ -262,15 +284,13 @@ resource "google_cloudfunctions2_function" "function" {
     service_account_email = var.service_account_email
     available_memory      = "${var.available_memory_mb}M"
     ingress_settings      = "ALLOW_ALL"
-    timeout_seconds       = 60 # TODO: what should this be? 60 for reg webhooks is more than enough, I'm concerned with batches
+    timeout_seconds       = local.function_exec_timeout_seconds
 
     # TODO: setting this > 1 gives error: │ Error: Error updating function: googleapi: Error 400: Could not update Cloud Run service projects/psoxy-dev-erik/locations/us-central1/services/psoxy-dev-erik-llm-portal. spec.template.spec.containers.resources.limits.cpu: Invalid value specified for cpu. Total cpu < 1 is not supported with concurrency > 1.
     # max_instance_request_concurrency = 5 # q: make configurable? default is 1
 
-    # would hope this is plenty, but could make configurable
-    # 5x5 = 25 concurrent requests; if taking 200ms to parse, sanitized, publish to Pub-Sub - then that's 125 events/s
-    # seems like a lot ...
-    max_instance_count = 5
+
+    max_instance_count = local.max_instance_count
 
     environment_variables = merge(
       local.required_env_vars,
