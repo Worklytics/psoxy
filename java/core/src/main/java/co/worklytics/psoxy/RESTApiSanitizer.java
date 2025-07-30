@@ -1,14 +1,12 @@
 package co.worklytics.psoxy;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import javax.annotation.Nullable;
 import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
 import co.worklytics.psoxy.rules.RESTRules;
@@ -35,8 +33,8 @@ public interface RESTApiSanitizer {
      *         pseudonymization/redaction (eg, pseudonymize(jsonPAths, content); redact(jsonPaths,
      *         content))
      *         - just invariably that's quite coupled, per above
-     * 
-     * 
+     *
+     *
      * TODO: migrate to isAllowed(String httpMethod, URL url, String contentType, String requestBody)
      */
     @Deprecated // use isAllowed(String httpMethod, URL url, String contentType, String requestBody) instead, as more general; this version assumes GET/HEAD request method
@@ -53,7 +51,7 @@ public interface RESTApiSanitizer {
 
     /**
      * Headers to include in the request
-     * 
+     *
      * @param httpMethod The method to test
      * @param url The url to test
      * @return
@@ -77,6 +75,8 @@ public interface RESTApiSanitizer {
      * <p>
      * q: compression; do we return gzipped stream out of here, or have consumer choose that??
      *
+     * for the InputStream on the response it seems.
+     *
      * @param httpMethod
      * @param url
      * @param response
@@ -87,7 +87,7 @@ public interface RESTApiSanitizer {
             throws IOException;
 
     @RequiredArgsConstructor
-    class ProcessedStream {
+    class ProcessedStream implements AutoCloseable {
 
         @Getter
         private final InputStream stream;
@@ -108,6 +108,23 @@ public interface RESTApiSanitizer {
          */
         public static ProcessedStream completed(InputStream stream) {
             return new ProcessedStream(stream,  CompletableFuture.completedFuture(null), null);
+        }
+
+        public static ProcessedStream createRunning(InputStream stream, Runnable runnable ) {
+            // possibly would be better to let callers pass in their own ExecutorService?
+            // and/or maybe should be something we use DI for to inject based on context?
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Future<?> future = executor.submit(runnable);
+            return new ProcessedStream(stream, future, executor);
+        }
+
+        @Override
+        public void close() throws Exception {
+            future.get();
+            stream.close();
+            if (executor != null) {
+                executor.shutdownNow();
+            }
         }
     }
 }

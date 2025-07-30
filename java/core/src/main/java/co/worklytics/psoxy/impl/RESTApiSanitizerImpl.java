@@ -249,11 +249,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         PipedInputStream inPipe = new PipedInputStream(outPipe);
 
         Endpoint endpoint = matchingEndpoint.get().getValue();
-        Future<?> future;
-
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-
-        future = executor.submit(() -> {
+        return ProcessedStream.createRunning(inPipe, () -> {
             JsonFactory factory = objectMapper.getFactory();
 
             try (JsonParser parser = factory.createParser(response);
@@ -295,8 +291,6 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 }
             }
         });
-
-        return new ProcessedStream(inPipe, future, executor);
     }
 
     /**
