@@ -10,6 +10,7 @@ import java.util.concurrent.*;
 import javax.annotation.Nullable;
 import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
 import co.worklytics.psoxy.rules.RESTRules;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -86,7 +87,15 @@ public interface RESTApiSanitizer {
     RESTApiSanitizerImpl.ProcessedStream sanitize(String httpMethod, URL url, InputStream response)
             throws IOException;
 
-    @RequiredArgsConstructor
+    /***
+     * q: why this instead of returning a Future<InputStream>?
+     * a: hard to reason about, but you actually have to consume the whole input stream before forcing the Future to complete; if you just
+     * expose Future<InputStream>, you don't have a separate handle to InputStream to readAllBytes()
+     * calling Future::get just deadlocks waiting for Future<> to complete, but future doesn't complete until InputStream fully read
+     * h
+     *
+     * */
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     class ProcessedStream implements AutoCloseable {
 
         @Getter
@@ -113,7 +122,10 @@ public interface RESTApiSanitizer {
         public static ProcessedStream createRunning(InputStream stream, Runnable runnable ) {
             // possibly would be better to let callers pass in their own ExecutorService?
             // and/or maybe should be something we use DI for to inject based on context?
+
+            // atm, we just use a single-thread executor created here bc limits scope of ExecutrorService to this single clas
             ExecutorService executor = Executors.newSingleThreadExecutor();
+
             Future<?> future = executor.submit(runnable);
             return new ProcessedStream(stream, future, executor);
         }
