@@ -19,8 +19,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -208,14 +206,10 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         // Convert input String to InputStream (UTF-8 encoding)
         try (InputStream input =
                 new ByteArrayInputStream(jsonResponse.getBytes(StandardCharsets.UTF_8))) {
-            final ProcessedStream processedStream = sanitize(httpMethod, url, input);
+            final Future<InputStream> processedStream = sanitize(httpMethod, url, input);
 
             // Read all bytes from the sanitized stream
-            byte[] sanitizedBytes = processedStream.getStream().readAllBytes();
-
-            // ensure NOTHING threw an exception while processing the stream
-            processedStream.complete();
-
+            byte[] sanitizedBytes = processedStream.get().readAllBytes();
             return new String(sanitizedBytes, StandardCharsets.UTF_8);
         } catch (IOException e) {
             // Wrap IOException in unchecked exception, or handle as needed
@@ -227,7 +221,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @SneakyThrows
     @Override
-    public ProcessedStream sanitize(String httpMethod, URL url, InputStream response)
+    public Future<InputStream> sanitize(String httpMethod, URL url, InputStream response)
             throws IOException {
         // extra check ...
         if (!isAllowed(httpMethod, url)) {
@@ -239,7 +233,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
         if (matchingEndpoint.isEmpty()) {
             // No matching endpoint found, return the original response
-            return ProcessedStream.completed(response);
+            return CompletableFuture.completedFuture(response);
         }
 
         // q: overkill for NON-ndjson case?
@@ -249,11 +243,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         PipedInputStream inPipe = new PipedInputStream(outPipe);
 
         Endpoint endpoint = matchingEndpoint.get().getValue();
-        Future<?> future;
-
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-
-        future = executor.submit(() -> {
+        return CompletableFuture.supplyAsync(() -> {
             JsonFactory factory = objectMapper.getFactory();
 
             try (JsonParser parser = factory.createParser(response);
@@ -281,6 +271,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                     first = false;
                 }
                 bufferedWriter.flush();
+                return inPipe;
             } catch (IOException e) {
                 // Propagate error by closing the pipe
                 try {
@@ -295,8 +286,6 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 }
             }
         });
-
-        return new ProcessedStream(inPipe, future, executor);
     }
 
     /**
