@@ -1,0 +1,90 @@
+{
+  "object": "list",
+  "last_id": "proj_002",
+  "has_more": false,
+  "data": [
+    {
+      "object": "compliance.workspace.project",
+      "id": "proj_001",
+      "created_at": 1692158096.299021,
+      "owner_id": "user_001",
+      "owner_email": "owner1@example.com",
+      "builder_name": "Worklytics Builder",
+      "latest_config": [
+        {
+          "object": "compliance.workspace.project.configuration",
+          "id": "pr_cnf_001",
+          "name": "Worklytics Migration",
+          "description": "Migration project for Worklytics.",
+          "categories": ["migration", "analytics"],
+          "conversation_starters": ["How do I migrate my data?", "Show migration status."],
+          "created_at": 1692158100.123456,
+          "instructions": "Follow the migration steps.",
+          "files": [],
+          "tools": [
+            {
+              "type": "code_interpreter",
+              "created_at": 1692158101.654321,
+              "action_domain": null,
+              "action_openapi_raw": null,
+              "action_privacy_policy_url": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "object": "compliance.workspace.project",
+      "id": "proj_002",
+      "created_at": 1692158200.987654,
+      "owner_id": "user_002",
+      "owner_email": "owner2@example.com",
+      "builder_name": "EU Builder",
+      "sharing": {
+        "object": "compliance.workspace.project.sharing",
+        "visibility": "workspace-with-link",
+        "permissions": {
+          "object": "compliance.workspace.project.permissions",
+          "can_read": true,
+          "can_view_config": false,
+          "can_write": false
+        },
+        "recipients": [
+          {
+            "object": "compliance.workspace.project.shared_user",
+            "id": "user_003",
+            "email": "recipient@example.com",
+            "permissions": {
+              "object": "compliance.workspace.project.permissions",
+              "can_read": true,
+              "can_view_config": true,
+              "can_write": false
+            }
+          }
+        ]
+      },
+      "latest_config": [
+        {
+          "object": "compliance.workspace.project.configuration",
+          "id": "pr_cnf_002",
+          "name": "EU Analytics",
+          "description": "Analytics for EU region.",
+          "categories": ["analytics", "eu"],
+          "conversation_starters": ["Show EU analytics.", "Export EU data."],
+          "created_at": 1692158205.111222,
+          "instructions": "Analyze EU data.",
+          "files": [],
+          "tools": [
+            {
+              "type": "browser",
+              "created_at": 1692158206.333444,
+              "action_domain": null,
+              "action_openapi_raw": null,
+              "action_privacy_policy_url": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
