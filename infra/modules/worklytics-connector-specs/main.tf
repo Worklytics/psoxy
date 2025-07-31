@@ -79,7 +79,7 @@ locals {
   2. Update the content of PSOXY_ASANA_ACCESS_TOKEN variable with the previous token value obtained
 EOT
     }
-    chat-gpt-compliance = {
+    chatgpt-compliance = {
       source_kind : "chatgpt",
       availability : "alpha",
       enable_by_default : false,

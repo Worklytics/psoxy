@@ -11,10 +11,10 @@ import java.util.Map;
  */
 public class PrebuiltSanitizerRules {
 
-    static final RESTRules COMPLIANCE = Rules2.load("sources/chat-gpt/compliance/chat-gpt-compliance.yaml");
+    static final RESTRules COMPLIANCE = Rules2.load("sources/chatgpt/compliance/chatgpt-compliance.yaml");
 
     static public final Map<String, RESTRules> DEFAULT_RULES_MAP =
         ImmutableMap.<String, RESTRules>builder()
-            .put("chat-gpt", COMPLIANCE)
+            .put("chatgpt-compliance", COMPLIANCE)
             .build();
 }
