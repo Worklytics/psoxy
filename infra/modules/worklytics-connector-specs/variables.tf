@@ -4,9 +4,9 @@ variable "enabled_connectors" {
 }
 
 variable "chat_gpt_compliance_example_workspace_id" {
-  type = string
+  type        = string
   description = "Workspace id to se for example calls"
-  default = null
+  default     = null
 }
 
 variable "google_workspace_example_user" {

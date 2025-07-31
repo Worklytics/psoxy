@@ -28,16 +28,16 @@ locals {
   }
 
   chat_gpt_compliance_example_workspace_id = coalesce(var.chat_gpt_compliance_example_workspace_id, "YOUR_WORKSPACEID")
-  jira_example_cloud_id            = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
-  jira_example_issue_id            = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
-  github_installation_id           = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
-  github_copilot_installation_id   = coalesce(var.github_copilot_installation_id, "YOUR_GITHUB_COPILOT_INSTALLATION_ID")
-  github_enterprise_server_host    = coalesce(var.github_api_host, var.github_enterprise_server_host, "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
-  github_enterprise_server_version = coalesce(var.github_enterprise_server_version, "v3")
-  github_organization              = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
-  github_first_organization        = split(",", coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME"))[0]
-  github_example_repository        = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
-  salesforce_example_account_id    = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
+  jira_example_cloud_id                    = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
+  jira_example_issue_id                    = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
+  github_installation_id                   = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
+  github_copilot_installation_id           = coalesce(var.github_copilot_installation_id, "YOUR_GITHUB_COPILOT_INSTALLATION_ID")
+  github_enterprise_server_host            = coalesce(var.github_api_host, var.github_enterprise_server_host, "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
+  github_enterprise_server_version         = coalesce(var.github_enterprise_server_version, "v3")
+  github_organization                      = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
+  github_first_organization                = split(",", coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME"))[0]
+  github_example_repository                = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
+  salesforce_example_account_id            = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
 
   oauth_long_access_connectors = {
     asana = {
@@ -110,7 +110,7 @@ EOT
         "/compliance/workspaces/${local.chat_gpt_compliance_example_workspace_id}/projects",
       ]
       external_token_todo : templatefile("${path.module}/docs/chat-gpt/compliance/instructions.tftpl", {
-        workspace_id         = local.chat_gpt_compliance_example_workspace_id,
+        workspace_id                = local.chat_gpt_compliance_example_workspace_id,
         path_to_instance_parameters = "PSOXY_CHAT_GTP_COMPLIANCE_"
       })
     }
