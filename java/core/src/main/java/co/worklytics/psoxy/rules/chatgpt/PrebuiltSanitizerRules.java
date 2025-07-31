@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 /**
- * Prebuilt sanitization rules for Cursor responses
+ * Prebuilt sanitization rules for ChatGPT responses
  */
 public class PrebuiltSanitizerRules {
 
