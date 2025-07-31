@@ -1,0 +1,23 @@
+{
+  "object": "list",
+  "last_id": "msg_1234567890",
+  "has_more": false,
+  "data": [
+    {
+      "id": "msg_1234567890",
+      "conversation_id": "conv_abcdef123456",
+      "user_id": "user_001",
+      "content": "Hello, how can I help you?",
+      "created_at": 1718000000,
+      "role": "assistant"
+    },
+    {
+      "id": "msg_1234567891",
+      "conversation_id": "conv_abcdef123456",
+      "user_id": "user_002",
+      "content": "What is the weather today?",
+      "created_at": 1718000001,
+      "role": "user"
+    }
+  ]
+}

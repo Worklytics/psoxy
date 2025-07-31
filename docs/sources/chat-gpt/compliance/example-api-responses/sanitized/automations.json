@@ -1,0 +1,15 @@
+{
+  "object": "list",
+  "last_id": "auto_987654321",
+  "has_more": false,
+  "data": [
+    {
+      "id": "auto_987654321",
+      "user_id": "user_001",
+      "name": "Daily Report",
+      "created_at": 1718000000,
+      "updated_at": 1718001000,
+      "status": "active"
+    }
+  ]
+}

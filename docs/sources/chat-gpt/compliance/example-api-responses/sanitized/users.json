@@ -1,0 +1,21 @@
+{
+  "object": "list",
+  "last_id": "user_002",
+  "has_more": false,
+  "data": [
+    {
+      "id": "user_001",
+      "email": "alice@example.com",
+      "display_name": "Alice Smith",
+      "created_at": 1718000000,
+      "role": "admin"
+    },
+    {
+      "id": "user_002",
+      "email": "bob@example.com",
+      "display_name": "Bob Jones",
+      "created_at": 1718001000,
+      "role": "member"
+    }
+  ]
+}
