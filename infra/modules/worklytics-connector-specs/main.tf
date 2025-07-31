@@ -111,7 +111,7 @@ EOT
       ]
       external_token_todo : templatefile("${path.module}/docs/chat-gpt/compliance/instructions.tftpl", {
         workspace_id                = local.chat_gpt_compliance_example_workspace_id,
-        path_to_instance_parameters = "PSOXY_CHAT_GTP_COMPLIANCE_"
+        path_to_instance_parameters = "PSOXY_CHATGPT_COMPLIANCE_"
       })
     }
     cursor = {
