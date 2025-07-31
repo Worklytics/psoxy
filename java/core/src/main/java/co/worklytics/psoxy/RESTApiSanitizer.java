@@ -32,8 +32,8 @@ public interface RESTApiSanitizer {
      *         pseudonymization/redaction (eg, pseudonymize(jsonPAths, content); redact(jsonPaths,
      *         content))
      *         - just invariably that's quite coupled, per above
-     * 
-     * 
+     *
+     *
      * TODO: migrate to isAllowed(String httpMethod, URL url, String contentType, String requestBody)
      */
     @Deprecated // use isAllowed(String httpMethod, URL url, String contentType, String requestBody) instead, as more general; this version assumes GET/HEAD request method
@@ -50,7 +50,7 @@ public interface RESTApiSanitizer {
 
     /**
      * Headers to include in the request
-     * 
+     *
      * @param httpMethod The method to test
      * @param url The url to test
      * @return
@@ -71,8 +71,8 @@ public interface RESTApiSanitizer {
      * sanitize response stream received from url, according any options set on Sanitizer
      * <p>
      * bc of streaming interface, this is preferred when expect large responses
-     * <p>
      * q: compression; do we return gzipped stream out of here, or have consumer choose that??
+     * <p>
      *
      * @param httpMethod
      * @param url

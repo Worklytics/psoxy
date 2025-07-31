@@ -84,11 +84,12 @@ public class AwsKmsPublicKeyStoreClient implements PublicKeyStoreClient {
     // wraps get with something that returns a Set, considering possible 'null' return value from getPublicKey,
     // if it has been disabled or deleted in AWS KMS (expected due to rotation)
     Map<PublicKeyVersionId, RSAPublicKey> getPublicKeysWrapper(PublicKeyRef keyRef) {
+        String versionId = null; // AWS KMS does not have 'versions' of asymmetric keys; when you rotate, it will get new id/ARN
         RSAPublicKey key = this.getPublicKey(keyRef);
         if (key == null) {
             return Collections.emptyMap();
         } else {
-            return new HashMap<>(Collections.singletonMap(new PublicKeyVersionId(keyRef.store(), keyRef.id(), "0"), key));
+            return new HashMap<>(Collections.singletonMap(new PublicKeyVersionId(keyRef.store(), keyRef.id(), versionId), key));
         }
     }
 

@@ -486,9 +486,11 @@ async function signJwtWithAWSKMS(claims, keyArn, credentials, region) {
   // Extract keyId from keyArn, e.g. `arn:aws:kms:us-east-1:123456789012:key/abcd1234-56ef-78gh-90ij-klmnopqrstuv`
   //let keyId = keyArn.split(":")[5].split("/")[1];
 
+  // get current version of the key from AWS KMs
+
   const encodedHeader = base64url(Buffer.from(JSON.stringify({
     "alg": "RS256",
-    "kid": keyArn,
+    "kid": "aws-kms:" + keyArn,
     "typ": "JWT",
   })));
   const encodedPayload = base64url(Buffer.from(JSON.stringify(claims)));
@@ -506,6 +508,7 @@ async function signJwtWithAWSKMS(claims, keyArn, credentials, region) {
   const response = await client.send(command);
 
   const signature = base64url(Buffer.from(response.Signature));
+
   return `${signingInput}.${signature}`;
 }
 
@@ -600,7 +603,7 @@ async function isGzipped(filePath) {
 /**
  * Poll for async response at the given URL (S3 or GCS)
  * Checks every 10 seconds for up to 120 seconds
- * 
+ *
  * @param {string} locationUrl - S3 or GCS URL to poll
  * @param {Object} options - Options for authentication and polling
  * @param {string} options.role - AWS role ARN (for S3)
@@ -665,7 +668,7 @@ async function pollAsyncResponse(locationUrl, options = {}) {
     try {
       let content;
       let contentEncoding;
-      
+
       if (isS3) {
         const credentials = await getAWSCredentials(options.role, options.region);
         const s3Client = new S3Client({
@@ -676,7 +679,7 @@ async function pollAsyncResponse(locationUrl, options = {}) {
           Bucket: bucketName,
           Key: keyOrFile
         }));
-        
+
         // Handle different types of response bodies from AWS SDK v3
         let contentBuffer;
         if (response.Body && typeof response.Body.transformToString === 'function') {
@@ -694,19 +697,19 @@ async function pollAsyncResponse(locationUrl, options = {}) {
           // Fallback
           contentBuffer = Buffer.from(response.Body);
         }
-        
+
         contentEncoding = response.ContentEncoding;
         logger.verbose(`S3 response Content-Encoding: ${contentEncoding}`);
-        
+
         logger.success(`Content found after ${attempt * 10} seconds!`);
-        
+
         // Check if content is gzipped using multiple methods
         const isGzippedByHeader = contentEncoding === 'gzip';
         const isGzippedByBuffer = isgzipBuffer(contentBuffer);
-        
+
         if (isGzippedByHeader || isGzippedByBuffer) {
           logger.verbose('Content appears to be compressed, attempting decompression...');
-          
+
           // Try different decompression methods
           try {
             const decompressed = await new Promise((resolve, reject) => {
@@ -744,21 +747,21 @@ async function pollAsyncResponse(locationUrl, options = {}) {
         content = fileContent.toString();
         // GCS doesn't return Content-Encoding in the same way, so we'll rely on buffer detection
         logger.verbose('GCS response - checking buffer for gzip signature');
-        
+
         logger.success(`Content found after ${attempt * 10} seconds!`);
-        
+
         // Check if content is gzipped using multiple methods
         const contentBuffer = Buffer.from(content, 'binary');
         const isGzippedByBuffer = isgzipBuffer(contentBuffer);
-        
+
         // Check if content looks like JSON (starts with { or [)
         const contentStart = content.trim().substring(0, 1);
         const looksLikeJson = contentStart === '{' || contentStart === '[';
-        
+
         // Only attempt decompression if we have strong indicators
         if (isGzippedByBuffer && !looksLikeJson) {
           logger.verbose('Content appears to be compressed, attempting decompression...');
-          
+
           // Try different decompression methods
           try {
             const decompressed = await new Promise((resolve, reject) => {

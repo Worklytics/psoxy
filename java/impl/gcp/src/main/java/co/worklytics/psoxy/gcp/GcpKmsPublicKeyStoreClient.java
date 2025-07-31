@@ -87,7 +87,7 @@ public class GcpKmsPublicKeyStoreClient implements PublicKeyStoreClient {
                 .collect(Collectors.toList());
 
             Map<PublicKeyVersionId, RSAPublicKey> keys = new HashMap<>();
-            for (String  version : activeVersions) {
+            for (String version : activeVersions) {
                 try {
                     // Attempt to get the public key for the version
                     CryptoKeyVersionName versionName = CryptoKeyVersionName.parse(version);
