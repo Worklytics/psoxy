@@ -1,0 +1,21 @@
+{
+  "object":"list",
+  "last_id":"conv_1234567890abcdef",
+  "has_more":false,
+  "data":[
+    {
+      "id":"conv_1234567890abcdef",
+      "user_id":"user_abcdef123456",
+      "user_email":"t~knxWE5tapsutcz6pLWSC3wfb5t34lCrXNZsKnhwyVXk@example.com",
+      "created_at":1717000000,
+      "last_active_at":1717003600
+    },
+    {
+      "id":"conv_abcdef1234567890",
+      "user_id":"user_123456abcdef",
+      "user_email":"t~PFsxS8oxlBJ9dZkL1zNMvRIajvbO3VzZpbdT-ty6Gm0@example.com",
+      "created_at":1716990000,
+      "last_active_at":1716993600
+    }
+  ]
+}
