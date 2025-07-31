@@ -1,0 +1,23 @@
+{
+  "object": "list",
+  "last_id": "proj_123456",
+  "has_more": false,
+  "data": [
+    {
+      "id": "proj_123456",
+      "name": "Compliance Project",
+      "owner_id": "user_001",
+      "created_at": 1718000000,
+      "updated_at": 1718001000,
+      "status": "live"
+    },
+    {
+      "id": "proj_654321",
+      "name": "Data Sync",
+      "owner_id": "user_002",
+      "created_at": 1718002000,
+      "updated_at": 1718003000,
+      "status": "live"
+    }
+  ]
+}

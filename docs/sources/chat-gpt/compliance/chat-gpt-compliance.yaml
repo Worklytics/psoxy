@@ -1,0 +1,249 @@
+---
+endpoints:
+  - pathTemplate: "/compliance/workspaces/{workspace_id}/automations"
+    allowedQueryParams:
+      - "after"
+      - "limit"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/ExportAutomation"
+        hasMore:
+          type: "boolean"
+        lastId:
+          type: "string"
+        object:
+          type: "string"
+  - pathTemplate: "/compliance/workspaces/{workspace_id}/conversations"
+    allowedQueryParams:
+      - "since_timestamp"
+      - "after"
+      - "limit"
+      - "users"
+      - "file_format"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/Conversation"
+        hasMore:
+          type: "boolean"
+        lastId:
+          type: "string"
+        object:
+          type: "string"
+  - pathTemplate: "/compliance/workspaces/{workspace_id}/conversations/{conversation_id}/messages"
+    allowedQueryParams:
+      - "after"
+      - "limit"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/Message"
+        hasMore:
+          type: "boolean"
+        lastId:
+          type: "string"
+        object:
+          type: "string"
+  - pathTemplate: "/compliance/workspaces/{workspace_id}/projects"
+    allowedQueryParams:
+      - "after"
+      - "limit"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/Project"
+        hasMore:
+          type: "boolean"
+        lastId:
+          type: "string"
+        object:
+          type: "string"
+  - pathTemplate: "/compliance/workspaces/{workspace_id}/users"
+    allowedQueryParams:
+      - "after"
+      - "limit"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/WorkspaceUser"
+        hasMore:
+          type: "boolean"
+        lastId:
+          type: "string"
+        object:
+          type: "string"
+definitions:
+  BaseFile:
+    type: "object"
+    properties:
+      createdAt:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      object:
+        type: "string"
+  Conversation:
+    type: "object"
+    properties:
+      createdAt:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      lastActiveAt:
+        type: "string"
+        format: "date-time"
+      messages:
+        type: "array"
+        items:
+          $ref: "#/definitions/Message"
+      object:
+        type: "string"
+      userEmail:
+        type: "string"
+      userId:
+        type: "string"
+      workspaceId:
+        type: "string"
+  ExportAutomation:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      isEnabled:
+        type: "boolean"
+      schedule:
+        type: "string"
+  Message:
+    type: "object"
+    properties:
+      author:
+        $ref: "#/definitions/MessageAuthor"
+      content:
+        $ref: "#/definitions/MessageContent"
+      createdAt:
+        type: "string"
+        format: "date-time"
+      files:
+        type: "array"
+        items:
+          $ref: "#/definitions/BaseFile"
+      gptId:
+        type: "string"
+      id:
+        type: "string"
+      object:
+        type: "string"
+      parentId:
+        type: "string"
+      projectId:
+        type: "string"
+  MessageAuthor:
+    type: "object"
+    properties:
+      object:
+        type: "string"
+      role:
+        type: "string"
+      toolName:
+        type: "string"
+  MessageContent:
+    type: "object"
+    properties:
+      object:
+        type: "string"
+      type:
+        type: "string"
+  Project:
+    type: "object"
+    properties:
+      builderName:
+        type: "string"
+      createdAt:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      latestConfig:
+        type: "array"
+        items:
+          $ref: "#/definitions/ProjectConfig"
+      object:
+        type: "string"
+      ownerEmail:
+        type: "string"
+      ownerId:
+        type: "string"
+      sharing:
+        type: "string"
+  ProjectConfig:
+    type: "object"
+    properties:
+      categories:
+        type: "array"
+        items:
+          type: "string"
+      conversationStarters:
+        type: "array"
+        items:
+          type: "string"
+      createdAt:
+        type: "string"
+        format: "date-time"
+      files:
+        type: "array"
+        items:
+          $ref: "#/definitions/BaseFile"
+      id:
+        type: "string"
+      instructions:
+        type: "string"
+      object:
+        type: "string"
+      tools:
+        type: "array"
+        items:
+          $ref: "#/definitions/ProjectTool"
+  ProjectTool:
+    type: "object"
+    properties:
+      actionDomain:
+        type: "string"
+      createdAt:
+        type: "string"
+        format: "date-time"
+      type:
+        type: "string"
+  WorkspaceUser:
+    type: "object"
+    properties:
+      createdAt:
+        type: "string"
+        format: "date-time"
+      email:
+        type: "string"
+      id:
+        type: "string"
+      object:
+        type: "string"
+      role:
+        type: "string"
+      status:
+        type: "string"
