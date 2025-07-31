@@ -1,23 +1,84 @@
 {
-  "object": "list",
-  "last_id": "proj_123456",
-  "has_more": false,
-  "data": [
+  "object":"list",
+  "last_id":"proj_002",
+  "has_more":false,
+  "data":[
     {
-      "id": "proj_123456",
-      "name": "Compliance Project",
-      "owner_id": "user_001",
-      "created_at": 1718000000,
-      "updated_at": 1718001000,
-      "status": "live"
+      "object":"compliance.workspace.project",
+      "id":"proj_001",
+      "created_at":1.692158096299021E9,
+      "owner_id":"user_001",
+      "owner_email":"t~q25ElXlAq6kJw6w_0tJ3SyEkdzSqed70E-rQCH9_hJA@example.com",
+      "builder_name":"Worklytics Builder",
+      "latest_config":[
+        {
+          "object":"compliance.workspace.project.configuration",
+          "id":"pr_cnf_001",
+          "categories":[
+            "migration",
+            "analytics"
+          ],
+          "created_at":1.692158100123456E9,
+          "files":[ ],
+          "tools":[
+            {
+              "type":"code_interpreter",
+              "created_at":1.692158101654321E9,
+              "action_domain":null
+            }
+          ]
+        }
+      ]
     },
     {
-      "id": "proj_654321",
-      "name": "Data Sync",
-      "owner_id": "user_002",
-      "created_at": 1718002000,
-      "updated_at": 1718003000,
-      "status": "live"
+      "object":"compliance.workspace.project",
+      "id":"proj_002",
+      "created_at":1.692158200987654E9,
+      "owner_id":"user_002",
+      "owner_email":"t~dTAxZmWVTZNHr3Tj4Xm3Xgmynd--1WD4MKuALIEZv5M@example.com",
+      "builder_name":"EU Builder",
+      "sharing":{
+        "object":"compliance.workspace.project.sharing",
+        "visibility":"workspace-with-link",
+        "permissions":{
+          "object":"compliance.workspace.project.permissions",
+          "can_read":true,
+          "can_view_config":false,
+          "can_write":false
+        },
+        "recipients":[
+          {
+            "object":"compliance.workspace.project.shared_user",
+            "id":"user_003",
+            "email":"t~vONyxRAf-f2apLTFmkhJH4GPi3gmbaSRDoeCpviD1jY@example.com",
+            "permissions":{
+              "object":"compliance.workspace.project.permissions",
+              "can_read":true,
+              "can_view_config":true,
+              "can_write":false
+            }
+          }
+        ]
+      },
+      "latest_config":[
+        {
+          "object":"compliance.workspace.project.configuration",
+          "id":"pr_cnf_002",
+          "categories":[
+            "analytics",
+            "eu"
+          ],
+          "created_at":1.692158205111222E9,
+          "files":[ ],
+          "tools":[
+            {
+              "type":"browser",
+              "created_at":1.692158206333444E9,
+              "action_domain":null
+            }
+          ]
+        }
+      ]
     }
   ]
 }

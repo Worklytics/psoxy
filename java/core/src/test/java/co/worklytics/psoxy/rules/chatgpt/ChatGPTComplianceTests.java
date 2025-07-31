@@ -24,7 +24,14 @@ public class ChatGPTComplianceTests extends JavaRulesTestBaseCase {
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
             InvocationExample.of("https://api.chatgpt.com/compliance/workspaces/some_id/conversations", "conversations.json"),
-            InvocationExample.of("https://api.chatgpt.com/compliance/workspaces/some_id/conversations?after=blabla&limit=100", "conversations.json")
+            InvocationExample.of("https://api.chatgpt.com/compliance/workspaces/some_id/conversations?after=blabla&limit=100", "conversations.json"),
+            InvocationExample.of("https://api.chatgpt.com/compliance/workspaces/{workspaceId}/automations", "automations.json"),
+            InvocationExample.of("https://api.chatgpt.com/compliance/workspaces/{workspaceId}/conversations/{conversationId}/messages", "conversation-messages.json"),
+            InvocationExample.of("https://api.chatgpt.com/compliance/workspaces/{workspaceId}/conversations/{conversationId}/messages?after=blabla&limit=100", "conversation-messages.json"),
+            InvocationExample.of("https://api.chatgpt.com/compliance/workspaces/some_id/projects", "projects.json"),
+            InvocationExample.of("https://api.chatgpt.com/compliance/workspaces/some_id/projects?after=blabla&limit=100", "projects.json"),
+            InvocationExample.of("https://api.chatgpt.com/compliance/workspaces/some_id/users", "users.json"),
+            InvocationExample.of("https://api.chatgpt.com/compliance/workspaces/some_id/users?after=blabla&limit=100", "users.json")
         );
     }
 }

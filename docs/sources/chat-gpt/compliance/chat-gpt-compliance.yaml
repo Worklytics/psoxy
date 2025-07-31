@@ -1,9 +1,14 @@
 ---
 endpoints:
-  - pathTemplate: "/compliance/workspaces/{workspace_id}/automations"
+  - pathTemplate: "/compliance/workspaces/{workspaceId}/automations"
     allowedQueryParams:
       - "after"
       - "limit"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$.data[*].title"
+          - "$.data[*].prompt"
     responseSchema:
       type: "object"
       properties:
@@ -11,19 +16,27 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/ExportAutomation"
-        hasMore:
+        has_more:
           type: "boolean"
-        lastId:
+        last_id:
           type: "string"
         object:
           type: "string"
-  - pathTemplate: "/compliance/workspaces/{workspace_id}/conversations"
+  - pathTemplate: "/compliance/workspaces/{workspaceId}/conversations"
     allowedQueryParams:
       - "since_timestamp"
       - "after"
       - "limit"
       - "users"
       - "file_format"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].user_email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.data[*].title"
     responseSchema:
       type: "object"
       properties:
@@ -31,16 +44,24 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/Conversation"
-        hasMore:
+        has_more:
           type: "boolean"
-        lastId:
+        last_id:
           type: "string"
         object:
           type: "string"
-  - pathTemplate: "/compliance/workspaces/{workspace_id}/conversations/{conversation_id}/messages"
+  - pathTemplate: "/compliance/workspaces/{workspaceId}/conversations/{conversationId}/messages"
     allowedQueryParams:
       - "after"
       - "limit"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].user_email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.data[*].content"
     responseSchema:
       type: "object"
       properties:
@@ -48,16 +69,28 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/Message"
-        hasMore:
+        has_more:
           type: "boolean"
-        lastId:
+        last_id:
           type: "string"
         object:
           type: "string"
-  - pathTemplate: "/compliance/workspaces/{workspace_id}/projects"
+  - pathTemplate: "/compliance/workspaces/{workspaceId}/projects"
     allowedQueryParams:
       - "after"
       - "limit"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].owner_email"
+          - "$..email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.data[*].latestConfig[*].name"
+          - "$.data[*].latestConfig[*].description"
+          - "$..conversation_starters"
+          - "$..instructions"
     responseSchema:
       type: "object"
       properties:
@@ -65,16 +98,24 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/Project"
-        hasMore:
+        has_more:
           type: "boolean"
-        lastId:
+        last_id:
           type: "string"
         object:
           type: "string"
-  - pathTemplate: "/compliance/workspaces/{workspace_id}/users"
+  - pathTemplate: "/compliance/workspaces/{workspaceId}/users"
     allowedQueryParams:
       - "after"
       - "limit"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.data[*].display_name"
     responseSchema:
       type: "object"
       properties:
@@ -82,9 +123,9 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/WorkspaceUser"
-        hasMore:
+        has_more:
           type: "boolean"
-        lastId:
+        last_id:
           type: "string"
         object:
           type: "string"
@@ -92,9 +133,8 @@ definitions:
   BaseFile:
     type: "object"
     properties:
-      createdAt:
-        type: "string"
-        format: "date-time"
+      created_at:
+        type: "number"
       id:
         type: "string"
       object:
@@ -102,32 +142,26 @@ definitions:
   Conversation:
     type: "object"
     properties:
-      createdAt:
-        type: "string"
-        format: "date-time"
+      created_at:
+        type: "number"
       id:
         type: "string"
-      lastActiveAt:
-        type: "string"
-        format: "date-time"
-      messages:
-        type: "array"
-        items:
-          $ref: "#/definitions/Message"
+      last_active_at:
+        type: "number"
       object:
         type: "string"
-      userEmail:
+      user_email:
         type: "string"
-      userId:
+      user_id:
         type: "string"
-      workspaceId:
+      workspace_id:
         type: "string"
   ExportAutomation:
     type: "object"
     properties:
       id:
         type: "string"
-      isEnabled:
+      is_enabled:
         type: "boolean"
       schedule:
         type: "string"
@@ -138,22 +172,21 @@ definitions:
         $ref: "#/definitions/MessageAuthor"
       content:
         $ref: "#/definitions/MessageContent"
-      createdAt:
-        type: "string"
-        format: "date-time"
+      created_at:
+        type: "number"
       files:
         type: "array"
         items:
           $ref: "#/definitions/BaseFile"
-      gptId:
+      gpt_id:
         type: "string"
       id:
         type: "string"
       object:
         type: "string"
-      parentId:
+      parent_id:
         type: "string"
-      projectId:
+      project_id:
         type: "string"
   MessageAuthor:
     type: "object"
@@ -162,7 +195,7 @@ definitions:
         type: "string"
       role:
         type: "string"
-      toolName:
+      tool_name:
         type: "string"
   MessageContent:
     type: "object"
@@ -171,28 +204,38 @@ definitions:
         type: "string"
       type:
         type: "string"
+  Permissions:
+    type: "object"
+    properties:
+      can_read:
+        type: "boolean"
+      can_view_config:
+        type: "boolean"
+      can_write:
+        type: "boolean"
+      object:
+        type: "string"
   Project:
     type: "object"
     properties:
-      builderName:
+      builder_name:
         type: "string"
-      createdAt:
-        type: "string"
-        format: "date-time"
+      created_at:
+        type: "number"
       id:
         type: "string"
-      latestConfig:
+      latest_config:
         type: "array"
         items:
           $ref: "#/definitions/ProjectConfig"
       object:
         type: "string"
-      ownerEmail:
+      owner_email:
         type: "string"
-      ownerId:
+      owner_id:
         type: "string"
       sharing:
-        type: "string"
+        $ref: "#/definitions/Sharing"
   ProjectConfig:
     type: "object"
     properties:
@@ -200,20 +243,17 @@ definitions:
         type: "array"
         items:
           type: "string"
-      conversationStarters:
+      conversation_starters:
         type: "array"
         items:
           type: "string"
-      createdAt:
-        type: "string"
-        format: "date-time"
+      created_at:
+        type: "number"
       files:
         type: "array"
         items:
           $ref: "#/definitions/BaseFile"
       id:
-        type: "string"
-      instructions:
         type: "string"
       object:
         type: "string"
@@ -224,19 +264,41 @@ definitions:
   ProjectTool:
     type: "object"
     properties:
-      actionDomain:
+      action_domain:
         type: "string"
-      createdAt:
-        type: "string"
-        format: "date-time"
+      created_at:
+        type: "number"
       type:
+        type: "string"
+  Recipient:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      id:
+        type: "string"
+      object:
+        type: "string"
+      permissions:
+        $ref: "#/definitions/Permissions"
+  Sharing:
+    type: "object"
+    properties:
+      object:
+        type: "string"
+      permissions:
+        $ref: "#/definitions/Permissions"
+      recipients:
+        type: "array"
+        items:
+          $ref: "#/definitions/Recipient"
+      visibility:
         type: "string"
   WorkspaceUser:
     type: "object"
     properties:
-      createdAt:
-        type: "string"
-        format: "date-time"
+      created_at:
+        type: "number"
       email:
         type: "string"
       id:
