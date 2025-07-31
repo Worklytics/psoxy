@@ -1,15 +1,17 @@
 {
-  "object": "list",
-  "last_id": "auto_987654321",
-  "has_more": false,
-  "data": [
+  "object":"list",
+  "last_id":"automation_002",
+  "has_more":false,
+  "data":[
     {
-      "id": "auto_987654321",
-      "user_id": "user_001",
-      "name": "Daily Report",
-      "created_at": 1718000000,
-      "updated_at": 1718001000,
-      "status": "active"
+      "id":"automation_001",
+      "schedule":"0 0 * * 0",
+      "is_enabled":true
+    },
+    {
+      "id":"automation_002",
+      "schedule":"0 0 1 * *",
+      "is_enabled":false
     }
   ]
 }

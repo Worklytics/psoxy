@@ -10,7 +10,6 @@
       "owner_id": "user_001",
       "owner_email": "owner1@example.com",
       "builder_name": "Worklytics Builder",
-      "sharing": "private",
       "latest_config": [
         {
           "object": "compliance.workspace.project.configuration",
@@ -41,7 +40,29 @@
       "owner_id": "user_002",
       "owner_email": "owner2@example.com",
       "builder_name": "EU Builder",
-      "sharing": "shared",
+      "sharing": {
+        "object": "compliance.workspace.project.sharing",
+        "visibility": "workspace-with-link",
+        "permissions": {
+          "object": "compliance.workspace.project.permissions",
+          "can_read": true,
+          "can_view_config": false,
+          "can_write": false
+        },
+        "recipients": [
+          {
+            "object": "compliance.workspace.project.shared_user",
+            "id": "user_003",
+            "email": "recipient@example.com",
+            "permissions": {
+              "object": "compliance.workspace.project.permissions",
+              "can_read": true,
+              "can_view_config": true,
+              "can_write": false
+            }
+          }
+        ]
+      },
       "latest_config": [
         {
           "object": "compliance.workspace.project.configuration",

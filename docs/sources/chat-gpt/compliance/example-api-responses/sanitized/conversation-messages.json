@@ -1,23 +1,39 @@
 {
-  "object": "list",
-  "last_id": "msg_1234567890",
-  "has_more": false,
-  "data": [
+  "object":"list",
+  "last_id":"msg_1234567891",
+  "has_more":false,
+  "data":[
     {
-      "id": "msg_1234567890",
-      "conversation_id": "conv_abcdef123456",
-      "user_id": "user_001",
-      "content": "Hello, how can I help you?",
-      "created_at": 1718000000,
-      "role": "assistant"
+      "object":"compliance.workspace.conversation.message",
+      "id":"msg_1234567890",
+      "parent_id":null,
+      "created_at":1.718000000123456E9,
+      "gpt_id":"g-987654321",
+      "project_id":"g-p-123456789",
+      "author":{
+        "object":"compliance.workspace.conversation.message.author",
+        "role":"assistant",
+        "tool_name":"python"
+      },
+      "files":[
+        {
+          "id":"file_001"
+        }
+      ]
     },
     {
-      "id": "msg_1234567891",
-      "conversation_id": "conv_abcdef123456",
-      "user_id": "user_002",
-      "content": "What is the weather today?",
-      "created_at": 1718000001,
-      "role": "user"
+      "object":"compliance.workspace.conversation.message",
+      "id":"msg_1234567891",
+      "parent_id":"msg_1234567890",
+      "created_at":1.718000001654321E9,
+      "gpt_id":null,
+      "project_id":null,
+      "author":{
+        "object":"compliance.workspace.conversation.message.author",
+        "role":"user",
+        "tool_name":null
+      },
+      "files":[ ]
     }
   ]
 }
