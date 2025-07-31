@@ -32,6 +32,7 @@ module "worklytics_connectors" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.5.5"
 
   enabled_connectors               = var.enabled_connectors
+  chat_gpt_compliance_example_workspace_id = var.chat_gpt_compliance_example_workspace_id
   jira_cloud_id                    = var.jira_cloud_id
   jira_server_url                  = var.jira_server_url
   jira_example_issue_id            = var.jira_example_issue_id
