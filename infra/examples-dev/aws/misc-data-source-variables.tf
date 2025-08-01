@@ -4,7 +4,7 @@
 
 variable "chat_gpt_compliance_example_workspace_id" {
   type        = string
-  description = "Workspace id to se for example calls"
+  description = "Workspace id to use for example calls"
   default     = null
 }
 
