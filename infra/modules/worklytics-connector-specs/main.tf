@@ -80,7 +80,7 @@ locals {
 EOT
     }
     chatgpt-enterprise = {
-      source_kind : "chatgpt",
+      source_kind : "chatgpt-enterprise",
       availability : "alpha",
       enable_by_default : false,
       worklytics_connector_id : "chatgpt-enterprise-psoxy"
