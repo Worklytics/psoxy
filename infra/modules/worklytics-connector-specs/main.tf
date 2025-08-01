@@ -27,7 +27,7 @@ locals {
     }
   }
 
-  chat_gpt_compliance_example_workspace_id = coalesce(var.chat_gpt_compliance_example_workspace_id, "YOUR_WORKSPACEID")
+  chat_gpt_enterprise_example_workspace_id = coalesce(var.chat_gpt_enterprise_example_workspace_id, "YOUR_WORKSPACEID")
   jira_example_cloud_id                    = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   jira_example_issue_id                    = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
   github_installation_id                   = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
@@ -79,13 +79,13 @@ locals {
   2. Update the content of PSOXY_ASANA_ACCESS_TOKEN variable with the previous token value obtained
 EOT
     }
-    chatgpt-compliance = {
+    chatgpt-enterprise = {
       source_kind : "chatgpt",
       availability : "alpha",
       enable_by_default : false,
-      worklytics_connector_id : "chatgpt-compliance-psoxy"
-      display_name : "ChatGPT Compliance"
-      worklytics_connector_name : "ChatGPT Compliance via Psoxy"
+      worklytics_connector_id : "chatgpt-enterprise-psoxy"
+      display_name : "ChatGPT Enterprise"
+      worklytics_connector_name : "ChatGPT Enterprise via Psoxy"
       target_host : "api.chatgpt.com"
       source_auth_strategy : "basic_auth" # ChatGPT API uses basic auth (RFC 7617 Section 2, with API key as 'user-id' and no password
       secured_variables : [
@@ -97,21 +97,21 @@ EOT
         }
       ],
       settings_to_provide = {
-        "Workspace Id" = local.chat_gpt_compliance_example_workspace_id
+        "Workspace Id" = local.chat_gpt_enterprise_example_workspace_id
       }
       reserved_concurrent_executions : null
       enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/compliance/workspaces/${local.chat_gpt_compliance_example_workspace_id}/projects",
-        "/compliance/workspaces/${local.chat_gpt_compliance_example_workspace_id}/conversations",
-        "/compliance/workspaces/${local.chat_gpt_compliance_example_workspace_id}/automations",
-        "/compliance/workspaces/${local.chat_gpt_compliance_example_workspace_id}/projects",
+        "/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
+        "/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/conversations",
+        "/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/automations",
+        "/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
       ]
-      external_token_todo : templatefile("${path.module}/docs/chat-gpt/compliance/instructions.tftpl", {
-        workspace_id                = local.chat_gpt_compliance_example_workspace_id,
-        path_to_instance_parameters = "PSOXY_CHATGPT_COMPLIANCE_"
+      external_token_todo : templatefile("${path.module}/docs/chatgpt/enteprise/instructions.tftpl", {
+        workspace_id                = local.chat_gpt_enterprise_example_workspace_id,
+        path_to_instance_parameters = "PSOXY_CHATGPT_ENTEPRISE_"
       })
     }
     cursor = {

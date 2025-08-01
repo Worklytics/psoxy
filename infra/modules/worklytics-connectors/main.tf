@@ -6,7 +6,7 @@ module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
   enabled_connectors                       = var.enabled_connectors
-  chat_gpt_compliance_example_workspace_id = var.chat_gpt_compliance_example_workspace_id
+  chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
   jira_cloud_id                            = var.jira_cloud_id
   jira_server_url                          = var.jira_server_url
   salesforce_domain                        = var.salesforce_domain

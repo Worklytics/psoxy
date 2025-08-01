@@ -9,14 +9,14 @@ import java.util.stream.Stream;
 @Getter
 public class ChatGPTComplianceTests extends JavaRulesTestBaseCase {
 
-    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.COMPLIANCE;
+    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.ENTERPRISE;
 
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
         .defaultScopeId("chatgpt")
         .sourceKind("chatgpt")
-        .rulesFile("compliance/chatgpt-compliance")
-        .exampleApiResponsesDirectoryPath("compliance/example-api-responses/original/")
-        .exampleSanitizedApiResponsesPath("compliance/example-api-responses/sanitized/")
+        .rulesFile("enterprise/chatgpt-enterprise")
+        .exampleApiResponsesDirectoryPath("enterprise/example-api-responses/original/")
+        .exampleSanitizedApiResponsesPath("enterprise/example-api-responses/sanitized/")
         .checkUncompressedSSMLength(false)
         .build();
 

@@ -2,7 +2,7 @@
 # (not coupled to hosting environment; so split into separate file to ease keeping them in sync
 #  across AWS/GCP examples.  DRY!!)
 
-variable "chat_gpt_compliance_example_workspace_id" {
+variable "chat_gpt_enterprise_example_workspace_id" {
   type        = string
   description = "Workspace id to use for example calls"
   default     = null
