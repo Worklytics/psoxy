@@ -87,8 +87,8 @@ endpoints:
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
-          - "$.data[*].latestConfig[*].name"
-          - "$.data[*].latestConfig[*].description"
+          - "$.data[*].latest_config[*].name"
+          - "$.data[*].latest_config[*].description"
           - "$..conversation_starters"
           - "$..instructions"
     responseSchema:
