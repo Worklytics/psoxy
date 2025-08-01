@@ -3,7 +3,7 @@ variable "enabled_connectors" {
   description = "ids of connectors to enable"
 }
 
-variable "chat_gpt_compliance_example_workspace_id" {
+variable "chat_gpt_enterprise_example_workspace_id" {
   type        = string
   description = "Workspace id to use for example calls"
   default     = null
