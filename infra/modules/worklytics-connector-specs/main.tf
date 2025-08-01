@@ -109,9 +109,9 @@ EOT
         "/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/automations",
         "/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
       ]
-      external_token_todo : templatefile("${path.module}/docs/chatgpt/enteprise/instructions.tftpl", {
+      external_token_todo : templatefile("${path.module}/docs/chatgpt/enterprise/instructions.tftpl", {
         workspace_id                = local.chat_gpt_enterprise_example_workspace_id,
-        path_to_instance_parameters = "PSOXY_CHATGPT_ENTEPRISE_"
+        path_to_instance_parameters = "PSOXY_CHATGPT_ENTERPRISE_"
       })
     }
     cursor = {
