@@ -5,7 +5,7 @@ endpoints:
       - "after"
       - "limit"
     transforms:
-      - !<redact>
+      - !<textDigest>
         jsonPaths:
           - "$.data[*].title"
           - "$.data[*].prompt"
@@ -34,7 +34,7 @@ endpoints:
         jsonPaths:
           - "$.data[*].user_email"
         encoding: "URL_SAFE_TOKEN"
-      - !<redact>
+      - !<textDigest>
         jsonPaths:
           - "$.data[*].title"
     responseSchema:
@@ -59,9 +59,9 @@ endpoints:
         jsonPaths:
           - "$.data[*].user_email"
         encoding: "URL_SAFE_TOKEN"
-      - !<redact>
+      - !<textDigest>
         jsonPaths:
-          - "$.data[*].content"
+          - "$.data[*].content.value"
     responseSchema:
       type: "object"
       properties:
@@ -89,7 +89,9 @@ endpoints:
         jsonPaths:
           - "$.data[*].latest_config[*].name"
           - "$.data[*].latest_config[*].description"
-          - "$..conversation_starters"
+      - !<textDigest>
+        jsonPaths:
+          - "$..conversation_starters[*]"
           - "$..instructions"
     responseSchema:
       type: "object"
@@ -150,6 +152,8 @@ definitions:
         type: "number"
       object:
         type: "string"
+      title:
+        type: "string"
       user_email:
         type: "string"
       user_id:
@@ -163,6 +167,8 @@ definitions:
         type: "string"
       is_enabled:
         type: "boolean"
+      prompt:
+        type: "string"
       schedule:
         type: "string"
   Message:
@@ -203,6 +209,8 @@ definitions:
       object:
         type: "string"
       type:
+        type: "string"
+      value:
         type: "string"
   Permissions:
     type: "object"
@@ -254,6 +262,8 @@ definitions:
         items:
           $ref: "#/definitions/BaseFile"
       id:
+        type: "string"
+      instructions:
         type: "string"
       object:
         type: "string"
