@@ -87,10 +87,10 @@ EOT
       display_name : "ChatGPT Enterprise"
       worklytics_connector_name : "ChatGPT Enterprise via Psoxy"
       target_host : "api.chatgpt.com"
-      source_auth_strategy : "basic_auth" # ChatGPT API uses basic auth (RFC 7617 Section 2, with API key as 'user-id' and no password
+      source_auth_strategy : "oauth2_access_token"
       secured_variables : [
         {
-          name : "BASIC_AUTH_USER_ID" # ChatGPT's UX calls this an 'API Key', but it's actually a Basic Auth 'user-id'; should we have aliases or something?
+          name : "ACCESS_TOKEN" # ChatGPT's UX calls this an 'API Key', but it's actually an access token;
           writable : false
           sensitive : true
           value_managed_by_tf : false
