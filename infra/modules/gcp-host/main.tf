@@ -222,9 +222,10 @@ locals {
   key_ring_needed                 = var.kms_key_ring == null && length(local.webhook_collectors_needing_keys) > 0
 }
 
-# key ring on which to provision required KMS keys; atm, only needed to support webhook collector case, but not 
+# key ring on which to provision required KMS keys; atm, only needed to support webhook collector case, but not
 # necessarily exclusive to that use-case
-# q: should this go into the gcp module? so long as we have that, arguably yes ...
+# it's just a single resource, couple to single mode ... pushing it down in into the 'gcp' module would add a bunch of
+# variables/outputs, as well as going against the general "inversion of control / composition" patterned preferred by terraform
 resource "google_kms_key_ring" "proxy_key_ring" {
   count = local.key_ring_needed ? 1 : 0
 
