@@ -261,7 +261,6 @@ resource "aws_kms_key" "auth_key" {
 }
 
 
-
 locals {
   accepted_auth_keys = concat(
     var.webhook_auth_public_keys,
@@ -330,7 +329,7 @@ ${local.command_cli_call} -u ${local.proxy_endpoint_url}/ --health-check
 Then, based on your configuration, these are some example test calls you can try (YMMV):
 
 ```shell
-${local.command_cli_call} -u ${local.proxy_endpoint_url} --body '{"test": "body"}'
+${local.command_cli_call} -u ${local.proxy_endpoint_url} --body '${coalesce(var.example_payload, "{\"test\": \"body\"}")}' --identity '${var.example_identity}'
 ```
 ### Check logs (AWS CloudWatch)
 
@@ -357,7 +356,7 @@ locals {
     function_name          = module.gate_instance.function_name,
     command_cli_call       = local.command_cli_call,
     signing_key_arn        = local.keys_to_provision > 0 ? element(local.auth_key_arns_sorted, length(local.auth_key_arns_sorted) - 1) : null,
-    example_payload        = var.example_payload
+    example_payload        = coalesce(var.example_payload, "{\"test\": \"data\"}")
     example_identity       = var.example_identity
     collection_path        = local.collection_path
   })

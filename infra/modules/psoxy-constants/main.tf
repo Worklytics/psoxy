@@ -480,34 +480,46 @@ locals {
     "serviceusage.googleapis.com" = "Service Usage API",
   }
 
-  required_gcp_roles_to_provision_host = {
+  required_gcp_roles_to_provision_host = merge({
     "roles/storage.admin" = {
       display_name    = "Storage Admin",
-      description_url = "https://cloud.google.com/iam/docs/understanding-roles#storage.admin"
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/storage#storage.admin"
     },
     "roles/iam.roleAdmin" = {
       display_name    = "IAM Role Admin",
-      description_url = "https://cloud.google.com/iam/docs/understanding-roles#iam.roleAdmin"
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/iam#iam.roleAdmin"
     },
     "roles/secretmanager.admin" = {
       display_name    = "Secret Manager Admin",
-      description_url = "https://cloud.google.com/iam/docs/understanding-roles#secretmanager.admin"
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/secretmanager#secretmanager.admin"
     },
     "roles/iam.serviceAccountAdmin" = {
       display_name    = "Service Account Admin",
-      description_url = "https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountAdmin"
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountAdmin"
     },
     "roles/serviceusage.serviceUsageAdmin" = {
       display_name    = "Service Usage Admin",
-      description_url = "https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin"
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/serviceusage#serviceusage.serviceUsageAdmin"
     },
     "roles/cloudfunctions.developer" = {
       display_name    = "Cloud Functions Developer",
-      description_url = "https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.developer"
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/cloudfunctions#cloudfunctions.developer"
     },
     "roles/cloudrun.developer" = {
       display_name    = "Cloud Run Developer",
-      description_url = "https://cloud.google.com/iam/docs/understanding-roles#cloudrun.developer"
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/run#run.developer"
+    },
+  }, local.required_gcp_roles_to_provision_webhook_collectors)
+
+  # required roles to provision webhook collectors, beyond the core ones needed for any GCP instance
+  required_gcp_roles_to_provision_webhook_collectors = {
+    "roles/pubsub.admin" = {
+      display_name    = "Pub/Sub Admin",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/pubsub#pubsub.admin"
+    },
+    "roles/cloudscheduler.admin" = {
+      display_name    = "Cloud Scheduler Admin",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/cloudscheduler#cloudscheduler.admin"
     }
   }
 
@@ -520,11 +532,11 @@ locals {
   required_gcp_roles_to_provision_google_workspace_source = {
     "roles/iam.serviceAccountAdmin" = {
       display_name    = "Service Account Admin",
-      description_url = "https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountAdmin"
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountAdmin"
     },
     "roles/serviceusage.serviceUsageAdmin" = {
       display_name    = "Service Usage Admin",
-      description_url = "https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin"
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/serviceusage#serviceusage.serviceUsageAdmin"
     }
   }
   # TODO: add list of permissions, which customer could use to create custom role as alternative

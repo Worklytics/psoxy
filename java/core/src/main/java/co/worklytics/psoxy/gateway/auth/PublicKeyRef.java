@@ -1,7 +1,7 @@
 package co.worklytics.psoxy.gateway.auth;
 
 /**
- * reference to a public key
+ * a configuration reference to a public key. 
  *
  * @param store the public key store where this key is stored
  *             (e.g. GCP KMS, AWS KMS, Base64 encoded key, etc.)

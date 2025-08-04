@@ -1,18 +1,19 @@
 package co.worklytics.psoxy.gateway.impl;
 
-import co.worklytics.psoxy.gateway.ProcessedContent;
-import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
-import co.worklytics.psoxy.gateway.output.Output;
-import lombok.extern.java.Log;
-
-import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
+import javax.inject.Inject;
+import org.apache.hc.core5.http.ContentType;
+import co.worklytics.psoxy.gateway.ProcessedContent;
+import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
+import co.worklytics.psoxy.gateway.output.Output;
+import lombok.extern.java.Log;
 
 /**
  * takes a batch of processed data items and merges it into a single processed data item
@@ -30,14 +31,15 @@ import java.util.zip.GZIPOutputStream;
 @Log
 public class BatchMergeHandler {
 
-
     // supported input content types
     // eg, stuff that can be concatenated into ndjson output
     // which is json, or other ndjson
     public static final Set<String> SUPPORTED_INPUT_CONTENT_TYPES = Set.of(
-        "application/json",
-        "application/x-ndjson"
+        ContentType.APPLICATION_JSON.getMimeType(),
+        ContentType.APPLICATION_NDJSON.getMimeType()
     );
+
+    public static final String GZIP_CONTENT_ENCODING = "gzip";
 
     // output
     OutputUtils outputUtils;
@@ -47,6 +49,13 @@ public class BatchMergeHandler {
         this.outputUtils = Objects.requireNonNull(outputUtils, "outputUtils must not be null");
     }
 
+    /**
+     * atomically handle batch of webhooks, writing to output
+     * 
+     * ALL or NONE should be written to output
+     * 
+     * @param batch stream of webhooks to process
+     */
     public void handleBatch(Stream<ProcessedContent> batch) {
         // Implementation for handling a batch of ProcessedContent
         // This could involve aggregating, transforming, or writing the content to an output
@@ -56,19 +65,20 @@ public class BatchMergeHandler {
         // combine into single processes content, call output.
 
         // create a gzipped stream of the batch content
+        AtomicInteger rowCount = new AtomicInteger(0);
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
              GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream)) {
 
-
             batch.forEach(item -> {
+                
                 if (item.getContentType() == null) {
                     throw new IllegalArgumentException("Batch items must have a content type");
                 }
                 if (!SUPPORTED_INPUT_CONTENT_TYPES.contains(item.getContentType())) {
-                    throw new IllegalArgumentException("Batch items must have content type 'application/json'; was " + item.getContentType());
+                    throw new IllegalArgumentException("Batch items must have content type 'application/json' or 'application/x-ndjson'; was " + item.getContentType());
                 }
                 byte[] uncompressedContent;
-                if ("gzip".equals(item.getContentEncoding())) {
+                if (GZIP_CONTENT_ENCODING.equals(item.getContentEncoding())) {
                     //decompress the content
                     try (
                         java.io.ByteArrayInputStream byteArrayInputStream = new java.io.ByteArrayInputStream(item.getContent());
@@ -85,6 +95,8 @@ public class BatchMergeHandler {
                 // write each content item to the gzip output stream
                 try {
                     gzipOutputStream.write(uncompressedContent);
+                    gzipOutputStream.write('\n');
+                    rowCount.incrementAndGet();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -92,13 +104,19 @@ public class BatchMergeHandler {
 
             gzipOutputStream.finish();
 
-            ProcessedContent combined = ProcessedContent.builder()
-                .contentEncoding("gzip")
-                .content(byteArrayOutputStream.toByteArray())
-                .contentType("application/x-ndjson")  // suggested, but not yet an official standard IANA type
-                .build();
-
-            outputUtils.forBatchedWebhookContent().write(combined);
+            int finalRowCount = rowCount.get();
+            if (rowCount.get() > 0) {
+                ProcessedContent combined = ProcessedContent.builder()
+                    .contentEncoding(GZIP_CONTENT_ENCODING)
+                    .content(byteArrayOutputStream.toByteArray())
+                    .contentType(ContentType.APPLICATION_NDJSON.getMimeType()) // suggested, but not yet an official standard IANA type
+                    .build();
+                outputUtils.forBatchedWebhookContent().write(combined);
+                
+                log.log(Level.INFO, "Successfully processed batch with " + finalRowCount + " rows");
+            } else {
+                log.log(Level.INFO, "No rows successfully processed in batch");
+            }
         } catch (Output.WriteFailure e) {
             log.log(Level.SEVERE, "Failed to write batched webhooks to output", e);
         } catch (IOException e) {

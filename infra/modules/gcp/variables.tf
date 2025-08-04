@@ -83,3 +83,9 @@ variable "support_bulk_mode" {
   description = "whether to enable/provision components required for 'bulk mode' instances"
   default     = true
 }
+
+variable "support_webhook_collectors" {
+  type        = bool
+  description = "whether to enable/provision components required for 'webhook collectors' instances"
+  default     = false
+}

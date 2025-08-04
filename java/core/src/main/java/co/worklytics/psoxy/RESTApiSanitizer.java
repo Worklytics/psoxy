@@ -73,8 +73,8 @@ public interface RESTApiSanitizer {
      * sanitize response stream received from url, according any options set on Sanitizer
      * <p>
      * bc of streaming interface, this is preferred when expect large responses
-     * <p>
      * q: compression; do we return gzipped stream out of here, or have consumer choose that??
+     * <p>
      *
      * for the InputStream on the response it seems.
      *

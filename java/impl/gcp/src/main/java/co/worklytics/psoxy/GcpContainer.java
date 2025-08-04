@@ -17,7 +17,9 @@ interface GcpContainer {
     @Singleton
     HttpRequestHandler httpRequestHandler();
 
-
     @Singleton
     GcsFileEventHandler gcsFileEventHandler();
+
+    @Singleton
+    GcpWebhookCollectionHandler gcpWebhookCollectionHandler();
 }

@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
-
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -23,13 +22,14 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.net.WWWFormCodec;
-
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URIBuilder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
@@ -38,7 +38,6 @@ import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.api.client.http.ByteArrayContent;
@@ -75,7 +74,6 @@ import co.worklytics.psoxy.gateway.output.ApiDataOutputUtils;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
 import co.worklytics.psoxy.gateway.output.Output;
-
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
@@ -291,7 +289,19 @@ public class ApiDataRequestHandler {
 
         String requestBody = Optional.ofNullable(requestToProxy.getBody())
                 .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
+                .map(StringUtils::trimToNull)
                 .orElse(null);
+
+        // return 400 if request body is non-empty, but method is GET or HEAD
+        if (requestToProxy.getHttpMethod() == HttpHead.METHOD_NAME || requestToProxy.getHttpMethod() == HttpGet.METHOD_NAME) {
+            if (requestBody != null) {
+                // rather than have google HttpClient blow up with its own exception, causing 500 from proxy
+                return HttpEventResponse.builder()
+                        .statusCode(HttpStatus.SC_BAD_REQUEST)
+                        .body("Request body is not allowed for GET or HEAD requests")
+                        .build();
+            }
+        }
 
         if (skipSanitization) {
             log.info(String.format("%s. Skipping sanitization.", logEntry));
@@ -326,7 +336,6 @@ public class ApiDataRequestHandler {
 
             requestToSourceApi = requestFactory.buildRequest(requestToProxy.getHttpMethod(),
                     new GenericUrl(requestUrls.getTarget()), content);
-
 
 
             // TODO: what headers to forward???
