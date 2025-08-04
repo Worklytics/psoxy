@@ -137,7 +137,7 @@ module "psoxy" {
   webhook_collectors = { for k, v in var.webhook_collectors : k => merge(
     v,
     {
-      example_payload = file(v.example_payload_file)
+      example_payload = try(file(v.example_payload_file), null)
     }
   ) }
   provision_bucket_public_access_block = var.provision_bucket_public_access_block
