@@ -13,10 +13,10 @@ public interface OutputLocation {
         S3("s3://"),
         GCS("gs://"),
         SQS("https://sqs"),
-        PUBSUB("https://pubsub"),
+        PUBSUB("https://pubsub.googleapis.com/"),
         ;
 
-        @Getter(AccessLevel.PACKAGE)
+        @Getter(AccessLevel.PUBLIC)
         private final String uriPrefix;
 
         LocationKind(String uriPrefix) {

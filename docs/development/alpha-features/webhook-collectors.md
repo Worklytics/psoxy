@@ -47,7 +47,7 @@ All of the above claims have their standard semantics per OpenID Connect and JWT
 
 This is POTENTIALLY a CSV, if multiple keys are concurrently valid (due to rotation/migration).
 
-In both AWS/GCP case, asymmetric key pairs CANNOT be automatically rotated, so we expect multiple keys to be configured in the usual case. For simplicity, if you're using our Terraform modules to manage keys and rotation, we'll provision TWO keys scheduled to expire after N and N/2 days, respectively. You should encrypt payloads with the key that expires FURTHEST in the future (refer to the ISO-formatted imestamp in the tag `rotation_time` to determine this). You should run `terraform apply` at least every N/2 days to ensure that the keys are rotated and the new key is provisioned.
+In both AWS/GCP case, asymmetric key pairs CANNOT be automatically rotated, so we expect multiple keys to be configured in the usual case. For simplicity, if you're using our Terraform modules to manage keys and rotation, we'll provision TWO keys scheduled to expire after N and N/2 days, respectively. You should encrypt payloads with the key that expires FURTHEST in the future (refer to the ISO-formatted timestamp in the tag `rotation_time` to determine this). You should run `terraform apply` at least every N/2 days to ensure that the keys are rotated and the new key is provisioned.
 
 Our module will also create a KMS key alias ending in `_signing-key`; any app you use to create auth tokens should use this alias when signing. If rotation is enabled, this alias will be updated accordingly on every `terraform apply` to point to the correct key.  Eg, if your environment id is `worklytics`, and your proxy webhook collection id is `llm-portal`, then alias will be `worklytics/llm-portal_signing-key`.
 
@@ -57,7 +57,7 @@ Note that this scheme **enables authentication of the request** AND **partial in
 
 `ALLOW_ORIGINS` environment variable can be used to control what origins are allowed to send webhooks to the collection; defaults to `*`, which is all. This is aligned to CORS standard.
 
-`AUTH_ISSUER` environment variable that is
+`AUTH_ISSUER` environment variable for expected issuer of the JWT identity token. This is used to verify the `iss` claim in the JWT identity token.
 
 
 `WEBHOOK_OUTPUT` - an env var that directs webhooks recieved by this collector should be sent; typically a queueing service (eg, SQS, PubSub, Cloud Tasks) to *batch* processing.

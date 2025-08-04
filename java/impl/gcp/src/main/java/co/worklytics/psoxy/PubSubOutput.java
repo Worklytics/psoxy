@@ -31,17 +31,17 @@ public class PubSubOutput implements Output {
     @AssistedInject
     public PubSubOutput(@Assisted OutputLocation location) {
         // expects location.getUri() to be a PubSub topic URL
-        this.topicName = location.getUri().replace("https://pubsub.googleapis.com/", "");
+        this.topicName = location.getUri().replace(OutputLocation.LocationKind.PUBSUB.getUriPrefix(), "");
     }
 
-    static enum MessageAttributes {
+    enum MessageAttributes {
         CONTENT_TYPE("Content-Type"),
         CONTENT_ENCODING("Content-Encoding"),
         ;
-        
+
         @Getter
         private final String stringEncoding;
-        
+
         MessageAttributes(String stringEncoding) {
             this.stringEncoding = stringEncoding;
         }

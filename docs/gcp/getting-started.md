@@ -13,7 +13,7 @@ This includes:
 - [Secret Manager](https://cloud.google.com/secret-manager/docs) - to hold pseudonymization salt, encryption keys, and data source API keys
 - [Cloud Storage Buckets](https://cloud.google.com/storage/docs) (GCS), if using psoxy to sanitize bulk file data, such as CSVs; or collecting data via webhooks
 - [Cloud KMS Keys](https://cloud.google.com/kms/docs) for webhook authentication (if using webhook collectors)
-- [Pub/Sub Topics and Subscriptiosn](https://cloud.google.com/pubsub/docs), for webhook message queuing and batch processing (if using webhook collectors)
+- [Pub/Sub Topics and Subscriptions](https://cloud.google.com/pubsub/docs), for webhook message queuing and batch processing (if using webhook collectors)
 
 NOTE: if you're connecting to Google Workspace as a data source, you'll also need to provision Service Account Keys and activate Google Workspace APIs.
 
