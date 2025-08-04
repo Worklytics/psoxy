@@ -3,6 +3,12 @@ variable "enabled_connectors" {
   description = "ids of connectors to enable"
 }
 
+variable "chat_gpt_enterprise_example_workspace_id" {
+  type        = string
+  description = "Workspace id to use for example calls"
+  default     = null
+}
+
 variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"

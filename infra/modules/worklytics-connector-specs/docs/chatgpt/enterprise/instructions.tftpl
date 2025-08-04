@@ -1,0 +1,15 @@
+See Chat GPT documentation for the latest, but as of August 2025, you must create an API key and fill that as a secret in your host platform. The Proxy will then use Basic Authentication when connecting to Chat GPT.
+
+1 - Create a new [OpenAI API Platform Portal](https://platform.openai.com/api-keys) on Settings ->  Default Project | All Permissions
+  - Note that this must be a new key.  Once the Compliance API scopes are granted, all other scopes are revoked.
+  - Reminder:  This key can only be viewed/copied once.
+2 - Copy the key immediately - you won’t see it again; then paste it as the `${path_to_instance_parameters}BASIC_AUTH_USER_ID` parameter value  in your proxy's host platform.
+3- Send an email to [support@openai.com](mailto:support@openai.com) with:
+  - (1) the last 4 digits of the API key
+  - (2) the Key Name
+  - (3) the Created By Name, and
+  - (4) the requested scope (`read`)
+ChatGPT team will verify the key and grant the requested Compliance API scopes
+
+
+
