@@ -15,11 +15,6 @@ public class GcpWebhookCollectorRoute implements HttpFunction {
     volatile GcpContainer container;
 
 
-//    static {
-//        Security.addProvider(new BouncyCastleProvider());
-//    }
-
-
     @Override
     public void service(HttpRequest request, HttpResponse response) {
         injectDependenciesIfNeeded();
