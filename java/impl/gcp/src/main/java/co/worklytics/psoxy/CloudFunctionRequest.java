@@ -16,15 +16,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(staticName = "of")
 public class CloudFunctionRequest implements HttpEventRequest {
 
-    /**
-     * see "https://cloud.google.com/functions/docs/configuring/env-var"
-     */
-    enum RuntimeEnvironmentVariables {
-        K_SERVICE,
-    }
-
     public static String getFunctionName() {
-        return System.getenv(RuntimeEnvironmentVariables.K_SERVICE.name());
+        return System.getenv(GcpEnvironment.RuntimeEnvironmentVariables.K_SERVICE.name());
     }
 
     @NonNull
@@ -35,6 +28,7 @@ public class CloudFunctionRequest implements HttpEventRequest {
 
     private byte[] body;
 
+    // path relative to function root
     @Override
     public String getPath() {
         return request.getPath()

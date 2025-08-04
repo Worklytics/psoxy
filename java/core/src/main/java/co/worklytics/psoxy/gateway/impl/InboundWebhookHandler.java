@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.auth.JwtAuthorizedResource;
 import co.worklytics.psoxy.gateway.auth.PublicKeyRef;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
+import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient.PublicKeyVersionId;
 import co.worklytics.psoxy.gateway.output.Output;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
@@ -124,7 +125,8 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
             }
         } else {
             try {
-                authToken = Optional.of(SignedJWT.parse(authorizationHeader.get()));
+                SignedJWT jwt = this.parseJwt(authorizationHeader.get());
+                authToken = Optional.of(jwt);
             } catch (ParseException e) {
                 return HttpEventResponse.builder()
                     .statusCode(HttpStatus.SC_BAD_REQUEST)
@@ -189,7 +191,17 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
                 .body("Failed to ingest incoming webhook")
                 .build();
         }
+    }
 
+    static final String BEARER_PREFIX = "Bearer ";
+
+    SignedJWT parseJwt(String authorizationHeader) throws java.text.ParseException {
+        if (authorizationHeader.startsWith(BEARER_PREFIX)) {
+            return SignedJWT.parse(authorizationHeader.substring(BEARER_PREFIX.length()));
+        } else {
+            log.warning("Authorization header does not start with Bearer prefix: " + authorizationHeader + "; will attempt to parse as JWT, but this is not standard OIDC");
+            return SignedJWT.parse(authorizationHeader);
+        }
     }
 
     /**
@@ -261,20 +273,28 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
         return Optional.empty();
     }
 
-    public Map<String, RSAPublicKey> acceptableAuthKeys() {
-        return Arrays.stream(configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ACCEPTED_AUTH_KEYS).orElse("").split(","))
-            .map(String::trim)
-            .filter(keyRef -> !keyRef.isEmpty())
-            .map(PublicKeyRef::fromString)
-            .flatMap(publicKeyRef -> {
-                Optional<PublicKeyStoreClient> client = publicKeyStoreClients.stream().filter(c -> c.getId().equals(publicKeyRef.store())).findAny();
-                if (client.isEmpty()) {
-                    throw new IllegalArgumentException("No public key store client found for: " + publicKeyRef.store());
-                }
-                // Map each key to its id (keyRef.id())
-                return client.get().getPublicKeys(publicKeyRef).stream()
-                    .map(key -> new java.util.AbstractMap.SimpleEntry<>(publicKeyRef.id(), key));
-            })
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    public Map<PublicKeyVersionId, RSAPublicKey> acceptableAuthKeys() {
+        return Arrays.stream(
+                    configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ACCEPTED_AUTH_KEYS)
+                        .orElse("")
+                        .split(",")
+                )
+                .map(String::trim)
+                .filter(keyRef -> !keyRef.isEmpty())
+                .map(PublicKeyRef::fromString)
+                .flatMap(publicKeyRef -> {
+                    Optional<PublicKeyStoreClient> client = publicKeyStoreClients.stream()
+                            .filter(c -> c.getId().equals(publicKeyRef.store()))
+                            .findAny();
+                    if (client.isEmpty()) {
+                        throw new IllegalArgumentException("No public key store client found for: " + publicKeyRef.store());
+                    }
+                    // getPublicKeys returns Map<PublicKeyVersionId, RSAPublicKey>
+                    Map<PublicKeyVersionId, RSAPublicKey> keys = client.get().getPublicKeys(publicKeyRef);
+
+                    // Fix: iterate over entrySet, not keys.stream()
+                    return keys.entrySet().stream();
+                })
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

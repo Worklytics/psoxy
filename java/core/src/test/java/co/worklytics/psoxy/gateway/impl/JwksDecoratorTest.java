@@ -1,5 +1,16 @@
 package co.worklytics.psoxy.gateway.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PublicKey;
+import java.time.Clock;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
@@ -9,20 +20,6 @@ import co.worklytics.psoxy.gateway.auth.JwtAuthorizedResource;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.output.NoOutput;
 import co.worklytics.test.MockModules;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PublicKey;
-import java.time.Clock;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 public class JwksDecoratorTest {
 
@@ -82,7 +79,7 @@ public class JwksDecoratorTest {
         java.util.Iterator<java.security.interfaces.RSAPublicKey> it =
                 handler.jwtAuthorizedResource.acceptableAuthKeys().values().iterator();
         java.security.interfaces.RSAPublicKey key = it.next();
-        String kid = Base64.getEncoder().encodeToString((key.getEncoded()));
+        String kid = "base64:" + Base64.getEncoder().encodeToString((key.getEncoded()));
         String n = JwksDecorator.JWK.fromRSAPublicKey(kid, key).n;
         String e = JwksDecorator.JWK.fromRSAPublicKey(kid, key).e;
         String expectedJson = String.format(EXPECTED_JSON, kid, n, e).replaceAll("\\s+", "");

@@ -131,7 +131,7 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
         log.info("Request path: " + httpEventRequest.prettyPrint());
 
         boolean base64Encoded = false;
-        if (httpEvent.getRequestContext().getRouteKey().endsWith("/.well-known/{proxy+}")) {
+        if (httpEvent.getRequestContext().getRouteKey().endsWith("/" + JwksDecorator.PATH_TO_RESOURCE + "/{proxy+}")) {
             // special case for JWKS endpoint, which is used by clients to fetch public keys
             // for verifying JWTs signed by the proxy
             response = jwksHandler.handle(httpEventRequest);
