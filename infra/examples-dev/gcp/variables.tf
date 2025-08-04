@@ -193,11 +193,10 @@ variable "webhook_collectors" {
       rotation_days = optional(number, null)                         # null means no rotation; if > 0, will rotate every N days
       key_spec      = optional(string, "RSA_SIGN_PKCS1_2048_SHA256") # see https://cloud.google.com/kms/docs/reference/rest/v1/CryptoKeyVersionAlgorithm
     }), null)
-    auth_public_keys = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
-    allow_origins    = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
-
-    example_identity = optional(string, null) # example identity to use in test payloads
-    example_payload  = optional(string, null) # example payload to use in test payloads
+    auth_public_keys     = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
+    allow_origins        = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
+    example_payload_file = optional(string, null)        # path to file with example payload to use in test payloads; if provided, will override `example_payload`
+    example_identity     = optional(string, null)        # example identity to use in test payloads
   }))
   default = {}
 
