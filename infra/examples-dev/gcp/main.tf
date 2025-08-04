@@ -101,7 +101,7 @@ module "psoxy" {
   webhook_collectors = { for k, v in var.webhook_collectors : k => merge(
     v,
     {
-      example_payload = file(v.example_payload_file)
+      example_payload = try(file(v.example_payload_file), null)
     }
   ) }
   non_production_connectors       = var.non_production_connectors
