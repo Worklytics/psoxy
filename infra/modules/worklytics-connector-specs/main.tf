@@ -27,16 +27,17 @@ locals {
     }
   }
 
-  jira_example_cloud_id            = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
-  jira_example_issue_id            = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
-  github_installation_id           = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
-  github_copilot_installation_id   = coalesce(var.github_copilot_installation_id, "YOUR_GITHUB_COPILOT_INSTALLATION_ID")
-  github_enterprise_server_host    = coalesce(var.github_api_host, var.github_enterprise_server_host, "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
-  github_enterprise_server_version = coalesce(var.github_enterprise_server_version, "v3")
-  github_organization              = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
-  github_first_organization        = split(",", coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME"))[0]
-  github_example_repository        = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
-  salesforce_example_account_id    = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
+  chat_gpt_enterprise_example_workspace_id = coalesce(var.chat_gpt_enterprise_example_workspace_id, "YOUR_WORKSPACEID")
+  jira_example_cloud_id                    = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
+  jira_example_issue_id                    = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
+  github_installation_id                   = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
+  github_copilot_installation_id           = coalesce(var.github_copilot_installation_id, "YOUR_GITHUB_COPILOT_INSTALLATION_ID")
+  github_enterprise_server_host            = coalesce(var.github_api_host, var.github_enterprise_server_host, "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
+  github_enterprise_server_version         = coalesce(var.github_enterprise_server_version, "v3")
+  github_organization                      = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
+  github_first_organization                = split(",", coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME"))[0]
+  github_example_repository                = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
+  salesforce_example_account_id            = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
 
   oauth_long_access_connectors = {
     asana = {
@@ -77,6 +78,41 @@ locals {
     import to Worklytics via this connection).
   2. Update the content of PSOXY_ASANA_ACCESS_TOKEN variable with the previous token value obtained
 EOT
+    }
+    chatgpt-enterprise = {
+      source_kind : "chatgpt-enterprise",
+      availability : "alpha",
+      enable_by_default : false,
+      worklytics_connector_id : "chatgpt-enterprise-psoxy"
+      display_name : "ChatGPT Enterprise"
+      worklytics_connector_name : "ChatGPT Enterprise via Psoxy"
+      target_host : "api.chatgpt.com"
+      source_auth_strategy : "basic_auth" # ChatGPT API uses basic auth (RFC 7617 Section 2, with API key as 'user-id' and no password
+      secured_variables : [
+        {
+          name : "BASIC_AUTH_USER_ID" # ChatGPT's UX calls this an 'API Key', but it's actually a Basic Auth 'user-id'; should we have aliases or something?
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      settings_to_provide = {
+        "Workspace Id" = local.chat_gpt_enterprise_example_workspace_id
+      }
+      reserved_concurrent_executions : null
+      enable_async_processing : false
+      enable_side_output : false
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
+        "/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/conversations",
+        "/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/automations",
+        "/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
+      ]
+      external_token_todo : templatefile("${path.module}/docs/chatgpt/enterprise/instructions.tftpl", {
+        workspace_id                = local.chat_gpt_enterprise_example_workspace_id,
+        path_to_instance_parameters = "PSOXY_CHATGPT_ENTERPRISE_"
+      })
     }
     cursor = {
       source_kind : "cursor",

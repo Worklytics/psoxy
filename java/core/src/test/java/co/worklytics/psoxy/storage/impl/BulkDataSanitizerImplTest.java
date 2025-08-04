@@ -1,13 +1,37 @@
 package co.worklytics.psoxy.storage.impl;
 
-import co.worklytics.psoxy.*;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
-import co.worklytics.psoxy.rules.RulesUtils;
-import co.worklytics.test.MockModules;
-import co.worklytics.test.TestModules;
-import co.worklytics.test.TestUtils;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.input.BOMInputStream;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
@@ -22,36 +46,23 @@ import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import co.worklytics.psoxy.PseudonymizedIdentity;
+import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.PseudonymizerImpl;
+import co.worklytics.psoxy.PseudonymizerImplFactory;
+import co.worklytics.psoxy.PsoxyModule;
+import co.worklytics.psoxy.RESTApiSanitizerFactory;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.rules.RulesUtils;
+import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
+import co.worklytics.test.TestUtils;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import lombok.SneakyThrows;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.io.File;
-import java.io.FileReader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 public class BulkDataSanitizerImplTest {
 
@@ -126,7 +137,7 @@ public class BulkDataSanitizerImplTest {
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
         columnarFileSanitizerImpl.setRules(rules);
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -150,7 +161,7 @@ public class BulkDataSanitizerImplTest {
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
         columnarFileSanitizerImpl.setRules(rules);
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -174,7 +185,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
         columnarFileSanitizerImpl.setRules(rules);
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -194,7 +205,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
         columnarFileSanitizerImpl.setRules(rules);
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -214,7 +225,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
         columnarFileSanitizerImpl.setRules(rules);
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -245,7 +256,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource(exampleFile).getFile());
         columnarFileSanitizerImpl.setRules(rules);
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -270,7 +281,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource(TEST_EXAMPLE_FILE).getFile());
         columnarFileSanitizerImpl.setRules(rules);
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -303,7 +314,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource(TEST_EXAMPLE_FILE).getFile());
         columnarFileSanitizerImpl.setRules(rules);
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -331,7 +342,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource("/csv/hris-default-rules_padded-employee-id.csv").getFile());
         columnarFileSanitizerImpl.setRules(rules);
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -352,7 +363,7 @@ public class BulkDataSanitizerImplTest {
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -373,7 +384,7 @@ public class BulkDataSanitizerImplTest {
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -407,7 +418,7 @@ public class BulkDataSanitizerImplTest {
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, defaultPseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -446,7 +457,7 @@ public class BulkDataSanitizerImplTest {
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, defaultPseudonymizer);
             String output = out.toString();
@@ -481,7 +492,7 @@ public class BulkDataSanitizerImplTest {
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, defaultPseudonymizer);
             String output = out.toString();
@@ -519,7 +530,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource("/csv/example_acme_20220901.csv").getFile());
 
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, defaultPseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -539,7 +550,7 @@ public class BulkDataSanitizerImplTest {
 
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -569,7 +580,7 @@ public class BulkDataSanitizerImplTest {
         columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
         columnarFileSanitizerImpl.makeShuffleDeterministic();
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -636,7 +647,7 @@ public class BulkDataSanitizerImplTest {
         columnarFileSanitizerImpl.makeShuffleDeterministic();
 
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -736,7 +747,7 @@ public class BulkDataSanitizerImplTest {
         // use stub for easy check on values
         Pseudonymizer pseudonymizer = new StubPseudonymizer();
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
             StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -775,7 +786,7 @@ public class BulkDataSanitizerImplTest {
 
         Pseudonymizer pseudonymizer = new StubPseudonymizer();
 
-        try (FileReader in = new FileReader(inputFile);
+        try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
@@ -833,6 +844,44 @@ public class BulkDataSanitizerImplTest {
             columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
             assertEquals("EMPLOYEE_ID,SWIPE DATE,BUILDING_ID,BUILDING_ASSIGNED\n" +
                 "t~uxVHJj4JLZrUDfo7bwUePfhD5-rd34W1BvTqO4B2PNk,01/01/2024 3:10PM,B1,B2\n", out.toString());
+
+        }
+    }
+
+    /**
+     * zoom AI metrics has a number of exotic things
+     *   - BOM at the start of the file (this is a problem)
+     *   - encapsulated whitespace in column names (should be ok ...)
+     *   - trailing commas on each line (problematic out-of-the-box with apache commons csv)
+     *   - multi-valued values delimited by semicolons (non-issue)
+     */
+    @Test
+    @SneakyThrows
+    void zoomCase() {
+        final String TEST_EXAMPLE_FILE = "/csv/zoom_example.csv";
+        final String EXPECTED = """
+User Name,Email,Action,Feature used,Department,\r
+"{""hash"":""GI144xrPnMS9IwneeTEzMfcC2zowYSHHhVaReTIDXeo""}","{""domain"":""acme.com"",""hash"":""-MFHtQFQtPUXyclPE-B71x_F4jJStaMz9ZN-kWFE4_o""}",13,AI Companion in Zoom Workplace App;Meeting summary;Meeting questions;,Product PMO,\r
+"{""hash"":""Wl-yMZGcKhwYgI4D4oBEyh3tAo-6CsZlI0Sm5e2HJIw""}","{""domain"":""acme.com"",""hash"":""dJD_mwEzDZdxpdKYwzpkG0k1u5eE9mL6RG2Z5G5VMQw""}",2,Meeting summary;,Payroll,\r
+"{""hash"":""WiO0pP6Lj25eMqiXLbL3AX6uBi5MRMT34BgaIuSEwQs""}","{""domain"":""acme.com"",""hash"":""45SVSXnRsVfIVUBXcn_TOBFHzpiC09JMO2h33QK-nrc""}",5,Meeting summary;,Product Management,\r
+"{""hash"":""otJtA1m_38S10LrW1bYLMA4D8wsNQoXp7Ow66WnffFc""}","{""domain"":""acme.com"",""hash"":""K1rUA4gXPMXXLH1Uu-as2TatFznGTlUnRICUpfI7sto""}",1,Smart recording;,Business Development,\r
+""";
+        ConfigService config = MockModules.provideMock(ConfigService.class);
+        when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
+            .thenReturn(Optional.of(Base64.encodeBase64String((
+                    "columnsToPseudonymize:\n" +
+                    "  - \"User Name\"\n" +
+                    "  - \"Email\"\n").getBytes(StandardCharsets.UTF_8))));
+
+        ColumnarRules rules = (ColumnarRules) rulesUtils.getRulesFromConfig(config, new EnvVarsConfigService()).orElseThrow();
+
+        File inputFile = new File(getClass().getResource(TEST_EXAMPLE_FILE).getFile());
+        columnarFileSanitizerImpl.setRules(rules);
+
+        try (Reader in = safeFileReader(inputFile);
+             StringWriter out = new StringWriter()) {
+            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            assertEquals(EXPECTED, out.toString());
         }
     }
 
@@ -858,5 +907,20 @@ public class BulkDataSanitizerImplTest {
             return ConfigurationOptions.builder().build();
         }
 
+    }
+
+
+    /**
+     * reader that ignores BOM (Byte Order Mark) at the start of the file
+     *
+     * @param inputFile
+     * @return
+     * @throws FileNotFoundException
+     */
+    @SneakyThrows
+    Reader safeFileReader(File inputFile) throws FileNotFoundException {
+        // BOMInputStream is used to handle files with BOM (Byte Order Mark) at the start
+        // which can cause issues with CSV parsing
+        return new InputStreamReader(BOMInputStream.builder().setInputStream(new FileInputStream(inputFile)).get(), StandardCharsets.UTF_8);
     }
 }

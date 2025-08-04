@@ -163,7 +163,7 @@ public class SanitizerUtils {
                 }
                 return null;
             } else {
-                if (transform.getIsJsonEscaped() && transform.getJsonPathToProcessWhenEscaped() != null) {
+                if (transform.getIsJsonEscaped() && StringUtils.isNotBlank(transform.getJsonPathToProcessWhenEscaped())) {
                     DocumentContext jsonContext = JsonPath.parse(toTokenize);
                     List<String> texts = jsonContext.read(transform.getJsonPathToProcessWhenEscaped());
 
