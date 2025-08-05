@@ -144,7 +144,7 @@ main() {
         echo -e "${GREEN}✓ Successfully published GCP JAR to GCS!${NC}"
         echo ""
         echo -e "${BLUE}Download URL:${NC}"
-        echo -e "  ${GREEN}GCS:${NC} https://storage.googleapis.com/${BUCKET_NAME}/gcp/${ZIP_FILENAME}"
+        echo -e "  ${GREEN}GCS:${NC} https://storage.googleapis.com/${BUCKET_NAME}/${ZIP_FILENAME}"
         echo ""
         echo -e "${BLUE}GCS URL for Terraform:${NC}"
         echo -e "  ${GREEN}gs://${BUCKET_NAME}/${ZIP_FILENAME}${NC}"
