@@ -360,7 +360,7 @@ We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](https:
      - provision API keys / make OAuth grants needed by each Data Connection
      - create the Data Connection from Worklytics to your psoxy instance (Terraform can provide `TODO` file with detailed steps for each)
 
-  6. Various test commands are provided in local files, as the output of the Terraform; you may use these examples to validate the performance of the proxy. Please review the proxy behavior and adapt the rules as needed. Customers needing assistance adapting the proxy behavior for their needs can contact support@worklytics.co
+  6. Various test commands are provided in local files, as the output of the Terraform; you may use these examples to validate the performance of the proxy. Please review the proxy behavior and adapt the rules as needed. Customers needing assistance adapting the proxy behavior for their needs can contact [support@worklytics.co](mailto:support@worklytics.co)
 
 ## Component Status
 
