@@ -58,14 +58,13 @@ DEPLOYMENT_ARTIFACT=$(ls "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deplo
 # Validate JAR exists
 JAR_PATH="${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment/${DEPLOYMENT_ARTIFACT}"
 if [ ! -f "$JAR_PATH" ]; then
-    echo -e "${RED}Error: JAR file not found at ${JAR_PATH}${NC}"
-    echo -e "${YELLOW}Make sure to build the AWS module first:${NC}"
-    echo -e "  cd java/impl/aws && mvn clean package -Dmaven.test.skip=true"
+    echo -e "${RED}Error: JAR file not found at ${JAR_PATH} after running build script${NC}"
+    echo -e "${YELLOW}Check last-build.log for errors${NC}"
     exit 1
 fi
 
 
-echo -e "${BLUE}Publishing Psoxy AWS JAR version ${GREEN}${VERSION}${BLUE} to S3 buckets...${NC}"
+echo -e "${BLUE}Publishing Psoxy $IMPLEMENTATION JAR version ${GREEN}${VERSION}${BLUE} to S3 buckets...${NC}"
 echo -e "${BLUE}JAR file: ${GREEN}${JAR_PATH}${NC}"
 echo -e "${BLUE}Role: ${GREEN}${ROLE_ARN}${NC}"
 echo ""
