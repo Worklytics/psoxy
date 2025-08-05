@@ -341,8 +341,8 @@ We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](https:
        - [Google Cloud platform](gcp/getting-started.md)
 
   2. Based on that choice, pick from the example template repos below. Use your choosen option as a template to create a new GitHub repo, or if you're not using GitHub Cloud, create clone/fork of the choosen option in your source control system:
-        - AWS - https://github.com/Worklytics/psoxy-example-aws
-        - GCP - https://github.com/Worklytics/psoxy-example-gcp
+        - AWS - [Worklytics/psoxy-example-aws](https://github.com/Worklytics/psoxy-example-aws)
+        - GCP - [Worklytics/psoxy-example-gcp](https://github.com/Worklytics/psoxy-example-gcp)
 
      You will make changes to the files contained in this repo as appropriate for your use-case. These changes should be committed to a repo that is accessible to other members of your team who may need to support your Psoxy deployment in the future.
 
