@@ -42,7 +42,7 @@ A WAF could make sense if you are using Psoxy to expose an on-prem, in-house bui
 
 ## Can I deploy Psoxy instances in a VPC?
 
-VPC support is available as a *beta* feature as of February 2024.
+VPC support is available as a *beta* feature as of February 2024, available in AWS-hosted deployments. It requires an Add-on to your Proxy support subscription.
 
 VPC usage *requires* an API Gateway to be deployed in front of the proxy instances.
 
