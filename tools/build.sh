@@ -20,9 +20,11 @@ while getopts ":qd" opt; do
       DISTRIBUTION_PROFILE="-Pdistribution"
       ;;
     *)
-      printf "Usage: build.sh [-q] <IMPLEMENTATION> <JAVA_SOURCE_ROOT>\n"
+      printf "Usage: build.sh [-qd] <IMPLEMENTATION> <JAVA_SOURCE_ROOT>\n"
       printf "  -q: Skip tests during build\n"
-      printf "  -d: Include distribution profile\n"
+      printf "  -d: build artifact for distribution\n"
+      printf "  <IMPLEMENTATION>: 'aws' or 'gcp'\n"
+      printf "  <JAVA_SOURCE_ROOT>: Path to the Java source root directory (e.g., 'java/')\n"
       exit 1
       ;;
   esac
