@@ -66,7 +66,7 @@ The module [psoxy-constants](../../infra/modules/psoxy-constants) is a dependenc
 
 ## Example
 
-The https://github.com/Worklytics/psoxy-example-gcp repo provides an example configuration for hosting proxy instances in GCP. You use that template, following its `Usage` docs to get started.
+The [Worklytics/psoxy-example-gcp](https://github.com/Worklytics/psoxy-example-gcp) repo provides an example configuration for hosting proxy instances in GCP. You use that template, following its `Usage` docs to get started.
 
 ## Security Considerations
 

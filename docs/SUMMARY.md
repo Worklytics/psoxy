@@ -55,6 +55,8 @@
   * [Atlassian](sources/atlassian/README.md)
     * [Jira Cloud](sources/atlassian/jira/README.md)
     * [Jira Data Center](sources/atlassian/jira/jira-server.md)
+  * [ChatGPT](sources/chatgpt/README.md)
+  * [Cursor](sources/cursor/README.md)
   * [Dropbox](sources/dropbox-business/README.md)
   * [GitHub](sources/github/README.md)
     * [GitHub Copilot](sources/github/copilot/README.md)
@@ -85,8 +87,8 @@
     * [Slack AI Bulk](sources/slack/slack-ai-bulk/README.md)
     * [Slack Bulk Exports](sources/slack/slack-discovery-bulk/README.md)
     * [Slack via Discovery API](sources/slack/slack-discovery-api/README.md)
+  * [Windsurf](sources/windsurf/README.md)
   * [Zoom](sources/zoom/README.md)
-    * [API Call Examples](sources/zoom/example-api-calls.md)
 
 * [FAQ](faq-security.md)
 * [Release Notes](https://github.com/Worklytics/psoxy/releases)
