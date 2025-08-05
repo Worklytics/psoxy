@@ -69,7 +69,7 @@ Hence, using DWD via Psoxy is more secure than the typical DWD scenario that man
 If you remain uncomfortable with DWD, a private Google Marketplace App is a possible alternative, albeit more tedious to configure. It requires a dedicated GCP project, with additional APIs enabled in the project.
 
 
-### Is this Attribute-based Access Control (ABAC)?
+## Is this Attribute-based Access Control (ABAC)?
 No. [ABAC](https://en.wikipedia.org/wiki/Attribute-based_access_control) is specifying an access control policy predicated on attributes of the object/resource being accessed. The approach of Psoxy is better described as Attribute-level Access Control, where the access control policy can be written to limit access to specific attritibutes (fields) within an object/resource.
 
 Eg, evaluation of an ABAC policy still results in boolean, allow/deny decision on the request; Psoxy policy (rule) evaluation results in a modified response, with specific fields redacted or transformed in accordance with the policy.
