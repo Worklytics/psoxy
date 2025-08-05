@@ -14,8 +14,10 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
+IMPLEMENTATION="gcp"
+JAVA_SOURCE_ROOT="java/"
 BUCKET_NAME="psoxy-public-artifacts"
-JAR_NAME="psoxy-gcp"
+JAR_NAME="psoxy-$IMPLEMENTATION"
 
 # ensure current directory is the project root
 if [ ! -f "java/pom.xml" ]; then
@@ -35,14 +37,15 @@ else
 fi
 
 # Construct JAR filename
-JAR_FILENAME="${JAR_NAME}-${VERSION}.jar"
-JAR_PATH="java/impl/gcp/target/deployment/${JAR_FILENAME}"
+./tools/build.sh -d "$IMPLEMENTATION" "$JAVA_SOURCE_ROOT"
+DEPLOYMENT_ARTIFACT=$(ls "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment" | grep -E "^psoxy-.*\.jar$" | head -1)
+
+JAR_PATH="java/impl/gcp/target/${DEPLOYMENT_ARTIFACT}"
 
 # Validate JAR exists
 if [ ! -f "$JAR_PATH" ]; then
-    echo -e "${RED}Error: JAR file not found at ${JAR_PATH}${NC}"
-    echo -e "${YELLOW}Make sure to build the GCP module first:${NC}"
-    echo -e "  cd java/impl/gcp && mvn clean package -Dmaven.test.skip=true"
+    echo -e "${RED}Error: JAR file not found at ${JAR_PATH} after running build script${NC}"
+    echo -e "${YELLOW}Check last-build.log for errors${NC}"
     exit 1
 fi
 
@@ -70,32 +73,26 @@ echo ""
 
 # Function to publish to GCS
 publish_to_gcs() {
-    local gcs_path="gs://${BUCKET_NAME}/gcp/${ZIP_FILENAME}"
-    
-    echo -e "${BLUE}Publishing to GCS (${gcs_path})${NC}"
-    
+    local gcs_path="gs://${BUCKET_NAME}/${ZIP_FILENAME}"
+
+    echo -e "Publishing ${BLUE}${ZIP_PATH}${NC} to ${BLUE}${gcs_path}${NC}"
+
     # Check if bucket exists
     if ! gsutil ls "gs://${BUCKET_NAME}" >/dev/null 2>&1; then
         echo -e "${YELLOW}Warning: Bucket ${BUCKET_NAME} does not exist${NC}"
-        echo -e "${YELLOW}Creating bucket ${BUCKET_NAME}...${NC}"
-        gsutil mb "gs://${BUCKET_NAME}"
-        echo -e "${GREEN}✓ Created bucket ${BUCKET_NAME}${NC}"
     fi
-    
+
     # Upload with metadata
-    gsutil cp "$ZIP_PATH" "$gcs_path" \
-        -h "x-goog-meta-version:${VERSION}" \
-        -h "x-goog-meta-build-date:$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-        -h "Cache-Control:public, max-age=3600"
-    
+    gsutil cp "$ZIP_PATH" "$gcs_path"
+
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}✓ Successfully uploaded to GCS${NC}"
-        
+
     else
         echo -e "${RED}✗ Failed to upload to GCS${NC}"
         return 1
     fi
-    
+
     echo ""
 }
 
@@ -105,15 +102,15 @@ main() {
     echo -e "${BLUE}Version: ${GREEN}${VERSION}${NC}"
     echo -e "${BLUE}Bucket: ${GREEN}gs://${BUCKET_NAME}${NC}"
     echo ""
-    
+
     # Check prerequisites
-    
+
     if ! command -v gsutil &> /dev/null; then
         echo -e "${RED}Error: gsutil is not installed${NC}"
         echo -e "${YELLOW}Install Google Cloud SDK from: https://cloud.google.com/sdk/docs/install${NC}"
         exit 1
     fi
-    
+
     # Check gsutil version
     GSUTIL_VERSION=$(gsutil version -l 2>/dev/null | grep "gsutil version" | cut -d' ' -f3)
     if [ -z "$GSUTIL_VERSION" ]; then
@@ -121,26 +118,26 @@ main() {
         exit 1
     fi
     echo -e "${BLUE}gsutil version: ${GREEN}${GSUTIL_VERSION}${NC}"
-    
+
     # Check if gsutil is authenticated
     if ! gsutil ls >/dev/null 2>&1; then
         echo -e "${RED}Error: gsutil is not authenticated${NC}"
         echo -e "${YELLOW}Run 'gcloud auth login' to authenticate${NC}"
         exit 1
     fi
-    
+
     # Show current GCP project
     CURRENT_PROJECT=$(gcloud config get-value project 2>/dev/null)
     if [ $? -eq 0 ] && [ -n "$CURRENT_PROJECT" ]; then
         echo -e "${BLUE}Current GCP project: ${GREEN}${CURRENT_PROJECT}${NC}"
     fi
-    
+
     if ! command -v jq &> /dev/null; then
         echo -e "${RED}Error: jq is not installed${NC}"
         echo -e "${YELLOW}Install jq from: https://stedolan.github.io/jq/download/${NC}"
         exit 1
     fi
-    
+
     # Publish to GCS
     if publish_to_gcs; then
         echo -e "${BLUE}=== Summary ===${NC}"
@@ -150,7 +147,7 @@ main() {
         echo -e "  ${GREEN}GCS:${NC} https://storage.googleapis.com/${BUCKET_NAME}/gcp/${ZIP_FILENAME}"
         echo ""
         echo -e "${BLUE}GCS URL for Terraform:${NC}"
-        echo -e "  ${GREEN}gs://${BUCKET_NAME}/gcp/${ZIP_FILENAME}${NC}"
+        echo -e "  ${GREEN}gs://${BUCKET_NAME}/${ZIP_FILENAME}${NC}"
     else
         echo -e "${RED}✗ Failed to publish to GCS${NC}"
         exit 1
@@ -158,4 +155,4 @@ main() {
 }
 
 # Run main function
-main "$@" 
+main "$@"
