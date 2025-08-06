@@ -22,10 +22,13 @@ locals {
 
   side_outputs_to_provision    = { for k, v in local.side_outputs : k => v if v.bucket == null }
   side_outputs_to_grant_access = { for k, v in local.side_outputs : k => v if v.bucket != null }
+
+  # whether ANY GCS buckets will need to be provisioned to support this instance
+  bucket_provisioning_required = var.enable_async_processing || length(local.side_outputs_to_provision) > 0
 }
 
 resource "random_string" "bucket_name_random_sequence" {
-  count = length(local.side_outputs_to_provision) > 0 ? 1 : 0
+  count = local.bucket_provisioning_required ? 1 : 0
 
   length  = 8
   special = false
