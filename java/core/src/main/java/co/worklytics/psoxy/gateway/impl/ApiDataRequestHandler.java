@@ -158,7 +158,13 @@ public class ApiDataRequestHandler {
             HttpHeaders.LINK,
             HttpHeaders.EXPIRES,
             HttpHeaders.LAST_MODIFIED,
-            HttpHeaders.RETRY_AFTER));
+            HttpHeaders.RETRY_AFTER
+    ));
+
+    public static Set<String> HTTP_METHODS_WHICH_DONT_SUPPORT_BODY = Set.of(
+        HttpHead.METHOD_NAME,
+        HttpGet.METHOD_NAME
+    );
 
     /**
      * Patterns to look for in headers to pass through
@@ -199,7 +205,9 @@ public class ApiDataRequestHandler {
     public HttpEventResponse handle(HttpEventRequest requestToProxy,
             ProcessingContext processingContext) {
 
-        logRequestIfVerbose(requestToProxy);
+        if (requestToProxy.getHttpMethod() == null) {
+            log.warning("HTTP method of com.google.cloud.functions.HttpRequest is null !???!");
+        }
 
         // application-level enforcement of HTTPS
         // (NOTE: should be redundant with infrastructure-level configuration)
@@ -293,7 +301,7 @@ public class ApiDataRequestHandler {
                 .orElse(null);
 
         // return 400 if request body is non-empty, but method is GET or HEAD
-        if (requestToProxy.getHttpMethod() == HttpHead.METHOD_NAME || requestToProxy.getHttpMethod() == HttpGet.METHOD_NAME) {
+        if (HTTP_METHODS_WHICH_DONT_SUPPORT_BODY.stream().anyMatch(requestToProxy.getHttpMethod().toUpperCase()::equals)) {
             if (requestBody != null) {
                 // rather than have google HttpClient blow up with its own exception, causing 500 from proxy
                 return HttpEventResponse.builder()
@@ -454,7 +462,6 @@ public class ApiDataRequestHandler {
 
             passThroughHeaders(builder, sourceApiResponse);
             if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
-
                 if (skipSanitization) {
                     proxyResponseContent = original.getContentAsString();
                 } else {

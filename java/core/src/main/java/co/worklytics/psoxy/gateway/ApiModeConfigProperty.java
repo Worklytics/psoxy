@@ -12,7 +12,7 @@ public enum ApiModeConfigProperty implements ConfigService.ConfigProperty {
 
 
     /**
-     * identifies the SourceAuthStrategy to use f
+     * identifies the SourceAuthStrategy to use when connecting to the data source API
      */
     SOURCE_AUTH_STRATEGY_IDENTIFIER,
 
@@ -26,14 +26,16 @@ public enum ApiModeConfigProperty implements ConfigService.ConfigProperty {
     TLS_VERSION,
 
     /**
-     * target Host to forward requests to
+     * target 'Host' to forward requests to, in HTTP sense
      */
     TARGET_HOST,
-
-
     ;
 
 
+    /**
+     * possible values for TLS_VERSION config property
+     *
+     */
     public static class TlsVersions {
         public final static String TLSv1_2 = "TLSv1.2";
         public final static String TLSv1_3 = "TLSv1.3";

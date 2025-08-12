@@ -25,6 +25,8 @@ locals {
 
   # whether ANY GCS buckets will need to be provisioned to support this instance
   bucket_provisioning_required = var.enable_async_processing || length(local.side_outputs_to_provision) > 0
+
+  path_to_instance_config_parameters = "${coalesce(var.config_parameter_prefix, "")}${replace(upper(var.instance_id), "-", "_")}_"
 }
 
 resource "random_string" "bucket_name_random_sequence" {
@@ -172,6 +174,24 @@ resource "google_cloudfunctions2_function" "function" {
     google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret,
     google_service_account_iam_member.act_as
   ]
+}
+
+# TODO: in 0.6, make this a 'google_parameter_manager_parameter' (requires google provide 6.25+)
+# bc SERVICE_URL is the url of function, and not known at deploy-time, we cannot fill it in ENV VARS
+# similarly, bc version number is not known at deploy-time, we cannot bind it via secret env vars
+module "service_url_parameter" {
+  source = "../../modules/gcp-secrets"
+
+  secret_project    = var.project_id
+  path_prefix       = local.path_to_instance_config_parameters
+  replica_locations = var.secret_replica_locations
+  secrets = {
+    SERVICE_URL = {
+      value       = google_cloudfunctions2_function.function.service_config[0].uri
+      description = "URL of the function as a web service"
+    },
+  }
+  default_labels = var.default_labels
 }
 
 # bizarrely, `google_cloudfunctions2_function_iam_binding` doesn't work for this; wtf?

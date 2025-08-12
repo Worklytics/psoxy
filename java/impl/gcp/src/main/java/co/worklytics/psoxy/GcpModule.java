@@ -23,6 +23,8 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * defines how to fulfill dependencies that need platform-specific implementations for GCP platform
@@ -135,11 +137,26 @@ public interface GcpModule {
         return GcpEnvironment.WebhookCollectorModeConfig.fromConfigService(configService);
     }
 
+    @Provides
+    @Singleton
+    static GcpEnvironment.ApiModeConfig apiModeConfig(ConfigService configService) {
+        return GcpEnvironment.ApiModeConfig.fromConfigService(configService);
+    }
+
+    @Provides
+    @Singleton
+    static ExecutorService executorService() {
+        return Executors.newSingleThreadExecutor();
+    }
+
+    @Provides @Singleton
+    static AsyncApiDataRequestHandler apiDataRequestViaPubSub(ApiDataRequestViaPubSubFactory factory,
+                                                              GcpEnvironment.ApiModeConfig config) {
+        return factory.create(config.getPubSubTopic());
+    }
+
     @Module
     abstract class Bindings {
-
-        @Binds
-        abstract AsyncApiDataRequestHandler asyncApiDataRequestHandler(GcpAsyncApiDataRequestHandler asyncApiDataRequestHandler);
 
         @Binds
         @IntoSet

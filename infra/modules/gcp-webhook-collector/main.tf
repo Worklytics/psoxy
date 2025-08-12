@@ -6,7 +6,7 @@ locals {
   # exec timeout for function, as set in infra level. GCP runtime should *kill* function execution if it exceeds this timeout
   function_exec_timeout_seconds = 300 # 5 minutes, at least avoids cron running MULTIPLE batches concurrenct, if that frequence is ALSO 5 minutes
 
-  # timeout for batch processing, in seconds; must be LESS than function_exec_timeout, otherwise function might get killed by the runtime 
+  # timeout for batch processing, in seconds; must be LESS than function_exec_timeout, otherwise function might get killed by the runtime
   batch_invocation_timeout_seconds = 240 # 4 minutes
 
   # number of webhooks to process in a batch; dictates MAX messages pulled from pubsub in one-shot, as well as MAX webhooks written to GCS object
@@ -207,8 +207,12 @@ module "auth_issuer_secret" {
   secrets = {
     AUTH_ISSUER = {
       value       = google_cloudfunctions2_function.function.service_config[0].uri
-      description = "URL of the webhook collector function"
-    }
+      description = "expected issuer of identity tokens for this collector"
+    },
+    SERVICE_URL = {
+      value       = google_cloudfunctions2_function.function.service_config[0].uri
+      description = "URL of the function as a web service"
+    },
   }
   default_labels = var.default_labels
 }

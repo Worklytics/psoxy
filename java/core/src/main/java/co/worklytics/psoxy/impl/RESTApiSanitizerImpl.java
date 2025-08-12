@@ -200,7 +200,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @SneakyThrows
     @Override
-    public String sanitize(String httpMethod, URL url, String jsonResponse) {
+    public String sanitize(@NonNull String httpMethod, @NonNull URL url, String jsonResponse) {
         if (StringUtils.isEmpty(jsonResponse)) {
             // Nothing to do
             return jsonResponse;
@@ -227,7 +227,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @SneakyThrows
     @Override
-    public ProcessedStream sanitize(String httpMethod, URL url, InputStream response)
+    public ProcessedStream sanitize(@NonNull String httpMethod,
+                                    @NonNull URL url, InputStream response)
             throws IOException {
         // extra check ...
         if (!isAllowed(httpMethod, url)) {

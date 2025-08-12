@@ -71,7 +71,8 @@ public class PubSubOutput implements Output {
             if (content.getContentEncoding() != null) {
                 messageBuilder.putAttributes(MessageAttributes.CONTENT_ENCODING.getStringEncoding(), content.getContentEncoding());
             }
-            publisher.publish(messageBuilder.build()).get();
+            String messageId = publisher.publish(messageBuilder.build()).get();
+            log.log(Level.INFO, "Published message with ID: {0} to PubSub topic: {1}", new Object[]{messageId, topicName});
         } catch (InterruptedException | ExecutionException | IOException e) {
             log.log(Level.WARNING, "Failed to publish to PubSub", e);
             throw new WriteFailure("Failed to publish to PubSub", e);
