@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathTemplate: "/compliance/workspaces/{workspaceId}/automations"
+  - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/automations"
     allowedQueryParams:
       - "after"
       - "limit"
@@ -22,7 +22,7 @@ endpoints:
           type: "string"
         object:
           type: "string"
-  - pathTemplate: "/compliance/workspaces/{workspaceId}/conversations"
+  - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/conversations"
     allowedQueryParams:
       - "since_timestamp"
       - "after"
@@ -50,7 +50,7 @@ endpoints:
           type: "string"
         object:
           type: "string"
-  - pathTemplate: "/compliance/workspaces/{workspaceId}/conversations/{conversationId}/messages"
+  - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/conversations/{conversationId}/messages"
     allowedQueryParams:
       - "after"
       - "limit"
@@ -75,7 +75,7 @@ endpoints:
           type: "string"
         object:
           type: "string"
-  - pathTemplate: "/compliance/workspaces/{workspaceId}/projects"
+  - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/projects"
     allowedQueryParams:
       - "after"
       - "limit"
@@ -106,7 +106,7 @@ endpoints:
           type: "string"
         object:
           type: "string"
-  - pathTemplate: "/compliance/workspaces/{workspaceId}/users"
+  - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/users"
     allowedQueryParams:
       - "after"
       - "limit"
