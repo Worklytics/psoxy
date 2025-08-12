@@ -489,6 +489,8 @@ public class ApiDataRequestHandler {
                                 Pair.of(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
                                         ErrorCauses.SIDE_OUTPUT_FAILURE_SANITIZED.name()));
                     }
+
+
                 }
             } else {
                 // write error, which shouldn't contain PII, directly
@@ -503,7 +505,12 @@ public class ApiDataRequestHandler {
                 // if versioning is enabled in the bucket, then subsequent successful calls will
                 // overwrite the error response
             }
-            builder.body(proxyResponseContent);
+
+            // only if not async, write content to body of response
+            if (!processingContext.getAsync()) {
+                builder.body(proxyResponseContent);
+            }
+
             return builder.build();
         } finally {
             sourceApiResponse.disconnect();

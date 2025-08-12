@@ -46,6 +46,8 @@ public class GcpApiDataRequestHandler {
     // standard Bearer token prefix on Authorization header
     static final String BEARER_PREFIX = "Bearer ";
 
+    final Integer MAX_ASYNC_ATTEMPTS = 3;
+
     @Inject
     public GcpApiDataRequestHandler(
         GcpEnvironment gcpEnvironment,
@@ -69,8 +71,19 @@ public class GcpApiDataRequestHandler {
         Boolean userAgentIsPubSub = request.getFirstHeader(HttpHeaders.USER_AGENT)
             .map(userAgent -> userAgent.contains(gcpEnvironment.getPubSubUserAgent()))
             .orElse(false);
+
         if (userAgentIsPubSub) {
+            // potentially async case - PubSub push invocation
+
+            if (request.getFirstHeader(GcpEnvironment.PUBSUB_DELIVERY_ATTEMPT_HEADER).map(Integer::parseInt).orElse(-1) > MAX_ASYNC_ATTEMPTS) {
+                log.log(Level.SEVERE, "Max PubSub delivery attempts exceeded, dropping message");
+                response.setStatusCode(org.apache.hc.core5.http.HttpStatus.SC_NO_CONTENT, "Max delivery attempts exceeded");
+                return;
+            }
+
+            // verify auth to ENSURE is legit PubSub push callback
             verifyAuthentication(request);
+
             PubSubPushBody pubSubPushBody = objectMapper.readerFor(PubSubPushBody.class)
                 .readValue(new ByteArrayInputStream(request.getInputStream().readAllBytes()));
 
@@ -83,6 +96,7 @@ public class GcpApiDataRequestHandler {
             processingContext = processingContext.toBuilder()
                 .async(true)
                 .build();
+
 
             HttpEventResponse genericResponse = requestHandler.handle(CloudFunctionRequest.of(wrappedRequest), processingContext);
 
