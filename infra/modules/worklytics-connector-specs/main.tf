@@ -107,7 +107,6 @@ EOT
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/conversations",
         "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/automations",
-        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
       ]
       external_token_todo : templatefile("${path.module}/docs/chatgpt/enterprise/instructions.tftpl", {
         workspace_id                = local.chat_gpt_enterprise_example_workspace_id,
