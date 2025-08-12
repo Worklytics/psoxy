@@ -93,8 +93,7 @@
             <artifactId>functions-framework-api</artifactId>
             <!-- NOTE: does NOT appear to be available in the google-libraries-bom -->
             <!-- does not appear to have any dependencies on other Google libraries -->
-            <version>1.1.0</version> <!-- June 2023 - https://mvnrepository.com/artifact/com.google.cloud.functions/functions-framework-api -->
-            <scope>provided</scope>
+            <version>1.1.4</version> <!-- Nov 2024 - https://mvnrepository.com/artifact/com.google.cloud.functions/functions-framework-api -->
         </dependency>
 
         <dependency>
