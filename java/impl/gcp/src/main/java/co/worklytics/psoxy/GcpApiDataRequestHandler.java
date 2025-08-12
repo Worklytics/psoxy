@@ -10,12 +10,14 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 import dagger.Lazy;
+import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 
 import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -60,6 +62,7 @@ public class GcpApiDataRequestHandler {
         this.objectMapper = objectMapper;
     }
 
+    @SneakyThrows
     public void service(HttpRequest request, HttpResponse response) {
 
         // check if request is invocation via PubSub
@@ -74,13 +77,14 @@ public class GcpApiDataRequestHandler {
             HttpRequest  wrappedRequest = objectMapper.readerFor(HttpRequest.class)
                 .readValue(pubSubPushBody.message.data.getBytes(StandardCharsets.UTF_8));
 
-            ProcessingContext processingContext = objectMapper.readerFor(ProcessingContext.class)
-                .readValue(pubSubPushBody.message.attributes.get(ProcessingContext.MESSAGE_ATTRIBUTE))
-                .toBuilder()
+            ApiDataRequestHandler.ProcessingContext processingContext = objectMapper.readerFor(ApiDataRequestHandler.ProcessingContext.class)
+                .readValue(pubSubPushBody.message.attributes.get(ApiDataRequestViaPubSub.MessageAttributes.PROCESSING_CONTEXT.getStringEncoding()));
+
+            processingContext = processingContext.toBuilder()
                 .async(true)
                 .build();
 
-            genericResponse = requestHandler.handle(HttpEventRequest.of(wrappedRequest), processingContext);
+            HttpEventResponse genericResponse = requestHandler.handle(CloudFunctionRequest.of(wrappedRequest), processingContext);
 
             // TODO: probably DO NOT want body/etc here, right??
             fillGcpResponseFromGenericResponse(response, genericResponse);

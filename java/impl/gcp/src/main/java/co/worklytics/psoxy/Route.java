@@ -5,17 +5,10 @@ import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 
 import lombok.extern.java.Log;
-import java.io.IOException;
-import org.apache.commons.lang3.RandomUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import javax.inject.Inject;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.Security;
 import java.util.concurrent.ExecutorService;
-import java.util.logging.Level;
 
 /**
  * simple wrapper over HttpRequestHandler; handles spinning up the application, as needed; then
