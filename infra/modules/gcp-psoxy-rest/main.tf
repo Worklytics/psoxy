@@ -55,6 +55,47 @@ module "async_output" {
   )
 }
 
+# Pub/Sub topic for async output (if enabled)
+resource "google_pubsub_topic" "async_output_topic" {
+  count = var.enable_async_processing ? 1 : 0
+
+  project = var.project_id
+  name    = "${var.environment_id_prefix}${var.instance_id}-async-output"
+
+  labels = var.default_labels
+}
+
+# Pub/Sub push subscription for async output (if enabled)
+resource "google_pubsub_subscription" "async_output_subscription" {
+  count = var.enable_async_processing ? 1 : 0
+
+  project = var.project_id
+  name    = "${var.environment_id_prefix}${var.instance_id}-async-output-subscription"
+  topic   = google_pubsub_topic.async_output_topic[0].name
+
+  # Push config: deliver messages to the Cloud Function's HTTP endpoint
+  push_config {
+    push_endpoint = local.proxy_endpoint_url
+
+    oidc_token {
+      service_account_email = var.service_account_email
+      audience              = local.proxy_endpoint_url
+    }
+  }
+
+  ack_deadline_seconds       = 600       # 10 minutes to process messages
+  message_retention_duration = "604800s" # 7 days retention
+  enable_message_ordering    = false
+
+  expiration_policy {
+    ttl = "604800s" # 7 days
+  }
+
+  labels = var.default_labels
+}
+
+# TODO: pretty sure we need some IAM perms around the pubsub stuff above ....
+
 module "side_output_bucket" {
   source = "../../modules/gcp-output-bucket"
 
@@ -91,6 +132,7 @@ locals {
     TARGET_HOST                     = var.target_host
     SOURCE_AUTH_STRATEGY_IDENTIFIER = var.source_auth_strategy
     OAUTH_SCOPES                    = join(" ", var.oauth_scopes)
+    PUB_SUB_TOPIC                   = var.enable_async_processing ? google_pubsub_topic.async_output_topic[0].name : null
     }
     : k => v if v != null
   }
@@ -358,3 +400,4 @@ output "todo" {
 output "next_todo_step" {
   value = var.todo_step + 1
 }
+
