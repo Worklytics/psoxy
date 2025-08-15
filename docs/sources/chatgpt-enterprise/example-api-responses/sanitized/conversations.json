@@ -6,7 +6,7 @@
     {
       "object":"compliance.workspace.conversation",
       "id":"conv_abcdef1234567890",
-      "user_id":"user_123456abcdef",
+      "user_id":"t~993ALwxy5hVl7G0CZJIDR3n6GFrp7O2bVs5_itaEBbU",
       "user_email":"t~PFsxS8oxlBJ9dZkL1zNMvRIajvbO3VzZpbdT-ty6Gm0@example.com",
       "created_at":1.716990000123123E9,
       "last_active_at":1.716993600123123E9,
@@ -40,7 +40,7 @@
     {
       "object":"compliance.workspace.conversation",
       "id":"conv_abcdef1234567891",
-      "user_id":"user_123456abcdef",
+      "user_id":"t~993ALwxy5hVl7G0CZJIDR3n6GFrp7O2bVs5_itaEBbU",
       "user_email":"t~PFsxS8oxlBJ9dZkL1zNMvRIajvbO3VzZpbdT-ty6Gm0@example.com",
       "created_at":1.716990000123123E9,
       "last_active_at":1.716993600123123E9,
