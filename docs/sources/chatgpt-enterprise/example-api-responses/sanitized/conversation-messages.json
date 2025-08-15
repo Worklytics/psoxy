@@ -15,11 +15,6 @@
         "role":"assistant",
         "tool_name":"python"
       },
-      "content":{
-        "object":"compliance.workspace.conversation.message.content",
-        "type":"text",
-        "value":"{\"length\":26,\"word_count\":6}"
-      },
       "files":[
         {
           "id":"file_001"
@@ -37,11 +32,6 @@
         "object":"compliance.workspace.conversation.message.author",
         "role":"user",
         "tool_name":null
-      },
-      "content":{
-        "object":"compliance.workspace.conversation.message.content",
-        "type":"text",
-        "value":"{\"length\":26,\"word_count\":5}"
       },
       "files":[ ]
     }

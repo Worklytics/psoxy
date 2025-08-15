@@ -1,0 +1,91 @@
+{
+  "object": "list",
+  "last_id": "conv_1234567890abcdef",
+  "has_more": false,
+  "data": [
+    {
+      "object": "compliance.workspace.conversation",
+      "id": "conv_abcdef1234567890",
+      "user_id": "user_123456abcdef",
+      "user_email": "bob@example.com",
+      "created_at": 1716990000.123123,
+      "last_active_at": 1716993600.123123,
+      "title": "Research Project",
+      "messages": {
+        "object": "list",
+        "last_id": "msg_1",
+        "has_more": false,
+        "data": [
+          {
+            "object": "compliance.workspace.conversation.message",
+            "id": "msg_1234567890",
+            "parent_id": null,
+            "created_at": 1716990000.123123,
+            "gpt_id": null,
+            "project_id": null,
+            "author": {
+              "object": "compliance.workspace.user",
+              "role": "user",
+              "tool_name": "browser"
+            },
+            "content": {
+              "object": "compliance.workspace.conversation.message.content",
+              "type": "text",
+              "value": "What are the key trends in AI for 2024?",
+              "annotations": [
+                {
+                  "type": "url_citation",
+                  "urls": [
+                    "https://example.com/ai-trends-2024"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "object": "compliance.workspace.conversation",
+      "id": "conv_abcdef1234567891",
+      "user_id": "user_123456abcdef",
+      "user_email": "bob@example.com",
+      "created_at": 1716990000.123123,
+      "last_active_at": 1716993600.123123,
+      "title": "Research Project",
+      "messages": {
+        "object": "list",
+        "last_id": "msg_1",
+        "has_more": false,
+        "data": [
+          {
+            "object": "compliance.workspace.conversation.message",
+            "id": "msg_1234567891",
+            "parent_id": null,
+            "created_at": 1716990000.123123,
+            "gpt_id": null,
+            "project_id": null,
+            "author": {
+              "object": "compliance.workspace.user",
+              "role": "user",
+              "tool_name": "browser"
+            },
+            "content": {
+              "object": "compliance.workspace.conversation.message.content",
+              "type": "text",
+              "value": "What are the key trends in AI for 2024?",
+              "annotations": [
+                {
+                  "type": "url_citation",
+                  "urls": [
+                    "https://example.com/ai-trends-2024"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

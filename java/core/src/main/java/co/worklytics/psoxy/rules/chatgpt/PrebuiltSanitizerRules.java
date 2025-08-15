@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class PrebuiltSanitizerRules {
 
-    static final RESTRules ENTERPRISE = Rules2.load("sources/chatgpt/enterprise/chatgpt-enterprise.yaml");
+    static final RESTRules ENTERPRISE = Rules2.load("sources/chatgpt-enterprise/chatgpt-enterprise.yaml");
 
     static public final Map<String, RESTRules> DEFAULT_RULES_MAP =
         ImmutableMap.<String, RESTRules>builder()
