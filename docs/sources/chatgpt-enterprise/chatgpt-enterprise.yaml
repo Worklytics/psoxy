@@ -33,6 +33,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.data[*].user_email"
+          - "$.data[*].user_id"
         encoding: "URL_SAFE_TOKEN"
       - !<textDigest>
         jsonPaths:
@@ -83,7 +84,9 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.data[*].owner_email"
+          - "$.data[*].owner_id"
           - "$..email"
+          - "$.data[*].sharing.recipients[*].id"
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
@@ -114,6 +117,11 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.data[*].email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].id"
+        includeReversible: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
@@ -150,6 +158,8 @@ definitions:
         type: "string"
       last_active_at:
         type: "number"
+      messages:
+        $ref: "#/definitions/MessageList"
       object:
         type: "string"
       title:
@@ -211,6 +221,19 @@ definitions:
       type:
         type: "string"
       value:
+        type: "string"
+  MessageList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: "#/definitions/Message"
+      has_more:
+        type: "boolean"
+      last_id:
+        type: "string"
+      object:
         type: "string"
   Permissions:
     type: "object"
