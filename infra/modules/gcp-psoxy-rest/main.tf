@@ -94,7 +94,37 @@ resource "google_pubsub_subscription" "async_output_subscription" {
   labels = var.default_labels
 }
 
-# TODO: pretty sure we need some IAM perms around the pubsub stuff above ....
+# IAM permissions for Pub/Sub async processing
+
+# 1. Allow the Cloud Function's service account to publish to the topic
+resource "google_pubsub_topic_iam_member" "function_publisher" {
+  count = var.enable_async_processing ? 1 : 0
+
+  project = var.project_id
+  topic   = google_pubsub_topic.async_output_topic[0].id
+  member  = "serviceAccount:${var.service_account_email}"
+  role    = "roles/pubsub.publisher"
+}
+
+# 2. Allow the Pub/Sub service account to invoke the Cloud Function
+resource "google_cloud_run_service_iam_member" "pubsub_invoker" {
+  count = var.enable_async_processing ? 1 : 0
+
+  project  = google_cloudfunctions2_function.function.project
+  location = google_cloudfunctions2_function.function.location
+  service  = google_cloudfunctions2_function.function.name
+  member   = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+  role     = "roles/run.invoker"
+}
+
+# 3. Allow the Cloud Function's service account to create signed URLs for Pub/Sub authentication
+resource "google_project_iam_member" "function_token_creator" {
+  count = var.enable_async_processing ? 1 : 0
+
+  project = var.project_id
+  member  = "serviceAccount:${var.service_account_email}"
+  role    = "roles/iam.serviceAccountTokenCreator"
+}
 
 module "side_output_bucket" {
   source = "../../modules/gcp-output-bucket"
@@ -132,7 +162,7 @@ locals {
     TARGET_HOST                     = var.target_host
     SOURCE_AUTH_STRATEGY_IDENTIFIER = var.source_auth_strategy
     OAUTH_SCOPES                    = join(" ", var.oauth_scopes)
-    PUB_SUB_TOPIC                   = var.enable_async_processing ? google_pubsub_topic.async_output_topic[0].name : null
+    PUB_SUB_TOPIC                   = var.enable_async_processing ? google_pubsub_topic.async_output_topic[0].id : null
     }
     : k => v if v != null
   }
@@ -214,7 +244,7 @@ resource "google_cloudfunctions2_function" "function" {
 
   depends_on = [
     google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret,
-    google_service_account_iam_member.act_as
+    google_service_account_iam_member.act_as,
   ]
 }
 
@@ -223,6 +253,8 @@ resource "google_cloudfunctions2_function" "function" {
 # similarly, bc version number is not known at deploy-time, we cannot bind it via secret env vars
 module "service_url_parameter" {
   source = "../../modules/gcp-secrets"
+
+  count = var.enable_async_processing ? 1 : 0
 
   secret_project    = var.project_id
   path_prefix       = local.path_to_instance_config_parameters
@@ -235,6 +267,37 @@ module "service_url_parameter" {
   }
   default_labels = var.default_labels
 }
+
+
+# grant access to secrets known AFTER function is deployed
+# (eg, SERVICE_URL)
+# distinct from var.secret_bindings; bc those are bound into the function's ENV VARS at deploy-time, grants must be done BEFORE deploy
+locals {
+  secrets_to_grant_access_to = try({
+    SERVICE_URL = {
+      secret_id = module.service_url_parameter[0].secret_ids_within_project["SERVICE_URL"]
+    }
+  }, {})
+}
+
+resource "google_secret_manager_secret_iam_member" "grant_sa_viewer_on_parameter" {
+  for_each = local.secrets_to_grant_access_to
+
+  project   = var.project_id
+  secret_id = each.value.secret_id
+  member    = "serviceAccount:${var.service_account_email}"
+  role      = "roles/secretmanager.viewer"
+}
+
+resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_parameter" {
+  for_each = local.secrets_to_grant_access_to
+
+  project   = var.project_id
+  secret_id = each.value.secret_id
+  member    = "serviceAccount:${var.service_account_email}"
+  role      = "roles/secretmanager.secretAccessor" # this is ONLY accessing payload of a secret version
+}
+
 
 # bizarrely, `google_cloudfunctions2_function_iam_binding` doesn't work for this; wtf?
 resource "google_cloud_run_service_iam_binding" "invokers" {

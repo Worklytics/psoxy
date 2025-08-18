@@ -110,6 +110,16 @@ variable "general_environment_variables" {
   type        = map(string)
   description = "environment variables to add for all connectors"
   default     = {}
+
+  validation {
+    condition     = !contains(keys(var.general_environment_variables), "IS_DEVELOPMENT_MODE")
+    error_message = "Cannot pass IS_DEVELOPMENT_MODE as a general environment variable; add connector id to `non_production_connectors` instead."
+  }
+
+  validation {
+    condition     = !contains(keys(var.general_environment_variables), "EMAIL_CANONICALIZATION")
+    error_message = "Use `email_canonicalization` instead of passing EMAIL_CANONICALIZATION as a general environment variable."
+  }
 }
 
 variable "pseudonymize_app_ids" {
@@ -122,6 +132,11 @@ variable "email_canonicalization" {
   type        = string
   description = "defines how email address are processed prior to hashing, hence which are considered 'canonically equivalent'; one of 'STRICT' (default and most standard compliant) or 'IGNORE_DOTS' (probably most in line with user expectations)"
   default     = "IGNORE_DOTS"
+
+  validation {
+    condition     = var.email_canonicalization == "STRICT" || var.email_canonicalization == "IGNORE_DOTS"
+    error_message = "`email_canonicalization` must be one of 'STRICT' or 'IGNORE_DOTS'."
+  }
 }
 
 variable "gcp_region" {

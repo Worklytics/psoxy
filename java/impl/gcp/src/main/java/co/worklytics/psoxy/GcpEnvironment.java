@@ -2,19 +2,19 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
+import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Value;
-import lombok.experimental.SuperBuilder;
 
 import javax.inject.Inject;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.Set;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class GcpEnvironment implements HostEnvironment {
 
-    public static Object ApiModeConfigProperty;
 
     // https://cloud.google.com/functions/docs/configuring/env-var#newer_runtimes
     // now: https://cloud.google.com/run/docs/container-contract#env-vars  ??
@@ -23,24 +23,13 @@ public class GcpEnvironment implements HostEnvironment {
         ;
     }
 
-    interface HttpInvocationConfig {
+    @Builder
+    @Value
+    static class ApiModeConfig {
 
         /**
          * the URL of the service, e.g. "https://my-service-12345.a.run.app"
          */
-        String getServiceUrl();
-
-        enum HttpInvocationConfigProperty implements co.worklytics.psoxy.gateway.ConfigService.ConfigProperty {
-
-            SERVICE_URL,
-        }
-
-    }
-
-    @Builder
-    @Value
-    static class ApiModeConfig implements HttpInvocationConfig {
-
         String serviceUrl;
 
         /**
@@ -50,14 +39,20 @@ public class GcpEnvironment implements HostEnvironment {
          */
         String pubSubTopic;
 
-        private enum ApiModeConfigProperty implements co.worklytics.psoxy.gateway.ConfigService.ConfigProperty {
+        @VisibleForTesting
+        enum ApiModeConfigProperty implements co.worklytics.psoxy.gateway.ConfigService.ConfigProperty {
 
             PUB_SUB_TOPIC,
+            SERVICE_URL,
         }
 
         static ApiModeConfig fromConfigService(ConfigService configService) {
+            if (!(configService instanceof CompositeConfigService)) {
+                throw new IllegalStateException("configService must be a CompositeConfigService");
+            }
+
             return ApiModeConfig.builder()
-                .serviceUrl(configService.getConfigPropertyOrError(HttpInvocationConfig.HttpInvocationConfigProperty.SERVICE_URL))
+                .serviceUrl(configService.getConfigPropertyOrError(ApiModeConfig.ApiModeConfigProperty.SERVICE_URL))
                 .pubSubTopic(configService.getConfigPropertyOrError(ApiModeConfig.ApiModeConfigProperty.PUB_SUB_TOPIC))
                 .build();
         }
@@ -66,7 +61,7 @@ public class GcpEnvironment implements HostEnvironment {
 
     @Builder
     @Value
-    static class WebhookCollectorModeConfig implements  HttpInvocationConfig {
+    static class WebhookCollectorModeConfig {
 
         /**
          * the URL of the service, e.g. "https://my-service-12345.a.run.app"
@@ -101,11 +96,13 @@ public class GcpEnvironment implements HostEnvironment {
             BATCH_SIZE,
 
             BATCH_INVOCATION_TIMEOUT_SECONDS,
+
+            SERVICE_URL,
         }
 
         static WebhookCollectorModeConfig fromConfigService(ConfigService configService) {
             return WebhookCollectorModeConfig.builder()
-                .serviceUrl(configService.getConfigPropertyOrError(HttpInvocationConfig.HttpInvocationConfigProperty.SERVICE_URL))
+                .serviceUrl(configService.getConfigPropertyOrError(WebhookCollectorModeConfig.WebhookCollectorModeConfigProperty.SERVICE_URL))
                 .batchMergeSubscription(configService.getConfigPropertyOrError(WebhookCollectorModeConfig.WebhookCollectorModeConfigProperty.BATCH_MERGE_SUBSCRIPTION))
                 .batchSize(configService.getConfigPropertyAsOptional(WebhookCollectorModeConfig.WebhookCollectorModeConfigProperty.BATCH_SIZE).map(Integer::parseInt).orElse(100))
                 .batchInvocationTimeoutSeconds(configService.getConfigPropertyAsOptional(WebhookCollectorModeConfig.WebhookCollectorModeConfigProperty.BATCH_INVOCATION_TIMEOUT_SECONDS).map(Integer::parseInt).orElse(60))

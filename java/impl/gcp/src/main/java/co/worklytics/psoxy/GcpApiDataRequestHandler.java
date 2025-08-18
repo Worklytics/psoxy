@@ -1,6 +1,8 @@
 package co.worklytics.psoxy;
 
 
+import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.HttpEventRequestDto;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
@@ -87,7 +89,7 @@ public class GcpApiDataRequestHandler {
             PubSubPushBody pubSubPushBody = objectMapper.readerFor(PubSubPushBody.class)
                 .readValue(new ByteArrayInputStream(request.getInputStream().readAllBytes()));
 
-            HttpRequest  wrappedRequest = objectMapper.readerFor(HttpRequest.class)
+            HttpEventRequest originalRequest = objectMapper.readerFor(HttpEventRequestDto.class)
                 .readValue(pubSubPushBody.message.data.getBytes(StandardCharsets.UTF_8));
 
             ApiDataRequestHandler.ProcessingContext processingContext = objectMapper.readerFor(ApiDataRequestHandler.ProcessingContext.class)
@@ -98,7 +100,7 @@ public class GcpApiDataRequestHandler {
                 .build();
 
 
-            HttpEventResponse genericResponse = requestHandler.handle(CloudFunctionRequest.of(wrappedRequest), processingContext);
+            HttpEventResponse genericResponse = requestHandler.handle(originalRequest, processingContext);
 
             // TODO: probably DO NOT want body/etc here, right??
             fillGcpResponseFromGenericResponse(response, genericResponse);

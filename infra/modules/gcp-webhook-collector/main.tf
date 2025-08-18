@@ -207,7 +207,7 @@ module "auth_issuer_secret" {
   secrets = {
     AUTH_ISSUER = {
       value       = google_cloudfunctions2_function.function.service_config[0].uri
-      description = "expected issuer of identity tokens for this collector"
+      description = "Expected issuer of identity tokens for this collector"
     },
     SERVICE_URL = {
       value       = google_cloudfunctions2_function.function.service_config[0].uri

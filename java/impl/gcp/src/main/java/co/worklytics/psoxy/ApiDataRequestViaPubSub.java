@@ -2,8 +2,8 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.HttpEventRequestDto;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
-import co.worklytics.psoxy.gateway.output.Output;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.pubsub.v1.Publisher;
 import com.google.protobuf.ByteString;
@@ -53,7 +53,7 @@ public class ApiDataRequestViaPubSub implements AsyncApiDataRequestHandler {
     public void handle(HttpEventRequest requestToProxy, ApiDataRequestHandler.ProcessingContext processingContext) {
         try {
             Publisher publisher = Publisher.newBuilder(TopicName.parse(topicName)).build();
-            ByteString data = ByteString.copyFrom(objectMapper.writeValueAsBytes(requestToProxy.getUnderlyingRepresentation()));
+            ByteString data = ByteString.copyFrom(objectMapper.writeValueAsBytes(HttpEventRequestDto.copyOf(requestToProxy)));
             PubsubMessage.Builder messageBuilder = PubsubMessage.newBuilder()
                 .putAttributes(MessageAttributes.PROCESSING_CONTEXT.getStringEncoding(), objectMapper.writeValueAsString(processingContext))
                 .setData(data);
