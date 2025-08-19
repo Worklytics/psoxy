@@ -7,7 +7,7 @@
       "object":"compliance.workspace.project",
       "id":"proj_001",
       "created_at":1.692158096299021E9,
-      "owner_id":"user_001",
+      "owner_id":"t~GJ76h9xZUIR59diahwa4Nule1RoapFfaRTpWEc-befw",
       "owner_email":"t~q25ElXlAq6kJw6w_0tJ3SyEkdzSqed70E-rQCH9_hJA@example.com",
       "builder_name":"Worklytics Builder",
       "latest_config":[
@@ -39,7 +39,7 @@
       "object":"compliance.workspace.project",
       "id":"proj_002",
       "created_at":1.692158200987654E9,
-      "owner_id":"user_002",
+      "owner_id":"t~KQP4pJfKSLCubnkhYg1vmW5TKTMRtnVDl6K-KgJak-A",
       "owner_email":"t~dTAxZmWVTZNHr3Tj4Xm3Xgmynd--1WD4MKuALIEZv5M@example.com",
       "builder_name":"EU Builder",
       "sharing":{
@@ -54,7 +54,7 @@
         "recipients":[
           {
             "object":"compliance.workspace.project.shared_user",
-            "id":"user_003",
+            "id":"t~oqHI8ZTSz0Q8ME7DhnaYYKwCcWyg4f1v4aeyTNqi3iE",
             "email":"t~vONyxRAf-f2apLTFmkhJH4GPi3gmbaSRDoeCpviD1jY@example.com",
             "permissions":{
               "object":"compliance.workspace.project.permissions",
