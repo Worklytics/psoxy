@@ -310,8 +310,8 @@ resource "google_cloud_run_service_iam_binding" "invokers" {
     [for email in var.invoker_sa_emails : "serviceAccount:${email}"],
     # testers, if any
     var.gcp_principals_authorized_to_test,
-     # itself, if async processing is enabled
-    var.enable_async_processing ? [ "serviceAccount:${var.service_account_email}" ] : [],
+    # itself, if async processing is enabled
+    var.enable_async_processing ? ["serviceAccount:${var.service_account_email}"] : [],
   )
 }
 

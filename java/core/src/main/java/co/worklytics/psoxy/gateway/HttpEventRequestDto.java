@@ -4,25 +4,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.Setter;
 
 /**
  * a JSON-serializable representation of an HttpEventRequest
  */
 @Builder
 @Getter
+@Setter
+@NoArgsConstructor // for Jackson
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class HttpEventRequestDto implements HttpEventRequest {
 
     private String path;
+    @JsonProperty("query")
     private String query;
     private String httpMethod;
     private byte[] body;
+
+    @JsonProperty("clientIp")
     private String clientIp;
+
     private Map<String, List<String>> headers;
     private Boolean https;
 

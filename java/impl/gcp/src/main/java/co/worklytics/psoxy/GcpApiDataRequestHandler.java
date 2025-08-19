@@ -6,12 +6,16 @@ import co.worklytics.psoxy.gateway.HttpEventRequestDto;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 import dagger.Lazy;
+import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.RandomUtils;
@@ -24,6 +28,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -70,13 +76,19 @@ public class GcpApiDataRequestHandler {
     public void service(HttpRequest request, HttpResponse response) {
 
         // check if request is invocation via PubSub
+        // as of 2025-08-19, appears as 'APIs-Google; (+https://developers.google.com/webmasters/APIs-Google.html)'
         Boolean userAgentIsPubSub = request.getFirstHeader(HttpHeaders.USER_AGENT)
-            .map(userAgent -> userAgent.contains(gcpEnvironment.getPubSubUserAgent()))
+            .map(userAgent -> 
+                userAgent.contains(gcpEnvironment.getGoogleApisUserAgent()) || // in practice, this is how invocation for Cloud Run v2 via PubSub is coming
+                userAgent.contains(gcpEnvironment.getPubSubUserAgent()))
             .orElse(false);
 
         if (userAgentIsPubSub) {
-            // potentially async case - PubSub push invocation
+            if (envVarsConfigService.isDevelopment()) {
+                log.log(Level.INFO, "PubSub push invocation detected");
+            }
 
+            // potentially async case - PubSub push invocation
             if (request.getFirstHeader(GcpEnvironment.PUBSUB_DELIVERY_ATTEMPT_HEADER).map(Integer::parseInt).orElse(-1) > MAX_ASYNC_ATTEMPTS) {
                 log.log(Level.SEVERE, "Max PubSub delivery attempts exceeded, dropping message");
                 response.setStatusCode(org.apache.hc.core5.http.HttpStatus.SC_NO_CONTENT, "Max delivery attempts exceeded");
@@ -89,11 +101,15 @@ public class GcpApiDataRequestHandler {
             PubSubPushBody pubSubPushBody = objectMapper.readerFor(PubSubPushBody.class)
                 .readValue(new ByteArrayInputStream(request.getInputStream().readAllBytes()));
 
+            if (envVarsConfigService.isDevelopment()) {
+                log.log(Level.INFO, "PubSub push body: " + pubSubPushBody);
+            }
+
             HttpEventRequest originalRequest = objectMapper.readerFor(HttpEventRequestDto.class)
-                .readValue(pubSubPushBody.message.data.getBytes(StandardCharsets.UTF_8));
+                .readValue(Base64.getDecoder().decode(pubSubPushBody.getMessage().getData().getBytes(StandardCharsets.UTF_8)));
 
             ApiDataRequestHandler.ProcessingContext processingContext = objectMapper.readerFor(ApiDataRequestHandler.ProcessingContext.class)
-                .readValue(pubSubPushBody.message.attributes.get(ApiDataRequestViaPubSub.MessageAttributes.PROCESSING_CONTEXT.getStringEncoding()));
+                .readValue(pubSubPushBody.getMessage().getAttributes().get(ApiDataRequestViaPubSub.MessageAttributes.PROCESSING_CONTEXT.getStringEncoding()));
 
             processingContext = processingContext.toBuilder()
                 .async(true)
@@ -200,15 +216,43 @@ public class GcpApiDataRequestHandler {
         }
     }
 
+    @Data
     public static class PubSubPushBody {
-        public PubSubMessage message;
-        public String subscription;
+        
+        String subscription;
 
+        PubSubMessage message;
+
+
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        Map<String, Object> unmapped = new HashMap<>();
+
+        @JsonAnySetter
+        void setAttribute(String key, Object value) {
+            unmapped.put(key, value);
+        }
+
+        /**
+         * NOTE: json for this seems to have BOTH snake_case and camelCase fields for messageId, publishTime, ...
+         */
+        @Data
         public static class PubSubMessage {
-            public String data;
-            public Map<String, String> attributes;
-            public String messageId;
-            public String publishTime;
+            String messageId;
+
+            String publishTime;
+
+            Map<String, String> attributes;
+
+            String data;
+
+
+            @JsonInclude(JsonInclude.Include.NON_EMPTY)
+            Map<String, Object> unmapped = new HashMap<>();
+
+            @JsonAnySetter
+            void setAttribute(String key, Object value) {
+                unmapped.put(key, value);
+            }
         }
     }
 }

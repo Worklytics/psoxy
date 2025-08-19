@@ -15,7 +15,6 @@ import java.util.Set;
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class GcpEnvironment implements HostEnvironment {
 
-
     // https://cloud.google.com/functions/docs/configuring/env-var#newer_runtimes
     // now: https://cloud.google.com/run/docs/container-contract#env-vars  ??
     enum RuntimeEnvironmentVariables {
@@ -130,6 +129,9 @@ public class GcpEnvironment implements HostEnvironment {
 
     @Getter
     final String pubSubUserAgent = "Google-Cloud-PubSub";
+
+    @Getter
+    final String googleApisUserAgent = "APIs-Google";
 
     @Getter
     final String cloudSchedulerUserAgent = "Google-Cloud-Scheduler";
