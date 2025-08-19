@@ -31,8 +31,13 @@
             "content":{
               "object":"compliance.workspace.conversation.message.content",
               "type":"text",
-              "value":"What are the key trends in AI for 2024?"
-            }
+              "value":"{\"length\":39,\"word_count\":9}"
+            },
+            "files":[
+              {
+                "id":"file_001"
+              }
+            ]
           }
         ]
       }
@@ -65,7 +70,7 @@
             "content":{
               "object":"compliance.workspace.conversation.message.content",
               "type":"text",
-              "value":"What are the key trends in AI for 2024?"
+              "value":"{\"length\":39,\"word_count\":9}"
             }
           }
         ]
