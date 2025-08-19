@@ -96,6 +96,11 @@ resource "google_pubsub_subscription" "async_output_subscription" {
 
 # IAM permissions for Pub/Sub async processing
 
+locals {
+  # TODO: there's a `google_project_service_identity` resource in `google-beta` provider, which we might be able to leverage from 0.6+
+  pubsub_service_identity = "service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+}
+
 # 1. Allow the Cloud Function's service account to publish to the topic
 resource "google_pubsub_topic_iam_member" "function_publisher" {
   count = var.enable_async_processing ? 1 : 0
@@ -106,24 +111,17 @@ resource "google_pubsub_topic_iam_member" "function_publisher" {
   role    = "roles/pubsub.publisher"
 }
 
-# 2. Allow the Pub/Sub service account to invoke the Cloud Function
-resource "google_cloud_run_service_iam_member" "pubsub_invoker" {
+# 2. Allow the Pub/Sub service account sign messages as the function'sSA
+# this is in ADDITION to allowing the function's SA to invoke the function itself, which is ABOVE
+#
+# NOTE: according to https://cloud.google.com/pubsub/docs/authenticate-push-subscriptions#configure_for_push_authentication
+# we need to grant Project-level token creator role to PubSub service account - but seems NOT in practice (and per ChatGPT)
+resource "google_service_account_iam_member" "pubsub_oidc_minter" {
   count = var.enable_async_processing ? 1 : 0
 
-  project  = google_cloudfunctions2_function.function.project
-  location = google_cloudfunctions2_function.function.location
-  service  = google_cloudfunctions2_function.function.name
-  member   = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-  role     = "roles/run.invoker"
-}
-
-# 3. Allow the Cloud Function's service account to create signed URLs for Pub/Sub authentication
-resource "google_project_iam_member" "function_token_creator" {
-  count = var.enable_async_processing ? 1 : 0
-
-  project = var.project_id
-  member  = "serviceAccount:${var.service_account_email}"
-  role    = "roles/iam.serviceAccountTokenCreator"
+  service_account_id = data.google_service_account.function.id
+  member             = "serviceAccount:${local.pubsub_service_identity}"
+  role               = "roles/iam.serviceAccountOpenIdTokenCreator"
 }
 
 module "side_output_bucket" {
@@ -308,8 +306,12 @@ resource "google_cloud_run_service_iam_binding" "invokers" {
   role = "roles/run.invoker"
 
   members = concat(
+    # actually expected callers
     [for email in var.invoker_sa_emails : "serviceAccount:${email}"],
-    var.gcp_principals_authorized_to_test
+    # testers, if any
+    var.gcp_principals_authorized_to_test,
+     # itself, if async processing is enabled
+    var.enable_async_processing ? [ "serviceAccount:${var.service_account_email}" ] : [],
   )
 }
 
