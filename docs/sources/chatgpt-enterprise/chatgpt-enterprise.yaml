@@ -35,9 +35,14 @@ endpoints:
           - "$.data[*].user_email"
           - "$.data[*].user_id"
         encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.data[*].files[*].name"
+          - "$.data[*].files[*].downloadUrl"
       - !<textDigest>
         jsonPaths:
-          - "$.data[*].title"
+          - "$.data[*]..title"
+          - "$.data[*]..content.value"
     responseSchema:
       type: "object"
       properties:
