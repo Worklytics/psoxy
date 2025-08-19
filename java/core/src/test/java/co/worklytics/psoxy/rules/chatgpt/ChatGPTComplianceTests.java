@@ -23,7 +23,7 @@ public class ChatGPTComplianceTests extends JavaRulesTestBaseCase {
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/conversations", "conversations.json"),
-            InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/conversations/some_id/messages", "messages.json"),
+            InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/conversations/some_id/messages", "conversation-messages.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/conversations?after=blabla&limit=100", "conversations.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/{workspaceId}/automations", "automations.json"),
             InvocationExample.of("https://api.chatgpt.com/v1/compliance/workspaces/some_id/projects", "projects.json"),
