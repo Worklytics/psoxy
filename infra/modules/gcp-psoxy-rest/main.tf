@@ -87,8 +87,9 @@ resource "google_pubsub_subscription" "async_output_subscription" {
   message_retention_duration = "604800s" # 7 days retention
   enable_message_ordering    = false
 
+  # Configure expiration policy of the subscription; this is NOT about the messages themselves.
   expiration_policy {
-    ttl = "604800s" # 7 days
+    ttl = "" # No expiration
   }
 
   labels = var.default_labels

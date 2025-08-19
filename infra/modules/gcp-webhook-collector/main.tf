@@ -362,9 +362,9 @@ resource "google_pubsub_subscription" "webhook_subscription" {
   # Enable batching for efficient processing
   enable_message_ordering = false
 
-  # Configure expiration policy
+  # Configure expiration policy of the subscription; this is NOT about the messages themselves.
   expiration_policy {
-    ttl = "2678400s" # 31 days
+    ttl = "" # No expiration
   }
 
   labels = var.default_labels
