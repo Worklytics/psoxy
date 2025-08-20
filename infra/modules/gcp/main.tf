@@ -39,7 +39,8 @@ resource "google_project_service" "gcp_infra_api" {
     # "serviceusage.googleapis.com", # manage service APIs via terraform (prob already
     ],
     var.support_bulk_mode ? local.services_required_for_bulk_mode : [],
-    var.support_webhook_collectors ? local.services_required_for_webhook_collectors : []
+    var.support_webhook_collectors ? local.services_required_for_webhook_collectors : [],
+    local.provision_serverless_connector ? ["vpcaccess.googleapis.com"] : []
   ))
 
   service                    = each.key
@@ -364,6 +365,48 @@ resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
 }
 
 
+# BEGIN Serverless VPC Access connector (conditional)
+locals {
+  MAX_SERVERLESS_CONNECTOR_NAME_LENGTH = 25
+
+  provision_serverless_connector = var.vpc_config != null && try(var.vpc_config.serverless_connector, null) == null
+  legal_connector_prefix         = substr(var.environment_id_prefix, 0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH)
+  legal_connector_suffix         = substr("connector", 0, max(0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH - length(var.environment_id_prefix)))
+}
+
+resource "google_vpc_access_connector" "connector" {
+  count = local.provision_serverless_connector ? 1 : 0
+
+  name          = "${local.legal_connector_prefix}${local.legal_connector_suffix}"
+  region        = var.gcp_region
+  network       = try(var.vpc_config.network, null)                         # network MUST be provided if serverless_connector is not provided
+  ip_cidr_range = try(var.vpc_config.serverless_connector_cidr_range, null) # seems like MUST be a /28 ??? not documented, but others give errors
+
+  dynamic "subnet" {
+    for_each = try(var.vpc_config.subnetwork, null) == null ? [] : [var.vpc_config.subnetwork]
+
+    content {
+      name       = subnet.value
+      project_id = var.project_id
+    }
+  }
+
+}
+
+locals {
+  vpc_config = try(
+    {
+      serverless_connector = google_vpc_access_connector.connector[0].id
+    },
+    {
+      serverless_connector = var.vpc_config.serverless_connector
+    },
+    null
+  )
+}
+# END VPC (conditional)
+
+
 
 output "artifacts_bucket_name" {
   value = local.artifact_bucket_name
@@ -448,4 +491,9 @@ output "oidc_token_verifier_role_id" {
 
 output "webhook_batch_invoker_sa_email" {
   value = google_service_account.webhook_batch_invoker.email
+}
+
+output "vpc_config" {
+  value       = local.vpc_config
+  description = "VPC configuration for the Cloud Run function. Possibly 'null' if no VPC is configured."
 }

@@ -44,6 +44,7 @@ NOTE: if you're connecting to Google Workspace as a data source, you'll also nee
   - [Pub/Sub API](https://console.cloud.google.com/apis/library/pubsub.googleapis.com) (`pubsub.googleapis.com`)
   - [Secret Manager API](https://console.cloud.google.com/apis/library/secretmanager.googleapis.com) (`secretmanager.googleapis.com`)
   - [Storage API](https://console.cloud.google.com/apis/library/storage-api.googleapis.com) (`storage-api.googleapis.com`)
+  - [VPC Accesss API](https://console.cloud.google/com/apis/library/vpcaccess.googleapis.com) (`vpcaccess.googleapis.com`), if relying on our provisioning a Serverless VPC Connector
 
 ### Terraform State Backend
 
@@ -91,7 +92,8 @@ So this is connecting your proxy instances to and through a VPC, but they are ot
 
 NOTE: Historically, there were GCP Cloud Functions; these are now called "GCP Cloud Run Functions (Gen1)"; we are using what would be the "GCP Cloud Run Functions (gen2)", which Google now brands simply as "Cloud Run Functions".
 
-NOTE: VPC Serverless Connectors, whether managed via our provided Terraform or not, are a potential bottleneck; please monitor to ensure sufficient capacity for your workload. 
+NOTE: VPC Serverless Connectors, whether managed via our provided Terraform or not, are a potential bottleneck; please monitor to ensure sufficient capacity for your workload. If the one we
+provision is not sufficient for your use-case, please provision it externally and pass it in. 
 
 NOTE: VPC resources, including serverless connectors, are billable GCP resources; provisioning and using them will increase your costs for hosting your proxy instances.
 
@@ -104,16 +106,18 @@ local {
 }
 
 resource "google_compute_network" "vpc" {
-  name = "${local.environment_id}vpc"
+  project                 = "my-gcp-project"
+  name                    = "${local.environment_id}vpc"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "subnet" {
-  name          = "${local.environment_id}subnet"
-  ip_cidr_range = "10.6.0.0/24"
-  region        = var.gcp_region
-  network       = google_compute_network.vpc.id
-  private_ip_google_access = true
+  project                  = "my-gcp-project"
+  network                  = google_compute_network.vpc.id
+  region                   = var.gcp_region
+  name                     = "${local.environment_id}subnet"
+  ip_cidr_range            = "10.6.0.0/24"
+  private_ip_google_access = true
 }
 ```
 

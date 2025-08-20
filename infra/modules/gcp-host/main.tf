@@ -19,6 +19,7 @@ module "psoxy" {
   source = "../../modules/gcp"
 
   project_id                   = var.gcp_project_id
+  gcp_region                   = var.gcp_region
   environment_id_prefix        = local.environment_id_prefix
   psoxy_base_dir               = var.psoxy_base_dir
   deployment_bundle            = var.deployment_bundle
@@ -30,39 +31,8 @@ module "psoxy" {
   default_labels               = var.default_labels
   support_bulk_mode            = length(var.bulk_connectors) > 0
   support_webhook_collectors   = length(var.webhook_collectors) > 0
+  vpc_config                   = var.vpc_config
 }
-
-# BEGIN Serverless VPC Access connector (conditional)
-# q: move this to gcp module?
-#  for: reduce repetitve code, keep top-level module simple, re-use, stronger interface
-#  against: deeper module hierarchy, not canonical terraform style (inversion of control)
-locals {
-  provision_serverless_connector = var.vpc_config != null && var.vpc_config.serverless_connector == null
-}
-
-resource "google_vpc_access_connector" "connector" {
-  count = local.provision_serverless_connector ? 1 : 0
-
-  name    = "${local.environment_id_prefix}serverless-connector"
-  region  = var.gcp_region
-  network = try(var.vpc_config.network, null) # network MUST be provided if serverless_connector is not provided
-
-  ip_cidr_range = var.vpc_config.serverless_connector_cidr_range
-}
-
-locals {
-  vpc_config = try(
-    {
-      serverless_connector = google_vpc_access_connector.connector[0].id
-    },
-    {
-      serverless_connector = var.vpc_config.serverless_connector
-    },
-    null
-  )
-}
-# END VPC (conditional)
-
 
 
 # BEGIN API CONNECTORS
@@ -292,6 +262,7 @@ module "webhook_collector" {
   path_to_repo_root                  = var.psoxy_base_dir
   config_parameter_prefix            = local.config_parameter_prefix
   invoker_sa_emails                  = var.worklytics_sa_emails
+  vpc_config                         = module.psoxy.vpc_config
   default_labels                     = var.default_labels
   gcp_principals_authorized_to_test  = var.gcp_principals_authorized_to_test
   bucket_write_role_id               = module.psoxy.bucket_write_role_id
@@ -319,7 +290,7 @@ module "webhook_collector" {
 
   secret_bindings = module.psoxy.secrets
 
-  vpc_config = local.vpc_config
+
 }
 
 # END WEBHOOK COLLECTORS
@@ -343,6 +314,7 @@ module "bulk_connector" {
   psoxy_base_dir                    = var.psoxy_base_dir
   bucket_write_role_id              = module.psoxy.bucket_write_role_id
   secret_bindings                   = module.psoxy.secrets
+  vpc_config                        = module.psoxy.vpc_config
   example_file                      = try(each.value.example_file, null)
   instructions_template             = try(each.value.instructions_template, null)
   input_expiration_days             = var.bulk_input_expiration_days
@@ -365,9 +337,8 @@ module "bulk_connector" {
       EMAIL_CANONICALIZATION = var.email_canonicalization
     }
   )
-
-  vpc_config = local.vpc_config
 }
+
 # END BULK CONNECTORS
 
 # BEGIN LOOKUP TABLES
