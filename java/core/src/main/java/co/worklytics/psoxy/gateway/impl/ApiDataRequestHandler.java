@@ -301,7 +301,7 @@ public class ApiDataRequestHandler {
                 .orElse(null);
 
         // return 400 if request body is non-empty, but method is GET or HEAD
-        if (HTTP_METHODS_WHICH_DONT_SUPPORT_BODY.stream().anyMatch(requestToProxy.getHttpMethod().toUpperCase()::equals)) {
+        if (HTTP_METHODS_WHICH_DONT_SUPPORT_BODY.contains(requestToProxy.getHttpMethod().toUpperCase())) {
             if (requestBody != null) {
                 // rather than have google HttpClient blow up with its own exception, causing 500 from proxy
                 return HttpEventResponse.builder()
