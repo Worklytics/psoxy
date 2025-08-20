@@ -13,9 +13,6 @@ locals {
   config_parameter_prefix               = var.config_parameter_prefix == "" ? local.default_config_parameter_prefix : var.config_parameter_prefix
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
-
-  provision_vpc   = var.provision_vpc != null
-  fixed_egress_ip = local.provision_vpc && var.vpc_config.fixed_egress_ip
 }
 
 module "psoxy" {
@@ -35,66 +32,34 @@ module "psoxy" {
   support_webhook_collectors   = length(var.webhook_collectors) > 0
 }
 
-# BEGIN VPC (conditional)
+# BEGIN Serverless VPC Access connector (conditional)
 # q: move this to gcp module?
 #  for: reduce repetitve code, keep top-level module simple, re-use, stronger interface
 #  against: deeper module hierarchy, not canonical terraform style (inversion of control)
-resource "google_compute_network" "vpc" {
-  count = local.provision_vpc ? 1 : 0
-
-  name                    = "${local.environment_id_prefix}vpc"
-  auto_create_subnetworks = false
+locals {
+  provision_serverless_connector = var.vpc_config != null && var.vpc_config.serverless_connector == null
 }
 
-resource "google_compute_subnetwork" "subnet" {
-  count = local.provision_vpc ? 1 : 0
-
-  name = "${local.environment_id_prefix}subnet"
-
-  network                  = google_compute_network.vpc[0].id
-  region                   = var.gcp_region
-  ip_cidr_range            = var.vpc_config.subnet_cidr_range
-  private_ip_google_access = true
-}
-
-# Serverless VPC Access connector
 resource "google_vpc_access_connector" "connector" {
-  count = local.provision_vpc ? 1 : 0
+  count = local.provision_serverless_connector ? 1 : 0
 
   name    = "${local.environment_id_prefix}serverless-connector"
   region  = var.gcp_region
-  network = google_compute_network.vpc[0].name
+  network = try(var.vpc_config.network, null) # network MUST be provided if serverless_connector is not provided
 
   ip_cidr_range = var.vpc_config.serverless_connector_cidr_range
 }
 
-# Static egress IP via Cloud NAT
-resource "google_compute_address" "fixed_egress_ip" {
-  count = local.fixed_egress_ip ? 1 : 0
-
-  name   = "${local.environment_id_prefix}nat-egress-ip"
-  region = var.gcp_region
-}
-
-resource "google_compute_router" "router" {
-  count = local.provision_vpc ? 1 : 0
-
-  name    = "${local.environment_id_prefix}router"
-  region  = var.gcp_region
-  network = google_compute_network.vpc[0].name
-}
-
-resource "google_compute_router_nat" "nat" {
-  count = local.provision_vpc ? 1 : 0
-
-  name   = "${local.environment_id_prefix}nat"
-  router = google_compute_router.router[0].name
-  region = var.gcp_region
-
-  nat_ip_allocate_option = local.fixed_egress_ip ? "MANUAL_ONLY" : "AUTO_ONLY"
-  nat_ips                = local.fixed_egress_ip ? [google_compute_address.fixed_egress_ip[0].self_link] : []
-
-  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+locals {
+  vpc_config = try(
+    {
+      serverless_connector = google_vpc_access_connector.connector[0].id
+    },
+    {
+      serverless_connector = var.vpc_config.serverless_connector
+    },
+    null
+  )
 }
 # END VPC (conditional)
 
@@ -353,6 +318,8 @@ module "webhook_collector" {
   )
 
   secret_bindings = module.psoxy.secrets
+
+  vpc_config = local.vpc_config
 }
 
 # END WEBHOOK COLLECTORS
@@ -398,6 +365,8 @@ module "bulk_connector" {
       EMAIL_CANONICALIZATION = var.email_canonicalization
     }
   )
+
+  vpc_config = local.vpc_config
 }
 # END BULK CONNECTORS
 

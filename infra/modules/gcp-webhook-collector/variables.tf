@@ -242,3 +242,19 @@ variable "todo_step" {
   description = "of all todos, where does this one logically fall in sequence"
   default     = 1
 }
+
+variable "vpc_config" {
+  type = object({
+    serverless_connector = string # Format: projects/{project}/locations/{location}/connectors/{connector}
+  })
+  description = "VPC configuration for the Cloud Run function."
+  default     = null
+
+  validation {
+    condition = (
+      var.vpc_config == null ||
+      can(regex("^projects/[^/]+/locations/[^/]+/connectors/[^/]+$", var.vpc_config.serverless_connector))
+    )
+    error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
+  }
+}

@@ -134,6 +134,9 @@ resource "google_cloudfunctions2_function" "function" {
     available_memory      = "${var.available_memory_mb}M"
     ingress_settings      = "ALLOW_ALL"
 
+    vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector
+    vpc_connector_egress_settings = var.vpc_config == null ? null : "ALL_TRAFFIC"
+
     environment_variables = merge(
       local.required_env_vars,
       var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
