@@ -130,6 +130,18 @@ variable "gcp_region" {
   default     = "us-central1"
 }
 
+variable "vpc_config" {
+  type = object({
+    subnet_cidr_range               = optional(string, "10.10.0.0/24")
+    serverless_connector_cidr_range = optional(string, "10.8.0.0/24")
+    fixed_egress_ip                 = optional(bool, false)
+  })
+
+  description = "**alpha** configuration of a VPC to be used by the Psoxy instances, if any (null for none)"
+  default     = null
+}
+
+
 
 variable "secret_replica_locations" {
   type        = list(string)

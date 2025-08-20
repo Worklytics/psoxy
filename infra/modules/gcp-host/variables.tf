@@ -109,6 +109,17 @@ variable "secret_replica_locations" {
   ]
 }
 
+variable "vpc_config" {
+  type = object({
+    subnet_cidr_range               = optional(string, "10.10.0.0/24")
+    serverless_connector_cidr_range = optional(string, "10.8.0.0/24")
+    fixed_egress_ip                 = optional(bool, false)
+  })
+
+  description = "**alpha** configuration of a VPC to be used by the Psoxy instances, if any (null for none)"
+  default     = null
+}
+
 variable "kms_key_ring" {
   type        = string
   description = "name of KMS key ring on which to provision any required KMS keys; if omitted, one will be created for you"
