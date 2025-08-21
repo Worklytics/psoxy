@@ -160,3 +160,9 @@ variable "salesforce_example_account_id" {
   default     = null
   description = "(Only required if using Salesforce connector) Id of the account id for using as an example calls for Salesforce (ex: 0015Y00002c7g95QAA)"
 }
+
+variable "example_api_calls_month_start" {
+  type        = string
+  default     = "2025-08-01T00:00:00Z"
+  description = "RFC3339 date of the beginning of the month to use for example API calls"
+}
