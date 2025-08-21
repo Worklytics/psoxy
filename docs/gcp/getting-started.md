@@ -101,7 +101,7 @@ NOTE: VPC resources, including serverless connectors, are billable GCP resources
 ### Min Network Example
 
 ```hcl
-local {
+locals {
   environment_id = "proxy_example_"
 }
 
