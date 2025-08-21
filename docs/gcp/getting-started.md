@@ -127,7 +127,7 @@ To have your proxy instances "dial out" from a fixed IP, you must do the above a
 
 ```hcl
 # Static egress IP via Cloud NAT
-local {
+locals {
   fixed_egress_ip=true
 }
 
