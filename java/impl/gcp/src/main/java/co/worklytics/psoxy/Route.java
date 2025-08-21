@@ -33,12 +33,6 @@ public class Route implements HttpFunction {
 
         container.httpRequestHandler().service(request, response);
 
-        ExecutorService executorService = container.executorService();
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("Shutdown hook triggered");
-            executorService.shutdown();
-        }));
     }
 
     void injectDependenciesIfNeeded() {
