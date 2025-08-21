@@ -28,8 +28,8 @@ class GcpContainerTest {
 
         GcpContainer gcpContainer = DaggerGcpContainer.create();
 
-        HttpRequestHandler instance1 = gcpContainer.httpRequestHandler();
-        HttpRequestHandler instance2 = gcpContainer.httpRequestHandler();
+        GcpApiDataRequestHandler instance1 = gcpContainer.httpRequestHandler();
+        GcpApiDataRequestHandler instance2 = gcpContainer.httpRequestHandler();
 
         //expect singletons
         assertSame(instance1, instance2);

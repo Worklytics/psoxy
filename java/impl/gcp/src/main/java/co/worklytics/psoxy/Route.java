@@ -5,16 +5,10 @@ import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 
 import lombok.extern.java.Log;
-import java.io.IOException;
-import org.apache.commons.lang3.RandomUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import javax.inject.Inject;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.Security;
-import java.util.logging.Level;
+import java.util.concurrent.ExecutorService;
 
 /**
  * simple wrapper over HttpRequestHandler; handles spinning up the application, as needed; then
@@ -25,7 +19,6 @@ public class Route implements HttpFunction {
 
     volatile GcpContainer container;
 
-
     static {
         Security.addProvider(new BouncyCastleProvider());
     }
@@ -34,7 +27,12 @@ public class Route implements HttpFunction {
     public void service(HttpRequest request, HttpResponse response) {
         injectDependenciesIfNeeded();
 
+        if (request.getMethod() == null) {
+            log.warning("HTTP method of  com.google.cloud.functions.HttpRequest is null !???!");
+        }
+
         container.httpRequestHandler().service(request, response);
+
     }
 
     void injectDependenciesIfNeeded() {
