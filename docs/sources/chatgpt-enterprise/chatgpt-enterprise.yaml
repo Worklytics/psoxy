@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathTemplate: "/compliance/workspaces/{workspaceId}/automations"
+  - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/automations"
     allowedQueryParams:
       - "after"
       - "limit"
@@ -22,7 +22,7 @@ endpoints:
           type: "string"
         object:
           type: "string"
-  - pathTemplate: "/compliance/workspaces/{workspaceId}/conversations"
+  - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/conversations"
     allowedQueryParams:
       - "since_timestamp"
       - "after"
@@ -33,10 +33,16 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.data[*].user_email"
+          - "$.data[*].user_id"
         encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.data[*].files[*].name"
+          - "$.data[*].files[*].downloadUrl"
       - !<textDigest>
         jsonPaths:
-          - "$.data[*].title"
+          - "$.data[*]..title"
+          - "$.data[*]..content.value"
     responseSchema:
       type: "object"
       properties:
@@ -50,7 +56,7 @@ endpoints:
           type: "string"
         object:
           type: "string"
-  - pathTemplate: "/compliance/workspaces/{workspaceId}/conversations/{conversationId}/messages"
+  - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/conversations/{conversationId}/messages"
     allowedQueryParams:
       - "after"
       - "limit"
@@ -75,7 +81,7 @@ endpoints:
           type: "string"
         object:
           type: "string"
-  - pathTemplate: "/compliance/workspaces/{workspaceId}/projects"
+  - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/projects"
     allowedQueryParams:
       - "after"
       - "limit"
@@ -83,7 +89,9 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.data[*].owner_email"
+          - "$.data[*].owner_id"
           - "$..email"
+          - "$.data[*].sharing.recipients[*].id"
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
@@ -106,7 +114,7 @@ endpoints:
           type: "string"
         object:
           type: "string"
-  - pathTemplate: "/compliance/workspaces/{workspaceId}/users"
+  - pathTemplate: "/v1/compliance/workspaces/{workspaceId}/users"
     allowedQueryParams:
       - "after"
       - "limit"
@@ -114,6 +122,11 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.data[*].email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].id"
+        includeReversible: true
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
@@ -150,6 +163,8 @@ definitions:
         type: "string"
       last_active_at:
         type: "number"
+      messages:
+        $ref: "#/definitions/MessageList"
       object:
         type: "string"
       title:
@@ -211,6 +226,19 @@ definitions:
       type:
         type: "string"
       value:
+        type: "string"
+  MessageList:
+    type: "object"
+    properties:
+      data:
+        type: "array"
+        items:
+          $ref: "#/definitions/Message"
+      has_more:
+        type: "boolean"
+      last_id:
+        type: "string"
+      object:
         type: "string"
   Permissions:
     type: "object"

@@ -104,10 +104,9 @@ EOT
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
-        "/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/conversations",
-        "/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/automations",
-        "/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
+        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
+        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/conversations",
+        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/automations",
       ]
       external_token_todo : templatefile("${path.module}/docs/chatgpt/enterprise/instructions.tftpl", {
         workspace_id                = local.chat_gpt_enterprise_example_workspace_id,

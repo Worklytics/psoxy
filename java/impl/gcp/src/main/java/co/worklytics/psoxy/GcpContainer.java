@@ -3,6 +3,7 @@ package co.worklytics.psoxy;
 import dagger.Component;
 
 import javax.inject.Singleton;
+import java.util.concurrent.ExecutorService;
 
 @Singleton
 @Component(modules = {
@@ -15,11 +16,14 @@ import javax.inject.Singleton;
 interface GcpContainer {
 
     @Singleton
-    HttpRequestHandler httpRequestHandler();
+    GcpApiDataRequestHandler httpRequestHandler();
 
     @Singleton
     GcsFileEventHandler gcsFileEventHandler();
 
     @Singleton
     GcpWebhookCollectionHandler gcpWebhookCollectionHandler();
+
+    @Singleton
+    ExecutorService executorService();
 }

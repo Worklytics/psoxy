@@ -1,28 +1,34 @@
 package co.worklytics.psoxy;
 
 
-import co.worklytics.psoxy.gateway.*;
-import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
-import co.worklytics.psoxy.gateway.impl.*;
-import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
-
-import co.worklytics.psoxy.gateway.output.OutputFactory;
-import co.worklytics.psoxy.gcp.GcpKmsPublicKeyStoreClient;
+import java.time.Duration;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import com.google.cloud.ServiceOptions;
-
 import com.google.cloud.kms.v1.KeyManagementServiceClient;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
+import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.HostEnvironment;
+import co.worklytics.psoxy.gateway.LockService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
+import co.worklytics.psoxy.gateway.impl.CachingConfigServiceDecorator;
+import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
+import co.worklytics.psoxy.gateway.output.OutputFactory;
+import co.worklytics.psoxy.gcp.GcpKmsPublicKeyStoreClient;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
 import lombok.SneakyThrows;
-
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.time.Duration;
-import java.util.Optional;
 
 /**
  * defines how to fulfill dependencies that need platform-specific implementations for GCP platform
@@ -135,11 +141,33 @@ public interface GcpModule {
         return GcpEnvironment.WebhookCollectorModeConfig.fromConfigService(configService);
     }
 
+    @Provides
+    @Singleton
+    static GcpEnvironment.ApiModeConfig apiModeConfig(ConfigService configService) {
+        return GcpEnvironment.ApiModeConfig.fromConfigService(configService);
+    }
+
+    @Provides
+    @Singleton
+    static ExecutorService providesExecutorService() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Shutdown hook triggered");
+            executorService.shutdown();
+        }));
+
+        return executorService;
+    }
+
+    @Provides @Singleton
+    static AsyncApiDataRequestHandler apiDataRequestViaPubSub(ApiDataRequestViaPubSubFactory factory,
+                                                              GcpEnvironment.ApiModeConfig config) {
+        return factory.create(config.getPubSubTopic());
+    }
+
     @Module
     abstract class Bindings {
-
-        @Binds
-        abstract AsyncApiDataRequestHandler asyncApiDataRequestHandler(GcpAsyncApiDataRequestHandler asyncApiDataRequestHandler);
 
         @Binds
         @IntoSet

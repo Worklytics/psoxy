@@ -47,10 +47,6 @@ public class GcpWebhookCollectionHandler {
     EnvVarsConfigService envVarsConfigService;
     Lazy<GcpEnvironment.WebhookCollectorModeConfig> webhookCollectorModeConfig;
 
-    // TODO: arg should be configurable via env vars; could expose generally, bc although not used in AWS, may be useful logging (eg, how often is AWS invoked with 'full' batch)
-    static final Duration BATCH_TIMEOUT = Duration.ofSeconds(30);
-    static final int BATCH_SIZE = 100;
-
     // standard Bearer token prefix on Authorization header
     static final String BEARER_PREFIX = "Bearer ";
 
@@ -84,7 +80,7 @@ public class GcpWebhookCollectionHandler {
     public void handle(HttpRequest request, HttpResponse response) {
 
         // see: https://cloud.google.com/scheduler/docs/reference/rpc/google.cloud.scheduler.v1#httptarget
-        Boolean userAgentIsCloudSchedulerOrPubSub = request.getFirstHeader(HttpHeaders.USER_AGENT)
+        Boolean userAgentIsCloudScheduler = request.getFirstHeader(HttpHeaders.USER_AGENT)
             .map(s -> s.contains(gcpEnvironment.getCloudSchedulerUserAgent()))
             .orElse(false);
         Boolean cloudSchedulerHeaderTrue = request.getFirstHeader("x-cloudscheduler")
@@ -92,7 +88,7 @@ public class GcpWebhookCollectionHandler {
             .orElse(false);
 
 
-        if (userAgentIsCloudSchedulerOrPubSub || cloudSchedulerHeaderTrue) {
+        if (userAgentIsCloudScheduler || cloudSchedulerHeaderTrue) {
             // purporting to be a cloud scheduler request, so assume it's a request to process a batch
             // request SHOULD Contain Authorization header, which handleBatch should check
             handleBatch(request, response);
@@ -107,9 +103,9 @@ public class GcpWebhookCollectionHandler {
                 // assume it's a direct inbound webhook request
                 genericResponse = inboundWebhookHandler.handle(cloudFunctionRequest);
             }
-            
+
             try {
-                HttpRequestHandler.fillGcpResponseFromGenericResponse(response, genericResponse);
+                GcpApiDataRequestHandler.fillGcpResponseFromGenericResponse(response, genericResponse);
             } catch (IOException e) {
                 log.log(Level.WARNING, "IOException while filling GCP response from generic response", e);
                 response.setStatusCode(500, "Internal Server Error");
@@ -136,7 +132,7 @@ public class GcpWebhookCollectionHandler {
      * @throws AuthorizationException if authorization fails; potentially wrapping IOException or IllegalArgumentException if getting public key fails, etc.
      */
     void verifyAuthorization(HttpRequest request) throws AuthorizationException {
-        Optional<String> jwt = request.getFirstHeader("Authorization")
+        Optional<String> jwt = request.getFirstHeader(HttpHeaders.AUTHORIZATION)
             .map(s -> s.replace(BEARER_PREFIX, ""));
 
         if (envVarsConfigService.isDevelopment()) {
@@ -151,22 +147,24 @@ public class GcpWebhookCollectionHandler {
         // TODO: hack; exploits that audience happens to be the same as the issuer in the inbound webhook context
         // would perhaps be *better* to hack this in the reverse; put the endpoint URL into config, and then
         // use that as Issuer in the inbound webhook context, Audience in the internal service context
+
+        //TODO: fill
         String endpointUrl = configService.getConfigPropertyOrError(WebhookCollectorModeConfigProperty.AUTH_ISSUER);
 
         GoogleIdTokenVerifier internalServiceVerifier = googleIdTokenVerifierFactory.getVerifierForAudience(endpointUrl);
-       
+
         GoogleIdToken idToken = null;
         try {
             idToken = GoogleIdToken.parse(internalServiceVerifier.getJsonFactory(), jwt.get());
             if (idToken == null) {
                 throw new AuthorizationException("Unauthorized - failed to parse JWT");
             }
-            
+
             if (!idToken.getPayload().getIssuer().equals(gcpEnvironment.getInternalServiceAuthIssuer())) {
                 log.log(Level.WARNING, "Unauthorized - unacceptable issuer: " + idToken.getPayload().getIssuer());
                 throw new AuthorizationException("Unauthorized - unacceptable issuer");
             }
-    
+
             internalServiceVerifier.verifyOrThrow(idToken);
             return; // success
         } catch (IOException | IllegalArgumentException e) {
@@ -235,7 +233,7 @@ public class GcpWebhookCollectionHandler {
                 } else {
                     possibleAdditionalMessagesWaiting = false;
                 }
-            } while (possibleAdditionalMessagesWaiting 
+            } while (possibleAdditionalMessagesWaiting
                 && stopWatch.getTime(TimeUnit.SECONDS) < webhookCollectorModeConfig.get().getBatchInvocationTimeoutSeconds());
 
             if (possibleAdditionalMessagesWaiting) {

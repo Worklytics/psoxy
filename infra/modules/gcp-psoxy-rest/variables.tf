@@ -46,6 +46,15 @@ variable "secret_bindings" {
   default     = {}
 }
 
+variable "secret_replica_locations" {
+  type        = list(string)
+  description = "list of locations to replicate secrets to. See https://cloud.google.com/secret-manager/docs/locations"
+  default = [
+    "us-central1",
+    "us-west1"
+  ]
+}
+
 variable "artifacts_bucket_name" {
   type        = string
   description = "Name of the bucket where artifacts are stored"
