@@ -5,6 +5,7 @@ import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventRequestDto;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler.ProcessingContext;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -26,6 +27,7 @@ import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
@@ -98,28 +100,7 @@ public class GcpApiDataRequestHandler {
             // verify auth to ENSURE is legit PubSub push callback
             verifyAuthentication(request);
 
-            PubSubPushBody pubSubPushBody = objectMapper.readerFor(PubSubPushBody.class)
-                .readValue(new ByteArrayInputStream(request.getInputStream().readAllBytes()));
-
-            if (envVarsConfigService.isDevelopment()) {
-                log.log(Level.INFO, "PubSub push body: " + pubSubPushBody);
-            }
-
-            HttpEventRequest originalRequest = objectMapper.readerFor(HttpEventRequestDto.class)
-                .readValue(Base64.getDecoder().decode(pubSubPushBody.getMessage().getData().getBytes(StandardCharsets.UTF_8)));
-
-            ApiDataRequestHandler.ProcessingContext processingContext = objectMapper.readerFor(ApiDataRequestHandler.ProcessingContext.class)
-                .readValue(pubSubPushBody.getMessage().getAttributes().get(ApiDataRequestViaPubSub.MessageAttributes.PROCESSING_CONTEXT.getStringEncoding()));
-
-            processingContext = processingContext.toBuilder()
-                .async(true)
-                .build();
-
-
-            HttpEventResponse genericResponse = requestHandler.handle(originalRequest, processingContext);
-
-            // TODO: probably DO NOT want body/etc here, right??
-            fillGcpResponseFromGenericResponse(response, genericResponse);
+            handleAsyncCase(request, response);
         } else {
             handleSyncCase(request, response);
         }
@@ -167,6 +148,7 @@ public class GcpApiDataRequestHandler {
         }
     }
 
+
     void verifyAuthentication(HttpRequest request) {
         Optional<String> jwt = request.getFirstHeader(HttpHeaders.AUTHORIZATION)
             .map(s -> s.replace(BEARER_PREFIX, ""));
@@ -200,6 +182,40 @@ public class GcpApiDataRequestHandler {
             throw new GcpWebhookCollectionHandler.AuthorizationException("Unauthorized : invalid JWT", e);
         }
     }
+
+        /**
+     * async handle an authenticated PubSub push invocation
+     * @param request an authenticated PubSub push invocation request
+     * @param response to fill with the response from the proxy
+     * @throws IOException
+     */
+    void handleAsyncCase(HttpRequest request, HttpResponse response) throws IOException {
+
+        try (InputStream inputStream = new ByteArrayInputStream(request.getInputStream().readAllBytes())) {
+            PubSubPushBody pubSubPushBody = objectMapper.readerFor(PubSubPushBody.class)
+                .readValue(inputStream);
+
+            if (envVarsConfigService.isDevelopment()) {
+                log.log(Level.INFO, "PubSub push body: " + pubSubPushBody);
+            }
+
+            HttpEventRequest originalRequest = objectMapper.readerFor(HttpEventRequestDto.class)
+                .readValue(Base64.getDecoder().decode(pubSubPushBody.getMessage().getData().getBytes(StandardCharsets.UTF_8)));
+
+            ApiDataRequestHandler.ProcessingContext processingContext = objectMapper.readerFor(ApiDataRequestHandler.ProcessingContext.class)
+                .readValue(pubSubPushBody.getMessage().getAttributes().get(ApiDataRequestViaPubSub.MessageAttributes.PROCESSING_CONTEXT.getStringEncoding()));
+
+            processingContext = processingContext.toBuilder()
+                .async(true)
+                .build();
+            
+            HttpEventResponse genericResponse = requestHandler.handle(originalRequest, processingContext);
+
+            // NOTE: in async case, genericResponse.getBody() will be `null`
+            fillGcpResponseFromGenericResponse(response, genericResponse);
+        }
+    }
+
 
     static void fillGcpResponseFromGenericResponse(HttpResponse response, HttpEventResponse genericResponse) throws IOException {
         response.setStatusCode(genericResponse.getStatusCode());
