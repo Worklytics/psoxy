@@ -44,10 +44,13 @@ locals {
 
 
 
+  any_buckets_to_provision = local.provision_side_output_original_bucket || local.provision_side_output_sanitized_bucket || var.enable_async_processing
 }
 
 # a unique sequence to commonly name this instance's buckets, but distinguish them globally
 resource "random_string" "bucket_unique_sequence" {
+  count = local.any_buckets_to_provision ? 1 : 0
+
   length  = 8
   lower   = true
   upper   = false
@@ -62,7 +65,7 @@ module "async_output" {
 
   environment_name                     = var.environment_name
   instance_id                          = var.instance_id
-  unique_sequence                      = random_string.bucket_unique_sequence.result
+  unique_sequence                      = random_string.bucket_unique_sequence[0].result
   bucket_suffix                        = "async-output"
   provision_bucket_public_access_block = true
   lifecycle_ttl_days                   = 90 # 3 months, more than enough
@@ -129,7 +132,7 @@ module "side_output_original" {
 
   environment_name                     = var.environment_name
   instance_id                          = var.instance_id
-  unique_sequence                      = random_string.bucket_unique_sequence.result
+  unique_sequence                      = random_string.bucket_unique_sequence[0].result
   bucket_suffix                        = "side-output-original"
   provision_bucket_public_access_block = true
   lifecycle_ttl_days                   = 720 # 2 years
@@ -142,7 +145,7 @@ module "side_output_sanitized" {
 
   environment_name                     = var.environment_name
   instance_id                          = var.instance_id
-  unique_sequence                      = random_string.bucket_unique_sequence.result
+  unique_sequence                      = random_string.bucket_unique_sequence[0].result
   bucket_suffix                        = "side-output-sanitized"
   provision_bucket_public_access_block = true
   lifecycle_ttl_days                   = 720 # 2 years
