@@ -1,33 +1,10 @@
 package co.worklytics.psoxy;
 
 
-import co.worklytics.psoxy.gateway.HttpEventRequest;
-import co.worklytics.psoxy.gateway.HttpEventRequestDto;
-import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
-import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler.ProcessingContext;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.cloud.functions.HttpRequest;
-import com.google.cloud.functions.HttpResponse;
-import dagger.Lazy;
-import lombok.Data;
-import lombok.SneakyThrows;
-import lombok.extern.java.Log;
-import org.apache.commons.lang3.RandomUtils;
-import org.apache.hc.core5.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-
-import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
@@ -36,6 +13,26 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
+import javax.inject.Inject;
+import org.apache.commons.lang3.RandomUtils;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.http.HttpStatus;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.cloud.functions.HttpRequest;
+import com.google.cloud.functions.HttpResponse;
+import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.HttpEventRequestDto;
+import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import dagger.Lazy;
+import lombok.Data;
+import lombok.SneakyThrows;
+import lombok.extern.java.Log;
 
 
 /**
@@ -77,15 +74,19 @@ public class GcpApiDataRequestHandler {
     @SneakyThrows
     public void service(HttpRequest request, HttpResponse response) {
 
-        // check if request is invocation via PubSub
-        // as of 2025-08-19, appears as 'APIs-Google; (+https://developers.google.com/webmasters/APIs-Google.html)'
-        Boolean userAgentIsPubSub = request.getFirstHeader(HttpHeaders.USER_AGENT)
-            .map(userAgent -> 
-                userAgent.contains(gcpEnvironment.getGoogleApisUserAgent()) || // in practice, this is how invocation for Cloud Run v2 via PubSub is coming
-                userAgent.contains(gcpEnvironment.getPubSubUserAgent()))
-            .orElse(false);
+        boolean pubsubTriggerConfigured = apiModeConfig.get().getPubSubTopic() != null;
 
-        if (userAgentIsPubSub) {
+        // if a pubsub trigger is configured, check if request is invocation via PubSub
+        // as of 2025-08-19, User-Agent appears as 'APIs-Google; (+https://developers.google.com/webmasters/APIs-Google.html)'
+        Boolean isPubSubInvocation = 
+            pubsubTriggerConfigured && 
+            request.getFirstHeader(HttpHeaders.USER_AGENT)
+                .map(userAgent -> 
+                    userAgent.contains(gcpEnvironment.getGoogleApisUserAgent()) || // in practice, this is how invocation for Cloud Run v2 via PubSub is coming
+                    userAgent.contains(gcpEnvironment.getPubSubUserAgent()))
+                .orElse(false);
+
+        if (isPubSubInvocation) {
             if (envVarsConfigService.isDevelopment()) {
                 log.log(Level.INFO, "PubSub push invocation detected");
             }
