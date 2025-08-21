@@ -25,7 +25,7 @@ module "worklytics_connector_specs" {
   msft_teams_example_call_guid               = var.msft_teams_example_call_guid
   msft_teams_example_call_record_guid        = var.msft_teams_example_call_record_guid
   msft_teams_example_online_meeting_join_url = var.msft_teams_example_online_meeting_join_url
-  example_api_calls_month_start              = time_static.month_start.id
+  example_api_calls_sample_date              = time_static.month_start.id
 }
 
 locals {
