@@ -167,6 +167,7 @@ module "api_connector" {
   artifacts_bucket_name                 = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name         = module.psoxy.deployment_bundle_object_name
   artifact_repository_id                = module.psoxy.artifact_repository
+  vpc_config                            = module.psoxy.vpc_config
   path_to_config                        = null
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
