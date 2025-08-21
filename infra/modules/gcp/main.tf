@@ -377,9 +377,10 @@ locals {
 resource "google_vpc_access_connector" "connector" {
   count = local.provision_serverless_connector ? 1 : 0
 
-  name          = "${local.legal_connector_prefix}${local.legal_connector_suffix}"
+  project       = var.project_id
   region        = var.gcp_region
-  network       = try(var.vpc_config.network, null)                         # network MUST be provided if serverless_connector is not provided
+  network       = try(var.vpc_config.network, null) # network MUST be provided if serverless_connector is not provided
+  name          = "${local.legal_connector_prefix}${local.legal_connector_suffix}"
   ip_cidr_range = try(var.vpc_config.serverless_connector_cidr_range, null) # seems like MUST be a /28 ??? not documented, but others give errors
 
   dynamic "subnet" {
