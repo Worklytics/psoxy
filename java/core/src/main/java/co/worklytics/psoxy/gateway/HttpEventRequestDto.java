@@ -58,12 +58,8 @@ public class HttpEventRequestDto implements HttpEventRequest {
         return Optional.ofNullable(headers.get(headerName));
     }
 
-    @JsonIgnore
-    @Override
-    public Object getUnderlyingRepresentation() {
     /**
      * This DTO does not wrap any underlying representation, so we return the DTO itself.
-     * This avoids UnsupportedOperationException and provides a safe default.
      */
     @JsonIgnore
     @Override
