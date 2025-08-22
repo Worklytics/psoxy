@@ -425,7 +425,7 @@ endpoints:
         records:
           type: "array"
           items:
-            oneOf:
+            anyOf:
               - type: "object"
                 properties: {}
                 _if:

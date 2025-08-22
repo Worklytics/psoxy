@@ -2,6 +2,12 @@
 # (not coupled to hosting environment; so split into separate file to ease keeping them in sync
 #  across AWS/GCP examples.  DRY!!)
 
+variable "chat_gpt_enterprise_example_workspace_id" {
+  type        = string
+  description = "Workspace id to use for example calls"
+  default     = null
+}
+
 variable "salesforce_domain" {
   type        = string
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"

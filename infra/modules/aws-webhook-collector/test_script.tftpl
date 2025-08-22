@@ -13,5 +13,5 @@ ${command_cli_call} -u "${collector_endpoint_url}${collection_path}" --method PO
 %{ if example_identity != null ~}
 --identity-subject '${example_identity}' \
 %{ endif ~}
---body '${example_payload != null ? example_payload : "{\"test\": \"data\"}"}'
+--body '${example_payload}'
 

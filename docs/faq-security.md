@@ -42,7 +42,7 @@ A WAF could make sense if you are using Psoxy to expose an on-prem, in-house bui
 
 ## Can I deploy Psoxy instances in a VPC?
 
-VPC support is available as a *beta* feature as of February 2024.
+VPC support is available as a *beta* feature as of February 2024, available in AWS-hosted deployments. It requires an Add-on to your Proxy support subscription.
 
 VPC usage *requires* an API Gateway to be deployed in front of the proxy instances.
 
@@ -69,7 +69,7 @@ Hence, using DWD via Psoxy is more secure than the typical DWD scenario that man
 If you remain uncomfortable with DWD, a private Google Marketplace App is a possible alternative, albeit more tedious to configure. It requires a dedicated GCP project, with additional APIs enabled in the project.
 
 
-### Is this Attribute-based Access Control (ABAC)?
+## Is this Attribute-based Access Control (ABAC)?
 No. [ABAC](https://en.wikipedia.org/wiki/Attribute-based_access_control) is specifying an access control policy predicated on attributes of the object/resource being accessed. The approach of Psoxy is better described as Attribute-level Access Control, where the access control policy can be written to limit access to specific attritibutes (fields) within an object/resource.
 
 Eg, evaluation of an ABAC policy still results in boolean, allow/deny decision on the request; Psoxy policy (rule) evaluation results in a modified response, with specific fields redacted or transformed in accordance with the policy.

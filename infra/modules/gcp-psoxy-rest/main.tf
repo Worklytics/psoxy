@@ -22,10 +22,15 @@ locals {
 
   side_outputs_to_provision    = { for k, v in local.side_outputs : k => v if v.bucket == null }
   side_outputs_to_grant_access = { for k, v in local.side_outputs : k => v if v.bucket != null }
+
+  # whether ANY GCS buckets will need to be provisioned to support this instance
+  bucket_provisioning_required = var.enable_async_processing || length(local.side_outputs_to_provision) > 0
+
+  path_to_instance_config_parameters = "${coalesce(var.config_parameter_prefix, "")}${replace(upper(var.instance_id), "-", "_")}_"
 }
 
 resource "random_string" "bucket_name_random_sequence" {
-  count = length(local.side_outputs_to_provision) > 0 ? 1 : 0
+  count = local.bucket_provisioning_required ? 1 : 0
 
   length  = 8
   special = false
@@ -48,6 +53,76 @@ module "async_output" {
     var.gcp_principals_authorized_to_test,
     [for email in var.invoker_sa_emails : "serviceAccount:${email}"]
   )
+}
+
+# Pub/Sub topic for async output (if enabled)
+resource "google_pubsub_topic" "async_output_topic" {
+  count = var.enable_async_processing ? 1 : 0
+
+  project = var.project_id
+  name    = "${var.environment_id_prefix}${var.instance_id}-async-output"
+
+  labels = var.default_labels
+}
+
+# Pub/Sub push subscription for async output (if enabled)
+resource "google_pubsub_subscription" "async_output_subscription" {
+  count = var.enable_async_processing ? 1 : 0
+
+  project = var.project_id
+  name    = "${var.environment_id_prefix}${var.instance_id}-async-output-subscription"
+  topic   = google_pubsub_topic.async_output_topic[0].name
+
+  # Push config: deliver messages to the Cloud Function's HTTP endpoint
+  push_config {
+    push_endpoint = local.proxy_endpoint_url
+
+    oidc_token {
+      service_account_email = var.service_account_email
+      audience              = local.proxy_endpoint_url
+    }
+  }
+
+  ack_deadline_seconds       = 600       # 10 minutes to process messages
+  message_retention_duration = "604800s" # 7 days retention
+  enable_message_ordering    = false
+
+  # Configure expiration policy of the subscription; this is NOT about the messages themselves.
+  expiration_policy {
+    ttl = "" # No expiration
+  }
+
+  labels = var.default_labels
+}
+
+# IAM permissions for Pub/Sub async processing
+
+locals {
+  # TODO: there's a `google_project_service_identity` resource in `google-beta` provider, which we might be able to leverage from 0.6+
+  pubsub_service_identity = "service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+}
+
+# 1. Allow the Cloud Function's service account to publish to the topic
+resource "google_pubsub_topic_iam_member" "function_publisher" {
+  count = var.enable_async_processing ? 1 : 0
+
+  project = var.project_id
+  topic   = google_pubsub_topic.async_output_topic[0].id
+  member  = "serviceAccount:${var.service_account_email}"
+  role    = "roles/pubsub.publisher"
+}
+
+# 2. Allow the Pub/Sub service account sign messages as the function'sSA
+# this is in ADDITION to allowing the function's SA to invoke the function itself, which is ABOVE
+#
+# NOTE: according to https://cloud.google.com/pubsub/docs/authenticate-push-subscriptions#configure_for_push_authentication
+# we need to grant Project-level token creator role to PubSub service account - but seems NOT in practice (and per ChatGPT)
+resource "google_service_account_iam_member" "pubsub_oidc_minter" {
+  count = var.enable_async_processing ? 1 : 0
+
+  service_account_id = data.google_service_account.function.id
+  member             = "serviceAccount:${local.pubsub_service_identity}"
+  role               = "roles/iam.serviceAccountOpenIdTokenCreator"
 }
 
 module "side_output_bucket" {
@@ -86,6 +161,7 @@ locals {
     TARGET_HOST                     = var.target_host
     SOURCE_AUTH_STRATEGY_IDENTIFIER = var.source_auth_strategy
     OAUTH_SCOPES                    = join(" ", var.oauth_scopes)
+    PUB_SUB_TOPIC                   = var.enable_async_processing ? google_pubsub_topic.async_output_topic[0].id : null
     }
     : k => v if v != null
   }
@@ -134,6 +210,9 @@ resource "google_cloudfunctions2_function" "function" {
     available_memory      = "${var.available_memory_mb}M"
     ingress_settings      = "ALLOW_ALL"
 
+    vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector
+    vpc_connector_egress_settings = var.vpc_config == null ? null : "ALL_TRAFFIC"
+
     environment_variables = merge(
       local.required_env_vars,
       var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
@@ -167,9 +246,60 @@ resource "google_cloudfunctions2_function" "function" {
 
   depends_on = [
     google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret,
-    google_service_account_iam_member.act_as
+    google_service_account_iam_member.act_as,
   ]
 }
+
+# TODO: in 0.6, make this a 'google_parameter_manager_parameter' (requires google provide 6.25+)
+# bc SERVICE_URL is the url of function, and not known at deploy-time, we cannot fill it in ENV VARS
+# similarly, bc version number is not known at deploy-time, we cannot bind it via secret env vars
+module "service_url_parameter" {
+  source = "../../modules/gcp-secrets"
+
+  count = var.enable_async_processing ? 1 : 0
+
+  secret_project    = var.project_id
+  path_prefix       = local.path_to_instance_config_parameters
+  replica_locations = var.secret_replica_locations
+  secrets = {
+    SERVICE_URL = {
+      value       = google_cloudfunctions2_function.function.service_config[0].uri
+      description = "URL of the function as a web service"
+    },
+  }
+  default_labels = var.default_labels
+}
+
+
+# grant access to secrets known AFTER function is deployed
+# (eg, SERVICE_URL)
+# distinct from var.secret_bindings; bc those are bound into the function's ENV VARS at deploy-time, grants must be done BEFORE deploy
+locals {
+  secrets_to_grant_access_to = try({
+    SERVICE_URL = {
+      secret_id = module.service_url_parameter[0].secret_ids_within_project["SERVICE_URL"]
+    }
+  }, {})
+}
+
+resource "google_secret_manager_secret_iam_member" "grant_sa_viewer_on_parameter" {
+  for_each = local.secrets_to_grant_access_to
+
+  project   = var.project_id
+  secret_id = each.value.secret_id
+  member    = "serviceAccount:${var.service_account_email}"
+  role      = "roles/secretmanager.viewer"
+}
+
+resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_parameter" {
+  for_each = local.secrets_to_grant_access_to
+
+  project   = var.project_id
+  secret_id = each.value.secret_id
+  member    = "serviceAccount:${var.service_account_email}"
+  role      = "roles/secretmanager.secretAccessor" # this is ONLY accessing payload of a secret version
+}
+
 
 # bizarrely, `google_cloudfunctions2_function_iam_binding` doesn't work for this; wtf?
 resource "google_cloud_run_service_iam_binding" "invokers" {
@@ -180,8 +310,12 @@ resource "google_cloud_run_service_iam_binding" "invokers" {
   role = "roles/run.invoker"
 
   members = concat(
+    # actually expected callers
     [for email in var.invoker_sa_emails : "serviceAccount:${email}"],
-    var.gcp_principals_authorized_to_test
+    # testers, if any
+    var.gcp_principals_authorized_to_test,
+    # itself, if async processing is enabled
+    var.enable_async_processing ? ["serviceAccount:${var.service_account_email}"] : [],
   )
 }
 
@@ -335,3 +469,4 @@ output "todo" {
 output "next_todo_step" {
   value = var.todo_step + 1
 }
+

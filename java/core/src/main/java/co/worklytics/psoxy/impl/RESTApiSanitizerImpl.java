@@ -200,7 +200,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @SneakyThrows
     @Override
-    public String sanitize(String httpMethod, URL url, String jsonResponse) {
+    public String sanitize(@NonNull String httpMethod, @NonNull URL url, String jsonResponse) {
         if (StringUtils.isEmpty(jsonResponse)) {
             // Nothing to do
             return jsonResponse;
@@ -227,7 +227,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @SneakyThrows
     @Override
-    public ProcessedStream sanitize(String httpMethod, URL url, InputStream response)
+    public ProcessedStream sanitize(@NonNull String httpMethod,
+                                    @NonNull URL url, InputStream response)
             throws IOException {
         // extra check ...
         if (!isAllowed(httpMethod, url)) {
@@ -239,7 +240,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
         if (matchingEndpoint.isEmpty()) {
             // No matching endpoint found, return the original response
-            return new ProcessedStream(response, CompletableFuture.completedFuture(null));
+            return ProcessedStream.completed(response);
         }
 
         // q: overkill for NON-ndjson case?
@@ -249,11 +250,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         PipedInputStream inPipe = new PipedInputStream(outPipe);
 
         Endpoint endpoint = matchingEndpoint.get().getValue();
-        Future<?> future;
-
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-
-        future = executor.submit(() -> {
+        return ProcessedStream.createRunning(inPipe, () -> {
             JsonFactory factory = objectMapper.getFactory();
 
             try (JsonParser parser = factory.createParser(response);
@@ -295,8 +292,6 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                 }
             }
         });
-
-        return new ProcessedStream(inPipe, future);
     }
 
     /**

@@ -3,6 +3,12 @@ variable "enabled_connectors" {
   description = "ids of connectors to enable"
 }
 
+variable "chat_gpt_enterprise_example_workspace_id" {
+  type        = string
+  description = "Workspace id to use for example calls"
+  default     = null
+}
+
 variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"
@@ -153,4 +159,10 @@ variable "salesforce_example_account_id" {
   type        = string
   default     = null
   description = "(Only required if using Salesforce connector) Id of the account id for using as an example calls for Salesforce (ex: 0015Y00002c7g95QAA)"
+}
+
+variable "example_api_calls_sample_date" {
+  type        = string
+  default     = "2025-08-01T00:00:00Z"
+  description = "RFC3339 date to use for example API calls; should be in the past, but not so far in the past as to not return interesting data from example API calls."
 }

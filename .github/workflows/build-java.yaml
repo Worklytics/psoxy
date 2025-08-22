@@ -16,6 +16,11 @@ on:
         type: string
         description: java distribution to use # see https://github.com/actions/setup-java#supported-distributions
         default: corretto
+      maven-version:
+        required: false
+        type: string
+        description: maven version to use # see https://github.com/s4u/setup-maven-action#supported-version-syntax
+        default: '3.9.10' # 3.9.10+ is required for Java 24; in theory, we support earlier shoudl we test?
 
 jobs:
   ci_java:
@@ -29,6 +34,11 @@ jobs:
           java-version: ${{ inputs.java-version }}
           # https://github.com/actions/setup-java#supported-distributions
           distribution: ${{ inputs.java-distribution }}
+      - name: Setup Maven Action
+        uses: s4u/setup-maven-action@v1.18.0
+        with:
+          java-version: ${{ inputs.java-version }}
+          maven-version: ${{ inputs.maven-version }}
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:

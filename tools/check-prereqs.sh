@@ -50,10 +50,20 @@ JAVA_VERSION_MAJOR=$(echo $JAVA_VERSION | sed -n 's/^Java version: \([0-9]*\).*/
 
 printf "Your Maven installation uses ${BLUE}${JAVA_VERSION}${NC}.\n"
 
-if [[  "$JAVA_VERSION_MAJOR" != 17 && "$JAVA_VERSION_MAJOR" != 21  && "$JAVA_VERSION_MAJOR" != 23  ]]; then
-  printf "${RED}This Java version appears to be unsupported. You should upgrade it, or may have compile errors.${NC} Psoxy requires an Oracle-supported version of Java 17 or later;  as of April 2025, this includes Java 17 or 21. See https://maven.apache.org/install.html\n"
+if [[  "$JAVA_VERSION_MAJOR" != 17 && "$JAVA_VERSION_MAJOR" != 21  && "$JAVA_VERSION_MAJOR" != 23  && "$JAVA_VERSION_MAJOR" != 24 ]]; then
+  printf "${RED}This Java version appears to be unsupported. You should upgrade it, or may have compile errors.${NC} Psoxy requires an Oracle-supported version of Java 17 or later;  as of April 2025, this includes Java 17, 21, or 24. See https://maven.apache.org/install.html\n"
   if $HOMEBREW_AVAILABLE; then printf "or as you have Homebrew available, run ${BLUE}brew install openjdk@17${NC}\n"; fi
   printf "If you have an alternative JDK installed, then you must update your ${BLUE}JAVA_HOME${NC} environment variable to point to it.\n"
+fi
+
+printf "\n"
+
+# if java > 23, then mvn must be 3.9.10+
+if (( $(echo "$JAVA_VERSION_MAJOR > 23" | bc ) == 1 )); then
+  if (( $(echo "$MVN_VERSION_MAJOR_MINOR < 3.9.10" | bc ) == 1 )); then
+    printf "${RED}Maven < 3.9.10 has compatibility issues with Java 24.${NC} If you're using Java 24, psoxy will NOT build correctly unless you upgrade Maven to 3.9.10 or later.\n"
+    printf "See https://maven.apache.org/install.html\n"
+  fi
 fi
 
 printf "\n"

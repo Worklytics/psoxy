@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
-
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -23,13 +22,14 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.net.WWWFormCodec;
-
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URIBuilder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
@@ -38,7 +38,6 @@ import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.api.client.http.ByteArrayContent;
@@ -75,7 +74,6 @@ import co.worklytics.psoxy.gateway.output.ApiDataOutputUtils;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
 import co.worklytics.psoxy.gateway.output.Output;
-
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
 import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
@@ -160,7 +158,13 @@ public class ApiDataRequestHandler {
             HttpHeaders.LINK,
             HttpHeaders.EXPIRES,
             HttpHeaders.LAST_MODIFIED,
-            HttpHeaders.RETRY_AFTER));
+            HttpHeaders.RETRY_AFTER
+    ));
+
+    public static Set<String> HTTP_METHODS_WHICH_DONT_SUPPORT_BODY = Set.of(
+        HttpHead.METHOD_NAME,
+        HttpGet.METHOD_NAME
+    );
 
     /**
      * Patterns to look for in headers to pass through
@@ -201,7 +205,9 @@ public class ApiDataRequestHandler {
     public HttpEventResponse handle(HttpEventRequest requestToProxy,
             ProcessingContext processingContext) {
 
-        logRequestIfVerbose(requestToProxy);
+        if (requestToProxy.getHttpMethod() == null) {
+            log.warning("HTTP method of com.google.cloud.functions.HttpRequest is null !???!");
+        }
 
         // application-level enforcement of HTTPS
         // (NOTE: should be redundant with infrastructure-level configuration)
@@ -291,7 +297,19 @@ public class ApiDataRequestHandler {
 
         String requestBody = Optional.ofNullable(requestToProxy.getBody())
                 .map(bytes -> new String(bytes, StandardCharsets.UTF_8))
+                .map(StringUtils::trimToNull)
                 .orElse(null);
+
+        // return 400 if request body is non-empty, but method is GET or HEAD
+        if (HTTP_METHODS_WHICH_DONT_SUPPORT_BODY.contains(requestToProxy.getHttpMethod().toUpperCase())) {
+            if (requestBody != null) {
+                // rather than have google HttpClient blow up with its own exception, causing 500 from proxy
+                return HttpEventResponse.builder()
+                        .statusCode(HttpStatus.SC_BAD_REQUEST)
+                        .body("Request body is not allowed for GET or HEAD requests")
+                        .build();
+            }
+        }
 
         if (skipSanitization) {
             log.info(String.format("%s. Skipping sanitization.", logEntry));
@@ -313,7 +331,7 @@ public class ApiDataRequestHandler {
 
             HttpContent content = null;
 
-            if (requestBody != null) {
+            if (StringUtils.isNotBlank(requestBody)) {
                 content = this.reverseRequestBodyTokenization(requestBodyContentType, requestBody);
             }
 
@@ -326,7 +344,6 @@ public class ApiDataRequestHandler {
 
             requestToSourceApi = requestFactory.buildRequest(requestToProxy.getHttpMethod(),
                     new GenericUrl(requestUrls.getTarget()), content);
-
 
 
             // TODO: what headers to forward???
@@ -445,7 +462,6 @@ public class ApiDataRequestHandler {
 
             passThroughHeaders(builder, sourceApiResponse);
             if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
-
                 if (skipSanitization) {
                     proxyResponseContent = original.getContentAsString();
                 } else {
@@ -473,6 +489,8 @@ public class ApiDataRequestHandler {
                                 Pair.of(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
                                         ErrorCauses.SIDE_OUTPUT_FAILURE_SANITIZED.name()));
                     }
+
+
                 }
             } else {
                 // write error, which shouldn't contain PII, directly
@@ -487,7 +505,12 @@ public class ApiDataRequestHandler {
                 // if versioning is enabled in the bucket, then subsequent successful calls will
                 // overwrite the error response
             }
-            builder.body(proxyResponseContent);
+
+            // only if not async, write content to body of response
+            if (!processingContext.getAsync()) {
+                builder.body(proxyResponseContent);
+            }
+
             return builder.build();
         } finally {
             sourceApiResponse.disconnect();
@@ -876,17 +899,16 @@ public class ApiDataRequestHandler {
     @SneakyThrows
     ByteArrayContent reverseRequestBodyTokenization(@NonNull String contentType, String body) {
         // JSON case: use ObjectMapper to parse request body and map decode ON every string value
-        if (contentType.equals(ContentType.APPLICATION_JSON.toString())) {
+        if (contentType.contains(ContentType.APPLICATION_JSON.getMimeType())) {
             JsonNode jsonNode = objectMapper.readTree(body);
             JsonNode transformedNode = applyStringTransformToTree(jsonNode, this::decode);
             String decodedRequestBody = objectMapper.writeValueAsString(transformedNode);
 
             return new ByteArrayContent(contentType,
                     decodedRequestBody.getBytes(StandardCharsets.UTF_8));
-        } else if (contentType.equals(ContentType.APPLICATION_FORM_URLENCODED.toString())) {
+        } else if (contentType.contains(ContentType.APPLICATION_FORM_URLENCODED.getMimeType())) {
             // Form-urlencoded case: use WWWFormCodec to parse request body and map decode ON every
             // value
-
             List<NameValuePair> nameValuePairs =
                     WWWFormCodec.parse(body, StandardCharsets.UTF_8).stream()
                             .map(pair -> new BasicNameValuePair(pair.getName(),

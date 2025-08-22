@@ -2,6 +2,12 @@ terraform {
   required_version = ">= 1.6, < 2.0"
 }
 
+# constants
+locals {
+  SA_NAME_MIN_LENGTH = 6
+  SA_NAME_MAX_LENGTH = 30
+}
+
 locals {
   default_config_parameter_prefix       = length(var.environment_name) == 0 ? "psoxy_" : "${var.environment_name}_"
   config_parameter_prefix               = var.config_parameter_prefix == "" ? local.default_config_parameter_prefix : var.config_parameter_prefix
@@ -13,6 +19,7 @@ module "psoxy" {
   source = "../../modules/gcp"
 
   project_id                   = var.gcp_project_id
+  gcp_region                   = var.gcp_region
   environment_id_prefix        = local.environment_id_prefix
   psoxy_base_dir               = var.psoxy_base_dir
   deployment_bundle            = var.deployment_bundle
@@ -22,13 +29,11 @@ module "psoxy" {
   install_test_tool            = var.install_test_tool
   custom_artifacts_bucket_name = var.custom_artifacts_bucket_name
   default_labels               = var.default_labels
+  support_bulk_mode            = length(var.bulk_connectors) > 0
+  support_webhook_collectors   = length(var.webhook_collectors) > 0
+  vpc_config                   = var.vpc_config
 }
 
-# constants
-locals {
-  SA_NAME_MIN_LENGTH = 6
-  SA_NAME_MAX_LENGTH = 30
-}
 
 # BEGIN API CONNECTORS
 
@@ -162,6 +167,7 @@ module "api_connector" {
   artifacts_bucket_name                 = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name         = module.psoxy.deployment_bundle_object_name
   artifact_repository_id                = module.psoxy.artifact_repository
+  vpc_config                            = module.psoxy.vpc_config
   path_to_config                        = null
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
@@ -212,8 +218,83 @@ module "custom_api_connector_rules" {
   default_labels    = var.default_labels
   instance_sa_email = module.api_connector[each.key].service_account_email
 }
-
 # END API CONNECTORS
+
+# BEGIN WEBHOOK COLLECTORS
+locals {
+  webhook_collectors_needing_keys = { for k, v in var.webhook_collectors : k => v if v.provision_auth_key != null }
+  key_ring_needed                 = var.kms_key_ring == null && length(local.webhook_collectors_needing_keys) > 0
+}
+
+# key ring on which to provision required KMS keys; atm, only needed to support webhook collector case, but not
+# necessarily exclusive to that use-case
+# it's just a single resource, couple to single mode ... pushing it down in into the 'gcp' module would add a bunch of
+# variables/outputs, as well as going against the general "inversion of control / composition" patterned preferred by terraform
+resource "google_kms_key_ring" "proxy_key_ring" {
+  count = local.key_ring_needed ? 1 : 0
+
+  project  = var.gcp_project_id
+  name     = replace(replace(var.environment_name, "/[^a-zA-Z0-9_-]/", "-"), "/-+/", "-")
+  location = var.gcp_region
+}
+
+resource "google_service_account" "webhook_collector" {
+  for_each = var.webhook_collectors
+
+  project      = var.gcp_project_id
+  account_id   = substr("${local.sa_prefix}${replace(each.key, "_", "-")}", 0, local.SA_NAME_MAX_LENGTH)
+  display_name = "${local.environment_id_display_name_qualifier} ${each.key} Webhook Collector"
+  description  = "Service account that cloud run function for ${each.key} Webhook Collector will run as"
+}
+
+module "webhook_collector" {
+  for_each = var.webhook_collectors
+
+  source = "../../modules/gcp-webhook-collector"
+
+  project_id                         = var.gcp_project_id
+  region                             = var.gcp_region
+  environment_id_prefix              = local.environment_id_prefix
+  instance_id                        = each.key
+  service_account_email              = google_service_account.webhook_collector[each.key].email
+  artifacts_bucket_name              = module.psoxy.artifacts_bucket_name
+  deployment_bundle_object_name      = module.psoxy.deployment_bundle_object_name
+  artifact_repository_id             = module.psoxy.artifact_repository
+  path_to_repo_root                  = var.psoxy_base_dir
+  config_parameter_prefix            = local.config_parameter_prefix
+  invoker_sa_emails                  = var.worklytics_sa_emails
+  vpc_config                         = module.psoxy.vpc_config
+  default_labels                     = var.default_labels
+  gcp_principals_authorized_to_test  = var.gcp_principals_authorized_to_test
+  bucket_write_role_id               = module.psoxy.bucket_write_role_id
+  side_output_original               = try(local.custom_original_side_outputs[each.key], null)
+  side_output_sanitized              = try(local.sanitized_side_outputs[each.key], null)
+  todos_as_local_files               = var.todos_as_local_files
+  key_ring_id                        = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
+  oidc_token_verifier_role_id        = module.psoxy.oidc_token_verifier_role_id
+  provision_auth_key                 = each.value.provision_auth_key
+  rules_file                         = each.value.rules_file
+  webhook_batch_invoker_sa_email     = module.psoxy.webhook_batch_invoker_sa_email
+  batch_processing_frequency_minutes = try(each.value.batch_processing_frequency_minutes, 5)
+  example_identity                   = try(each.value.example_identity, null)
+  example_payload                    = try(each.value.example_payload, null)
+
+  environment_variables = merge(
+    var.general_environment_variables,
+    try(each.value.environment_variables, {}),
+    {
+      BUNDLE_FILENAME        = module.psoxy.filename
+      IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
+      EMAIL_CANONICALIZATION = var.email_canonicalization
+    }
+  )
+
+  secret_bindings = module.psoxy.secrets
+
+
+}
+
+# END WEBHOOK COLLECTORS
 
 # BEGIN BULK CONNECTORS
 module "bulk_connector" {
@@ -234,6 +315,7 @@ module "bulk_connector" {
   psoxy_base_dir                    = var.psoxy_base_dir
   bucket_write_role_id              = module.psoxy.bucket_write_role_id
   secret_bindings                   = module.psoxy.secrets
+  vpc_config                        = module.psoxy.vpc_config
   example_file                      = try(each.value.example_file, null)
   instructions_template             = try(each.value.instructions_template, null)
   input_expiration_days             = var.bulk_input_expiration_days
@@ -257,6 +339,7 @@ module "bulk_connector" {
     }
   )
 }
+
 # END BULK CONNECTORS
 
 # BEGIN LOOKUP TABLES

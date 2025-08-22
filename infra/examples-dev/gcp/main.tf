@@ -29,21 +29,22 @@ locals {
 # call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.5.4"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.5.6"
 
-  enabled_connectors               = var.enabled_connectors
-  jira_cloud_id                    = var.jira_cloud_id
-  jira_server_url                  = var.jira_server_url
-  jira_example_issue_id            = var.jira_example_issue_id
-  salesforce_domain                = var.salesforce_domain
-  github_api_host                  = var.github_api_host
-  github_enterprise_server_host    = var.github_enterprise_server_host
-  github_enterprise_server_version = var.github_enterprise_server_version
-  github_installation_id           = var.github_installation_id
-  github_copilot_installation_id   = var.github_copilot_installation_id
-  github_organization              = var.github_organization
-  github_example_repository        = var.github_example_repository
-  salesforce_example_account_id    = var.salesforce_example_account_id
+  enabled_connectors                       = var.enabled_connectors
+  chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
+  jira_cloud_id                            = var.jira_cloud_id
+  jira_server_url                          = var.jira_server_url
+  jira_example_issue_id                    = var.jira_example_issue_id
+  salesforce_domain                        = var.salesforce_domain
+  github_api_host                          = var.github_api_host
+  github_enterprise_server_host            = var.github_enterprise_server_host
+  github_enterprise_server_version         = var.github_enterprise_server_version
+  github_installation_id                   = var.github_installation_id
+  github_copilot_installation_id           = var.github_copilot_installation_id
+  github_organization                      = var.github_organization
+  github_example_repository                = var.github_example_repository
+  salesforce_example_account_id            = var.salesforce_example_account_id
 }
 
 # sources which require additional dependencies are split into distinct Terraform files, following
@@ -81,7 +82,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.5.4"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.5.6"
 
   gcp_project_id                    = var.gcp_project_id
   environment_name                  = var.environment_name
@@ -94,23 +95,30 @@ module "psoxy" {
   install_test_tool                 = var.install_test_tool
   gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
   gcp_region                        = var.gcp_region
+  vpc_config                        = var.vpc_config
   secret_replica_locations          = var.secret_replica_locations
   api_connectors                    = local.api_connectors
   bulk_connectors                   = local.bulk_connectors
-  non_production_connectors         = var.non_production_connectors
-  custom_api_connector_rules        = var.custom_api_connector_rules
-  general_environment_variables     = var.general_environment_variables
-  pseudonymize_app_ids              = var.pseudonymize_app_ids
-  email_canonicalization            = var.email_canonicalization
-  bulk_input_expiration_days        = var.bulk_input_expiration_days
-  bulk_sanitized_expiration_days    = var.bulk_sanitized_expiration_days
-  custom_bulk_connector_rules       = var.custom_bulk_connector_rules
-  custom_bulk_connector_arguments   = var.custom_bulk_connector_arguments
-  lookup_tables                     = var.lookup_tables
-  custom_artifacts_bucket_name      = var.custom_artifacts_bucket_name
-  custom_side_outputs               = var.custom_side_outputs
-  todos_as_local_files              = var.todos_as_local_files
-  todo_step                         = local.max_auth_todo_step
+  webhook_collectors = { for k, v in var.webhook_collectors : k => merge(
+    v,
+    {
+      example_payload = try(file(v.example_payload_file), null)
+    }
+  ) }
+  non_production_connectors       = var.non_production_connectors
+  custom_api_connector_rules      = var.custom_api_connector_rules
+  general_environment_variables   = var.general_environment_variables
+  pseudonymize_app_ids            = var.pseudonymize_app_ids
+  email_canonicalization          = var.email_canonicalization
+  bulk_input_expiration_days      = var.bulk_input_expiration_days
+  bulk_sanitized_expiration_days  = var.bulk_sanitized_expiration_days
+  custom_bulk_connector_rules     = var.custom_bulk_connector_rules
+  custom_bulk_connector_arguments = var.custom_bulk_connector_arguments
+  lookup_tables                   = var.lookup_tables
+  custom_artifacts_bucket_name    = var.custom_artifacts_bucket_name
+  custom_side_outputs             = var.custom_side_outputs
+  todos_as_local_files            = var.todos_as_local_files
+  todo_step                       = local.max_auth_todo_step
 }
 
 locals {
@@ -122,7 +130,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.5.4"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.5.6"
 
   host_platform_id  = local.host_platform_id
   proxy_instance_id = each.key

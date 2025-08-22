@@ -7,6 +7,11 @@ locals {
   environment_id_display_name_qualifier = length(var.environment_id) > 0 ? " ${var.environment_id} " : ""
 }
 
+# beginning of current month - used for example API calls to provide recent but fairly stable dates
+# this will only change monthly, preventing churning while keeping examples relevant
+resource "time_static" "month_start" {
+  rfc3339 = formatdate("YYYY-MM-01'T'00:00:00Z", timestamp())
+}
 
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
@@ -20,11 +25,12 @@ module "worklytics_connector_specs" {
   msft_teams_example_call_guid               = var.msft_teams_example_call_guid
   msft_teams_example_call_record_guid        = var.msft_teams_example_call_record_guid
   msft_teams_example_online_meeting_join_url = var.msft_teams_example_online_meeting_join_url
+  example_api_calls_sample_date              = time_static.month_start.id
 }
 
 locals {
   provision_entraid_apps  = var.msft_connector_app_object_id == null
-  connectors_needing_apps = local.provision_entraid_apps ? module.worklytics_connector_specs.enabled_msft_365_connectors : {}
+  connectors_needing_apps = { for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors : k => v if local.provision_entraid_apps }
 }
 
 data "azuread_client_config" "current" {

@@ -8,7 +8,7 @@ import dagger.assisted.AssistedFactory;
 @AssistedFactory
 public interface GCSOutputFactory extends OutputFactory<GCSOutput> {
 
-
+    @Override
     GCSOutput create(@Assisted OutputLocation outputLocation);
 
     @Override

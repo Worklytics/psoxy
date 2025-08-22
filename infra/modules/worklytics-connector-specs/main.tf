@@ -21,22 +21,26 @@ locals {
       name : "OAUTH_REFRESH_TOKEN"
       writable : true
       lockable : true   # nonsensical; this parameter/secret IS the lock. it's really the tokens that should have lockable:true
-      sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself
+      sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself # NO, as of 2025, AWS also seems to be using a separate one with 'lock' suffix
       value_managed_by_tf : false
-      description : "Used to 'lock' the token refresh flow, so multiple processes don't refresh tokens concurrently.  Filled by Proxy instance."
+      description : "Used to 'lock' the token refresh flow, so multiple processes don't refresh tokens concurrently. Filled by Proxy instance. Not sensitive."
     }
   }
 
-  jira_example_cloud_id            = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
-  jira_example_issue_id            = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
-  github_installation_id           = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
-  github_copilot_installation_id   = coalesce(var.github_copilot_installation_id, "YOUR_GITHUB_COPILOT_INSTALLATION_ID")
-  github_enterprise_server_host    = coalesce(var.github_api_host, var.github_enterprise_server_host, "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
-  github_enterprise_server_version = coalesce(var.github_enterprise_server_version, "v3")
-  github_organization              = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
-  github_first_organization        = split(",", coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME"))[0]
-  github_example_repository        = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
-  salesforce_example_account_id    = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
+  # 3 days before the sample date, for interesting API calls (without repeating computation a dozen times)
+  example_api_calls_sample_interval_start = timeadd(var.example_api_calls_sample_date, "-72h")
+
+  chat_gpt_enterprise_example_workspace_id = coalesce(var.chat_gpt_enterprise_example_workspace_id, "YOUR_WORKSPACEID")
+  jira_example_cloud_id                    = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
+  jira_example_issue_id                    = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
+  github_installation_id                   = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
+  github_copilot_installation_id           = coalesce(var.github_copilot_installation_id, "YOUR_GITHUB_COPILOT_INSTALLATION_ID")
+  github_enterprise_server_host            = coalesce(var.github_api_host, var.github_enterprise_server_host, "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
+  github_enterprise_server_version         = coalesce(var.github_enterprise_server_version, "v3")
+  github_organization                      = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
+  github_first_organization                = split(",", coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME"))[0]
+  github_example_repository                = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
+  salesforce_example_account_id            = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
 
   oauth_long_access_connectors = {
     asana = {
@@ -77,6 +81,40 @@ locals {
     import to Worklytics via this connection).
   2. Update the content of PSOXY_ASANA_ACCESS_TOKEN variable with the previous token value obtained
 EOT
+    }
+    chatgpt-enterprise = {
+      source_kind : "chatgpt-enterprise",
+      availability : "alpha",
+      enable_by_default : false,
+      worklytics_connector_id : "chatgpt-enterprise-psoxy"
+      display_name : "ChatGPT Enterprise"
+      worklytics_connector_name : "ChatGPT Enterprise via Psoxy"
+      target_host : "api.chatgpt.com"
+      source_auth_strategy : "oauth2_access_token"
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN" # ChatGPT's UX calls this an 'API Key', but it's actually an access token;
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      settings_to_provide = {
+        "Workspace Id" = local.chat_gpt_enterprise_example_workspace_id
+      }
+      reserved_concurrent_executions : null
+      enable_async_processing : false
+      enable_side_output : false
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/projects",
+        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/conversations",
+        "/v1/compliance/workspaces/${local.chat_gpt_enterprise_example_workspace_id}/automations",
+      ]
+      external_token_todo : templatefile("${path.module}/docs/chatgpt/enterprise/instructions.tftpl", {
+        workspace_id                = local.chat_gpt_enterprise_example_workspace_id,
+        path_to_instance_parameters = "PSOXY_CHATGPT_ENTERPRISE_"
+      })
     }
     cursor = {
       source_kind : "cursor",
@@ -396,12 +434,12 @@ EOT
       example_api_calls : [
         "/services/data/v57.0/sobjects/Account/describe",
         "/services/data/v57.0/sobjects/ActivityHistory/describe",
-        "/services/data/v57.0/sobjects/Account/updated?start=${urlencode(timeadd(timestamp(), "-48h"))}&end=${urlencode(timestamp())}",
+        "/services/data/v57.0/sobjects/Account/updated?start=${urlencode(timeadd(var.example_api_calls_sample_date, "-48h"))}&end=${urlencode(var.example_api_calls_sample_date)}",
         "/services/data/v57.0/composite/sobjects/User?ids=${local.salesforce_example_account_id}&fields=Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType",
         "/services/data/v57.0/composite/sobjects/Account?ids=${local.salesforce_example_account_id}&fields=Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,ParentId,Rating,Sic,Type",
         "/services/data/v57.0/query?q=SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%27${local.salesforce_example_account_id}%27",
-        "/services/data/v57.0/query?q=SELECT+Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType+FROM+User+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(time_static.deployment.id, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(time_static.deployment.id)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
-        "/services/data/v57.0/query?q=SELECT+Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,ParentId,Rating,Sic,Type+FROM+Account+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(time_static.deployment.id, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(time_static.deployment.id)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST"
+        "/services/data/v57.0/query?q=SELECT+Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType+FROM+User+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
+        "/services/data/v57.0/query?q=SELECT+Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,ParentId,Rating,Sic,Type+FROM+Account+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST"
       ]
       external_token_todo : <<EOT
   Before running the example, you have to populate the following variables in terraform:
@@ -477,7 +515,7 @@ EOT
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/api/admin.analytics.getFile?type=member&date=${urlencode(formatdate("YYYY-MM-DD", timeadd(timestamp(), "-72h")))}"
+        "/api/admin.analytics.getFile?type=member&date=${urlencode(formatdate("YYYY-MM-DD", var.example_api_calls_sample_date))}"
       ]
       instructions_template = "${path.module}/docs/slack/analytics/instructions.tftpl"
       external_token_todo : templatefile("${path.module}/docs/slack/analytics/instructions.tftpl", {
@@ -856,12 +894,12 @@ EOT
         "/oauth/token/accessible-resources", # obtain Jira Cloud ID from here
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/users",
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/group/bulk",
-        "/services/data/v57.0/sobjects/Account/updated?start=${urlencode(timeadd(timestamp(), "-48h"))}&end=${urlencode(timestamp())}",
+        "/services/data/v57.0/sobjects/Account/updated?start=${urlencode(local.example_api_calls_sample_interval_start)}&end=${urlencode(var.example_api_calls_sample_date)}",
         format(
           "/ex/jira/%s/rest/api/3/search/jql?jql=updated >= '%s' AND updated < '%s' ORDER BY updated DESC&fields=*all,-comment,-worklog&maxResults=25",
           local.jira_example_cloud_id,
-          formatdate("YYYY/MM/DD hh:mm", timeadd(timestamp(), "-96h")),
-          formatdate("YYYY/MM/DD hh:mm", timestamp())
+          formatdate("YYYY/MM/DD hh:mm", local.example_api_calls_sample_interval_start),
+          formatdate("YYYY/MM/DD hh:mm", var.example_api_calls_sample_date)
         ),
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/changelog?maxResults=25",
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/comment?maxResults=25",

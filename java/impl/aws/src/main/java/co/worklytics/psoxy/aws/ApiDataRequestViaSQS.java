@@ -38,9 +38,7 @@ public class ApiDataRequestViaSQS implements AsyncApiDataRequestHandler {
 
     @Override
     public void handle(HttpEventRequest request, ApiDataRequestHandler.ProcessingContext processingContext) {
-        try {
-            SqsClient client = sqsClient.get();
-
+        try (SqsClient client = sqsClient.get()) {
             String payload = objectMapper.writeValueAsString(request.getUnderlyingRepresentation());
 
             SendMessageRequest.Builder requestBuilder = SendMessageRequest.builder()

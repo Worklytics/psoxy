@@ -1,7 +1,7 @@
 import test from 'ava';
-import * as td from 'testdouble';
-import { createRequire } from 'module';
 import { constants as httpCodes } from 'http2';
+import { createRequire } from 'module';
+import * as td from 'testdouble';
 const require = createRequire(import.meta.url);
 const logsSample = require('./cloudwatch-log-events-sample.json').events;
 
@@ -162,7 +162,7 @@ test.serial('Psoxy call: with POST, signingKey, and identitySubject options (Web
     const jwtSignatureExample = 'jwtSignatureExample';
 
     td.when(
-      utils.signJwtWithKMS(
+      utils.signJwtWithAWSKMS(
         td.matchers.contains({
           iss: options.url,
           sub: options.identitySubject,

@@ -261,12 +261,13 @@ resource "aws_kms_key" "auth_key" {
 }
 
 
-
 locals {
   accepted_auth_keys = concat(
     var.webhook_auth_public_keys,
     var.provision_auth_key == null ? [] : [for arn in aws_kms_key.auth_key[*].arn : "aws-kms:${arn}"]
   )
+
+  # these ARE sorted, bc maps in tf are always iterated in lexicographic order of the keys
   auth_key_arns_sorted = values({
     for k in aws_kms_key.auth_key[*] : try(k.tags.rotation_time, k.arn) => k.arn
   })
@@ -283,36 +284,6 @@ resource "aws_kms_alias" "auth_key_alias" {
 
   # TODO: from terraform v1.11, can simply pass -1 to `element` to get the last element
   target_key_id = element(local.auth_key_ids_sorted, length(local.auth_key_arns_sorted) - 1) # should be latest, bc sorted by rotation_time
-}
-
-## if testing, we need test caller to be able to use the signing-key role
-resource "aws_iam_policy" "kms_signing_policy" {
-  count = local.allow_test_role_to_sign ? 1 : 0
-
-  name        = "${module.env_id.id}_${var.instance_id}_testCallerPolicy"
-  description = "Allows test caller role to sign webhook requests with the key to allow for testing webhook collection. Only for testing; can be detached once production ready."
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "kms:Sign",
-          "kms:GetPublicKey",
-          "kms:DescribeKey"
-        ]
-        Resource = aws_kms_key.auth_key[*].arn
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "auth_key_to_test_caller_role" {
-  count = local.allow_test_role_to_sign ? 1 : 0
-
-  role       = regex("arn:aws:iam::[0-9]+:role/(.+)", var.test_caller_role_arn)[0]
-  policy_arn = aws_iam_policy.kms_signing_policy[0].arn
 }
 
 ## end Authentication Key Pair Provisioning
@@ -358,7 +329,7 @@ ${local.command_cli_call} -u ${local.proxy_endpoint_url}/ --health-check
 Then, based on your configuration, these are some example test calls you can try (YMMV):
 
 ```shell
-${local.command_cli_call} -u ${local.proxy_endpoint_url} --body '{"test": "body"}'
+${local.command_cli_call} -u ${local.proxy_endpoint_url} --body '${coalesce(var.example_payload, "{\"test\": \"body\"}")}' --identity '${var.example_identity}'
 ```
 ### Check logs (AWS CloudWatch)
 
@@ -385,7 +356,7 @@ locals {
     function_name          = module.gate_instance.function_name,
     command_cli_call       = local.command_cli_call,
     signing_key_arn        = local.keys_to_provision > 0 ? element(local.auth_key_arns_sorted, length(local.auth_key_arns_sorted) - 1) : null,
-    example_payload        = var.example_payload
+    example_payload        = coalesce(var.example_payload, "{\"test\": \"data\"}")
     example_identity       = var.example_identity
     collection_path        = local.collection_path
   })

@@ -11,7 +11,7 @@ RED='\e[0;31m'
 BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
-while getopts ":q" opt; do
+while getopts ":qd" opt; do
   case $opt in
     q)
       QUIET_OPTIONS="-q -Dmaven.test.skip=true"
@@ -20,8 +20,11 @@ while getopts ":q" opt; do
       DISTRIBUTION_PROFILE="-Pdistribution"
       ;;
     *)
-      printf "Usage: build.sh [-q] <IMPLEMENTATION> <JAVA_SOURCE_ROOT>\n"
+      printf "Usage: build.sh [-qd] <IMPLEMENTATION> <JAVA_SOURCE_ROOT>\n"
       printf "  -q: Skip tests during build\n"
+      printf "  -d: build artifact for distribution\n"
+      printf "  <IMPLEMENTATION>: 'aws' or 'gcp'\n"
+      printf "  <JAVA_SOURCE_ROOT>: Path to the Java source root directory (e.g., 'java/')\n"
       exit 1
       ;;
   esac
@@ -32,13 +35,13 @@ JAVA_SOURCE_ROOT=${@:$OPTIND+1:1}
 
 if [[ "$IMPLEMENTATION" != "aws" && "$IMPLEMENTATION" != "gcp" ]]; then
     printf "${RED}Error: HOST_PLATFORM value '${IMPLEMENTATION}' must be 'aws' or 'gcp'.${NC}\n"
-    printf "Usage: build.sh [-q] <IMPLEMENTATION> <JAVA_SOURCE_ROOT>\n"
+    printf "Usage: build.sh [-qd] <IMPLEMENTATION> <JAVA_SOURCE_ROOT>\n"
     exit 1
 fi
 
 if [[ -z "$JAVA_SOURCE_ROOT" ]]; then
     printf "${RED}Error: JAVA_SOURCE_ROOT value is required.${NC}\n"
-    printf "Usage: build.sh [-q] <IMPLEMENTATION> <JAVA_SOURCE_ROOT>\n"
+    printf "Usage: build.sh [-qd] <IMPLEMENTATION> <JAVA_SOURCE_ROOT>\n"
     exit 1
 fi
 

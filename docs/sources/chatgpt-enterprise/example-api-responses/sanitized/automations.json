@@ -1,0 +1,19 @@
+{
+  "object":"list",
+  "last_id":"automation_002",
+  "has_more":false,
+  "data":[
+    {
+      "id":"automation_001",
+      "schedule":"0 0 * * 0",
+      "is_enabled":true,
+      "prompt":"{\"length\":32,\"word_count\":4}"
+    },
+    {
+      "id":"automation_002",
+      "schedule":"0 0 1 * *",
+      "is_enabled":false,
+      "prompt":"{\"length\":33,\"word_count\":4}"
+    }
+  ]
+}

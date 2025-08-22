@@ -1,0 +1,19 @@
+{
+  "object":"list",
+  "last_id":"user_002",
+  "has_more":false,
+  "data":[
+    {
+      "id":"p~GJ76h9xZUIR59diahwa4Nule1RoapFfaRTpWEc-befz04Fgmpsls-OkGNiAlVkxD",
+      "email":"t~knxWE5tapsutcz6pLWSC3wfb5t34lCrXNZsKnhwyVXk@example.com",
+      "created_at":1718000000,
+      "role":"admin"
+    },
+    {
+      "id":"p~KQP4pJfKSLCubnkhYg1vmW5TKTMRtnVDl6K-KgJak-CWGVHU7x3SQShz0pPzD7_Y",
+      "email":"t~PFsxS8oxlBJ9dZkL1zNMvRIajvbO3VzZpbdT-ty6Gm0@example.com",
+      "created_at":1718001000,
+      "role":"member"
+    }
+  ]
+}

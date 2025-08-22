@@ -47,26 +47,22 @@ But Psoxy ensures Worklytics only sees:
 }
 ```
 
-These pseudonyms leverage SHA-256 hashing / AES encryption, with salt/keys that are known only to
-your organization and never transferred to Worklytics.
+These pseudonyms leverage SHA-256 hashing / AES encryption, with salt/keys that are known only to your organization and never transferred to Worklytics.
 
-Psoxy enforces that Worklytics can only access API endpoints you've configured ([principle of least
-privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege)) using HTTP methods you allow (eg, limit to `GET` to enforce read-only for RESTful APIs).
+Psoxy enforces that Worklytics can only access API endpoints you've configured ([principle of least privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege)) using HTTP methods you allow (eg, limit to `GET` to enforce read-only for RESTful APIs).
 
-For data sources APIs which require keys/secrets for authentication, such values remain stored in
-your premises and are never accessible to Worklytics.
+For data sources APIs which require keys/secrets for authentication, such values remain stored in your premises and are never accessible to Worklytics.
 
-You authorize your Worklytics tenant to access your proxy instance(s) via the IAM platform of your
-cloud host.
+You authorize your Worklytics tenant to access your proxy instance(s) via the IAM platform of your cloud host.
 
 Worklytics authenticates your tenant with your cloud host via [Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation). This eliminates the need for any secrets to be exchanged between your organization and Worklytics, or the use any API keys/certificates for Worklytics which you would need to rotate.
 
 See also: [API Data Sanitization](configuration/api-data-sanitization.md)
 
 ## Supported Data Sources
-As of March 2023, the following sources can be connected to Worklytics via psoxy.
+As of July 2025, the following sources can be connected to Worklytics via psoxy.
 
-Note: Some sources require specific licenses to transfer data via the APIs/endpoints used by Worklytics, or impose some per API request costs for such transfers.
+Note: Some sources require specific licenses to transfer data via the APIs/endpoints used by Worklytics, or impose some per API request costs/rate limits for such transfers. Inclusion of the source in the list below does not represent or warrant retrieval of your data using Psoxy from the source via our provided connectors.
 
 ### Google Workspace (formerly GSuite)
 
@@ -114,7 +110,7 @@ NOTE: usage of the Microsoft Teams APIs may be billable, depending on your Micro
 
 See details: [sources/microsoft-365/README.md](sources/microsoft-365/README.md)
 
-### Github
+### GitHub
 
 Check the documentation to use the right permissions and the right authentication flow per connector.
 
@@ -131,15 +127,15 @@ See details: [sources/github/README.md](sources/github/README.md)
 
 ### Slack
 
-| Source                 | Examples                                                                                                                                                                                                                                                                                                                                                                          | Scope                                                                     |
-|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
-| Slack via Discovery API | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-api/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-api/discovery.yaml)                                                                                                                                                 | `discovery:read`                                                          |
-| Slack Bulk    | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-bulk/example-bulk) - [bulk rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-bulk/discovery-bulk.yaml),[hierarchical rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-bulk/discovery-bulk-hierarchical.yaml) | N/A                                                                       |
-| Slack AI Snapshot      | N/A                                                                                                                                                                                                                                                                                                                                                                               | N/A |
+| Source                           | Examples                                                                                                                                                                                                                                                                                                                                                                          |  API Permissions / Scopes                                                                       |
+|----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| Slack AI Snapshot  **beta**      | N/A                                                                                                                                                                                                                                                                                                                                                                               | N/A |
+| Slack Bulk                       | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-bulk/example-bulk) - [bulk rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-bulk/discovery-bulk.yaml),[hierarchical rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-bulk/discovery-bulk-hierarchical.yaml) | N/A                                                                       |
+| Slack via Discovery API **beta** | [data](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-api/example-api-responses) - [rules](https://github.com/Worklytics/psoxy/tree/main/docs/sources/slack/slack-discovery-api/discovery.yaml)                                                                                                                                                 | `discovery:read`                                                          |
 
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](../infra/modules/worklytics-connector-specs)./ Please refer to that module for a definitive list.
 
-See details: [sources/github/README.md](sources/github/README.md)
+See details: [sources/slack/README.md](sources/slack/README.md)
 
 ### Other Data Sources via  APIs
 
@@ -148,13 +144,14 @@ These sources will typically require some kind of "Admin" within the tool to cre
 The API key/secret will be used to authenticate with the source's REST API and access the data.
 
 
-| Source                    | Details + Examples                                                               | API Permissions / Scopes                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-|---------------------------|----------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Asana                     | [sources/asana](sources/asana/README.md)                               | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace)                                                                                                                                                                                                                                                                                                                                                 |
-| Cursor *alpha*                    | [sources/cursor](sources/cursor/README.md)                                 | Admin API key (Basic Authentication)                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Jira Cloud                | [sources/atlassian/jira-cloud](sources/atlassian/jira/README.md)   | "Classic Scopes": `read:jira-user` `read:jira-work` "Granular Scopes": `read:group:jira` `read:user:jira`  "User Identity API" `read:account`                                                                                                                                                                                                                                                                                                                  |
-| Jira Server / Data Center | [sources/atlassian/jira-server](sources/atlassian/jira/jira-server.md) | Personal Acccess Token on behalf of user with access to equivalent of above scopes for entire instance                                                                                                                                                                                                                                                                                                                                                         |
-| Salesforce                | [sources/salesforce](sources/salesforce/README.md)                     | `api` `chatter_api` `refresh_token` `offline_access` `openid` `lightning` `content` `cdp_query_api`                                                                                                                                                                                                                                                                                                                                                            |                                                                                                       |
+| Source                    | Details + Examples                                                               | API Permissions / Scopes                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+|---------------------------|----------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Asana                     | [sources/asana](sources/asana/README.md)                               | a [Service Account](https://asana.com/guide/help/premium/service-accounts) (provides full access to Workspace)                                                                                                                                                                                                                                                                                                                                                                           |
+| Cursor *alpha*                    | [sources/cursor](sources/cursor/README.md)                                 | Admin API key (Basic Authentication)                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Jira Cloud                | [sources/atlassian/jira-cloud](sources/atlassian/jira/README.md)   | "Classic Scopes": `read:jira-user` `read:jira-work` "Granular Scopes": `read:group:jira` `read:user:jira`  "User Identity API" `read:account`                                                                                                                                                                                                                                                                                                                                            |
+| Jira Server / Data Center | [sources/atlassian/jira-server](sources/atlassian/jira/jira-server.md) | Personal Acccess Token on behalf of user with access to equivalent of above scopes for entire instance                                                                                                                                                                                                                                                                                                                                                                                   |
+| Salesforce                | [sources/salesforce](sources/salesforce/README.md)                     | `api` `chatter_api` `refresh_token` `offline_access` `openid` `lightning` `content` `cdp_query_api`                                                                                                                                                                                                                                                                                                                                                                                      |                                                                                                       |
+| Windsurf                  | [sources/windsurf](sources/windsurf/README.md)                           | Analytics API                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | Zoom                      | [sources/zoom](sources/zoom/README.md)                                 | `meeting:read:past_meeting:admin` `meeting:read:meeting:admin` `meeting:read:list_past_participants:admin` `meeting:read:list_past_instances:admin` `meeting:read:list_meetings:admin` `meeting:read:participant:admin` `meeting:read:summary:admin` `cloud_recording:read:list_user_recordings:admin` `report:read:list_meeting_participants:admin` `report:read:meeting:admin` `report:read:user:admin` `user:read:user:admin` `user:read:list_users:admin` `user:read:settings:admin` |
 
 NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs](https://github.com/Worklytics/psoxy/tree/main/infra/modules/worklytics-connector-specs). Please refer to that module for a definitive list.
@@ -173,8 +170,6 @@ See also: [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
 | Badge                  | [sources/badge](sources/badge/README.md) |
 | HRIS                   | [sources/hris](sources/hris/README.md) |
 | Miro AI Bulk **alpha** | [sources/miro/miro-ai-bulk](sources/miro/miro-ai-bulk/README.md) |
-| Slack AI Bulk **alpha** | [sources/slack/slack-ai-bulk](sources/slack/slack-ai-bulk/README.md) |
-| Slack Bulk             | [sources/slack/slack-discovery-bulk](sources/slack/slack-discovery-bulk/README.md) |
 | Survey                 | [sources/survey](sources/survey/README.md) |
 
 ### Other Data Sources via Webhook Collection
@@ -214,11 +209,10 @@ You will need all the following in your deployment environment (eg, your laptop)
 | Tool                                         | Version              | Test Command          |
 |----------------------------------------------|----------------------|-----------------------|
 | [git](https://git-scm.com/)                  | 2.17+                | `git --version`       |
-| [Maven](https://maven.apache.org/)           | 3.6+                 | `mvn -v`              |
-| [Java JDK 17+](https://openjdk.org/install/) | 17, 21 (see notes) | `mvn -v \| grep Java` |
+| [Maven](https://maven.apache.org/)           | 3.6+ ; 3.9.10+ required for java 24  | `mvn -v`              |
+| [Java JDK 17+](https://openjdk.org/install/) | 17, 21, 24 (see notes) | `mvn -v \| grep Java` |
 | [Terraform](https://www.terraform.io/)       | 1.6+, < 2.0          | `terraform version`   |
 
-NOTE: as of Apr 8, 2024, although Java 24 has been released Maven 3.9.9 is not compatible with it. Maven has fixed this, but has yet to release a version 3.9.10 or 4.0.x with the fix. Until then, we don't officially support Java 24.
 
 NOTE: we will support Java versions for duration of official support windows, in particular the LTS versions. Minor versions, such as 18-20, 22-23 which are out of official support, may work but are not routinely tested.
 
@@ -347,8 +341,8 @@ We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](https:
        - [Google Cloud platform](gcp/getting-started.md)
 
   2. Based on that choice, pick from the example template repos below. Use your choosen option as a template to create a new GitHub repo, or if you're not using GitHub Cloud, create clone/fork of the choosen option in your source control system:
-        - AWS - https://github.com/Worklytics/psoxy-example-aws
-        - GCP - https://github.com/Worklytics/psoxy-example-gcp
+        - AWS - [Worklytics/psoxy-example-aws](https://github.com/Worklytics/psoxy-example-aws)
+        - GCP - [Worklytics/psoxy-example-gcp](https://github.com/Worklytics/psoxy-example-gcp)
 
      You will make changes to the files contained in this repo as appropriate for your use-case. These changes should be committed to a repo that is accessible to other members of your team who may need to support your Psoxy deployment in the future.
 
@@ -366,16 +360,16 @@ We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](https:
      - provision API keys / make OAuth grants needed by each Data Connection
      - create the Data Connection from Worklytics to your psoxy instance (Terraform can provide `TODO` file with detailed steps for each)
 
-  6. Various test commands are provided in local files, as the output of the Terraform; you may use these examples to validate the performance of the proxy. Please review the proxy behavior and adapt the rules as needed. Customers needing assistance adapting the proxy behavior for their needs can contact support@worklytics.co
+  6. Various test commands are provided in local files, as the output of the Terraform; you may use these examples to validate the performance of the proxy. Please review the proxy behavior and adapt the rules as needed. Customers needing assistance adapting the proxy behavior for their needs can contact [support@worklytics.co](mailto:support@worklytics.co)
 
 ## Component Status
 
-| Component                | Status                                                                                                                                    |
-|--------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| Java                     | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-java.yaml)                            |
-| Terraform Examples       | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform-examples.yaml)              |
-| Tools                    | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-tools.yaml)                           |
-| Terraform Security Scan | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform-sec-analysis-examples.yaml) |
+| Component                | Status                                                                                                                                 |
+|--------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| Java                     | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-java.yaml)                         |
+| Terraform Examples       | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-terraform-examples.yaml)           |
+| Tools                    | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/ci-tools.yaml)                        |
+| Terraform Security Scan | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Worklytics/psoxy/terraform-sec-analysis-examples.yaml) |
 
 Review [release notes in GitHub](https://github.com/Worklytics/psoxy/releases).
 

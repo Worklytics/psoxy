@@ -85,11 +85,7 @@
             <artifactId>commons-lang3</artifactId>
             <version>${dependency.apache-commons-lang3.version}</version>
         </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${dependency.commons-io.version}</version>
-        </dependency>
+
 
         <!-- platform stuff (eg, GCP Cloud Function support) -->
         <dependency>
@@ -97,8 +93,7 @@
             <artifactId>functions-framework-api</artifactId>
             <!-- NOTE: does NOT appear to be available in the google-libraries-bom -->
             <!-- does not appear to have any dependencies on other Google libraries -->
-            <version>1.1.0</version> <!-- June 2023 - https://mvnrepository.com/artifact/com.google.cloud.functions/functions-framework-api -->
-            <scope>provided</scope>
+            <version>1.1.4</version> <!-- Nov 2024 - https://mvnrepository.com/artifact/com.google.cloud.functions/functions-framework-api -->
         </dependency>
 
         <dependency>
@@ -109,6 +104,16 @@
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-secretmanager</artifactId>
+        </dependency>
+
+        <dependency> <!-- only for Webhook Collector mode, atm -->
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-pubsub</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-kms</artifactId>
         </dependency>
 
 
