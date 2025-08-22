@@ -3,11 +3,16 @@ variable "project_id" {
   description = "id of GCP project that will host psoxy instance"
 }
 
+variable "gcp_region" {
+  type        = string
+  description = "Region in which to provision GCP resources, if applicable"
+  default     = "us-central1"
+}
 
 variable "bucket_location" {
   type        = string
   description = "location of bucket that will be used to store Psoxy artifacts"
-  default     = "us-central-1"
+  default     = "us-central1"
 }
 
 variable "secret_replica_locations" {
@@ -88,4 +93,16 @@ variable "support_webhook_collectors" {
   type        = bool
   description = "whether to enable/provision components required for 'webhook collectors' instances"
   default     = false
+}
+
+variable "vpc_config" {
+  type = object({
+    network                         = optional(string)                # Local name of the VPC network resource on which to provision the VPC connector (if `serverless_connector` is not provided)
+    subnetwork                      = optional(string)                # Local name of the VPC subnetwork resource on which to provision the VPC connector (if `serverless_connector` is not provided)
+    serverless_connector            = optional(string)                # Format: projects/{project}/locations/{location}/connectors/{connector}
+    serverless_connector_cidr_range = optional(string, "10.8.0.0/28") # ignored if serverless_connector is provided
+  })
+
+  description = "**alpha** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
+  default     = null
 }

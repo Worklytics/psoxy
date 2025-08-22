@@ -95,6 +95,7 @@ module "psoxy" {
   install_test_tool                 = var.install_test_tool
   gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
   gcp_region                        = var.gcp_region
+  vpc_config                        = var.vpc_config
   secret_replica_locations          = var.secret_replica_locations
   api_connectors                    = local.api_connectors
   bulk_connectors                   = local.bulk_connectors

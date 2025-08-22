@@ -2,6 +2,12 @@ terraform {
   required_version = ">= 1.6, < 2.0"
 }
 
+# constants
+locals {
+  SA_NAME_MIN_LENGTH = 6
+  SA_NAME_MAX_LENGTH = 30
+}
+
 locals {
   default_config_parameter_prefix       = length(var.environment_name) == 0 ? "psoxy_" : "${var.environment_name}_"
   config_parameter_prefix               = var.config_parameter_prefix == "" ? local.default_config_parameter_prefix : var.config_parameter_prefix
@@ -13,6 +19,7 @@ module "psoxy" {
   source = "../../modules/gcp"
 
   project_id                   = var.gcp_project_id
+  gcp_region                   = var.gcp_region
   environment_id_prefix        = local.environment_id_prefix
   psoxy_base_dir               = var.psoxy_base_dir
   deployment_bundle            = var.deployment_bundle
@@ -24,13 +31,9 @@ module "psoxy" {
   default_labels               = var.default_labels
   support_bulk_mode            = length(var.bulk_connectors) > 0
   support_webhook_collectors   = length(var.webhook_collectors) > 0
+  vpc_config                   = var.vpc_config
 }
 
-# constants
-locals {
-  SA_NAME_MIN_LENGTH = 6
-  SA_NAME_MAX_LENGTH = 30
-}
 
 # BEGIN API CONNECTORS
 
@@ -164,6 +167,7 @@ module "api_connector" {
   artifacts_bucket_name                 = module.psoxy.artifacts_bucket_name
   deployment_bundle_object_name         = module.psoxy.deployment_bundle_object_name
   artifact_repository_id                = module.psoxy.artifact_repository
+  vpc_config                            = module.psoxy.vpc_config
   path_to_config                        = null
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
@@ -259,6 +263,7 @@ module "webhook_collector" {
   path_to_repo_root                  = var.psoxy_base_dir
   config_parameter_prefix            = local.config_parameter_prefix
   invoker_sa_emails                  = var.worklytics_sa_emails
+  vpc_config                         = module.psoxy.vpc_config
   default_labels                     = var.default_labels
   gcp_principals_authorized_to_test  = var.gcp_principals_authorized_to_test
   bucket_write_role_id               = module.psoxy.bucket_write_role_id
@@ -285,6 +290,8 @@ module "webhook_collector" {
   )
 
   secret_bindings = module.psoxy.secrets
+
+
 }
 
 # END WEBHOOK COLLECTORS
@@ -308,6 +315,7 @@ module "bulk_connector" {
   psoxy_base_dir                    = var.psoxy_base_dir
   bucket_write_role_id              = module.psoxy.bucket_write_role_id
   secret_bindings                   = module.psoxy.secrets
+  vpc_config                        = module.psoxy.vpc_config
   example_file                      = try(each.value.example_file, null)
   instructions_template             = try(each.value.instructions_template, null)
   input_expiration_days             = var.bulk_input_expiration_days
@@ -331,6 +339,7 @@ module "bulk_connector" {
     }
   )
 }
+
 # END BULK CONNECTORS
 
 # BEGIN LOOKUP TABLES
