@@ -112,12 +112,14 @@ public class ApiDataOutputUtils {
             .contentType(sourceApiResponse.getContentType())
             .contentCharset(sourceApiResponse.getContentCharset());
 
-        try (InputStream stream = sourceApiResponse.getContent()) {
-            builder.content(stream.readAllBytes());
+        // sourceApiResponse will not have content for 'HEAD' requests (or potentially even GET, in some cases - 204 No Content, 304 Not Modified, etc.)
+        if (sourceApiResponse.getContent() != null) {
+            try (InputStream stream = sourceApiResponse.getContent()) {
+                builder.content(stream.readAllBytes());
+            }
         }
 
         Map<String, String> metadata = this.buildRawMetadata(sourceApiRequest);
-
 
         //not sure this will work; are we certain to be able to consume HttpContent after request has been sent?
         if (sourceApiRequest.getContent() != null
