@@ -55,7 +55,7 @@
   * [Atlassian](sources/atlassian/README.md)
     * [Jira Cloud](sources/atlassian/jira/README.md)
     * [Jira Data Center](sources/atlassian/jira/jira-server.md)
-  * [ChatGPT](sources/chatgpt/README.md)
+  * [ChatGPT Enterprise](sources/chatgpt-enterprise/README.md)
   * [Cursor](sources/cursor/README.md)
   * [Dropbox](sources/dropbox-business/README.md)
   * [GitHub](sources/github/README.md)
