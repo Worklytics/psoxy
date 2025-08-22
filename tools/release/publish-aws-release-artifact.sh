@@ -136,7 +136,7 @@ assume_role() {
 publish_to_region() {
     local region="$1"
     local bucket_name="${BUCKET_PREFIX}-${region}"
-    local s3_path="s3://${bucket_name}/aws/${JAR_FILENAME}"
+    local s3_path="s3://${bucket_name}/${DEPLOYMENT_ARTIFACT}"
 
     echo -e "${BLUE}Publishing to ${GREEN}${region}${BLUE} (${s3_path})${NC}"
 
@@ -188,7 +188,7 @@ publish() {
         echo -e "${BLUE}Download URLs:${NC}"
         for region in "${REGIONS[@]}"; do
             local bucket_name="${BUCKET_PREFIX}-${region}"
-            echo -e "  ${GREEN}${region}:${NC} https://${bucket_name}.s3.${region}.amazonaws.com/aws/${JAR_FILENAME}"
+            echo -e "  ${GREEN}${region}:${NC} https://${bucket_name}.s3.${region}.amazonaws.com/${DEPLOYMENT_ARTIFACT}"
         done
     else
         echo -e "${YELLOW}⚠ Some regions failed to publish${NC}"
