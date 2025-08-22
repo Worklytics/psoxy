@@ -236,7 +236,7 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
         String lockParameterName = lockParameterName(lockId);
         try {
             client.deleteParameter(DeleteParameterRequest.builder()
-                .name(lockParameterName(lockId))
+                .name(lockParameterName)
                 .build());
         } catch (ParameterNotFoundException e) {
             log.log(Level.WARNING, "Lock " + lockParameterName + " not found; OK, but may indicate a problem", e);

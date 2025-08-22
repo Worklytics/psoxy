@@ -21,9 +21,9 @@ locals {
       name : "OAUTH_REFRESH_TOKEN"
       writable : true
       lockable : true   # nonsensical; this parameter/secret IS the lock. it's really the tokens that should have lockable:true
-      sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself
+      sensitive : false # not sensitive; this just represents lock of the refresh of the token, not hold token value itself # NO, as of 2025, AWS also seems to be using a separate one with 'lock' suffix
       value_managed_by_tf : false
-      description : "Used to 'lock' the token refresh flow, so multiple processes don't refresh tokens concurrently.  Filled by Proxy instance."
+      description : "Used to 'lock' the token refresh flow, so multiple processes don't refresh tokens concurrently. Filled by Proxy instance. Not sensitive."
     }
   }
 
