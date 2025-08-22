@@ -6,6 +6,7 @@ import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
 import lombok.AllArgsConstructor;
+import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
@@ -21,8 +22,10 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+@Log
 @AllArgsConstructor(onConstructor_ = {@Inject})
 public class ApiDataOutputUtils {
 
@@ -121,14 +124,18 @@ public class ApiDataOutputUtils {
 
         Map<String, String> metadata = this.buildRawMetadata(sourceApiRequest);
 
+
         //not sure this will work; are we certain to be able to consume HttpContent after request has been sent?
         if (sourceApiRequest.getContent() != null
             && sourceApiRequest.getContent().getLength() > 0) {
             // if the request has a body, add it to metadata
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            sourceApiRequest.getContent().writeTo(out);
-            String body = base64encoder.encodeToString(out.toByteArray());
-            metadata.put(OutputObjectMetadata.REQUEST_BODY.name(), body);
+            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                sourceApiRequest.getContent().writeTo(out);
+                metadata.put(OutputObjectMetadata.REQUEST_BODY.name(),
+                    base64encoder.encodeToString(out.toByteArray()));
+            } catch (IOException e) {
+                log.log(Level.WARNING, "Error reading request body to fill in metadata; possibly bc request already sent, so some implementations we cannot re-read the content stream", e);
+            }
         }
 
         builder.metadata(metadata);
