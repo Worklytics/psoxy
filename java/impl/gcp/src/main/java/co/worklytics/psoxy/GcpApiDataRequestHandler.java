@@ -74,7 +74,7 @@ public class GcpApiDataRequestHandler {
     @SneakyThrows
     public void service(HttpRequest request, HttpResponse response) {
 
-        boolean pubsubTriggerConfigured = apiModeConfig.get().getAsyncPubSubQueue() != null;
+        boolean pubsubTriggerConfigured = apiModeConfig.get().getAsyncPubSubQueue().isPresent();
 
         // if a pubsub trigger is configured, check if request is invocation via PubSub
         // as of 2025-08-19, User-Agent appears as 'APIs-Google; (+https://developers.google.com/webmasters/APIs-Google.html)'
