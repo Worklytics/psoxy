@@ -74,7 +74,7 @@ public class GcpApiDataRequestHandler {
     @SneakyThrows
     public void service(HttpRequest request, HttpResponse response) {
 
-        boolean pubsubTriggerConfigured = apiModeConfig.get().getPubSubTopic() != null;
+        boolean pubsubTriggerConfigured = apiModeConfig.get().getAsyncPubSubQueue() != null;
 
         // if a pubsub trigger is configured, check if request is invocation via PubSub
         // as of 2025-08-19, User-Agent appears as 'APIs-Google; (+https://developers.google.com/webmasters/APIs-Google.html)'
@@ -162,7 +162,10 @@ public class GcpApiDataRequestHandler {
             log.log(Level.WARNING, "Unauthorized : no authorization header included");
             throw new GcpWebhookCollectionHandler.AuthorizationException("Unauthorized : no authorization header included");
         }
-        GoogleIdTokenVerifier internalServiceVerifier = googleIdTokenVerifierFactory.getVerifierForAudience(apiModeConfig.get().getServiceUrl());
+        GoogleIdTokenVerifier internalServiceVerifier = 
+            apiModeConfig.get().getServiceUrl()
+                .map(googleIdTokenVerifierFactory::getVerifierForAudience)
+                .orElseThrow(() -> new IllegalStateException("Service URL not configured"));
 
         GoogleIdToken idToken = null;
         try {
