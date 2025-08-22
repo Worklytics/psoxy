@@ -184,6 +184,22 @@ variable "general_environment_variables" {
   type        = map(string)
   description = "environment variables to add for all connectors"
   default     = {}
+
+
+  validation {
+    condition     = !contains(keys(var.general_environment_variables), "IS_DEVELOPMENT_MODE")
+    error_message = "Use 'non_production_connectors' to flag connectors as non-production, rather than passing `IS_DEVELOPMENT_MODE` environment variable."
+  }
+
+  validation {
+    condition     = !contains(keys(var.general_environment_variables), "PSEUDONYMIZE_APP_IDS")
+    error_message = "Use 'pseudonymize_app_ids' to set value of PSEUDONYMIZE_APP_IDS environment variable for all sources, rather than passing it as a general environment variable."
+  }
+
+  validation {
+    condition     = !contains(keys(var.general_environment_variables), "EMAIL_CANONICALIZATION")
+    error_message = "Use 'email_canonicalization' to set value of EMAIL_CANONICALIZATION environment variable for all sources, rather than passing it as a general environment variable."
+  }
 }
 
 variable "pseudonymize_app_ids" {
