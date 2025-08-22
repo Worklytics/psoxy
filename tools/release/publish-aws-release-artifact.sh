@@ -155,15 +155,6 @@ publish_to_region() {
 
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}✓ Successfully published to ${region}${NC}"
-
-        # Make the object publicly readable
-        aws s3api put-object-acl \
-            --bucket "$bucket_name" \
-            --key "aws/${JAR_FILENAME}" \
-            --acl public-read \
-            --region "$region"
-
-        echo -e "${GREEN}✓ Made object publicly readable in ${region}${NC}"
     else
         echo -e "${RED}✗ Failed to publish to ${region}${NC}"
         return 1
