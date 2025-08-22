@@ -163,7 +163,7 @@ public interface GcpModule {
     @Provides @Singleton
     static AsyncApiDataRequestHandler apiDataRequestViaPubSub(ApiDataRequestViaPubSubFactory factory,
                                                               GcpEnvironment.ApiModeConfig config) {
-        return factory.create(config.getPubSubTopic());
+        return factory.create(config.getAsyncPubSubQueue().orElseThrow(() -> new IllegalStateException("PubSub topic not configured")));
     }
 
     @Module

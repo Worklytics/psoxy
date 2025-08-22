@@ -1,5 +1,9 @@
 package co.worklytics.psoxy;
 
+import java.util.Optional;
+import java.util.Set;
+import javax.inject.Inject;
+import com.google.common.annotations.VisibleForTesting;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
@@ -7,10 +11,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Value;
-
-import javax.inject.Inject;
-import com.google.common.annotations.VisibleForTesting;
-import java.util.Set;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class GcpEnvironment implements HostEnvironment {
@@ -27,21 +27,21 @@ public class GcpEnvironment implements HostEnvironment {
     static class ApiModeConfig {
 
         /**
-         * the URL of the service, e.g. "https://my-service-12345.a.run.app"
+         * the URL of the service, e.g. "https://my-service-12345.a.run.app", if known/applicable
          */
-        String serviceUrl;
+        Optional<String> serviceUrl;
 
         /**
-         * Pub/Sub topic to which to publish events
+         * Pub/Sub topic to which to queue requests for async processing, if any
          *
          * eg, "projects/my-project/topics/my-topic"
          */
-        String pubSubTopic;
+        Optional<String> asyncPubSubQueue;
 
         @VisibleForTesting
         enum ApiModeConfigProperty implements co.worklytics.psoxy.gateway.ConfigService.ConfigProperty {
 
-            PUB_SUB_TOPIC,
+            ASYNC_PUB_SUB_QUEUE,
             SERVICE_URL,
         }
 
@@ -51,8 +51,8 @@ public class GcpEnvironment implements HostEnvironment {
             }
 
             return ApiModeConfig.builder()
-                .serviceUrl(configService.getConfigPropertyOrError(ApiModeConfig.ApiModeConfigProperty.SERVICE_URL))
-                .pubSubTopic(configService.getConfigPropertyOrError(ApiModeConfig.ApiModeConfigProperty.PUB_SUB_TOPIC))
+                .serviceUrl(configService.getConfigPropertyAsOptional(ApiModeConfig.ApiModeConfigProperty.SERVICE_URL))
+                .asyncPubSubQueue(configService.getConfigPropertyAsOptional(ApiModeConfig.ApiModeConfigProperty.ASYNC_PUB_SUB_QUEUE))
                 .build();
         }
     }

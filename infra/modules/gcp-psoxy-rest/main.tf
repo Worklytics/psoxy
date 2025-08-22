@@ -161,7 +161,7 @@ locals {
     TARGET_HOST                     = var.target_host
     SOURCE_AUTH_STRATEGY_IDENTIFIER = var.source_auth_strategy
     OAUTH_SCOPES                    = join(" ", var.oauth_scopes)
-    PUB_SUB_TOPIC                   = var.enable_async_processing ? google_pubsub_topic.async_output_topic[0].id : null
+    ASYNC_PUB_SUB_QUEUE             = var.enable_async_processing ? google_pubsub_topic.async_output_topic[0].id : null
     }
     : k => v if v != null
   }
