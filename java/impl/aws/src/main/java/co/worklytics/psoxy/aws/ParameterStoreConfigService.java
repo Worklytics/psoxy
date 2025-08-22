@@ -173,6 +173,7 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
     }
 
     String lockParameterName(String lockId) {
+        // TODO: in v0.6 i think this would be better as `_lock` suffix - or drop it entirely?? (just use the lockId??)
         return this.namespace + "lock_" + lockId;
     }
 
