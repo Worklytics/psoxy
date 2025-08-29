@@ -9,6 +9,12 @@ variable "chat_gpt_enterprise_example_workspace_id" {
   default     = null
 }
 
+variable "confluence_cloud_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Confluence Cloud connector) Example of cloud id of the Confluence Cloud to connect to (ex: 1324a887-45db-1bf4-1e99-ef0ff456d421)."
+}
+
 variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"
