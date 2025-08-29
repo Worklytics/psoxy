@@ -850,13 +850,13 @@ EOT
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/oauth/token/accessible-resources", # obtain Jira Cloud ID from here
-        "/ex/confluence/${local.confluence_example_cloud_id}/rest/api/content/search",
-        "/ex/confluence/${local.confluence_example_cloud_id}/rest/api/v2/spaces",
-        "/ex/confluence/${local.confluence_example_cloud_id}/rest/api/v2/attachments",
-        "/ex/confluence/${local.confluence_example_cloud_id}/rest/api/v2/blogposts",
-        "/ex/confluence/${local.confluence_example_cloud_id}/rest/api/v2/pages",
-        "/ex/confluence/${local.confluence_example_cloud_id}/rest/api/v2/footer-comments",
-        "/ex/confluence/${local.confluence_example_cloud_id}/rest/api/v2/inline-comments",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/content/search",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/spaces",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/attachments",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/blogposts",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/pages",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/footer-comments",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki /api/v2/inline-comments",
       ],
       external_token_todo : <<EOT
 ## Prerequisites

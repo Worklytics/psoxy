@@ -23,7 +23,7 @@ then
     exit 1
 fi
 
-printf "${GREEN}This script will guide you through the process of creating an OAuth app in Jira Cloud, authorizing it for the required scopes, and obtaining authentication credentials that can be used by the proxy connector.${NC}\n"
+printf "${GREEN}This script will guide you through the process of creating an OAuth app in Confluence Cloud, authorizing it for the required scopes, and obtaining authentication credentials that can be used by the proxy connector.${NC}\n"
 
 printf "1. Go to https://developer.atlassian.com/console/myapps/ and click on \"Create\" and choose \"OAuth 2.0 Integration\"\n"
 printf "2. Then click \"Authorization\" and \"Add\" on \`OAuth 2.0 (3L0)\`, adding \`http://localhost\` as callback URI. It can be any URL     that matches the URL format and it is required to be populated, but the proxy instance workflow will not use it.\n"
@@ -49,14 +49,20 @@ printf "Enter your Confluence Client Secret: "
 read -r CLIENT_SECRET
 
 # Open authorization URL in user's browser
-AUTH_URL="https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${CLIENT_ID}&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent"
+AUTH_URL="https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${CLIENT_ID}&scope=offline_access%20read%3Ablogpost%3Aconfluence%20read%3Acomment%3Aconfluence%20read%3Alabel%3Aconfluence%20read%3Agroup%3Aconfluence%20read%3Aspace%3Aconfluence%20read%3Aattachment%3Aconfluence%20read%3Apage%3Aconfluence%20read%3Auser%3Aconfluence%20read%3Aspace.property%3Aconfluence%20read%3Acontent.property%3Aconfluence%20read%3Atask%3Aconfluence%20read%3Acontent-details%3Aconfluence%20read%3Acontent%3Aconfluence&redirect_uri=http%3A%2F%2Flocalhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent"
 printf "${GREEN}Opening the following URL in your default browser:${NC}\n"
 echo $AUTH_URL
 open "${AUTH_URL}" || xdg-open "${AUTH_URL}"
 
 # Prompt for authorization code
-printf "After accepting access on the Confluence site, paste the authorization code from the URL here: "
-read -r AUTH_CODE
+printf "After accepting access on the Confluence site, paste the full redirect URL here (then press Enter):\n"
+if read -e -r REDIRECT_URL; then
+  :
+else
+  read -r REDIRECT_URL
+fi
+AUTH_CODE=$(echo "$REDIRECT_URL" | sed -n 's/.*[?&]code=\([^&]*\).*/\1/p')
+
 
 # Use the authorization code to request access and refresh tokens
 DATA="{\"grant_type\": \"authorization_code\",\"client_id\": \"${CLIENT_ID}\",\"client_secret\": \"${CLIENT_SECRET}\", \"code\": \"${AUTH_CODE}\", \"redirect_uri\": \"http://localhost\"}"
