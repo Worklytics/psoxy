@@ -2,7 +2,7 @@
 
 Prior to any upgrade, please determine your current version and target version, then review the [`CHANGELOG.md`](https://github.com/Worklytics/psoxy/blob/main/CHANGELOG.md) and [release notes](https://github.com/Worklytics/psoxy/releases) your target version, and all intermediary versions, for any significant changes that may require additional action on your part.
 
-Generally speaking, prior to a `v1`, we strive to following semantic versioning as follows: `v{x}.{y}.{z}`
+Generally speaking, prior to a `v1`, we strive to follow semantic versioning as follows: `v{x}.{y}.{z}`
 
 ## Deployments Using Our Examples (from `v0.4.30` and later)
 
