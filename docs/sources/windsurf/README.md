@@ -5,7 +5,7 @@
 
 Our Windsurf data connector uses the Analytics API to import data about Users (accounts) and aggregate usage data  (metrics) to Worklytics. As of July 2025, this API requires an Enterprise SaaS subscription.
 
-https://docs.windsurf.com/windsurf/accounts/analytics-api#overview
+[https://docs.windsurf.com/windsurf/accounts/analytics-api#overview](https://docs.windsurf.com/windsurf/accounts/analytics-api#overview])
 
 
 ## Steps to Connect

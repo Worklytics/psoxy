@@ -10,8 +10,8 @@ The Dropbox Business connector through Psoxy requires a Dropbox Application crea
 - `events.read`: event listing
 - `groups.read`: group listing
 
-1. Go to https://www.dropbox.com/apps and Build an App.
-2. Then go to https://www.dropbox.com/developers to enter the `App Console` to configure your app.
+1. Go to [https://www.dropbox.com/apps](https://www.dropbox.com/apps) and Build an App.
+2. Then go to [https://www.dropbox.com/developers](https://www.dropbox.com/developers) to enter the `App Console` to configure your app.
 3. In the app, go to `Permissions` and mark all the scopes described above. NOTE: The UI may automatically select additional required permissions (like _account_info_read_). Just mark the ones described here, and the UI will prompt you to include any other required ones.
 4. In settings, you can access the `App key` and `App secret`. You can create an access token here, but it will have limited expiration. To create a long-lived token, edit the following URL with your `App key` and paste it into your browser:
 

@@ -5,7 +5,7 @@
 
 Our Cursor data connector uses the Admin API to import data about Team Members (accounts),  Daily Usage (metrics), and Usage Events (work events) to Worklytics.
 
-https://docs.cursor.com/account/teams/admin-api
+[https://docs.cursor.com/account/teams/admin-api](https://docs.cursor.com/account/teams/admin-api)
 
 
 ## Steps to Connect
@@ -13,7 +13,7 @@ https://docs.cursor.com/account/teams/admin-api
 See Cursor's documentation for the latest, but as of July 10, 2025, you must create an API key and fill that as a secret in your host platform. The Proxy will then use Basic Authentication when connecting to Cursor.
 
 
-1. Navigate to https://cursor.com/dashboard → Settings tab → Cursor Admin API Keys
+1. Navigate to [https://cursor.com/dashboard](https://cursor.com/dashboard) → Settings tab → Cursor Admin API Keys
 
 2. Click 'Create New API Key'
 
