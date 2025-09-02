@@ -339,7 +339,7 @@ data "google_project" "project" {
 resource "google_service_account_iam_member" "allow_scheduler_impersonation" {
   count = var.support_webhook_collectors ? 1 : 0
 
-  service_account_id = google_service_account.webhook_batch_invoker.id
+  service_account_id = google_service_account.webhook_batch_invoker[0].id
   role               = "roles/iam.serviceAccountTokenCreator"
   member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudscheduler.iam.gserviceaccount.com"
 }
@@ -495,7 +495,7 @@ output "oidc_token_verifier_role_id" {
 }
 
 output "webhook_batch_invoker_sa_email" {
-  value = google_service_account.webhook_batch_invoker.email
+  value = try(google_service_account.webhook_batch_invoker[0].email, null)
 }
 
 output "vpc_config" {
