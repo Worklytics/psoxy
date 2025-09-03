@@ -18,7 +18,7 @@ import java.util.Map;
  */
 @With
 @Builder(toBuilder = true)
-@Getter
+@Value
 public class ProcessedContent implements Serializable {
 
     @Serial
