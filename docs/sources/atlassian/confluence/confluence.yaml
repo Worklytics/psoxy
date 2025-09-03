@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/attachments/{pageId}/versions"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/{version}/attachments/{pageId}/versions"
     allowedQueryParams:
       - "limit"
       - "cursor"
@@ -32,7 +32,7 @@ endpoints:
           type: "integer"
         start:
           type: "integer"
-  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/blogposts/{blogpostId}/versions"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/{version}/blogposts/{blogpostId}/versions"
     allowedQueryParams:
       - "limit"
       - "cursor"
@@ -64,7 +64,7 @@ endpoints:
           type: "integer"
         start:
           type: "integer"
-  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/custom-content/{customContentId}/versions"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/{version}/custom-content/{customContentId}/versions"
     allowedQueryParams:
       - "limit"
       - "cursor"
@@ -99,7 +99,7 @@ endpoints:
           type: "integer"
         start:
           type: "integer"
-  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/footer-comments/{commentId}/versions"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/{version}/footer-comments/{commentId}/versions"
     allowedQueryParams:
       - "limit"
       - "cursor"
@@ -131,7 +131,7 @@ endpoints:
           type: "integer"
         start:
           type: "integer"
-  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/inline-comments/{commentId}/versions"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/{version}/inline-comments/{commentId}/versions"
     allowedQueryParams:
       - "limit"
       - "cursor"
@@ -163,7 +163,7 @@ endpoints:
           type: "integer"
         start:
           type: "integer"
-  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/pages/{pageId}/versions"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/{version}/pages/{pageId}/versions"
     allowedQueryParams:
       - "limit"
       - "cursor"
@@ -195,7 +195,7 @@ endpoints:
           type: "integer"
         start:
           type: "integer"
-  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/spaces"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/{version}/spaces"
     allowedQueryParams:
       - "limit"
       - "cursor"
@@ -230,7 +230,7 @@ endpoints:
           type: "integer"
         start:
           type: "integer"
-  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/tasks"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/{version}/tasks"
     allowedQueryParams:
       - "limit"
       - "cursor"
