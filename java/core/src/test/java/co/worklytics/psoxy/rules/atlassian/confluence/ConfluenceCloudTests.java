@@ -59,6 +59,15 @@ public class ConfluenceCloudTests extends JavaRulesTestBaseCase {
                 "https://api.atlassian.com/ex/confluence/company-team/wiki/rest/api/group/35e417ad-bcb1-45fe-9be0-959239a84327/membersByGroupId?limit=100&start=100",
                 "group_members.json"
             ),
+            // Tasks (v2)
+            InvocationExample.of(
+                "https://api.atlassian.com/ex/confluence/company-team/wiki/api/v2/tasks?limit=100",
+                "tasks.json"
+            ),
+            InvocationExample.of(
+                "https://api.atlassian.com/ex/confluence/company-team/wiki/api/v2/tasks?limit=100&cursor=some-cursor-value&completed-at-from=1756817402000",
+                "tasks.json"
+            ),
             // Spaces (v2)
             InvocationExample.of(
                 "https://api.atlassian.com/ex/confluence/company-team/wiki/api/v2/spaces?limit=100",

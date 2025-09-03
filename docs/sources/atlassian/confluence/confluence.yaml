@@ -198,6 +198,42 @@ endpoints:
           type: "integer"
         start:
           type: "integer"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/tasks"
+    allowedQueryParams:
+      - "limit"
+      - "cursor"
+      - "created-at-from"
+      - "created-at-to"
+      - "completed-at-from"
+      - "completed-at-to"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.results[*].assignedTo"
+          - "$.results[*].completedBy"
+          - "$.results[*].createdBy"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.results[*]..body"
+          - "$._links.base"
+          - "$._links.context"
+          - "$._links.self"
+    responseSchema:
+      type: "object"
+      properties:
+        _links:
+          $ref: "#/definitions/Links"
+        limit:
+          type: "integer"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/Task"
+        size:
+          type: "integer"
+        start:
+          type: "integer"
   - pathTemplate: "/ex/confluence/{cloudId}/wiki/rest/api/content/search"
     allowedQueryParams:
       - "cql"
@@ -496,6 +532,37 @@ definitions:
         type: "string"
       spaceOwnerId:
         type: "string"
+  Task:
+    type: "object"
+    properties:
+      assignedTo:
+        type: "string"
+      completedAt:
+        type: "string"
+        format: "date-time"
+      completedBy:
+        type: "string"
+      createdAt:
+        type: "string"
+        format: "date-time"
+      createdBy:
+        type: "string"
+      dueAt:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      localId:
+        type: "string"
+      pageId:
+        type: "string"
+      spaceId:
+        type: "string"
+      status:
+        type: "string"
+      updatedAt:
+        type: "string"
+        format: "date-time"
   User:
     type: "object"
     properties:
