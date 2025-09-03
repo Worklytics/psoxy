@@ -1,0 +1,554 @@
+---
+endpoints:
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/attachments/{pageId}/versions"
+    allowedQueryParams:
+      - "limit"
+      - "cursor"
+      - "sort"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.results[*].authorId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.results[*]..body"
+      - !<textDigest>
+        jsonPaths:
+          - "$.results[*].message"
+          - "$.results[*].title"
+    responseSchema:
+      type: "object"
+      properties:
+        _links:
+          $ref: "#/definitions/Links"
+        limit:
+          type: "integer"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/Version"
+        size:
+          type: "integer"
+        start:
+          type: "integer"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/blogposts/{blogpostId}/versions"
+    allowedQueryParams:
+      - "limit"
+      - "cursor"
+      - "sort"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.results[*].authorId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.results[*]..body"
+      - !<textDigest>
+        jsonPaths:
+          - "$.results[*].message"
+          - "$.results[*].title"
+    responseSchema:
+      type: "object"
+      properties:
+        _links:
+          $ref: "#/definitions/Links"
+        limit:
+          type: "integer"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/Version"
+        size:
+          type: "integer"
+        start:
+          type: "integer"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/comments/{commentId}/versions"
+    allowedQueryParams:
+      - "limit"
+      - "cursor"
+      - "sort"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.results[*].authorId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.results[*]..body"
+      - !<textDigest>
+        jsonPaths:
+          - "$.results[*].message"
+          - "$.results[*].title"
+    responseSchema:
+      type: "object"
+      properties:
+        _links:
+          $ref: "#/definitions/Links"
+        limit:
+          type: "integer"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/Version"
+        size:
+          type: "integer"
+        start:
+          type: "integer"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/custom-content/{customContentId}/versions"
+    allowedQueryParams:
+      - "limit"
+      - "cursor"
+      - "sort"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.results[*].authorId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.results[*]..body"
+          - "$._links.base"
+          - "$._links.context"
+          - "$._links.self"
+      - !<textDigest>
+        jsonPaths:
+          - "$.results[*].message"
+          - "$.results[*].title"
+    responseSchema:
+      type: "object"
+      properties:
+        _links:
+          $ref: "#/definitions/Links"
+        limit:
+          type: "integer"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/Version"
+        size:
+          type: "integer"
+        start:
+          type: "integer"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/pages/{pageId}/versions"
+    allowedQueryParams:
+      - "limit"
+      - "cursor"
+      - "sort"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.results[*].authorId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.results[*]..body"
+      - !<textDigest>
+        jsonPaths:
+          - "$.results[*].message"
+          - "$.results[*].title"
+    responseSchema:
+      type: "object"
+      properties:
+        _links:
+          $ref: "#/definitions/Links"
+        limit:
+          type: "integer"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/Version"
+        size:
+          type: "integer"
+        start:
+          type: "integer"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/spaces"
+    allowedQueryParams:
+      - "limit"
+      - "cursor"
+      - "type"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.results[*].authorId"
+          - "$.results[*].spaceOwnerId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.results[*].name"
+          - "$._links.base"
+          - "$._links.context"
+          - "$._links.self"
+      - !<textDigest>
+        jsonPaths:
+          - "$.results[*].description"
+    responseSchema:
+      type: "object"
+      properties:
+        _links:
+          $ref: "#/definitions/Links"
+        limit:
+          type: "integer"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/Space"
+        size:
+          type: "integer"
+        start:
+          type: "integer"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/rest/api/content/search"
+    allowedQueryParams:
+      - "cql"
+      - "expand"
+      - "limit"
+      - "cursor"
+      - "includeArchivedSpaces"
+      - "start"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.results[*]..accountId"
+          - "$.results[*]..email"
+          - "$.results[*]..attrs.id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.results[*]..ari"
+          - "$.results[*]..displayName"
+          - "$.results[*]..publicName"
+          - "$.results[*]..profilePicture"
+          - "$.results[*]..body"
+          - "$.results[*]..base64EncodedAri"
+          - "$.results[*]..macroRenderedOutput"
+          - "$.results[*]..extensions"
+          - "$.results[*].._expandable"
+          - "$.results[*].._links"
+          - "$.results[*]..webui"
+          - "$.results[*]..self"
+          - "$.results[*]..download"
+          - "$._links.base"
+          - "$._links.context"
+          - "$._links.self"
+      - !<textDigest>
+        jsonPaths:
+          - "$.results[*]..title"
+          - "$.results[*].body.atlas_doc_format.value..text"
+          - "$.results[*]..message"
+    responseSchema:
+      type: "object"
+      properties:
+        _links:
+          $ref: "#/definitions/Links"
+        limit:
+          type: "integer"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/ContentItem"
+        size:
+          type: "integer"
+        start:
+          type: "integer"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/rest/api/group"
+    allowedQueryParams:
+      - "limit"
+      - "start"
+    transforms:
+      - !<redact>
+        jsonPaths:
+          - "$..name"
+          - "$._links.base"
+          - "$._links.context"
+          - "$._links.self"
+    responseSchema:
+      type: "object"
+      properties:
+        _links:
+          $ref: "#/definitions/Links"
+        limit:
+          type: "integer"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/Group"
+        size:
+          type: "integer"
+        start:
+          type: "integer"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/rest/api/group/{groupId}/membersByGroupId"
+    allowedQueryParams:
+      - "limit"
+      - "start"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.results[*].accountId"
+          - "$.results[*].email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.results[*].displayName"
+          - "$.results[*].profilePicture"
+          - "$.results[*].publicName"
+          - "$._links.base"
+          - "$._links.context"
+          - "$._links.self"
+    responseSchema:
+      type: "object"
+      properties:
+        _links:
+          $ref: "#/definitions/Links"
+        limit:
+          type: "integer"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/GroupMember"
+        size:
+          type: "integer"
+        start:
+          type: "integer"
+  - pathTemplate: "/oauth/token/accessible-resources"
+    allowedQueryParams: []
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/AccessibleResource"
+definitions:
+  AccessibleResource:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      scopes:
+        type: "array"
+        items:
+          type: "string"
+      url:
+        type: "string"
+  AncestorReference:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      status:
+        type: "string"
+      title:
+        type: "string"
+      type:
+        type: "string"
+  Body:
+    type: "object"
+    properties:
+      atlasDocFormat:
+        $ref: "#/definitions/DocFormat"
+  ContentItem:
+    type: "object"
+    properties:
+      ancestors:
+        type: "array"
+        items:
+          $ref: "#/definitions/AncestorReference"
+      body:
+        $ref: "#/definitions/Body"
+      history:
+        $ref: "#/definitions/History"
+      id:
+        type: "string"
+      sourceId:
+        type: "string"
+      status:
+        type: "string"
+      title:
+        type: "string"
+      type:
+        type: "string"
+      version:
+        $ref: "#/definitions/ContentSearchVersion"
+  ContentSearchVersion:
+    type: "object"
+    properties:
+      attachment:
+        $ref: "#/definitions/Parent"
+      authorId:
+        type: "string"
+      blogpost:
+        $ref: "#/definitions/Parent"
+      by:
+        $ref: "#/definitions/User"
+      comment:
+        $ref: "#/definitions/Parent"
+      contentTypeModified:
+        type: "boolean"
+      email:
+        type: "string"
+      message:
+        type: "string"
+      minorEdit:
+        type: "boolean"
+      number:
+        type: "integer"
+      page:
+        $ref: "#/definitions/Parent"
+      when:
+        type: "string"
+  CreatedBy:
+    type: "object"
+    properties:
+      accountId:
+        type: "string"
+      displayName:
+        type: "string"
+  DocFormat:
+    type: "object"
+    properties:
+      representation:
+        type: "string"
+      value:
+        type: "string"
+  Group:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      type:
+        type: "string"
+  GroupMember:
+    type: "object"
+    properties:
+      accountId:
+        type: "string"
+      accountStatus:
+        type: "string"
+      accountType:
+        type: "string"
+      displayName:
+        type: "string"
+      email:
+        type: "string"
+      emailAddress:
+        type: "string"
+      externalCollaborator:
+        type: "boolean"
+      guest:
+        type: "boolean"
+      locale:
+        type: "string"
+      profilePicture:
+        $ref: "#/definitions/ProfilePicture"
+      publicName:
+        type: "string"
+      type:
+        type: "string"
+      userKey:
+        type: "string"
+      username:
+        type: "string"
+  History:
+    type: "object"
+    properties:
+      createdBy:
+        $ref: "#/definitions/CreatedBy"
+      createdDate:
+        type: "string"
+  Links:
+    type: "object"
+    properties:
+      next:
+        type: "string"
+      prev:
+        type: "string"
+  Parent:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+  ProfilePicture:
+    type: "object"
+    properties:
+      height:
+        type: "integer"
+      isDefault:
+        type: "boolean"
+      path:
+        type: "string"
+      width:
+        type: "integer"
+  Space:
+    type: "object"
+    properties:
+      authorId:
+        type: "string"
+      createdAt:
+        type: "string"
+        format: "date-time"
+      description:
+        type: "string"
+      homePageId:
+        type: "string"
+      id:
+        type: "string"
+      key:
+        type: "string"
+      name:
+        type: "string"
+      spaceOwnerId:
+        type: "string"
+  User:
+    type: "object"
+    properties:
+      accountId:
+        type: "string"
+      accountStatus:
+        type: "string"
+      accountType:
+        type: "string"
+      displayName:
+        type: "string"
+      email:
+        type: "string"
+      emailAddress:
+        type: "string"
+      externalCollaborator:
+        type: "boolean"
+      guest:
+        type: "boolean"
+      locale:
+        type: "string"
+      profilePicture:
+        $ref: "#/definitions/ProfilePicture"
+      publicName:
+        type: "string"
+      type:
+        type: "string"
+      userKey:
+        type: "string"
+      username:
+        type: "string"
+  Version:
+    type: "object"
+    properties:
+      attachment:
+        $ref: "#/definitions/Parent"
+      authorId:
+        type: "string"
+      blogpost:
+        $ref: "#/definitions/Parent"
+      comment:
+        $ref: "#/definitions/Parent"
+      contentTypeModified:
+        type: "boolean"
+      email:
+        type: "string"
+      message:
+        type: "string"
+      minorEdit:
+        type: "boolean"
+      number:
+        type: "integer"
+      page:
+        $ref: "#/definitions/Parent"
+      when:
+        type: "string"

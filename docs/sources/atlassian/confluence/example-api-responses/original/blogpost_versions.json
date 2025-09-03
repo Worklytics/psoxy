@@ -1,0 +1,19 @@
+{
+  "results": [
+    {
+      "number": 1,
+      "message": "",
+      "minorEdit": false,
+      "authorId": "608a9b555426330072f9867d",
+      "createdAt": "2025-09-01T17:05:39.580Z",
+      "blogpost": {
+        "body": {},
+        "title": "This is a blog post",
+        "id": "557065"
+      }
+    }
+  ],
+  "_links": {
+    "base": "https://company-team.atlassian.net/wiki"
+  }
+}

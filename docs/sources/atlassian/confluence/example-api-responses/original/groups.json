@@ -1,0 +1,58 @@
+{
+  "results": [
+    {
+      "id": "f1d0f7dc-acda-4ad2-b398-26a7150a6b1c",
+      "name": "confluence-guests-company-team",
+      "resourceAri": "ari:cloud:identity::group/f1d0f7dc-acda-4ad2-b398-26a7150a6b1c",
+      "type": "group",
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/experimental/group/confluence-guests-company-team"
+      }
+    },
+    {
+      "id": "5e35e521-e2ed-47c2-8964-eb938da4f339",
+      "name": "confluence-user-access-admins-company-team",
+      "resourceAri": "ari:cloud:identity::group/5e35e521-e2ed-47c2-8964-eb938da4f339",
+      "type": "group",
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/experimental/group/confluence-user-access-admins-company-team"
+      }
+    },
+    {
+      "id": "35e417ad-bcb1-45fe-9be0-959239a84327",
+      "name": "jira-users-company-team",
+      "resourceAri": "ari:cloud:identity::group/35e417ad-bcb1-45fe-9be0-959239a84327",
+      "type": "group",
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/experimental/group/jira-users-company-team"
+      }
+    },
+    {
+      "id": "d062d6c4-4c82-4478-9232-99dda8d3baf8",
+      "name": "jira-admins-company-team",
+      "resourceAri": "ari:cloud:identity::group/d062d6c4-4c82-4478-9232-99dda8d3baf8",
+      "type": "group",
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/experimental/group/jira-admins-company-team"
+      }
+    },
+    {
+      "id": "b5b487c0-2629-4f65-a211-d9ec4a0c3888",
+      "name": "org-admins",
+      "resourceAri": "ari:cloud:identity::group/b5b487c0-2629-4f65-a211-d9ec4a0c3888",
+      "type": "group",
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/experimental/group/org-admins"
+      }
+    }
+  ],
+  "start": 0,
+  "limit": 5,
+  "size": 5,
+  "_links": {
+    "base": "https://company-team.atlassian.net/wiki",
+    "context": "/wiki",
+    "next": "/rest/api/group?next=true&limit=5&start=5",
+    "self": "https://company-team.atlassian.net/wiki/rest/api/group"
+  }
+}
