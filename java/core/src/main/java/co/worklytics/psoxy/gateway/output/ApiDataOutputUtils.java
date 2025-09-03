@@ -107,7 +107,7 @@ public class ApiDataOutputUtils {
      * @param sourceApiRequest request to the source API
      * @param sourceApiResponse response from the source API
      * @return ProcessedContent containing the response content, metadata, etc.
-     * @throws IOException
+     * @throws IOException if error reading content from response
      */
     public ProcessedContent responseAsRawProcessedContent(HttpRequest sourceApiRequest,
                                                           HttpResponse sourceApiResponse) throws IOException {
@@ -117,13 +117,10 @@ public class ApiDataOutputUtils {
 
         // sourceApiResponse will not have content for 'HEAD' requests (or potentially even GET, in some cases - 204 No Content, 304 Not Modified, etc.)
         if (sourceApiResponse.getContent() != null) {
-            try (InputStream stream = sourceApiResponse.getContent()) {
-                builder.content(stream.readAllBytes());
-            }
+            builder.stream(sourceApiResponse.getContent());
         }
 
         Map<String, String> metadata = this.buildRawMetadata(sourceApiRequest);
-
 
         //not sure this will work; are we certain to be able to consume HttpContent after request has been sent?
         if (sourceApiRequest.getContent() != null
@@ -139,8 +136,6 @@ public class ApiDataOutputUtils {
         }
 
         builder.metadata(metadata);
-
-
 
         return builder.build();
     }

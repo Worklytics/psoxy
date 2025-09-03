@@ -449,8 +449,9 @@ public class ApiDataRequestHandler {
 
             // TODO: if side output cases of the original, we *could* use the potentially compressed
             // stream directly, instead of reading to a string?
-            ProcessedContent original = apiDataOutputUtils
-                    .responseAsRawProcessedContent(requestToSourceApi, sourceApiResponse);
+            ProcessedContent original =
+                apiDataOutputUtils.responseAsRawProcessedContent(requestToSourceApi, sourceApiResponse);
+
             try {
                 apiDataSideOutput.writeRaw(original, processingContext);
             } catch (Output.WriteFailure e) {
@@ -518,7 +519,7 @@ public class ApiDataRequestHandler {
     }
 
     ProcessedContent sanitize(HttpEventRequest request, RequestUrls requestUrls,
-            ProcessedContent originalContent) {
+            ProcessedContent originalContent) throws IOException {
         RESTApiSanitizer sanitizerForRequest = getSanitizerForRequest(request);
         String sanitized =
                 StringUtils.trimToEmpty(sanitizerForRequest.sanitize(request.getHttpMethod(),

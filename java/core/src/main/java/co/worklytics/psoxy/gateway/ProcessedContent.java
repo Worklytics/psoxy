@@ -2,8 +2,7 @@ package co.worklytics.psoxy.gateway;
 
 import lombok.*;
 
-import java.io.Serial;
-import java.io.Serializable;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -54,11 +53,33 @@ public class ProcessedContent implements Serializable {
      */
     byte[] content;
 
+    InputStream stream;
+
+    public byte[] getContent() throws IOException {
+        if (content != null) {
+            return content;
+        } else if (stream != null) {
+            return stream.readAllBytes();
+        } else {
+            return new byte[0];
+        }
+    }
+
+    public InputStream getStream() {
+        if (stream != null) {
+            return stream;
+        } else if (content != null) {
+            return new ByteArrayInputStream(content);
+        } else {
+            return InputStream.nullInputStream();
+        }
+    }
+
     /**
      * for convenience, a method to get the content as a string - rather than byte array
      * @return the content as a string, using the specified contentCharset
      */
-    public String getContentAsString() {
+    public String getContentAsString() throws IOException {
         return new String(getContent(), contentCharset);
     }
 }
