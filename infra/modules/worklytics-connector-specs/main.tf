@@ -856,7 +856,8 @@ EOT
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/attachments/{attachmentId}/versions",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/blogposts/{blogpostId}/versions",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/pages/{pageId}/versions",
-        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/comments/{commentId}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/footer-comments/{commentId}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/inline-comments/{commentId}/versions",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/tasks",
       ],
       external_token_todo : <<EOT

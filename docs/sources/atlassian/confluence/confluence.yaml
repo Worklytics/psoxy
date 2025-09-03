@@ -64,7 +64,42 @@ endpoints:
           type: "integer"
         start:
           type: "integer"
-  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/comments/{commentId}/versions"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/custom-content/{customContentId}/versions"
+    allowedQueryParams:
+      - "limit"
+      - "cursor"
+      - "sort"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.results[*].authorId"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.results[*]..body"
+          - "$._links.base"
+          - "$._links.context"
+          - "$._links.self"
+      - !<textDigest>
+        jsonPaths:
+          - "$.results[*].message"
+          - "$.results[*].title"
+    responseSchema:
+      type: "object"
+      properties:
+        _links:
+          $ref: "#/definitions/Links"
+        limit:
+          type: "integer"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/Version"
+        size:
+          type: "integer"
+        start:
+          type: "integer"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/footer-comments/{commentId}/versions"
     allowedQueryParams:
       - "limit"
       - "cursor"
@@ -96,7 +131,7 @@ endpoints:
           type: "integer"
         start:
           type: "integer"
-  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/custom-content/{customContentId}/versions"
+  - pathTemplate: "/ex/confluence/{cloudId}/wiki/api/v2/inline-comments/{commentId}/versions"
     allowedQueryParams:
       - "limit"
       - "cursor"
@@ -109,9 +144,6 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.results[*]..body"
-          - "$._links.base"
-          - "$._links.context"
-          - "$._links.self"
       - !<textDigest>
         jsonPaths:
           - "$.results[*].message"

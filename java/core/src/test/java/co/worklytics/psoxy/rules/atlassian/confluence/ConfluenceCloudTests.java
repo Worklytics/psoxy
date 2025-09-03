@@ -112,11 +112,19 @@ public class ConfluenceCloudTests extends JavaRulesTestBaseCase {
                 "custom_content_versions.json"
             ),
             InvocationExample.of(
-                "https://api.atlassian.com/ex/confluence/company-team/wiki/api/v2/comments/1234/versions?limit=10",
+                "https://api.atlassian.com/ex/confluence/company-team/wiki/api/v2/footer-comments/1234/versions?limit=10",
                 "comment_versions.json"
             ),
             InvocationExample.of(
-                "https://api.atlassian.com/ex/confluence/company-team/wiki/api/v2/comments/1234/versions?limit=10&cursor=some-cursor-value",
+                "https://api.atlassian.com/ex/confluence/company-team/wiki/api/v2/footer-comments/1234/versions?limit=10&cursor=some-cursor-value",
+                "comment_versions.json"
+            ),
+            InvocationExample.of(
+                "https://api.atlassian.com/ex/confluence/company-team/wiki/api/v2/inline-comments/1234/versions?limit=10",
+                "comment_versions.json"
+            ),
+            InvocationExample.of(
+                "https://api.atlassian.com/ex/confluence/company-team/wiki/api/v2/inline-comments/1234/versions?limit=10&cursor=some-cursor-value",
                 "comment_versions.json"
             ),
             InvocationExample.of(
