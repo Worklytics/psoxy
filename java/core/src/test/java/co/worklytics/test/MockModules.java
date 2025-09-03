@@ -16,7 +16,6 @@ import com.avaulta.gateway.rules.RuleSet;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import com.google.auth.http.HttpTransportFactory;
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
@@ -199,7 +198,7 @@ public class MockModules {
          * a no-op implementation of SideOutput that does nothing.
          */
         @NoArgsConstructor(onConstructor_ = {@Inject})
-        class NoApiDataSideOutput implements ApiDataSideOutput {
+        class NoApiDataSideOutput implements ApiDataSideOutput, ApiSanitizedDataOutput {
 
             @Override
             public void writeRaw(ProcessedContent content, ApiDataRequestHandler.ProcessingContext processingContext) throws IOException {
@@ -209,6 +208,16 @@ public class MockModules {
             @Override
             public void writeSanitized(ProcessedContent content, ApiDataRequestHandler.ProcessingContext processingContext) throws IOException {
 
+            }
+
+            @Override
+            public boolean hasRawOutput() {
+                return false;
+            }
+
+            @Override
+            public boolean hasSanitizedOutput() {
+                return false;
             }
         }
     }

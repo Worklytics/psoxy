@@ -127,11 +127,9 @@ public class ApiDataRequestHandler {
     @Named("async")
     Lazy<ApiSanitizedDataOutput> asyncSanitizedDataOutput;
     @Inject
-    @Named("forOriginal")
     ApiDataSideOutput apiDataSideOutput;
     @Inject
-    @Named("forSanitized")
-    ApiDataSideOutput apiDataSideOutputSanitized;
+    ApiSanitizedDataOutput apiDataSideOutputSanitized;
     @Inject
     ApiDataOutputUtils apiDataOutputUtils;
     @Inject
@@ -447,8 +445,6 @@ public class ApiDataRequestHandler {
             // return response
             builder.statusCode(sourceApiResponse.getStatusCode());
 
-            // TODO: if side output cases of the original, we *could* use the potentially compressed
-            // stream directly, instead of reading to a string?
             ProcessedContent original =
                 apiDataOutputUtils.responseAsRawProcessedContent(requestToSourceApi, sourceApiResponse);
 
