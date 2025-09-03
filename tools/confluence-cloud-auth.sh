@@ -28,13 +28,17 @@ printf "${GREEN}This script will guide you through the process of creating an OA
 printf "1. Go to https://developer.atlassian.com/console/myapps/ and click on \"Create\" and choose \"OAuth 2.0 Integration\"\n"
 printf "2. Then click \"Authorization\" and \"Add\" on \`OAuth 2.0 (3L0)\`, adding \`http://localhost\` as callback URI. It can be any URL     that matches the URL format and it is required to be populated, but the proxy instance workflow will not use it.\n"
 printf "3. Now navigate to \"Permissions\" and click on \"Add\" for \`Jira API\`. Once added, click on \"Configure\".
-  Add following scopes as part of \"Classic Scopes\", first clicking on \`Edit Scopes\` and then selecting them:
-    - \`read:jira-user\`
-    - \`read:jira-work\`
-  And these from \"Granular Scopes\":
-    - \`read:group:jira\`
-    - \`read:avatar:jira\`
-    - \`read:user:jira\`
+  Add following scopes as part of \"Granular Scopes\", first clicking on \`Edit Scopes\` and then selecting them:
+    - \`read:blogpost:confluence\`
+    - \`read:comment:confluence\`
+    - \`read:group:confluence\`
+    - \`read:space:confluence\`
+    - \`read:attachment:confluence\`
+    - \`read:page:confluence\`
+    - \`read:user:confluence\`
+    - \`read:task:confluence\`
+    - \`read:content-details:confluence\`
+    - \`read:content:confluence\`
   Then go back to \"Permissions\" and click on \"Add\" for \`User Identity API\`, only selecting following scopes:
     - \`read:account\`
 \n"
@@ -49,7 +53,7 @@ printf "Enter your Confluence Client Secret: "
 read -r CLIENT_SECRET
 
 # Open authorization URL in user's browser
-AUTH_URL="https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${CLIENT_ID}&scope=offline_access%20read%3Ablogpost%3Aconfluence%20read%3Acomment%3Aconfluence%20read%3Alabel%3Aconfluence%20read%3Agroup%3Aconfluence%20read%3Aspace%3Aconfluence%20read%3Aattachment%3Aconfluence%20read%3Apage%3Aconfluence%20read%3Auser%3Aconfluence%20read%3Aspace.property%3Aconfluence%20read%3Acontent.property%3Aconfluence%20read%3Atask%3Aconfluence%20read%3Acontent-details%3Aconfluence%20read%3Acontent%3Aconfluence&redirect_uri=http%3A%2F%2Flocalhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent"
+AUTH_URL="https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${CLIENT_ID}&scope=offline_access%20read%3Ablogpost%3Aconfluence%20read%3Acomment%3Aconfluence%20read%3Agroup%3Aconfluence%20read%3Aspace%3Aconfluence%20read%3Aattachment%3Aconfluence%20read%3Apage%3Aconfluence%20read%3Auser%3Aconfluence%20read%3Atask%3Aconfluence%20read%3Acontent-details%3Aconfluence%20read%3Acontent%3Aconfluence&redirect_uri=http%3A%2F%2Flocalhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent"
 printf "${GREEN}Opening the following URL in your default browser:${NC}\n"
 echo $AUTH_URL
 open "${AUTH_URL}" || xdg-open "${AUTH_URL}"
