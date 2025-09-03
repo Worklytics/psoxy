@@ -120,6 +120,8 @@ public interface RESTApiSanitizer {
          * TODO: this is a transitional method; intention is to read to an outputstream later (entire point is to be able to
          * read/sanitize/write in a streaming manner, so can accommodate very large data loads)
          *
+         * eg, an implementation of transferTo(OutputStream)
+         *
          * @param timeout
          * @return
          * @throws IOException
