@@ -4,6 +4,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.*;
@@ -13,6 +14,7 @@ import co.worklytics.psoxy.rules.RESTRules;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 
 public interface RESTApiSanitizer {
     /**
@@ -98,18 +100,10 @@ public interface RESTApiSanitizer {
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     class ProcessedStream implements AutoCloseable {
 
-        @Getter
         private final InputStream stream;
         private final Future<?> future;
         @Nullable
         private final ExecutorService executor;
-
-        public void complete() throws ExecutionException, InterruptedException {
-            future.get();
-            if (executor != null) {
-                executor.shutdown();
-            }
-        }
 
         /**
          * a stream that's already completed
@@ -132,11 +126,53 @@ public interface RESTApiSanitizer {
 
         @Override
         public void close() throws Exception {
-            future.get();
+            if (future != null && !future.isDone()) {
+                future.cancel(true);
+            }
             stream.close();
             if (executor != null) {
                 executor.shutdownNow();
             }
+        }
+
+        /**
+         * read all bytes from stream, subject to a max timeout
+         *
+         * @param timeout
+         * @return
+         * @throws IOException
+         * @throws ExecutionException
+         * @throws InterruptedException
+         * @throws TimeoutException
+         */
+        @SneakyThrows
+        public byte[] readAllBytes(Duration timeout) throws IOException, ExecutionException, InterruptedException, TimeoutException {
+            // q: even needed? instead of createRunning, do we just start it here??
+
+            // NOTE: cannot re-use the same executor, or things block
+            ExecutorService localExecutor = Executors.newSingleThreadExecutor();
+            Future<byte[]> readAllBytes = localExecutor.submit(stream::readAllBytes);
+            byte[] result;
+            try {
+                // not ideal. some exception cases in future cause stream to be blocked, resulting in dead-lock that only the timeout catches
+                // is there a way to poll the future
+                result = readAllBytes.get(timeout.getSeconds(), TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                if (future.isDone()) {
+                    // attempt to force the execution exception that resulted in the dead-lock that caused the timeout,
+                    // and unwrap it
+                    try {
+                        future.get();
+                    } catch (ExecutionException executionException) {
+                        throw executionException.getCause();
+                    }
+                }
+                throw e;
+            } finally {
+                localExecutor.shutdown();
+                this.close();
+            }
+            return result;
         }
     }
 }

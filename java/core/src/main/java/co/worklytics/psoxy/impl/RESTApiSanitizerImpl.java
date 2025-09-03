@@ -12,16 +12,12 @@ import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -31,6 +27,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import lombok.Setter;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -75,6 +73,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     final Pseudonymizer pseudonymizer;
     final EmailAddressParser emailAddressParser;
 
+    @Getter @Setter
+    Duration sanitizationTimeout = Duration.ofSeconds(55);
 
     // NOTE: JsonPath seems to be threadsafe
     // - https://github.com/json-path/JsonPath/issues/384
@@ -211,12 +211,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             final ProcessedStream processedStream = sanitize(httpMethod, url, input);
 
             // Read all bytes from the sanitized stream
-            byte[] sanitizedBytes = processedStream.getStream().readAllBytes();
-
-            // ensure NOTHING threw an exception while processing the stream
-            processedStream.complete();
-
-            return new String(sanitizedBytes, StandardCharsets.UTF_8);
+            return new String(processedStream.readAllBytes(sanitizationTimeout), StandardCharsets.UTF_8);
         } catch (IOException e) {
             // Wrap IOException in unchecked exception, or handle as needed
             throw new UncheckedIOException("Failed to sanitize content", e);
@@ -251,6 +246,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
         Endpoint endpoint = matchingEndpoint.get().getValue();
         return ProcessedStream.createRunning(inPipe, () -> {
+
             JsonFactory factory = objectMapper.getFactory();
 
             try (JsonParser parser = factory.createParser(response);
