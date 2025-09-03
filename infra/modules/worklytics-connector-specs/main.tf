@@ -855,8 +855,6 @@ EOT
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/attachments",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/blogposts",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/pages",
-        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/footer-comments",
-        "/ex/confluence/${local.confluence_example_cloud_id}/wiki /api/v2/inline-comments",
       ],
       external_token_todo : <<EOT
 ## Prerequisites
