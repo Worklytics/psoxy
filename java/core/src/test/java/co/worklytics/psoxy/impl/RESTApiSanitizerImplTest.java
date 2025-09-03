@@ -617,7 +617,7 @@ class RESTApiSanitizerImplTest {
                 "sources/google-workspace/gmail/example-api-responses/original/message.json"));
 
             // causes an NPE in async execution of the sanitization
-            // this is example of possible exception that can cause it to hange
+            // this is example of possible exception that can cause it to hang
             sanitizer.objectMapper = null;
             sanitizer.setSanitizationTimeout(Duration.ofSeconds(1));
 
