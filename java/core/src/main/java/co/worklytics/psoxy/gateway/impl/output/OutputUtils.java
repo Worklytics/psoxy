@@ -16,7 +16,6 @@ import com.google.common.annotations.VisibleForTesting;
 import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProcessedContent;
-import co.worklytics.psoxy.gateway.ProcessedDataStage;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfigProperty;
 import lombok.NoArgsConstructor;
@@ -46,7 +45,7 @@ public class OutputUtils {
     OutputToSanitizedSideOutputAdapterFactory outputToSanitizedSideOutputAdapterFactory;
 
     public ApiDataSideOutput originalSideOutput() {
-        Output outputToAdapt = fromConfigProperty( ProxyConfigProperty.SIDE_OUTPUT_ORIGINAL)
+        Output outputToAdapt = fromConfigProperty( ProxyConfigProperty.SIDE_OUTPUT_ORIGINAL);
         return outputToSideOutputAdapterFactory.create(outputToAdapt);
     }
 
