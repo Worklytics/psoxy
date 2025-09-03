@@ -51,6 +51,46 @@ else
     fi
 fi
 
+echo -e "${BLUE}=== Psoxy AWS Artifact Publisher ===${NC}"
+echo -e "${BLUE}Version: ${GREEN}${VERSION}${NC}"
+echo -e "${BLUE}Regions: ${GREEN}${REGIONS[*]}${NC}"
+echo ""
+
+# Check prerequisites
+if ! command -v aws &> /dev/null; then
+    echo -e "${RED}Error: AWS CLI is not installed${NC}"
+    echo -e "${YELLOW}Install AWS CLI from: https://aws.amazon.com/cli/${NC}"
+    exit 1
+fi
+
+# Check AWS CLI version
+AWS_VERSION=$(aws --version 2>/dev/null | cut -d' ' -f1 | cut -d'/' -f2)
+if [ -z "$AWS_VERSION" ]; then
+    echo -e "${RED}Error: AWS CLI is installed but not working properly${NC}"
+    exit 1
+fi
+echo -e "${BLUE}AWS CLI version: ${GREEN}${AWS_VERSION}${NC}"
+
+# Check if AWS CLI is configured
+if ! aws sts get-caller-identity &> /dev/null; then
+    echo -e "${RED}Error: AWS CLI is not configured/authenticated${NC}"
+    echo -e "${YELLOW}Run 'aws configure' to set up your credentials${NC}"
+    exit 1
+fi
+
+if ! command -v jq &> /dev/null; then
+    echo -e "${RED}Error: jq is not installed${NC}"
+    echo -e "Install with ${YELLOW}brew install jq${NC} or similar"
+    exit 1
+fi
+
+# Show current AWS identity
+CURRENT_IDENTITY=$(aws sts get-caller-identity --query 'Arn' --output text 2>/dev/null)
+if [ $? -eq 0 ]; then
+    echo -e "${BLUE}Current AWS identity: ${GREEN}${CURRENT_IDENTITY}${NC}"
+fi
+
+
 # run build with distribution profile
 ./tools/build.sh -d "$IMPLEMENTATION" "$JAVA_SOURCE_ROOT"
 DEPLOYMENT_ARTIFACT=$(ls "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment" | grep -E "^psoxy-.*\.jar$" | head -1)
@@ -62,7 +102,6 @@ if [ ! -f "$JAR_PATH" ]; then
     echo -e "${YELLOW}Check last-build.log for errors${NC}"
     exit 1
 fi
-
 
 echo -e "${BLUE}Publishing Psoxy $IMPLEMENTATION JAR version ${GREEN}${VERSION}${BLUE} to S3 buckets...${NC}"
 echo -e "${BLUE}JAR file: ${GREEN}${JAR_PATH}${NC}"
@@ -97,7 +136,7 @@ assume_role() {
 publish_to_region() {
     local region="$1"
     local bucket_name="${BUCKET_PREFIX}-${region}"
-    local s3_path="s3://${bucket_name}/aws/${JAR_FILENAME}"
+    local s3_path="s3://${bucket_name}/${DEPLOYMENT_ARTIFACT}"
 
     echo -e "${BLUE}Publishing to ${GREEN}${region}${BLUE} (${s3_path})${NC}"
 
@@ -116,15 +155,6 @@ publish_to_region() {
 
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}✓ Successfully published to ${region}${NC}"
-
-        # Make the object publicly readable
-        aws s3api put-object-acl \
-            --bucket "$bucket_name" \
-            --key "aws/${JAR_FILENAME}" \
-            --acl public-read \
-            --region "$region"
-
-        echo -e "${GREEN}✓ Made object publicly readable in ${region}${NC}"
     else
         echo -e "${RED}✗ Failed to publish to ${region}${NC}"
         return 1
@@ -134,45 +164,7 @@ publish_to_region() {
 }
 
 # Main execution
-main() {
-    echo -e "${BLUE}=== Psoxy AWS Artifact Publisher ===${NC}"
-    echo -e "${BLUE}Version: ${GREEN}${VERSION}${NC}"
-    echo -e "${BLUE}Regions: ${GREEN}${REGIONS[*]}${NC}"
-    echo ""
-
-    # Check prerequisites
-    if ! command -v aws &> /dev/null; then
-        echo -e "${RED}Error: AWS CLI is not installed${NC}"
-        echo -e "${YELLOW}Install AWS CLI from: https://aws.amazon.com/cli/${NC}"
-        exit 1
-    fi
-
-    # Check AWS CLI version
-    AWS_VERSION=$(aws --version 2>/dev/null | cut -d' ' -f1 | cut -d'/' -f2)
-    if [ -z "$AWS_VERSION" ]; then
-        echo -e "${RED}Error: AWS CLI is installed but not working properly${NC}"
-        exit 1
-    fi
-    echo -e "${BLUE}AWS CLI version: ${GREEN}${AWS_VERSION}${NC}"
-
-    # Check if AWS CLI is configured
-    if ! aws sts get-caller-identity &> /dev/null; then
-        echo -e "${RED}Error: AWS CLI is not configured${NC}"
-        echo -e "${YELLOW}Run 'aws configure' to set up your credentials${NC}"
-        exit 1
-    fi
-
-    # Show current AWS identity
-    CURRENT_IDENTITY=$(aws sts get-caller-identity --query 'Arn' --output text 2>/dev/null)
-    if [ $? -eq 0 ]; then
-        echo -e "${BLUE}Current AWS identity: ${GREEN}${CURRENT_IDENTITY}${NC}"
-    fi
-
-    if ! command -v jq &> /dev/null; then
-        echo -e "${RED}Error: jq is not installed${NC}"
-        echo -e "${YELLOW}Install jq from: https://stedolan.github.io/jq/download/${NC}"
-        exit 1
-    fi
+publish() {
 
     # Assume role
     assume_role
@@ -196,7 +188,7 @@ main() {
         echo -e "${BLUE}Download URLs:${NC}"
         for region in "${REGIONS[@]}"; do
             local bucket_name="${BUCKET_PREFIX}-${region}"
-            echo -e "  ${GREEN}${region}:${NC} https://${bucket_name}.s3.${region}.amazonaws.com/aws/${JAR_FILENAME}"
+            echo -e "  ${GREEN}${region}:${NC} https://${bucket_name}.s3.${region}.amazonaws.com/${DEPLOYMENT_ARTIFACT}"
         done
     else
         echo -e "${YELLOW}⚠ Some regions failed to publish${NC}"
@@ -204,5 +196,5 @@ main() {
     fi
 }
 
-# Run main function
-main "$@"
+# Run main publish function
+publish "$@"
