@@ -200,8 +200,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             return jsonResponse;
         }
         // Convert input String to InputStream (UTF-8 encoding)
-        try (InputStream input =
-                new ByteArrayInputStream(jsonResponse.getBytes(StandardCharsets.UTF_8));
+        // afaik, JSON *must* be UTF-8, per spec
+        byte[] jsonBytes = jsonResponse.getBytes(StandardCharsets.UTF_8);
+        try (InputStream input = new ByteArrayInputStream(jsonBytes);
              ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             sanitize(httpMethod, url, input, output);
             return output.toString(StandardCharsets.UTF_8);
