@@ -31,7 +31,7 @@ locals {
   example_api_calls_sample_interval_start = timeadd(var.example_api_calls_sample_date, "-72h")
 
   chat_gpt_enterprise_example_workspace_id = coalesce(var.chat_gpt_enterprise_example_workspace_id, "YOUR_WORKSPACEID")
-  confluence_example_cloud_id              = coalesce(var.jira_cloud_id, "YOUR_CONFLUENCE_CLOUD_ID")
+  confluence_example_cloud_id              = coalesce(var.confluence_cloud_id, "YOUR_CONFLUENCE_CLOUD_ID")
   jira_example_cloud_id                    = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   jira_example_issue_id                    = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
   github_installation_id                   = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
@@ -803,7 +803,7 @@ all the operations for the connector:
 EOT
     },
     confluence-cloud = {
-      source_kind : "confluence-cloud"
+      source_kind : "confluence"
       availability : "beta"
       enable_by_default : false
       worklytics_connector_id : "confluence-cloud-psoxy"
@@ -849,12 +849,15 @@ EOT
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/oauth/token/accessible-resources", # obtain Jira Cloud ID from here
-        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/content/search",
+        "/oauth/token/accessible-resources", # obtain Confluence Cloud ID from here
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/rest/api/group",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/rest/api/content/search?cql=lastmodified>=${formatdate("YYYY-MM-DD", timeadd(var.example_api_calls_sample_date, "-720h"))}%20AND%20lastmodified<=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}&limit=30&expand=body.atlas_doc_format,ancestors,version,history,history.previousVersion&includeArchivedSpaces=true",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/spaces",
-        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/attachments",
-        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/blogposts",
-        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/pages",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/attachments/{attachmentId}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/blogposts/{blogpostId}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/pages/{pageId}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/comments/{commentId}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/tasks",
       ],
       external_token_todo : <<EOT
 ## Prerequisites
@@ -918,7 +921,7 @@ it will print the all the values to complete the configuration:
    `refresh_token`.
 2. Build an OAuth authorization endpoint URL by copying the value for "Client Id" obtained in the
    previous step into the URL below. Then open the result in a web browser:
-   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${CLIENT_ID}&scope=offline_access%20read%3Ablogpost%3Aconfluence%20read%3Acomment%3Aconfluence%20read%3Agroup%3Aconfluence%20read%3Aspace%3Aconfluence%20read%3Aattachment%3Aconfluence%20read%3Apage%3Aconfluence%20read%3Auser%3Aconfluence%20read%3Atask%3Aconfluence%20read%3Acontent-details%3Aconfluence%20read%3Acontent%3Aconfluence&redirect_uri=http%3A%2F%2Flocalhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
+   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read%3Ablogpost%3Aconfluence%20read%3Acomment%3Aconfluence%20read%3Agroup%3Aconfluence%20read%3Aspace%3Aconfluence%20read%3Aattachment%3Aconfluence%20read%3Apage%3Aconfluence%20read%3Auser%3Aconfluence%20read%3Atask%3Aconfluence%20read%3Acontent-details%3Aconfluence%20read%3Acontent%3Aconfluence&redirect_uri=http%3A%2F%2Flocalhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
 3. Choose a site in your Confluence workspace to allow access for this application and click "Accept".
    As the callback does not exist, you will see an error. But in the URL of your browser you will
    see something like this as URL:
