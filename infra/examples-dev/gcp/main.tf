@@ -33,7 +33,7 @@ module "worklytics_connectors" {
 
   enabled_connectors                       = var.enabled_connectors
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
-  confluence_cloud_id                      = var.confluence_cloud_id
+  confluence_example_cloud_id              = var.confluence_example_cloud_id
   jira_cloud_id                            = var.jira_cloud_id
   jira_server_url                          = var.jira_server_url
   jira_example_issue_id                    = var.jira_example_issue_id

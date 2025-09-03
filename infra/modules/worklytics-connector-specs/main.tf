@@ -31,7 +31,7 @@ locals {
   example_api_calls_sample_interval_start = timeadd(var.example_api_calls_sample_date, "-72h")
 
   chat_gpt_enterprise_example_workspace_id = coalesce(var.chat_gpt_enterprise_example_workspace_id, "YOUR_WORKSPACEID")
-  confluence_example_cloud_id              = coalesce(var.confluence_cloud_id, "YOUR_CONFLUENCE_CLOUD_ID")
+  confluence_example_cloud_id              = coalesce(var.confluence_example_cloud_id, "YOUR_confluence_example_cloud_id")
   jira_example_cloud_id                    = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   jira_example_issue_id                    = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
   github_installation_id                   = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
@@ -985,7 +985,7 @@ it will print the all the values to complete the configuration:
      }
    ]
    ```
-Add the `id` value from that JSON response as the value of the `confluence_cloud_id` variable in the
+Add the `id` value from that JSON response as the value of the `confluence_example_cloud_id` variable in the
 `terraform.tfvars` file of your Terraform configuration. This will generate all the test URLs with
 a proper value.
 
