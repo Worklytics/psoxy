@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor(onConstructor_ = {@Inject})
 public class ApiDataOutputUtils {
 
+
     /**
      * keys for metadata that will be added to API Data output objects.
      *
@@ -139,6 +140,7 @@ public class ApiDataOutputUtils {
 
         return builder.build();
     }
+
 
     Map<String, String> buildRawMetadata(HttpRequest sourceApiRequest) {
         HashMap<String, String> metadata = new HashMap<>();

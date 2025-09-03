@@ -92,29 +92,6 @@ public class OutputUtils {
                         "No side output configured for webhook queue"));
     }
 
-    public ProcessedContent decompressIfNeeded(ProcessedContent original) throws IOException {
-        if (Objects.equals(original.getContentType(), "application/gzip")) {
-            log.info("Decompressing gzip response from source API");
-
-            byte[] decompressed;
-            try (ByteArrayInputStream bais = new ByteArrayInputStream(original.getContent());
-                    GZIPInputStream gzipIn = new GZIPInputStream(bais);
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-
-                byte[] buffer = new byte[8192];
-                int len;
-                while ((len = gzipIn.read(buffer)) != -1) {
-                    baos.write(buffer, 0, len);
-                }
-                decompressed = baos.toByteArray();
-            }
-            original = original.toBuilder().content(decompressed)
-                    .contentType("application/x-ndjson").contentEncoding(null) // no longer
-                                                                               // gzip-encoded
-                    .build();
-        }
-        return original;
-    }
 
     private <T extends Output> T createOutputForLocation(OutputLocation outputLocation) {
         OutputFactory<?> outputFactory = outputFactories.stream()

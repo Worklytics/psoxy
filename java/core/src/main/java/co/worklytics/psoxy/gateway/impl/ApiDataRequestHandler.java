@@ -382,8 +382,6 @@ public class ApiDataRequestHandler {
             ProcessingContext.ProcessingContextBuilder processingContextBuilder =
                     processingContext.toBuilder().async(true);
 
-
-
             ProcessingContext asyncProcessingContext =
                     apiDataOutputUtils.fillOutputContext(processingContextBuilder.build());
             try {
@@ -448,13 +446,16 @@ public class ApiDataRequestHandler {
             ProcessedContent original =
                 apiDataOutputUtils.responseAsRawProcessedContent(requestToSourceApi, sourceApiResponse);
 
-            try {
-                apiDataSideOutput.writeRaw(original, processingContext);
-            } catch (Output.WriteFailure e) {
-                log.log(Level.WARNING, "Error writing to side output for original content", e);
-                builder.multivaluedHeader(
+            if (apiDataSideOutput.hasRawOutput()) {
+                original = original.multiReadableCopy();
+                try {
+                    apiDataSideOutput.writeRaw(original, processingContext);
+                } catch (Output.WriteFailure e) {
+                    log.log(Level.WARNING, "Error writing to side output for original content", e);
+                    builder.multivaluedHeader(
                         Pair.of(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
-                                ErrorCauses.SIDE_OUTPUT_FAILURE_SANITIZED.name()));
+                            ErrorCauses.SIDE_OUTPUT_FAILURE_ORIGINAL.name()));
+                }
             }
 
             passThroughHeaders(builder, sourceApiResponse);
@@ -462,7 +463,7 @@ public class ApiDataRequestHandler {
                 if (skipSanitization) {
                     proxyResponseContent = original.getContentAsString();
                 } else {
-                    ProcessedContent forSanitization = outputUtils.decompressIfNeeded(original);
+                    ProcessedContent forSanitization = original.decompressIfNeeded();
                     ProcessedContent sanitizationResult =
                             sanitize(requestToProxy, requestUrls, forSanitization);
 
