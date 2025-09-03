@@ -140,3 +140,17 @@ Add the `id` value from that JSON response as the value of the `confluence_cloud
 a proper value.
 
 NOTE: A "token family" includes the initial access/refresh tokens generated above as well as all subsequent access/refresh tokens that Jira returns to any future token refresh requests. By default, Jira enforces a maximum lifetime of 1 year for each **token family**. So you MUST repeat steps 5-9 at least annually or your proxy instance will stop working when the token family expires.
+
+### Troubleshooting
+
+If a request is done and the following content is returned:
+```
+{
+"code": 401,
+"message": "Unauthorized; scope does not match"
+}
+```
+
+It could mean:
+- scope is not correctly set in the app configuration. Please check the "Prerquisites" section above.
+- endpoint doesn't exist
