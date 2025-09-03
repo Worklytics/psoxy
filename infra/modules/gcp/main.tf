@@ -319,6 +319,8 @@ resource "google_project_iam_custom_role" "oidc_token_verifier" {
 # q: is there a default Cloud Scheduler service account, that needs tokencreator role on the webhook_batch_invoker SA?
 # GCP docs don't show one, and ChatGPT didn't say one needed until I asked - at which point it gave me example email for the SA that doesn't look to follow usual pattern ...
 resource "google_service_account" "webhook_batch_invoker" {
+  count = var.support_webhook_collectors ? 1 : 0
+
   project      = var.project_id
   account_id   = "${var.environment_id_prefix}webhook-batch"
   display_name = "${local.environment_id_prefix_display} Webhook Batch Invoker"
@@ -335,7 +337,9 @@ data "google_project" "project" {
 # to the GCP principal terraform is running as is the proper approach (eg, idea is that terraform is 'scheduling' the job
 # as the service account's identity) 
 resource "google_service_account_iam_member" "allow_scheduler_impersonation" {
-  service_account_id = google_service_account.webhook_batch_invoker.id
+  count = var.support_webhook_collectors ? 1 : 0
+
+  service_account_id = google_service_account.webhook_batch_invoker[0].id
   role               = "roles/iam.serviceAccountTokenCreator"
   member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudscheduler.iam.gserviceaccount.com"
 }
@@ -491,7 +495,7 @@ output "oidc_token_verifier_role_id" {
 }
 
 output "webhook_batch_invoker_sa_email" {
-  value = google_service_account.webhook_batch_invoker.email
+  value = try(google_service_account.webhook_batch_invoker[0].email, null)
 }
 
 output "vpc_config" {
