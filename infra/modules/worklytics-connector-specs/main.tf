@@ -860,33 +860,39 @@ EOT
       ],
       external_token_todo : <<EOT
 ## Prerequisites
-Confluence OAuth 2.0 (3LO) through Psoxy requires a Confluence Cloud account with following classical scopes:
+Confluence OAuth 2.0 (3LO) through Psoxy requires a Confluence Cloud account with following granular scopes:
 
-- read:attachment:confluence for attachments
-- read:page:confluence for blog posts
-- read:comment:confluence  for comments
-- read:space:confluence  for listing spaces
+Add following scopes as part of \"Granular Scopes\", first clicking on \`Edit Scopes\` and then selecting them:
+    - read:blogpost:confluence: for getting blogposts and their versions
+    - read:comment:confluence: for getting comments and their versions
+    - read:group:confluence: for getting groups
+    - read:space:confluence: for getting spaces
+    - read:attachment:confluence: for getting attachments and their versions
+    - read:page:confluence: for getting pages and their versions
+    - read:user:confluence: for getting users
+    - read:task:confluence: for getting tasks
+    - read:content-details:confluence: for using content search endpoint
+    - read:content:confluence: for using content search endpoint
 
-And following granular scopes:
-- read:account: for getting user emails
-- read:group:jira: for retrieving group members
-- read:avatar:jira: for retrieving group members
-
+  Then go back to \"Permissions\" and click on \"Add\" for \`User Identity API\`, only selecting following scopes:
+    - read:account: for getting user emails
 ## Setup Instructions
 
 ### App configuration
 1. Go to the [Atlassian Developer Console](https://developer.atlassian.com/console/myapps/) and
    click on "Create" (OAuth 2.0 integration).
 2. Now navigate to "Permissions" and click on "Add" for Confluence. Once added, click on "Configure".
-   Add the following scopes as part of "Classic Scopes":
-   - `read:attachment:confluence`
-   - `read:page:confluence`
-   - `read:comment:confluence`
-   - `read:space:confluence`
-   And these from "Granular Scopes":
-   - `read:group:jira`
-   - `read:avatar:jira`
-   - `read:user:jira`
+   Add following scopes as part of \"Granular Scopes\", first clicking on \`Edit Scopes\` and then selecting them:
+    - `read:blogpost:confluence`
+    - `read:comment:confluence`
+    - `read:group:confluence`
+    - `read:space:confluence`
+    - `read:attachment:confluence`
+    - `read:page:confluence`
+    - `read:user:confluence`
+    - `read:task:confluence`
+    - `read:content-details:confluence`
+    - `read:content:confluence`
    Then repeat the same but for "User Identity API", adding the following scope:
    - `read:account`
 3. Go to the "Authorization" section and add an OAuth 2.0 (3LO) authorization type: click on "Add"
@@ -914,8 +920,8 @@ it will print the all the values to complete the configuration:
    `refresh_token`.
 2. Build an OAuth authorization endpoint URL by copying the value for "Client Id" obtained in the
    previous step into the URL below. Then open the result in a web browser:
-   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
-3. Choose a site in your Jira workspace to allow access for this application and click "Accept".
+   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${CLIENT_ID}&scope=offline_access%20read%3Ablogpost%3Aconfluence%20read%3Acomment%3Aconfluence%20read%3Agroup%3Aconfluence%20read%3Aspace%3Aconfluence%20read%3Aattachment%3Aconfluence%20read%3Apage%3Aconfluence%20read%3Auser%3Aconfluence%20read%3Atask%3Aconfluence%20read%3Acontent-details%3Aconfluence%20read%3Acontent%3Aconfluence&redirect_uri=http%3A%2F%2Flocalhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
+3. Choose a site in your Confluence workspace to allow access for this application and click "Accept".
    As the callback does not exist, you will see an error. But in the URL of your browser you will
    see something like this as URL:
    `http://localhost/?state=YOUR_USER_BOUND_VALUE&code=eyJhbGc...`
@@ -930,18 +936,28 @@ it will print the all the values to complete the configuration:
    [JSON response](https://developer.atlassian.com/cloud/confluence/platform/oauth-2-3lo-apps/#2--exchange-authorization-code-for-access-token) like this:
    ```json
    {
-     "access_token": "some short live access token",
-     "expires_in": 3600,
-     "token_type": "Bearer",
-     "refresh_token": "some long live token we are going to use",
-     "scope": "read:jira-work offline_access read:jira-user"
+    "access_token": "some short live access token",
+    "expires_in": 3600,
+    "token_type": "Bearer",
+    "refresh_token": "some long live token we are going to use",
+    "scopes": [
+            "read:attachment:confluence",
+            "read:blogpost:confluence",
+            "read:comment:confluence",
+            "read:content-details:confluence",
+            "read:content:confluence",
+            "read:group:confluence",
+            "read:page:confluence",
+            "read:space:confluence",
+            "read:user:confluence"
+        ],
    }
    ```
 6. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
-   - `PSOXY_JIRA_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
-   - `PSOXY_JIRA_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
-   - `PSOXY_JIRA_CLOUD_CLIENT_ID` with `Client Id` value.
-   - `PSOXY_JIRA_CLOUD_CLIENT_SECRET` with `Client Secret` value.
+   - `PSOXY_CONFLUENCE_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
+   - `PSOXY_CONFLUENCE_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
+   - `PSOXY_CONFLUENCE_CLOUD_CLIENT_ID` with `Client Id` value.
+   - `PSOXY_CONFLUENCE_CLOUD_CLIENT_SECRET` with `Client Secret` value.
 7. Optional, obtain the "Cloud ID" of your Jira instance. Use the following command, with the
    `access_token` obtained in the previous step in place of `<ACCESS_TOKEN>` below:
    `curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'`
@@ -952,7 +968,17 @@ it will print the all the values to complete the configuration:
        "id":"SOME UUID",
        "url":"https://your-site.atlassian.net",
        "name":"your-site-name",
-       "scopes":["read:jira-user","read:jira-work"],
+        "scopes": [
+            "read:attachment:confluence",
+            "read:blogpost:confluence",
+            "read:comment:confluence",
+            "read:content-details:confluence",
+            "read:content:confluence",
+            "read:group:confluence",
+            "read:page:confluence",
+            "read:space:confluence",
+            "read:user:confluence"
+        ],
        "avatarUrl":"https://site-admin-avatar-cdn.prod.public.atl-paas.net/avatars/240/rocket.png"
      }
    ]
