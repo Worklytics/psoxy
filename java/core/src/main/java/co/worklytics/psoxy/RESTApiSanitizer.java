@@ -1,20 +1,14 @@
 package co.worklytics.psoxy;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.concurrent.*;
-import javax.annotation.Nullable;
-import co.worklytics.psoxy.impl.RESTApiSanitizerImpl;
+
 import co.worklytics.psoxy.rules.RESTRules;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
+import lombok.*;
 
 public interface RESTApiSanitizer {
     /**
@@ -71,93 +65,8 @@ public interface RESTApiSanitizer {
 
     RESTRules getRules();
 
-    /**
-     * sanitize response stream received from url, according any options set on Sanitizer
-     * <p>
-     * bc of streaming interface, this is preferred when expect large responses
-     * q: compression; do we return gzipped stream out of here, or have consumer choose that??
-     * <p>
-     *
-     * for the InputStream on the response it seems.
-     *
-     * @param httpMethod
-     * @param url
-     * @param response
-     * @return
-     * @throws IOException
-     */
-    RESTApiSanitizerImpl.ProcessedStream sanitize(String httpMethod, URL url, InputStream response)
-            throws IOException;
+    void sanitize(@NonNull String httpMethod,
+                  @NonNull URL url, InputStream originalStream,
+                  OutputStream outputStream) throws IOException;
 
-    /**
-     * a processed stream
-     *
-     * q: why this instead of returning a Future<InputStream>?
-     * a: hard to reason about, but you actually have to consume the whole input stream before forcing the Future to complete; if you just
-     * expose Future<InputStream>, you don't have a separate handle to InputStream to readAllBytes()
-     * calling Future::get just deadlocks waiting for Future<> to complete, but future doesn't complete until InputStream fully read
-     *
-     **/
-    @RequiredArgsConstructor(access = AccessLevel.PUBLIC, staticName = "create")
-    class ProcessedStream {
-
-        private final InputStream stream;
-        private final Runnable runnable;
-
-        /**
-         * a stream that's already completed
-         * @param stream
-         */
-        public static ProcessedStream completed(InputStream stream) {
-            return new ProcessedStream(stream,  null);
-        }
-
-        /**
-         * read all bytes from stream, subject to a max timeout
-         *
-         * TODO: pass in the executorService here
-         *
-         * TODO: this is a transitional method; intention is to read to an outputstream later (entire point is to be able to
-         * read/sanitize/write in a streaming manner, so can accommodate very large data loads)
-         *
-         * eg, an implementation of transferTo(OutputStream)
-         *
-         * @param timeout
-         * @return
-         * @throws IOException
-         * @throws InterruptedException
-         */
-        @SneakyThrows  // deals with wrapped exceptions from Future::get
-        public byte[] readAllBytes(Duration timeout) throws IOException, InterruptedException{
-            // q: even needed? instead of createRunning, do we just start it here??
-            if (runnable == null) {
-                return stream.readAllBytes();
-            } else {
-                ExecutorService executorService = Executors.newFixedThreadPool(2);
-                Future<?> future = executorService.submit(runnable);
-                byte[] result;
-                try {
-                    Future<byte[]> resultFuture = executorService.submit(stream::readAllBytes);
-                    result = resultFuture.get(timeout.getSeconds(), TimeUnit.SECONDS);
-                    return result;
-                } catch (ExecutionException e) {
-                    throw e.getCause();
-                } catch (TimeoutException e) {
-                    if (future.isDone()) {
-                        // attempt to force the execution exception that resulted in the dead-lock that caused the timeout,
-                        // and unwrap it
-                        // TODO: in java 19+ can use future.exceptionNow() probably
-                        try {
-                            future.get();
-                        } catch (ExecutionException executionException) {
-                            throw executionException.getCause();
-                        }
-                    }
-                    throw e;
-                } finally {
-                    executorService.shutdown();
-                }
-            }
-        }
-    }
 }
