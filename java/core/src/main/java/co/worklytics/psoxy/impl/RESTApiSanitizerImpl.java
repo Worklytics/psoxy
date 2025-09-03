@@ -245,8 +245,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         PipedInputStream inPipe = new PipedInputStream(outPipe);
 
         Endpoint endpoint = matchingEndpoint.get().getValue();
-        return ProcessedStream.createRunning(inPipe, () -> {
-
+        return ProcessedStream.create(inPipe, () -> {
             JsonFactory factory = objectMapper.getFactory();
 
             try (JsonParser parser = factory.createParser(response);
