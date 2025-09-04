@@ -1,11 +1,6 @@
 package co.worklytics.psoxy.gateway.impl.output;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Objects;
 import java.util.Set;
-import java.util.zip.GZIPInputStream;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -15,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.annotations.VisibleForTesting;
 import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfigProperty;
 import lombok.NoArgsConstructor;

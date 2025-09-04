@@ -147,7 +147,7 @@ public class ProcessedContent implements Serializable {
      *
      * @throws IOException
      */
-    public ProcessedContent decompressIfNeeded() throws IOException {
+    public ProcessedContent asDecompressed() throws IOException {
         if (this.isGzipEncoded() || isGzipFile()) {
             // NOTE: in isGzipFile(), we assume that uncompressed file is really ndjson or json
             log.info("Decompressing gzip response from source API");
@@ -171,5 +171,28 @@ public class ProcessedContent implements Serializable {
             throw new RuntimeException("Unsupported content encoding returned by source API: " + this.getContentEncoding());
         }
         return this;
+    }
+
+    /**
+     * if the content is not already gzip-encoded, return a gzip-encoded version
+     * @return a gzip-encoded version of this ProcessedContent, or this if no compression was needed
+     * @throws IOException error reading or compressing the content
+     */
+    public ProcessedContent asCompressed() throws IOException {
+        if (this.isGzipEncoded()) {
+            return this;
+        } else {
+            log.info("Compressing response to gzip");
+            ProcessedContent .ProcessedContentBuilder builder = this.toBuilder();
+            try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                GZIPOutputStream gzipOutputStream = new GZIPOutputStream(baos)) {
+                this.getStream().transferTo(gzipOutputStream);
+                builder
+                    .contentEncoding(CONTENT_ENCODING_GZIP)
+                    .content(baos.toByteArray())
+                    .stream(null);
+            }
+            return builder.build();
+        }
     }
 }

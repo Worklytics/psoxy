@@ -367,8 +367,14 @@ public class PsoxyModule {
         return new Base64KeyClient();
     }
 
+    //TODO: 99% sure this is thread-safe so can be singleton
     @Provides
     Base64.Encoder provideBase64Encoder() {
         return Base64.getEncoder();
+    }
+
+    @Provides @Singleton
+    ResponseCompressionHandler responseCompressionHandler() {
+        return new ResponseCompressionHandler();
     }
 }

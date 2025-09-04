@@ -4,6 +4,7 @@ import java.security.Security;
 import java.time.Instant;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
@@ -63,7 +64,6 @@ public class Handler implements
         //
 
         HttpEventResponse response;
-        boolean base64Encoded = false;
         try {
             APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter =
                     new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
@@ -73,12 +73,8 @@ public class Handler implements
                                     .ofEpochMilli(httpEvent.getRequestContext().getTimeEpoch()))
                             .requestId(httpEvent.getRequestContext().getRequestId()).build());
 
-            if (responseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
-                Pair<Boolean, HttpEventResponse> compressedResponse =
-                        responseCompressionHandler.compressIfNeeded(response);
-                base64Encoded = compressedResponse.getLeft();
-                response = compressedResponse.getRight();
-            } else {
+            //TODO: this is NOT AWS specific - move down into ApiDataRequestHandler
+            if (!responseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
                 response =
                         response.toBuilder()
                                 .header(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
@@ -102,7 +98,9 @@ public class Handler implements
             return APIGatewayV2HTTPResponse.builder().withStatusCode(response.getStatusCode())
                     .withHeaders(response.getHeaders())
                     .withMultiValueHeaders(response.getMultivaluedHeaders())
-                    .withBody(response.getBody()).withIsBase64Encoded(base64Encoded).build();
+                    .withBody(response.getBody())
+                    .withIsBase64Encoded(response.getHeaders().getOrDefault(HttpHeaders.CONTENT_ENCODING, "").equals("gzip"))
+                    .build();
         } catch (Throwable e) {
             context.getLogger().log("Error writing response as Lambda return");
             throw new Error(e);

@@ -24,8 +24,10 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import co.worklytics.psoxy.*;
 import com.google.api.client.http.ByteArrayContent;
 import org.apache.hc.core5.http.HttpHeaders;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -53,13 +55,6 @@ import com.google.api.client.testing.http.HttpTesting;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.MockLowLevelHttpRequest;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
-import co.worklytics.psoxy.ConfigRulesModule;
-import co.worklytics.psoxy.ControlHeader;
-import co.worklytics.psoxy.Pseudonymizer;
-import co.worklytics.psoxy.PseudonymizerImplFactory;
-import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.RESTApiSanitizer;
-import co.worklytics.psoxy.RESTApiSanitizerFactory;
 import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
@@ -95,6 +90,9 @@ class ApiDataRequestHandlerTest {
 
     @Inject
     ApiDataRequestHandler handler;
+
+    @Inject
+    ResponseCompressionHandler responseCompressionHandler;
 
     @Inject
     RESTRules rules;
@@ -477,7 +475,9 @@ class ApiDataRequestHandlerTest {
         when(request.getPath()).thenReturn(
             "/graphql");
         when(request.getQuery()).thenReturn(Optional.of(query));
-        when(request.getBody()).thenReturn("some content".getBytes(StandardCharsets.UTF_8)); // empty body
+        // TODO: unparseable body causes warning(s) when trying to reverse tokenization in request body
+        // solution - request bodies that MATCH contentTypes set above
+        when(request.getBody()).thenReturn("some content".getBytes(StandardCharsets.UTF_8));
 
         HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
         when(requestFactory.buildRequest(anyString(), any(), any())).thenReturn(null);
@@ -602,6 +602,39 @@ class ApiDataRequestHandlerTest {
         assertEquals(Json.MEDIA_TYPE, headersMap.get(ApiDataRequestHandler
             .normalizeHeader(org.apache.http.HttpHeaders.CONTENT_TYPE)));
     }
+
+    @Disabled // WIP
+    // returns compressed content when requested
+    @SneakyThrows
+    @Test
+    void testReturnsCompressedContentWhenRequested() throws IOException {
+        setup("gdirectory", "google.apis.com");
+
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
+            .thenReturn(Optional.of(PseudonymImplementation.DEFAULT
+                .getHttpHeaderValue()));
+        when(request.getHttpMethod()).thenReturn("GET");
+        when(request.getPath()).thenReturn("/admin/directory/v1/users");
+        HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
+        when(requestFactory.buildRequest(anyString(), any(), any())).thenReturn(null);
+
+        //doReturn(requestFactory).when(handler).getRequestFactory(any());
+
+        when(request.getHeader(HttpHeaders.ACCEPT_ENCODING))
+            .thenReturn(Optional.of("gzip, deflate"));
+
+        HttpEventResponse response = handler.handle(request, ApiDataRequestHandler.ProcessingContext.synchronous(clock.instant()));
+
+        assertEquals(200, response.getStatusCode());
+        assertEquals("gzip", response.getHeaders().get(HttpHeaders.CONTENT_ENCODING));
+        assertNotNull(response.getBody());
+        // decompress the body to verify it is valid gzip
+        String decompressed = responseCompressionHandler.uncompress(response.getBody());
+        assertEquals("",  decompressed);
+    }
+
 
     private void setup(String source, String host) {
         ApiDataRequestHandlerTest.Container container =

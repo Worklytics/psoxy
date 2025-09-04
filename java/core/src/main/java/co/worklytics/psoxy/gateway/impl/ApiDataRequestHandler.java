@@ -1,26 +1,23 @@
 package co.worklytics.psoxy.gateway.impl;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.ConnectException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
+
+import co.worklytics.psoxy.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -54,13 +51,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import co.worklytics.psoxy.ControlHeader;
-import co.worklytics.psoxy.ErrorCauses;
-import co.worklytics.psoxy.ProcessedDataMetadataFields;
-import co.worklytics.psoxy.Pseudonymizer;
-import co.worklytics.psoxy.PseudonymizerImplFactory;
-import co.worklytics.psoxy.RESTApiSanitizer;
-import co.worklytics.psoxy.RESTApiSanitizerFactory;
 import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
 import co.worklytics.psoxy.gateway.ConfigService;
@@ -133,13 +123,11 @@ public class ApiDataRequestHandler {
     @Inject
     ApiDataOutputUtils apiDataOutputUtils;
     @Inject
-    OutputUtils outputUtils;
+    ResponseCompressionHandler responseCompressionHandler;
 
     // lazy-loaded, to avoid circular dependency issues; and bc unused in 99.9% of situations
     @Inject
     Lazy<AsyncApiDataRequestHandler> asyncApiDataRequestHandler;
-    @Inject
-    Provider<UUID> uuidProvider;
 
     /**
      * Basic headers to pass: content, caching, retries. Can be expanded by connection later.
@@ -340,6 +328,8 @@ public class ApiDataRequestHandler {
                         .addServiceKeyToRequestBody(content);
             }
 
+            //TODO: always request gziped content from source, even if client didn't request it?
+
             requestToSourceApi = requestFactory.buildRequest(requestToProxy.getHttpMethod(),
                     new GenericUrl(requestUrls.getTarget()), content);
 
@@ -463,7 +453,7 @@ public class ApiDataRequestHandler {
                 if (skipSanitization) {
                     proxyResponseContent = original.getContentAsString();
                 } else {
-                    ProcessedContent forSanitization = original.decompressIfNeeded();
+                    ProcessedContent forSanitization = original.asDecompressed();
                     ProcessedContent sanitizationResult =
                             sanitize(requestToProxy, requestUrls, forSanitization);
 
@@ -518,9 +508,15 @@ public class ApiDataRequestHandler {
     ProcessedContent sanitize(HttpEventRequest request, RequestUrls requestUrls,
             ProcessedContent originalContent) throws IOException {
         RESTApiSanitizer sanitizerForRequest = getSanitizerForRequest(request);
-        String sanitized =
-                StringUtils.trimToEmpty(sanitizerForRequest.sanitize(request.getHttpMethod(),
-                        requestUrls.getOriginal(), originalContent.getContentAsString()));
+
+        // TODO: a good value for this is probably the content length of the response we received if response Content-Type is JSON
+        // maybe 1/10th of content length if ndjson
+        int initialBufferSize = 65536; // 64 KB ... big enough for most responses, but not going to push anything OOM
+
+        PipedOutputStream outPipe = new PipedOutputStream();
+        InputStream sanitizedContentStream = new PipedInputStream(outPipe, initialBufferSize);
+        OutputStream out = responseCompressionHandler.wrapOutputStreamIfRequested(request, outPipe);
+        sanitizerForRequest.sanitize(request.getHttpMethod(), requestUrls.getOriginal(), originalContent.getStream(), out);
 
         String rulesSha = rulesUtils.sha(sanitizerForRequest.getRules());
         log.info("response sanitized with rule set " + rulesSha);
@@ -537,7 +533,7 @@ public class ApiDataRequestHandler {
                 .contentType(originalContent.getContentType())
                 .contentCharset(originalContent.getContentCharset())
                 .metadata(metadata)
-                .content(sanitized.getBytes(originalContent.getContentCharset()))
+                .stream(sanitizedContentStream)
                 .build();
     }
 
@@ -918,6 +914,7 @@ public class ApiDataRequestHandler {
             return new ByteArrayContent(contentType,
                     decodedRequestBody.getBytes(StandardCharsets.UTF_8));
         } else {
+            //q: right behavior here?? or should just warn?
             throw new IllegalArgumentException("Unsupported content type: " + contentType);
         }
     }
