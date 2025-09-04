@@ -287,7 +287,6 @@ endpoints:
           - "$.results[*]..displayName"
           - "$.results[*]..publicName"
           - "$.results[*]..profilePicture"
-          - "$.results[*]..body"
           - "$.results[*]..base64EncodedAri"
           - "$.results[*]..macroRenderedOutput"
           - "$.results[*]..extensions"
@@ -302,8 +301,11 @@ endpoints:
       - !<textDigest>
         jsonPaths:
           - "$.results[*]..title"
-          - "$.results[*].body.atlas_doc_format.value..text"
           - "$.results[*]..message"
+      - !<textDigest>
+        jsonPaths:
+          - "$.results[*].body.atlas_doc_format.value..text"
+        isJsonEscaped: true
     responseSchema:
       type: "object"
       properties:
@@ -410,7 +412,7 @@ definitions:
   Body:
     type: "object"
     properties:
-      atlasDocFormat:
+      atlas_doc_format:
         $ref: "#/definitions/DocFormat"
   ContentItem:
     type: "object"
@@ -462,13 +464,6 @@ definitions:
         $ref: "#/definitions/Parent"
       when:
         type: "string"
-  CreatedBy:
-    type: "object"
-    properties:
-      accountId:
-        type: "string"
-      displayName:
-        type: "string"
   DocFormat:
     type: "object"
     properties:
@@ -518,7 +513,7 @@ definitions:
     type: "object"
     properties:
       createdBy:
-        $ref: "#/definitions/CreatedBy"
+        $ref: "#/definitions/User"
       createdDate:
         type: "string"
   Links:

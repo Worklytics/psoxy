@@ -1,115 +1,872 @@
 {
-  "results":[
+  "results": [
     {
-      "id":"294926",
-      "type":"folder",
-      "status":"current",
-      "title":"{\"length\":11,\"word_count\":2}",
-      "history":{
-        "createdBy":{
-          "accountId":"t~7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q"
+      "id": "294926",
+      "type": "folder",
+      "ari": "ari:cloud:confluence:5011b43e-4aea-4083-b3be-7b0fec6b4455:folder/activation/7581535c-b7cf-4e3a-82d2-0364fd18f13c/294926",
+      "base64EncodedAri": "YXJpOmNsb3VkOmNvbmZsdWVuY2U6NTAxMWI0M2UtNGFlYS00MDgzLWIzYmUtN2IwZmVjNmI0NDU1OmZvbGRlci9hY3RpdmF0aW9uLzc1ODE1MzVjLWI3Y2YtNGUzYS04MmQyLTAzNjRmZDE4ZjEzYy8yOTQ5MjY=",
+      "status": "current",
+      "title": "test folder",
+      "history": {
+        "latest": true,
+        "createdBy": {
+          "type": "known",
+          "accountId": "608a9b555426330072f9867d",
+          "accountType": "atlassian",
+          "email": "alice@company.org",
+          "publicName": "alice",
+          "profilePicture": {
+            "path": "/wiki/aa-avatar/608a9b555426330072f9867d",
+            "width": 48,
+            "height": 48,
+            "isDefault": false
+          },
+          "displayName": "Alice",
+          "isExternalCollaborator": false,
+          "isGuest": false,
+          "locale": "en_US",
+          "accountStatus": "active",
+          "_expandable": {
+            "operations": "",
+            "personalSpace": ""
+          },
+          "_links": {
+            "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=608a9b555426330072f9867d"
+          }
         },
-        "createdDate":"2025-08-28T13:37:15.848Z"
-      },
-      "version":{
-        "by":{
-          "type":"known",
-          "accountId":"t~7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q",
-          "accountType":"atlassian",
-          "email":"t~uefpLtxr1xRTo2WkRl5HjW1GVPerChD2ZjCmMDFvG5g@company.org",
-          "locale":"en_US",
-          "accountStatus":"active"
+        "createdDate": "2025-08-28T13:37:15.848Z",
+        "_expandable": {
+          "lastUpdated": "",
+          "lastOwnedBy": "",
+          "contributors": "",
+          "nextVersion": "",
+          "ownedBy": ""
         },
-        "when":"2025-08-28T13:37:19.052Z",
-        "message":"{\"length\":0,\"word_count\":0}",
-        "number":1,
-        "minorEdit":false,
-        "contentTypeModified":false
-      },
-      "ancestors":[
-        {
-          "id":"65930",
-          "type":"page",
-          "status":"current",
-          "title":"{\"length\":8,\"word_count\":1}"
+        "_links": {
+          "self": "https://company-team.atlassian.net/wiki/rest/api/content/294926/history"
         }
-      ]
+      },
+      "version": {
+        "by": {
+          "type": "known",
+          "accountId": "608a9b555426330072f9867d",
+          "accountType": "atlassian",
+          "email": "alice@company.org",
+          "publicName": "alice",
+          "profilePicture": {
+            "path": "/wiki/aa-avatar/608a9b555426330072f9867d",
+            "width": 48,
+            "height": 48,
+            "isDefault": false
+          },
+          "displayName": "Alice",
+          "isExternalCollaborator": false,
+          "isGuest": false,
+          "locale": "en_US",
+          "accountStatus": "active",
+          "_expandable": {
+            "operations": "",
+            "personalSpace": ""
+          },
+          "_links": {
+            "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=608a9b555426330072f9867d"
+          }
+        },
+        "when": "2025-08-28T13:37:19.052Z",
+        "friendlyWhen": "Aug 28, 2025",
+        "message": "",
+        "number": 1,
+        "minorEdit": false,
+        "contentTypeModified": false,
+        "_expandable": {
+          "collaborators": "",
+          "content": "/rest/api/content/294926"
+        },
+        "_links": {
+          "self": "https://company-team.atlassian.net/wiki/rest/api/content/294926/version/1"
+        }
+      },
+      "ancestors": [
+        {
+          "id": "65930",
+          "type": "page",
+          "ari": "ari:cloud:confluence:5011b43e-4aea-4083-b3be-7b0fec6b4455:page/65930",
+          "base64EncodedAri": "YXJpOmNsb3VkOmNvbmZsdWVuY2U6NTAxMWI0M2UtNGFlYS00MDgzLWIzYmUtN2IwZmVjNmI0NDU1OmNvbnRlbnQvNjU5MzA=",
+          "status": "current",
+          "title": "Overview",
+          "macroRenderedOutput": {},
+          "extensions": {
+            "position": 221
+          },
+          "_expandable": {
+            "container": "/rest/api/space/~608a9b555426330072f9867d",
+            "metadata": "",
+            "restrictions": "/rest/api/content/65930/restriction/byOperation",
+            "history": "/rest/api/content/65930/history",
+            "body": "",
+            "version": "",
+            "descendants": "/rest/api/content/65930/descendant",
+            "space": "/rest/api/space/~608a9b555426330072f9867d",
+            "childTypes": "",
+            "schedulePublishInfo": "",
+            "operations": "",
+            "schedulePublishDate": "",
+            "children": "/rest/api/content/65930/child",
+            "ancestors": "",
+            "draftVersion": ""
+          },
+          "_links": {
+            "self": "https://company-team.atlassian.net/wiki/rest/api/content/65930",
+            "tinyui": "/x/igEB",
+            "editui": "/pages/resumedraft.action?draftId=65930",
+            "webui": "/spaces/~608a9b555426330072f9867d/overview",
+            "edituiv2": "/spaces/~608a9b555426330072f9867d/pages/edit-v2/65930"
+          }
+        }
+      ],
+      "macroRenderedOutput": {},
+      "body": {
+        "atlas_doc_format": {
+          "value": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\"}],\"version\":1}",
+          "representation": "atlas_doc_format",
+          "_expandable": {
+            "webresource": "",
+            "embeddedContent": "",
+            "mediaToken": "",
+            "content": "/rest/api/content/294926"
+          }
+        },
+        "_expandable": {
+          "editor": "",
+          "view": "",
+          "export_view": "",
+          "styled_view": "",
+          "dynamic": "",
+          "storage": "",
+          "editor2": "",
+          "anonymous_export_view": ""
+        }
+      },
+      "extensions": {
+        "position": 2834
+      },
+      "_expandable": {
+        "childTypes": "",
+        "container": "/rest/api/space/~608a9b555426330072f9867d",
+        "schedulePublishInfo": "",
+        "metadata": "",
+        "operations": "",
+        "schedulePublishDate": "",
+        "children": "/rest/api/content/294926/child",
+        "restrictions": "/rest/api/content/294926/restriction/byOperation",
+        "draftVersion": "",
+        "descendants": "/rest/api/content/294926/descendant",
+        "space": "/rest/api/space/~608a9b555426330072f9867d"
+      },
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/api/content/294926",
+        "editui": "/spaces/~608a9b555426330072f9867d/folder/294926",
+        "webui": "/spaces/~608a9b555426330072f9867d/folder/294926",
+        "edituiv2": "/spaces/~608a9b555426330072f9867d/folder/294926"
+      }
     },
     {
-      "id":"98317",
-      "type":"comment",
-      "status":"current",
-      "title":"{\"length\":13,\"word_count\":3}",
-      "history":{
-        "createdBy":{
-          "accountId":"t~7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q"
+      "id": "98317",
+      "type": "comment",
+      "ari": "ari:cloud:confluence:5011b43e-4aea-4083-b3be-7b0fec6b4455:comment/98317",
+      "base64EncodedAri": "YXJpOmNsb3VkOmNvbmZsdWVuY2U6NTAxMWI0M2UtNGFlYS00MDgzLWIzYmUtN2IwZmVjNmI0NDU1OmNvbW1lbnQvOTgzMTc=",
+      "status": "current",
+      "title": "Re: Test page",
+      "history": {
+        "latest": true,
+        "createdBy": {
+          "type": "known",
+          "accountId": "608a9b555426330072f9867d",
+          "accountType": "atlassian",
+          "email": "alice@company.org",
+          "publicName": "alice",
+          "profilePicture": {
+            "path": "/wiki/aa-avatar/608a9b555426330072f9867d",
+            "width": 48,
+            "height": 48,
+            "isDefault": false
+          },
+          "displayName": "Alice",
+          "isExternalCollaborator": false,
+          "isGuest": false,
+          "locale": "en_US",
+          "accountStatus": "active",
+          "_expandable": {
+            "operations": "",
+            "personalSpace": ""
+          },
+          "_links": {
+            "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=608a9b555426330072f9867d"
+          }
         },
-        "createdDate":"2025-08-28T13:37:15.848Z"
-      },
-      "version":{
-        "by":{
-          "type":"known",
-          "accountId":"t~7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q",
-          "accountType":"atlassian",
-          "email":"t~uefpLtxr1xRTo2WkRl5HjW1GVPerChD2ZjCmMDFvG5g@company.org",
-          "locale":"en_US",
-          "accountStatus":"active"
+        "createdDate": "2025-08-28T13:37:15.848Z",
+        "_expandable": {
+          "lastUpdated": "",
+          "lastOwnedBy": "",
+          "contributors": "",
+          "nextVersion": "",
+          "ownedBy": ""
         },
-        "when":"2025-08-28T13:37:19.052Z",
-        "message":"{\"length\":0,\"word_count\":0}",
-        "number":1,
-        "minorEdit":false,
-        "contentTypeModified":false
-      },
-      "ancestors":[
-        {
-          "id":"196886",
-          "type":"comment",
-          "status":"current",
-          "title":"{\"length\":13,\"word_count\":3}"
+        "_links": {
+          "self": "https://company-team.atlassian.net/wiki/rest/api/content/98317/history"
         }
-      ]
+      },
+      "version": {
+        "by": {
+          "type": "known",
+          "accountId": "608a9b555426330072f9867d",
+          "accountType": "atlassian",
+          "email": "alice@company.org",
+          "publicName": "alice",
+          "profilePicture": {
+            "path": "/wiki/aa-avatar/608a9b555426330072f9867d",
+            "width": 48,
+            "height": 48,
+            "isDefault": false
+          },
+          "displayName": "Alice",
+          "isExternalCollaborator": false,
+          "isGuest": false,
+          "locale": "en_US",
+          "accountStatus": "active",
+          "_expandable": {
+            "operations": "",
+            "personalSpace": ""
+          },
+          "_links": {
+            "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=608a9b555426330072f9867d"
+          }
+        },
+        "when": "2025-08-28T13:37:19.052Z",
+        "friendlyWhen": "Aug 28, 2025",
+        "message": "",
+        "number": 1,
+        "minorEdit": false,
+        "contentTypeModified": false,
+        "_expandable": {
+          "collaborators": "",
+          "content": "/rest/api/content/98317"
+        },
+        "_links": {
+          "self": "https://company-team.atlassian.net/wiki/rest/api/content/98317/version/1"
+        }
+      },
+      "ancestors": [
+        {
+          "id": "196886",
+          "type": "comment",
+          "ari": "ari:cloud:confluence:5011b43e-4aea-4083-b3be-7b0fec6b4455:comment/196886",
+          "base64EncodedAri": "YXJpOmNsb3VkOmNvbmZsdWVuY2U6NTAxMWI0M2UtNGFlYS00MDgzLWIzYmUtN2IwZmVjNmI0NDU1OmNvbW1lbnQvMTk2ODg2",
+          "status": "current",
+          "title": "Re: Test page",
+          "macroRenderedOutput": {},
+          "extensions": {
+            "location": "footer",
+            "_expandable": {
+              "resolution": ""
+            }
+          },
+          "_expandable": {
+            "container": "/rest/api/content/196858",
+            "metadata": "",
+            "restrictions": "/rest/api/content/196886/restriction/byOperation",
+            "history": "/rest/api/content/196886/history",
+            "body": "",
+            "version": "",
+            "descendants": "/rest/api/content/196886/descendant",
+            "space": "/rest/api/space/~608a9b555426330072f9867d",
+            "childTypes": "",
+            "schedulePublishInfo": "",
+            "operations": "",
+            "schedulePublishDate": "",
+            "children": "/rest/api/content/196886/child",
+            "ancestors": "",
+            "draftVersion": ""
+          },
+          "_links": {
+            "webui": "/spaces/~608a9b555426330072f9867d/pages/196858/Test+page?focusedCommentId=196886",
+            "self": "https://company-team.atlassian.net/wiki/rest/api/content/196886"
+          }
+        }
+      ],
+      "macroRenderedOutput": {},
+      "body": {
+        "atlas_doc_format": {
+          "value": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"this is another reploy on a comment on a page\",\"type\":\"text\"}]}],\"version\":1}",
+          "representation": "atlas_doc_format",
+          "_expandable": {
+            "webresource": "",
+            "embeddedContent": "",
+            "mediaToken": "",
+            "content": "/rest/api/content/98317"
+          }
+        },
+        "_expandable": {
+          "editor": "",
+          "view": "",
+          "export_view": "",
+          "styled_view": "",
+          "dynamic": "",
+          "storage": "",
+          "editor2": "",
+          "anonymous_export_view": ""
+        }
+      },
+      "extensions": {
+        "location": "footer",
+        "_expandable": {
+          "resolution": ""
+        }
+      },
+      "_expandable": {
+        "childTypes": "",
+        "container": "/rest/api/content/196858",
+        "schedulePublishInfo": "",
+        "metadata": "",
+        "operations": "",
+        "schedulePublishDate": "",
+        "children": "/rest/api/content/98317/child",
+        "restrictions": "/rest/api/content/98317/restriction/byOperation",
+        "draftVersion": "",
+        "descendants": "/rest/api/content/98317/descendant",
+        "space": "/rest/api/space/~608a9b555426330072f9867d"
+      },
+      "_links": {
+        "webui": "/spaces/~608a9b555426330072f9867d/pages/196858/Test+page?focusedCommentId=98317",
+        "self": "https://company-team.atlassian.net/wiki/rest/api/content/98317"
+      }
     },
     {
-      "id":"98307",
-      "type":"comment",
-      "status":"current",
-      "title":"{\"length\":12,\"word_count\":2}",
-      "history":{
-        "createdBy":{
-          "accountId":"t~7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q"
+      "id": "98307",
+      "type": "comment",
+      "ari": "ari:cloud:confluence:5011b43e-4aea-4083-b3be-7b0fec6b4455:comment/98307",
+      "base64EncodedAri": "YXJpOmNsb3VkOmNvbmZsdWVuY2U6NTAxMWI0M2UtNGFlYS00MDgzLWIzYmUtN2IwZmVjNmI0NDU1OmNvbW1lbnQvOTgzMDc=",
+      "status": "current",
+      "title": "Re: Overview",
+      "history": {
+        "latest": true,
+        "createdBy": {
+          "type": "known",
+          "accountId": "608a9b555426330072f9867d",
+          "accountType": "atlassian",
+          "email": "alice@company.org",
+          "publicName": "alice",
+          "profilePicture": {
+            "path": "/wiki/aa-avatar/608a9b555426330072f9867d",
+            "width": 48,
+            "height": 48,
+            "isDefault": false
+          },
+          "displayName": "Alice",
+          "isExternalCollaborator": false,
+          "isGuest": false,
+          "locale": "en_US",
+          "accountStatus": "active",
+          "_expandable": {
+            "operations": "",
+            "personalSpace": ""
+          },
+          "_links": {
+            "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=608a9b555426330072f9867d"
+          }
         },
-        "createdDate":"2025-08-28T13:27:25.965Z"
-      },
-      "version":{
-        "by":{
-          "type":"known",
-          "accountId":"t~7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q",
-          "accountType":"atlassian",
-          "email":"t~uefpLtxr1xRTo2WkRl5HjW1GVPerChD2ZjCmMDFvG5g@company.org",
-          "locale":"en_US",
-          "accountStatus":"active"
+        "createdDate": "2025-08-28T13:27:25.965Z",
+        "_expandable": {
+          "lastUpdated": "",
+          "lastOwnedBy": "",
+          "contributors": "",
+          "nextVersion": "",
+          "ownedBy": ""
         },
-        "when":"2025-08-28T13:27:25.965Z",
-        "message":"{\"length\":0,\"word_count\":0}",
-        "number":1,
-        "minorEdit":false,
-        "contentTypeModified":false
-      },
-      "ancestors":[
-        {
-          "id":"294914",
-          "type":"comment",
-          "status":"current",
-          "title":"{\"length\":12,\"word_count\":2}"
+        "_links": {
+          "self": "https://company-team.atlassian.net/wiki/rest/api/content/98307/history"
         }
-      ]
+      },
+      "version": {
+        "by": {
+          "type": "known",
+          "accountId": "608a9b555426330072f9867d",
+          "accountType": "atlassian",
+          "email": "alice@company.org",
+          "publicName": "alice",
+          "profilePicture": {
+            "path": "/wiki/aa-avatar/608a9b555426330072f9867d",
+            "width": 48,
+            "height": 48,
+            "isDefault": false
+          },
+          "displayName": "Alice",
+          "isExternalCollaborator": false,
+          "isGuest": false,
+          "locale": "en_US",
+          "accountStatus": "active",
+          "_expandable": {
+            "operations": "",
+            "personalSpace": ""
+          },
+          "_links": {
+            "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=608a9b555426330072f9867d"
+          }
+        },
+        "when": "2025-08-28T13:27:25.965Z",
+        "friendlyWhen": "Aug 28, 2025",
+        "message": "",
+        "number": 1,
+        "minorEdit": false,
+        "contentTypeModified": false,
+        "_expandable": {
+          "collaborators": "",
+          "content": "/rest/api/content/98307"
+        },
+        "_links": {
+          "self": "https://company-team.atlassian.net/wiki/rest/api/content/98307/version/1"
+        }
+      },
+      "ancestors": [
+        {
+          "id": "294914",
+          "type": "comment",
+          "ari": "ari:cloud:confluence:5011b43e-4aea-4083-b3be-7b0fec6b4455:comment/294914",
+          "base64EncodedAri": "YXJpOmNsb3VkOmNvbmZsdWVuY2U6NTAxMWI0M2UtNGFlYS00MDgzLWIzYmUtN2IwZmVjNmI0NDU1OmNvbW1lbnQvMjk0OTE0",
+          "status": "current",
+          "title": "Re: Overview",
+          "macroRenderedOutput": {},
+          "extensions": {
+            "location": "inline",
+            "_expandable": {
+              "inlineProperties": "",
+              "resolution": ""
+            }
+          },
+          "_expandable": {
+            "container": "/rest/api/content/65930",
+            "metadata": "",
+            "restrictions": "/rest/api/content/294914/restriction/byOperation",
+            "history": "/rest/api/content/294914/history",
+            "body": "",
+            "version": "",
+            "descendants": "/rest/api/content/294914/descendant",
+            "space": "/rest/api/space/~608a9b555426330072f9867d",
+            "childTypes": "",
+            "schedulePublishInfo": "",
+            "operations": "",
+            "schedulePublishDate": "",
+            "children": "/rest/api/content/294914/child",
+            "ancestors": "",
+            "draftVersion": ""
+          },
+          "_links": {
+            "webui": "/spaces/~608a9b555426330072f9867d/overview?focusedCommentId=294914",
+            "self": "https://company-team.atlassian.net/wiki/rest/api/content/294914"
+          }
+        }
+      ],
+      "macroRenderedOutput": {},
+      "body": {
+        "atlas_doc_format": {
+          "value": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"this is another reply\",\"type\":\"text\"}]}],\"version\":1}",
+          "representation": "atlas_doc_format",
+          "_expandable": {
+            "webresource": "",
+            "embeddedContent": "",
+            "mediaToken": "",
+            "content": "/rest/api/content/294921"
+          }
+        },
+        "_expandable": {
+          "editor": "",
+          "view": "",
+          "export_view": "",
+          "styled_view": "",
+          "dynamic": "",
+          "storage": "",
+          "editor2": "",
+          "anonymous_export_view": ""
+        }
+      },
+      "extensions": {
+        "location": "inline",
+        "_expandable": {
+          "inlineProperties": "",
+          "resolution": ""
+        }
+      },
+      "_expandable": {
+        "childTypes": "",
+        "container": "/rest/api/content/65930",
+        "schedulePublishInfo": "",
+        "metadata": "",
+        "operations": "",
+        "schedulePublishDate": "",
+        "children": "/rest/api/content/294921/child",
+        "restrictions": "/rest/api/content/294921/restriction/byOperation",
+        "draftVersion": "",
+        "descendants": "/rest/api/content/294921/descendant",
+        "space": "/rest/api/space/~608a9b555426330072f9867d"
+      },
+      "_links": {
+        "webui": "/spaces/~608a9b555426330072f9867d/overview?focusedCommentId=294921",
+        "self": "https://company-team.atlassian.net/wiki/rest/api/content/294921"
+      }
+    },
+    {
+      "id": "65931",
+      "type": "page",
+      "ari": "ari:cloud:confluence:5011b43e-4aea-4083-b3be-7b0fec6b4455:page/65931",
+      "base64EncodedAri": "YXJpOmNsb3VkOmNvbmZsdWVuY2U6NTAxMWI0M2UtNGFlYS00MDgzLWIzYmUtN2IwZmVjNmI0NDU1OmNvbnRlbnQvNjU5MzE=",
+      "status": "current",
+      "title": "Getting started in Confluence from Jira",
+      "history": {
+        "latest": true,
+        "createdBy": {
+          "type": "known",
+          "accountId": "608a9b555426330072f9867d",
+          "accountType": "atlassian",
+          "email": "alice@company.org",
+          "publicName": "alice",
+          "profilePicture": {
+            "path": "/wiki/aa-avatar/608a9b555426330072f9867d",
+            "width": 48,
+            "height": 48,
+            "isDefault": false
+          },
+          "displayName": "alice",
+          "isExternalCollaborator": false,
+          "isGuest": false,
+          "locale": "en_US",
+          "accountStatus": "active",
+          "_expandable": {
+            "operations": "",
+            "personalSpace": ""
+          },
+          "_links": {
+            "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=608a9b555426330072f9867d"
+          }
+        },
+        "createdDate": "2025-08-28T13:04:01.531Z",
+        "_expandable": {
+          "lastUpdated": "",
+          "lastOwnedBy": "",
+          "contributors": "",
+          "nextVersion": "",
+          "ownedBy": ""
+        },
+        "_links": {
+          "self": "https://company-team.atlassian.net/wiki/rest/api/content/65931/history"
+        }
+      },
+      "version": {
+        "by": {
+          "type": "known",
+          "accountId": "608a9b555426330072f9867d",
+          "accountType": "atlassian",
+          "email": "alice@company.org",
+          "publicName": "alice",
+          "profilePicture": {
+            "path": "/wiki/aa-avatar/608a9b555426330072f9867d",
+            "width": 48,
+            "height": 48,
+            "isDefault": false
+          },
+          "displayName": "alice",
+          "isExternalCollaborator": false,
+          "isGuest": false,
+          "locale": "en_US",
+          "accountStatus": "active",
+          "_expandable": {
+            "operations": "",
+            "personalSpace": ""
+          },
+          "_links": {
+            "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=608a9b555426330072f9867d"
+          }
+        },
+        "when": "2025-08-28T13:04:01.531Z",
+        "friendlyWhen": "Aug 28, 2025",
+        "message": "",
+        "number": 1,
+        "minorEdit": false,
+        "confRev": "confluence$content$65931.3",
+        "contentTypeModified": false,
+        "_expandable": {
+          "collaborators": "",
+          "content": "/rest/api/content/65931"
+        },
+        "_links": {
+          "self": "https://company-team.atlassian.net/wiki/rest/api/content/65931/version/1"
+        }
+      },
+      "ancestors": [
+        {
+          "id": "65930",
+          "type": "page",
+          "ari": "ari:cloud:confluence:5011b43e-4aea-4083-b3be-7b0fec6b4455:page/65930",
+          "base64EncodedAri": "YXJpOmNsb3VkOmNvbmZsdWVuY2U6NTAxMWI0M2UtNGFlYS00MDgzLWIzYmUtN2IwZmVjNmI0NDU1OmNvbnRlbnQvNjU5MzA=",
+          "status": "current",
+          "title": "Overview",
+          "macroRenderedOutput": {},
+          "extensions": {
+            "position": 221
+          },
+          "_expandable": {
+            "container": "/rest/api/space/~608a9b555426330072f9867d",
+            "metadata": "",
+            "restrictions": "/rest/api/content/65930/restriction/byOperation",
+            "history": "/rest/api/content/65930/history",
+            "body": "",
+            "version": "",
+            "descendants": "/rest/api/content/65930/descendant",
+            "space": "/rest/api/space/~608a9b555426330072f9867d",
+            "childTypes": "",
+            "schedulePublishInfo": "",
+            "operations": "",
+            "schedulePublishDate": "",
+            "children": "/rest/api/content/65930/child",
+            "ancestors": "",
+            "draftVersion": ""
+          },
+          "_links": {
+            "self": "https://company-team.atlassian.net/wiki/rest/api/content/65930",
+            "tinyui": "/x/igEB",
+            "editui": "/pages/resumedraft.action?draftId=65930",
+            "webui": "/spaces/~608a9b555426330072f9867d/overview",
+            "edituiv2": "/spaces/~608a9b555426330072f9867d/pages/edit-v2/65930"
+          }
+        }
+      ],
+      "macroRenderedOutput": {},
+      "body": {
+        "atlas_doc_format": {
+          "value": "{\"type\":\"doc\",\"content\":[{\"type\":\"panel\",\"attrs\":{\"panelIconId\":\"0b885b7f-2b42-41b1-8a5e-f0dc5e91cb27\",\"panelIcon\":\":Growth_purple:\",\"panelIconText\":\"🌱\",\"panelColor\":\"#EAE6FF\",\"panelType\":\"custom\"},\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"There’s a lot that Confluence and Jira can do together—this page is a reference and resource for successfully incorporating both into your team’s workflow. Feel free to come back to it as often as you like.\",\"type\":\"text\"}]},{\"type\":\"taskList\",\"attrs\":{\"localId\":\"\"},\"content\":[{\"type\":\"taskItem\",\"attrs\":{\"state\":\"TODO\",\"localId\":\"1981\"},\"content\":[{\"text\":\"Bookmark this page to reference it later.\",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]}]}]}]},{\"type\":\"embedCard\",\"attrs\":{\"layout\":\"center\",\"originalHeight\":480.0,\"width\":100.0,\"url\":\"https://www.youtube.com/watch?v=EyPiFfiBVdg\",\"originalWidth\":853.34}},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Jump to a section\",\"type\":\"text\",\"marks\":[{\"type\":\"strong\"}]},{\"type\":\"inlineExtension\",\"attrs\":{\"extensionType\":\"com.atlassian.confluence.macro.core\",\"extensionKey\":\"anchor\",\"parameters\":{\"macroParams\":{\"\":{\"value\":\"On-this-page\"},\"legacyAnchorId\":{\"value\":\"GettingstartedinConfluencefromJira-On-this-page\"}},\"macroMetadata\":{\"macroId\":{\"value\":\"a1094ebb05173bfa77ab39da352f5f6f\"},\"schemaVersion\":{\"value\":\"1\"},\"title\":\"Anchor\"}}}}]},{\"type\":\"extension\",\"attrs\":{\"extensionType\":\"com.atlassian.confluence.macro.core\",\"extensionKey\":\"toc\",\"parameters\":{\"macroParams\":{\"maxLevel\":{\"value\":\"1\"},\"minLevel\":{\"value\":\"1\"},\"absoluteUrl\":{\"value\":\"true\"},\"type\":{\"value\":\"flat\"}},\"macroMetadata\":{\"macroId\":{\"value\":\"4177e2b3f5a20c8f78ec14b7ecb41ffa\"},\"schemaVersion\":{\"value\":\"1\"},\"title\":\"Table of Contents\"}}}},{\"type\":\"rule\"},{\"type\":\"paragraph\",\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}]},{\"type\":\"heading\",\"attrs\":{\"level\":2},\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}],\"content\":[{\"text\":\"Move between Jira & Confluence\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"When you add a Jira issue link in Confluence, or link to a Confluence page from Jira, the \",\"type\":\"text\"},{\"text\":\"Jira links\",\"type\":\"text\",\"marks\":[{\"type\":\"code\"}]},{\"text\":\" button appears at the top of the Confluence page. This means you can quickly jump from Confluence to Jira, and vice versa, speeding up your workflow.\",\"type\":\"text\"}]},{\"type\":\"mediaSingle\",\"attrs\":{\"layout\":\"center\"},\"content\":[{\"type\":\"media\",\"attrs\":{\"alt\":\"Jira Link On Connie Page.7.22.gif\",\"type\":\"external\",\"url\":\"https://dam-cdn.atl.orangelogic.com/AssetLink/wn7e7g250r8442548n6p162pds7c22i0.gif\"}}]},{\"type\":\"paragraph\",\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}],\"content\":[{\"text\":\"Jira Link at Top of Confluence Content\",\"type\":\"text\"}]},{\"type\":\"paragraph\"},{\"type\":\"rule\"},{\"type\":\"paragraph\",\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}]},{\"type\":\"heading\",\"attrs\":{\"level\":2},\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}],\"content\":[{\"text\":\"Display your progress in Confluence\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Give your stakeholders a snapshot of your team’s work or project progress. When you integrate Confluence and Jira, you can see information visualized from Jira. Add a Jira macro by copying & pasting the link from an existing dashboard into your Confluence page. Your stakeholders will be able to see progress in real time.\",\"type\":\"text\"}]},{\"type\":\"paragraph\"},{\"type\":\"mediaSingle\",\"attrs\":{\"layout\":\"center\"},\"content\":[{\"type\":\"media\",\"attrs\":{\"alt\":\"Jira Dash in Page.gif\",\"type\":\"external\",\"url\":\"https://dam-cdn.atl.orangelogic.com/AssetLink/7d1yk2c5h71oj0nnvf70ph4o550ri225.gif\"}}]},{\"type\":\"paragraph\",\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}],\"content\":[{\"text\":\"Jira Issues Macro in Confluence\",\"type\":\"text\"}]},{\"type\":\"paragraph\"},{\"type\":\"mediaSingle\",\"attrs\":{\"layout\":\"center\"},\"content\":[{\"type\":\"media\",\"attrs\":{\"alt\":\"Jira Widget in Confluence Page.gif\",\"type\":\"external\",\"url\":\"https://dam-cdn.atl.orangelogic.com/AssetLink/32n682p4tl152n42720e066a00447xtu.gif\"}}]},{\"type\":\"paragraph\",\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}],\"content\":[{\"text\":\"Jira Project Timeline in Confluence Content\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}]},{\"type\":\"rule\"},{\"type\":\"paragraph\",\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}]},{\"type\":\"heading\",\"attrs\":{\"level\":2},\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}],\"content\":[{\"text\":\"For all teams\",\"type\":\"text\"}]},{\"type\":\"heading\",\"attrs\":{\"level\":3},\"content\":[{\"text\":\"Define requirements\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"You can create issues while viewing or editing, making Confluence great for planning and gathering requirements. Use the \",\"type\":\"text\"},{\"text\":\"product requirements template\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"https://company-team.atlassian.net/wiki/templates?space=~608a9b555426330072f9867d&template=com.atlassian.confluence.plugins.confluence-software-blueprints:requirements-blueprint\"}}]},{\"text\":\" to define and outline expectations, then create a Jira epic and other issues right from that page.\",\"type\":\"text\"}]},{\"type\":\"expand\",\"attrs\":{\"title\":\"Here’s how it works\"},\"content\":[{\"type\":\"orderedList\",\"attrs\":{\"order\":1},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"Create a Confluence page using the Product requirements template.\",\"type\":\"text\"}]}]},{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"Choose the placeholder text \",\"type\":\"text\"},{\"text\":\"Link to Jira epic or feature\",\"type\":\"text\",\"marks\":[{\"type\":\"em\"}]},{\"text\":\" and choose \",\"type\":\"text\"},{\"text\":\"Create new issue\",\"type\":\"text\",\"marks\":[{\"type\":\"strong\"}]},{\"text\":\" to create your epic in Jira.\",\"type\":\"text\"}]}]},{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"Collaborate with your team to define your stories and save the page.\",\"type\":\"text\"}]}]},{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"Highlight text on your requirements page and choose the \",\"type\":\"text\"},{\"text\":\"Create Jira issue\",\"type\":\"text\",\"marks\":[{\"type\":\"strong\"}]},{\"text\":\" link to create stories in Jira, and automatically link them to your epic.\",\"type\":\"text\"}]}]},{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"Track the progress of the stories from Confluence or from within Jira.\",\"type\":\"text\"}]}]}]}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"The tight integration between Confluence and Jira allows for easy access to issues and their statuses from Confluence, along with viewing links to related Confluence pages within Jira.\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"More about defining requirements in Confluence\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"https://support.atlassian.com/confluence-cloud/docs/use-jira-and-confluence-together/\"}}]}]},{\"type\":\"heading\",\"attrs\":{\"level\":3},\"content\":[{\"text\":\"Share your roadmap\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"After you define requirements, share your project or team’s roadmap with the \",\"type\":\"text\"},{\"text\":\"Jira roadmap macro\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"https://support.atlassian.com/confluence-cloud/docs/insert-the-jira-roadmap-macro/\"}}]},{\"text\":\".\",\"type\":\"text\"}]},{\"type\":\"mediaSingle\",\"attrs\":{\"layout\":\"center\"},\"content\":[{\"type\":\"media\",\"attrs\":{\"alt\":\"Jira Roadmap Macro.jpeg\",\"type\":\"external\",\"url\":\"https://dam-cdn.atl.orangelogic.com/AssetLink/7o63k87qsn1d8dbs22lf1lc537fu4324.jpeg\"}}]},{\"type\":\"paragraph\",\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}],\"content\":[{\"text\":\"Jira Roadmap Macro\",\"type\":\"text\"}]},{\"type\":\"taskList\",\"attrs\":{\"localId\":\"\"},\"content\":[{\"type\":\"taskItem\",\"attrs\":{\"state\":\"TODO\",\"localId\":\"1977\"},\"content\":[{\"text\":\"Press \",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]},{\"text\":\"c\",\"type\":\"text\",\"marks\":[{\"type\":\"code\"}]},{\"text\":\" to create content at any time. \",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]},{\"text\":\"Enter \",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]},{\"text\":\"/jiraroadmap\",\"type\":\"text\",\"marks\":[{\"type\":\"code\"}]},{\"text\":\" to insert and configure your road\",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]},{\"text\":\"map.\",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]}]}]},{\"type\":\"paragraph\"},{\"type\":\"paragraph\",\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"end\"}}],\"content\":[{\"text\":\"Back to top ⤴\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"#\"}}]}]},{\"type\":\"rule\"},{\"type\":\"paragraph\",\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}]},{\"type\":\"heading\",\"attrs\":{\"level\":1},\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}],\"content\":[{\"text\":\"Confluence glossary: Terms & features\",\"type\":\"text\"}]},{\"type\":\"heading\",\"attrs\":{\"level\":3},\"content\":[{\"text\":\"Spaces\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Spaces are places for individuals, teams, and companies to organize and work on ideas, projects, documentation, and announcements. Spaces can be customized and integrated with both Atlassian tools and others. \",\"type\":\"text\"},{\"text\":\"Create\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"https://support.atlassian.com/confluence-cloud/docs/create-a-blank-space/\"}}]},{\"text\":\" as many spaces as you need to get things done:\",\"type\":\"text\"}]},{\"type\":\"paragraph\"},{\"type\":\"layoutSection\",\"content\":[{\"type\":\"layoutColumn\",\"attrs\":{\"width\":33.33},\"content\":[{\"type\":\"mediaSingle\",\"attrs\":{\"layout\":\"center\"},\"content\":[{\"type\":\"media\",\"attrs\":{\"type\":\"external\",\"url\":\"https://dam-cdn.atl.orangelogic.com/AssetLink/h38u8bnh78n17hwdhf6h7m08sm5k6k64.png\"}}]},{\"type\":\"heading\",\"attrs\":{\"level\":4},\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}],\"content\":[{\"text\":\"Team Spaces\",\"type\":\"text\",\"marks\":[{\"type\":\"strong\"}]}]},{\"type\":\"paragraph\",\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}],\"content\":[{\"text\":\"Give each team their own space so they can work closely and make information easier to find.\",\"type\":\"text\",\"marks\":[{\"type\":\"strong\"}]}]},{\"type\":\"paragraph\"}]},{\"type\":\"layoutColumn\",\"attrs\":{\"width\":33.33},\"content\":[{\"type\":\"mediaSingle\",\"attrs\":{\"layout\":\"center\"},\"content\":[{\"type\":\"media\",\"attrs\":{\"type\":\"external\",\"url\":\"https://dam-cdn.atl.orangelogic.com/AssetLink/07ig4706m81g6tr6816vduls8utlxe02.png\"}}]},{\"type\":\"heading\",\"attrs\":{\"level\":4},\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}],\"content\":[{\"text\":\"Project Spaces\",\"type\":\"text\",\"marks\":[{\"type\":\"strong\"}]}]},{\"type\":\"paragraph\",\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}],\"content\":[{\"text\":\"Put all the information related to your project in one place so everyone can work together.\",\"type\":\"text\"}]}]},{\"type\":\"layoutColumn\",\"attrs\":{\"width\":33.33},\"content\":[{\"type\":\"mediaSingle\",\"attrs\":{\"layout\":\"center\"},\"content\":[{\"type\":\"media\",\"attrs\":{\"type\":\"external\",\"url\":\"https://dam-cdn.atl.orangelogic.com/AssetLink/0po7y2sd102d0vg0p4a8733580v05548.png\"}}]},{\"type\":\"heading\",\"attrs\":{\"level\":4},\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}],\"content\":[{\"text\":\"Personal Spaces\",\"type\":\"text\",\"marks\":[{\"type\":\"strong\"}]}]},{\"type\":\"paragraph\",\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"center\"}}],\"content\":[{\"text\":\"Store anything you’re working on, keep your to-do lists, and polish content before moving it into a shared space.\",\"type\":\"text\"}]}]}]},{\"type\":\"taskList\",\"attrs\":{\"localId\":\"\"},\"content\":[{\"type\":\"taskItem\",\"attrs\":{\"state\":\"TODO\",\"localId\":\"16\"},\"content\":[{\"text\":\"In the main navigation bar, select \",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]},{\"text\":\"Spaces\",\"type\":\"text\",\"marks\":[{\"type\":\"code\"}]},{\"text\":\" → \",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]},{\"text\":\"Create space\",\"type\":\"text\",\"marks\":[{\"type\":\"code\"}]},{\"text\":\" to create a new space.\",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]}]}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"More about spaces\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"https://www.atlassian.com/software/confluence/guides/get-started/set-up\"}}]}]},{\"type\":\"rule\"},{\"type\":\"heading\",\"attrs\":{\"level\":3},\"content\":[{\"text\":\"Content types\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"To create content within a space, select the \",\"type\":\"text\"},{\"text\":\"+\",\"type\":\"text\",\"marks\":[{\"type\":\"code\"}]},{\"text\":\" and choose your content type. You can also create content using the \",\"type\":\"text\"},{\"text\":\"Create\",\"type\":\"text\",\"marks\":[{\"type\":\"code\"}]},{\"text\":\" button in the main navigation bar.\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Whiteboards \",\"type\":\"text\",\"marks\":[{\"type\":\"strong\"}]},{\"type\":\"status\",\"attrs\":{\"color\":\"purple\",\"style\":\"bold\",\"text\":\"new\",\"localId\":\"7290d883-a063-4f20-a3a0-2694df66d8c8\"}},{\"text\":\" are your team’s place to brainstorm, build connections, and make ideas come to life.\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Pages\",\"type\":\"text\",\"marks\":[{\"type\":\"strong\"}]},{\"text\":\" are the building blocks of Confluence. Drop ideas into a page, to collaborate on, refine, and document work.\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Blog posts\",\"type\":\"text\",\"marks\":[{\"type\":\"strong\"}]},{\"text\":\" are individually-authored pieces of content that illustrate a particular perspective, typically shared broadly—great for documenting case studies or broad insights.\",\"type\":\"text\"}]},{\"type\":\"mediaSingle\",\"attrs\":{\"layout\":\"center\"},\"content\":[{\"type\":\"media\",\"attrs\":{\"type\":\"external\",\"url\":\"https://dam-cdn.atl.orangelogic.com/AssetLink/0lovhk1hukmv2od55j52v66x83o7152n.gif\"}}]},{\"type\":\"taskList\",\"attrs\":{\"localId\":\"\"},\"content\":[{\"type\":\"taskItem\",\"attrs\":{\"state\":\"TODO\",\"localId\":\"36\"},\"content\":[{\"text\":\"Press \",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]},{\"text\":\"k\",\"type\":\"text\",\"marks\":[{\"type\":\"code\"}]},{\"text\":\" for a shareable link to your page or post.\",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]}]}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"More about sharing content\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"https://support.atlassian.com/confluence-cloud/docs/share-a-page-or-blog-post/\"}}]},{\"text\":\" | \",\"type\":\"text\"},{\"text\":\"More about whiteboards\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"https://hello.atlassian.net/wiki/spaces/~766660823/whiteboard/3078363456?atlOrigin=eyJpIjoiNGJkN2VmODk5NzMzNDZmYWE2N2RmN2ViYzBiZjgzZjciLCJwIjoiY29uZmx1ZW5jZS1jaGF0cy1pbnQifQ\"}}]}]},{\"type\":\"rule\"},{\"type\":\"heading\",\"attrs\":{\"level\":3},\"content\":[{\"text\":\"Real-time editing\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"You and up to 11 teammates can edit a page together in real time. Changes save and sync automatically so that everyone editing sees the same thing. Start editing together by selecting the \",\"type\":\"text\"},{\"text\":\"Edit\",\"type\":\"text\",\"marks\":[{\"type\":\"code\"}]},{\"text\":\" icon in the header.\",\"type\":\"text\"}]},{\"type\":\"table\",\"attrs\":{\"layout\":\"default\",\"width\":760.0,\"localId\":\"9b893293-49ca-4e08-b0fc-6d702ae185ac\"},\"content\":[{\"type\":\"tableRow\",\"content\":[{\"type\":\"tableCell\",\"attrs\":{\"colspan\":1,\"background\":\"#ffffff\",\"rowspan\":1,\"colwidth\":[760.0]},\"content\":[{\"type\":\"mediaSingle\",\"attrs\":{\"layout\":\"center\"},\"content\":[{\"type\":\"media\",\"attrs\":{\"type\":\"external\",\"url\":\"https://dam-cdn.atl.orangelogic.com/AssetLink/5r88j5247g7xy0u561cs713o6y4tb26b.gif\"}}]}]}]}]},{\"type\":\"taskList\",\"attrs\":{\"localId\":\"\"},\"content\":[{\"type\":\"taskItem\",\"attrs\":{\"state\":\"TODO\",\"localId\":\"22\"},\"content\":[{\"text\":\"Press\",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]},{\"text\":\" \",\"type\":\"text\",\"marks\":[{\"type\":\"strong\"}]},{\"text\":\"Command + Enter\",\"type\":\"text\",\"marks\":[{\"type\":\"code\"}]},{\"text\":\" when in the editor to publish.\",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]}]}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"More about collaborative editing\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"https://support.atlassian.com/confluence-cloud/docs/create-edit-and-publish-a-page/#Collaborative-editing\"}}]}]},{\"type\":\"rule\"},{\"type\":\"heading\",\"attrs\":{\"level\":3},\"content\":[{\"text\":\"Mentions and comments\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Comments are a great way to start a conversation about a page or blog post. They allow you to remark on content, add important information, ask questions, and generally drive collaboration and teamwork.\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"@mention a teammate to bring them into the conversation, and they can reply to and/or like comments.\",\"type\":\"text\"}]},{\"type\":\"table\",\"attrs\":{\"layout\":\"default\",\"width\":760.0,\"localId\":\"4fc4332a-417b-403a-87e1-5c5b62392a52\"},\"content\":[{\"type\":\"tableRow\",\"content\":[{\"type\":\"tableCell\",\"attrs\":{\"colspan\":1,\"background\":\"#ffffff\",\"rowspan\":1,\"colwidth\":[680.0]},\"content\":[{\"type\":\"mediaSingle\",\"attrs\":{\"layout\":\"center\"},\"content\":[{\"type\":\"media\",\"attrs\":{\"type\":\"external\",\"url\":\"https://dam-cdn.atl.orangelogic.com/AssetLink/yoy4y3y157x16qd7kd0d36p5g236kr7i.gif\"}}]}]}]}]},{\"type\":\"expand\",\"attrs\":{\"title\":\"Leave comments for your team in different places, depending on the type of feedback you have:\"},\"content\":[{\"type\":\"taskList\",\"attrs\":{\"localId\":\"\"},\"content\":[{\"type\":\"taskItem\",\"attrs\":{\"state\":\"TODO\",\"localId\":\"23\"},\"content\":[{\"text\":\"Inline comment '→' \",\"type\":\"text\",\"marks\":[{\"type\":\"strong\"}]},{\"text\":\"Added to a highlighted section of the content you are editing or viewing';' good for targeted comments on a specific word or phrase.\",\"type\":\"text\"}]},{\"type\":\"taskItem\",\"attrs\":{\"state\":\"TODO\",\"localId\":\"24\"},\"content\":[{\"text\":\"General comment '→' \",\"type\":\"text\",\"marks\":[{\"type\":\"strong\"}]},{\"text\":\"Added below the content you are viewing';' good for comments that apply to the content as a whole.\",\"type\":\"text\"}]}]}]},{\"type\":\"taskList\",\"attrs\":{\"localId\":\"\"},\"content\":[{\"type\":\"taskItem\",\"attrs\":{\"state\":\"TODO\",\"localId\":\"25\"},\"content\":[{\"text\":\"Leave an inline comment when viewing or editing content.\",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]}]}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"More about comments\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"https://support.atlassian.com/confluence-cloud/docs/comment-on-pages-and-blog-posts/\"}}]}]},{\"type\":\"rule\"},{\"type\":\"heading\",\"attrs\":{\"level\":3},\"content\":[{\"text\":\"Content tree\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"The content tree is where your content is organized within a space. Drag and drop to reorder or nest content, so you can more effectively share your work with others.\",\"type\":\"text\"}]},{\"type\":\"mediaSingle\",\"attrs\":{\"layout\":\"center\"},\"content\":[{\"type\":\"media\",\"attrs\":{\"alt\":\"You can move a page within a space by dragging and dropping it in the page tree\",\"type\":\"external\",\"url\":\"https://dam-cdn.atl.orangelogic.com/AssetLink/26lphshndyo263huh3848a21joev1x0k.gif\"}}]},{\"type\":\"taskList\",\"attrs\":{\"localId\":\"\"},\"content\":[{\"type\":\"taskItem\",\"attrs\":{\"state\":\"TODO\",\"localId\":\"1970\"},\"content\":[{\"text\":\"After you publish, select \",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]},{\"text\":\"[\",\"type\":\"text\",\"marks\":[{\"type\":\"code\"}]},{\"text\":\" to expand or collapse the content tree.\",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]}]}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"More about the content tree\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"https://support.atlassian.com/confluence-cloud/docs/move-copy-and-hide-pages/\"}}]}]},{\"type\":\"rule\"},{\"type\":\"heading\",\"attrs\":{\"level\":3},\"content\":[{\"text\":\"Tables\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Tables allow you to organize important information on a page to discuss it with your team. Present the information the way it makes sense to you—resize columns, color cells, rows and columns, and sort the table by clicking the column headers.\",\"type\":\"text\"}]},{\"type\":\"mediaSingle\",\"attrs\":{\"layout\":\"center\"},\"content\":[{\"type\":\"media\",\"attrs\":{\"type\":\"external\",\"url\":\"https://dam-cdn.atl.orangelogic.com/AssetLink/s20n7t880t3622mky68kx0hanvm82a2w.gif\"}}]},{\"type\":\"taskList\",\"attrs\":{\"localId\":\"\"},\"content\":[{\"type\":\"taskItem\",\"attrs\":{\"state\":\"TODO\",\"localId\":\"28\"},\"content\":[{\"text\":\"Enter \",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]},{\"text\":\"/table\",\"type\":\"text\",\"marks\":[{\"type\":\"code\"}]},{\"text\":\" to add a table at any time.\",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]}]}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"More about tables\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"https://support.atlassian.com/confluence-cloud/docs/add-formatting-to-your-page/#Tables\"}}]}]},{\"type\":\"rule\"},{\"type\":\"heading\",\"attrs\":{\"level\":3},\"content\":[{\"text\":\"Drafts\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Confluence autosaves your content as you work—if you select \",\"type\":\"text\"},{\"text\":\"Close\",\"type\":\"text\",\"marks\":[{\"type\":\"code\"}]},{\"text\":\" in the editor without publishing, you’ll create a draft, or an unpublished page you can get back to at any time.\",\"type\":\"text\"}]},{\"type\":\"mediaSingle\",\"attrs\":{\"layout\":\"center\"},\"content\":[{\"type\":\"media\",\"attrs\":{\"type\":\"external\",\"url\":\"https://dam-cdn.atl.orangelogic.com/AssetLink/4x78413f7t7651oxs78v76w0b650386p.png\"}}]},{\"type\":\"paragraph\",\"content\":[{\"type\":\"status\",\"attrs\":{\"color\":\"neutral\",\"style\":\"bold\",\"text\":\"draft\",\"localId\":\"c4a26005-1fd8-438f-82bc-ecbbef54af63\"}},{\"text\":\" Only you can see your draft, unless you share a link to it.\",\"type\":\"text\",\"marks\":[{\"type\":\"textColor\",\"attrs\":{\"color\":\"#403294\"}},{\"type\":\"strong\"}]}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"More about drafts\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"https://support.atlassian.com/confluence-cloud/docs/create-edit-and-publish-a-page/#Drafts\"}}]}]},{\"type\":\"paragraph\",\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"end\"}}],\"content\":[{\"text\":\"Back to top ⤴\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"#On-this-page\"}}]}]},{\"type\":\"rule\"},{\"type\":\"heading\",\"attrs\":{\"level\":3},\"content\":[{\"text\":\"TL;DR\",\"type\":\"text\"}]},{\"type\":\"layoutSection\",\"content\":[{\"type\":\"layoutColumn\",\"attrs\":{\"width\":66.66},\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"These are the top three actions we think will help you get the most from Confluence.\",\"type\":\"text\"}]},{\"type\":\"taskList\",\"attrs\":{\"localId\":\"\"},\"content\":[{\"type\":\"taskItem\",\"attrs\":{\"state\":\"TODO\",\"localId\":\"32\"},\"content\":[{\"text\":\"Explore the \",\"type\":\"text\"},{\"text\":\"/\",\"type\":\"text\",\"marks\":[{\"type\":\"code\"}]},{\"text\":\" menu\",\"type\":\"text\"}]},{\"type\":\"taskItem\",\"attrs\":{\"state\":\"TODO\",\"localId\":\"33\"},\"content\":[{\"text\":\"Embed a Jira issue\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"https://support.atlassian.com/confluence-cloud/docs/insert-the-jira-issues-macro/\"}}]}]},{\"type\":\"taskItem\",\"attrs\":{\"state\":\"TODO\",\"localId\":\"34\"},\"content\":[{\"text\":\"Create a knowledge base article\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"https://support.atlassian.com/jira-service-management-cloud/docs/write-knowledge-base-articles/\"}}]}]}]}]},{\"type\":\"layoutColumn\",\"attrs\":{\"width\":33.33},\"content\":[{\"type\":\"mediaSingle\",\"attrs\":{\"layout\":\"center\",\"width\":65.0},\"content\":[{\"type\":\"media\",\"attrs\":{\"type\":\"external\",\"url\":\"https://dam-cdn.atl.orangelogic.com/AssetLink/20dn7f552r34wurd4mnsl7ttm7oc0336.png\"}}]}]}]},{\"type\":\"paragraph\"},{\"type\":\"paragraph\",\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"end\"}}],\"content\":[{\"text\":\"Back to top ⤴\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"#On-this-page\"}}]}]},{\"type\":\"paragraph\",\"marks\":[{\"type\":\"alignment\",\"attrs\":{\"align\":\"end\"}}]}],\"version\":1}",
+          "representation": "atlas_doc_format",
+          "_expandable": {
+            "webresource": "",
+            "embeddedContent": "",
+            "mediaToken": "",
+            "content": "/rest/api/content/65931"
+          }
+        },
+        "_expandable": {
+          "editor": "",
+          "view": "",
+          "export_view": "",
+          "styled_view": "",
+          "dynamic": "",
+          "storage": "",
+          "editor2": "",
+          "anonymous_export_view": ""
+        }
+      },
+      "extensions": {
+        "position": 671
+      },
+      "_expandable": {
+        "childTypes": "",
+        "container": "/rest/api/space/~608a9b555426330072f9867d",
+        "schedulePublishInfo": "",
+        "metadata": "",
+        "operations": "",
+        "schedulePublishDate": "",
+        "children": "/rest/api/content/65931/child",
+        "restrictions": "/rest/api/content/65931/restriction/byOperation",
+        "draftVersion": "",
+        "descendants": "/rest/api/content/65931/descendant",
+        "space": "/rest/api/space/~608a9b555426330072f9867d"
+      },
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/api/content/65931",
+        "tinyui": "/x/iwEB",
+        "editui": "/pages/resumedraft.action?draftId=65931",
+        "webui": "/spaces/~608a9b555426330072f9867d/pages/65931/Getting+started+in+Confluence+from+Jira",
+        "edituiv2": "/spaces/~608a9b555426330072f9867d/pages/edit-v2/65931"
+      }
+    },
+    {
+      "id": "196835",
+      "type": "comment",
+      "ari": "ari:cloud:confluence:5011b43e-4aea-4083-b3be-7b0fec6b4455:comment/196835",
+      "base64EncodedAri": "YXJpOmNsb3VkOmNvbmZsdWVuY2U6NTAxMWI0M2UtNGFlYS00MDgzLWIzYmUtN2IwZmVjNmI0NDU1OmNvbW1lbnQvMTk2ODM1",
+      "status": "current",
+      "title": "Re: Overview",
+      "history": {
+        "latest": true,
+        "createdBy": {
+          "type": "known",
+          "accountId": "608a9b555426330072f9867d",
+          "accountType": "atlassian",
+          "email": "alice@company.org",
+          "publicName": "alice",
+          "profilePicture": {
+            "path": "/wiki/aa-avatar/608a9b555426330072f9867d",
+            "width": 48,
+            "height": 48,
+            "isDefault": false
+          },
+          "displayName": "alice",
+          "isExternalCollaborator": false,
+          "isGuest": false,
+          "locale": "en_US",
+          "accountStatus": "active",
+          "_expandable": {
+            "operations": "",
+            "personalSpace": ""
+          },
+          "_links": {
+            "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=608a9b555426330072f9867d"
+          }
+        },
+        "createdDate": "2025-08-28T13:27:39.085Z",
+        "_expandable": {
+          "lastUpdated": "",
+          "lastOwnedBy": "",
+          "contributors": "",
+          "nextVersion": "",
+          "ownedBy": ""
+        },
+        "_links": {
+          "self": "https://company-team.atlassian.net/wiki/rest/api/content/196835/history"
+        }
+      },
+      "version": {
+        "by": {
+          "type": "known",
+          "accountId": "608a9b555426330072f9867d",
+          "accountType": "atlassian",
+          "email": "alice@company.org",
+          "publicName": "alice",
+          "profilePicture": {
+            "path": "/wiki/aa-avatar/608a9b555426330072f9867d",
+            "width": 48,
+            "height": 48,
+            "isDefault": false
+          },
+          "displayName": "alice",
+          "isExternalCollaborator": false,
+          "isGuest": false,
+          "locale": "en_US",
+          "accountStatus": "active",
+          "_expandable": {
+            "operations": "",
+            "personalSpace": ""
+          },
+          "_links": {
+            "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=608a9b555426330072f9867d"
+          }
+        },
+        "when": "2025-08-28T13:27:39.085Z",
+        "friendlyWhen": "Aug 28, 2025",
+        "message": "",
+        "number": 1,
+        "minorEdit": false,
+        "contentTypeModified": false,
+        "_expandable": {
+          "collaborators": "",
+          "content": "/rest/api/content/196835"
+        },
+        "_links": {
+          "self": "https://company-team.atlassian.net/wiki/rest/api/content/196835/version/1"
+        }
+      },
+      "ancestors": [
+        {
+          "id": "294914",
+          "type": "comment",
+          "ari": "ari:cloud:confluence:5011b43e-4aea-4083-b3be-7b0fec6b4455:comment/294914",
+          "base64EncodedAri": "YXJpOmNsb3VkOmNvbmZsdWVuY2U6NTAxMWI0M2UtNGFlYS00MDgzLWIzYmUtN2IwZmVjNmI0NDU1OmNvbW1lbnQvMjk0OTE0",
+          "status": "current",
+          "title": "Re: Overview",
+          "macroRenderedOutput": {},
+          "extensions": {
+            "location": "inline",
+            "_expandable": {
+              "inlineProperties": "",
+              "resolution": ""
+            }
+          },
+          "_expandable": {
+            "container": "/rest/api/content/65930",
+            "metadata": "",
+            "restrictions": "/rest/api/content/294914/restriction/byOperation",
+            "history": "/rest/api/content/294914/history",
+            "body": "",
+            "version": "",
+            "descendants": "/rest/api/content/294914/descendant",
+            "space": "/rest/api/space/~608a9b555426330072f9867d",
+            "childTypes": "",
+            "schedulePublishInfo": "",
+            "operations": "",
+            "schedulePublishDate": "",
+            "children": "/rest/api/content/294914/child",
+            "ancestors": "",
+            "draftVersion": ""
+          },
+          "_links": {
+            "webui": "/spaces/~608a9b555426330072f9867d/overview?focusedCommentId=294914",
+            "self": "https://company-team.atlassian.net/wiki/rest/api/content/294914"
+          }
+        }
+      ],
+      "macroRenderedOutput": {},
+      "body": {
+        "atlas_doc_format": {
+          "value": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"mention\",\"attrs\":{\"id\":\"608a9b555426330072f9867d\",\"text\":\"@alice\"}},{\"text\":\" this is a reply from a reply?\",\"type\":\"text\"}]}],\"version\":1}",
+          "representation": "atlas_doc_format",
+          "_expandable": {
+            "webresource": "",
+            "embeddedContent": "",
+            "mediaToken": "",
+            "content": "/rest/api/content/196835"
+          }
+        },
+        "_expandable": {
+          "editor": "",
+          "view": "",
+          "export_view": "",
+          "styled_view": "",
+          "dynamic": "",
+          "storage": "",
+          "editor2": "",
+          "anonymous_export_view": ""
+        }
+      },
+      "extensions": {
+        "location": "inline",
+        "_expandable": {
+          "inlineProperties": "",
+          "resolution": ""
+        }
+      },
+      "_expandable": {
+        "childTypes": "",
+        "container": "/rest/api/content/65930",
+        "schedulePublishInfo": "",
+        "metadata": "",
+        "operations": "",
+        "schedulePublishDate": "",
+        "children": "/rest/api/content/196835/child",
+        "restrictions": "/rest/api/content/196835/restriction/byOperation",
+        "draftVersion": "",
+        "descendants": "/rest/api/content/196835/descendant",
+        "space": "/rest/api/space/~608a9b555426330072f9867d"
+      },
+      "_links": {
+        "webui": "/spaces/~608a9b555426330072f9867d/overview?focusedCommentId=196835",
+        "self": "https://company-team.atlassian.net/wiki/rest/api/content/196835"
+      }
     }
   ],
-  "start":0,
-  "limit":10,
-  "size":10,
-  "_links":{
-    "next":"/rest/api/content/search?next=true&cursor=_f_MTA%3D_sa_WyJcdDI5NDkyMSA6X0MmdTknU1pvWmJDYnNsdF0haCBjYyJd&expand=body.atlas_doc_format%2Cancestors%2Cversion%2Chistory%2Chistory.previousVersion&includeArchivedSpaces=true&limit=10&start=10&cql=lastmodified%3E%3D2025-08-01+AND+lastmodified%3C%3D2025-09-29+AND+space%3D%22%7E608a9b555426330072f9867d%22"
+  "start": 0,
+  "limit": 10,
+  "size": 10,
+  "_links": {
+    "base": "https://company-team.atlassian.net/wiki",
+    "context": "/wiki",
+    "next": "/rest/api/content/search?next=true&cursor=_f_MTA%3D_sa_WyJcdDI5NDkyMSA6X0MmdTknU1pvWmJDYnNsdF0haCBjYyJd&expand=body.atlas_doc_format%2Cancestors%2Cversion%2Chistory%2Chistory.previousVersion&includeArchivedSpaces=true&limit=10&start=10&cql=lastmodified%3E%3D2025-08-01+AND+lastmodified%3C%3D2025-09-29+AND+space%3D%22%7E608a9b555426330072f9867d%22",
+    "self": "https://company-team.atlassian.net/wiki/rest/api/content/search?expand=body.atlas_doc_format%2Cancestors%2Cversion%2Chistory%2Chistory.previousVersion&includeArchivedSpaces=true&cql=lastmodified%3E%3D2025-08-01+AND+lastmodified%3C%3D2025-09-29+AND+space%3D%22%7E608a9b555426330072f9867d%22"
   }
 }
