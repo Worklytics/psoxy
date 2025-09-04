@@ -47,7 +47,7 @@ public class ConfluenceCloudTests extends JavaRulesTestBaseCase {
                 "groups.json"
             ),
             InvocationExample.of(
-                "https://api.atlassian.com/ex/confluence/company-team/wiki/rest/api/group?limit=5&start=5",
+                "https://api.atlassian.com/ex/confluence/company-team/wiki/rest/api/group?next=true&limit=5&start=5",
                 "groups.json"
             ),
             // Group members (v1)
@@ -56,7 +56,7 @@ public class ConfluenceCloudTests extends JavaRulesTestBaseCase {
                 "group_members.json"
             ),
             InvocationExample.of(
-                "https://api.atlassian.com/ex/confluence/company-team/wiki/rest/api/group/35e417ad-bcb1-45fe-9be0-959239a84327/membersByGroupId?limit=100&start=100",
+                "https://api.atlassian.com/ex/confluence/company-team/wiki/rest/api/group/35e417ad-bcb1-45fe-9be0-959239a84327/membersByGroupId?next=true&limit=100&start=100",
                 "group_members.json"
             ),
             // Tasks (v2)
@@ -83,7 +83,7 @@ public class ConfluenceCloudTests extends JavaRulesTestBaseCase {
                 "content_search.json"
             ),
             InvocationExample.of(
-                "https://api.atlassian.com/ex/confluence/company-team/wiki/rest/api/content/search?cursor=_f_MTA%3D_sa_WyJcdDI5NDkyMSA6X0MmdTknU1pvWmJDYnNsdF0haCBjYyJd&expand=body.atlas_doc_format%2Cancestors%2Cversion%2Chistory%2Chistory.previousVersion&includeArchivedSpaces=true&limit=10&start=10&cql=lastmodified%3E%3D2025-08-01+AND+lastmodified%3C%3D2025-09-29+AND+space%3D%22~608a9b555426330072f9867d%22",
+                "https://api.atlassian.com/ex/confluence/company-team/wiki/rest/api/content/search?next=true&cursor=_f_MTA%3D_sa_WyJcdDI5NDkyMSA6X0MmdTknU1pvWmJDYnNsdF0haCBjYyJd&expand=body.atlas_doc_format%2Cancestors%2Cversion%2Chistory%2Chistory.previousVersion&includeArchivedSpaces=true&limit=10&start=10&cql=lastmodified%3E%3D2025-08-01+AND+lastmodified%3C%3D2025-09-29+AND+space%3D%22~608a9b555426330072f9867d%22",
                 "content_search.json"
             ),
             // Versions (v2)
