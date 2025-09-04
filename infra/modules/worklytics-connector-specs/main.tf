@@ -32,6 +32,7 @@ locals {
 
   chat_gpt_enterprise_example_workspace_id = coalesce(var.chat_gpt_enterprise_example_workspace_id, "YOUR_WORKSPACEID")
   confluence_example_cloud_id              = coalesce(var.confluence_example_cloud_id, "YOUR_confluence_example_cloud_id")
+  confluence_example_group_id              = coalesce(var.confluence_example_group_id, "YOUR_confluence_example_group_id")
   jira_example_cloud_id                    = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   jira_example_issue_id                    = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
   github_installation_id                   = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
@@ -849,8 +850,8 @@ EOT
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/oauth/token/accessible-resources", # obtain Confluence Cloud ID from here
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/rest/api/group",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/rest/api/group/${local.confluence_example_group_id}/membersByGroupId",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/rest/api/content/search?cql=lastmodified>=${formatdate("YYYY-MM-DD", timeadd(var.example_api_calls_sample_date, "-720h"))}%20AND%20lastmodified<=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}&limit=30&expand=body.atlas_doc_format,ancestors,version,history,history.previousVersion&includeArchivedSpaces=true",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/spaces",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/attachments/{attachmentId}/versions",
@@ -859,25 +860,23 @@ EOT
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/footer-comments/{commentId}/versions",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/inline-comments/{commentId}/versions",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/tasks",
+        "/oauth/token/accessible-resources", # obtain Confluence Cloud ID from here
       ],
       external_token_todo : <<EOT
 ## Prerequisites
 Confluence OAuth 2.0 (3LO) through Psoxy requires a Confluence Cloud account with following granular scopes:
 
 Add following scopes as part of \"Granular Scopes\", first clicking on \`Edit Scopes\` and then selecting them:
-    - read:blogpost:confluence: for getting blogposts and their versions
-    - read:comment:confluence: for getting comments and their versions
-    - read:group:confluence: for getting groups
-    - read:space:confluence: for getting spaces
-    - read:attachment:confluence: for getting attachments and their versions
-    - read:page:confluence: for getting pages and their versions
-    - read:user:confluence: for getting users
-    - read:task:confluence: for getting tasks
-    - read:content-details:confluence: for using content search endpoint
-    - read:content:confluence: for using content search endpoint
+    - read:blogpost:confluence: for getting [blogposts and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-blogposts-id-versions-get)
+    - read:comment:confluence: for getting [footer-comments](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-footer-comments-id-versions-get) and [inline-comments](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-inline-comments-id-versions-get) and their versions
+    - read:group:confluence: for getting [groups](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-group/#api-wiki-rest-api-group-get)
+    - read:user:confluence: for getting [users from groups](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-group/#api-wiki-rest-api-group-groupid-membersbygroupid-get)
+    - read:space:confluence: for getting [spaces](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-space/#api-spaces-get)
+    - read:attachment:confluence: for getting [attachments and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-attachments-id-versions-get)
+    - read:page:confluence: for getting [pages and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-pages-id-versions-get)
+    - read:task:confluence: for getting [tasks](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-task/#api-tasks-get)
+    - read:content-details:confluence: for using [content search endpoint](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-search/#api-wiki-rest-api-search-get)
 
-  Then go back to \"Permissions\" and click on \"Add\" for \`User Identity API\`, only selecting following scopes:
-    - read:account: for getting user emails
 ## Setup Instructions
 
 ### App configuration
@@ -894,7 +893,6 @@ Add following scopes as part of \"Granular Scopes\", first clicking on \`Edit Sc
     - `read:user:confluence`
     - `read:task:confluence`
     - `read:content-details:confluence`
-    - `read:content:confluence`
    Then repeat the same but for "User Identity API", adding the following scope:
    - `read:account`
 3. Go to the "Authorization" section and add an OAuth 2.0 (3LO) authorization type: click on "Add"
