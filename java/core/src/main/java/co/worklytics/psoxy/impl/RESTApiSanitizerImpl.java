@@ -1,27 +1,17 @@
 package co.worklytics.psoxy.impl;
 
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.io.UncheckedIOException;
+
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -31,6 +21,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import lombok.Setter;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -75,6 +67,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     final Pseudonymizer pseudonymizer;
     final EmailAddressParser emailAddressParser;
 
+    @Getter @Setter
+    Duration sanitizationTimeout = Duration.ofSeconds(55);
 
     // NOTE: JsonPath seems to be threadsafe
     // - https://github.com/json-path/JsonPath/issues/384
@@ -206,60 +200,39 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             return jsonResponse;
         }
         // Convert input String to InputStream (UTF-8 encoding)
-        try (InputStream input =
-                new ByteArrayInputStream(jsonResponse.getBytes(StandardCharsets.UTF_8))) {
-            final ProcessedStream processedStream = sanitize(httpMethod, url, input);
-
-            // Read all bytes from the sanitized stream
-            byte[] sanitizedBytes = processedStream.getStream().readAllBytes();
-
-            // ensure NOTHING threw an exception while processing the stream
-            processedStream.complete();
-
-            return new String(sanitizedBytes, StandardCharsets.UTF_8);
+        // afaik, JSON *must* be UTF-8, per spec
+        byte[] jsonBytes = jsonResponse.getBytes(StandardCharsets.UTF_8);
+        try (InputStream input = new ByteArrayInputStream(jsonBytes);
+             ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            sanitize(httpMethod, url, input, output);
+            return output.toString(StandardCharsets.UTF_8);
         } catch (IOException e) {
             // Wrap IOException in unchecked exception, or handle as needed
             throw new UncheckedIOException("Failed to sanitize content", e);
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
         }
     }
 
-    @SneakyThrows
     @Override
-    public ProcessedStream sanitize(@NonNull String httpMethod,
-                                    @NonNull URL url, InputStream response)
-            throws IOException {
-        // extra check ...
+    public void sanitize(@NonNull String httpMethod,
+                         @NonNull URL url,
+                         InputStream originalStream,
+                         OutputStream outputStream) throws IOException {
         if (!isAllowed(httpMethod, url)) {
             throw new IllegalStateException(String.format(
-                    "Sanitizer called to sanitize response that should not have been retrieved: %s",
-                    url));
+                "Sanitizer called to sanitize response that should not have been retrieved: %s",
+                url));
         }
         Optional<Pair<Pattern, Endpoint>> matchingEndpoint = getEndpoint(httpMethod, url);
 
         if (matchingEndpoint.isEmpty()) {
-            // No matching endpoint found, return the original response
-            return ProcessedStream.completed(response);
-        }
-
-        // q: overkill for NON-ndjson case?
-
-        // Create piped stream pair
-        PipedOutputStream outPipe = new PipedOutputStream();
-        PipedInputStream inPipe = new PipedInputStream(outPipe);
-
-        Endpoint endpoint = matchingEndpoint.get().getValue();
-        return ProcessedStream.createRunning(inPipe, () -> {
-            JsonFactory factory = objectMapper.getFactory();
-
-            try (JsonParser parser = factory.createParser(response);
-                    OutputStreamWriter writer =
-                            new OutputStreamWriter(outPipe, StandardCharsets.UTF_8);
-                    BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
-
+            originalStream.transferTo(outputStream);
+        } else {
+            final Endpoint endpoint = matchingEndpoint.get().getValue();
+            final JsonFactory factory = objectMapper.getFactory();
+            try (JsonParser parser = factory.createParser(originalStream);
+                 OutputStreamWriter writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
+                 BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
                 boolean first = true;
-
                 while (parser.nextToken() != null) {
                     // in theory, should parse only the 'next' JSON object from the stream, such
                     // that NDJSON, or even "{}{}" works
@@ -269,7 +242,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                     // native jackson JsonNode
                     // TODO: figure out a way to streamline this parsing
                     Object node = jsonConfiguration.jsonProvider()
-                            .parse(objectMapper.writeValueAsString(objectMapper.readTree(parser)));
+                        .parse(objectMapper.writeValueAsString(objectMapper.readTree(parser)));
 
                     Object sanitized = sanitize(endpoint, node);
                     if (!first)
@@ -278,20 +251,8 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                     first = false;
                 }
                 bufferedWriter.flush();
-            } catch (IOException e) {
-                // Propagate error by closing the pipe
-                try {
-                    outPipe.close();
-                } catch (IOException ignore) {
-                }
-                throw new UncheckedIOException(e);
-            } finally {
-                try {
-                    outPipe.close();
-                } catch (IOException ignore) {
-                }
             }
-        });
+        }
     }
 
     /**
