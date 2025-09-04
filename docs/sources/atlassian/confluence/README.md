@@ -151,5 +151,5 @@ If a request is done and the following content is returned:
 ```
 
 It could mean:
-- scope is not correctly set in the app configuration. Please check the "Prerquisites" section above.
+- scope is not correctly set in the app configuration. Please check the "Prerequisites" section above.
 - endpoint doesn't exist
