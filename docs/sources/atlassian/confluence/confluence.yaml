@@ -274,12 +274,12 @@ endpoints:
       - "cursor"
       - "includeArchivedSpaces"
       - "start"
+      - "excerpt"
     transforms:
       - !<pseudonymize>
         jsonPaths:
           - "$.results[*]..accountId"
           - "$.results[*]..email"
-          - "$.results[*]..attrs.id"
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
@@ -304,8 +304,7 @@ endpoints:
           - "$.results[*]..message"
       - !<textDigest>
         jsonPaths:
-          - "$.results[*].body.atlas_doc_format.value..text"
-        isJsonEscaped: true
+          - "$.results[*].body.atlas_doc_format.value"
     responseSchema:
       type: "object"
       properties:
