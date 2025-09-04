@@ -920,7 +920,7 @@ it will print the all the values to complete the configuration:
    `refresh_token`.
 2. Build an OAuth authorization endpoint URL by copying the value for "Client Id" obtained in the
    previous step into the URL below. Then open the result in a web browser:
-   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read%3Ablogpost%3Aconfluence%20read%3Acomment%3Aconfluence%20read%3Agroup%3Aconfluence%20read%3Aspace%3Aconfluence%20read%3Aattachment%3Aconfluence%20read%3Apage%3Aconfluence%20read%3Auser%3Aconfluence%20read%3Atask%3Aconfluence%20read%3Acontent-details%3Aconfluence%20read%3Acontent%3Aconfluence&redirect_uri=http%3A%2F%2Flocalhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
+   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:task:confluence%20read%3Ablogpost%3Aconfluence%20read%3Acomment%3Aconfluence%20read%3Agroup%3Aconfluence%20read%3Aspace%3Aconfluence%20read%3Aattachment%3Aconfluence%20read%3Apage%3Aconfluence%20read%3Auser%3Aconfluence%20read%3Atask%3Aconfluence%20read%3Acontent-details%3Aconfluence%20read%3Acontent%3Aconfluence&redirect_uri=http%3A%2F%2Flocalhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
 3. Choose a site in your Confluence workspace to allow access for this application and click "Accept".
    As the callback does not exist, you will see an error. But in the URL of your browser you will
    see something like this as URL:
@@ -945,7 +945,6 @@ it will print the all the values to complete the configuration:
             "read:blogpost:confluence",
             "read:comment:confluence",
             "read:content-details:confluence",
-            "read:content:confluence",
             "read:group:confluence",
             "read:page:confluence",
             "read:space:confluence",
@@ -953,6 +952,7 @@ it will print the all the values to complete the configuration:
         ],
    }
    ```
+    NOTE: As per September 2025, scopes don't show `read:task:confluence` in the response.
 6. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
    - `PSOXY_CONFLUENCE_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
    - `PSOXY_CONFLUENCE_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
