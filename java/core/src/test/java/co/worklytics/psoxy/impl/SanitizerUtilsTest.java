@@ -157,6 +157,19 @@ class SanitizerUtilsTest {
     }
 
     @Test
+    void pseudonymizeWithJsonEscaped() {
+        String input = "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"mention\",\"attrs\":{\"id\":\"608a9b555426330072f9867d\",\"text\":\"@alice\"}},{\"text\":\" this is a reply from a reply?\",\"type\":\"text\"}]}],\"version\":1}";
+        String expected = "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"mention\",\"attrs\":{\"id\":\"t~7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\",\"text\":\"@alice\"}},{\"text\":\" this is a reply from a reply?\",\"type\":\"text\"}]}],\"version\":1}";
+        MapFunction f = sanitizerUtils.getPseudonymize(pseudonymizer,
+            Transform.Pseudonymize.builder()
+                .isJsonEscaped(true)
+                .jsonPathToProcessWhenEscaped("$..attrs.id")
+                .build());
+
+        assertEquals(expected, f.map(input, jsonConfiguration));
+    }
+
+    @Test
     void reversiblePseudonym() {
         MapFunction f = sanitizerUtils.getPseudonymize(pseudonymizer,
             Transform.Pseudonymize.builder().includeReversible(true).build());

@@ -360,8 +360,21 @@ public class SanitizerUtils {
     }
 
     public MapFunction getPseudonymize(Pseudonymizer pseudonymizer, Transform.Pseudonymize transformOptions) {
-        return (Object s, Configuration configuration) -> {
-            PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(s, transformOptions);
+        return (Object object, Configuration configuration) -> {
+            if (transformOptions.getIsJsonEscaped()
+                && StringUtils.isNotBlank(transformOptions.getJsonPathToProcessWhenEscaped())
+            && object instanceof String toTokenize) {
+                DocumentContext jsonContext = JsonPath.parse(toTokenize);
+                List<String> texts = jsonContext.read(transformOptions.getJsonPathToProcessWhenEscaped());
+
+                if (texts.size() > 1) {
+                    throw new RuntimeException("Can't pseudonymize JSON-escaped text if multiple matches for jsonPathToProcessWhenEscaped" + transformOptions.getJsonPathToProcessWhenEscaped());
+                }
+
+                object = texts.stream().findFirst().orElse(null);
+            }
+
+            PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(object, transformOptions);
             if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.JSON) {
                 return configuration.jsonProvider().toJson(pseudonymizedIdentity);
             } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
