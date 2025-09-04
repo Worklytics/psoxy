@@ -157,13 +157,13 @@ public class MockModules {
 
         // so actually, not mocks ...
 
-        @Provides @Named("forOriginal") @Singleton
+        @Provides @Singleton
         static ApiDataSideOutput sideOutputForOriginal() {
             return new NoApiDataSideOutput();
         }
 
-        @Provides @Named("forSanitized") @Singleton
-        static ApiDataSideOutput sideOutputForSanitized() {
+        @Provides @Singleton
+        static ApiSanitizedDataOutput sideOutputForSanitized() {
             return new NoApiDataSideOutput();
         }
 

@@ -77,12 +77,18 @@ import lombok.SneakyThrows;
 class ApiDataRequestHandlerTest {
 
     @Singleton
-    @Component(modules = {PsoxyModule.class, MockModules.ForConfigService.class,
-        MockModules.ForSecretStore.class, MockModules.ForRules.class,
+    @Component(modules = {
+        PsoxyModule.class,
+        MockModules.ForConfigService.class,
+        MockModules.ForSecretStore.class,
+        MockModules.ForRules.class,
         MockModules.ForSourceAuthStrategySet.class,
-        MockModules.ForHttpTransportFactory.class, MockModules.ForSideOutputs.class,
+        MockModules.ForHttpTransportFactory.class,
+        MockModules.ForSideOutputs.class,
         MockModules.ForAsyncApiDataRequestHandler.class,
-        TestModules.ForFixedUUID.class, TestModules.ForFixedClock.class,})
+        TestModules.ForFixedUUID.class,
+        TestModules.ForFixedClock.class,
+    })
     public interface Container {
         void inject(ApiDataRequestHandlerTest test);
     }

@@ -63,7 +63,8 @@ public class ProcessedContent implements Serializable {
 
     InputStream stream;
 
-    public byte[] getContent() throws IOException {
+    @SneakyThrows
+    public byte[] getContent() {
         if (content != null) {
             return content;
         } else if (stream != null) {
@@ -73,6 +74,7 @@ public class ProcessedContent implements Serializable {
         }
     }
 
+    @SneakyThrows
     public InputStream getStream() {
         if (stream != null) {
             return stream;
@@ -87,7 +89,8 @@ public class ProcessedContent implements Serializable {
      * for convenience, a method to get the content as a string - rather than byte array
      * @return the content as a string, using the specified contentCharset
      */
-    public String getContentAsString() throws IOException {
+    @SneakyThrows
+    public String getContentAsString() {
         return new String(getContent(), contentCharset);
     }
 
