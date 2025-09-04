@@ -298,13 +298,12 @@ endpoints:
           - "$.results[*]..download"
           - "$._links.base"
           - "$._links.context"
+          - "$._links.prev"
           - "$._links.self"
       - !<textDigest>
         jsonPaths:
           - "$.results[*]..title"
           - "$.results[*]..message"
-      - !<textDigest>
-        jsonPaths:
           - "$.results[*].body.atlas_doc_format.value"
     responseSchema:
       type: "object"
@@ -332,6 +331,7 @@ endpoints:
           - "$..name"
           - "$._links.base"
           - "$._links.context"
+          - "$._links.prev"
           - "$._links.self"
     responseSchema:
       type: "object"
