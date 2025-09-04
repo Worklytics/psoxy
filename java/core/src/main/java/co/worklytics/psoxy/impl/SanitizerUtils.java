@@ -40,7 +40,6 @@ import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 /**
  * utility methods that are common to multiple types of sanitizers
- *
  */
 @Log
 public class SanitizerUtils {
@@ -167,11 +166,15 @@ public class SanitizerUtils {
                     DocumentContext jsonContext = JsonPath.parse(toTokenize);
                     List<String> texts = jsonContext.read(transform.getJsonPathToProcessWhenEscaped());
 
-                    for (String text : texts) {
-                        jsonContext.set(transform.getJsonPathToProcessWhenEscaped(), jsonConfiguration.jsonProvider().toJson(Transform.TextDigest.generate(text)));
+                    if (texts.isEmpty()) {
+                        // If nothing matched, return original string, as is to avoid any format manipulation
+                        return s;
+                    } else {
+                        for (String text : texts) {
+                            jsonContext.set(transform.getJsonPathToProcessWhenEscaped(), jsonConfiguration.jsonProvider().toJson(Transform.TextDigest.generate(text)));
+                        }
+                        return jsonContext.jsonString();
                     }
-
-                    return jsonContext.jsonString();
                 } else {
                     return jsonConfiguration.jsonProvider().toJson(Transform.TextDigest.generate(toTokenize));
                 }
@@ -372,6 +375,12 @@ public class SanitizerUtils {
                 }
 
                 Object valueToPseudonymize = texts.stream().findFirst().orElse(null);
+
+                if (valueToPseudonymize == null) {
+                    // If nothing matched, return original string, as is to avoid any format manipulation
+                    return object;
+                }
+
                 PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(valueToPseudonymize, transformOptions);
                 String pseudonymizedValue;
                 if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.JSON) {
@@ -496,7 +505,7 @@ public class SanitizerUtils {
             f = getEncryptIp((EncryptIp) transform);
         } else if (transform instanceof Transform.TextDigest) {
             f = getTextDigest((Transform.TextDigest) transform);
-        }else {
+        } else {
             throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
         }
         return f;
@@ -505,9 +514,9 @@ public class SanitizerUtils {
     /**
      * Applies a transform to a document, using the provided pseudonymizer.
      *
-     * @param pseudonymizer to use
-     * @param transform to apply
-     * @param document will be MUTATED in place, if the transform applies
+     * @param pseudonymizer      to use
+     * @param transform          to apply
+     * @param document           will be MUTATED in place, if the transform applies
      * @param compiledTransforms pre-compiled JsonPaths for the transforms, to avoid re-compiling them if transform is already in that list
      */
     void applyTransform(Pseudonymizer pseudonymizer, Transform transform, Object document, Map<Transform, List<JsonPath>> compiledTransforms) {
