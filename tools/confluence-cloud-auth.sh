@@ -38,9 +38,6 @@ printf "3. Now navigate to \"Permissions\" and click on \"Add\" for \`Jira API\`
     - \`read:user:confluence\`
     - \`read:task:confluence\`
     - \`read:content-details:confluence\`
-    - \`read:content:confluence\`
-  Then go back to \"Permissions\" and click on \"Add\" for \`User Identity API\`, only selecting following scopes:
-    - \`read:account\`
 \n"
 
 printf "4. Once Configured, go to \"Settings\" and copy the \"Client Id\" and \"Secret\". You will use these to
@@ -53,7 +50,7 @@ printf "Enter your Confluence Client Secret: "
 read -r CLIENT_SECRET
 
 # Open authorization URL in user's browser
-AUTH_URL="https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${CLIENT_ID}&scope=offline_access%20read%3Ablogpost%3Aconfluence%20read%3Acomment%3Aconfluence%20read%3Agroup%3Aconfluence%20read%3Aspace%3Aconfluence%20read%3Aattachment%3Aconfluence%20read%3Apage%3Aconfluence%20read%3Auser%3Aconfluence%20read%3Atask%3Aconfluence%20read%3Acontent-details%3Aconfluence%20read%3Acontent%3Aconfluence&redirect_uri=http%3A%2F%2Flocalhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent"
+AUTH_URL="https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${CLIENT_ID}&scope=offline_access%20read%3Ablogpost%3Aconfluence%20read%3Acomment%3Aconfluence%20read%3Agroup%3Aconfluence%20read%3Aspace%3Aconfluence%20read%3Aattachment%3Aconfluence%20read%3Apage%3Aconfluence%20read%3Auser%3Aconfluence%20read%3Atask%3Aconfluence%20read%3Acontent-details%3Aconfluence%20&redirect_uri=http%3A%2F%2Flocalhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent"
 printf "${GREEN}Opening the following URL in your default browser:${NC}\n"
 echo $AUTH_URL
 open "${AUTH_URL}" || xdg-open "${AUTH_URL}"
