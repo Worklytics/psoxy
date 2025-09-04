@@ -363,7 +363,7 @@ public class SanitizerUtils {
         return (Object object, Configuration configuration) -> {
             if (transformOptions.getIsJsonEscaped()
                 && StringUtils.isNotBlank(transformOptions.getJsonPathToProcessWhenEscaped())
-            && object instanceof String toTokenize) {
+                && object instanceof String toTokenize) {
                 DocumentContext jsonContext = JsonPath.parse(toTokenize);
                 List<String> texts = jsonContext.read(transformOptions.getJsonPathToProcessWhenEscaped());
 
@@ -371,7 +371,25 @@ public class SanitizerUtils {
                     throw new RuntimeException("Can't pseudonymize JSON-escaped text if multiple matches for jsonPathToProcessWhenEscaped" + transformOptions.getJsonPathToProcessWhenEscaped());
                 }
 
-                object = texts.stream().findFirst().orElse(null);
+                Object valueToPseudonymize = texts.stream().findFirst().orElse(null);
+                PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(valueToPseudonymize, transformOptions);
+                String pseudonymizedValue;
+                if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.JSON) {
+                    pseudonymizedValue = configuration.jsonProvider().toJson(pseudonymizedIdentity);
+                } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
+                    if (pseudonymizedIdentity == null) {
+                        pseudonymizedValue = null;
+                    } else {
+                        pseudonymizedValue = urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym());
+                    }
+                } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_HASH_ONLY) {
+                    pseudonymizedValue = pseudonymizedIdentity.getHash();
+                } else {
+                    throw new RuntimeException("Unsupported pseudonym implementation: " + transformOptions.getEncoding());
+                }
+                // Set the pseudonymized value back into the JSON at the path
+                jsonContext.set(transformOptions.getJsonPathToProcessWhenEscaped(), pseudonymizedValue);
+                return jsonContext.jsonString();
             }
 
             PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(object, transformOptions);
@@ -383,12 +401,8 @@ public class SanitizerUtils {
                 }
                 if (pseudonymizedIdentity.getReversible() != null
                     && pseudonymizer.getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
-                    // can't URL_SAFE_TOKEN encode reversible portion of pseudonym if LEGACY mode, bc
-                    // URL_SAFE_TOKEN depends on 'hash' being encoded as prefix of the reversible;
-                    // and reverisbles need the non-legacy
                     return configuration.jsonProvider().toJson(pseudonymizedIdentity);
                 }
-                //exploit that already reversibly encoded, including prefix
                 return ObjectUtils.firstNonNull(pseudonymizedIdentity.getReversible(), urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym()));
             } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_HASH_ONLY) {
                 return pseudonymizedIdentity.getHash();
