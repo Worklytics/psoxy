@@ -34,9 +34,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SanitizerUtilsTest {
 
-
-
-
     @Singleton
     @Component(
         modules = {
