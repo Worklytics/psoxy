@@ -120,7 +120,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
             if (authHeaderRequired) {
                 return HttpEventResponse.builder()
                     .statusCode(HttpStatus.SC_UNAUTHORIZED)
-                    .body("Authorization header is required, but not present in request")
+                    .bodyString("Authorization header is required, but not present in request")
                     .build();
             }
         } else {
@@ -130,7 +130,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
             } catch (ParseException e) {
                 return HttpEventResponse.builder()
                     .statusCode(HttpStatus.SC_BAD_REQUEST)
-                    .body("Authorization header is present, but could not be parsed as a JWT: " + e.getMessage())
+                    .bodyString("Authorization header is present, but could not be parsed as a JWT: " + e.getMessage())
                     .build();
             }
 
@@ -140,7 +140,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
             if (validationError.isPresent()) {
                 return HttpEventResponse.builder()
                     .statusCode(HttpStatus.SC_UNAUTHORIZED)
-                    .body("Authorization header is present, but validation failed: " + validationError.get())
+                    .bodyString("Authorization header is present, but validation failed: " + validationError.get())
                     .build();
             }
 
@@ -154,7 +154,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
             if (!webhookSanitizer.verifyClaims(request, claims)) {
                 return HttpEventResponse.builder()
                     .statusCode(HttpStatus.SC_UNAUTHORIZED)
-                    .body("Claims in Authorization header do not match request")
+                    .bodyString("Claims in Authorization header do not match request")
                     .build();
             }
         }
@@ -175,7 +175,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
             log.log(Level.WARNING, "Failed to sanitize incoming webhook request", e);
             return HttpEventResponse.builder()
                 .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-                .body("Failed to sanitize incoming webhook")
+                .bodyString("Failed to sanitize incoming webhook")
                 .build();
         }
 
@@ -188,7 +188,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
             log.log(Level.WARNING, "Failed to write sanitized webhook payload to output", e);
             return HttpEventResponse.builder()
                 .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-                .body("Failed to ingest incoming webhook")
+                .bodyString("Failed to ingest incoming webhook")
                 .build();
         }
     }

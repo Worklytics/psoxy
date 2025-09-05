@@ -202,7 +202,7 @@ public class ApiDataRequestHandler {
                     .statusCode(HttpStatus.SC_BAD_REQUEST)
                     .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                             ErrorCauses.HTTPS_REQUIRED.name())
-                    .body("Requests MUST be sent over HTTPS")
+                    .bodyString("Requests MUST be sent over HTTPS")
                     .build();
         }
 
@@ -226,7 +226,7 @@ public class ApiDataRequestHandler {
                     .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
                     .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                             ErrorCauses.FAILED_TO_BUILD_URL.name())
-                    .body("Error parsing request URL")
+                    .bodyString("Error parsing request URL")
                     .build();
         }
 
@@ -246,7 +246,7 @@ public class ApiDataRequestHandler {
                     .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
                     .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                             ErrorCauses.CONFIGURATION_FAILURE.name())
-                    .body("Error loading sanitizer rules")
+                    .bodyString("Error loading sanitizer rules")
                     .build();
         }
 
@@ -274,7 +274,7 @@ public class ApiDataRequestHandler {
                     .statusCode(HttpStatus.SC_BAD_REQUEST)
                     .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                             ErrorCauses.INVALID_REQUEST.name())
-                    .body(String.format(
+                    .bodyString(String.format(
                             "Content encoding %s not supported; only UTF-8 compatible encodings are supported (utf-8, ascii, iso-8859-1, us-ascii)",
                             requestBodyContentEncoding))
                     .build();
@@ -292,7 +292,7 @@ public class ApiDataRequestHandler {
                 // rather than have google HttpClient blow up with its own exception, causing 500 from proxy
                 return HttpEventResponse.builder()
                         .statusCode(HttpStatus.SC_BAD_REQUEST)
-                        .body("Request body is not allowed for GET or HEAD requests")
+                        .bodyString("Request body is not allowed for GET or HEAD requests")
                         .build();
             }
         }
@@ -345,7 +345,7 @@ public class ApiDataRequestHandler {
 
         } catch (IOException e) {
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-            builder.body("Failed to parse request; review logs");
+            builder.bodyString("Failed to parse request; review logs");
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                     ErrorCauses.CONNECTION_SETUP.name());
             log.log(Level.WARNING, e.getMessage(), e);
@@ -388,13 +388,13 @@ public class ApiDataRequestHandler {
                         .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
                         .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                                 ErrorCauses.ASYNC_HANDLER_DISPATCH.name())
-                        .body("Error processing side output only request: " + e.getMessage())
+                        .bodyString("Error processing side output only request: " + e.getMessage())
                         .build();
             }
             HttpEventResponse.HttpEventResponseBuilder responseBuilder = HttpEventResponse.builder()
                     .statusCode(HttpStatus.SC_ACCEPTED) // proper response code indicating payload
                                                         // accepted for asynchronous processing
-                    .body(objectMapper.writeValueAsString(asyncProcessingContext));
+                    .bodyString(objectMapper.writeValueAsString(asyncProcessingContext));
 
 
             // TODO: generate host-platform specific signed URL for the async output
@@ -422,7 +422,7 @@ public class ApiDataRequestHandler {
             builder.statusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                     ErrorCauses.CONNECTION_TO_SOURCE.name());
-            builder.body("Error connecting to source API: " + e.getMessage());
+            builder.bodyString("Error connecting to source API: " + e.getMessage());
             log.log(Level.SEVERE, "Error connecting to source API: " + e.getMessage(), e);
             return builder.build();
         }
@@ -451,16 +451,24 @@ public class ApiDataRequestHandler {
             passThroughHeaders(builder, sourceApiResponse);
             if (isSuccessFamily(sourceApiResponse.getStatusCode())) {
                 if (skipSanitization) {
-                    proxyResponseContent = original.getContentAsString();
+                    if (responseCompressionHandler.isCompressionRequested(requestToProxy)) {
+                        proxyResponseContent = original.asCompressed().getContentAsString();
+                        builder.header(HttpHeaders.CONTENT_ENCODING, ResponseCompressionHandler.GZIP);
+                    } else {
+                        proxyResponseContent = original.getContentAsString();
+                    }
                 } else {
-                    ProcessedContent forSanitization = original.asDecompressed();
                     ProcessedContent sanitizationResult =
-                            sanitize(requestToProxy, requestUrls, forSanitization);
+                            sanitize(requestToProxy, requestUrls, original);
 
                     if (processingContext.getAsync()) {
                         asyncSanitizedDataOutput.get().writeSanitized(sanitizationResult,
                                 processingContext);
                     } else {
+                        if (sanitizationResult.getContentEncoding() != null) {
+                            builder.header(HttpHeaders.CONTENT_ENCODING,
+                                    sanitizationResult.getContentEncoding());
+                        }
                         proxyResponseContent = sanitizationResult.getContentAsString();
                         sanitizationResult.getMetadata().entrySet()
                                 .forEach(e -> builder.header(e.getKey(), e.getValue()));
@@ -496,7 +504,7 @@ public class ApiDataRequestHandler {
 
             // only if not async, write content to body of response
             if (!processingContext.getAsync()) {
-                builder.body(proxyResponseContent);
+                builder.body(proxyResponseContent.getBytes(StandardCharsets.UTF_8));
             }
 
             return builder.build();
@@ -507,6 +515,10 @@ public class ApiDataRequestHandler {
 
     ProcessedContent sanitize(HttpEventRequest request, RequestUrls requestUrls,
             ProcessedContent originalContent) throws IOException {
+
+        // if the content is `application/gzip', we can't directly sanitize it; we need to uncompress it first
+        originalContent = originalContent.isGzipFile() ? uncompressGzipFile(originalContent) : originalContent;
+
         RESTApiSanitizer sanitizerForRequest = getSanitizerForRequest(request);
 
         // TODO: a good value for this is probably the content length of the response we received if response Content-Type is JSON
@@ -529,12 +541,16 @@ public class ApiDataRequestHandler {
                 healthCheckRequestHandler.piiSaltHash());
 
         // q: add instance id to the metadata??
-        return ProcessedContent.builder()
-                .contentType(originalContent.getContentType())
-                .contentCharset(originalContent.getContentCharset())
-                .metadata(metadata)
-                .stream(sanitizedContentStream)
-                .build();
+        ProcessedContent.ProcessedContentBuilder contentBuilder = ProcessedContent.builder()
+            .contentType(originalContent.getContentType())
+            .contentCharset(originalContent.getContentCharset())
+            .metadata(metadata);
+
+        if (responseCompressionHandler.isCompressionRequested(request)) {
+            contentBuilder.contentEncoding(ResponseCompressionHandler.GZIP);
+        }
+
+        return contentBuilder.stream(sanitizedContentStream).build();
     }
 
     @Value
@@ -969,5 +985,28 @@ public class ApiDataRequestHandler {
         }
     }
 
+    /**
+     * this is to deal with "application-level" compression, rather than http-server level compression
+     * eg, the API server is actually serving a gzip file as the resource; not merely gzipping the resource for transport
+     * it would be IGNORING any Accepts-Encoding header; bc it knows nothing about the underlying content
+     * at the HTTP level AND the API level, it's just data.
+     *
+     * @param content
+     * @return
+     * @throws IOException
+     */
+    ProcessedContent uncompressGzipFile(ProcessedContent content) throws IOException {
+        if (content.isGzipFile()) {
+            log.info("Decompressing application/gzip response from source API");
+            ProcessedContent.ProcessedContentBuilder builder = content.toBuilder()
+                .content(null)
+                .contentType("application/x-ndjson") // not the correct assumption in all cases ...
+                .stream(new GZIPInputStream(content.getStream()));
+
+            return builder.build();
+        } else {
+            return content;
+        }
+    }
 
 }

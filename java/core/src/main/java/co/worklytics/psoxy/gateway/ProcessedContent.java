@@ -136,41 +136,8 @@ public class ProcessedContent implements Serializable {
      *
      * @return whether the contentType indicates that the content is a gzip file
      */
-    private boolean isGzipFile() {
+    public boolean isGzipFile() {
         return Objects.equals(this.getContentType(), "application/gzip");
-    }
-
-
-    /**
-     * if the content is gzipped (either by contentEncoding or contentType), return a decompressed version
-     * @return a decompressed version of this ProcessedContent, or this if no decompression was needed
-     *
-     * @throws IOException
-     */
-    public ProcessedContent asDecompressed() throws IOException {
-        if (this.isGzipEncoded() || isGzipFile()) {
-            // NOTE: in isGzipFile(), we assume that uncompressed file is really ndjson or json
-            log.info("Decompressing gzip response from source API");
-            ProcessedContent.ProcessedContentBuilder builder = this.toBuilder()
-                .content(null)
-                .stream(new GZIPInputStream(this.getStream()));
-
-            if (isGzipFile()) {
-                // we're guessing that real type of this is json or ndjson underneath
-                builder.contentType("application/x-ndjson");
-            }
-
-            if (this.isGzipEncoded()) {
-                builder.contentEncoding(null); // no longer gzip-encoded
-            }
-
-            return builder.build();
-        } else if (StringUtils.isNotBlank(this.getContentEncoding())) {
-            // we only support 'gzip' encoding; as long as our outbound request never specifies that we accept something else, it's all we should get
-            // but check just in case
-            throw new RuntimeException("Unsupported content encoding returned by source API: " + this.getContentEncoding());
-        }
-        return this;
     }
 
     /**

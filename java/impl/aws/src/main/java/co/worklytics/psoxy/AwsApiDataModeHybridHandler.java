@@ -23,6 +23,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.Security;
 import java.time.Instant;
 import java.util.logging.Level;
@@ -182,7 +183,7 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
             return Pair.of(false, HttpEventResponse.builder()
                     .statusCode(500)
-                    .body("Unknown error: " + e.getClass().getName())
+                    .bodyString("Unknown error: " + e.getClass().getName())
                     .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), "Unknown error")
                     .build());
         }

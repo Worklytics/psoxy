@@ -202,7 +202,7 @@ public class HealthCheckRequestHandler {
             responseBuilder.statusCode(responseStatusCode(result));
             responseBuilder.header(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.withCharset(StandardCharsets.UTF_8).getMimeType());
             String json = objectMapper.writeValueAsString(result);
-            responseBuilder.body(json + "\r\n");
+            responseBuilder.bodyString(json + "\r\n");
             if (!result.passed()) {
                 log.warning("Health check failed: " + json);
             }

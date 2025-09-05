@@ -21,7 +21,7 @@ import java.util.zip.GZIPOutputStream;
  */
 public class ResponseCompressionHandler {
 
-    static final String GZIP = "gzip";
+    public static final String GZIP = "gzip";
     static final int DEFAULT_COMPRESSION_BUFFER_SIZE = 2048;
     static final int MIN_BYTES_TO_COMPRESS = 2048;
 
@@ -41,13 +41,13 @@ public class ResponseCompressionHandler {
      * @param body to compress
      * @return optional with content if compression has been applied
      */
-    Optional<String> compressBodyAndConvertToBase64(String body) {
+    Optional<String> compressBody(String body) {
         if (compressionOutweighOverhead(body)) {
             try (ByteArrayOutputStream bos = new ByteArrayOutputStream(DEFAULT_COMPRESSION_BUFFER_SIZE)) {
                 try (GZIPOutputStream output = new GZIPOutputStream(bos)) {
                     output.write(body.getBytes(StandardCharsets.UTF_8));
                 }
-                return Optional.ofNullable(Base64.encodeBase64String(bos.toByteArray()));
+                return Optional.of(new String(bos.toByteArray(), StandardCharsets.UTF_8));
             } catch (IOException ignored) {
                 // do nothing, send uncompressed
             }
@@ -64,15 +64,14 @@ public class ResponseCompressionHandler {
         boolean compressed = false;
 
         // only bother to check if long enough to compress IF not already gzipped
-        if (response.getHeaders().containsKey(HttpHeaders.CONTENT_ENCODING) &&
-                Objects.equals(GZIP, response.getHeaders().get(org.apache.hc.core5.http.HttpHeaders.CONTENT_ENCODING))) {
-            String uncompressed = response.getBody();
-            Optional<String> compressedBody = compressBodyAndConvertToBase64(uncompressed);
+        if (!response.getHeaders().containsKey(HttpHeaders.CONTENT_ENCODING)) {
+            String uncompressed = new String(response.getBody());
+            Optional<String> compressedBody = compressBody(uncompressed);
 
             compressed = compressedBody.isPresent();
             if (compressed) {
                 responseToReturn = HttpEventResponse.builder()
-                    .body(compressedBody.get())
+                    .body(compressedBody.get().getBytes(StandardCharsets.UTF_8))
                     .statusCode(response.getStatusCode())
                     .multivaluedHeaders(response.getMultivaluedHeaders().entrySet().stream()
                         .flatMap(entry -> entry.getValue().stream().map(v -> Pair.of(entry.getKey(), v)))
@@ -88,7 +87,7 @@ public class ResponseCompressionHandler {
 
     public OutputStream wrapOutputStreamIfRequested(HttpEventRequest request, OutputStream outputStream) throws IOException {
         if (isCompressionRequested(request)) {
-            return java.util.Base64.getEncoder().wrap(new GZIPOutputStream(outputStream));
+            return new GZIPOutputStream(outputStream, DEFAULT_COMPRESSION_BUFFER_SIZE);
         } else {
             return outputStream;
         }
@@ -96,10 +95,9 @@ public class ResponseCompressionHandler {
 
 
     @VisibleForTesting // really, only for tests
-    public String uncompress(String compressBody) throws Exception {
-        byte[] compressed = compressBody.getBytes(StandardCharsets.UTF_8);
-        try (InputStream base64In =  java.util.Base64.getDecoder().wrap(new ByteArrayInputStream(compressed));
-             GZIPInputStream gis = new GZIPInputStream(base64In)) {
+    public String uncompress(byte[] compressedBody) throws Exception {
+        try (InputStream baos = new ByteArrayInputStream(compressedBody);
+             GZIPInputStream gis = new GZIPInputStream(baos)) {
             return new String(gis.readAllBytes(), StandardCharsets.UTF_8);
         }
     }
