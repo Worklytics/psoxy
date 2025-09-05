@@ -29,10 +29,12 @@ locals {
 # call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.5.6"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.5.7"
 
   enabled_connectors                       = var.enabled_connectors
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
+  confluence_example_cloud_id              = var.confluence_example_cloud_id
+  confluence_example_group_id              = var.confluence_example_group_id
   jira_cloud_id                            = var.jira_cloud_id
   jira_server_url                          = var.jira_server_url
   jira_example_issue_id                    = var.jira_example_issue_id
@@ -82,7 +84,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.5.6"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.5.7"
 
   gcp_project_id                    = var.gcp_project_id
   environment_name                  = var.environment_name
@@ -130,7 +132,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.5.6"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.5.7"
 
   host_platform_id  = local.host_platform_id
   proxy_instance_id = each.key

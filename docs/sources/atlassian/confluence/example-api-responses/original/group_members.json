@@ -1,0 +1,325 @@
+{
+  "results": [
+    {
+      "type": "known",
+      "accountId": "608a9b555426330072f9867d",
+      "accountType": "atlassian",
+      "email": "alice@company.org",
+      "publicName": "alice",
+      "profilePicture": {
+        "path": "/wiki/aa-avatar/608a9b555426330072f9867d",
+        "width": 48,
+        "height": 48,
+        "isDefault": false
+      },
+      "displayName": "Alice",
+      "isExternalCollaborator": false,
+      "isGuest": false,
+      "locale": "en_US",
+      "accountStatus": "active",
+      "_expandable": {
+        "operations": "",
+        "personalSpace": ""
+      },
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=608a9b555426330072f9867d"
+      }
+    },
+    {
+      "type": "known",
+      "accountId": "630db2cd9796033b256bc349",
+      "accountType": "app",
+      "email": "",
+      "publicName": "Atlas for Jira Cloud",
+      "profilePicture": {
+        "path": "/wiki/aa-avatar/630db2cd9796033b256bc349",
+        "width": 48,
+        "height": 48,
+        "isDefault": false
+      },
+      "displayName": "Atlas for Jira Cloud",
+      "isExternalCollaborator": false,
+      "isGuest": false,
+      "accountStatus": "active",
+      "_expandable": {
+        "operations": "",
+        "personalSpace": ""
+      },
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=630db2cd9796033b256bc349"
+      }
+    },
+    {
+      "type": "known",
+      "accountId": "5cb4ae0e4b97ab11a18e00c7",
+      "accountType": "app",
+      "email": "",
+      "publicName": "Atlassian Assist",
+      "profilePicture": {
+        "path": "/wiki/aa-avatar/5cb4ae0e4b97ab11a18e00c7",
+        "width": 48,
+        "height": 48,
+        "isDefault": false
+      },
+      "displayName": "Atlassian Assist",
+      "isExternalCollaborator": false,
+      "isGuest": false,
+      "accountStatus": "active",
+      "_expandable": {
+        "operations": "",
+        "personalSpace": ""
+      },
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=5cb4ae0e4b97ab11a18e00c7"
+      }
+    },
+    {
+      "type": "known",
+      "accountId": "557058:f58131cb-b67d-43c7-b30d-6b58d40bd077",
+      "accountType": "app",
+      "email": "",
+      "publicName": "Automation for Jira",
+      "profilePicture": {
+        "path": "/wiki/aa-avatar/557058:f58131cb-b67d-43c7-b30d-6b58d40bd077",
+        "width": 48,
+        "height": 48,
+        "isDefault": false
+      },
+      "displayName": "Automation for Jira",
+      "isExternalCollaborator": false,
+      "isGuest": false,
+      "accountStatus": "active",
+      "_expandable": {
+        "operations": "",
+        "personalSpace": ""
+      },
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=557058:f58131cb-b67d-43c7-b30d-6b58d40bd077"
+      }
+    },
+    {
+      "type": "known",
+      "accountId": "5d53f3cbc6b9320d9ea5bdc2",
+      "accountType": "app",
+      "email": "",
+      "publicName": "Jira Outlook",
+      "profilePicture": {
+        "path": "/wiki/aa-avatar/5d53f3cbc6b9320d9ea5bdc2",
+        "width": 48,
+        "height": 48,
+        "isDefault": false
+      },
+      "displayName": "Jira Outlook",
+      "isExternalCollaborator": false,
+      "isGuest": false,
+      "accountStatus": "active",
+      "_expandable": {
+        "operations": "",
+        "personalSpace": ""
+      },
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=5d53f3cbc6b9320d9ea5bdc2"
+      }
+    },
+    {
+      "type": "known",
+      "accountId": "557058:950f9f5b-3d6d-4e1d-954a-21367ae9ac75",
+      "accountType": "app",
+      "email": "",
+      "publicName": "Jira Service Management Widget",
+      "profilePicture": {
+        "path": "/wiki/aa-avatar/557058:950f9f5b-3d6d-4e1d-954a-21367ae9ac75",
+        "width": 48,
+        "height": 48,
+        "isDefault": false
+      },
+      "displayName": "Jira Service Management Widget",
+      "isExternalCollaborator": false,
+      "isGuest": false,
+      "accountStatus": "active",
+      "_expandable": {
+        "operations": "",
+        "personalSpace": ""
+      },
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=557058:950f9f5b-3d6d-4e1d-954a-21367ae9ac75"
+      }
+    },
+    {
+      "type": "known",
+      "accountId": "5cf112d31552030f1e3a5905",
+      "accountType": "app",
+      "email": "",
+      "publicName": "Jira Spreadsheets",
+      "profilePicture": {
+        "path": "/wiki/aa-avatar/5cf112d31552030f1e3a5905",
+        "width": 48,
+        "height": 48,
+        "isDefault": false
+      },
+      "displayName": "Jira Spreadsheets",
+      "isExternalCollaborator": false,
+      "isGuest": false,
+      "accountStatus": "active",
+      "_expandable": {
+        "operations": "",
+        "personalSpace": ""
+      },
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=5cf112d31552030f1e3a5905"
+      }
+    },
+    {
+      "type": "known",
+      "accountId": "60e5a86a471e61006a4c51fd",
+      "accountType": "app",
+      "email": "",
+      "publicName": "Microsoft Teams for Jira Cloud",
+      "profilePicture": {
+        "path": "/wiki/aa-avatar/60e5a86a471e61006a4c51fd",
+        "width": 48,
+        "height": 48,
+        "isDefault": false
+      },
+      "displayName": "Microsoft Teams for Jira Cloud",
+      "isExternalCollaborator": false,
+      "isGuest": false,
+      "accountStatus": "active",
+      "_expandable": {
+        "operations": "",
+        "personalSpace": ""
+      },
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=60e5a86a471e61006a4c51fd"
+      }
+    },
+    {
+      "type": "known",
+      "accountId": "63a22fb348b367d78a14c15b",
+      "accountType": "app",
+      "email": "",
+      "publicName": "Proforma Migrator",
+      "profilePicture": {
+        "path": "/wiki/aa-avatar/63a22fb348b367d78a14c15b",
+        "width": 48,
+        "height": 48,
+        "isDefault": false
+      },
+      "displayName": "Proforma Migrator",
+      "isExternalCollaborator": false,
+      "isGuest": false,
+      "accountStatus": "active",
+      "_expandable": {
+        "operations": "",
+        "personalSpace": ""
+      },
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=63a22fb348b367d78a14c15b"
+      }
+    },
+    {
+      "type": "known",
+      "accountId": "557058:0867a421-a9ee-4659-801a-bc0ee4a4487e",
+      "accountType": "app",
+      "email": "",
+      "publicName": "Slack",
+      "profilePicture": {
+        "path": "/wiki/aa-avatar/557058:0867a421-a9ee-4659-801a-bc0ee4a4487e",
+        "width": 48,
+        "height": 48,
+        "isDefault": false
+      },
+      "displayName": "Slack",
+      "isExternalCollaborator": false,
+      "isGuest": false,
+      "accountStatus": "active",
+      "_expandable": {
+        "operations": "",
+        "personalSpace": ""
+      },
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=557058:0867a421-a9ee-4659-801a-bc0ee4a4487e"
+      }
+    },
+    {
+      "type": "known",
+      "accountId": "5b6c7b3afbc68529c6c47967",
+      "accountType": "app",
+      "email": "",
+      "publicName": "Statuspage for Jira",
+      "profilePicture": {
+        "path": "/wiki/aa-avatar/5b6c7b3afbc68529c6c47967",
+        "width": 48,
+        "height": 48,
+        "isDefault": false
+      },
+      "displayName": "Statuspage for Jira",
+      "isExternalCollaborator": false,
+      "isGuest": false,
+      "accountStatus": "active",
+      "_expandable": {
+        "operations": "",
+        "personalSpace": ""
+      },
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=5b6c7b3afbc68529c6c47967"
+      }
+    },
+    {
+      "type": "known",
+      "accountId": "5dd64082af96bc0efbe55103",
+      "accountType": "app",
+      "email": "",
+      "publicName": "System",
+      "profilePicture": {
+        "path": "/wiki/aa-avatar/5dd64082af96bc0efbe55103",
+        "width": 48,
+        "height": 48,
+        "isDefault": false
+      },
+      "displayName": "System",
+      "isExternalCollaborator": false,
+      "isGuest": false,
+      "accountStatus": "active",
+      "_expandable": {
+        "operations": "",
+        "personalSpace": ""
+      },
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=5dd64082af96bc0efbe55103"
+      }
+    },
+    {
+      "type": "known",
+      "accountId": "557058:214cdd6a-ff93-4d8b-838b-62dfcf1a2a71",
+      "accountType": "app",
+      "email": "",
+      "publicName": "Trello",
+      "profilePicture": {
+        "path": "/wiki/aa-avatar/557058:214cdd6a-ff93-4d8b-838b-62dfcf1a2a71",
+        "width": 48,
+        "height": 48,
+        "isDefault": false
+      },
+      "displayName": "Trello",
+      "isExternalCollaborator": false,
+      "isGuest": false,
+      "accountStatus": "active",
+      "_expandable": {
+        "operations": "",
+        "personalSpace": ""
+      },
+      "_links": {
+        "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=557058:214cdd6a-ff93-4d8b-838b-62dfcf1a2a71"
+      }
+    }
+  ],
+  "start": 0,
+  "limit": 100,
+  "size": 13,
+  "_links": {
+    "base": "https://company-team.atlassian.net/wiki",
+    "context": "/wiki",
+    "self": "https://company-team.atlassian.net/wiki/rest/api/group/35e417ad-bcb1-45fe-9be0-959239a84327/membersByGroupId"
+  }
+}

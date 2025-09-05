@@ -1,0 +1,19 @@
+[
+  {
+    "id": "adcae078-765b-45bf-a38b-7cda232b9a94",
+    "url": "https://some-org.atlassian.net",
+    "name": "some-org",
+    "scopes": [
+      "read:attachment:confluence",
+      "read:blogpost:confluence",
+      "read:comment:confluence",
+      "read:content-details:confluence",
+      "read:content:confluence",
+      "read:group:confluence",
+      "read:page:confluence",
+      "read:space:confluence",
+      "read:user:confluence"
+    ],
+    "avatarUrl": "https://site-admin-avatar-cdn.prod.public.atl-paas.net/avatars/240/site.png"
+  }
+]

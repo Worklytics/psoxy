@@ -38,6 +38,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.net.URL;
+import java.time.Duration;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -107,6 +108,7 @@ class RESTApiSanitizerImplTest {
 
         sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"),
                 pseudonymizer);
+        sanitizer.setSanitizationTimeout(Duration.ofSeconds(5));
     }
 
     @SneakyThrows
@@ -606,6 +608,25 @@ class RESTApiSanitizerImplTest {
 
         assertTrue(sanitizer.getEndpoint("GET", new URL(url)).isPresent());
 
+    }
+
+    @SneakyThrows
+    @Test
+    public void terminatesIfException() {
+            String jsonString = new String(TestUtils.getData(
+                "sources/google-workspace/gmail/example-api-responses/original/message.json"));
+
+            // causes an NPE in async execution of the sanitization
+            // this is example of possible exception that can cause it to hang
+            sanitizer.objectMapper = null;
+            sanitizer.setSanitizationTimeout(Duration.ofSeconds(1));
+
+            assertThrows(NullPointerException.class, () -> {
+                sanitizer.sanitize("GET",
+                    new URL("https", "gmail.googleapis.com",
+                        "/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata"),
+                    jsonString);
+            });
     }
 
 }

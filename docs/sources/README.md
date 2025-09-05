@@ -12,6 +12,7 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `azure-ad`                 | Azure Active Directory              | API  | DEPRECATED   |
 | `badge`                    | Badge                               | Bulk | GA           |
 | `chatgpt`                  | ChatGPT                     | API  | BETA         |
+| `confluence`               | Confluence Cloud                    | API  | BETA         |
 | `cursor`                   | Cursor                              | API  | BETA         |
 | `dropbox-business`         | Dropbox Business                    | API  | DEPRECATED   |
 | `gcal`                     | Google Calendar                     | API  | GA           |

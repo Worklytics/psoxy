@@ -1,8 +1,6 @@
 package co.worklytics.psoxy.gateway;
 
-import lombok.Builder;
-import lombok.Value;
-import lombok.With;
+import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -52,7 +50,7 @@ public class ProcessedContent implements Serializable {
     Map<String, String> metadata = new HashMap<>();
 
     /**
-     * the processed content itself
+     * the actual content
      */
     byte[] content;
 
@@ -61,6 +59,6 @@ public class ProcessedContent implements Serializable {
      * @return the content as a string, using the specified contentCharset
      */
     public String getContentAsString() {
-        return new String(content, contentCharset);
+        return new String(getContent(), contentCharset);
     }
 }

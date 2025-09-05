@@ -7,6 +7,9 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
+## [0.5.7](https://github.com/Worklytics/psoxy/release/tag/v0.5.7)
+  - `Confluence`: added new connector for supporting fetching Confluence Cloud data, through OAuth 2.0 (3LO)
+
 ## [0.5.4](https://github.com/Worklytics/psoxy/release/tag/v0.5.4)
   - `Slack Analytics`: added new connector for supporting fetching Slack Analytics data, through `api/admin.analytics.getFile` endpoint
   - Side Outputs: added support; see [docs/configuration/side-outputs.md](docs/configuration/side-outputs.md) for details

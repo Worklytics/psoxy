@@ -1,0 +1,30 @@
+{
+  "results":[
+    {
+      "id":"f1d0f7dc-acda-4ad2-b398-26a7150a6b1c",
+      "type":"group"
+    },
+    {
+      "id":"5e35e521-e2ed-47c2-8964-eb938da4f339",
+      "type":"group"
+    },
+    {
+      "id":"35e417ad-bcb1-45fe-9be0-959239a84327",
+      "type":"group"
+    },
+    {
+      "id":"d062d6c4-4c82-4478-9232-99dda8d3baf8",
+      "type":"group"
+    },
+    {
+      "id":"b5b487c0-2629-4f65-a211-d9ec4a0c3888",
+      "type":"group"
+    }
+  ],
+  "start":0,
+  "limit":5,
+  "size":5,
+  "_links":{
+    "next":"/rest/api/group?next=true&limit=5&start=5"
+  }
+}
