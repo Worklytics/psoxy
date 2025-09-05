@@ -454,8 +454,9 @@ definitions:
         $ref: "#/definitions/Parent"
       contentTypeModified:
         type: "boolean"
-      email:
+      createdAt:
         type: "string"
+        format: "date-time"
       message:
         type: "string"
       minorEdit:
@@ -466,6 +467,7 @@ definitions:
         $ref: "#/definitions/Parent"
       when:
         type: "string"
+        format: "date-time"
   DocFormat:
     type: "object"
     properties:
@@ -639,8 +641,9 @@ definitions:
         $ref: "#/definitions/Parent"
       contentTypeModified:
         type: "boolean"
-      email:
+      createdAt:
         type: "string"
+        format: "date-time"
       message:
         type: "string"
       minorEdit:
@@ -649,5 +652,3 @@ definitions:
         type: "integer"
       page:
         $ref: "#/definitions/Parent"
-      when:
-        type: "string"
