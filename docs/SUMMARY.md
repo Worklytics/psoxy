@@ -53,6 +53,7 @@
 * [Data Sources](sources/README.md)
   * [Asana](sources/asana/README.md)
   * [Atlassian](sources/atlassian/README.md)
+    * [Confluence Cloud](sources/atlassian/confluence/README.md)
     * [Jira Cloud](sources/atlassian/jira/README.md)
     * [Jira Data Center](sources/atlassian/jira/jira-server.md)
   * [ChatGPT Enterprise](sources/chatgpt-enterprise/README.md)

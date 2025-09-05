@@ -1,0 +1,17 @@
+[
+  {
+    "id":"adcae078-765b-45bf-a38b-7cda232b9a94",
+    "url":"https://some-org.atlassian.net",
+    "scopes":[
+      "read:attachment:confluence",
+      "read:blogpost:confluence",
+      "read:comment:confluence",
+      "read:content-details:confluence",
+      "read:content:confluence",
+      "read:group:confluence",
+      "read:page:confluence",
+      "read:space:confluence",
+      "read:user:confluence"
+    ]
+  }
+]

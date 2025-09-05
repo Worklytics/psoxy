@@ -1,0 +1,58 @@
+{
+  "results": [
+    {
+      "spaceOwnerId": "608a9b555426330072f9867d",
+      "createdAt": "2025-08-28T13:04:01.309Z",
+      "authorId": "608a9b555426330072f9867d",
+      "homepageId": "65930",
+      "icon": null,
+      "description": null,
+      "status": "current",
+      "name": "Alice",
+      "key": "~608a9b555426330072f9867d",
+      "id": "65831",
+      "type": "personal",
+      "_links": {
+        "webui": "/spaces/~608a9b555426330072f9867d"
+      },
+      "currentActiveAlias": "~608a9b555426330072f9867d"
+    },
+    {
+      "spaceOwnerId": "608a9b555426330072f9867d",
+      "createdAt": "2025-08-28T13:04:01.559Z",
+      "authorId": "608a9b555426330072f9867d",
+      "homepageId": "66087",
+      "icon": null,
+      "description": null,
+      "status": "current",
+      "name": "Software Development",
+      "key": "SD",
+      "id": "65937",
+      "type": "global",
+      "_links": {
+        "webui": "/spaces/SD"
+      },
+      "currentActiveAlias": "SD"
+    },
+    {
+      "spaceOwnerId": "608a9b555426330072f9867d",
+      "createdAt": "2025-08-28T13:04:14.967Z",
+      "authorId": "608a9b555426330072f9867d",
+      "homepageId": "196738",
+      "icon": null,
+      "description": null,
+      "status": "current",
+      "name": "Getting Started Space (By Atlassian)",
+      "key": "XFLOW",
+      "id": "196612",
+      "type": "xflow_sample_space",
+      "_links": {
+        "webui": "/spaces/XFLOW"
+      },
+      "currentActiveAlias": "XFLOW"
+    }
+  ],
+  "_links": {
+    "base": "https://company-team.atlassian.net/wiki"
+  }
+}
