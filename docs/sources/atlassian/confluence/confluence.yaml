@@ -518,6 +518,9 @@ definitions:
         $ref: "#/definitions/User"
       createdDate:
         type: "string"
+        format: "date-time"
+      previousVersion:
+        $ref: "#/definitions/Version"
   Links:
     type: "object"
     properties:
