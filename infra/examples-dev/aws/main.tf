@@ -205,6 +205,12 @@ output "bulk_connector_instances" {
   } }
 }
 
+output "webhook_collector_instances" {
+  value = { for k, v in module.psoxy.webhook_collector_instances : k => {
+    sanitized_bucket = v.output_sanitized_bucket_id
+  } }
+}
+
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
   value       = var.todos_as_outputs ? join("\n", local.source_authorization_todos) : null
