@@ -13,4 +13,6 @@ public interface ApiSanitizedDataOutput {
      * @param content to write to side output (maybe modified form of the response)
      */
     void writeSanitized(ProcessedContent content, ApiDataRequestHandler.ProcessingContext processingContext) throws IOException;
+
+    boolean hasSanitizedOutput();
 }

@@ -1,9 +1,6 @@
 package co.worklytics.psoxy.gateway;
 
-import lombok.Builder;
-import lombok.Singular;
-import lombok.ToString;
-import lombok.Value;
+import lombok.*;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.List;
@@ -24,7 +21,20 @@ public class HttpEventResponse {
     @Singular
     Map<String, String> headers;
 
-    String body;
+    byte[] body;
+
+    @Getter(AccessLevel.NONE)
+    String bodyString;
+
+    public byte[] getBody() {
+        if (body != null) {
+            return body;
+        } else if (bodyString != null) {
+            return bodyString.getBytes();
+        } else {
+            return null;
+        }
+    }
 
     @Singular
     List<Pair<String, String>> multivaluedHeaders;

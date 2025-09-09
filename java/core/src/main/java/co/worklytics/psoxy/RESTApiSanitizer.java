@@ -60,13 +60,24 @@ public interface RESTApiSanitizer {
      */
     String sanitize(String httpMethod, URL url, String jsonResponse);
 
+    /**
+     * sanitize a response retrieved for httpMethod+url, writing sanitized version to outputStream
+     *
+     * @param httpMethod of the request that generated the response
+     * @param url from which response was retrieved
+     * @param originalStream stream containing original response content
+     * @param outputStream stream to write sanitized content to
+     * @throws IOException if reading from originalStream or writing to outputStream fails
+     */
+    void sanitize(@NonNull String httpMethod,
+                  @NonNull URL url, InputStream originalStream,
+                  OutputStream outputStream) throws IOException;
+
 
     Pseudonymizer getPseudonymizer();
 
     RESTRules getRules();
 
-    void sanitize(@NonNull String httpMethod,
-                  @NonNull URL url, InputStream originalStream,
-                  OutputStream outputStream) throws IOException;
+
 
 }

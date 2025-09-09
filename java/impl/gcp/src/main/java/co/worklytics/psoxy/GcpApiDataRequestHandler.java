@@ -78,10 +78,10 @@ public class GcpApiDataRequestHandler {
 
         // if a pubsub trigger is configured, check if request is invocation via PubSub
         // as of 2025-08-19, User-Agent appears as 'APIs-Google; (+https://developers.google.com/webmasters/APIs-Google.html)'
-        Boolean isPubSubInvocation = 
-            pubsubTriggerConfigured && 
+        Boolean isPubSubInvocation =
+            pubsubTriggerConfigured &&
             request.getFirstHeader(HttpHeaders.USER_AGENT)
-                .map(userAgent -> 
+                .map(userAgent ->
                     userAgent.contains(gcpEnvironment.getGoogleApisUserAgent()) || // in practice, this is how invocation for Cloud Run v2 via PubSub is coming
                     userAgent.contains(gcpEnvironment.getPubSubUserAgent()))
                 .orElse(false);
@@ -162,7 +162,7 @@ public class GcpApiDataRequestHandler {
             log.log(Level.WARNING, "Unauthorized : no authorization header included");
             throw new GcpWebhookCollectionHandler.AuthorizationException("Unauthorized : no authorization header included");
         }
-        GoogleIdTokenVerifier internalServiceVerifier = 
+        GoogleIdTokenVerifier internalServiceVerifier =
             apiModeConfig.get().getServiceUrl()
                 .map(googleIdTokenVerifierFactory::getVerifierForAudience)
                 .orElseThrow(() -> new IllegalStateException("Service URL not configured"));
@@ -212,7 +212,7 @@ public class GcpApiDataRequestHandler {
             processingContext = processingContext.toBuilder()
                 .async(true)
                 .build();
-            
+
             HttpEventResponse genericResponse = requestHandler.handle(originalRequest, processingContext);
 
             // NOTE: in async case, genericResponse.getBody() will be `null`
@@ -229,7 +229,7 @@ public class GcpApiDataRequestHandler {
 
         if (genericResponse.getBody() != null) {
             try (OutputStream outputStream = response.getOutputStream()) {
-                outputStream.write(genericResponse.getBody().getBytes(StandardCharsets.UTF_8));
+                outputStream.write(genericResponse.getBody());
             } catch (IOException e) {
                 log.log(Level.WARNING, "Error writing response body", e);
             }
@@ -238,7 +238,7 @@ public class GcpApiDataRequestHandler {
 
     @Data
     public static class PubSubPushBody {
-        
+
         String subscription;
 
         PubSubMessage message;

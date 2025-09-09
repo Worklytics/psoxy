@@ -10,8 +10,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.zip.GZIPInputStream;
 
 import static co.worklytics.psoxy.ResponseCompressionHandler.GZIP;
@@ -25,23 +28,27 @@ class ResponseCompressionHandlerTest {
     void compress(int bodySize) {
 
         ResponseCompressionHandler responseCompressionHandler = new ResponseCompressionHandler();
-        String uncompressed = RandomStringUtils.random(bodySize);
+        byte[] uncompressed = IntStream.range(0, bodySize).mapToObj(Integer::toString).collect(Collectors.joining()).getBytes();//RandomStringUtils.random(bodySize);
 
         HttpEventResponse originalResponse =
-            HttpEventResponse.builder().statusCode(200).headers(new HashMap<>()).body(uncompressed).build();
+            HttpEventResponse.builder()
+                .statusCode(200)
+                .headers(new HashMap<>())
+                .body(uncompressed)
+                .build();
         Pair<Boolean, HttpEventResponse> compressedResponse = responseCompressionHandler.compressIfNeeded(originalResponse);
 
 
-        boolean shouldCompress = responseCompressionHandler.compressionOutweighOverhead(uncompressed);
+        boolean shouldCompress = responseCompressionHandler.compressionOutweighOverhead(new String(uncompressed));
         boolean isCompressed = compressedResponse.getLeft();
         HttpEventResponse response = compressedResponse.getRight();
-        String compressed = response.getBody();
+        String compressed = new String(response.getBody(), StandardCharsets.UTF_8);
         assertEquals(shouldCompress, isCompressed);
 
         if (shouldCompress) {
             assertNotEquals(uncompressed, compressed);
             assertTrue(isCompressed);
-            assertEquals(uncompressed, uncompressBase64(compressed));
+            assertEquals(uncompressed, responseCompressionHandler.uncompress(response.getBody()));
             assertEquals(GZIP, response.getHeaders().get(HttpHeaders.CONTENT_ENCODING));
         } else {
             assertEquals(uncompressed, compressed);
@@ -49,14 +56,4 @@ class ResponseCompressionHandlerTest {
             assertNull(response.getHeaders().get(HttpHeaders.CONTENT_ENCODING));
         }
     }
-
-
-    String uncompressBase64(String compressed) {
-        try (GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(Base64.getDecoder().decode(compressed.getBytes())))) {
-            return new String(gis.readAllBytes());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 }

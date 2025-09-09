@@ -2,6 +2,8 @@ package co.worklytics.psoxy.gateway.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
+
+import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
@@ -83,7 +85,7 @@ public class JwksDecoratorTest {
         String n = JwksDecorator.JWK.fromRSAPublicKey(kid, key).n;
         String e = JwksDecorator.JWK.fromRSAPublicKey(kid, key).e;
         String expectedJson = String.format(EXPECTED_JSON, kid, n, e).replaceAll("\\s+", "");
-        String actualJson = response.getBody().replaceAll("\\s+", "");
+        String actualJson = new String(response.getBody(), StandardCharsets.UTF_8).replaceAll("\\s+", "");
         assertEquals(expectedJson, actualJson);
     }
 
@@ -111,6 +113,6 @@ public class JwksDecoratorTest {
             "\"issuer\":\"%s\"," +
             "\"jwks_uri\":\"%s/.well-known/jwks.json\"}", issuer, issuer);
         // Remove whitespace for comparison
-        assertEquals(expectedJson.replaceAll("\\s+", ""), response.getBody().replaceAll("\\s+", ""));
+        assertEquals(expectedJson.replaceAll("\\s+", ""), new String(response.getBody(), StandardCharsets.UTF_8).replaceAll("\\s+", ""));
     }
 }

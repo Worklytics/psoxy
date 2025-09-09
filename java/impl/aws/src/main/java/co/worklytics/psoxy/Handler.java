@@ -1,9 +1,13 @@
 package co.worklytics.psoxy;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Security;
 import java.time.Instant;
+import java.util.Base64;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
@@ -63,7 +67,6 @@ public class Handler implements
         //
 
         HttpEventResponse response;
-        boolean base64Encoded = false;
         try {
             APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter =
                     new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
@@ -73,17 +76,13 @@ public class Handler implements
                                     .ofEpochMilli(httpEvent.getRequestContext().getTimeEpoch()))
                             .requestId(httpEvent.getRequestContext().getRequestId()).build());
 
-            if (responseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
-                Pair<Boolean, HttpEventResponse> compressedResponse =
-                        responseCompressionHandler.compressIfNeeded(response);
-                base64Encoded = compressedResponse.getLeft();
-                response = compressedResponse.getRight();
-            } else {
+            //TODO: this is NOT AWS specific - move down into ApiDataRequestHandler
+            if (!responseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
                 response =
-                        response.toBuilder()
-                                .header(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
-                                        Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode())
-                                .build();
+                    response.toBuilder()
+                        .header(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
+                            Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode())
+                        .build();
             }
 
         } catch (Throwable e) {
@@ -91,7 +90,7 @@ public class Handler implements
                     .log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
             context.getLogger().log(ExceptionUtils.getStackTrace(e));
             response = HttpEventResponse.builder().statusCode(500)
-                    .body("Unknown error: " + e.getClass().getName())
+                    .bodyString("Unknown error: " + e.getClass().getName())
                     .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), "Unknown error")
                     .build();
         }
@@ -99,10 +98,16 @@ public class Handler implements
         try {
             // NOTE: AWS seems to give 502 Bad Gateway errors without explanation or any info
             // in the lambda logs if this is malformed somehow (Eg, missing statusCode)
+
+            // AWS can't deal with binary bodies; need to base64 encode in gzip case
+            boolean base64Encode = response.getHeaders().getOrDefault(HttpHeaders.CONTENT_ENCODING, "").equals("gzip");
+
             return APIGatewayV2HTTPResponse.builder().withStatusCode(response.getStatusCode())
                     .withHeaders(response.getHeaders())
                     .withMultiValueHeaders(response.getMultivaluedHeaders())
-                    .withBody(response.getBody()).withIsBase64Encoded(base64Encoded).build();
+                    .withBody(base64Encode ? Base64.getEncoder().encodeToString(response.getBody()) : new String(response.getBody(), StandardCharsets.UTF_8))
+                    .withIsBase64Encoded(base64Encode)
+                    .build();
         } catch (Throwable e) {
             context.getLogger().log("Error writing response as Lambda return");
             throw new Error(e);

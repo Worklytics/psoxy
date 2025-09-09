@@ -109,14 +109,14 @@ public class FunctionRuntimeModule {
     }
 
 
-    @Provides @Singleton @Named("forOriginal")
+    @Provides @Singleton
     static ApiDataSideOutput sideOutputForOriginal(OutputUtils sideOutputUtil) {
-        return sideOutputUtil.forStage(ProcessedDataStage.ORIGINAL);
+        return sideOutputUtil.originalSideOutput();
     }
 
-    @Provides @Singleton @Named("forSanitized")
-    static ApiDataSideOutput sideOutputForSanitized(OutputUtils outputUtils) {
-        return outputUtils.forStage(ProcessedDataStage.SANITIZED);
+    @Provides @Singleton
+    static ApiSanitizedDataOutput sideOutputForSanitized(OutputUtils outputUtils) {
+        return outputUtils.sanitizedSideOutput();
     }
 
     @Provides @Singleton  @Named("forWebhooks")

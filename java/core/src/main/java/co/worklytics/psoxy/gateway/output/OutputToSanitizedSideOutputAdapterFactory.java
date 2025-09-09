@@ -4,7 +4,7 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 
 @AssistedFactory
-public interface OutputToSideOutputAdapterFactory {
+public interface OutputToSanitizedSideOutputAdapterFactory {
 
 
     /**
@@ -13,5 +13,5 @@ public interface OutputToSideOutputAdapterFactory {
      * @param wrappedOutput the output to wrap
      * @return a new instance of {@link ApiDataSideOutput}
      */
-    OutputToSideOutputAdapter create(@Assisted Output wrappedOutput);
+    OutputToSanitizedSideOutputAdapter create(@Assisted Output wrappedOutput);
 }

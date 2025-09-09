@@ -55,7 +55,7 @@ public class JwksDecorator {
                 return HttpEventResponse.builder()
                 .statusCode(HttpStatus.SC_BAD_REQUEST)
                 .header("Content-Type", "application/json")
-                .body("{\"error\": \"Invalid request path\"}")
+                .bodyString("{\"error\": \"Invalid request path\"}")
                 .build();
             }
         } catch (Exception e) {
@@ -63,14 +63,14 @@ public class JwksDecorator {
             return HttpEventResponse.builder()
                 .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
                 .header("Content-Type", "application/json")
-                .body("{\"error\": \"Internal Server Error\"}")
+                .bodyString("{\"error\": \"Internal Server Error\"}")
                 .build();
         }
 
         return HttpEventResponse.builder()
             .statusCode(HttpStatus.SC_OK)
             .header("Content-Type", "application/json")
-            .body(objectMapper.writeValueAsString(content))
+            .bodyString(objectMapper.writeValueAsString(content))
             .build();
     }
 
