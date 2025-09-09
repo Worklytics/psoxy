@@ -36,7 +36,7 @@ resource "google_storage_bucket" "input_bucket" {
   project                     = var.project_id
   name                        = coalesce(var.input_bucket_name, "${local.bucket_prefix}-input")
   location                    = var.region
-  force_destroy               = true
+  force_destroy               = var.bucket_force_destroy
   uniform_bucket_level_access = true
   labels                      = var.default_labels
 
@@ -70,6 +70,7 @@ module "output_bucket" {
   region                         = var.region
   expiration_days                = var.sanitized_expiration_days
   bucket_labels                  = var.default_labels
+  bucket_force_destroy           = var.bucket_force_destroy
 }
 
 resource "google_service_account" "service_account" {

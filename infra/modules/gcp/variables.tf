@@ -106,3 +106,9 @@ variable "vpc_config" {
   description = "**alpha** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
   default     = null
 }
+
+variable "bucket_force_destroy" {
+  type        = bool
+  description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this module"
+  default     = false
+}

@@ -359,3 +359,9 @@ variable "todo_step" {
   description = "of all todos, where does this one logically fall in sequence"
   default     = 2
 }
+
+variable "bucket_force_destroy" {
+  type        = bool
+  description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this module"
+  default     = false
+}

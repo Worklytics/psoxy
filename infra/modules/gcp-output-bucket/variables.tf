@@ -76,3 +76,9 @@ variable "bucket_labels" {
   description = "*alpha*; in v0.4.x only respected for new resources. Labels to apply to bucket"
   default     = {}
 }
+
+variable "bucket_force_destroy" {
+  type        = bool
+  description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this module"
+  default     = false
+}

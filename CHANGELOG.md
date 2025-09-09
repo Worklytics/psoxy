@@ -7,6 +7,9 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
+## [0.5.8](https://github.com/Worklytics/psoxy/release/tag/v0.5.8)
+- **GCP**: Changed default value of `bucket_force_destroy` from `true` to `false` across all GCP modules. Customers upgrading may see this change from `true` → `false`. To maintain the previous behavior, add `bucket_force_destroy = true` to your terraform.tfvars file.
+
 ## [0.5.7](https://github.com/Worklytics/psoxy/release/tag/v0.5.7)
   - `Confluence`: added new connector for supporting fetching Confluence Cloud data, through OAuth 2.0 (3LO)
 
