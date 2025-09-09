@@ -14,7 +14,7 @@ Cloud Shell offers both a terminal and an editor interface via the web. This is 
 
 ## Why not Google Cloud Shell?
 
-Stock dependencies provided by Google are somewhat old; you'll have to update and maintain a few of them to manage the proxy, which may be redundant if you maintain your laptop for terraform/git/java/maven development.
+Stock dependencies provided by Google are somewhat old; you'll have to update and maintain a few of them to manage the proxy, which may be redundant if you maintain your laptop for terraform/git/java/maven development. As of v0.5.x of the proxy, the stock `terraform` is insufficient; with `v0.6.x`, we anticipate the stock `mvn`/`java` will also be too old.
 
 Per above, GCP is a bit stingy about keeping Google Cloud shell home directories around if not in "active" use; so you need to ensure you log into it periodically. Even if you back-up your Terraform configurations and state to locations outside the shell, if your Cloud Shell instance is de-provisioned by GCP - you'll need to repeat the 'Getting Started' steps again to install all the dependencies/etc.
 
