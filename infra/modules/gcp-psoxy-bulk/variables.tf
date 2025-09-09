@@ -168,3 +168,9 @@ variable "vpc_config" {
     error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
   }
 }
+
+variable "bucket_force_destroy" {
+  type        = bool
+  description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this module"
+  default     = false
+}

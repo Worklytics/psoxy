@@ -56,6 +56,17 @@ resource "random_string" "bucket_unique_sequence" {
   upper   = false
   special = false
   numeric = true
+
+  lifecycle {
+    # just NEVER recreate this random string; never what we're going to want to do, as will re-create the buckets
+    ignore_changes = [
+      length,
+      special,
+      lower,
+      upper,
+      numeric,
+    ]
+  }
 }
 
 module "async_output" {

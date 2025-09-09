@@ -25,6 +25,17 @@ resource "random_string" "bucket_id_part" {
   lower   = true
   upper   = false
   numeric = true
+
+  lifecycle {
+    # just NEVER recreate this random string; never what we're going to want to do, as will re-create the buckets
+    ignore_changes = [
+      length,
+      special,
+      lower,
+      upper,
+      numeric,
+    ]
+  }
 }
 
 locals {
@@ -36,7 +47,7 @@ resource "google_storage_bucket" "input_bucket" {
   project                     = var.project_id
   name                        = coalesce(var.input_bucket_name, "${local.bucket_prefix}-input")
   location                    = var.region
-  force_destroy               = true
+  force_destroy               = var.bucket_force_destroy
   uniform_bucket_level_access = true
   labels                      = var.default_labels
 
@@ -52,6 +63,7 @@ resource "google_storage_bucket" "input_bucket" {
 
   lifecycle {
     ignore_changes = [
+      name, # avoid recreation of bucket just on name change alone
       labels
     ]
   }
@@ -69,6 +81,7 @@ module "output_bucket" {
   region                         = var.region
   expiration_days                = var.sanitized_expiration_days
   bucket_labels                  = var.default_labels
+  bucket_force_destroy           = var.bucket_force_destroy
 }
 
 resource "google_service_account" "service_account" {

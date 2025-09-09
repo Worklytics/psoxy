@@ -32,6 +32,7 @@ module "psoxy" {
   support_bulk_mode            = length(var.bulk_connectors) > 0
   support_webhook_collectors   = length(var.webhook_collectors) > 0
   vpc_config                   = var.vpc_config
+  bucket_force_destroy         = var.bucket_force_destroy
 }
 
 
@@ -326,6 +327,7 @@ module "bulk_connector" {
   todos_as_local_files              = var.todos_as_local_files
   available_memory_mb               = coalesce(try(var.custom_bulk_connector_arguments[each.key].available_memory_mb, null), try(each.value.available_memory_mb, null), 512)
   gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
+  bucket_force_destroy              = var.bucket_force_destroy
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -357,6 +359,7 @@ module "lookup_output" {
   expiration_days                = each.value.expiration_days
   sanitizer_accessor_principals  = each.value.sanitized_accessor_principals
   bucket_labels                  = var.default_labels
+  bucket_force_destroy           = var.bucket_force_destroy
 }
 
 locals {
