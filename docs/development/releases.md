@@ -40,11 +40,17 @@ After merged to `main`:
 ./tools/release/publish.sh v0.4.16
 ```
 
-## Java 8 Library Binaries
+## Test Plan
 
-```shell
-cd java/gateway-core
-mvn clean install -P java8
-cd ../core
-mvn clean install -P java8
-```
+For both AWS and GCP-hosted examples:
+
+1. API connectors working
+ [ ] MSFT case
+ [ ] Google Workspace case
+ [ ] Other oauth case
+
+2. API async case
+
+3. Webhook connector
+
+4. Bulk case
