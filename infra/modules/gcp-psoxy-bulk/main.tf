@@ -52,6 +52,7 @@ resource "google_storage_bucket" "input_bucket" {
 
   lifecycle {
     ignore_changes = [
+      name, # avoid recreation of bucket just on name change alone
       labels
     ]
   }

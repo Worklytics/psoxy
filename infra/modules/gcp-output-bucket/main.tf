@@ -17,7 +17,7 @@ resource "google_storage_bucket" "bucket" {
     }
   }
 
-  # TODO: remove in v0.6 ???
+  # TODO: remove in v0.6 ??? NO - various exotic migration cases are much easier with this
   # left of 0.5, just to ease migrations; avoid destruction/recreation of bucket
   lifecycle {
     ignore_changes = [
