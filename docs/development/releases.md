@@ -22,11 +22,6 @@ On `rc-`:
 
 QA aws, gcp dev examples by running `terraform apply` for each, and testing various connectors.
 
-Scan a GCP container image for vulnerabilities:
-
-```shell
-./tools/gcp/container-scan.sh psoxy-dev-erik psoxy-dev-erik-gcal
-```
 
 Create PR to merge `rc-` to `main`.
 
@@ -39,18 +34,3 @@ After merged to `main`:
 ```shell
 ./tools/release/publish.sh v0.4.16
 ```
-
-## Test Plan
-
-For both AWS and GCP-hosted examples:
-
-1. API connectors working
- [ ] MSFT case
- [ ] Google Workspace case
- [ ] Other oauth case
-
-2. API async case
-
-3. Webhook connector
-
-4. Bulk case
