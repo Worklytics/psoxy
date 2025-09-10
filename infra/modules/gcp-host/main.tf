@@ -459,7 +459,14 @@ locals {
     )
   }
 
-  all_instances = merge(local.api_instances, local.bulk_instances)
+  webhook_collector_instances = { for k, instance in module.webhook_collector :
+    k => merge(
+      instance,
+      var.webhook_collectors[k]
+    )
+  }
+
+  all_instances = merge(local.api_instances, local.bulk_instances, local.webhook_collector_instances)
 }
 
 # script to test ALL connectors

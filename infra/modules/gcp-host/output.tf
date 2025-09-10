@@ -22,6 +22,11 @@ output "bulk_connector_instances" {
   value = local.bulk_instances
 }
 
+output "webhook_collector_instances" {
+  value = local.webhook_collector_instances
+}
+
+
 output "pseudonym_salt" {
   description = "Value used to salt pseudonyms (SHA-256) hashes. If migrate to new deployment, you should copy this value."
   value       = module.psoxy.pseudonym_salt
