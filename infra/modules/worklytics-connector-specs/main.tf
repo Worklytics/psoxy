@@ -18,7 +18,7 @@ locals {
 
   # create map of connector id --> { template_id: ... }
   enabled_connectors_from_templates = merge(
-    { for v in var.enabled_connectors_from_templates : v => { template_id = v } },
+    { for v in var.enabled_connectors : v => { template_id = v } },
     var.enabled_connectors_from_templates
   )
 
