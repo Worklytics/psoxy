@@ -273,6 +273,7 @@ variable "custom_api_connectors" {
       })),
     [])
     settings_to_provide = optional(map(string), {})
+    rules_file          = optional(string, null)
   }))
 
   description = "map of custom API connectors to provision"
