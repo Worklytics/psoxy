@@ -17,6 +17,7 @@ module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
   enabled_connectors                         = var.enabled_connectors
+  enabled_connectors_from_templates          = var.enabled_connectors_from_templates
   msft_tenant_id                             = var.msft_tenant_id
   example_msft_user_guid                     = var.example_msft_user_guid
   msft_teams_example_team_guid               = var.msft_teams_example_team_guid
