@@ -1,0 +1,20 @@
+{
+  "results": [
+    {
+      "number": 2,
+      "message": "",
+      "minorEdit": false,
+      "authorId": "608a9b555426330072f9867d",
+      "createdAt": "2025-08-28T17:18:41.970Z",
+      "comment": {
+        "body": {},
+        "title": null,
+        "id": "196886"
+      }
+    }
+  ],
+  "_links": {
+    "next": "/wiki/api/v2/footer-comments/196886/versions?limit=1&cursor=eyJpZCI6IjE5Njg4NiIsImNvbnRlbnRPcmRlciI6Ii1tb2RpZmllZC1kYXRlIiwiY29udGVudE9yZGVyVmFsdWUiOjE3NTY0MDE1MjE5NzB9",
+    "base": "https://company-team.atlassian.net/wiki"
+  }
+}

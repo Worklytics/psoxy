@@ -3,7 +3,7 @@ resource "google_storage_bucket" "bucket" {
   project                     = var.project_id
   name                        = "${var.bucket_name_prefix}${var.bucket_name_suffix}"
   location                    = var.region
-  force_destroy               = true
+  force_destroy               = var.bucket_force_destroy
   uniform_bucket_level_access = true
   labels                      = var.bucket_labels
 
@@ -17,7 +17,7 @@ resource "google_storage_bucket" "bucket" {
     }
   }
 
-  # TODO: remove in v0.6 ???
+  # TODO: remove in v0.6 ??? NO - various exotic migration cases are much easier with this
   # left of 0.5, just to ease migrations; avoid destruction/recreation of bucket
   lifecycle {
     ignore_changes = [

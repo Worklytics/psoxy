@@ -1,0 +1,29 @@
+{
+  "results":[
+    {
+      "spaceOwnerId":"t~7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q",
+      "createdAt":"2025-08-28T13:04:01.309Z",
+      "authorId":"t~7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q",
+      "description":null,
+      "key":"~608a9b555426330072f9867d",
+      "id":"65831"
+    },
+    {
+      "spaceOwnerId":"t~7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q",
+      "createdAt":"2025-08-28T13:04:01.559Z",
+      "authorId":"t~7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q",
+      "description":null,
+      "key":"SD",
+      "id":"65937"
+    },
+    {
+      "spaceOwnerId":"t~7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q",
+      "createdAt":"2025-08-28T13:04:14.967Z",
+      "authorId":"t~7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q",
+      "description":null,
+      "key":"XFLOW",
+      "id":"196612"
+    }
+  ],
+  "_links":{ }
+}

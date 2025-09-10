@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.HttpContent;
 import com.google.auth.Credentials;
-import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +18,13 @@ import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -101,14 +105,14 @@ public class WindsurfServiceKeyAuthStrategy implements SourceAuthStrategy {
             fillServiceKey(pojoBody);
             bytes = objectMapper.writeValueAsBytes(pojoBody);
         } else {
-            if (!(Objects.equals(ContentType.APPLICATION_JSON, content.getType()))) {
+            if (!(Objects.equals(ContentType.APPLICATION_JSON.getMimeType(), content.getType()))) {
                 throw new IllegalArgumentException("WindsurfServiceKeyAuthStrategy only supports application/json content type");
             }
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             content.writeTo(out);
             bytes = addServiceKeyToRequestBody(out.toByteArray());
         }
-        return new ByteArrayContent(ContentType.APPLICATION_JSON.toString(), bytes);
+        return new ByteArrayContent(ContentType.APPLICATION_JSON.getMimeType(), bytes);
     }
 
     void fillServiceKey(Map<String, Object> pojoBody) {

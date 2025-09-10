@@ -407,3 +407,9 @@ variable "todos_as_local_files" {
   description = "whether to render TODOs as flat files"
   default     = true
 }
+
+variable "bucket_force_destroy" {
+  type        = bool
+  description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this configuration"
+  default     = false
+}

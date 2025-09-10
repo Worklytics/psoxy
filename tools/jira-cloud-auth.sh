@@ -55,8 +55,13 @@ echo $AUTH_URL
 open "${AUTH_URL}" || xdg-open "${AUTH_URL}"
 
 # Prompt for authorization code
-printf "After accepting access on the Jira site, paste the authorization code from the URL here: "
-read -r AUTH_CODE
+printf "After accepting access on the Jira site, paste the full redirect URL here (then press Enter):\n"
+if read -e -r REDIRECT_URL; then
+  :
+else
+  read -r REDIRECT_URL
+fi
+AUTH_CODE=$(echo "$REDIRECT_URL" | sed -n 's/.*[?&]code=\([^&]*\).*/\1/p')
 
 # Use the authorization code to request access and refresh tokens
 DATA="{\"grant_type\": \"authorization_code\",\"client_id\": \"${CLIENT_ID}\",\"client_secret\": \"${CLIENT_SECRET}\", \"code\": \"${AUTH_CODE}\", \"redirect_uri\": \"http://localhost\"}"
