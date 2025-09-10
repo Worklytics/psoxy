@@ -51,6 +51,7 @@ locals {
     module.worklytics_connectors.enabled_api_connectors,
     module.worklytics_connectors_google_workspace.enabled_api_connectors,
     local.msft_api_connectors_with_auth,
+    var.custom_api_connectors,
     {}
   )
 
