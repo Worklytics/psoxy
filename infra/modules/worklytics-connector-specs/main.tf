@@ -15,6 +15,13 @@ resource "time_static" "deployment" {
 }
 
 locals {
+
+  # create map of connector id --> { template_id: ... }
+  enabled_connectors_from_templates = merge(
+    { for v in var.enabled_connectors_from_templates : v => { template_id = v } },
+    var.enabled_connectors_from_templates
+  )
+
   standard_config_values = {
     oauth_refresh_token_lock = {
       # NOTE: in GCP case, this is NEVER actually filled with a value; lock is done by labeling the secret
@@ -1343,12 +1350,17 @@ locals {
   k => merge(v, { example_calls : try(v.example_api_calls, []) }) }
 
   enabled_google_workspace_connectors = {
-    for k, v in local.google_workspace_sources_backwards : k => v if contains(var.enabled_connectors, k)
+    for alias, v in local.enabled_connectors_from_templates :
+    alias => local.google_workspace_sources_backwards[v.template_id] if contains(keys(local.google_workspace_sources_backwards), v.template_id)
   }
   enabled_msft_365_connectors = {
-    for k, v in local.msft_365_connectors_backwards : k => v if contains(var.enabled_connectors, k) && length(try(var.msft_tenant_id, "")) > 0
+    for alias, v in local.enabled_connectors_from_templates :
+    alias => local.msft_365_connectors_backwards[v.template_id] if contains(keys(local.msft_365_connectors_backwards), v.template_id) && length(try(var.msft_tenant_id, "")) > 0
   }
-  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors_backwards : k => v if contains(var.enabled_connectors, k) }
+  enabled_oauth_long_access_connectors = {
+    for alias, v in local.enabled_connectors_from_templates :
+    alias => local.oauth_long_access_connectors_backwards[v.template_id] if contains(keys(local.oauth_long_access_connectors_backwards), v.template_id)
+  }
 
   enabled_oauth_long_access_connectors_todos = { for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
   # list of pair of [(conn1, secret1), (conn1, secret2), ... (connN, secretM)]
@@ -1365,7 +1377,8 @@ locals {
   ]))
 
   enabled_bulk_connectors = {
-    for k, v in local.bulk_connectors : k => v if contains(var.enabled_connectors, k)
+    for alias, v in local.enabled_connectors_from_templates :
+    alias => local.bulk_connectors[v.template_id] if contains(keys(local.bulk_connectors), v.template_id)
   }
 
   enabled_lockable_oauth_secrets_to_create = distinct(flatten([
