@@ -14,6 +14,14 @@ variable "enabled_connectors" {
   description = "ids of connectors to enable"
 }
 
+variable "enabled_connectors_from_templates" {
+  type = map(object({
+    template_id = string
+  }))
+  description = "map of connector id --> id of connector template to enable"
+  default     = {}
+}
+
 variable "gcp_project_id" {
   type        = string
   description = "id of GCP project that will host OAuth Clients for Google Workspace API connectors"

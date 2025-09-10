@@ -219,6 +219,14 @@ variable "enabled_connectors" {
   description = "list of ids of connectors to enabled; see modules/worklytics-connector-specs"
 }
 
+variable "enabled_connectors_from_templates" {
+  type = map(object({
+    template_id = string
+  }))
+  description = "map of connector id --> id of connector template to enable"
+  default     = {}
+}
+
 variable "non_production_connectors" {
   type        = list(string)
   description = "connector ids in this list will be in development mode (not for production use)"

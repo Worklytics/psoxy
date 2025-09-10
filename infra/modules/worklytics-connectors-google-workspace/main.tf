@@ -19,9 +19,10 @@ locals {
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
-  enabled_connectors             = var.enabled_connectors
-  google_workspace_example_admin = var.google_workspace_example_admin
-  google_workspace_example_user  = var.google_workspace_example_user
+  enabled_connectors                = var.enabled_connectors
+  enabled_connectors_from_templates = var.enabled_connectors_from_templates
+  google_workspace_example_admin    = var.google_workspace_example_admin
+  google_workspace_example_user     = var.google_workspace_example_user
 }
 
 module "google_workspace_connection" {
