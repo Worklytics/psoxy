@@ -14,13 +14,14 @@ module "worklytics_connectors_google_workspace" {
     google = google.google_workspace
   }
 
-  environment_id                 = var.environment_name
-  enabled_connectors             = var.enabled_connectors
-  gcp_project_id                 = var.google_workspace_gcp_project_id
-  google_workspace_example_user  = var.google_workspace_example_user
-  google_workspace_example_admin = var.google_workspace_example_admin
-  provision_gcp_sa_keys          = var.google_workspace_provision_keys
-  todos_as_local_files           = var.todos_as_local_files
+  environment_id                    = var.environment_name
+  enabled_connectors                = var.enabled_connectors
+  enabled_connectors_from_templates = var.enabled_connectors_from_templates
+  gcp_project_id                    = var.google_workspace_gcp_project_id
+  google_workspace_example_user     = var.google_workspace_example_user
+  google_workspace_example_admin    = var.google_workspace_example_admin
+  provision_gcp_sa_keys             = var.google_workspace_provision_keys
+  todos_as_local_files              = var.todos_as_local_files
 }
 
 output "google_workspace_api_clients" {

@@ -3,6 +3,14 @@ variable "enabled_connectors" {
   description = "ids of connectors to enable"
 }
 
+variable "enabled_connectors_from_templates" {
+  type = map(object({
+    template_id = string
+  }))
+  description = "map of connector id --> id of connector template to enable"
+  default     = {}
+}
+
 variable "chat_gpt_enterprise_example_workspace_id" {
   type        = string
   description = "Workspace id to use for example calls"
