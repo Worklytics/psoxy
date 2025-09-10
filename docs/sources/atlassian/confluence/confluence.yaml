@@ -290,7 +290,6 @@ endpoints:
           - "$.results[*]..profilePicture"
           - "$.results[*]..base64EncodedAri"
           - "$.results[*]..macroRenderedOutput"
-          - "$.results[*]..extensions"
           - "$.results[*].._expandable"
           - "$.results[*].._links"
           - "$.results[*]..webui"
@@ -425,6 +424,8 @@ definitions:
           $ref: "#/definitions/AncestorReference"
       body:
         $ref: "#/definitions/Body"
+      extensions:
+        $ref: "#/definitions/Extensions"
       history:
         $ref: "#/definitions/History"
       id:
@@ -475,6 +476,11 @@ definitions:
         type: "string"
       value:
         type: "string"
+  Extensions:
+    type: "object"
+    properties:
+      location:
+        type: "string"
   Group:
     type: "object"
     properties:
@@ -522,7 +528,7 @@ definitions:
         type: "string"
         format: "date-time"
       previousVersion:
-        $ref: "#/definitions/Version"
+        $ref: "#/definitions/ContentSearchVersion"
   Links:
     type: "object"
     properties:
@@ -563,6 +569,8 @@ definitions:
       key:
         type: "string"
       name:
+        type: "string"
+      sourceId:
         type: "string"
       spaceOwnerId:
         type: "string"
