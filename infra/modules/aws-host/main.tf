@@ -29,7 +29,7 @@ locals {
   has_enabled_webhook_collectors = length(keys(var.webhook_collectors)) > 0
   enable_webhook_testing         = var.provision_testing_infra && local.has_enabled_webhook_collectors
 
-  api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v if v.rules_file != null })
+  api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
 }
 
 module "psoxy" {
