@@ -267,7 +267,7 @@ variable "custom_api_connectors" {
     rules_file          = optional(string, null)
   }))
 
-  description = "map of API connectors to provision"
+  description = "map of custom API connectors to provision"
   default     = {}
 }
 
