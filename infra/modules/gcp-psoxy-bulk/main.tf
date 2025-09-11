@@ -142,6 +142,14 @@ resource "google_project_iam_member" "grant_sa_event_receiver" {
   role    = "roles/eventarc.eventReceiver"
 }
 
+resource "google_cloud_run_service_iam_member" "grant_sa_invoker" {
+  project  = var.project_id
+  location = google_cloudfunctions2_function.function.location
+  service  = google_cloudfunctions2_function.function.name
+  member   = "serviceAccount:${google_service_account.service_account.email}"
+  role     = "roles/run.invoker"
+}
+
 # to provision Cloud Function, TF must be able to act as the service account that the function will
 # run as
 module "tf_runner" {
