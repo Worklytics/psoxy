@@ -138,8 +138,8 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
 # but that does not seem to be universally true - so we'll stop relying on that assumption from 0.5.9 onwards
 resource "google_project_iam_member" "grant_sa_event_receiver" {
   project = var.project_id
-  member = "serviceAccount:${google_service_account.service_account.email}"
-  role   = "roles/eventarc.eventReceiver"
+  member  = "serviceAccount:${google_service_account.service_account.email}"
+  role    = "roles/eventarc.eventReceiver"
 }
 
 # to provision Cloud Function, TF must be able to act as the service account that the function will
@@ -207,8 +207,8 @@ resource "google_cloudfunctions2_function" "function" {
   }
 
   event_trigger {
-    event_type = "google.cloud.storage.object.v1.finalized"
-    trigger_region = var.region
+    event_type            = "google.cloud.storage.object.v1.finalized"
+    trigger_region        = var.region
     service_account_email = google_service_account.service_account.email
 
     # no retries for now, consistent with legacy behavior
