@@ -239,7 +239,7 @@ else
   printf "No Google provider found in top-level of Terraform configuration. No gcloud initialization required.\n"
 
   if [ -f google-workspace.tf ]; then
-    printf "If you don't intend to use Google Workspace via APIsas a data source in future, you can ${BLUE}rm google-workspace.tf${NC} and ${BLUE}rm google-workspace-variables.tf${NC} \n"
+    printf "If you don't intend to use Google Workspace via APIs as a data source in future, you can ${BLUE}rm google-workspace.tf${NC} and ${BLUE}rm google-workspace-variables.tf${NC} \n"
   fi
 fi
 
