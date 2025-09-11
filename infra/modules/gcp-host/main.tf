@@ -13,6 +13,8 @@ locals {
   config_parameter_prefix               = var.config_parameter_prefix == "" ? local.default_config_parameter_prefix : var.config_parameter_prefix
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
+
+  api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
 }
 
 module "psoxy" {
@@ -196,7 +198,7 @@ module "api_connector" {
       BUNDLE_FILENAME        = module.psoxy.filename
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
-      CUSTOM_RULES_SHA       = try(var.custom_api_connector_rules[each.key], null) != null ? filesha1(var.custom_api_connector_rules[each.key]) : null
+      CUSTOM_RULES_SHA       = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : null
       EMAIL_CANONICALIZATION = var.email_canonicalization
     }
   )
@@ -209,7 +211,7 @@ module "api_connector" {
 }
 
 module "custom_api_connector_rules" {
-  for_each = var.custom_api_connector_rules
+  for_each = local.api_connector_rules_files
 
   source = "../../modules/gcp-sm-rules"
 
