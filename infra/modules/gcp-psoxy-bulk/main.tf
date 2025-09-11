@@ -130,6 +130,18 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
   role      = "roles/secretmanager.secretAccessor"
 }
 
+# the function's SA needs to be able to receive events from Eventarc, so can be triggered by GCS events
+# project is most granular level for this role
+# without this, we get "googleapi: Error 403: Validation failed for trigger {{TRIGGER_ID}}: Permission "eventarc.events.receiveEvent" denied on "{{SA_EMAIL}}"
+# see: https://cloud.google.com/iam/docs/roles-permissions/eventarc#eventarc.eventReceiver
+# historically, we used the GCP Compute Engine default service account as the event trigger SA, and relied on it having 'Editor' by default on most GCP projects
+# but that does not seem to be universally true - so we'll stop relying on that assumption from 0.5.9 onwards
+resource "google_project_iam_member" "grant_sa_event_receiver" {
+  project = var.project_id
+  member = "serviceAccount:${google_service_account.service_account.email}"
+  role   = "roles/eventarc.eventReceiver"
+}
+
 # to provision Cloud Function, TF must be able to act as the service account that the function will
 # run as
 module "tf_runner" {
@@ -196,6 +208,8 @@ resource "google_cloudfunctions2_function" "function" {
 
   event_trigger {
     event_type = "google.cloud.storage.object.v1.finalized"
+    trigger_region = var.region
+    service_account_email = google_service_account.service_account.email
 
     # no retries for now, consistent with legacy behavior
     # can configure this to retry on errors, and will do so with exponential backoff. but concern is that
@@ -216,10 +230,11 @@ resource "google_cloudfunctions2_function" "function" {
     ]
   }
 
-  # can't provision function until grants that allow reading of secrets, acting as SA are complete
+  # can't provision function until various IAM grants complete
   depends_on = [
     google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret,
-    google_service_account_iam_member.act_as
+    google_service_account_iam_member.act_as,
+    google_project_iam_member.grant_sa_event_receiver
   ]
 }
 
