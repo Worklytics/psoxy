@@ -159,6 +159,27 @@ output "path_to_deployment_jar" {
   value       = module.psoxy.path_to_deployment_jar
 }
 
+output "api_connector_instances" {
+  value = { for k, v in module.psoxy.api_connector_instances : k => merge({
+    endpoint_url = v.endpoint_url
+    }, v.sanitized_bucket != null ? {
+    sanitized_bucket = v.sanitized_bucket
+    } : {})
+  }
+}
+
+output "bulk_connector_instances" {
+  value = { for k, v in module.psoxy.bulk_connector_instances : k => {
+    sanitized_bucket = v.sanitized_bucket
+  } }
+}
+
+output "webhook_collector_instances" {
+  value = { for k, v in module.psoxy.webhook_collector_instances : k => {
+    sanitized_bucket = v.output_sanitized_bucket_id
+  } }
+}
+
 output "todos_1" {
   description = "List of todo steps to complete 1st, in markdown format."
   value = var.todos_as_outputs ? join("\n",
@@ -188,3 +209,5 @@ output "todos_3" {
 #  value       = module.psoxy.pseudonym_salt
 #  sensitive   = true
 #}
+
+
