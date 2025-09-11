@@ -14,7 +14,7 @@ locals {
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
 
-  api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v if v.rules_file != null })
+  api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
 }
 
 module "psoxy" {
