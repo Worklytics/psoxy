@@ -282,6 +282,13 @@ endpoints:
           - "$.results[*]..accountId"
           - "$.results[*]..email"
         encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.results[*].body.atlas_doc_format.value"
+          - "$.results[*]..email"
+        isJsonEscaped: true
+        jsonPathToProcessWhenEscaped: "$..attrs.id"
+        encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
           - "$.results[*]..ari"
@@ -303,6 +310,10 @@ endpoints:
         jsonPaths:
           - "$.results[*]..title"
           - "$.results[*]..message"
+      - !<textDigest>
+        isJsonEscaped: true
+        jsonPathToProcessWhenEscaped: "$..text"
+        jsonPaths:
           - "$.results[*].body.atlas_doc_format.value"
     responseSchema:
       type: "object"

@@ -34,9 +34,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SanitizerUtilsTest {
 
-
-
-
     @Singleton
     @Component(
         modules = {
@@ -157,6 +154,19 @@ class SanitizerUtilsTest {
     }
 
     @Test
+    void pseudonymizeWithJsonEscaped() {
+        String input = "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"mention\",\"attrs\":{\"id\":\"608a9b555426330072f9867d\",\"text\":\"@alice\"}},{\"text\":\" this is a reply from a reply?\",\"type\":\"text\"}]}],\"version\":1}";
+        String expected = "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"mention\",\"attrs\":{\"id\":\"t~7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q\",\"text\":\"@alice\"}},{\"text\":\" this is a reply from a reply?\",\"type\":\"text\"}]}],\"version\":1}";
+        MapFunction f = sanitizerUtils.getPseudonymize(pseudonymizer,
+            Transform.Pseudonymize.builder()
+                .isJsonEscaped(true)
+                .jsonPathToProcessWhenEscaped("$..attrs.id")
+                .build());
+
+        assertEquals(expected, f.map(input, jsonConfiguration));
+    }
+
+    @Test
     void reversiblePseudonym() {
         MapFunction f = sanitizerUtils.getPseudonymize(pseudonymizer,
             Transform.Pseudonymize.builder().includeReversible(true).build());
@@ -226,6 +236,45 @@ class SanitizerUtilsTest {
 
         Transform.TextDigest transform = Transform.TextDigest.builder().isJsonEscaped(true)
             .jsonPathToProcessWhenEscaped("$..text").build();
+        MapFunction textDigestFunction = sanitizerUtils.getTextDigest(transform);
+
+        String resultJson =
+            (String) textDigestFunction.map(input, jsonConfiguration);
+
+        assertEquals(expected, resultJson);
+    }
+
+    @SneakyThrows
+    @Test
+    void textDigest_with_escaping_should_keep_input_if_not_matching() {
+        String input = "{\n" + "  \"type\": \"AdaptiveCard\",\n" + "  \"version\": \"1.0\",\n"
+            + "  \"body\": [\n" + "    {\n" + "      \"type\": \"TextBlock\",\n"
+            + "      \"text\": \"It looks like there were no important \\\"emails\\\" from last week. However, I found some relevant meetings and files that might be of interest to you.\\n\\nFrom your meetings last week:\\n- **[test meeting2 - export api](https://teams.microsoft.com/l/meeting/details?eventId=AAMkADcyZTMzNWZhLWE1YjAtNDc3Mi04MzBlLTc2NzEzOTE0MmU1ZQBGAAAAAAC5e4DRHIMCQJ-tS6nB82CZBwCMIOyf3WTwTIsBMwZamp77AAAAAAENAACMIOyf3WTwTIsBMwZamp77AABCrxI6AAA%3d)**: You discussed the need to send a reminder about an upcoming event, possibly Ignite, scheduled for next week. You emphasized the importance of the event and the reminder[1](https://teams.microsoft.com/l/meeting/details?eventId=AAMkADcyZTMzNWZhLWE1YjAtNDc3Mi04MzBlLTc2NzEzOTE0MmU1ZQBGAAAAAAC5e4DRHIMCQJ-tS6nB82CZBwCMIOyf3WTwTIsBMwZamp77AAAAAAENAACMIOyf3WTwTIsBMwZamp77AABCrxI6AAA%3d).\\n- **[new meeting to test copilot interaction in meetings](https://teams.microsoft.com/l/meeting/details?eventId=AAMkADcyZTMzNWZhLWE1YjAtNDc3Mi04MzBlLTc2NzEzOTE0MmU1ZQBGAAAAAAC5e4DRHIMCQJ-tS6nB82CZBwCMIOyf3WTwTIsBMwZamp77AAAAAAENAACMIOyf3WTwTIsBMwZamp77AABCrxI5AAA%3d)**: This meeting was held last Friday from 12:30 PM to 1 PM[2](https://teams.microsoft.com/l/meeting/details?eventId=AAMkADcyZTMzNWZhLWE1YjAtNDc3Mi04MzBlLTc2NzEzOTE0MmU1ZQBGAAAAAAC5e4DRHIMCQJ-tS6nB82CZBwCMIOyf3WTwTIsBMwZamp77AAAAAAENAACMIOyf3WTwTIsBMwZamp77AABCrxI5AAA%3d).\\n- **[teste meeting](https://teams.microsoft.com/l/meeting/details?eventId=AAMkADcyZTMzNWZhLWE1YjAtNDc3Mi04MzBlLTc2NzEzOTE0MmU1ZQBGAAAAAAC5e4DRHIMCQJ-tS6nB82CZBwCMIOyf3WTwTIsBMwZamp77AAAAAAENAACMIOyf3WTwTIsBMwZamp77AABAvsP6AAA%3d)**: You explained the significance of the Nobel Prize in Economics and announced the 2024 Nobel Prize winners, Darren Simon Johnson and James A. Robinson[3](https://teams.microsoft.com/l/meeting/details?eventId=AAMkADcyZTMzNWZhLWE1YjAtNDc3Mi04MzBlLTc2NzEzOTE0MmU1ZQBGAAAAAAC5e4DRHIMCQJ-tS6nB82CZBwCMIOyf3WTwTIsBMwZamp77AAAAAAENAACMIOyf3WTwTIsBMwZamp77AABAvsP6AAA%3d).\\n\\nAdditionally, there is a file titled **[OnCall DRI Handbook-v3](https://m365cpi17278319-my.sharepoint.com/personal/corat_m365cpi17278319_onmicrosoft_com/Documents/Microsoft%20Copilot%20Chat%20Files/OnCall%20DRI%20Handbook-v3.pdf?web=1)** that you last modified on February 4th, 2021. This document provides guidelines on handling incidents and includes important terminology and procedures[4](https://m365cpi17278319-my.sharepoint.com/personal/corat_m365cpi17278319_onmicrosoft_com/Documents/Microsoft%20Copilot%20Chat%20Files/OnCall%20DRI%20Handbook-v3.pdf?web=1).\\n\\nIs there anything specific you would like to know more about?\",\n"
+            + "      \"wrap\": true\n" + "    },\n" + "    {\n"
+            + "      \"type\": \"TextBlock\",\n" + "      \"id\": \"MessageTextField\",\n"
+            + "      \"text\": \"It looks like there were no important \\\"emails\\\" from last week. However, I found some relevant meetings and files that might be of interest to you.\\n\\nFrom your meetings last week:\\n- **test meeting2 - export api[3]**: You discussed the need to send a reminder about an upcoming event, possibly Ignite, scheduled for next week. You emphasized the importance of the event and the reminder[^2^].\\n- **new meeting to test copilot interaction in meetings[3]**: This meeting was held last Friday from 12:30 PM to 1 PM[^3^].\\n- **teste meeting[3]**: You explained the significance of the Nobel Prize in Economics and announced the 2024 Nobel Prize winners, Darren Simon Johnson and James A. Robinson[^4^].\\n\\nAdditionally, there is a file titled **OnCall DRI Handbook-v3[2]** that you last modified on February 4th, 2021. This document provides guidelines on handling incidents and includes important terminology and procedures[^1^].\\n\\nIs there anything specific you would like to know more about?\",\n"
+            + "      \"wrap\": true\n" + "    }\n" + "  ]\n" + "}";
+
+        String expected = "{\n" +
+            "  \"type\": \"AdaptiveCard\",\n" +
+            "  \"version\": \"1.0\",\n" +
+            "  \"body\": [\n" +
+            "    {\n" +
+            "      \"type\": \"TextBlock\",\n" +
+            "      \"text\": \"It looks like there were no important \\\"emails\\\" from last week. However, I found some relevant meetings and files that might be of interest to you.\\n\\nFrom your meetings last week:\\n- **[test meeting2 - export api](https://teams.microsoft.com/l/meeting/details?eventId=AAMkADcyZTMzNWZhLWE1YjAtNDc3Mi04MzBlLTc2NzEzOTE0MmU1ZQBGAAAAAAC5e4DRHIMCQJ-tS6nB82CZBwCMIOyf3WTwTIsBMwZamp77AAAAAAENAACMIOyf3WTwTIsBMwZamp77AABCrxI6AAA%3d)**: You discussed the need to send a reminder about an upcoming event, possibly Ignite, scheduled for next week. You emphasized the importance of the event and the reminder[1](https://teams.microsoft.com/l/meeting/details?eventId=AAMkADcyZTMzNWZhLWE1YjAtNDc3Mi04MzBlLTc2NzEzOTE0MmU1ZQBGAAAAAAC5e4DRHIMCQJ-tS6nB82CZBwCMIOyf3WTwTIsBMwZamp77AAAAAAENAACMIOyf3WTwTIsBMwZamp77AABCrxI6AAA%3d).\\n- **[new meeting to test copilot interaction in meetings](https://teams.microsoft.com/l/meeting/details?eventId=AAMkADcyZTMzNWZhLWE1YjAtNDc3Mi04MzBlLTc2NzEzOTE0MmU1ZQBGAAAAAAC5e4DRHIMCQJ-tS6nB82CZBwCMIOyf3WTwTIsBMwZamp77AAAAAAENAACMIOyf3WTwTIsBMwZamp77AABCrxI5AAA%3d)**: This meeting was held last Friday from 12:30 PM to 1 PM[2](https://teams.microsoft.com/l/meeting/details?eventId=AAMkADcyZTMzNWZhLWE1YjAtNDc3Mi04MzBlLTc2NzEzOTE0MmU1ZQBGAAAAAAC5e4DRHIMCQJ-tS6nB82CZBwCMIOyf3WTwTIsBMwZamp77AAAAAAENAACMIOyf3WTwTIsBMwZamp77AABCrxI5AAA%3d).\\n- **[teste meeting](https://teams.microsoft.com/l/meeting/details?eventId=AAMkADcyZTMzNWZhLWE1YjAtNDc3Mi04MzBlLTc2NzEzOTE0MmU1ZQBGAAAAAAC5e4DRHIMCQJ-tS6nB82CZBwCMIOyf3WTwTIsBMwZamp77AAAAAAENAACMIOyf3WTwTIsBMwZamp77AABAvsP6AAA%3d)**: You explained the significance of the Nobel Prize in Economics and announced the 2024 Nobel Prize winners, Darren Simon Johnson and James A. Robinson[3](https://teams.microsoft.com/l/meeting/details?eventId=AAMkADcyZTMzNWZhLWE1YjAtNDc3Mi04MzBlLTc2NzEzOTE0MmU1ZQBGAAAAAAC5e4DRHIMCQJ-tS6nB82CZBwCMIOyf3WTwTIsBMwZamp77AAAAAAENAACMIOyf3WTwTIsBMwZamp77AABAvsP6AAA%3d).\\n\\nAdditionally, there is a file titled **[OnCall DRI Handbook-v3](https://m365cpi17278319-my.sharepoint.com/personal/corat_m365cpi17278319_onmicrosoft_com/Documents/Microsoft%20Copilot%20Chat%20Files/OnCall%20DRI%20Handbook-v3.pdf?web=1)** that you last modified on February 4th, 2021. This document provides guidelines on handling incidents and includes important terminology and procedures[4](https://m365cpi17278319-my.sharepoint.com/personal/corat_m365cpi17278319_onmicrosoft_com/Documents/Microsoft%20Copilot%20Chat%20Files/OnCall%20DRI%20Handbook-v3.pdf?web=1).\\n\\nIs there anything specific you would like to know more about?\",\n" +
+            "      \"wrap\": true\n" +
+            "    },\n" +
+            "    {\n" +
+            "      \"type\": \"TextBlock\",\n" +
+            "      \"id\": \"MessageTextField\",\n" +
+            "      \"text\": \"It looks like there were no important \\\"emails\\\" from last week. However, I found some relevant meetings and files that might be of interest to you.\\n\\nFrom your meetings last week:\\n- **test meeting2 - export api[3]**: You discussed the need to send a reminder about an upcoming event, possibly Ignite, scheduled for next week. You emphasized the importance of the event and the reminder[^2^].\\n- **new meeting to test copilot interaction in meetings[3]**: This meeting was held last Friday from 12:30 PM to 1 PM[^3^].\\n- **teste meeting[3]**: You explained the significance of the Nobel Prize in Economics and announced the 2024 Nobel Prize winners, Darren Simon Johnson and James A. Robinson[^4^].\\n\\nAdditionally, there is a file titled **OnCall DRI Handbook-v3[2]** that you last modified on February 4th, 2021. This document provides guidelines on handling incidents and includes important terminology and procedures[^1^].\\n\\nIs there anything specific you would like to know more about?\",\n" +
+            "      \"wrap\": true\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}";
+
+        Transform.TextDigest transform = Transform.TextDigest.builder().isJsonEscaped(true)
+            .jsonPathToProcessWhenEscaped("$..notFound").build();
         MapFunction textDigestFunction = sanitizerUtils.getTextDigest(transform);
 
         String resultJson =

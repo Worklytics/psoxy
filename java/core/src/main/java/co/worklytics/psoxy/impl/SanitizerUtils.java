@@ -40,7 +40,6 @@ import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 /**
  * utility methods that are common to multiple types of sanitizers
- *
  */
 @Log
 public class SanitizerUtils {
@@ -167,11 +166,15 @@ public class SanitizerUtils {
                     DocumentContext jsonContext = JsonPath.parse(toTokenize);
                     List<String> texts = jsonContext.read(transform.getJsonPathToProcessWhenEscaped());
 
-                    for (String text : texts) {
-                        jsonContext.set(transform.getJsonPathToProcessWhenEscaped(), jsonConfiguration.jsonProvider().toJson(Transform.TextDigest.generate(text)));
+                    if (texts.isEmpty()) {
+                        // If nothing matched, return original string, as is to avoid any format manipulation
+                        return s;
+                    } else {
+                        for (String text : texts) {
+                            jsonContext.set(transform.getJsonPathToProcessWhenEscaped(), jsonConfiguration.jsonProvider().toJson(Transform.TextDigest.generate(text)));
+                        }
+                        return jsonContext.jsonString();
                     }
-
-                    return jsonContext.jsonString();
                 } else {
                     return jsonConfiguration.jsonProvider().toJson(Transform.TextDigest.generate(toTokenize));
                 }
@@ -360,8 +363,45 @@ public class SanitizerUtils {
     }
 
     public MapFunction getPseudonymize(Pseudonymizer pseudonymizer, Transform.Pseudonymize transformOptions) {
-        return (Object s, Configuration configuration) -> {
-            PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(s, transformOptions);
+        return (Object object, Configuration configuration) -> {
+            if (transformOptions.getIsJsonEscaped()
+                && StringUtils.isNotBlank(transformOptions.getJsonPathToProcessWhenEscaped())
+                && object instanceof String toTokenize) {
+                DocumentContext jsonContext = JsonPath.parse(toTokenize);
+                List<String> texts = jsonContext.read(transformOptions.getJsonPathToProcessWhenEscaped());
+
+                if (texts.size() > 1) {
+                    throw new RuntimeException("Can't pseudonymize JSON-escaped text if multiple matches for jsonPathToProcessWhenEscaped" + transformOptions.getJsonPathToProcessWhenEscaped());
+                }
+
+                Object valueToPseudonymize = texts.stream().findFirst().orElse(null);
+
+                if (valueToPseudonymize == null) {
+                    // If nothing matched, return original string, as is to avoid any format manipulation
+                    return object;
+                }
+
+                PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(valueToPseudonymize, transformOptions);
+                String pseudonymizedValue;
+                if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.JSON) {
+                    pseudonymizedValue = configuration.jsonProvider().toJson(pseudonymizedIdentity);
+                } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
+                    if (pseudonymizedIdentity == null) {
+                        pseudonymizedValue = null;
+                    } else {
+                        pseudonymizedValue = urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym());
+                    }
+                } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_HASH_ONLY) {
+                    pseudonymizedValue = pseudonymizedIdentity.getHash();
+                } else {
+                    throw new RuntimeException("Unsupported pseudonym implementation: " + transformOptions.getEncoding());
+                }
+                // Set the pseudonymized value back into the JSON at the path
+                jsonContext.set(transformOptions.getJsonPathToProcessWhenEscaped(), pseudonymizedValue);
+                return jsonContext.jsonString();
+            }
+
+            PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(object, transformOptions);
             if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.JSON) {
                 return configuration.jsonProvider().toJson(pseudonymizedIdentity);
             } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
@@ -370,12 +410,8 @@ public class SanitizerUtils {
                 }
                 if (pseudonymizedIdentity.getReversible() != null
                     && pseudonymizer.getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
-                    // can't URL_SAFE_TOKEN encode reversible portion of pseudonym if LEGACY mode, bc
-                    // URL_SAFE_TOKEN depends on 'hash' being encoded as prefix of the reversible;
-                    // and reverisbles need the non-legacy
                     return configuration.jsonProvider().toJson(pseudonymizedIdentity);
                 }
-                //exploit that already reversibly encoded, including prefix
                 return ObjectUtils.firstNonNull(pseudonymizedIdentity.getReversible(), urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym()));
             } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_HASH_ONLY) {
                 return pseudonymizedIdentity.getHash();
@@ -469,7 +505,7 @@ public class SanitizerUtils {
             f = getEncryptIp((EncryptIp) transform);
         } else if (transform instanceof Transform.TextDigest) {
             f = getTextDigest((Transform.TextDigest) transform);
-        }else {
+        } else {
             throw new IllegalArgumentException("Unknown transform type: " + transform.getClass().getName());
         }
         return f;
@@ -478,9 +514,9 @@ public class SanitizerUtils {
     /**
      * Applies a transform to a document, using the provided pseudonymizer.
      *
-     * @param pseudonymizer to use
-     * @param transform to apply
-     * @param document will be MUTATED in place, if the transform applies
+     * @param pseudonymizer      to use
+     * @param transform          to apply
+     * @param document           will be MUTATED in place, if the transform applies
      * @param compiledTransforms pre-compiled JsonPaths for the transforms, to avoid re-compiling them if transform is already in that list
      */
     void applyTransform(Pseudonymizer pseudonymizer, Transform transform, Object document, Map<Transform, List<JsonPath>> compiledTransforms) {

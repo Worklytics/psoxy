@@ -274,6 +274,14 @@ public abstract class Transform {
         @Builder.Default
         Boolean includeReversible = false;
 
+         @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+         @Builder.Default
+         Boolean isJsonEscaped = false;
+
+         @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+         @Builder.Default
+         String jsonPathToProcessWhenEscaped = null;
+
         /**
          * if provided, only values at this json path(es) will be pseudonymized
          * if has a capture group, only portion of value matched by regex captured by first group
@@ -311,6 +319,8 @@ public abstract class Transform {
                 .jsonPaths(new ArrayList<>(this.jsonPaths))
                 .clearFields()
                 .fields(new ArrayList<>(this.fields))
+                .jsonPathToProcessWhenEscaped(this.jsonPathToProcessWhenEscaped)
+                .isJsonEscaped(this.isJsonEscaped)
                 .build();
         }
     }
