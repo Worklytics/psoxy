@@ -35,7 +35,10 @@ MVN_VERSION=`mvn -v | grep "Apache Maven"`
 MVN_VERSION_MAJOR_MINOR=$(echo $MVN_VERSION | sed -n 's/^Apache Maven \([0-9]*\.[0-9]*\).*$/\1/p')
 printf "Your Maven version is ${BLUE}${MVN_VERSION}${NC}.\n"
 
-if (( $(echo "$MVN_VERSION_MAJOR_MINOR < 3.6" | bc ) == 1 )); then
+# Parse Maven version components
+MVN_MAJOR=$(echo "$MVN_VERSION_MAJOR_MINOR" | cut -d. -f1)
+MVN_MINOR=$(echo "$MVN_VERSION_MAJOR_MINOR" | cut -d. -f2)
+if (( MVN_MAJOR < 3 || (MVN_MAJOR == 3 && MVN_MINOR < 6) )); then
   printf "${RED}This Maven version appears to be unsupported.${NC} Psoxy requires a supported version of Maven 3.6 or later.\n"
   printf "We recommend you upgrade. See https://maven.apache.org/install.html\n"
   printf "Maven is used to build the package that will be deployed to your host platform as an AWS lambda or a GCP Cloud Function\n"
@@ -59,8 +62,11 @@ fi
 printf "\n"
 
 # if java > 23, then mvn must be 3.9.10+
-if (( $(echo "$JAVA_VERSION_MAJOR > 23" | bc ) == 1 )); then
-  if (( $(echo "$MVN_VERSION_MAJOR_MINOR < 3.9.10" | bc ) == 1 )); then
+if (( JAVA_VERSION_MAJOR > 23 )); then
+  # Parse full Maven version for patch comparison
+  MVN_VERSION_FULL=$(echo "$MVN_VERSION" | sed -n 's/^Apache Maven \([0-9]*\.[0-9]*\.[0-9]*\).*$/\1/p')
+  MVN_PATCH=$(echo "$MVN_VERSION_FULL" | cut -d. -f3)
+  if (( MVN_MAJOR < 3 || (MVN_MAJOR == 3 && MVN_MINOR < 9) || (MVN_MAJOR == 3 && MVN_MINOR == 9 && MVN_PATCH < 10) )); then
     printf "${RED}Maven < 3.9.10 has compatibility issues with Java 24.${NC} If you're using Java 24, psoxy will NOT build correctly unless you upgrade Maven to 3.9.10 or later.\n"
     printf "See https://maven.apache.org/install.html\n"
   fi

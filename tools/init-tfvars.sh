@@ -207,7 +207,7 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
       [[ -f google-workspace-variables.tf ]] || grep -q '^variable "google_workspace_gcp_project_id"' variables.tf
       if [[ $? -eq 0 ]]; then
         printf "# GCP project in which OAuth clients for Google Workspace connectors will be provisioned\n" >> $TFVARS_FILE
-        printf "#  - if you're not connecting to Google Workspace data sources, you can omit this value\n" >> $TFVARS_FILE
+        printf "#  - if you're not connecting to Google Workspace data sources via their APIs, you can omit this value\n" >> $TFVARS_FILE
         printf "google_workspace_gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
         printf "\tgoogle_workspace_gcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
       fi
@@ -239,7 +239,7 @@ else
   printf "No Google provider found in top-level of Terraform configuration. No gcloud initialization required.\n"
 
   if [ -f google-workspace.tf ]; then
-    printf "If you don't intend to use Google Workspace as a data source in future, you can ${BLUE}rm google-workspace.tf${NC} and ${BLUE}rm google-workspace-variables.tf${NC} \n"
+    printf "If you don't intend to use Google Workspace via APIs as a data source in future, you can ${BLUE}rm google-workspace.tf${NC} and ${BLUE}rm google-workspace-variables.tf${NC} \n"
   fi
 fi
 
@@ -275,7 +275,7 @@ if test $AZUREAD_PROVIDER_COUNT -ne 0; then
 
         printf "# Azure AD Apps (Microsoft API Clients) will be provisioned in the following tenant to access your Microsoft 365 data\n" >> $TFVARS_FILE
         printf "#  - this should be the ID of your Microsoft 365 organization (tenant)\n" >> $TFVARS_FILE
-        printf "#  - if you're not connecting to Microsoft 365 data sources, you can omit this value\n" >> $TFVARS_FILE
+        printf "#  - if you're not connecting to Microsoft 365 data sources via their APIs, you can omit this value\n" >> $TFVARS_FILE
         MSFT_TENANT_ID=$(az account show --query tenantId --output tsv)
         printf "msft_tenant_id=\"${MSFT_TENANT_ID}\"\n\n" >> $TFVARS_FILE
         printf "\tmsft_tenant_id=${BLUE}\"${MSFT_TENANT_ID}\"${NC}\n"

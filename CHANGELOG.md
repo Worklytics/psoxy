@@ -9,6 +9,7 @@ Changes to be including in future/planned release notes will be added here.
 
 ## [0.5.9](https://github.com/Worklytics/psoxy/release/tag/v0.5.9)
 - `Confluence`: support extensions and previous version from Content Search
+- 'gcp' : for customers who were already on v0.5.x, you'll see identity of eventarc triggers for your bulk connectors change from the Compute Engine default SA --> to the SA of the function itself; and an associated IAM role grant so that your SA can recieve eventarc events; this avoids making assumptions about the default permissions you might have on the Compute Engine service account.
 
 ## [0.5.8](https://github.com/Worklytics/psoxy/release/tag/v0.5.8)
 - **GCP**: Changed default value of `bucket_force_destroy` from `true` to `false` across all GCP modules. Customers upgrading may see this change from `true` → `false`. To maintain the previous behavior, add `bucket_force_destroy = true` to your terraform.tfvars file.

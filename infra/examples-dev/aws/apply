@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # prompt if user wants to force_bundle or not; default to Y
-read -p "Do you want to force rebuild of the bundle? (Y/n): " force_bundle
+read -p "Do you want to force rebuild of the bundle? (eg, have you made java code changes?) (Y/n): " force_bundle
 
 if [ "$force_bundle" == "y" ] || [ "$force_bundle" == "Y" ] || [ "$force_bundle" == "" ]; then
   force_bundle="true"
