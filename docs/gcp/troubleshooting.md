@@ -42,3 +42,37 @@ You may need define an exception for the GCP project in which you're deploying t
 ## Warning like 'Failed to find a usable hardware address from the network interfaces; using random bytes: '
 
 This is benign and can be safely ignored.
+
+## Perpetual Changes to `docker_repostory`, `environment_variables.LOG_EXECUTION_ID`
+
+We've observed in some customers, where after upgrading proxy versions 0.5.x, they see perpetual changes in their Terraform plan.
+
+To solve this, you should upgrade your `google` provider.
+
+1. find the `google` provider version constraint at the top of your `main.tf`; it should look something like:
+
+```hcl
+terraform {
+  required_providers {
+    google = {
+      version = "> 3.7.4, <= 5.0"
+    }
+  }
+
+```
+
+Change that to:
+
+```hcl
+terraform {
+  required_providers {
+    google = {
+      version = "~> 5.0"
+    }
+  }
+```
+
+2. `terraform init --upgrade` and `terraform apply`
+
+You will likely see MANY changes. These are caused by the provider version difference and should be benign. The vast majority are label changes; we utilize the `default_labels` functionality in google provider `5.x` to label all the infra created by this configuration; 
+

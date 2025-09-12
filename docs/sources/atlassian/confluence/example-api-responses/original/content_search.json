@@ -178,6 +178,46 @@
       "status": "current",
       "title": "Re: Test page",
       "history": {
+        "previousVersion": {
+          "by": {
+            "type": "known",
+            "accountId": "608a9b555426330072f9867d",
+            "accountType": "atlassian",
+            "email": "alice@company.org",
+            "publicName": "alice",
+            "profilePicture": {
+              "path": "/wiki/aa-avatar/608a9b555426330072f9867d",
+              "width": 48,
+              "height": 48,
+              "isDefault": false
+            },
+            "displayName": "alice",
+            "isExternalCollaborator": false,
+            "isGuest": false,
+            "locale": "en_US",
+            "accountStatus": "active",
+            "_expandable": {
+              "operations": "",
+              "personalSpace": ""
+            },
+            "_links": {
+              "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=608a9b555426330072f9867d"
+            }
+          },
+          "when": "2025-08-28T17:18:31.793Z",
+          "friendlyWhen": "Aug 28, 2025",
+          "message": "",
+          "number": 1,
+          "minorEdit": false,
+          "contentTypeModified": false,
+          "_expandable": {
+            "collaborators": "",
+            "content": "/rest/api/content/196886?status=historical&version=1"
+          },
+          "_links": {
+            "self": "https://company-team.atlassian.net/wiki/rest/api/content/196886/version/1"
+          }
+        },
         "latest": true,
         "createdBy": {
           "type": "known",
@@ -191,7 +231,7 @@
             "height": 48,
             "isDefault": false
           },
-          "displayName": "Alice",
+          "displayName": "alice",
           "isExternalCollaborator": false,
           "isGuest": false,
           "locale": "en_US",
@@ -204,7 +244,7 @@
             "self": "https://company-team.atlassian.net/wiki/rest/api/user?accountId=608a9b555426330072f9867d"
           }
         },
-        "createdDate": "2025-08-28T13:37:15.848Z",
+        "createdDate": "2025-08-28T17:18:31.793Z",
         "_expandable": {
           "lastUpdated": "",
           "lastOwnedBy": "",
@@ -213,7 +253,7 @@
           "ownedBy": ""
         },
         "_links": {
-          "self": "https://company-team.atlassian.net/wiki/rest/api/content/98317/history"
+          "self": "https://company-team.atlassian.net/wiki/rest/api/content/196886/history"
         }
       },
       "version": {

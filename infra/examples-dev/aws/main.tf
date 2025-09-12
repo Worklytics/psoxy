@@ -21,7 +21,7 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.5.8"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.5.9"
 
   enabled_connectors                       = var.enabled_connectors
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
@@ -51,6 +51,7 @@ locals {
     module.worklytics_connectors.enabled_api_connectors,
     module.worklytics_connectors_google_workspace.enabled_api_connectors,
     local.msft_api_connectors_with_auth,
+    var.custom_api_connectors,
     {}
   )
 
@@ -106,7 +107,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.5.8"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.5.9"
 
   environment_name                     = var.environment_name
   aws_account_id                       = var.aws_account_id
@@ -170,7 +171,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.5.8"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.5.9"
 
   proxy_instance_id    = each.key
   worklytics_host      = var.worklytics_host
@@ -190,6 +191,25 @@ module "connection_in_worklytics" {
 output "path_to_deployment_jar" {
   description = "Path to the package to deploy (JAR)."
   value       = module.psoxy.path_to_deployment_jar
+}
+
+output "api_connector_instances" {
+  value = { for k, v in module.psoxy.api_connector_instances : k => {
+    endpoint_url     = v.endpoint_url
+    sanitized_bucket = v.sanitized_bucket
+  } }
+}
+
+output "bulk_connector_instances" {
+  value = { for k, v in module.psoxy.bulk_connector_instances : k => {
+    sanitized_bucket = v.sanitized_bucket
+  } }
+}
+
+output "webhook_collector_instances" {
+  value = { for k, v in module.psoxy.webhook_collector_instances : k => {
+    sanitized_bucket = v.output_sanitized_bucket_id
+  } }
 }
 
 output "todos_1" {

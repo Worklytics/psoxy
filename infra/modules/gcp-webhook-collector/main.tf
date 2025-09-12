@@ -535,19 +535,19 @@ output "test_script" {
   value = try(local_file.test_script[0].filename, null)
 }
 
-output "webhook_output_bucket_id" {
-  value       = try(module.sanitized_webhook_output[0].bucket_id, null)
-  description = "Bucket ID of the sanitized webhook output bucket, if any. May have been provided by the user, or provisioned by this module."
+output "output_sanitized_bucket_id" {
+  value       = module.sanitized_webhook_output.bucket_name
+  description = "Bucket ID (name) of the sanitized webhook output bucket."
 }
 
 output "side_output_sanitized_bucket_id" {
-  value       = try(module.side_output_bucket["sanitized"].bucket_id, null)
-  description = "Bucket ID of the sanitized side output bucket, if any. May have been provided by the user, or provisioned by this module."
+  value       = try(module.side_output_bucket["sanitized"].bucket_name, null)
+  description = "Bucket ID (name) of the sanitized side output bucket, if any. May have been provided by the user, or provisioned by this module."
 }
 
 output "side_output_original_bucket_id" {
-  value       = try(module.side_output_bucket["original"].bucket_id, null)
-  description = "Bucket ID of the original side output bucket, if any. May have been provided by the user, or provisioned by this module."
+  value       = try(module.side_output_bucket["original"].bucket_name, null)
+  description = "Bucket ID (name) of the original side output bucket, if any. May have been provided by the user, or provisioned by this module."
 }
 
 

@@ -246,6 +246,40 @@ variable "bulk_sanitized_expiration_days" {
   default     = 1805 # 5 years; intent is 'forever', but some upperbound in case bucket is forgotten
 }
 
+variable "custom_api_connectors" {
+  type = map(object({
+    source_kind             = string
+    source_auth_strategy    = string
+    target_host             = string
+    oauth_scopes_needed     = optional(list(string), [])
+    environment_variables   = optional(map(string), {})
+    enable_async_processing = optional(bool, false)
+    example_api_calls       = optional(list(string), [])
+    example_api_requests = optional(list(object({
+      method       = optional(string, "GET")
+      path         = string
+      content_type = optional(string, "application/json")
+      body         = optional(string, null)
+    })), [])
+    example_api_calls_user_to_impersonate = optional(string)
+    secured_variables = optional(list(object({
+      name                = string
+      value               = optional(string)
+      writable            = optional(bool, false)
+      lockable            = optional(bool, false)
+      sensitive           = optional(bool, true)
+      value_managed_by_tf = optional(bool, true)
+      description         = optional(string)
+      })),
+    [])
+    settings_to_provide = optional(map(string), {})
+    rules_file          = optional(string, null)
+  }))
+
+  description = "map of custom API connectors to provision"
+  default     = {}
+}
+
 variable "custom_api_connector_rules" {
   type        = map(string)
   description = "map of connector id --> YAML file with custom rules"

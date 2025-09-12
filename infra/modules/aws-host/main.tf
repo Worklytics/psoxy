@@ -28,6 +28,8 @@ locals {
 
   has_enabled_webhook_collectors = length(keys(var.webhook_collectors)) > 0
   enable_webhook_testing         = var.provision_testing_infra && local.has_enabled_webhook_collectors
+
+  api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
 }
 
 module "psoxy" {
@@ -218,7 +220,7 @@ module "api_connector" {
     {
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
       EMAIL_CANONICALIZATION = var.email_canonicalization
-      CUSTOM_RULES_SHA       = try(var.custom_api_connector_rules[each.key], null) != null ? filesha1(var.custom_api_connector_rules[each.key]) : null
+      CUSTOM_RULES_SHA       = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : null
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
     }
   )
@@ -229,7 +231,7 @@ module "api_connector" {
 module "custom_api_connector_rules" {
   source = "../../modules/aws-ssm-rules"
 
-  for_each = var.custom_api_connector_rules
+  for_each = local.api_connector_rules_files
 
   prefix    = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
   file_path = each.value
