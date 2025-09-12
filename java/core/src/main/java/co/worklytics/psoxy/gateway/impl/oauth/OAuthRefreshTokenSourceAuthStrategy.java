@@ -288,34 +288,40 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 // only lock if we're using a shared token across processes
                 boolean lockNeeded = useSharedToken();
 
-                boolean acquired = !lockNeeded || lockService.acquire(TOKEN_REFRESH_LOCK_ID, TOKEN_LOCK_DURATION);
+                try  {
+                    boolean acquired = !lockNeeded || lockService.acquire(TOKEN_REFRESH_LOCK_ID, TOKEN_LOCK_DURATION);
 
-                if (acquired) {
-                    tokenResponse = exchangeRefreshTokenForAccessToken();
-                    token = asAccessToken(tokenResponse);
+                    if (acquired) {
+                        tokenResponse = exchangeRefreshTokenForAccessToken();
+                        token = asAccessToken(tokenResponse);
 
-                    storeSharedAccessTokenIfSupported(token, lockNeeded);
-                    storeRefreshTokenIfRotated(tokenResponse);
+                        storeSharedAccessTokenIfSupported(token, lockNeeded);
+                        storeRefreshTokenIfRotated(tokenResponse);
 
-                    if (isAccessTokenCacheable()) {
-                        this.cachedToken = token;
+                        if (isAccessTokenCacheable()) {
+                            this.cachedToken = token;
+                        }
+
+
+                    } else {
+                        //re-try recursively, w/ linear backoff
+                        Uninterruptibles.sleepUninterruptibly(WAIT_AFTER_FAILED_LOCK_ATTEMPTS
+                            .plusMillis(randomNumberGenerator.nextInt(250))
+                            .multipliedBy(attempt + 1));
+
+                        token = refreshAccessToken(attempt + 1);
                     }
-
+                } catch (Throwable e) {
+                        log.log(Level.SEVERE, "Failed to refresh token after " + attempt + " attempts", e);
+                       throw e;
+                } finally {
                     if (lockNeeded) {
                         // hold lock extra, to try to maximize the time between token refreshes
                         Uninterruptibles.sleepUninterruptibly(ALLOWANCE_FOR_EVENTUAL_CONSISTENCY);
                         lockService.release(TOKEN_REFRESH_LOCK_ID);
                     }
-                } else {
-                    //re-try recursively, w/ linear backoff
-                    Uninterruptibles.sleepUninterruptibly(WAIT_AFTER_FAILED_LOCK_ATTEMPTS
-                        .plusMillis(randomNumberGenerator.nextInt(250))
-                        .multipliedBy(attempt + 1));
-
-                    token = refreshAccessToken(attempt + 1);
                 }
-            }
-
+            } 
             return token;
         }
 
