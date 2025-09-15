@@ -762,7 +762,7 @@ public class ApiDataRequestHandler {
         // type and subtype, such as 'text/plain'."}}
         headers.setAccept(ContentType.APPLICATION_JSON.getMimeType());
 
-        sanitizer.getAllowedRequestHeadersToForward(request.getHttpMethod(), targetUrl)
+        sanitizer.getAllowedRequestHeaders(request.getHttpMethod(), targetUrl)
                 .ifPresent(i -> i.forEach(h -> request.getHeader(h).ifPresent(headerValue -> {
                     logIfDevelopmentMode(() -> String.format("Header %s included", h));
                     headers.set(h, headerValue);

@@ -45,6 +45,7 @@ import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.util.Lists;
 import com.google.common.annotations.VisibleForTesting;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
@@ -190,10 +191,15 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     }
 
     @Override
-    public Optional<Collection<String>> getAllowedRequestHeadersToForward(String httpMethod, URL url) {
+    public Optional<Collection<String>> getAllowedRequestHeaders(String httpMethod, URL url) {
         return getEndpoint(httpMethod, url)
                 .map(Pair::getRight)
-                .map(endpoint -> endpoint.getAllowedRequestHeadersToForward())
+                .map(endpoint -> {
+                    Collection<String> allowedRequestHeaders = Lists.newArrayList();
+                    endpoint.getAllowedRequestHeaders().ifPresent(allowedRequestHeaders::addAll);
+                    endpoint.getAllowedRequestHeadersToForward().ifPresent(allowedRequestHeaders::addAll);
+                    return Optional.of(allowedRequestHeaders);
+                })
                 .orElse(Optional.empty());
     }
 

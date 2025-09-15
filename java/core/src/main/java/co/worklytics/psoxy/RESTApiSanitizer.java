@@ -52,7 +52,7 @@ public interface RESTApiSanitizer {
      * @param url The url to test
      * @return
      */
-    Optional<Collection<String>> getAllowedRequestHeadersToForward(String httpMethod, URL url);
+    Optional<Collection<String>> getAllowedRequestHeaders(String httpMethod, URL url);
 
     /**
      * sanitize jsonResponse received from url, according any options set on Sanitizer
