@@ -36,7 +36,7 @@ Clone the resulting repo to your machine.  Example command below, just fill in y
 git clone https://github.com/{{YOUR_ORG_ID}}/{{YOUR_REPO_NAME}}.git
 ```
 
-1a. **Manual template setup** (if you *cannot* 'Use this template', perhaps because your organization doesn't use GitHub or you need to use a different git host, you can manually create a copy:
+- Alternatively **use template outside GitHub** (if you *cannot* 'Use this template', perhaps because your organization doesn't use GitHub or you need to use a different git host, you can manually create a copy:
    - Clone this repository to your local machine:
      ```shell
      git clone https://github.com/Worklytics/psoxy-example-aws.git
@@ -50,7 +50,7 @@ git clone https://github.com/{{YOUR_ORG_ID}}/{{YOUR_REPO_NAME}}.git
      ```shell
      git init
      git add .
-     git commit -m "Initial commit from psoxy-example-aws template"
+     git commit -m "Initial commit from psoxy-example template"
      ```
    - Create a new repository on your preferred git hosting service (GitLab, Bitbucket, etc.)
    - Add your new repository as the remote origin:
@@ -58,6 +58,14 @@ git clone https://github.com/{{YOUR_ORG_ID}}/{{YOUR_REPO_NAME}}.git
      git remote add origin https://your-git-host.com/your-org/your-repo-name.git
      git branch -M main
      git push -u origin main
+     ```
+
+- Alternatively, **use this in a monorepo** (eg, you maintain have a monorepo with lots of terraform configurations, and you want to add this to those)
+  - Clone this repository to your local machine and copy its contents (excluding hidden stuff like `.git` files into your monorepo)
+     ```shell
+     git clone https://github.com/Worklytics/psoxy-example-aws.git
+     rm -rf psoxy-example-aws/.git
+     cp -r psoxy-example-aws ${PATH_TO_MONO_REPO}/
      ```
 
 2. Check your prereqs. Review versions and install anything needed.
