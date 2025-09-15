@@ -17,6 +17,12 @@ NC='\e[0m' # No Color
 
 CURRENT_RELEASE=$(sed -n '/git::https:\/\/github\.com\/worklytics\/psoxy\//{s/.*ref=\([^"&]*\).*/\1/p;q;}' main.tf)
 
+# if $NEXT_RELEASE is not provided, warn user and exit
+if [ -z "$NEXT_RELEASE" ]; then
+  printf "${RED}Next release version not specified. Exiting.${NC}\n"
+  exit 1
+fi
+
 printf "Parsed your current terraform module version as ${BLUE}${CURRENT_RELEASE}${NC}; this script will upgrade it to ${GREEN}${NEXT_RELEASE}${NC}?\n"
 
 read -p "Do you wish to continue? (Y/n) " -n 1 -r
