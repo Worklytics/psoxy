@@ -45,6 +45,10 @@ done
 
 rm ${EXAMPLE_TEMPLATE_REPO}*.bck
 
+# copy the README intended to be published to the example repo
+# q: better name for this README?
+cp README_to_publish.md ${EXAMPLE_TEMPLATE_REPO}README.md
+
 cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/init-example.sh ${EXAMPLE_TEMPLATE_REPO}init
 chmod +x ${EXAMPLE_TEMPLATE_REPO}init
 
