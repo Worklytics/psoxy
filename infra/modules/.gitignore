@@ -1,0 +1,6 @@
+# Terraform files generated during module testing
+# These files are created when running `terraform init` and `terraform test` on modules
+# and should not be committed to the repository
+
+.terraform/
+.terraform.lock.hcl
