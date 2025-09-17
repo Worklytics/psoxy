@@ -12,7 +12,12 @@ jobs:
     strategy:
       matrix:
         terraform_version: [ '~1.6.0', '~1.7.0', '~1.8.0', '~1.9.0', '~1.10.0', 'latest' ]
-        # TODO: we should matrix this over modules eventually too
+        module:
+          # Modules that only need validation
+          - { name: 'psoxy-constants', test: false }
+          # Modules that have tests
+          - { name: 'worklytics-connector-specs', test: true }
+          - { name: 'gcp-host', test: true }
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -22,15 +27,14 @@ jobs:
         with:
           terraform_version: ${{ matrix.terraform_version }}
 
-      - name: "Terraform - validate modules/psoxy-constants"
-        working-directory: infra/modules/psoxy-constants
+      - name: "Terraform - validate ${{ matrix.module.name }}"
+        working-directory: infra/modules/${{ matrix.module.name }}
         run: |
           terraform init -reconfigure
           terraform validate
 
-      # also test here ...
-      - name: "Terraform - test modules/worklytics-connector-specs"
-        working-directory: infra/modules/worklytics-connector-specs
+      - name: "Terraform - test ${{ matrix.module.name }}"
+        if: ${{ matrix.module.test }}
+        working-directory: infra/modules/${{ matrix.module.name }}
         run: |
-          terraform init -reconfigure
           terraform test
