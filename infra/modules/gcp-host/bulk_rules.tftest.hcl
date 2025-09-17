@@ -27,10 +27,10 @@ variables {
     }
   }
 
-  # Test custom_bulk_connector_rules (should be overridden by bulk_connectors rules)
+  # Test custom_bulk_connector_rules (takes precedence over rules specified directly in the connector spec)
   custom_bulk_connector_rules = {
     "test-hris" = {
-      # This should NOT be used since test-hris has rules in bulk_connectors
+      # This SHOULD be used since custom_bulk_connector_rules takes precedence over the connector spec
       columnsToPseudonymize          = ["wrong_field"]
       columnsToPseudonymizeIfPresent = ["wrong_optional_field"]
     }
