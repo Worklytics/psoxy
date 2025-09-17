@@ -35,6 +35,16 @@ columnsToPseudonymize:
 
 To avoid inadvertent data leakage, if a column specified to be pseudonymized is not present in the input data, the Proxy will fail with an error. This is to avoid simple column name typos resulting in data leakage.
 
+
+If that is not the behavior to desire, you can use `columnsToPseudonymizeIfPresent` to pseudonymize columns without this check:
+
+```yaml
+columnsToPseudonymizeIfPresent:
+  - optional_employee_id
+  - backup_email
+  - secondary_manager_id
+```
+
 #### Additional Transformations
 
 To ease integration, the 'bulk' mode also supports a few additional common transformations that may be useful. These provide an alternative to using a separate ETL tool to transform your data, or modifying your existing data export pipelines.
@@ -71,6 +81,16 @@ columnsToRename:
 ```
 
 This feature supports simple adaptation of existing data pipelines for use in Worklytics.
+
+##### Duplicating Columns
+
+To duplicate a column (creating a copy with a different name), add it to `columnsToDuplicate`, which is a map from original column name --> new column name. Column duplication is applied before pseudonymization and other transforms.
+
+```yaml
+columnsToDuplicate:
+  employee_id: employee_id_original
+  manager_id: manager_id_backup
+```
 
 #### See Also
 
