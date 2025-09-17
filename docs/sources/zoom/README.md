@@ -30,7 +30,7 @@ The Zoom connector through Psoxy requires a Custom Managed App on the Zoom Marke
 be left in development mode; it does not need to be published.
 
 1. Go to https://marketplace.zoom.us/develop/create and create an app of type "Server to Server
-   OAuth" for creating a server-to-server app.
+OAuth" for creating a server-to-server app. (NOTE: if this option is disabled for you, the owner/super-admin for your account may need to edit permissions associated with your role via User Management > Roles > Role Settings > Advanced features in the Zoom web portal and select the View and Edit checkboxes for "Server-to-Server OAuth app.")
 
 2. After creation, it will show the App Credentials.
 
