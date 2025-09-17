@@ -45,8 +45,8 @@ variables {
   webhook_collectors = {}
 }
 
-# Mock provider since we're only testing the logic, not actual GCP resources
-mock_provider "google" {}
+# Note: mock_provider is not supported in Terraform 1.6 (requires 1.7+)
+# Tests will run against actual provider logic without mocking
 
 run "rules_environment_variable_set" {
   command = plan
