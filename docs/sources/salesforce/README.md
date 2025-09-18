@@ -40,7 +40,7 @@ Before running the example, you have to populate the following variables in terr
         - The policy MUST have the application marked as "enabled" in "Connected App Access".
           Otherwise requests will return 401 with INVALID_SESSION_ID
 
-  The user set for "run as" on the connector should have, between its `Permission Sets` and`Profile`, the permission of `View All Data`. This is required to support the queries used to retrieve [Activity Histories](https://developer.salesforce.com/docs/atlas.en-us. object_reference.meta/object_reference/sforce_api_objects_activityhistory.htm) by _account id_.
+  The user set for "run as" on the connector should have, between its `Permission Sets` and`Profile`, the permission of `View All Data`. This is required to support the queries used to retrieve [Activity Histories](https://developer.salesforce.com/docs/atlas.en-us.object_reference.meta/object_reference/sforce_api_objects_activityhistory.htm) by _account id_.
 
 2. Once created, open "Manage Consumer Details"
 3. Update the content of `PSOXY_SALESFORCE_CLIENT_ID` from Consumer Key and
