@@ -37,6 +37,17 @@ variable "provision_gcp_sa_keys" {
   default     = true
 }
 
+variable "gcp_sa_key_rotation_days" {
+  type        = number
+  description = "rotation period for the GCP Service Account key, in day; not applicable if provision_gcp_sa_keys is false"
+  default     = 60
+
+  validation {
+    condition     = var.gcp_sa_key_rotation_days > 0
+    error_message = "gcp_sa_key_rotation_days must be greater than 0"
+  }
+}
+
 variable "todos_as_local_files" {
   type        = bool
   description = "whether to render TODOs as flat files"

@@ -24,14 +24,11 @@ resource "time_rotating" "sa-key-rotation" {
 resource "google_service_account_key" "key" {
   service_account_id = var.service_account_id
 
-  # does this actually destroy/disable the old key? that's a problem as Cloud functions pull the
-  # value at instance start-up and don't refresh it
-  keepers = {
-    rotation_time = time_rotating.sa-key-rotation.rotation_rfc3339
-  }
-
   lifecycle {
     create_before_destroy = true
+    replace_triggered_by = [
+      time_rotating.sa-key-rotation
+    ]
   }
 
   depends_on = [

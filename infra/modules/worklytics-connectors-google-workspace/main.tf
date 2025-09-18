@@ -78,6 +78,7 @@ module "google_workspace_connection_auth" {
   source = "../../modules/gcp-sa-auth-key"
 
   service_account_id = each.value
+  rotation_days      = var.gcp_sa_key_rotation_days
 }
 
 
