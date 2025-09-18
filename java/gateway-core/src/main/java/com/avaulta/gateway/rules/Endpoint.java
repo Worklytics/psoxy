@@ -101,13 +101,41 @@ public class Endpoint {
     }
 
     /**
-     * if provided, headers included here will be passed through to the endpoint
-     * this can be used for passing a specific header (for example, pagination, limits, etc.)
-     * to the request in the source
+     * if provided, headers included here will be forwarded through to the source API endpoint if they are present on the request.
+     * this can be used for passing a specific header (for example, pagination, limits, etc.) to the request in the source
+     * 
+     * endpoint-matching does NOT take these into account. eg, absence of a header on request will NOT cause the request to not be
+     * matched to this endpoint; similarly, presence of a header on a request will NOT cause request to be blocked - the header will
+     * simply be dropped.
+     * 
+     * q: should we implement strict request header handling? (block requests will unexpected headers?)
+     * 
      * NOTE: Using List, as Set is not being serializable in YAML
      */
+    @Deprecated // use `allowedRequestHeaders` instead
     @JsonInclude(JsonInclude.Include.NON_NULL)
     Collection<String> allowedRequestHeadersToForward;
+
+
+    /**
+     * if provided, headers included here will be forwarded through to the source API endpoint if they are present on the request.
+     * this can be used for passing a specific header (for example, pagination, limits, etc.) to the request in the source
+     * 
+     * endpoint-matching does NOT take these into account. eg, absence of a header on request will NOT cause the request to not be
+     * matched to this endpoint; similarly, presence of a header on a request will NOT cause request to be blocked - the header will
+     * simply be dropped.
+     * 
+     * q: should we implement strict request header handling? (block requests will unexpected headers?)
+     * 
+     * NOTE: Using List, as Set is not being serializable in YAML
+     */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    Collection<String> allowedRequestHeaders;
+
+    @JsonIgnore
+    public Optional<Collection<String>> getAllowedRequestHeaders() {
+        return Optional.ofNullable(allowedRequestHeaders);
+    }
 
     @JsonIgnore
     public Optional<Collection<String>> getAllowedRequestHeadersToForward() {

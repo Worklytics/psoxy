@@ -6,9 +6,8 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Optional;
-
 import co.worklytics.psoxy.rules.RESTRules;
-import lombok.*;
+import lombok.NonNull;
 
 public interface RESTApiSanitizer {
     /**
@@ -53,7 +52,7 @@ public interface RESTApiSanitizer {
      * @param url The url to test
      * @return
      */
-    Optional<Collection<String>> getAllowedHeadersToForward(String httpMethod, URL url);
+    Optional<Collection<String>> getAllowedRequestHeaders(String httpMethod, URL url);
 
     /**
      * sanitize jsonResponse received from url, according any options set on Sanitizer

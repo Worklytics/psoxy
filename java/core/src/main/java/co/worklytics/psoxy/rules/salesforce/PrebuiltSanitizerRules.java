@@ -200,28 +200,28 @@ public class PrebuiltSanitizerRules {
 
     static final Endpoint QUERY_USERS_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT.*FROM(%20|\\+)User(%20|\\+)WHERE(%20|\\+)LastModifiedDate.*$")
-            .allowedRequestHeadersToForward(DEFAULT_QUERY_HEADERS)
+            .allowedRequestHeaders(DEFAULT_QUERY_HEADERS)
             .transforms(getUserTransformations(".records[*]", true))
             .responseSchema(jsonSchemaForQueryResult("User", USER_BY_QUERY_RESULT_JSON_SCHEMA))
             .build();
 
     static final Endpoint QUERY_ACCOUNTS_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT.*FROM(%20|\\+)Account(%20|\\+)WHERE(%20|\\+)LastModifiedDate.*$")
-            .allowedRequestHeadersToForward(DEFAULT_QUERY_HEADERS)
+            .allowedRequestHeaders(DEFAULT_QUERY_HEADERS)
             .transform(getAccountTransformations(".records[*]", true))
             .responseSchema(jsonSchemaForQueryResult("Account", ACCOUNT_WITH_ACTIVITY_HISTORIES_QUERY_RESULT_PROPERTY_SCHEMA))
             .build();
 
     static final Endpoint QUERY_FOR_ACTIVITY_HISTORIES_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/query[?]q=SELECT.*FROM(%20|\\+)ActivityHistories.*$")
-            .allowedRequestHeadersToForward(DEFAULT_QUERY_HEADERS)
+            .allowedRequestHeaders(DEFAULT_QUERY_HEADERS)
             .transform(getActivityHistoryTransformations(false))
             .responseSchema(jsonSchemaForActivityHistoryQueryResult())
             .build();
 
     static final Endpoint QUERY_PAGINATION_ENDPOINT = Endpoint.builder()
             .pathRegex("^/services/data/" + VERSION_REGEX + "/query/.*")
-            .allowedRequestHeadersToForward(DEFAULT_QUERY_HEADERS)
+            .allowedRequestHeaders(DEFAULT_QUERY_HEADERS)
             .transforms(getUserTransformations(".records[*]", true))
             .transform(getAccountTransformations(".records[*]", true))
             .transform(getActivityHistoryTransformations(true))
