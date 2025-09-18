@@ -151,7 +151,7 @@ public class ApiDataRequestHandler {
      * @see <a href="https://flaviocopes.com/http-response-headers/"></a>
      * @see <a href="https://developer.mozilla.org/en-US/docs/Glossary/Response_header"></a>
      */
-    public static Set<String> DEFAULT_HEADERS_PASS_THROUGH = normalizeHeaders(Set.of(
+    public static Set<String> DEFAULT_RESPONSE_HEADERS_TO_PASS_THROUGH = normalizeHeaders(Set.of(
             HttpHeaders.CONTENT_TYPE,
             HttpHeaders.CACHE_CONTROL,
             HttpHeaders.ETAG,
@@ -625,7 +625,7 @@ public class ApiDataRequestHandler {
         Set<String> availableHeaders = normalizeHeaders(response.getHeaders().keySet());
 
 
-        Sets.intersection(availableHeaders, DEFAULT_HEADERS_PASS_THROUGH)
+        Sets.intersection(availableHeaders, DEFAULT_RESPONSE_HEADERS_TO_PASS_THROUGH)
                 .forEach(h -> responseBuilder.header(h,
                         HEADER_JOINER.join(response.getHeaders().getHeaderStringValues(h))));
 
@@ -763,7 +763,7 @@ public class ApiDataRequestHandler {
         // type and subtype, such as 'text/plain'."}}
         headers.setAccept(ContentType.APPLICATION_JSON.getMimeType());
 
-        sanitizer.getAllowedHeadersToForward(request.getHttpMethod(), targetUrl)
+        sanitizer.getAllowedRequestHeaders(request.getHttpMethod(), targetUrl)
                 .ifPresent(i -> i.forEach(h -> request.getHeader(h).ifPresent(headerValue -> {
                     logIfDevelopmentMode(() -> String.format("Header %s included", h));
                     headers.set(h, headerValue);
