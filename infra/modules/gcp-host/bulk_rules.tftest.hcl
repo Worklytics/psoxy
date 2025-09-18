@@ -6,7 +6,7 @@ variables {
   gcp_project_id       = "test-project-123456"
   environment_name     = "test"
   worklytics_sa_emails = ["test@example.com"]
-  psoxy_base_dir       = "/Users/erik/code/psoxy/" # Use actual path for validation
+  psoxy_base_dir       = "../../../" # Use actual path for validation
 
   # Test custom_bulk_connectors with columnsToPseudonymizeIfPresent
   bulk_connectors = {
@@ -45,8 +45,8 @@ variables {
   webhook_collectors = {}
 }
 
-# Note: mock_provider is not supported in Terraform 1.6 (requires 1.7+)
-# Tests will run against actual provider logic without mocking
+# Mock provider since we're only testing the logic, not actual GCP resources
+mock_provider "google" {}
 
 run "rules_environment_variable_set" {
   command = plan

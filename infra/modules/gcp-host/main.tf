@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.6, < 2.0"
+  required_version = ">= 1.6, < 2.0" # should work with 1.6, but we don't automate testing against that version anymore
 }
 
 # constants
