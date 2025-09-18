@@ -624,7 +624,7 @@ public class ApiDataRequestHandler {
         Set<String> availableHeaders = normalizeHeaders(response.getHeaders().keySet());
 
 
-        Sets.intersection(availableHeaders, DEFAULT_HEADERS_PASS_THROUGH)
+        Sets.intersection(availableHeaders, DEFAULT_RESPONSE_HEADERS_TO_PASS_THROUGH)
                 .forEach(h -> responseBuilder.header(h,
                         HEADER_JOINER.join(response.getHeaders().getHeaderStringValues(h))));
 
