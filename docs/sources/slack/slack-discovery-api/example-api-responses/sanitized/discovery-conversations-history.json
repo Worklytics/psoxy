@@ -55,9 +55,7 @@
         "ts":"38327498237.000000"
       },
       "attachments":[
-        {
-          "id":1
-        }
+        { }
       ]
     },
     {
@@ -165,6 +163,10 @@
         "created_by":"t~ht3jIZhCUKqR7UVboNfpxTZZUWLoExaW1WX6GG19JVg",
         "date_start":1720542372,
         "date_end":1720542756,
+        "participant_history":[
+          "t~ht3jIZhCUKqR7UVboNfpxTZZUWLoExaW1WX6GG19JVg",
+          "t~C35tSgm0FijTntSB1kSz4RzerO3J58n-H3rwI7A0698"
+        ],
         "canvas_thread_ts":"1720542372.566689",
         "thread_root_ts":"1720542372.566689",
         "channels":[
