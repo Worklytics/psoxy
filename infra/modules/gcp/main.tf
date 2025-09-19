@@ -269,10 +269,14 @@ module "test_tool" {
   psoxy_version = module.psoxy_package.version
 }
 
-# create custom role needed for bulk psoxy use-cases
+# create custom role needed for any proxy use-case that writes output to a GCS bucket:
+# - bulk mode
+# - webhook collectors
+# - side output
+# - async mode
+# could condition creation of this on at least one of the above being used, but essentially EVERYONE uses at least one of those,
+# so not bothering with unnecessary complexity of that.
 resource "google_project_iam_custom_role" "bucket_write" {
-  count = var.support_bulk_mode ? 1 : 0
-
   project     = var.project_id
   role_id     = "${local.environment_id_role_prefix}writeAccess"
   title       = "${local.environment_id_prefix_display}Bucket Object Write/Update"
@@ -424,8 +428,8 @@ output "deployment_bundle_object_name" {
 }
 
 output "bucket_write_role_id" {
-  value       = try(google_project_iam_custom_role.bucket_write[0].id, null)
-  description = "Role to grant on bucket to enable writes. Only provisioned if support_bulk_mode is true."
+  value       = google_project_iam_custom_role.bucket_write.id
+  description = "Role to grant on bucket to enable writes. Used by any proxy use case that writes output to a GCS bucket."
 }
 
 output "secrets" {
