@@ -7,10 +7,9 @@ locals {
   environment_id_display_name_qualifier = length(var.environment_id) > 0 ? " ${var.environment_id} " : ""
 }
 
-# beginning of current month - used for example API calls to provide recent but fairly stable dates
-# this will only change monthly, preventing churning while keeping examples relevant
-resource "time_static" "month_start" {
-  rfc3339 = formatdate("YYYY-MM-01'T'00:00:00Z", timestamp())
+# a timestamp used to seed example test API calls, so that they're likely to return interesting data, but the terraform test scripts don't churn too much
+resource "time_rotating" "example_timestamp" {
+  rotation_days = 360
 }
 
 module "worklytics_connector_specs" {
@@ -25,7 +24,7 @@ module "worklytics_connector_specs" {
   msft_teams_example_call_guid               = var.msft_teams_example_call_guid
   msft_teams_example_call_record_guid        = var.msft_teams_example_call_record_guid
   msft_teams_example_online_meeting_join_url = var.msft_teams_example_online_meeting_join_url
-  example_api_calls_sample_date              = time_static.month_start.id
+  example_api_calls_sample_date              = time_rotating.example_timestamp.id
 }
 
 locals {
