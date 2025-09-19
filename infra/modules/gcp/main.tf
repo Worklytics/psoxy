@@ -424,18 +424,8 @@ output "deployment_bundle_object_name" {
 }
 
 output "bucket_write_role_id" {
-  value = try(google_project_iam_custom_role.bucket_write[0].id, null)
+  value       = try(google_project_iam_custom_role.bucket_write[0].id, null)
   description = "Role to grant on bucket to enable writes. Only provisioned if support_bulk_mode is true."
-}
-
-# Deprecated, it will be removed in v0.5.x
-output "salt_secret_id" {
-  value = google_secret_manager_secret.pseudonym_salt.secret_id
-}
-
-# Deprecated, it will be removed in v0.5.x
-output "salt_secret_version_number" {
-  value = trimprefix(google_secret_manager_secret_version.initial_version.name, "${google_secret_manager_secret.pseudonym_salt.name}/versions/")
 }
 
 output "secrets" {
