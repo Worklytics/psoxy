@@ -4,14 +4,14 @@ import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import lombok.*;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
+import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
@@ -104,9 +104,8 @@ public class AESReversibleTokenizationStrategy implements ReversibleTokenization
         return result;
     }
 
-    @SneakyThrows
     @Override
-    public String getOriginalDatum(@NonNull byte[] reversibleToken) {
+    public String getOriginalDatum(@NonNull byte[] reversibleToken) throws TokenInvalid {
         if (getKey() == null) {
             throw new IllegalStateException("No key set on AESReversibleTokenizationStrategy");
         }
@@ -115,13 +114,20 @@ public class AESReversibleTokenizationStrategy implements ReversibleTokenization
 
         Cipher cipher = getCipherInstance();
 
-        cipher.init(Cipher.DECRYPT_MODE, getKey(), cipherSuite.getParameterSpecGenerator().apply(reversibleToken));
+        try {
+            cipher.init(Cipher.DECRYPT_MODE, getKey(), cipherSuite.getParameterSpecGenerator().apply(reversibleToken));
 
-        byte[] plain = cipher.doFinal(cryptoText);
-        return new String(plain, StandardCharsets.UTF_8);
+            byte[] plain = cipher.doFinal(cryptoText);
+            return new String(plain, StandardCharsets.UTF_8);
+        } catch (IllegalBlockSizeException | InvalidAlgorithmParameterException |
+                 BadPaddingException | InvalidKeyException e) {
+            throw new RuntimeException(e);
+        } catch (RuntimeException e) {
+            throw new TokenInvalid("Failed to decrypt token; most likely because encryption key has been rotated", e);
+        }
     }
 
-    @Override
+        @Override
     public String toString() {
         return "AESReversiblePseudonymStrategy(" + cipherSuite.getCipher() + ")";
     }
