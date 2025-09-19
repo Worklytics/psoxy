@@ -8,29 +8,22 @@ data may be incomplete.
 
 Accounts on unpaid plans do not have access to some methods Worklytics use like:
 
-- [Zoom Reports API](https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#tag/Reports)
-  -required for historical data
-- certain
-  [Zoom Meeting API](https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#tag/Meetings)
-  methods such as retrieving
-  [past meeting participants](https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#operation/pastMeetingParticipants)
+- [Zoom Reports API](https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#tag/Reports) -required for historical data
+- certain [Zoom Meeting API](https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#tag/Meetings) methods such as retrieving [past meeting participants](https://developers.zoom.us/docs/api/rest/reference/zoom-api/methods/#operation/pastMeetingParticipants)
 
 ## Examples
 
 - [Example Rules](zoom.yaml)
-- Example Data : [original/meeting-details.json](example-api-responses/original/meeting-details.json) |
-  [sanitized/meeting-details](example-api-responses/sanitized/meeting-details.json)
+- Example Data : [original/meeting-details.json](example-api-responses/original/meeting-details.json) | [sanitized/meeting-details](example-api-responses/sanitized/meeting-details.json)
 
-See more examples in the `docs/sources/zoom/example-api-responses` folder
-of the [Psoxy repository](https://github.com/Worklytics/psoxy).
+See more examples in the `docs/sources/zoom/example-api-responses` folder of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
 ## Steps to Connect
 
-The Zoom connector through Psoxy requires a Custom Managed App on the Zoom Marketplace. This app may
-be left in development mode; it does not need to be published.
+The Zoom connector through Psoxy requires a Custom Managed App on the Zoom Marketplace. This app may be left in development mode; it does not need to be published.
 
 1. Go to https://marketplace.zoom.us/develop/create and create an app of type "Server to Server
-   OAuth" for creating a server-to-server app.
+OAuth" for creating a server-to-server app. (NOTE: if this option is disabled for you, the owner/super-admin for your account may need to edit permissions associated with your role via User Management > Roles > Role Settings > Advanced features in the Zoom web portal and select the View and Edit checkboxes for "Server-to-Server OAuth app.")
 
 2. After creation, it will show the App Credentials.
 
@@ -42,20 +35,15 @@ be left in development mode; it does not need to be published.
 
    ![Server to Server OAuth App](server-to-server-oauth-app.png)
 
-   Share them with the AWS/GCP administrator, who should fill them in your host platform's secret
-   manager (AWS Systems Manager Parameter Store / GCP Secret Manager) for use by the proxy when
-   authenticating with the Zoom API:
+   Share them with the AWS/GCP administrator, who should fill them in your host platform's secret manager (AWS Systems Manager Parameter Store / GCP Secret Manager) for use by the proxy when authenticating with the Zoom API:
 
    - `Account ID` --> `PSOXY_ZOOM_ACCOUNT_ID`
    - `Client ID` --> `PSOXY_ZOOM_CLIENT_ID`
    - `Client Secret` --> `PSOXY_ZOOM_CLIENT_SECRET`
 
-   NOTE: Anytime the _Client Secret_ is regenerated it needs to be updated in the Proxy too. NOTE:
-   _Client Secret_ should be handled according to your organization's security policies for API
-   keys/secrets as, in combination with the above, allows access to your organization's data.
+   NOTE: Anytime the _Client Secret_ is regenerated it needs to be updated in the Proxy too. NOTE: _Client Secret_ should be handled according to your organization's security policies for API keys/secrets as, in combination with the above, allows access to your organization's data.
 
-3. Fill the 'Information' section. Zoom requires company name, developer name, and developer email
-   to activate the app.
+3. Fill the 'Information' section. Zoom requires company name, developer name, and developer email to activate the app.
 
 4. No changes are needed in the 'Features' section. Continue.
 

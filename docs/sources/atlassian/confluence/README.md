@@ -15,18 +15,20 @@ of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 Confluence OAuth 2.0 (3LO) through Psoxy requires a Confluence Cloud account with following granular scopes:
 
 Add following scopes as part of \"Granular Scopes\", first clicking on \`Edit Scopes\` and then selecting them:
-- read:blogpost:confluence: for getting [blogposts and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-blogposts-id-versions-get)
-- read:comment:confluence: for getting [footer-comments](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-footer-comments-id-versions-get) and [inline-comments](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-inline-comments-id-versions-get) and their versions
-- read:group:confluence: for getting [groups](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-group/#api-wiki-rest-api-group-get)
-- read:user:confluence: for getting [users from groups](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-group/#api-wiki-rest-api-group-groupid-membersbygroupid-get)
-- read:space:confluence: for getting [spaces](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-space/#api-spaces-get)
-- read:attachment:confluence: for getting [attachments and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-attachments-id-versions-get)
-- read:page:confluence: for getting [pages and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-pages-id-versions-get)
-- read:task:confluence: for getting [tasks](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-task/#api-tasks-get)
-- read:content-details:confluence: for using [content search endpoint](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-search/#api-wiki-rest-api-search-get)
+- `read:blogpost:confluence`: for getting [blogposts and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-blogposts-id-versions-get)
+- `read:comment:confluence`: for getting [footer-comments](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-footer-comments-id-versions-get) and [inline-comments](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-inline-comments-id-versions-get) and their versions
+- `read:group:confluence`: for getting [groups](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-group/#api-wiki-rest-api-group-get)
+- `read:user:confluence`: for getting [users from groups](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-group/#api-wiki-rest-api-group-groupid-membersbygroupid-get)
+- `read:space:confluence`: for getting [spaces](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-space/#api-spaces-get)
+- `read:attachment:confluence`: for getting [attachments and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-attachments-id-versions-get)
+- `read:page:confluence`: for getting [pages and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-pages-id-versions-get)
+- `read:task:confluence`: for getting [tasks](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-task/#api-tasks-get)
+- `read:content-details:confluence`: for using [content search endpoint](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-search/#api-wiki-rest-api-search-get)
 
 Then go back to \"Permissions\" and click on \"Add\" for \`User Identity API\`, only selecting following scopes:
-- read:account: for getting user emails
+- `read:account`: for getting user emails
+
+
 ## Setup Instructions
 
 ### App configuration
@@ -44,8 +46,10 @@ Then go back to \"Permissions\" and click on \"Add\" for \`User Identity API\`, 
     - `read:task:confluence`
     - `read:content-details:confluence`
     - `read:content:confluence`
-      Then repeat the same but for "User Identity API", adding the following scope:
+
+  Then repeat the same but for "User Identity API", adding the following scope:
     - `read:account`
+
 3. Go to the "Authorization" section and add an OAuth 2.0 (3LO) authorization type: click on "Add"
    and you will be prompted to provide a "Callback URI". At this point, you could add
    `http://localhost` as value and follow the [Manual steps](#manual-steps), or you could
@@ -82,7 +86,9 @@ it will print the all the values to complete the configuration:
    obtain a new code by  again pasting the authorization URL in the browser.
 4. Now, replace the values in following URL and run it from command line in your terminal. Replace
    `YOUR_AUTHENTICATION_CODE`, `YOUR_CLIENT_ID` and `YOUR_CLIENT_SECRET` in the placeholders:
-   `curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Content-Type: application/json' --data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET", "code": "YOUR_AUTHENTICATION_CODE", "redirect_uri": "http://localhost"}'`
+```shell
+curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Content-Type: application/json' --data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET", "code": "YOUR_AUTHENTICATION_CODE", "redirect_uri": "http://localhost"}'`
+```
 5. After running that command, if successful you will see a
    [JSON response](https://developer.atlassian.com/cloud/confluence/platform/oauth-2-3lo-apps/#2--exchange-authorization-code-for-access-token) like this:
    ```json
