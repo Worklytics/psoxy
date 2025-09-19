@@ -32,6 +32,17 @@ variable "google_workspace_provision_keys" {
   default     = true
 }
 
+variable "google_workspace_key_rotation_days" {
+  type        = number
+  description = "rotation period for the GCP Service Account keys, in days; not applicable if provision_gcp_sa_keys is false"
+  default     = 60
+
+  validation {
+    condition     = var.google_workspace_key_rotation_days > 0
+    error_message = "gcp_sa_keygoogle_workspace_key_rotation_days_rotation_days must be greater than 0"
+  }
+}
+
 locals {
   # tflint-ignore: terraform_unused_declarations
   some_google_connector_enabled                    = (length(setintersection(var.enabled_connectors, ["gcal", "gdirectory", "gdrive", "gmail", "google-meet", "google-chat", "gemini-for-workspace"])) > 0)
