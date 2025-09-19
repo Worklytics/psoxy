@@ -390,3 +390,8 @@ output "todo_setup" {
 output "next_todo_step" {
   value = var.todo_step + 1
 }
+
+output "function_config" {
+  description = "INTERNAL USE ONLY - Cloud Function configuration for CI/testing purposes. Users should NOT rely on this output's presence, structure, or schema as it may change without notice."
+  value       = google_cloudfunctions2_function.function
+}
