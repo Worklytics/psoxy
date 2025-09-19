@@ -182,6 +182,8 @@ resource "google_cloudfunctions2_function" "function" {
     }
   }
 
+  # NOTE: bulk connectors are STILL triggered through HTTPS invocations, so these have default HTTPS endpoint URls
+
   service_config {
     available_memory      = "${coalesce(var.available_memory_mb, 1024)}M"
     service_account_email = google_service_account.service_account.email
@@ -324,16 +326,16 @@ FILE_PATH=$${1:-${try(local.example_file, "")}}
 BLUE='\e[0;34m'
 NC='\e[0m'
 
-printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"tf
+printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"
 
 node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
 
-if gzip -t "$FILE_PATH"; then
+if gzip -t "$FILE_PATH" 2>/dev/null; then
   printf "test file was compressed, so not testing compression as a separate case\n"
 else
   printf "testing with compressed input file ... \n"
   # extract the file name from the path
-  TEST_FILE_NAME=./$(basename $FILE_PATH)
+  TEST_FILE_NAME=/tmp/$(basename $FILE_PATH)
 
   gzip -c $FILE_PATH > $TEST_FILE_NAME
   node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $TEST_FILE_NAME -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
