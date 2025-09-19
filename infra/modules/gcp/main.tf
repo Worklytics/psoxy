@@ -271,6 +271,8 @@ module "test_tool" {
 
 # create custom role needed for bulk psoxy use-cases
 resource "google_project_iam_custom_role" "bucket_write" {
+  count = var.support_bulk_mode ? 1 : 0
+
   project     = var.project_id
   role_id     = "${local.environment_id_role_prefix}writeAccess"
   title       = "${local.environment_id_prefix_display}Bucket Object Write/Update"
@@ -422,7 +424,8 @@ output "deployment_bundle_object_name" {
 }
 
 output "bucket_write_role_id" {
-  value = google_project_iam_custom_role.bucket_write.id
+  value = try(google_project_iam_custom_role.bucket_write[0].id, null)
+  description = "Role to grant on bucket to enable writes. Only provisioned if support_bulk_mode is true."
 }
 
 # Deprecated, it will be removed in v0.5.x
