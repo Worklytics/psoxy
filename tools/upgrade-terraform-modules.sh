@@ -81,5 +81,5 @@ CURRENT_PATCH=$(echo $CURRENT_RELEASE | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]
 
 if [ $NEXT_MINOR -gt $CURRENT_MINOR ]; then
   printf "Next release version *may* include a provider bump. It is recommended to run ${BLUE} terraform init --upgrade${NC} to get the latest versions of all terraform providers that are compatible with your configuration.\n"
-  printf "You may first with to run ${BLUE}terraform providers${NC} to review the various provider version constraints, and consider revising them in top-level ${BLUE}main.tf${NC} or wherever they're specified.\n"
+  printf "You may first wish to run ${BLUE}terraform providers${NC} to review the various provider version constraints, and consider revising them in top-level ${BLUE}main.tf${NC} or wherever they're specified.\n"
 fi
