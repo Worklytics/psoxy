@@ -20,8 +20,6 @@ ASYNC_CALL_RC=$$?
 ASYNC_CALL_RC=0
 %{ endif ~}
 
-exit $$((HEALTHCHECK_RC + SYNC_CALL_RC + ASYNC_CALL_RC))
-
 echo "Invoke this script with any of the following as arguments to test other endpoints:"
 
 %{ for example_api_get_request in example_api_get_requests ~}
@@ -30,3 +28,5 @@ echo "Invoke this script with any of the following as arguments to test other en
 %{ for example_api_post_request in example_api_post_requests ~}
     printf "\t%s\n" "${example_api_post_request.method} '${example_api_post_request.path}' ${example_api_post_request.content_type} '${example_api_post_request.body}'"
 %{ endfor ~}
+
+exit $$((HEALTHCHECK_RC + SYNC_CALL_RC + ASYNC_CALL_RC))
