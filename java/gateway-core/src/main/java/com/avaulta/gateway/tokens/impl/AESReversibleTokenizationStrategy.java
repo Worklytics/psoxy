@@ -113,7 +113,7 @@ public class AESReversibleTokenizationStrategy implements ReversibleTokenization
     }
 
     @Override
-    public String getOriginalDatum(@NonNull byte[] reversibleToken) throws InvalidTokenException {
+    public String getOriginalDatum(@NonNull byte[] reversibleToken) throws ReversibleTokenizationStrategy.InvalidTokenException {
         if (getKey() == null) {
             throw new IllegalStateException("No key set on AESReversibleTokenizationStrategy");
         }
