@@ -87,5 +87,5 @@ printf "${YELLOW}${PREFIX}CONFLUENCE_CLOUD_REFRESH_TOKEN${NC}: ${REFRESH_TOKEN}\
 printf "${YELLOW}${PREFIX}CONFLUENCE_CLOUD_CLIENT_ID${NC}: ${CLIENT_ID}\n"
 printf "${YELLOW}${PREFIX}CONFLUENCE_CLOUD_CLIENT_SECRET${NC}: ${CLIENT_SECRET}\n"
 
-printf "And set the cloud ID (${YELLOW}${CLOUD_ID}${NC}) as the value of ${YELLOW}confluence_cloud_id${NC} in your ${YELLOW}terraform.tfvars${NC} file.\n"
+printf "And set the cloud ID (${YELLOW}${CLOUD_ID}${NC}) as the value of ${YELLOW}confluence_example_cloud_id${NC} in your ${YELLOW}terraform.tfvars${NC} file.\n"
 
