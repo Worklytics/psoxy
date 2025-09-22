@@ -819,6 +819,29 @@ public class PrebuiltSanitizerRules {
                     put("data", JsonSchemaFilter.<String, RESTRules>builder()
                             .type("object")
                             .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{
+                                put("rateLimit", JsonSchemaFilter.builder()
+                                    .type("object")
+                                    .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{
+                                        put("limit", JsonSchemaFilter.builder()
+                                            .type("integer")
+                                            .build());
+                                        put("nodeCount", JsonSchemaFilter.builder()
+                                            .type("integer")
+                                            .build());
+                                        put("remaining", JsonSchemaFilter.builder()
+                                            .type("integer")
+                                            .build());
+                                        put("resetAt", JsonSchemaFilter.builder()
+                                            .type("string")
+                                            .format("date-time")
+                                            .build());
+                                        put("used", JsonSchemaFilter.builder()
+                                            .type("integer")
+                                            .build());
+                                        put("cost", JsonSchemaFilter.builder()
+                                                .type("integer")
+                                                .build());
+                                        }}).build());
                                 put("organization", JsonSchemaFilter.builder()
                                         .type("object")
                                         .properties(new LinkedHashMap<String, JsonSchemaFilter>() {{
