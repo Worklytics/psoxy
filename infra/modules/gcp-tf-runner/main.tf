@@ -10,13 +10,9 @@
 # in any env, this is NEVER the gcp service account configured via provider block
 # (eg, google.impersonate_service_account = "terraform@...")
 data "google_client_openid_userinfo" "me" {
-
 }
 
-#
-
-# if no 'email' field from 'google_client_openid_userinfo', generate id token for the current user
-# and parse email from it.
+# generate id token for the current user, from which we could parse email of that user
 # such parsing is explicitly allowed by Google; see https://cloud.google.com/docs/authentication/token-types#id
 #
 # however, this still appears to be the email of the authenticated user, not service account that
@@ -25,11 +21,13 @@ data "google_client_openid_userinfo" "me" {
 # we could pass in the service account email as a variable; but that pollutes a LOT of interfaces
 # and calls into question why we even use this module at all
 data "google_service_account_id_token" "identity" {
-  count = data.google_client_openid_userinfo.me.email == "" ? 1 : 0
-
   target_audience = "worklytics.co/gcp-tf-runner"
 }
 
+# TOD: external is hacky, likely not to work in many contexts; can we conditionally avoid it?
+# - does it work in terraform cloud? likely not ...
+# - should work locally, and in cloud shell
+# - would guess some tf linters/etc would complain about this
 data "external" "identity" {
   program = ["./${path.module}/read-tfvars.sh", "gcp_terraform_sa_account_email"]
 }
@@ -40,15 +38,16 @@ data "external" "identity" {
 #  - is there some resource that has an attribute that's the service account used to create it?
 
 locals {
-  jwt_payload = try(split(".", data.google_service_account_id_token.identity[0].id_token)[1], "")
+  # Only use the JWT token if we don't have an email from google_client_openid_userinfo, attempt to parse one from the JWT payload of the ID token
+  jwt_payload = data.google_client_openid_userinfo.me.email == "" ? try(split(".", data.google_service_account_id_token.identity.id_token)[1], "") : ""
 
   # convert base64url encoding to base64 encoding
   padding                   = join("", formatlist("%s", [for _ in range(4 - length(local.jwt_payload) % 4) : "="]))
   jwt_payload_padded        = "${local.jwt_payload}${local.padding}"
   jwt_payload_base64encoded = replace(replace(local.jwt_payload_padded, "-", "+"), "_", "/")
 
-  # decode to JSON, then extract email field
-  email_from_jwt = try(nonsensitive(jsondecode(base64decode(local.jwt_payload_base64encoded)).email), "")
+  # decode to JSON, then extract email field - only if we have a JWT payload
+  email_from_jwt = local.jwt_payload != "" ? try(nonsensitive(jsondecode(base64decode(local.jwt_payload_base64encoded)).email), "") : ""
 
   # coalesce failing here implies we failed to detect the auth'd gcp user
   authed_user_email = coalesce(
