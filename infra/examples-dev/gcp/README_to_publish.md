@@ -70,8 +70,8 @@ git clone https://github.com/{{YOUR_ORG_ID}}/{{YOUR_REPO_NAME}}.git
 
 4. Authenticate your tools as needed:
 
-  - auth [GCloud CLI](https://cloud.google.com/sdk/docs/authorizing) - `gcloud auth login` to authenticate, then `gcloud auth list` to verify you have expected account/user
-  - auth [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli) if using Microsoft 365 data sources  - `az login --allow-no-subscription` to authenticate, then `az account list` to verify you have expected account/user
+  - auth [GCloud CLI](https://cloud.google.com/sdk/docs/authorizing) - `gcloud auth login` to authenticate, then `gcloud auth list` to verify you have the expected account/user
+  - auth [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli) if using Microsoft 365 data sources  - `az login --allow-no-subscription` to authenticate, then `az account list` to verify you have the expected account/user
 
 5. Initialize your configuration using our helper script. Follow the prompts.
 
