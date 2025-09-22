@@ -127,19 +127,22 @@ public class AESReversibleTokenizationStrategy implements ReversibleTokenization
 
             byte[] plain = cipher.doFinal(cryptoText);
             return new String(plain, StandardCharsets.UTF_8);
-        } catch (IllegalBlockSizeException | InvalidAlgorithmParameterException |
-                 BadPaddingException | InvalidKeyException e) {
-            throw new RuntimeException(e);
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException("Invalid encryption key configuration", e);
+        } catch (InvalidAlgorithmParameterException e) {
+            throw new InvalidTokenException("Failed to decrypt token; some algorithm parameter, such as iv, is wrong", e);
+        } catch (BadPaddingException e) {
+            throw new InvalidTokenException("Failed to decrypt token; token appears to be corrupted or invalid, due to mismatch between token's padding and the padding expected by the cipher mode", e);
+        } catch (IllegalBlockSizeException e) {
+            throw new InvalidTokenException("Failed to decrypt token; token appears to be corrupted or invalid, as block size seems to differ from expected", e);
         } catch (RuntimeException e) {
-            // TODO: try to disambiguate between key rotation and other errors, or at least ensure that TokenInvalid is really cthe case here.
             throw new InvalidTokenException("Failed to decrypt token; most likely because encryption key has been rotated", e);
         }
     }
 
-        @Override
+    @Override
     public String toString() {
         return "AESReversiblePseudonymStrategy(" + cipherSuite.getCipher() + ")";
     }
-
 
 }
