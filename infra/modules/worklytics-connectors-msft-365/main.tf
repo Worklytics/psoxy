@@ -9,7 +9,7 @@ locals {
 
 # a timestamp used to seed example test API calls, so that they're likely to return interesting data, but the terraform test scripts don't churn too much
 resource "time_rotating" "example_timestamp" {
-  rotation_days = 360
+  rotation_days = 365
 }
 
 module "worklytics_connector_specs" {
