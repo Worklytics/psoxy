@@ -60,7 +60,7 @@ git clone https://github.com/{{YOUR_ORG_ID}}/{{YOUR_REPO_NAME}}.git
      git push -u origin main
      ```
 
-- Alternatively, **use this in a monorepo** (eg, you maintain have a monorepo with lots of terraform configurations, and you want to add this to those)
+- Alternatively, **use this in a monorepo** (eg, you maintain a monorepo with lots of terraform configurations, and you want to add this to those)
   - Clone this repository to your local machine and copy its contents (excluding hidden stuff like `.git` files into your monorepo)
      ```shell
      git clone https://github.com/Worklytics/psoxy-example-aws.git
