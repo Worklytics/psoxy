@@ -21,8 +21,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-
-import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -375,7 +373,7 @@ public class ApiDataRequestHandler {
                     ErrorCauses.CONNECTION_SETUP.name());
             log.log(Level.WARNING, e.getMessage(), e);
             return builder.build();
-        } catch (ReversibleTokenizationStrategy.TokenInvalid e) {
+        } catch (ReversibleTokenizationStrategy.InvalidTokenException e) {
             builder.statusCode(HttpStatus.SC_CONFLICT);
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                 ErrorCauses.TOKENIZED_REQUEST_PARAMETER_INVALID.name());
