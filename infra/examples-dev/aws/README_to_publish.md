@@ -77,7 +77,7 @@ git clone https://github.com/{{YOUR_ORG_ID}}/{{YOUR_REPO_NAME}}.git
 3. Authenticate your tools as needed:
 
    - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) - `aws get-caller-identity` should work and return your expected account/user
-   - if plan to get data from Google Workspace, auth [GCloud CLI](https://cloud.google.com/sdk/docs/authorizing) - `gcloud auth login` to authenticate, then `gcloud auth list` to verify you have expected account/user
+   - if plan to get data from Google Workspace, auth [GCloud CLI](https://cloud.google.com/sdk/docs/authorizing) - `gcloud auth login` to authenticate, then `gcloud auth list` to verify you have the expected account/user
    - if plan to get data from Microsoft 365, auth [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli) - `az login --allow-no-subscription` to authenticate, then `az account list` to verify you have expected account/user
 
 4. Initialize your configuration
