@@ -1,5 +1,13 @@
 {
   "data": {
+    "rateLimit": {
+      "limit": 5000,
+      "nodeCount": 600,
+      "remaining": 4997,
+      "resetAt": "2025-09-22T15:59:03Z",
+      "used": 3,
+      "cost": 1
+    },
     "organization": {
       "repository": {
         "pullRequest": {

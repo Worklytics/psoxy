@@ -140,7 +140,7 @@ curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Con
      }
    ]
    ```
-Add the `id` value from that JSON response as the value of the `confluence_cloud_id` variable in the
+Add the `id` value from that JSON response as the value of the `confluence_example_cloud_id` variable in the
 `terraform.tfvars` file of your Terraform configuration. This will generate all the test URLs with
 a proper value.
 
