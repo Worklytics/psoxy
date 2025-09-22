@@ -17,7 +17,7 @@
 #
 #
 # Testing:
-#   - within example directory, such as `infra/examples/aws-msft-365`:
+#   - within example directory, such as `infra/examples-dev/aws`:
 #     ../../../tools/init-example.sh ~/code/psoxy
 #
 #   to repeat:

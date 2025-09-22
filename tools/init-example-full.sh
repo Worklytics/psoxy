@@ -11,6 +11,8 @@ TF_CONFIG_ROOT=`pwd`
 
 if [[ ! -d "$REPO_CLONE_BASE_DIR" ]]; then
   printf "Directory ${RED}${REPO_CLONE_BASE_DIR}${NC} does not exist.\n"
+  printf "This usually means the Terraform modules haven't been initialized yet.\n"
+  printf "Please run ${BLUE}./init${NC} again to initialize the Terraform modules first.\n"
   exit 1
 fi
 
@@ -71,6 +73,20 @@ fi
 
 
 
+# define reusable check for git clone of proxy repo directory
+# (in shared team, one person may have initially cloned/forked the example repo, ran `./init`; so they have a .terraform directory; 
+# if a different person tries to run ./upgrade-terraform-modules, or ./build, these depend on a .terraform directory that never gets checked in and won't exist on their machine.)
+DIRECTORY_CHECK_LOGIC="
+# Check if the psoxy module directory exists
+REPO_CLONE_BASE_DIR=\"${REPO_CLONE_BASE_DIR}\"
+if [[ ! -d \"\$REPO_CLONE_BASE_DIR\" ]]; then
+  echo \"Directory \$REPO_CLONE_BASE_DIR does not exist.\"
+  echo \"This usually means the Terraform modules haven't been initialized yet.\"
+  echo \"Please run ./init again to initialize the Terraform modules first.\"
+  exit 1
+fi
+"
+
 # START CREATION OF BUILD SCRIPT
 # create example build script, to support building deployment bundle (JAR) outside of Terraform
 # (useful for debugging)
@@ -82,7 +98,8 @@ fi
 
 touch "$BUILD_DEPLOYMENT_BUNDLE_SCRIPT"
 echo "#!/bin/bash" >> $BUILD_DEPLOYMENT_BUNDLE_SCRIPT
-
+echo "$DIRECTORY_CHECK_LOGIC" >> $BUILD_DEPLOYMENT_BUNDLE_SCRIPT
+echo "" >> $BUILD_DEPLOYMENT_BUNDLE_SCRIPT
 echo "\"${REPO_CLONE_BASE_DIR}tools/build.sh\" $HOST_PLATFORM \"${REPO_CLONE_BASE_DIR}java\"" >> $BUILD_DEPLOYMENT_BUNDLE_SCRIPT
 chmod +x "$BUILD_DEPLOYMENT_BUNDLE_SCRIPT"
 # END BUILD SCRIPT
@@ -96,6 +113,8 @@ fi
 
 touch "$UPGRADE_TF_MODULE_SCRIPT"
 echo "#!/bin/bash" >> $UPGRADE_TF_MODULE_SCRIPT
+echo "$DIRECTORY_CHECK_LOGIC" >> $UPGRADE_TF_MODULE_SCRIPT
+echo "" >> $UPGRADE_TF_MODULE_SCRIPT
 echo "\"${REPO_CLONE_BASE_DIR}tools/upgrade-terraform-modules.sh\" \$1" >> $UPGRADE_TF_MODULE_SCRIPT
 chmod +x "$UPGRADE_TF_MODULE_SCRIPT"
 
