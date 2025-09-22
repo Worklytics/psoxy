@@ -83,18 +83,6 @@ variable "path_to_config" {
   default     = null
 }
 
-variable "salt_secret_id" {
-  type        = string
-  description = "DEPRECATED: Id of the secret used to salt pseudonyms"
-  default     = ""
-}
-
-variable "salt_secret_version_number" {
-  type        = string
-  description = "DEPRECATED: Version number of the secret used to salt pseudonyms"
-  default     = ""
-}
-
 variable "target_host" {
   type        = string
   description = "The target host to which to forward requests."

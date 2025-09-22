@@ -342,6 +342,10 @@ module "bulk_connector" {
       EMAIL_CANONICALIZATION = var.email_canonicalization
     }
   )
+
+  depends_on = [
+    module.psoxy # some of the set-up IAM grants done there, but not EXPLICITLY passed out as outputs and into above as inputs, are required; so make this explicit
+  ]
 }
 
 # END BULK CONNECTORS
