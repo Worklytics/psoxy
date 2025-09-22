@@ -18,7 +18,7 @@ You'll need:
   - [`git` installed](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), although it
     is usually included on those platforms (check with `git --version`).
   - an AWS account and credentials, as described in [Psoxy's AWS - Getting Started docs](https://github.com/Worklytics/psoxy/blob/v0.4.37/docs/aws/getting-started.md)
-  - the [prerequisites for Psoxy](https://github.com/Worklytics/psoxy/blob/v0.4.37/README.md#prerequisites)
+  - the [prerequisites for Psoxy](https://github.com/Worklytics/psoxy/blob/v0.5.9/README.md#prerequisites)
     itself, although this example will attempt to help you check those.
 
 ### Getting Started
