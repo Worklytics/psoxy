@@ -1,8 +1,7 @@
 package com.avaulta.gateway.tokens;
 
-import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
-
 import java.util.function.Function;
+import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
 
 /**
  *
@@ -38,15 +37,15 @@ public interface ReversibleTokenizationStrategy {
      * @param reversibleToken ciphertext, if it was created with this TokenizationStrategy
      * @return plaintext that was originally passed to this TokenizationStrategy
      */
-    String getOriginalDatum(byte[] reversibleToken) throws AESReversibleTokenizationStrategy.TokenInvalid;
+    String getOriginalDatum(byte[] reversibleToken) throws AESReversibleTokenizationStrategy.InvalidTokenException;
 
 
     /**
      * Indicates that the token could not be reversed, likely because invalid
      *
      */
-    class TokenInvalid extends RuntimeException {
-        public TokenInvalid(String message, Throwable cause) {
+    class InvalidTokenException extends RuntimeException {
+        public InvalidTokenException(String message, Throwable cause) {
             super(message, cause);
         }
     }
