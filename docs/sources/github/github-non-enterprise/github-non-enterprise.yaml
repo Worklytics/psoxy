@@ -338,6 +338,22 @@ endpoints:
                                       type: "string"
                                     hasNextPage:
                                       type: "boolean"
+            rateLimit:
+              type: "object"
+              properties:
+                cost:
+                  type: "integer"
+                limit:
+                  type: "integer"
+                nodeCount:
+                  type: "integer"
+                remaining:
+                  type: "integer"
+                resetAt:
+                  type: "string"
+                  format: "date-time"
+                used:
+                  type: "integer"
         errors:
           type: "array"
           items:
