@@ -21,13 +21,14 @@ usage() {
     echo "   OR: $0 <object_path>"
     echo ""
     echo "Arguments:"
-    echo "  bucket_name  : GCS bucket name (without gs:// prefix)"
+    echo "  bucket_name  : GCS bucket name (with or without gs:// prefix)"
     echo "  timestamp    : ISO 8601 timestamp (YYYY-MM-DDTHH:MM:SSZ) - optional"
     echo "                If not provided, defaults to one week ago"
     echo "  object_path  : GCS object path (with or without gs:// prefix) to replay a single object"
     echo ""
     echo "Examples:"
     echo "  $0 my-bucket                                    # Replay writes on objects from last week"
+    echo "  $0 gs://my-bucket                               # Replay writes on objects from last week (gs:// prefix accepted)"
     echo "  $0 my-bucket 2024-01-01T00:00:00Z              # Replay writes on objects since specific date"
     echo "  $0 gs://my-bucket/path/to/object.json          # Replay write on a single object"
     echo "  $0 my-bucket/path/to/object.json               # Replay write on a single object (gs:// added automatically)"
@@ -46,8 +47,10 @@ fi
 
 FIRST_ARG="$1"
 
-# Check if first argument is an object path (starts with gs:// or contains a slash)
-if [[ "$FIRST_ARG" == gs://* ]] || [[ "$FIRST_ARG" == */* ]]; then
+# Check if first argument is an object path (contains a slash after the bucket name)
+# For gs:// URLs, check if there's a slash after the bucket name
+# For non-gs:// URLs, check if there's a slash (indicating bucket/path structure)
+if [[ "$FIRST_ARG" == gs://*/* ]] || ([[ "$FIRST_ARG" != gs://* ]] && [[ "$FIRST_ARG" == */* ]]); then
     # Single object mode
     if [ $# -ne 1 ]; then
         echo "Error: When providing an object path, no additional arguments are allowed"
@@ -62,7 +65,12 @@ if [[ "$FIRST_ARG" == gs://* ]] || [[ "$FIRST_ARG" == */* ]]; then
     SINGLE_OBJECT_MODE=true
 else
     # Bucket mode
-    BUCKET_NAME="$FIRST_ARG"
+    # Remove gs:// prefix if present for bucket name
+    if [[ "$FIRST_ARG" == gs://* ]]; then
+        BUCKET_NAME="${FIRST_ARG#gs://}"
+    else
+        BUCKET_NAME="$FIRST_ARG"
+    fi
     SINGLE_OBJECT_MODE=false
     
     # Set timestamp - default to one week ago if not provided
