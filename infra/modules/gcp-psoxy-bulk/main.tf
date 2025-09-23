@@ -154,6 +154,8 @@ resource "google_cloud_run_service_iam_member" "grant_sa_invoker" {
 # run as
 module "tf_runner" {
   source = "../../modules/gcp-tf-runner"
+
+  tf_gcp_principal_email = var.tf_gcp_principal_email
 }
 
 resource "google_service_account_iam_member" "act_as" {
