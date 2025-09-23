@@ -55,3 +55,9 @@ WARNING: Source API Error [{     "message": "\nLastModifiedById,NumberOfEmployee
 
 
 NOTE: derived from [worklytics-connector-specs](../../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
+
+## Troubleshooting
+
+### `invalid_grant` errors in logs
+
+We've seen this be noted with messages about there not being an enabled client credentials user for the application. BUT issue actually was invalid client_secret. So double-check client id + secret are configured correctly.
