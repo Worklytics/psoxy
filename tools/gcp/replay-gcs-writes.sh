@@ -18,19 +18,23 @@ NC='\033[0m' # No Color
 # Function to display usage information
 usage() {
     echo "Usage: $0 <bucket_name> [timestamp]"
+    echo "   OR: $0 <object_path>"
     echo ""
     echo "Arguments:"
     echo "  bucket_name  : GCS bucket name (without gs:// prefix)"
     echo "  timestamp    : ISO 8601 timestamp (YYYY-MM-DDTHH:MM:SSZ) - optional"
     echo "                If not provided, defaults to one week ago"
+    echo "  object_path  : GCS object path (with or without gs:// prefix) to replay a single object"
     echo ""
     echo "Examples:"
     echo "  $0 my-bucket                                    # Replay writes on objects from last week"
     echo "  $0 my-bucket 2024-01-01T00:00:00Z              # Replay writes on objects since specific date"
+    echo "  $0 gs://my-bucket/path/to/object.json          # Replay write on a single object"
+    echo "  $0 my-bucket/path/to/object.json               # Replay write on a single object (gs:// added automatically)"
     echo ""
     echo "This script will:"
-    echo "  1. List all objects in the bucket created after the specified timestamp"
-    echo "  2. Replay writes on each object using 'gsutil rewrite -kO'"
+    echo "  • If bucket_name provided: List all objects in the bucket created after the specified timestamp and replay writes"
+    echo "  • If object_path provided: Replay write on just that single object using 'gsutil rewrite -kO'"
     exit 1
 }
 
@@ -40,31 +44,51 @@ if [ $# -lt 1 ] || [ $# -gt 2 ]; then
     usage
 fi
 
-BUCKET_NAME="$1"
+FIRST_ARG="$1"
 
-# Set timestamp - default to one week ago if not provided
-if [ $# -eq 2 ]; then
-    TIMESTAMP="$2"
-else
-    # Calculate one week ago in ISO 8601 format
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS
-        TIMESTAMP=$(date -u -v-7d '+%Y-%m-%dT%H:%M:%SZ')
-    else
-        # Linux
-        TIMESTAMP=$(date -u -d '1 week ago' '+%Y-%m-%dT%H:%M:%SZ')
+# Check if first argument is an object path (starts with gs:// or contains a slash)
+if [[ "$FIRST_ARG" == gs://* ]] || [[ "$FIRST_ARG" == */* ]]; then
+    # Single object mode
+    if [ $# -ne 1 ]; then
+        echo "Error: When providing an object path, no additional arguments are allowed"
+        usage
     fi
-    echo -e "No timestamp provided, defaulting to one week ago: ${BLUE}$TIMESTAMP${NC}"
+    # Add gs:// prefix if not present
+    if [[ "$FIRST_ARG" == gs://* ]]; then
+        OBJECT_PATH="$FIRST_ARG"
+    else
+        OBJECT_PATH="gs://$FIRST_ARG"
+    fi
+    SINGLE_OBJECT_MODE=true
+else
+    # Bucket mode
+    BUCKET_NAME="$FIRST_ARG"
+    SINGLE_OBJECT_MODE=false
+    
+    # Set timestamp - default to one week ago if not provided
+    if [ $# -eq 2 ]; then
+        TIMESTAMP="$2"
+    else
+        # Calculate one week ago in ISO 8601 format
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS
+            TIMESTAMP=$(date -u -v-7d '+%Y-%m-%dT%H:%M:%SZ')
+        else
+            # Linux
+            TIMESTAMP=$(date -u -d '1 week ago' '+%Y-%m-%dT%H:%M:%SZ')
+        fi
+        echo -e "No timestamp provided, defaulting to one week ago: ${BLUE}$TIMESTAMP${NC}"
+    fi
+    
+    # Validate bucket name (basic check)
+    if [[ -z "$BUCKET_NAME" ]]; then
+        echo "Error: Bucket name cannot be empty"
+        usage
+    fi
 fi
 
-# Validate bucket name (basic check)
-if [[ -z "$BUCKET_NAME" ]]; then
-    echo "Error: Bucket name cannot be empty"
-    usage
-fi
-
-# Validate timestamp format (basic ISO 8601 check)
-if [[ ! "$TIMESTAMP" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$ ]]; then
+# Validate timestamp format (basic ISO 8601 check) - only in bucket mode
+if [[ "$SINGLE_OBJECT_MODE" == false ]] && [[ ! "$TIMESTAMP" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$ ]]; then
     echo "Error: Invalid timestamp format. Expected: YYYY-MM-DDTHH:MM:SSZ"
     echo "Example: 2024-01-01T00:00:00Z"
     exit 1
@@ -91,6 +115,20 @@ echo ""
 echo -e "${BLUE}roles/storage.objectAdmin${NC} is the least-privileged predefined role that provides these permissions."
 echo ""
 
+# Handle single object mode
+if [[ "$SINGLE_OBJECT_MODE" == true ]]; then
+    echo -e "Single object mode: Replaying write on ${BLUE}$OBJECT_PATH${NC}"
+    echo ""
+    
+    # Perform the write replay operation on the single object
+    if gsutil rewrite -kO "$OBJECT_PATH" > /dev/null 2>&1; then
+        echo -e "${GREEN}✓ Successfully replayed write on $OBJECT_PATH${NC}"
+        exit 0
+    else
+        echo -e "${RED}✗ Failed to replay write on $OBJECT_PATH${NC}"
+        exit 1
+    fi
+fi
 
 # Create temporary file to store object list
 TEMP_FILE=$(mktemp)
