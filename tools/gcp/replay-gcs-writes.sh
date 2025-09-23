@@ -147,7 +147,7 @@ done < "$TEMP_FILE"
 mv "$FILTERED_FILE" "$TEMP_FILE"
 
 # Count total objects to process
-TOTAL_OBJECTS=$(wc -l < "$TEMP_FILE")
+TOTAL_OBJECTS=$(wc -l < "$TEMP_FILE" | tr -d ' ')
 
 if [ "$TOTAL_OBJECTS" -eq 0 ]; then
     echo -e "${YELLOW}No objects found created after $TIMESTAMP${NC}"
