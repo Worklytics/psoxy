@@ -123,6 +123,7 @@ module "psoxy" {
   todos_as_local_files            = var.todos_as_local_files
   todo_step                       = local.max_auth_todo_step
   bucket_force_destroy            = var.bucket_force_destroy
+  tf_gcp_principal_email          = var.gcp_terraform_sa_account_email
 }
 
 locals {

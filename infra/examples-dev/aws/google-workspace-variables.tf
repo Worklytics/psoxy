@@ -5,12 +5,34 @@ variable "google_workspace_gcp_project_id" {
 
 variable "google_workspace_terraform_sa_account_email" {
   type        = string
-  description = "Email of GCP service account that will be used to provision GCP resources. Leave 'null' to use application default for you environment."
+  description = "DEPRECATED; use google_workspace_sa_to_impersonate instead. Email of GCP service account that will be used to provision GCP resources via impersonation. Leave 'null' to use application default for you environment."
   default     = null
 
   validation {
     condition     = var.google_workspace_terraform_sa_account_email == null || can(regex(".*@.*\\.iam\\.gserviceaccount\\.com$", var.google_workspace_terraform_sa_account_email))
     error_message = "The gcp_terraform_sa_account_email value should be a valid GCP service account email address."
+  }
+}
+
+variable "google_workspace_sa_to_impersonate" {
+  type        = string
+  description = "Email of GCP service account that will be used to provision GCP resources via impersonation. Leave 'null' to use application default for you environment."
+  default     = null
+
+  validation {
+    condition     = var.google_workspace_sa_to_impersonate == null || can(regex(".*@.*\\.iam\\.gserviceaccount\\.com$", var.google_workspace_sa_to_impersonate))
+    error_message = "The google_workspace_sa_to_impersonate value should be a valid GCP service account email address."
+  }
+}
+
+variable "google_workspace_terraform_principal_email" {
+  type        = string
+  description = "Email of GCP principal that will be used to provision GCP resources via impersonation. Leave 'null' to use application default for you environment."
+  default     = null
+
+  validation {
+    condition     = var.google_workspace_terraform_principal_email == null || can(regex(".*@.*", var.google_workspace_terraform_principal_email))
+    error_message = "The google_workspace_terraform_principal_email value should be a valid email address."
   }
 }
 

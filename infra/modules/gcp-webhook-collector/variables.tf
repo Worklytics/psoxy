@@ -3,6 +3,17 @@ variable "project_id" {
   description = "name of the gcp project"
 }
 
+variable "tf_gcp_principal_email" {
+  description = "if terraform is using gcloud cli authenticated a known principal (eg, user or service account), pass it in here; this avoids need to try to determine it dynamically at run-time. If it ends with 'iam.gserviceaccount.com', it will be treated as a service account; otherwise assumed to be a regular Google user."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.tf_gcp_principal_email == null || can(regex(".*@.*", var.tf_gcp_principal_email))
+    error_message = "The tf_gcp_principal_email value should be a valid email address."
+  }
+}
+
 variable "region" {
   type        = string
   description = "region into which to deploy function"

@@ -79,6 +79,7 @@ module "google_workspace_connection_auth" {
 
   service_account_id = each.value
   rotation_days      = var.gcp_sa_key_rotation_days
+  tf_gcp_principal_email = var.tf_gcp_principal_email
 }
 
 

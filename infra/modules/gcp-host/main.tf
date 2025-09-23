@@ -189,6 +189,7 @@ module "api_connector" {
   side_output_sanitized                 = try(local.sanitized_side_outputs[each.key], null)
   enable_async_processing               = try(each.value.enable_async_processing, false)
   todos_as_local_files                  = var.todos_as_local_files
+  tf_gcp_principal_email                = var.tf_gcp_principal_email
 
 
   environment_variables = merge(
@@ -273,6 +274,7 @@ module "webhook_collector" {
   side_output_original               = try(local.custom_original_side_outputs[each.key], null)
   side_output_sanitized              = try(local.sanitized_side_outputs[each.key], null)
   todos_as_local_files               = var.todos_as_local_files
+  tf_gcp_principal_email             = var.tf_gcp_principal_email
   key_ring_id                        = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
   oidc_token_verifier_role_id        = module.psoxy.oidc_token_verifier_role_id
   provision_auth_key                 = each.value.provision_auth_key
@@ -327,6 +329,7 @@ module "bulk_connector" {
   sanitized_bucket_name             = try(each.value.sanitized_bucket_name, null)
   default_labels                    = var.default_labels
   todos_as_local_files              = var.todos_as_local_files
+  tf_gcp_principal_email           = var.tf_gcp_principal_email
   available_memory_mb               = coalesce(try(var.custom_bulk_connector_arguments[each.key].available_memory_mb, null), try(each.value.available_memory_mb, null), 512)
   gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
   bucket_force_destroy              = var.bucket_force_destroy

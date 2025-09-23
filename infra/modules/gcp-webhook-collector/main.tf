@@ -260,6 +260,8 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_paramet
 
 module "tf_runner" {
   source = "../../modules/gcp-tf-runner"
+  
+  tf_gcp_principal_email = var.tf_gcp_principal_email
 }
 
 data "google_service_account" "function" {

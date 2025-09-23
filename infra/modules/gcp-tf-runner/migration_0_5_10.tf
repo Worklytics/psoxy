@@ -1,4 +1,4 @@
 moved {
-  from = data.google_service_account_id_token.identity[0]
-  to   = data.google_service_account_id_token.identity
+  from = data.google_client_openid_userinfo.identity
+  to   = data.google_client_openid_userinfo.identity[0]
 }
