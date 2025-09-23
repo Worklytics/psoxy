@@ -82,6 +82,15 @@ if ! gsutil ls &> /dev/null; then
     exit 1
 fi
 
+# Display required permissions information
+echo -e "NOTE: Running this script requires that you be authenticated as a GCP user with the following permissions on the bucket:"
+echo "  • storage.objects.list    (to list objects in the bucket)"
+echo "  • storage.objects.get     (to get object metadata including creation time)"
+echo "  • storage.objects.update  (to rewrite objects and trigger write events)"
+echo ""
+echo -e "${BLUE}roles/storage.objectAdmin${NC} is the least-privileged predefined role that provides these permissions."
+echo ""
+
 
 # Create temporary file to store object list
 TEMP_FILE=$(mktemp)
