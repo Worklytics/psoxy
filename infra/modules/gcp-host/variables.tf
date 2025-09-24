@@ -300,7 +300,7 @@ variable "custom_bulk_connector_rules" {
 variable "custom_bulk_connector_arguments" {
   type = map(object({
     available_memory_mb = optional(number)
-    timeout_seconds = optional(number)
+    timeout_seconds     = optional(number)
   }))
 
   description = "map of connector id --> settings object"

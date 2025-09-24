@@ -325,7 +325,7 @@ variable "custom_bulk_connectors" {
       })))
     }))
     available_memory_mb = optional(number)
-    timeout_seconds = optional(number)
+    timeout_seconds     = optional(number)
     rules_file          = optional(string)
     settings_to_provide = optional(map(string), {})
     example_file        = optional(string)
@@ -383,7 +383,7 @@ variable "custom_bulk_connector_rules" {
 variable "custom_bulk_connector_arguments" {
   type = map(object({
     available_memory_mb = optional(number)
-    timeout_seconds = optional(number)
+    timeout_seconds     = optional(number)
   }))
 
   description = "map of connector id --> arguments object, to override defaults for bulk connector instances"
