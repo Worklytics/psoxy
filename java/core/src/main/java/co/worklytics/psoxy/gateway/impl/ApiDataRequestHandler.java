@@ -373,7 +373,14 @@ public class ApiDataRequestHandler {
                     ErrorCauses.CONNECTION_SETUP.name());
             log.log(Level.WARNING, e.getMessage(), e);
             return builder.build();
+        } catch (ReversibleTokenizationStrategy.InvalidTokenException e) {
+            builder.statusCode(HttpStatus.SC_CONFLICT);
+            builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                ErrorCauses.TOKENIZED_REQUEST_PARAMETER_INVALID.name());
+            log.log(Level.WARNING, e.getMessage(), e);
+            return builder.build();
         }
+
 
         // check if request is side output only case, if so pass to AsyncApiDataRequestHandler,
         // implementation of which will vary by platform
@@ -680,7 +687,7 @@ public class ApiDataRequestHandler {
 
         accountToImpersonate = accountToImpersonate
                 .map(s -> pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(s,
-                        reversibleTokenizationStrategy));
+                    reversibleTokenizationStrategy));
 
         Credentials credentials = sourceAuthStrategy.getCredentials(accountToImpersonate);
         HttpCredentialsAdapter initializeWithCredentials = new HttpCredentialsAdapter(credentials);

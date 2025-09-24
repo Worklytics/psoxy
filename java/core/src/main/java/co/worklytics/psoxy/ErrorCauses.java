@@ -1,6 +1,8 @@
 package co.worklytics.psoxy;
 
 
+import co.worklytics.psoxy.gateway.ConfigService;
+
 /**
  * Enumeration of errors that cause a not 200 OK response from Psoxy
  * Values of response header {@see co.worklytics.psoxy.ResponseHeader.ERROR}
@@ -47,6 +49,13 @@ public enum ErrorCauses {
     FAILED_TO_BUILD_URL,
 
     /**
+     * tokenized request parameter is invalid. most likely too stale.
+     *
+     * clients should re-try with a fresh token(s), which may involve re-fetching from the endpoint from which they originally got the tokenized parameter value
+     */
+    TOKENIZED_REQUEST_PARAMETER_INVALID,
+
+    /**
      * request was not sent over HTTPS
      */
     HTTPS_REQUIRED,
@@ -67,6 +76,8 @@ public enum ErrorCauses {
      *  An error internal to proxy's application logic, but not handled such that it could be mapped into one of the above.
      *  eg, something very unexpected, or a bug in the code.
      */
-    UNKNOWN, INVALID_REQUEST,
+    UNKNOWN,
+
+    INVALID_REQUEST,
     ;
 }
