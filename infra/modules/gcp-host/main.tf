@@ -17,6 +17,7 @@ locals {
   api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
 }
 
+# TODO: probably pull all the way to the top level bc 1) proper tf style, 2) simplifies customization if it doesn't work for a particular environment
 module "tf_runner" {
   source = "../../modules/gcp-tf-runner"
 
