@@ -3,14 +3,13 @@ variable "project_id" {
   description = "id of GCP project that will host psoxy instance"
 }
 
-variable "tf_gcp_principal_email" {
-  description = "if terraform is using gcloud cli authenticated a known principal (eg, user or service account), pass it in here; this avoids need to try to determine it dynamically at run-time. If it ends with 'iam.gserviceaccount.com', it will be treated as a service account; otherwise assumed to be a regular Google user."
+variable "tf_runner_iam_principal" {
+  description = "The IAM principal (e.g., 'user:alice@example.com' or 'serviceAccount:terraform@project.iam.gserviceaccount.com') that Terraform is running as, used for granting necessary permissions to provision Cloud Functions."
   type        = string
-  default     = null
 
   validation {
-    condition     = var.tf_gcp_principal_email == null || can(regex(".*@.*", var.tf_gcp_principal_email))
-    error_message = "The tf_gcp_principal_email value should be a valid email address."
+    condition     = can(regex("^(user:|serviceAccount:|group:|domain:).*", var.tf_runner_iam_principal))
+    error_message = "The tf_runner_iam_principal value should be a valid IAM principal (e.g., 'user:alice@example.com' or 'serviceAccount:terraform@project.iam.gserviceaccount.com')."
   }
 }
 

@@ -258,12 +258,6 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_paramet
 }
 
 
-module "tf_runner" {
-  source = "../../modules/gcp-tf-runner"
-
-  tf_gcp_principal_email = var.tf_gcp_principal_email
-}
-
 data "google_service_account" "function" {
   account_id = var.service_account_email
 }
@@ -272,7 +266,7 @@ data "google_service_account" "function" {
 # to provision Cloud Function, TF must be able to act as the service account that the function will
 # run as
 resource "google_service_account_iam_member" "act_as" {
-  member             = module.tf_runner.iam_principal
+  member             = var.tf_runner_iam_principal
   role               = "roles/iam.serviceAccountUser"
   service_account_id = data.google_service_account.function.id
 }

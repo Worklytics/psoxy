@@ -152,14 +152,8 @@ resource "google_cloud_run_service_iam_member" "grant_sa_invoker" {
 
 # to provision Cloud Function, TF must be able to act as the service account that the function will
 # run as
-module "tf_runner" {
-  source = "../../modules/gcp-tf-runner"
-
-  tf_gcp_principal_email = var.tf_gcp_principal_email
-}
-
 resource "google_service_account_iam_member" "act_as" {
-  member             = module.tf_runner.iam_principal
+  member             = var.tf_runner_iam_principal
   role               = "roles/iam.serviceAccountUser"
   service_account_id = google_service_account.service_account.id
 }
