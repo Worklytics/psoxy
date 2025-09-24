@@ -14,6 +14,8 @@ locals {
 # in cloud shell, this seems to return {"email":"", "id":""}
 # in any env, this is NEVER the gcp service account configured via provider block
 # (eg, google.impersonate_service_account = "terraform@...")
+# similarly, data.google_client_config is the same
+# and locally, data.google_service_account_id_token only works when auth'd as a service account
 data "google_client_openid_userinfo" "me" {
   count = local.tf_runner_passed_in ? 0 : 1
 }
