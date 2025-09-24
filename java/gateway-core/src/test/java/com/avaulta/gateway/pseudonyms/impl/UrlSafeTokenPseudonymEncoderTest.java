@@ -67,6 +67,7 @@ public class UrlSafeTokenPseudonymEncoderTest {
         "https://api.acme.com/v1/accounts",
         "",
     })
+    @SneakyThrows
     void reverseAll(String template) {
         String original = "blah";
         String encodedPseudonym =

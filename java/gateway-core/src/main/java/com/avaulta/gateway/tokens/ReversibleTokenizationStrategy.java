@@ -36,7 +36,16 @@ public interface ReversibleTokenizationStrategy {
      * @param reversibleToken ciphertext, if it was created with this TokenizationStrategy
      * @return plaintext that was originally passed to this TokenizationStrategy
      */
-    String getOriginalDatum(byte[] reversibleToken);
+    String getOriginalDatum(byte[] reversibleToken) throws InvalidTokenException;
 
 
+    /**
+     * Indicates that the token could not be reversed, likely because invalid
+     *
+     */
+    class InvalidTokenException extends RuntimeException {
+        public InvalidTokenException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
 }
