@@ -327,7 +327,7 @@ module "bulk_connector" {
   sanitized_bucket_name             = try(each.value.sanitized_bucket_name, null)
   default_labels                    = var.default_labels
   todos_as_local_files              = var.todos_as_local_files
-  available_memory_mb               = coalesce(try(var.custom_bulk_connector_arguments[each.key].available_memory_mb, null), try(each.value.available_memory_mb, null), 1024)
+  available_memory_mb               = coalesce(try(var.custom_bulk_connector_arguments[each.key].available_memory_mb, null), try(each.value.available_memory_mb, null), 512)
   timeout_seconds                   = coalesce(try(var.custom_bulk_connector_arguments[each.key].timeout_seconds, null), try(each.value.timeout_seconds, null), 540) # TODO: bump to 1800 (30 minutes) in 0.6.x
   gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
   bucket_force_destroy              = var.bucket_force_destroy
