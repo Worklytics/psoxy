@@ -20,16 +20,36 @@ data "google_client_openid_userinfo" "me" {
   count = local.tf_runner_passed_in ? 0 : 1
 }
 
+# this seems to be what Cloud Shell relies on??
+data "google_service_account_id_token" "identity" {
+  count = !local.tf_runner_passed_in && try(data.google_client_openid_userinfo.me[0].email, "") == "" ? 1 : 0
+
+  target_audience = "worklytics.co/gcp-tf-runner"
+}
+
 # alternative ideas
 #  - data.google_client_config has an 'access_token', but that's opaque so can't parse email from it
 #  - call outs to gcloud CLI via data.external --> still won't know about impersonation
 #  - is there some resource that has an attribute that's the service account used to create it?
 
 locals {
+
+  jwt_payload = try(split(".", data.google_service_account_id_token.identity[0].id_token)[1], "")
+
+  # convert base64url encoding to base64 encoding
+  padding                   = join("", formatlist("%s", [for _ in range(4 - length(local.jwt_payload) % 4) : "="]))
+  jwt_payload_padded        = "${local.jwt_payload}${local.padding}"
+  jwt_payload_base64encoded = replace(replace(local.jwt_payload_padded, "-", "+"), "_", "/")
+
+  # decode to JSON, then extract email field
+  email_from_jwt = try(nonsensitive(jsondecode(base64decode(local.jwt_payload_base64encoded)).email), "")
+
+
   # coalesce failing here implies we failed to detect the auth'd gcp user
   authed_user_email = coalesce(
     var.tf_gcp_principal_email,
-    try(data.google_client_openid_userinfo.me[0].email, "")
+    try(data.google_client_openid_userinfo.me[0].email, ""),
+    local.email_from_jwt
   )
 
   # hacky way to determine if Terraform running as a service account or not
