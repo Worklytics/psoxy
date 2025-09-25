@@ -187,7 +187,7 @@ resource "google_cloudfunctions2_function" "function" {
   service_config {
     available_memory      = "${coalesce(var.available_memory_mb, 1024)}M"
     service_account_email = google_service_account.service_account.email
-    timeout_seconds       = 540 # 9 minutes
+    timeout_seconds       = var.timeout_seconds
     ingress_settings      = "ALLOW_INTERNAL_ONLY"
 
     vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector

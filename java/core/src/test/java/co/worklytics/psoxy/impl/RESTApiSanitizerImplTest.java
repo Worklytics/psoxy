@@ -277,8 +277,6 @@ class RESTApiSanitizerImplTest {
     }
 
 
-
-
     @SneakyThrows
     @ValueSource(strings = {"GET", "POST", "PUT", "PATCH"})
     @ParameterizedTest
