@@ -89,8 +89,14 @@ variable "bucket_write_role_id" {
 
 variable "available_memory_mb" {
   type        = number
-  description = "Memory (in MB), available to the function. Default value is 1024. Possible values include 128, 256, 512, 1024, etc."
+  description = "Memory (in MB), available to the function. Default value is 1024. Possible values include 128, 256, 512, 1024, 2048, 4096; above that requires multiple CPUs, beyond scope of our built-in configurations."
   default     = 1024
+}
+
+variable "timeout_seconds" {
+  type        = number
+  description = "Timeout (in seconds) for the function. Default value is 540 (9 minutes)."
+  default     = 540 # TODO: bump to 1800 (30 minutes) in 0.6.x
 }
 
 variable "example_file" {
