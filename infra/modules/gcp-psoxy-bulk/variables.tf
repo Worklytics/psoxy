@@ -3,6 +3,16 @@ variable "project_id" {
   description = "id of GCP project that will host psoxy instance"
 }
 
+variable "tf_runner_iam_principal" {
+  description = "The IAM principal (e.g., 'user:alice@example.com' or 'serviceAccount:terraform@project.iam.gserviceaccount.com') that Terraform is running as, used for granting necessary permissions to provision Cloud Functions."
+  type        = string
+
+  validation {
+    condition     = can(regex("^(user:|serviceAccount:|group:|domain:).*", var.tf_runner_iam_principal))
+    error_message = "The tf_runner_iam_principal value should be a valid IAM principal (e.g., 'user:alice@example.com' or 'serviceAccount:terraform@project.iam.gserviceaccount.com')."
+  }
+}
+
 variable "environment_id_prefix" {
   type        = string
   description = "A prefix to give to all resources created/consumed by this module."

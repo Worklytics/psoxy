@@ -5,33 +5,26 @@
 # times throughout the code base, and includes some hard-coded convention stuff that imho is better
 # to have in one place.
 
+locals {
+  tf_runner_passed_in = var.tf_gcp_principal_email != null && try(length(var.tf_gcp_principal_email) > 0, false)
+}
+
+
 
 # in cloud shell, this seems to return {"email":"", "id":""}
 # in any env, this is NEVER the gcp service account configured via provider block
 # (eg, google.impersonate_service_account = "terraform@...")
+# similarly, data.google_client_config is the same
+# and locally, data.google_service_account_id_token only works when auth'd as a service account
 data "google_client_openid_userinfo" "me" {
-
+  count = local.tf_runner_passed_in ? 0 : 1
 }
 
-#
-
-# if no 'email' field from 'google_client_openid_userinfo', generate id token for the current user
-# and parse email from it.
-# such parsing is explicitly allowed by Google; see https://cloud.google.com/docs/authentication/token-types#id
-#
-# however, this still appears to be the email of the authenticated user, not service account that
-# it's impersonating via the provider configuration
-#
-# we could pass in the service account email as a variable; but that pollutes a LOT of interfaces
-# and calls into question why we even use this module at all
+# this seems to be what Cloud Shell relies on??
 data "google_service_account_id_token" "identity" {
-  count = data.google_client_openid_userinfo.me.email == "" ? 1 : 0
+  count = !local.tf_runner_passed_in && try(data.google_client_openid_userinfo.me[0].email, "") == "" ? 1 : 0
 
   target_audience = "worklytics.co/gcp-tf-runner"
-}
-
-data "external" "identity" {
-  program = ["./${path.module}/read-tfvars.sh", "gcp_terraform_sa_account_email"]
 }
 
 # alternative ideas
@@ -40,6 +33,7 @@ data "external" "identity" {
 #  - is there some resource that has an attribute that's the service account used to create it?
 
 locals {
+
   jwt_payload = try(split(".", data.google_service_account_id_token.identity[0].id_token)[1], "")
 
   # convert base64url encoding to base64 encoding
@@ -50,10 +44,11 @@ locals {
   # decode to JSON, then extract email field
   email_from_jwt = try(nonsensitive(jsondecode(base64decode(local.jwt_payload_base64encoded)).email), "")
 
+
   # coalesce failing here implies we failed to detect the auth'd gcp user
   authed_user_email = coalesce(
-    try(data.external.identity.result.gcp_terraform_sa_account_email, ""), # "" if no such value
-    data.google_client_openid_userinfo.me.email,
+    var.tf_gcp_principal_email,
+    try(data.google_client_openid_userinfo.me[0].email, ""),
     local.email_from_jwt
   )
 

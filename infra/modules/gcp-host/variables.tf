@@ -3,6 +3,17 @@ variable "gcp_project_id" {
   description = "id of GCP project that will host psoxy instance"
 }
 
+variable "tf_gcp_principal_email" {
+  description = "if terraform is using gcloud cli authenticated a known principal (eg, user or service account), pass it in here; this avoids need to try to determine it dynamically at run-time. If it ends with 'iam.gserviceaccount.com', it will be treated as a service account; otherwise assumed to be a regular Google user."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.tf_gcp_principal_email == null || can(regex(".*@.*", var.tf_gcp_principal_email))
+    error_message = "The tf_gcp_principal_email value should be a valid email address."
+  }
+}
+
 variable "environment_name" {
   type        = string
   description = "Qualifier to append to names/ids of resources for psoxy. If not empty, A-Za-z0-9 or - characters only. Max length 10. Useful to distinguish between deployments into same GCP project."
