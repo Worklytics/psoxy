@@ -159,35 +159,35 @@ else
     TIMESTAMP_EPOCH=$(date -d "$TIMESTAMP" +%s)
 fi
 
-# Filter objects by creation time
+# Filter objects by creation time using a single gsutil call
 echo "Filtering objects by creation time..."
 FILTERED_FILE=$(mktemp)
 trap 'rm -f "$TEMP_FILE" "$FILTERED_FILE"' EXIT
 
-while IFS= read -r object_path; do
-    if [ -n "$object_path" ]; then
-        # Get creation time for this object
-        creation_time=$(gsutil ls -L "$object_path" 2>/dev/null | grep "Creation time:" | cut -d: -f2- | xargs)
-        
-        if [ -n "$creation_time" ]; then
-            # Convert creation time to epoch
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-                # macOS - handle various date formats
-                creation_epoch=$(date -j -f "%a, %d %b %Y %H:%M:%S GMT" "$creation_time" +%s 2>/dev/null || \
-                               date -j -f "%Y-%m-%dT%H:%M:%SZ" "$creation_time" +%s 2>/dev/null || \
-                               date -j -f "%Y-%m-%d %H:%M:%S" "$creation_time" +%s 2>/dev/null)
-            else
-                # Linux - handle various date formats
-                creation_epoch=$(date -d "$creation_time" +%s 2>/dev/null)
-            fi
-            
-            # If creation time is after our timestamp, include this object
-            if [ -n "$creation_epoch" ] && [ "$creation_epoch" -gt "$TIMESTAMP_EPOCH" ]; then
-                echo "$object_path" >> "$FILTERED_FILE"
-            fi
+# Use gsutil ls -l to get object metadata in bulk
+gsutil ls -l "gs://$BUCKET_NAME/**" 2>/dev/null | while read -r line; do
+    # Each line is either:
+    #  - metadata line: <size>  <creation_time>  <object_path>
+    #  - summary line: TOTAL: <size> bytes in <count> objects
+    #  - header line: (ignore)
+    # We want lines that start with a number (size)
+    if [[ "$line" =~ ^[0-9]+[[:space:]] ]]; then
+        size=$(echo "$line" | awk '{print $1}')
+        creation_time=$(echo "$line" | awk '{print $2}')
+        object_path=$(echo "$line" | awk '{print $3}')
+        # Convert creation_time to epoch
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            creation_epoch=$(date -j -f "%Y-%m-%dT%H:%M:%SZ" "$creation_time" +%s 2>/dev/null || \
+                             date -j -f "%Y-%m-%d %H:%M:%S" "$creation_time" +%s 2>/dev/null)
+        else
+            creation_epoch=$(date -d "$creation_time" +%s 2>/dev/null)
+        fi
+        # If creation time is after our timestamp, include this object
+        if [ -n "$creation_epoch" ] && [ "$creation_epoch" -gt "$TIMESTAMP_EPOCH" ]; then
+            echo "$object_path" >> "$FILTERED_FILE"
         fi
     fi
-done < "$TEMP_FILE"
+done
 
 # Move filtered results back to temp file
 mv "$FILTERED_FILE" "$TEMP_FILE"
