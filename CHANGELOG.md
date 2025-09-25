@@ -8,6 +8,7 @@ Changes to be including in future/planned release notes will be added here.
 ## Next
 ## [0.5.10](https://github.com/Worklytics/psoxy/release/tag/v0.5.10)
 - `GitHub`: adding support for returning `RateLimit` information for GraphQL
+- `gcp`: `timeout_seconds` configurable for bulk connectors
 
 ## [0.5.9](https://github.com/Worklytics/psoxy/release/tag/v0.5.9)
 - `Confluence`: support extensions and previous version from Content Search
