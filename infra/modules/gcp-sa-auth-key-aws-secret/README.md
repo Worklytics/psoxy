@@ -1,4 +1,4 @@
-# gcp-sa-auth-key-secret-manager
+# gcp-sa-auth-key-aws-secret
 
 This terraform module provisions a service account key for a target service account and saves it as
 a secret in AWS Secret Manager.

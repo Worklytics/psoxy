@@ -19,7 +19,7 @@ jobs:
           - { name: 'psoxy-constants', test: false }
           # Modules that have tests
           - { name: 'worklytics-connector-specs', test: true }
-          - { name: 'gcp-host', test: false } # TODO: recover this; tests failing bc of various data sources that don't work in GitHub Actions
+          - { name: 'gcp-host', test: true } 
     steps:
       - name: Check out code
         uses: actions/checkout@v4
