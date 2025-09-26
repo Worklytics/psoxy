@@ -324,8 +324,11 @@ NC='\e[0m'
 
 printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"
 
+EXIT_CODE=0
+
 node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
 
+EXIT_CODE=$((EXIT_CODE + $?))
 if gzip -t "$FILE_PATH" 2>/dev/null; then
   printf "test file was compressed, so not testing compression as a separate case\n"
 else
@@ -335,8 +338,11 @@ else
 
   gzip -c $FILE_PATH > $TEST_FILE_NAME
   node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $TEST_FILE_NAME -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
+  EXIT_CODE=$((EXIT_CODE + $?))
   rm $TEST_FILE_NAME
 fi
+
+exit $EXIT_CODE
 
 EOT
 

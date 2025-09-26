@@ -403,6 +403,8 @@ NC='\e[0m'
 printf "Quick test of $${BLUE}${var.instance_id}$${NC} ...\n"
 
 node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$${FILE_PATH}" -d "AWS" -i "${aws_s3_bucket.input.bucket}" -o "${aws_s3_bucket.sanitized.bucket}" ${local.role_option_for_tests} -re "${var.aws_region}"
+
+exit $?
 EOT
 }
 
