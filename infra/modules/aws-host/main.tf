@@ -434,33 +434,16 @@ locals {
 }
 
 # script to test ALL connectors
+# - in effect, light wrapper over common test-all.sh script found in tools
+# why? 1) keeps tf plan/output small; 2) caan interate on test-all.sh implementation with min tf state changes
 resource "local_file" "test_all_script" {
   count = var.todos_as_local_files ? 1 : 0
 
   filename        = "test-all.sh"
-  file_permission = "755"
+  file_permission = "0770"
   content         = <<EOF
 #!/bin/bash
 
-echo "Testing API Connectors ..."
-
-%{for test_script in values(module.api_connector)[*].test_script~}
-%{if test_script != null}./${test_script}%{endif}
-%{endfor}
-
-%{if length(values(module.bulk_connector)) > 0~}
-echo "Testing Bulk Connectors ..."
-%{endif~}
-%{for test_script in values(module.bulk_connector)[*].test_script~}
-%{if test_script != null}./${test_script}%{endif}
-%{endfor}
-
-%{if local.enable_webhook_testing && local.has_enabled_webhook_collectors}
-echo "Testing Webhook Collectors ..."
-%{endif~}
-%{for test_script in values(module.webhook_collectors)[*].test_script~}
-%{if test_script != null}./${test_script}%{endif}
-%{endfor}
+${path.module}/../../../tools/test-all.sh
 EOF
 }
-
