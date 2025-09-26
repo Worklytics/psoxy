@@ -1,13 +1,17 @@
 #!/bin/bash
 echo "Quick test of ${function_name} ..."
 
+EXIT_CODE=0
+
 ${command_cli_call} -u "${collector_endpoint_url}/.well-known/openid-configuration"
+EXIT_CODE=$((EXIT_CODE + $?))
 
 ${command_cli_call} -u "${collector_endpoint_url}/.well-known/jwks.json"
+EXIT_CODE=$((EXIT_CODE + $?))
 
 ${command_cli_call} -u "${collector_endpoint_url}${collection_path}" --method POST \
-%{ if signing_key_id != null ~}
---signing-key "gcp-kms:${signing_key_id}" \
+%{ if signing_key_arn != null ~}
+--signing-key "gcp-kms:${signing_key_arn}" \
 --identity-issuer "${collector_endpoint_url}" \
 %{ endif ~}
 %{ if example_identity != null ~}
@@ -15,3 +19,6 @@ ${command_cli_call} -u "${collector_endpoint_url}${collection_path}" --method PO
 %{ endif ~}
 --body '${example_payload}'
 
+EXIT_CODE=$((EXIT_CODE + $?))
+
+exit $EXIT_CODE

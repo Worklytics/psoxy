@@ -1,12 +1,12 @@
 import chalk from 'chalk';
+import { constants as httpCodes } from 'http2';
+import _ from 'lodash';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import aws from './lib/aws.js';
 import gcp from './lib/gcp.js';
 import getLogger from './lib/logger.js';
-import path from 'path';
-import _ from 'lodash';
-import { constants as httpCodes } from 'http2';
-import { fileURLToPath } from 'url';
-import { environmentCheck, saveToFile, getFileNameFromURL, pollAsyncResponse } from './lib/utils.js';
+import { environmentCheck, getFileNameFromURL, pollAsyncResponse, saveToFile } from './lib/utils.js';
 
 // Since we're using ESM modules, we need to make `__dirname` available
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -186,6 +186,9 @@ export default async function (options = {}) {
       //  require more parameters i.e. cloudwatch log group name)
       logger.info(`This looks like an internal error in the Proxy. Check out the logs for more details: ${logsURL}`);
     }
+
+    // Throw an exception to ensure the CLI tool exits with non-zero code
+    throw new Error(`${resultMessagePrefix} ${errorMessage}`);
   }
 
   return result;
