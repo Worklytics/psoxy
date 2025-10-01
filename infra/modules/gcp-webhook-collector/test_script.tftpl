@@ -10,7 +10,7 @@ ${command_cli_call} -u "${collector_endpoint_url}/.well-known/jwks.json"
 EXIT_CODE=$((EXIT_CODE + $?))
 
 ${command_cli_call} -u "${collector_endpoint_url}${collection_path}" --method POST \
-%{ if signing_key_arn != null ~}
+%{ if signing_key_id != null ~}
 --signing-key "gcp-kms:${signing_key_arn}" \
 --identity-issuer "${collector_endpoint_url}" \
 %{ endif ~}
