@@ -435,7 +435,7 @@ locals {
 
 # script to test ALL connectors
 # - in effect, light wrapper over common test-all.sh script found in tools
-# why? 1) keeps tf plan/output small; 2) caan interate on test-all.sh implementation with min tf state changes
+# why? 1) keeps tf plan/output small; 2) can iterate on test-all.sh implementation with min tf state changes
 resource "local_file" "test_all_script" {
   count = var.todos_as_local_files ? 1 : 0
 
