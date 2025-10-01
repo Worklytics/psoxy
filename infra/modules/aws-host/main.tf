@@ -440,7 +440,7 @@ resource "local_file" "test_all_script" {
   count = var.todos_as_local_files ? 1 : 0
 
   filename        = "test-all.sh"
-  file_permission = "0770"
+  file_permission = "0755"
   content         = <<EOF
 #!/bin/bash
 
