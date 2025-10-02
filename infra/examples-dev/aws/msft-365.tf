@@ -49,7 +49,7 @@ module "cognito_identity_pool" {
 
   source = "../../modules/aws-cognito-pool"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-cognito-pool?ref=v0.5.10"
-
+  
   developer_provider_name = local.developer_provider_name
   name                    = "${local.env_qualifier}-azure-ad-federation"
 }

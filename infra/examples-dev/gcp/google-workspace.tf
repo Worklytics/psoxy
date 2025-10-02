@@ -2,7 +2,7 @@ provider "google" {
   alias = "google_workspace"
 
   project                     = var.google_workspace_gcp_project_id
-  impersonate_service_account = var.google_workspace_terraform_sa_account_email
+  impersonate_service_account = var.google_workspace_sa_to_impersonate != null ? var.google_workspace_sa_to_impersonate : var.google_workspace_terraform_sa_account_email # TODO: remove ternary in 0.6.x
 }
 
 
@@ -17,6 +17,7 @@ module "worklytics_connectors_google_workspace" {
   environment_id                 = var.environment_name
   enabled_connectors             = var.enabled_connectors
   gcp_project_id                 = var.google_workspace_gcp_project_id
+  tf_gcp_principal_email         = var.google_workspace_terraform_sa_account_email
   google_workspace_example_user  = var.google_workspace_example_user
   google_workspace_example_admin = var.google_workspace_example_admin
   provision_gcp_sa_keys          = var.google_workspace_provision_keys

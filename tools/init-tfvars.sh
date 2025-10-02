@@ -9,6 +9,7 @@ HOST_PLATFORM=${4:-"aws"}
 
 SCRIPT_VERSION="v0.5.10"
 
+
 if [ -z "$PSOXY_BASE_DIR" ]; then
   printf "Usage: init-tfvars.sh <path-to-terraform.tfvars> <path-to-psoxy-base-directory> [DEPLOYMENT_ENV]\n"
   exit 1

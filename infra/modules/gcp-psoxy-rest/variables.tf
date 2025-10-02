@@ -3,6 +3,16 @@ variable "project_id" {
   description = "name of the gcp project"
 }
 
+variable "tf_runner_iam_principal" {
+  description = "The IAM principal (e.g., 'user:alice@example.com' or 'serviceAccount:terraform@project.iam.gserviceaccount.com') that Terraform is running as, used for granting necessary permissions to provision Cloud Functions."
+  type        = string
+
+  validation {
+    condition     = can(regex("^(user:|serviceAccount:|group:|domain:).*", var.tf_runner_iam_principal))
+    error_message = "The tf_runner_iam_principal value should be a valid IAM principal (e.g., 'user:alice@example.com' or 'serviceAccount:terraform@project.iam.gserviceaccount.com')."
+  }
+}
+
 variable "region" {
   type        = string
   description = "region into which to deploy function"
