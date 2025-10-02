@@ -25,10 +25,6 @@ Add following scopes as part of \"Granular Scopes\", first clicking on \`Edit Sc
 - `read:task:confluence`: for getting [tasks](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-task/#api-tasks-get)
 - `read:content-details:confluence`: for using [content search endpoint](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-search/#api-wiki-rest-api-search-get)
 
-Then go back to \"Permissions\" and click on \"Add\" for \`User Identity API\`, only selecting following scopes:
-- `read:account`: for getting user emails
-
-
 ## Setup Instructions
 
 ### App configuration
@@ -46,9 +42,6 @@ Then go back to \"Permissions\" and click on \"Add\" for \`User Identity API\`, 
     - `read:task:confluence`
     - `read:content-details:confluence`
     - `read:content:confluence`
-
-  Then repeat the same but for "User Identity API", adding the following scope:
-    - `read:account`
 
 3. Go to the "Authorization" section and add an OAuth 2.0 (3LO) authorization type: click on "Add"
    and you will be prompted to provide a "Callback URI". At this point, you could add
@@ -111,7 +104,6 @@ curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Con
    ```
        NOTE: As per September 2025, scopes don't show `read:task:confluence` in the response.
 6. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
-    - `PSOXY_CONFLUENCE_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
     - `PSOXY_CONFLUENCE_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
     - `PSOXY_CONFLUENCE_CLOUD_CLIENT_ID` with `Client Id` value.
     - `PSOXY_CONFLUENCE_CLOUD_CLIENT_SECRET` with `Client Secret` value.
