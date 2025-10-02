@@ -25,6 +25,7 @@ Add following scopes as part of \"Granular Scopes\", first clicking on \`Edit Sc
 - `read:task:confluence`: for getting [tasks](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-task/#api-tasks-get)
 - `read:content-details:confluence`: for using [content search endpoint](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-search/#api-wiki-rest-api-search-get)
 
+
 ## Setup Instructions
 
 ### App configuration
@@ -42,6 +43,7 @@ Add following scopes as part of \"Granular Scopes\", first clicking on \`Edit Sc
     - `read:task:confluence`
     - `read:content-details:confluence`
     - `read:content:confluence`
+
 
 3. Go to the "Authorization" section and add an OAuth 2.0 (3LO) authorization type: click on "Add"
    and you will be prompted to provide a "Callback URI". At this point, you could add

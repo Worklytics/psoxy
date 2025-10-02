@@ -37,6 +37,7 @@ You will need a web browser and a terminal with `curl` available (such as macOS 
 
   ![Granular Scopes for Jira API](./img/jira-cloud-jira-api-scope-granular-permissions.png)
 
+
    After adding all the scopes, you should have 5 permissions for `Jira API`:
 
   ![Permissions](./img/jira-cloud-final-permissions.png)
@@ -67,6 +68,8 @@ You will need a web browser and a terminal with `curl` available (such as macOS 
 ```shell
 curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Content-Type: application/json' --data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET", "code": "YOUR_AUTHENTICATION_CODE", "redirect_uri": "http://localhost"}'
 ```
+
+
 
 8. After running that command, if successful you will see a
    [JSON response](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/#2--exchange-authorization-code-for-access-token)
