@@ -7,13 +7,13 @@ NOTE: These instructions are derived from [worklytics-connector-specs](../../../
 ## Prerequisites
 
 Jira Cloud through Psoxy uses Jira OAuth 2.0 (3LO), which a Jira Cloud (user) account with following classical scopes:
-- `read:jira-user`: for getting generic user information
-- `read:jira-work`: for getting information about issues, comments, etc
+- `read:jira-user`: for getting [users](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-users/#api-rest-api-3-users-search-get)
+- `read:jira-work`: for getting information about [issue](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-get), [issue search]https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-get), [changelogs](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-changelog-get), [comments]https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-comments/#api-rest-api-3-issue-issueidorkey-comment-get, [projects](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-projects/#api-rest-api-3-project-search-get) and [worklogs](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-worklogs/#api-rest-api-3-issue-issueidorkey-worklog-get)
 
 And following granular scopes:
-- `read:account`: for getting user emails
-- `read:group:jira`: for retrieving group members
-- `read:avatar:jira`: for retrieving group members
+- `read:user:jira`: for retrieving [group members](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-member-get)
+- `read:group:jira`: for retrieving [groups](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-bulk-get) and [group members](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-member-get)
+- `read:avatar:jira`: for retrieving [group members](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-member-get)
 
 You will need a web browser and a terminal with `curl` available (such as macOS terminal, Linux, an AWS Cloud Shell, [Windows Subsystem for Linux](https://learn.microsoft.com/en-us/windows/wsl/install), etc)
 
