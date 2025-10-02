@@ -37,12 +37,7 @@ You will need a web browser and a terminal with `curl` available (such as macOS 
 
   ![Granular Scopes for Jira API](./img/jira-cloud-jira-api-scope-granular-permissions.png)
 
-   Then go back to "Permissions" and click on "Add" for `User Identity API`, only selecting following scopes:
-   - `read:account`
-
-  ![Classic Scopes for User Identity API](./img/jira-cloud-user-api-scope-permissions.png)
-
-   After adding all the scopes, you should have 1 permission for `User Identity API` and 5 for `Jira API`:
+   After adding all the scopes, you should have 5 permissions for `Jira API`:
 
   ![Permissions](./img/jira-cloud-final-permissions.png)
 
@@ -50,7 +45,7 @@ You will need a web browser and a terminal with `curl` available (such as macOS 
 
 5. Build an OAuth authorization endpoint URL by copying the value for "Client Id" obtained in the previous step into the URL below. Then open the result in a web browser:
 
-`https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
+`https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
 
      NOTES:
      - That URL can be obtained from "Authorization" and clicking on `Configure` for  "OAuth 2.0 (3LO)" page.
@@ -72,7 +67,7 @@ You will need a web browser and a terminal with `curl` available (such as macOS 
 ```shell
 curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Content-Type: application/json' --data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET", "code": "YOUR_AUTHENTICATION_CODE", "redirect_uri": "http://localhost"}'
 ```
-  
+
 8. After running that command, if successful you will see a
    [JSON response](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/#2--exchange-authorization-code-for-access-token)
    like this:
@@ -87,7 +82,6 @@ curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Con
 }
 ```
 9. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
-   - `PSOXY_JIRA_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
    - `PSOXY_JIRA_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
    - `PSOXY_JIRA_CLOUD_CLIENT_ID` with `Client Id` value.
    - `PSOXY_JIRA_CLOUD_CLIENT_SECRET` with `Client Secret` value.
