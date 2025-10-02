@@ -893,8 +893,7 @@ Add following scopes as part of \"Granular Scopes\", first clicking on \`Edit Sc
     - `read:user:confluence`
     - `read:task:confluence`
     - `read:content-details:confluence`
-   Then repeat the same but for "User Identity API", adding the following scope:
-   - `read:account`
+
 3. Go to the "Authorization" section and add an OAuth 2.0 (3LO) authorization type: click on "Add"
    and you will be prompted to provide a "Callback URI". At this point, you could add
    `http://localhost` as value and follow the [Manual steps](#manual-steps), or you could
@@ -954,7 +953,6 @@ it will print the all the values to complete the configuration:
    ```
     NOTE: As per September 2025, scopes don't show `read:task:confluence` in the response.
 6. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
-   - `PSOXY_CONFLUENCE_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
    - `PSOXY_CONFLUENCE_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
    - `PSOXY_CONFLUENCE_CLOUD_CLIENT_ID` with `Client Id` value.
    - `PSOXY_CONFLUENCE_CLOUD_CLIENT_SECRET` with `Client Secret` value.
@@ -1163,7 +1161,6 @@ it will print the all the values to complete the configuration:
    }
    ```
 6. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
-   - `PSOXY_JIRA_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
    - `PSOXY_JIRA_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
    - `PSOXY_JIRA_CLOUD_CLIENT_ID` with `Client Id` value.
    - `PSOXY_JIRA_CLOUD_CLIENT_SECRET` with `Client Secret` value.
