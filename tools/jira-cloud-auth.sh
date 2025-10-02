@@ -35,8 +35,6 @@ printf "3. Now navigate to \"Permissions\" and click on \"Add\" for \`Jira API\`
     - \`read:group:jira\`
     - \`read:avatar:jira\`
     - \`read:user:jira\`
-  Then go back to \"Permissions\" and click on \"Add\" for \`User Identity API\`, only selecting following scopes:
-    - \`read:account\`
 \n"
 
 printf "4. Once Configured, go to \"Settings\" and copy the \"Client Id\" and \"Secret\". You will use these to
@@ -49,7 +47,7 @@ printf "Enter your Jira Client Secret: "
 read -r CLIENT_SECRET
 
 # Open authorization URL in user's browser
-AUTH_URL="https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${CLIENT_ID}&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent"
+AUTH_URL="https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=${CLIENT_ID}&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent"
 printf "${GREEN}Opening the following URL in your default browser:${NC}\n"
 echo $AUTH_URL
 open "${AUTH_URL}" || xdg-open "${AUTH_URL}"

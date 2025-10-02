@@ -1112,8 +1112,6 @@ And following granular scopes:
    - `read:group:jira`
    - `read:avatar:jira`
    - `read:user:jira`
-   Then repeat the same but for "User Identity API", adding the following scope:
-   - `read:account`
 3. Go to the "Authorization" section and add an OAuth 2.0 (3LO) authorization type: click on "Add"
    and you will be prompted to provide a "Callback URI". At this point, you could add
    `http://localhost` as value and follow the [Manual steps](#manual-steps), or you could
@@ -1141,7 +1139,7 @@ it will print the all the values to complete the configuration:
    `refresh_token`.
 2. Build an OAuth authorization endpoint URL by copying the value for "Client Id" obtained in the
    previous step into the URL below. Then open the result in a web browser:
-   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
+   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
 3. Choose a site in your Jira workspace to allow access for this application and click "Accept".
    As the callback does not exist, you will see an error. But in the URL of your browser you will
    see something like this as URL:
