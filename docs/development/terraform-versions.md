@@ -1,14 +1,14 @@
 # Terraform Version Compatibility
 
 We use CI to automate testing against *latest* version of each minor version of Terraform
-(eg 1.3.x, 1.4.x, etc that we support).
+(eg 1.7.x, 1.8.x, etc that we support).
 
 Given that Hashicorp has changed Terraform licensing to ELv2; and that Linux foundation has forked
 Terraform from 1.5.x to [create OpenTofu](https://opentofu.org/blog/the-opentofu-fork-is-now-available/),
-we are targeting compatibility with 1.6.x feature set.
+we are targeting compatibility with 1.7.x feature set.
 
-Do NOT use any features from 1.3.x or later, as we wish to allow all our terraform modules/examples
-to work with Terraform back to 1.3.x, which is vintage Sept 2022.
+Do NOT use any features from 1.9.x or later, as we wish to allow all our terraform modules/examples
+to work with Terraform 1.7.x minimum, which is vintage 2024.
 
 In particular, **features to NOT use**:
   - `removed` block - introduced in 1.7 (this is our major constraint to maintain compatibility with OpenTofu)
