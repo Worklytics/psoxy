@@ -33,13 +33,15 @@ In **Webhook Collection** mode, psoxy is an endpoint for [webhooks](https://en.w
 
 The app/service in question is usually an internal / on-prem tool, that lacks a REST or similar API that would be suitable for API mode.
 
+While this mode is designed as a webhook endpoint, it's usefulness is not limited to "real-time" data. You could write a script that "exports" data from a source by POST each element to a webhook collector, as if it were an ingestion API. This might be a more convenient alternative to using "Bulk Data" mode for that use-case in many situations.
+
 As in Bulk Data mode, the destination bucket - which contains only sanitized data - must be accessible to the client service, which must poll for new data appearing in the bucket. The client service does not require any access to the actual proxy instance (cloud function) that processes the data.
 
 ### Command-line (cli)
 
 In **Command-line (cli)** mode, psoxy is invoked from the command-line to sanitize data stored in files on the local machine. This is useful for testing, or for one-off data sanitization tasks. Resulting files can then be transferred to a client service via some other means. (Worklytics supports a direct file upload or storage bucket import features, for example; subject to size/format limits) 
 
-This mode is NOT recommended for ongoing production use. It's provided many for testing and supporting some edge cases.
+This mode is NOT recommended for ongoing production use. It's provided mainly for testing and supporting some edge cases.
 
 ## Layers of Data Protection
 
