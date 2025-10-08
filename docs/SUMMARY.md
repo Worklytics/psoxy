@@ -25,6 +25,7 @@
   * [Getting Started with Google Cloud Shell](gcp/cloud-shell.md)
   * [GCP Troubleshooting](gcp/troubleshooting.md)
   * [GCP Development](gcp/development.md)
+  * [VPC](gcp/vpc.md)
 * [General Guides](guides/README.md)
   * [Implementation](guides/implementation.md)
   * [Terraform Cloud / Enterprise](guides/terraform-cloud.md)
