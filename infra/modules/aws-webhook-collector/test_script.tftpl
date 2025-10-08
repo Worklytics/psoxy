@@ -2,8 +2,10 @@
 echo "Quick test of ${function_name} ..."
 
 ${command_cli_call} -u "${collector_endpoint_url}/.well-known/openid-configuration"
+OPENID_CONFIG_RC=$?
 
 ${command_cli_call} -u "${collector_endpoint_url}/.well-known/jwks.json"
+JWKS_RC=$?
 
 ${command_cli_call} -u "${collector_endpoint_url}${collection_path}" --method POST \
 %{ if signing_key_arn != null ~}
@@ -14,4 +16,7 @@ ${command_cli_call} -u "${collector_endpoint_url}${collection_path}" --method PO
 --identity-subject '${example_identity}' \
 %{ endif ~}
 --body '${example_payload}'
+COLLECTION_RC=$?
+
+exit $(( OPENID_CONFIG_RC + JWKS_RC + COLLECTION_RC ))
 

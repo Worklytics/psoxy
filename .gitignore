@@ -6,7 +6,6 @@
 # libraries isn't in above doc, but simply doesn't seem like what we want ...
 .idea/libraries/
 
-
 # exclude .iml, modules.xml due bc including them doesn't cause repo to behave well w Intellij
 # and seems we don't *need* to commit them
 # https://intellij-support.jetbrains.com/hc/en-us/articles/206544839-How-to-manage-projects-under-Version-Control-Systems
@@ -16,6 +15,9 @@
 # IntelliJ config file created IFF you have terraform plugin installed; this includes paths on your machine couple to how terraform is installed,
 # so I dont' think a good idea to commit it
 .idea/terraform.xml
+
+# bunch of github copilot files???
+.idea/copilot.*
 
 # macOs generated files
 .DS_Store

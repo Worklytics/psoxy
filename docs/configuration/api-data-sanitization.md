@@ -76,7 +76,7 @@ For each Endpoint, rules specify a list of transforms to apply to the response c
 
 ### Transform Specification
 
-`<transform> ::= "- " <transform-type> <json-paths> [<encoding>]`
+`<transform> ::= "- " <transform-type> <json-paths> [<encoding>] [<apply-only-when>]`
 
 Each transform is specified by a transform type and a list of [JSON paths](https://github.com/json-path/JsonPath). The transform is applied to all portions of the response content that match any of the JSON paths.
 
@@ -142,6 +142,31 @@ Options:
 
 - `delimiter` - used to split the value into tokens; if not provided, the entire value is treated as a single token.
 - `filters` - in effect, combined via OR; tokens matching ANY of the filters is preserved in the value.
+
+
+### Conditional Transform Application
+
+All transforms support an optional `applyOnlyWhen` parameter that allows conditional application based on the content of the response. This is particularly useful when dealing with APIs that return heterogeneous data (e.g., different object types in the same response).
+
+`<apply-only-when> ::= "applyOnlyWhen: " <json-path-filter>`
+
+The `applyOnlyWhen` parameter accepts a [JSONPath](https://github.com/json-path/JsonPath) expression that acts as a filter. The transform will only be applied if this JSONPath expression matches one or more elements in the response content.
+
+**How it works:**
+- The JSONPath expression is evaluated against the entire response document
+- If the expression returns a non-empty array, the transform is applied
+- If the expression returns an empty array or null, the transform is skipped entirely
+- This evaluation happens before the transform's own `jsonPaths` are processed
+
+**Example:**
+```yaml
+- !<pseudonymize>
+  jsonPaths:
+    - "$.records[*].Email"
+    - "$.records[*].Id"
+  applyOnlyWhen: "$.records[?(@.attributes.type == \"User\")]"
+  encoding: "URL_SAFE_TOKEN"
+```
 
 ### Response Schema Specification
 
