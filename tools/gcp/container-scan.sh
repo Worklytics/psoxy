@@ -37,7 +37,7 @@ ARTIFACT_NAME="${PROJECT_ID_EXTRA_DASHES}__${REGION_EXTRA_DASHES}__${INSTANCE_NA
 
 printf "Looking up container image for ${BLUE}${INSTANCE_NAME}${NC}...\n"
 
-VERSION=$(gcloud artifacts docker images list ${REGION}-docker.pkg.dev/${PROJECT_ID}/gcf-artifacts/${ARTIFACT_NAME} --include-tags --format=json 2>/dev/null | jq -r 'max_by(.createTime) | .version // empty')
+VERSION=$(gcloud artifacts docker images list ${REGION}-docker.pkg.dev/${PROJECT_ID}/gcf-artifacts/${ARTIFACT_NAME} --include-tags --format=json 2>/dev/null | jq -r 'sort_by(.createTime)[-1]?.version // empty')
 
 if [ -z "$VERSION" ]; then
   printf "${RED}No container image found for ${INSTANCE_NAME}. Exiting.${NC}\n"
