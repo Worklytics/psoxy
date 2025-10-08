@@ -36,6 +36,7 @@
   * [Cleaning Up](guides/cleaning-up.md)
 * [General Troubleshooting](troubleshooting.md)
 * [Configuration](configuration/README.md)
+  * [Async API Data Sanitization](configuration/async-api-data.md)
   * [API Data Sanitization](configuration/api-data-sanitization.md)
   * [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
   * [Email Handling](configuration/email-handling.md)

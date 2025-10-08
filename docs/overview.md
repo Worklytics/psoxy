@@ -21,21 +21,30 @@ For some connectors, an **'async'** variant of this is is supported; if client r
 
 In this mode, the client service (Worklytics) must be able to send HTTPS requests to the proxy instances (either directly, or via an API gateway). If async is enabled, the client service must also access the destination bucket from which to retrieve any data that is processed asynchronously.
 
+More details:
+- [Configure API Data Sanitization](./configuration/api-data-sanitization.md)
+- [Async API Data](./configuration/async-api-data.md)
+
 ### Bulk Data Mode
 
 In **Bulk Data** mode, the proxy is triggered by files (objects) being uploaded to cloud storage buckets (eg, S3, GCS, etc). Psoxy reads the incoming file, applies one or more sanitization rules (transforms), writing the result(s) to a destination (usually in distinct bucket).
 
 The destination bucket is exposed the to client service (Workltyics), from which it can access the data. The client service would typically poll for newly processed data to arrive in the bucket.
 
+More details:
+- [Configure Bulk Data Sanitization](./configuration/bulk-file-sanitization.md)
+
 ### Webhook Collection
 
-In **Webhook Collection** mode, psoxy is an endpoint for [webhooks](https://en.wikipedia.org/wiki/Webhook), receiving payloads from an app/service over HTTPS POST methods, the content of which validated, sanitized (transformed), and finally written to a destination cloud storage bucket. 
+In **Webhook Collection** mode, psoxy is an endpoint for [webhooks](https://en.wikipedia.org/wiki/Webhook), receiving payloads from an app/service over HTTPS POST methods, the content of which validated, sanitized (transformed), and finally written to a destination cloud storage bucket. Webhook requests MUST be authenticated via OIDC. 
 
 The app/service in question is usually an internal / on-prem tool, that lacks a REST or similar API that would be suitable for API mode.
 
 While this mode is designed as a webhook endpoint, it's usefulness is not limited to "real-time" data. You could write a script that "exports" data from a source by POST each element to a webhook collector, as if it were an ingestion API. This might be a more convenient alternative to using "Bulk Data" mode for that use-case in many situations.
 
 As in Bulk Data mode, the destination bucket - which contains only sanitized data - must be accessible to the client service, which must poll for new data appearing in the bucket. The client service does not require any access to the actual proxy instance (cloud function) that processes the data.
+
+More details: [Configure Webhook Sanitization](./configuration/webhook-collectors.md)
 
 ### Command-line (cli)
 
