@@ -54,6 +54,7 @@ Data transfer via Psoxy provides a layered approach to data protection, with var
 4. **Proxy-level response transformation** Psoxy can be configured to sanitize fields in API responses, including:
       - pseudonymizing/tokenizing fields that include PII or sensitive identifiers
       - redacting fields containing sensitive information or which aren't needed for analysis
+5. **Network-level Client IP restriction** Optionally, proxy instances may be locked to be invoked ONLY from a given set of IP addresses, leveraging the capabilities of the host service. This may require using VPC/API Gateway features of the hose platform, as well as a subscription with Worklytics that ensures a static list of IPs from which data transfer requests will originate. 
 
 Together, these layers of data protection can redundantly control data access. Eg, you could ensure read-only access to GMail metadata by:
   - granting the Gmail metadata-only oauth scope to your instance via the Google Workspace Admin console, instead of the full Gmail API scope
