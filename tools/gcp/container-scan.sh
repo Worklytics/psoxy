@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# NOTE: this does NOT work with gen2 java cloud run functiosn, bc they use distroless base images without detectable OS
+# NOTE: this does NOT work with gen2 java cloud run functions, bc they use distroless base images without detectable OS
 
 # NOTE: requires that you've enabled the Container Analysis API for the project
 # https://console.developers.google.com/apis/library/containeranalysis.googleapis.com
