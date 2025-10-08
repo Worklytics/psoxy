@@ -11,28 +11,29 @@ This includes:
 - [Cloud Run Functions](https://cloud.google.com/run/docs) - serverless containerized applications
 - [Service Accounts](https://cloud.google.com/iam/docs/service-accounts) - identity and access management
 - [Secret Manager](https://cloud.google.com/secret-manager/docs) - to hold pseudonymization salt, encryption keys, and data source API keys
-- [Cloud Storage Buckets](https://cloud.google.com/storage/docs) (GCS), if using psoxy to sanitize bulk file data, such as CSVs; or collecting data via webhooks
-- [Cloud KMS Keys](https://cloud.google.com/kms/docs) for webhook authentication (if using webhook collectors)
-- [Pub/Sub Topics and Subscriptions](https://cloud.google.com/pubsub/docs), for webhook message queuing and batch processing (if using webhook collectors)
+- [Cloud Storage Buckets](https://cloud.google.com/storage/docs) (GCS), if using psoxy to sanitize bulk file data, such as CSVs; collecting data via webhooks; or async API requests.
+- [Cloud KMS Keys](https://cloud.google.com/kms/docs) for webhook authentication (if using webhook collection mode).
+- [Pub/Sub Topics and Subscriptions](https://cloud.google.com/pubsub/docs), for webhook message queuing and batch processing (if using webhook collectors); and async API requests (if using an API connector that supports/requires async mode).
 
-NOTE: if you're connecting to Google Workspace as a data source, you'll also need to provision Service Account Keys and activate Google Workspace APIs.
+NOTE: if you're connecting to Google Workspace as a data source, you'll also need to provision Service Account Keys and activate Google Workspace APIs. This may be located in same GCP project where you deploy the proxy, but that is not required; it can be managed by our provided Terraform modules - or you provision the services accounts/keys outside of terraform and fill them into the secrets manager on your own.
 
 ## Prerequisites
 
 - a Google Project (we recommend a _dedicated_ GCP project for your deployment, to provide an implicit security boundary around your infrastructure as well as simplify monitoring/cleanup)
+- some set of the IAM permissions and GCP services detailed below. The exact set required depends on the data sources you intend to use, and the [data processing mode(s)](https://docs.worklytics.co/psoxy/overview#modes) used for each.
 
 ### IAM Permissions
 - a GCP (Google) user or Service Account with permissions to provision Service Accounts, Secrets, Storage Buckets, Cloud Run Functions, KMS Keys, Pub/Sub Topics/Subscriptions, and enable APIs within that project. eg:
   - [Cloud Functions Developer](https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.developer) - proxy instances are deployed as GCP cloud functions
-  - [Cloud KMS Admin](https://cloud.google.com/iam/docs/understanding-roles#cloudkms.admin) - webhook authentication keys are provisioned as KMS asymmetric signing keys
+  - [Cloud KMS Admin](https://cloud.google.com/iam/docs/understanding-roles#cloudkms.admin) - webhook authentication keys are provisioned as KMS asymmetric signing keys. this is only required for Webhook collection mode.
   - [Cloud Run Developer](https://cloud.google.com/iam/docs/understanding-roles#cloudrun.developer) - cloud function deployment requires Cloud Run Developer role
   - [Cloud Scheduler Admin](https://cloud.google.com/iam/docs/roles-permissions/cloudscheduler#cloudscheduler.admin) - cloud scheduler - required if using Webhook Collector mode.
-  - [Cloud Storage Admin](https://cloud.google.com/iam/docs/roles-permissions/storage#storage.admin) - processing of bulk data (such as HRIS exports) uses GCS buckets
+  - [Cloud Storage Admin](https://cloud.google.com/iam/docs/roles-permissions/storage#storage.admin) - processing of bulk data (such as HRIS exports) uses GCS buckets, as does Webhook Collection and async API request mode.
   - [IAM Role Admin](https://cloud.google.com/iam/docs/understanding-roles#iam.roles.admin) - create custom roles for the proxy, to follow principle of least privilege
   - [Secret Manager Admin](https://cloud.google.com/iam/docs/understanding-roles#secretmanager.admin) - your API keys and pseudonymization salt is stored in Secret Manager
   - [Service Account Admin](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountAdmin) - admin Service Accounts that personify Cloud Functions or are used as Google Workspace API connections
   - [Service Usage Admin](https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin) - you will need to enable various GCP APIs
-  - [Pub/Sub Admin](https://cloud.google.com/iam/docs/understanding-roles#pubsub.admin) - webhook messages are queued in Pub/Sub topics and subscriptions for batch processing
+  - [Pub/Sub Admin](https://cloud.google.com/iam/docs/understanding-roles#pubsub.admin) - webhook messages are queued in Pub/Sub topics and subscriptions for batch processing; also used for Async API mode requests.
 
 NOTE: the above are the least-privileged predefined GCP roles; depending on your use-cases for the proxy, you can likely create a less-privileged [custom GCP IAM role](https://cloud.google.com/iam/docs/creating-custom-roles) that will suffice. 
 

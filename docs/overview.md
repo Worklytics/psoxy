@@ -11,14 +11,35 @@ Benefits include:
 
 ## Modes
 
-Psoxy can be deployed/used in 4 different modes, to support various data sources:
+Psoxy can be deployed/used in 4 different modes (deployment scenarios), to support various data flows from sources.
+
+### API Mode
 
 - **API** - psoxy sits in front of a data source API. Any call that would normally be sent to the data source API is instead sent to psoxy, which parses the request, validates it / applies ACL, and adds authentication before forwarding to the host API. After the host API response, psoxy sanitizes the response as defined by its roles before returning the response to the caller. This is an _http triggered_ flow.
-  - For some connectors, an **'async'** variant of this is is supported; if client requests `Prefer: respond-async`, psoxy may responds `202 Accepted` and provide a cloud storage uri (s3, gcs, etc) were actual response will be available after being asynchronously requested from source API and sanitized.
-- **Bulk File** - psoxy is triggered by files (objects) being uploaded to cloud storage buckets (eg, S3, GCS, etc). Psoxy reads the incoming file, applies one or more sanitization rules (transforms), writing the result(s) to a destination (usually in distinct bucket).
-- **Webhook Collection** - psoxy is an endpoint for [webhooks](https://en.wikipedia.org/wiki/Webhook), receiving payloads from an app/service over HTTPS POST methods, the content of which validated, sanitized (transformed), and finally written to a cloud storage bucket. 
-- **Command-line (cli)** - psoxy is invoked from the command-line, and is used to sanitize data stored in files on the local machine. This is useful for testing, or for one-off data sanitization tasks. Resulting files can be uploaded to Worklytics via the file upload of its web portal.
 
+For some connectors, an **'async'** variant of this is is supported; if client requests `Prefer: respond-async`, psoxy may responds `202 Accepted` and provide a cloud storage uri (s3, gcs, etc) were actual response will be available after being asynchronously requested from source API and sanitized.
+
+In this mode, the client service (Worklytics) must be able to send HTTPS requests to the proxy instances (either directly, or via an API gateway). If async is enabled, the client service must also access the destination bucket from which to retrieve any data that is processed asynchronously.
+
+### Bulk Data Mode
+
+In **Bulk Data** mode, the proxy is triggered by files (objects) being uploaded to cloud storage buckets (eg, S3, GCS, etc). Psoxy reads the incoming file, applies one or more sanitization rules (transforms), writing the result(s) to a destination (usually in distinct bucket).
+
+The destination bucket is exposed the to client service (Workltyics), from which it can access the data. The client service would typically poll for newly processed data to arrive in the bucket.
+
+### Webhook Collection
+
+In **Webhook Collection** mode, psoxy is an endpoint for [webhooks](https://en.wikipedia.org/wiki/Webhook), receiving payloads from an app/service over HTTPS POST methods, the content of which validated, sanitized (transformed), and finally written to a destination cloud storage bucket. 
+
+The app/service in question is usually an internal / on-prem tool, that lacks a REST or similar API that would be suitable for API mode.
+
+As in Bulk Data mode, the destination bucket - which contains only sanitized data - must be accessible to the client service, which must poll for new data appearing in the bucket. The client service does not require any access to the actual proxy instance (cloud function) that processes the data.
+
+### Command-line (cli)
+
+In **Command-line (cli)** mode, psoxy is invoked from the command-line to sanitize data stored in files on the local machine. This is useful for testing, or for one-off data sanitization tasks. Resulting files can then be transferred to a client service via some other means. (Worklytics supports a direct file upload or storage bucket import features, for example; subject to size/format limits) 
+
+This mode is NOT recommended for ongoing production use. It's provided many for testing and supporting some edge cases.
 
 ## Layers of Data Protection
 

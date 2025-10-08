@@ -62,7 +62,7 @@ See also: [API Data Sanitization](configuration/api-data-sanitization.md)
 
 ## Modes
 
-Psoxy can be deployed/used in 4 different modes, to support various data sources:
+Psoxy can be [deployed/used in 4 different modes](https://docs.worklytics.co/psoxy/overview#modes), to support various data sources:
 
 - **API** - psoxy sits in front of a data source API. Any call that would normally be sent to the data source API is instead sent to psoxy, which parses the request, validates it / applies ACL, and adds authentication before forwarding to the host API. After the host API response, psoxy sanitizes the response as defined by its roles before returning the response to the caller. This is an _http triggered_ flow.
   - For some connectors, an **'async'** variant of this is is supported; if client requests `Prefer: respond-async`, psoxy may responds `202 Accepted` and provide a cloud storage uri (s3, gcs, etc) were actual response will be available after being asynchronously requested from source API and sanitized.
