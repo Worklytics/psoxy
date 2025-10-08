@@ -893,8 +893,7 @@ Add following scopes as part of \"Granular Scopes\", first clicking on \`Edit Sc
     - `read:user:confluence`
     - `read:task:confluence`
     - `read:content-details:confluence`
-   Then repeat the same but for "User Identity API", adding the following scope:
-   - `read:account`
+
 3. Go to the "Authorization" section and add an OAuth 2.0 (3LO) authorization type: click on "Add"
    and you will be prompted to provide a "Callback URI". At this point, you could add
    `http://localhost` as value and follow the [Manual steps](#manual-steps), or you could
@@ -954,7 +953,6 @@ it will print the all the values to complete the configuration:
    ```
     NOTE: As per September 2025, scopes don't show `read:task:confluence` in the response.
 6. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
-   - `PSOXY_CONFLUENCE_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
    - `PSOXY_CONFLUENCE_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
    - `PSOXY_CONFLUENCE_CLOUD_CLIENT_ID` with `Client Id` value.
    - `PSOXY_CONFLUENCE_CLOUD_CLIENT_SECRET` with `Client Secret` value.
@@ -1089,15 +1087,14 @@ EOT
       ],
       external_token_todo : <<EOT
 ## Prerequisites
-Jira OAuth 2.0 (3LO) through Psoxy requires a Jira Cloud account with following classical scopes:
-
-- read:jira-user: for getting generic user information
-- read:jira-work: for getting information about issues, comments, etc
+Jira Cloud through Psoxy uses Jira OAuth 2.0 (3LO) with following classical scopes:
+- `read:jira-user`: for getting [users](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-users/#api-rest-api-3-users-search-get)
+- `read:jira-work`: for getting information about [issue](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-get), [issue search](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-get), [changelogs](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-changelog-get), [comments](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-comments/#api-rest-api-3-issue-issueidorkey-comment-get), [projects](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-projects/#api-rest-api-3-project-search-get) and [worklogs](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-worklogs/#api-rest-api-3-issue-issueidorkey-worklog-get)
 
 And following granular scopes:
-- read:account: for getting user emails
-- read:group:jira: for retrieving group members
-- read:avatar:jira: for retrieving group members
+- `read:user:jira`: for retrieving [group members](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-member-get)
+- `read:group:jira`: for retrieving [groups](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-bulk-get) and [group members](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-member-get)
+- `read:avatar:jira`: for retrieving [group members](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-member-get)
 
 ## Setup Instructions
 
@@ -1112,8 +1109,6 @@ And following granular scopes:
    - `read:group:jira`
    - `read:avatar:jira`
    - `read:user:jira`
-   Then repeat the same but for "User Identity API", adding the following scope:
-   - `read:account`
 3. Go to the "Authorization" section and add an OAuth 2.0 (3LO) authorization type: click on "Add"
    and you will be prompted to provide a "Callback URI". At this point, you could add
    `http://localhost` as value and follow the [Manual steps](#manual-steps), or you could
@@ -1141,7 +1136,7 @@ it will print the all the values to complete the configuration:
    `refresh_token`.
 2. Build an OAuth authorization endpoint URL by copying the value for "Client Id" obtained in the
    previous step into the URL below. Then open the result in a web browser:
-   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:account%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
+   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
 3. Choose a site in your Jira workspace to allow access for this application and click "Accept".
    As the callback does not exist, you will see an error. But in the URL of your browser you will
    see something like this as URL:
@@ -1165,7 +1160,6 @@ it will print the all the values to complete the configuration:
    }
    ```
 6. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
-   - `PSOXY_JIRA_CLOUD_ACCESS_TOKEN` secret variable with value of `access_token` received in previous response
    - `PSOXY_JIRA_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
    - `PSOXY_JIRA_CLOUD_CLIENT_ID` with `Client Id` value.
    - `PSOXY_JIRA_CLOUD_CLIENT_SECRET` with `Client Secret` value.

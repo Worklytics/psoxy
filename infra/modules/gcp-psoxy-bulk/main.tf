@@ -152,12 +152,8 @@ resource "google_cloud_run_service_iam_member" "grant_sa_invoker" {
 
 # to provision Cloud Function, TF must be able to act as the service account that the function will
 # run as
-module "tf_runner" {
-  source = "../../modules/gcp-tf-runner"
-}
-
 resource "google_service_account_iam_member" "act_as" {
-  member             = module.tf_runner.iam_principal
+  member             = var.tf_runner_iam_principal
   role               = "roles/iam.serviceAccountUser"
   service_account_id = google_service_account.service_account.id
 }
@@ -182,10 +178,12 @@ resource "google_cloudfunctions2_function" "function" {
     }
   }
 
+  # NOTE: bulk connectors are STILL triggered through HTTPS invocations, so these have default HTTPS endpoint URls
+
   service_config {
     available_memory      = "${coalesce(var.available_memory_mb, 1024)}M"
     service_account_email = google_service_account.service_account.email
-    timeout_seconds       = 540 # 9 minutes
+    timeout_seconds       = var.timeout_seconds
     ingress_settings      = "ALLOW_INTERNAL_ONLY"
 
     vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector
@@ -324,16 +322,16 @@ FILE_PATH=$${1:-${try(local.example_file, "")}}
 BLUE='\e[0;34m'
 NC='\e[0m'
 
-printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"tf
+printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"
 
 node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
 
-if gzip -t "$FILE_PATH"; then
+if gzip -t "$FILE_PATH" 2>/dev/null; then
   printf "test file was compressed, so not testing compression as a separate case\n"
 else
   printf "testing with compressed input file ... \n"
   # extract the file name from the path
-  TEST_FILE_NAME=./$(basename $FILE_PATH)
+  TEST_FILE_NAME=/tmp/$(basename $FILE_PATH)
 
   gzip -c $FILE_PATH > $TEST_FILE_NAME
   node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $TEST_FILE_NAME -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
@@ -387,4 +385,9 @@ output "todo_setup" {
 
 output "next_todo_step" {
   value = var.todo_step + 1
+}
+
+output "function_config" {
+  description = "INTERNAL USE ONLY - Cloud Function configuration for CI/testing purposes. Users should NOT rely on this output's presence, structure, or schema as it may change without notice."
+  value       = google_cloudfunctions2_function.function
 }

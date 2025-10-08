@@ -39,6 +39,7 @@ fi
 
 touch rc_to_main.md
 echo "$RELEASE back to main" >> rc_to_main.md
+cat tools/release/test_plan.md >> rc_to_main.md
 echo "" >> rc_to_main.md
 echo "Next steps, after that's merged to \`main\`:" >> rc_to_main.md
 echo "  1. publish the release: \`./tools/release/publish.sh $RELEASE\`" >> rc_to_main.md

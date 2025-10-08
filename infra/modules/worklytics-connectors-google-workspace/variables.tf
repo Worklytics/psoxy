@@ -19,6 +19,17 @@ variable "gcp_project_id" {
   description = "id of GCP project that will host OAuth Clients for Google Workspace API connectors"
 }
 
+variable "tf_gcp_principal_email" {
+  description = "if terraform is using gcloud cli authenticated a known principal (eg, user or service account), pass it in here; this avoids need to try to determine it dynamically at run-time. If it ends with 'iam.gserviceaccount.com', it will be treated as a service account; otherwise assumed to be a regular Google user."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.tf_gcp_principal_email == null || can(regex(".*@.*", var.tf_gcp_principal_email))
+    error_message = "The tf_gcp_principal_email value should be a valid email address."
+  }
+}
+
 variable "google_workspace_example_user" {
   type        = string
   description = "user to impersonate for Google Workspace API calls (null for none)"
@@ -35,6 +46,17 @@ variable "provision_gcp_sa_keys" {
   type        = bool
   description = "whether to provision key for each connector's GCP Service Account (OAuth Client). If false, you must create the key manually and provide it."
   default     = true
+}
+
+variable "gcp_sa_key_rotation_days" {
+  type        = number
+  description = "rotation period for the GCP Service Account key, in day; not applicable if provision_gcp_sa_keys is false"
+  default     = 60
+
+  validation {
+    condition     = var.gcp_sa_key_rotation_days > 0
+    error_message = "gcp_sa_key_rotation_days must be greater than 0"
+  }
 }
 
 variable "todos_as_local_files" {

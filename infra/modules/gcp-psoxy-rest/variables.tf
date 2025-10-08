@@ -3,6 +3,16 @@ variable "project_id" {
   description = "name of the gcp project"
 }
 
+variable "tf_runner_iam_principal" {
+  description = "The IAM principal (e.g., 'user:alice@example.com' or 'serviceAccount:terraform@project.iam.gserviceaccount.com') that Terraform is running as, used for granting necessary permissions to provision Cloud Functions."
+  type        = string
+
+  validation {
+    condition     = can(regex("^(user:|serviceAccount:|group:|domain:).*", var.tf_runner_iam_principal))
+    error_message = "The tf_runner_iam_principal value should be a valid IAM principal (e.g., 'user:alice@example.com' or 'serviceAccount:terraform@project.iam.gserviceaccount.com')."
+  }
+}
+
 variable "region" {
   type        = string
   description = "region into which to deploy function"
@@ -81,18 +91,6 @@ variable "path_to_config" {
   type        = string
   description = "DEPRECATED; path to config file (usually something in ../../configs/, eg configs/gdirectory.yaml"
   default     = null
-}
-
-variable "salt_secret_id" {
-  type        = string
-  description = "DEPRECATED: Id of the secret used to salt pseudonyms"
-  default     = ""
-}
-
-variable "salt_secret_version_number" {
-  type        = string
-  description = "DEPRECATED: Version number of the secret used to salt pseudonyms"
-  default     = ""
 }
 
 variable "target_host" {

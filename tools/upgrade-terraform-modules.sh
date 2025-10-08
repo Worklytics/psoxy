@@ -17,6 +17,12 @@ NC='\e[0m' # No Color
 
 CURRENT_RELEASE=$(sed -n '/git::https:\/\/github\.com\/worklytics\/psoxy\//{s/.*ref=\([^"&]*\).*/\1/p;q;}' main.tf)
 
+# if $NEXT_RELEASE is not provided, warn user and exit
+if [ -z "$NEXT_RELEASE" ]; then
+  printf "${RED}Next release version not specified. Exiting.${NC}\n"
+  exit 1
+fi
+
 printf "Parsed your current terraform module version as ${BLUE}${CURRENT_RELEASE}${NC}; this script will upgrade it to ${GREEN}${NEXT_RELEASE}${NC}?\n"
 
 read -p "Do you wish to continue? (Y/n) " -n 1 -r
@@ -60,4 +66,20 @@ if grep -q '^deployment_bundle\s*=' terraform.tfvars; then
     else
         echo "Bundle not updated."
     fi
+fi
+
+
+# parse NEXT_RELEASE as something of the form `rc-v0.5.6` or `v0.5.6`, as MAJOR.MINOR.PATCH
+NEXT_MAJOR=$(echo $NEXT_RELEASE | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\1/')
+NEXT_MINOR=$(echo $NEXT_RELEASE | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\2/')
+NEXT_PATCH=$(echo $NEXT_RELEASE | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\3/')
+
+# parse CURRENT_RELEASE as something of the form `rc-v0.5.6` or `v0.5.6`, as MAJOR.MINOR.PATCH
+CURRENT_MAJOR=$(echo $CURRENT_RELEASE | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\1/')
+CURRENT_MINOR=$(echo $CURRENT_RELEASE | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\2/')
+CURRENT_PATCH=$(echo $CURRENT_RELEASE | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\3/')
+
+if [ $NEXT_MINOR -gt $CURRENT_MINOR ]; then
+  printf "Next release version *may* include a provider bump. It is recommended to run ${BLUE} terraform init --upgrade${NC} to get the latest versions of all terraform providers that are compatible with your configuration.\n"
+  printf "You may first wish to run ${BLUE}terraform providers${NC} to review the various provider version constraints, and consider revising them in top-level ${BLUE}main.tf${NC} or wherever they're specified.\n"
 fi

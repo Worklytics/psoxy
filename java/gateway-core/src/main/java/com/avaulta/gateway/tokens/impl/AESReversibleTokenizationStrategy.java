@@ -1,21 +1,29 @@
 package com.avaulta.gateway.tokens.impl;
 
-import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
-import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
-import lombok.*;
-
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.KeySpec;
+import java.util.Arrays;
+import java.util.function.Function;
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.KeySpec;
-import java.util.Arrays;
-import java.util.function.Function;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.Value;
 
 @Builder
 @RequiredArgsConstructor
@@ -104,9 +112,8 @@ public class AESReversibleTokenizationStrategy implements ReversibleTokenization
         return result;
     }
 
-    @SneakyThrows
     @Override
-    public String getOriginalDatum(@NonNull byte[] reversibleToken) {
+    public String getOriginalDatum(@NonNull byte[] reversibleToken) throws ReversibleTokenizationStrategy.InvalidTokenException {
         if (getKey() == null) {
             throw new IllegalStateException("No key set on AESReversibleTokenizationStrategy");
         }
@@ -115,16 +122,27 @@ public class AESReversibleTokenizationStrategy implements ReversibleTokenization
 
         Cipher cipher = getCipherInstance();
 
-        cipher.init(Cipher.DECRYPT_MODE, getKey(), cipherSuite.getParameterSpecGenerator().apply(reversibleToken));
+        try {
+            cipher.init(Cipher.DECRYPT_MODE, getKey(), cipherSuite.getParameterSpecGenerator().apply(reversibleToken));
 
-        byte[] plain = cipher.doFinal(cryptoText);
-        return new String(plain, StandardCharsets.UTF_8);
+            byte[] plain = cipher.doFinal(cryptoText);
+            return new String(plain, StandardCharsets.UTF_8);
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException("Invalid encryption key configuration", e);
+        } catch (InvalidAlgorithmParameterException e) {
+            throw new InvalidTokenException("Failed to decrypt token; some algorithm parameter, such as iv, is wrong", e);
+        } catch (BadPaddingException e) {
+            throw new InvalidTokenException("Failed to decrypt token; token appears to be corrupted or invalid, due to mismatch between token's padding and the padding expected by the cipher mode", e);
+        } catch (IllegalBlockSizeException e) {
+            throw new InvalidTokenException("Failed to decrypt token; token appears to be corrupted or invalid, as block size seems to differ from expected", e);
+        } catch (RuntimeException e) {
+            throw new InvalidTokenException("Failed to decrypt token; most likely because encryption key has been rotated", e);
+        }
     }
 
     @Override
     public String toString() {
         return "AESReversiblePseudonymStrategy(" + cipherSuite.getCipher() + ")";
     }
-
 
 }
