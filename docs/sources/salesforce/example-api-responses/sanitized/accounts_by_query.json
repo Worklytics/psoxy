@@ -3,14 +3,11 @@
   "done":true,
   "records":[
     {
-      "attributes":{
-        "type":"Account"
-      },
       "Id":"0015Y00002c7g95QAA",
       "AnnualRevenue":1.23456789E9,
       "CreatedDate":"2021-03-02T16:31:04.000+0000",
       "CreatedById":"t~WREVnRtj0N9dGhZfwAgC8Gw-IBQIGk-7JpUbxVSyEy8",
-      "IsDeleted":null,
+      "IsDeleted":false,
       "LastActivityDate":"2021-03-27",
       "LastModifiedDate":"2021-03-24T10:11:08.000+0000",
       "LastModifiedById":"t~FvgRGSB_DRy-y2zUpN35_Josv6-No-nx2M2VGfOx5z4",
@@ -23,14 +20,11 @@
       "Type":"Technology Partner"
     },
     {
-      "attributes":{
-        "type":"Account"
-      },
       "Id":"0015Y00002c7g8uQAA",
       "AnnualRevenue":1.39E8,
       "CreatedDate":"2021-03-02T16:31:04.000+0000",
       "CreatedById":"t~WREVnRtj0N9dGhZfwAgC8Gw-IBQIGk-7JpUbxVSyEy8",
-      "IsDeleted":null,
+      "IsDeleted":false,
       "LastActivityDate":null,
       "LastModifiedDate":"2021-03-02T16:31:04.000+0000",
       "LastModifiedById":"t~WREVnRtj0N9dGhZfwAgC8Gw-IBQIGk-7JpUbxVSyEy8",

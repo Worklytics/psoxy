@@ -3,9 +3,6 @@
   "done":true,
   "records":[
     {
-      "attributes":{
-        "type":"User"
-      },
       "AccountId":null,
       "ContactId":"null",
       "CreatedDate":"2021-03-02T16:31:04.000+0000",
@@ -22,9 +19,6 @@
       "UserType":"CsnOnly"
     },
     {
-      "attributes":{
-        "type":"User"
-      },
       "AccountId":null,
       "ContactId":"null",
       "CreatedDate":"2021-03-02T16:31:04.000+0000",
