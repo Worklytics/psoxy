@@ -1,37 +1,72 @@
 ---
 endpoints:
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/sobjects/(Account|ActivityHistory|User)/describe$"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/sobjects/(Account|ActivityHistory)/updated[?][^/]*"
-    allowedQueryParams:
-      - "start"
-      - "end"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/composite$"
+    allowedQueryParams: []
+    responseSchema:
+      type: "object"
+      properties:
+        allResults:
+          type: "array"
+          items:
+            $ref: "#/definitions/Account"
+        compositeResponse:
+          type: "array"
+          items:
+            $ref: "#/definitions/CompositeResult(AccountId)"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/composite$"
+    allowedQueryParams: []
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..records[*].OwnerId"
+          - "$..records[*].WhoId"
+          - "$..records[*].CreatedById"
+          - "$..records[*].LastModifiedById"
+          - "$..records[*].eventWhoIds"
+          - "$..records[*].acceptedEventInviteeIds"
+          - "$..records[*].declinedEventInviteeIds"
+          - "$..records[*].undecidedEventInviteeIds"
+          - "$..records[*].taskWhoIds"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$..records[*].Description"
+          - "$..records[*].Subject"
+          - "$..records[*].CallResult"
+    responseSchema:
+      type: "object"
+      properties:
+        allResults:
+          type: "array"
+          items:
+            $ref: "#/definitions/Activity"
+        compositeResponse:
+          type: "array"
+          items:
+            $ref: "#/definitions/CompositeResult(Activity)"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/composite/sobjects/Account[?][^/]*"
     allowedQueryParams:
       - "ids"
       - "fields"
     transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..attributes"
       - !<pseudonymize>
         jsonPaths:
           - "$..CreatedById"
           - "$..LastModifiedById"
           - "$..OwnerId"
         encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$..attributes"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/Account"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/composite/sobjects/User[?][^/]*"
     allowedQueryParams:
       - "ids"
       - "fields"
     transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..attributes"
-      - !<redact>
-        jsonPaths:
-          - "$..Alias"
-          - "$..Name"
-          - "$..Username"
       - !<pseudonymize>
         jsonPaths:
           - "$..ContactId"
@@ -40,15 +75,20 @@ endpoints:
           - "$..Email"
           - "$..Id"
         encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$..attributes"
+          - "$..Alias"
+          - "$..Name"
+          - "$..Username"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/User"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)User(%20|\\\
     +)WHERE(%20|\\+)LastModifiedDate.*$"
+    allowedQueryParams: []
     transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.records[*].Alias"
-          - "$.records[*].Name"
-          - "$.records[*].Username"
-        applyOnlyWhen: "records[?(@.attributes.type == \"User\")]"
       - !<pseudonymize>
         jsonPaths:
           - "$.records[*].ContactId"
@@ -56,365 +96,12 @@ endpoints:
           - "$.records[*].ManagerId"
           - "$.records[*].Email"
           - "$.records[*].Id"
-        applyOnlyWhen: "$.records[?(@.attributes.type == \"User\")]"
         encoding: "URL_SAFE_TOKEN"
-    responseSchema:
-      type: "object"
-      properties:
-        done:
-          type: "boolean"
-        nextRecordsUrl:
-          type: "string"
-        records:
-          type: "array"
-          items:
-            type: "object"
-            properties: {}
-            _if:
-              properties:
-                attributes:
-                  type: "object"
-                  properties:
-                    type:
-                      type: "string"
-                      constant: "User"
-            _then:
-              properties:
-                AccountId:
-                  type: "string"
-                Alias:
-                  type: "string"
-                ContactId:
-                  type: "string"
-                CreatedById:
-                  type: "string"
-                CreatedDate:
-                  type: "string"
-                Email:
-                  type: "string"
-                EmailEncodingKey:
-                  type: "string"
-                Id:
-                  type: "string"
-                IsActive:
-                  type: "boolean"
-                LastLoginDate:
-                  type: "string"
-                LastModifiedDate:
-                  type: "string"
-                ManagerId:
-                  type: "string"
-                Name:
-                  type: "string"
-                TimeZoneSidKey:
-                  type: "string"
-                UserRoleId:
-                  type: "string"
-                UserType:
-                  type: "string"
-                Username:
-                  type: "string"
-                attributes:
-                  type: "object"
-                  properties:
-                    type:
-                      type: "string"
-        totalSize:
-          type: "integer"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)Account(%20|\\\
-    +)WHERE(%20|\\+)LastModifiedDate.*$"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.records[*].CreatedById"
-          - "$.records[*].LastModifiedById"
-          - "$.records[*].OwnerId"
-        applyOnlyWhen: "$.records[?(@.attributes.type == \"Account\")]"
-        encoding: "URL_SAFE_TOKEN"
-    responseSchema:
-      type: "object"
-      properties:
-        done:
-          type: "boolean"
-        nextRecordsUrl:
-          type: "string"
-        records:
-          type: "array"
-          items:
-            type: "object"
-            properties: {}
-            _if:
-              properties:
-                attributes:
-                  type: "object"
-                  properties:
-                    type:
-                      type: "string"
-                      constant: "Account"
-            _then:
-              properties:
-                ActivityHistories:
-                  type: "object"
-                  properties:
-                    done:
-                      type: "boolean"
-                    nextRecordsUrl:
-                      type: "string"
-                    records:
-                      type: "array"
-                      items:
-                        type: "object"
-                        properties: {}
-                        _if:
-                          properties:
-                            attributes:
-                              type: "object"
-                              properties:
-                                type:
-                                  type: "string"
-                                  constant: "ActivityHistory"
-                        _then:
-                          properties:
-                            AccountId:
-                              type: "string"
-                            ActivityDate:
-                              type: "string"
-                            ActivityDateTime:
-                              type: "string"
-                            ActivitySubtype:
-                              type: "string"
-                            ActivityType:
-                              type: "string"
-                            CallDurationInSeconds:
-                              type: "integer"
-                            CallType:
-                              type: "string"
-                            CreatedById:
-                              type: "string"
-                            CreatedDate:
-                              type: "string"
-                            DurationInMinutes:
-                              type: "integer"
-                            EndDateTime:
-                              type: "string"
-                            Id:
-                              type: "string"
-                            IsAllDayEvent:
-                              type: "boolean"
-                            IsDeleted:
-                              type: "boolean"
-                            IsHighPriority:
-                              type: "boolean"
-                            IsTask:
-                              type: "boolean"
-                            LastModifiedById:
-                              type: "string"
-                            LastModifiedDate:
-                              type: "string"
-                            OwnerId:
-                              type: "string"
-                            Priority:
-                              type: "string"
-                            StartDateTime:
-                              type: "string"
-                            Status:
-                              type: "string"
-                            WhatId:
-                              type: "string"
-                            WhoId:
-                              type: "string"
-                            attributes:
-                              type: "object"
-                              properties:
-                                type:
-                                  type: "string"
-                    totalSize:
-                      type: "integer"
-                AnnualRevenue:
-                  type: "number"
-                CreatedById:
-                  type: "string"
-                CreatedDate:
-                  type: "string"
-                Id:
-                  type: "string"
-                IsDeleted:
-                  type: "string"
-                LastActivityDate:
-                  type: "string"
-                LastModifiedById:
-                  type: "string"
-                LastModifiedDate:
-                  type: "string"
-                NumberOfEmployees:
-                  type: "integer"
-                OwnerId:
-                  type: "string"
-                Ownership:
-                  type: "string"
-                ParentId:
-                  type: "string"
-                Rating:
-                  type: "string"
-                Sic:
-                  type: "string"
-                Type:
-                  type: "string"
-                attributes:
-                  type: "object"
-                  properties:
-                    type:
-                      type: "string"
-        totalSize:
-          type: "integer"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)ActivityHistories.*$"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.records[*].ActivityHistories.records[*].CreatedById"
-          - "$.records[*].ActivityHistories.records[*].LastModifiedById"
-          - "$.records[*].ActivityHistories.records[*].OwnerId"
-          - "$.records[*].ActivityHistories.records[*].WhoId"
-        encoding: "URL_SAFE_TOKEN"
-    responseSchema:
-      type: "object"
-      properties:
-        done:
-          type: "boolean"
-        nextRecordsUrl:
-          type: "string"
-        records:
-          type: "array"
-          items:
-            type: "object"
-            properties: {}
-            _if:
-              properties:
-                attributes:
-                  type: "object"
-                  properties:
-                    type:
-                      type: "string"
-                      constant: "Account"
-            _then:
-              properties:
-                ActivityHistories:
-                  type: "object"
-                  properties:
-                    done:
-                      type: "boolean"
-                    nextRecordsUrl:
-                      type: "string"
-                    records:
-                      type: "array"
-                      items:
-                        type: "object"
-                        properties: {}
-                        _if:
-                          properties:
-                            attributes:
-                              type: "object"
-                              properties:
-                                type:
-                                  type: "string"
-                                  constant: "ActivityHistory"
-                        _then:
-                          properties:
-                            AccountId:
-                              type: "string"
-                            ActivityDate:
-                              type: "string"
-                            ActivityDateTime:
-                              type: "string"
-                            ActivitySubtype:
-                              type: "string"
-                            ActivityType:
-                              type: "string"
-                            CallDurationInSeconds:
-                              type: "integer"
-                            CallType:
-                              type: "string"
-                            CreatedById:
-                              type: "string"
-                            CreatedDate:
-                              type: "string"
-                            DurationInMinutes:
-                              type: "integer"
-                            EndDateTime:
-                              type: "string"
-                            Id:
-                              type: "string"
-                            IsAllDayEvent:
-                              type: "boolean"
-                            IsDeleted:
-                              type: "boolean"
-                            IsHighPriority:
-                              type: "boolean"
-                            IsTask:
-                              type: "boolean"
-                            LastModifiedById:
-                              type: "string"
-                            LastModifiedDate:
-                              type: "string"
-                            OwnerId:
-                              type: "string"
-                            Priority:
-                              type: "string"
-                            StartDateTime:
-                              type: "string"
-                            Status:
-                              type: "string"
-                            WhatId:
-                              type: "string"
-                            WhoId:
-                              type: "string"
-                            attributes:
-                              type: "object"
-                              properties:
-                                type:
-                                  type: "string"
-                    totalSize:
-                      type: "integer"
-                attributes:
-                  type: "object"
-                  properties:
-                    type:
-                      type: "string"
-        totalSize:
-          type: "integer"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query/.*"
-    transforms:
       - !<redact>
         jsonPaths:
           - "$.records[*].Alias"
           - "$.records[*].Name"
           - "$.records[*].Username"
-        applyOnlyWhen: "records[?(@.attributes.type == \"User\")]"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.records[*].ContactId"
-          - "$.records[*].CreatedById"
-          - "$.records[*].ManagerId"
-          - "$.records[*].Email"
-          - "$.records[*].Id"
-        applyOnlyWhen: "$.records[?(@.attributes.type == \"User\")]"
-        encoding: "URL_SAFE_TOKEN"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.records[*].CreatedById"
-          - "$.records[*].LastModifiedById"
-          - "$.records[*].OwnerId"
-        applyOnlyWhen: "$.records[?(@.attributes.type == \"Account\")]"
-        encoding: "URL_SAFE_TOKEN"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.records[*].ActivityHistories.records[*].CreatedById"
-          - "$.records[*].ActivityHistories.records[*].LastModifiedById"
-          - "$.records[*].ActivityHistories.records[*].OwnerId"
-          - "$.records[*].ActivityHistories.records[*].WhoId"
-        applyOnlyWhen: "$.records[*].ActivityHistories.records[?(@.attributes.type ==\
-      \ \"ActivityHistory\")]"
-        encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
       properties:
@@ -425,181 +112,594 @@ endpoints:
         records:
           type: "array"
           items:
-            anyOf:
-              - type: "object"
-                properties: {}
-                _if:
-                  properties:
-                    attributes:
-                      type: "object"
-                      properties:
-                        type:
-                          type: "string"
-                          constant: "User"
-                _then:
-                  properties:
-                    AccountId:
-                      type: "string"
-                    Alias:
-                      type: "string"
-                    ContactId:
-                      type: "string"
-                    CreatedById:
-                      type: "string"
-                    CreatedDate:
-                      type: "string"
-                    Email:
-                      type: "string"
-                    EmailEncodingKey:
-                      type: "string"
-                    Id:
-                      type: "string"
-                    IsActive:
-                      type: "boolean"
-                    LastLoginDate:
-                      type: "string"
-                    LastModifiedDate:
-                      type: "string"
-                    ManagerId:
-                      type: "string"
-                    Name:
-                      type: "string"
-                    TimeZoneSidKey:
-                      type: "string"
-                    UserRoleId:
-                      type: "string"
-                    UserType:
-                      type: "string"
-                    Username:
-                      type: "string"
-                    attributes:
-                      type: "object"
-                      properties:
-                        type:
-                          type: "string"
-              - type: "object"
-                properties: {}
-                _if:
-                  properties:
-                    attributes:
-                      type: "object"
-                      properties:
-                        type:
-                          type: "string"
-                          constant: "Account"
-                _then:
-                  properties:
-                    ActivityHistories:
-                      type: "object"
-                      properties:
-                        done:
-                          type: "boolean"
-                        nextRecordsUrl:
-                          type: "string"
-                        records:
-                          type: "array"
-                          items:
-                            type: "object"
-                            properties: {}
-                            _if:
-                              properties:
-                                attributes:
-                                  type: "object"
-                                  properties:
-                                    type:
-                                      type: "string"
-                                      constant: "ActivityHistory"
-                            _then:
-                              properties:
-                                AccountId:
-                                  type: "string"
-                                ActivityDate:
-                                  type: "string"
-                                ActivityDateTime:
-                                  type: "string"
-                                ActivitySubtype:
-                                  type: "string"
-                                ActivityType:
-                                  type: "string"
-                                CallDurationInSeconds:
-                                  type: "integer"
-                                CallType:
-                                  type: "string"
-                                CreatedById:
-                                  type: "string"
-                                CreatedDate:
-                                  type: "string"
-                                DurationInMinutes:
-                                  type: "integer"
-                                EndDateTime:
-                                  type: "string"
-                                Id:
-                                  type: "string"
-                                IsAllDayEvent:
-                                  type: "boolean"
-                                IsDeleted:
-                                  type: "boolean"
-                                IsHighPriority:
-                                  type: "boolean"
-                                IsTask:
-                                  type: "boolean"
-                                LastModifiedById:
-                                  type: "string"
-                                LastModifiedDate:
-                                  type: "string"
-                                OwnerId:
-                                  type: "string"
-                                Priority:
-                                  type: "string"
-                                StartDateTime:
-                                  type: "string"
-                                Status:
-                                  type: "string"
-                                WhatId:
-                                  type: "string"
-                                WhoId:
-                                  type: "string"
-                                attributes:
-                                  type: "object"
-                                  properties:
-                                    type:
-                                      type: "string"
-                        totalSize:
-                          type: "integer"
-                    AnnualRevenue:
-                      type: "number"
-                    CreatedById:
-                      type: "string"
-                    CreatedDate:
-                      type: "string"
-                    Id:
-                      type: "string"
-                    IsDeleted:
-                      type: "string"
-                    LastActivityDate:
-                      type: "string"
-                    LastModifiedById:
-                      type: "string"
-                    LastModifiedDate:
-                      type: "string"
-                    NumberOfEmployees:
-                      type: "integer"
-                    OwnerId:
-                      type: "string"
-                    Ownership:
-                      type: "string"
-                    ParentId:
-                      type: "string"
-                    Rating:
-                      type: "string"
-                    Sic:
-                      type: "string"
-                    Type:
-                      type: "string"
-                    attributes:
-                      type: "object"
-                      properties:
-                        type:
-                          type: "string"
+            $ref: "#/definitions/User"
         totalSize:
           type: "integer"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM.*WHERE.*$"
+    allowedQueryParams: []
+    responseSchema:
+      type: "object"
+      properties:
+        done:
+          type: "boolean"
+        nextRecordsUrl:
+          type: "string"
+        records:
+          type: "array"
+          items:
+            $ref: "#/definitions/AccountId"
+        totalSize:
+          type: "integer"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM.Event.WHERE.*$"
+    allowedQueryParams: []
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..records[*].OwnerId"
+          - "$..records[*].WhoId"
+          - "$..records[*].CreatedById"
+          - "$..records[*].LastModifiedById"
+          - "$..records[*].eventWhoIds"
+          - "$..records[*].acceptedEventInviteeIds"
+          - "$..records[*].declinedEventInviteeIds"
+          - "$..records[*].undecidedEventInviteeIds"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$..records[*].Description"
+          - "$..records[*].Subject"
+          - "$..records[*].CallResult"
+    responseSchema:
+      type: "object"
+      properties:
+        done:
+          type: "boolean"
+        nextRecordsUrl:
+          type: "string"
+        records:
+          type: "array"
+          items:
+            $ref: "#/definitions/Event"
+        totalSize:
+          type: "integer"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM.Task.WHERE.*$"
+    allowedQueryParams: []
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..records[*].OwnerId"
+          - "$..records[*].WhoId"
+          - "$..records[*].CreatedById"
+          - "$..records[*].LastModifiedById"
+          - "$..records[*].taskWhoIds"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$..records[*].Description"
+          - "$..records[*].Subject"
+          - "$..records[*].CallResult"
+    responseSchema:
+      type: "object"
+      properties:
+        done:
+          type: "boolean"
+        nextRecordsUrl:
+          type: "string"
+        records:
+          type: "array"
+          items:
+            $ref: "#/definitions/Task"
+        totalSize:
+          type: "integer"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/sobjects/(Account|ActivityHistory)/updated[?][^/]*"
+    allowedQueryParams:
+      - "start"
+      - "end"
+    responseSchema:
+      type: "object"
+      properties:
+        ids:
+          type: "array"
+          items:
+            type: "string"
+        latestDateCovered:
+          type: "string"
+          format: "date-time"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/sobjects/(Account|ActivityHistory|User|Task|Event)/describe$"
+    allowedQueryParams: []
+    responseSchema:
+      type: "object"
+      properties:
+        childRelationships:
+          type: "array"
+          items:
+            $ref: "#/definitions/ChildRelationship"
+        deprecatedAndHidden:
+          type: "boolean"
+        fields:
+          type: "array"
+          items:
+            $ref: "#/definitions/Field"
+        name:
+          type: "string"
+        queryable:
+          type: "boolean"
+        retrieveable:
+          type: "boolean"
+        searchable:
+          type: "boolean"
+definitions:
+  Account:
+    type: "object"
+    properties:
+      IsDeleted:
+        type: "boolean"
+      accountSource:
+        type: "string"
+      annualRevenue:
+        type: "number"
+      createdById:
+        type: "string"
+      createdDate:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      lastActivityDate:
+        type: "string"
+        format: "date-time"
+      lastModifiedById:
+        type: "string"
+      lastModifiedDate:
+        type: "string"
+        format: "date-time"
+      numberOfEmployees:
+        type: "integer"
+      ownerId:
+        type: "string"
+      ownership:
+        type: "string"
+      parentId:
+        type: "string"
+      rating:
+        type: "string"
+      sic:
+        type: "string"
+      sourceId:
+        type: "string"
+      type:
+        type: "string"
+  AccountId:
+    type: "object"
+    properties:
+      accountId:
+        type: "string"
+  Activity:
+    type: "object"
+    properties:
+      accountId:
+        type: "string"
+      activityDate:
+        type: "string"
+      createdById:
+        type: "string"
+      createdDate:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      isArchived:
+        type: "boolean"
+      isRecurrence:
+        type: "boolean"
+      isReminderSet:
+        type: "boolean"
+      lastModifiedById:
+        type: "string"
+      lastModifiedDate:
+        type: "string"
+        format: "date-time"
+      ownerId:
+        type: "string"
+      recurrenceActivityDate:
+        type: "string"
+      recurrenceDayOfMonth:
+        type: "integer"
+      recurrenceDayOfWeekMask:
+        type: "string"
+      recurrenceEndDateOnly:
+        type: "string"
+      recurrenceInstance:
+        type: "string"
+      recurrenceInterval:
+        type: "integer"
+      recurrenceMonthOfYear:
+        type: "string"
+      recurrenceStartDateOnly:
+        type: "string"
+      recurrenceTimeZoneSidKey:
+        type: "string"
+      recurrenceType:
+        type: "string"
+      reminderDateTime:
+        type: "string"
+        format: "date-time"
+      sourceId:
+        type: "string"
+      type:
+        type: "string"
+      whatId:
+        type: "string"
+      whoId:
+        type: "string"
+  ChildRelationship:
+    type: "object"
+    properties:
+      childSObject:
+        type: "string"
+      field:
+        type: "string"
+      relationshipName:
+        type: "string"
+  CompositeResult(AccountId):
+    type: "object"
+    properties:
+      body:
+        $ref: "#/definitions/NestedQueryResult(AccountId)"
+      errorBody:
+        type: "array"
+        items:
+          $ref: "#/definitions/ErrorBody"
+      httpHeaders:
+        type: "object"
+      httpStatusCode:
+        type: "integer"
+      referenceId:
+        type: "string"
+  CompositeResult(Activity):
+    type: "object"
+    properties:
+      body:
+        $ref: "#/definitions/NestedQueryResult(Activity)"
+      errorBody:
+        type: "array"
+        items:
+          $ref: "#/definitions/ErrorBody"
+      httpHeaders:
+        type: "object"
+      httpStatusCode:
+        type: "integer"
+      referenceId:
+        type: "string"
+  ErrorBody:
+    type: "object"
+    properties:
+      errorCode:
+        type: "string"
+      extendedErrorDetails:
+        type: "array"
+        items:
+          $ref: "#/definitions/ExtendedErrorDetails"
+      message:
+        type: "string"
+  Event:
+    type: "object"
+    properties:
+      acceptedEventInviteeIds:
+        type: "array"
+        items:
+          type: "string"
+      accountId:
+        type: "string"
+      activityDate:
+        type: "string"
+      activityDateTime:
+        type: "string"
+        format: "date-time"
+      clientGuid:
+        type: "string"
+      createdById:
+        type: "string"
+      createdDate:
+        type: "string"
+        format: "date-time"
+      currencyIsoCode:
+        type: "string"
+      declinedEventInviteeIds:
+        type: "array"
+        items:
+          type: "string"
+      division:
+        type: "string"
+      durationInMinutes:
+        type: "integer"
+      endDate:
+        type: "string"
+      endDateTime:
+        type: "string"
+        format: "date-time"
+      eventSubtype:
+        type: "string"
+      eventWhoIds:
+        type: "array"
+        items:
+          type: "string"
+      groupEventType:
+        type: "string"
+      id:
+        type: "string"
+      isAllDayEvent:
+        type: "boolean"
+      isArchived:
+        type: "boolean"
+      isChild:
+        type: "boolean"
+      isClientManaged:
+        type: "boolean"
+      isGroupEvent:
+        type: "boolean"
+      isPrivate:
+        type: "boolean"
+      isRecurrence:
+        type: "boolean"
+      isRecurrence2:
+        type: "boolean"
+      isRecurrence2Exception:
+        type: "boolean"
+      isRecurrence2Exclusion:
+        type: "boolean"
+      isReminderSet:
+        type: "boolean"
+      isVisibleInSelfService:
+        type: "boolean"
+      lastModifiedById:
+        type: "string"
+      lastModifiedDate:
+        type: "string"
+        format: "date-time"
+      location:
+        type: "string"
+      ownerId:
+        type: "string"
+      recurrence2PatternStartDate:
+        type: "string"
+        format: "date-time"
+      recurrence2PatternText:
+        type: "string"
+      recurrence2PatternTimeZone:
+        type: "string"
+      recurrence2PatternVersion:
+        type: "string"
+      recurrenceActivityDate:
+        type: "string"
+      recurrenceActivityId:
+        type: "string"
+      recurrenceDayOfMonth:
+        type: "integer"
+      recurrenceDayOfWeekMask:
+        type: "string"
+      recurrenceEndDateOnly:
+        type: "string"
+      recurrenceInstance:
+        type: "string"
+      recurrenceInterval:
+        type: "integer"
+      recurrenceMonthOfYear:
+        type: "string"
+      recurrenceStartDateOnly:
+        type: "string"
+      recurrenceStartDateTime:
+        type: "string"
+        format: "date-time"
+      recurrenceTimeZoneSidKey:
+        type: "string"
+      recurrenceType:
+        type: "string"
+      reminderDateTime:
+        type: "string"
+        format: "date-time"
+      showAs:
+        type: "string"
+      sourceId:
+        type: "string"
+      startDateTime:
+        type: "string"
+        format: "date-time"
+      type:
+        type: "string"
+      undecidedEventInviteeIds:
+        type: "array"
+        items:
+          type: "string"
+      whatCount:
+        type: "integer"
+      whatId:
+        type: "string"
+      whoCount:
+        type: "integer"
+      whoId:
+        type: "string"
+  ExtendedErrorDetails:
+    type: "object"
+    properties:
+      extendedErrorCode:
+        type: "string"
+      message:
+        type: "string"
+  Field:
+    type: "object"
+    properties:
+      custom:
+        type: "boolean"
+      dependentPicklist:
+        type: "boolean"
+      deprecatedAndHidden:
+        type: "boolean"
+      filterable:
+        type: "boolean"
+      name:
+        type: "string"
+      nameField:
+        type: "boolean"
+      sortable:
+        type: "boolean"
+  NestedQueryResult(AccountId):
+    type: "object"
+    properties:
+      done:
+        type: "boolean"
+      nextRecordsUrl:
+        type: "string"
+      records:
+        type: "array"
+        items:
+          $ref: "#/definitions/AccountId"
+      totalSize:
+        type: "integer"
+  NestedQueryResult(Activity):
+    type: "object"
+    properties:
+      done:
+        type: "boolean"
+      nextRecordsUrl:
+        type: "string"
+      records:
+        type: "array"
+        items:
+          $ref: "#/definitions/Activity"
+      totalSize:
+        type: "integer"
+  Object:
+    type: "object"
+    properties: {}
+  Task:
+    type: "object"
+    properties:
+      accountId:
+        type: "string"
+      activityDate:
+        type: "string"
+      activitySubtype:
+        type: "string"
+      callDisposition:
+        type: "string"
+      callDurationInSeconds:
+        type: "integer"
+      callObject:
+        type: "string"
+      callResult:
+        type: "string"
+      callType:
+        type: "string"
+      completedDateTime:
+        type: "string"
+        format: "date-time"
+      createdById:
+        type: "string"
+      createdDate:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      isArchived:
+        type: "boolean"
+      isClosed:
+        type: "boolean"
+      isDeleted:
+        type: "boolean"
+      isHighPriority:
+        type: "boolean"
+      isRecurrence:
+        type: "boolean"
+      isReminderSet:
+        type: "boolean"
+      lastModifiedById:
+        type: "string"
+      lastModifiedDate:
+        type: "string"
+        format: "date-time"
+      ownerId:
+        type: "string"
+      priority:
+        type: "string"
+      recurrenceActivityDate:
+        type: "string"
+      recurrenceDayOfMonth:
+        type: "integer"
+      recurrenceDayOfWeekMask:
+        type: "string"
+      recurrenceEndDateOnly:
+        type: "string"
+      recurrenceInstance:
+        type: "string"
+      recurrenceInterval:
+        type: "integer"
+      recurrenceMonthOfYear:
+        type: "string"
+      recurrenceRegeneratedType:
+        type: "string"
+      recurrenceStartDateOnly:
+        type: "string"
+      recurrenceTimeZoneSidKey:
+        type: "string"
+      recurrenceType:
+        type: "string"
+      reminderDateTime:
+        type: "string"
+        format: "date-time"
+      sourceId:
+        type: "string"
+      status:
+        type: "string"
+      taskSubtype:
+        type: "string"
+      taskWhoIds:
+        type: "array"
+        items:
+          type: "string"
+      type:
+        type: "string"
+      whatId:
+        type: "string"
+      whoId:
+        type: "string"
+  User:
+    type: "object"
+    properties:
+      IsActive:
+        type: "boolean"
+      accountId:
+        type: "string"
+      contactId:
+        type: "string"
+      createdById:
+        type: "string"
+      createdDate:
+        type: "string"
+        format: "date-time"
+      email:
+        type: "string"
+      emailEncodingKey:
+        type: "string"
+      employee:
+        type: "boolean"
+      id:
+        type: "string"
+      lastLoginDate:
+        type: "string"
+        format: "date-time"
+      lastModifiedById:
+        type: "string"
+      lastModifiedDate:
+        type: "string"
+        format: "date-time"
+      managerId:
+        type: "string"
+      sourceId:
+        type: "string"
+      timeZoneSidKey:
+        type: "string"
+      userRoleId:
+        type: "string"
+      userType:
+        type: "string"
