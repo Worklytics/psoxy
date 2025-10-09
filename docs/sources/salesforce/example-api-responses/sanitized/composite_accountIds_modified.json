@@ -1,0 +1,50 @@
+{
+  "compositeResponse":[
+    {
+      "body":{
+        "totalSize":3,
+        "done":true,
+        "records":[
+          {
+            "attributes":{
+              "type":"AggregateResult"
+            },
+            "AccountId":"0015Y00002c7g8uQAA"
+          },
+          {
+            "attributes":{
+              "type":"AggregateResult"
+            },
+            "AccountId":"0015Y00002c7g95QAA"
+          },
+          {
+            "attributes":{
+              "type":"AggregateResult"
+            },
+            "AccountId":"0015Y00005YXiYnQAL"
+          }
+        ]
+      },
+      "httpHeaders":{ },
+      "httpStatusCode":200,
+      "referenceId":"tasks"
+    },
+    {
+      "body":{
+        "totalSize":1,
+        "done":true,
+        "records":[
+          {
+            "attributes":{
+              "type":"AggregateResult"
+            },
+            "AccountId":"0015Y00002c7g8uQAA"
+          }
+        ]
+      },
+      "httpHeaders":{ },
+      "httpStatusCode":200,
+      "referenceId":"events"
+    }
+  ]
+}

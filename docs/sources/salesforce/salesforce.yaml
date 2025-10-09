@@ -2,48 +2,37 @@
 endpoints:
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/composite$"
     allowedQueryParams: []
-    responseSchema:
-      type: "object"
-      properties:
-        allResults:
-          type: "array"
-          items:
-            $ref: "#/definitions/Account"
-        compositeResponse:
-          type: "array"
-          items:
-            $ref: "#/definitions/CompositeResult(AccountId)"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/composite$"
-    allowedQueryParams: []
     transforms:
       - !<pseudonymize>
         jsonPaths:
+          - "$..records[*].CreatedById"
+          - "$..records[*].ContactId"
+          - "$..records[*].ManagerId"
+          - "$..records[*].Email"
+          - "$..records[*].LastModifiedById"
           - "$..records[*].OwnerId"
           - "$..records[*].WhoId"
-          - "$..records[*].CreatedById"
-          - "$..records[*].LastModifiedById"
           - "$..records[*].eventWhoIds"
           - "$..records[*].acceptedEventInviteeIds"
           - "$..records[*].declinedEventInviteeIds"
-          - "$..records[*].undecidedEventInviteeIds"
           - "$..records[*].taskWhoIds"
+          - "$..records[*].undecidedEventInviteeIds"
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
+          - "$..records[*].Alias"
+          - "$..records[*].Name"
+          - "$..records[*].Username"
           - "$..records[*].Description"
           - "$..records[*].Subject"
           - "$..records[*].CallResult"
     responseSchema:
       type: "object"
       properties:
-        allResults:
-          type: "array"
-          items:
-            $ref: "#/definitions/Activity"
         compositeResponse:
           type: "array"
           items:
-            $ref: "#/definitions/CompositeResult(Activity)"
+            $ref: "#/definitions/CompositeResult(Response)"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/composite/sobjects/Account[?][^/]*"
     allowedQueryParams:
       - "ids"
@@ -68,39 +57,22 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.records[*].CreatedById"
-          - "$.records[*].LastModifiedById"
-          - "$.records[*].OwnerId"
-        applyOnlyWhen: "$.records[?(@.attributes.type == \"Account\")]\""
-        encoding: "URL_SAFE_TOKEN"
-      - !<pseudonymize>
-        jsonPaths:
           - "$.records[*].ContactId"
-          - "$.records[*].CreatedById"
           - "$.records[*].ManagerId"
           - "$.records[*].Email"
+          - "$.records[*].LastModifiedById"
+          - "$.records[*].OwnerId"
+          - "$.records[*].WhoId"
+          - "$.records[*].eventWhoIds"
+          - "$.records[*].acceptedEventInviteeIds"
+          - "$.records[*].declinedEventInviteeIds"
+          - "$.records[*].taskWhoIds"
+          - "$.records[*].undecidedEventInviteeIds"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
           - "$.records[*].Id"
         applyOnlyWhen: "$.records[?(@.attributes.type == \"User\")]\""
-        encoding: "URL_SAFE_TOKEN"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..records[*].OwnerId"
-          - "$..records[*].WhoId"
-          - "$..records[*].CreatedById"
-          - "$..records[*].LastModifiedById"
-          - "$..records[*].eventWhoIds"
-          - "$..records[*].acceptedEventInviteeIds"
-          - "$..records[*].declinedEventInviteeIds"
-          - "$..records[*].undecidedEventInviteeIds"
-        applyOnlyWhen: "$.records[?(@.attributes.type == \"Event\")]\""
-        encoding: "URL_SAFE_TOKEN"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$..records[*].OwnerId"
-          - "$..records[*].WhoId"
-          - "$..records[*].CreatedById"
-          - "$..records[*].LastModifiedById"
-          - "$..records[*].taskWhoIds"
-        applyOnlyWhen: "$.records[?(@.attributes.type == \"Task\")]\""
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
@@ -110,19 +82,9 @@ endpoints:
           - "$.records[*].Alias"
           - "$.records[*].Name"
           - "$.records[*].Username"
-        applyOnlyWhen: "$.records[?(@.attributes.type == \"User\")]\""
-      - !<redact>
-        jsonPaths:
-          - "$..records[*].Description"
-          - "$..records[*].Subject"
-          - "$..records[*].CallResult"
-        applyOnlyWhen: "$.records[?(@.attributes.type == \"Event\")]\""
-      - !<redact>
-        jsonPaths:
-          - "$..records[*].Description"
-          - "$..records[*].Subject"
-          - "$..records[*].CallResult"
-        applyOnlyWhen: "$.records[?(@.attributes.type == \"Task\")]\""
+          - "$.records[*].Description"
+          - "$.records[*].Subject"
+          - "$.records[*].CallResult"
     responseSchema:
       type: "object"
       properties:
@@ -340,66 +302,6 @@ definitions:
     properties:
       accountId:
         type: "string"
-  Activity:
-    type: "object"
-    properties:
-      AccountId:
-        type: "string"
-      ActivityDate:
-        type: "string"
-      CreatedById:
-        type: "string"
-      CreatedDate:
-        type: "string"
-        format: "date-time"
-      Id:
-        type: "string"
-      IsArchived:
-        type: "boolean"
-      IsDeleted:
-        type: "boolean"
-      IsRecurrence:
-        type: "boolean"
-      IsReminderSet:
-        type: "boolean"
-      LastModifiedById:
-        type: "string"
-      LastModifiedDate:
-        type: "string"
-        format: "date-time"
-      OwnerId:
-        type: "string"
-      RecurrenceActivityDate:
-        type: "string"
-      RecurrenceActivityId:
-        type: "string"
-      RecurrenceDayOfMonth:
-        type: "integer"
-      RecurrenceDayOfWeekMask:
-        type: "string"
-      RecurrenceEndDateOnly:
-        type: "string"
-      RecurrenceInstance:
-        type: "string"
-      RecurrenceInterval:
-        type: "integer"
-      RecurrenceMonthOfYear:
-        type: "string"
-      RecurrenceStartDateOnly:
-        type: "string"
-      RecurrenceTimeZoneSidKey:
-        type: "string"
-      RecurrenceType:
-        type: "string"
-      ReminderDateTime:
-        type: "string"
-        format: "date-time"
-      Type:
-        type: "string"
-      WhatId:
-        type: "string"
-      WhoId:
-        type: "string"
   Attributes:
     type: "object"
     properties:
@@ -414,26 +316,11 @@ definitions:
         type: "string"
       relationshipName:
         type: "string"
-  CompositeResult(AccountId):
+  CompositeResult(Response):
     type: "object"
     properties:
       body:
-        $ref: "#/definitions/NestedQueryResult(AccountId)"
-      errorBody:
-        type: "array"
-        items:
-          $ref: "#/definitions/ErrorBody"
-      httpHeaders:
-        type: "object"
-      httpStatusCode:
-        type: "integer"
-      referenceId:
-        type: "string"
-  CompositeResult(Activity):
-    type: "object"
-    properties:
-      body:
-        $ref: "#/definitions/NestedQueryResult(Activity)"
+        $ref: "#/definitions/NestedQueryResult(Response)"
       errorBody:
         type: "array"
         items:
@@ -616,7 +503,7 @@ definitions:
         type: "boolean"
       sortable:
         type: "boolean"
-  NestedQueryResult(AccountId):
+  NestedQueryResult(Response):
     type: "object"
     properties:
       done:
@@ -626,20 +513,7 @@ definitions:
       records:
         type: "array"
         items:
-          $ref: "#/definitions/AccountId"
-      totalSize:
-        type: "integer"
-  NestedQueryResult(Activity):
-    type: "object"
-    properties:
-      done:
-        type: "boolean"
-      nextRecordsUrl:
-        type: "string"
-      records:
-        type: "array"
-        items:
-          $ref: "#/definitions/Activity"
+          $ref: "#/definitions/Response"
       totalSize:
         type: "integer"
   Object:
