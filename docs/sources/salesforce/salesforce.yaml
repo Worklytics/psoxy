@@ -62,33 +62,16 @@ endpoints:
       type: "array"
       items:
         $ref: "#/definitions/Account"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/composite/sobjects/User[?][^/]*"
-    allowedQueryParams:
-      - "ids"
-      - "fields"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query/.*"
+    allowedQueryParams: []
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..ContactId"
-          - "$..CreatedById"
-          - "$..ManagerId"
-          - "$..Email"
-          - "$..Id"
+          - "$.records[*].CreatedById"
+          - "$.records[*].LastModifiedById"
+          - "$.records[*].OwnerId"
+        applyOnlyWhen: "$.records[?(@.attributes.type == \"Account\")]\""
         encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$..attributes"
-          - "$..Alias"
-          - "$..Name"
-          - "$..Username"
-    responseSchema:
-      type: "array"
-      items:
-        $ref: "#/definitions/User"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)User(%20|\\\
-    +)WHERE(%20|\\+)LastModifiedDate.*$"
-    allowedQueryParams: []
-    transforms:
       - !<pseudonymize>
         jsonPaths:
           - "$.records[*].ContactId"
@@ -96,12 +79,50 @@ endpoints:
           - "$.records[*].ManagerId"
           - "$.records[*].Email"
           - "$.records[*].Id"
+        applyOnlyWhen: "$.records[?(@.attributes.type == \"User\")]\""
         encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..records[*].OwnerId"
+          - "$..records[*].WhoId"
+          - "$..records[*].CreatedById"
+          - "$..records[*].LastModifiedById"
+          - "$..records[*].eventWhoIds"
+          - "$..records[*].acceptedEventInviteeIds"
+          - "$..records[*].declinedEventInviteeIds"
+          - "$..records[*].undecidedEventInviteeIds"
+        applyOnlyWhen: "$.records[?(@.attributes.type == \"Event\")]\""
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..records[*].OwnerId"
+          - "$..records[*].WhoId"
+          - "$..records[*].CreatedById"
+          - "$..records[*].LastModifiedById"
+          - "$..records[*].taskWhoIds"
+        applyOnlyWhen: "$.records[?(@.attributes.type == \"Task\")]\""
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$..attributes"
       - !<redact>
         jsonPaths:
           - "$.records[*].Alias"
           - "$.records[*].Name"
           - "$.records[*].Username"
+        applyOnlyWhen: "$.records[?(@.attributes.type == \"User\")]\""
+      - !<redact>
+        jsonPaths:
+          - "$..records[*].Description"
+          - "$..records[*].Subject"
+          - "$..records[*].CallResult"
+        applyOnlyWhen: "$.records[?(@.attributes.type == \"Event\")]\""
+      - !<redact>
+        jsonPaths:
+          - "$..records[*].Description"
+          - "$..records[*].Subject"
+          - "$..records[*].CallResult"
+        applyOnlyWhen: "$.records[?(@.attributes.type == \"Task\")]\""
     responseSchema:
       type: "object"
       properties:
@@ -112,26 +133,13 @@ endpoints:
         records:
           type: "array"
           items:
-            $ref: "#/definitions/User"
+            $ref: "#/definitions/Response"
         totalSize:
           type: "integer"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM.*WHERE.*$"
-    allowedQueryParams: []
-    responseSchema:
-      type: "object"
-      properties:
-        done:
-          type: "boolean"
-        nextRecordsUrl:
-          type: "string"
-        records:
-          type: "array"
-          items:
-            $ref: "#/definitions/AccountId"
-        totalSize:
-          type: "integer"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM.Event.WHERE.*$"
-    allowedQueryParams: []
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)*Event(%20|\\\
+    +)*.*$"
+    allowedQueryParams:
+      - "q"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -162,8 +170,10 @@ endpoints:
             $ref: "#/definitions/Event"
         totalSize:
           type: "integer"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM.Task.WHERE.*$"
-    allowedQueryParams: []
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)*Task(%20|\\\
+    +)*.*$"
+    allowedQueryParams:
+      - "q"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -191,20 +201,54 @@ endpoints:
             $ref: "#/definitions/Task"
         totalSize:
           type: "integer"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/sobjects/(Account|ActivityHistory)/updated[?][^/]*"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)User(%20|\\\
+    +)WHERE(%20|\\+)LastModifiedDate.*$"
     allowedQueryParams:
-      - "start"
-      - "end"
+      - "q"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.records[*].ContactId"
+          - "$.records[*].CreatedById"
+          - "$.records[*].ManagerId"
+          - "$.records[*].Email"
+          - "$.records[*].Id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.records[*].Alias"
+          - "$.records[*].Name"
+          - "$.records[*].Username"
     responseSchema:
       type: "object"
       properties:
-        ids:
+        done:
+          type: "boolean"
+        nextRecordsUrl:
+          type: "string"
+        records:
           type: "array"
           items:
-            type: "string"
-        latestDateCovered:
+            $ref: "#/definitions/User"
+        totalSize:
+          type: "integer"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT\\s+AccountId\\s+FROM\\\
+    s+\\S+.*GROUP\\s+BY\\s+AccountId$"
+    allowedQueryParams:
+      - "q"
+    responseSchema:
+      type: "object"
+      properties:
+        done:
+          type: "boolean"
+        nextRecordsUrl:
           type: "string"
-          format: "date-time"
+        records:
+          type: "array"
+          items:
+            $ref: "#/definitions/AccountId"
+        totalSize:
+          type: "integer"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/sobjects/(Account|ActivityHistory|User|Task|Event)/describe$"
     allowedQueryParams: []
     responseSchema:
@@ -228,46 +272,68 @@ endpoints:
           type: "boolean"
         searchable:
           type: "boolean"
+  - pathRegex: "^/services/data/v(\\d+\\.\\d+)/query[?]q=SELECT.*FROM(%20|\\+)*Account(%20|\\\
+    +|\\b).*"
+    allowedQueryParams:
+      - "q"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.records[*].CreatedById"
+          - "$.records[*].LastModifiedById"
+          - "$.records[*].OwnerId"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        done:
+          type: "boolean"
+        nextRecordsUrl:
+          type: "string"
+        records:
+          type: "array"
+          items:
+            $ref: "#/definitions/Account"
+        totalSize:
+          type: "integer"
 definitions:
   Account:
     type: "object"
     properties:
+      AccountSource:
+        type: "string"
+      AnnualRevenue:
+        type: "number"
+      CreatedById:
+        type: "string"
+      CreatedDate:
+        type: "string"
+        format: "date-time"
+      Id:
+        type: "string"
       IsDeleted:
         type: "boolean"
-      accountSource:
-        type: "string"
-      annualRevenue:
-        type: "number"
-      createdById:
-        type: "string"
-      createdDate:
+      LastActivityDate:
         type: "string"
         format: "date-time"
-      id:
+      LastModifiedById:
         type: "string"
-      lastActivityDate:
-        type: "string"
-        format: "date-time"
-      lastModifiedById:
-        type: "string"
-      lastModifiedDate:
+      LastModifiedDate:
         type: "string"
         format: "date-time"
-      numberOfEmployees:
+      NumberOfEmployees:
         type: "integer"
-      ownerId:
+      OwnerId:
         type: "string"
-      ownership:
+      Ownership:
         type: "string"
-      parentId:
+      ParentId:
         type: "string"
-      rating:
+      Rating:
         type: "string"
-      sic:
+      Sic:
         type: "string"
-      sourceId:
-        type: "string"
-      type:
+      Type:
         type: "string"
   AccountId:
     type: "object"
@@ -277,60 +343,67 @@ definitions:
   Activity:
     type: "object"
     properties:
-      accountId:
+      AccountId:
         type: "string"
-      activityDate:
+      ActivityDate:
         type: "string"
-      createdById:
+      CreatedById:
         type: "string"
-      createdDate:
-        type: "string"
-        format: "date-time"
-      id:
-        type: "string"
-      isArchived:
-        type: "boolean"
-      isRecurrence:
-        type: "boolean"
-      isReminderSet:
-        type: "boolean"
-      lastModifiedById:
-        type: "string"
-      lastModifiedDate:
+      CreatedDate:
         type: "string"
         format: "date-time"
-      ownerId:
+      Id:
         type: "string"
-      recurrenceActivityDate:
+      IsArchived:
+        type: "boolean"
+      IsDeleted:
+        type: "boolean"
+      IsRecurrence:
+        type: "boolean"
+      IsReminderSet:
+        type: "boolean"
+      LastModifiedById:
         type: "string"
-      recurrenceDayOfMonth:
+      LastModifiedDate:
+        type: "string"
+        format: "date-time"
+      OwnerId:
+        type: "string"
+      RecurrenceActivityDate:
+        type: "string"
+      RecurrenceActivityId:
+        type: "string"
+      RecurrenceDayOfMonth:
         type: "integer"
-      recurrenceDayOfWeekMask:
+      RecurrenceDayOfWeekMask:
         type: "string"
-      recurrenceEndDateOnly:
+      RecurrenceEndDateOnly:
         type: "string"
-      recurrenceInstance:
+      RecurrenceInstance:
         type: "string"
-      recurrenceInterval:
+      RecurrenceInterval:
         type: "integer"
-      recurrenceMonthOfYear:
+      RecurrenceMonthOfYear:
         type: "string"
-      recurrenceStartDateOnly:
+      RecurrenceStartDateOnly:
         type: "string"
-      recurrenceTimeZoneSidKey:
+      RecurrenceTimeZoneSidKey:
         type: "string"
-      recurrenceType:
+      RecurrenceType:
         type: "string"
-      reminderDateTime:
+      ReminderDateTime:
         type: "string"
         format: "date-time"
-      sourceId:
+      Type:
         type: "string"
+      WhatId:
+        type: "string"
+      WhoId:
+        type: "string"
+  Attributes:
+    type: "object"
+    properties:
       type:
-        type: "string"
-      whatId:
-        type: "string"
-      whoId:
         type: "string"
   ChildRelationship:
     type: "object"
@@ -385,139 +458,139 @@ definitions:
   Event:
     type: "object"
     properties:
-      acceptedEventInviteeIds:
+      AcceptedEventInviteeIds:
         type: "array"
         items:
           type: "string"
-      accountId:
+      AccountId:
         type: "string"
-      activityDate:
+      ActivityDate:
         type: "string"
-      activityDateTime:
-        type: "string"
-        format: "date-time"
-      clientGuid:
-        type: "string"
-      createdById:
-        type: "string"
-      createdDate:
+      ActivityDateTime:
         type: "string"
         format: "date-time"
-      currencyIsoCode:
+      ClientGuid:
         type: "string"
-      declinedEventInviteeIds:
+      CreatedById:
+        type: "string"
+      CreatedDate:
+        type: "string"
+        format: "date-time"
+      CurrencyIsoCode:
+        type: "string"
+      DeclinedEventInviteeIds:
         type: "array"
         items:
           type: "string"
-      division:
+      Division:
         type: "string"
-      durationInMinutes:
+      DurationInMinutes:
         type: "integer"
-      endDate:
+      EndDate:
         type: "string"
-      endDateTime:
+      EndDateTime:
         type: "string"
         format: "date-time"
-      eventSubtype:
+      EventSubtype:
         type: "string"
-      eventWhoIds:
+      EventWhoIds:
         type: "array"
         items:
           type: "string"
-      groupEventType:
+      GroupEventType:
         type: "string"
-      id:
+      Id:
         type: "string"
-      isAllDayEvent:
+      IsAllDayEvent:
         type: "boolean"
-      isArchived:
+      IsArchived:
         type: "boolean"
-      isChild:
+      IsChild:
         type: "boolean"
-      isClientManaged:
+      IsClientManaged:
         type: "boolean"
-      isGroupEvent:
+      IsDeleted:
         type: "boolean"
-      isPrivate:
+      IsGroupEvent:
         type: "boolean"
-      isRecurrence:
+      IsPrivate:
         type: "boolean"
-      isRecurrence2:
+      IsRecurrence:
         type: "boolean"
-      isRecurrence2Exception:
+      IsRecurrence2:
         type: "boolean"
-      isRecurrence2Exclusion:
+      IsRecurrence2Exception:
         type: "boolean"
-      isReminderSet:
+      IsRecurrence2Exclusion:
         type: "boolean"
-      isVisibleInSelfService:
+      IsReminderSet:
         type: "boolean"
-      lastModifiedById:
+      IsVisibleInSelfService:
+        type: "boolean"
+      LastModifiedById:
         type: "string"
-      lastModifiedDate:
-        type: "string"
-        format: "date-time"
-      location:
-        type: "string"
-      ownerId:
-        type: "string"
-      recurrence2PatternStartDate:
+      LastModifiedDate:
         type: "string"
         format: "date-time"
-      recurrence2PatternText:
+      Location:
         type: "string"
-      recurrence2PatternTimeZone:
+      OwnerId:
         type: "string"
-      recurrence2PatternVersion:
+      Recurrence2PatternStartDate:
         type: "string"
-      recurrenceActivityDate:
+        format: "date-time"
+      Recurrence2PatternText:
         type: "string"
-      recurrenceActivityId:
+      Recurrence2PatternTimeZone:
         type: "string"
-      recurrenceDayOfMonth:
+      Recurrence2PatternVersion:
+        type: "string"
+      RecurrenceActivityDate:
+        type: "string"
+      RecurrenceActivityId:
+        type: "string"
+      RecurrenceDayOfMonth:
         type: "integer"
-      recurrenceDayOfWeekMask:
+      RecurrenceDayOfWeekMask:
         type: "string"
-      recurrenceEndDateOnly:
+      RecurrenceEndDateOnly:
         type: "string"
-      recurrenceInstance:
+      RecurrenceInstance:
         type: "string"
-      recurrenceInterval:
+      RecurrenceInterval:
         type: "integer"
-      recurrenceMonthOfYear:
+      RecurrenceMonthOfYear:
         type: "string"
-      recurrenceStartDateOnly:
+      RecurrenceStartDateOnly:
         type: "string"
-      recurrenceStartDateTime:
-        type: "string"
-        format: "date-time"
-      recurrenceTimeZoneSidKey:
-        type: "string"
-      recurrenceType:
-        type: "string"
-      reminderDateTime:
+      RecurrenceStartDateTime:
         type: "string"
         format: "date-time"
-      showAs:
+      RecurrenceTimeZoneSidKey:
         type: "string"
-      sourceId:
+      RecurrenceType:
         type: "string"
-      startDateTime:
+      ReminderDateTime:
         type: "string"
         format: "date-time"
-      type:
+      ShowAs:
         type: "string"
-      undecidedEventInviteeIds:
+      StartDateTime:
+        type: "string"
+        format: "date-time"
+      Type:
+        type: "string"
+      UndecidedEventInviteeIds:
         type: "array"
         items:
           type: "string"
-      whatCount:
+      WhatCount:
         type: "integer"
-      whatId:
+      WhatId:
         type: "string"
-      whoCount:
+      WhoCount:
         type: "integer"
-      whoId:
+      WhoId:
         type: "string"
   ExtendedErrorDetails:
     type: "object"
@@ -572,134 +645,338 @@ definitions:
   Object:
     type: "object"
     properties: {}
-  Task:
+  Response:
     type: "object"
     properties:
-      accountId:
-        type: "string"
-      activityDate:
-        type: "string"
-      activitySubtype:
-        type: "string"
-      callDisposition:
-        type: "string"
-      callDurationInSeconds:
-        type: "integer"
-      callObject:
-        type: "string"
-      callResult:
-        type: "string"
-      callType:
-        type: "string"
-      completedDateTime:
-        type: "string"
-        format: "date-time"
-      createdById:
-        type: "string"
-      createdDate:
-        type: "string"
-        format: "date-time"
-      id:
-        type: "string"
-      isArchived:
-        type: "boolean"
-      isClosed:
-        type: "boolean"
-      isDeleted:
-        type: "boolean"
-      isHighPriority:
-        type: "boolean"
-      isRecurrence:
-        type: "boolean"
-      isReminderSet:
-        type: "boolean"
-      lastModifiedById:
-        type: "string"
-      lastModifiedDate:
-        type: "string"
-        format: "date-time"
-      ownerId:
-        type: "string"
-      priority:
-        type: "string"
-      recurrenceActivityDate:
-        type: "string"
-      recurrenceDayOfMonth:
-        type: "integer"
-      recurrenceDayOfWeekMask:
-        type: "string"
-      recurrenceEndDateOnly:
-        type: "string"
-      recurrenceInstance:
-        type: "string"
-      recurrenceInterval:
-        type: "integer"
-      recurrenceMonthOfYear:
-        type: "string"
-      recurrenceRegeneratedType:
-        type: "string"
-      recurrenceStartDateOnly:
-        type: "string"
-      recurrenceTimeZoneSidKey:
-        type: "string"
-      recurrenceType:
-        type: "string"
-      reminderDateTime:
-        type: "string"
-        format: "date-time"
-      sourceId:
-        type: "string"
-      status:
-        type: "string"
-      taskSubtype:
-        type: "string"
-      taskWhoIds:
+      AcceptedEventInviteeIds:
         type: "array"
         items:
           type: "string"
-      type:
+      AccountId:
         type: "string"
-      whatId:
+      AccountSource:
         type: "string"
-      whoId:
+      ActivityDate:
+        type: "string"
+      ActivityDateTime:
+        type: "string"
+        format: "date-time"
+      ActivitySubtype:
+        type: "string"
+      AnnualRevenue:
+        type: "number"
+      CallDisposition:
+        type: "string"
+      CallDurationInSeconds:
+        type: "integer"
+      CallObject:
+        type: "string"
+      CallResult:
+        type: "string"
+      CallType:
+        type: "string"
+      ClientGuid:
+        type: "string"
+      CompletedDateTime:
+        type: "string"
+        format: "date-time"
+      ContactId:
+        type: "string"
+      CreatedById:
+        type: "string"
+      CreatedDate:
+        type: "string"
+        format: "date-time"
+      CurrencyIsoCode:
+        type: "string"
+      DeclinedEventInviteeIds:
+        type: "array"
+        items:
+          type: "string"
+      Division:
+        type: "string"
+      DurationInMinutes:
+        type: "integer"
+      Email:
+        type: "string"
+      EmailEncodingKey:
+        type: "string"
+      EndDate:
+        type: "string"
+      EndDateTime:
+        type: "string"
+        format: "date-time"
+      EventSubtype:
+        type: "string"
+      EventWhoIds:
+        type: "array"
+        items:
+          type: "string"
+      GroupEventType:
+        type: "string"
+      Id:
+        type: "string"
+      IsActive:
+        type: "boolean"
+      IsAllDayEvent:
+        type: "boolean"
+      IsArchived:
+        type: "boolean"
+      IsChild:
+        type: "boolean"
+      IsClientManaged:
+        type: "boolean"
+      IsClosed:
+        type: "boolean"
+      IsDeleted:
+        type: "boolean"
+      IsGroupEvent:
+        type: "boolean"
+      IsHighPriority:
+        type: "boolean"
+      IsPrivate:
+        type: "boolean"
+      IsRecurrence:
+        type: "boolean"
+      IsRecurrence2:
+        type: "boolean"
+      IsRecurrence2Exception:
+        type: "boolean"
+      IsRecurrence2Exclusion:
+        type: "boolean"
+      IsReminderSet:
+        type: "boolean"
+      IsVisibleInSelfService:
+        type: "boolean"
+      LastActivityDate:
+        type: "string"
+        format: "date-time"
+      LastLoginDate:
+        type: "string"
+        format: "date-time"
+      LastModifiedById:
+        type: "string"
+      LastModifiedDate:
+        type: "string"
+        format: "date-time"
+      Location:
+        type: "string"
+      ManagerId:
+        type: "string"
+      NumberOfEmployees:
+        type: "integer"
+      OwnerId:
+        type: "string"
+      Ownership:
+        type: "string"
+      ParentId:
+        type: "string"
+      Priority:
+        type: "string"
+      Rating:
+        type: "string"
+      Recurrence2PatternStartDate:
+        type: "string"
+        format: "date-time"
+      Recurrence2PatternText:
+        type: "string"
+      Recurrence2PatternTimeZone:
+        type: "string"
+      Recurrence2PatternVersion:
+        type: "string"
+      RecurrenceActivityDate:
+        type: "string"
+      RecurrenceActivityId:
+        type: "string"
+      RecurrenceDayOfMonth:
+        type: "integer"
+      RecurrenceDayOfWeekMask:
+        type: "string"
+      RecurrenceEndDateOnly:
+        type: "string"
+      RecurrenceInstance:
+        type: "string"
+      RecurrenceInterval:
+        type: "integer"
+      RecurrenceMonthOfYear:
+        type: "string"
+      RecurrenceRegeneratedType:
+        type: "string"
+      RecurrenceStartDateOnly:
+        type: "string"
+      RecurrenceStartDateTime:
+        type: "string"
+        format: "date-time"
+      RecurrenceTimeZoneSidKey:
+        type: "string"
+      RecurrenceType:
+        type: "string"
+      ReminderDateTime:
+        type: "string"
+        format: "date-time"
+      ShowAs:
+        type: "string"
+      Sic:
+        type: "string"
+      StartDateTime:
+        type: "string"
+        format: "date-time"
+      Status:
+        type: "string"
+      TaskSubtype:
+        type: "string"
+      TaskWhoIds:
+        type: "array"
+        items:
+          type: "string"
+      TimeZoneSidKey:
+        type: "string"
+      Type:
+        type: "string"
+      UndecidedEventInviteeIds:
+        type: "array"
+        items:
+          type: "string"
+      UserRoleId:
+        type: "string"
+      UserType:
+        type: "string"
+      WhatCount:
+        type: "integer"
+      WhatId:
+        type: "string"
+      WhoCount:
+        type: "integer"
+      WhoId:
+        type: "string"
+      attributes:
+        $ref: "#/definitions/Attributes"
+  Task:
+    type: "object"
+    properties:
+      AccountId:
+        type: "string"
+      ActivityDate:
+        type: "string"
+      ActivitySubtype:
+        type: "string"
+      CallDisposition:
+        type: "string"
+      CallDurationInSeconds:
+        type: "integer"
+      CallObject:
+        type: "string"
+      CallResult:
+        type: "string"
+      CallType:
+        type: "string"
+      CompletedDateTime:
+        type: "string"
+        format: "date-time"
+      CreatedById:
+        type: "string"
+      CreatedDate:
+        type: "string"
+        format: "date-time"
+      Id:
+        type: "string"
+      IsArchived:
+        type: "boolean"
+      IsClosed:
+        type: "boolean"
+      IsDeleted:
+        type: "boolean"
+      IsHighPriority:
+        type: "boolean"
+      IsRecurrence:
+        type: "boolean"
+      IsReminderSet:
+        type: "boolean"
+      LastModifiedById:
+        type: "string"
+      LastModifiedDate:
+        type: "string"
+        format: "date-time"
+      OwnerId:
+        type: "string"
+      Priority:
+        type: "string"
+      RecurrenceActivityDate:
+        type: "string"
+      RecurrenceActivityId:
+        type: "string"
+      RecurrenceDayOfMonth:
+        type: "integer"
+      RecurrenceDayOfWeekMask:
+        type: "string"
+      RecurrenceEndDateOnly:
+        type: "string"
+      RecurrenceInstance:
+        type: "string"
+      RecurrenceInterval:
+        type: "integer"
+      RecurrenceMonthOfYear:
+        type: "string"
+      RecurrenceRegeneratedType:
+        type: "string"
+      RecurrenceStartDateOnly:
+        type: "string"
+      RecurrenceTimeZoneSidKey:
+        type: "string"
+      RecurrenceType:
+        type: "string"
+      ReminderDateTime:
+        type: "string"
+        format: "date-time"
+      Status:
+        type: "string"
+      TaskSubtype:
+        type: "string"
+      TaskWhoIds:
+        type: "array"
+        items:
+          type: "string"
+      Type:
+        type: "string"
+      WhatId:
+        type: "string"
+      WhoId:
         type: "string"
   User:
     type: "object"
     properties:
-      IsActive:
-        type: "boolean"
-      accountId:
+      AccountId:
         type: "string"
-      contactId:
+      ContactId:
         type: "string"
-      createdById:
+      CreatedById:
         type: "string"
-      createdDate:
+      CreatedDate:
         type: "string"
         format: "date-time"
-      email:
+      Email:
         type: "string"
-      emailEncodingKey:
+      EmailEncodingKey:
+        type: "string"
+      Id:
+        type: "string"
+      IsActive:
+        type: "boolean"
+      LastLoginDate:
+        type: "string"
+        format: "date-time"
+      LastModifiedById:
+        type: "string"
+      LastModifiedDate:
+        type: "string"
+        format: "date-time"
+      ManagerId:
+        type: "string"
+      TimeZoneSidKey:
+        type: "string"
+      UserRoleId:
+        type: "string"
+      UserType:
         type: "string"
       employee:
         type: "boolean"
-      id:
-        type: "string"
-      lastLoginDate:
-        type: "string"
-        format: "date-time"
-      lastModifiedById:
-        type: "string"
-      lastModifiedDate:
-        type: "string"
-        format: "date-time"
-      managerId:
-        type: "string"
-      sourceId:
-        type: "string"
-      timeZoneSidKey:
-        type: "string"
-      userRoleId:
-        type: "string"
-      userType:
-        type: "string"
