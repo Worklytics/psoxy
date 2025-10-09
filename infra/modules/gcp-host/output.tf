@@ -30,6 +30,7 @@ output "webhook_collector_instances" {
 output "pseudonym_salt" {
   description = "Value used to salt pseudonyms (SHA-256) hashes. If migrate to new deployment, you should copy this value."
   value       = module.psoxy.pseudonym_salt
+  sensitive   = true
 }
 
 output "api_connector_gcp_execution_service_accounts" {

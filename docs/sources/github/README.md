@@ -3,9 +3,20 @@
 There are several connectors available for GitHub:
 
 - [GitHub](github/README.md) - for GitHub Cloud Enterprise organizations hosted in github.com
-- [GitHub non enterprise](github-non-enterprise/README.md) - for non-Enterprise GitHub Cloud (Free/Pro/Teams) organization hosted in github.com.
+- [GitHub non-Enterprise](github-non-enterprise/README.md) - for non-Enterprise GitHub Cloud (Free/Pro/Teams) organization hosted in github.com.
 - [GitHub Enterprise Cloud](enterprise-server/README.md) - GitHub Enterprise instances hosted by github.com on behalf of your organization.
 - [GitHub Copilot](copilot/README.md) - Copilot data from GitHub Enterprise instances hosted by github.com on behalf of your organization.
+
+
+## Notes
+
+Our default github rules *block* access to commit content. The GitHub REST API returns commit content if the `Accepts` header is sent with one of the following media types:
+- `application/vnd.github.diff`: Returns the commit as a diff format.
+- `application/vnd.github.patch`: Returns the commit as a patch format.
+
+As `Accepts` is NOT included in the `allowedRequestHeadersToForward` (or `allowedRequestHeaders` from `v0.6.x`)
+
+See: [https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#get-a-commit](https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#get-a-commit)
 
 
 ## Troubleshooting

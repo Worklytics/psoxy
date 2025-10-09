@@ -8,11 +8,16 @@ BODY=$${4:-""}
 echo "Quick test of ${function_name} ..."
 
 ${command_cli_call} -u "${proxy_endpoint_url}/" --health-check
+HEALTHCHECK_RC=$?
 
 ${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param} -m $METHOD -b "$BODY"
+SYNC_CALL_RC=$?
 
 %{ if enable_async_processing ~}
 ${command_cli_call} -u "${proxy_endpoint_url}$API_PATH" ${impersonation_param} -m $METHOD -b "$BODY" --async
+ASYNC_CALL_RC=$?
+%{ else ~}
+ASYNC_CALL_RC=0
 %{ endif ~}
 
 echo "Invoke this script with any of the following as arguments to test other endpoints:"
@@ -23,3 +28,5 @@ echo "Invoke this script with any of the following as arguments to test other en
 %{ for example_api_post_request in example_api_post_requests ~}
     printf "\t%s\n" "${example_api_post_request.method} '${example_api_post_request.path}' ${example_api_post_request.content_type} '${example_api_post_request.body}'"
 %{ endfor ~}
+
+exit $(( HEALTHCHECK_RC + SYNC_CALL_RC + ASYNC_CALL_RC ))

@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.6, < 2.0"
+  required_version = ">= 1.6, < 2.0" # should work with 1.6, but we don't automate testing against that version anymore
 }
 
 # constants
@@ -15,6 +15,13 @@ locals {
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
 
   api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
+}
+
+# TODO: probably pull all the way to the top level bc 1) proper tf style, 2) simplifies customization if it doesn't work for a particular environment
+module "tf_runner" {
+  source = "../../modules/gcp-tf-runner"
+
+  tf_gcp_principal_email = var.tf_gcp_principal_email
 }
 
 module "psoxy" {
@@ -189,6 +196,7 @@ module "api_connector" {
   side_output_sanitized                 = try(local.sanitized_side_outputs[each.key], null)
   enable_async_processing               = try(each.value.enable_async_processing, false)
   todos_as_local_files                  = var.todos_as_local_files
+  tf_runner_iam_principal               = module.tf_runner.iam_principal
 
 
   environment_variables = merge(
@@ -273,6 +281,7 @@ module "webhook_collector" {
   side_output_original               = try(local.custom_original_side_outputs[each.key], null)
   side_output_sanitized              = try(local.sanitized_side_outputs[each.key], null)
   todos_as_local_files               = var.todos_as_local_files
+  tf_runner_iam_principal            = module.tf_runner.iam_principal
   key_ring_id                        = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
   oidc_token_verifier_role_id        = module.psoxy.oidc_token_verifier_role_id
   provision_auth_key                 = each.value.provision_auth_key
@@ -327,7 +336,9 @@ module "bulk_connector" {
   sanitized_bucket_name             = try(each.value.sanitized_bucket_name, null)
   default_labels                    = var.default_labels
   todos_as_local_files              = var.todos_as_local_files
+  tf_runner_iam_principal           = module.tf_runner.iam_principal
   available_memory_mb               = coalesce(try(var.custom_bulk_connector_arguments[each.key].available_memory_mb, null), try(each.value.available_memory_mb, null), 512)
+  timeout_seconds                   = coalesce(try(var.custom_bulk_connector_arguments[each.key].timeout_seconds, null), try(each.value.timeout_seconds, null), 540) # TODO: bump to 1800 (30 minutes) in 0.6.x
   gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
   bucket_force_destroy              = var.bucket_force_destroy
 
@@ -342,6 +353,10 @@ module "bulk_connector" {
       EMAIL_CANONICALIZATION = var.email_canonicalization
     }
   )
+
+  depends_on = [
+    module.psoxy # some of the set-up IAM grants done there, but not EXPLICITLY passed out as outputs and into above as inputs, are required; so make this explicit
+  ]
 }
 
 # END BULK CONNECTORS

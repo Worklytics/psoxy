@@ -196,9 +196,7 @@ definitions:
         type: "string"
   Attachment:
     type: "object"
-    properties:
-      id:
-        type: "integer"
+    properties: {}
   Block:
     type: "object"
     properties:
@@ -474,6 +472,10 @@ definitions:
         type: "boolean"
       media_backend_type:
         type: "string"
+      participant_history:
+        type: "array"
+        items:
+          type: "string"
       thread_root_ts:
         type: "string"
       was_accepted:

@@ -82,10 +82,9 @@ CLOUD_ID=$(echo "${CLOUD_ID_RESPONSE}" | jq -r '.[0].id')
 # Instructions for user
 printf "${GREEN}Use the following values in the secret manager choosen for your host platform:${NC}\n"
 
-printf "${YELLOW}${PREFIX}CONFLUENCE_CLOUD_ACCESS_TOKEN${NC}: ${ACCESS_TOKEN}\n"
 printf "${YELLOW}${PREFIX}CONFLUENCE_CLOUD_REFRESH_TOKEN${NC}: ${REFRESH_TOKEN}\n"
 printf "${YELLOW}${PREFIX}CONFLUENCE_CLOUD_CLIENT_ID${NC}: ${CLIENT_ID}\n"
 printf "${YELLOW}${PREFIX}CONFLUENCE_CLOUD_CLIENT_SECRET${NC}: ${CLIENT_SECRET}\n"
 
-printf "And set the cloud ID (${YELLOW}${CLOUD_ID}${NC}) as the value of ${YELLOW}confluence_cloud_id${NC} in your ${YELLOW}terraform.tfvars${NC} file.\n"
+printf "And set the cloud ID (${YELLOW}${CLOUD_ID}${NC}) as the value of ${YELLOW}confluence_example_cloud_id${NC} in your ${YELLOW}terraform.tfvars${NC} file.\n"
 
