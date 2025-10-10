@@ -434,14 +434,12 @@ EOT
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/services/data/v57.0/sobjects/Account/describe",
-        "/services/data/v57.0/sobjects/ActivityHistory/describe",
-        "/services/data/v57.0/sobjects/Account/updated?start=${urlencode(timeadd(var.example_api_calls_sample_date, "-48h"))}&end=${urlencode(var.example_api_calls_sample_date)}",
-        "/services/data/v57.0/composite/sobjects/User?ids=${local.salesforce_example_account_id}&fields=Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType",
-        "/services/data/v57.0/composite/sobjects/Account?ids=${local.salesforce_example_account_id}&fields=Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,ParentId,Rating,Sic,Type",
-        "/services/data/v57.0/query?q=SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%27${local.salesforce_example_account_id}%27",
-        "/services/data/v57.0/query?q=SELECT+Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType+FROM+User+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
-        "/services/data/v57.0/query?q=SELECT+Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,ParentId,Rating,Sic,Type+FROM+Account+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST"
+        "/services/data/v64.0/sobjects/Account/describe",
+        "/services/data/v64.0/sobjects/Task/describe",
+        "/services/data/v64.0/query?q=SELECT+Id,Email,IsActive+FROM+User+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
+        "/services/data/v64.0/query?q=SELECT+AccountId+FROM+Task+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+GROUP+BY+AccountId",
+        "/services/data/v64.0/query?q=SELECT+Id,AccountId,WhoId+FROM+Task+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
+        "/services/data/v64.0/query?q=SELECT+Id,AccountId,WhoId+FROM+Event+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST"
       ]
       external_token_todo : <<EOT
   Before running the example, you have to populate the following variables in terraform:
@@ -467,9 +465,6 @@ EOT
           - API Enabled
           - APEX REST Services
       - The policy MUST have the application marked as "enabled" in "Connected App Access". Otherwise requests will return 401 with INVALID_SESSION_ID
-
-     The user set for "run as" on the connector should have, between its `Permission Sets` and `Profile`, the permission of `View All Data`. This is required
-     to support the queries used to retrieve [Activity Histories](https://developer.salesforce.com/docs/atlas.en-us.object_reference.meta/object_reference/sforce_api_objects_activityhistory.htm) by *account id*.
 
   2. Once created, open "Manage Consumer Details"
   3. Update the content of `PSOXY_SALESFORCE_CLIENT_ID` from Consumer Key	and `PSOXY_SALESFORCE_CLIENT_SECRET` from Consumer Secret
