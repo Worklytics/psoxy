@@ -9,7 +9,7 @@ import lombok.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@JsonPropertyOrder({"pathRegex", "pathTemplate", "allowedQueryParams", "supportedHeaders",
+@JsonPropertyOrder({"pathRegex", "pathTemplate", "allowedMethods", "allowedQueryParams", "supportedHeaders",
         "transforms"})
 @Builder(toBuilder = true)
 @With
@@ -86,13 +86,12 @@ public class Endpoint {
     }
 
 
-
     /**
      * if provided, only HTTP methods in this list will be allowed (eg, GET, HEAD, etc)
      *
      * if omitted, any HTTP method is permitted.
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     Set<String> allowedMethods;
 
     @JsonIgnore
@@ -103,13 +102,13 @@ public class Endpoint {
     /**
      * if provided, headers included here will be forwarded through to the source API endpoint if they are present on the request.
      * this can be used for passing a specific header (for example, pagination, limits, etc.) to the request in the source
-     * 
+     *
      * endpoint-matching does NOT take these into account. eg, absence of a header on request will NOT cause the request to not be
      * matched to this endpoint; similarly, presence of a header on a request will NOT cause request to be blocked - the header will
      * simply be dropped.
-     * 
+     *
      * q: should we implement strict request header handling? (block requests will unexpected headers?)
-     * 
+     *
      * NOTE: Using List, as Set is not being serializable in YAML
      */
     @Deprecated // use `allowedRequestHeaders` instead
@@ -120,13 +119,13 @@ public class Endpoint {
     /**
      * if provided, headers included here will be forwarded through to the source API endpoint if they are present on the request.
      * this can be used for passing a specific header (for example, pagination, limits, etc.) to the request in the source
-     * 
+     *
      * endpoint-matching does NOT take these into account. eg, absence of a header on request will NOT cause the request to not be
      * matched to this endpoint; similarly, presence of a header on a request will NOT cause request to be blocked - the header will
      * simply be dropped.
-     * 
+     *
      * q: should we implement strict request header handling? (block requests will unexpected headers?)
-     * 
+     *
      * NOTE: Using List, as Set is not being serializable in YAML
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
