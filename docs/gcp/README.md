@@ -1,6 +1,6 @@
 # GCP
 
-## Documentation
+git status## Documentation
 
 - [Getting Started](getting-started.md)
 - [Authentication & Authorization](authentication-authorization.md)
