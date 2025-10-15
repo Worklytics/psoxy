@@ -125,8 +125,12 @@ public class JsonSchemaFilterUtils {
                 Object result = filterBySchema(path, provisionalOutput, oneOfCandidate, root,
                         redactionsMade);
 
-                if (!(result instanceof NotMatchedConstant)) {
-                    return result;
+                if (result == null && provisionalOutput.isNull()) {
+                    return null;
+                } else if (result != null ){
+                    if (!(result instanceof NotMatchedConstant)) {
+                        return result;
+                    }
                 }
             }
 
