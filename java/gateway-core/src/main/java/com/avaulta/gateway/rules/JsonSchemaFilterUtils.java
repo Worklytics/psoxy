@@ -224,7 +224,9 @@ public class JsonSchemaFilterUtils {
             // must have explicit type
             // https://json-schema.org/understanding-json-schema/reference/type.html
             if (schema.isString()) {
-                if (provisionalOutput.isTextual()) {
+                if (provisionalOutput.isNull()) {
+                    return null;
+                } else if (provisionalOutput.isTextual()) {
                     // TODO: validate 'format'??
                     return provisionalOutput.asText();
                 } else {
@@ -235,7 +237,9 @@ public class JsonSchemaFilterUtils {
                     return null;
                 }
             } else if (schema.isInteger()) {
-                if (provisionalOutput.canConvertToInt() || provisionalOutput.isNull()) {
+                if (provisionalOutput.isNull()) {
+                    return null;
+                } else if (provisionalOutput.canConvertToInt()) {
                     return provisionalOutput.intValue();
                 } else if (provisionalOutput.canConvertToLong()) {
                     return provisionalOutput.longValue();
@@ -247,7 +251,9 @@ public class JsonSchemaFilterUtils {
                     return null;
                 }
             } else if (schema.isNumber()) {
-                if (provisionalOutput.isNumber() || provisionalOutput.isNull()) {
+                if (provisionalOutput.isNull()) {
+                    return null;
+                } else if (provisionalOutput.isNumber()) {
                     return provisionalOutput.numberValue();
                 } else {
                     if (options.getLogRedactions()) {
@@ -257,7 +263,9 @@ public class JsonSchemaFilterUtils {
                     return null;
                 }
             } else if (schema.isBoolean()) {
-                if (provisionalOutput.isBoolean() || provisionalOutput.isNull()) {
+                if (provisionalOutput.isNull()) {
+                    return null;
+                } else if (provisionalOutput.isBoolean()) {
                     return provisionalOutput.booleanValue();
                 } else {
                     if (options.getLogRedactions()) {
