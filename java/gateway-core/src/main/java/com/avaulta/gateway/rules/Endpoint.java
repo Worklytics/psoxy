@@ -95,7 +95,7 @@ public class Endpoint {
     Set<String> allowedMethods;
 
     @JsonIgnore
-    public Optional<Set<String>> getAllowedMethods() {
+    public Optional<Set<String>> getAllowedMethodsOptional() {
         return Optional.ofNullable(allowedMethods);
     }
 
