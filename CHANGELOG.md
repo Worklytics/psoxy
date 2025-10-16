@@ -8,6 +8,7 @@ Changes to be including in future/planned release notes will be added here.
 ## Next
 ## [0.5.11](https://github.com/Worklytics/psoxy/release/tag/v0.5.11)
 - `Salesforce`: adding support for fetching Task and Events and dropped support for ActivityHistories. No need to use `viewAllData` administrative permission anymore.
+- Support for nullable primitives when applying JSON schema rules.
 
 ## [0.5.10](https://github.com/Worklytics/psoxy/release/tag/v0.5.10)
 - `GitHub`: adding support for returning `RateLimit` information for GraphQL.
