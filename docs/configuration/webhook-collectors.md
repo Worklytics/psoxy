@@ -57,7 +57,6 @@ Note that this scheme **enables authentication of the request** AND **partial in
 
 `AUTH_ISSUER` environment variable for expected issuer of the JWT identity token. This is used to verify the `iss` claim in the JWT identity token.
 
-
 `WEBHOOK_OUTPUT` - an env var that directs webhooks recieved by this collector should be sent; typically a queueing service (eg, SQS, PubSub, Cloud Tasks) to *batch* processing.
 
 `WEBHOOK_BATCH_OUTPUT` - the env var that controls where final output of the batched webhooks is sent; typically a cloud storage bucket (eg, S3, GCS). This output would be expected to be NDJSON files, gzipped.
@@ -136,6 +135,49 @@ let signature = await signJwtWithKMS(claims, signingKeyArn, credentials, 'us-eas
 ```
 
 You would then pass the resulting token to the Tool Client, to send with every webhook request to the Webhook Collector as the `Authorization` header.
+
+## Proxy Instance in Terraform
+
+Add something like the following to your `terraform.tfvars`:
+
+```hcl
+webhook_collectors = {
+  "llm-portal" = {
+    rules_file = "work-events.yaml"
+    provision_auth_key = {
+      rotation_days = 2
+    }
+    example_identity     = "erik@worklytics.co"
+    example_payload_file = "work-events-example.json"
+  }
+}
+```
+
+Where `work-events.yaml` is YAML-encoded rules, such as:
+
+```yaml
+endpoints:
+  - jwtClaimsToVerify:
+      sub:
+        payloadContents:
+          - "$.actor.id"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.actor.id"
+        encoding: "URL_SAFE_TOKEN"
+```
+
+The above example ensures that the `id` property of the `actor` property sent as the body of the POST request to the endpoint MUST match the `sub` claim in the JWT sent as the `Authorization` header with the request.  Additionally, a pseudonymize transform will be applied to the any fields in the payload matching the JSON path `$.actor.id` (eg, that same field).
+
+See the java class `WebhookCollectionRules` for details on supported elements of the YAML. But briefly:
+- `endpoints` - a list of `endpoint`
+- endpoint properties:
+  - `jwtClaimsToVerify` - map of field in JWT claims to spec on what to verify it against in the payload contents
+  - `transforms` - list of transforms to apply; everything supported for [API Data Sanitization case](./api-data-sanitization.md) 
+- `jwtClaimsToVerify` spec properties:
+  - `queryParam` - name of a parameter in the query string of the POST sent to the endpoint
+  - `payloadContents` - a list of JSON paths relative to payload root to evaluate; any matching value in the payload MUST be the same as the field in the JWT claims.
 
 ## Data Flows
 
