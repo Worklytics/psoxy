@@ -30,11 +30,9 @@ endpoints:
       type: "object"
       properties:
         compositeResponse:
-          oneOf:
-            - type: "null"
-            - type: "array"
-              items:
-                $ref: "#/definitions/CompositeResult(Response)"
+          type: "array"
+          items:
+            $ref: "#/definitions/CompositeResult(Response)"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/composite/sobjects/Account[?][^/]*"
     allowedQueryParams:
       - "ids"
@@ -93,15 +91,11 @@ endpoints:
         done:
           type: "boolean"
         nextRecordsUrl:
-          oneOf:
-            - type: "null"
-            - type: "string"
+          type: "string"
         records:
-          oneOf:
-            - type: "null"
-            - type: "array"
-              items:
-                $ref: "#/definitions/Response"
+          type: "array"
+          items:
+            $ref: "#/definitions/Response"
         totalSize:
           type: "integer"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)*Event(%20|\\\
@@ -131,15 +125,11 @@ endpoints:
         done:
           type: "boolean"
         nextRecordsUrl:
-          oneOf:
-            - type: "null"
-            - type: "string"
+          type: "string"
         records:
-          oneOf:
-            - type: "null"
-            - type: "array"
-              items:
-                $ref: "#/definitions/Event"
+          type: "array"
+          items:
+            $ref: "#/definitions/Event"
         totalSize:
           type: "integer"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)*Task(%20|\\\
@@ -166,15 +156,11 @@ endpoints:
         done:
           type: "boolean"
         nextRecordsUrl:
-          oneOf:
-            - type: "null"
-            - type: "string"
+          type: "string"
         records:
-          oneOf:
-            - type: "null"
-            - type: "array"
-              items:
-                $ref: "#/definitions/Task"
+          type: "array"
+          items:
+            $ref: "#/definitions/Task"
         totalSize:
           type: "integer"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)User(%20|\\\
@@ -201,15 +187,11 @@ endpoints:
         done:
           type: "boolean"
         nextRecordsUrl:
-          oneOf:
-            - type: "null"
-            - type: "string"
+          type: "string"
         records:
-          oneOf:
-            - type: "null"
-            - type: "array"
-              items:
-                $ref: "#/definitions/User"
+          type: "array"
+          items:
+            $ref: "#/definitions/User"
         totalSize:
           type: "integer"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT\\s+AccountId\\s+FROM\\\
@@ -222,15 +204,11 @@ endpoints:
         done:
           type: "boolean"
         nextRecordsUrl:
-          oneOf:
-            - type: "null"
-            - type: "string"
+          type: "string"
         records:
-          oneOf:
-            - type: "null"
-            - type: "array"
-              items:
-                $ref: "#/definitions/AccountId"
+          type: "array"
+          items:
+            $ref: "#/definitions/AccountId"
         totalSize:
           type: "integer"
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/sobjects/(Account|ActivityHistory|User|Task|Event)/describe$"
@@ -239,23 +217,17 @@ endpoints:
       type: "object"
       properties:
         childRelationships:
-          oneOf:
-            - type: "null"
-            - type: "array"
-              items:
-                $ref: "#/definitions/ChildRelationship"
+          type: "array"
+          items:
+            $ref: "#/definitions/ChildRelationship"
         deprecatedAndHidden:
           type: "boolean"
         fields:
-          oneOf:
-            - type: "null"
-            - type: "array"
-              items:
-                $ref: "#/definitions/Field"
+          type: "array"
+          items:
+            $ref: "#/definitions/Field"
         name:
-          oneOf:
-            - type: "null"
-            - type: "string"
+          type: "string"
         queryable:
           type: "boolean"
         retrieveable:
@@ -279,15 +251,11 @@ endpoints:
         done:
           type: "boolean"
         nextRecordsUrl:
-          oneOf:
-            - type: "null"
-            - type: "string"
+          type: "string"
         records:
-          oneOf:
-            - type: "null"
-            - type: "array"
-              items:
-                $ref: "#/definitions/Account"
+          type: "array"
+          items:
+            $ref: "#/definitions/Account"
         totalSize:
           type: "integer"
 definitions:
@@ -295,405 +263,229 @@ definitions:
     type: "object"
     properties:
       AccountSource:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       AnnualRevenue:
-        oneOf:
-          - type: "null"
-          - type: "number"
+        type: "number"
       CreatedById:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       CreatedDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       Id:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       IsDeleted:
         type: "boolean"
       LastActivityDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       LastModifiedById:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       LastModifiedDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       NumberOfEmployees:
-        oneOf:
-          - type: "null"
-          - type: "integer"
+        type: "integer"
       OwnerId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Ownership:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       ParentId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Rating:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Sic:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Type:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
   AccountId:
     type: "object"
     properties:
       accountId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
   Attributes:
     type: "object"
     properties:
       type:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
   ChildRelationship:
     type: "object"
     properties:
       childSObject:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       field:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       relationshipName:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
   CompositeResult(Response):
     type: "object"
     properties:
       body:
-        oneOf:
-          - type: "null"
-          - $ref: "#/definitions/NestedQueryResult(Response)"
+        $ref: "#/definitions/NestedQueryResult(Response)"
       errorBody:
-        oneOf:
-          - type: "null"
-          - type: "array"
-            items:
-              $ref: "#/definitions/ErrorBody"
+        type: "array"
+        items:
+          $ref: "#/definitions/ErrorBody"
       httpHeaders:
-        oneOf:
-          - type: "null"
-          - type: "object"
+        type: "object"
       httpStatusCode:
         type: "integer"
       referenceId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
   ErrorBody:
     type: "object"
     properties:
       errorCode:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       extendedErrorDetails:
-        oneOf:
-          - type: "null"
-          - type: "array"
-            items:
-              $ref: "#/definitions/ExtendedErrorDetails"
+        type: "array"
+        items:
+          $ref: "#/definitions/ExtendedErrorDetails"
       message:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
   Event:
     type: "object"
     properties:
       AcceptedEventInviteeIds:
-        oneOf:
-          - type: "null"
-          - type: "array"
-            items:
-              type: "string"
+        type: "array"
+        items:
+          type: "string"
       AccountId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       ActivityDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       ActivityDateTime:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       ClientGuid:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       CreatedById:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       CreatedDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       CurrencyIsoCode:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       DeclinedEventInviteeIds:
-        oneOf:
-          - type: "null"
-          - type: "array"
-            items:
-              type: "string"
+        type: "array"
+        items:
+          type: "string"
       Division:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       DurationInMinutes:
-        oneOf:
-          - type: "null"
-          - type: "integer"
+        type: "integer"
       EndDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       EndDateTime:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       EventSubtype:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       EventWhoIds:
-        oneOf:
-          - type: "null"
-          - type: "array"
-            items:
-              type: "string"
+        type: "array"
+        items:
+          type: "string"
       GroupEventType:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Id:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       IsAllDayEvent:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsArchived:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsChild:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsClientManaged:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsDeleted:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsGroupEvent:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsPrivate:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsRecurrence:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsRecurrence2:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsRecurrence2Exception:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsRecurrence2Exclusion:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsReminderSet:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsVisibleInSelfService:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       LastModifiedById:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       LastModifiedDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       Location:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       OwnerId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Recurrence2PatternStartDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       Recurrence2PatternText:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Recurrence2PatternTimeZone:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Recurrence2PatternVersion:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceActivityDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceActivityId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceDayOfMonth:
-        oneOf:
-          - type: "null"
-          - type: "integer"
+        type: "integer"
       RecurrenceDayOfWeekMask:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceEndDateOnly:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceInstance:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceInterval:
-        oneOf:
-          - type: "null"
-          - type: "integer"
+        type: "integer"
       RecurrenceMonthOfYear:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceStartDateOnly:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceStartDateTime:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       RecurrenceTimeZoneSidKey:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceType:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       ReminderDateTime:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       ShowAs:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       StartDateTime:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       Type:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       UndecidedEventInviteeIds:
-        oneOf:
-          - type: "null"
-          - type: "array"
-            items:
-              type: "string"
+        type: "array"
+        items:
+          type: "string"
       WhatCount:
-        oneOf:
-          - type: "null"
-          - type: "integer"
+        type: "integer"
       WhatId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       WhoCount:
-        oneOf:
-          - type: "null"
-          - type: "integer"
+        type: "integer"
       WhoId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
   ExtendedErrorDetails:
     type: "object"
     properties:
       extendedErrorCode:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       message:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
   Field:
     type: "object"
     properties:
@@ -706,9 +498,7 @@ definitions:
       filterable:
         type: "boolean"
       name:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       nameField:
         type: "boolean"
       sortable:
@@ -719,15 +509,11 @@ definitions:
       done:
         type: "boolean"
       nextRecordsUrl:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       records:
-        oneOf:
-          - type: "null"
-          - type: "array"
-            items:
-              $ref: "#/definitions/Response"
+        type: "array"
+        items:
+          $ref: "#/definitions/Response"
       totalSize:
         type: "integer"
   Object:
@@ -737,624 +523,334 @@ definitions:
     type: "object"
     properties:
       AcceptedEventInviteeIds:
-        oneOf:
-          - type: "null"
-          - type: "array"
-            items:
-              type: "string"
+        type: "array"
+        items:
+          type: "string"
       AccountId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       AccountSource:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       ActivityDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       ActivityDateTime:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       ActivitySubtype:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       AnnualRevenue:
-        oneOf:
-          - type: "null"
-          - type: "number"
+        type: "number"
       CallDisposition:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       CallDurationInSeconds:
-        oneOf:
-          - type: "null"
-          - type: "integer"
+        type: "integer"
       CallObject:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       CallResult:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       CallType:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       ClientGuid:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       CompletedDateTime:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       ContactId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       CreatedById:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       CreatedDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       CurrencyIsoCode:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       DeclinedEventInviteeIds:
-        oneOf:
-          - type: "null"
-          - type: "array"
-            items:
-              type: "string"
+        type: "array"
+        items:
+          type: "string"
       Division:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       DurationInMinutes:
-        oneOf:
-          - type: "null"
-          - type: "integer"
+        type: "integer"
       Email:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       EmailEncodingKey:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       EndDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       EndDateTime:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       EventSubtype:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       EventWhoIds:
-        oneOf:
-          - type: "null"
-          - type: "array"
-            items:
-              type: "string"
+        type: "array"
+        items:
+          type: "string"
       GroupEventType:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Id:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       IsActive:
         type: "boolean"
       IsAllDayEvent:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsArchived:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsChild:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsClientManaged:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsClosed:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsDeleted:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsGroupEvent:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsHighPriority:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsPrivate:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsRecurrence:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsRecurrence2:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsRecurrence2Exception:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsRecurrence2Exclusion:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsReminderSet:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsVisibleInSelfService:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       LastActivityDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       LastLoginDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       LastModifiedById:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       LastModifiedDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       Location:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       ManagerId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       NumberOfEmployees:
-        oneOf:
-          - type: "null"
-          - type: "integer"
+        type: "integer"
       OwnerId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Ownership:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       ParentId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Priority:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Rating:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Recurrence2PatternStartDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       Recurrence2PatternText:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Recurrence2PatternTimeZone:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Recurrence2PatternVersion:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceActivityDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceActivityId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceDayOfMonth:
-        oneOf:
-          - type: "null"
-          - type: "integer"
+        type: "integer"
       RecurrenceDayOfWeekMask:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceEndDateOnly:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceInstance:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceInterval:
-        oneOf:
-          - type: "null"
-          - type: "integer"
+        type: "integer"
       RecurrenceMonthOfYear:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceRegeneratedType:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceStartDateOnly:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceStartDateTime:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       RecurrenceTimeZoneSidKey:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceType:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       ReminderDateTime:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       ShowAs:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Sic:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       StartDateTime:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       Status:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       TaskSubtype:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       TaskWhoIds:
-        oneOf:
-          - type: "null"
-          - type: "array"
-            items:
-              type: "string"
+        type: "array"
+        items:
+          type: "string"
       TimeZoneSidKey:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Type:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       UndecidedEventInviteeIds:
-        oneOf:
-          - type: "null"
-          - type: "array"
-            items:
-              type: "string"
+        type: "array"
+        items:
+          type: "string"
       UserRoleId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       UserType:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       WhatCount:
-        oneOf:
-          - type: "null"
-          - type: "integer"
+        type: "integer"
       WhatId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       WhoCount:
-        oneOf:
-          - type: "null"
-          - type: "integer"
+        type: "integer"
       WhoId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       attributes:
-        oneOf:
-          - type: "null"
-          - $ref: "#/definitions/Attributes"
+        $ref: "#/definitions/Attributes"
   Task:
     type: "object"
     properties:
       AccountId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       ActivityDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       ActivitySubtype:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       CallDisposition:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       CallDurationInSeconds:
-        oneOf:
-          - type: "null"
-          - type: "integer"
+        type: "integer"
       CallObject:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       CallResult:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       CallType:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       CompletedDateTime:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       CreatedById:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       CreatedDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       Id:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       IsArchived:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsClosed:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsDeleted:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsHighPriority:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsRecurrence:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       IsReminderSet:
-        oneOf:
-          - type: "null"
-          - type: "boolean"
+        type: "boolean"
       LastModifiedById:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       LastModifiedDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       OwnerId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Priority:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceActivityDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceActivityId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceDayOfMonth:
-        oneOf:
-          - type: "null"
-          - type: "integer"
+        type: "integer"
       RecurrenceDayOfWeekMask:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceEndDateOnly:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceInstance:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceInterval:
-        oneOf:
-          - type: "null"
-          - type: "integer"
+        type: "integer"
       RecurrenceMonthOfYear:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceRegeneratedType:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceStartDateOnly:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceTimeZoneSidKey:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       RecurrenceType:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       ReminderDateTime:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       Status:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       TaskSubtype:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       TaskWhoIds:
-        oneOf:
-          - type: "null"
-          - type: "array"
-            items:
-              type: "string"
+        type: "array"
+        items:
+          type: "string"
       Type:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       WhatId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       WhoId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
   User:
     type: "object"
     properties:
       AccountId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       ContactId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       CreatedById:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       CreatedDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       Email:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       EmailEncodingKey:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       Id:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       IsActive:
         type: "boolean"
       LastLoginDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       LastModifiedById:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       LastModifiedDate:
-        oneOf:
-          - type: "null"
-          - type: "string"
-            format: "date-time"
+        type: "string"
+        format: "date-time"
       ManagerId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       TimeZoneSidKey:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       UserRoleId:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       UserType:
-        oneOf:
-          - type: "null"
-          - type: "string"
+        type: "string"
       employee:
         type: "boolean"
