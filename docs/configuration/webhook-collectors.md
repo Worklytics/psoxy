@@ -138,7 +138,7 @@ You would then pass the resulting token to the Tool Client, to send with every w
 
 ## Proxy Instance in Terraform
 
-Add something like the following to your `terraform.tfvars`:
+If you forked on of our example repos after ~0.5.3, you should be able to add something like the following to your `terraform.tfvars`:
 
 ```hcl
 webhook_collectors = {
