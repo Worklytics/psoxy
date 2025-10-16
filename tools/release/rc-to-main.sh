@@ -43,8 +43,6 @@ cat tools/release/test_plan.md >> rc_to_main.md
 echo "" >> rc_to_main.md
 echo "Next steps, after that's merged to \`main\`:" >> rc_to_main.md
 echo "  1. publish the release: \`./tools/release/publish.sh $RELEASE\`" >> rc_to_main.md
-echo "  2. update stable deployment in demos repo to point to $RELEASE" >> rc_to_main.md
-echo "  3. prep next rc: \`./tools/release/prep.sh $RELEASE rc-v{x.y.z}\`" >> rc_to_main.md
 
 PR_URL=$(gh pr create --title "$RELEASE" --body-file rc_to_main.md --base main --assignee "@me")
 PR_NUMBER=$(echo $PR_URL | sed -n 's/.*\/pull\/\([0-9]*\).*/\1/p')
