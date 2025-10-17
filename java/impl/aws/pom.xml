@@ -257,6 +257,28 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- CycloneDX SBOM generation -->
+            <plugin>
+                <groupId>org.cyclonedx</groupId>
+                <artifactId>cyclonedx-maven-plugin</artifactId>
+                <version>2.8.2</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>makeBom</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <schemaVersion>1.5</schemaVersion>
+                    <includeBomSerialNumber>true</includeBomSerialNumber>
+                    <includeLicenseText>true</includeLicenseText>
+                    <outputFormat>json</outputFormat>
+                    <outputName>sbom</outputName>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
