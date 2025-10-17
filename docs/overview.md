@@ -29,7 +29,7 @@ More details:
 
 In **Bulk Data** mode, the proxy is triggered by files (objects) being uploaded to cloud storage buckets (eg, S3, GCS, etc). Psoxy reads the incoming file, applies one or more sanitization rules (transforms), writing the result(s) to a destination (usually in distinct bucket).
 
-The destination bucket is exposed the to client service (Workltyics), from which it can access the data. The client service would typically poll for newly processed data to arrive in the bucket.
+The destination bucket is exposed the to client service (Worklytics), from which it can access the data. The client service would typically poll for newly processed data to arrive in the bucket.
 
 More details:
 - [Configure Bulk Data Sanitization](./configuration/bulk-file-sanitization.md)
