@@ -54,10 +54,10 @@ module "psoxy" {
 }
 
 resource "aws_iam_policy" "execution_lambda_to_caller" {
-  count = local.use_api_gateway_v2 ? 0 : 1
+  count = local.use_api_gateway_v2 && length(module.api_connector) > 0 ? 0 : 1
 
-  name        = "${module.env_id.id}ExecuteLambdas"
-  description = "Allow caller role to execute the lambda url directly"
+  name        = "${module.env_id.id}ExecuteLambdas" # TODO: change this name in next major version
+  description = "Allow caller to execute the lambda url directly and/or read from async output buckets"
 
   policy = jsonencode(
     {
@@ -75,6 +75,7 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
           "Effect" : "Allow",
           "Resource" : ["arn:aws:s3:::${v.async_output_bucket_id}", "arn:aws:s3:::${v.async_output_bucket_id}/*"]
         } if v.async_output_bucket_id != null]
+        # also include read from sanitized buckets here? kinda non-sense that we handle async buckets but not sanitized buckets
       )
   })
 
