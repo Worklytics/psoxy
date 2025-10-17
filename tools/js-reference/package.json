@@ -8,9 +8,6 @@
   },
   "author": "Worklytics, Co. <www.worklytics.co>",
   "license": "ISC",
-  "dependencies": {
-    "crypto": "^1.0.1"
-  },
   "devDependencies": {
     "ava": "^5.3.1"
   },
