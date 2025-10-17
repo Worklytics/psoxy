@@ -11,7 +11,7 @@
 ## Concept
 - **Tool Client** - Javascript or web application client, running in a user endpoint (browser, mobile, etc), that sends webhook payloads directly to the collector (in principle)
 - **Tool Server** - the backend server of the tool.
-- **Webhook Collector** - the instance of psoxy that collects webhooks from the Tool Client or Tool Server, and sanitizes the data before storing it in bulk storage (e.g. S3, GCS, etc).
+- **Webhook Collector** - the instance of Psoxy that collects webhooks from the Tool Client or Tool Server, and sanitizes the data before storing it in bulk storage (e.g. S3, GCS, etc).
 
 ## Authentication
 

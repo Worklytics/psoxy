@@ -11,7 +11,7 @@ This includes:
 - [Cloud Run Functions](https://cloud.google.com/run/docs) - serverless containerized applications
 - [Service Accounts](https://cloud.google.com/iam/docs/service-accounts) - identity and access management
 - [Secret Manager](https://cloud.google.com/secret-manager/docs) - to hold pseudonymization salt, encryption keys, and data source API keys
-- [Cloud Storage Buckets](https://cloud.google.com/storage/docs) (GCS), if using psoxy to sanitize bulk file data, such as CSVs; collecting data via webhooks; or async API requests.
+- [Cloud Storage Buckets](https://cloud.google.com/storage/docs) (GCS), if using Psoxy to sanitize bulk file data, such as CSVs; collecting data via webhooks; or async API requests.
 - [Cloud KMS Keys](https://cloud.google.com/kms/docs) for webhook authentication (if using webhook collection mode).
 - [Pub/Sub Topics and Subscriptions](https://cloud.google.com/pubsub/docs), for webhook message queuing and batch processing (if using webhook collectors); and async API requests (if using an API connector that supports/requires async mode).
 

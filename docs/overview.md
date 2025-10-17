@@ -15,9 +15,9 @@ Psoxy can be deployed/used in 4 different modes (deployment scenarios), to suppo
 
 ### API Mode
 
-- **API** - psoxy sits in front of a data source API. Any call that would normally be sent to the data source API is instead sent to psoxy, which parses the request, validates it / applies ACL, and adds authentication before forwarding to the host API. After the host API response, psoxy sanitizes the response as defined by its roles before returning the response to the caller. This is an _http triggered_ flow.
+- **API** - Psoxy sits in front of a data source API. Any call that would normally be sent to the data source API is instead sent to Psoxy, which parses the request, validates it / applies ACL, and adds authentication before forwarding to the host API. After the host API response, Psoxy sanitizes the response as defined by its roles before returning the response to the caller. This is an _http triggered_ flow.
 
-For some connectors, an **'async'** variant of this is supported; if client requests `Prefer: respond-async`, psoxy may respond `202 Accepted` and provide a cloud storage uri (s3, gcs, etc) where actual response will be available after being asynchronously requested from source API and sanitized.
+For some connectors, an **'async'** variant of this is supported; if client requests `Prefer: respond-async`, Psoxy may respond `202 Accepted` and provide a cloud storage uri (s3, gcs, etc) where actual response will be available after being asynchronously requested from source API and sanitized.
 
 In this mode, the client service (Worklytics) must be able to send HTTPS requests to the proxy instances (either directly, or via an API gateway). If async is enabled, the client service must also access the destination bucket from which to retrieve any data that is processed asynchronously.
 
@@ -36,7 +36,7 @@ More details:
 
 ### Webhook Collection
 
-In **Webhook Collection** mode, psoxy is an endpoint for [webhooks](https://en.wikipedia.org/wiki/Webhook), receiving payloads from an app/service over HTTPS POST methods, the content of which validated, sanitized (transformed), and finally written to a destination cloud storage bucket. Webhook requests MUST be authenticated via OIDC. 
+In **Webhook Collection** mode, Psoxy is an endpoint for [webhooks](https://en.wikipedia.org/wiki/Webhook), receiving payloads from an app/service over HTTPS POST methods, the content of which validated, sanitized (transformed), and finally written to a destination cloud storage bucket. Webhook requests MUST be authenticated via OIDC. 
 
 The app/service in question is usually an internal / on-prem tool, that lacks a REST or similar API that would be suitable for API mode.
 
@@ -48,7 +48,7 @@ More details: [Configure Webhook Sanitization](./configuration/webhook-collector
 
 ### Command-line (cli)
 
-In **Command-line (cli)** mode, psoxy is invoked from the command-line to sanitize data stored in files on the local machine. This is useful for testing, or for one-off data sanitization tasks. Resulting files can then be transferred to a client service via some other means. (Worklytics supports a direct file upload or storage bucket import features, for example; subject to size/format limits) 
+In **Command-line (cli)** mode, Psoxy is invoked from the command-line to sanitize data stored in files on the local machine. This is useful for testing, or for one-off data sanitization tasks. Resulting files can then be transferred to a client service via some other means. (Worklytics supports a direct file upload or storage bucket import features, for example; subject to size/format limits) 
 
 This mode is NOT recommended for ongoing production use. It's provided mainly for testing and supporting some edge cases.
 
@@ -79,7 +79,7 @@ This example illustrates how the proxy provides data protection across several r
    - you trust the Psoxy implementation, which is source-available for your review and testing, to properly implement its specified rules/functionality.
    - you trust Worklytics to implement its service to not store or process non-metadata fields, even if accessible.
 
-You can verify this trust via the logging provided by your data source (API calls received), your cloud host (eg, AWS cloud watch logs include API calls made via the proxy instance), the psoxy testing tools to simulate API calls and inspect responses, and Worklytics logs.
+You can verify this trust via the logging provided by your data source (API calls received), your cloud host (eg, AWS cloud watch logs include API calls made via the proxy instance), the Psoxy testing tools to simulate API calls and inspect responses, and Worklytics logs.
 
 ## Software Bill of Materials (SBOM)
 
