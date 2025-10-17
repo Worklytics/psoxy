@@ -58,11 +58,10 @@ mkdir -p ../../../docs/gcp
 cp target/sbom.json ../../../docs/gcp/sbom.json
 printf "GCP SBOM copied to ${BLUE}docs/gcp/sbom.json${NC}\n\n"
 
-# Return to root directory
-cd ../../.. || exit 1
-
 printf "${GREEN}SBOM generation complete!${NC}\n"
 printf "Generated files:\n"
 printf "  - ${BLUE}docs/aws/sbom.json${NC}\n"
 printf "  - ${BLUE}docs/gcp/sbom.json${NC}\n"
 
+# Return to root directory
+cd ../../.. || exit 1
