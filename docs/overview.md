@@ -17,7 +17,7 @@ Psoxy can be deployed/used in 4 different modes (deployment scenarios), to suppo
 
 - **API** - psoxy sits in front of a data source API. Any call that would normally be sent to the data source API is instead sent to psoxy, which parses the request, validates it / applies ACL, and adds authentication before forwarding to the host API. After the host API response, psoxy sanitizes the response as defined by its roles before returning the response to the caller. This is an _http triggered_ flow.
 
-For some connectors, an **'async'** variant of this is is supported; if client requests `Prefer: respond-async`, psoxy may responds `202 Accepted` and provide a cloud storage uri (s3, gcs, etc) were actual response will be available after being asynchronously requested from source API and sanitized.
+For some connectors, an **'async'** variant of this is supported; if client requests `Prefer: respond-async`, psoxy may respond `202 Accepted` and provide a cloud storage uri (s3, gcs, etc) where actual response will be available after being asynchronously requested from source API and sanitized.
 
 In this mode, the client service (Worklytics) must be able to send HTTPS requests to the proxy instances (either directly, or via an API gateway). If async is enabled, the client service must also access the destination bucket from which to retrieve any data that is processed asynchronously.
 
