@@ -80,3 +80,31 @@ This example illustrates how the proxy provides data protection across several r
    - you trust Worklytics to implement its service to not store or process non-metadata fields, even if accessible.
 
 You can verify this trust via the logging provided by your data source (API calls received), your cloud host (eg, AWS cloud watch logs include API calls made via the proxy instance), the psoxy testing tools to simulate API calls and inspect responses, and Worklytics logs.
+
+## Software Bill of Materials (SBOM)
+
+For transparency and security auditing, we provide comprehensive Software Bill of Materials (SBOM) for each platform deployment:
+
+- [AWS SBOM](aws/sbom.json) - Complete inventory of all dependencies in the AWS Lambda deployment (~115 components)
+- [GCP SBOM](gcp/sbom.json) - Complete inventory of all dependencies in the GCP Cloud Function deployment (~133 components)
+
+The SBOMs are provided in [CycloneDX](https://cyclonedx.org/) v1.5 format, an industry-standard machine-readable specification maintained by OWASP. Each SBOM includes:
+- All Java libraries and transitive dependencies
+- License information for each component
+- Cryptographic hashes for verification
+- Package URLs (PURLs) for standardized identification
+- Dependency relationship mappings
+
+**Use Cases:**
+- **Security Auditing** - Scan for known vulnerabilities using tools like [Grype](https://github.com/anchore/grype), [Trivy](https://github.com/aquasecurity/trivy), or [OWASP Dependency-Check](https://owasp.org/www-project-dependency-check/)
+- **Compliance** - Generate reports for SOC 2, ISO 27001, and other compliance requirements
+- **Vulnerability Management** - Track CVEs affecting your deployment and prioritize patching efforts
+- **Supply Chain Security** - Understand transitive dependencies and assess supply chain risks
+
+**Regenerating SBOMs:**
+```bash
+# From repository root
+./tools/release/generate-sbom.sh
+```
+
+SBOMs are automatically regenerated during releases and available as GitHub Actions artifacts for each release.
