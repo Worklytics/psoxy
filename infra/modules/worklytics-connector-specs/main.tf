@@ -437,7 +437,6 @@ EOT
         "/services/data/v64.0/sobjects/Account/describe",
         "/services/data/v64.0/sobjects/Task/describe",
         "/services/data/v64.0/query?q=SELECT+Id,Email,IsActive+FROM+User+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
-        "/services/data/v64.0/query?q=SELECT+AccountId+FROM+Task+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+GROUP+BY+AccountId",
         "/services/data/v64.0/query?q=SELECT+Id,AccountId,WhoId+FROM+Task+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
         "/services/data/v64.0/query?q=SELECT+Id,AccountId,WhoId+FROM+Event+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST"
       ]
