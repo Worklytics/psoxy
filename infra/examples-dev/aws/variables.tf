@@ -389,6 +389,9 @@ variable "custom_side_outputs" {
 
 variable "webhook_collectors" {
   type = map(object({
+    worklytics_connector_id = optional(string, "work-data-generic-psoxy")
+    worklytics_connector_name = optional(string, "Workplace Metadata via Psoxy")
+    display_name = optional(string, "Webhooks Collected via Psoxy")
     rules_file = string
     provision_auth_key = optional(object({         # whether to provision auth keys for webhook collector; if not provided, will not provision any
       rotation_days = optional(number, null)       # null means no rotation; if > 0, will rotate every N days

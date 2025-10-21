@@ -61,6 +61,22 @@ locals {
     {}
   )
 
+  bulk_connectors = merge(
+    module.worklytics_connectors.enabled_bulk_connectors,
+    var.custom_bulk_connectors,
+    {
+      for k, v in var.webhook_collectors : k => {
+        source_kind = v.source_kind
+        sanitized_bucket_name = module.psoxy.webhook_collector_instances[k].sanitized_bucket_name
+        display_name = v.display_name
+        settings_to_provide = {
+          ""
+        }
+      } 
+    }
+  )
+
+
   source_authorization_todos = concat(
     module.worklytics_connectors.todos,
     module.worklytics_connectors_google_workspace.todos,
@@ -76,12 +92,6 @@ locals {
   )
 }
 
-locals {
-  bulk_connectors = merge(
-    module.worklytics_connectors.enabled_bulk_connectors,
-    var.custom_bulk_connectors,
-  )
-}
 
 module "psoxy" {
   source = "../../modules/gcp-host"
@@ -127,8 +137,8 @@ module "psoxy" {
 }
 
 locals {
-  all_connectors = merge(local.api_connectors, local.bulk_connectors)
-  all_instances  = merge(module.psoxy.bulk_connector_instances, module.psoxy.api_connector_instances)
+  all_connectors = merge(local.api_connectors, local.bulk_connectors, var.webhook_collectors)
+  all_instances  = merge(module.psoxy.bulk_connector_instances, module.psoxy.api_connector_instances, module.psoxy.webhook_collector_instances)
 }
 
 module "connection_in_worklytics" {

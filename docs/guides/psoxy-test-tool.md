@@ -95,7 +95,7 @@ Notice how the URL changes, and any other option the Psoxy may need doesn't.
 Assuming that you've successfully deployed the Psoxy to AWS, you can inspect the logs by running the following command:
 
 ```shell
-node cli-logs.js -r <role> -re <region> -l <logGroupName>
+node cli-logs.js -r <role> --region <region> -l <logGroupName>
 ```
 
 ## Psoxy Logs: GCP
@@ -119,7 +119,7 @@ perform the upload and download operations.
 
 Example:
 ```shell
-node cli-file-upload.js -d AWS -i input-bucket-name -o output-bucket-name -f /path/to/file.csv -r <ROLE> -re <REGION>
+node cli-file-upload.js -d AWS -i input-bucket-name -o output-bucket-name -f /path/to/file.csv -r <ROLE> --region <REGION>
 ```
 
 ## Psoxy Bulk Instances: GCP
