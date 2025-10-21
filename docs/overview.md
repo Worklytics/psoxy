@@ -11,13 +11,46 @@ Benefits include:
 
 ## Modes
 
-Psoxy can be deployed/used in 4 different modes:
+Psoxy can be deployed/used in 4 different modes (deployment scenarios), to support various data flows from sources.
 
-- **API** - psoxy sits in front of a data source API. Any call that would normally be sent to the data source API is instead sent to psoxy, which parses the request, validates it / applies ACL, and adds authentication before forwarding to the host API. After the host API response, psoxy sanitizes the response as defined by its roles before returning the response to the caller. This is an _http triggered_ flow.
-- **Bulk File** - psoxy is triggered by files (objects) being uploaded to cloud storage buckets (eg, S3, GCS, etc). Psoxy reads the incoming file, applies one or more sanitization rules (transforms), writing the result(s) to a destination (usually in distinct bucket).
-- **Webhook Coollection** - psoxy is an endpoint for [webhooks](https://en.wikipedia.org/wiki/Webhook), receiving payloads from an app/service over HTTPS POST methods, the content of which validated, sanitized (transformed), and finally written to a cloud storage bucket. 
-- **Command-line (cli)** - psoxy is invoked from the command-line, and is used to sanitize data stored in files on the local machine. This is useful for testing, or for one-off data sanitization tasks. Resulting files can be uploaded to Worklytics via the file upload of its web portal.
+### API Mode
 
+- **API** - Psoxy sits in front of a data source API. Any call that would normally be sent to the data source API is instead sent to Psoxy, which parses the request, validates it / applies ACL, and adds authentication before forwarding to the host API. After the host API response, Psoxy sanitizes the response as defined by its roles before returning the response to the caller. This is an _http triggered_ flow.
+
+For some connectors, an **'async'** variant of this is supported; if client requests `Prefer: respond-async`, Psoxy may respond `202 Accepted` and provide a cloud storage uri (s3, gcs, etc) where actual response will be available after being asynchronously requested from source API and sanitized.
+
+In this mode, the client service (Worklytics) must be able to send HTTPS requests to the proxy instances (either directly, or via an API gateway). If async is enabled, the client service must also access the destination bucket from which to retrieve any data that is processed asynchronously.
+
+More details:
+- [Configure API Data Sanitization](./configuration/api-data-sanitization.md)
+- [Async API Data](./configuration/async-api-data.md)
+
+### Bulk Data Mode
+
+In **Bulk Data** mode, the proxy is triggered by files (objects) being uploaded to cloud storage buckets (eg, S3, GCS, etc). Psoxy reads the incoming file, applies one or more sanitization rules (transforms), writing the result(s) to a destination (usually in distinct bucket).
+
+The destination bucket is exposed the to client service (Worklytics), from which it can access the data. The client service would typically poll for newly processed data to arrive in the bucket.
+
+More details:
+- [Configure Bulk Data Sanitization](./configuration/bulk-file-sanitization.md)
+
+### Webhook Collection
+
+In **Webhook Collection** mode, Psoxy is an endpoint for [webhooks](https://en.wikipedia.org/wiki/Webhook), receiving payloads from an app/service over HTTPS POST methods, the content of which validated, sanitized (transformed), and finally written to a destination cloud storage bucket. Webhook requests MUST be authenticated via OIDC. 
+
+The app/service in question is usually an internal / on-prem tool, that lacks a REST or similar API that would be suitable for API mode.
+
+While this mode is designed as a webhook endpoint, it's usefulness is not limited to "real-time" data. You could write a script that "exports" data from a source by POST each element to a webhook collector, as if it were an ingestion API. This might be a more convenient alternative to using "Bulk Data" mode for that use-case in many situations.
+
+As in Bulk Data mode, the destination bucket - which contains only sanitized data - must be accessible to the client service, which must poll for new data appearing in the bucket. The client service does not require any access to the actual proxy instance (cloud function) that processes the data.
+
+More details: [Configure Webhook Sanitization](./configuration/webhook-collectors.md)
+
+### Command-line (cli)
+
+In **Command-line (cli)** mode, Psoxy is invoked from the command-line to sanitize data stored in files on the local machine. This is useful for testing, or for one-off data sanitization tasks. Resulting files can then be transferred to a client service via some other means. (Worklytics supports a direct file upload or storage bucket import features, for example; subject to size/format limits) 
+
+This mode is NOT recommended for ongoing production use. It's provided mainly for testing and supporting some edge cases.
 
 ## Layers of Data Protection
 
@@ -32,6 +65,7 @@ Data transfer via Psoxy provides a layered approach to data protection, with var
 4. **Proxy-level response transformation** Psoxy can be configured to sanitize fields in API responses, including:
       - pseudonymizing/tokenizing fields that include PII or sensitive identifiers
       - redacting fields containing sensitive information or which aren't needed for analysis
+5. **Network-level Client IP restriction** Optionally, proxy instances may be locked to be invoked ONLY from a given set of IP addresses, leveraging the capabilities of the host service. This may require using VPC/API Gateway features of the host platform, as well as a subscription with Worklytics that ensures a static list of IPs from which data transfer requests will originate. 
 
 Together, these layers of data protection can redundantly control data access. Eg, you could ensure read-only access to GMail metadata by:
   - granting the Gmail metadata-only oauth scope to your instance via the Google Workspace Admin console, instead of the full Gmail API scope
@@ -45,7 +79,7 @@ This example illustrates how the proxy provides data protection across several r
    - you trust the Psoxy implementation, which is source-available for your review and testing, to properly implement its specified rules/functionality.
    - you trust Worklytics to implement its service to not store or process non-metadata fields, even if accessible.
 
-You can verify this trust via the logging provided by your data source (API calls received), your cloud host (eg, AWS cloud watch logs include API calls made via the proxy instance), the psoxy testing tools to simulate API calls and inspect responses, and Worklytics logs.
+You can verify this trust via the logging provided by your data source (API calls received), your cloud host (eg, AWS cloud watch logs include API calls made via the proxy instance), the Psoxy testing tools to simulate API calls and inspect responses, and Worklytics logs.
 
 ## Software Bill of Materials (SBOM)
 
