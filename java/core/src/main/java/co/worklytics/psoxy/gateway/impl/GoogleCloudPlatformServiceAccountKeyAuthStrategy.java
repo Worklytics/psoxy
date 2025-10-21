@@ -1,8 +1,13 @@
 package co.worklytics.psoxy.gateway.impl;
 
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import java.io.ByteArrayInputStream;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
 import com.google.auth.Credentials;
 import com.google.auth.http.HttpTransportFactory;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -11,17 +16,14 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.inject.Inject;
-import java.io.ByteArrayInputStream;
-import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Log
@@ -138,12 +140,19 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
     }
 
     @VisibleForTesting
-    ByteArrayInputStream toStream(String base64encodedKey) {
-        return new ByteArrayInputStream(Base64.getDecoder().decode(
-            //strip whitespace around base64-encoded string; have seen these with artifacts from
-            // copy-paste of the SA key into cloud consoles
-            StringUtils.strip(base64encodedKey))
-        );
+    ByteArrayInputStream toStream(String key) {
+        String trimmedKey = StringUtils.strip(key);
+        
+        // Check if the key is plain JSON (starts with '{')
+        if (trimmedKey.startsWith("{")) {
+            // Plain JSON format - convert directly to bytes using UTF-8
+            log.info("Service account key detected as plain JSON format");
+            return new ByteArrayInputStream(trimmedKey.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        } else {
+            // Assume base64-encoded format
+            log.info("Service account key detected as base64-encoded format");
+            return new ByteArrayInputStream(Base64.getDecoder().decode(trimmedKey));
+        }
     }
 
 }
