@@ -151,7 +151,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
 
         AccessToken token = new AccessToken("my-token", Date.from(anyTime.plus(10_000L, ChronoUnit.MILLIS)));
 
-        tokenRefreshHandler.storeSharedAccessTokenIfSupported(token, true);
+        tokenRefreshHandler.storeSharedAccessTokenIfSupported(token);
 
         verify(tokenRefreshHandler.secretStore, times(1)).putConfigProperty(eq(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN),
             eq("{\"token\":\"my-token\",\"expirationDate\":1639526410000}"),
