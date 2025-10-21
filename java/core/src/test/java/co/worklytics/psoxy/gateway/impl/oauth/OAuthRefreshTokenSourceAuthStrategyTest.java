@@ -1,25 +1,14 @@
 package co.worklytics.psoxy.gateway.impl.oauth;
 
-import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.SourceAuthModule;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.psoxy.utils.RandomNumberGenerator;
-import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
-import co.worklytics.test.MockModules;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.auth.oauth2.AccessToken;
-import dagger.Component;
-import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import java.sql.Date;
 import java.time.Clock;
 import java.time.Instant;
@@ -28,9 +17,25 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.auth.oauth2.AccessToken;
+import co.worklytics.psoxy.PsoxyModule;
+import co.worklytics.psoxy.SourceAuthModule;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.utils.RandomNumberGenerator;
+import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
+import co.worklytics.test.MockModules;
+import dagger.Component;
+import lombok.SneakyThrows;
 
 class OAuthRefreshTokenSourceAuthStrategyTest {
 
@@ -106,13 +111,13 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 1, 3_600_000})
-    public void testCachedTokenDoesntNeedRefreshIfNotExpired(int millis) {
+    @ValueSource(ints = { 1, 30_000, 300_000, 3_600_000})
+    public void testCachedTokenDoesntNeedRefreshIfNotExpired(int millisBeyondMaxProactiveRefreshUntilTokenExpires) {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
         Instant fixed = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         Instant expiration = fixed
             .plus(tokenRefreshHandler.MAX_PROACTIVE_TOKEN_REFRESH)
-            .plusMillis(millis);
+            .plusMillis(millisBeyondMaxProactiveRefreshUntilTokenExpires);
 
         AccessToken token = new AccessToken("any-token", Date.from(expiration));
         tokenRefreshHandler.randomNumberGenerator = this.randomNumberGenerator;
@@ -120,19 +125,29 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { -3_600_000, -1_000, -1, 0})
-    public void testCachedTokenNeedsRefreshIfExpiredOrCloseTo(int millis) {
+    @ValueSource(ints = { -3_600_000, -1_000, -1, 0, 1, 1_000, 30_000})
+    public void testCachedTokenNeedsRefreshIfExpiredOrCloseTo(int millisAgoThatTokenExpired) {
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
         Instant fixed = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         Instant expiration = fixed
-            .minus(tokenRefreshHandler.MAX_PROACTIVE_TOKEN_REFRESH) //expired 5 minutes ago
-            .plusMillis(millis); // plus some additional (negative) millisecond amount
-
+            .plusMillis(millisAgoThatTokenExpired);
 
         AccessToken token = new AccessToken("any-token", Date.from(expiration));
         tokenRefreshHandler.randomNumberGenerator = this.randomNumberGenerator;
         assertTrue(tokenRefreshHandler.shouldRefresh(token, fixed));
     }
+
+    @Test
+    public void testProactiveRefreshWithin1MinuteOfExpiration() {
+        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
+        tokenRefreshHandler.randomNumberGenerator = this.randomNumberGenerator;
+        Instant fixed = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        Instant expiration = fixed.plusSeconds(58);
+        AccessToken token = new AccessToken("any-token", Date.from(expiration));
+        assertTrue(tokenRefreshHandler.shouldRefresh(token, fixed));
+    }
+
+
 
     @SneakyThrows
     @Test

@@ -217,10 +217,11 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @Inject
         TokenResponseParser tokenResponseParser;
 
+        // so we'll attempt to *proactively* refresh the token 1-9 minutes before it expires
         @VisibleForTesting
-        protected final Duration MIN_PROACTIVE_TOKEN_REFRESH = Duration.ofMinutes(2L);
+        protected final Duration MIN_PROACTIVE_TOKEN_REFRESH = Duration.ofMinutes(1L);
         @VisibleForTesting
-        protected final Duration MAX_PROACTIVE_TOKEN_REFRESH = MIN_PROACTIVE_TOKEN_REFRESH.plusMinutes(5L);
+        protected final Duration MAX_PROACTIVE_TOKEN_REFRESH = MIN_PROACTIVE_TOKEN_REFRESH.plusMinutes(9L);
 
         // not high; better to fail fast and leave it to the caller (Worklytics) to retry than hold
         // open a lambda waiting for a lock
