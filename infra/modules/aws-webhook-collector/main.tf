@@ -75,7 +75,7 @@ module "gate_instance" {
   logs_kms_key_arn                     = var.logs_kms_key_arn
   memory_size_mb                       = var.memory_size_mb
   timeout_seconds                      = 55
-  reserved_concurrent_executions       = var.reserved_concurrent_executions
+  reserved_concurrent_executions       = coalesce(var.max_instance_count, var.reserved_concurrent_executions)
   path_to_instance_ssm_parameters      = var.path_to_instance_ssm_parameters
   path_to_shared_ssm_parameters        = var.path_to_shared_ssm_parameters
   global_parameter_arns                = var.global_parameter_arns

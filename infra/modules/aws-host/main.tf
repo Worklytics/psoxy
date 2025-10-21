@@ -209,6 +209,8 @@ module "api_connector" {
   side_output_original                  = try(local.custom_original_side_outputs[each.key], null)
   side_output_sanitized                 = try(local.sanitized_side_outputs[each.key], null)
   enable_async_processing               = each.value.enable_async_processing
+  max_instance_count                    = try(each.value.max_instance_count, each.value.reserved_concurrent_executions, null)
+  reserved_concurrent_executions        = try(each.value.reserved_concurrent_executions, null)
   memory_size_mb                        = each.value.enable_async_processing ? 1024 : 512 # default is 512; double it for async case, to give additional margin
 
   todos_as_local_files = var.todos_as_local_files
@@ -317,6 +319,8 @@ module "webhook_collectors" {
   rules_file                           = each.value.rules_file
   webhook_auth_public_keys             = each.value.auth_public_keys
   provision_auth_key                   = each.value.provision_auth_key
+  max_instance_count                   = try(each.value.max_instance_count, each.value.reserved_concurrent_executions, null)
+  reserved_concurrent_executions       = try(each.value.reserved_concurrent_executions, null)
   example_payload                      = try(each.value.example_payload, null)
   example_identity                     = try(each.value.example_identity, null)
 

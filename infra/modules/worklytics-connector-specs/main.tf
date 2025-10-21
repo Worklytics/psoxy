@@ -63,7 +63,8 @@ locals {
           value_managed_by_tf : false
         },
       ]
-      reserved_concurrent_executions : null
+      reserved_concurrent_executions : null # DEPRECATED: use max_instance_count instead
+      max_instance_count : null
       enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
@@ -104,7 +105,8 @@ EOT
       settings_to_provide = {
         "Workspace Id" = local.chat_gpt_enterprise_example_workspace_id
       }
-      reserved_concurrent_executions : null
+      reserved_concurrent_executions : null # DEPRECATED: use max_instance_count instead
+      max_instance_count : null
       enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
@@ -200,7 +202,8 @@ EOT
       settings_to_provide = {
         "GitHub Organization" = local.github_organization
       }
-      reserved_concurrent_executions : null
+      reserved_concurrent_executions : null # DEPRECATED: use max_instance_count instead
+      max_instance_count : null
       enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
@@ -260,7 +263,8 @@ EOT
       settings_to_provide = {
         "GitHub Organization" = local.github_organization
       }
-      reserved_concurrent_executions : null
+      reserved_concurrent_executions : null # DEPRECATED: use max_instance_count instead
+      max_instance_count : null
       enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
@@ -846,7 +850,8 @@ EOT
       }
       settings_to_provide = {
       }
-      reserved_concurrent_executions : null
+      reserved_concurrent_executions : null # DEPRECATED: use max_instance_count instead
+      max_instance_count : 5
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
@@ -1073,7 +1078,8 @@ EOT
       }
       settings_to_provide = {
       }
-      reserved_concurrent_executions : null
+      reserved_concurrent_executions : null # DEPRECATED: use max_instance_count instead
+      max_instance_count : 5
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [

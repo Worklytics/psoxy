@@ -216,6 +216,7 @@ resource "google_cloudfunctions2_function" "function" {
     service_account_email = var.service_account_email
     available_memory      = "${var.available_memory_mb}M"
     ingress_settings      = "ALLOW_ALL"
+    max_instance_count    = coalesce(var.max_instance_count, var.reserved_concurrent_executions)
 
     vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector
     vpc_connector_egress_settings = var.vpc_config == null ? null : "ALL_TRAFFIC"
