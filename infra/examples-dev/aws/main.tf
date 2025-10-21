@@ -161,8 +161,18 @@ module "psoxy" {
 #  Worklytics API / Terraform provider
 
 locals {
-  all_connectors = merge(local.api_connectors, local.bulk_connectors, var.webhook_collectors)
-  all_instances  = merge(module.psoxy.bulk_connector_instances, module.psoxy.api_connector_instances,   module.psoxy.webhook_collector_instances)
+  # Webhook collectors are handled separately to avoid cycles - their metadata comes from outputs
+  webhook_connectors_for_worklytics = {
+    for k, v in module.psoxy.webhook_collector_instances : k => {
+      source_kind           = var.webhook_collectors[k].source_kind
+      sanitized_bucket_name = v.output_sanitized_bucket_id
+      display_name          = var.webhook_collectors[k].display_name
+      settings_to_provide   = {}
+    }
+  }
+
+  all_connectors = merge(local.api_connectors, local.bulk_connectors, local.webhook_connectors_for_worklytics)
+  all_instances  = merge(module.psoxy.bulk_connector_instances, module.psoxy.api_connector_instances, module.psoxy.webhook_collector_instances)
 }
 
 module "connection_in_worklytics" {

@@ -288,10 +288,11 @@ variable "custom_api_connector_rules" {
 
 variable "webhook_collectors" {
   type = map(object({
-    worklytics_connector_id = optional(string, "work-data-generic-psoxy")
+    worklytics_connector_id   = optional(string, "work-data-generic-psoxy")
     worklytics_connector_name = optional(string, "Workplace Metadata via Psoxy")
-    display_name = optional(string, "Webhooks Collected via Psoxy")
-    rules_file = string
+    display_name              = optional(string, "Webhooks Collected via Psoxy")
+    source_kind               = optional(string, "work-event") # source kind for this webhook collector, used for labeling and categorization
+    rules_file                = string
     provision_auth_key = optional(object({                           # whether to provision auth keys for webhook collector; if not provided, will not provision any
       rotation_days = optional(number, null)                         # null means no rotation; if > 0, will rotate every N days
       key_spec      = optional(string, "RSA_SIGN_PKCS1_2048_SHA256") # see https://cloud.google.com/kms/docs/reference/rest/v1/CryptoKeyVersionAlgorithm
