@@ -15,11 +15,13 @@ Psoxy ensures more secure, granular data access than direct connections between 
 Psoxy functions as API-level Data Loss Prevention layer (DLP), by blocking sensitive fields / values / endpoints that would otherwise be exposed when you connect a data sources API to a 3rd party service. It can ensure that data which would otherwise be exposed to a 3rd party service, due to granularity of source API models/permissions, is not accessed or transfered to the service.
 
 Objectives:
-  - **serverless** - we strive to minimize the moving pieces required to run psoxy at scale, keeping your attack surface small and operational complexity low. Furthermore, we define infrastructure-as-code to ease setup.
-  - **transparent** - psoxy's source code is available to customers, to facilitate code review and white box penetration testing.
-  - **simple** - psoxy's functionality will focus on performing secure authentication with the 3rd party API and then perform minimal transformation on the response (pseudonymization, field redaction) to ease code review and auditing of its behavior.
+  - **serverless** - we strive to minimize the moving pieces required to run Psoxy at scale, keeping your attack surface small and operational complexity low. Furthermore, we define infrastructure-as-code to ease setup.
+  - **transparent** - Psoxy's source code is available to customers, to facilitate code review and white box penetration testing.
+  - **simple** - Psoxy's functionality will focus on performing secure authentication with the 3rd party API and then perform minimal transformation on the response (pseudonymization, field redaction) to ease code review and auditing of its behavior.
 
 Psoxy may be hosted in [Google Cloud](gcp/getting-started.md) or [AWS](aws/getting-started.md).
+
+For transparency and security auditing, we provide a [Software Bill of Materials (SBOM)](overview.md#software-bill-of-materials-sbom) for each platform.
 
 ## Data Flow
 
@@ -59,8 +61,20 @@ Worklytics authenticates your tenant with your cloud host via [Workload Identity
 
 See also: [API Data Sanitization](configuration/api-data-sanitization.md)
 
+
+## Modes
+
+Psoxy can be [deployed/used in 4 different modes](https://docs.worklytics.co/psoxy/overview#modes), to support various data sources:
+
+- **API** - Psoxy sits in front of a data source API. Any call that would normally be sent to the data source API is instead sent to Psoxy, which parses the request, validates it / applies ACL, and adds authentication before forwarding to the host API. After the host API response, Psoxy sanitizes the response as defined by its roles before returning the response to the caller. This is an _http triggered_ flow.
+  - For some connectors, an **'async'** variant of this is supported; if client requests `Prefer: respond-async`, Psoxy may respond `202 Accepted` and provide a cloud storage uri (s3, gcs, etc) where actual response will be available after being asynchronously requested from source API and sanitized.
+- **Bulk File** - Psoxy is triggered by files (objects) being uploaded to cloud storage buckets (eg, S3, GCS, etc). Psoxy reads the incoming file, applies one or more sanitization rules (transforms), writing the result(s) to a destination (usually in distinct bucket).
+- **Webhook Collection** - Psoxy is an endpoint for [webhooks](https://en.wikipedia.org/wiki/Webhook), receiving payloads from an app/service over HTTPS POST methods, the content of which validated, sanitized (transformed), and finally written to a cloud storage bucket. 
+- **Command-line (cli)** - Psoxy is invoked from the command-line, and is used to sanitize data stored in files on the local machine. This is useful for testing, or for one-off data sanitization tasks. Resulting files can be uploaded to Worklytics via the file upload of its web portal.
+
+
 ## Supported Data Sources
-As of July 2025, the following sources can be connected to Worklytics via psoxy.
+As of July 2025, the following sources can be connected to Worklytics via Psoxy.
 
 Note: Some sources require specific licenses to transfer data via the APIs/endpoints used by Worklytics, or impose some per API request costs/rate limits for such transfers. Inclusion of the source in the list below does not represent or warrant retrieval of your data using Psoxy from the source via our provided connectors.
 
@@ -161,7 +175,7 @@ NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs
 
 Other data sources, such as Human Resource Information System (HRIS), Badge, or Survey data can be exported to a CSV file. The "bulk" mode of the proxy can be used to pseudonymize these files by copying/uploading the original to a cloud storage bucket (GCS, S3, etc), which will trigger the proxy to sanitize the file and write  the result to a 2nd storage bucket, which you then grant Worklytics access to read.
 
-Alternatively, the proxy can be used as a command line tool to pseudonymize arbitrary CSV files (eg, exports from your  HRIS), in a manner consistent with how a psoxy instance will pseudonymize identifiers in a target REST API. This is REQUIRED if you want SaaS accounts to be linked with HRIS data for analysis (eg, Worklytics will match email set in HRIS with email set in SaaS tool's account so these must be pseudonymized using an equivalent algorithm and secret). See [`java/impl/cmd-line/`](https://github.com/Worklytics/psoxy/tree/main/java/impl/cmd-line) for details.
+Alternatively, the proxy can be used as a command line tool to pseudonymize arbitrary CSV files (eg, exports from your  HRIS), in a manner consistent with how a Psoxy instance will pseudonymize identifiers in a target REST API. This is REQUIRED if you want SaaS accounts to be linked with HRIS data for analysis (eg, Worklytics will match email set in HRIS with email set in SaaS tool's account so these must be pseudonymized using an equivalent algorithm and secret). See [`java/impl/cmd-line/`](https://github.com/Worklytics/psoxy/tree/main/java/impl/cmd-line) for details.
 
 See also: [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
 
@@ -175,7 +189,7 @@ See also: [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
 
 ### Other Data Sources via Webhook Collection
 
-Some data sources may support **webhooks** to send data to a URL endpoint, often in response to a user-performed action.  These 'events' can be collected by psoxy instances in "webhook collector" mode, to later be transferred to Worklytics for analysis.
+Some data sources may support **webhooks** to send data to a URL endpoint, often in response to a user-performed action.  These 'events' can be collected by Psoxy instances in "webhook collector" mode, to later be transferred to Worklytics for analysis.
 
 On-prem/in-house-build data sources can be insturmented to produce webhooks, using the [Worklytics Work Events JS SDK](https://github.com/Worklytics/Work-Events-JS).
 
@@ -186,7 +200,7 @@ See also: [Webhook Collectors](development/alpha-features/webhook-collectors.md)
 ### Host Platform and Data Sources
 
 The prequisites and dependencies you will need for Psoxy are determined by:
-   1. Where you will host psoxy? eg, Amazon Web Services (AWS), or Google Cloud Platform (GCP)
+   1. Where you will host Psoxy? eg, Amazon Web Services (AWS), or Google Cloud Platform (GCP)
    2. Which data sources you will connect to? eg, Microsoft 365, Google Workspace, Zoom, etc, as defined in previous sections.
 
 Once you've gathered that information, you can identify the required software and permissions in the next section, and the best environment from which to deploy Psoxy.
@@ -318,7 +332,7 @@ Depending on your Cloud Host / Data Sources, you will need:
   </tbody>
 </table>
 
-For testing your psoxy instance, you will need:
+For testing your Psoxy instance, you will need:
 
 | Tool                                                               | Version                           | Test Command      |
 |--------------------------------------------------------------------|-----------------------------------|-------------------|
@@ -347,7 +361,7 @@ We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](https:
 
      You will make changes to the files contained in this repo as appropriate for your use-case. These changes should be committed to a repo that is accessible to other members of your team who may need to support your Psoxy deployment in the future.
 
-  3. Pick the location from which you will deploy (provision) the psoxy instance. This location will need the software prereqs defined in the previous section. Some suggestions:
+  3. Pick the location from which you will deploy (provision) the Psoxy instance. This location will need the software prereqs defined in the previous section. Some suggestions:
 
         - your local machine; if you have the prereqs installed and can authenticate it with your host platform (AWS/GCP) as a sufficiently privileged user/role, this is a simple option
         - [Google Cloud Shell](https://cloud.google.com/shell/) - if you're using GCP and/or connecting to Google Workspace, this is option simplifies authentication. It [includes the prereqs above](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools) EXCEPT aws/azure CLIs out-of-the-box.
@@ -359,7 +373,7 @@ We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](https:
 
   5. follow any `TODO` instructions produced by Terraform, such as:
      - provision API keys / make OAuth grants needed by each Data Connection
-     - create the Data Connection from Worklytics to your psoxy instance (Terraform can provide `TODO` file with detailed steps for each)
+     - create the Data Connection from Worklytics to your Psoxy instance (Terraform can provide `TODO` file with detailed steps for each)
 
   6. Various test commands are provided in local files, as the output of the Terraform; you may use these examples to validate the performance of the proxy. Please review the proxy behavior and adapt the rules as needed. Customers needing assistance adapting the proxy behavior for their needs can contact [support@worklytics.co](mailto:support@worklytics.co)
 

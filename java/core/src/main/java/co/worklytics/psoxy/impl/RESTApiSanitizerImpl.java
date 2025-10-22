@@ -405,7 +405,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @VisibleForTesting
     Predicate<Endpoint> allowsHttpMethod(@NonNull String httpMethod) {
-        return (endpoint) -> endpoint.getAllowedMethods()
+        return (endpoint) -> endpoint.getAllowedMethodsOptional()
                 .map(methods -> methods.stream().map(String::toUpperCase)
                         .collect(Collectors.toList())
                         .contains(httpMethod.toUpperCase()))

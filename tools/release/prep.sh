@@ -85,6 +85,23 @@ git grep -l "$CURRENT_RELEASE_PATTERN" tools/
 
 ./tools/release/lib/sync-examples.sh ./
 
+# Generate SBOMs
+printf "Generate updated SBOMs for AWS and GCP?\n"
+read -p "(Y/n) " -n 1 -r
+REPLY=${REPLY:-Y}
+echo    # Move to a new line
+case "$REPLY" in
+  [yY][eE][sS]|[yY])
+    ./tools/release/generate-sbom.sh
+    git add docs/aws/sbom.json
+    git add docs/gcp/sbom.json
+    ;;
+  *)
+    echo "SBOM generation skipped."
+    ;;
+esac
+echo "" # newline
+
 git add java/**.java
 git add java/pom.xml
 git add infra/examples/**/main.tf
