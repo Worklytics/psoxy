@@ -69,7 +69,7 @@ Psoxy can be [deployed/used in 4 different modes](https://docs.worklytics.co/pso
 - **API** - Psoxy sits in front of a data source API. Any call that would normally be sent to the data source API is instead sent to Psoxy, which parses the request, validates it / applies ACL, and adds authentication before forwarding to the host API. After the host API response, Psoxy sanitizes the response as defined by its roles before returning the response to the caller. This is an _http triggered_ flow.
   - For some connectors, an **'async'** variant of this is supported; if client requests `Prefer: respond-async`, Psoxy may respond `202 Accepted` and provide a cloud storage uri (s3, gcs, etc) where actual response will be available after being asynchronously requested from source API and sanitized.
 - **Bulk File** - Psoxy is triggered by files (objects) being uploaded to cloud storage buckets (eg, S3, GCS, etc). Psoxy reads the incoming file, applies one or more sanitization rules (transforms), writing the result(s) to a destination (usually in distinct bucket).
-- **Webhook Collection** - Psoxy is an endpoint for [webhooks](https://en.wikipedia.org/wiki/Webhook), receiving payloads from an app/service over HTTPS POST methods, the content of which validated, sanitized (transformed), and finally written to a cloud storage bucket. 
+- **Webhook Collection** - Psoxy is an endpoint for [webhooks](https://en.wikipedia.org/wiki/Webhook), receiving payloads from an app/service over HTTPS POST methods, the content of which validated, sanitized (transformed), and finally written to a cloud storage bucket.
 - **Command-line (cli)** - Psoxy is invoked from the command-line, and is used to sanitize data stored in files on the local machine. This is useful for testing, or for one-off data sanitization tasks. Resulting files can be uploaded to Worklytics via the file upload of its web portal.
 
 
@@ -332,7 +332,7 @@ Depending on your Cloud Host / Data Sources, you will need:
   </tbody>
 </table>
 
-For testing your psoxy instance, you will need:
+For testing your Psoxy instance, you will need:
 
 | Tool                                                               | Version                           | Test Command      |
 |--------------------------------------------------------------------|-----------------------------------|-------------------|
@@ -361,7 +361,7 @@ We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](https:
 
      You will make changes to the files contained in this repo as appropriate for your use-case. These changes should be committed to a repo that is accessible to other members of your team who may need to support your Psoxy deployment in the future.
 
-  3. Pick the location from which you will deploy (provision) the psoxy instance. This location will need the software prereqs defined in the previous section. Some suggestions:
+  3. Pick the location from which you will deploy (provision) the Psoxy instance. This location will need the software prereqs defined in the previous section. Some suggestions:
 
         - your local machine; if you have the prereqs installed and can authenticate it with your host platform (AWS/GCP) as a sufficiently privileged user/role, this is a simple option
         - [Google Cloud Shell](https://cloud.google.com/shell/) - if you're using GCP and/or connecting to Google Workspace, this is option simplifies authentication. It [includes the prereqs above](https://cloud.google.com/shell/docs/how-cloud-shell-works#tools) EXCEPT aws/azure CLIs out-of-the-box.
@@ -373,7 +373,7 @@ We provide a script to check these prereqs, at [`tools/check-prereqs.sh`](https:
 
   5. follow any `TODO` instructions produced by Terraform, such as:
      - provision API keys / make OAuth grants needed by each Data Connection
-     - create the Data Connection from Worklytics to your psoxy instance (Terraform can provide `TODO` file with detailed steps for each)
+     - create the Data Connection from Worklytics to your Psoxy instance (Terraform can provide `TODO` file with detailed steps for each)
 
   6. Various test commands are provided in local files, as the output of the Terraform; you may use these examples to validate the performance of the proxy. Please review the proxy behavior and adapt the rules as needed. Customers needing assistance adapting the proxy behavior for their needs can contact [support@worklytics.co](mailto:support@worklytics.co)
 
