@@ -55,6 +55,11 @@ locals {
     {}
   )
 
+  bulk_connectors = merge(
+    module.worklytics_connectors.enabled_bulk_connectors,
+    var.custom_bulk_connectors,
+  )
+
   source_authorization_todos = concat(
     module.worklytics_connectors.todos,
     module.worklytics_connectors_google_workspace.todos,
@@ -68,13 +73,6 @@ locals {
     module.worklytics_connectors_google_workspace.next_todo_step,
     module.worklytics_connectors_msft_365.next_todo_step,
     0
-  )
-}
-
-locals {
-  bulk_connectors = merge(
-    module.worklytics_connectors.enabled_bulk_connectors,
-    var.custom_bulk_connectors,
   )
 }
 
@@ -163,8 +161,18 @@ module "psoxy" {
 #  Worklytics API / Terraform provider
 
 locals {
-  all_connectors = merge(local.api_connectors, local.bulk_connectors)
-  all_instances  = merge(module.psoxy.bulk_connector_instances, module.psoxy.api_connector_instances)
+  # Webhook collectors are handled separately to avoid cycles - their metadata comes from outputs
+  webhook_connectors_for_worklytics = {
+    for k, v in module.psoxy.webhook_collector_instances : k => {
+      source_kind           = var.webhook_collectors[k].source_kind
+      sanitized_bucket_name = v.output_sanitized_bucket_id
+      display_name          = var.webhook_collectors[k].display_name
+      settings_to_provide   = {}
+    }
+  }
+
+  all_connectors = merge(local.api_connectors, local.bulk_connectors, local.webhook_connectors_for_worklytics)
+  all_instances  = merge(module.psoxy.bulk_connector_instances, module.psoxy.api_connector_instances, module.psoxy.webhook_collector_instances)
 }
 
 module "connection_in_worklytics" {
@@ -180,7 +188,7 @@ module "connection_in_worklytics" {
   proxy_endpoint_url   = try(each.value.endpoint_url, null)
   bucket_name          = try(each.value.sanitized_bucket, null)
   connector_id         = try(local.all_connectors[each.key].worklytics_connector_id, "")
-  display_name         = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
+  display_name         = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy", "")
   todo_step            = module.psoxy.next_todo_step
   todos_as_local_files = var.todos_as_local_files
 

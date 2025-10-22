@@ -143,9 +143,11 @@ If you forked on of our example repos after ~0.5.3, you should be able to add so
 ```hcl
 webhook_collectors = {
   "llm-portal" = {
-    rules_file = "work-events.yaml"
+    source_kind          = "work-event"  # optional, defaults to "work-event"; used for labeling and categorization
+    display_name         = "LLM Portal Webhooks"  # optional, defaults to "Webhooks Collected via Psoxy"
+    rules_file           = "work-events.yaml"
     provision_auth_key = {
-      rotation_days = 2
+      rotation_days = 2  # optional, null means no rotation
     }
     example_identity     = "erik@worklytics.co"
     example_payload_file = "work-events-example.json"
@@ -153,7 +155,24 @@ webhook_collectors = {
 }
 ```
 
-Where `work-events.yaml` is YAML-encoded rules, such as:
+### Configuration Options
+
+- **`source_kind`** (optional, default: `"work-event"`): Source kind for this webhook collector, used for labeling and categorization
+- **`display_name`** (optional, default: `"Webhooks Collected via Psoxy"`): Display name for the collector
+- **`worklytics_connector_id`** (optional, default: `"work-data-generic-psoxy"`): Worklytics connector ID
+- **`worklytics_connector_name`** (optional, default: `"Workplace Metadata via Psoxy"`): Worklytics connector name
+- **`rules_file`** (required): Path to YAML-encoded sanitization rules file
+- **`provision_auth_key`** (optional): Configuration for provisioning authentication keys
+  - `rotation_days` (optional): Number of days between key rotations; null means no rotation
+  - `key_spec` (optional, GCP-specific): Key specification algorithm (e.g., `"RSA_SIGN_PKCS1_2048_SHA256"`)
+- **`auth_public_keys`** (optional, default: `[]`): List of public keys to use for verifying webhook signatures
+- **`allow_origins`** (optional, default: `["*"]`): List of origins allowed for CORS (e.g., `["https://my-app.com"]`)
+- **`example_payload_file`** (optional): Path to example payload file for testing
+- **`example_identity`** (optional): Example identity to use for testing
+
+### Rules File Format
+
+The `rules_file` should be YAML-encoded sanitization rules, such as:
 
 ```yaml
 endpoints:
