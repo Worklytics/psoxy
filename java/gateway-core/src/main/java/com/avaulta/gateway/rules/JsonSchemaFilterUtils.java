@@ -231,7 +231,9 @@ public class JsonSchemaFilterUtils {
                     return null;
                 }
             } else if (schema.isInteger()) {
-                if (provisionalOutput.canConvertToInt() || provisionalOutput.isNull()) {
+                if (provisionalOutput.isNull()) {
+                    return null;
+                } else if (provisionalOutput.canConvertToInt()) {
                     return provisionalOutput.intValue();
                 } else if (provisionalOutput.canConvertToLong()) {
                     return provisionalOutput.longValue();
@@ -243,7 +245,9 @@ public class JsonSchemaFilterUtils {
                     return null;
                 }
             } else if (schema.isNumber()) {
-                if (provisionalOutput.isNumber() || provisionalOutput.isNull()) {
+                if (provisionalOutput.isNull()) {
+                    return null;
+                } else if (provisionalOutput.isNumber()) {
                     return provisionalOutput.numberValue();
                 } else {
                     if (options.getLogRedactions()) {
