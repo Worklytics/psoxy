@@ -175,7 +175,7 @@ NOTE: the above scopes are copied from [infra/modules/worklytics-connector-specs
 
 Other data sources, such as Human Resource Information System (HRIS), Badge, or Survey data can be exported to a CSV file. The "bulk" mode of the proxy can be used to pseudonymize these files by copying/uploading the original to a cloud storage bucket (GCS, S3, etc), which will trigger the proxy to sanitize the file and write  the result to a 2nd storage bucket, which you then grant Worklytics access to read.
 
-Alternatively, the proxy can be used as a command line tool to pseudonymize arbitrary CSV files (eg, exports from your  HRIS), in a manner consistent with how a psoxy instance will pseudonymize identifiers in a target REST API. This is REQUIRED if you want SaaS accounts to be linked with HRIS data for analysis (eg, Worklytics will match email set in HRIS with email set in SaaS tool's account so these must be pseudonymized using an equivalent algorithm and secret). See [`java/impl/cmd-line/`](https://github.com/Worklytics/psoxy/tree/main/java/impl/cmd-line) for details.
+Alternatively, the proxy can be used as a command line tool to pseudonymize arbitrary CSV files (eg, exports from your  HRIS), in a manner consistent with how a Psoxy instance will pseudonymize identifiers in a target REST API. This is REQUIRED if you want SaaS accounts to be linked with HRIS data for analysis (eg, Worklytics will match email set in HRIS with email set in SaaS tool's account so these must be pseudonymized using an equivalent algorithm and secret). See [`java/impl/cmd-line/`](https://github.com/Worklytics/psoxy/tree/main/java/impl/cmd-line) for details.
 
 See also: [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
 
