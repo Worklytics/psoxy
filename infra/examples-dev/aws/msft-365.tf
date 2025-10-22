@@ -4,6 +4,7 @@ module "worklytics_connectors_msft_365" {
   source = "../../modules/worklytics-connectors-msft-365"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors-msft-365?ref=v0.5.11"
 
+
   enabled_connectors                         = var.enabled_connectors
   environment_id                             = var.environment_name
   msft_tenant_id                             = var.msft_tenant_id
@@ -72,6 +73,7 @@ module "cognito_identity" {
 
   source = "../../modules/aws-cognito-identity-cli"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-cognito-identity-cli?ref=v0.5.11"
+
 
   aws_region       = data.aws_region.current.id
   aws_role         = var.aws_assume_role_arn

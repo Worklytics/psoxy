@@ -196,5 +196,5 @@ If there is a new error after doing the admin like this:
 
 ```
 
-Please re-deploy the psoxy instance again, as it is an error related on an invalid cached token before the admin consent
+Please re-deploy the Psoxy instance again, as it is an error related on an invalid cached token before the admin consent
 has been done.

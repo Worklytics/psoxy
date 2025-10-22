@@ -2,6 +2,7 @@
 
 # Arguments: repository name and tag name
 RELEASE="$1"
+PATH_TO_REPO="$2"
 
 GREEN='\e[0;32m'
 RED='\e[0;31m'
@@ -90,27 +91,9 @@ fi
 printf "Opening release ${BLUE}${RELEASE}${NC} in browser; review / update notes and then publish as latest ...\n"
 gh release view $RELEASE --web
 
-printf "Do you want to create a docs branch based on the release? (Y/n)\n"
-read -p "(Y/n) " -n 1 -r
-REPLY=${REPLY:-Y}
-echo    # Move to a new line
-if [[ "$REPLY" =~ ^[Yy][Ee]?[Ss]?$ ]]; then
- if git rev-parse --verify "docs-$RELEASE" >/dev/null 2>&1; then
-    printf "${RED}Branch docs-${RELEASE} already exists.${NC}\n"
-  else
-    git checkout -b "docs-$RELEASE"
-    git push origin "docs-$RELEASE"
-    git checkout main
-    printf "Docs branch ${GREEN}docs-$RELEASE${NC} created and pushed. View it at: ${BLUE}https://github.com/Worklytics/psoxy/tree/docs-$RELEASE${NC}\n"
-    printf "Manual steps to publish docs in GitBook. (YMMV, gitbook seems to change this *weekly**): \n"
-    printf "1. Login to gitbook ( ${BLUE}https://app.gitbook.com/o/bJjt4PjVnmXkP0Z3ui04/sites/site_m0IOi${NC} ) \n"
-    printf "2. Navigate to 'Structure -> Manage'  under the Psoxy site \n"
-    printf "3. Create a new 'Space' in the list (duplicate existing), with the same name as the release ${GREEN}X.Y.Z${NC}\n"
-    printf "4. Click on the new space's link icon; edit GitHub Sync settings to point to the branch: ${GREEN}docs-$RELEASE${NC}\n"
-    printf "5. Set the new 'space' as the 'home' for the site\n"
-    printf "6. Visit ${BLUE}https://docs.worklytics.co/psoxy${NC} to confirm it points to the latest release\n"
-  fi
-fi
+
+printf "  Then publish docs: \n"
+printf "    ${BLUE}./tools/release/publish-docs.sh ${RELEASE} ${PATH_TO_REPO}${NC}\n"
 
 printf "  Then update example templates to point to it:\n"
 if [ -d ~/code/psoxy-example-aws/ ]; then
@@ -131,9 +114,14 @@ printf "    ${BLUE}./tools/release/example-create-release-pr.sh . gcp ${GCP_EXAM
 printf "Publish release artifacts: \n"
 printf "    ${BLUE}./tools/release/publish-aws-release-artifact.sh ${RELEASE}${NC}\n"
 
-printf "Finally, update stable demo deployment to point to it: \n"
+printf "Update stable demo deployment to point to it: \n"
 printf "In ${BLUE}psoxy-demos${NC} repo, run:\n"
 printf "    ${BLUE}git checkout -b upgrade-aws-stable-to-${RELEASE}${NC}\n"
 printf "    ${BLUE}cd developers/psoxy-dev-stable-aws ${NC}\n"
 printf "    ${BLUE} ./upgrade-terraform-modules.sh  ${RELEASE}${NC}\n"
-printf "    ${BLUE}terraform apply${NC}\n"
+printf "    ${BLUE}terraform apply --auto-approve${NC}\n"
+printf "    ${BLUE}git commit -m \"upgrade aws stable to ${RELEASE}\"${NC}\n"
+printf "    ${BLUE}git push origin upgrade-aws-stable-to-${RELEASE}${NC}\n"
+
+printf "Prep next rc: \n"
+printf "    ${BLUE}./tools/release/prep.sh ${RELEASE} rc-NEXT${NC}\n"
