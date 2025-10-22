@@ -155,3 +155,28 @@ Cons:
 - you must enable additional APIs in the GCP project (marketplace SDK).
 - as of Dec 2023, Marketplace Apps cannot be completely managed by Terraform resources; so there are more out-of-band steps that someone must complete by hand to create the App; and a simple `terraform destroy` will not remove the associated infrastructure. In contrast, `terraform destroy` in the DWD approach will result in revocation of the access grants when the service account is deleted.
 - You must monitor how many service accounts exist in the project and ensure only the expected ons  are created. Note that all Google Workspace API access, as of Dec 2023, requires the service account to authenticate with a key; so any SA without a key provisioned cannot access your data.
+
+
+## Troubleshooting
+
+Google Workspace API errors/error codes are NOT exhaustively documented by Google, nor do they appear to be viewed as under the scope of API contract. So YMMV; below are some of our notes on errors we've seen in the past, and ideas on root causes of each in case you see them in the future.
+
+
+### `"error": "invalid_grant"`
+A couple possible cause of `invalid_grant` errors being returned by Google Workspace APIs.  The error_description / HTTP response codes can provide additional clues.
+
+#### 400
+```
+com.google.auth.oauth2.GoogleAuthException: Error getting access token for service account: 400 Bad Request POST https://oauth2.googleapis.com/token { "error": "invalid_grant", "error_description": "java.security.SignatureException: Invalid signature for token
+```
+
+This indicates that the service account key (stored as a secret in your proxy instance) has been disabled/destroyed. Ensure that 1) a service account key is set on the service account for the connection, and 2) 
+
+#### 401
+If response code seen in your logs from google is a 401, check that Google Workspace Admin has done DWD grant, as described above.
+
+#### 403
+If response code seen in your logs from Google is a 403, check that Google Workspace Admin has done DWD grant, as described above, **with the proper list of OAuth scopes**. Confirm that the list in the grant as shown in the Google Workspace Admin console MATCHES what is configured on the `OAUTH_SCOPES` environment variable of your proxy instance.  
+
+
+

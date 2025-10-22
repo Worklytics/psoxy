@@ -23,7 +23,7 @@ If you DO intend to use Google Workspace as a data source, you must install and 
 
 ### Verify Pre-Requisites
 
-Our example templates include a script to check for the prerequisites for running the psoxy. You can run this prior to `./init` to get feedback/suggestions on what prerequisites you may be missing and how to install them.
+Our example templates include a script to check for the prerequisites for running Psoxy. You can run this prior to `./init` to get feedback/suggestions on what prerequisites you may be missing and how to install them.
 
 ```shell
 ./check-prereqs
@@ -68,7 +68,7 @@ Some problems we've seen:
 
 ### Upgrading Psoxy Code
 
-If you upgrade your psoxy code, it may be worth trying `terraform init --upgrade` to make sure you have the latest versions of all Terraform providers on which our configuration depends.
+If you upgrade your Psoxy code, it may be worth trying `terraform init --upgrade` to make sure you have the latest versions of all Terraform providers on which our configuration depends.
 
 By default, terraform locks providers to the version that was the latest when you first ran `terraform init`. It does not upgrade them unless you explicitly instruct it to. It will not prompt you to upgrade them unless we update the version constraints in our modules.
 

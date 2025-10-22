@@ -15,11 +15,13 @@ Psoxy ensures more secure, granular data access than direct connections between 
 Psoxy functions as API-level Data Loss Prevention layer (DLP), by blocking sensitive fields / values / endpoints that would otherwise be exposed when you connect a data sources API to a 3rd party service. It can ensure that data which would otherwise be exposed to a 3rd party service, due to granularity of source API models/permissions, is not accessed or transfered to the service.
 
 Objectives:
-  - **serverless** - we strive to minimize the moving pieces required to run psoxy at scale, keeping your attack surface small and operational complexity low. Furthermore, we define infrastructure-as-code to ease setup.
-  - **transparent** - psoxy's source code is available to customers, to facilitate code review and white box penetration testing.
-  - **simple** - psoxy's functionality will focus on performing secure authentication with the 3rd party API and then perform minimal transformation on the response (pseudonymization, field redaction) to ease code review and auditing of its behavior.
+  - **serverless** - we strive to minimize the moving pieces required to run Psoxy at scale, keeping your attack surface small and operational complexity low. Furthermore, we define infrastructure-as-code to ease setup.
+  - **transparent** - Psoxy's source code is available to customers, to facilitate code review and white box penetration testing.
+  - **simple** - Psoxy's functionality will focus on performing secure authentication with the 3rd party API and then perform minimal transformation on the response (pseudonymization, field redaction) to ease code review and auditing of its behavior.
 
 Psoxy may be hosted in [Google Cloud](gcp/getting-started.md) or [AWS](aws/getting-started.md).
+
+For transparency and security auditing, we provide a [Software Bill of Materials (SBOM)](overview.md#software-bill-of-materials-sbom) for each platform.
 
 ## Data Flow
 
@@ -59,8 +61,20 @@ Worklytics authenticates your tenant with your cloud host via [Workload Identity
 
 See also: [API Data Sanitization](configuration/api-data-sanitization.md)
 
+
+## Modes
+
+Psoxy can be [deployed/used in 4 different modes](https://docs.worklytics.co/psoxy/overview#modes), to support various data sources:
+
+- **API** - Psoxy sits in front of a data source API. Any call that would normally be sent to the data source API is instead sent to Psoxy, which parses the request, validates it / applies ACL, and adds authentication before forwarding to the host API. After the host API response, Psoxy sanitizes the response as defined by its roles before returning the response to the caller. This is an _http triggered_ flow.
+  - For some connectors, an **'async'** variant of this is supported; if client requests `Prefer: respond-async`, Psoxy may respond `202 Accepted` and provide a cloud storage uri (s3, gcs, etc) where actual response will be available after being asynchronously requested from source API and sanitized.
+- **Bulk File** - Psoxy is triggered by files (objects) being uploaded to cloud storage buckets (eg, S3, GCS, etc). Psoxy reads the incoming file, applies one or more sanitization rules (transforms), writing the result(s) to a destination (usually in distinct bucket).
+- **Webhook Collection** - Psoxy is an endpoint for [webhooks](https://en.wikipedia.org/wiki/Webhook), receiving payloads from an app/service over HTTPS POST methods, the content of which validated, sanitized (transformed), and finally written to a cloud storage bucket. 
+- **Command-line (cli)** - Psoxy is invoked from the command-line, and is used to sanitize data stored in files on the local machine. This is useful for testing, or for one-off data sanitization tasks. Resulting files can be uploaded to Worklytics via the file upload of its web portal.
+
+
 ## Supported Data Sources
-As of July 2025, the following sources can be connected to Worklytics via psoxy.
+As of July 2025, the following sources can be connected to Worklytics via Psoxy.
 
 Note: Some sources require specific licenses to transfer data via the APIs/endpoints used by Worklytics, or impose some per API request costs/rate limits for such transfers. Inclusion of the source in the list below does not represent or warrant retrieval of your data using Psoxy from the source via our provided connectors.
 
@@ -175,7 +189,7 @@ See also: [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
 
 ### Other Data Sources via Webhook Collection
 
-Some data sources may support **webhooks** to send data to a URL endpoint, often in response to a user-performed action.  These 'events' can be collected by psoxy instances in "webhook collector" mode, to later be transferred to Worklytics for analysis.
+Some data sources may support **webhooks** to send data to a URL endpoint, often in response to a user-performed action.  These 'events' can be collected by Psoxy instances in "webhook collector" mode, to later be transferred to Worklytics for analysis.
 
 On-prem/in-house-build data sources can be instrumented to produce webhooks. See the [GenAI / LLM Portal Instrumentation](https://docs.worklytics.co/knowledge-base/connectors/gen-ai-portal) use-case documentation for more details.
 
@@ -185,9 +199,9 @@ See also: [Webhook Collectors](development/alpha-features/webhook-collectors.md)
 
 ### Host Platform and Data Sources
 
-The prerequisites and dependencies you will need for Psoxy are determined by:
-   1. Where you will host psoxy? eg, Amazon Web Services (AWS), or Google Cloud Platform (GCP)
-   2. Which data sources will you connect to? eg, Microsoft 365, Google Workspace, Zoom, etc, as defined in previous sections.
+The prequisites and dependencies you will need for Psoxy are determined by:
+   1. Where you will host Psoxy? eg, Amazon Web Services (AWS), or Google Cloud Platform (GCP)
+   2. Which data sources you will connect to? eg, Microsoft 365, Google Workspace, Zoom, etc, as defined in previous sections.
 
 Once you've gathered that information, you can identify the required software and permissions in the next section, and the best environment from which to deploy Psoxy.
 
