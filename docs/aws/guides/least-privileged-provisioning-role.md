@@ -2,9 +2,9 @@
 
 **beta** - we're not committed that maintaining this under versioning policy; minor proxy iterations *may* require changes to privileges required in the least-privileged role.
 
-This is a guide about how to create a role for provisioning psoxy infrastructure in AWS, following the principle of least-privilege at permission-level, rather than policy-level.
+This is a guide about how to create a role for provisioning Psoxy infrastructure in AWS, following the principle of least-privilege at permission-level, rather than policy-level.
 
-Eg, as of v0.4.55 of the proxy, our docs provide guidance on using an AWS role to provision your psoxy infrastructure using the least-privileged set of AWS managed policies possible. A stronger standard would be to use a custom IAM policy rather than AWS managed policy, with the least-privileged set of *permissions* required.
+Eg, as of v0.4.55 of the proxy, our docs provide guidance on using an AWS role to provision your Psoxy infrastructure using the least-privileged set of AWS managed policies possible. A stronger standard would be to use a custom IAM policy rather than AWS managed policy, with the least-privileged set of *permissions* required.
 
 Additionally, you can specify resource constraints to improve security within a shared AWS account. (However, we do not recommend or officially support deployment into a shared AWS account. We recommend deploying your proxy instances in isolated AWS account to provide an implicit security boundary by default, as an additional layer of protection beyond those provided by our proxy modules)
 

@@ -10,6 +10,7 @@ import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
 
 import com.avaulta.gateway.rules.ColumnarRules;
+import com.avaulta.gateway.rules.Endpoint;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import dagger.Component;
@@ -25,6 +26,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
@@ -64,6 +66,14 @@ class RulesUtilsTest {
             "      jsonPaths:\n" +
             "      - \"$..displayName\"\n" +
             "      - \"$..employeeId\"\n";
+
+    static final String YAML_REST_WITH_ALLOWED_METHODS =
+        "---\n" +
+            "endpoints:\n" +
+            "- pathTemplate: \"/some/{path}\"\n" +
+            "  allowedMethods:\n" +
+            "  - \"POST\"\n" +
+            "  - \"GET\"\n";
 
     static final String YAML_CSV =
         "columnsToPseudonymize:\n" +
@@ -147,6 +157,34 @@ class RulesUtilsTest {
     void decodeToYaml(String encoded) {
         String decoded = utils.decodeToYaml(encoded);
         assertEquals(YAML_REST, decoded);
+    }
+
+    @Test
+    @SneakyThrows
+    void check_allowed_methods_is_not_included_if_empty() {
+        RESTRules rules = Rules2.builder()
+            .endpoint(Endpoint.builder()
+                .pathTemplate("/some/{path}")
+                .build())
+            .build();
+
+        String yaml = yamlMapper.writeValueAsString(rules);
+        assertFalse(yaml.contains("allowedMethods"));
+    }
+
+    @Test
+    @SneakyThrows
+    void check_allowed_methods_is_included() {
+        RESTRules rules = Rules2.builder()
+            .endpoint(Endpoint.builder()
+                .pathTemplate("/some/{path}")
+                .allowedMethods(Set.of("GET", "POST"))
+                .build())
+            .build();
+
+        String yaml = yamlMapper.writeValueAsString(rules);
+        assertTrue(yaml.contains("allowedMethods"));
+        assertEquals(YAML_REST_WITH_ALLOWED_METHODS, yaml);
     }
 
     // if you change YAML_REST, this test will fail; you can copy-paste the expected value to
