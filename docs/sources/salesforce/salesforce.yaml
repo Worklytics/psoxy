@@ -194,24 +194,7 @@ endpoints:
             $ref: "#/definitions/User"
         totalSize:
           type: "integer"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT\\s+AccountId\\s+FROM\\\
-    s+\\S+.*GROUP\\s+BY\\s+AccountId$"
-    allowedQueryParams:
-      - "q"
-    responseSchema:
-      type: "object"
-      properties:
-        done:
-          type: "boolean"
-        nextRecordsUrl:
-          type: "string"
-        records:
-          type: "array"
-          items:
-            $ref: "#/definitions/AccountId"
-        totalSize:
-          type: "integer"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/sobjects/(Account|ActivityHistory|User|Task|Event)/describe$"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/sobjects/(Account|User|Task|Event)/describe$"
     allowedQueryParams: []
     responseSchema:
       type: "object"
@@ -296,11 +279,6 @@ definitions:
       Sic:
         type: "string"
       Type:
-        type: "string"
-  AccountId:
-    type: "object"
-    properties:
-      accountId:
         type: "string"
   Attributes:
     type: "object"
