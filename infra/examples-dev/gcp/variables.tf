@@ -288,16 +288,21 @@ variable "custom_api_connector_rules" {
 
 variable "webhook_collectors" {
   type = map(object({
-    rules_file = string
+    worklytics_connector_id   = optional(string, "work-data-generic-psoxy")
+    worklytics_connector_name = optional(string, "Workplace Metadata via Psoxy")
+    display_name              = optional(string, "Webhooks Collected via Psoxy")
+    source_kind               = optional(string, "work-event") # source kind for this webhook collector, used for labeling and categorization
+    rules_file                = string
     provision_auth_key = optional(object({                           # whether to provision auth keys for webhook collector; if not provided, will not provision any
       rotation_days = optional(number, null)                         # null means no rotation; if > 0, will rotate every N days
       key_spec      = optional(string, "RSA_SIGN_PKCS1_2048_SHA256") # see https://cloud.google.com/kms/docs/reference/rest/v1/CryptoKeyVersionAlgorithm
     }), null)
     auth_public_keys     = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
     allow_origins        = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
-    example_payload_file = optional(string, null)        # path to file with example payload to use in test payloads; if provided, will override `example_payload`
-    example_identity     = optional(string, null)        # example identity to use in test payloads
+    example_payload_file = optional(string, null)        # path to example payload file to use for testing; if provided, will be used in the test script
+    example_identity     = optional(string, null)        # example identity to use for testing; if provided, will be used to test the collector
   }))
+
   default = {}
 
   description = "map of webhook collector id --> webhook collector configuration"

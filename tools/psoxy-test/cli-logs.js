@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import { createRequire } from 'module';
-import { Command } from 'commander';
 import chalk from 'chalk';
-import psoxyTestLogs from './psoxy-test-logs.js';
+import { Command } from 'commander';
+import { createRequire } from 'module';
 import getLogger from './lib/logger.js';
+import psoxyTestLogs from './psoxy-test-logs.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('./package.json');
@@ -22,7 +22,7 @@ const { version } = require('./package.json');
     .option('-f --function-name <functionName>', 'GCP: Name of the cloud function from which to list entries')
     .option('-l, --log-group-name <logGroupName>', 'AWS: Log group to display')
     .option('-r, --role <arn>', 'AWS: ARN of IAM role to assume; if omitted, AWS CLI must be authenticated as a principal with perms to read from log group')
-    .option('-re, --region <region>', 'AWS: region of your Psoxy instance',
+    .option('--region <region>', 'AWS: region of your Psoxy instance',
       'us-east-1')
     .option('-v, --verbose', 'Verbose output', false)
     .configureOutput({
@@ -32,7 +32,7 @@ const { version } = require('./package.json');
   program.addHelpText(
     'after',
     `
-      AWS example call: node cli-logs.js -l \"/aws/lambda/psoxy-name\" -r \"arn:aws:iam::id:myRole\" -re us-east-1\n
+      AWS example call: node cli-logs.js -l \"/aws/lambda/psoxy-name\" -r \"arn:aws:iam::id:myRole\" --region us-east-1\n
       GCP example call: node cli-logs.js -p \"psoxy-project-name\" -f \"psoxy-function-name\"
     `
   );

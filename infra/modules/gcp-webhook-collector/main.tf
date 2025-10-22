@@ -499,7 +499,7 @@ resource "local_file" "test_script" {
   })
 }
 
-resource "local_file" "review" {
+resource "local_file" "test_todo" {
   count = var.todos_as_local_files ? 1 : 0
 
   filename = "TODO ${var.todo_step} - test ${google_cloudfunctions2_function.function.name}.md"
