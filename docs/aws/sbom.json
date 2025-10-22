@@ -4,7 +4,7 @@
   "serialNumber" : "urn:uuid:45a524e1-0d61-3149-8d7e-fa8b79f2b317",
   "version" : 1,
   "metadata" : {
-    "timestamp" : "2025-10-15T22:21:49Z",
+    "timestamp" : "2025-10-22T22:43:20Z",
     "lifecycles" : [
       {
         "phase" : "build"
@@ -85,35 +85,35 @@
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "46a9fe136664e7a15c331779228c0a4e"
+          "content" : "774cbec66a3776768f6839086c5d600c"
         },
         {
           "alg" : "SHA-1",
-          "content" : "6e8fd61472752672f5be2fcecc8cebd0529e4532"
+          "content" : "7e997aa403643167290a4594aad9ab10bec77971"
         },
         {
           "alg" : "SHA-256",
-          "content" : "a827971ffacfcf7c353581f711027d7ec093a62e96353aee4718f1cf56e69765"
+          "content" : "058d422809c3c0814d2fbf416865b29158a7abb226d404f6b78e1a8c1cd8a4e3"
         },
         {
           "alg" : "SHA-512",
-          "content" : "d77127d18b966e5715e4a47bb0f95031667bc8de78710308a669e5a2ecdf6cad2b6212a5aa7536cf5684ae9e50ef2fd36999fd58f0552e9515694cd04932d850"
+          "content" : "af741202020a2844515ba4434aa20afe71a37b3c85e1c21126cea75a18b20abe20023668c42492d89980def1498371a0c44b77caf1a98a4dd54606b38a652ad4"
         },
         {
           "alg" : "SHA-384",
-          "content" : "abc2631d8b4e3da71d83e433cf9ab080fc763b14624e3611c01b87bf4c663bfd37b422a71857b6b02a1b26daedddd379"
+          "content" : "6d7cdcaecd51f3c890ba892000791ea165cf8b514a612bf171dbdc87280f892188bd5e492373f62a752f556a1321ea31"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "670a13190d5dfb53036088e2a8a2898fdcb1e8bd78e0531e3c2abb9b8430e75ff86bd12c534d11441edd541f89e535b8"
+          "content" : "e196e4dfc2e2654669d776e11edd600cc89125cf414a50e54420fe54cf78d5d8ffcfabbd98a44c66d527bfc76c3831c6"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "31f05667143dba1a686ecd54bed96fdc0b4abcdc8607bfcde514b8490005493f"
+          "content" : "64c735f28820a29ae3fff6f1c1a57ffe932f9595202d70d924634e1644f34a4d"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "a2989303a9fbd85ddf38b22c60d6f8daebf8e749538fb8b2714480259b2372e5de893f3dbdf56b8750677d19aecfb387c3e5c8bd60fd5c8bd460123b4cae30a0"
+          "content" : "bb105292b815cbc60bdb04af2d444959cdb6347cbf7b36613f834e7ec562a62b7f6c257c29e38681a517fcac48ac92bee10b1a1707c268c0c283c6b442971456"
         }
       ],
       "licenses" : [
@@ -136,35 +136,35 @@
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "30c4054d6f212ac3fdd91b9acc720174"
+          "content" : "e135edfc43ac64e3f41309d3b2307df7"
         },
         {
           "alg" : "SHA-1",
-          "content" : "b40ac2b9d5f91bc5d67ab4aa0906b467c5591494"
+          "content" : "bd5cf7b777252cdf7e80c6d72bc168d0ffc06344"
         },
         {
           "alg" : "SHA-256",
-          "content" : "4ae3cc69d50122f8a9d77efee406c559e676435dbf791a9eae33bf86a971bec9"
+          "content" : "2c4dbcda03fc89c46e22da664d44f61241860ff1e0b00c90fd67c37aa90ecddf"
         },
         {
           "alg" : "SHA-512",
-          "content" : "bb8ad9893a67ad8774bc73c9389d65a438731c3202cd90f4e889fca6d7d91f90e656d4e624cccb2625f50fde94b5978eeb30644438f64953365066deedce7d1c"
+          "content" : "6126e7028e8285a95c63f31f8febaea777323a0636f4518577aa025df3fc73888cbfea232548b9ebf4406febb66f3f38e1fefc05f7f8006812d488ecbec12f8e"
         },
         {
           "alg" : "SHA-384",
-          "content" : "212f86342ca5d1e2d86c5bcbb9c921480a52d42f3eb9ea7382ed665cdea76467b58644af2fbb1f47e094827c65e86a85"
+          "content" : "bbf9c3bf28a5b424748bffccd780d63daa6cf9b71ce1f07631b79bca78bd386a86815eb0826a5140d06e75cac4f9d4e6"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "0eb3d6a3766433a3789e22a24876801c4e82fd23c55847a498e4b850ea1892d54434d6c80723669eeb177afee734d5de"
+          "content" : "acf4e4a7551fe904daa86f4d13afed0fd4931ab116df37227f51f516de4d681cbdfb3b04830804148913544e14cf430a"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "a0429eab207679ad91069f695f732c286aa25284352dbc21e66b38c6ab915038"
+          "content" : "0c099254fc09844c8bf77023aceda6aa952d85c71059b60ab95d504e36f73deb"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "7d62a63192e62f8e6fad5f4d08c628d57c4f873586e7062bef05772c6e74b9c99cf19dd2f9103f55f079517f724fe628075a692d704f2a7acb68c9676f277c0e"
+          "content" : "b60a35420acdf5703e0aaff834c43f9038fc0f49437ae65c7b2949db4e63bab9517c4edebe03852e7136bb123bee869afb94de30a603ca2a4ab89f7219e38d0b"
         }
       ],
       "licenses" : [
@@ -3197,41 +3197,41 @@
       "publisher" : "Connect2id Ltd.",
       "group" : "com.nimbusds",
       "name" : "nimbus-jose-jwt",
-      "version" : "9.47",
+      "version" : "10.5",
       "description" : "Java library for Javascript Object Signing and Encryption (JOSE) and JSON Web Tokens (JWT)",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "f828596eddb0587b2b78f5e893f2fc3c"
+          "content" : "51cc73823a7174b80a2b245918a5927d"
         },
         {
           "alg" : "SHA-1",
-          "content" : "e81c184fca5c137b6d3695868f73f4d9aa686244"
+          "content" : "8ef880fa881a4eb9676dd6c419126aa7753d49f2"
         },
         {
           "alg" : "SHA-256",
-          "content" : "8f5b5843c44753fb04441c798e1778e275dae9347f57ea11e67cf0fb1ad9fd35"
+          "content" : "104ed6c348d35f68ab16d85550ed59239bcb7846bc2bd885ef3851a0ab2e73cf"
         },
         {
           "alg" : "SHA-512",
-          "content" : "6c9c07ec84ce4b061a0ebb820297c43f0b73ecf4457128052105e2616ceb41a9719a701dc2b2a2b47f9c85bf73e696f8e22565739bc55f6011278c7ae08075e9"
+          "content" : "148573795c7add3d46d183288d9aa85691bc322345b15b80839c33a710ef235afb55792d7d56eb0ee88986d24fda61b54cdce7f6916f2e99679480554c394988"
         },
         {
           "alg" : "SHA-384",
-          "content" : "9a02a7ed9308a770e94f3720cca3ec8aa872159dd6111880c144789214247689c87c3e6457e93d0333c41f05b86bf919"
+          "content" : "574a37ff618997cb5eaa64b56d7e7513695c3c27eb867d82ec0e77824dda450c4ef2193c6c4fe409d50ceb0eff8c0f0b"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "3df635bfead7a996a42cceba054edce60d5eb4c8c6f755d0cf2de70cb99de65312bf6fb46c16374c639ef286d9c67d35"
+          "content" : "85e0098ace1146db8be0102e0f65d68544b20bd136b7afc26971d72bf4e6f8507cc8e4c1418e33c50c83f296795a83db"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "e67900056391473bd82cb51c30303918a6743d90b04bba0ed60aaac943ff07d0"
+          "content" : "8b2fe4bf780f0d319cd9662afda5ed96b814ab4073cca3306be38be455e3624f"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "6fee65e87060666ceabc6a87aea5b7a6fd7658c14a5263ed47cb934334b323c8d172fea0088d986bdc7d320410a71be05ba430525ef75bfd14377cb535d6b288"
+          "content" : "027f58f7b548e210ee4ca60922d7ac80476ce7f6b22be6c38e63080fdf007e244eaaba3691b18d1762a9ef47c28afc42be360e143d9012179b838f73587a6cd7"
         }
       ],
       "licenses" : [
@@ -3246,7 +3246,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.nimbusds/nimbus-jose-jwt@9.47?type=jar",
+      "purl" : "pkg:maven/com.nimbusds/nimbus-jose-jwt@10.5?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -3262,7 +3262,7 @@
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.nimbusds/nimbus-jose-jwt@9.47?type=jar"
+      "bom-ref" : "pkg:maven/com.nimbusds/nimbus-jose-jwt@10.5?type=jar"
     },
     {
       "group" : "org.projectlombok",
@@ -8193,7 +8193,7 @@
         "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.3.1?type=jar",
         "pkg:maven/org.bouncycastle/bcprov-jdk18on@1.81?type=jar",
         "pkg:maven/org.bouncycastle/bcpkix-jdk18on@1.81?type=jar",
-        "pkg:maven/com.nimbusds/nimbus-jose-jwt@9.47?type=jar"
+        "pkg:maven/com.nimbusds/nimbus-jose-jwt@10.5?type=jar"
       ]
     },
     {
@@ -8471,7 +8471,7 @@
       ]
     },
     {
-      "ref" : "pkg:maven/com.nimbusds/nimbus-jose-jwt@9.47?type=jar",
+      "ref" : "pkg:maven/com.nimbusds/nimbus-jose-jwt@10.5?type=jar",
       "dependsOn" : [ ]
     },
     {
