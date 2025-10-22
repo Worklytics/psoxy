@@ -151,7 +151,7 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
         // Check if the key is plain JSON (starts with '{')
         if (trimmedKey.startsWith("{")) {
             // Plain JSON format - convert directly to bytes using UTF-8
-            log.finest("Service account key detected as plain JSON format");
+            log.fine("Service account key detected as plain JSON format");
 
             try {
                 @SuppressWarnings("unused") // we're just checking if it's valid JSON, not using the result
@@ -162,7 +162,7 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
             return new ByteArrayInputStream(trimmedKey.getBytes(java.nio.charset.StandardCharsets.UTF_8));
         } else {
             // Assume base64-encoded format
-            log.info("Service account key detected as base64-encoded format");
+            log.fine("Service account key detected as base64-encoded format");
             try {
                 return new ByteArrayInputStream(Base64.getDecoder().decode(trimmedKey));
             } catch (IllegalArgumentException e) {
