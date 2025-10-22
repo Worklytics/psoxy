@@ -511,9 +511,8 @@ public class SanitizerUtils {
         }
     }
 
-
     private static boolean transformApplies(Transform transform, Object document) {
-        if (transform.getApplyOnlyWhen() != null) {
+        if (StringUtils.isNotBlank(transform.getApplyOnlyWhen())) {
             Object filterResult = JsonPath.compile(transform.getApplyOnlyWhen()).read(document);
 
             ArrayList<?> results = (ArrayList<?>) filterResult;
