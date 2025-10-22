@@ -177,7 +177,7 @@ See also: [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
 
 Some data sources may support **webhooks** to send data to a URL endpoint, often in response to a user-performed action.  These 'events' can be collected by psoxy instances in "webhook collector" mode, to later be transferred to Worklytics for analysis.
 
-On-prem/in-house-build data sources can be insturmented to produce webhooks, using the [Worklytics Work Events JS SDK](https://github.com/Worklytics/Work-Events-JS).
+On-prem/in-house-build data sources can be instrumented to produce webhooks. See the [GenAI / LLM Portal Instrumentation](https://docs.worklytics.co/knowledge-base/connectors/gen-ai-portal) use-case documentation for more details.
 
 See also: [Webhook Collectors](development/alpha-features/webhook-collectors.md)
 
@@ -185,16 +185,16 @@ See also: [Webhook Collectors](development/alpha-features/webhook-collectors.md)
 
 ### Host Platform and Data Sources
 
-The prequisites and dependencies you will need for Psoxy are determined by:
+The prerequisites and dependencies you will need for Psoxy are determined by:
    1. Where you will host psoxy? eg, Amazon Web Services (AWS), or Google Cloud Platform (GCP)
-   2. Which data sources you will connect to? eg, Microsoft 365, Google Workspace, Zoom, etc, as defined in previous sections.
+   2. Which data sources will you connect to? eg, Microsoft 365, Google Workspace, Zoom, etc, as defined in previous sections.
 
 Once you've gathered that information, you can identify the required software and permissions in the next section, and the best environment from which to deploy Psoxy.
 
 
 ### Prerequisites
 
-At a high-level, you need 3 things:
+At a high-level, you need three things:
   1. a cloud host platform account to which you will deploy Psoxy (eg, AWS account or GCP project)
   2. an environment on which you will run the deployment tools (usually your laptop)
   3. some way to authenticate that environment with your host platform as an entity with sufficient permissions to perform the deployment. (usually an AWS IAM Role or a GCP Service Account, which your personal AWS or Google user can assume).
