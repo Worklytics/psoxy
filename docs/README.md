@@ -69,7 +69,7 @@ Psoxy can be [deployed/used in 4 different modes](https://docs.worklytics.co/pso
 - **API** - Psoxy sits in front of a data source API. Any call that would normally be sent to the data source API is instead sent to Psoxy, which parses the request, validates it / applies ACL, and adds authentication before forwarding to the host API. After the host API response, Psoxy sanitizes the response as defined by its roles before returning the response to the caller. This is an _http triggered_ flow.
   - For some connectors, an **'async'** variant of this is supported; if client requests `Prefer: respond-async`, Psoxy may respond `202 Accepted` and provide a cloud storage uri (s3, gcs, etc) where actual response will be available after being asynchronously requested from source API and sanitized.
 - **Bulk File** - Psoxy is triggered by files (objects) being uploaded to cloud storage buckets (eg, S3, GCS, etc). Psoxy reads the incoming file, applies one or more sanitization rules (transforms), writing the result(s) to a destination (usually in distinct bucket).
-- **Webhook Collection** - Psoxy is an endpoint for [webhooks](https://en.wikipedia.org/wiki/Webhook), receiving payloads from an app/service over HTTPS POST methods, the content of which validated, sanitized (transformed), and finally written to a cloud storage bucket. 
+- **Webhook Collection** - Psoxy is an endpoint for [webhooks](https://en.wikipedia.org/wiki/Webhook), receiving payloads from an app/service over HTTPS POST methods, the content of which validated, sanitized (transformed), and finally written to a cloud storage bucket.
 - **Command-line (cli)** - Psoxy is invoked from the command-line, and is used to sanitize data stored in files on the local machine. This is useful for testing, or for one-off data sanitization tasks. Resulting files can be uploaded to Worklytics via the file upload of its web portal.
 
 
@@ -191,7 +191,7 @@ See also: [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
 
 Some data sources may support **webhooks** to send data to a URL endpoint, often in response to a user-performed action.  These 'events' can be collected by Psoxy instances in "webhook collector" mode, to later be transferred to Worklytics for analysis.
 
-On-prem/in-house-build data sources can be insturmented to produce webhooks, using the [Worklytics Work Events JS SDK](https://github.com/Worklytics/Work-Events-JS).
+On-prem/in-house-build data sources can be instrumented to produce webhooks. See the [GenAI / LLM Portal Instrumentation](https://docs.worklytics.co/knowledge-base/connectors/gen-ai-portal) use-case documentation for more details.
 
 See also: [Webhook Collectors](development/alpha-features/webhook-collectors.md)
 
@@ -208,7 +208,7 @@ Once you've gathered that information, you can identify the required software an
 
 ### Prerequisites
 
-At a high-level, you need 3 things:
+At a high-level, you need three things:
   1. a cloud host platform account to which you will deploy Psoxy (eg, AWS account or GCP project)
   2. an environment on which you will run the deployment tools (usually your laptop)
   3. some way to authenticate that environment with your host platform as an entity with sufficient permissions to perform the deployment. (usually an AWS IAM Role or a GCP Service Account, which your personal AWS or Google user can assume).
