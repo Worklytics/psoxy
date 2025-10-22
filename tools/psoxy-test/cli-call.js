@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-import { createRequire } from 'module';
-import { Command, Option } from 'commander';
 import chalk from 'chalk';
-import psoxyTestCall from './psoxy-test-call.js';
+import { Command, Option } from 'commander';
+import _ from 'lodash';
+import { createRequire } from 'module';
 import { callDataSourceEndpoints } from './data-sources/runner.js';
 import getLogger from './lib/logger.js';
-import _ from 'lodash';
+import psoxyTestCall from './psoxy-test-call.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('./package.json');
@@ -23,7 +23,7 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
     .option('-f, --force <type>', 'Force deploy type: AWS or GCP')
     .option('-i, --impersonate <user>', 'User to impersonate, needed for certain connectors')
     .option('-r, --role <arn>', 'ARN of AWS role to assume; if omitted, AWS CLI must be authenticated as a principal with perms to invoke the function directly')
-    .option('-re, --region <region>', 'AWS: region of your Psoxy instance')
+    .option('--region <region>', 'AWS: region of your Psoxy instance')
     .option('-s, --save-to-file', 'Save test results to file', false)
     .option('--skip',
       'Skip sanitization rules, only works if function deployed in development mode',

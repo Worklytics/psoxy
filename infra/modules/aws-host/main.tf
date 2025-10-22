@@ -30,6 +30,9 @@ locals {
   enable_webhook_testing         = var.provision_testing_infra && local.has_enabled_webhook_collectors
 
   api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
+
+  # proxy caller role requires direct lambda access if API Gateway v2 is not used and there are API connectors
+  caller_requires_direct_lambda_access = !local.use_api_gateway_v2 && length(module.api_connector) > 0
 }
 
 module "psoxy" {
@@ -54,28 +57,22 @@ module "psoxy" {
 }
 
 resource "aws_iam_policy" "execution_lambda_to_caller" {
-  count = local.use_api_gateway_v2 ? 0 : 1
+  count = local.caller_requires_direct_lambda_access ? 1 : 0
 
-  name        = "${module.env_id.id}ExecuteLambdas"
-  description = "Allow caller role to execute the lambda url directly"
+  name        = "${module.env_id.id}ExecuteLambdas" # TODO: change this name in next major version
+  description = "Allow caller to invoke the lambda via function url"
 
   policy = jsonencode(
     {
       "Version" : "2012-10-17",
-      "Statement" : concat([
+      "Statement" : [
+        # allow caller to invoke the lambda via function url
         {
           "Action" : ["lambda:InvokeFunctionUrl"],
           "Effect" : "Allow",
           "Resource" : [for k, v in module.api_connector : v.function_arn]
         }
-        ],
-        # allow caller to read from async output buckets
-        [for k, v in module.api_connector : {
-          "Action" : ["s3:GetObject", "s3:ListBucket"],
-          "Effect" : "Allow",
-          "Resource" : ["arn:aws:s3:::${v.async_output_bucket_id}", "arn:aws:s3:::${v.async_output_bucket_id}/*"]
-        } if v.async_output_bucket_id != null]
-      )
+      ],
   })
 
   lifecycle {
@@ -86,12 +83,42 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
 }
 
 resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {
-  count = var.use_api_gateway_v2 ? 0 : 1
+  count = local.caller_requires_direct_lambda_access ? 1 : 0
 
   role       = module.psoxy.api_caller_role_name
   policy_arn = aws_iam_policy.execution_lambda_to_caller[0].arn
 }
 
+# access to async output buckets
+# this is independent of whether API connectors are otherwise invoked via API Gateway v2 or function urls
+locals {
+  async_output_buckets = [for k, v in module.api_connector : v.async_output_bucket_id if v.async_output_bucket_id != null]
+}
+
+resource "aws_iam_policy" "async_output_access" {
+  count = length(local.async_output_buckets) > 0 ? 1 : 0
+
+  name        = "${module.env_id.id}AsyncOutputAccess"
+  description = "Allow caller to read from async output buckets (sanitized output)"
+
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [for k, v in module.api_connector : {
+        "Action" : ["s3:GetObject", "s3:ListBucket"],
+        "Effect" : "Allow",
+        "Resource" : ["arn:aws:s3:::${v.async_output_bucket_id}", "arn:aws:s3:::${v.async_output_bucket_id}/*"]
+      } if v.async_output_bucket_id != null]
+    }
+  )
+}
+
+resource "aws_iam_role_policy_attachment" "async_output_access_to_caller" {
+  count = length(local.async_output_buckets) > 0 ? 1 : 0
+
+  role       = module.psoxy.api_caller_role_name
+  policy_arn = aws_iam_policy.async_output_access[0].arn
+}
 
 
 # secrets shared across all instances
