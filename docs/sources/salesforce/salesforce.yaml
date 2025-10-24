@@ -51,7 +51,7 @@ endpoints:
       type: "array"
       items:
         $ref: "#/definitions/Account"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query/.*"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query/[^?]+$"
     allowedQueryParams: []
     transforms:
       - !<pseudonymize>
