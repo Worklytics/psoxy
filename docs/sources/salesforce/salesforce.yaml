@@ -163,55 +163,7 @@ endpoints:
             $ref: "#/definitions/Task"
         totalSize:
           type: "integer"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)User(%20|\\\
-    +)WHERE(%20|\\+)LastModifiedDate.*$"
-    allowedQueryParams:
-      - "q"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.records[*].ContactId"
-          - "$.records[*].CreatedById"
-          - "$.records[*].ManagerId"
-          - "$.records[*].Email"
-          - "$.records[*].Id"
-        encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$.records[*].Alias"
-          - "$.records[*].Name"
-          - "$.records[*].Username"
-    responseSchema:
-      type: "object"
-      properties:
-        done:
-          type: "boolean"
-        nextRecordsUrl:
-          type: "string"
-        records:
-          type: "array"
-          items:
-            $ref: "#/definitions/User"
-        totalSize:
-          type: "integer"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT\\s+AccountId\\s+FROM\\\
-    s+\\S+.*GROUP\\s+BY\\s+AccountId$"
-    allowedQueryParams:
-      - "q"
-    responseSchema:
-      type: "object"
-      properties:
-        done:
-          type: "boolean"
-        nextRecordsUrl:
-          type: "string"
-        records:
-          type: "array"
-          items:
-            $ref: "#/definitions/AccountId"
-        totalSize:
-          type: "integer"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/sobjects/(Account|ActivityHistory|User|Task|Event)/describe$"
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/sobjects/(Account|User|Task|Event)/describe$"
     allowedQueryParams: []
     responseSchema:
       type: "object"
@@ -258,6 +210,37 @@ endpoints:
             $ref: "#/definitions/Account"
         totalSize:
           type: "integer"
+  - pathRegex: "^/services/data/v(\\d+\\.\\d+)/query[?]q=SELECT.*FROM(%20|\\+)*User(%20|\\\
+    +|\\b).*"
+    allowedQueryParams:
+      - "q"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.records[*].ContactId"
+          - "$.records[*].CreatedById"
+          - "$.records[*].ManagerId"
+          - "$.records[*].Email"
+          - "$.records[*].Id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.records[*].Alias"
+          - "$.records[*].Name"
+          - "$.records[*].Username"
+    responseSchema:
+      type: "object"
+      properties:
+        done:
+          type: "boolean"
+        nextRecordsUrl:
+          type: "string"
+        records:
+          type: "array"
+          items:
+            $ref: "#/definitions/User"
+        totalSize:
+          type: "integer"
 definitions:
   Account:
     type: "object"
@@ -296,11 +279,6 @@ definitions:
       Sic:
         type: "string"
       Type:
-        type: "string"
-  AccountId:
-    type: "object"
-    properties:
-      accountId:
         type: "string"
   Attributes:
     type: "object"
