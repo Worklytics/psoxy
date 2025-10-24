@@ -11,7 +11,7 @@
               "type":"Task"
             },
             "Id":"00T5Y00007Txy7DUAR",
-            "WhoId":"null",
+            "WhoId":null,
             "WhatId":"0015Y00002c7g95QAA",
             "ActivityDate":"2021-08-07",
             "Status":"Not Started",
@@ -43,7 +43,7 @@
               "type":"Task"
             },
             "Id":"00T5Y00007ViqDbUAJ",
-            "WhoId":"null",
+            "WhoId":null,
             "WhatId":"0015Y00002c7g95QAA",
             "ActivityDate":null,
             "Status":"Deferred",
@@ -86,7 +86,7 @@
               "type":"Event"
             },
             "Id":"00UKe000002rCdsMAE",
-            "WhoId":"null",
+            "WhoId":null,
             "WhatId":"0015Y00002c7g8uQAA",
             "Location":null,
             "IsAllDayEvent":false,

@@ -5,7 +5,7 @@
   "records":[
     {
       "Id":"00T5Y00007Txy7DUAR",
-      "WhoId":"null",
+      "WhoId":null,
       "WhatId":"0015Y00002c7g95QAA",
       "ActivityDate":"2021-08-07",
       "Status":"Not Started",
@@ -34,7 +34,7 @@
     },
     {
       "Id":"00T5Y00007ViqDbUAJ",
-      "WhoId":"null",
+      "WhoId":null,
       "WhatId":"0015Y00002c7g95QAA",
       "ActivityDate":null,
       "Status":"Deferred",
