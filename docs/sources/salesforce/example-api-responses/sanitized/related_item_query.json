@@ -37,7 +37,7 @@
             "StartDateTime":"2021-03-08T00:00:00.000+0000",
             "Status":"Completed",
             "WhatId":"0015Y00002c7g95QAA",
-            "WhoId":"null"
+            "WhoId":null
           },
           {
             "attributes":{
@@ -66,7 +66,7 @@
             "StartDateTime":"2021-03-12T11:00:00.000+0000",
             "Status":null,
             "WhatId":"0015Y00002c7g95QAA",
-            "WhoId":"null"
+            "WhoId":null
           },
           {
             "attributes":{
@@ -95,7 +95,7 @@
             "StartDateTime":"2021-03-26T00:00:00.000+0000",
             "Status":"Completed",
             "WhatId":"0015Y00002c7g95QAA",
-            "WhoId":"null"
+            "WhoId":null
           },
           {
             "attributes":{
@@ -124,7 +124,7 @@
             "StartDateTime":"2021-03-27T00:00:00.000+0000",
             "Status":null,
             "WhatId":"0015Y00002c7g95QAA",
-            "WhoId":"null"
+            "WhoId":null
           },
           {
             "attributes":{
@@ -153,7 +153,7 @@
             "StartDateTime":"2021-03-12T00:00:00.000+0000",
             "Status":"Completed",
             "WhatId":"0015Y00002c7g95QAA",
-            "WhoId":"null"
+            "WhoId":null
           }
         ]
       }
