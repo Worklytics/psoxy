@@ -72,7 +72,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$.records[*].Id"
-        applyOnlyWhen: "$.records[?(@.attributes.type == \"User\")]\""
+        applyOnlyWhen: "$.records[?(@.attributes.type == \"User\")]"
         encoding: "URL_SAFE_TOKEN"
       - !<redact>
         jsonPaths:
