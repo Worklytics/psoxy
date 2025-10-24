@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SalesforceTests extends JavaRulesTestBaseCase {
 
@@ -93,6 +94,29 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
         String sanitized = this.sanitize(endpoint, jsonString);
 
         assertPseudonymized(sanitized, "0055Y00000E16gwQAB");
+    }
+
+    @Test
+    void query_pagination() {
+        String jsonString = asJson("accounts_by_query.json");
+
+        String endpoint = "https://test.salesforce.com/services/data/v64.0/query/0r8xx4lporj4SzoAAE-1000";
+
+        String sanitized = this.sanitize(endpoint, jsonString);
+
+        assertPseudonymized(sanitized, "0055Y00000E16gwQAB");
+    }
+
+    @Test
+    void query_blocks_other_stuff() {
+        String jsonString = asJson("accounts_by_query.json");
+
+        String endpoint = "https://test.salesforce.com/services/data/v64.0/query?q=SELECT+Some+Other+Stuff+FROM+Subresource";
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> {
+            this.sanitize(endpoint, jsonString);
+        });
+
+        assertTrue(ex.getMessage().contains("Sanitizer called to sanitize response that should not have been retrieved:"));
     }
 
     @Override
