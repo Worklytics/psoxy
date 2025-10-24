@@ -366,7 +366,7 @@ public class SanitizerUtils {
                 return configuration.jsonProvider().toJson(pseudonymizedIdentity);
             } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
                 if (pseudonymizedIdentity == null) {
-                    return configuration.jsonProvider().toJson(null);
+                    return null; //configuration.jsonProvider().toJson(null);
                 }
                 if (pseudonymizedIdentity.getReversible() != null
                     && pseudonymizer.getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
