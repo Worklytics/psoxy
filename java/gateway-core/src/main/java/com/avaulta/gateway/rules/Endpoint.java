@@ -91,12 +91,25 @@ public class Endpoint {
      *
      * if omitted, any HTTP method is permitted.
      */
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     Set<String> allowedMethods;
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public Set<String> getAllowedMethods() {
+        // our own implementation, so consistently sorted.
+        if (allowedMethods == null) {
+            return null;
+        } else if (allowedMethods instanceof TreeSet) {
+            return allowedMethods;
+        } else {
+            //rely on natural ordering of strings to sort
+            this.allowedMethods = new TreeSet<>(allowedMethods);
+            return this.allowedMethods;
+        }
+    }
 
     @JsonIgnore
     public Optional<Set<String>> getAllowedMethodsOptional() {
-        return Optional.ofNullable(allowedMethods);
+        return Optional.ofNullable(getAllowedMethods());
     }
 
     /**

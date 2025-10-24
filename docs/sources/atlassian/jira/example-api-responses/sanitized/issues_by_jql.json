@@ -10,7 +10,7 @@
           "subtask":false,
           "hierarchyLevel":0
         },
-        "timespent":0,
+        "timespent":null,
         "project":{
           "id":"10000",
           "projectTypeKey":"software",
@@ -98,7 +98,7 @@
             }
           }
         },
-        "timespent":0,
+        "timespent":null,
         "project":{
           "id":"10000",
           "projectTypeKey":"software",

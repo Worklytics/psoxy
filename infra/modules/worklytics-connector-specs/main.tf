@@ -437,7 +437,6 @@ EOT
         "/services/data/v64.0/sobjects/Account/describe",
         "/services/data/v64.0/sobjects/Task/describe",
         "/services/data/v64.0/query?q=SELECT+Id,Email,IsActive+FROM+User+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
-        "/services/data/v64.0/query?q=SELECT+AccountId+FROM+Task+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+GROUP+BY+AccountId",
         "/services/data/v64.0/query?q=SELECT+Id,AccountId,WhoId+FROM+Task+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
         "/services/data/v64.0/query?q=SELECT+Id,AccountId,WhoId+FROM+Event+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST"
       ]
@@ -446,27 +445,26 @@ EOT
   - `salesforce_domain`. This is the [domain](https://help.salesforce.com/s/articleView?id=sf.faq_domain_name_what.htm&type=5) your instance is using.
   - `salesforce_example_account_id`: An example of any account id; this is only applicable for example calls.
 
-  1. Create a [Salesforce application + client credentials flow](https://help.salesforce.com/s/articleView?language=en_US&id=sf.remoteaccess_oauth_client_credentials_flow.htm&type=5)
-    with following permissions:
-    - Manage user data via APIs (`api`)
-    - Access Connect REST API resources (`chatter_api`)
-    - Perform requests at any time (`refresh_token`, `offline_access`)
-    - Access unique user identifiers (`openid`)
-    - Access Lightning applications (`lightning`)
-    - Access content resources (`content`)
-    - Perform ANSI SQL queries on Customer Data Platform data (`cdp_query_api`)
+  1. Create a [Salesforce external application](https://help.salesforce.com/s/articleView?id=xcloud.create_a_local_external_client_app.htm&type=5):
+     - Ensure "Enable OAuth" is checked
+     - "Callback URL" MUST be filled; can be anything as not required in this flow, but required to be set by Salesforce. Something dummy like `http://localhost` will work
+     - Select following OAuth scopes:
+      - Manage user data via APIs (`api`)
+      - Access Connect REST API resources (`chatter_api`)
+      - Perform requests at any time (`refresh_token`, `offline_access`)
+      - Access content resources (`content`)
+      - Perform ANSI SQL queries on Customer Data Platform data (`cdp_query_api`)
 
      Apart from Salesforce instructions above, please review the following:
-     - "Callback URL" MUST be filled; can be anything as not required in this flow, but required to be set by Salesforce.
-     - Application MUST be marked with "Enable Client Credentials Flow"
-     - You MUST assign a user for Client Credentials, be sure:
-        - you associate a "run as" user marked with "API Only Permission"
-        - The policy associated to the user MUST have the following Administrative Permissions enabled:
-          - API Enabled
-          - APEX REST Services
-      - The policy MUST have the application marked as "enabled" in "Connected App Access". Otherwise requests will return 401 with INVALID_SESSION_ID
 
-  2. Once created, open "Manage Consumer Details"
+     - Application MUST be marked with "Enable Client Credentials Flow"
+     - You MUST assign a user for Client Credentials. A user with a valid `Salesforce License` should be enough. Also, user should have a [Permission Set](https://help.salesforce.com/s/articleView?id=platform.perm_sets_overview.htm&type=5) with following permissions:
+       - `Access Activities`: For reading Tasks, Events, Calendar and Emails.
+       - `View All Users`: For reading Users information.
+
+  2. Once created, edit the application.
+     - In Policies tab, ensure "Enable Client Credentials Flow" is checked with the user assigned.
+     - In Settings, go to `OAuth Settings` and click on `Consumer Key and Consumer Secret` link to get the values required for the next step.
   3. Update the content of `PSOXY_SALESFORCE_CLIENT_ID` from Consumer Key	and `PSOXY_SALESFORCE_CLIENT_SECRET` from Consumer Secret
   4. Finally, we recommend to run `test-salesforce` script with all the queries in the example to ensure the expected information covered by rules can be obtained from Salesforce API.
      Some test calls may fail with a 400 (bad request) response. That is something expected if parameters requested on the query are not available (for example, running a SOQL query
