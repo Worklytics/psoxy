@@ -1,11 +1,9 @@
 {
   "totalSize":2,
   "done":true,
+  "nextRecordsUrl":"/services/data/v57.0/query/01gRO0000016PIAYA2-500",
   "records":[
     {
-      "attributes":{
-        "type":"User"
-      },
       "AccountId":null,
       "ContactId":"null",
       "CreatedDate":"2021-03-02T16:31:04.000+0000",
@@ -22,9 +20,6 @@
       "UserType":"CsnOnly"
     },
     {
-      "attributes":{
-        "type":"User"
-      },
       "AccountId":null,
       "ContactId":"null",
       "CreatedDate":"2021-03-02T16:31:04.000+0000",
