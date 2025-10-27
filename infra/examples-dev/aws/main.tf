@@ -21,7 +21,7 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.5.10"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.5.11"
 
   enabled_connectors                       = var.enabled_connectors
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
@@ -55,6 +55,11 @@ locals {
     {}
   )
 
+  bulk_connectors = merge(
+    module.worklytics_connectors.enabled_bulk_connectors,
+    var.custom_bulk_connectors,
+  )
+
   source_authorization_todos = concat(
     module.worklytics_connectors.todos,
     module.worklytics_connectors_google_workspace.todos,
@@ -68,13 +73,6 @@ locals {
     module.worklytics_connectors_google_workspace.next_todo_step,
     module.worklytics_connectors_msft_365.next_todo_step,
     0
-  )
-}
-
-locals {
-  bulk_connectors = merge(
-    module.worklytics_connectors.enabled_bulk_connectors,
-    var.custom_bulk_connectors,
   )
 }
 
@@ -107,7 +105,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.5.10"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.5.11"
 
   environment_name                     = var.environment_name
   aws_account_id                       = var.aws_account_id
@@ -163,15 +161,25 @@ module "psoxy" {
 #  Worklytics API / Terraform provider
 
 locals {
-  all_connectors = merge(local.api_connectors, local.bulk_connectors)
-  all_instances  = merge(module.psoxy.bulk_connector_instances, module.psoxy.api_connector_instances)
+  # Webhook collectors are handled separately to avoid cycles - their metadata comes from outputs
+  webhook_connectors_for_worklytics = {
+    for k, v in module.psoxy.webhook_collector_instances : k => {
+      source_kind           = var.webhook_collectors[k].source_kind
+      sanitized_bucket_name = v.output_sanitized_bucket_id
+      display_name          = var.webhook_collectors[k].display_name
+      settings_to_provide   = {}
+    }
+  }
+
+  all_connectors = merge(local.api_connectors, local.bulk_connectors, local.webhook_connectors_for_worklytics)
+  all_instances  = merge(module.psoxy.bulk_connector_instances, module.psoxy.api_connector_instances, module.psoxy.webhook_collector_instances)
 }
 
 module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.5.10"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.5.11"
 
   proxy_instance_id    = each.key
   worklytics_host      = var.worklytics_host
@@ -180,7 +188,7 @@ module "connection_in_worklytics" {
   proxy_endpoint_url   = try(each.value.endpoint_url, null)
   bucket_name          = try(each.value.sanitized_bucket, null)
   connector_id         = try(local.all_connectors[each.key].worklytics_connector_id, "")
-  display_name         = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
+  display_name         = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy", "")
   todo_step            = module.psoxy.next_todo_step
   todos_as_local_files = var.todos_as_local_files
 

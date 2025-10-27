@@ -1,13 +1,11 @@
 {
   "totalSize":2,
   "done":true,
+  "nextRecordsUrl":"/services/data/v57.0/query/01gRO0000016PIAYA2-500",
   "records":[
     {
-      "attributes":{
-        "type":"User"
-      },
       "AccountId":null,
-      "ContactId":"null",
+      "ContactId":null,
       "CreatedDate":"2021-03-02T16:31:04.000+0000",
       "CreatedById":"t~WREVnRtj0N9dGhZfwAgC8Gw-IBQIGk-7JpUbxVSyEy8",
       "Email":"t~JMXUidwYSB43dLmUcrQSf1JqJaLEr2e8HlkceIs6y34@chatter.salesforce.com",
@@ -16,17 +14,14 @@
       "IsActive":true,
       "LastLoginDate":null,
       "LastModifiedDate":"2021-03-02T16:31:04.000+0000",
-      "ManagerId":"null",
+      "ManagerId":null,
       "TimeZoneSidKey":"America/Los_Angeles",
       "UserRoleId":null,
       "UserType":"CsnOnly"
     },
     {
-      "attributes":{
-        "type":"User"
-      },
       "AccountId":null,
-      "ContactId":"null",
+      "ContactId":null,
       "CreatedDate":"2021-03-02T16:31:04.000+0000",
       "CreatedById":"t~WREVnRtj0N9dGhZfwAgC8Gw-IBQIGk-7JpUbxVSyEy8",
       "Email":"t~wofbf_MBpIWTEVLl1KLYaAz0a6LjHgu-YwEz1eY0FjY@example.com",
@@ -35,7 +30,7 @@
       "IsActive":true,
       "LastLoginDate":"2023-03-17T10:40:29.000+0000",
       "LastModifiedDate":"2021-03-02T16:31:04.000+0000",
-      "ManagerId":"null",
+      "ManagerId":null,
       "TimeZoneSidKey":"America/Los_Angeles",
       "UserRoleId":null,
       "UserType":"Standard"

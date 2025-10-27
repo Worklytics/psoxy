@@ -11,7 +11,7 @@
           "id":"10002",
           "subtask":false
         },
-        "timespent":0,
+        "timespent":null,
         "project":{
           "id":"10000",
           "projectTypeKey":"software"

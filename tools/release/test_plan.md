@@ -30,9 +30,3 @@ Confirm everything worked:
 - [ ] API connector with async
 - [ ] Webhook collector
 - [ ] Bulk connector
-- [ ] Scan a GCP container image for vulnerabilities:
-
-```shell
-./tools/gcp/container-scan.sh psoxy-dev-erik psoxy-dev-erik-gcal
-```
-

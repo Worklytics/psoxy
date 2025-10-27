@@ -84,7 +84,7 @@ Supported Transform Types:
 
 `<transform-type> ::= "!<pseudonymizeEmailHeader>" | "!<pseudonymize>" | "!<redact>" | "!<redactRegexMatches>" | "!<tokenize>" | "<!filterTokenByRegex>" | "!<redactExceptSubstringsMatchingRegexes>"`
 
-NOTE: these are implementations of `com.avaulta.gateway.rules.transforms.Transform` class in the psoxy codebase.
+NOTE: these are implementations of `com.avaulta.gateway.rules.transforms.Transform` class in the Psoxy codebase.
 
 #### Pseudonymize
 
