@@ -129,7 +129,17 @@ final class Dragons {
         //RFC 2822 3.2.5 Quoted strings:
         //noWsCtl and the rest of ASCII except the doublequote and backslash characters:
 
-        final String qtext = format("[%s!#-\\[\\]-~]", noWsCtl);
+        // Standard	Year	Status	Notes
+        // RFC 822	1982	Obsolete	Original Internet message format
+        // RFC 2822	2001	Obsolete	Replaced by 5322
+        // RFC 5322	2008	Current	    Still ASCII-only headers
+        // RFC 6532	2012	Extension	UTF-8 headers allowed
+
+        // RFC 2822 - qtext ASCII only (Range ASCII minus control))
+        // final String qtext = format("[%s!#-\\[\\]-~]", noWsCtl);
+        // RFC 6532 qtext: any non-control except DQUOTE (") and backslash (\)
+        // Modern Email providers use RFC 5322 + RFC 6532 allowing UTF-8 in headers
+        final String qtext = "[^\\p{Cntrl}\\\\\"]";
         final String localPartqtext = format("[%s%s", noWsCtl,
             criteria.contains(EmailAddressCriteria.ALLOW_PARENS_IN_LOCALPART) ? "!#-\\[\\]-~]" : "!#-'\\*-\\[\\]-~]");
 
