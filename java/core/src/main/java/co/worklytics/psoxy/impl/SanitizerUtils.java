@@ -366,7 +366,8 @@ public class SanitizerUtils {
                 return configuration.jsonProvider().toJson(pseudonymizedIdentity);
             } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
                 if (pseudonymizedIdentity == null) {
-                    return configuration.jsonProvider().toJson(null);
+                    // Forcing null instead of configuration.jsonProvider().toJson(null), which is going to return "null" string
+                    return null;
                 }
                 if (pseudonymizedIdentity.getReversible() != null
                     && pseudonymizer.getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
@@ -511,9 +512,8 @@ public class SanitizerUtils {
         }
     }
 
-
     private static boolean transformApplies(Transform transform, Object document) {
-        if (transform.getApplyOnlyWhen() != null) {
+        if (StringUtils.isNotBlank(transform.getApplyOnlyWhen())) {
             Object filterResult = JsonPath.compile(transform.getApplyOnlyWhen()).read(document);
 
             ArrayList<?> results = (ArrayList<?>) filterResult;

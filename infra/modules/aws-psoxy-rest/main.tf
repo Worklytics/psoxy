@@ -305,7 +305,7 @@ locals {
   role_param = local.arn_for_test_calls == null ? "" : " -r \"${local.arn_for_test_calls}\""
 
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
-  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} -re \"${data.aws_region.current.id}\""
+  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} --region \"${data.aws_region.current.id}\""
 
   # Merge example_api_calls into example_api_requests for unified processing
   all_example_api_requests = concat(
@@ -328,7 +328,7 @@ locals {
   )
 
 
-  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} -re \"${data.aws_region.current.id}\" -l \"${module.psoxy_lambda.log_group}\""
+  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} --region \"${data.aws_region.current.id}\" -l \"${module.psoxy_lambda.log_group}\""
 
   awscurl_test_call = "${var.path_to_repo_root}tools/test-psoxy.sh -a ${local.role_param} -e \"${data.aws_region.current.id}\""
   awscurl_test_calls = [for path in var.example_api_calls :
