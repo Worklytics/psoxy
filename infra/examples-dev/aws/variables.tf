@@ -398,10 +398,11 @@ variable "webhook_collectors" {
       rotation_days = optional(number, null)       # null means no rotation; if > 0, will rotate every N days
       key_spec      = optional(string, "RSA_2048") # RSA_2048, RSA_3072, or RSA_4096; defaults to RSA_2048, which should be sufficient this use-case
     }), null)
-    auth_public_keys     = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
-    allow_origins        = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
-    example_payload_file = optional(string, null)        # path to example payload file to use for testing; if provided, will be used in the test script
-    example_identity     = optional(string, null)        # example identity to use for testing; if provided, will be used to test the collector
+    auth_public_keys     = optional(list(string), [])      # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
+    allow_origins        = optional(list(string), ["*"])   # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
+    output_path_prefix   = optional(string, "")            # optional path prefix to prepend to webhook output files in bucket (e.g., 'events_', 'webhooks/')
+    example_payload_file = optional(string, null)          # path to example payload file to use for testing; if provided, will be used in the test script
+    example_identity     = optional(string, null)          # example identity to use for testing; if provided, will be used to test the collector
   }))
 
   default = {}
