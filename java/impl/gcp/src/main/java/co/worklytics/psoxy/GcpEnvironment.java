@@ -60,7 +60,7 @@ public class GcpEnvironment implements HostEnvironment {
 
     @Builder
     @Value
-    static class WebhookCollectorModeConfig {
+    static class GcpWebhookCollectorModeConfig {
 
         /**
          * the URL of the service, e.g. "https://my-service-12345.a.run.app"
@@ -88,7 +88,7 @@ public class GcpEnvironment implements HostEnvironment {
          */
         int batchInvocationTimeoutSeconds;
 
-        private enum WebhookCollectorModeConfigProperty implements co.worklytics.psoxy.gateway.ConfigService.ConfigProperty {
+        private enum GcpWebhookCollectorModeConfigProperty implements co.worklytics.psoxy.gateway.ConfigService.ConfigProperty {
 
             BATCH_MERGE_SUBSCRIPTION,
 
@@ -99,12 +99,12 @@ public class GcpEnvironment implements HostEnvironment {
             SERVICE_URL,
         }
 
-        static WebhookCollectorModeConfig fromConfigService(ConfigService configService) {
-            return WebhookCollectorModeConfig.builder()
-                .serviceUrl(configService.getConfigPropertyOrError(WebhookCollectorModeConfig.WebhookCollectorModeConfigProperty.SERVICE_URL))
-                .batchMergeSubscription(configService.getConfigPropertyOrError(WebhookCollectorModeConfig.WebhookCollectorModeConfigProperty.BATCH_MERGE_SUBSCRIPTION))
-                .batchSize(configService.getConfigPropertyAsOptional(WebhookCollectorModeConfig.WebhookCollectorModeConfigProperty.BATCH_SIZE).map(Integer::parseInt).orElse(100))
-                .batchInvocationTimeoutSeconds(configService.getConfigPropertyAsOptional(WebhookCollectorModeConfig.WebhookCollectorModeConfigProperty.BATCH_INVOCATION_TIMEOUT_SECONDS).map(Integer::parseInt).orElse(60))
+        static GcpWebhookCollectorModeConfig fromConfigService(ConfigService configService) {
+            return GcpWebhookCollectorModeConfig.builder()
+                .serviceUrl(configService.getConfigPropertyOrError(GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.SERVICE_URL))
+                .batchMergeSubscription(configService.getConfigPropertyOrError(GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_MERGE_SUBSCRIPTION))
+                .batchSize(configService.getConfigPropertyAsOptional(GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_SIZE).map(Integer::parseInt).orElse(100))
+                .batchInvocationTimeoutSeconds(configService.getConfigPropertyAsOptional(GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_INVOCATION_TIMEOUT_SECONDS).map(Integer::parseInt).orElse(60))
                 .build();
         }
     }
