@@ -96,8 +96,8 @@ Module module.psoxy (from git::https://github.com/worklytics/psoxy//infra/module
 │ this version constraint. Version constraints are normally set for good reason, so updating the constraint may lead to other errors or unexpected behavior.
 ```
 
-The solution is to downgrade your Terraform version to one that's supported by our modules (>= 1.3.x, <= 1.7.x as of March 2024).
+The solution is to use a Terraform version that's supported by our modules (>= 1.7.x, < 2.0 as of v0.6.x).
 
 _If you're running Terraform in cloud/CI environment,_ including Terraform Cloud, GitHub Actions, etc, you can likely explicitly set the desired Terraform version in your workspace settings / terraform setup action.
 
-_If you're running Terraform on your laptop or in a VM,_ use your package manager to downgrade or something like [`tfenv`](https://github.com/tfutils/tfenv) to concurrently use distinct Terraform versions on the machine. (set version <= 1.7.x in `.terraform-version` file in the root of your Terraform configuration for the proxy).
+_If you're running Terraform on your laptop or in a VM,_ use your package manager to upgrade or something like [`tfenv`](https://github.com/tfutils/tfenv) to concurrently use distinct Terraform versions on the machine. (set version >= 1.7.x in `.terraform-version` file in the root of your Terraform configuration for the proxy).
