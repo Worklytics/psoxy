@@ -1,6 +1,22 @@
 package co.worklytics.psoxy;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.http.HttpStatus;
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
+import com.amazonaws.services.lambda.runtime.events.SQSEvent;
+import com.fasterxml.jackson.databind.JsonNode;
 import co.worklytics.psoxy.aws.AwsContainer;
+import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.SQSOutput;
 import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
 import co.worklytics.psoxy.aws.request.LambdaEventUtils;
@@ -10,25 +26,8 @@ import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.impl.BatchMergeHandler;
 import co.worklytics.psoxy.gateway.impl.InboundWebhookHandler;
 import co.worklytics.psoxy.gateway.impl.JwksDecorator;
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
-import com.amazonaws.services.lambda.runtime.events.SQSEvent;
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
-import co.worklytics.psoxy.aws.DaggerAwsContainer;
-import org.apache.http.HttpStatus;
 
 /**
  * AWS lambda entrypoint that can handle BOTH:
@@ -62,6 +61,28 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
         inboundWebhookHandler = awsContainer.inboundWebhookHandler();
         jwksHandler = awsContainer.jwksDecoratorFactory().create(inboundWebhookHandler);
         lambdaEventUtils = awsContainer.lambdaEventUtils();
+        
+        // Pre-warm the public key cache during Lambda initialization
+        // This ensures first JWKS request doesn't wait for KMS fetch
+        warmPublicKeyCache();
+    }
+    
+    /**
+     * Pre-fetches public keys from KMS to populate the cache during Lambda initialization.
+     * This reduces latency for the first JWKS endpoint request after Lambda starts.
+     * Failures are logged but don't prevent Lambda from starting.
+     */
+    private static void warmPublicKeyCache() {
+        try {
+            log.info("Pre-warming public key cache during Lambda initialization");
+            // Trigger cache population by fetching keys
+            int keyCount = inboundWebhookHandler.acceptableAuthKeys().size();
+            log.info("Successfully pre-warmed cache with " + keyCount + " public key(s)");
+        } catch (Exception e) {
+            // Don't fail Lambda initialization if key fetch fails
+            // Keys will be fetched on-demand when first needed
+            log.warning("Failed to pre-warm public key cache during initialization (keys will be fetched on-demand): " + e.getMessage());
+        }
     }
 
 

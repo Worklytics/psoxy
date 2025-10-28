@@ -1,7 +1,6 @@
 package co.worklytics.psoxy;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -67,6 +66,28 @@ public class GcpWebhookCollectionHandler {
         this.configService = configService;
         this.envVarsConfigService = envVarsConfigService;
         this.webhookCollectorModeConfig = webhookCollectorModeConfig;
+        
+        // Pre-warm the public key cache during function initialization
+        // This ensures first JWKS request doesn't wait for KMS fetch
+        warmPublicKeyCache();
+    }
+    
+    /**
+     * Pre-fetches public keys from KMS to populate the cache during Cloud Function initialization.
+     * This reduces latency for the first JWKS endpoint request after the function starts.
+     * Failures are logged but don't prevent function from starting.
+     */
+    private void warmPublicKeyCache() {
+        try {
+            log.info("Pre-warming public key cache during Cloud Function initialization");
+            // Trigger cache population by fetching keys
+            int keyCount = inboundWebhookHandler.acceptableAuthKeys().size();
+            log.info("Successfully pre-warmed cache with " + keyCount + " public key(s)");
+        } catch (Exception e) {
+            // Don't fail function initialization if key fetch fails
+            // Keys will be fetched on-demand when first needed
+            log.warning("Failed to pre-warm public key cache during initialization (keys will be fetched on-demand): " + e.getMessage());
+        }
     }
 
     /**
