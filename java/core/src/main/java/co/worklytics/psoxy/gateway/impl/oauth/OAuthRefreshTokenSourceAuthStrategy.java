@@ -1,30 +1,47 @@
 package co.worklytics.psoxy.gateway.impl.oauth;
 
-import co.worklytics.psoxy.gateway.*;
-import co.worklytics.psoxy.utils.RandomNumberGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.http.*;
-import com.google.auth.Credentials;
-import com.google.auth.oauth2.AccessToken;
-import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.util.concurrent.Uninterruptibles;
-import lombok.*;
-import lombok.extern.java.Log;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.apache.commons.lang3.StringUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpContent;
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpResponse;
+import com.google.auth.Credentials;
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.util.concurrent.Uninterruptibles;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.LockService;
+import co.worklytics.psoxy.gateway.RequiresConfiguration;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.WritePropertyRetriesExhaustedException;
+import co.worklytics.psoxy.utils.RandomNumberGenerator;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 
 
 /**
@@ -200,10 +217,11 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @Inject
         TokenResponseParser tokenResponseParser;
 
+        // so we'll attempt to *proactively* refresh the token 1-9 minutes before it expires
         @VisibleForTesting
-        protected final Duration MIN_PROACTIVE_TOKEN_REFRESH = Duration.ofMinutes(2L);
+        protected final Duration MIN_PROACTIVE_TOKEN_REFRESH = Duration.ofMinutes(1L);
         @VisibleForTesting
-        protected final Duration MAX_PROACTIVE_TOKEN_REFRESH = MIN_PROACTIVE_TOKEN_REFRESH.plusMinutes(5L);
+        protected final Duration MAX_PROACTIVE_TOKEN_REFRESH = MIN_PROACTIVE_TOKEN_REFRESH.plusMinutes(9L);
 
         // not high; better to fail fast and leave it to the caller (Worklytics) to retry than hold
         // open a lambda waiting for a lock
@@ -294,7 +312,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     tokenResponse = exchangeRefreshTokenForAccessToken();
                     token = asAccessToken(tokenResponse);
 
-                    storeSharedAccessTokenIfSupported(token, lockNeeded);
+                    if (useSharedToken()) {
+                        storeSharedAccessTokenIfSupported(token);
+                    }
                     storeRefreshTokenIfRotated(tokenResponse);
 
                     if (isAccessTokenCacheable()) {
@@ -459,8 +479,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         }
 
         @VisibleForTesting
-        void storeSharedAccessTokenIfSupported(@NonNull AccessToken accessToken, boolean useSharedToken) {
-            if (useSharedToken) {
+        void storeSharedAccessTokenIfSupported(@NonNull AccessToken accessToken) {
                 try {
                     secretStore.putConfigProperty(ConfigProperty.ACCESS_TOKEN,
                         objectMapper.writerFor(AccessTokenDto.class)
@@ -471,7 +490,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 } catch (WritePropertyRetriesExhaustedException e) {
                     log.log(Level.SEVERE, "Could not write access token to config after " + WRITE_RETRIES + " attempts", e);
                 }
-            }
+            
         }
     }
 

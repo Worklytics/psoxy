@@ -1,26 +1,25 @@
 package co.worklytics.psoxy.gateway.impl;
 
-import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.test.MockModules;
-import com.google.auth.Credentials;
-import com.google.auth.oauth2.ServiceAccountCredentials;
-import dagger.Component;
-import lombok.SneakyThrows;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import com.google.auth.Credentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
+import co.worklytics.psoxy.PsoxyModule;
+import co.worklytics.test.MockModules;
+import dagger.Component;
+import lombok.SneakyThrows;
 
 class GoogleCloudPlatformServiceAccountKeyAuthStrategyTest {
 
@@ -115,6 +114,83 @@ class GoogleCloudPlatformServiceAccountKeyAuthStrategyTest {
         //current implementation works as expected, even w the whitespace
         assertEquals("something",
             new String(authStrategy.toStream(validBase64).readAllBytes()));
+    }
+
+    @SneakyThrows
+    @org.junit.jupiter.api.Test
+    void toStream_plainJsonFormat() {
+        // Test that plain JSON (UTF-8) format works
+        ByteArrayInputStream stream = authStrategy.toStream(KEY);
+        String result = new String(stream.readAllBytes());
+        
+        // Verify the result is valid JSON by checking key fields
+        assertTrue(result.contains("\"type\": \"service_account\""));
+        assertTrue(result.contains("\"client_email\": \"123-abc@developer.gserviceaccount.com\""));
+        assertTrue(result.contains("\"private_key_id\": \"abc\""));
+    }
+
+    @SneakyThrows
+    @org.junit.jupiter.api.Test
+    void toStream_base64EncodedJsonFormat() {
+        // Test that base64-encoded JSON format works
+        String base64Key = Base64.getEncoder().encodeToString(KEY.getBytes());
+        ByteArrayInputStream stream = authStrategy.toStream(base64Key);
+        String result = new String(stream.readAllBytes());
+        
+        // Verify the result is valid JSON by checking key fields
+        assertTrue(result.contains("\"type\": \"service_account\""));
+        assertTrue(result.contains("\"client_email\": \"123-abc@developer.gserviceaccount.com\""));
+        assertTrue(result.contains("\"private_key_id\": \"abc\""));
+    }
+
+    @SneakyThrows
+    @org.junit.jupiter.api.Test
+    void toStream_bothFormatsProduceSameResult() {
+        // Test that both plain JSON and base64-encoded formats produce the same result
+        String base64Key = Base64.getEncoder().encodeToString(KEY.getBytes());
+        
+        ByteArrayInputStream plainStream = authStrategy.toStream(KEY);
+        ByteArrayInputStream base64Stream = authStrategy.toStream(base64Key);
+        
+        String plainResult = new String(plainStream.readAllBytes());
+        String base64Result = new String(base64Stream.readAllBytes());
+        
+        assertEquals(plainResult, base64Result);
+    }
+
+    @SneakyThrows
+    @org.junit.jupiter.api.Test
+    void toStream_plainJsonWithWhitespace() {
+        // Test that plain JSON with extra whitespace works
+        String keyWithWhitespace = "  " + KEY + "\n";
+        ByteArrayInputStream stream = authStrategy.toStream(keyWithWhitespace);
+        String result = new String(stream.readAllBytes());
+        
+        // Verify the result is valid JSON
+        assertTrue(result.contains("\"type\": \"service_account\""));
+        assertTrue(result.contains("\"client_email\": \"123-abc@developer.gserviceaccount.com\""));
+    }
+
+    @SneakyThrows
+    @ValueSource(strings = {
+        "single",
+        "c,s,v",
+        "space delimited"
+    })
+    @ParameterizedTest
+    void getCredentials_plainJsonKey(String oauthScopes) {
+        // Test that credentials work with plain JSON key format
+        MockModules.ForHttpTransportFactory.mockResponse(authStrategy.httpTransportFactory, FAKE_TOKEN_RESPONSE);
+
+        when(authStrategy.config.getConfigPropertyOrError(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.OAUTH_SCOPES))
+            .thenReturn(oauthScopes);
+        when(authStrategy.secretStore.getConfigPropertyAsOptional(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.SERVICE_ACCOUNT_KEY))
+            .thenReturn(Optional.of(KEY)); // Plain JSON format
+
+        Credentials credentials = authStrategy.getCredentials(Optional.empty());
+
+        assertEquals("123-abc.apps.googleusercontent.com", ((ServiceAccountCredentials) credentials).getClientId());
+        assertEquals("http://localhost:8080/token", ((ServiceAccountCredentials) credentials).getTokenServerUri().toString());
     }
 
 }
