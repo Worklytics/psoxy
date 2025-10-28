@@ -344,6 +344,7 @@ module "webhook_collectors" {
   rules_file                           = each.value.rules_file
   webhook_auth_public_keys             = each.value.auth_public_keys
   provision_auth_key                   = each.value.provision_auth_key
+  keep_warm_instances                  = try(each.value.keep_warm_instances, null)
   example_payload                      = try(each.value.example_payload, null)
   example_identity                     = try(each.value.example_identity, null)
 
