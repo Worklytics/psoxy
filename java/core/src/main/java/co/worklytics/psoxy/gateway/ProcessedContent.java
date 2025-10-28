@@ -1,13 +1,17 @@
 package co.worklytics.psoxy.gateway;
 
 import lombok.*;
+import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
-import java.io.Serial;
-import java.io.Serializable;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 
 /**
@@ -16,10 +20,13 @@ import java.util.Map;
  *  (possibly an intermediate step in the pipeline)
  *
  */
+@Log
 @With
 @Builder(toBuilder = true)
 @Value
 public class ProcessedContent implements Serializable {
+
+    public static final String CONTENT_ENCODING_GZIP = "gzip";
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -54,11 +61,105 @@ public class ProcessedContent implements Serializable {
      */
     byte[] content;
 
+    InputStream stream;
+
+    @SneakyThrows
+    public byte[] getContent() {
+        if (content != null) {
+            return content;
+        } else if (stream != null) {
+            return stream.readAllBytes();
+        } else {
+            return new byte[0];
+        }
+    }
+
+    @SneakyThrows
+    public InputStream getStream() {
+        if (stream != null) {
+            return stream;
+        } else if (content != null) {
+            return new ByteArrayInputStream(content);
+        } else {
+            return InputStream.nullInputStream();
+        }
+    }
+
     /**
      * for convenience, a method to get the content as a string - rather than byte array
      * @return the content as a string, using the specified contentCharset
      */
+    @SneakyThrows
     public String getContentAsString() {
         return new String(getContent(), contentCharset);
+    }
+
+    public boolean isGzipEncoded() {
+        return CONTENT_ENCODING_GZIP.equalsIgnoreCase(contentEncoding);
+    }
+
+    /**
+     * @return a copy of ProcessedContent, which can be read from multiple times
+     * if the original content was a stream, it will be fully read into memory, gzipped, and stored in the content byte array
+     * this *hopefully* avoids most mem issues
+     *
+     */
+    public ProcessedContent multiReadableCopy() {
+        if (this.stream == null) {
+            return this;
+        } else {
+            try (InputStream originalStream = this.stream;
+                   ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                   OutputStream output = isGzipEncoded() ? new GZIPOutputStream(baos) : baos) {
+                originalStream.transferTo(output);
+                byte[] contentBytes = baos.toByteArray();
+                return this.toBuilder()
+                    .contentEncoding(CONTENT_ENCODING_GZIP)
+                    .content(contentBytes)
+                    .stream(null)
+                    .build();
+            } catch (IOException e) {
+                throw new UncheckedIOException("Failed to create multi-readable copy of ProcessedContent", e);
+            }
+        }
+    }
+
+    /**
+     * whether the contentType indicates that the content is a gzip file
+     *
+     * this suggests that the HTTP server is serving a gzipped file; while that's byte-wise equivalent to a gzip-encoded response from a JSON API,
+     * it's semantically different.  eg, the object is a file, that is inherently gzipped at the application-layer
+     *
+     *
+     * `Content-Encoding: gzip` implies gzip applied at the server-layer
+     * eg, the client (us) said we accept gzip-encoded responses, and the server choose to provide such
+     *
+     * @return whether the contentType indicates that the content is a gzip file
+     */
+    public boolean isGzipFile() {
+        return Objects.equals(this.getContentType(), "application/gzip");
+    }
+
+    /**
+     * if the content is not already gzip-encoded, return a gzip-encoded version
+     * @return a gzip-encoded version of this ProcessedContent, or this if no compression was needed
+     * @throws IOException error reading or compressing the content
+     */
+    public ProcessedContent asCompressed() throws IOException {
+        if (this.isGzipEncoded()) {
+            return this;
+        } else {
+            log.info("Compressing response to gzip");
+            ProcessedContent .ProcessedContentBuilder builder = this.toBuilder();
+            try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                GZIPOutputStream gzipOutputStream = new GZIPOutputStream(baos)) {
+                this.getStream().transferTo(gzipOutputStream);
+                builder
+                    .contentEncoding(CONTENT_ENCODING_GZIP)
+                    .content(baos.toByteArray())
+                    .stream(null);
+            }
+            return builder.build();
+        }
     }
 }

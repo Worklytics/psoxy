@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -130,7 +131,6 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
 
         log.info("Request path: " + httpEventRequest.prettyPrint());
 
-        boolean base64Encoded = false;
         if (httpEvent.getRequestContext().getRouteKey().endsWith("/" + JwksDecorator.PATH_TO_RESOURCE + "/{proxy+}")) {
             // special case for JWKS endpoint, which is used by clients to fetch public keys
             // for verifying JWTs signed by the proxy
@@ -144,7 +144,7 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
                 response = HttpEventResponse.builder()
                     .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
                     .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), "Unknown error")
-                    .body("Unknown error: " + e.getClass().getName())
+                    .bodyString("Unknown error: " + e.getClass().getName())
                     .build();
             }
         }
@@ -152,11 +152,13 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
         try {
             //NOTE: AWS seems to give 502 Bad Gateway errors without explanation or any info
             // in the lambda logs if this is malformed somehow (Eg, missing statusCode)
+            boolean base64encode = response.getHeaders().getOrDefault(org.apache.hc.core5.http.HttpHeaders.CONTENT_ENCODING, "").equals("gzip");
+            String encodedBody = base64encode ? Base64.getEncoder().encodeToString(response.getBody()) : new String(response.getBody(), StandardCharsets.UTF_8);
             return APIGatewayV2HTTPResponse.builder()
                 .withStatusCode(response.getStatusCode())
                 .withHeaders(response.getHeaders())
-                .withBody(response.getBody())
-                .withIsBase64Encoded(base64Encoded)
+                .withBody(encodedBody)
+                .withIsBase64Encoded(base64encode)
                 .build();
         } catch (Throwable e) {
             context.getLogger().log("Error writing response as Lambda return");
