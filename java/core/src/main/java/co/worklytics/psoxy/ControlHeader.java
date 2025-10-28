@@ -46,7 +46,10 @@ public enum ControlHeader {
      *
      * q: specific to Google? generalizable??
      *
-     * this is a header, but NOT something we forward to the source API. rather used
+     * this is a header, but NOT something we forward to the source API. rather used for Auth flows.
+     * 
+     * TODO: rename to SOURCE_IDENTITY_TO_ASSUME
+     * 
      */
     USER_TO_IMPERSONATE("User-To-Impersonate"),
     ;
