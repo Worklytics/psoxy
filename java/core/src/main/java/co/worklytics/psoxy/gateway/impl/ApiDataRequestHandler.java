@@ -46,6 +46,7 @@ import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.auth.Credentials;
 import com.google.auth.http.HttpCredentialsAdapter;
@@ -354,10 +355,22 @@ public class ApiDataRequestHandler {
                     .setThrowExceptionOnExecuteError(false)
                     .setConnectTimeout(SOURCE_API_REQUEST_CONNECT_TIMEOUT_MS)
                     .setReadTimeout(SOURCE_API_REQUEST_READ_TIMEOUT_MS);
-
         } catch (IOException e) {
+            // one example of this case is when the request-initializer returned by GoogleCloudPlatformServiceAccountKeyAuthStrategy does a token refresh,
+            // in order to get access token; better way to expose that to this layer of the code?
+            // e is really a GoogleAuthException, which wraps a HttpResponseException; but GoogleAuthException is package-private
+            if (e.getCause() instanceof HttpResponseException) {
+                builder.statusCode(((HttpResponseException) e.getCause()).getStatusCode());
+                builder.body("Failed to prepare API request to source. Some prerequisite request, such as refreshing access token, failed: " + e.getMessage());
+                if (((HttpResponseException) e.getCause()).getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+                    builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                        ErrorCauses.CONNECTION_SETUP.name());
+                }
+                return builder.build();
+            }
+
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-            builder.body("Failed to parse request; review logs");
+            builder.body("Failed to build request; review logs");
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                     ErrorCauses.CONNECTION_SETUP.name());
             log.log(Level.WARNING, e.getMessage(), e);
