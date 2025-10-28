@@ -45,6 +45,6 @@ public interface SourceAuthStrategy extends RequiresConfiguration {
     String getConfigIdentifier();
 
 
-    Credentials getCredentials(Optional<String> userToImpersonate);
+    Credentials getCredentials(Optional<String> identityToAssumeForRequest);
 
 }

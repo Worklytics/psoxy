@@ -45,7 +45,9 @@ public class OAuthAccessTokenSourceAuthStrategy implements SourceAuthStrategy {
     SecretStore secretStore;
 
     @Override
-    public Credentials getCredentials(Optional<String> userToImpersonateIgnored) {
+    public Credentials getCredentials(Optional<String> identityToAssumeForRequestIgnored) {
+        identityToAssumeForRequestIgnored.ifPresent(identity -> log.warning("Identity to assume for request ignored for OAuthAccessTokenSourceAuthStrategy"));
+
         String token = secretStore.getConfigPropertyOrError(ConfigProperty.ACCESS_TOKEN);
         // Some date into far future. Expiration is required
         Instant expire = clock.instant().plus(365L, ChronoUnit.DAYS);

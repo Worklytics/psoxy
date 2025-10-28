@@ -359,6 +359,8 @@ public class ApiDataRequestHandler {
             // one example of this case is when the request-initializer returned by GoogleCloudPlatformServiceAccountKeyAuthStrategy does a token refresh,
             // in order to get access token; better way to expose that to this layer of the code?
             // e is really a GoogleAuthException, which wraps a HttpResponseException; but GoogleAuthException is package-private
+
+            // jira/confluence bad tokens also end-up going through this path (attempt to us)
             if (e.getCause() instanceof HttpResponseException) {
                 builder.statusCode(((HttpResponseException) e.getCause()).getStatusCode());
                 builder.body("Failed to prepare API request to source. Some prerequisite request, such as refreshing access token, failed: " + e.getMessage());
@@ -691,18 +693,17 @@ public class ApiDataRequestHandler {
         // eg, OAuth2CredentialsWithRefresh.newBuilder(), etc ..
 
         // assume that in cloud function env, this will get ours ...
-        Optional<String> accountToImpersonate =
+        Optional<String> identityToAssumeForRequest =
                 request.getHeader(ControlHeader.USER_TO_IMPERSONATE.getHttpHeader());
 
 
-        accountToImpersonate.ifPresent(user -> log.info("Impersonating user"));
-        // TODO: warn here for Google Workspace connectors, which expect user??
+        identityToAssumeForRequest.ifPresent(user -> log.info("Assuming identity for requests: " + user));
 
-        accountToImpersonate = accountToImpersonate
+        identityToAssumeForRequest = identityToAssumeForRequest
                 .map(s -> pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(s,
                     reversibleTokenizationStrategy));
 
-        Credentials credentials = sourceAuthStrategy.getCredentials(accountToImpersonate);
+        Credentials credentials = sourceAuthStrategy.getCredentials(identityToAssumeForRequest);
         HttpCredentialsAdapter initializeWithCredentials = new HttpCredentialsAdapter(credentials);
 
         // TODO: in OAuth-type use cases, where execute() may have caused token to be refreshed, how
