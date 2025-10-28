@@ -137,10 +137,8 @@ public class OutputUtils {
         return (T) outputFactory.create(outputLocation);
     }
 
-    // Ensure the path prefix ends with a slash, if non-empty
+    // Format the path prefix, trimming whitespace but preserving the exact prefix (including whether it ends with slash, underscore, etc)
     public static String formatObjectPathPrefix(String rawPathPrefix) {
-        String trimmedPath = StringUtils.trimToEmpty(rawPathPrefix);
-        return (trimmedPath.endsWith("/") || StringUtils.isEmpty(trimmedPath)) ? trimmedPath
-                : trimmedPath + "/";
+        return StringUtils.trimToEmpty(rawPathPrefix);
     }
 }
