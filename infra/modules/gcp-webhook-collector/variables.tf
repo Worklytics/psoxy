@@ -108,6 +108,18 @@ variable "available_memory_mb" {
   default     = 1024
 }
 
+variable "max_instance_count" {
+  type        = number
+  description = "Maximum number of concurrent Cloud Function instances. If null, no limit is set."
+  default     = null
+}
+
+variable "reserved_concurrent_executions" {
+  type        = number
+  description = "DEPRECATED: use max_instance_count instead. Maximum number of concurrent Cloud Function instances."
+  default     = null
+}
+
 variable "gcp_principals_authorized_to_test" {
   type        = list(string)
   description = "list of GCP principals authorized to test this deployment - eg 'user:alice@acme.com', 'group:devs@acme.com'; if omitted, up to you to configure necessary perms for people to test if desired."

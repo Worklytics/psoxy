@@ -80,9 +80,15 @@ variable "handler_class" {
   default     = "co.worklytics.psoxy.AwsWebhookCollectionModeHandler"
 }
 
+variable "max_instance_count" {
+  type        = number
+  description = "Maximum number of concurrent instances for the function. If null, no limit is set."
+  default     = null
+}
+
 variable "reserved_concurrent_executions" {
   type        = number
-  description = "Max number of concurrent instances for the function"
+  description = "DEPRECATED: use max_instance_count instead. Max number of concurrent instances for the function"
   default     = null # meaning no reserved concurrency
 }
 

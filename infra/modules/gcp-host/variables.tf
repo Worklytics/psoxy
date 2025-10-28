@@ -185,13 +185,15 @@ variable "custom_artifacts_bucket_name" {
 
 variable "api_connectors" {
   type = map(object({
-    source_kind             = string
-    source_auth_strategy    = string
-    target_host             = string
-    oauth_scopes_needed     = optional(list(string), [])
-    environment_variables   = optional(map(string), {})
-    enable_async_processing = optional(bool, false)
-    example_api_calls       = optional(list(string), [])
+    source_kind                    = string
+    source_auth_strategy           = string
+    target_host                    = string
+    oauth_scopes_needed            = optional(list(string), [])
+    environment_variables          = optional(map(string), {})
+    enable_async_processing        = optional(bool, false)
+    max_instance_count             = optional(number, null)
+    reserved_concurrent_executions = optional(number, null) # DEPRECATED: use max_instance_count instead
+    example_api_calls              = optional(list(string), [])
     example_api_requests = optional(list(object({
       method       = optional(string, "GET")
       path         = string
@@ -233,6 +235,8 @@ variable "webhook_collectors" {
     auth_public_keys                   = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
     allow_origins                      = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
     batch_processing_frequency_minutes = optional(number, 5)           # frequency (in minutes) at which to batch process webhooks
+    max_instance_count                 = optional(number, null)        # max number of concurrent Cloud Function instances
+    reserved_concurrent_executions     = optional(number, null)        # DEPRECATED: use max_instance_count instead
 
     example_identity = optional(string, null) # example identity to use in test payloads
     example_payload  = optional(string, null) # example payload to use in test payloads

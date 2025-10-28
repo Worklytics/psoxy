@@ -12,11 +12,11 @@ locals {
   # number of webhooks to process in a batch; dictates MAX messages pulled from pubsub in one-shot, as well as MAX webhooks written to GCS object
   batch_size = 100
 
-  # would hope this is plenty, but could make configurable
+  # configurable via variable; defaults to unlimited (null)
   # if we assume each inbound webhook takes 200ms to parse, sanitized, publish to Pub-Sub, then
-  # we can doe 5 req/s per instance, with concurrency == 1
-  # 5 instances, gives us 25 req/s ... OK place to start
-  max_instance_count = 5
+  # we can do 5 req/s per instance, with concurrency == 1
+  # if explicitly set to 5 instances, gives us 25 req/s
+  max_instance_count = coalesce(var.max_instance_count, var.reserved_concurrent_executions)
 }
 # deployment for a single Psoxy instance in GCP project that has be initialized for Psoxy.
 # project itself may hold MULTIPLE psoxy instances
