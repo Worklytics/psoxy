@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -106,45 +105,46 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
 
     @Test
     public void testCachedTokenNeedsRefreshWhenNull() {
-        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
-        assertTrue(tokenRefreshHandler.shouldRefresh(null, Instant.now()));
+        OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
+        strategy.randomNumberGenerator = this.randomNumberGenerator;
+        assertTrue(strategy.shouldRefresh(null, Instant.now()));
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 1, 30_000, 300_000, 3_600_000})
     public void testCachedTokenDoesntNeedRefreshIfNotExpired(int millisBeyondMaxProactiveRefreshUntilTokenExpires) {
-        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
+        OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
         Instant fixed = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         Instant expiration = fixed
-            .plus(tokenRefreshHandler.MAX_PROACTIVE_TOKEN_REFRESH)
+            .plus(strategy.MAX_PROACTIVE_TOKEN_REFRESH)
             .plusMillis(millisBeyondMaxProactiveRefreshUntilTokenExpires);
 
         AccessToken token = new AccessToken("any-token", Date.from(expiration));
-        tokenRefreshHandler.randomNumberGenerator = this.randomNumberGenerator;
-        assertFalse(tokenRefreshHandler.shouldRefresh(token, fixed));
+        strategy.randomNumberGenerator = this.randomNumberGenerator;
+        assertFalse(strategy.shouldRefresh(token, fixed));
     }
 
     @ParameterizedTest
     @ValueSource(ints = { -3_600_000, -1_000, -1, 0, 1, 1_000, 30_000})
     public void testCachedTokenNeedsRefreshIfExpiredOrCloseTo(int millisAgoThatTokenExpired) {
-        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
+        OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
         Instant fixed = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         Instant expiration = fixed
             .plusMillis(millisAgoThatTokenExpired);
 
         AccessToken token = new AccessToken("any-token", Date.from(expiration));
-        tokenRefreshHandler.randomNumberGenerator = this.randomNumberGenerator;
-        assertTrue(tokenRefreshHandler.shouldRefresh(token, fixed));
+        strategy.randomNumberGenerator = this.randomNumberGenerator;
+        assertTrue(strategy.shouldRefresh(token, fixed));
     }
 
     @Test
     public void testProactiveRefreshWithin1MinuteOfExpiration() {
-        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
-        tokenRefreshHandler.randomNumberGenerator = this.randomNumberGenerator;
+        OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
+        strategy.randomNumberGenerator = this.randomNumberGenerator;
         Instant fixed = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         Instant expiration = fixed.plusSeconds(58);
         AccessToken token = new AccessToken("any-token", Date.from(expiration));
-        assertTrue(tokenRefreshHandler.shouldRefresh(token, fixed));
+        assertTrue(strategy.shouldRefresh(token, fixed));
     }
 
 
@@ -152,41 +152,44 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @SneakyThrows
     @Test
     public void serializesAccessTokenDTO() {
-        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
-        tokenRefreshHandler.objectMapper = objectMapper;
-        tokenRefreshHandler.config = MockModules.provideMock(ConfigService.class);
-        tokenRefreshHandler.secretStore = MockModules.provideMock(SecretStore.class);
-        tokenRefreshHandler.payloadBuilder = mock(OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder.class);
-        when(tokenRefreshHandler.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.USE_SHARED_TOKEN))
+        OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
+        strategy.objectMapper = objectMapper;
+        strategy.config = MockModules.provideMock(ConfigService.class);
+        strategy.secretStore = MockModules.provideMock(SecretStore.class);
+        when(strategy.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.USE_SHARED_TOKEN))
             .thenReturn(Optional.of("true"));
 
         Instant anyTime = Instant.parse("2021-12-15T00:00:00Z");
-        tokenRefreshHandler.clock = Clock.fixed(anyTime, ZoneOffset.UTC);
-
+        strategy.clock = Clock.fixed(anyTime, ZoneOffset.UTC);
 
         AccessToken token = new AccessToken("my-token", Date.from(anyTime.plus(10_000L, ChronoUnit.MILLIS)));
 
+        // Create a TokenRefreshHandlerImpl to access the storeSharedAccessTokenIfSupported method
+        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
+        tokenRefreshHandler.objectMapper = objectMapper;
+        tokenRefreshHandler.secretStore = strategy.secretStore;
+        tokenRefreshHandler.sourceAuthStrategy = strategy;
+
         tokenRefreshHandler.storeSharedAccessTokenIfSupported(token);
 
-        verify(tokenRefreshHandler.secretStore, times(1)).putConfigProperty(eq(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN),
+        verify(strategy.secretStore, times(1)).putConfigProperty(eq(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN),
             eq("{\"token\":\"my-token\",\"expirationDate\":1639526410000}"),
             eq(OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl.WRITE_RETRIES));
     }
 
     @Test
     public void deserializesAccessTokenDTO() {
-        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
-        tokenRefreshHandler.objectMapper = objectMapper;
-        tokenRefreshHandler.config = MockModules.provideMock(ConfigService.class);
-        tokenRefreshHandler.secretStore = MockModules.provideMock(SecretStore.class);
-        when(tokenRefreshHandler.secretStore.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN))
+        OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
+        strategy.objectMapper = objectMapper;
+        strategy.config = MockModules.provideMock(ConfigService.class);
+        strategy.secretStore = MockModules.provideMock(SecretStore.class);
+        when(strategy.secretStore.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN))
             .thenReturn(Optional.of("{\"token\":\"my-token\",\"expirationDate\":1639526410000}"));
 
-        tokenRefreshHandler.payloadBuilder = mock(OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder.class);
-        when(tokenRefreshHandler.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.USE_SHARED_TOKEN))
+        when(strategy.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.USE_SHARED_TOKEN))
             .thenReturn(Optional.of("true"));
 
-        Optional<AccessToken> accessToken = tokenRefreshHandler.getSharedAccessTokenIfSupported();
+        Optional<AccessToken> accessToken = strategy.getSharedAccessTokenIfSupported();
         assertTrue(accessToken.isPresent());
         assertEquals("my-token", accessToken.get().getTokenValue());
         assertEquals(1639526410000L, accessToken.get().getExpirationTime().getTime());
@@ -205,29 +208,36 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @ParameterizedTest
     @MethodSource
     public void refreshTokenNotRotated(String originalToken, String newToken, boolean shouldRotate) {
+        OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
+        strategy.config = MockModules.provideMock(ConfigService.class);
+        strategy.secretStore = MockModules.provideMock(SecretStore.class);
+        
+        // Create a TokenRefreshHandlerImpl to access the storeRefreshTokenIfRotated method
         OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
-        tokenRefreshHandler.config = MockModules.provideMock(ConfigService.class);
-        tokenRefreshHandler.secretStore = MockModules.provideMock(SecretStore.class);
-        when(tokenRefreshHandler.secretStore.getConfigPropertyAsOptional(eq(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN)))
+        tokenRefreshHandler.config = strategy.config;
+        tokenRefreshHandler.secretStore = strategy.secretStore;
+        tokenRefreshHandler.sourceAuthStrategy = strategy;
+        
+        when(strategy.secretStore.getConfigPropertyAsOptional(eq(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN)))
             .thenReturn(Optional.of(originalToken));
-        when(tokenRefreshHandler.secretStore.getConfigPropertyWithMetadata(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN))
+        when(strategy.secretStore.getConfigPropertyWithMetadata(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN))
             .thenReturn(Optional.of(ConfigService.ConfigValueWithMetadata.builder().value(originalToken).build()));
 
         CanonicalOAuthAccessTokenResponseDto exampleResponse = new CanonicalOAuthAccessTokenResponseDto();
         exampleResponse.refreshToken = newToken;
         tokenRefreshHandler.storeRefreshTokenIfRotated(exampleResponse);
 
-        verify(tokenRefreshHandler.secretStore, times(shouldRotate ? 1 : 0)).putConfigProperty(eq(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN), eq(newToken), eq(OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl.WRITE_RETRIES));
+        verify(strategy.secretStore, times(shouldRotate ? 1 : 0)).putConfigProperty(eq(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN), eq(newToken), eq(OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl.WRITE_RETRIES));
     }
 
     @Test
     public void refreshProactiveThresholdTimeIsBounded() {
-        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler = new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
-        tokenRefreshHandler.randomNumberGenerator = new RandomNumberGeneratorImpl();
+        OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
+        strategy.randomNumberGenerator = new RandomNumberGeneratorImpl();
         IntStream.range(0, 1_000).forEach(i -> {
-            int proactiveGracePeriodSeconds = tokenRefreshHandler.getProactiveGracePeriodSeconds();
-            assertTrue(proactiveGracePeriodSeconds >= tokenRefreshHandler.MIN_PROACTIVE_TOKEN_REFRESH.getSeconds());
-            assertTrue(proactiveGracePeriodSeconds <= tokenRefreshHandler.MAX_PROACTIVE_TOKEN_REFRESH.getSeconds());
+            int proactiveGracePeriodSeconds = strategy.getProactiveGracePeriodSeconds();
+            assertTrue(proactiveGracePeriodSeconds >= strategy.MIN_PROACTIVE_TOKEN_REFRESH.getSeconds());
+            assertTrue(proactiveGracePeriodSeconds <= strategy.MAX_PROACTIVE_TOKEN_REFRESH.getSeconds());
         });
     }
 }
