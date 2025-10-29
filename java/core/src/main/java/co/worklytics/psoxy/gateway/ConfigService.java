@@ -106,4 +106,26 @@ public interface ConfigService {
             return Optional.ofNullable(lastModifiedDate);
         }
     }
+
+    /**
+     * Represents a versioned configuration value with metadata
+     */
+    @Builder
+    @Value
+    class ConfigValueVersion implements Serializable {
+        /**
+         * The actual value of the configuration
+         */
+        String value;
+
+        /**
+         * When this version was last modified/created
+         */
+        Instant lastModifiedDate;
+
+        /**
+         * Version identifier (typically numeric, but represented as Integer for flexibility)
+         */
+        Integer version;
+    }
 }
