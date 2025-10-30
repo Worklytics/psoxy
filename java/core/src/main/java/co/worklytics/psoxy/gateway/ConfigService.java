@@ -1,16 +1,12 @@
 package co.worklytics.psoxy.gateway;
 
-import com.google.common.util.concurrent.Uninterruptibles;
+import java.io.Serializable;
+import java.time.Instant;
+import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Value;
-import lombok.extern.java.Log;
-
-import java.io.Serializable;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Optional;
 
 public interface ConfigService {
 

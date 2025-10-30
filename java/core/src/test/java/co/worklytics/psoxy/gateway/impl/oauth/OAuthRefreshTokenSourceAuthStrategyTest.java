@@ -13,6 +13,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -183,8 +185,13 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         strategy.objectMapper = objectMapper;
         strategy.config = MockModules.provideMock(ConfigService.class);
         strategy.secretStore = MockModules.provideMock(SecretStore.class);
-        when(strategy.secretStore.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN))
-            .thenReturn(Optional.of("{\"token\":\"my-token\",\"expirationDate\":1639526410000}"));
+        when(strategy.secretStore.getAvailableVersions(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN, 5))
+            .thenReturn(Arrays.asList(
+                ConfigService.ConfigValueVersion.builder()
+                    .value("{\"token\":\"my-token\",\"expirationDate\":1639526410000}")
+                    .version(1)
+                    .build()
+            ));
 
         when(strategy.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.USE_SHARED_TOKEN))
             .thenReturn(Optional.of("true"));
@@ -193,6 +200,67 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         assertTrue(accessToken.isPresent());
         assertEquals("my-token", accessToken.get().getTokenValue());
         assertEquals(1639526410000L, accessToken.get().getExpirationTime().getTime());
+    }
+
+    @SneakyThrows
+    @Test
+    public void choosesTokenByLatestExpiryThenVersion() {
+        OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
+        strategy.objectMapper = objectMapper;
+        strategy.config = MockModules.provideMock(ConfigService.class);
+        strategy.secretStore = MockModules.provideMock(SecretStore.class);
+
+        when(strategy.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.USE_SHARED_TOKEN))
+            .thenReturn(Optional.of("true"));
+
+        // Build three versions: 1,2,3 with 2 having the furthest expiration
+        long now = Instant.parse("2025-01-01T00:00:00Z").toEpochMilli();
+        String v1Json = objectMapper.writeValueAsString(new AccessTokenDto("t1", now + 1000));
+        String v2Json = objectMapper.writeValueAsString(new AccessTokenDto("t2", now + 10_000)); // largest expiry
+        String v3Json = objectMapper.writeValueAsString(new AccessTokenDto("t3", now + 5000));
+
+        List<ConfigService.ConfigValueVersion> versions = Arrays.asList(
+            ConfigService.ConfigValueVersion.builder().value(v1Json).version(1).build(),
+            ConfigService.ConfigValueVersion.builder().value(v2Json).version(2).build(),
+            ConfigService.ConfigValueVersion.builder().value(v3Json).version(3).build()
+        );
+
+        when(strategy.secretStore.getAvailableVersions(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN, 5))
+            .thenReturn(versions);
+
+        Optional<AccessToken> chosen = strategy.getSharedAccessTokenIfSupported();
+        assertTrue(chosen.isPresent());
+        assertEquals("t2", chosen.get().getTokenValue());
+    }
+
+    @SneakyThrows
+    @Test
+    public void choosesTokenByVersionWhenNoExpiry() {
+        OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
+        strategy.objectMapper = objectMapper;
+        strategy.config = MockModules.provideMock(ConfigService.class);
+        strategy.secretStore = MockModules.provideMock(SecretStore.class);
+
+        when(strategy.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.USE_SHARED_TOKEN))
+            .thenReturn(Optional.of("true"));
+
+        // Build three versions: 1,2,3 with no expiration dates -> pick highest version (3)
+        String v1Json = objectMapper.writeValueAsString(new AccessTokenDto("t1", null));
+        String v2Json = objectMapper.writeValueAsString(new AccessTokenDto("t2", null));
+        String v3Json = objectMapper.writeValueAsString(new AccessTokenDto("t3", null));
+
+        List<ConfigService.ConfigValueVersion> versions = Arrays.asList(
+            ConfigService.ConfigValueVersion.builder().value(v1Json).version(1).build(),
+            ConfigService.ConfigValueVersion.builder().value(v2Json).version(2).build(),
+            ConfigService.ConfigValueVersion.builder().value(v3Json).version(3).build()
+        );
+
+        when(strategy.secretStore.getAvailableVersions(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN, 5))
+            .thenReturn(versions);
+
+        Optional<AccessToken> chosen = strategy.getSharedAccessTokenIfSupported();
+        assertTrue(chosen.isPresent());
+        assertEquals("t3", chosen.get().getTokenValue());
     }
 
     static Stream<Arguments> refreshTokenNotRotated() {

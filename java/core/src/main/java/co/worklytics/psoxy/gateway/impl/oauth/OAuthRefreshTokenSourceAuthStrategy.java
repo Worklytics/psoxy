@@ -1,12 +1,13 @@
 package co.worklytics.psoxy.gateway.impl.oauth;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -16,6 +17,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.GenericUrl;
@@ -27,10 +29,10 @@ import com.google.api.client.http.HttpResponse;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
-import com.google.auth.oauth2.OAuth2CredentialsWithRefresh.Builder;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.Uninterruptibles;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ConfigService.ConfigValueVersion;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.RequiresConfiguration;
 import co.worklytics.psoxy.gateway.SecretStore;
@@ -246,24 +248,41 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     @VisibleForTesting
     Optional<AccessToken> getSharedAccessTokenIfSupported() {
         if (useSharedToken()) {
-            Optional<String> jsonToken =
-                    secretStore.getConfigPropertyAsOptional(ConfigProperty.ACCESS_TOKEN);
-            if (jsonToken.isEmpty()) {
-                return Optional.empty();
-            } else {
-                byte[] value = jsonToken.get().getBytes(StandardCharsets.UTF_8);
-                try {
-                    AccessTokenDto accessTokenDto =
-                            objectMapper.readerFor(AccessTokenDto.class).readValue(value);
-                    return Optional.ofNullable(accessTokenDto).map(AccessTokenDto::asAccessToken);
-                } catch (IOException e) {
-                    // NOTE: not logging 'e' itself, as sometimes includes value, so if value
-                    // really is a proper token then we don't want it in the logs
-                    log.log(Level.WARNING,
-                            "Could not parse contents of token into an AccessToken object; possibly expected initially, if config has a placeholder value for token");
-                    return Optional.empty();
-                }
-            }
+            List<ConfigValueVersion> possibleTokens = 
+                secretStore.getAvailableVersions(ConfigProperty.ACCESS_TOKEN, 5);
+            
+            return possibleTokens.stream()
+                .map(value -> {
+                    try {
+                        AccessTokenDto dto = objectMapper
+                            .readerFor(AccessTokenDto.class)
+                            .readValue(value.getValue());
+                        return Pair.of(value, dto);
+                    } catch (IOException e) {
+                        log.log(Level.WARNING, "Failed to parse stored access token JSON", e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                // sort by expiration date, then by version
+                // NOTE: oauth spec is for `expires_in`, which is a value in seconds ... this is parsed to Date by Google's lib
+                // so various potential issues 1) quick refreshes could result in 2 tokens with same expiration date
+                // 2) we don't know, or at least don't control, how google lib converts offset to date; nor is it clear what the right
+                // approach even its; probably relative to a Date value in the http response header ... but we can't be certain - is that
+                // when server SENT the response? began generating the response? what??
+                // so YMMV
+                .sorted(
+                    Comparator
+                        .comparing(
+                            (Pair<ConfigValueVersion, AccessTokenDto> p) ->
+                                Optional.ofNullable(p.getRight().getExpirationDate()).orElse(null),
+                            Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(
+                            p -> p.getLeft().getVersion(),
+                            Comparator.reverseOrder()))
+                .findFirst()
+                .map(Pair::getRight)
+                .map(AccessTokenDto::asAccessToken);
         } else {
             return Optional.empty();
         }
@@ -416,7 +435,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             boolean lockNeeded = sourceAuthStrategy.useSharedToken();
 
             boolean acquired =
-                    !lockNeeded || lockService.acquire(TOKEN_REFRESH_LOCK_ID, TOKEN_LOCK_DURATION);
+                !lockNeeded || lockService.acquire(TOKEN_REFRESH_LOCK_ID, TOKEN_LOCK_DURATION);
 
             AccessToken token;
             if (acquired) {
