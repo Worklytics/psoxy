@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Value;
 
 /**
@@ -54,6 +55,7 @@ public class WebhookCollectorModeConfig {
      *
      * default to "*", meaning all origins are allowed.
      */
+    @NonNull
     @Builder.Default
     String allowOrigins = "*";
 
@@ -71,6 +73,7 @@ public class WebhookCollectorModeConfig {
      *
      * defaults to true
      */
+    @NonNull
     @Builder.Default
     Boolean requireAuthorizationHeader = true;
 
