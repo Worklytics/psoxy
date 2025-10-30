@@ -242,3 +242,14 @@ variable "example_identity" {
   description = "Example identity to use for testing; if provided, will be used in the test script."
   default     = null
 }
+
+variable "keep_warm_instances" {
+  type        = number
+  description = "Number of Lambda execution environments to keep warm (at minimum). If null (default), Lambda will cold-start as needed. If set to 1 or more, AWS will keep at least that many instances ready, eliminating cold starts for the JWKS endpoint used by the JWT authorizer. This significantly improves webhook collection reliability. Cost: ~$0.015/hour per instance (~$11/month for 1 instance)."
+  default     = null
+
+  validation {
+    condition     = var.keep_warm_instances == null ? true : var.keep_warm_instances >= 1
+    error_message = "If keep_warm_instances is set, it must be at least 1."
+  }
+}
