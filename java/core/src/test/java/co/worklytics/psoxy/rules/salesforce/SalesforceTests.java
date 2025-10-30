@@ -142,7 +142,7 @@ public class SalesforceTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://test.salesforce.com/services/data/v64.0/query?q=SELECT%20Id%2CWhoId%2CWhatId%2CSubject%2CLocation%2CIsAllDayEvent%2CActivityDateTime%2CActivityDate%2CDurationInMinutes%2CStartDateTime%2CEndDateTime%2CEndDate%2CDescription%2CAccountId%2COwnerId%2CIsPrivate%2CShowAs%2CIsDeleted%2CIsChild%2CIsGroupEvent%2CGroupEventType%2CCreatedDate%2CCreatedById%2CLastModifiedDate%2CLastModifiedById%2CSystemModstamp%2CIsArchived%2CRecurrenceActivityId%2CIsRecurrence%2CRecurrenceStartDateTime%2CRecurrenceEndDateOnly%2CRecurrenceTimeZoneSidKey%2CRecurrenceType%2CRecurrenceInterval%2CRecurrenceDayOfWeekMask%2CRecurrenceDayOfMonth%2CRecurrenceInstance%2CRecurrenceMonthOfYear%2CReminderDateTime%2CIsReminderSet%2CEventSubtype%2CIsRecurrence2Exclusion%2CRecurrence2PatternText%2CRecurrence2PatternVersion%2CIsRecurrence2%2CIsRecurrence2Exception%2CRecurrence2PatternStartDate%2CRecurrence2PatternTimeZone%2CServiceAppointmentId%20FROM%20Event%20WHERE%20AccountId%3D%270015Y00002c7g8uQAA%27%20AND%20LastModifiedDate%3E%3D2016-01-01T00%3A00%3A00Z%20AND%20LastModifiedDate%3C2026-01-01T00%3A00%3A00Z", "events_by_query.json"),
             InvocationExample.of("https://test.salesforce.com/services/data/v64.0/query/SOME_TOKEN", "events_by_query.json"),
 
-            InvocationExample.of("https://test.salesforce.com/services/data/v64.0/composite", "composite_task_and_events.json")
+            InvocationExample.of("https://test.salesforce.com/services/data/v64.0/composite", "composite_task_and_events.json", "POST")
         );
     }
 }

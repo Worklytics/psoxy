@@ -74,5 +74,22 @@ terraform {
 
 2. `terraform init --upgrade` and `terraform apply`
 
-You will likely see MANY changes. These are caused by the provider version difference and should be benign. The vast majority are label changes; we utilize the `default_labels` functionality in google provider `5.x` to label all the infra created by this configuration; 
+You will likely see MANY changes. These are caused by the provider version difference and should be benign. The vast majority are label changes; we utilize the `default_labels` functionality in google provider `5.x` to label all the infra created by this configuration;
+
+## Bulk processing failures
+
+If you need to re-trigger bulk processing of objects that have already been written to GCS (e.g., for webhook collectors), you can use the `replay-gcs-writes.sh` script.
+
+This script uses `gsutil rewrite -kO` to replay write events on GCS objects, which triggers Cloud Storage write events that will cause the Cloud Function to re-process those objects.
+
+```bash
+# Re-trigger processing for all objects created in the last week
+./tools/gcp/replay-gcs-writes.sh my-bucket-name
+
+# Re-trigger processing for objects created since a specific date
+./tools/gcp/replay-gcs-writes.sh my-bucket-name 2024-01-01T00:00:00Z
+
+# Re-trigger processing for a single object
+./tools/gcp/replay-gcs-writes.sh gs://my-bucket-name/path/to/object.json
+```
 

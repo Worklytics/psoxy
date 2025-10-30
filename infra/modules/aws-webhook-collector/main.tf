@@ -196,6 +196,29 @@ resource "aws_lambda_event_source_mapping" "sqs_trigger" {
   ]
 }
 
+# Provisioned concurrency configuration to keep Lambda warm and eliminate cold starts
+# This is particularly important for the JWKS endpoint used by the JWT authorizer
+resource "aws_lambda_alias" "provisioned" {
+  count = var.keep_warm_instances != null ? 1 : 0
+
+  name             = "provisioned"
+  description      = "Alias for provisioned concurrency to eliminate cold starts"
+  function_name    = module.gate_instance.function_name
+  function_version = "$LATEST"
+
+  lifecycle {
+    ignore_changes = [function_version]
+  }
+}
+
+resource "aws_lambda_provisioned_concurrency_config" "keep_warm" {
+  count = var.keep_warm_instances != null ? 1 : 0
+
+  function_name                     = module.gate_instance.function_name
+  qualifier                         = aws_lambda_alias.provisioned[0].name
+  provisioned_concurrent_executions = var.keep_warm_instances
+}
+
 resource "aws_iam_policy" "sanitized_bucket_read" {
   name        = "${module.env_id.id}_BucketRead_${module.sanitized_output.bucket_id}"
   description = "Allow to read content from bucket: ${module.sanitized_output.bucket_id}"
@@ -422,5 +445,15 @@ output "provisioned_auth_key_pairs" {
 
 output "todo" {
   value = local.todo_content
+}
+
+output "provisioned_concurrency" {
+  value = var.keep_warm_instances != null ? {
+    enabled                           = true
+    provisioned_concurrent_executions = var.keep_warm_instances
+    alias_name                        = aws_lambda_alias.provisioned[0].name
+    alias_arn                         = aws_lambda_alias.provisioned[0].arn
+  } : null
+  description = "Provisioned concurrency configuration, if enabled. This keeps Lambda execution environments warm to eliminate cold starts for the JWKS endpoint."
 }
 
