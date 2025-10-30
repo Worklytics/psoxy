@@ -2,6 +2,7 @@ package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import dagger.Module;
 import dagger.Provides;
 import lombok.SneakyThrows;
@@ -74,5 +75,14 @@ public class TestModules {
             .thenReturn(Optional.of("salt"));
        // when(secretStore.getConfigPropertyAsOptional(eq(roxyConfigProperty.PSOXY_SALT)))
        //     .thenReturn(Optional.of("salt"));
+    }
+
+    @Module
+    public interface ForWebhookCollectorModeConfig {
+        @Provides
+        @Singleton
+        static WebhookCollectorModeConfig webhookCollectorModeConfig() {
+            return WebhookCollectorModeConfig.builder().build();
+        }
     }
 }

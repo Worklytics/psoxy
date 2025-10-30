@@ -57,9 +57,11 @@ public class JwksDecoratorTest {
         configService = MockModules.ForConfigService.configService();
         
         // Mock WebhookCollectorModeConfig
-        webhookCollectorModeConfig = MockModules.provideMock(WebhookCollectorModeConfig.class);
-        when(webhookCollectorModeConfig.getAcceptedAuthKeys())
-            .thenReturn(java.util.Optional.of("base64:" + generatedBase64Key));
+        webhookCollectorModeConfig = WebhookCollectorModeConfig.builder()
+        .acceptedAuthKeys("base64:" + generatedBase64Key)
+        .build();
+
+
         
         keyClients = Collections.singleton(new Base64KeyClient());
         handler = new JwksDecorator(new InboundWebhookHandler(
