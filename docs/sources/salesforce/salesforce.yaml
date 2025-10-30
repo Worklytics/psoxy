@@ -1,6 +1,8 @@
 ---
 endpoints:
   - pathRegex: "^/services/data/v(\\d*.\\d{1})/composite$"
+    allowedMethods:
+      - "POST"
     allowedQueryParams: []
     transforms:
       - !<pseudonymize>
