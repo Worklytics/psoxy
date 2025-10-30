@@ -50,6 +50,12 @@ variable "sanitized_accessor_role_names" {
   description = "list of names of AWS IAM Roles which should be able to access the sanitized (output) bucket"
 }
 
+variable "output_path_prefix" {
+  type        = string
+  description = "optional path prefix to prepend to webhook output files in the bucket (e.g., 'events_', 'webhooks/')"
+  default     = ""
+}
+
 variable "logs_kms_key_arn" {
   type        = string
   description = "AWS KMS key ARN to use to encrypt lambdas' logs. NOTE: ensure CloudWatch is setup to use this key (cloudwatch principal has perms, log group in same region as key, etc) - see https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html ."

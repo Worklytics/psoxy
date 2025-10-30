@@ -288,6 +288,7 @@ module "webhook_collector" {
   rules_file                         = each.value.rules_file
   webhook_batch_invoker_sa_email     = module.psoxy.webhook_batch_invoker_sa_email
   batch_processing_frequency_minutes = try(each.value.batch_processing_frequency_minutes, 5)
+  output_path_prefix                 = each.value.output_path_prefix
   example_identity                   = try(each.value.example_identity, null)
   example_payload                    = try(each.value.example_payload, null)
 

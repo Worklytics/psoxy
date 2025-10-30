@@ -106,7 +106,7 @@ module "gate_instance" {
     local.required_env_vars,
     {
       WEBHOOK_OUTPUT               = aws_sqs_queue.sanitized_webhooks_to_batch.url
-      WEBHOOK_BATCH_OUTPUT         = "s3://${module.sanitized_output.bucket_id}"
+      WEBHOOK_BATCH_OUTPUT         = "s3://${module.sanitized_output.bucket_id}/${var.output_path_prefix}"
       REQUIRE_AUTHORIZATION_HEADER = length(local.accepted_auth_keys) > 0
       ALLOW_ORIGINS                = join(",", var.allow_origins)
       CUSTOM_RULES_SHA             = module.rules_parameter.rules_hash
@@ -134,6 +134,7 @@ resource "aws_apigatewayv2_authorizer" "jwt" {
   api_id           = var.api_gateway_v2.id
   authorizer_type  = "JWT"
   identity_sources = ["$request.header.Authorization"]
+
 
   jwt_configuration {
     issuer = local.auth_issuer

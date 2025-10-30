@@ -200,7 +200,7 @@ locals {
     BATCH_MERGE_SUBSCRIPTION         = google_pubsub_subscription.webhook_subscription.id
     BATCH_SIZE                       = local.batch_size
     BATCH_INVOCATION_TIMEOUT_SECONDS = local.batch_invocation_timeout_seconds
-    WEBHOOK_BATCH_OUTPUT             = "gs://${module.sanitized_webhook_output.bucket_name}"
+    WEBHOOK_BATCH_OUTPUT             = "gs://${module.sanitized_webhook_output.bucket_name}/${var.output_path_prefix}"
     }
     : k => v if v != null
   }
