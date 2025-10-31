@@ -1,18 +1,17 @@
 package co.worklytics.psoxy.gateway.impl.oauth;
 
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.RequiresConfiguration;
-import co.worklytics.psoxy.gateway.SecretStore;
-import com.google.api.client.http.HttpContent;
-import com.google.api.client.http.HttpHeaders;
-import com.google.api.client.http.UrlEncodedContent;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import javax.inject.Inject;
+import com.google.api.client.http.HttpContent;
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.UrlEncodedContent;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.RequiresConfiguration;
+import co.worklytics.psoxy.gateway.SecretStore;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * build payload for canonical OAuth access token request authenticated by a long-lived refresh

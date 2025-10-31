@@ -1,23 +1,36 @@
 package co.worklytics.psoxy.aws;
 
-import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import java.util.Collections;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.Getter;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.StringUtils;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
-import software.amazon.awssdk.services.secretsmanager.model.*;
-
-import javax.inject.Inject;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.logging.Level;
+import software.amazon.awssdk.services.secretsmanager.model.DecryptionFailureException;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
+import software.amazon.awssdk.services.secretsmanager.model.ListSecretVersionIdsRequest;
+import software.amazon.awssdk.services.secretsmanager.model.ListSecretVersionIdsResponse;
+import software.amazon.awssdk.services.secretsmanager.model.PutSecretValueRequest;
+import software.amazon.awssdk.services.secretsmanager.model.PutSecretValueResponse;
+import software.amazon.awssdk.services.secretsmanager.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.secretsmanager.model.SecretVersionsListEntry;
+import software.amazon.awssdk.services.secretsmanager.model.SecretsManagerException;
 
 /**
  * implementation of SecretStore backed by AWS Secrets Manager
@@ -125,5 +138,92 @@ public class SecretsManagerSecretStore implements SecretStore {
             }
             throw new IllegalStateException(String.format("failed to get config value: %s", id));
         }
+    }
+
+    @Override
+    public List<ConfigService.ConfigValueVersion> getAvailableVersions(ConfigProperty property, int limit) {
+        if (property.isEnvVarOnly()) {
+            return Collections.emptyList();
+        }
+
+        String id = secretId(property);
+        try {
+            // List all versions of the secret
+            ListSecretVersionIdsRequest request = ListSecretVersionIdsRequest.builder()
+                .secretId(id)
+                .build();
+
+            ListSecretVersionIdsResponse response = client.listSecretVersionIds(request);
+
+            // Get all versions and sort by creation date descending
+            List<SecretVersionsListEntry> versions = response.versions();
+            if (versions == null || versions.isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            // Filter to only include AWSCURRENT and AWSPREVIOUS versions
+            // and sort by last accessed date (most recent first)
+            return versions.stream()
+                .filter(v -> v.versionStages() != null && 
+                    (v.versionStages().contains("AWSCURRENT") || v.versionStages().contains("AWSPREVIOUS")))
+                .sorted((v1, v2) -> {
+                    // Sort by lastAccessedDate if available, otherwise by createdDate
+                    if (v1.lastAccessedDate() != null && v2.lastAccessedDate() != null) {
+                        return v2.lastAccessedDate().compareTo(v1.lastAccessedDate());
+                    } else if (v1.createdDate() != null && v2.createdDate() != null) {
+                        return v2.createdDate().compareTo(v1.createdDate());
+                    }
+                    return 0;
+                })
+                .limit(limit)
+                .map(version -> {
+                    try {
+                        // Retrieve the actual secret value for this version
+                        GetSecretValueRequest getRequest = GetSecretValueRequest.builder()
+                            .secretId(id)
+                            .versionId(version.versionId())
+                            .build();
+                        GetSecretValueResponse getResponse = client.getSecretValue(getRequest);
+
+                        return ConfigService.ConfigValueVersion.builder()
+                            .value(getResponse.secretString())
+                            .lastModifiedDate(version.createdDate() != null ? 
+                                version.createdDate() : version.lastAccessedDate())
+                            .version(parseVersionNumber(version.versionId()))
+                            .build();
+                    } catch (Exception e) {
+                        log.log(Level.WARNING, "Failed to retrieve version " + version.versionId() + " of secret " + id, e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        } catch (ResourceNotFoundException e) {
+            if (envVarsConfig.isDevelopment()) {
+                log.log(Level.INFO, "secret not found when listing versions; may be expected; secret " + id);
+            }
+            return Collections.emptyList();
+        } catch (SecretsManagerException e) {
+            if (envVarsConfig.isDevelopment()) {
+                log.log(Level.WARNING, "failed to list secret versions for " + id, e);
+            }
+            return Collections.emptyList();
+        } catch (Exception e) {
+            log.log(Level.WARNING, "Unexpected error listing secret versions for " + id, e);
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * AWS Secrets Manager version IDs are UUIDs, so we can't parse them as integers.
+     * We'll use a hash code as a pseudo-version number for ordering purposes.
+     */
+    private Integer parseVersionNumber(String versionId) {
+        if (versionId == null) {
+            return null;
+        }
+        // Use hashCode as a stable numeric representation
+        return Math.abs(versionId.hashCode());
     }
 }

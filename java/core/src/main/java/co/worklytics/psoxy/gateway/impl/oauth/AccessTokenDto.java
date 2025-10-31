@@ -16,7 +16,7 @@ import java.util.Optional;
 @Value
 public class AccessTokenDto {
     @JsonCreator
-    public AccessTokenDto(@JsonProperty("token") String token, @JsonProperty("expirationDate") long expirationDate) {
+    public AccessTokenDto(@JsonProperty("token") String token, @JsonProperty("expirationDate") Long expirationDate) {
         this.token = token;
         this.expirationDate = expirationDate;
     }

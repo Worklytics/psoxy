@@ -1,26 +1,25 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import dagger.assisted.Assisted;
-import dagger.assisted.AssistedInject;
-import lombok.SneakyThrows;
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.File;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedInject;
+import lombok.SneakyThrows;
 
 /**
  * config service that either takes its configuration from the command line or from a file
@@ -124,5 +123,14 @@ public class CommandLineConfigService implements ConfigService, SecretStore {
             throw new IllegalArgumentException("No file to process");
         }
         return cmd.getArgList().get(0);
+    }
+
+    @Override
+    public List<ConfigService.ConfigValueVersion> getAvailableVersions(ConfigProperty property, int limit) {
+       return getConfigPropertyWithMetadata(property).map(value -> ConfigService.ConfigValueVersion.builder()
+            .value(value.getValue())
+            .lastModifiedDate(value.getLastModifiedDate().orElse(null))
+            .version(null)
+            .build()).stream().collect(Collectors.toList());
     }
 }
