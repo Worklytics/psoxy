@@ -34,3 +34,39 @@ After merged to `main`:
 ```shell
 ./tools/release/publish.sh v0.4.16
 ```
+
+This script will:
+- Create and push a git tag
+- Create a GitHub release
+- Publish Maven artifacts to GitHub Packages (requires authentication)
+- Provide instructions for additional release steps
+
+### Maven Artifacts Publishing
+
+The `publish.sh` script automatically publishes Maven artifacts (`gateway-core` and `psoxy-core`) to GitHub Packages.
+
+**Prerequisites:**
+- Maven installed
+- GitHub Personal Access Token with `write:packages` permission
+- Authentication configured in `~/.m2/settings.xml`:
+
+```xml
+<settings>
+  <servers>
+    <server>
+      <id>github</id>
+      <username>YOUR_GITHUB_USERNAME</username>
+      <password>YOUR_GITHUB_TOKEN</password>
+    </server>
+  </servers>
+</settings>
+```
+
+If the automatic publish fails, you can manually run:
+
+```shell
+cd java
+mvn clean deploy
+```
+
+For information on consuming these artifacts, see [Maven Artifacts](maven-artifacts.md).

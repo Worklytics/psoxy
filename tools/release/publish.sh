@@ -114,6 +114,21 @@ printf "    ${BLUE}./tools/release/example-create-release-pr.sh . gcp ${GCP_EXAM
 printf "Publish release artifacts: \n"
 printf "    ${BLUE}./tools/release/publish-aws-release-artifact.sh ${RELEASE}${NC}\n"
 
+printf "\nPublishing Maven artifacts to GitHub Packages ...\n"
+printf "  (requires GitHub token with ${BLUE}write:packages${NC} permission in ${BLUE}~/.m2/settings.xml${NC})\n"
+if command -v mvn &> /dev/null; then
+  cd "${PATH_TO_REPO}java"
+  if mvn clean deploy -DskipTests; then
+    printf "${GREEN}✓${NC} Maven artifacts published to GitHub Packages\n"
+  else
+    printf "${RED}✗${NC} Maven deploy failed. You may need to configure authentication in ~/.m2/settings.xml\n"
+    printf "  See: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry\n"
+  fi
+else
+  printf "${RED}Maven not found.${NC} Skipping Maven artifact deployment.\n"
+  printf "  To deploy manually, run: ${BLUE}cd ${PATH_TO_REPO}java && mvn clean deploy${NC}\n"
+fi
+
 printf "Update stable demo deployment to point to it: \n"
 printf "In ${BLUE}psoxy-demos${NC} repo, run:\n"
 printf "    ${BLUE}git checkout -b upgrade-aws-stable-to-${RELEASE}${NC}\n"
