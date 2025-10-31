@@ -330,7 +330,7 @@ public class SanitizerUtils {
             com.google.api.client.util.Preconditions.checkArgument(value instanceof String, "Value must be string");
 
             if (StringUtils.isBlank((String) value)) {
-                return new ArrayList<>();
+                return ""; // empty string
             } else {
                 // NOTE: this does NOT seem to work for lists containing empty values (eg ",,"),
                 // which
@@ -338,6 +338,9 @@ public class SanitizerUtils {
                 if (emailAddressParser.isValidAddressList((String) value)) {
                     List<EmailAddress> addresses =
                         emailAddressParser.parseEmailAddressesFromHeader((String) value);
+
+                    //TODO: in v0.6, we should use a String instead of List<PseudonymizedIdentity>/List<String>;
+                    // encode EVERYTHING according to encoding option, then join with comma back into a CSV string
 
                     return jsonConfiguration.jsonProvider()
                         .toJson(addresses.stream().map(EmailAddress::asFormattedString)

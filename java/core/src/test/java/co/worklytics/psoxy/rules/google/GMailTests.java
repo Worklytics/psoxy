@@ -97,7 +97,8 @@ public class GMailTests extends JavaRulesTestBaseCase {
 
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
-            InvocationExample.of("https://gmail.googleapis.com/gmail/v1/users/me/messages/sdfgsdfg", "message.json")
+            InvocationExample.of("https://gmail.googleapis.com/gmail/v1/users/me/messages/sdfgsdfg", "message.json"),
+            InvocationExample.of("https://gmail.googleapis.com/gmail/v1/users/me/messages/emptycc", "message_emptyCC.json")
         );
     }
 }
