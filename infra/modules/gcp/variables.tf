@@ -105,6 +105,15 @@ variable "vpc_config" {
 
   description = "**alpha** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
   default     = null
+
+  validation {
+    condition = var.vpc_config == null || (
+      (var.vpc_config.network != null && var.vpc_config.subnetwork == null) ||
+      (var.vpc_config.network == null && var.vpc_config.subnetwork != null) ||
+      (var.vpc_config.network == null && var.vpc_config.subnetwork == null && var.vpc_config.serverless_connector != null)
+    )
+    error_message = "Only one of 'network' or 'subnetwork' can be specified in vpc_config, not both. If using an existing serverless_connector, neither network nor subnetwork should be specified."
+  }
 }
 
 variable "bucket_force_destroy" {
