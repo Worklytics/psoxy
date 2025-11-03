@@ -319,8 +319,8 @@ variable "webhook_collectors" {
     allow_origins       = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
     output_path_prefix  = optional(string, "")          # optional path prefix to prepend to webhook output files in bucket
     keep_warm_instances = optional(number, null)        # if set, keeps N Lambda instances warm to eliminate cold starts; adds cost (~$11/month per instance) but improves reliability
-    example_identity    = optional(string, null) # example identity to use in test payloads
-    example_payload     = optional(string, null) # example payload to use in test payloads
+    example_identity    = optional(string, null)        # example identity to use in test payloads
+    example_payload     = optional(string, null)        # example payload to use in test payloads
   }))
   default = {}
 
