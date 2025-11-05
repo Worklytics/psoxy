@@ -155,7 +155,6 @@ variable "vpc_config" {
 
   description = "**alpha** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
   default     = null
-
   # serverless_connector: allow null; if provided, must match the full resource name
   validation {
     condition = (

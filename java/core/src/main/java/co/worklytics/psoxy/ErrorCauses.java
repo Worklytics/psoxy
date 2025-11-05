@@ -1,8 +1,5 @@
 package co.worklytics.psoxy;
 
-
-import co.worklytics.psoxy.gateway.ConfigService;
-
 /**
  * Enumeration of errors that cause a not 200 OK response from Psoxy
  * Values of response header {@see co.worklytics.psoxy.ResponseHeader.ERROR}
@@ -47,6 +44,12 @@ public enum ErrorCauses {
      * failed to build target URL (eg, that of source) from request URL (requested from proxy)
      */
     FAILED_TO_BUILD_URL,
+
+    /**
+     * network egress from proxy instance is blocked, likely due to VPC/serverless connector misconfiguration
+     * or network connectivity issues (firewall, routing, etc)
+     */
+    NETWORK_EGRESS_BLOCKED,
 
     /**
      * tokenized request parameter is invalid. most likely too stale.
