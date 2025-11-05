@@ -26,7 +26,7 @@ endpoints:
         host_id:
           type: "string"
         id:
-          type: "string"
+          type: "integer"
         settings:
           $ref: "#/definitions/MeetingSettings"
         start_time:
@@ -35,6 +35,10 @@ endpoints:
         status:
           type: "string"
         timezone:
+          type: "string"
+        type:
+          type: "integer"
+        uuid:
           type: "string"
   - pathTemplate: "/v2/meetings/{meetingId}/meeting_summary"
     allowedQueryParams: []
@@ -357,6 +361,33 @@ endpoints:
         total_records:
           type: "integer"
 definitions:
+  AuthenticationException:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+  BreakoutRoom:
+    type: "object"
+    properties:
+      enable:
+        type: "boolean"
+      rooms:
+        type: "array"
+        items:
+          $ref: "#/definitions/Room"
+  ContinuousMeetingChat:
+    type: "object"
+    properties:
+      auto_add_invited_external_users:
+        type: "boolean"
+      auto_add_meeting_participants:
+        type: "boolean"
+      channel_id:
+        type: "string"
+      enable:
+        type: "boolean"
+      who_is_added:
+        type: "string"
   CustomKeysItem:
     type: "object"
     properties:
@@ -375,6 +406,24 @@ definitions:
         type: "string"
       summary_overview:
         type: "string"
+  Interpreter:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      interpreter_languages:
+        type: "string"
+      languages:
+        type: "string"
+  LanguageInterpretation:
+    type: "object"
+    properties:
+      enable:
+        type: "boolean"
+      interpreters:
+        type: "array"
+        items:
+          $ref: "#/definitions/Interpreter"
   Meeting:
     type: "object"
     properties:
@@ -396,6 +445,13 @@ definitions:
         type: "string"
       type:
         type: "integer"
+  MeetingInvitee:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      internal_user:
+        type: "boolean"
   MeetingOccurrence:
     type: "object"
     properties:
@@ -487,9 +543,105 @@ definitions:
   MeetingSettings:
     type: "object"
     properties:
+      allow_host_control_participant_mute_state:
+        type: "boolean"
+      allow_multiple_devices:
+        type: "boolean"
+      alternative_host_update_polls:
+        type: "boolean"
+      alternative_hosts_email_notification:
+        type: "boolean"
+      approval_type:
+        type: "integer"
+      audio:
+        type: "string"
+      authentication_domains:
+        type: "string"
+      authentication_exception:
+        type: "array"
+        items:
+          $ref: "#/definitions/AuthenticationException"
+      auto_recording:
+        type: "string"
       auto_start_ai_companion_questions:
         type: "boolean"
       auto_start_meeting_summary:
+        type: "boolean"
+      breakout_room:
+        $ref: "#/definitions/BreakoutRoom"
+      calendar_type:
+        type: "integer"
+      close_registration:
+        type: "boolean"
+      cn_meeting:
+        type: "boolean"
+      contact_email:
+        type: "string"
+      continuous_meeting_chat:
+        $ref: "#/definitions/ContinuousMeetingChat"
+      device_testing:
+        type: "boolean"
+      disable_participant_video:
+        type: "boolean"
+      email_notification:
+        type: "boolean"
+      encryption_type:
+        type: "string"
+      enforce_login:
+        type: "boolean"
+      focus_mode:
+        type: "boolean"
+      host_save_video_order:
+        type: "boolean"
+      host_video:
+        type: "boolean"
+      in_meeting:
+        type: "boolean"
+      internal_meeting:
+        type: "boolean"
+      jbh_time:
+        type: "integer"
+      join_before_host:
+        type: "boolean"
+      language_interpretation:
+        $ref: "#/definitions/LanguageInterpretation"
+      meeting_authentication:
+        type: "boolean"
+      meeting_invitees:
+        type: "array"
+        items:
+          $ref: "#/definitions/MeetingInvitee"
+      mute_upon_entry:
+        type: "boolean"
+      participant_focused_meeting:
+        type: "boolean"
+      participant_video:
+        type: "boolean"
+      private_meeting:
+        type: "boolean"
+      push_change_to_calendar:
+        type: "boolean"
+      question_and_answer:
+        $ref: "#/definitions/QuestionAndAnswer"
+      registrants_confirmation_email:
+        type: "boolean"
+      registrants_email_notification:
+        type: "boolean"
+      registration_type:
+        type: "integer"
+      resources:
+        type: "array"
+        items:
+          $ref: "#/definitions/Resource"
+      show_share_button:
+        type: "boolean"
+      sign_language_interpretation:
+        $ref: "#/definitions/SignLanguageInterpretation"
+      use_pmi:
+        type: "boolean"
+      waiting_room:
+        type: "boolean"
+      watermark:
         type: "boolean"
       who_can_ask_questions:
         type: "integer"
@@ -540,6 +692,21 @@ definitions:
         type: "string"
       uuid:
         type: "string"
+  QuestionAndAnswer:
+    type: "object"
+    properties:
+      allow_anonymous_questions:
+        type: "boolean"
+      allow_submit_questions:
+        type: "boolean"
+      attendees_can_comment:
+        type: "boolean"
+      attendees_can_upvote:
+        type: "boolean"
+      enable:
+        type: "boolean"
+      question_visibility:
+        type: "string"
   RecordingFile:
     type: "object"
     properties:
@@ -566,6 +733,38 @@ definitions:
         type: "string"
       status:
         type: "string"
+  Resource:
+    type: "object"
+    properties:
+      permission_level:
+        type: "string"
+      resource_id:
+        type: "string"
+      resource_type:
+        type: "string"
+  Room:
+    type: "object"
+    properties:
+      participants:
+        type: "array"
+        items:
+          type: "string"
+  SignInterpreter:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      sign_language:
+        type: "string"
+  SignLanguageInterpretation:
+    type: "object"
+    properties:
+      enable:
+        type: "boolean"
+      interpreters:
+        type: "array"
+        items:
+          $ref: "#/definitions/SignInterpreter"
   SummaryDetail:
     type: "object"
     properties:
