@@ -633,7 +633,6 @@ EOT
       example_api_calls : [
         "/v2/users",
         "/v2/users/{USER_ID}/meetings",
-        "/v2/users/{USER_ID}/settings",
         "/v2/users/{USER_ID}/recordings",
         "/v2/meetings/{MEETING_ID}",
         "/v2/meetings/{MEETING_ID}/meeting_summary",
@@ -641,7 +640,6 @@ EOT
         "/v2/past_meetings/{MEETING_ID}/instances",
         "/v2/past_meetings/{MEETING_ID}/participants",
         "/v2/report/users/{userId}/meetings",
-        "/v2/report/meetings/{meetingId}",
         "/v2/report/meetings/{meetingId}/participants"
       ],
       external_token_todo : <<EOT
