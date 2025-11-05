@@ -1,42 +1,7 @@
 ---
 endpoints:
-  - pathTemplate: "/v2/users"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.users[*]['email','phone_number']"
-        encoding: "URL_SAFE_TOKEN"
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.users[*]['id','pmi']"
-        includeReversible: true
-        encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$.users[*]['display_name','first_name','last_name','pic_url','employee_unique_id']"
-  - pathTemplate: "/v2/users/{userId}/settings"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$..ip_addresses_or_ranges"
-          - "$..require_password_for_pmi_meetings"
-          - "$..pmi_password"
-          - "$..meeting_password_requirement"
-          - "$..virtual_background_settings"
-          - "$..audio_conference_info"
-          - "$..numbers"
-          - "$..custom_service_instructions"
-          - "$..default_password_for_scheduled_meetings"
-  - pathTemplate: "/v2/users/{userId}/meetings"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.meetings[*]['host_id','host_email']"
-        encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$.meetings[*]['topic','join_url','start_url','agenda']"
   - pathTemplate: "/v2/meetings/{meetingId}"
+    allowedQueryParams: []
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -52,12 +17,35 @@ endpoints:
           - "$.['password','h323_password','pstn_password','encrypted_password','start_url']"
           - "$..join_url"
           - "$..name"
+    responseSchema:
+      type: "object"
+      properties:
+        created_at:
+          type: "string"
+          format: "date-time"
+        host_id:
+          type: "string"
+        id:
+          type: "string"
+        settings:
+          $ref: "#/definitions/MeetingSettings"
+        start_time:
+          type: "string"
+          format: "date-time"
+        status:
+          type: "string"
+        timezone:
+          type: "string"
   - pathTemplate: "/v2/meetings/{meetingId}/meeting_summary"
+    allowedQueryParams: []
     transforms:
       - !<pseudonymize>
         jsonPaths:
           - "$['meeting_host_id','meeting_host_email', 'summary_last_modified_user_id','summary_last_modified_user_email']"
         encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$['meeting_topic','summary_title']"
       - !<textDigest>
         jsonPaths:
           - "$..summary_overview"
@@ -65,11 +53,53 @@ endpoints:
           - "$.summary_details[*].summary"
           - "$.edited_summary.summary_details"
           - "$..next_steps[*]"
-      - !<redact>
-        jsonPaths:
-          - "$['meeting_topic','summary_title']"
-  - pathTemplate: "/v2/past_meetings/{meetingId}/instances"
+    responseSchema:
+      type: "object"
+      properties:
+        edited_summary:
+          $ref: "#/definitions/EditedSummary"
+        meeting_end_time:
+          type: "string"
+          format: "date-time"
+        meeting_host_email:
+          type: "string"
+        meeting_host_id:
+          type: "string"
+        meeting_id:
+          type: "integer"
+        meeting_start_time:
+          type: "string"
+          format: "date-time"
+        meeting_uuid:
+          type: "string"
+        next_steps:
+          type: "array"
+          items:
+            type: "string"
+        summary_created_time:
+          type: "string"
+          format: "date-time"
+        summary_details:
+          type: "array"
+          items:
+            $ref: "#/definitions/SummaryDetail"
+        summary_end_time:
+          type: "string"
+          format: "date-time"
+        summary_last_modified_time:
+          type: "string"
+          format: "date-time"
+        summary_last_modified_user_email:
+          type: "string"
+        summary_last_modified_user_id:
+          type: "string"
+        summary_overview:
+          type: "string"
+        summary_start_time:
+          type: "string"
+          format: "date-time"
   - pathTemplate: "/v2/past_meetings/{meetingId}"
+    allowedQueryParams: []
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -78,7 +108,64 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.['user_name','topic','agenda']"
-  - pathTemplate: "/v2/past_meetings/{meetingId}/participants"
+    responseSchema:
+      type: "object"
+      properties:
+        dept:
+          type: "string"
+        duration:
+          type: "integer"
+        end_time:
+          type: "string"
+          format: "date-time"
+        host_id:
+          type: "string"
+        id:
+          type: "integer"
+        participants_count:
+          type: "integer"
+        source:
+          type: "string"
+        start_time:
+          type: "string"
+          format: "date-time"
+        topic:
+          type: "string"
+        total_minutes:
+          type: "integer"
+        type:
+          type: "integer"
+        user_email:
+          type: "string"
+        user_name:
+          type: "string"
+        uuid:
+          type: "string"
+  - pathTemplate: "/v2/past_meetings/{occurrenceUuid}/instances"
+    allowedQueryParams:
+      - "page_size"
+      - "next_page_token"
+    responseSchema:
+      type: "object"
+      properties:
+        meetings:
+          type: "array"
+          items:
+            $ref: "#/definitions/MeetingOccurrence"
+        next_page_token:
+          type: "string"
+        page_count:
+          type: "integer"
+        page_number:
+          type: "integer"
+        page_size:
+          type: "integer"
+        total_records:
+          type: "integer"
+  - pathTemplate: "/v2/past_meetings/{occurrenceUuid}/participants"
+    allowedQueryParams:
+      - "page_size"
+      - "next_page_token"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -87,25 +174,27 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.participants[*]['name','registrant_id']"
-  - pathTemplate: "/v2/report/users/{accountId}/meetings"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.meetings[*]['host_id','user_email','host_email']"
-        encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$.meetings[*]['user_name','topic','custom_keys','tracking_fields']"
-  - pathTemplate: "/v2/report/meetings/{meetingId}"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.['host_id','user_email','host_email']"
-        encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$.['user_name','topic','custom_keys','tracking_fields']"
-  - pathTemplate: "/v2/report/meetings/{meetingId}/participants"
+    responseSchema:
+      type: "object"
+      properties:
+        next_page_token:
+          type: "string"
+        page_count:
+          type: "integer"
+        page_number:
+          type: "integer"
+        page_size:
+          type: "integer"
+        participants:
+          type: "array"
+          items:
+            $ref: "#/definitions/MeetingParticipant"
+        total_records:
+          type: "integer"
+  - pathTemplate: "/v2/report/meetings/{occurrenceUuid}/participants"
+    allowedQueryParams:
+      - "page_size"
+      - "next_page_token"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -114,7 +203,129 @@ endpoints:
       - !<redact>
         jsonPaths:
           - "$.participants[*]['name','registrant_id','display_name']"
+    responseSchema:
+      type: "object"
+      properties:
+        next_page_token:
+          type: "string"
+        page_count:
+          type: "integer"
+        page_number:
+          type: "integer"
+        page_size:
+          type: "integer"
+        participants:
+          type: "array"
+          items:
+            $ref: "#/definitions/MeetingParticipant"
+        total_records:
+          type: "integer"
+  - pathTemplate: "/v2/report/users/{userId}/meetings"
+    allowedQueryParams:
+      - "from"
+      - "to"
+      - "type"
+      - "page_size"
+      - "next_page_token"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.meetings[*]['host_id','user_email','host_email']"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.meetings[*]['user_name','topic','custom_keys','tracking_fields']"
+    responseSchema:
+      type: "object"
+      properties:
+        meetings:
+          type: "array"
+          items:
+            $ref: "#/definitions/MeetingsItem"
+        next_page_token:
+          type: "string"
+        page_count:
+          type: "integer"
+        page_number:
+          type: "integer"
+        page_size:
+          type: "integer"
+        total_records:
+          type: "integer"
+  - pathTemplate: "/v2/users"
+    allowedQueryParams:
+      - "status"
+      - "page_size"
+      - "page_number"
+      - "next_page_token"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.users[*]['email','phone_number']"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.users[*]['id','pmi']"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.users[*]['display_name','first_name','last_name','pic_url','employee_unique_id']"
+    responseSchema:
+      type: "object"
+      properties:
+        next_page_token:
+          type: "string"
+        page_count:
+          type: "integer"
+        page_number:
+          type: "integer"
+        page_size:
+          type: "integer"
+        total_records:
+          type: "integer"
+        users:
+          type: "array"
+          items:
+            $ref: "#/definitions/User"
+  - pathTemplate: "/v2/users/{userId}/meetings"
+    allowedQueryParams:
+      - "page_size"
+      - "next_page_token"
+      - "type"
+      - "from"
+      - "to"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.meetings[*]['host_id','host_email']"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$.meetings[*]['topic','join_url','start_url','agenda']"
+    responseSchema:
+      type: "object"
+      properties:
+        meetings:
+          type: "array"
+          items:
+            $ref: "#/definitions/Meeting"
+        next_page_token:
+          type: "string"
+        page_count:
+          type: "integer"
+        page_number:
+          type: "integer"
+        page_size:
+          type: "integer"
+        total_records:
+          type: "integer"
   - pathTemplate: "/v2/users/{userId}/recordings"
+    allowedQueryParams:
+      - "from"
+      - "to"
+      - "page_size"
+      - "next_page_token"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -124,3 +335,272 @@ endpoints:
         jsonPaths:
           - "$..['topic','share_url','recording_play_passcode']"
           - "$..recording_files[*]['download_url','file_path','play_url','agenda']"
+    responseSchema:
+      type: "object"
+      properties:
+        from:
+          type: "string"
+        meetings:
+          type: "array"
+          items:
+            $ref: "#/definitions/MeetingRecording"
+        next_page_token:
+          type: "string"
+        page_count:
+          type: "integer"
+        page_number:
+          type: "integer"
+        page_size:
+          type: "integer"
+        to:
+          type: "string"
+        total_records:
+          type: "integer"
+definitions:
+  CustomKeysItem:
+    type: "object"
+    properties:
+      key:
+        type: "string"
+      value:
+        type: "string"
+  EditedSummary:
+    type: "object"
+    properties:
+      next_steps:
+        type: "array"
+        items:
+          type: "string"
+      summary_details:
+        type: "string"
+      summary_overview:
+        type: "string"
+  Meeting:
+    type: "object"
+    properties:
+      created_at:
+        type: "string"
+        format: "date-time"
+      duration:
+        type: "integer"
+      host_id:
+        type: "string"
+      id:
+        type: "integer"
+      sourceId:
+        type: "string"
+      start_time:
+        type: "string"
+        format: "date-time"
+      timezone:
+        type: "string"
+      type:
+        type: "integer"
+  MeetingOccurrence:
+    type: "object"
+    properties:
+      duration:
+        type: "integer"
+      end_time:
+        type: "string"
+        format: "date-time"
+      host_id:
+        type: "string"
+      meeting_id:
+        type: "string"
+      meeting_type:
+        type: "integer"
+      participants:
+        type: "array"
+        items:
+          $ref: "#/definitions/MeetingParticipant"
+      participants_count:
+        type: "integer"
+      start_time:
+        type: "string"
+        format: "date-time"
+      topic_length:
+        type: "integer"
+      total_minutes:
+        type: "integer"
+      user_id:
+        type: "string"
+      uuid:
+        type: "string"
+      workItemId:
+        type: "string"
+  MeetingParticipant:
+    type: "object"
+    properties:
+      bo_mtg_id:
+        type: "string"
+      customer_key:
+        type: "string"
+      duration:
+        type: "integer"
+      failover:
+        type: "boolean"
+      id:
+        type: "string"
+      join_time:
+        type: "string"
+        format: "date-time"
+      leave_time:
+        type: "string"
+        format: "date-time"
+      name:
+        type: "string"
+      registrant_id:
+        type: "string"
+      status:
+        type: "string"
+      user_email:
+        type: "string"
+      user_id:
+        type: "string"
+  MeetingRecording:
+    type: "object"
+    properties:
+      account_id:
+        type: "string"
+      duration:
+        type: "integer"
+      host_id:
+        type: "string"
+      id:
+        type: "integer"
+      recording_count:
+        type: "integer"
+      recording_files:
+        type: "array"
+        items:
+          $ref: "#/definitions/RecordingFile"
+      start_time:
+        type: "string"
+        format: "date-time"
+      total_size:
+        type: "integer"
+      type:
+        type: "string"
+      uuid:
+        type: "string"
+  MeetingSettings:
+    type: "object"
+    properties:
+      auto_start_ai_companion_questions:
+        type: "boolean"
+      auto_start_meeting_summary:
+        type: "boolean"
+      who_can_ask_questions:
+        type: "integer"
+      who_will_receive_summary:
+        type: "integer"
+  MeetingsItem:
+    type: "object"
+    properties:
+      custom_keys:
+        type: "array"
+        items:
+          $ref: "#/definitions/CustomKeysItem"
+      duration:
+        type: "integer"
+      end_time:
+        type: "string"
+        format: "date-time"
+      host_id:
+        type: "string"
+      id:
+        type: "string"
+      join_time:
+        type: "string"
+      join_waiting_room_time:
+        type: "string"
+      leave_time:
+        type: "string"
+      participants_count:
+        type: "integer"
+      schedule_time:
+        type: "string"
+      session_key:
+        type: "string"
+      source:
+        type: "string"
+      start_time:
+        type: "string"
+        format: "date-time"
+      topic:
+        type: "string"
+      total_minutes:
+        type: "integer"
+      type:
+        type: "integer"
+      user_email:
+        type: "string"
+      user_name:
+        type: "string"
+      uuid:
+        type: "string"
+  RecordingFile:
+    type: "object"
+    properties:
+      deleted_time:
+        type: "string"
+        format: "date-time"
+      file_extension:
+        type: "string"
+      file_size:
+        type: "integer"
+      file_type:
+        type: "string"
+      id:
+        type: "string"
+      meeting_id:
+        type: "string"
+      recording_end:
+        type: "string"
+        format: "date-time"
+      recording_start:
+        type: "string"
+        format: "date-time"
+      recording_type:
+        type: "string"
+      status:
+        type: "string"
+  SummaryDetail:
+    type: "object"
+    properties:
+      label:
+        type: "string"
+      summary:
+        type: "string"
+  User:
+    type: "object"
+    properties:
+      created_at:
+        type: "string"
+        format: "date-time"
+      email:
+        type: "string"
+      fullName:
+        type: "string"
+      group_ids:
+        type: "array"
+        items:
+          type: "string"
+      id:
+        type: "string"
+      im_group_ids:
+        type: "array"
+        items:
+          type: "string"
+      last_login_time:
+        type: "string"
+        format: "date-time"
+      pmi:
+        type: "integer"
+      status:
+        type: "string"
+      timezone:
+        type: "string"
+      type:
+        type: "integer"
