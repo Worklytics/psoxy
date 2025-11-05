@@ -355,7 +355,14 @@ public class ApiDataRequestHandler {
                     .setConnectTimeout(SOURCE_API_REQUEST_CONNECT_TIMEOUT_MS)
                     .setReadTimeout(SOURCE_API_REQUEST_READ_TIMEOUT_MS);
 
+        } catch (java.net.SocketTimeoutException e) {
+            return buildNetworkTimeoutErrorResponse(builder, e);
         } catch (IOException e) {
+            // Check if the root cause is a SocketTimeoutException
+            if (isSocketTimeoutException(e)) {
+                return buildNetworkTimeoutErrorResponse(builder, e);
+            }
+            
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             builder.body("Failed to parse request; review logs");
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
@@ -982,5 +989,44 @@ public class ApiDataRequestHandler {
         }
     }
 
+    /**
+     * Check if an exception or any of its causes is a SocketTimeoutException
+     */
+    private boolean isSocketTimeoutException(Throwable throwable) {
+        Throwable cause = throwable;
+        while (cause != null) {
+            if (cause instanceof java.net.SocketTimeoutException) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
+    }
+
+    /**
+     * Build error response for network timeout issues
+     * Cannot distinguish between:
+     * 1) Network egress blocked from proxy (VPC/serverless connector misconfiguration)
+     * 2) Target API being unreachable/slow (their infrastructure issue)
+     */
+    private HttpEventResponse buildNetworkTimeoutErrorResponse(
+            HttpEventResponse.HttpEventResponseBuilder builder, Throwable e) {
+        
+        builder.statusCode(HttpStatus.SC_BAD_GATEWAY);
+        builder.body("Network timeout: unable to connect to target API. " +
+                "This could indicate: " +
+                "1) Proxy network egress is blocked (VPC/serverless connector misconfiguration, firewall rules, missing Cloud NAT), OR " +
+                "2) Target API is unreachable or experiencing connectivity issues. " +
+                "If using VPC connector, verify: VPC connector is active, CIDR range is correct, firewall allows egress, Cloud NAT is configured.");
+        builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                ErrorCauses.NETWORK_EGRESS_BLOCKED.name());
+        
+        log.log(Level.SEVERE, "SocketTimeoutException: Network timeout connecting to target API", e);
+        log.log(Level.SEVERE, "Possible causes: " +
+                "1) Proxy network egress blocked - check VPC connector configuration, firewall rules, Cloud NAT; " +
+                "2) Target API unreachable or slow - check API status, DNS resolution");
+        
+        return builder.build();
+    }
 
 }
