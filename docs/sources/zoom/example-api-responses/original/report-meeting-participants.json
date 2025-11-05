@@ -16,8 +16,7 @@
       "user_email": "jchill@example.com",
       "user_id": "27423744",
       "status": "in_meeting",
-      "bo_mtg_id": "27423744",
-      "pmi": 111111111
+      "bo_mtg_id": "27423744"
     }
   ]
 }
