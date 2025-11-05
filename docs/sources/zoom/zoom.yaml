@@ -662,7 +662,7 @@ definitions:
       host_id:
         type: "string"
       id:
-        type: "string"
+        type: "integer"
       join_time:
         type: "string"
       join_waiting_room_time:
