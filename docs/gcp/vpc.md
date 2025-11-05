@@ -34,7 +34,7 @@ resource "google_compute_network" "vpc" {
 
 ```
 
-Then add the following as to the specificatly of the psoxy module in our terraform example, eg:
+Then add the following specifically to the psoxy module in our Terraform example, e.g.:
 
 ```hcl
 module "psoxy" {
