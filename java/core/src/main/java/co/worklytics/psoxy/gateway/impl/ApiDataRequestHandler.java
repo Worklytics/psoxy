@@ -1017,7 +1017,7 @@ public class ApiDataRequestHandler {
                 "This could indicate: " +
                 "1) Proxy network egress is blocked (VPC/serverless connector misconfiguration, firewall rules, missing Cloud NAT), OR " +
                 "2) Target API is unreachable or experiencing connectivity issues. " +
-                "If using VPC connector, verify: VPC connector is active, CIDR range is correct, firewall allows egress, Cloud NAT is configured if needed.");
+                "If using VPC connector, verify: VPC connector is active, CIDR range is correct, firewall allows egress, Cloud NAT is configured.");
         builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                 ErrorCauses.NETWORK_EGRESS_BLOCKED.name());
         
