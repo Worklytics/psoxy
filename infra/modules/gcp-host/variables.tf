@@ -132,7 +132,7 @@ variable "vpc_config" {
   description = "**beta** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
   default     = null
 
- 
+
 }
 
 variable "kms_key_ring" {

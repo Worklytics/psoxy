@@ -16,7 +16,7 @@ locals {
     "arn:aws:iam::aws:policy/CloudWatchFullAccess"             = "CloudWatchFullAccess"
     "arn:aws:iam::aws:policy/AmazonSSMFullAccess"              = "AmazonSSMFullAccess"
     "arn:aws:iam::aws:policy/AWSLambda_FullAccess"             = "AWSLambda_FullAccess"
-    "arn:aws:iam::aws:policy/AmazonSQS_FullAccess"             = "AmazonSQS_FullAccess"             # only if using webhook-collection
+    "arn:aws:iam::aws:policy/AmazonSQSFullAccess"              = "AmazonSQSFullAccess"              # only if using webhook-collection
     "arn:aws:iam::aws:policy/AWSKeyManagementServicePowerUser" = "AWSKeyManagementServicePowerUser" # only if using webhook-collection AND using our terraform modules to manage authentication keys
   }
   # AWS managed policy required to consume Microsoft 365 data
@@ -505,7 +505,7 @@ locals {
       display_name    = "Cloud Functions Developer",
       description_url = "https://cloud.google.com/iam/docs/roles-permissions/cloudfunctions#cloudfunctions.developer"
     },
-    "roles/cloudrun.developer" = {
+    "roles/run.developer" = {
       display_name    = "Cloud Run Developer",
       description_url = "https://cloud.google.com/iam/docs/roles-permissions/run#run.developer"
     },
