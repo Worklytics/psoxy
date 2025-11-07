@@ -394,7 +394,7 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
                             return ConfigService.ConfigValueVersion.builder()
                                 .value(value.get())
                                 .lastModifiedDate(Instant.ofEpochSecond(version.getCreateTime().getSeconds()))
-                                .version(extractVersionNumber(version.getName()))
+                                .version(extractVersionNumber(version.getName()).toString())
                                 .build();
                         }
                         return null;
