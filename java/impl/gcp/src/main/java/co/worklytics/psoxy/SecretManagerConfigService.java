@@ -46,7 +46,7 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
 
     private static final String LOCK_LABEL = "locked";
     private static final String VERSION_LABEL = "latest-version";
-    private static final int NUMBER_OF_VERSIONS_TO_RETRIEVE = 20;
+    private static final int MIN_NUMBER_OF_VERSIONS_TO_RETRIEVE = 20;
 
     /**
      *  GCP-level alias for the latest version of the secret
@@ -275,7 +275,7 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
                                     .setFilter("state:ENABLED")
                                     .setParent(secretName.toString())
                                     // Reduce the page, as each version will be disabled one by one
-                                    .setPageSize(NUMBER_OF_VERSIONS_TO_RETRIEVE)
+                                    .setPageSize(MIN_NUMBER_OF_VERSIONS_TO_RETRIEVE)
                                     .build())
                             .getPage();
 
@@ -314,7 +314,7 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
                                             .withZone(ZoneOffset.UTC)
                                             .format(until))
                                     .setParent(secretName.toString())
-                                    .setPageSize(NUMBER_OF_VERSIONS_TO_RETRIEVE)
+                                    .setPageSize(MIN_NUMBER_OF_VERSIONS_TO_RETRIEVE)
                                     .build())
                             .getPage();
 
@@ -358,7 +358,7 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
             ListSecretVersionsRequest request = ListSecretVersionsRequest.newBuilder()
                 .setParent(secretName.toString())
                 .setFilter("state:ENABLED")
-                .setPageSize(Math.max(limit, NUMBER_OF_VERSIONS_TO_RETRIEVE))
+                .setPageSize(Math.max(limit, MIN_NUMBER_OF_VERSIONS_TO_RETRIEVE))
                 .build();
 
             SecretManagerServiceClient.ListSecretVersionsPagedResponse response = client.listSecretVersions(request);

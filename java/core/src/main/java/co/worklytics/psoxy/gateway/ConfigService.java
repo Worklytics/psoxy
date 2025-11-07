@@ -122,6 +122,6 @@ public interface ConfigService {
         /**
          * Version identifier (typically numeric, but represented as Integer for flexibility)
          */
-        Integer version;
+        String version;
     }
 }

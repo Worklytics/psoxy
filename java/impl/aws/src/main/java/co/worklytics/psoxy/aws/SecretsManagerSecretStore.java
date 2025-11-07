@@ -189,7 +189,7 @@ public class SecretsManagerSecretStore implements SecretStore {
                             .value(getResponse.secretString())
                             .lastModifiedDate(version.createdDate() != null ? 
                                 version.createdDate() : version.lastAccessedDate())
-                            .version(parseVersionNumber(version.versionId()))
+                            .version(version.versionId())
                             .build();
                     } catch (Exception e) {
                         log.log(Level.WARNING, "Failed to retrieve version " + version.versionId() + " of secret " + id, e);
@@ -214,16 +214,5 @@ public class SecretsManagerSecretStore implements SecretStore {
             return Collections.emptyList();
         }
     }
-
-    /**
-     * AWS Secrets Manager version IDs are UUIDs, so we can't parse them as integers.
-     * We'll use a hash code as a pseudo-version number for ordering purposes.
-     */
-    private Integer parseVersionNumber(String versionId) {
-        if (versionId == null) {
-            return null;
-        }
-        // Use hashCode as a stable numeric representation
-        return Math.abs(versionId.hashCode());
-    }
+  }
 }
