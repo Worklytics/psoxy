@@ -51,6 +51,66 @@ else
     fi
 fi
 
+# Function to validate git branch/tag matches version requirements
+validate_git_branch_or_tag() {
+    # Check if git is available
+    if ! command -v git &> /dev/null; then
+        echo -e "${YELLOW}Warning: git is not installed, skipping git validation${NC}"
+        return 0
+    fi
+    
+    # Check if we're in a git repository
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        echo -e "${YELLOW}Warning: Not in a git repository, skipping git validation${NC}"
+        return 0
+    fi
+    
+    # Get current branch or tag
+    local current_ref
+    if git describe --exact-match --tags HEAD >/dev/null 2>&1; then
+        # We're on a tag
+        current_ref=$(git describe --exact-match --tags HEAD)
+    else
+        # We're on a branch
+        current_ref=$(git rev-parse --abbrev-ref HEAD)
+    fi
+    
+    # Expected tag format: v{VERSION}
+    local expected_tag="v${VERSION}"
+    
+    # Check if we're on main branch or matching tag
+    if [ "$current_ref" = "main" ]; then
+        echo -e "${GREEN}✓ Running on main branch${NC}"
+        return 0
+    elif [ "$current_ref" = "$expected_tag" ]; then
+        echo -e "${GREEN}✓ Running on tag ${expected_tag}${NC}"
+        return 0
+    else
+        echo -e "${YELLOW}⚠ Warning: Not running on main branch or tag ${expected_tag}${NC}"
+        echo -e "${YELLOW}Current git reference: ${current_ref}${NC}"
+        echo -e "${YELLOW}Version: ${VERSION}${NC}"
+        echo ""
+        echo -e "${YELLOW}Recommended: Run from main branch or tag ${expected_tag}${NC}"
+        echo -e "${YELLOW}Do you want to proceed anyway? (yes/no):${NC} "
+        read -r response
+        
+        case "$response" in
+            [yY][eE][sS]|[yY])
+                echo -e "${YELLOW}Proceeding with publish from ${current_ref}...${NC}"
+                return 0
+                ;;
+            *)
+                echo -e "${YELLOW}Publishing cancelled by user${NC}"
+                exit 0
+                ;;
+        esac
+    fi
+}
+
+# Validate git branch/tag before proceeding
+validate_git_branch_or_tag
+echo ""
+
 echo -e "${BLUE}=== Psoxy AWS Artifact Publisher ===${NC}"
 echo -e "${BLUE}Version: ${GREEN}${VERSION}${NC}"
 echo -e "${BLUE}Regions: ${GREEN}${REGIONS[*]}${NC}"
