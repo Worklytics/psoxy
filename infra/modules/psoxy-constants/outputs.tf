@@ -20,6 +20,11 @@ output "required_gcp_roles_to_provision_host" {
   description = "The GCP roles required to provision infrastructure needed to host Psoxy in GCP"
 }
 
+output "required_gcp_roles_to_use_vpc" {
+  value       = local.required_gpc_roles_to_use_vpc
+  description = "The GCP roles required to use a VPC to host Psoxy in GCP. Needed UNLESS you're merely using an existing VPC, subnetwork, and connector."
+}
+
 output "required_gcp_roles_to_provision_google_workspace_source" {
   value       = local.required_gcp_roles_to_provision_google_workspace_source
   description = "The GCP roles required to provision OAuth Client(s) needed to use Google Workspace as a data source via Psoxy"

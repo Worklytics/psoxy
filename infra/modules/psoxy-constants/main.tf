@@ -527,6 +527,19 @@ locals {
     }
   }
 
+  # assumes you actually need to create the subnetwork, VPC serverless connector; if your VPC, subnetwork, and connector exist,
+  # you probably can avoid
+  required_gpc_roles_to_use_vpc = {
+    "roles/compute.networkAdmin" = {
+      display_name    = "Compute Network Admin",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/compute#compute.networkAdmin"
+    },
+    "roles/vpcaccess.admin" = {
+      display_name    = "VPC Access Admin",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/vpcaccess#vpcaccess.admin"
+    }
+  }
+
   # TODO: add list of permissions, which customer could use to create custom role as alternative
   min_gcp_permissions_to_host = toset([
     # Project IAM administration
