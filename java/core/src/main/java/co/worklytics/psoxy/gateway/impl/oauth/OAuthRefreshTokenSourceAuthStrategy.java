@@ -62,7 +62,7 @@ import lombok.extern.java.Log;
  * @see OAuthAccessTokenSourceAuthStrategy
  *
  */
-@Singleton // one per-instance of the gateway - OK?
+@Singleton
 @Log
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
