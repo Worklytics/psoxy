@@ -292,7 +292,7 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
                 .map((ParameterHistory paramHistory) -> ConfigService.ConfigValueVersion.builder()
                     .value(paramHistory.value())
                     .lastModifiedDate(paramHistory.lastModifiedDate())
-                    .version(paramHistory.version().intValue())
+                    .version(paramHistory.version().toString())
                     .build())
                 .collect(Collectors.toList());
 
