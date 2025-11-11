@@ -189,7 +189,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
             .thenReturn(Arrays.asList(
                 ConfigService.ConfigValueVersion.builder()
                     .value("{\"token\":\"my-token\",\"expirationDate\":1639526410000}")
-                    .version(1)
+                    .version("1")
                     .build()
             ));
 
@@ -220,9 +220,9 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         String v3Json = objectMapper.writeValueAsString(new AccessTokenDto("t3", now + 5000));
 
         List<ConfigService.ConfigValueVersion> versions = Arrays.asList(
-            ConfigService.ConfigValueVersion.builder().value(v1Json).version(1).build(),
-            ConfigService.ConfigValueVersion.builder().value(v2Json).version(2).build(),
-            ConfigService.ConfigValueVersion.builder().value(v3Json).version(3).build()
+            ConfigService.ConfigValueVersion.builder().value(v1Json).version("1").build(),
+            ConfigService.ConfigValueVersion.builder().value(v2Json).version("2").build(),
+            ConfigService.ConfigValueVersion.builder().value(v3Json).version("3").build()
         );
 
         when(strategy.secretStore.getAvailableVersions(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN, 5))
@@ -250,9 +250,9 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         String v3Json = objectMapper.writeValueAsString(new AccessTokenDto("t3", null));
 
         List<ConfigService.ConfigValueVersion> versions = Arrays.asList(
-            ConfigService.ConfigValueVersion.builder().value(v1Json).version(1).build(),
-            ConfigService.ConfigValueVersion.builder().value(v2Json).version(2).build(),
-            ConfigService.ConfigValueVersion.builder().value(v3Json).version(3).build()
+            ConfigService.ConfigValueVersion.builder().value(v1Json).version("1").build(),
+            ConfigService.ConfigValueVersion.builder().value(v2Json).version("2").build(),
+            ConfigService.ConfigValueVersion.builder().value(v3Json).version("3").build()
         );
 
         when(strategy.secretStore.getAvailableVersions(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN, 5))
