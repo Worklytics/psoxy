@@ -167,10 +167,7 @@ public class SecretsManagerSecretStore implements SecretStore {
                 .filter(v -> v.versionStages() != null && 
                     (v.versionStages().contains("AWSCURRENT") || v.versionStages().contains("AWSPREVIOUS")))
                 .sorted((v1, v2) -> {
-                    // Sort by lastAccessedDate if available, otherwise by createdDate
-                    if (v1.lastAccessedDate() != null && v2.lastAccessedDate() != null) {
-                        return v2.lastAccessedDate().compareTo(v1.lastAccessedDate());
-                    } else if (v1.createdDate() != null && v2.createdDate() != null) {
+                    if (v1.createdDate() != null && v2.createdDate() != null) {
                         return v2.createdDate().compareTo(v1.createdDate());
                     }
                     return 0;
