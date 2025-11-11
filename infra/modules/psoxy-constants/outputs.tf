@@ -21,7 +21,7 @@ output "required_gcp_roles_to_provision_host" {
 }
 
 output "required_gcp_roles_to_use_vpc" {
-  value       = local.required_gpc_roles_to_use_vpc
+  value       = local.required_gcp_roles_to_use_vpc
   description = "The GCP roles required to use a VPC to host Psoxy in GCP. Needed UNLESS you're merely using an existing VPC, subnetwork, and connector."
 }
 
