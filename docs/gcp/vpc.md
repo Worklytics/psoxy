@@ -12,7 +12,7 @@ vpc_config = {
 ```
 
 The following IAM roles, or equivalent subset of perms, may be required:
-- `roles/compute.networkAdmin` - a read-only equivalent could be used both your network and subnetwork exists
+- `roles/compute.networkAdmin` - a read-only equivalent could be used if both your network and subnetwork exist
 - `roles/vpcaccess.admin` - a read-only equivalent could be used if serverless VPC connector exists 
 
 So this is connecting your proxy instances to and through a VPC, but they are otherwise not "on" the VPC. (Eg, will not run inside container instances with NICs bound to IPs on the VPC).
