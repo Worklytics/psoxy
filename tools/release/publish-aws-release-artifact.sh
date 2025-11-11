@@ -108,6 +108,52 @@ echo -e "${BLUE}JAR file: ${GREEN}${JAR_PATH}${NC}"
 echo -e "${BLUE}Role: ${GREEN}${ROLE_ARN}${NC}"
 echo ""
 
+# Function to check if artifact already exists in any S3 bucket
+# Outputs regions where artifacts exist, returns 0 if any exist, 1 if none exist
+check_artifacts_exist() {
+    local existing_regions=()
+    
+    for region in "${REGIONS[@]}"; do
+        local bucket_name="${BUCKET_PREFIX}-${region}"
+        local s3_path="s3://${bucket_name}/${DEPLOYMENT_ARTIFACT}"
+        
+        if aws s3 ls "$s3_path" >/dev/null 2>&1; then
+            existing_regions+=("$region")
+        fi
+    done
+    
+    if [ ${#existing_regions[@]} -gt 0 ]; then
+        printf '%s\n' "${existing_regions[@]}"
+        return 0  # Artifacts exist
+    else
+        return 1  # No artifacts exist
+    fi
+}
+
+# Function to prompt user for confirmation
+prompt_overwrite() {
+    local existing_regions=("$@")
+    
+    echo -e "${YELLOW}Warning: Artifact already exists in the following regions:${NC}"
+    for region in "${existing_regions[@]}"; do
+        local bucket_name="${BUCKET_PREFIX}-${region}"
+        local s3_path="s3://${bucket_name}/${DEPLOYMENT_ARTIFACT}"
+        echo -e "  ${BLUE}${region}:${NC} ${s3_path}"
+    done
+    echo ""
+    echo -e "${YELLOW}Do you want to overwrite these artifacts? (yes/no):${NC} "
+    read -r response
+    
+    case "$response" in
+        [yY][eE][sS]|[yY])
+            return 0  # User confirmed
+            ;;
+        *)
+            return 1  # User declined
+            ;;
+    esac
+}
+
 # Function to assume role and get temporary credentials
 assume_role() {
     echo -e "${BLUE}Assuming role ${GREEN}${ROLE_ARN}${NC}..."
@@ -165,6 +211,19 @@ publish_to_region() {
 
 # Main execution
 publish() {
+    # Check if artifacts already exist and prompt for confirmation
+    EXISTING_REGIONS_OUTPUT=$(check_artifacts_exist)
+    local check_result=$?
+    
+    if [ $check_result -eq 0 ]; then
+        # Convert output to array
+        readarray -t existing_regions_array <<< "$EXISTING_REGIONS_OUTPUT"
+        if ! prompt_overwrite "${existing_regions_array[@]}"; then
+            echo -e "${YELLOW}Publishing cancelled by user${NC}"
+            exit 0
+        fi
+        echo ""
+    fi
 
     # Assume role
     assume_role
