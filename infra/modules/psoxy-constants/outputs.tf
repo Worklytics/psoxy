@@ -25,6 +25,11 @@ output "required_gcp_roles_to_provision_google_workspace_source" {
   description = "The GCP roles required to provision OAuth Client(s) needed to use Google Workspace as a data source via Psoxy"
 }
 
+output "required_gcp_permissions_to_host" {
+  value       = local.min_gcp_permissions_to_host
+  description = "The minimum GCP permissions required to host Psoxy in GCP"
+}
+
 output "required_gcp_apis_to_host" {
   value       = local.required_gcp_apis_to_host
   description = "The GCP Service APIs required to host Psoxy in GCP"
