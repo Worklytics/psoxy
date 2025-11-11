@@ -11,6 +11,10 @@ vpc_config = {
 }
 ```
 
+The following IAM roles, or equivalent subset of perms, may be required:
+- `roles/compute.networkAdmin` - a read-only equivalent could be used if both your network and subnetwork exist
+- `roles/vpcaccess.admin` - a read-only equivalent could be used if serverless VPC connector exists 
+
 So this is connecting your proxy instances to and through a VPC, but they are otherwise not "on" the VPC. (Eg, will not run inside container instances with NICs bound to IPs on the VPC).
 
 NOTE: Historically, there were GCP Cloud Functions; these are now called "GCP Cloud Run Functions (Gen1)"; we are using what would be the "GCP Cloud Run Functions (gen2)", which Google now brands simply as "Cloud Run Functions".
