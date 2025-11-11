@@ -30,6 +30,7 @@ NOTE: if you're connecting to Google Workspace as a data source, you'll also nee
   - [Cloud Scheduler Admin](https://cloud.google.com/iam/docs/roles-permissions/cloudscheduler#cloudscheduler.admin) - cloud scheduler - required if using Webhook Collector mode.
   - [Cloud Storage Admin](https://cloud.google.com/iam/docs/roles-permissions/storage#storage.admin) - processing of bulk data (such as HRIS exports) uses GCS buckets, as does Webhook Collection and async API request mode.
   - [IAM Role Admin](https://cloud.google.com/iam/docs/understanding-roles#iam.roles.admin) - create custom roles for the proxy, to follow principle of least privilege
+  - [Project IAM Admin](https://cloud.google.com/iam/docs/roles-permissions/resourcemanager#resourcemanager.projectIamAdmin) - to bind IAM policies at project level
   - [Secret Manager Admin](https://cloud.google.com/iam/docs/understanding-roles#secretmanager.admin) - your API keys and pseudonymization salt is stored in Secret Manager
   - [Service Account Admin](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountAdmin) - admin Service Accounts that personify Cloud Functions or are used as Google Workspace API connections
   - [Service Usage Admin](https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin) - you will need to enable various GCP APIs
