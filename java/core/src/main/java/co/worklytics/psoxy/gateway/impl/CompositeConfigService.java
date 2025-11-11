@@ -75,19 +75,17 @@ public class CompositeConfigService implements ConfigService, SecretStore {
                 .build()).stream().collect(Collectors.toList());
         }
 
-        if (!versions.isEmpty()) {
-            return versions;
-        }
-
-        // Try fallback if it's a SecretStore
-        if (fallback instanceof SecretStore) {
-            versions = ((SecretStore) fallback).getAvailableVersions(property, limit);
-        } else {
-            versions = fallback.getConfigPropertyWithMetadata(property).map(value -> ConfigService.ConfigValueVersion.builder()
-                .value(value.getValue())
-                .lastModifiedDate(value.getLastModifiedDate().orElse(null))
-                .version(null)
-                .build()).stream().collect(Collectors.toList());
+        if (versions.isEmpty()) {      
+          // Try fallback if it's a SecretStore
+          if (fallback instanceof SecretStore) {
+              versions = ((SecretStore) fallback).getAvailableVersions(property, limit);
+          } else {
+              versions = fallback.getConfigPropertyWithMetadata(property).map(value -> ConfigService.ConfigValueVersion.builder()
+                  .value(value.getValue())
+                  .lastModifiedDate(value.getLastModifiedDate().orElse(null))
+                  .version(null)
+                  .build()).stream().collect(Collectors.toList());
+          }
         }
 
         return versions;
