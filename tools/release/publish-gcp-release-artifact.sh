@@ -117,6 +117,37 @@ echo ""
 
 
 
+# Function to check if artifact already exists in GCS
+check_artifact_exists() {
+    local gcs_path="gs://${BUCKET_NAME}/${ZIP_FILENAME}"
+    
+    if gsutil ls "$gcs_path" >/dev/null 2>&1; then
+        return 0  # Artifact exists
+    else
+        return 1  # Artifact does not exist
+    fi
+}
+
+# Function to prompt user for confirmation
+prompt_overwrite() {
+    local gcs_path="gs://${BUCKET_NAME}/${ZIP_FILENAME}"
+    
+    echo -e "${YELLOW}Warning: Artifact already exists in GCS:${NC}"
+    echo -e "  ${BLUE}${gcs_path}${NC}"
+    echo ""
+    echo -e "${YELLOW}Do you want to overwrite it? (yes/no):${NC} "
+    read -r response
+    
+    case "$response" in
+        [yY][eE][sS]|[yY])
+            return 0  # User confirmed
+            ;;
+        *)
+            return 1  # User declined
+            ;;
+    esac
+}
+
 # Function to publish to GCS
 publish_to_gcs() {
     local gcs_path="gs://${BUCKET_NAME}/${ZIP_FILENAME}"
@@ -182,6 +213,15 @@ main() {
         echo -e "${RED}Error: jq is not installed${NC}"
         echo -e "${YELLOW}Install jq from: https://stedolan.github.io/jq/download/${NC}"
         exit 1
+    fi
+
+    # Check if artifact already exists and prompt for confirmation
+    if check_artifact_exists; then
+        if ! prompt_overwrite; then
+            echo -e "${YELLOW}Publishing cancelled by user${NC}"
+            exit 0
+        fi
+        echo ""
     fi
 
     # Publish to GCS
