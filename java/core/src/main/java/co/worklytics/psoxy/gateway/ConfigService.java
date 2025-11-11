@@ -120,7 +120,7 @@ public interface ConfigService {
         Instant lastModifiedDate;
 
         /**
-         * Version identifier (typically numeric, but represented as Integer for flexibility)
+         * Version identifier (typically numeric, but represented as String for flexibility)
          */
         String version;
     }
