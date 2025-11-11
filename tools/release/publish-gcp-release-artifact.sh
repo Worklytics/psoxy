@@ -36,11 +36,57 @@ else
     fi
 fi
 
+# Function to clean Maven repository artifacts to avoid "bad class file" errors
+# Note: JDK 21 can compile Java 17 source/target correctly, but corrupted artifacts
+# in the local Maven repository can cause "bad class file" errors. This cleanup
+# ensures we rebuild from source rather than using potentially corrupted cached artifacts.
+clean_maven_artifacts() {
+    echo -e "${BLUE}Cleaning local Maven repository artifacts to avoid 'bad class file' errors...${NC}"
+    
+    # Get Maven local repository path (respect MAVEN_LOCAL_REPO env var if set)
+    if [ -z "$MAVEN_LOCAL_REPO" ]; then
+        # Try to get it from Maven settings, fallback to default
+        MAVEN_LOCAL_REPO=$(mvn help:evaluate -Dexpression=settings.localRepository -q -DforceStdout 2>/dev/null || echo "${HOME}/.m2/repository")
+    fi
+    
+    if [ ! -d "$MAVEN_LOCAL_REPO" ]; then
+        echo -e "${YELLOW}Warning: Maven local repository not found at ${MAVEN_LOCAL_REPO}, skipping cleanup${NC}"
+        return
+    fi
+    
+    # Remove psoxy artifacts that might be corrupted or incompatible
+    PSOXY_ARTIFACTS=(
+        "co/worklytics/psoxy"
+        "com/avaulta/gateway"
+    )
+    
+    local cleaned=false
+    for artifact_path in "${PSOXY_ARTIFACTS[@]}"; do
+        local full_path="${MAVEN_LOCAL_REPO}/${artifact_path}"
+        if [ -d "$full_path" ]; then
+            echo -e "${YELLOW}Removing ${full_path}...${NC}"
+            rm -rf "$full_path"
+            echo -e "${GREEN}✓ Removed ${artifact_path}${NC}"
+            cleaned=true
+        fi
+    done
+    
+    if [ "$cleaned" = true ]; then
+        echo -e "${GREEN}✓ Maven repository cleanup complete${NC}"
+    else
+        echo -e "${BLUE}No psoxy artifacts found in local repository, nothing to clean${NC}"
+    fi
+    echo ""
+}
+
+# Clean Maven artifacts before building to avoid "bad class file" errors
+clean_maven_artifacts
+
 # Construct JAR filename
 ./tools/build.sh -d "$IMPLEMENTATION" "$JAVA_SOURCE_ROOT"
 DEPLOYMENT_ARTIFACT=$(ls "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment" | grep -E "^psoxy-.*\.jar$" | head -1)
 
-JAR_PATH="java/impl/gcp/target/${DEPLOYMENT_ARTIFACT}"
+JAR_PATH="java/impl/gcp/target/deployment/${DEPLOYMENT_ARTIFACT}"
 
 # Validate JAR exists
 if [ ! -f "$JAR_PATH" ]; then
