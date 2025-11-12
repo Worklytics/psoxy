@@ -69,10 +69,10 @@ validate_git_branch_or_tag() {
     local current_ref
     if git describe --exact-match --tags HEAD >/dev/null 2>&1; then
         # We're on a tag
-        current_ref=$(git describe --exact-match --tags HEAD | tr -d '\n\r')
+        current_ref=$(git describe --exact-match --tags HEAD | tr -d '\n\r' | xargs)
     else
         # We're on a branch
-        current_ref=$(git rev-parse --abbrev-ref HEAD | tr -d '\n\r')
+        current_ref=$(git rev-parse --abbrev-ref HEAD | tr -d '\n\r' | xargs)
     fi
     
     # Expected tag format: v{VERSION}
@@ -82,8 +82,8 @@ validate_git_branch_or_tag() {
     if [ "$current_ref" = "main" ]; then
         echo -e "${GREEN}✓ Running on main branch${NC}"
         return 0
-    elif [ "$current_ref" = "$expected_tag" ]; then
-        echo -e "${GREEN}✓ Running on tag ${expected_tag}${NC}"
+    elif [ "$current_ref" = "$expected_tag" ] || [ "$current_ref" = "${VERSION}" ]; then
+        echo -e "${GREEN}✓ Running on tag ${current_ref}${NC}"
         return 0
     else
         echo -e "${YELLOW}⚠ Warning: Not running on main branch or tag ${expected_tag}${NC}"
