@@ -54,10 +54,10 @@ validate_git_branch_or_tag() {
     local current_ref
     if git describe --exact-match --tags HEAD >/dev/null 2>&1; then
         # We're on a tag
-        current_ref=$(git describe --exact-match --tags HEAD)
+        current_ref=$(git describe --exact-match --tags HEAD | tr -d '\n\r')
     else
         # We're on a branch
-        current_ref=$(git rev-parse --abbrev-ref HEAD)
+        current_ref=$(git rev-parse --abbrev-ref HEAD | tr -d '\n\r')
     fi
     
     # Expected tag format: v{VERSION}
@@ -142,8 +142,9 @@ clean_maven_artifacts() {
 # Clean Maven artifacts before building to avoid "bad class file" errors
 clean_maven_artifacts
 
-# Construct JAR filename
-./tools/build.sh -d "$IMPLEMENTATION" "$JAVA_SOURCE_ROOT"
+# Construct JAR filename - build in isolated environment to avoid IDE conflicts
+echo -e "${BLUE}Building ${GREEN}${IMPLEMENTATION}${BLUE} bundle in isolated environment...${NC}"
+./tools/build-isolated.sh "$IMPLEMENTATION"
 DEPLOYMENT_ARTIFACT=$(ls "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment" | grep -E "^psoxy-.*\.jar$" | head -1)
 
 JAR_PATH="java/impl/gcp/target/deployment/${DEPLOYMENT_ARTIFACT}"
