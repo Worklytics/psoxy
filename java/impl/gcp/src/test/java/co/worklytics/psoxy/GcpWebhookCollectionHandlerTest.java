@@ -27,6 +27,7 @@ import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 import co.worklytics.psoxy.GcpWebhookCollectionHandler.AuthorizationException;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import lombok.SneakyThrows;
 
@@ -84,7 +85,7 @@ class GcpWebhookCollectionHandlerTest {
             .thenReturn(false);
 
 
-        GcpEnvironment.WebhookCollectorModeConfig webhookCollectorModeConfig = GcpEnvironment.WebhookCollectorModeConfig.builder()
+        GcpEnvironment.GcpWebhookCollectorModeConfig webhookCollectorModeConfig = GcpEnvironment.GcpWebhookCollectorModeConfig.builder()
             .batchMergeSubscription("projects/my-project/subscriptions/my-subscription")
             .batchSize(100)
             .batchInvocationTimeoutSeconds(60)
@@ -98,6 +99,7 @@ class GcpWebhookCollectionHandlerTest {
             null, // batchMergeHandler - not needed for these tests
             null, // jwksDecoratorFactory - not needed for these tests
             mockConfigService,
+            WebhookCollectorModeConfig.builder().build(),
             mockEnvVarsConfigService,
             () -> webhookCollectorModeConfig
         );

@@ -1,10 +1,10 @@
 {
   "bomFormat" : "CycloneDX",
   "specVersion" : "1.5",
-  "serialNumber" : "urn:uuid:45a524e1-0d61-3149-8d7e-fa8b79f2b317",
+  "serialNumber" : "urn:uuid:0ace93c5-a282-3029-bed6-29afe923fa37",
   "version" : 1,
   "metadata" : {
-    "timestamp" : "2025-10-22T22:43:20Z",
+    "timestamp" : "2025-11-11T21:28:55Z",
     "lifecycles" : [
       {
         "phase" : "build"
@@ -59,11 +59,17 @@
     "component" : {
       "group" : "co.worklytics.psoxy",
       "name" : "psoxy-aws",
-      "version" : "0.5.11",
+      "version" : "0.5.12",
       "licenses" : [ ],
-      "purl" : "pkg:maven/co.worklytics.psoxy/psoxy-aws@0.5.11?type=jar",
+      "purl" : "pkg:maven/co.worklytics.psoxy/psoxy-aws@0.5.12?type=jar",
+      "externalReferences" : [
+        {
+          "type" : "distribution-intake",
+          "url" : "https://maven.pkg.github.com/Worklytics/psoxy"
+        }
+      ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/co.worklytics.psoxy/psoxy-aws@0.5.11?type=jar"
+      "bom-ref" : "pkg:maven/co.worklytics.psoxy/psoxy-aws@0.5.12?type=jar"
     },
     "properties" : [
       {
@@ -80,40 +86,40 @@
     {
       "group" : "co.worklytics.psoxy",
       "name" : "psoxy-core",
-      "version" : "0.5.11",
+      "version" : "0.5.12",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "774cbec66a3776768f6839086c5d600c"
+          "content" : "afd92dc28e4e590a6c005006edc6a60e"
         },
         {
           "alg" : "SHA-1",
-          "content" : "7e997aa403643167290a4594aad9ab10bec77971"
+          "content" : "b50aa4c02046530e8d2cfa44108f931ac65f5ab1"
         },
         {
           "alg" : "SHA-256",
-          "content" : "058d422809c3c0814d2fbf416865b29158a7abb226d404f6b78e1a8c1cd8a4e3"
+          "content" : "a9ca5f36708523520d29c9897c86837b2f00ac55ff7b0c533d15adc088ed368a"
         },
         {
           "alg" : "SHA-512",
-          "content" : "af741202020a2844515ba4434aa20afe71a37b3c85e1c21126cea75a18b20abe20023668c42492d89980def1498371a0c44b77caf1a98a4dd54606b38a652ad4"
+          "content" : "c8e95b90b4a23f3f08b7f9bd3a997860d392b13982f4a212b6478f5d6e17b2819927bace6d96c74a907cdc6ea22b1c22e7aa687000788b060e460fb7a2c2a5d1"
         },
         {
           "alg" : "SHA-384",
-          "content" : "6d7cdcaecd51f3c890ba892000791ea165cf8b514a612bf171dbdc87280f892188bd5e492373f62a752f556a1321ea31"
+          "content" : "33df6da633653d695f5f4d57aa4965187ceaefbbf2dd2e1cb45718ede3f209f21d788846a653b979b61aa1a1d9bcce1d"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "e196e4dfc2e2654669d776e11edd600cc89125cf414a50e54420fe54cf78d5d8ffcfabbd98a44c66d527bfc76c3831c6"
+          "content" : "0c268a30dd56ecc43cf478b7eef3fdb9afee3907a85acb070a53e1a50ff8daf15fc143424fddd7863c6a94b502d20d57"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "64c735f28820a29ae3fff6f1c1a57ffe932f9595202d70d924634e1644f34a4d"
+          "content" : "d3c6f842a486f35a471123429eb7cf869e04fed1ee35fd03c4fe1f7752be0892"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "bb105292b815cbc60bdb04af2d444959cdb6347cbf7b36613f834e7ec562a62b7f6c257c29e38681a517fcac48ac92bee10b1a1707c268c0c283c6b442971456"
+          "content" : "d1f00a1c0f421a8a24816368bf4b317e2f2baff271eeaade7903ab396e74cf3512816c7f98d6fd34012dedddc44d6319401d70fc723205bde7d453c84117d3de"
         }
       ],
       "licenses" : [
@@ -124,47 +130,47 @@
           }
         }
       ],
-      "purl" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.5.11?type=jar",
+      "purl" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.5.12?type=jar",
       "type" : "library",
-      "bom-ref" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.5.11?type=jar"
+      "bom-ref" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.5.12?type=jar"
     },
     {
       "group" : "com.avaulta.gateway",
       "name" : "gateway-core",
-      "version" : "0.5.11",
+      "version" : "0.5.12",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "e135edfc43ac64e3f41309d3b2307df7"
+          "content" : "f0c1ab194bb362f85ce39e3a8f920cd6"
         },
         {
           "alg" : "SHA-1",
-          "content" : "bd5cf7b777252cdf7e80c6d72bc168d0ffc06344"
+          "content" : "43e1e9e7661e6373de12ba972d8a5d5be53401cb"
         },
         {
           "alg" : "SHA-256",
-          "content" : "2c4dbcda03fc89c46e22da664d44f61241860ff1e0b00c90fd67c37aa90ecddf"
+          "content" : "613570a482d9e37e2a3f71c7f9fe55b80f68574d27f6d8e35b424383708bb779"
         },
         {
           "alg" : "SHA-512",
-          "content" : "6126e7028e8285a95c63f31f8febaea777323a0636f4518577aa025df3fc73888cbfea232548b9ebf4406febb66f3f38e1fefc05f7f8006812d488ecbec12f8e"
+          "content" : "3695cd59996430cf8d2f7ec7a0d8a65c9b7dc226b2efaaa921fbd1cd250897e70dfcb7f75c09bbc12856412131f332cf357ce5e15f7254a0e70e1f8cf694fa3e"
         },
         {
           "alg" : "SHA-384",
-          "content" : "bbf9c3bf28a5b424748bffccd780d63daa6cf9b71ce1f07631b79bca78bd386a86815eb0826a5140d06e75cac4f9d4e6"
+          "content" : "e80e7df5ae6f027436389bb80eb6b9e088888cec7c9aee133b08898664a47f1f256e98b4b4e42d66fb7b9081c6e12782"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "acf4e4a7551fe904daa86f4d13afed0fd4931ab116df37227f51f516de4d681cbdfb3b04830804148913544e14cf430a"
+          "content" : "c8aa433b38f28694bab77c8ea1c4033ecf433831ac471896d7e6a67c8b1ffedcee9bf4dd1890d5ee383d763645ce79a3"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "0c099254fc09844c8bf77023aceda6aa952d85c71059b60ab95d504e36f73deb"
+          "content" : "01a0b4f6b7117ffa99f330a57fd5011714698efe4091beefea586e639b0d2c86"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "b60a35420acdf5703e0aaff834c43f9038fc0f49437ae65c7b2949db4e63bab9517c4edebe03852e7136bb123bee869afb94de30a603ca2a4ab89f7219e38d0b"
+          "content" : "ed070d7296aa919ffcc067a0f558c9d508bc7a7aa15f85628d2cde43be649953a2fc7a75f656ba474b4e68d960331cf31d44cc7d9ad5bb695f1b7b06eba238fc"
         }
       ],
       "licenses" : [
@@ -175,49 +181,49 @@
           }
         }
       ],
-      "purl" : "pkg:maven/com.avaulta.gateway/gateway-core@0.5.11?type=jar",
+      "purl" : "pkg:maven/com.avaulta.gateway/gateway-core@0.5.12?type=jar",
       "type" : "library",
-      "bom-ref" : "pkg:maven/com.avaulta.gateway/gateway-core@0.5.11?type=jar"
+      "bom-ref" : "pkg:maven/com.avaulta.gateway/gateway-core@0.5.12?type=jar"
     },
     {
       "publisher" : "The Apache Software Foundation",
       "group" : "commons-codec",
       "name" : "commons-codec",
-      "version" : "1.17.1",
-      "description" : "The Apache Commons Codec component contains encoders and decoders for various formats such as Base16, Base32, Base64, digest, and Hexadecimal. In addition to these widely used encoders and decoders, the codec package also maintains a collection of phonetic encoding utilities.",
+      "version" : "1.19.0",
+      "description" : "The Apache Commons Codec component contains encoders and decoders for formats such as Base16, Base32, Base64, digest, and Hexadecimal. In addition to these widely used encoders and decoders, the codec package also maintains a collection of phonetic encoding utilities.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "7b3438ab4c6d91e0066d410947e43f3e"
+          "content" : "e46fa78c69544eb6239c4e8447e72544"
         },
         {
           "alg" : "SHA-1",
-          "content" : "973638b7149d333563584137ebf13a691bb60579"
+          "content" : "8c0dbe3ae883fceda9b50a6c76e745e548073388"
         },
         {
           "alg" : "SHA-256",
-          "content" : "f9f6cb103f2ddc3c99a9d80ada2ae7bf0685111fd6bffccb72033d1da4e6ff23"
+          "content" : "5c3881e4f556855e9c532927ee0c9dfde94cc66760d5805c031a59887070af5f"
         },
         {
           "alg" : "SHA-512",
-          "content" : "a7db98db470e6ad338266ff442fbdfbc277ba1d07a591336f7d15dc49fdac884da7dac04d806628b12437f993d8b5e6a4b800a66590ff11936dbf8bedcd8e860"
+          "content" : "d98a7a1cfcc08aa9cce4f7778e3f37ecb99da7b1da01944e5fa8faf06fbf9f969f2efb0b416832f419d53085250f711c071f1dac9fa0968483c37034198367fb"
         },
         {
           "alg" : "SHA-384",
-          "content" : "ef0b8e0fbea5ee057b2c39114ff862a057d207d4dd6b4fd2f5ca96bfc039e76274f1dd02ddf985f1fa965736a522f5c5"
+          "content" : "f0edec3cd84b2320e6930380d3fe13335d33f041470d27fb93789db0c696ec01dda21b471f0015bf70bffffcbfdb67c0"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "ac30c88a6c4bbdfa79cb697cd179627d2addae842e48e2ab167c4f9c5475d05ef4743f58fbed254dd7abc6f3877644fe"
+          "content" : "ce771ef9f0df326a34ab37e70f710801bb18d545aca0ee492db62770db323ab8a0b5082123ca4826f3d3182748537cfc"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "f3fe1daf04e63f556d72f4f59f149327b65d899d6afe1de770b42faae2e323df"
+          "content" : "8296db95bb2fac86a0eb68e61e9730084f4272ad6a4a4327a5259c631840e98e"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "29901c3e6394dd87f13a91b5432c678ac144cb6c86271b06c57c73c0480b23a4688d0266e2dd04abf5e1d148a2e80e1215dd87d2cb5ffbf2c023409f4f5f8f86"
+          "content" : "05da2f8674a257c5d8a1137cadbda71d2635f22237450bf2cbc980380a56905247bea38049c8cd80e60077be2be73b1eae6b466c228e4277763a54979cf856fb"
         }
       ],
       "licenses" : [
@@ -233,7 +239,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/commons-codec/commons-codec@1.17.1?type=jar",
+      "purl" : "pkg:maven/commons-codec/commons-codec@1.19.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -241,7 +247,7 @@
         },
         {
           "type" : "build-system",
-          "url" : "https://github.com/apache/commons-parent/actions"
+          "url" : "https://github.com/apache/commons-cli/actions"
         },
         {
           "type" : "distribution-intake",
@@ -261,7 +267,7 @@
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/commons-codec/commons-codec@1.17.1?type=jar"
+      "bom-ref" : "pkg:maven/commons-codec/commons-codec@1.19.0?type=jar"
     },
     {
       "publisher" : "FasterXML",
@@ -486,41 +492,41 @@
       "publisher" : "The Apache Software Foundation",
       "group" : "org.apache.httpcomponents.client5",
       "name" : "httpclient5",
-      "version" : "5.4.1",
+      "version" : "5.4.3",
       "description" : "Apache HttpComponents Client",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "a114dfe3b3e460e2a209c01961ed7709"
+          "content" : "1c4d8427607d7660e49759028e200566"
         },
         {
           "alg" : "SHA-1",
-          "content" : "ce913081e592ee8eeee35c4e577d7dce13cba7a4"
+          "content" : "2f3fc0687c6fa39b0aad7cf7c3cf171ec8ad009b"
         },
         {
           "alg" : "SHA-256",
-          "content" : "c6c6fc60cbb3edd9e823d9226d608ff3135eb48bd2049bb83bdbc3ef4a911138"
+          "content" : "739e035679c68e15efa93b44c808a453bc98eaac1722e5a80cab15c026223022"
         },
         {
           "alg" : "SHA-512",
-          "content" : "00125c1bb25a00b3a21bbcf77a555ada9c84814af01c3fa350e25fc3af1546e0699abb50ecc7a1e646c1572ca43a4165905c5c4bf8f763df8aeb29c001f78334"
+          "content" : "e56109f0ca17470631bf6962b59ad810eb1dfb7184888f207457510c8f0232b9374cd06cd18fdd2556733c9734288ae9c7569087b569f5bc2ec13a110d47c8c6"
         },
         {
           "alg" : "SHA-384",
-          "content" : "85ef2e6d2c901e47338a9eeb23cd6254feb9bb70abc9578a9e9a95f3c84162fb3049145e4a01017e2e80b2060111cde8"
+          "content" : "f3be7c666a1ac83b21312205e72480a714d9291dd5bb36f528393ca2ae373f51e0883248daf67c6388ae465b0922b358"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "555d404c69d4e8d8d197f38b12c72a77bda672776dd87712a5e971cf09002b4c12c8f4eb91caaac0ae575d6a7ddcf0fc"
+          "content" : "2ab5c06cad61af7d139a2becd942f4f711588a021712ca992c1045a987c1cc2446844a0b3d361bb0713f939ea14f3dc8"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "791d2f80934ecabd4696f8e7d781ff2e0f502e35c38e7dade4f760bfcd46b082"
+          "content" : "27b63a3e26d66bfcd341dc7a3dbefad30a077c0c4cd2dfcfd0fe120c869d7051"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "da08f04f7d3570d067498abb3a3313b24bfb5b4e4e60c7dded17276deada5049f2d4404ff9d72cfd1bc5376713564957977c0ffd0a72b9180d167bfd0320f8ab"
+          "content" : "5ff6461115b3248c5b852f3f4c26146dd69647cb7d38de01819c4d0bb9e131e14e7dc72bfb5c863c8739990c51bfa57b1cb28e382ce2ca607ef0e815d609cd2a"
         }
       ],
       "licenses" : [
@@ -535,11 +541,11 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.4.1?type=jar",
+      "purl" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.4.3?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
-          "url" : "https://hc.apache.org/httpcomponents-client-5.4.x/5.4.1/httpclient5/"
+          "url" : "https://hc.apache.org/httpcomponents-client-5.4.x/5.4.3/httpclient5/"
         },
         {
           "type" : "distribution-intake",
@@ -555,51 +561,51 @@
         },
         {
           "type" : "vcs",
-          "url" : "https://github.com/apache/httpcomponents-client/tree/5.4.1/httpclient5"
+          "url" : "https://github.com/apache/httpcomponents-client/tree/5.4.3/httpclient5"
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.4.1?type=jar"
+      "bom-ref" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.4.3?type=jar"
     },
     {
       "publisher" : "The Apache Software Foundation",
       "group" : "org.apache.httpcomponents.core5",
       "name" : "httpcore5-h2",
-      "version" : "5.3.1",
+      "version" : "5.3.4",
       "description" : "Apache HttpComponents HTTP/2 Core Components",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "4cf50639992f2796200049e778ac64ed"
+          "content" : "45cddb0e4be800806019ef8d9bfa7931"
         },
         {
           "alg" : "SHA-1",
-          "content" : "760c34db3ba41b0ffa07e956bc308d3a12356915"
+          "content" : "3742a9a9ba3a5a0d45be230093b52a1302a561e2"
         },
         {
           "alg" : "SHA-256",
-          "content" : "963e194a972aa3daf09287c921ed5a2dd4c3985c44185b0138002943025bed6a"
+          "content" : "1fb4f34e4b612e7c127ad693335583587850b17ce9b1c366f9de1ca49fe2c781"
         },
         {
           "alg" : "SHA-512",
-          "content" : "cd8f75113c419477d640550643646778af863254e26225dc4ff5e8b1e3ab59ca52495505bfe4bf8735ca6ec5f571620bf53203bffddb176791c14b7f5ed97d76"
+          "content" : "ff6a6ffa1f6e4974011778ea8ffb6771c52c8b1ec161f7f411f7d6e0ec2988a36cf3c9636da956222a91a81f2718a215bc176b678cb6ef98ff44bc6cfe4b80e7"
         },
         {
           "alg" : "SHA-384",
-          "content" : "8c5db09b1e9c26ff4e9eb31b590e116afba000e2d96a0d4d7efe4e274c8ce056eeebc3a60d4996bdf7d597a303638e09"
+          "content" : "0e5a679b26abd8b170f7f5afded5a3923908dfd0fc92e90ab4757e561fa92a0e36cf2129313c355245810db9061fb309"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "85117ec342bbd322ed4483b58780cee0a54fb392bd14f46cbc7f2de89e7f878bfef8bba06a241eec46a9a10a8faf515a"
+          "content" : "a203c70cd9e2d7f378b4745886ac8a25c2bcee599dc9f66f4be295deed81a70d68ba7b69d8a658a3a6fe9f14fda9dada"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "f0fd290266eec9968a962e3f3834bae9d31a636b77468065fcdab78e27fcb23f"
+          "content" : "cd90c09e8b92780fc77a197bea9f7a056ca79e80359d5f356727e1a132ac57fc"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "178d26cc9f55940c2de8af3df712ff23417bf80908843d27fb4c9a33ca5105b3e3da15fcda7455147d0639861ec8053827e9ab6cebd0320fdbc15b63aae28ae9"
+          "content" : "e792b5a49e3b5dfd71de0130122cf5b52dac056bbc27aa67863d3b4877e721a0774a0483f41bae89016ddb1f8444e3a4cc2fda25213f38d008788ced76f14c18"
         }
       ],
       "licenses" : [
@@ -614,11 +620,11 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.3.1?type=jar",
+      "purl" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.3.4?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
-          "url" : "https://hc.apache.org/httpcomponents-core-5.3.x/5.3.1/httpcore5-h2/"
+          "url" : "https://hc.apache.org/httpcomponents-core-5.3.x/5.3.4/httpcore5-h2/"
         },
         {
           "type" : "distribution-intake",
@@ -634,51 +640,51 @@
         },
         {
           "type" : "vcs",
-          "url" : "https://github.com/apache/httpcomponents-core/tree/5.3.1/httpcore5-h2"
+          "url" : "https://github.com/apache/httpcomponents-core/tree/5.3.4/httpcore5-h2"
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.3.1?type=jar"
+      "bom-ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.3.4?type=jar"
     },
     {
       "publisher" : "The Apache Software Foundation",
       "group" : "org.apache.commons",
       "name" : "commons-csv",
-      "version" : "1.12.0",
+      "version" : "1.14.1",
       "description" : "The Apache Commons CSV library provides a simple interface for reading and writing CSV files of various types.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "feeb1ea8569f89f70a0c2530413d9323"
+          "content" : "b8119900179992cf139005db63481103"
         },
         {
           "alg" : "SHA-1",
-          "content" : "c77e053d7189bc0857f8d323ab61cb949965fbd1"
+          "content" : "467354980fade8528b6a9f9bdf7f4f19ab9b3373"
         },
         {
           "alg" : "SHA-256",
-          "content" : "e11a33d65e5f2e92769c0b13c548e0c2da01e37c1581417ea3fd7d5d9474fee6"
+          "content" : "32be0e1e76673092f5d12cb790bd2acb6c2ab04c4ea6efc69ea5ee17911c24fe"
         },
         {
           "alg" : "SHA-512",
-          "content" : "c446efe169d7415fc9b64cca2cf0c94f668365e5b3d6eaf8c39b8eec8253f824d6a375790d6e69a888a469d1f70d757236a01df638f7e0abe1fb5b9a8121318d"
+          "content" : "f64fb9c4895532dd9f6cd448dfb4b35bfe9c4a81afc61e5bb13121f5142330ae97447200022b03988967a7cb89d3f48ce76e253238eb9f0bea57c09b352ac27b"
         },
         {
           "alg" : "SHA-384",
-          "content" : "635aca2fdf48a9bdebaa0f77a204bbc0cfef21c49e2ef998f78b71ddf795e3361231cc64310570d31e6483b2ef4ead7e"
+          "content" : "a20dfbaaedf8e08e13969761e456ed6caa2e4c513c4c1662654fd4348a40a57416675e8e2802b1f1d0ce2bf3353bed75"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "d623ef0a49b81acd61b45ba1de4ffce2eceac64864e828d42a330f754512e6f5c6594a515ac8e25d438d6f3720324a4a"
+          "content" : "577f3ee1b77ff740d2c894f8dfff6e662f1329030d04a7b27cfcef910b711decc7b26654bb259067a11ce3ba923edb16"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "f458a27ff063e607604d4c5f3d7d7e61473aa9d601c214a098c10e3119171921"
+          "content" : "e645fdbb0c85c775adf273502ea361b6b432a9fcf0e32d9946226c4a28b0b959"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "2c43730ef5c2612fbaaf920aeff294ea4c608e41932fe6881c22a7e9324fade7563fac6a670e7ae5be5978049e5b884202e22555d935338e00aff92a2f6b3d55"
+          "content" : "f9e5e2e9ba824e86ea5b2c9cdab1edde6a253b5ca557ea6e6e6669e318c35ad17ee1162cb0cc90febf5b60ad3535e5a93bfa2e3b83191bf4cb462662b24cce74"
         }
       ],
       "licenses" : [
@@ -694,7 +700,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.apache.commons/commons-csv@1.12.0?type=jar",
+      "purl" : "pkg:maven/org.apache.commons/commons-csv@1.14.1?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -722,7 +728,7 @@
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.apache.commons/commons-csv@1.12.0?type=jar"
+      "bom-ref" : "pkg:maven/org.apache.commons/commons-csv@1.14.1?type=jar"
     },
     {
       "publisher" : "The Apache Software Foundation",
@@ -2998,41 +3004,41 @@
     {
       "group" : "org.bouncycastle",
       "name" : "bcprov-jdk18on",
-      "version" : "1.81",
-      "description" : "The Bouncy Castle Crypto package is a Java implementation of cryptographic algorithms. This jar contains the JCA/JCE provider and low-level API for the BC Java version 1.81 for Java 8 and later.",
+      "version" : "1.82",
+      "description" : "The Bouncy Castle Crypto package is a Java implementation of cryptographic algorithms. This jar contains the JCA/JCE provider and low-level API for the BC Java version 1.82 for Java 1.8 and later.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "3913a176dc36b31e867be5360f3ee524"
+          "content" : "73520ba13118979db17136db32a8c401"
         },
         {
           "alg" : "SHA-1",
-          "content" : "d17c094daef57dbd80af71687a475aa6df7cbe54"
+          "content" : "e1118397395d21909a1b7b15120d0c2a68d7fd0c"
         },
         {
           "alg" : "SHA-256",
-          "content" : "249f396412b0c0ce67f25c8197da757b241b8be3ec4199386c00704a2457459b"
+          "content" : "14cde2fdfaa8890480a8e5b67aceef0c90f96682c1e23c133bafdc9e0b3255ce"
         },
         {
           "alg" : "SHA-512",
-          "content" : "e44c612fd4658ae5ee9f451b865e4f490ed73bb229e772c4c14769b1d14ba1879b130983e87557609ee815d7c56f8b339b37e00404088e5bc5f0c3715880f4eb"
+          "content" : "acf5e383a93cb16b3ad5a531b86acda3c7fad306c655b1090bad576898707ac4516b2681fc4993ee1dbe3ecbeb05156b836e17cb0f6db811d81d1e3d762a4151"
         },
         {
           "alg" : "SHA-384",
-          "content" : "ec82fd783817fb3634813258ba4e4c82cffa9f0d23d849ec0c1749de2b04a2e1f432e43545eb5f06acc52a9bd5c43921"
+          "content" : "17937df1cc7f2bc82b1d3be96ae9e411c8c6be9fba12f45a00016136539594584c0c3414fcbf22635e8aa958773eb3c9"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "772d4b813c9733b70d7fd1fe2c5fedbfa5fec05f0bdf21afd49c26c40777b4b7048a6fa4e662da7e7f3b8d69c5b792bf"
+          "content" : "a1f9cf6c9a75ba5b83cbcee081f1482383a0fe111eeb6a5663feaeef9046fe2b46c1299b8355fc99987e0053317b911d"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "472a56ef6828dab569e4d7e14c8844ddb25c35ad4be363b4ada7b1f4c02aead8"
+          "content" : "a5678d424b2754823a997ddac7727d51294218c8a831eb30e4d12d00abf02704"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "6c68600dbb4c6b9b32a3dd3fcf5bc056b8ce0aaba6e243fc96014dc702eb29e7236f6da1ac584bb42bd69c03b135c4d222901c4bf9bdd22d05a1b9f9a1d1ac5d"
+          "content" : "ad5ad754087d6b089d3060deff7b8dd9fa2a3ea82d57c62c3d4f5336212447e882f489ada58f69858bd84f347cc0f5575141d8895a29e7da6c546412b40ec344"
         }
       ],
       "licenses" : [
@@ -3043,7 +3049,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.bouncycastle/bcprov-jdk18on@1.81?type=jar",
+      "purl" : "pkg:maven/org.bouncycastle/bcprov-jdk18on@1.82?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -3059,46 +3065,46 @@
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.bouncycastle/bcprov-jdk18on@1.81?type=jar"
+      "bom-ref" : "pkg:maven/org.bouncycastle/bcprov-jdk18on@1.82?type=jar"
     },
     {
       "group" : "org.bouncycastle",
       "name" : "bcpkix-jdk18on",
-      "version" : "1.81",
-      "description" : "The Bouncy Castle Java APIs for CMS, PKCS, EAC, TSP, CMP, CRMF, OCSP, and certificate generation. This jar contains APIs for JDK 1.8 and up. The APIs are designed primarily to be used in conjunction with the BC Java provider but may also be used with other providers providing cryptographic services.",
+      "version" : "1.82",
+      "description" : "The Bouncy Castle Java APIs for CMS, PKCS, EAC, TSP, CMP, CRMF, OCSP, and certificate generation. This jar contains APIs for Java 1.8 and later. The APIs are designed primarily to be used in conjunction with the BC Java provider but may also be used with other providers providing cryptographic services.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "a66bdc5d32d086737b86803cd87cd187"
+          "content" : "9958d2f8aa097a31806756542e461079"
         },
         {
           "alg" : "SHA-1",
-          "content" : "819fd6f5d170c8b8bf8c5acc73816e9c36574042"
+          "content" : "ad7b7155abac3e4e4f73579d5176c11f7659c560"
         },
         {
           "alg" : "SHA-256",
-          "content" : "b38c604871f3690109a3c00982d9145634125de3365a817ba16eb90d88e242c9"
+          "content" : "bdc723e20834832ac6af136cb5b5ff05e43b71d4fa151cc6510d9212ee086e63"
         },
         {
           "alg" : "SHA-512",
-          "content" : "830aa649f0e40c4a1e3ac808857af2465ebaf3284fd821819962bf44233f67d3b2ddb01f937be522332b63be1dc0a8735afc5ebbcc85e448a684bacdf6083432"
+          "content" : "530b4f8818fe9918ee4d945985d0408024a0107b709cd4963147f0f7e364004078878398d4c1ce357e502cd98f97a6985ea1628c9b98fd8ac0adbe00c1330898"
         },
         {
           "alg" : "SHA-384",
-          "content" : "c58a0e8d20f3c874dbbc0b2680409c1e9802a166c676443c14e5c3734111363050d8397bcf43b30ee1cee87c1bd14fcb"
+          "content" : "57fd639b0a1bce5cccb7984fce86cb65397111519feefa75260961d0def9e646363047d54af88701281823a9cc09a0cb"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "b625876c0da1f9f5b975e5df13c0f30d2e8faeb86a271930059fd5f5d84b0507f5e9c26c0e7fdfd23b7bfda2e34f7513"
+          "content" : "997838ee62cd2c05640efdd7f46593b683a09ead69f6b1cda37c2e0755a86f565f27dc1c5ed21cd9a2e14f9ef22becdd"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "ee5788e24c7ea3446d938a45c320a69d526183c9250ba9b0090de875d3e69c7b"
+          "content" : "181cde82f2f2e4483ee85b8695aca990f2eec5e2fb1b5b3855c384718ccae580"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "d33c509714a0b0eb5cac46c58582e8990160a3fb6079fefd64370fcffa7a91cf3d7b984f6aa623dabf8aee029a43a95d4fba19a9496e5745a3943158570b5ff8"
+          "content" : "2f979dec5105f7d46412257548b2c9cdd16e02d3b530220f3726b0bb423fd3eb314d737fcba501df18a86e3ee9b4163af899ba1301d09de0c9cd81c961123752"
         }
       ],
       "licenses" : [
@@ -3109,7 +3115,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.bouncycastle/bcpkix-jdk18on@1.81?type=jar",
+      "purl" : "pkg:maven/org.bouncycastle/bcpkix-jdk18on@1.82?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -3125,46 +3131,46 @@
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.bouncycastle/bcpkix-jdk18on@1.81?type=jar"
+      "bom-ref" : "pkg:maven/org.bouncycastle/bcpkix-jdk18on@1.82?type=jar"
     },
     {
       "group" : "org.bouncycastle",
       "name" : "bcutil-jdk18on",
-      "version" : "1.81",
-      "description" : "The Bouncy Castle Java APIs for ASN.1 extension and utility APIs used to support bcpkix and bctls. This jar contains APIs for Java 8 and later.",
+      "version" : "1.82",
+      "description" : "The Bouncy Castle Java APIs for ASN.1 extension and utility APIs used to support bcpkix and bctls. This jar contains APIs for Java 1.8 and later.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "c75f3409ceba35d90b00dd9d1937d9db"
+          "content" : "ca33a7c1e7e60f68333e127c75f5ab45"
         },
         {
           "alg" : "SHA-1",
-          "content" : "e2dd79395ab435094142b6aba219f35adcba0f01"
+          "content" : "1850911d674c91ce6444783ff10478e2c6e9bbf9"
         },
         {
           "alg" : "SHA-256",
-          "content" : "31a5fe3a7ba42e3457b83930f0ff8d679fb5b76eaadf2b51f5740c92a394bf52"
+          "content" : "4420691958ad1c0ba275a6d6d8a6317adbdbdc9277055b6a72aa89c88cda8c7d"
         },
         {
           "alg" : "SHA-512",
-          "content" : "e9876cf07776a2703c93a7d22a1557acc307774f00dce72dc1ff35d1bebd2c76dc625a269a803109a1ad0d473674c06662fcfc71377405c801cb2876e5b1afdb"
+          "content" : "61a4bbc07402fafe91a55170a3f04a87060c6721bc1d52865dfa9445b97dac92cd6b4c8558a7adbbf0dcb2bc62f4af72c547c366fb449e207d7436fbdead3c31"
         },
         {
           "alg" : "SHA-384",
-          "content" : "bb10fa7dcbaad60a384caa7183a30ca83542f9c3915fd76d28998bd6aa44671ad28afee0310bdfaa325462ef285b909b"
+          "content" : "f5aa8faf96128bdc7605e9991da58eff4e56b9a96aebc399d69f35ba4346a7878c3171b88fffe8a969e7195054356408"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "88ef60e1aaaec69b7d103effb9d52eff26ce5a54d51d03d7ebceb254c403c360deb82da663d497301ad72ba36fa21408"
+          "content" : "19d950e37f3927b6116b99f4dfa4b9b83b2cccfb469a2302c55e1db22d6e4514e8991979caf585598f3857b9282ee667"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "87f2dc00ccb78ea4654863798746e8e5c9322c038fdbc320525e86317daa0385"
+          "content" : "8ca6f590c1e6708076432e9e0db01e3c52f910918d5bc53c462c3ba56c330ab5"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "64b23ed0f13c598c7e45ca626dafab48b6b52c3165d9ec6297437fc6e91e1e22fcb3438ddac20de5bdd40edb74b6ab3d24677fa6aa4b0d74b8675c6814d8b5b0"
+          "content" : "6f120f75980fafb4a2ae33adbaf6ef2ac077e7c36343dc889f0cb9423fa4f7f16aa0c2fbfc9cf12835bbc5f91d8931ce68bafd6653a6c62660d291fee3bb62ff"
         }
       ],
       "licenses" : [
@@ -3175,7 +3181,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.bouncycastle/bcutil-jdk18on@1.81?type=jar",
+      "purl" : "pkg:maven/org.bouncycastle/bcutil-jdk18on@1.82?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -3191,7 +3197,7 @@
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.bouncycastle/bcutil-jdk18on@1.81?type=jar"
+      "bom-ref" : "pkg:maven/org.bouncycastle/bcutil-jdk18on@1.82?type=jar"
     },
     {
       "publisher" : "Connect2id Ltd.",
@@ -3267,41 +3273,41 @@
     {
       "group" : "org.projectlombok",
       "name" : "lombok",
-      "version" : "1.18.36",
+      "version" : "1.18.42",
       "description" : "Spice up your java: Automatic Resource Management, automatic generation of getters, setters, equals, hashCode and toString, and more!",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "92c08153ae16c161c8cc2cc8185d2724"
+          "content" : "f29149836e0187fb9fd95d82dc718d36"
         },
         {
           "alg" : "SHA-1",
-          "content" : "5a30490a6e14977d97d9c73c924c1f1b5311ea95"
+          "content" : "8365263844ebb62398e0dc33057ba10ba472d3b8"
         },
         {
           "alg" : "SHA-256",
-          "content" : "73b6b05b6a2d365b700bab08d30f94de9d336490bc0acce5b6181fef48cbf18e"
+          "content" : "3488a4e9994c26596baaceebee58cad36a50e3bdaec5be72b5834d3c3b560306"
         },
         {
           "alg" : "SHA-512",
-          "content" : "c551a534ad8b4275ac881001b233e3abf32d5267b14eb19a3497f477e3752ebe0b09a55b1bf59bb6e4feb17c1b9c6d8c0554a5b63fbb8b5d441f66fc038bd8d6"
+          "content" : "7ddad4f59705bde29a1fe818fbd28fac0fcf9e83eee08b2fd16af24ff2cd3afe93643b0b9ddbfdf0fe9fa999b5a23348a5fe45e41f4a9c543909beadf48be794"
         },
         {
           "alg" : "SHA-384",
-          "content" : "1588ecc4497fcc1193fba639a6da89dd7edc9bddcb88b4ed8253fa9e13ca62bab1e26f65064d7cbfd8cb5c70689dd3b7"
+          "content" : "c93fee1dd47988ff6d9bc0a84dec31650abdfb6ec9d9cf076434b62b118a0b06544ebb3d3bf3796962cb890f66e876ea"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "66206ea59c5c3048cc1b720e5c558500515f83df79215ed0ae63deaa5b711fe2aa3dcaeea3adbec8241b341ff4a7516b"
+          "content" : "967d7555c30f8d40d2de38c64c96f6a865a6465953db712e55818cb1f0f47eb002561159ed21f2d5e31db4c76430433d"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "5c50c613749455f1ca9fae5320ba305c68abedb72ec9632634249fc6e18e9829"
+          "content" : "291e591c341b4b370365c63e616210831fcfed09239d28ce1b459e15d851c3fc"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "57ccfb3a9865e68a076bce2d3e6e1cc38edae8eff3eb6d62403e5e45d971a338b575038e55b62d74fb27c1533cdf9b19061a62bb0d1a3544331cb55543183463"
+          "content" : "daaa58823eda466fdd12ab325ace764d0166011965e42520e3145fd28a55547a5b9f4ea0ea487ee80bce33121546e33b8bde103004e033f5996758589e8cde43"
         }
       ],
       "licenses" : [
@@ -3316,7 +3322,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.projectlombok/lombok@1.18.36?type=jar",
+      "purl" : "pkg:maven/org.projectlombok/lombok@1.18.42?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -3332,7 +3338,7 @@
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.projectlombok/lombok@1.18.36?type=jar"
+      "bom-ref" : "pkg:maven/org.projectlombok/lombok@1.18.42?type=jar"
     },
     {
       "publisher" : "Google, Inc.",
@@ -4610,41 +4616,41 @@
       "publisher" : "The Apache Software Foundation",
       "group" : "org.apache.commons",
       "name" : "commons-lang3",
-      "version" : "3.17.0",
+      "version" : "3.19.0",
       "description" : "Apache Commons Lang, a package of Java utility classes for the classes that are in java.lang's hierarchy, or are considered to be so standard as to justify existence in java.lang. The code is tested using the latest revision of the JDK for supported LTS releases: 8, 11, 17 and 21 currently. See https://github.com/apache/commons-lang/blob/master/.github/workflows/maven.yml Please ensure your build environment is up-to-date and kindly report any build issues.",
       "scope" : "required",
       "hashes" : [
         {
           "alg" : "MD5",
-          "content" : "7730df72b7fdff4a3a32d89a314f826a"
+          "content" : "2ac2db154e365d55d167ec1215125a3a"
         },
         {
           "alg" : "SHA-1",
-          "content" : "b17d2136f0460dcc0d2016ceefca8723bdf4ee70"
+          "content" : "d6524b169a6574cd253760c472d419b47bfd37e6"
         },
         {
           "alg" : "SHA-256",
-          "content" : "6ee731df5c8e5a2976a1ca023b6bb320ea8d3539fbe64c8a1d5cb765127c33b4"
+          "content" : "32733ab4bc90b45b63eb72677d886961003fd4ed113e07b1028f9877cb2ac735"
         },
         {
           "alg" : "SHA-512",
-          "content" : "dfd5ff7fe7f852b9caabc81e5a00e20616f98405085f059b64dc2121feb5fa6cb327e11a3d2f954c079811c31f6fd484e90f932d45078796fbfa7dbf1f1eb5aa"
+          "content" : "24cf9bfc7c32736277d2a1e82a455d004ec7d4989e8d0dc2831c910a04b6ff8b30ca9c49ec25562cf0b7f1ffc27726e7510a54bb99e75a3be83ddf6030c37978"
         },
         {
           "alg" : "SHA-384",
-          "content" : "c6ed55a5c2b05332890a43a3ea73b30f42dc23c92ebd054a8b0d29ca8f49fb9361f7325cfa90715be457804b087221b5"
+          "content" : "90c567c8f42b58d0f3f24233260258e7e3bae1f8284ee33f9730e1cecc4fe2c98b7d6ebbba2a6598b50d444ddfa70722"
         },
         {
           "alg" : "SHA3-384",
-          "content" : "bb9e148a87928c3053bcccee361d5d8d81b3c6ea41a390d96c615afd242409f909361c945f3b4238a297e4ebb2ed413b"
+          "content" : "397a7aafd4f66cdec80cf4682a72db0873b3fc6a3db3cdd7be747b24ae13804dfc290e2441a115d50b0add9ce76af2dd"
         },
         {
           "alg" : "SHA3-256",
-          "content" : "f28f34565f25dd65fd1a47916e917df9e3ff2c6721897ea57391a238227c96a2"
+          "content" : "4c0809e7ff0474603b0a1bcdf2f745cec9233ffdc6c652b077d93f2630d52f8b"
         },
         {
           "alg" : "SHA3-512",
-          "content" : "4c8e7a5f10d091bb240e7eb59287d0e4e4420e7a2d2be2b8060111e479540ffae89040377c99ec7f458cd54e1ac0ed0778951cd1f34d5d90571b8a303fbb9baf"
+          "content" : "25564027878618e00dc24ea5caf8365a9396c25597aaf4ea8a37997fd699dabdf4b6f9ce4c1c9f86abedb4afa26041ac234d238c63ffecc207ce2068a6271956"
         }
       ],
       "licenses" : [
@@ -4660,7 +4666,7 @@
           }
         }
       ],
-      "purl" : "pkg:maven/org.apache.commons/commons-lang3@3.17.0?type=jar",
+      "purl" : "pkg:maven/org.apache.commons/commons-lang3@3.19.0?type=jar",
       "externalReferences" : [
         {
           "type" : "website",
@@ -4668,7 +4674,7 @@
         },
         {
           "type" : "build-system",
-          "url" : "https://github.com/apache/commons-parent/actions"
+          "url" : "https://github.com/apache/commons-lang/actions"
         },
         {
           "type" : "distribution-intake",
@@ -4684,11 +4690,11 @@
         },
         {
           "type" : "vcs",
-          "url" : "https://gitbox.apache.org/repos/asf?p=commons-lang.git"
+          "url" : "https://gitbox.apache.org/repos/asf/commons-lang.git"
         }
       ],
       "type" : "library",
-      "bom-ref" : "pkg:maven/org.apache.commons/commons-lang3@3.17.0?type=jar"
+      "bom-ref" : "pkg:maven/org.apache.commons/commons-lang3@3.19.0?type=jar"
     },
     {
       "group" : "com.amazonaws",
@@ -8153,13 +8159,13 @@
   ],
   "dependencies" : [
     {
-      "ref" : "pkg:maven/co.worklytics.psoxy/psoxy-aws@0.5.11?type=jar",
+      "ref" : "pkg:maven/co.worklytics.psoxy/psoxy-aws@0.5.12?type=jar",
       "dependsOn" : [
-        "pkg:maven/co.worklytics.psoxy/psoxy-core@0.5.11?type=jar",
-        "pkg:maven/org.projectlombok/lombok@1.18.36?type=jar",
+        "pkg:maven/co.worklytics.psoxy/psoxy-core@0.5.12?type=jar",
+        "pkg:maven/org.projectlombok/lombok@1.18.42?type=jar",
         "pkg:maven/com.google.dagger/dagger-compiler@2.40.5?type=jar",
         "pkg:maven/com.google.dagger/dagger@2.40.5?type=jar",
-        "pkg:maven/org.apache.commons/commons-lang3@3.17.0?type=jar",
+        "pkg:maven/org.apache.commons/commons-lang3@3.19.0?type=jar",
         "pkg:maven/com.amazonaws/aws-lambda-java-core@1.2.3?type=jar",
         "pkg:maven/com.amazonaws/aws-lambda-java-events@3.11.5?type=jar",
         "pkg:maven/com.amazonaws/aws-java-sdk-s3@1.12.701?type=jar",
@@ -8173,11 +8179,11 @@
       ]
     },
     {
-      "ref" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.5.11?type=jar",
+      "ref" : "pkg:maven/co.worklytics.psoxy/psoxy-core@0.5.12?type=jar",
       "dependsOn" : [
-        "pkg:maven/com.avaulta.gateway/gateway-core@0.5.11?type=jar",
-        "pkg:maven/org.apache.commons/commons-lang3@3.17.0?type=jar",
-        "pkg:maven/org.apache.commons/commons-csv@1.12.0?type=jar",
+        "pkg:maven/com.avaulta.gateway/gateway-core@0.5.12?type=jar",
+        "pkg:maven/org.apache.commons/commons-lang3@3.19.0?type=jar",
+        "pkg:maven/org.apache.commons/commons-csv@1.14.1?type=jar",
         "pkg:maven/commons-io/commons-io@2.18.0?type=jar",
         "pkg:maven/com.google.guava/guava@33.4.7-jre?type=jar",
         "pkg:maven/javax.inject/javax.inject@1?type=jar",
@@ -8191,17 +8197,17 @@
         "pkg:maven/com.google.http-client/google-http-client@1.45.1?type=jar",
         "pkg:maven/com.google.auth/google-auth-library-oauth2-http@1.32.0?type=jar",
         "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.3.1?type=jar",
-        "pkg:maven/org.bouncycastle/bcprov-jdk18on@1.81?type=jar",
-        "pkg:maven/org.bouncycastle/bcpkix-jdk18on@1.81?type=jar",
+        "pkg:maven/org.bouncycastle/bcprov-jdk18on@1.82?type=jar",
+        "pkg:maven/org.bouncycastle/bcpkix-jdk18on@1.82?type=jar",
         "pkg:maven/com.nimbusds/nimbus-jose-jwt@10.5?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/com.avaulta.gateway/gateway-core@0.5.11?type=jar",
+      "ref" : "pkg:maven/com.avaulta.gateway/gateway-core@0.5.12?type=jar",
       "dependsOn" : [
-        "pkg:maven/org.apache.commons/commons-lang3@3.17.0?type=jar",
-        "pkg:maven/org.apache.commons/commons-csv@1.12.0?type=jar",
-        "pkg:maven/commons-codec/commons-codec@1.17.1?type=jar",
+        "pkg:maven/org.apache.commons/commons-lang3@3.19.0?type=jar",
+        "pkg:maven/org.apache.commons/commons-csv@1.14.1?type=jar",
+        "pkg:maven/commons-codec/commons-codec@1.19.0?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.18.3?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.18.3?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.18.3?type=jar",
@@ -8209,18 +8215,18 @@
         "pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jsr310@2.18.3?type=jar",
         "pkg:maven/com.networknt/json-schema-validator@1.5.8?type=jar",
         "pkg:maven/com.google.guava/guava@33.4.7-jre?type=jar",
-        "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.4.1?type=jar"
+        "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.4.3?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/org.apache.commons/commons-lang3@3.17.0?type=jar",
+      "ref" : "pkg:maven/org.apache.commons/commons-lang3@3.19.0?type=jar",
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/org.apache.commons/commons-csv@1.12.0?type=jar",
+      "ref" : "pkg:maven/org.apache.commons/commons-csv@1.14.1?type=jar",
       "dependsOn" : [
         "pkg:maven/commons-io/commons-io@2.18.0?type=jar",
-        "pkg:maven/commons-codec/commons-codec@1.17.1?type=jar"
+        "pkg:maven/commons-codec/commons-codec@1.19.0?type=jar"
       ]
     },
     {
@@ -8228,7 +8234,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/commons-codec/commons-codec@1.17.1?type=jar",
+      "ref" : "pkg:maven/commons-codec/commons-codec@1.19.0?type=jar",
       "dependsOn" : [ ]
     },
     {
@@ -8314,10 +8320,10 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.4.1?type=jar",
+      "ref" : "pkg:maven/org.apache.httpcomponents.client5/httpclient5@5.4.3?type=jar",
       "dependsOn" : [
         "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.3.1?type=jar",
-        "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.3.1?type=jar",
+        "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.3.4?type=jar",
         "pkg:maven/org.slf4j/slf4j-api@2.0.11?type=jar"
       ]
     },
@@ -8326,7 +8332,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.3.1?type=jar",
+      "ref" : "pkg:maven/org.apache.httpcomponents.core5/httpcore5-h2@5.3.4?type=jar",
       "dependsOn" : [
         "pkg:maven/org.apache.httpcomponents.core5/httpcore5@5.3.1?type=jar"
       ]
@@ -8389,7 +8395,7 @@
       "ref" : "pkg:maven/org.apache.httpcomponents/httpclient@4.5.14?type=jar",
       "dependsOn" : [
         "pkg:maven/org.apache.httpcomponents/httpcore@4.4.16?type=jar",
-        "pkg:maven/commons-codec/commons-codec@1.17.1?type=jar"
+        "pkg:maven/commons-codec/commons-codec@1.19.0?type=jar"
       ]
     },
     {
@@ -8455,19 +8461,19 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/org.bouncycastle/bcprov-jdk18on@1.81?type=jar",
+      "ref" : "pkg:maven/org.bouncycastle/bcprov-jdk18on@1.82?type=jar",
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/org.bouncycastle/bcpkix-jdk18on@1.81?type=jar",
+      "ref" : "pkg:maven/org.bouncycastle/bcpkix-jdk18on@1.82?type=jar",
       "dependsOn" : [
-        "pkg:maven/org.bouncycastle/bcutil-jdk18on@1.81?type=jar"
+        "pkg:maven/org.bouncycastle/bcutil-jdk18on@1.82?type=jar"
       ]
     },
     {
-      "ref" : "pkg:maven/org.bouncycastle/bcutil-jdk18on@1.81?type=jar",
+      "ref" : "pkg:maven/org.bouncycastle/bcutil-jdk18on@1.82?type=jar",
       "dependsOn" : [
-        "pkg:maven/org.bouncycastle/bcprov-jdk18on@1.81?type=jar"
+        "pkg:maven/org.bouncycastle/bcprov-jdk18on@1.82?type=jar"
       ]
     },
     {
@@ -8475,7 +8481,7 @@
       "dependsOn" : [ ]
     },
     {
-      "ref" : "pkg:maven/org.projectlombok/lombok@1.18.36?type=jar",
+      "ref" : "pkg:maven/org.projectlombok/lombok@1.18.42?type=jar",
       "dependsOn" : [ ]
     },
     {
@@ -8618,7 +8624,7 @@
       "ref" : "pkg:maven/com.amazonaws/aws-java-sdk-core@1.12.701?type=jar",
       "dependsOn" : [
         "pkg:maven/commons-logging/commons-logging@1.1.3?type=jar",
-        "pkg:maven/commons-codec/commons-codec@1.17.1?type=jar",
+        "pkg:maven/commons-codec/commons-codec@1.19.0?type=jar",
         "pkg:maven/org.apache.httpcomponents/httpclient@4.5.14?type=jar",
         "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.18.3?type=jar",
         "pkg:maven/com.fasterxml.jackson.dataformat/jackson-dataformat-cbor@2.12.6?type=jar",
@@ -8879,7 +8885,7 @@
         "pkg:maven/software.amazon.awssdk/annotations@2.25.31?type=jar",
         "pkg:maven/org.apache.httpcomponents/httpclient@4.5.14?type=jar",
         "pkg:maven/org.apache.httpcomponents/httpcore@4.4.16?type=jar",
-        "pkg:maven/commons-codec/commons-codec@1.17.1?type=jar"
+        "pkg:maven/commons-codec/commons-codec@1.19.0?type=jar"
       ]
     },
     {

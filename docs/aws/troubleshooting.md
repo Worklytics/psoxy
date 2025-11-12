@@ -158,3 +158,30 @@ Setting `IS_DEVELOPMENT_MODE` to "true" in the Lambda's Env Vars via the console
 Our Terraform examples should provide both of the above for you, but worth double-checking.
 
 If those are present, yet the error persists, it's possible that you have some org-level security constraint/policy preventing SSM parameters from being used / read. For example, you have a "default deny" policy set for SSM GET actions/etc. In such a case, you need to add the execute roles for each lambda as exceptions to such policies (find these under AWS --> IAM --> Roles).
+
+## Bulk Processing failures
+
+If you need to re-trigger bulk processing of objects that have already been written to S3 (e.g., for webhook collectors), you can use the `replay-s3-writes.sh` script.
+
+This script copies S3 objects to themselves (adding a `psoxy-last-replay` metadata field), which triggers S3 write events that will cause the Lambda function to re-process those objects.
+
+
+```bash
+# Re-trigger processing for all objects modified in the last week
+./tools/aws/replay-s3-writes.sh my-bucket-name
+
+# Re-trigger processing for objects modified since a specific date
+./tools/aws/replay-s3-writes.sh my-bucket-name 2024-01-01T00:00:00Z
+
+# Re-trigger processing for a single object
+./tools/aws/replay-s3-writes.sh s3://my-bucket-name/path/to/object.json
+
+# Assume an IAM role before accessing the bucket
+./tools/aws/replay-s3-writes.sh --role arn:aws:iam::123456789012:role/MyRole my-bucket-name
+```
+
+Notes:
+
+- The script preserves object content, tags, and existing metadata
+- A `psoxy-last-replay` metadata field is added/updated with the current timestamp
+- This is safe to run on production data

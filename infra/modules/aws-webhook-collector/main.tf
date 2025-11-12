@@ -106,7 +106,7 @@ module "gate_instance" {
     local.required_env_vars,
     {
       WEBHOOK_OUTPUT               = aws_sqs_queue.sanitized_webhooks_to_batch.url
-      WEBHOOK_BATCH_OUTPUT         = "s3://${module.sanitized_output.bucket_id}"
+      WEBHOOK_BATCH_OUTPUT         = "s3://${module.sanitized_output.bucket_id}/${var.output_path_prefix}"
       REQUIRE_AUTHORIZATION_HEADER = length(local.accepted_auth_keys) > 0
       ALLOW_ORIGINS                = join(",", var.allow_origins)
       CUSTOM_RULES_SHA             = module.rules_parameter.rules_hash
@@ -134,6 +134,7 @@ resource "aws_apigatewayv2_authorizer" "jwt" {
   api_id           = var.api_gateway_v2.id
   authorizer_type  = "JWT"
   identity_sources = ["$request.header.Authorization"]
+
 
   jwt_configuration {
     issuer = local.auth_issuer
@@ -193,6 +194,29 @@ resource "aws_lambda_event_source_mapping" "sqs_trigger" {
   depends_on = [
     module.gate_instance
   ]
+}
+
+# Provisioned concurrency configuration to keep Lambda warm and eliminate cold starts
+# This is particularly important for the JWKS endpoint used by the JWT authorizer
+resource "aws_lambda_alias" "provisioned" {
+  count = var.keep_warm_instances != null ? 1 : 0
+
+  name             = "provisioned"
+  description      = "Alias for provisioned concurrency to eliminate cold starts"
+  function_name    = module.gate_instance.function_name
+  function_version = "$LATEST"
+
+  lifecycle {
+    ignore_changes = [function_version]
+  }
+}
+
+resource "aws_lambda_provisioned_concurrency_config" "keep_warm" {
+  count = var.keep_warm_instances != null ? 1 : 0
+
+  function_name                     = module.gate_instance.function_name
+  qualifier                         = aws_lambda_alias.provisioned[0].name
+  provisioned_concurrent_executions = var.keep_warm_instances
 }
 
 resource "aws_iam_policy" "sanitized_bucket_read" {
@@ -421,5 +445,15 @@ output "provisioned_auth_key_pairs" {
 
 output "todo" {
   value = local.todo_content
+}
+
+output "provisioned_concurrency" {
+  value = var.keep_warm_instances != null ? {
+    enabled                           = true
+    provisioned_concurrent_executions = var.keep_warm_instances
+    alias_name                        = aws_lambda_alias.provisioned[0].name
+    alias_arn                         = aws_lambda_alias.provisioned[0].arn
+  } : null
+  description = "Provisioned concurrency configuration, if enabled. This keeps Lambda execution environments warm to eliminate cold starts for the JWKS endpoint."
 }
 

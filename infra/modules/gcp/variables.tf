@@ -103,7 +103,7 @@ variable "vpc_config" {
     serverless_connector_cidr_range = optional(string, "10.8.0.0/28") # ignored if serverless_connector is provided
   })
 
-  description = "**alpha** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
+  description = "**beta** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
   default     = null
 }
 

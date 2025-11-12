@@ -246,6 +246,12 @@ variable "example_identity" {
   default     = null
 }
 
+variable "output_path_prefix" {
+  type        = string
+  description = "optional path prefix to prepend to webhook output files in the bucket (e.g., 'events_', 'webhooks/')"
+  default     = ""
+}
+
 
 variable "todo_step" {
   type        = number

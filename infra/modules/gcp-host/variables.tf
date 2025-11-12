@@ -129,46 +129,10 @@ variable "vpc_config" {
     serverless_connector_cidr_range = optional(string, "10.8.0.0/28") # ignored if serverless_connector is provided
   })
 
-  description = "**alpha** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
+  description = "**beta** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
   default     = null
 
-  # serverless_connector: allow null; if provided, must match the full resource name
-  validation {
-    condition = (
-      var.vpc_config == null
-      || try(var.vpc_config.serverless_connector, null) == null
-      || can(regex("^projects/[^/]+/locations/[^/]+/connectors/[^/]+$", try(var.vpc_config.serverless_connector, "")))
-    )
-    error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
-  }
 
-  # serverless_connector_cidr_range: allow null; if provided, must look like CIDR
-  validation {
-    condition = (
-      var.vpc_config == null
-      || try(var.vpc_config.serverless_connector_cidr_range, null) == null
-      || can(regex("^[0-9.]+/[0-9]+$", try(var.vpc_config.serverless_connector_cidr_range, "")))
-    )
-    error_message = "If vpc_config.serverless_connector_cidr_range is provided, it must match the format: {ip}/{mask}"
-  }
-
-  validation {
-    condition = (
-      var.vpc_config == null
-      || try(var.vpc_config.network, null) == null
-      || can(regex("^[a-z0-9-]+$", try(var.vpc_config.network, "")))
-    )
-    error_message = "vpc_config.network must be lowercase letters, numbers, or dashes."
-  }
-
-  validation {
-    condition = (
-      var.vpc_config == null
-      || try(var.vpc_config.network, null) != null
-      || try(var.vpc_config.serverless_connector, null) != null
-    )
-    error_message = "If vpc_config is provided, it must either specify a serverless_connector or a network on which to provision a serverless connector."
-  }
 }
 
 variable "kms_key_ring" {
@@ -233,6 +197,7 @@ variable "webhook_collectors" {
     auth_public_keys                   = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
     allow_origins                      = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
     batch_processing_frequency_minutes = optional(number, 5)           # frequency (in minutes) at which to batch process webhooks
+    output_path_prefix                 = optional(string, "")          # optional path prefix to prepend to webhook output files in bucket
 
     example_identity = optional(string, null) # example identity to use in test payloads
     example_payload  = optional(string, null) # example payload to use in test payloads

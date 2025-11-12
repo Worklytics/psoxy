@@ -146,6 +146,12 @@ abstract public class RulesBaseTestCase {
 
         @NonNull
         String plainExampleFile;
+
+        String httpMethod;
+
+        public static InvocationExample of(String requestUrl, String plainExampleFile) {
+            return InvocationExample.of(requestUrl, plainExampleFile, "GET");
+        }
     }
 
 
@@ -227,7 +233,7 @@ abstract public class RulesBaseTestCase {
             .forEach(example -> {
                 String original =
                     new String(TestUtils.getData(getRulesTestSpec().getExampleApiResponsesDirectoryPathFull() + example.getPlainExampleFile()));
-                String sanitized = sanitize(example.getRequestUrl(), original);
+                String sanitized = sanitize(example.getHttpMethod(), example.getRequestUrl(), original);
 
                 String sanitizedFilepath = getRulesTestSpec().getExampleSanitizedApiResponsesPathFull() + example.getPlainExampleFile();
 
@@ -269,7 +275,12 @@ abstract public class RulesBaseTestCase {
 
     @SneakyThrows
     protected String sanitize(String endpoint, String jsonResponse) {
-        return this.sanitizer.sanitize("GET", new URL(endpoint), jsonResponse);
+        return sanitize("GET", endpoint, jsonResponse);
+    }
+
+    @SneakyThrows
+    protected String sanitize(String httpMethod, String endpoint, String jsonResponse) {
+        return this.sanitizer.sanitize(httpMethod, new URL(endpoint), jsonResponse);
     }
 
     protected void assertSha(String expectedSha) {

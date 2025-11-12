@@ -50,6 +50,12 @@ variable "sanitized_accessor_role_names" {
   description = "list of names of AWS IAM Roles which should be able to access the sanitized (output) bucket"
 }
 
+variable "output_path_prefix" {
+  type        = string
+  description = "optional path prefix to prepend to webhook output files in the bucket (e.g., 'events_', 'webhooks/')"
+  default     = ""
+}
+
 variable "logs_kms_key_arn" {
   type        = string
   description = "AWS KMS key ARN to use to encrypt lambdas' logs. NOTE: ensure CloudWatch is setup to use this key (cloudwatch principal has perms, log group in same region as key, etc) - see https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html ."
@@ -241,4 +247,15 @@ variable "example_identity" {
   type        = string
   description = "Example identity to use for testing; if provided, will be used in the test script."
   default     = null
+}
+
+variable "keep_warm_instances" {
+  type        = number
+  description = "Number of Lambda execution environments to keep warm (at minimum). If null (default), Lambda will cold-start as needed. If set to 1 or more, AWS will keep at least that many instances ready, eliminating cold starts for the JWKS endpoint used by the JWT authorizer. This significantly improves webhook collection reliability. Cost: ~$0.015/hour per instance (~$11/month for 1 instance)."
+  default     = null
+
+  validation {
+    condition     = var.keep_warm_instances == null ? true : var.keep_warm_instances >= 1
+    error_message = "If keep_warm_instances is set, it must be at least 1."
+  }
 }
