@@ -382,6 +382,7 @@ locals {
   provision_serverless_connector = var.vpc_config != null && try(var.vpc_config.serverless_connector, null) == null
   legal_connector_prefix         = substr(var.environment_id_prefix, 0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH)
   legal_connector_suffix         = substr("connector", 0, max(0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH - length(var.environment_id_prefix)))
+  vpc_connector_network          = try(var.vpc_config.subnetwork, null) == null ? try(var.vpc_config.network, null) : null # network MUST be provided if NEITHER subnetwork or serverless_connector are provided
 }
 
 resource "google_vpc_access_connector" "connector" {
@@ -389,9 +390,9 @@ resource "google_vpc_access_connector" "connector" {
 
   project       = var.project_id
   region        = var.gcp_region
-  network       = try(var.vpc_config.network, null) # network MUST be provided if serverless_connector is not provided
+  network       = local.vpc_connector_network # network MUST be provided if NEITHER subnetwork or serverless_connector are provided
   name          = "${local.legal_connector_prefix}${local.legal_connector_suffix}"
-  ip_cidr_range = try(var.vpc_config.serverless_connector_cidr_range, null) # seems like MUST be a /28 ??? not documented, but others give errors
+  ip_cidr_range = local.vpc_connector_network != null ? try(var.vpc_config.serverless_connector_cidr_range, "10.8.0.0/28") : null # only set when network is set; seems like MUST be a /28 ??? not documented, but others give errors
 
   dynamic "subnet" {
     for_each = try(var.vpc_config.subnetwork, null) == null ? [] : [var.vpc_config.subnetwork]
