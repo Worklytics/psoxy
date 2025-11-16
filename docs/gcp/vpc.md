@@ -5,6 +5,8 @@ As of v0.5.6, GCP-hosted proxy instances are [Cloud Run Functions](https://cloud
 
 To configure a VPC / serverless VPC connector, provide exactly ONE of the following to the `vpc_config` in your `terraform.tfvars`: 1) a `network`, 2) a `subnetwork`, or 3) `serverless_connector`; if you provide just the `network`, the latter two will be provisioned for you; if you provide just the `subnetwork`, the connector will be provisioned for you.
 
+**IMPORTANT:** When using the `subnetwork` approach, the subnet **must** have a `/28` netmask (e.g., `10.8.0.0/28`). This is a Google Cloud requirement for subnets used with VPC Serverless Connectors. If your existing subnet has a larger range (e.g., `/24` or `/16`), you will need to create a dedicated `/28` subnet for the VPC connector.
+
 ```hcl
 vpc_config = {
   serverless_connector = "projects/my-proxy-deployment/locations/us-central1/connectors/my-connector" # full resource ID of your Serverless VPC connector
@@ -66,9 +68,11 @@ or
 
 ```hcl
 vpc_config = {
-  subnetwork = "proxy_example_subnet"
+  subnetwork = "proxy_example_subnet"  # NOTE: Subnet must have /28 netmask (required by Google Cloud for VPC connectors)
 }
 ```
+
+**Subnetwork Requirements:** When specifying a `subnetwork`, ensure it has a `/28` netmask. Google Cloud requires this specific netmask for subnets used with VPC Serverless Connectors. If your subnet has a different netmask, you'll need to create a new subnet with `/28` or use the `network` approach instead (which will create the subnet automatically).
 
 
 ## Fixed IP Out
