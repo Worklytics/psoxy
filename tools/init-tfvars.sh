@@ -19,6 +19,14 @@ RED='\e[0;31m'
 BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
+# Validate DEPLOYMENT_ENV
+VALID_DEPLOYMENT_ENVS=("local" "terraform_cloud" "github_actions" "other_nonlocal")
+if [[ ! " ${VALID_DEPLOYMENT_ENVS[@]} " =~ " ${DEPLOYMENT_ENV} " ]]; then
+  printf "${RED}Error: Invalid DEPLOYMENT_ENV '${DEPLOYMENT_ENV}'.${NC}\n"
+  printf "Valid values are: ${BLUE}local${NC}, ${BLUE}terraform_cloud${NC}, ${BLUE}github_actions${NC}, ${BLUE}other_nonlocal${NC}\n"
+  exit 1
+fi
+
 prompt_user_Yn() {
   local prompt_message="$1"
   printf "$prompt_message"
