@@ -425,7 +425,7 @@ check_and_offer_published_bundle() {
       bundle_path="$s3_path"
       bundle_exists=true
     fi
-  elif [ "$HOST_PLATFORM" == "gcp" ]; then
+  elif [ "$HOST_PLATFORM" = "gcp" ]; then
     if ! command -v gsutil &> /dev/null; then
       return 0  # gsutil not installed, skip check
     fi
