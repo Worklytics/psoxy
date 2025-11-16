@@ -520,7 +520,7 @@ EOT
     slack-discovery-api = {
       source_kind : "slack"
       availability : "ga",
-      enable_by_default : true
+      enable_by_default : false,
       worklytics_connector_id : "slack-discovery-api-psoxy",
       worklytics_connector_name : "Slack via Psoxy",
       display_name : "Slack via Discovery API"
