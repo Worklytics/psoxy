@@ -84,7 +84,7 @@ if grep -q '^[[:space:]]*deployment_bundle[[:space:]]*=' terraform.tfvars; then
             
             BUNDLE_UPDATED=false
             
-            if [ "$PLATFORM" == "aws" ]; then
+            if [ "$PLATFORM" = "aws" ]; then
                 if command -v aws &> /dev/null; then
                     # Extract region from current bundle path or get from terraform.tfvars/AWS config
                     AWS_REGION=""
