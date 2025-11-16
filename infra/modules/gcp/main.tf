@@ -382,12 +382,12 @@ locals {
   provision_serverless_connector = var.vpc_config != null && try(var.vpc_config.serverless_connector, null) == null
   legal_connector_prefix         = substr(var.environment_id_prefix, 0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH)
   legal_connector_suffix         = substr("connector", 0, max(0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH - length(var.environment_id_prefix)))
-  
+
   # network argument to vpc_access_connector resource; must be provided if subnetwork isn't
-  vpc_connector_network          = try(var.vpc_config.subnetwork, null) == null ? try(var.vpc_config.network, null) : null
+  vpc_connector_network = try(var.vpc_config.subnetwork, null) == null ? try(var.vpc_config.network, null) : null
 
   # CIDR MUST be provided if network is provided; not otherwise
-  vpc_connector_cidr_range       = local.vpc_connector_network != null ? try(var.vpc_config.serverless_connector_cidr_range, "10.8.0.0/28") : null
+  vpc_connector_cidr_range = local.vpc_connector_network != null ? try(var.vpc_config.serverless_connector_cidr_range, "10.8.0.0/28") : null
 }
 
 resource "google_vpc_access_connector" "connector" {
@@ -398,7 +398,7 @@ resource "google_vpc_access_connector" "connector" {
   network       = local.vpc_connector_network
   name          = "${local.legal_connector_prefix}${local.legal_connector_suffix}"
   ip_cidr_range = local.vpc_connector_cidr_range
-  
+
   # subnet; provide if network is NOT provided
   dynamic "subnet" {
 

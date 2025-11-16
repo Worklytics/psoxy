@@ -349,6 +349,86 @@ if [ "$DEPLOYMENT_ENV" != "local" ]; then
   echo "todos_as_outputs = true" >> $TFVARS_FILE
 fi
 
+# Check for published bundles and offer to use them
+check_and_offer_published_bundle() {
+  local version=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' "${PSOXY_BASE_DIR}java/pom.xml")
+  if [ -z "$version" ]; then
+    return 0  # Can't determine version, skip check
+  fi
+
+  local bundle_path=""
+  local bundle_exists=false
+
+  if [ "$HOST_PLATFORM" == "aws" ]; then
+    if ! command -v aws &> /dev/null; then
+      return 0  # AWS CLI not installed, skip check
+    fi
+
+    # Get AWS region from terraform.tfvars if set, otherwise from AWS config, or use default
+    local aws_region=""
+    if grep -q '^[[:space:]]*aws_region[[:space:]]*=' "$TFVARS_FILE" 2>/dev/null; then
+      aws_region=$(grep '^[[:space:]]*aws_region[[:space:]]*=' "$TFVARS_FILE" | sed 's/.*=[[:space:]]*"\([^"]*\)".*/\1/' | head -1)
+    fi
+    if [ -z "$aws_region" ]; then
+      aws_region=$(aws configure get region 2>/dev/null || echo "")
+    fi
+    if [ -z "$aws_region" ]; then
+      aws_region="us-east-1"  # Default region
+    fi
+
+    local bucket_name="psoxy-public-artifacts-${aws_region}"
+    local jar_name="psoxy-aws-${version}.jar"
+    local s3_path="s3://${bucket_name}/${jar_name}"
+
+    # Check if bundle exists in S3
+    if aws s3 ls "$s3_path" >/dev/null 2>&1; then
+      bundle_path="$s3_path"
+      bundle_exists=true
+    fi
+  elif [ "$HOST_PLATFORM" == "gcp" ]; then
+    if ! command -v gsutil &> /dev/null; then
+      return 0  # gsutil not installed, skip check
+    fi
+
+    local bucket_name="psoxy-public-artifacts"
+    local zip_name="psoxy-gcp-${version}.zip"
+    local gcs_path="gs://${bucket_name}/${zip_name}"
+
+    # Check if bundle exists in GCS
+    if gsutil ls "$gcs_path" >/dev/null 2>&1; then
+      bundle_path="$gcs_path"
+      bundle_exists=true
+    fi
+  fi
+
+  if [ "$bundle_exists" = true ]; then
+    printf "\n"
+    printf "Found published deployment bundle for version ${BLUE}${version}${NC} at:\n"
+    printf "  ${GREEN}${bundle_path}${NC}\n"
+    prompt_user_Yn "Do you want to use this published bundle instead of building one locally?"
+    if [[ $? -eq 1 ]]; then
+      # User wants to use published bundle
+      if grep -q '^[[:space:]]*deployment_bundle' "$TFVARS_FILE" 2>/dev/null; then
+        sed -i.bck "/^[[:space:]]*deployment_bundle.*/c\\
+deployment_bundle = \"${bundle_path}\"" "$TFVARS_FILE"
+        rm -f "${TFVARS_FILE}.bck" 2>/dev/null
+      else
+        printf "deployment_bundle = \"${bundle_path}\"\n\n" >> $TFVARS_FILE
+      fi
+      printf "Set ${BLUE}deployment_bundle${NC} to ${GREEN}${bundle_path}${NC}\n"
+      return 1  # Indicate bundle was set
+    fi
+  fi
+
+  return 0
+}
+
+# Check for published bundles (only if not terraform_cloud, as that needs local build)
+if [ "$DEPLOYMENT_ENV" != "terraform_cloud" ]; then
+  check_and_offer_published_bundle
+  bundle_was_set=$?
+fi
+
 if [ "$DEPLOYMENT_ENV" == "terraform_cloud" ]; then
   # need to build the JAR now, to ship with the proxy
   ${PSOXY_BASE_DIR}tools/update-bundle.sh $PSOXY_BASE_DIR $TFVARS_FILE $HOST_PLATFORM
