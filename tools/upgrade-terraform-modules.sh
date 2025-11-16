@@ -121,7 +121,7 @@ if grep -q '^[[:space:]]*deployment_bundle[[:space:]]*=' terraform.tfvars; then
                 else
                     printf "${BLUE}Note:${NC} AWS CLI not available. Cannot check for updated bundle in public S3 bucket.\n\n"
                 fi
-            elif [ "$PLATFORM" == "gcp" ]; then
+            elif [ "$PLATFORM" = "gcp" ]; then
                 if command -v gsutil &> /dev/null; then
                     BUCKET_NAME="psoxy-public-artifacts"
                     NEW_BUNDLE_PATH="gs://${BUCKET_NAME}/psoxy-gcp-${NEXT_VERSION}.zip"
