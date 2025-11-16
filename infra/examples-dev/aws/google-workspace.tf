@@ -24,6 +24,7 @@ module "worklytics_connectors_google_workspace" {
   provision_gcp_sa_keys          = var.google_workspace_provision_keys
   gcp_sa_key_rotation_days       = var.google_workspace_key_rotation_days
   todos_as_local_files           = var.todos_as_local_files
+  todo_step                      = 1
 }
 
 output "google_workspace_api_clients" {
