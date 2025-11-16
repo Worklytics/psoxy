@@ -325,12 +325,30 @@ fi
 
 # if ALL_AVAILABLE_CONNECTORS is not empty, then list them in terraform.tfvars
 if [[ -n "$ALL_AVAILABLE_CONNECTORS" ]]; then
-  # add comment '#' to each line of the ALL_AVAILABLE_CONNECTORS
-  ALL_AVAILABLE_CONNECTORS=$(echo "$ALL_AVAILABLE_CONNECTORS" | sed 's/^/# /')
-
   printf "# If you wish to enable additional connectors, you can uncomment and add one of the ids\n" >> $TFVARS_FILE
   printf "# listed below  to \`enabled_connectors\`; run \`./available-connectors\` if available for an updated list\n" >> $TFVARS_FILE
-  printf "${ALL_AVAILABLE_CONNECTORS}\n\n" >> $TFVARS_FILE
+  
+  # Parse JSON array and output one connector per line, each commented
+  # ALL_AVAILABLE_CONNECTORS is a JSON-encoded string from terraform console: "[\"asana\",\"azure-ad\",...]"
+  # First decode the JSON string, then parse the array
+  if command -v jq &> /dev/null; then
+    # Use jq to decode the JSON string and then parse the array
+    echo "$ALL_AVAILABLE_CONNECTORS" | jq -r '.' 2>/dev/null | jq -r '.[]' 2>/dev/null | while read -r connector; do
+      if [ -n "$connector" ]; then
+        printf "#   \"%s\",\n" "$connector" >> $TFVARS_FILE
+      fi
+    done
+  else
+    # Manual parsing: terraform outputs "[\"asana\",\"azure-ad\",\"badge\"]"
+    # Remove outer quotes, then parse the inner JSON array
+    echo "$ALL_AVAILABLE_CONNECTORS" | sed 's/^"//' | sed 's/"$//' | sed 's/\\"/"/g' | sed 's/^\[//' | sed 's/\]$//' | tr ',' '\n' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/^"//' | sed 's/"$//' | while read -r connector; do
+      if [ -n "$connector" ]; then
+        printf "#   \"%s\",\n" "$connector" >> $TFVARS_FILE
+      fi
+    done
+  fi
+  
+  printf "\n" >> $TFVARS_FILE
 fi
 
 printf "\n"
