@@ -47,6 +47,8 @@ module "worklytics_connectors" {
   github_organization                      = var.github_organization
   github_example_repository                = var.github_example_repository
   salesforce_example_account_id            = var.salesforce_example_account_id
+  todos_as_local_files                     = var.todos_as_local_files
+  todo_step                                = 1
 }
 
 # sources which require additional dependencies are split into distinct Terraform files, following
@@ -153,6 +155,7 @@ module "connection_in_worklytics" {
   connector_id      = try(local.all_connectors[each.key].worklytics_connector_id, "")
   display_name      = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
   todo_step         = module.psoxy.next_todo_step
+  todos_as_local_files = var.todos_as_local_files
 
   settings_to_provide = merge(
     # Source API case
