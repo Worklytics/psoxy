@@ -323,7 +323,8 @@ resource "google_project_iam_custom_role" "oidc_token_verifier" {
 
 
 # q: is there a default Cloud Scheduler service account, that needs tokencreator role on the webhook_batch_invoker SA?
-# GCP docs don't show one, and ChatGPT didn't say one needed until I asked - at which point it gave me example email for the SA that doesn't look to follow usual pattern ...
+# GCP docs don't show one, and ChatGPT didn't say one needed until I asked - at which point it gave me example email 
+# for the SA that doesn't look to follow usual pattern ...
 resource "google_service_account" "webhook_batch_invoker" {
   count = var.support_webhook_collectors ? 1 : 0
 
@@ -335,6 +336,19 @@ resource "google_service_account" "webhook_batch_invoker" {
 
 data "google_project" "project" {
   project_id = var.project_id
+}
+
+# Cloud Functions Gen2 deployment REQUIRES the terraform principal to have roles/iam.serviceAccountUser
+# on the Compute Engine default service account in order to provision the Cloud Functions Gen2 instance
+# with a specific service account (which we do, and seems like good practice)
+data "google_compute_default_service_account" "default" {
+  project = var.project_id
+}
+
+resource "google_service_account_iam_member" "tf_runner_act_as_compute_default" {
+  member             = var.tf_runner_iam_principal
+  role               = "roles/iam.serviceAccountUser"
+  service_account_id = data.google_compute_default_service_account.default.id
 }
 
 # q: is this needed????

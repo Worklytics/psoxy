@@ -42,6 +42,7 @@ module "psoxy" {
   support_webhook_collectors   = length(var.webhook_collectors) > 0
   vpc_config                   = var.vpc_config
   bucket_force_destroy         = var.bucket_force_destroy
+  tf_runner_iam_principal      = module.tf_runner.iam_principal
 }
 
 

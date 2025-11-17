@@ -112,3 +112,8 @@ variable "bucket_force_destroy" {
   description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this module"
   default     = false
 }
+
+variable "tf_runner_iam_principal" {
+  description = "The IAM principal (e.g., 'user:alice@example.com' or 'serviceAccount:terraform@project.iam.gserviceaccount.com') that Terraform is running as, used for granting necessary permissions to provision Cloud Functions."
+  type        = string
+}
