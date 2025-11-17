@@ -29,7 +29,7 @@ locals {
 # call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.5.12"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.5.13"
 
   enabled_connectors                       = var.enabled_connectors
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
@@ -47,6 +47,8 @@ module "worklytics_connectors" {
   github_organization                      = var.github_organization
   github_example_repository                = var.github_example_repository
   salesforce_example_account_id            = var.salesforce_example_account_id
+  todos_as_local_files                     = var.todos_as_local_files
+  todo_step                                = 1
 }
 
 # sources which require additional dependencies are split into distinct Terraform files, following
@@ -85,7 +87,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.5.12"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.5.13"
 
   gcp_project_id                    = var.gcp_project_id
   environment_name                  = var.environment_name
@@ -145,7 +147,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.5.12"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.5.13"
 
   host_platform_id  = local.host_platform_id
   proxy_instance_id = each.key
@@ -153,6 +155,7 @@ module "connection_in_worklytics" {
   connector_id      = try(local.all_connectors[each.key].worklytics_connector_id, "")
   display_name      = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
   todo_step         = module.psoxy.next_todo_step
+  todos_as_local_files = var.todos_as_local_files
 
   settings_to_provide = merge(
     # Source API case
