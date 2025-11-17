@@ -54,9 +54,5 @@ gh pr merge $PR_NUMBER --auto --merge --subject "release $RELEASE from PR #${PR_
 
 printf "created PR ${GREEN}${PR_URL}${NC} and set to auto-merge to ${BLUE}main${NC}\n"
 
-printf "Next steps, after that's merged to ${BLUE}main${NC}:\n"
-printf "  1. publish the release: ${BLUE}./tools/release/publish.sh $RELEASE${NC}\n"
-printf "  2. update stable deployment in demos repo to point to ${BLUE}$RELEASE${NC}\n"
-printf "  3. prep next rc : ${BLUE}./tools/release/prep.sh $RELEASE rc-{x.y.z}${NC}\n"
-
-
+printf "After that's merged to ${BLUE}main${NC} publish the release:\n"
+printf "  ${BLUE}./tools/release/publish.sh $RELEASE${NC}\n"
