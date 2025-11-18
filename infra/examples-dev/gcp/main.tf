@@ -110,22 +110,23 @@ module "psoxy" {
       example_payload = try(file(v.example_payload_file), null)
     }
   ) }
-  non_production_connectors       = var.non_production_connectors
-  custom_api_connector_rules      = var.custom_api_connector_rules
-  general_environment_variables   = var.general_environment_variables
-  pseudonymize_app_ids            = var.pseudonymize_app_ids
-  email_canonicalization          = var.email_canonicalization
-  bulk_input_expiration_days      = var.bulk_input_expiration_days
-  bulk_sanitized_expiration_days  = var.bulk_sanitized_expiration_days
-  custom_bulk_connector_rules     = var.custom_bulk_connector_rules
-  custom_bulk_connector_arguments = var.custom_bulk_connector_arguments
-  lookup_tables                   = var.lookup_tables
-  custom_artifacts_bucket_name    = var.custom_artifacts_bucket_name
-  custom_side_outputs             = var.custom_side_outputs
-  todos_as_local_files            = var.todos_as_local_files
-  todo_step                       = local.max_auth_todo_step
-  bucket_force_destroy            = var.bucket_force_destroy
-  tf_gcp_principal_email          = var.gcp_terraform_sa_account_email
+  non_production_connectors                                 = var.non_production_connectors
+  custom_api_connector_rules                                = var.custom_api_connector_rules
+  general_environment_variables                             = var.general_environment_variables
+  pseudonymize_app_ids                                      = var.pseudonymize_app_ids
+  email_canonicalization                                    = var.email_canonicalization
+  bulk_input_expiration_days                                = var.bulk_input_expiration_days
+  bulk_sanitized_expiration_days                            = var.bulk_sanitized_expiration_days
+  custom_bulk_connector_rules                               = var.custom_bulk_connector_rules
+  custom_bulk_connector_arguments                           = var.custom_bulk_connector_arguments
+  lookup_tables                                             = var.lookup_tables
+  custom_artifacts_bucket_name                              = var.custom_artifacts_bucket_name
+  custom_side_outputs                                       = var.custom_side_outputs
+  todos_as_local_files                                      = var.todos_as_local_files
+  todo_step                                                 = local.max_auth_todo_step
+  bucket_force_destroy                                      = var.bucket_force_destroy
+  tf_gcp_principal_email                                    = var.gcp_terraform_sa_account_email
+  provision_pubsub_publisher_to_gcs_default_service_account = var.provision_pubsub_publisher_to_gcs_default_service_account
 }
 
 locals {
@@ -149,12 +150,12 @@ module "connection_in_worklytics" {
   source = "../../modules/worklytics-psoxy-connection-generic"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=rc-v0.5.14"
 
-  host_platform_id  = local.host_platform_id
-  proxy_instance_id = each.key
-  worklytics_host   = var.worklytics_host
-  connector_id      = try(local.all_connectors[each.key].worklytics_connector_id, "")
-  display_name      = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
-  todo_step         = module.psoxy.next_todo_step
+  host_platform_id     = local.host_platform_id
+  proxy_instance_id    = each.key
+  worklytics_host      = var.worklytics_host
+  connector_id         = try(local.all_connectors[each.key].worklytics_connector_id, "")
+  display_name         = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
+  todo_step            = module.psoxy.next_todo_step
   todos_as_local_files = var.todos_as_local_files
 
   settings_to_provide = merge(
