@@ -118,7 +118,7 @@ If you're managing your Microsoft 365 connectors OUTSIDE of our provided terrafo
 
 2. Under "Manage", select "Certificates & Secrets" --> "Federated Credentials" --> "Add Credential" --> "Other Issuer"
 
-3. Fill in `Issuer`, `Value` (leave Type as `Explicit subject identifier` --> use 'Subject' from OIDC. Name + Description can be whatever you want.
+3. Fill in the `Issuer` and `Value` fields (leave Type as `Explicit subject identifier`). For `Value`, use the `Subject` value from your OIDC configuration. Name and Description can be whatever you want.
 
 
 AWS: 
