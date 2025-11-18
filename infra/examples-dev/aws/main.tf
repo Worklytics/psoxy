@@ -223,6 +223,7 @@ output "api_connector_instances" {
         )]
       )
       },
+      try(v.enable_async_processing, false) ? { supports_async = true } : {},
       try(v.example_api_calls_user_to_impersonate, null) != null ? { user_to_impersonate = try(v.example_api_calls_user_to_impersonate, null) } : {}
     ) }
   }
