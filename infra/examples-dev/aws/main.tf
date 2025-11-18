@@ -205,19 +205,52 @@ output "api_connector_instances" {
   value = { for k, v in module.psoxy.api_connector_instances : k => {
     endpoint_url     = v.endpoint_url
     sanitized_bucket = v.sanitized_bucket
-  } }
+    test_examples = merge({
+      api_requests = concat(
+        [for path in try(v.example_api_calls, []) : {
+          method = "GET"
+          path   = path
+        }],
+        [for req in try(v.example_api_requests, []) : merge(
+          {
+            method = try(req.method, "GET")
+            path   = req.path
+          },
+          try(req.method, "GET") == "POST" || try(req.method, "GET") == "PUT" ? merge(
+            try(req.content_type, null) != null ? { content_type = req.content_type } : {},
+            try(req.body, null) != null ? { body = req.body } : {}
+          ) : {}
+        )]
+      )
+      },
+      try(v.example_api_calls_user_to_impersonate, null) != null ? { user_to_impersonate = try(v.example_api_calls_user_to_impersonate, null) } : {}
+    ) }
+  }
 }
 
 output "bulk_connector_instances" {
   value = { for k, v in module.psoxy.bulk_connector_instances : k => {
+    input_bucket     = try(v.input_bucket, null)
     sanitized_bucket = v.sanitized_bucket
   } }
 }
 
 output "webhook_collector_instances" {
-  value = { for k, v in module.psoxy.webhook_collector_instances : k => {
+  value = { for k, v in module.psoxy.webhook_collector_instances : k => merge({
+    endpoint_url     = try(v.endpoint_url, null)
     sanitized_bucket = v.output_sanitized_bucket_id
-  } }
+    }, length(try(v.provisioned_auth_key_pairs, [])) > 0 || try(var.webhook_collectors[k].example_payload_file, null) != null || try(var.webhook_collectors[k].example_identity, null) != null ? {
+    test_examples = [{
+      body_file      = try(var.webhook_collectors[k].example_payload_file, null)
+      signing_key_id = length(try(v.provisioned_auth_key_pairs, [])) > 0 ? "aws-kms:${element(v.provisioned_auth_key_pairs, length(v.provisioned_auth_key_pairs) - 1)}" : null
+      identity       = try(var.webhook_collectors[k].example_identity, null)
+    }]
+  } : {}) }
+}
+
+output "caller_role_arn" {
+  description = "ARN of the AWS role to impersonate when making API calls (AWS case)"
+  value       = module.psoxy.caller_role_arn
 }
 
 output "todos_1" {

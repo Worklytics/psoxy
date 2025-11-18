@@ -149,12 +149,12 @@ module "connection_in_worklytics" {
   source = "../../modules/worklytics-psoxy-connection-generic"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=rc-v0.5.14"
 
-  host_platform_id  = local.host_platform_id
-  proxy_instance_id = each.key
-  worklytics_host   = var.worklytics_host
-  connector_id      = try(local.all_connectors[each.key].worklytics_connector_id, "")
-  display_name      = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
-  todo_step         = module.psoxy.next_todo_step
+  host_platform_id     = local.host_platform_id
+  proxy_instance_id    = each.key
+  worklytics_host      = var.worklytics_host
+  connector_id         = try(local.all_connectors[each.key].worklytics_connector_id, "")
+  display_name         = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
+  todo_step            = module.psoxy.next_todo_step
   todos_as_local_files = var.todos_as_local_files
 
   settings_to_provide = merge(
@@ -182,20 +182,48 @@ output "api_connector_instances" {
     endpoint_url = v.endpoint_url
     }, v.sanitized_bucket != null ? {
     sanitized_bucket = v.sanitized_bucket
-    } : {})
-  }
+    } : {}, {
+    test_examples = merge({
+      api_requests = concat(
+        [for path in try(v.example_api_calls, []) : {
+          method = "GET"
+          path   = path
+        }],
+        [for req in try(v.example_api_requests, []) : merge(
+          {
+            method = try(req.method, "GET")
+            path   = req.path
+          },
+          try(req.method, "GET") == "POST" || try(req.method, "GET") == "PUT" ? merge(
+            try(req.content_type, null) != null ? { content_type = req.content_type } : {},
+            try(req.body, null) != null ? { body = req.body } : {}
+          ) : {}
+        )]
+      )
+      },
+      try(v.example_api_calls_user_to_impersonate, null) != null ? { user_to_impersonate = try(v.example_api_calls_user_to_impersonate, null) } : {}
+    ) }
+  ) }
 }
 
 output "bulk_connector_instances" {
   value = { for k, v in module.psoxy.bulk_connector_instances : k => {
+    input_bucket     = try(v.input_bucket, null)
     sanitized_bucket = v.sanitized_bucket
   } }
 }
 
 output "webhook_collector_instances" {
-  value = { for k, v in module.psoxy.webhook_collector_instances : k => {
+  value = { for k, v in module.psoxy.webhook_collector_instances : k => merge({
+    endpoint_url     = try(v.cloud_function_url, null)
     sanitized_bucket = v.output_sanitized_bucket_id
-  } }
+    }, length(try(v.provisioned_auth_key_pairs, [])) > 0 || try(var.webhook_collectors[k].example_payload_file, null) != null || try(var.webhook_collectors[k].example_identity, null) != null ? {
+    test_examples = [{
+      body_file      = try(var.webhook_collectors[k].example_payload_file, null)
+      signing_key_id = length(try(v.provisioned_auth_key_pairs, [])) > 0 ? "gcp-kms:${element(v.provisioned_auth_key_pairs, 0)}" : null
+      identity       = try(var.webhook_collectors[k].example_identity, null)
+    }]
+  } : {}) }
 }
 
 output "todos_1" {
