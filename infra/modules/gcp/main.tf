@@ -296,7 +296,7 @@ data "google_storage_project_service_account" "gcs_default_service_account" {
 }
 
 resource "google_project_iam_member" "grant_gcs-sa_pub-sub-publisher" {
-  count = var.support_bulk_mode ? 1 : 0
+  count = var.support_bulk_mode && var.provision_pubsub_publisher_to_gcs_default_service_account ? 1 : 0
 
   project = var.project_id
   role    = "roles/pubsub.publisher"
