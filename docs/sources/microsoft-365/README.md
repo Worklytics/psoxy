@@ -108,6 +108,33 @@ in your `terraform.tfvars` file. See:
 
 https://github.com/Worklytics/psoxy-example-aws/blob/main/msft-365-variables.tf
 
+### Configure Workload Identity Federation (OIDC) Authentication via Entra ID
+
+*Unsupported, alpha approach; YMMV; using our Terraform is recommended approach*
+
+If you're managing the your Microsoft 365 connectors OUTSIDE of our provided terraform modules, you will have to configure authentication yourself.
+
+1. Navigate to Microsoft Entra admin center --> App Registrations; find each connector.
+
+2. Under "Manage", select "Certificates & Secrets" --> "Federated Credentials" --> "Add Credential" --> "Other Issuer"
+
+3. Fill in `Issuer`, `Value` (leave Type as `Explicit subject identifier` --> use 'Subject' from OIDC. Name + Description can be whatever you want.
+
+
+AWS: 
+- **Issuer:** `"https://cognito-identity.amazonaws.com"`
+- **Subject:** `identity_id` of the Cognito within your pool
+- **Audience:** `pool_id` of your AWS Cognito Identity pool
+
+![Microsoft Entra OIDC Configuration](msft-entra-oidc-config-aws.png)
+
+GCP:
+- **Issuer:** `"https://accounts.google.com"`
+- **Subject:** numeric ID of the GCP service account
+- **Audience:** `"api://AzureADTokenExchange"`
+
+![Microsoft Entra OIDC Configuration](msft-entra-oidc-config.png)
+
 ## Troubleshooting
 
 ### Lack of 'Cloud Application Administrator' role
