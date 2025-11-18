@@ -112,7 +112,7 @@ https://github.com/Worklytics/psoxy-example-aws/blob/main/msft-365-variables.tf
 
 *Unsupported, alpha approach; YMMV; using our Terraform is recommended approach*
 
-If you're managing the your Microsoft 365 connectors OUTSIDE of our provided terraform modules, you will have to configure authentication yourself.
+If you're managing your Microsoft 365 connectors OUTSIDE of our provided terraform modules, you will have to configure authentication yourself.
 
 1. Navigate to Microsoft Entra admin center --> App Registrations; find each connector.
 
