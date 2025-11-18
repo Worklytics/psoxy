@@ -131,7 +131,7 @@ AWS:
 GCP:
 - **Issuer:** `"https://accounts.google.com"`
 - **Subject:** numeric ID of the GCP service account
-- **Audience:** `"api://AzureADTokenExchange"`
+- **Audience:** `"api://AzureADTokenExchange"`. This value should match the `aud` JWT claim when retrieving the [Idtoken](https://docs.cloud.google.com/compute/docs/instances/verifying-instance-identity#request_signature) on the GCP side. We recommend to use `api://AzureADTokenExchange` by default as explained in [Entra ID documentation](https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation-considerations)
 
 ![Microsoft Entra OIDC Configuration](msft-entra-oidc-config.png)
 
