@@ -346,9 +346,9 @@ data "google_compute_default_service_account" "default" {
 }
 
 resource "google_service_account_iam_member" "tf_runner_act_as_compute_default" {
+  service_account_id = data.google_compute_default_service_account.default.name
   member             = var.tf_runner_iam_principal
   role               = "roles/iam.serviceAccountUser"
-  service_account_id = data.google_compute_default_service_account.default.id
 }
 
 # q: is this needed????
