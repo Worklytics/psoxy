@@ -233,20 +233,16 @@ output "bulk_connector_instances" {
   value = { for k, v in module.psoxy.bulk_connector_instances : k => {
     input_bucket     = try(v.input_bucket, null)
     sanitized_bucket = v.sanitized_bucket
+    example_files    = try(v.example_files, [])
   } }
 }
 
 output "webhook_collector_instances" {
-  value = { for k, v in module.psoxy.webhook_collector_instances : k => merge({
+  value = { for k, v in module.psoxy.webhook_collector_instances : k => {
     endpoint_url     = try(v.endpoint_url, null)
     sanitized_bucket = v.output_sanitized_bucket_id
-    }, length(try(v.provisioned_auth_key_pairs, [])) > 0 || try(var.webhook_collectors[k].example_payload_file, null) != null || try(var.webhook_collectors[k].example_identity, null) != null ? {
-    test_examples = [{
-      body_file      = try(var.webhook_collectors[k].example_payload_file, null)
-      signing_key_id = length(try(v.provisioned_auth_key_pairs, [])) > 0 ? "aws-kms:${element(v.provisioned_auth_key_pairs, length(v.provisioned_auth_key_pairs) - 1)}" : null
-      identity       = try(var.webhook_collectors[k].example_identity, null)
-    }]
-  } : {}) }
+    test_examples    = try(v.test_examples, [])
+  } }
 }
 
 output "caller_role_arn" {

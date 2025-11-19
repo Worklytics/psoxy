@@ -557,6 +557,15 @@ output "provisioned_auth_key_pairs" {
   description = "List of IDs of kms keys provisioned for webhook authentication purposes, if any."
 }
 
+output "test_examples" {
+  value = try(var.example_payload, null) != null ? [{
+    content_base64 = try(var.example_payload, null) != null ? base64encode(var.example_payload) : null
+    signing_key_id = length(local.auth_key_ids_sorted) > 0 ? "gcp-kms:${element(local.auth_key_ids_sorted, 0)}" : null
+    identity       = try(var.example_identity, null)
+  }] : []
+  description = "Array of test examples with base64-encoded content, signing key, and identity"
+}
+
 output "todo" {
   value = local.todo_content
 }

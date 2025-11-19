@@ -236,7 +236,7 @@ variable "batch_processing_frequency_minutes" {
 
 variable "example_payload" {
   type        = string
-  description = "Example payload to use for testing; if provided, will be used in the test script."
+  description = "Example payload content to use for testing; if provided, will be used in the test script."
   default     = null
 }
 
