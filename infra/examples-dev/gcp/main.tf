@@ -185,14 +185,10 @@ output "api_connector_instances" {
     } : {}, {
     test_examples = merge({
       api_requests = concat(
-        [for path in try(v.example_api_calls, []) : {
-          method = "GET"
-          path   = path
-        }],
+        [for path in try(v.example_api_calls, []) : "GET ${path}"],
         [for req in try(v.example_api_requests, []) : merge(
           {
-            method = try(req.method, "GET")
-            path   = req.path
+            request = "${try(req.method, "GET")} ${req.path}"
           },
           try(req.method, "GET") == "POST" || try(req.method, "GET") == "PUT" ? merge(
             try(req.content_type, null) != null ? { content_type = req.content_type } : {},
