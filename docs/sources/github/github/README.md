@@ -19,14 +19,14 @@ Follow these steps:
 
 1. Populate the `github_organization` variable in Terraform with the name of your GitHub organization.
 2. Register a [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app#registering-a-github-app) *owned by your Organization, not you as an individual* with following permissions with **Read Only**:
-    - Repository:
-     - Contents: for reading commits and comments
-     - Issues: for listing issues, comments, assignees, etc.
-     - Metadata: for listing repositories and branches
-     - Pull requests: for listing pull requests, reviews, comments and commits
-   - Organization:
-     - Administration: for listing events from audit log
-     - Members: for listing teams and their members
+  - Repository:
+    - Contents: for reading commits and comments
+    - Issues: for listing issues, comments, assignees, etc.
+    - Metadata: for listing repositories and branches
+    - Pull requests: for listing pull requests, reviews, comments and commits
+  - Organization:
+    - Administration: for listing events from audit log
+    - Members: for listing teams and their members
 
 NOTES:
 - We assume that ALL the repositories to be listed **should be owned by the organization, not the users**.
@@ -47,11 +47,11 @@ https://github.com/organizations/{YOUR ORG}/settings/installations/{INSTALLATION
 Copy the value of `installationId` and assign it to the `github_installation_id` variable in Terraform. You will need to redeploy the proxy again if that value was not populated before.
 
 **NOTE**:
-- If `github_cinstallation_id` is not set, authentication URL will not be properly formatted and you will see *401: Unauthorized* when trying to get an access token.
+- If `github_installation_id` is not set, authentication URL will not be properly formatted and you will see *401: Unauthorized* when trying to get an access token.
 - If you see *404: Not found* in logs please review the *IP restriction policies* that your organization might have; that could cause connections from psoxy AWS Lambda/GCP Cloud Functions be rejected.
 
 6. Update the configuration parameters in your host platform with values obtained in previous step:
-    - `PSOXY_GITHUB_COPILOT_CLIENT_ID` with `Client ID` value from the application you have created.
+    - `PSOXY_GITHUB_CLIENT_ID` with `Client ID` value from the application you have created.
     - `PSOXY_GITHUB_PRIVATE_KEY` with content of the key file downloaded in step 4. In a terminal on MacOS, run `cat key_file.pem | pbcopy` to copy the key to your clipboard, then paste it as the value of the parameter via the web console of your host platforms parameter store.
 
 7. Once your key value has been filled in the parameter store, you should DELETE the key file from your machine.
