@@ -342,3 +342,9 @@ variable "bucket_force_destroy" {
   description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this module"
   default     = false
 }
+
+variable "provision_pubsub_publisher_to_gcs_default_service_account" {
+  description = "Whether to grant the Pub/Sub Publisher role to the GCS default service account at the project level. Set to false if you prefer to manage this IAM binding outside of Terraform."
+  type        = bool
+  default     = true
+}
