@@ -296,11 +296,22 @@ data "google_storage_project_service_account" "gcs_default_service_account" {
 }
 
 resource "google_project_iam_member" "grant_gcs-sa_pub-sub-publisher" {
-  count = var.support_bulk_mode && var.provision_pubsub_publisher_to_gcs_default_service_account ? 1 : 0
+  count = var.support_bulk_mode && var.provision_project_level_iam ? 1 : 0
 
   project = var.project_id
   role    = "roles/pubsub.publisher"
   member  = "serviceAccount:${data.google_storage_project_service_account.gcs_default_service_account.email_address}"
+}
+
+# Grant Cloud Build builder role to Compute Engine default service account
+# Required for Cloud Functions Gen2 deployment to build the function
+# See: https://cloud.google.com/functions/docs/troubleshooting#build-service-account
+resource "google_project_iam_member" "grant_compute_default_sa_cloudbuild_builder" {
+  count = var.provision_project_level_iam ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/cloudbuild.builds.builder"
+  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
 }
 
 
