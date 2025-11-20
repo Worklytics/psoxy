@@ -49,7 +49,7 @@ Error: Error creating function: googleapi: Error 400: Validation failed for trig
 
 This error occurs when the Eventarc Service Agent doesn't have the necessary permissions to create triggers for Cloud Functions. The Eventarc Service Agent is a Google-managed service account that handles event routing.
 
-In our experience, this DOES resolve itself after a few minutes; so wait and try again. If still failes, confirm Eventarc service is activated in the project.
+In our experience, this DOES resolve itself after a few minutes; so wait and try again. If still fails, confirm Eventarc service is activated in the project.
 
 ## Warning like 'Failed to find a usable hardware address from the network interfaces; using random bytes: '
 
