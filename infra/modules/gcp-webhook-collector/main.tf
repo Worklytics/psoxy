@@ -461,8 +461,8 @@ Then, based on your configuration, these are some example test calls you can try
 ${local.command_cli_call} --method POST \
  -u ${local.proxy_endpoint_url} \
  --signing-key "gcp-kms:${local.signing_key_id}" \
- --identity-issuer ${local.proxy_endpoint_url} \ 
- --identity-subject '${var.example_identity}' \ 
+ --identity-issuer ${local.proxy_endpoint_url} \
+ --identity-subject '${var.example_identity}' \
  --body '${coalesce(var.example_payload, "{\"test\": \"body\"}")}' 
 ```
 
