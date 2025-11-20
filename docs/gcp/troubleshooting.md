@@ -39,6 +39,18 @@ This may be due to an [Organization Policy](https://cloud.google.com/resource-ma
 
 You may need define an exception for the GCP project in which you're deploying the proxy, or add the domain of your Worklytics Tenant SA to the list of allowed domains.
 
+## Error 400: Validation failed for trigger, Permission denied while using the Eventarc Service Agent
+
+If you receive an error such as:
+
+```
+Error: Error creating function: googleapi: Error 400: Validation failed for trigger projects/my-project-id/locations/us-central1/triggers/survey-495732: Invalid resource state for "": Permission denied while using the Eventarc Service Agent. If you recently started to use Eventarc, it may take a few minutes before all necessary permissions are propagated to the Service Agent. Otherwise, verify that it has Eventarc Service Agent role.
+```
+
+This error occurs when the Eventarc Service Agent doesn't have the necessary permissions to create triggers for Cloud Functions. The Eventarc Service Agent is a Google-managed service account that handles event routing.
+
+In our experience, this DOES resolve itself after a few minutes; so wait and try again. If still failes, confirm Eventarc service is activated in the project.
+
 ## Warning like 'Failed to find a usable hardware address from the network interfaces; using random bytes: '
 
 This is benign and can be safely ignored.
