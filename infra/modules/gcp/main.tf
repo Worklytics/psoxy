@@ -296,7 +296,7 @@ data "google_storage_project_service_account" "gcs_default_service_account" {
 }
 
 resource "google_project_iam_member" "grant_gcs-sa_pub-sub-publisher" {
-  count = var.support_bulk_mode ? 1 : 0
+  count = var.support_bulk_mode && var.provision_pubsub_publisher_to_gcs_default_service_account ? 1 : 0
 
   project = var.project_id
   role    = "roles/pubsub.publisher"
@@ -323,7 +323,8 @@ resource "google_project_iam_custom_role" "oidc_token_verifier" {
 
 
 # q: is there a default Cloud Scheduler service account, that needs tokencreator role on the webhook_batch_invoker SA?
-# GCP docs don't show one, and ChatGPT didn't say one needed until I asked - at which point it gave me example email for the SA that doesn't look to follow usual pattern ...
+# GCP docs don't show one, and ChatGPT didn't say one needed until I asked - at which point it gave me example email 
+# for the SA that doesn't look to follow usual pattern ...
 resource "google_service_account" "webhook_batch_invoker" {
   count = var.support_webhook_collectors ? 1 : 0
 
@@ -335,6 +336,19 @@ resource "google_service_account" "webhook_batch_invoker" {
 
 data "google_project" "project" {
   project_id = var.project_id
+}
+
+# Cloud Functions Gen2 deployment REQUIRES the terraform principal to have roles/iam.serviceAccountUser
+# on the Compute Engine default service account in order to provision the Cloud Functions Gen2 instance
+# with a specific service account (which we do, and seems like good practice)
+data "google_compute_default_service_account" "default" {
+  project = var.project_id
+}
+
+resource "google_service_account_iam_member" "tf_runner_act_as_compute_default" {
+  service_account_id = data.google_compute_default_service_account.default.name
+  member             = var.tf_runner_iam_principal
+  role               = "roles/iam.serviceAccountUser"
 }
 
 # q: is this needed????
@@ -383,8 +397,8 @@ locals {
   legal_connector_prefix         = substr(var.environment_id_prefix, 0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH)
   legal_connector_suffix         = substr("connector", 0, max(0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH - length(var.environment_id_prefix)))
 
-  # network argument to vpc_access_connector resource; must be provided if subnetwork isn't
-  vpc_connector_network = try(var.vpc_config.subnetwork, null) == null ? try(var.vpc_config.network, null) : null
+  # network argument to vpc_access_connector resource; must be provided if subnet isn't
+  vpc_connector_network = try(var.vpc_config.subnet, null) == null ? try(var.vpc_config.network, null) : null
 
   # CIDR MUST be provided if network is provided; not otherwise
   vpc_connector_cidr_range = local.vpc_connector_network != null ? try(var.vpc_config.serverless_connector_cidr_range, "10.8.0.0/28") : null
@@ -402,7 +416,7 @@ resource "google_vpc_access_connector" "connector" {
   # subnet; provide if network is NOT provided
   dynamic "subnet" {
 
-    for_each = local.vpc_connector_network == null ? [var.vpc_config.subnetwork] : []
+    for_each = local.vpc_connector_network == null ? [var.vpc_config.subnet] : []
 
     content {
       name       = subnet.value

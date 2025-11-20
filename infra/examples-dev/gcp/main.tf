@@ -29,7 +29,7 @@ locals {
 # call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.5.13"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.5.14"
 
   enabled_connectors                       = var.enabled_connectors
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
@@ -47,6 +47,8 @@ module "worklytics_connectors" {
   github_organization                      = var.github_organization
   github_example_repository                = var.github_example_repository
   salesforce_example_account_id            = var.salesforce_example_account_id
+  todos_as_local_files                     = var.todos_as_local_files
+  todo_step                                = 1
 }
 
 # sources which require additional dependencies are split into distinct Terraform files, following
@@ -85,7 +87,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=rc-v0.5.13"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=rc-v0.5.14"
 
   gcp_project_id                    = var.gcp_project_id
   environment_name                  = var.environment_name
@@ -108,22 +110,23 @@ module "psoxy" {
       example_payload = try(file(v.example_payload_file), null)
     }
   ) }
-  non_production_connectors       = var.non_production_connectors
-  custom_api_connector_rules      = var.custom_api_connector_rules
-  general_environment_variables   = var.general_environment_variables
-  pseudonymize_app_ids            = var.pseudonymize_app_ids
-  email_canonicalization          = var.email_canonicalization
-  bulk_input_expiration_days      = var.bulk_input_expiration_days
-  bulk_sanitized_expiration_days  = var.bulk_sanitized_expiration_days
-  custom_bulk_connector_rules     = var.custom_bulk_connector_rules
-  custom_bulk_connector_arguments = var.custom_bulk_connector_arguments
-  lookup_tables                   = var.lookup_tables
-  custom_artifacts_bucket_name    = var.custom_artifacts_bucket_name
-  custom_side_outputs             = var.custom_side_outputs
-  todos_as_local_files            = var.todos_as_local_files
-  todo_step                       = local.max_auth_todo_step
-  bucket_force_destroy            = var.bucket_force_destroy
-  tf_gcp_principal_email          = var.gcp_terraform_sa_account_email
+  non_production_connectors                                 = var.non_production_connectors
+  custom_api_connector_rules                                = var.custom_api_connector_rules
+  general_environment_variables                             = var.general_environment_variables
+  pseudonymize_app_ids                                      = var.pseudonymize_app_ids
+  email_canonicalization                                    = var.email_canonicalization
+  bulk_input_expiration_days                                = var.bulk_input_expiration_days
+  bulk_sanitized_expiration_days                            = var.bulk_sanitized_expiration_days
+  custom_bulk_connector_rules                               = var.custom_bulk_connector_rules
+  custom_bulk_connector_arguments                           = var.custom_bulk_connector_arguments
+  lookup_tables                                             = var.lookup_tables
+  custom_artifacts_bucket_name                              = var.custom_artifacts_bucket_name
+  custom_side_outputs                                       = var.custom_side_outputs
+  todos_as_local_files                                      = var.todos_as_local_files
+  todo_step                                                 = local.max_auth_todo_step
+  bucket_force_destroy                                      = var.bucket_force_destroy
+  tf_gcp_principal_email                                    = var.gcp_terraform_sa_account_email
+  provision_pubsub_publisher_to_gcs_default_service_account = var.provision_pubsub_publisher_to_gcs_default_service_account
 }
 
 locals {
@@ -145,14 +148,15 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=rc-v0.5.13"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=rc-v0.5.14"
 
-  host_platform_id  = local.host_platform_id
-  proxy_instance_id = each.key
-  worklytics_host   = var.worklytics_host
-  connector_id      = try(local.all_connectors[each.key].worklytics_connector_id, "")
-  display_name      = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
-  todo_step         = module.psoxy.next_todo_step
+  host_platform_id     = local.host_platform_id
+  proxy_instance_id    = each.key
+  worklytics_host      = var.worklytics_host
+  connector_id         = try(local.all_connectors[each.key].worklytics_connector_id, "")
+  display_name         = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
+  todo_step            = module.psoxy.next_todo_step
+  todos_as_local_files = var.todos_as_local_files
 
   settings_to_provide = merge(
     # Source API case
