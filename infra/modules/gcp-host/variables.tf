@@ -200,7 +200,7 @@ variable "webhook_collectors" {
     output_path_prefix                 = optional(string, "")          # optional path prefix to prepend to webhook output files in bucket
 
     example_identity = optional(string, null) # example identity to use in test payloads
-    example_payload  = optional(string, null) # example payload to use in test payloads
+    example_payload  = optional(string, null) # example payload content to use in test scripts
   }))
   default = {}
 
