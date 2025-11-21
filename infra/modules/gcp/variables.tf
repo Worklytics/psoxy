@@ -118,8 +118,8 @@ variable "tf_runner_iam_principal" {
   type        = string
 }
 
-variable "provision_pubsub_publisher_to_gcs_default_service_account" {
-  description = "Whether to grant the Pub/Sub Publisher role to the GCS default service account at the project level. Set to false if you prefer to manage this IAM binding outside of Terraform."
+variable "provision_project_level_iam" {
+  description = "Whether to provision project-level IAM bindings required for Psoxy operation. This includes granting the Pub/Sub Publisher role to the GCS default service account and the Cloud Build Builder role to the Compute Engine default service account. Set to false if you prefer to manage these IAM bindings outside of Terraform."
   type        = bool
   default     = true
 }
