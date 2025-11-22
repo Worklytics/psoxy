@@ -189,7 +189,7 @@ case "$REPLY" in
     ;;
 esac
 
-# prep next ct ?
+# prep next rc ?
 printf "Prep next rc?\n"
 read -p "(Y/n) " -n 1 -r
 REPLY=${REPLY:-Y}
