@@ -161,7 +161,7 @@ case "$REPLY" in
   *)
     printf "Skipped publishing GCP bundle to GCS bucket\n"
     printf "To do so manually, run:\n"
-    printf "    ${BLUE}./tools/release/publish-gcp-bundle.sh ${RELEASE}${NC}\n"
+    printf "    ${BLUE}./tools/release/publish-gcp-bundle.sh ${PATH_TO_REPO}${NC}\n"
     ;;
 esac
 
