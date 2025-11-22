@@ -112,7 +112,7 @@ printf "    ${BLUE}./tools/release/example-create-release-pr.sh . aws ${AWS_EXAM
 printf "    ${BLUE}./tools/release/example-create-release-pr.sh . gcp ${GCP_EXAMPLE_DIR}${NC}\n"
 
 printf "Publish release artifacts: \n"
-printf "    ${BLUE}./tools/release/publish-aws-release-artifact.sh ${RELEASE}${NC}\n"
+printf "    ${BLUE}./tools/release/publish-aws-bundle.sh ${RELEASE}${NC}\n"
 
 printf "\nPublishing Maven artifacts to GitHub Packages ...\n"
 printf "  (requires GitHub token with ${BLUE}write:packages${NC} permission in ${BLUE}~/.m2/settings.xml${NC})\n"

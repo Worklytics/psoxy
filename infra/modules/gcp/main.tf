@@ -411,6 +411,7 @@ locals {
   # network argument to vpc_access_connector resource; must be provided if subnet isn't
   vpc_connector_network = try(var.vpc_config.subnet, null) == null ? try(var.vpc_config.network, null) : null
 
+
   # CIDR MUST be provided if network is provided; not otherwise
   vpc_connector_cidr_range = local.vpc_connector_network != null ? try(var.vpc_config.serverless_connector_cidr_range, "10.8.0.0/28") : null
 }

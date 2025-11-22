@@ -19,6 +19,14 @@ RED='\e[0;31m'
 BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
+# Validate DEPLOYMENT_ENV
+VALID_DEPLOYMENT_ENVS=("local" "terraform_cloud" "github_actions" "other_nonlocal")
+if [[ ! " ${VALID_DEPLOYMENT_ENVS[@]} " =~ " ${DEPLOYMENT_ENV} " ]]; then
+  printf "${RED}Error: Invalid DEPLOYMENT_ENV '${DEPLOYMENT_ENV}'.${NC}\n"
+  printf "Valid values are: ${BLUE}local${NC}, ${BLUE}terraform_cloud${NC}, ${BLUE}github_actions${NC}, ${BLUE}other_nonlocal${NC}\n"
+  exit 1
+fi
+
 prompt_user_Yn() {
   local prompt_message="$1"
   printf "$prompt_message"
@@ -115,13 +123,23 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
       printf "No ${BLUE}aws_region${NC} could be determined from your AWS CLI configuration. You should fill ${BLUE}aws_region${NC} in your terraform.tfvars file if you wish to use a value other than the default.\n"
     fi
 
-    AWS_ARN=$(aws sts get-caller-identity --query Arn --output text)
-    if [ $? -eq 0 ] && [ -z "$AWS_ARN" ]; then
-      AWS_ARN="{{ARN_OF_AWS_ROLE_TERRAFORM_SHOULD_ASSUME}}"
-      TEST_AWS_ARN=" # add ARN of AWS principals you want to be able to invoke your proxy instances for testing purposes\n"
-    else
+    AWS_ARN=$(aws sts get-caller-identity --query Arn --output text 2>/dev/null)
+    AWS_ARN_EXIT_CODE=$?
+    
+    # Determine what to put in caller_aws_arns
+    if [ $AWS_ARN_EXIT_CODE -eq 0 ] && [ -n "$AWS_ARN" ]; then
+      # AWS CLI is authenticated and returned a valid ARN
       TEST_AWS_ARN="\"${AWS_ARN}\" # for testing; can remove once ready for production\n"
+    else
+      # AWS CLI not authenticated or returned empty - use empty list (no empty string)
+      TEST_AWS_ARN=""
     fi
+    
+    # Set AWS_ARN for aws_assume_role_arn comment (even if empty)
+    if [ $AWS_ARN_EXIT_CODE -eq 0 ] && [ -z "$AWS_ARN" ]; then
+      AWS_ARN="{{ARN_OF_AWS_ROLE_TERRAFORM_SHOULD_ASSUME}}"
+    fi
+    
     printf "# AWS IAM role to assume when deploying your Psoxy infrastructure via Terraform, if needed\n" >> $TFVARS_FILE
     printf "# - this variable is used when you are authenticated as an AWS user which can assume the AWS role which actually has the requisite permissions to provision your infrastructure\n" >> $TFVARS_FILE
     printf "#   (this is approach is good practice, as minimizes the privileges of the AWS user you habitually use and easily supports multi-account scenarios) \n" >> $TFVARS_FILE
@@ -132,7 +150,11 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
 
     printf "# AWS principals in the following list will be explicitly authorized to invoke your proxy instances\n" >> $TFVARS_FILE
     printf "#  - this is for initial testing/development; it can (and should) be empty for production-use\n" >> $TFVARS_FILE
-    printf "caller_aws_arns = [\n  ${TEST_AWS_ARN}]\n\n" >> $TFVARS_FILE
+    if [ -n "$TEST_AWS_ARN" ]; then
+      printf "caller_aws_arns = [\n  ${TEST_AWS_ARN}]\n\n" >> $TFVARS_FILE
+    else
+      printf "caller_aws_arns = [\n]\n\n" >> $TFVARS_FILE
+    fi
 
     printf "# GCP service accounts with ids in the list below will be allowed to invoke your proxy instances\n" >> $TFVARS_FILE
     printf "#  - for initial testing/deployment, it can be empty list; it needs to be filled only once you're ready to authorize Worklytics to access your data\n" >> $TFVARS_FILE
@@ -325,12 +347,30 @@ fi
 
 # if ALL_AVAILABLE_CONNECTORS is not empty, then list them in terraform.tfvars
 if [[ -n "$ALL_AVAILABLE_CONNECTORS" ]]; then
-  # add comment '#' to each line of the ALL_AVAILABLE_CONNECTORS
-  ALL_AVAILABLE_CONNECTORS=$(echo "$ALL_AVAILABLE_CONNECTORS" | sed 's/^/# /')
-
   printf "# If you wish to enable additional connectors, you can uncomment and add one of the ids\n" >> $TFVARS_FILE
   printf "# listed below  to \`enabled_connectors\`; run \`./available-connectors\` if available for an updated list\n" >> $TFVARS_FILE
-  printf "${ALL_AVAILABLE_CONNECTORS}\n\n" >> $TFVARS_FILE
+  
+  # Parse JSON array and output one connector per line, each commented
+  # ALL_AVAILABLE_CONNECTORS is a JSON-encoded string from terraform console: "[\"asana\",\"azure-ad\",...]"
+  # First decode the JSON string, then parse the array
+  if command -v jq &> /dev/null; then
+    # Use jq to decode the JSON string and then parse the array
+    echo "$ALL_AVAILABLE_CONNECTORS" | jq -r '.' 2>/dev/null | jq -r '.[]' 2>/dev/null | while read -r connector; do
+      if [ -n "$connector" ]; then
+        printf "#   \"%s\",\n" "$connector" >> $TFVARS_FILE
+      fi
+    done
+  else
+    # Manual parsing: terraform outputs "[\"asana\",\"azure-ad\",\"badge\"]"
+    # Remove outer quotes, then parse the inner JSON array
+    echo "$ALL_AVAILABLE_CONNECTORS" | sed 's/^"//' | sed 's/"$//' | sed 's/\\"/"/g' | sed 's/^\[//' | sed 's/\]$//' | tr ',' '\n' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//' | sed 's/^"//' | sed 's/"$//' | while read -r connector; do
+      if [ -n "$connector" ]; then
+        printf "#   \"%s\",\n" "$connector" >> $TFVARS_FILE
+      fi
+    done
+  fi
+  
+  printf "\n" >> $TFVARS_FILE
 fi
 
 printf "\n"
@@ -347,6 +387,86 @@ if [ "$DEPLOYMENT_ENV" != "local" ]; then
 
   echo "install_test_tool = false" >> $TFVARS_FILE
   echo "todos_as_outputs = true" >> $TFVARS_FILE
+fi
+
+# Check for published bundles and offer to use them
+check_and_offer_published_bundle() {
+  local version=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' "${PSOXY_BASE_DIR}java/pom.xml")
+  if [ -z "$version" ]; then
+    return 0  # Can't determine version, skip check
+  fi
+
+  local bundle_path=""
+  local bundle_exists=false
+
+  if [ "$HOST_PLATFORM" == "aws" ]; then
+    if ! command -v aws &> /dev/null; then
+      return 0  # AWS CLI not installed, skip check
+    fi
+
+    # Get AWS region from terraform.tfvars if set, otherwise from AWS config, or use default
+    local aws_region=""
+    if grep -q '^[[:space:]]*aws_region[[:space:]]*=' "$TFVARS_FILE" 2>/dev/null; then
+      aws_region=$(grep '^[[:space:]]*aws_region[[:space:]]*=' "$TFVARS_FILE" | sed 's/.*=[[:space:]]*"\([^"]*\)".*/\1/' | head -1)
+    fi
+    if [ -z "$aws_region" ]; then
+      aws_region=$(aws configure get region 2>/dev/null || echo "")
+    fi
+    if [ -z "$aws_region" ]; then
+      aws_region="us-east-1"  # Default region
+    fi
+
+    local bucket_name="psoxy-public-artifacts-${aws_region}"
+    local jar_name="psoxy-aws-${version}.jar"
+    local s3_path="s3://${bucket_name}/${jar_name}"
+
+    # Check if bundle exists in S3
+    if aws s3 ls "$s3_path" >/dev/null 2>&1; then
+      bundle_path="$s3_path"
+      bundle_exists=true
+    fi
+  elif [ "$HOST_PLATFORM" = "gcp" ]; then
+    if ! command -v gsutil &> /dev/null; then
+      return 0  # gsutil not installed, skip check
+    fi
+
+    local bucket_name="psoxy-public-artifacts"
+    local zip_name="psoxy-gcp-${version}.zip"
+    local gcs_path="gs://${bucket_name}/${zip_name}"
+
+    # Check if bundle exists in GCS
+    if gsutil ls "$gcs_path" >/dev/null 2>&1; then
+      bundle_path="$gcs_path"
+      bundle_exists=true
+    fi
+  fi
+
+  if [ "$bundle_exists" = true ]; then
+    printf "\n"
+    printf "Found published deployment bundle for version ${BLUE}${version}${NC} at:\n"
+    printf "  ${GREEN}${bundle_path}${NC}\n"
+    prompt_user_Yn "Do you want to use this published bundle instead of building one locally?"
+    if [[ $? -eq 1 ]]; then
+      # User wants to use published bundle
+      if grep -q '^[[:space:]]*deployment_bundle' "$TFVARS_FILE" 2>/dev/null; then
+        sed -i.bck "/^[[:space:]]*deployment_bundle.*/c\\
+deployment_bundle = \"${bundle_path}\"" "$TFVARS_FILE"
+        rm -f "${TFVARS_FILE}.bck" 2>/dev/null
+      else
+        printf "deployment_bundle = \"${bundle_path}\"\n\n" >> $TFVARS_FILE
+      fi
+      printf "Set ${BLUE}deployment_bundle${NC} to ${GREEN}${bundle_path}${NC}\n"
+      return 1  # Indicate bundle was set
+    fi
+  fi
+
+  return 0
+}
+
+# Check for published bundles (only if not terraform_cloud, as that needs local build)
+if [ "$DEPLOYMENT_ENV" != "terraform_cloud" ]; then
+  check_and_offer_published_bundle
+  bundle_was_set=$?
 fi
 
 if [ "$DEPLOYMENT_ENV" == "terraform_cloud" ]; then
