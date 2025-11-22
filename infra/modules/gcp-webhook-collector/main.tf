@@ -428,8 +428,8 @@ locals {
   proxy_endpoint_url  = google_cloudfunctions2_function.function.service_config[0].uri
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
   command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js"
-
-  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${google_cloudfunctions2_function.function.project}\" -f \"${google_cloudfunctions2_function.function.name}\""
+  signing_key_id      = var.provision_auth_key == null ? null : google_kms_crypto_key.webhook_auth_key[0].id
+  command_test_logs   = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${google_cloudfunctions2_function.function.project}\" -f \"${google_cloudfunctions2_function.function.name}\""
 }
 
 locals {
@@ -458,7 +458,12 @@ ${local.command_cli_call} -u ${local.proxy_endpoint_url} --health-check
 Then, based on your configuration, these are some example test calls you can try (YMMV):
 
 ```shell
-${local.command_cli_call} -u ${local.proxy_endpoint_url} --body '${coalesce(var.example_payload, "{\"test\": \"body\"}")}' --identity '${var.example_identity}'
+${local.command_cli_call} --method POST \
+ -u ${local.proxy_endpoint_url} \
+ --signing-key "gcp-kms:${local.signing_key_id}" \
+ --identity-issuer ${local.proxy_endpoint_url} \
+ --identity-subject '${var.example_identity}' \
+ --body '${coalesce(var.example_payload, "{\"test\": \"body\"}")}' 
 ```
 
 Feel free to try the above calls, and reference to the source's API docs for other parameters /
@@ -492,7 +497,7 @@ resource "local_file" "test_script" {
     collector_endpoint_url = local.proxy_endpoint_url,
     function_name          = var.instance_id,
     command_cli_call       = local.command_cli_call,
-    signing_key_id         = var.provision_auth_key == null ? null : google_kms_crypto_key.webhook_auth_key[0].id,
+    signing_key_id         = local.signing_key_id,
     example_payload        = coalesce(var.example_payload, "{\"test\": \"data\"}")
     example_identity       = var.example_identity
     collection_path        = "/"
@@ -550,6 +555,15 @@ output "side_output_original_bucket_id" {
 output "provisioned_auth_key_pairs" {
   value       = local.auth_key_ids_sorted
   description = "List of IDs of kms keys provisioned for webhook authentication purposes, if any."
+}
+
+output "test_examples" {
+  value = try(var.example_payload, null) != null ? [{
+    content_base64 = try(var.example_payload, null) != null ? base64encode(var.example_payload) : null
+    signing_key_id = length(local.auth_key_ids_sorted) > 0 ? "gcp-kms:${element(local.auth_key_ids_sorted, 0)}" : null
+    identity       = try(var.example_identity, null)
+  }] : []
+  description = "Array of test examples with base64-encoded content, signing key, and identity"
 }
 
 output "todo" {

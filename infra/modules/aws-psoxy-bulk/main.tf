@@ -424,6 +424,14 @@ output "sanitized_bucket" {
   value = aws_s3_bucket.sanitized.bucket
 }
 
+output "example_files" {
+  value = try(var.example_file, null) != null ? [{
+    path           = var.example_file
+    content_base64 = base64encode(file(local.example_file))
+  }] : []
+  description = "Array of example files with path relative to terraform config root and base64-encoded content"
+}
+
 output "instance_role_arn" {
   value = module.psoxy_lambda.iam_role_for_lambda_arn
 }

@@ -124,9 +124,9 @@ variable "secret_replica_locations" {
 variable "vpc_config" {
   type = object({
     network                         = optional(string)                # Local name of the VPC network resource on which to provision the VPC connector (if `serverless_connector` is not provided)
-    subnetwork                      = optional(string)                # Local name of the VPC subnetwork resource on which to provision the VPC connector (if `serverless_connector` is not provided)
+    subnet                          = optional(string)                # Local name of the VPC subnet resource on which to provision the VPC connector (if `serverless_connector` is not provided). NOTE: Subnet MUST have /28 netmask (required by Google Cloud for VPC connectors)
     serverless_connector            = optional(string)                # Format: projects/{project}/locations/{location}/connectors/{connector}
-    serverless_connector_cidr_range = optional(string, "10.8.0.0/28") # ignored if serverless_connector is provided
+    serverless_connector_cidr_range = optional(string, "10.8.0.0/28") # ignored if serverless_connector or subnet is provided
   })
 
   description = "**beta** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
@@ -200,7 +200,7 @@ variable "webhook_collectors" {
     output_path_prefix                 = optional(string, "")          # optional path prefix to prepend to webhook output files in bucket
 
     example_identity = optional(string, null) # example identity to use in test payloads
-    example_payload  = optional(string, null) # example payload to use in test payloads
+    example_payload  = optional(string, null) # example payload content to use in test scripts
   }))
   default = {}
 
@@ -341,4 +341,10 @@ variable "bucket_force_destroy" {
   type        = bool
   description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this module"
   default     = false
+}
+
+variable "provision_project_level_iam" {
+  description = "Whether to provision project-level IAM bindings required for Psoxy operation. Set to false if you prefer to manage these IAM bindings outside of Terraform."
+  type        = bool
+  default     = true
 }
