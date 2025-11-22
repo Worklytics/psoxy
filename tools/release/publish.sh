@@ -226,3 +226,4 @@ printf "    ${BLUE}./tools/release/example-create-release-pr.sh . gcp ${GCP_EXAM
 
 printf "2. Update stable demo deployment to point to it. In ${BLUE}psoxy-demos${NC} repo, run:\n"
 printf "    ${BLUE}./update-stable.sh${NC}\n"
+
