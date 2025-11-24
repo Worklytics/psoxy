@@ -136,7 +136,7 @@ case "$REPLY" in
   *)
     printf "Skipped publishing AWS bundle to S3 bucket\n"
     printf "To do so manually, run:\n"
-    printf "    ${BLUE}./tools/release/publish-aws-bundle.sh ${RELEASE}${NC}\n"
+    printf "    ${BLUE}./tools/release/publish-aws-bundle.sh ${PATH_TO_REPO}${NC}\n"
     ;;
 esac
 
