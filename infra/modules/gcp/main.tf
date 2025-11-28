@@ -397,6 +397,10 @@ locals {
   vpc_connector_subnetwork_project = coalesce(
       try(startswith(var.vpc_config.subnet, "projects/") ? regex("^projects/([^/]+)", var.vpc_config.subnet)[0] : null),
       var.project_id)
+
+  vpc_connector_subnetwork_name = coalesce(
+    try(regex(".*/([^/]+)$", var.vpc_config.subnet)[0], null),
+    var.vpc_config.subnet)
 }
 
 resource "google_vpc_access_connector" "connector" {
@@ -411,7 +415,7 @@ resource "google_vpc_access_connector" "connector" {
   # subnet; provide if network is NOT provided
   dynamic "subnet" {
 
-    for_each = local.vpc_connector_network == null ? [var.vpc_config.subnet] : []
+    for_each = local.vpc_connector_network == null ? [local.vpc_connector_subnetwork_name] : []
 
     content {
       name       = subnet.value
