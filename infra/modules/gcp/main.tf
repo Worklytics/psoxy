@@ -384,6 +384,7 @@ locals {
   legal_connector_suffix         = substr("connector", 0, max(0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH - length(var.environment_id_prefix)))
 
   # check if shared VPC
+  vpc_network_defined = try(var.vpc_config.serverless_connector, null) != null
   vpc_connector_network_project = coalesce(
     try(regex("^projects/([^/]+)", var.vpc_config.network)[0], null),
     var.project_id)
@@ -392,10 +393,10 @@ locals {
   # if shared, expect network, expect everything set-up
 
   # network argument to vpc_access_connector resource; must be provided if subnet isn't
-  vpc_connector_network = var.vpc_config.network
+  vpc_connector_network = local.shared ? null : var.vpc_config.network
 
   # CIDR MUST be provided if network is provided and not shared; not otherwise
-  vpc_connector_cidr_range = local.vpc_connector_network != null && !local.shared ? try(var.vpc_config.serverless_connector_cidr_range, "10.8.0.0/28") : null
+  vpc_connector_cidr_range = local.shared ? null : try(var.vpc_config.serverless_connector_cidr_range, "10.8.0.0/28")
 
   # extract from subnetwork
   vpc_connector_region = coalesce(
@@ -419,7 +420,7 @@ resource "google_vpc_access_connector" "connector" {
   # subnet; provide if network is NOT provided
   dynamic "subnet" {
 
-    for_each = local.vpc_connector_network == null ? [local.vpc_connector_subnetwork_name] : []
+    for_each = local.vpc_connector_subnetwork_name != null ? [local.vpc_connector_subnetwork_name] : []
 
     content {
       name       = subnet.value
