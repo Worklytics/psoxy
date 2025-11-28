@@ -179,7 +179,14 @@ variable "vpc_config" {
     condition = (
       var.vpc_config == null
       || try(var.vpc_config.network, null) == null
-      || can(regex("^[a-z0-9-]+$", try(var.vpc_config.network, "")))
+      ||
+      (
+      # Accepts a simple network name: lowercase letters, digits, dashes
+      can(regex("^[a-z0-9-]+$", var.vpc_config.network))
+      ||
+      # Accepts a full self-link (Compute URL format)
+      can(regex("^projects/[^/]+/(global|regions/[^/]+)/networks/[^/]+$", var.vpc_config.network))
+      )
     )
     error_message = "vpc_config.network must be lowercase letters, numbers, or dashes."
   }
