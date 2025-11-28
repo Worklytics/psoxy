@@ -15,13 +15,13 @@ vpc_config = {
 
 The following IAM roles, or equivalent subset of perms, may be required:
 - `roles/compute.networkAdmin` - a read-only equivalent could be used if both your network and subnet exist
-- `roles/vpcaccess.admin` - a read-only equivalent could be used if serverless VPC connector exists 
+- `roles/vpcaccess.admin` - a read-only equivalent could be used if serverless VPC connector exists
 
 So this is connecting your proxy instances to and through a VPC, but they are otherwise not "on" the VPC. (Eg, will not run inside container instances with NICs bound to IPs on the VPC).
 
 NOTE: Historically, there were GCP Cloud Functions; these are now called "GCP Cloud Run Functions (Gen1)"; we are using what would be the "GCP Cloud Run Functions (gen2)", which Google now brands simply as "Cloud Run Functions".
 
-NOTE: VPC Serverless Connectors, whether managed via our provided Terraform or not, are a potential bottleneck; please monitor to ensure sufficient capacity for your workload. If the one we provision is not sufficient for your use-case, please provision it externally and pass it in. 
+NOTE: VPC Serverless Connectors, whether managed via our provided Terraform or not, are a potential bottleneck; please monitor to ensure sufficient capacity for your workload. If the one we provision is not sufficient for your use-case, please provision it externally and pass it in.
 
 NOTE: VPC resources, including serverless connectors, are billable GCP resources; provisioning and using them will increase your costs for hosting your proxy instances.
 
@@ -34,8 +34,8 @@ locals {
 
 resource "google_compute_network" "vpc" {
   project                 = "my-gcp-project"
-  name                    = "${local.environment_id}vpc"
-  auto_create_subnetworks = true
+  name                    = "${local.environment_id}vpc"
+  auto_create_subnetworks = true
 }
 
 ```

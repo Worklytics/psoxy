@@ -341,7 +341,7 @@ data "google_project" "project" {
 # doubt is, without it, what is allowing the scheduler to generate OIDC tokens on behalf of the webhook_batch_invoker SA?
 # but admittedly, I'm unclear if it's this SA that needs the grant, or if  instead granting `roles/iam.serviceAccountUser`
 # to the GCP principal terraform is running as is the proper approach (eg, idea is that terraform is 'scheduling' the job
-# as the service account's identity) 
+# as the service account's identity)
 resource "google_service_account_iam_member" "allow_scheduler_impersonation" {
   count = var.support_webhook_collectors ? 1 : 0
 
@@ -388,13 +388,17 @@ locals {
 
   # CIDR MUST be provided if network is provided; not otherwise
   vpc_connector_cidr_range = local.vpc_connector_network != null ? try(var.vpc_config.serverless_connector_cidr_range, "10.8.0.0/28") : null
+
+  # extract from subnetwork
+  vpc_connector_region = try(region_from_id(var.vpc_config.subnet), var.gcp_region)
+  vpc_connector_subnetwork_project = try(project_from_id(var.vpc_config.subnet), var.project_id)
 }
 
 resource "google_vpc_access_connector" "connector" {
   count = local.provision_serverless_connector ? 1 : 0
 
   project       = var.project_id
-  region        = var.gcp_region
+  region        = local.vpc_connector_region
   network       = local.vpc_connector_network
   name          = "${local.legal_connector_prefix}${local.legal_connector_suffix}"
   ip_cidr_range = local.vpc_connector_cidr_range
@@ -406,7 +410,7 @@ resource "google_vpc_access_connector" "connector" {
 
     content {
       name       = subnet.value
-      project_id = var.project_id
+      project_id = local.vpc_connector_subnetwork_project
     }
   }
 
