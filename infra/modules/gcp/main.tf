@@ -383,20 +383,24 @@ locals {
   legal_connector_prefix         = substr(var.environment_id_prefix, 0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH)
   legal_connector_suffix         = substr("connector", 0, max(0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH - length(var.environment_id_prefix)))
 
-  # network argument to vpc_access_connector resource; must be provided if subnet isn't
-  vpc_connector_network = try(var.vpc_config.subnet, null) == null ? try(var.vpc_config.network, null) : null
+  # check if shared VPC
+  vpc_connector_network_project = coalesce(
+    try(regex("^projects/([^/]+)", var.vpc_config.network)[0], null),
+    var.project_id)
+  shared = var.project_id != local.vpc_connector_network_project
 
-  # CIDR MUST be provided if network is provided; not otherwise
-  vpc_connector_cidr_range = local.vpc_connector_network != null ? try(var.vpc_config.serverless_connector_cidr_range, "10.8.0.0/28") : null
+  # if shared, expect network, expect everything set-up
+
+  # network argument to vpc_access_connector resource; must be provided if subnet isn't
+  vpc_connector_network = var.vpc_config.network
+
+  # CIDR MUST be provided if network is provided and not shared; not otherwise
+  vpc_connector_cidr_range = local.vpc_connector_network != null && !local.shared ? try(var.vpc_config.serverless_connector_cidr_range, "10.8.0.0/28") : null
 
   # extract from subnetwork
   vpc_connector_region = coalesce(
       try(regex("projects/[^/]+/regions/([^/]+)", var.vpc_config.subnet)[0], null),
       var.gcp_region)
-
-  vpc_connector_subnetwork_project = coalesce(
-      try(regex("^projects/([^/]+)", var.vpc_config.subnet)[0], null),
-      var.project_id)
 
   vpc_connector_subnetwork_name = coalesce(
     try(regex(".*/([^/]+)$", var.vpc_config.subnet)[0], null),
@@ -419,7 +423,7 @@ resource "google_vpc_access_connector" "connector" {
 
     content {
       name       = subnet.value
-      project_id = local.vpc_connector_subnetwork_project
+      project_id = local.vpc_connector_network_project
     }
   }
 
