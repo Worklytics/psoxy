@@ -391,11 +391,11 @@ locals {
 
   # extract from subnetwork
   vpc_connector_region = coalesce(
-      try(can(regex("projects/[^/]+/regions/([^/]+)", var.vpc_config.subnet)) ? regex("projects/[^/]+/regions/([^/]+)", var.vpc_config.subnet)[0] : null,
+      try(regex("projects/[^/]+/regions/([^/]+)", var.vpc_config.subnet)[0], null),
       var.gcp_region))
 
   vpc_connector_subnetwork_project = coalesce(
-      try(startswith(var.vpc_config.subnet, "projects/") ? regex("^projects/([^/]+)", var.vpc_config.subnet)[0] : null),
+      try(regex("^projects/([^/]+)", var.vpc_config.subnet)[0], null),
       var.project_id)
 
   vpc_connector_subnetwork_name = coalesce(
