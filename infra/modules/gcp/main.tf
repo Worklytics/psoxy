@@ -390,12 +390,13 @@ locals {
   vpc_connector_cidr_range = local.vpc_connector_network != null ? try(var.vpc_config.serverless_connector_cidr_range, "10.8.0.0/28") : null
 
   # extract from subnetwork
-  vpc_connector_region = try(provider::google::region_from_id(var.vpc_config.subnet), var.gcp_region)
-  vpc_connector_subnetwork_project = try(provider::google::project_from_id(var.vpc_config.subnet), var.project_id)
-}
+  vpc_connector_region = coalesce(
+      try(can(regex("projects/[^/]+/regions/([^/]+)", var.vpc_config.subnet)) ? regex("projects/[^/]+/regions/([^/]+)", var.vpc_config.subnet)[0] : null,
+      var.gcp_region))
 
-output "test-function" {
-  value = provider::google::project_from_id(var.vpc_config.subnet)
+  vpc_connector_subnetwork_project = coalesce(
+      try(startswith(var.vpc_config.subnet, "projects/") ? regex("^projects/([^/]+)", var.vpc_config.subnet)[0] : null),
+      var.project_id)
 }
 
 resource "google_vpc_access_connector" "connector" {
