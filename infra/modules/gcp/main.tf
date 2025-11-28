@@ -394,6 +394,10 @@ locals {
   vpc_connector_subnetwork_project = try(provider::google::project_from_id(var.vpc_config.subnet), var.project_id)
 }
 
+output "test-function" {
+  value = provider::google::project_from_id(var.vpc_config.subnet)
+}
+
 resource "google_vpc_access_connector" "connector" {
   count = local.provision_serverless_connector ? 1 : 0
 
