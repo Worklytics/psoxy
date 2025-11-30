@@ -74,6 +74,27 @@ vpc_config = {
 
 **Subnet Requirements:** When specifying a `subnet`, ensure it has a `/28` netmask. Google Cloud requires this specific netmask for subnets used with VPC Serverless Connectors. If your subnet has a different netmask, you'll need to create a new subnet with `/28` or use the `network` approach instead (which will create the subnet automatically).
 
+## Shared VPC connector
+
+Preconditions:
+
+- `HOST_PROJECT` - the project that hosts the network/subnetwork to be shared
+- `SERVICE_PROJECT` - the project that hosts the cloud run function
+- on host project, grant the role `roles/compute.networkUser` or equivalent to the following service accounts:
+  - `service-SERVICE_PROJECT@serverless-robot-prod.iam.gserviceaccount.com`
+  - `service-SERVICE_PROJECT@gcp-sa-vpcaccess.iam.gserviceaccount.com`
+- Remember: the subnetwork **MUST BE** a `/28` netmask (required by Google Cloud for VPC connectors)
+
+Fill the `vpc_config` in your `terraform.tfvars`, as follows, providing the full **self_links** to network and subnetwork on the HOST PROJECT:
+
+```hcl
+vpc_config = {
+    network = "projects/HOST_PROJECT/global/networks/NAME"
+    subnet = "projects/HOST_PROJECT/regions/REGION/subnetworks/SUBNETWORK_NAME"
+    serverless_connector = null
+    serverless_connector_cidr_range = null
+}
+```
 
 ## Fixed IP Out
 To have your proxy instances "dial out" from a fixed IP, you must do the above as well set-up a router + NAT + IP on your network; example of which follows.

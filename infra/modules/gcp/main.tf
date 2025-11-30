@@ -384,7 +384,6 @@ locals {
   legal_connector_suffix         = substr("connector", 0, max(0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH - length(var.environment_id_prefix)))
 
   # check if shared VPC
-  vpc_network_defined = try(var.vpc_config.serverless_connector, null) != null
   vpc_connector_network_project = coalesce(
     try(regex("^projects/([^/]+)", var.vpc_config.network)[0], null),
     var.project_id)
@@ -398,7 +397,7 @@ locals {
   # CIDR MUST be provided if network is provided and not shared; not otherwise
   vpc_connector_cidr_range = local.shared ? null : try(var.vpc_config.serverless_connector_cidr_range, "10.8.0.0/28")
 
-  # extract from subnetwork
+  # extract region from subnetwork (if shared)
   vpc_connector_region = coalesce(
       try(regex("projects/[^/]+/regions/([^/]+)", var.vpc_config.subnet)[0], null),
       var.gcp_region)
