@@ -134,6 +134,8 @@ variable "vpc_config" {
     # If set, everything else will be ignored
     serverless_connector = optional(string)
   })
+  description = "**beta** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
+  default     = null
 
   validation {
     condition = (
