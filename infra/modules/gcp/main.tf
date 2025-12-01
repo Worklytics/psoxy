@@ -419,7 +419,7 @@ locals {
   # if shared, expect network, expect everything set-up
 
   # network argument to vpc_access_connector resource; must be provided if subnet isn't
-  vpc_connector_network = local.shared || !local.vpc_defined ? null : var.vpc_config.network
+  vpc_connector_network = try(local.shared || !local.vpc_defined ? null : var.vpc_config.network, null)
 
   # extract region from subnetwork (if shared)
   vpc_connector_region = coalesce(
@@ -428,7 +428,7 @@ locals {
 
   vpc_connector_subnetwork_name = coalesce(
     try(regex(".*/([^/]+)$", var.vpc_config.subnet)[0], null),
-    local.vpc_defined ? var.vpc_config.subnet : null)
+     try(local.vpc_defined ? var.vpc_config.subnet : null, null))
 }
 
 resource "google_vpc_access_connector" "connector" {
