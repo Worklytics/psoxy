@@ -404,7 +404,9 @@ resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
 locals {
   MAX_SERVERLESS_CONNECTOR_NAME_LENGTH = 25
 
-  provision_serverless_connector = var.vpc_config != null && try(var.vpc_config.serverless_connector, null) == null
+  vpc_defined              = var.vpc_config != null
+
+  provision_serverless_connector = local.vpc_defined && try(var.vpc_config.serverless_connector, null) == null
   legal_connector_prefix         = substr(var.environment_id_prefix, 0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH)
   legal_connector_suffix         = substr("connector", 0, max(0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH - length(var.environment_id_prefix)))
 
@@ -417,7 +419,7 @@ locals {
   # if shared, expect network, expect everything set-up
 
   # network argument to vpc_access_connector resource; must be provided if subnet isn't
-  vpc_connector_network = local.shared ? null : var.vpc_config.network
+  vpc_connector_network = local.shared || !local.vpc_defined ? null : var.vpc_config.network
 
   # extract region from subnetwork (if shared)
   vpc_connector_region = coalesce(
