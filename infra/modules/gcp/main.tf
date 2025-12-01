@@ -428,7 +428,7 @@ locals {
 
   vpc_connector_subnetwork_name = coalesce(
     try(regex(".*/([^/]+)$", var.vpc_config.subnet)[0], null),
-    var.vpc_config.subnet)
+    local.vpc_defined ? var.vpc_config.subnet : null)
 }
 
 resource "google_vpc_access_connector" "connector" {
