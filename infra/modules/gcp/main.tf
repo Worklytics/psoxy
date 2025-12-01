@@ -426,7 +426,7 @@ locals {
       try(regex("projects/[^/]+/regions/([^/]+)", var.vpc_config.subnet)[0], null),
       var.gcp_region)
 
-  vpc_connector_subnetwork_name = coalesce(
+  vpc_connector_subnetwork_name = !local.provision_serverless_connector ? null : coalesce(
     try(regex(".*/([^/]+)$", var.vpc_config.subnet)[0], null),
      try(local.vpc_defined ? var.vpc_config.subnet : null, null))
 }
