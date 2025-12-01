@@ -117,14 +117,15 @@ variable "vpc_config" {
     # no config at all
     var.vpc_config == null ||
     # serverless connector referenced
-    try(var.vpc_config.serverless_connector, null) != null) &&
+    (try(var.vpc_config.serverless_connector, null) != null) &&
     # network and subnetwork defined
     (
     (try(var.vpc_config.serverless_connector, null) == null) &&
     (try(var.vpc_config.network, null) != null) &&
     (try(var.vpc_config.subnet, null) != null) &&
     ((!startswith(var.vpc_config.network, "projects/") && !startswith(var.vpc_config.subnet, "projects/")) ||
-    (startswith(var.vpc_config.network, "projects/") && startswith(var.vpc_config.subnet, "projects/")))
+    ( startswith(var.vpc_config.network, "projects/") &&  startswith(var.vpc_config.subnet, "projects/")))
+    )
     )
     error_message = "Invalid vpc_config: Must provide either serverless_connector, or valid network/subnet as described in the documentation."
   }
