@@ -123,16 +123,35 @@ variable "secret_replica_locations" {
 
 variable "vpc_config" {
   type = object({
-    network                         = optional(string)                # Local name of the VPC network resource on which to provision the VPC connector (if `serverless_connector` is not provided)
-    subnet                          = optional(string)                # Local name of the VPC subnet resource on which to provision the VPC connector (if `serverless_connector` is not provided). NOTE: Subnet MUST have /28 netmask (required by Google Cloud for VPC connectors)
-    serverless_connector            = optional(string)                # Format: projects/{project}/locations/{location}/connectors/{connector}
-    serverless_connector_cidr_range = optional(string, "10.8.0.0/28") # ignored if serverless_connector or subnet is provided
+    # Local name of the VPC network resource on which to provision the VPC connector (if `serverless_connector` is not provided)
+    # For Shared VPC, use the full self_link to the network in the host project
+    network = optional(string)
+    # Local name of the VPC subnet resource on which to provision the VPC connector (if `serverless_connector` is not provided).
+    # For Shared VPC, use the full self_link of the subnetwork in the host project
+    # NOTE: Subnet MUST have /28 netmask (required by Google Cloud for VPC connectors)
+    subnet = optional(string)
+    # Format: projects/{project}/locations/{location}/connectors/{connector}
+    # If set, everything else will be ignored
+    serverless_connector = optional(string)
   })
-
   description = "**beta** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
   default     = null
 
-
+  validation {
+    condition = (
+    # no config at all
+    var.vpc_config == null ||
+    # serverless connector referenced
+    (try(var.vpc_config.serverless_connector, null) != null) &&
+    # network and subnetwork defined
+    (
+    (try(var.vpc_config.serverless_connector, null) == null) &&
+    (try(var.vpc_config.network, null) != null) &&
+    (try(var.vpc_config.subnet, null) != null)
+    )
+    )
+    error_message = "Invalid vpc_config: Must provide either serverless_connector, or valid network/subnet as described in the documentation."
+  }
 }
 
 variable "kms_key_ring" {
