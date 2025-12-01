@@ -419,9 +419,6 @@ locals {
   # network argument to vpc_access_connector resource; must be provided if subnet isn't
   vpc_connector_network = local.shared ? null : var.vpc_config.network
 
-  # CIDR MUST be provided if network is provided and not shared; not otherwise
-  vpc_connector_cidr_range = local.shared ? null : try(var.vpc_config.serverless_connector_cidr_range, "10.8.0.0/28")
-
   # extract region from subnetwork (if shared)
   vpc_connector_region = coalesce(
       try(regex("projects/[^/]+/regions/([^/]+)", var.vpc_config.subnet)[0], null),
@@ -439,17 +436,10 @@ resource "google_vpc_access_connector" "connector" {
   region        = local.vpc_connector_region
   network       = local.vpc_connector_network
   name          = "${local.legal_connector_prefix}${local.legal_connector_suffix}"
-  ip_cidr_range = local.vpc_connector_cidr_range
 
-  # subnet; provide if network is NOT provided
-  dynamic "subnet" {
-
-    for_each = local.vpc_connector_subnetwork_name != null ? [local.vpc_connector_subnetwork_name] : []
-
-    content {
-      name       = subnet.value
-      project_id = local.vpc_connector_network_project
-    }
+  subnet {
+    name       = local.vpc_connector_subnetwork_name
+    project_id = local.vpc_connector_network_project
   }
 
 }

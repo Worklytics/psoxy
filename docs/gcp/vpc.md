@@ -38,6 +38,21 @@ resource "google_compute_network" "vpc" {
   auto_create_subnetworks = true
 }
 
+resource "google_compute_network" "vpc_network" {
+    project                 = "my-gcp-project"
+    name                    = "${local.environment_id}vpc"
+    auto_create_subnetworks = false
+    mtu                     = 1460
+}
+
+# NOTE: Subnet must have /28 netmask (required by Google Cloud for VPC connectors)
+resource "google_compute_subnetwork" "default" {
+    name          = "my-custom-subnet"
+    ip_cidr_range = "10.0.1.0/28"
+    region        = var.gcp_region
+    network       = google_compute_network.vpc_network.id
+}
+
 ```
 
 Then add the following specifically to the psoxy module in our Terraform example, e.g.:
@@ -49,6 +64,7 @@ module "psoxy" {
   ...
   vpc_config = {
     network = google_compute_network.vpc.name
+    subnet = google_compute_subnetwork.default.name
   }
    ...
 }
@@ -61,20 +77,16 @@ Alternatively, if you created the VPC *outside* of the terraform configuration i
 ```hcl
 vpc_config = {
   network = "proxy_example_vpc"
-}
-```
-
-or
-
-```hcl
-vpc_config = {
   subnet = "proxy_example_subnet"  # NOTE: Subnet must have /28 netmask (required by Google Cloud for VPC connectors)
 }
 ```
 
-**Subnet Requirements:** When specifying a `subnet`, ensure it has a `/28` netmask. Google Cloud requires this specific netmask for subnets used with VPC Serverless Connectors. If your subnet has a different netmask, you'll need to create a new subnet with `/28` or use the `network` approach instead (which will create the subnet automatically).
+**Subnet Requirements:** When specifying a `subnet`, ensure it has a `/28` netmask. Google Cloud requires this specific netmask for subnets used with VPC Serverless Connectors. If your subnet has a different netmask, you'll need to create a new subnet with `/28`.
 
 ## Shared VPC connector
+
+Same as above, but with a VPC hosted on a different project. This setup is useful when you want to share a VPC between multiple projects
+and have a centralized network configuration.
 
 Preconditions:
 
@@ -92,7 +104,6 @@ vpc_config = {
     network = "projects/HOST_PROJECT/global/networks/NAME"
     subnet = "projects/HOST_PROJECT/regions/REGION/subnetworks/SUBNETWORK_NAME"
     serverless_connector = null
-    serverless_connector_cidr_range = null
 }
 ```
 

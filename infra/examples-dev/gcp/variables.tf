@@ -150,7 +150,6 @@ variable "vpc_config" {
     network                         = optional(string)                # Local name of the VPC network resource on which to provision the VPC connector (if `serverless_connector` is not provided)
     subnet                          = optional(string)                # Local name of the VPC subnet resource on which to provision the VPC connector (if `serverless_connector` is not provided). NOTE: Subnet MUST have /28 netmask (required by Google Cloud for VPC connectors)
     serverless_connector            = optional(string)                # Format: projects/{project}/locations/{location}/connectors/{connector}
-    serverless_connector_cidr_range = optional(string, "10.8.0.0/28") # ignored if serverless_connector or subnet is provided
   })
 
   description = "**alpha** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
@@ -163,16 +162,6 @@ variable "vpc_config" {
       || can(regex("^projects/[^/]+/locations/[^/]+/connectors/[^/]+$", try(var.vpc_config.serverless_connector, "")))
     )
     error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
-  }
-
-  # serverless_connector_cidr_range: allow null; if provided, must look like CIDR
-  validation {
-    condition = (
-      var.vpc_config == null
-      || try(var.vpc_config.serverless_connector_cidr_range, null) == null
-      || can(regex("^[0-9.]+/[0-9]+$", try(var.vpc_config.serverless_connector_cidr_range, "")))
-    )
-    error_message = "If vpc_config.serverless_connector_cidr_range is provided, it must match the format: {ip}/{mask}"
   }
 
   validation {

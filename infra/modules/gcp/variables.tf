@@ -107,8 +107,6 @@ variable "vpc_config" {
     # Format: projects/{project}/locations/{location}/connectors/{connector}
     # If set, everything else will be ignored
     serverless_connector            = optional(string)
-    # ignored if serverless_connector or subnet is provided
-    serverless_connector_cidr_range = optional(string, "10.8.0.0/28")
   })
 
   description = "**beta** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
@@ -131,7 +129,6 @@ variable "vpc_config" {
     var.vpc_config.serverless_connector == null &&
     var.vpc_config.network != null &&
     var.vpc_config.subnet == null &&
-    var.vpc_config.serverless_connector_cidr_range != null
     ) ||
     (
     var.vpc_config.serverless_connector == null &&
