@@ -233,7 +233,7 @@ variable "webhook_collectors" {
     output_path_prefix                 = optional(string, "")          # optional path prefix to prepend to webhook output files in bucket
 
     example_identity = optional(string, null) # example identity to use in test payloads
-    example_payload  = optional(string, null) # example payload to use in test payloads
+    example_payload  = optional(string, null) # example payload content to use in test scripts
   }))
   default = {}
 
@@ -374,4 +374,10 @@ variable "bucket_force_destroy" {
   type        = bool
   description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this module"
   default     = false
+}
+
+variable "provision_project_level_iam" {
+  description = "Whether to provision project-level IAM bindings required for Psoxy operation. Set to false if you prefer to manage these IAM bindings outside of Terraform."
+  type        = bool
+  default     = true
 }

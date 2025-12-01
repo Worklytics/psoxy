@@ -461,3 +461,9 @@ variable "bucket_force_destroy" {
   description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this configuration"
   default     = false
 }
+
+variable "provision_project_level_iam" {
+  description = "Whether to provision project-level IAM bindings required for Psoxy operation. Set to false if you prefer to manage these IAM bindings outside of Terraform."
+  type        = bool
+  default     = true
+}

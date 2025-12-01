@@ -15,5 +15,8 @@
     "files": [
       "test/**/*.test.js"
     ]
+  },
+  "overrides": {
+    "js-yaml": "^4.1.1"
   }
 }
