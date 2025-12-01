@@ -38,3 +38,9 @@ jobs:
    uses: ./.github/workflows/build-java.yaml
    with:
      java-version: '24'
+
+ # Java 25 - released 17 Oct 2025, supported until Apr 2026
+ ci_java25:
+   uses: ./.github/workflows/build-java.yaml
+   with:
+     java-version: '25'

@@ -47,8 +47,11 @@ esac
 CURRENT_RELEASE_PATTERN=$(echo $CURRENT_RELEASE | sed 's/\./\\\./g')
 PATTERN="s|ref=${CURRENT_RELEASE_PATTERN}|ref=${NEXT_RELEASE}|"
 
+# find + sed to replace all references to the current release with the next release
 find . -type f -name "*.tf" -exec sed -i.bck "${PATTERN}" {} +
-rm *.bck
+
+# delete the sed backup files
+find . -type f -name "*.bck" -delete
 
 terraform init
 
