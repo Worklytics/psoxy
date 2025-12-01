@@ -136,7 +136,7 @@ variable "vpc_config" {
   })
 
   validation {
-    condition =
+    condition = (
       # no config at all
       var.vpc_config == null ||
       # serverless connector referenced
@@ -149,6 +149,7 @@ variable "vpc_config" {
         ((!startswith(var.vpc_config.network, "projects/") && !startswith(var.vpc_config.subnet, "projects/")) ||
         (startswith(var.vpc_config.network, "projects/") && startswith(var.vpc_config.subnet, "projects/")))
       )
+    )
     error_message = "Invalid vpc_config: Must provide either serverless_connector, or valid network/subnet as described in the documentation."
   }
 }
