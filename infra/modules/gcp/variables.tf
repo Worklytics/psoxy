@@ -117,9 +117,11 @@ variable "vpc_config" {
     # no config at all
     var.vpc_config == null ||
     # serverless connector referenced
-    var.vpc_config.serverless_connector != null ||
+    (var.vpc_config != null &&
+    var.vpc_config.serverless_connector != null) ||
     # network and subnetwork defined
     (
+    var.vpc_config != null &&
     var.vpc_config.serverless_connector == null &&
     var.vpc_config.network != null &&
     var.vpc_config.subnet != null &&
