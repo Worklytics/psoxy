@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Publish Psoxy GCP JAR to GCS bucket, zipped so can be used as a Cloud Function deployment bundle
-# Usage: ./publish-gcp-release-artifact.sh [version]
+# Usage: ./publish-gcp-bundle.sh [version]
 # If version not provided, reads from java/pom.xml
 
 set -e

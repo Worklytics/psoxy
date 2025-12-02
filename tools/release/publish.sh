@@ -91,11 +91,124 @@ fi
 printf "Opening release ${BLUE}${RELEASE}${NC} in browser; review / update notes and then publish as latest ...\n"
 gh release view $RELEASE --web
 
+# prompt user to publish mvn artifacts
+printf "Publish Maven artifacts to GitHub Packages?\n"
+read -p "(Y/n) " -n 1 -r
+REPLY=${REPLY:-Y}
+echo    # Move to a new line
+case "$REPLY" in
+  [yY][eE][sS]|[yY])
+    LOG_FILE="/tmp/release_${RELEASE}_mvn-artifacts.log"
+    ./tools/release/publish-mvn-artifacts.sh ${PATH_TO_REPO} &> "${LOG_FILE}"
+    if [ $? -ne 0 ]; then
+      printf "${RED}Failed to publish Maven artifacts to GitHub Packages. Exiting.${NC}\n"
+      printf "Please review the error logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
+    else
+      printf "${GREEN}✓${NC} Maven artifacts published to GitHub Packages\n"
+      printf "See logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
+    fi
+  ;;
+  *)
+    printf "Skipped publishing Maven artifacts to GitHub Packages\n"
+    printf "To do so manually, run:\n"
+    printf "    ${BLUE}./tools/release/publish-mvn-artifacts.sh ${PATH_TO_REPO}${NC}\n"
+    ;;
+esac
 
-printf "  Then publish docs: \n"
-printf "    ${BLUE}./tools/release/publish-docs.sh ${RELEASE} ${PATH_TO_REPO}${NC}\n"
 
-printf "  Then update example templates to point to it:\n"
+# aws bundle, as above
+printf "Publish AWS bundle to S3 bucket?\n"
+read -p "(Y/n) " -n 1 -r
+REPLY=${REPLY:-Y}
+echo    # Move to a new line
+case "$REPLY" in
+  [yY][eE][sS]|[yY])
+    LOG_FILE="/tmp/release_${RELEASE}_aws-bundle.log"
+    ./tools/release/publish-aws-bundle.sh ${PATH_TO_REPO} &> "${LOG_FILE}"
+    if [ $? -ne 0 ]; then
+      printf "${RED}Failed to publish AWS bundle to S3 bucket. Exiting.${NC}\n"
+      printf "Please review the error logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
+    else
+      printf "${GREEN}✓${NC} AWS bundle published to S3 bucket\n"
+      printf "See logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
+    fi
+  ;;
+  *)
+    printf "Skipped publishing AWS bundle to S3 bucket\n"
+    printf "To do so manually, run:\n"
+    printf "    ${BLUE}./tools/release/publish-aws-bundle.sh ${PATH_TO_REPO}${NC}\n"
+    ;;
+esac
+
+
+# gcp bundle, as above
+printf "Publish GCP bundle to GCS bucket?\n"
+read -p "(Y/n) " -n 1 -r
+REPLY=${REPLY:-Y}
+echo    # Move to a new line
+case "$REPLY" in
+  [yY][eE][sS]|[yY])
+    LOG_FILE="/tmp/release_${RELEASE}_gcp-bundle.log"
+    ./tools/release/publish-gcp-bundle.sh ${PATH_TO_REPO} &> "${LOG_FILE}"
+    if [ $? -ne 0 ]; then
+      printf "${RED}Failed to publish GCP bundle to GCS bucket. Exiting.${NC}\n"
+      printf "Please review the error logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
+    else
+      printf "${GREEN}✓${NC} GCP bundle published to GCS bucket\n"
+      printf "See logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
+    fi
+  ;;
+  *)
+    printf "Skipped publishing GCP bundle to GCS bucket\n"
+    printf "To do so manually, run:\n"
+    printf "    ${BLUE}./tools/release/publish-gcp-bundle.sh ${PATH_TO_REPO}${NC}\n"
+    ;;
+esac
+
+# publish docs
+printf "Publish docs?\n"
+read -p "(Y/n) " -n 1 -r
+REPLY=${REPLY:-Y}
+echo    # Move to a new line
+case "$REPLY" in
+  [yY][eE][sS]|[yY])
+    LOG_FILE="/tmp/release_${RELEASE}_docs.log"
+    ./tools/release/publish-docs.sh ${RELEASE} ${PATH_TO_REPO} &> "${LOG_FILE}"
+    if [ $? -ne 0 ]; then
+      printf "${RED}Failed to publish docs. Exiting.${NC}\n"
+      printf "Please review the error logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
+    else
+      printf "${GREEN}✓${NC} Docs published\n"
+      printf "See logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
+    fi
+  ;;
+  *)
+    printf "Skipped publishing docs\n"
+    printf "To do so manually, run:\n"
+    printf "    ${BLUE}./tools/release/publish-docs.sh ${RELEASE} ${PATH_TO_REPO}${NC}\n"
+    ;;
+esac
+
+# prep next rc ?
+printf "Prep next rc?\n"
+read -p "(Y/n) " -n 1 -r
+REPLY=${REPLY:-Y}
+echo    # Move to a new line
+case "$REPLY" in
+  [yY][eE][sS]|[yY])
+    ./tools/release/prep.sh ${RELEASE} rc-NEXT
+  ;;
+  *)
+    printf "Skipped prepping next rc\n"
+    printf "To do so manually, run:\n"
+    printf "    ${BLUE}./tools/release/prep.sh ${RELEASE} rc-NEXT${NC}\n"
+    ;;
+esac
+
+printf "Next steps: \n"
+printf "  1. update example templates to point to it:\n"
+
+# particular to my machine, but just for examples ...
 if [ -d ~/code/psoxy-example-aws/ ]; then
   AWS_EXAMPLE_DIR="~/code/psoxy-example-aws"
 else
@@ -111,32 +224,6 @@ fi
 printf "    ${BLUE}./tools/release/example-create-release-pr.sh . aws ${AWS_EXAMPLE_DIR}${NC}\n"
 printf "    ${BLUE}./tools/release/example-create-release-pr.sh . gcp ${GCP_EXAMPLE_DIR}${NC}\n"
 
-printf "Publish release artifacts: \n"
-printf "    ${BLUE}./tools/release/publish-aws-release-artifact.sh ${RELEASE}${NC}\n"
+printf "2. Update stable demo deployment to point to it. In ${BLUE}psoxy-demos${NC} repo, run:\n"
+printf "    ${BLUE}./update-stable.sh${NC}\n"
 
-printf "\nPublishing Maven artifacts to GitHub Packages ...\n"
-printf "  (requires GitHub token with ${BLUE}write:packages${NC} permission in ${BLUE}~/.m2/settings.xml${NC})\n"
-if command -v mvn &> /dev/null; then
-  cd "${PATH_TO_REPO}java"
-  if mvn clean deploy -DskipTests; then
-    printf "${GREEN}✓${NC} Maven artifacts published to GitHub Packages\n"
-  else
-    printf "${RED}✗${NC} Maven deploy failed. You may need to configure authentication in ~/.m2/settings.xml\n"
-    printf "  See: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry\n"
-  fi
-else
-  printf "${RED}Maven not found.${NC} Skipping Maven artifact deployment.\n"
-  printf "  To deploy manually, run: ${BLUE}cd ${PATH_TO_REPO}java && mvn clean deploy${NC}\n"
-fi
-
-printf "Update stable demo deployment to point to it: \n"
-printf "In ${BLUE}psoxy-demos${NC} repo, run:\n"
-printf "    ${BLUE}git checkout -b upgrade-aws-stable-to-${RELEASE}${NC}\n"
-printf "    ${BLUE}cd developers/psoxy-dev-stable-aws ${NC}\n"
-printf "    ${BLUE} ./upgrade-terraform-modules.sh  ${RELEASE}${NC}\n"
-printf "    ${BLUE}terraform apply --auto-approve${NC}\n"
-printf "    ${BLUE}git commit -m \"upgrade aws stable to ${RELEASE}\"${NC}\n"
-printf "    ${BLUE}git push origin upgrade-aws-stable-to-${RELEASE}${NC}\n"
-
-printf "Prep next rc: \n"
-printf "    ${BLUE}./tools/release/prep.sh ${RELEASE} rc-NEXT${NC}\n"

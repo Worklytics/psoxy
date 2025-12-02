@@ -296,11 +296,22 @@ data "google_storage_project_service_account" "gcs_default_service_account" {
 }
 
 resource "google_project_iam_member" "grant_gcs-sa_pub-sub-publisher" {
-  count = var.support_bulk_mode ? 1 : 0
+  count = var.support_bulk_mode && var.provision_project_level_iam ? 1 : 0
 
   project = var.project_id
   role    = "roles/pubsub.publisher"
   member  = "serviceAccount:${data.google_storage_project_service_account.gcs_default_service_account.email_address}"
+}
+
+# Grant Cloud Build builder role to Compute Engine default service account
+# Required for Cloud Functions Gen2 deployment to build the function
+# See: https://cloud.google.com/functions/docs/troubleshooting#build-service-account
+resource "google_project_iam_member" "grant_compute_default_sa_cloudbuild_builder" {
+  count = var.provision_project_level_iam ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/cloudbuild.builds.builder"
+  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
 }
 
 
@@ -323,7 +334,8 @@ resource "google_project_iam_custom_role" "oidc_token_verifier" {
 
 
 # q: is there a default Cloud Scheduler service account, that needs tokencreator role on the webhook_batch_invoker SA?
-# GCP docs don't show one, and ChatGPT didn't say one needed until I asked - at which point it gave me example email for the SA that doesn't look to follow usual pattern ...
+# GCP docs don't show one, and ChatGPT didn't say one needed until I asked - at which point it gave me example email
+# for the SA that doesn't look to follow usual pattern ...
 resource "google_service_account" "webhook_batch_invoker" {
   count = var.support_webhook_collectors ? 1 : 0
 
@@ -337,11 +349,24 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
+# Cloud Functions Gen2 deployment REQUIRES the terraform principal to have roles/iam.serviceAccountUser
+# on the Compute Engine default service account in order to provision the Cloud Functions Gen2 instance
+# with a specific service account (which we do, and seems like good practice)
+data "google_compute_default_service_account" "default" {
+  project = var.project_id
+}
+
+resource "google_service_account_iam_member" "tf_runner_act_as_compute_default" {
+  service_account_id = data.google_compute_default_service_account.default.name
+  member             = var.tf_runner_iam_principal
+  role               = "roles/iam.serviceAccountUser"
+}
+
 # q: is this needed????
 # doubt is, without it, what is allowing the scheduler to generate OIDC tokens on behalf of the webhook_batch_invoker SA?
 # but admittedly, I'm unclear if it's this SA that needs the grant, or if  instead granting `roles/iam.serviceAccountUser`
 # to the GCP principal terraform is running as is the proper approach (eg, idea is that terraform is 'scheduling' the job
-# as the service account's identity) 
+# as the service account's identity)
 resource "google_service_account_iam_member" "allow_scheduler_impersonation" {
   count = var.support_webhook_collectors ? 1 : 0
 
@@ -379,35 +404,43 @@ resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
 locals {
   MAX_SERVERLESS_CONNECTOR_NAME_LENGTH = 25
 
-  provision_serverless_connector = var.vpc_config != null && try(var.vpc_config.serverless_connector, null) == null
+  vpc_defined = var.vpc_config != null
+
+  provision_serverless_connector = local.vpc_defined && try(var.vpc_config.serverless_connector, null) == null
   legal_connector_prefix         = substr(var.environment_id_prefix, 0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH)
   legal_connector_suffix         = substr("connector", 0, max(0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH - length(var.environment_id_prefix)))
 
-  # network argument to vpc_access_connector resource; must be provided if subnet isn't
-  vpc_connector_network = try(var.vpc_config.subnet, null) == null ? try(var.vpc_config.network, null) : null
+  # check if shared VPC
+  vpc_connector_network_project = coalesce(
+    try(regex("^projects/([^/]+)", var.vpc_config.network)[0], null),
+  var.project_id)
+  shared = var.project_id != local.vpc_connector_network_project
 
-  # CIDR MUST be provided if network is provided; not otherwise
-  vpc_connector_cidr_range = local.vpc_connector_network != null ? try(var.vpc_config.serverless_connector_cidr_range, "10.8.0.0/28") : null
+  # if shared, expect network, expect everything set-up
+
+  # network argument to vpc_access_connector resource; must be provided if subnet isn't
+  vpc_connector_network = try(local.shared || !local.vpc_defined ? null : var.vpc_config.network, null)
+
+  # extract region from subnetwork (if shared)
+  vpc_connector_region = coalesce(
+    try(regex("projects/[^/]+/regions/([^/]+)", var.vpc_config.subnet)[0], null),
+  var.gcp_region)
+
+  vpc_connector_subnetwork_name = !local.provision_serverless_connector ? null : coalesce(
+    try(regex(".*/([^/]+)$", var.vpc_config.subnet)[0], null),
+  try(local.vpc_defined ? var.vpc_config.subnet : null, null))
 }
 
 resource "google_vpc_access_connector" "connector" {
   count = local.provision_serverless_connector ? 1 : 0
 
-  project       = var.project_id
-  region        = var.gcp_region
-  network       = local.vpc_connector_network
-  name          = "${local.legal_connector_prefix}${local.legal_connector_suffix}"
-  ip_cidr_range = local.vpc_connector_cidr_range
+  project = var.project_id
+  region  = local.vpc_connector_region
+  name    = "${local.legal_connector_prefix}${local.legal_connector_suffix}"
 
-  # subnet; provide if network is NOT provided
-  dynamic "subnet" {
-
-    for_each = local.vpc_connector_network == null ? [var.vpc_config.subnet] : []
-
-    content {
-      name       = subnet.value
-      project_id = var.project_id
-    }
+  subnet {
+    name       = local.vpc_connector_subnetwork_name
+    project_id = local.vpc_connector_network_project
   }
 
 }

@@ -147,10 +147,9 @@ variable "gcp_region" {
 
 variable "vpc_config" {
   type = object({
-    network                         = optional(string)                # Local name of the VPC network resource on which to provision the VPC connector (if `serverless_connector` is not provided)
-    subnet                          = optional(string)                # Local name of the VPC subnet resource on which to provision the VPC connector (if `serverless_connector` is not provided). NOTE: Subnet MUST have /28 netmask (required by Google Cloud for VPC connectors)
-    serverless_connector            = optional(string)                # Format: projects/{project}/locations/{location}/connectors/{connector}
-    serverless_connector_cidr_range = optional(string, "10.8.0.0/28") # ignored if serverless_connector or subnet is provided
+    network              = string           # Local name of the VPC network resource on which to provision the VPC connector (required if `serverless_connector` is not provided)
+    subnet               = string           # Local name of the VPC subnet resource on which to provision the VPC connector (required if `serverless_connector` is not provided). NOTE: Subnet MUST have /28 netmask (required by Google Cloud for VPC connectors)
+    serverless_connector = optional(string) # Format: projects/{project}/locations/{location}/connectors/{connector}
   })
 
   description = "**alpha** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
@@ -158,39 +157,36 @@ variable "vpc_config" {
   # serverless_connector: allow null; if provided, must match the full resource name
   validation {
     condition = (
-      var.vpc_config == null
-      || try(var.vpc_config.serverless_connector, null) == null
-      || can(regex("^projects/[^/]+/locations/[^/]+/connectors/[^/]+$", try(var.vpc_config.serverless_connector, "")))
+    var.vpc_config == null
+    || try(var.vpc_config.serverless_connector, null) == null
+    || can(regex("^projects/[^/]+/locations/[^/]+/connectors/[^/]+$", try(var.vpc_config.serverless_connector, "")))
     )
     error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
   }
 
-  # serverless_connector_cidr_range: allow null; if provided, must look like CIDR
   validation {
     condition = (
-      var.vpc_config == null
-      || try(var.vpc_config.serverless_connector_cidr_range, null) == null
-      || can(regex("^[0-9.]+/[0-9]+$", try(var.vpc_config.serverless_connector_cidr_range, "")))
+    var.vpc_config == null
+    || try(var.vpc_config.serverless_connector, null) != null
+    ||
+    (
+    # Accepts a simple network name: lowercase letters, digits, dashes
+    can(regex("^[a-z0-9-]+$", try(var.vpc_config.network,"")))
+    ||
+    # Accepts a full self-link (Compute URL format)
+    can(regex("^projects/[^/]+/(global|regions/[^/]+)/networks/[^/]+$", try(var.vpc_config.network,"")))
     )
-    error_message = "If vpc_config.serverless_connector_cidr_range is provided, it must match the format: {ip}/{mask}"
-  }
-
-  validation {
-    condition = (
-      var.vpc_config == null
-      || try(var.vpc_config.network, null) == null
-      || can(regex("^[a-z0-9-]+$", try(var.vpc_config.network, "")))
     )
     error_message = "vpc_config.network must be lowercase letters, numbers, or dashes."
   }
 
   validation {
     condition = (
-      var.vpc_config == null
-      || try(var.vpc_config.network, null) != null
-      || try(var.vpc_config.serverless_connector, null) != null
+    var.vpc_config == null
+    || try(var.vpc_config.serverless_connector, null) != null
+    || (try(var.vpc_config.network, null) != null && try(var.vpc_config.subnet, null) != null)
     )
-    error_message = "If vpc_config is provided, it must either specify a serverless_connector or a network on which to provision a serverless connector."
+    error_message = "If vpc_config is provided without serverless_connector, both network and subnet are required."
   }
 }
 
@@ -453,4 +449,10 @@ variable "bucket_force_destroy" {
   type        = bool
   description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this configuration"
   default     = false
+}
+
+variable "provision_project_level_iam" {
+  description = "Whether to provision project-level IAM bindings required for Psoxy operation. Set to false if you prefer to manage these IAM bindings outside of Terraform."
+  type        = bool
+  default     = true
 }
