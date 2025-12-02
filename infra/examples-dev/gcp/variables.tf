@@ -157,34 +157,34 @@ variable "vpc_config" {
   # serverless_connector: allow null; if provided, must match the full resource name
   validation {
     condition = (
-    var.vpc_config == null
-    || try(var.vpc_config.serverless_connector, null) == null
-    || can(regex("^projects/[^/]+/locations/[^/]+/connectors/[^/]+$", try(var.vpc_config.serverless_connector, "")))
+      var.vpc_config == null
+      || try(var.vpc_config.serverless_connector, null) == null
+      || can(regex("^projects/[^/]+/locations/[^/]+/connectors/[^/]+$", try(var.vpc_config.serverless_connector, "")))
     )
     error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
   }
 
   validation {
     condition = (
-    var.vpc_config == null
-    || try(var.vpc_config.serverless_connector, null) != null
-    ||
-    (
-    # Accepts a simple network name: lowercase letters, digits, dashes
-    can(regex("^[a-z0-9-]+$", try(var.vpc_config.network,"")))
-    ||
-    # Accepts a full self-link (Compute URL format)
-    can(regex("^projects/[^/]+/(global|regions/[^/]+)/networks/[^/]+$", try(var.vpc_config.network,"")))
-    )
+      var.vpc_config == null
+      || try(var.vpc_config.serverless_connector, null) != null
+      ||
+      (
+        # Accepts a simple network name: lowercase letters, digits, dashes
+        can(regex("^[a-z0-9-]+$", try(var.vpc_config.network, "")))
+        ||
+        # Accepts a full self-link (Compute URL format)
+        can(regex("^projects/[^/]+/(global|regions/[^/]+)/networks/[^/]+$", try(var.vpc_config.network, "")))
+      )
     )
     error_message = "vpc_config.network must be lowercase letters, numbers, or dashes."
   }
 
   validation {
     condition = (
-    var.vpc_config == null
-    || try(var.vpc_config.serverless_connector, null) != null
-    || (try(var.vpc_config.network, null) != null && try(var.vpc_config.subnet, null) != null)
+      var.vpc_config == null
+      || try(var.vpc_config.serverless_connector, null) != null
+      || (try(var.vpc_config.network, null) != null && try(var.vpc_config.subnet, null) != null)
     )
     error_message = "If vpc_config is provided without serverless_connector, both network and subnet are required."
   }
