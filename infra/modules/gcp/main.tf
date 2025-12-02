@@ -404,7 +404,7 @@ resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
 locals {
   MAX_SERVERLESS_CONNECTOR_NAME_LENGTH = 25
 
-  vpc_defined              = var.vpc_config != null
+  vpc_defined = var.vpc_config != null
 
   provision_serverless_connector = local.vpc_defined && try(var.vpc_config.serverless_connector, null) == null
   legal_connector_prefix         = substr(var.environment_id_prefix, 0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH)
@@ -413,7 +413,7 @@ locals {
   # check if shared VPC
   vpc_connector_network_project = coalesce(
     try(regex("^projects/([^/]+)", var.vpc_config.network)[0], null),
-    var.project_id)
+  var.project_id)
   shared = var.project_id != local.vpc_connector_network_project
 
   # if shared, expect network, expect everything set-up
@@ -423,21 +423,20 @@ locals {
 
   # extract region from subnetwork (if shared)
   vpc_connector_region = coalesce(
-      try(regex("projects/[^/]+/regions/([^/]+)", var.vpc_config.subnet)[0], null),
-      var.gcp_region)
+    try(regex("projects/[^/]+/regions/([^/]+)", var.vpc_config.subnet)[0], null),
+  var.gcp_region)
 
   vpc_connector_subnetwork_name = !local.provision_serverless_connector ? null : coalesce(
     try(regex(".*/([^/]+)$", var.vpc_config.subnet)[0], null),
-     try(local.vpc_defined ? var.vpc_config.subnet : null, null))
+  try(local.vpc_defined ? var.vpc_config.subnet : null, null))
 }
 
 resource "google_vpc_access_connector" "connector" {
   count = local.provision_serverless_connector ? 1 : 0
 
-  project       = var.project_id
-  region        = local.vpc_connector_region
-  network       = local.vpc_connector_network
-  name          = "${local.legal_connector_prefix}${local.legal_connector_suffix}"
+  project = var.project_id
+  region  = local.vpc_connector_region
+  name    = "${local.legal_connector_prefix}${local.legal_connector_suffix}"
 
   subnet {
     name       = local.vpc_connector_subnetwork_name
