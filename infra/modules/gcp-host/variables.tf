@@ -147,10 +147,10 @@ variable "vpc_config" {
       ||
       (
         # Accepts a simple network name: lowercase letters, digits, dashes
-        can(regex("^[a-z0-9-]+$", var.vpc_config.network))
+        can(regex("^[a-z0-9-]+$", try(var.vpc_config.network,"")))
         ||
         # Accepts a full self-link (Compute URL format)
-        can(regex("^projects/[^/]+/(global|regions/[^/]+)/networks/[^/]+$", var.vpc_config.network))
+        can(regex("^projects/[^/]+/(global|regions/[^/]+)/networks/[^/]+$", try(var.vpc_config.network,"")))
       )
     )
     error_message = "vpc_config.network must be lowercase letters, numbers, or dashes."
@@ -160,7 +160,7 @@ variable "vpc_config" {
     condition = (
       var.vpc_config == null
       || try(var.vpc_config.serverless_connector, null) != null
-      || (var.vpc_config.network != null && var.vpc_config.subnet != null)
+      || (try(var.vpc_config.network, null) != null && try(var.vpc_config.subnet, null) != null)
     )
     error_message = "If vpc_config is provided without serverless_connector, both network and subnet are required."
   }
