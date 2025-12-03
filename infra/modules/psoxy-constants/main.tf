@@ -513,6 +513,10 @@ locals {
       display_name    = "Cloud Run Developer",
       description_url = "https://cloud.google.com/iam/docs/roles-permissions/run#run.developer"
     },
+    "roles/compute.viewer" = {
+      display_name    = "Compute Viewer",
+      description_url = "https://docs.cloud.google.com/iam/docs/roles-permissions/compute#compute.viewer"
+    },
   }, local.required_gcp_roles_to_provision_webhook_collectors)
 
   # required roles to provision webhook collectors, beyond the core ones needed for any GCP instance
