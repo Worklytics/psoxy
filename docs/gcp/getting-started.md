@@ -26,7 +26,7 @@ NOTE: if you're connecting to Google Workspace as a data source, you'll also nee
 - a GCP (Google) user or Service Account with permissions to provision Service Accounts, Secrets, Storage Buckets, Cloud Run Functions, KMS Keys, Pub/Sub Topics/Subscriptions, and enable APIs within that project. eg:
   - [Cloud Functions Developer](https://docs.cloud.google.com/iam/docs/roles-permissions/cloudfunctions#cloudfunctions.developer) - proxy instances are deployed as GCP cloud functions
   - [Cloud KMS Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/cloudkms#cloudkms.admin) - webhook authentication keys are provisioned as KMS asymmetric signing keys. this is only required for Webhook collection mode.
-  - [Cloud Run Developer](https://docs.cloud.google.com/iam/docs/roles-permissions/run#run.developer) - cloud function deployment requires Cloud Run Developer role
+  - [Cloud Run Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/run#run.admin) - cloud function deployment requires Cloud Run Admin role
   - [Cloud Scheduler Admin](https://cloud.google.com/iam/docs/roles-permissions/cloudscheduler#cloudscheduler.admin) - cloud scheduler - required if using Webhook Collector mode.
   - [Cloud Storage Admin](https://cloud.google.com/iam/docs/roles-permissions/storage#storage.admin) - processing of bulk data (such as HRIS exports) uses GCS buckets, as does Webhook Collection and async API request mode.
   - [Computer Viewer](https://docs.cloud.google.com/iam/docs/roles-permissions/compute#compute.viewer) - cloud function deployment requires reading come Compute Engine metadata for the project.

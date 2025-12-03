@@ -509,9 +509,9 @@ locals {
       display_name    = "Cloud Functions Developer",
       description_url = "https://cloud.google.com/iam/docs/roles-permissions/cloudfunctions#cloudfunctions.developer"
     },
-    "roles/run.developer" = {
-      display_name    = "Cloud Run Developer",
-      description_url = "https://cloud.google.com/iam/docs/roles-permissions/run#run.developer"
+    "roles/run.admin" = {
+      display_name    = "Cloud Run Admin",
+      description_url = "https://docs.cloud.google.com/iam/docs/roles-permissions/run#run.admin"
     },
     "roles/compute.viewer" = {
       display_name    = "Compute Viewer",
