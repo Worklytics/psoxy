@@ -1,6 +1,6 @@
 # Cursor
 
-**ALPHA**; may change in backwards incompatible ways. We are NOT committed to supporting it or making it available to all customers.
+**BETA**
 
 
 Our Cursor data connector uses the Admin API to import data about Team Members (accounts),  Daily Usage (metrics), and Usage Events (work events) to Worklytics.
