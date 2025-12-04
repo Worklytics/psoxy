@@ -209,14 +209,18 @@ variable "todo_step" {
 
 variable "vpc_config" {
   type = object({
-    serverless_connector = string # Format: projects/{project}/locations/{location}/connectors/{connector}
+    network              = optional(string)           # VPC network for Direct VPC Egress
+    subnet               = optional(string)           # VPC subnet for Direct VPC Egress
+    network_tags         = optional(list(string), []) # Network tags for Direct VPC Egress firewall rules
+    serverless_connector = optional(string)           # Format: projects/{project}/locations/{location}/connectors/{connector} - if provided, uses Serverless VPC Access connector
   })
-  description = "VPC configuration for the Cloud Run function."
+  description = "VPC configuration for the Cloud Run function. If network and subnet are provided without serverless_connector, Direct VPC Egress will be used."
   default     = null
 
   validation {
     condition = (
       var.vpc_config == null ||
+      try(var.vpc_config.serverless_connector, null) == null ||
       can(regex("^projects/[^/]+/locations/[^/]+/connectors/[^/]+$", var.vpc_config.serverless_connector))
     )
     error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"

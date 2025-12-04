@@ -1,11 +1,29 @@
 
 # VPC ***beta***
 
-As of v0.5.6, GCP-hosted proxy instances are [Cloud Run Functions](https://cloud.google.com/run/docs/functions/comparison). This serverless architecture amounts to code being executed by GCP within a sandbox environment, with low-level networking fully-managed by Google.  This means that we don't support VPC-networking-level controls for ingress to the cloud functions; such connectivity/routing is managed by Google and secured by GCP IAM.  However, Cloud Run Functions do support routing all outbound traffic through a [serverless VPC connector](https://cloud.google.com/vpc/docs/serverless-vpc-access), which provides some opportunity for limited egress connectivity and/or allowing proxy instances to connect to data sources that are otherwise on a private VPC that is not externally accessible (eg, a self-hosted JIRA instance).  Your VPC must provide connectivity to all data sources you wish to connect to; Google Workspace sources seem to work relying on the default "private Google access"; but all others likely require a Cloud Router + NAT; such networking configuration is outside the scope of what our terraform modules provide.
+As of v0.5.6, GCP-hosted proxy instances are [Cloud Run Functions](https://cloud.google.com/run/docs/functions/comparison). This serverless architecture amounts to code being executed by GCP within a sandbox environment, with low-level networking fully-managed by Google.  This means that we don't support VPC-networking-level controls for ingress to the cloud functions; such connectivity/routing is managed by Google and secured by GCP IAM.  However, Cloud Run Functions do support routing all outbound traffic through a VPC using either [Direct VPC Egress](https://docs.cloud.google.com/run/docs/configuring/connecting-vpc) (recommended) or a [serverless VPC connector](https://cloud.google.com/vpc/docs/serverless-vpc-access), which provides some opportunity for limited egress connectivity and/or allowing proxy instances to connect to data sources that are otherwise on a private VPC that is not externally accessible (eg, a self-hosted JIRA instance).  Your VPC must provide connectivity to all data sources you wish to connect to; Google Workspace sources seem to work relying on the default "private Google access"; but all others likely require a Cloud Router + NAT; such networking configuration is outside the scope of what our terraform modules provide.
 
-To configure a VPC / serverless VPC connector, provide exactly ONE of the following to the `vpc_config` in your `terraform.tfvars`: 1) a `network`, 2) a `subnet`, or 3) `serverless_connector`; if you provide just the `network`, the latter two will be provisioned for you; if you provide just the `subnet`, the connector will be provisioned for you.
+## Direct VPC Egress (Recommended)
 
-**IMPORTANT:** When using the `subnet` approach, the subnet **must** have a `/28` netmask (e.g., `10.8.0.0/28`). This is a Google Cloud requirement for subnets used with VPC Serverless Connectors. If your existing subnet has a larger range (e.g., `/24` or `/16`), you will need to create a dedicated `/28` subnet for the VPC connector.
+By default, when you provide `network` and `subnet` in your `vpc_config`, the module will use **Direct VPC Egress**, which provides better performance, lower latency, and no additional VM charges compared to Serverless VPC Access connectors.
+
+```hcl
+vpc_config = {
+  network = "my-vpc-network"
+  subnet  = "my-vpc-subnet"
+  network_tags = ["tag1", "tag2"]  # Optional: network tags for firewall rules
+}
+```
+
+**Benefits of Direct VPC Egress:**
+- Lower latency and higher throughput
+- No additional VM charges (only network egress charges)
+- Finer granularity with network tags per service
+- No subnet size restrictions (unlike connectors which require /28)
+
+## Serverless VPC Access Connector (Legacy)
+
+If you have an existing Serverless VPC Access connector or prefer to use one, you can explicitly provide it:
 
 ```hcl
 vpc_config = {
@@ -13,17 +31,21 @@ vpc_config = {
 }
 ```
 
+**IMPORTANT:** When using Serverless VPC Access connectors, the subnet **must** have a `/28` netmask (e.g., `10.8.0.0/28`). This is a Google Cloud requirement for subnets used with VPC Serverless Connectors. If your existing subnet has a larger range (e.g., `/24` or `/16`), you will need to create a dedicated `/28` subnet for the VPC connector.
+
 The following IAM roles, or equivalent subset of perms, may be required:
 - `roles/compute.networkAdmin` - a read-only equivalent could be used if both your network and subnet exist
-- `roles/vpcaccess.admin` - a read-only equivalent could be used if serverless VPC connector exists
+- `roles/vpcaccess.admin` - only required if using Serverless VPC Access connector
 
 So this is connecting your proxy instances to and through a VPC, but they are otherwise not "on" the VPC. (Eg, will not run inside container instances with NICs bound to IPs on the VPC).
 
 NOTE: Historically, there were GCP Cloud Functions; these are now called "GCP Cloud Run Functions (Gen1)"; we are using what would be the "GCP Cloud Run Functions (gen2)", which Google now brands simply as "Cloud Run Functions".
 
-NOTE: VPC Serverless Connectors, whether managed via our provided Terraform or not, are a potential bottleneck; please monitor to ensure sufficient capacity for your workload. If the one we provision is not sufficient for your use-case, please provision it externally and pass it in.
+NOTE: **Direct VPC Egress is recommended** over Serverless VPC Access connectors as it provides better performance, lower latency, and no additional VM charges. The module uses Direct VPC Egress by default when `network` and `subnet` are provided.
 
-NOTE: VPC resources, including serverless connectors, are billable GCP resources; provisioning and using them will increase your costs for hosting your proxy instances.
+NOTE: VPC Serverless Connectors are a potential bottleneck; please monitor to ensure sufficient capacity for your workload. If you need to use a connector, provision it externally and pass it in via `serverless_connector`.
+
+NOTE: VPC resources are billable GCP resources; using them will increase your costs for hosting your proxy instances. With Direct VPC Egress, you only pay for network egress charges (no VM charges).
 
 ## Min Network Example
 
@@ -81,7 +103,7 @@ vpc_config = {
 }
 ```
 
-**Subnet Requirements:** When specifying a `subnet`, ensure it has a `/28` netmask. Google Cloud requires this specific netmask for subnets used with VPC Serverless Connectors. If your subnet has a different netmask, you'll need to create a new subnet with `/28`.
+**Subnet Requirements:** When using Direct VPC Egress (default), there are no subnet size restrictions. However, if you're using a Serverless VPC Access connector (by providing `serverless_connector`), the subnet **must** have a `/28` netmask. If your subnet has a different netmask and you need to use a connector, you'll need to create a new subnet with `/28`.
 
 ## Shared VPC connector
 
@@ -103,7 +125,7 @@ Fill the `vpc_config` in your `terraform.tfvars`, as follows, providing the full
 vpc_config = {
     network = "projects/HOST_PROJECT/global/networks/NAME"
     subnet = "projects/HOST_PROJECT/regions/REGION/subnetworks/SUBNETWORK_NAME"
-    serverless_connector = null
+    # Direct VPC Egress will be used by default (no serverless_connector needed)
 }
 ```
 
