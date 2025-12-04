@@ -39,11 +39,14 @@ jobs:
           proxy/tools/release/example-copy.sh proxy/${{ inputs.example-to-copy }} example
       - name: Commit changes to example repo
         working-directory: example
-        uses: planetscale/ghcommit-action@v0.1.6
-        with:
-          commit_message: "update example to ${{ inputs.release }}"
-          repo: ${{ inputs.example-repo }}
-          branch: rc-${{ inputs.release }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b rc-${{ inputs.release }}
+          git add .
+          git commit -m "update example to ${{ inputs.release }}"
+          git remote set-url origin https://${{ inputs.example-repo-token }}@github.com/${{ inputs.example-repo }}.git
+          git push origin rc-${{ inputs.release }}
         env:
           GITHUB_TOKEN: ${{ inputs.example-repo-token }}
       - name: Open PR in example repo to merge update back to its mainline
