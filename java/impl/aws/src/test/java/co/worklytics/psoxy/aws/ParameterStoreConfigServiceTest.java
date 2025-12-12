@@ -1,9 +1,9 @@
 package co.worklytics.psoxy.aws;
 
+import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
-import lombok.NonNull;
 import org.apache.commons.lang3.JavaVersion;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +18,7 @@ import software.amazon.awssdk.services.ssm.model.*;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Objects;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -188,4 +188,97 @@ class ParameterStoreConfigServiceTest {
             parameterStoreConfigService.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN).isEmpty());
     }
 
+    @Test
+    void getAvailableVersions_returnsExpectedVersions() {
+        ParameterStoreConfigService parameterStoreConfigService = spy(
+            new ParameterStoreConfigService(""));
+        parameterStoreConfigService.client = client;
+        parameterStoreConfigService.envVarsConfig = mock(EnvVarsConfigService.class);
+        when(parameterStoreConfigService.envVarsConfig.isDevelopment()).thenReturn(false);
+
+        // Prepare mock ParameterHistory list
+        ParameterHistory v1 = ParameterHistory.builder()
+            .value("value1")
+            .version(1L)
+            .lastModifiedDate(Instant.parse("2023-01-01T00:00:00Z"))
+            .build();
+        ParameterHistory v2 = ParameterHistory.builder()
+            .value("value2")
+            .version(2L)
+            .lastModifiedDate(Instant.parse("2023-02-01T00:00:00Z"))
+            .build();
+        ParameterHistory placeholder = ParameterHistory.builder()
+            .value(ParameterStoreConfigService.PLACEHOLDER_VALUE)
+            .version(3L)
+            .lastModifiedDate(Instant.parse("2023-03-01T00:00:00Z"))
+            .build();
+        // v3 is a placeholder and should be filtered out
+        List<ParameterHistory> history = List.of(placeholder, v2, v1);
+
+        GetParameterHistoryResponse response = GetParameterHistoryResponse.builder()
+            .parameters(history)
+            .build();
+        when(client.getParameterHistory(any(GetParameterHistoryRequest.class))).thenReturn(response);
+
+        // Use a dummy ConfigProperty
+        ConfigService.ConfigProperty property = () -> "DUMMY";
+        List<ConfigService.ConfigValueVersion> versions = parameterStoreConfigService.getAvailableVersions(property, 5);
+
+        // Should only return v2 and v1, sorted by version descending
+        assertEquals(2, versions.size());
+        assertEquals("value2", versions.get(0).getValue());
+        assertEquals("2", versions.get(0).getVersion());
+        assertEquals("value1", versions.get(1).getValue());
+        assertEquals("1", versions.get(1).getVersion());
+    }
+
+    @Test
+    void getAvailableVersions_emptyIfNoHistory() {
+        ParameterStoreConfigService parameterStoreConfigService =
+            new ParameterStoreConfigService("");
+        parameterStoreConfigService.client = client;
+        parameterStoreConfigService.envVarsConfig = mock(EnvVarsConfigService.class);
+        when(parameterStoreConfigService.envVarsConfig.isDevelopment()).thenReturn(false);
+
+        GetParameterHistoryResponse response = GetParameterHistoryResponse.builder()
+            .parameters(List.of())
+            .build();
+        when(client.getParameterHistory(any(GetParameterHistoryRequest.class))).thenReturn(response);
+
+        ConfigService.ConfigProperty property = () -> "DUMMY";
+        List<ConfigService.ConfigValueVersion> versions = parameterStoreConfigService.getAvailableVersions(property, 10);
+        assertTrue(versions.isEmpty());
+    }
+
+    @Test
+    void getAvailableVersions_handlesParameterNotFound() {
+        ParameterStoreConfigService parameterStoreConfigService =
+            new ParameterStoreConfigService("");
+        parameterStoreConfigService.client = client;
+        parameterStoreConfigService.envVarsConfig = mock(EnvVarsConfigService.class);
+        when(parameterStoreConfigService.envVarsConfig.isDevelopment()).thenReturn(false);
+
+        when(client.getParameterHistory(any(GetParameterHistoryRequest.class)))
+            .thenThrow(ParameterNotFoundException.builder().build());
+
+        ConfigService.ConfigProperty property = () -> "DUMMY";
+        List<ConfigService.ConfigValueVersion> versions = parameterStoreConfigService.getAvailableVersions(property, 10);
+        assertTrue(versions.isEmpty());
+    }
+
+    @Test
+    void getAvailableVersions_handlesSsmException() {
+        ParameterStoreConfigService parameterStoreConfigService =
+            new ParameterStoreConfigService("");
+        parameterStoreConfigService.client = client;
+        parameterStoreConfigService.envVarsConfig = mock(EnvVarsConfigService.class);
+        when(parameterStoreConfigService.envVarsConfig.isDevelopment()).thenReturn(false);
+
+        when(client.getParameterHistory(any(GetParameterHistoryRequest.class)))
+            .thenThrow(SsmException.builder().build());
+
+        ConfigService.ConfigProperty property = () -> "DUMMY";
+        List<ConfigService.ConfigValueVersion> versions = parameterStoreConfigService.getAvailableVersions(property, 10);
+        assertTrue(versions.isEmpty());
+    }
 }

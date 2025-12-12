@@ -433,8 +433,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          * @return
          */
         private Optional<AccessToken> checkIfAlreadyRefreshed() {
-            AccessToken freshToken = sourceAuthStrategy.getSharedAccessTokenIfSupported()
-                .orElse(sourceAuthStrategy.getCachedToken());
+            AccessToken freshToken = sourceAuthStrategy.getSharedAccessTokenIfSupported().orElse(null);
             if (sourceAuthStrategy.shouldRefresh(freshToken, clock.instant())) {
                 return Optional.empty();
             } else {
@@ -458,8 +457,6 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 return refreshedToken.get();
             }
 
-            CanonicalOAuthAccessTokenResponseDto tokenResponse;
-
             // only lock if we're using a shared token across processes
             boolean lockNeeded = sourceAuthStrategy.useSharedToken();
 
@@ -477,7 +474,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     if (envVarsConfigService.isDevelopment()) {
                         log.info("> Acquire: refresh token");
                     }
-                    tokenResponse = exchangeRefreshTokenForAccessToken();
+                    CanonicalOAuthAccessTokenResponseDto tokenResponse = exchangeRefreshTokenForAccessToken();
                     token = asAccessToken(tokenResponse);
 
                     if (sourceAuthStrategy.useSharedToken()) {
