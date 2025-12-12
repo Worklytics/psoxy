@@ -431,7 +431,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             }
             // check if the access token has been refreshed already, if so, move on
             // reload from shared
-            AccessToken freshToken = sourceAuthStrategy.getSharedAccessTokenIfSupported().orElse(sourceAuthStrategy.getCachedToken());
+            AccessToken freshToken = sourceAuthStrategy.getSharedAccessTokenIfSupported()
+                .orElse(sourceAuthStrategy.getCachedToken());
             if (freshToken != null && !sourceAuthStrategy.shouldRefresh(freshToken, clock.instant())) {
                 return freshToken;
             }
@@ -466,6 +467,11 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 }
             } else {
                 // re-try recursively, w/ linear backoff
+                // this exec path should only happen when different instances (VMs) are attempting
+                // to refresh. 2+ threads of same VM can never hit this as the whole recursive call
+                // is synchronized (see #refreshAccessToken). So on same VM, this will block until
+                // A) acquires lock and refreshes
+                // B) checks already refreshed token and exits
                 Uninterruptibles.sleepUninterruptibly(WAIT_AFTER_FAILED_LOCK_ATTEMPTS
                         .plusMillis(randomNumberGenerator.nextInt(250)).multipliedBy(attempt + 1));
 
