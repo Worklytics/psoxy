@@ -4,6 +4,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.utils.DevLogUtils;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.amazonaws.SdkClientException;
 import com.google.common.annotations.VisibleForTesting;
@@ -128,24 +129,18 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
                 log.info("Found placeholder value for " + paramName + "; this is either a misconfiguration, or a value that proxy itself should later fill.");
                 r = Optional.empty();
             } else {
-                if (envVarsConfig.isDevelopment()) {
-                    log.info("Found SSM parameter for " + paramName);
-                }
+                DevLogUtils.info(envVarsConfig, log, "Found SSM parameter for " + paramName);
                 r = Optional.of(mapping.apply(parameterResponse));
             }
             return r;
         } catch (ParameterNotFoundException | ParameterVersionNotFoundException ignore) {
             // does not exist, that could be OK depending on case.
-            if (envVarsConfig.isDevelopment()) {
-                log.info("No SSM parameter for " + paramName + " (may be expected)");
-            }
+            DevLogUtils.info(envVarsConfig, log, "No SSM parameter for " + paramName + " (may be expected)");
             return Optional.empty();
         } catch (SsmException ignore) {
             // very likely the policy doesn't allow reading this parameter
             // may be OK in those cases
-            if (envVarsConfig.isDevelopment()) {
-                log.log(Level.WARNING, "Couldn't read SSM parameter for " + paramName, ignore);
-            }
+            DevLogUtils.warn(envVarsConfig, log, "Failed to read SSM parameter for " + paramName, ignore);
             return Optional.empty();
         } catch (AwsServiceException e) {
             if (e.isThrottlingException()) {
@@ -206,9 +201,8 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
             Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(100).plusMillis(randomNumberGenerator.nextInt(200)));
             // if value doesn't match what we wrote, someone else got it, race condition.
             Parameter parameter = readParameter(lockParameterName);
-            if (envVarsConfig.isDevelopment()) {
-                log.info("> Acquire: " + parameter.name() + "/" + parameter.value());
-            }
+            DevLogUtils.info(envVarsConfig, log, "Acquired lock " + lockParameterName + "/" + parameter.value());
+
             return Objects.equals(lockValue, parameter.value());
         } catch (ParameterAlreadyExistsException e) {
             try {
@@ -277,9 +271,7 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
                 return Collections.emptyList();
             }
 
-            if (envVarsConfig.isDevelopment()) {
-                log.info("getAvailableVersions " + paramName + " :  " + history.stream().map(ParameterHistory::toString).toList());
-            }
+            DevLogUtils.info(envVarsConfig, log, "Found " + history.size() + " versions for " + paramName);
 
             // Sort by version descending and convert to ConfigValueVersion
             return history.stream()
@@ -294,17 +286,13 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
                 .collect(Collectors.toList());
 
         } catch (ParameterNotFoundException | ParameterVersionNotFoundException e) {
-            if (envVarsConfig.isDevelopment()) {
-                log.info("No parameter history found for " + paramName + " when listing versions");
-            }
+            DevLogUtils.info(envVarsConfig, log, "No parameter history found for " + paramName);
             return Collections.emptyList();
         } catch (SsmException e) {
-            if (envVarsConfig.isDevelopment()) {
-                log.log(Level.WARNING, "failed to list parameter versions for " + paramName, e);
-            }
+            DevLogUtils.warn(envVarsConfig, log, "Failed to list parameter versions for " + paramName, e);
             return Collections.emptyList();
         } catch (Exception e) {
-            log.log(Level.WARNING, "Unexpected error listing parameter versions for " + paramName, e);
+            DevLogUtils.warn(envVarsConfig, log, "Unexpected error listing parameter versions for " + paramName, e);
             return Collections.emptyList();
         }
     }

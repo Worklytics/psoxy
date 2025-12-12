@@ -8,6 +8,7 @@ import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.WritePropertyRetriesExhaustedException;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.utils.DevLogUtils;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +30,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -107,7 +109,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         REFRESH_ENDPOINT(false, SupportedSource.ENV_VAR_OR_REMOTE),
         CLIENT_ID(false, SupportedSource.ENV_VAR_OR_REMOTE),
         GRANT_TYPE(false, SupportedSource.ENV_VAR),
-        ACCESS_TOKEN(true,SupportedSource.ENV_VAR_OR_REMOTE),
+        ACCESS_TOKEN(true, SupportedSource.ENV_VAR_OR_REMOTE),
 
         /**
          * whether resulting `access_token` should be shared across all instances of connections to
@@ -157,6 +159,13 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     @Inject // injected, so can be mocked for tests
     RandomNumberGenerator randomNumberGenerator;
 
+    /**
+     * -- SETTER --
+     *  Sets the local copy of the token, assumes valid until expiration.
+     *
+     * @param token
+     */
+    @Setter
     @Getter
     private AccessToken cachedToken = null;
 
@@ -234,19 +243,6 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         return useSharedTokenConfig.map(Boolean::parseBoolean).orElse(isClientCredentialsGrantType);
     }
-
-    public void setCachedToken(AccessToken token) {
-        if (isAccessTokenCacheable()) {
-            this.cachedToken = token;
-        }
-    }
-
-    private boolean isAccessTokenCacheable() {
-        return config.getConfigPropertyAsOptional(ConfigProperty.ACCESS_TOKEN_CACHEABLE)
-                .map(Boolean::parseBoolean).orElse(!useSharedToken()); // by default, tokens
-                                                                       // cacheable unless shared
-    }
-
 
     @VisibleForTesting
     Optional<AccessToken> getSharedAccessTokenIfSupported() {
@@ -421,8 +417,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          */
         @Override
         public synchronized AccessToken refreshAccessToken() throws IOException {
-            if (envVarsConfigService.isDevelopment() && sourceAuthStrategy.getCachedToken() != null) {
-                log.info("About to refresh, expires: " + sourceAuthStrategy.getCachedToken().getExpirationTime());
+            if (sourceAuthStrategy.getCachedToken() != null) {
+                DevLogUtils.info(envVarsConfigService, log, "Refreshing token, expires: " + sourceAuthStrategy.getCachedToken().getExpirationTime());
+            } else {
+                DevLogUtils.info(envVarsConfigService, log, "Refreshing token, no cached value yet");
             }
             return refreshAccessToken(0);
         }
@@ -436,25 +434,16 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             AccessToken freshToken = sourceAuthStrategy.getSharedAccessTokenIfSupported().orElse(null);
             if (sourceAuthStrategy.shouldRefresh(freshToken, clock.instant())) {
                 return Optional.empty();
-            } else {
-                if (envVarsConfigService.isDevelopment() && freshToken != null) {
-                    log.info("Token already refreshed " + freshToken.getExpirationTime() + " on another instance");
-                }
-                return Optional.ofNullable(freshToken);
+            } else if (freshToken != null) {
+                DevLogUtils.info(envVarsConfigService, log, "Token already refreshed " + freshToken.getExpirationTime());
+                return Optional.of(freshToken);
             }
+            return Optional.empty();
         }
 
         private AccessToken refreshAccessToken(int attempt) throws IOException {
             if (attempt == MAX_TOKEN_REFRESH_ATTEMPTS) {
-                throw new RuntimeException(
-                        "Failed to refresh token after " + attempt + " attempts");
-            }
-            Optional<AccessToken> refreshedToken = checkIfAlreadyRefreshed();
-            if (refreshedToken.isPresent()) {
-                if (envVarsConfigService.isDevelopment()) {
-                    log.info("Token already refreshed on another instance; using new value");
-                }
-                return refreshedToken.get();
+                throw new RuntimeException("Failed to refresh token after " + attempt + " attempts");
             }
 
             // only lock if we're using a shared token across processes
@@ -465,15 +454,12 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             AccessToken token;
             if (acquired) {
-                if (envVarsConfigService.isDevelopment()) {
-                    log.info("Acquired lock to refresh token");
-                }
-                refreshedToken = checkIfAlreadyRefreshed();
+                DevLogUtils.info(envVarsConfigService, log, "Acquired lock to refresh token");
+                Optional<AccessToken> refreshedToken = checkIfAlreadyRefreshed();
                 if (refreshedToken.isEmpty()) {
                     // token still expired, refresh with lock acquired
-                    if (envVarsConfigService.isDevelopment()) {
-                        log.info("> Acquire: refresh token");
-                    }
+                    DevLogUtils.info(envVarsConfigService, log, "Token refresh in progress");
+
                     CanonicalOAuthAccessTokenResponseDto tokenResponse = exchangeRefreshTokenForAccessToken();
                     token = asAccessToken(tokenResponse);
 
@@ -485,9 +471,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     storeRefreshTokenIfRotated(tokenResponse);
 
                 } else {
-                    if (envVarsConfigService.isDevelopment()) {
-                        log.info("> Acquire: lock refreshed already");
-                    }
+                    DevLogUtils.info(envVarsConfigService, log, "Token already refreshed");
                     token = refreshedToken.get();
                 }
 
@@ -498,9 +482,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     // hold lock extra, to try to maximize the time between token refreshes
                     Uninterruptibles.sleepUninterruptibly(ALLOWANCE_FOR_EVENTUAL_CONSISTENCY);
                     lockService.release(TOKEN_REFRESH_LOCK_ID);
-                    if (envVarsConfigService.isDevelopment()) {
-                        log.info("> Acquire: free lock");
-                    }
+                    DevLogUtils.info(envVarsConfigService, log, "Released lock to refresh token");
                 }
             } else {
                 // re-try recursively, w/ linear backoff
@@ -512,9 +494,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 Uninterruptibles.sleepUninterruptibly(WAIT_AFTER_FAILED_LOCK_ATTEMPTS
                         .plusMillis(randomNumberGenerator.nextInt(250)).multipliedBy(attempt + 1));
 
-                if (envVarsConfigService.isDevelopment()) {
-                    log.info("Slept and re-trying to refresh token after lock failure " + attempt);
-                }
+                DevLogUtils.info(envVarsConfigService, log, "Failed to acquire lock to refresh token, re-trying. Attempt %d", attempt);
                 token = refreshAccessToken(attempt + 1);
             }
 
