@@ -10,6 +10,7 @@ import co.worklytics.psoxy.gateway.WritePropertyRetriesExhaustedException;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.HttpHeaders;
@@ -102,10 +103,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     @AllArgsConstructor
     @RequiredArgsConstructor
     public enum ConfigProperty implements ConfigService.ConfigProperty {
-        REFRESH_ENDPOINT(false, SupportedSource.ENV_VAR_OR_REMOTE), CLIENT_ID(false,
-                SupportedSource.ENV_VAR_OR_REMOTE), GRANT_TYPE(false,
-                        SupportedSource.ENV_VAR), ACCESS_TOKEN(true,
-                                SupportedSource.ENV_VAR_OR_REMOTE),
+        REFRESH_ENDPOINT(false, SupportedSource.ENV_VAR_OR_REMOTE),
+        CLIENT_ID(false, SupportedSource.ENV_VAR_OR_REMOTE),
+        GRANT_TYPE(false, SupportedSource.ENV_VAR),
+        ACCESS_TOKEN(true,SupportedSource.ENV_VAR_OR_REMOTE),
 
         /**
          * whether resulting `access_token` should be shared across all instances of connections to
@@ -252,12 +253,18 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             List<ConfigValueVersion> possibleTokens =
                 secretStore.getAvailableVersions(ConfigProperty.ACCESS_TOKEN, 5);
 
+            ObjectReader objectReader = objectMapper.readerFor(AccessTokenDto.class);
+            // sort by expiration date, then by version
+            // NOTE: oauth spec is for `expires_in`, which is a value in seconds ... this is parsed to Date by Google's lib
+            // so various potential issues 1) quick refreshes could result in 2 tokens with same expiration date
+            // 2) we don't know, or at least don't control, how google lib converts offset to date; nor is it clear what the right
+            // approach even its; probably relative to a Date value in the http response header ... but we can't be certain - is that
+            // when server SENT the response? began generating the response? what??
+            // so YMMV
             return possibleTokens.stream()
                 .map(value -> {
                     try {
-                        AccessTokenDto dto = objectMapper
-                            .readerFor(AccessTokenDto.class)
-                            .readValue(value.getValue());
+                        AccessTokenDto dto = objectReader.readValue(value.getValue());
                         return Pair.of(value, dto);
                     } catch (IOException e) {
                         log.log(Level.WARNING, "Failed to parse stored access token JSON", e);
@@ -265,23 +272,14 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     }
                 })
                 .filter(Objects::nonNull)
-                // sort by expiration date, then by version
-                // NOTE: oauth spec is for `expires_in`, which is a value in seconds ... this is parsed to Date by Google's lib
-                // so various potential issues 1) quick refreshes could result in 2 tokens with same expiration date
-                // 2) we don't know, or at least don't control, how google lib converts offset to date; nor is it clear what the right
-                // approach even its; probably relative to a Date value in the http response header ... but we can't be certain - is that
-                // when server SENT the response? began generating the response? what??
-                // so YMMV
-                .sorted(
-                    Comparator
-                        .comparing(
-                            (Pair<ConfigValueVersion, AccessTokenDto> p) ->
-                                Optional.ofNullable(p.getRight().getExpirationDate()).orElse(null),
-                            Comparator.nullsLast(Comparator.reverseOrder()))
-                        .thenComparing(
-                            p -> p.getLeft().getVersion(),
-                            Comparator.reverseOrder()))
-                .findFirst()
+                .min(Comparator
+                    .comparing(
+                        (Pair<ConfigValueVersion, AccessTokenDto> p) ->
+                            p.getRight().getExpirationDate(),
+                        Comparator.nullsLast(Comparator.reverseOrder()))
+                    .thenComparing(
+                        p -> p.getLeft().getVersion(),
+                        Comparator.reverseOrder()))
                 .map(Pair::getRight)
                 .map(AccessTokenDto::asAccessToken);
         } else {
@@ -431,16 +429,21 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         private Optional<AccessToken> checkIfAlreadyRefreshed() {
             AccessToken freshToken = sourceAuthStrategy.getSharedAccessTokenIfSupported()
                 .orElse(sourceAuthStrategy.getCachedToken());
-            if (freshToken != null && !sourceAuthStrategy.shouldRefresh(freshToken, clock.instant())) {
-                return Optional.of(freshToken);
+            if (sourceAuthStrategy.shouldRefresh(freshToken, clock.instant())) {
+                return Optional.empty();
+            } else {
+                return Optional.ofNullable(freshToken);
             }
-            return Optional.empty();
         }
 
         private AccessToken refreshAccessToken(int attempt) throws IOException {
             if (attempt == MAX_TOKEN_REFRESH_ATTEMPTS) {
                 throw new RuntimeException(
                         "Failed to refresh token after " + attempt + " attempts");
+            }
+            Optional<AccessToken> refreshedToken = checkIfAlreadyRefreshed();
+            if (refreshedToken.isPresent()) {
+                return refreshedToken.get();
             }
 
             CanonicalOAuthAccessTokenResponseDto tokenResponse;
@@ -454,7 +457,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             AccessToken token;
             if (acquired) {
 
-                Optional<AccessToken> refreshedToken = checkIfAlreadyRefreshed();
+                refreshedToken = checkIfAlreadyRefreshed();
                 if (refreshedToken.isEmpty()) {
                     // token still expired, refresh with lock acquired
 
