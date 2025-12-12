@@ -1,5 +1,38 @@
 package co.worklytics.psoxy.gateway.impl.oauth;
 
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ConfigService.ConfigValueVersion;
+import co.worklytics.psoxy.gateway.LockService;
+import co.worklytics.psoxy.gateway.RequiresConfiguration;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.WritePropertyRetriesExhaustedException;
+import co.worklytics.psoxy.utils.RandomNumberGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpContent;
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpResponse;
+import com.google.auth.Credentials;
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.util.concurrent.Uninterruptibles;
+import dagger.Lazy;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
@@ -14,38 +47,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpContent;
-import com.google.api.client.http.HttpHeaders;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpResponse;
-import com.google.auth.Credentials;
-import com.google.auth.oauth2.AccessToken;
-import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.util.concurrent.Uninterruptibles;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ConfigService.ConfigValueVersion;
-import co.worklytics.psoxy.gateway.LockService;
-import co.worklytics.psoxy.gateway.RequiresConfiguration;
-import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.psoxy.gateway.SourceAuthStrategy;
-import co.worklytics.psoxy.gateway.WritePropertyRetriesExhaustedException;
-import co.worklytics.psoxy.utils.RandomNumberGenerator;
-import dagger.Lazy;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 
 
 /**
@@ -58,7 +59,7 @@ import lombok.extern.java.Log;
  * <p>
  * If the source API you're connecting to offers long-lived access tokens (or does not offer refresh
  * tokens), you may opt for the access-token only strategy:
- * 
+ *
  * @see OAuthAccessTokenSourceAuthStrategy
  *
  */
@@ -248,9 +249,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     @VisibleForTesting
     Optional<AccessToken> getSharedAccessTokenIfSupported() {
         if (useSharedToken()) {
-            List<ConfigValueVersion> possibleTokens = 
+            List<ConfigValueVersion> possibleTokens =
                 secretStore.getAvailableVersions(ConfigProperty.ACCESS_TOKEN, 5);
-            
+
             return possibleTokens.stream()
                 .map(value -> {
                     try {
@@ -330,7 +331,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         /**
          * Add any headers to the request if needed, by default, does nothing
-         * 
+         *
          * @param httpHeaders the request headers to modify
          */
         default void addHeaders(HttpHeaders httpHeaders) {}
@@ -427,6 +428,12 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             if (attempt == MAX_TOKEN_REFRESH_ATTEMPTS) {
                 throw new RuntimeException(
                         "Failed to refresh token after " + attempt + " attempts");
+            }
+            // check if the access token has been refreshed already, if so, move on
+            // reload from shared
+            AccessToken freshToken = sourceAuthStrategy.getSharedAccessTokenIfSupported().orElse(sourceAuthStrategy.getCachedToken());
+            if (freshToken != null && !sourceAuthStrategy.shouldRefresh(freshToken, clock.instant())) {
+                return freshToken;
             }
 
             CanonicalOAuthAccessTokenResponseDto tokenResponse;
