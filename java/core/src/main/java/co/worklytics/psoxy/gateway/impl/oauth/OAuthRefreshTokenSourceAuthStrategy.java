@@ -423,18 +423,24 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             return refreshAccessToken(0);
         }
 
+        /**
+         * On shared-token scenarios, check if the token has been refreshed on another instance
+         * before attempting to refresh it locally.
+         * @return
+         */
+        private Optional<AccessToken> checkIfAlreadyRefreshed() {
+            AccessToken freshToken = sourceAuthStrategy.getSharedAccessTokenIfSupported()
+                .orElse(sourceAuthStrategy.getCachedToken());
+            if (freshToken != null && !sourceAuthStrategy.shouldRefresh(freshToken, clock.instant())) {
+                return Optional.of(freshToken);
+            }
+            return Optional.empty();
+        }
 
         private AccessToken refreshAccessToken(int attempt) throws IOException {
             if (attempt == MAX_TOKEN_REFRESH_ATTEMPTS) {
                 throw new RuntimeException(
                         "Failed to refresh token after " + attempt + " attempts");
-            }
-            // check if the access token has been refreshed already, if so, move on
-            // reload from shared
-            AccessToken freshToken = sourceAuthStrategy.getSharedAccessTokenIfSupported()
-                .orElse(sourceAuthStrategy.getCachedToken());
-            if (freshToken != null && !sourceAuthStrategy.shouldRefresh(freshToken, clock.instant())) {
-                return freshToken;
             }
 
             CanonicalOAuthAccessTokenResponseDto tokenResponse;
@@ -447,15 +453,24 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             AccessToken token;
             if (acquired) {
-                tokenResponse = exchangeRefreshTokenForAccessToken();
-                token = asAccessToken(tokenResponse);
 
-                if (sourceAuthStrategy.useSharedToken()) {
-                    storeSharedAccessTokenIfSupported(token);
+                Optional<AccessToken> refreshedToken = checkIfAlreadyRefreshed();
+                if (refreshedToken.isEmpty()) {
+                    // token still expired, refresh with lock acquired
+
+                    tokenResponse = exchangeRefreshTokenForAccessToken();
+                    token = asAccessToken(tokenResponse);
+
+                    if (sourceAuthStrategy.useSharedToken()) {
+                        storeSharedAccessTokenIfSupported(token);
+                    }
+                    // TODO: breaks abstraction?? whether there *is* a refresh token at all depends on
+                    // the PayloadBuilder
+                    storeRefreshTokenIfRotated(tokenResponse);
+
+                } else {
+                    token = refreshedToken.get();
                 }
-                // TODO: breaks abstraction?? whether there *is* a refresh token at all depends on
-                // the PayloadBuilder
-                storeRefreshTokenIfRotated(tokenResponse);
 
                 sourceAuthStrategy.setCachedToken(token);
 
