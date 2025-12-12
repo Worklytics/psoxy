@@ -7,6 +7,7 @@ import co.worklytics.psoxy.gateway.RequiresConfiguration;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.WritePropertyRetriesExhaustedException;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -355,6 +356,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @Inject
         ConfigService config;
         @Inject
+        EnvVarsConfigService envVarsConfigService;
+        @Inject
         SecretStore secretStore;
         @Inject
         OAuthRefreshTokenSourceAuthStrategy sourceAuthStrategy;
@@ -418,6 +421,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          */
         @Override
         public synchronized AccessToken refreshAccessToken() throws IOException {
+            if (envVarsConfigService.isDevelopment() && sourceAuthStrategy.getCachedToken() != null) {
+                log.info("About to refresh, expires: " + sourceAuthStrategy.getCachedToken().getExpirationTime());
+            }
             return refreshAccessToken(0);
         }
 
@@ -432,6 +438,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             if (sourceAuthStrategy.shouldRefresh(freshToken, clock.instant())) {
                 return Optional.empty();
             } else {
+                if (envVarsConfigService.isDevelopment() && freshToken != null) {
+                    log.info("Token already refreshed " + freshToken.getExpirationTime() + " on another instance");
+                }
                 return Optional.ofNullable(freshToken);
             }
         }
@@ -443,6 +452,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             }
             Optional<AccessToken> refreshedToken = checkIfAlreadyRefreshed();
             if (refreshedToken.isPresent()) {
+                if (envVarsConfigService.isDevelopment()) {
+                    log.info("Token already refreshed on another instance; using new value");
+                }
                 return refreshedToken.get();
             }
 
@@ -456,11 +468,15 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             AccessToken token;
             if (acquired) {
-
+                if (envVarsConfigService.isDevelopment()) {
+                    log.info("Acquired lock to refresh token");
+                }
                 refreshedToken = checkIfAlreadyRefreshed();
                 if (refreshedToken.isEmpty()) {
                     // token still expired, refresh with lock acquired
-
+                    if (envVarsConfigService.isDevelopment()) {
+                        log.info("> Acquire: refresh token");
+                    }
                     tokenResponse = exchangeRefreshTokenForAccessToken();
                     token = asAccessToken(tokenResponse);
 
@@ -472,6 +488,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     storeRefreshTokenIfRotated(tokenResponse);
 
                 } else {
+                    if (envVarsConfigService.isDevelopment()) {
+                        log.info("> Acquire: lock refreshed already");
+                    }
                     token = refreshedToken.get();
                 }
 
@@ -482,6 +501,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     // hold lock extra, to try to maximize the time between token refreshes
                     Uninterruptibles.sleepUninterruptibly(ALLOWANCE_FOR_EVENTUAL_CONSISTENCY);
                     lockService.release(TOKEN_REFRESH_LOCK_ID);
+                    if (envVarsConfigService.isDevelopment()) {
+                        log.info("> Acquire: free lock");
+                    }
                 }
             } else {
                 // re-try recursively, w/ linear backoff
@@ -493,6 +515,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 Uninterruptibles.sleepUninterruptibly(WAIT_AFTER_FAILED_LOCK_ATTEMPTS
                         .plusMillis(randomNumberGenerator.nextInt(250)).multipliedBy(attempt + 1));
 
+                if (envVarsConfigService.isDevelopment()) {
+                    log.info("Slept and re-trying to refresh token after lock failure " + attempt);
+                }
                 token = refreshAccessToken(attempt + 1);
             }
 
