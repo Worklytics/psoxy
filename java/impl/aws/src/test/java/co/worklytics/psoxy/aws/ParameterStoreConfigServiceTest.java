@@ -70,6 +70,8 @@ class ParameterStoreConfigServiceTest {
         parameterStoreConfigService.client = client;
         parameterStoreConfigService.clock = Clock.systemUTC();
         parameterStoreConfigService.randomNumberGenerator = new RandomNumberGeneratorImpl();
+        parameterStoreConfigService.envVarsConfig = mock(EnvVarsConfigService.class);
+        when(parameterStoreConfigService.envVarsConfig.isDevelopment()).thenReturn(false);
 
         when(parameterStoreConfigService.lockParameterValue()).thenReturn("locked_123");
 
@@ -105,6 +107,8 @@ class ParameterStoreConfigServiceTest {
 
         //setup test
         parameterStoreConfigService.client = client;
+        parameterStoreConfigService.envVarsConfig = mock(EnvVarsConfigService.class);
+        when(parameterStoreConfigService.envVarsConfig.isDevelopment()).thenReturn(false);
         parameterStoreConfigService.clock = Clock.systemUTC();
         parameterStoreConfigService.randomNumberGenerator = new RandomNumberGeneratorImpl();
 
