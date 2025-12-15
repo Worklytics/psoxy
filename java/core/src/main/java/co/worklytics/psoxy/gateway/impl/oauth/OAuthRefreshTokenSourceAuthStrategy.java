@@ -1,5 +1,42 @@
 package co.worklytics.psoxy.gateway.impl.oauth;
 
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ConfigService.ConfigValueVersion;
+import co.worklytics.psoxy.gateway.LockService;
+import co.worklytics.psoxy.gateway.RequiresConfiguration;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.WritePropertyRetriesExhaustedException;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.utils.DevLogUtils;
+import co.worklytics.psoxy.utils.RandomNumberGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpContent;
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpResponse;
+import com.google.auth.Credentials;
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.util.concurrent.Uninterruptibles;
+import dagger.Lazy;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
@@ -14,38 +51,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpContent;
-import com.google.api.client.http.HttpHeaders;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpResponse;
-import com.google.auth.Credentials;
-import com.google.auth.oauth2.AccessToken;
-import com.google.auth.oauth2.OAuth2CredentialsWithRefresh;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.util.concurrent.Uninterruptibles;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ConfigService.ConfigValueVersion;
-import co.worklytics.psoxy.gateway.LockService;
-import co.worklytics.psoxy.gateway.RequiresConfiguration;
-import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.psoxy.gateway.SourceAuthStrategy;
-import co.worklytics.psoxy.gateway.WritePropertyRetriesExhaustedException;
-import co.worklytics.psoxy.utils.RandomNumberGenerator;
-import dagger.Lazy;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 
 
 /**
@@ -58,7 +63,7 @@ import lombok.extern.java.Log;
  * <p>
  * If the source API you're connecting to offers long-lived access tokens (or does not offer refresh
  * tokens), you may opt for the access-token only strategy:
- * 
+ *
  * @see OAuthAccessTokenSourceAuthStrategy
  *
  */
@@ -101,10 +106,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     @AllArgsConstructor
     @RequiredArgsConstructor
     public enum ConfigProperty implements ConfigService.ConfigProperty {
-        REFRESH_ENDPOINT(false, SupportedSource.ENV_VAR_OR_REMOTE), CLIENT_ID(false,
-                SupportedSource.ENV_VAR_OR_REMOTE), GRANT_TYPE(false,
-                        SupportedSource.ENV_VAR), ACCESS_TOKEN(true,
-                                SupportedSource.ENV_VAR_OR_REMOTE),
+        REFRESH_ENDPOINT(false, SupportedSource.ENV_VAR_OR_REMOTE),
+        CLIENT_ID(false, SupportedSource.ENV_VAR_OR_REMOTE),
+        GRANT_TYPE(false, SupportedSource.ENV_VAR),
+        ACCESS_TOKEN(true, SupportedSource.ENV_VAR_OR_REMOTE),
 
         /**
          * whether resulting `access_token` should be shared across all instances of connections to
@@ -154,6 +159,13 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     @Inject // injected, so can be mocked for tests
     RandomNumberGenerator randomNumberGenerator;
 
+    /**
+     * -- SETTER --
+     *  Sets the local copy of the token, assumes valid until expiration.
+     *
+     * @param token
+     */
+    @Setter
     @Getter
     private AccessToken cachedToken = null;
 
@@ -232,31 +244,24 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         return useSharedTokenConfig.map(Boolean::parseBoolean).orElse(isClientCredentialsGrantType);
     }
 
-    public void setCachedToken(AccessToken token) {
-        if (isAccessTokenCacheable()) {
-            this.cachedToken = token;
-        }
-    }
-
-    private boolean isAccessTokenCacheable() {
-        return config.getConfigPropertyAsOptional(ConfigProperty.ACCESS_TOKEN_CACHEABLE)
-                .map(Boolean::parseBoolean).orElse(!useSharedToken()); // by default, tokens
-                                                                       // cacheable unless shared
-    }
-
-
     @VisibleForTesting
     Optional<AccessToken> getSharedAccessTokenIfSupported() {
         if (useSharedToken()) {
-            List<ConfigValueVersion> possibleTokens = 
+            List<ConfigValueVersion> possibleTokens =
                 secretStore.getAvailableVersions(ConfigProperty.ACCESS_TOKEN, 5);
-            
+
+            ObjectReader objectReader = objectMapper.readerFor(AccessTokenDto.class);
+            // sort by expiration date, then by version
+            // NOTE: oauth spec is for `expires_in`, which is a value in seconds ... this is parsed to Date by Google's lib
+            // so various potential issues 1) quick refreshes could result in 2 tokens with same expiration date
+            // 2) we don't know, or at least don't control, how google lib converts offset to date; nor is it clear what the right
+            // approach even its; probably relative to a Date value in the http response header ... but we can't be certain - is that
+            // when server SENT the response? began generating the response? what??
+            // so YMMV
             return possibleTokens.stream()
                 .map(value -> {
                     try {
-                        AccessTokenDto dto = objectMapper
-                            .readerFor(AccessTokenDto.class)
-                            .readValue(value.getValue());
+                        AccessTokenDto dto = objectReader.readValue(value.getValue());
                         return Pair.of(value, dto);
                     } catch (IOException e) {
                         log.log(Level.WARNING, "Failed to parse stored access token JSON", e);
@@ -264,23 +269,14 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     }
                 })
                 .filter(Objects::nonNull)
-                // sort by expiration date, then by version
-                // NOTE: oauth spec is for `expires_in`, which is a value in seconds ... this is parsed to Date by Google's lib
-                // so various potential issues 1) quick refreshes could result in 2 tokens with same expiration date
-                // 2) we don't know, or at least don't control, how google lib converts offset to date; nor is it clear what the right
-                // approach even its; probably relative to a Date value in the http response header ... but we can't be certain - is that
-                // when server SENT the response? began generating the response? what??
-                // so YMMV
-                .sorted(
-                    Comparator
-                        .comparing(
-                            (Pair<ConfigValueVersion, AccessTokenDto> p) ->
-                                Optional.ofNullable(p.getRight().getExpirationDate()).orElse(null),
-                            Comparator.nullsLast(Comparator.reverseOrder()))
-                        .thenComparing(
-                            p -> p.getLeft().getVersion(),
-                            Comparator.reverseOrder()))
-                .findFirst()
+                .min(Comparator
+                    .comparing(
+                        (Pair<ConfigValueVersion, AccessTokenDto> p) ->
+                            p.getRight().getExpirationDate(),
+                        Comparator.nullsLast(Comparator.reverseOrder()))
+                    .thenComparing(
+                        p -> p.getLeft().getVersion(),
+                        Comparator.reverseOrder()))
                 .map(Pair::getRight)
                 .map(AccessTokenDto::asAccessToken);
         } else {
@@ -330,7 +326,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         /**
          * Add any headers to the request if needed, by default, does nothing
-         * 
+         *
          * @param httpHeaders the request headers to modify
          */
         default void addHeaders(HttpHeaders httpHeaders) {}
@@ -355,6 +351,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         @Inject
         ConfigService config;
+        @Inject
+        EnvVarsConfigService envVarsConfigService;
         @Inject
         SecretStore secretStore;
         @Inject
@@ -419,17 +417,34 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          */
         @Override
         public synchronized AccessToken refreshAccessToken() throws IOException {
+            if (sourceAuthStrategy.getCachedToken() != null) {
+                DevLogUtils.info(envVarsConfigService, log, "Refreshing token, expires: " + sourceAuthStrategy.getCachedToken().getExpirationTime());
+            } else {
+                DevLogUtils.info(envVarsConfigService, log, "Refreshing token, no cached value yet");
+            }
             return refreshAccessToken(0);
         }
 
+        /**
+         * On shared-token scenarios, check if the token has been refreshed on another instance
+         * before attempting to refresh it locally.
+         * @return
+         */
+        private Optional<AccessToken> checkIfAlreadyRefreshed() {
+            AccessToken freshToken = sourceAuthStrategy.getSharedAccessTokenIfSupported().orElse(null);
+            if (sourceAuthStrategy.shouldRefresh(freshToken, clock.instant())) {
+                return Optional.empty();
+            } else if (freshToken != null) {
+                DevLogUtils.info(envVarsConfigService, log, "Token already refreshed " + freshToken.getExpirationTime());
+                return Optional.of(freshToken);
+            }
+            return Optional.empty();
+        }
 
         private AccessToken refreshAccessToken(int attempt) throws IOException {
             if (attempt == MAX_TOKEN_REFRESH_ATTEMPTS) {
-                throw new RuntimeException(
-                        "Failed to refresh token after " + attempt + " attempts");
+                throw new RuntimeException("Failed to refresh token after " + attempt + " attempts");
             }
-
-            CanonicalOAuthAccessTokenResponseDto tokenResponse;
 
             // only lock if we're using a shared token across processes
             boolean lockNeeded = sourceAuthStrategy.useSharedToken();
@@ -439,15 +454,26 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
             AccessToken token;
             if (acquired) {
-                tokenResponse = exchangeRefreshTokenForAccessToken();
-                token = asAccessToken(tokenResponse);
+                DevLogUtils.info(envVarsConfigService, log, "Acquired lock to refresh token");
+                Optional<AccessToken> refreshedToken = checkIfAlreadyRefreshed();
+                if (refreshedToken.isEmpty()) {
+                    // token still expired, refresh with lock acquired
+                    DevLogUtils.info(envVarsConfigService, log, "Token refresh in progress");
 
-                if (sourceAuthStrategy.useSharedToken()) {
-                    storeSharedAccessTokenIfSupported(token);
+                    CanonicalOAuthAccessTokenResponseDto tokenResponse = exchangeRefreshTokenForAccessToken();
+                    token = asAccessToken(tokenResponse);
+
+                    if (sourceAuthStrategy.useSharedToken()) {
+                        storeSharedAccessTokenIfSupported(token);
+                    }
+                    // TODO: breaks abstraction?? whether there *is* a refresh token at all depends on
+                    // the PayloadBuilder
+                    storeRefreshTokenIfRotated(tokenResponse);
+
+                } else {
+                    DevLogUtils.info(envVarsConfigService, log, "Token already refreshed");
+                    token = refreshedToken.get();
                 }
-                // TODO: breaks abstraction?? whether there *is* a refresh token at all depends on
-                // the PayloadBuilder
-                storeRefreshTokenIfRotated(tokenResponse);
 
                 sourceAuthStrategy.setCachedToken(token);
 
@@ -456,12 +482,19 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     // hold lock extra, to try to maximize the time between token refreshes
                     Uninterruptibles.sleepUninterruptibly(ALLOWANCE_FOR_EVENTUAL_CONSISTENCY);
                     lockService.release(TOKEN_REFRESH_LOCK_ID);
+                    DevLogUtils.info(envVarsConfigService, log, "Released lock to refresh token");
                 }
             } else {
                 // re-try recursively, w/ linear backoff
+                // this exec path should only happen when different instances (VMs) are attempting
+                // to refresh. 2+ threads of same VM can never hit this as the whole recursive call
+                // is synchronized (see #refreshAccessToken). So on same VM, this will block until
+                // A) acquires lock and refreshes
+                // B) checks already refreshed token and exits
                 Uninterruptibles.sleepUninterruptibly(WAIT_AFTER_FAILED_LOCK_ATTEMPTS
                         .plusMillis(randomNumberGenerator.nextInt(250)).multipliedBy(attempt + 1));
 
+                DevLogUtils.info(envVarsConfigService, log, "Failed to acquire lock to refresh token, re-trying. Attempt %d", attempt);
                 token = refreshAccessToken(attempt + 1);
             }
 
