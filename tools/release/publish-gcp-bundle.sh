@@ -55,11 +55,6 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Debug output
-if [ "${DEBUG:-}" = "true" ]; then
-    echo -e "${BLUE}Debug: IS_RC_BUILD=${IS_RC_BUILD}${NC}"
-    echo -e "${BLUE}Debug: VERSION=${VERSION}${NC}"
-fi
 
 # ensure current directory is the project root
 if [ ! -f "java/pom.xml" ]; then
@@ -197,21 +192,13 @@ fi
 
 # Create ZIP filename for GCP Cloud Functions
 # RC builds should have artifact name like: psoxy-gcp-0.5.15-rc.zip
-echo -e "${BLUE}Determining artifact name...${NC}"
-echo -e "${BLUE}  IS_RC_BUILD='${IS_RC_BUILD}'${NC}"
-echo -e "${BLUE}  VERSION='${VERSION}'${NC}"
-echo -e "${BLUE}  JAR_NAME='${JAR_NAME}'${NC}"
-
 # Use explicit boolean check
 if [ "$IS_RC_BUILD" = "true" ] || [ "$IS_RC_BUILD" = "1" ]; then
     ZIP_FILENAME="${JAR_NAME}-${VERSION}-rc.zip"
-    echo -e "${GREEN}✓ RC build detected - artifact name: ${ZIP_FILENAME}${NC}"
 else
     ZIP_FILENAME="${JAR_NAME}-${VERSION}.zip"
-    echo -e "${GREEN}✓ Regular build - artifact name: ${ZIP_FILENAME}${NC}"
 fi
 ZIP_PATH="/tmp/${ZIP_FILENAME}"
-echo -e "${BLUE}Final ZIP filename that will be uploaded: ${GREEN}${ZIP_FILENAME}${NC}"
 
 # Create ZIP file containing the JAR (GCP Cloud Functions require ZIP, not JAR)
 echo -e "${BLUE}Creating ZIP file for GCP Cloud Functions...${NC}"
@@ -328,13 +315,6 @@ main() {
     # In CI (GitHub Actions), OIDC authentication sets GOOGLE_APPLICATION_CREDENTIALS
     # Detect CI environment - check multiple ways
     IS_CI=false
-    
-    # Debug: show environment (helpful for troubleshooting)
-    if [ "${DEBUG:-}" = "true" ]; then
-        echo -e "${BLUE}Debug: GITHUB_ACTIONS=${GITHUB_ACTIONS:-not set}${NC}"
-        echo -e "${BLUE}Debug: CI=${CI:-not set}${NC}"
-        echo -e "${BLUE}Debug: GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS:-not set}${NC}"
-    fi
     
     # Check for CI indicators (use parameter expansion to handle empty/unset)
     if [ "${GITHUB_ACTIONS:-}" = "true" ] || \
