@@ -13,20 +13,27 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Configuration
-IMPLEMENTATION="aws"
-JAVA_SOURCE_ROOT="java/"
-ROLE_ARN="arn:aws:iam::908404960471:role/InfraAdmin"
-ROLE_SESSION_NAME="psoxy-artifact-publish-$(date +%s)"
-BUCKET_PREFIX="psoxy-public-artifacts"
+# Configuration (use env vars if set, otherwise defaults for local use)
+IMPLEMENTATION="${IMPLEMENTATION:-aws}"
+JAVA_SOURCE_ROOT="${JAVA_SOURCE_ROOT:-java/}"
+ROLE_ARN="${ROLE_ARN:-arn:aws:iam::908404960471:role/InfraAdmin}"
+ROLE_SESSION_NAME="${ROLE_SESSION_NAME:-psoxy-artifact-publish-$(date +%s)}"
+BUCKET_PREFIX="${BUCKET_PREFIX:-psoxy-public-artifacts}"
 
-# AWS regions to publish to
-REGIONS=(
-    "us-east-1"
-    "us-east-2"
-    "us-west-1"
-    "us-west-2"
-)
+# AWS regions to publish to (comma-separated string from env, or default array)
+if [ -n "$AWS_REGIONS" ]; then
+    # Convert comma-separated string to array
+    IFS=',' read -ra REGIONS_ARRAY <<< "$AWS_REGIONS"
+    REGIONS=("${REGIONS_ARRAY[@]}")
+else
+    # Default regions
+    REGIONS=(
+        "us-east-1"
+        "us-east-2"
+        "us-west-1"
+        "us-west-2"
+    )
+fi
 
 # ensure current directory is the project root
 if [ ! -f "java/pom.xml" ]; then

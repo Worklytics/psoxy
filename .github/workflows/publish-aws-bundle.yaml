@@ -1,10 +1,9 @@
-name: Publish GCP Bundle
+name: Publish AWS Bundle
 
-# This workflow publishes GCP bundles to GCS using OIDC authentication.
+# This workflow publishes AWS bundles to S3 using OIDC authentication.
 #
 # Required GitHub Secrets:
-#   - GCP_SERVICE_ACCOUNT: Service account email (e.g., gh-actions@example-project.iam.gserviceaccount.com)
-#   - GCP_WORKLOAD_IDENTITY_PROVIDER: Full provider path (e.g., projects/123456789/locations/global/workloadIdentityPools/github-actions/providers/github)
+#   - AWS_ROLE_ARN: IAM role ARN to assume (e.g., arn:aws:iam::123456789012:role/GithubActionPublishAgent)
 #
 # Security:
 #   - Uses OIDC authentication (no long-lived credentials)
@@ -28,14 +27,14 @@ on:
       - 'rc-*'
 
 env:
-  IMPLEMENTATION: gcp
+  IMPLEMENTATION: aws
   JAVA_SOURCE_ROOT: java/
-  BUCKET_NAME: psoxy-public-artifacts
-  JAR_NAME: psoxy-gcp
+  BUCKET_PREFIX: psoxy-public-artifacts
+  AWS_REGIONS: us-east-1,us-east-2,us-west-1,us-west-2
 
 jobs:
   publish:
-    name: Build and Publish GCP Bundle
+    name: Build and Publish AWS Bundle
     runs-on: ubuntu-latest
     # Security: Only run on authorized triggers
     # - Tags (v*): Regular releases, anyone with push access can create tags
@@ -78,21 +77,18 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-west-2
 
       - name: Install dependencies
         run: |
           # Install jq if not already available
           sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Publish GCP Bundle
+      - name: Publish AWS Bundle
         env:
           VERSION: ${{ github.event.inputs.version }}
         run: |
@@ -110,18 +106,19 @@ jobs:
           # Call the publish script
           # Note: Pipe "yes" to handle interactive prompts in CI
           if [ -n "$VERSION" ]; then
-            yes | ./tools/release/publish-gcp-bundle.sh "$VERSION"
+            yes | ./tools/release/publish-aws-bundle.sh "$VERSION"
           else
-            yes | ./tools/release/publish-gcp-bundle.sh
+            yes | ./tools/release/publish-aws-bundle.sh
           fi
 
       - name: Summary
         if: success()
         run: |
-          echo "## ✅ Successfully published GCP bundle" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Successfully published AWS bundle" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** $(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' java/pom.xml)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Bucket:** psoxy-public-artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "**Regions:** us-east-1, us-east-2, us-west-1, us-west-2" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Artifact has been published to GCS." >> $GITHUB_STEP_SUMMARY
+          echo "Artifacts have been published to S3 buckets in all configured regions." >> $GITHUB_STEP_SUMMARY
+

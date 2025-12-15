@@ -13,11 +13,11 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Configuration
-IMPLEMENTATION="gcp"
-JAVA_SOURCE_ROOT="java/"
-BUCKET_NAME="psoxy-public-artifacts"
-JAR_NAME="psoxy-$IMPLEMENTATION"
+# Configuration (use env vars if set, otherwise defaults for local use)
+IMPLEMENTATION="${IMPLEMENTATION:-gcp}"
+JAVA_SOURCE_ROOT="${JAVA_SOURCE_ROOT:-java/}"
+BUCKET_NAME="${BUCKET_NAME:-psoxy-public-artifacts}"
+JAR_NAME="${JAR_NAME:-psoxy-$IMPLEMENTATION}"
 
 # ensure current directory is the project root
 if [ ! -f "java/pom.xml" ]; then
