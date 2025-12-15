@@ -125,63 +125,6 @@ case "$REPLY" in
 esac
 
 
-# aws bundle, as above
-printf "Publish AWS bundle to S3 bucket?\n"
-read -p "(Y/n) " -n 1 -r
-REPLY=${REPLY:-Y}
-echo    # Move to a new line
-case "$REPLY" in
-  [yY][eE][sS]|[yY])
-    LOG_FILE="/tmp/release_${RELEASE}_aws-bundle.log"
-    set +e  # Temporarily disable exit on error to check exit code
-    ./tools/release/publish-aws-bundle.sh ${PATH_TO_REPO} &> "${LOG_FILE}"
-    EXIT_CODE=$?
-    set -e  # Re-enable exit on error
-    if [ $EXIT_CODE -ne 0 ]; then
-      printf "${RED}Failed to publish AWS bundle to S3 bucket.${NC}\n"
-      printf "Please review the error logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
-      exit $EXIT_CODE
-    else
-      printf "${GREEN}✓${NC} AWS bundle published to S3 bucket\n"
-      printf "See logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
-    fi
-  ;;
-  *)
-    printf "Skipped publishing AWS bundle to S3 bucket\n"
-    printf "To do so manually, run:\n"
-    printf "    ${BLUE}./tools/release/publish-aws-bundle.sh ${PATH_TO_REPO}${NC}\n"
-    ;;
-esac
-
-
-# gcp bundle, as above
-printf "Publish GCP bundle to GCS bucket?\n"
-read -p "(Y/n) " -n 1 -r
-REPLY=${REPLY:-Y}
-echo    # Move to a new line
-case "$REPLY" in
-  [yY][eE][sS]|[yY])
-    LOG_FILE="/tmp/release_${RELEASE}_gcp-bundle.log"
-    set +e  # Temporarily disable exit on error to check exit code
-    ./tools/release/publish-gcp-bundle.sh ${PATH_TO_REPO} &> "${LOG_FILE}"
-    EXIT_CODE=$?
-    set -e  # Re-enable exit on error
-    if [ $EXIT_CODE -ne 0 ]; then
-      printf "${RED}Failed to publish GCP bundle to GCS bucket.${NC}\n"
-      printf "Please review the error logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
-      exit $EXIT_CODE
-    else
-      printf "${GREEN}✓${NC} GCP bundle published to GCS bucket\n"
-      printf "See logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
-    fi
-  ;;
-  *)
-    printf "Skipped publishing GCP bundle to GCS bucket\n"
-    printf "To do so manually, run:\n"
-    printf "    ${BLUE}./tools/release/publish-gcp-bundle.sh ${PATH_TO_REPO}${NC}\n"
-    ;;
-esac
-
 # publish docs
 printf "Publish docs?\n"
 read -p "(Y/n) " -n 1 -r

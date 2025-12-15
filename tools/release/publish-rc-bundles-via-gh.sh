@@ -116,7 +116,7 @@ get_workflow_status() {
     local workflow_name="$1"
     local run_id="$2"
     
-    local status=$(gh run view "$run_id" --json conclusion --jq -r '.conclusion // "unknown"')
+    local status=$(gh run view "$run_id" --json conclusion --jq '.conclusion // "unknown"')
     echo "$status"
 }
 
