@@ -256,11 +256,35 @@ main() {
     fi
     echo -e "${BLUE}gsutil version: ${GREEN}${GSUTIL_VERSION}${NC}"
 
-    # Check if gsutil is authenticated
-    if ! gsutil ls >/dev/null 2>&1; then
-        echo -e "${RED}Error: gsutil is not authenticated${NC}"
-        echo -e "${YELLOW}Run 'gcloud auth login' to authenticate${NC}"
-        exit 1
+    # Check if authenticated
+    # In CI (GitHub Actions), OIDC authentication sets GOOGLE_APPLICATION_CREDENTIALS
+    # In that case, verify the credentials file exists and is readable
+    if [ -n "$GOOGLE_APPLICATION_CREDENTIALS" ] || [ -n "$CI" ] || [ -n "$GITHUB_ACTIONS" ]; then
+        echo -e "${GREEN}✓ Using Application Default Credentials (OIDC/CI)${NC}"
+        if [ -n "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+            if [ ! -f "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+                echo -e "${RED}Error: Credentials file not found: $GOOGLE_APPLICATION_CREDENTIALS${NC}"
+                exit 1
+            fi
+            if [ ! -r "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+                echo -e "${RED}Error: Credentials file is not readable: $GOOGLE_APPLICATION_CREDENTIALS${NC}"
+                exit 1
+            fi
+            echo -e "${BLUE}Credentials file: ${GREEN}$GOOGLE_APPLICATION_CREDENTIALS${NC}"
+        fi
+        # Verify we can get an access token (this validates the credentials work)
+        if command -v gcloud &> /dev/null; then
+            if ! gcloud auth application-default print-access-token >/dev/null 2>&1; then
+                echo -e "${YELLOW}Warning: Could not verify access token, but continuing...${NC}"
+            fi
+        fi
+    else
+        # Local execution: check traditional authentication
+        if ! gsutil ls >/dev/null 2>&1; then
+            echo -e "${RED}Error: gsutil is not authenticated${NC}"
+            echo -e "${YELLOW}Run 'gcloud auth login' to authenticate${NC}"
+            exit 1
+        fi
     fi
 
     # Show current GCP project
