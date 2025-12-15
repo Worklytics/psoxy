@@ -92,9 +92,21 @@ jobs:
           # Install jq if not already available
           sudo apt-get update && sudo apt-get install -y jq
 
+      - name: Verify authentication
+        run: |
+          # Verify Application Default Credentials are set up
+          if [ -n "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+            echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS"
+            echo "Credentials file exists: $([ -f "$GOOGLE_APPLICATION_CREDENTIALS" ] && echo 'yes' || echo 'no')"
+          fi
+          # Test that we can get an access token
+          gcloud auth application-default print-access-token >/dev/null 2>&1 && echo "✓ Authentication verified" || echo "⚠ Could not verify access token"
+
       - name: Publish GCP Bundle
         env:
           VERSION: ${{ github.event.inputs.version }}
+          GITHUB_ACTIONS: true
+          CI: true
         run: |
           # Determine version from tag, input, or pom.xml
           if [[ "${{ github.ref_name }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
