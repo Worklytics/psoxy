@@ -2,12 +2,12 @@ package co.worklytics.psoxy.rules.google;
 
 import co.worklytics.psoxy.ConfigRulesModule;
 import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.rules.generics.Calendar;
-import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.Rules2;
-import com.avaulta.gateway.rules.transforms.Transform;
+import co.worklytics.psoxy.rules.generics.Calendar;
 import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -321,7 +321,7 @@ public class PrebuiltSanitizerRules {
             .add("location_country", "location_region", "ip_address") //collaboration across offices / geographies / time zones
             .add("is_external") // internal v external collaboration
             .add("product_type", "device_type") // tool classification
-            .add("video_send_seconds", "video_recv_seconds", "screencast_send_seconds", "screencast_recv_seconds", "audio_send_seconds", "audio_recv_seconds") //actual duration inference
+            .add("duration_seconds","video_send_seconds", "video_recv_seconds", "screencast_send_seconds", "screencast_recv_seconds", "audio_send_seconds", "audio_recv_seconds") //actual duration inference
             .add("calendar_event_id", "endpoint_id", "meeting_code", "conference_id") //matching to calendar events
             .build();
 

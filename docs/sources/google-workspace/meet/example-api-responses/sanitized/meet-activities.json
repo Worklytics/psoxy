@@ -55,6 +55,10 @@
               "intValue":"952"
             },
             {
+              "name":"duration_seconds",
+              "intValue":"952"
+            },
+            {
               "name":"identifier",
               "value":"t~N7KL1RlAGqPFhFxRWCW0yVybYxaeFleLKSfzsA7iTqg@worklytics.co"
             },
@@ -154,6 +158,10 @@
               "intValue":"937"
             },
             {
+              "name":"duration_seconds",
+              "intValue":"930"
+            },
+            {
               "name":"identifier",
               "value":"t~p4EqhPet-p2vhJbMJD5jrbrlJtF21L0TOl8bBtjrNpk@worklytics.co"
             },
@@ -251,6 +259,10 @@
             {
               "name":"audio_recv_seconds",
               "intValue":"959"
+            },
+            {
+              "name":"duration_seconds",
+              "intValue":"1024"
             },
             {
               "name":"identifier",
