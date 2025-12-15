@@ -275,9 +275,10 @@ publish_to_gcs() {
 
     # Upload with metadata
     # Add gh_ref metadata if available (from GitHub Actions)
+    # Note: -h flag must come BEFORE cp command
     if [ -n "${GH_REF:-}" ]; then
         echo -e "${BLUE}Adding metadata: gh_ref=${GH_REF}${NC}"
-        gsutil cp -h "x-goog-meta-gh_ref:${GH_REF}" "$ZIP_PATH" "$gcs_path"
+        gsutil -h "x-goog-meta-gh_ref:${GH_REF}" cp "$ZIP_PATH" "$gcs_path"
     else
         gsutil cp "$ZIP_PATH" "$gcs_path"
     fi
