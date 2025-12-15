@@ -100,8 +100,12 @@ jobs:
             echo "Credentials file exists: $([ -f "$GOOGLE_APPLICATION_CREDENTIALS" ] && echo 'yes' || echo 'no')"
           fi
           # Test that we can get an access token
-          gcloud auth application-default print-access-token >/dev/null 2>&1 && echo "✓ Authentication verified" || echo "⚠ Could not verify access token"
-
+          if gcloud auth application-default print-access-token >/dev/null 2>&1; then
+            echo "✓ Authentication verified"
+          else
+            echo "❌ Could not verify access token"
+            exit 1
+          fi
       - name: Publish GCP Bundle
         env:
           VERSION: ${{ github.event.inputs.version }}
