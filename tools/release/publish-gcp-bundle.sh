@@ -1,8 +1,15 @@
 #!/bin/bash
 
 # Publish Psoxy GCP JAR to GCS bucket, zipped so can be used as a Cloud Function deployment bundle
-# Usage: ./publish-gcp-bundle.sh [version]
-# If version not provided, reads from java/pom.xml
+# Usage: ./publish-gcp-bundle.sh [--rc] [version]
+#   --rc:    Mark this as a release candidate build (adds -rc suffix to artifact name)
+#   version: Version to publish (optional, will read from pom.xml if not provided)
+#
+# Examples:
+#   ./publish-gcp-bundle.sh                    # Read version from pom.xml
+#   ./publish-gcp-bundle.sh 0.5.15            # Use specified version
+#   ./publish-gcp-bundle.sh --rc 0.5.15        # RC build with specified version
+#   ./publish-gcp-bundle.sh --rc               # RC build, read version from pom.xml
 
 set -e
 
@@ -19,6 +26,34 @@ JAVA_SOURCE_ROOT="${JAVA_SOURCE_ROOT:-java/}"
 BUCKET_NAME="${BUCKET_NAME:-psoxy-public-artifacts}"
 JAR_NAME="${JAR_NAME:-psoxy-$IMPLEMENTATION}"
 
+# Parse command-line arguments
+IS_RC_BUILD=false
+VERSION=""
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --rc)
+            IS_RC_BUILD=true
+            shift
+            ;;
+        -*)
+            echo -e "${RED}Error: Unknown option: $1${NC}"
+            echo "Usage: $0 [--rc] [version]"
+            exit 1
+            ;;
+        *)
+            if [ -z "$VERSION" ]; then
+                VERSION="$1"
+            else
+                echo -e "${RED}Error: Multiple version arguments provided${NC}"
+                echo "Usage: $0 [--rc] [version]"
+                exit 1
+            fi
+            shift
+            ;;
+    esac
+done
+
 # ensure current directory is the project root
 if [ ! -f "java/pom.xml" ]; then
     echo -e "${RED}Error: java/pom.xml not found. Run this script from the psoxy root directory.${NC}"
@@ -26,9 +61,7 @@ if [ ! -f "java/pom.xml" ]; then
 fi
 
 # Get version from argument or pom.xml
-if [ -n "$1" ]; then
-    VERSION="$1"
-else
+if [ -z "$VERSION" ]; then
     VERSION=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' "java/pom.xml")
     if [ -z "$VERSION" ]; then
         echo -e "${RED}Error: Could not extract version from java/pom.xml${NC}"
@@ -156,7 +189,12 @@ if [ ! -f "$JAR_PATH" ]; then
 fi
 
 # Create ZIP filename for GCP Cloud Functions
-ZIP_FILENAME="${JAR_NAME}-${VERSION}.zip"
+# RC builds should have artifact name like: psoxy-gcp-0.5.15-rc.zip
+if [ "$IS_RC_BUILD" = true ]; then
+    ZIP_FILENAME="${JAR_NAME}-${VERSION}-rc.zip"
+else
+    ZIP_FILENAME="${JAR_NAME}-${VERSION}.zip"
+fi
 ZIP_PATH="/tmp/${ZIP_FILENAME}"
 
 # Create ZIP file containing the JAR (GCP Cloud Functions require ZIP, not JAR)
