@@ -258,15 +258,27 @@ main() {
 
     # Check if authenticated
     # In CI (GitHub Actions), OIDC authentication sets GOOGLE_APPLICATION_CREDENTIALS
-    # Detect CI environment - GITHUB_ACTIONS is always set in GitHub Actions
+    # Detect CI environment - check multiple ways
     IS_CI=false
-    if [ -n "$GITHUB_ACTIONS" ] || [ -n "$CI" ] || [ -n "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+    
+    # Debug: show environment (helpful for troubleshooting)
+    if [ "${DEBUG:-}" = "true" ]; then
+        echo -e "${BLUE}Debug: GITHUB_ACTIONS=${GITHUB_ACTIONS:-not set}${NC}"
+        echo -e "${BLUE}Debug: CI=${CI:-not set}${NC}"
+        echo -e "${BLUE}Debug: GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS:-not set}${NC}"
+    fi
+    
+    # Check for CI indicators (use parameter expansion to handle empty/unset)
+    if [ "${GITHUB_ACTIONS:-}" = "true" ] || \
+       [ "${GITHUB_ACTIONS:-}" = "1" ] || \
+       [ -n "${CI:-}" ] || \
+       [ -n "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]; then
         IS_CI=true
     fi
 
     if [ "$IS_CI" = true ]; then
         echo -e "${GREEN}✓ Running in CI environment${NC}"
-        if [ -n "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+        if [ -n "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]; then
             if [ ! -f "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
                 echo -e "${RED}Error: Credentials file not found: $GOOGLE_APPLICATION_CREDENTIALS${NC}"
                 exit 1
