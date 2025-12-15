@@ -260,14 +260,31 @@ publish_to_region() {
         return 1
     fi
 
+    # Build metadata string
+    local metadata="version=${VERSION},build-date=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    
+    # Add gh_ref metadata if available (from GitHub Actions)
+    if [ -n "${GH_REF:-}" ]; then
+        metadata="${metadata},gh_ref=${GH_REF}"
+        echo -e "${BLUE}Adding metadata: gh_ref=${GH_REF}${NC}"
+    fi
+
     # Upload with metadata
     aws s3 cp "$JAR_PATH" "$s3_path" \
         --region "$region" \
-        --metadata "version=${VERSION},build-date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --metadata "$metadata" \
         --cache-control "public, max-age=3600"
 
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}✓ Successfully published to ${region}${NC}"
+        
+        # Verify metadata was set
+        if [ -n "${GH_REF:-}" ]; then
+            local object_metadata=$(aws s3api head-object --bucket "$bucket_name" --key "$DEPLOYMENT_ARTIFACT" --region "$region" --query 'Metadata.gh_ref' --output text 2>/dev/null || echo "")
+            if [ -n "$object_metadata" ] && [ "$object_metadata" != "None" ]; then
+                echo -e "${GREEN}✓ Metadata verified: gh_ref=${object_metadata}${NC}"
+            fi
+        fi
     else
         echo -e "${RED}✗ Failed to publish to ${region}${NC}"
         return 1

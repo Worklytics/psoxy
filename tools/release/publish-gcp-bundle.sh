@@ -197,7 +197,10 @@ fi
 
 # Create ZIP filename for GCP Cloud Functions
 # RC builds should have artifact name like: psoxy-gcp-0.5.15-rc.zip
-echo -e "${BLUE}Determining artifact name (IS_RC_BUILD='${IS_RC_BUILD}')...${NC}"
+echo -e "${BLUE}Determining artifact name...${NC}"
+echo -e "${BLUE}  IS_RC_BUILD='${IS_RC_BUILD}'${NC}"
+echo -e "${BLUE}  VERSION='${VERSION}'${NC}"
+echo -e "${BLUE}  JAR_NAME='${JAR_NAME}'${NC}"
 
 # Use explicit boolean check
 if [ "$IS_RC_BUILD" = "true" ] || [ "$IS_RC_BUILD" = "1" ]; then
@@ -270,12 +273,32 @@ publish_to_gcs() {
         echo -e "${YELLOW}Warning: Bucket ${BUCKET_NAME} does not exist${NC}"
     fi
 
+    # Build metadata flags
+    local metadata_flags=()
+    
+    # Add gh_ref metadata if available (from GitHub Actions)
+    if [ -n "${GH_REF:-}" ]; then
+        metadata_flags+=(-h "x-goog-meta-gh_ref:${GH_REF}")
+        echo -e "${BLUE}Adding metadata: gh_ref=${GH_REF}${NC}"
+    fi
+    
     # Upload with metadata
-    gsutil cp "$ZIP_PATH" "$gcs_path"
+    if [ ${#metadata_flags[@]} -gt 0 ]; then
+        gsutil cp "${metadata_flags[@]}" "$ZIP_PATH" "$gcs_path"
+    else
+        gsutil cp "$ZIP_PATH" "$gcs_path"
+    fi
 
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}✓ Successfully uploaded to GCS${NC}"
-
+        
+        # Verify metadata was set
+        if [ -n "${GH_REF:-}" ]; then
+            local metadata=$(gsutil stat "$gcs_path" 2>/dev/null | grep "x-goog-meta-gh_ref" || echo "")
+            if [ -n "$metadata" ]; then
+                echo -e "${GREEN}✓ Metadata verified: ${metadata}${NC}"
+            fi
+        fi
     else
         echo -e "${RED}✗ Failed to upload to GCS${NC}"
         return 1

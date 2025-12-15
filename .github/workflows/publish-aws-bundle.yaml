@@ -93,8 +93,10 @@ jobs:
           VERSION: ${{ github.event.inputs.version }}
         run: |
           # Determine version from tag, input, or pom.xml
-          if [[ "${{ github.ref_name }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-            VERSION="${GITHUB_REF_NAME#v}"
+          REF_NAME="${{ github.ref_name }}"
+          
+          if [[ "$REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            VERSION="${REF_NAME#v}"
           elif [ -n "$VERSION" ]; then
             # Use provided version
             :
@@ -102,6 +104,9 @@ jobs:
             # Script will read from pom.xml
             VERSION=""
           fi
+          
+          # Export GH_REF for metadata
+          export GH_REF="$REF_NAME"
           
           # Call the publish script
           # Note: Pipe "yes" to handle interactive prompts in CI

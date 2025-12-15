@@ -158,14 +158,20 @@ jobs:
           # Export environment variables explicitly to ensure they're available
           export GITHUB_ACTIONS=true
           export CI=true
-          if [ "$IS_RC_BRANCH" = true ]; then
-            # Pass --rc flag and version
-            yes | ./tools/release/publish-gcp-bundle.sh --rc "$VERSION"
-          elif [ -n "$VERSION" ]; then
-            yes | ./tools/release/publish-gcp-bundle.sh "$VERSION"
-          else
-            yes | ./tools/release/publish-gcp-bundle.sh
+          export GH_REF="$REF_NAME"
+          
+          # Build command arguments
+          SCRIPT_ARGS=()
+          if [ "$IS_RC_BRANCH" = "true" ]; then
+            SCRIPT_ARGS+=(--rc)
+            echo "✓ Adding --rc flag to script"
           fi
+          if [ -n "$VERSION" ]; then
+            SCRIPT_ARGS+=("$VERSION")
+          fi
+          
+          echo "Calling script with args: ${SCRIPT_ARGS[*]}"
+          yes | ./tools/release/publish-gcp-bundle.sh "${SCRIPT_ARGS[@]}"
 
       - name: Summary
         if: success()
