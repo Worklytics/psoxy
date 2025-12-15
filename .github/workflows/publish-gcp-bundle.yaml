@@ -119,21 +119,39 @@ jobs:
           fi
           
           # Determine version from tag, RC branch, input, or pom.xml
-          IS_RC_BRANCH=false
-          if [[ "${{ github.ref_name }}" =~ ^rc- ]]; then
-            IS_RC_BRANCH=true
-            # Extract version from RC branch name (e.g., rc-v0.5.15 -> 0.5.15)
-            VERSION="${GITHUB_REF_NAME#rc-v}"
-            echo "Detected RC branch: ${{ github.ref_name }}, version: $VERSION"
-          elif [[ "${{ github.ref_name }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-            VERSION="${GITHUB_REF_NAME#v}"
+          # Logic: Treat as RC build UNLESS it's a tag starting with v (e.g., v0.5.15)
+          REF_NAME="${{ github.ref_name }}"
+          echo "Debug: github.ref_name = $REF_NAME"
+          echo "Debug: github.ref = ${{ github.ref }}"
+          echo "Debug: github.event_name = ${{ github.event_name }}"
+          
+          # Default to RC build unless it's a version tag
+          IS_RC_BRANCH=true
+          
+          if [[ "$REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            # Version tag (e.g., v0.5.15) - regular release, not RC
+            IS_RC_BRANCH=false
+            VERSION="${REF_NAME#v}"
+            echo "✓ Detected version tag: $REF_NAME, extracted version: $VERSION (regular release)"
+          elif [[ "$REF_NAME" =~ ^rc-v ]]; then
+            # RC branch with version (e.g., rc-v0.5.15) - extract version
+            VERSION="${REF_NAME#rc-v}"
+            echo "✓ Detected RC branch: $REF_NAME, extracted version: $VERSION"
+          elif [[ "$REF_NAME" =~ ^rc- ]]; then
+            # RC branch without v prefix (e.g., rc-0.5.15) - extract version
+            VERSION="${REF_NAME#rc-}"
+            echo "✓ Detected RC branch: $REF_NAME, extracted version: $VERSION"
           elif [ -n "$VERSION" ]; then
-            # Use provided version
-            :
+            # Use provided version (from workflow_dispatch input)
+            echo "✓ Using provided version: $VERSION (treating as RC build)"
           else
             # Script will read from pom.xml
             VERSION=""
+            echo "⚠ No version specified, script will read from pom.xml (treating as RC build)"
           fi
+          
+          echo "Debug: IS_RC_BRANCH = $IS_RC_BRANCH"
+          echo "Debug: VERSION = $VERSION"
           
           # Call the publish script
           # Note: Pipe "yes" to handle interactive prompts in CI
