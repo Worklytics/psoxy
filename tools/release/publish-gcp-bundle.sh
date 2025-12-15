@@ -273,18 +273,11 @@ publish_to_gcs() {
         echo -e "${YELLOW}Warning: Bucket ${BUCKET_NAME} does not exist${NC}"
     fi
 
-    # Build metadata flags
-    local metadata_flags=()
-    
+    # Upload with metadata
     # Add gh_ref metadata if available (from GitHub Actions)
     if [ -n "${GH_REF:-}" ]; then
-        metadata_flags+=(-h "x-goog-meta-gh_ref:${GH_REF}")
         echo -e "${BLUE}Adding metadata: gh_ref=${GH_REF}${NC}"
-    fi
-    
-    # Upload with metadata
-    if [ ${#metadata_flags[@]} -gt 0 ]; then
-        gsutil cp "${metadata_flags[@]}" "$ZIP_PATH" "$gcs_path"
+        gsutil cp -h "x-goog-meta-gh_ref:${GH_REF}" "$ZIP_PATH" "$gcs_path"
     else
         gsutil cp "$ZIP_PATH" "$gcs_path"
     fi
