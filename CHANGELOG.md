@@ -7,6 +7,10 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
+## [0.5.14](https://github.com/Worklytics/psoxy/release/tag/v0.5.14)
+- `gcp`: Cloud function deployment now requires [Compute Viewer](https://docs.cloud.google.com/iam/docs/roles-permissions/compute#compute.viewer) role to read Compute Engine metadata for the project. See [docs/gcp/getting-started.md](docs/gcp/getting-started.md) for details.
+- `gcp`: Cloud function deployment now requires [Cloud Run Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/run#run.admin) role instead of Cloud Run Developer. See [docs/gcp/getting-started.md](docs/gcp/getting-started.md) for details.
+
 ## [0.5.11](https://github.com/Worklytics/psoxy/release/tag/v0.5.11)
 - `Salesforce`: adding support for fetching Task and Events and dropped support for ActivityHistories. No need to use `viewAllData` administrative permission anymore.
 - `aws`: may see some churn in TODO 2 files, due to changing parameters in test tool

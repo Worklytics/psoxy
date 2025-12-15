@@ -1,9 +1,31 @@
 package co.worklytics.psoxy.aws;
 
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.LockService;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.utils.DevLogUtils;
+import co.worklytics.psoxy.utils.RandomNumberGenerator;
+import com.amazonaws.SdkClientException;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.Uninterruptibles;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedInject;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.ssm.SsmClient;
+import software.amazon.awssdk.services.ssm.model.*;
+
+import javax.inject.Inject;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -11,38 +33,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
-import org.apache.commons.lang3.StringUtils;
-import com.amazonaws.SdkClientException;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.Uninterruptibles;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.LockService;
-import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
-import co.worklytics.psoxy.utils.RandomNumberGenerator;
-import dagger.assisted.Assisted;
-import dagger.assisted.AssistedInject;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.extern.java.Log;
-import software.amazon.awssdk.awscore.exception.AwsServiceException;
-import software.amazon.awssdk.services.ssm.SsmClient;
-import software.amazon.awssdk.services.ssm.model.DeleteParameterRequest;
-import software.amazon.awssdk.services.ssm.model.GetParameterHistoryRequest;
-import software.amazon.awssdk.services.ssm.model.GetParameterHistoryResponse;
-import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
-import software.amazon.awssdk.services.ssm.model.GetParameterResponse;
-import software.amazon.awssdk.services.ssm.model.Parameter;
-import software.amazon.awssdk.services.ssm.model.ParameterAlreadyExistsException;
-import software.amazon.awssdk.services.ssm.model.ParameterHistory;
-import software.amazon.awssdk.services.ssm.model.ParameterNotFoundException;
-import software.amazon.awssdk.services.ssm.model.ParameterType;
-import software.amazon.awssdk.services.ssm.model.ParameterVersionNotFoundException;
-import software.amazon.awssdk.services.ssm.model.PutParameterRequest;
-import software.amazon.awssdk.services.ssm.model.PutParameterResponse;
-import software.amazon.awssdk.services.ssm.model.SsmException;
 
 /**
  * implementation of ConfigService backed by AWS Systems Manager Parameter Store
@@ -139,24 +129,18 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
                 log.info("Found placeholder value for " + paramName + "; this is either a misconfiguration, or a value that proxy itself should later fill.");
                 r = Optional.empty();
             } else {
-                if (envVarsConfig.isDevelopment()) {
-                    log.info("Found SSM parameter for " + paramName);
-                }
+                DevLogUtils.info(envVarsConfig, log, "Found SSM parameter for " + paramName);
                 r = Optional.of(mapping.apply(parameterResponse));
             }
             return r;
         } catch (ParameterNotFoundException | ParameterVersionNotFoundException ignore) {
             // does not exist, that could be OK depending on case.
-            if (envVarsConfig.isDevelopment()) {
-                log.info("No SSM parameter for " + paramName + " (may be expected)");
-            }
+            DevLogUtils.info(envVarsConfig, log, "No SSM parameter for " + paramName + " (may be expected)");
             return Optional.empty();
         } catch (SsmException ignore) {
             // very likely the policy doesn't allow reading this parameter
             // may be OK in those cases
-            if (envVarsConfig.isDevelopment()) {
-                log.log(Level.WARNING, "Couldn't read SSM parameter for " + paramName, ignore);
-            }
+            DevLogUtils.warn(envVarsConfig, log, "Failed to read SSM parameter for " + paramName, ignore);
             return Optional.empty();
         } catch (AwsServiceException e) {
             if (e.isThrottlingException()) {
@@ -217,6 +201,8 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
             Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(100).plusMillis(randomNumberGenerator.nextInt(200)));
             // if value doesn't match what we wrote, someone else got it, race condition.
             Parameter parameter = readParameter(lockParameterName);
+            DevLogUtils.info(envVarsConfig, log, "Acquired lock " + lockParameterName + "/" + parameter.value());
+
             return Objects.equals(lockValue, parameter.value());
         } catch (ParameterAlreadyExistsException e) {
             try {
@@ -274,6 +260,7 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
             // Get parameter history to retrieve all versions
             GetParameterHistoryRequest request = GetParameterHistoryRequest.builder()
                 .name(paramName)
+                .maxResults(limit * 2)
                 .withDecryption(true)
                 .build();
 
@@ -284,10 +271,12 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
                 return Collections.emptyList();
             }
 
+            DevLogUtils.info(envVarsConfig, log, "Found " + history.size() + " versions for " + paramName);
+
             // Sort by version descending and convert to ConfigValueVersion
             return history.stream()
                 .filter(p -> !Objects.equals(p.value(), PLACEHOLDER_VALUE))
-                .sorted((p1, p2) -> Long.compare(p2.version(), p1.version()))
+                .sorted(Comparator.comparingLong(ParameterHistory::version).reversed())
                 .limit(limit)
                 .map((ParameterHistory paramHistory) -> ConfigService.ConfigValueVersion.builder()
                     .value(paramHistory.value())
@@ -297,17 +286,13 @@ public class ParameterStoreConfigService implements SecretStore, LockService {
                 .collect(Collectors.toList());
 
         } catch (ParameterNotFoundException | ParameterVersionNotFoundException e) {
-            if (envVarsConfig.isDevelopment()) {
-                log.info("No parameter history found for " + paramName + " when listing versions");
-            }
+            DevLogUtils.info(envVarsConfig, log, "No parameter history found for " + paramName);
             return Collections.emptyList();
         } catch (SsmException e) {
-            if (envVarsConfig.isDevelopment()) {
-                log.log(Level.WARNING, "failed to list parameter versions for " + paramName, e);
-            }
+            DevLogUtils.warn(envVarsConfig, log, "Failed to list parameter versions for " + paramName, e);
             return Collections.emptyList();
         } catch (Exception e) {
-            log.log(Level.WARNING, "Unexpected error listing parameter versions for " + paramName, e);
+            DevLogUtils.warn(envVarsConfig, log, "Unexpected error listing parameter versions for " + paramName, e);
             return Collections.emptyList();
         }
     }
