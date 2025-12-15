@@ -107,7 +107,17 @@ jobs:
           VERSION: ${{ github.event.inputs.version }}
           GITHUB_ACTIONS: true
           CI: true
+          DEBUG: true
         run: |
+          # Ensure GOOGLE_APPLICATION_CREDENTIALS is available to the script
+          # The auth action should set this, but let's verify
+          if [ -n "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+            echo "GOOGLE_APPLICATION_CREDENTIALS is set: $GOOGLE_APPLICATION_CREDENTIALS"
+            export GOOGLE_APPLICATION_CREDENTIALS
+          else
+            echo "Warning: GOOGLE_APPLICATION_CREDENTIALS not set"
+          fi
+          
           # Determine version from tag, input, or pom.xml
           if [[ "${{ github.ref_name }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
             VERSION="${GITHUB_REF_NAME#v}"
@@ -121,6 +131,9 @@ jobs:
           
           # Call the publish script
           # Note: Pipe "yes" to handle interactive prompts in CI
+          # Export environment variables explicitly to ensure they're available
+          export GITHUB_ACTIONS=true
+          export CI=true
           if [ -n "$VERSION" ]; then
             yes | ./tools/release/publish-gcp-bundle.sh "$VERSION"
           else
