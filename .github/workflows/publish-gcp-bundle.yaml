@@ -16,11 +16,6 @@ name: Publish GCP Bundle
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to publish (optional, will read from pom.xml if not provided)'
-        required: false
-        type: string
   push:
     tags:
       - 'v*'
@@ -108,7 +103,6 @@ jobs:
           fi
       - name: Publish GCP Bundle
         env:
-          VERSION: ${{ github.event.inputs.version }}
           GITHUB_ACTIONS: true
           CI: true
         run: |
@@ -121,7 +115,7 @@ jobs:
             echo "Warning: GOOGLE_APPLICATION_CREDENTIALS not set"
           fi
           
-          # Determine version from tag, RC branch, input, or pom.xml
+          # Determine version from tag, RC branch, or pom.xml
           # Logic: Treat as RC build UNLESS it's a tag starting with v (e.g., v0.5.15)
           REF_NAME="${{ github.ref_name }}"
           
@@ -141,12 +135,10 @@ jobs:
             # RC branch without v prefix (e.g., rc-0.5.15) - extract version
             VERSION="${REF_NAME#rc-}"
             echo "✓ Detected RC branch: $REF_NAME, extracted version: $VERSION"
-          elif [ -n "$VERSION" ]; then
-            # Use provided version (from workflow_dispatch input)
-            echo "✓ Using provided version: $VERSION (treating as RC build)"
           else
             # Script will read from pom.xml
             VERSION=""
+            echo "✓ Will read version from pom.xml"
           fi
           
           # Call the publish script

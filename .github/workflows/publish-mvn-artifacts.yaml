@@ -10,11 +10,6 @@ name: Publish Maven Artifacts
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to publish (optional, will read from pom.xml if not provided)'
-        required: false
-        type: string
   push:
     tags:
       - 'v*'
@@ -72,15 +67,12 @@ jobs:
         run: |
           cd java
           
-          # Determine version from tag or input
+          # Determine version from tag or pom.xml
           REF_NAME="${{ github.ref_name }}"
           
           if [[ "$REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
             VERSION="${REF_NAME#v}"
             echo "✓ Detected version tag: $REF_NAME, extracted version: $VERSION"
-          elif [ -n "${{ github.event.inputs.version }}" ]; then
-            VERSION="${{ github.event.inputs.version }}"
-            echo "✓ Using provided version: $VERSION"
           else
             # Script will read from pom.xml
             VERSION=""
