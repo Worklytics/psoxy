@@ -15,7 +15,7 @@ jobs:
                         'examples-dev/aws',
                         'examples-dev/gcp',
         ]
-        terraform_version: [ '~1.6.0', '~1.7.0', '~1.8.0', '~1.9.0', '~1.10.0', '~1.11.0', '~1.12.0', 'latest' ]
+        terraform_version: [ '~1.7.0', '~1.8.0', '~1.9.0', '~1.10.0', '~1.11.0', '~1.12.0', 'latest' ]
     uses: ./.github/workflows/ci-terraform-example.yaml
     with:
       terraform_version: ${{ matrix.terraform_version }}
