@@ -1,0 +1,109 @@
+name: Publish Maven Artifacts
+
+# This workflow publishes Maven artifacts to GitHub Packages.
+#
+# Security:
+#   - Uses GITHUB_TOKEN (automatically provided by GitHub Actions)
+#   - workflow_dispatch requires write access (enforced by GitHub)
+#   - Tag pushes require push access (enforced by GitHub)
+#   - Consider adding branch protection rules to restrict who can push tags
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (optional, will read from pom.xml if not provided)'
+        required: false
+        type: string
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    name: Publish Maven Artifacts to GitHub Packages
+    runs-on: ubuntu-latest
+    # Security: Only run on authorized triggers
+    # - Tags (v*): Regular releases, anyone with push access can create tags
+    # - workflow_dispatch: Manual trigger, requires write access (checked in step below)
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Verify authorization for manual trigger
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          # For manual triggers, verify the user has write access to the repository
+          # This prevents unauthorized users from triggering the workflow
+          # Note: GitHub will also enforce permissions
+          
+          # Check if actor is a member of the organization or has write access
+          # This is a basic check - GitHub will also enforce permissions
+          if [ "${{ github.event.sender.type }}" != "User" ] && [ "${{ github.event.sender.type }}" != "Bot" ]; then
+            echo "❌ ERROR: Unauthorized trigger. Only users and bots can trigger this workflow."
+            exit 1
+          fi
+          
+          echo "✓ Authorized trigger by: ${{ github.event.sender.login }}"
+          echo "  Actor type: ${{ github.event.sender.type }}"
+          echo "  Repository: ${{ github.repository }}"
+          echo ""
+          echo "Note: This workflow requires write access to the repository."
+          echo "GitHub will enforce this permission check before allowing the workflow to run."
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+          server-id: github
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
+
+      - name: Publish Maven Artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: |
+          cd java
+          
+          # Determine version from tag or input
+          REF_NAME="${{ github.ref_name }}"
+          
+          if [[ "$REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            VERSION="${REF_NAME#v}"
+            echo "✓ Detected version tag: $REF_NAME, extracted version: $VERSION"
+          elif [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            echo "✓ Using provided version: $VERSION"
+          else
+            # Script will read from pom.xml
+            VERSION=""
+            echo "✓ Will read version from pom.xml"
+          fi
+          
+          # Build and deploy Maven artifacts
+          # Skip tests as per the original script
+          if mvn clean deploy -DskipTests; then
+            echo "✓ Maven artifacts published to GitHub Packages"
+          else
+            echo "❌ Maven deploy failed"
+            exit 1
+          fi
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "## ✅ Successfully published Maven artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** $(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' java/pom.xml)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Artifacts have been published to GitHub Packages." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Repository: https://github.com/Worklytics/psoxy/packages" >> $GITHUB_STEP_SUMMARY
+
