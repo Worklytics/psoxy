@@ -67,7 +67,7 @@ trigger_workflow() {
     local version="$2"
     local branch="$3"
     
-    echo -e "${BLUE}Triggering workflow: ${GREEN}${workflow_name}${NC}"
+    echo -e "${BLUE}Triggering workflow: ${GREEN}${workflow_name}${NC}" >&2
     
     if [ -n "$version" ]; then
         gh workflow run "$workflow_name" --ref "$branch" --raw-field version="$version"
@@ -86,7 +86,7 @@ trigger_workflow() {
         run_id=$(gh run list --workflow="$workflow_name" --limit 1 --json databaseId,status --jq '.[0].databaseId' 2>/dev/null || echo "")
         
         if [ $attempt -ge $max_attempts ]; then
-            echo -e "${RED}Error: Could not get run ID for workflow after ${max_attempts} attempts${NC}"
+            echo -e "${RED}Error: Could not get run ID for workflow after ${max_attempts} attempts${NC}" >&2
             return 1
         fi
     done
