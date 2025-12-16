@@ -111,9 +111,9 @@ jobs:
           # Call the publish script
           # Note: Pipe "yes" to handle interactive prompts in CI
           if [ -n "$VERSION" ]; then
-            yes | ./tools/release/publish-aws-bundle.sh "$VERSION"
+            yes | ./tools/release/lib/publish-aws-bundle.sh "$VERSION"
           else
-            yes | ./tools/release/publish-aws-bundle.sh
+            yes | ./tools/release/lib/publish-aws-bundle.sh
           fi
 
       - name: Summary

@@ -166,7 +166,7 @@ jobs:
           fi
           
           echo "Calling script with args: ${SCRIPT_ARGS[*]}"
-          yes | ./tools/release/publish-gcp-bundle.sh "${SCRIPT_ARGS[@]}"
+          yes | ./tools/release/lib/publish-gcp-bundle.sh "${SCRIPT_ARGS[@]}"
 
       - name: Summary
         if: success()
