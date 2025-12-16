@@ -317,20 +317,20 @@ module "bulk_connector" {
 
   source = "../../modules/gcp-psoxy-bulk"
 
-  project_id                        = var.gcp_project_id
-  region                            = var.gcp_region
-  environment_id_prefix             = local.environment_id_prefix
-  instance_id                       = each.key
-  worklytics_sa_emails              = var.worklytics_sa_emails
-  config_parameter_prefix           = local.config_parameter_prefix
-  source_kind                       = each.value.source_kind
-  artifacts_bucket_name             = module.psoxy.artifacts_bucket_name
-  artifact_repository_id            = module.psoxy.artifact_repository
-  deployment_bundle_object_name     = module.psoxy.deployment_bundle_object_name
-  psoxy_base_dir                    = var.psoxy_base_dir
-  bucket_write_role_id              = module.psoxy.bucket_write_role_id
-  secret_bindings                   = module.psoxy.secrets
-  vpc_config                        = module.psoxy.vpc_config
+  project_id                    = var.gcp_project_id
+  region                        = var.gcp_region
+  environment_id_prefix         = local.environment_id_prefix
+  instance_id                   = each.key
+  worklytics_sa_emails          = var.worklytics_sa_emails
+  config_parameter_prefix       = local.config_parameter_prefix
+  source_kind                   = each.value.source_kind
+  artifacts_bucket_name         = module.psoxy.artifacts_bucket_name
+  artifact_repository_id        = module.psoxy.artifact_repository
+  deployment_bundle_object_name = module.psoxy.deployment_bundle_object_name
+  psoxy_base_dir                = var.psoxy_base_dir
+  bucket_write_role_id          = module.psoxy.bucket_write_role_id
+  secret_bindings               = module.psoxy.secrets
+  # Note: bulk connectors don't need VPC config - they only access GCS and Secret Manager
   example_file                      = try(each.value.example_file, null)
   instructions_template             = try(each.value.instructions_template, null)
   input_expiration_days             = var.bulk_input_expiration_days

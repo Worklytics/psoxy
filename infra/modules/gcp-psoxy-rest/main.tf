@@ -176,6 +176,9 @@ locals {
     }
     : k => v if v != null
   }
+
+  use_serverless_connector = var.vpc_config != null && try(var.vpc_config.serverless_connector, null) != null
+  use_direct_vpc_egress    = !local.use_serverless_connector && try(var.vpc_config.network, null) != null && try(var.vpc_config.subnet, null) != null
 }
 
 data "google_service_account" "function" {
@@ -217,8 +220,21 @@ resource "google_cloudfunctions2_function" "function" {
     available_memory      = "${var.available_memory_mb}M"
     ingress_settings      = "ALLOW_ALL"
 
-    vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector
-    vpc_connector_egress_settings = var.vpc_config == null ? null : "ALL_TRAFFIC"
+    # Use Serverless VPC Access connector if explicitly provided
+    vpc_connector                 = local.use_serverless_connector ? var.vpc_config.serverless_connector : null
+    vpc_connector_egress_settings = local.use_serverless_connector ? "ALL_TRAFFIC" : null
+
+    # Use Direct VPC Egress if network and subnet are provided without serverless_connector
+    dynamic "vpc_access" {
+      for_each = local.use_direct_vpc_egress ? [1] : []
+      content {
+        network_interfaces {
+          network    = var.vpc_config.network
+          subnetwork = var.vpc_config.subnet
+          tags       = try(var.vpc_config.network_tags, [])
+        }
+      }
+    }
 
     environment_variables = merge(
       # { LOG_EXECUTION_ID = "true" }, # NOTE that the google provider > 5.x seems to magically add this here, seemingly bc that's the defalt behavior of the version gcloud cli / API its using

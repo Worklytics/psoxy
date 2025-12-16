@@ -300,8 +300,21 @@ resource "google_cloudfunctions2_function" "function" {
     # TODO: setting this > 1 gives error: │ Error: Error updating function: googleapi: Error 400: Could not update Cloud Run service projects/psoxy-dev-erik/locations/us-central1/services/psoxy-dev-erik-llm-portal. spec.template.spec.containers.resources.limits.cpu: Invalid value specified for cpu. Total cpu < 1 is not supported with concurrency > 1.
     # max_instance_request_concurrency = 5 # q: make configurable? default is 1
 
-    vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector
-    vpc_connector_egress_settings = var.vpc_config == null ? null : "ALL_TRAFFIC"
+    # Use Serverless VPC Access connector if explicitly provided
+    vpc_connector                 = var.vpc_config != null && try(var.vpc_config.serverless_connector, null) != null ? var.vpc_config.serverless_connector : null
+    vpc_connector_egress_settings = var.vpc_config != null && try(var.vpc_config.serverless_connector, null) != null ? "ALL_TRAFFIC" : null
+
+    # Use Direct VPC Egress if network and subnet are provided without serverless_connector
+    dynamic "vpc_access" {
+      for_each = var.vpc_config != null && try(var.vpc_config.serverless_connector, null) == null && try(var.vpc_config.network, null) != null && try(var.vpc_config.subnet, null) != null ? [1] : []
+      content {
+        network_interfaces {
+          network    = var.vpc_config.network
+          subnetwork = var.vpc_config.subnet
+          tags       = try(var.vpc_config.network_tags, [])
+        }
+      }
+    }
 
     max_instance_count = local.max_instance_count
 

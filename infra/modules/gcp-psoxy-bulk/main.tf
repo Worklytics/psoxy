@@ -186,8 +186,8 @@ resource "google_cloudfunctions2_function" "function" {
     timeout_seconds       = var.timeout_seconds
     ingress_settings      = "ALLOW_INTERNAL_ONLY"
 
-    vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector
-    vpc_connector_egress_settings = var.vpc_config == null ? null : "ALL_TRAFFIC"
+    # Bulk connectors only access GCS buckets and Secret Manager (GCP managed services),
+    # so they don't need VPC egress configuration
 
     environment_variables = merge(tomap({
       INPUT_BUCKET  = google_storage_bucket.input_bucket.name,

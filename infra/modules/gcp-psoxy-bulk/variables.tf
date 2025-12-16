@@ -169,21 +169,6 @@ variable "todo_step" {
   default     = 2
 }
 
-variable "vpc_config" {
-  type = object({
-    serverless_connector = string # Format: projects/{project}/locations/{location}/connectors/{connector}
-  })
-  description = "VPC configuration for the Cloud Run function."
-  default     = null
-
-  validation {
-    condition = (
-      var.vpc_config == null ||
-      can(regex("^projects/[^/]+/locations/[^/]+/connectors/[^/]+$", var.vpc_config.serverless_connector))
-    )
-    error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
-  }
-}
 
 variable "bucket_force_destroy" {
   type        = bool
