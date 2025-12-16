@@ -24,9 +24,12 @@ resource "null_resource" "install_test_tool" {
   }
 }
 
+# TODO: not used - so remove in 0.6?? 
+
 # expose whether test tool installed back, in case want to condition test commands on it
 output "test_tool_installed" {
-  value = fileexists("${local.test_tool_directory}/node_modules/.package-lock.json")
+  # try here bc complaints that NOT installing the tool causes this to fail ... which is odd, but OK.
+  value = try(fileexists("${local.test_tool_directory}/node_modules/.package-lock.json"), false)
 
   depends_on = [
     null_resource.install_test_tool
