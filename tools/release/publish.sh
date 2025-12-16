@@ -124,6 +124,21 @@ case "$REPLY" in
     ;;
 esac
 
+# publish bundles
+printf "Publish bundles (via GitHub Actions)?\n"
+read -p "(Y/n) " -n 1 -r
+REPLY=${REPLY:-Y}
+echo    # Move to a new line
+case "$REPLY" in
+  [yY][eE][sS]|[yY])
+    ./tools/release/publish-bundles-via-gh.sh ${RELEASE}
+  ;;
+  *)
+    printf "Skipped publishing bundles (via GitHub Actions)\n"
+    printf "To do so manually, run:\n"
+    printf "    ${BLUE}./tools/release/publish-bundles-via-gh.sh ${RELEASE}${NC}\n"
+    ;;
+esac
 
 # publish docs
 printf "Publish docs?\n"
