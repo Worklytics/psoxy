@@ -121,6 +121,7 @@ case "$REPLY" in
     printf "Skipped publishing Maven artifacts to GitHub Packages\n"
     printf "To do so manually, run:\n"
     printf "    ${BLUE}./tools/release/publish-mvn-artifacts.sh ${PATH_TO_REPO}${NC}\n"
+    printf "    or run the GitHub Actions workflow manually: ${BLUE}gh workflow run publish-mvn-artifacts.yaml --ref ${RELEASE}${NC}\n"
     ;;
 esac
 
@@ -131,12 +132,12 @@ REPLY=${REPLY:-Y}
 echo    # Move to a new line
 case "$REPLY" in
   [yY][eE][sS]|[yY])
-    ./tools/release/publish-bundles-via-gh.sh ${RELEASE}
+    ./tools/release/publish-rc-bundles-via-gh.sh ${RELEASE}
   ;;
   *)
     printf "Skipped publishing bundles (via GitHub Actions)\n"
     printf "To do so manually, run:\n"
-    printf "    ${BLUE}./tools/release/publish-bundles-via-gh.sh ${RELEASE}${NC}\n"
+    printf "    ${BLUE}./tools/release/publish-rc-bundles-via-gh.sh ${RELEASE}${NC}\n"
     ;;
 esac
 
