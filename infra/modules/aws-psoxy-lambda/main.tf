@@ -198,6 +198,7 @@ locals {
     Action = [
       "ssm:GetParameter",
       "ssm:GetParameters",
+      "ssm:GetParameterHistory", # list available versions
       "ssm:GetParametersByPath",
       "ssm:PutParameter",
       "ssm:DeleteParameter" # delete locks, bad access tokens, etc

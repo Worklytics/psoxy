@@ -120,7 +120,7 @@ EOT
     }
     cursor = {
       source_kind : "cursor",
-      availability : "alpha",
+      availability : "beta",
       enable_by_default : false,
       worklytics_connector_id : "cursor-psoxy"
       display_name : "Cursor"
