@@ -87,79 +87,17 @@ jobs:
           # Install jq if not already available
           sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Verify authentication
-        run: |
-          # Verify Application Default Credentials are set up
-          if [ -n "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
-            echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS"
-            echo "Credentials file exists: $([ -f "$GOOGLE_APPLICATION_CREDENTIALS" ] && echo 'yes' || echo 'no')"
-          fi
-          # Test that we can get an access token
-          if gcloud auth application-default print-access-token >/dev/null 2>&1; then
-            echo "✓ Authentication verified"
-          else
-            echo "❌ Could not verify access token"
-            exit 1
-          fi
       - name: Publish GCP Bundle
-        env:
-          GITHUB_ACTIONS: true
-          CI: true
         run: |
-          # Ensure GOOGLE_APPLICATION_CREDENTIALS is available to the script
-          # The auth action should set this, but let's verify
-          if [ -n "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
-            echo "GOOGLE_APPLICATION_CREDENTIALS is set: $GOOGLE_APPLICATION_CREDENTIALS"
-            export GOOGLE_APPLICATION_CREDENTIALS
-          else
-            echo "Warning: GOOGLE_APPLICATION_CREDENTIALS not set"
-          fi
-          
-          # Determine version from tag, RC branch, or pom.xml
-          # Logic: Treat as RC build UNLESS it's a tag starting with v (e.g., v0.5.15)
+          # Determine if RC build; assume it is UNLESS ref is tag starting with v (e.g., v0.5.15)
+          RC_OPTION="--rc"
           REF_NAME="${{ github.ref_name }}"
-          
-          # Default to RC build unless it's a version tag
-          IS_RC_BRANCH=true
-          
           if [[ "$REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-            # Version tag (e.g., v0.5.15) - regular release, not RC
-            IS_RC_BRANCH=false
-            VERSION="${REF_NAME#v}"
-            echo "✓ Detected version tag: $REF_NAME, extracted version: $VERSION (regular release)"
-          elif [[ "$REF_NAME" =~ ^rc-v ]]; then
-            # RC branch with version (e.g., rc-v0.5.15) - extract version
-            VERSION="${REF_NAME#rc-v}"
-            echo "✓ Detected RC branch: $REF_NAME, extracted version: $VERSION"
-          elif [[ "$REF_NAME" =~ ^rc- ]]; then
-            # RC branch without v prefix (e.g., rc-0.5.15) - extract version
-            VERSION="${REF_NAME#rc-}"
-            echo "✓ Detected RC branch: $REF_NAME, extracted version: $VERSION"
-          else
-            # Script will read from pom.xml
-            VERSION=""
-            echo "✓ Will read version from pom.xml"
+            RC_OPTION=""
           fi
           
-          # Call the publish script
-          # Note: Pipe "yes" to handle interactive prompts in CI
-          # Export environment variables explicitly to ensure they're available
-          export GITHUB_ACTIONS=true
-          export CI=true
-          export GH_REF="$REF_NAME"
+          ./tools/release/lib/publish-gcp-bundle.sh --non-interactive $RC_OPTION
           
-          # Build command arguments
-          SCRIPT_ARGS=()
-          if [ "$IS_RC_BRANCH" = "true" ]; then
-            SCRIPT_ARGS+=(--rc)
-          fi
-          if [ -n "$VERSION" ]; then
-            SCRIPT_ARGS+=("$VERSION")
-          fi
-          
-          echo "Calling script with args: ${SCRIPT_ARGS[*]}"
-          yes | ./tools/release/lib/publish-gcp-bundle.sh "${SCRIPT_ARGS[@]}"
-
       - name: Summary
         if: success()
         run: |

@@ -85,28 +85,14 @@ jobs:
 
       - name: Publish AWS Bundle
         run: |
-          # Determine version from tag or pom.xml
+          # Determine if RC build; assume it is UNLESS ref is tag starting with v (e.g., v0.5.15)
+          RC_OPTION="--rc"
           REF_NAME="${{ github.ref_name }}"
-          
           if [[ "$REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-            VERSION="${REF_NAME#v}"
-            echo "✓ Detected version tag: $REF_NAME, extracted version: $VERSION"
-          else
-            # Script will read from pom.xml
-            VERSION=""
-            echo "✓ Will read version from pom.xml"
+            RC_OPTION=""
           fi
           
-          # Export GH_REF for metadata
-          export GH_REF="$REF_NAME"
-          
-          # Call the publish script
-          # Note: Pipe "yes" to handle interactive prompts in CI
-          if [ -n "$VERSION" ]; then
-            yes | ./tools/release/lib/publish-aws-bundle.sh "$VERSION"
-          else
-            yes | ./tools/release/lib/publish-aws-bundle.sh
-          fi
+          ./tools/release/lib/publish-aws-bundle.sh --non-interactive $RC_OPTION
 
       - name: Summary
         if: success()

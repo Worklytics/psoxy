@@ -1,15 +1,17 @@
 #!/bin/bash
 
 # Publish Psoxy GCP JAR to GCS bucket, zipped so can be used as a Cloud Function deployment bundle
-# Usage: ./publish-gcp-bundle.sh [--rc] [version]
-#   --rc:    Mark this as a release candidate build (adds -rc suffix to artifact name)
-#   version: Version to publish (optional, will read from pom.xml if not provided)
+# Usage: ./publish-gcp-bundle.sh [--rc] [--non-interactive] [version]
+#   --rc:              Mark this as a release candidate build (adds -rc suffix to artifact name)
+#   --non-interactive: Skip all interactive prompts (auto-confirm all prompts)
+#   version:           Version to publish (optional, will read from pom.xml if not provided)
 #
 # Examples:
 #   ./publish-gcp-bundle.sh                    # Read version from pom.xml
 #   ./publish-gcp-bundle.sh 0.5.15            # Use specified version
 #   ./publish-gcp-bundle.sh --rc 0.5.15        # RC build with specified version
 #   ./publish-gcp-bundle.sh --rc               # RC build, read version from pom.xml
+#   ./publish-gcp-bundle.sh --non-interactive  # Non-interactive mode (for CI)
 
 set -e
 
@@ -28,6 +30,7 @@ JAR_NAME="${JAR_NAME:-psoxy-$IMPLEMENTATION}"
 
 # Parse command-line arguments
 IS_RC_BUILD=false
+NON_INTERACTIVE=false
 VERSION=""
 
 while [[ $# -gt 0 ]]; do
@@ -37,20 +40,15 @@ while [[ $# -gt 0 ]]; do
             echo -e "${BLUE}RC build flag detected${NC}"
             shift
             ;;
+        --non-interactive)
+            NON_INTERACTIVE=true
+            echo -e "${BLUE}Non-interactive mode enabled${NC}"
+            shift
+            ;;
         -*)
             echo -e "${RED}Error: Unknown option: $1${NC}"
-            echo "Usage: $0 [--rc] [version]"
+            echo "Usage: $0 [--rc] [--non-interactive]"
             exit 1
-            ;;
-        *)
-            if [ -z "$VERSION" ]; then
-                VERSION="$1"
-            else
-                echo -e "${RED}Error: Multiple version arguments provided${NC}"
-                echo "Usage: $0 [--rc] [version]"
-                exit 1
-            fi
-            shift
             ;;
     esac
 done
@@ -62,14 +60,13 @@ if [ ! -f "java/pom.xml" ]; then
     exit 1
 fi
 
-# Get version from argument or pom.xml
+# Get version from pom.xml
+VERSION=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' "java/pom.xml")
 if [ -z "$VERSION" ]; then
-    VERSION=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' "java/pom.xml")
-    if [ -z "$VERSION" ]; then
-        echo -e "${RED}Error: Could not extract version from java/pom.xml${NC}"
-        exit 1
-    fi
+    echo -e "${RED}Error: Could not extract version from java/pom.xml${NC}"
+    exit 1
 fi
+
 
 # Function to validate git branch/tag matches version requirements
 validate_git_branch_or_tag() {
@@ -111,6 +108,12 @@ validate_git_branch_or_tag() {
         echo -e "${YELLOW}Version: ${VERSION}${NC}"
         echo ""
         echo -e "${YELLOW}Recommended: Run from main branch or tag ${expected_tag}${NC}"
+        
+        if [ "$NON_INTERACTIVE" = "true" ]; then
+            echo -e "${BLUE}Non-interactive mode: Auto-proceeding${NC}"
+            return 0
+        fi
+        
         echo -e "${YELLOW}Do you want to proceed anyway? (yes/no):${NC} "
         read -r response
         
@@ -236,6 +239,12 @@ prompt_overwrite() {
     echo -e "${YELLOW}Warning: Artifact already exists in GCS:${NC}"
     echo -e "  ${BLUE}${gcs_path}${NC}"
     echo ""
+    
+    if [ "$NON_INTERACTIVE" = "true" ]; then
+        echo -e "${BLUE}Non-interactive mode: Auto-overwriting${NC}"
+        return 0
+    fi
+    
     echo -e "${YELLOW}Do you want to overwrite it? (yes/no):${NC} "
     read -r response
     
