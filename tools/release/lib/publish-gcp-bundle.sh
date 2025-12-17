@@ -44,11 +44,13 @@ while [[ $# -gt 0 ]]; do
         -*)
             echo -e "${RED}Error: Unknown option: $1${NC}"
             echo "Usage: $0 [--rc] [--non-interactive]"
+            shift
             exit 1
             ;;
         *)
             echo -e "${RED}Error: Unexpected argument: $1${NC}"
             echo "Usage: $0 [--rc] [--non-interactive]"
+            shift
             exit 1
             ;;
     esac
