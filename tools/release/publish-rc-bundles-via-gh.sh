@@ -105,7 +105,7 @@ get_workflow_status() {
 # Function to get workflow URL
 get_workflow_url() {
     local run_id="$1"
-    local url=$(gh run view "$run_id" --json url --jq -r '.url')
+    local url=$(gh run view "$run_id" --json url --jq '.url')
     echo "$url"
 }
 
