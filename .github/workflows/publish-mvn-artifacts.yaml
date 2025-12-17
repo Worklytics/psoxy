@@ -6,13 +6,16 @@ name: Publish Maven Artifacts
 #   - Uses GITHUB_TOKEN (automatically provided by GitHub Actions)
 #   - workflow_dispatch requires write access (enforced by GitHub)
 #   - Tag pushes require push access (enforced by GitHub)
-#   - Consider adding branch protection rules to restrict who can push tags
+#   - RC branch pushes require write access (enforced by GitHub)
+#   - Consider adding branch protection rules to restrict who can push tags and create rc-* branches
 
 on:
   workflow_dispatch:
   push:
     tags:
       - 'v*'
+    branches:
+      - 'rc-*'
 
 jobs:
   publish:
@@ -20,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     # Security: Only run on authorized triggers
     # - Tags (v*): Regular releases, anyone with push access can create tags
+    # - RC branches (rc-*): Release candidates, requires write access (includes PR merges)
     # - workflow_dispatch: Manual trigger, requires write access (checked in step below)
     permissions:
       contents: read
@@ -67,22 +71,39 @@ jobs:
         run: |
           cd java
           
-          # Determine version from tag or pom.xml
+          # Determine if RC build; assume it is UNLESS ref is tag starting with v (e.g., v0.5.15)
+          RC_OPTION="--rc"
           REF_NAME="${{ github.ref_name }}"
-          
           if [[ "$REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-            VERSION="${REF_NAME#v}"
-            echo "✓ Detected version tag: $REF_NAME, extracted version: $VERSION"
-          else
-            # Script will read from pom.xml
-            VERSION=""
-            echo "✓ Will read version from pom.xml"
+            RC_OPTION=""
           fi
           
-          # Build and deploy Maven artifacts
-          # Skip tests as per the original script
-          if mvn clean deploy -DskipTests; then
+          # Read base version from pom.xml
+          BASE_VERSION=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' pom.xml)
+          if [ -z "$BASE_VERSION" ]; then
+            echo "❌ ERROR: Could not extract version from pom.xml"
+            exit 1
+          fi
+          
+          # Determine version based on RC_OPTION
+          if [ -z "$RC_OPTION" ]; then
+            # Non-RC build: extract version from tag
+            VERSION="${REF_NAME#v}"
+            echo "✓ Detected version tag: $REF_NAME, extracted version: $VERSION"
+            echo "✓ This is a release build (non-RC)"
+          else
+            # RC build: use version from pom.xml and add -rc suffix
+            VERSION="$BASE_VERSION-rc"
+            echo "✓ Using version from pom.xml: $BASE_VERSION"
+            echo "✓ This is an RC build, final version: $VERSION"
+          fi
+          
+          # Build and deploy Maven artifacts with the determined version
+          # Pass -Drevision to override the version in pom.xml
+          echo "Building and deploying with version: $VERSION"
+          if mvn clean deploy -DskipTests -Drevision="$VERSION"; then
             echo "✓ Maven artifacts published to GitHub Packages"
+            echo "Published version: $VERSION"
           else
             echo "❌ Maven deploy failed"
             exit 1
@@ -91,9 +112,30 @@ jobs:
       - name: Summary
         if: success()
         run: |
+          cd java
+          
+          # Determine the published version (same logic as publish step)
+          # Determine if RC build; assume it is UNLESS ref is tag starting with v (e.g., v0.5.15)
+          RC_OPTION="--rc"
+          REF_NAME="${{ github.ref_name }}"
+          if [[ "$REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            RC_OPTION=""
+          fi
+          
+          BASE_VERSION=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' pom.xml)
+          
+          if [ -z "$RC_OPTION" ]; then
+            PUBLISHED_VERSION="${REF_NAME#v}"
+            BUILD_TYPE="Release"
+          else
+            PUBLISHED_VERSION="${BASE_VERSION}-rc"
+            BUILD_TYPE="Release Candidate (RC)"
+          fi
+          
           echo "## ✅ Successfully published Maven artifacts" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** $(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' java/pom.xml)" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${PUBLISHED_VERSION}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Type:** ${BUILD_TYPE}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Artifacts have been published to GitHub Packages." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
