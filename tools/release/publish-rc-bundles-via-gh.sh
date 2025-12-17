@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Publish RC bundles (AWS and GCP) via GitHub Actions workflow_dispatch
-# Usage: ./publish-rc-bundles-via-gh.sh [version] [branch]
-#   version: Version to publish (optional, will read from pom.xml if not provided)
-#   branch:  Branch/ref to trigger workflows on (default: current branch)
+# Usage: ./publish-rc-bundles-via-gh.sh [ref]
+#   ref:  Git ref to trigger workflows on (branch, tag, or any git ref; default: current branch)
 #
 # This script triggers both AWS and GCP publish workflows and monitors their execution.
+# The workflows will read the version from pom.xml automatically.
 
 set -e
 
@@ -34,50 +34,28 @@ if ! gh auth status &> /dev/null; then
     exit 1
 fi
 
-# Get version from argument or pom.xml
-VERSION="$1"
-if [ -z "$VERSION" ]; then
-    if [ ! -f "java/pom.xml" ]; then
-        echo -e "${RED}Error: java/pom.xml not found. Run this script from the psoxy root directory.${NC}"
-        exit 1
-    fi
-    VERSION=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' "java/pom.xml")
-    if [ -z "$VERSION" ]; then
-        echo -e "${RED}Error: Could not extract version from java/pom.xml${NC}"
-        exit 1
-    fi
-    echo -e "${BLUE}Using version from pom.xml: ${GREEN}${VERSION}${NC}"
-else
-    echo -e "${BLUE}Using provided version: ${GREEN}${VERSION}${NC}"
-fi
-
-# Get branch/ref (default to current branch)
-BRANCH="${2:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')}"
-if [ "$BRANCH" = "HEAD" ]; then
-    echo -e "${RED}Error: Detached HEAD state detected. Please checkout a branch or tag first.${NC}"
+# Get ref (branch, tag, or any git ref; default to current branch)
+REF="${1:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')}"
+if [ "$REF" = "HEAD" ]; then
+    echo -e "${RED}Error: Detached HEAD state detected. Please provide a branch, tag, or other git ref.${NC}"
     exit 1
 fi
-if [ -z "$BRANCH" ]; then
+if [ -z "$REF" ]; then
     echo -e "${YELLOW}Warning: Could not determine current branch, using 'main'${NC}"
-    BRANCH="main"
+    REF="main"
 fi
 
-echo -e "${BLUE}Target branch/ref: ${GREEN}${BRANCH}${NC}"
+echo -e "${BLUE}Target ref: ${GREEN}${REF}${NC}"
 echo ""
 
 # Function to trigger workflow and get run ID
 trigger_workflow() {
     local workflow_name="$1"
-    local version="$2"
-    local branch="$3"
+    local ref="$2"
     
     echo -e "${BLUE}Triggering workflow: ${GREEN}${workflow_name}${NC}" >&2
     
-    if [ -n "$version" ]; then
-        gh workflow run "$workflow_name" --ref "$branch" --raw-field version="$version"
-    else
-        gh workflow run "$workflow_name" --ref "$branch"
-    fi
+    gh workflow run "$workflow_name" --ref "$ref"
     
     # Wait for the workflow to start and get the run ID
     local run_id=""
@@ -133,15 +111,14 @@ get_workflow_url() {
 
 # Main execution
 echo -e "${BLUE}=== Publishing RC Bundles via GitHub Actions ===${NC}"
-echo -e "${BLUE}Version: ${GREEN}${VERSION}${NC}"
-echo -e "${BLUE}Branch: ${GREEN}${BRANCH}${NC}"
+echo -e "${BLUE}Ref: ${GREEN}${REF}${NC}"
 echo ""
 
 # Trigger AWS workflow
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${BLUE}Step 1/2: AWS Bundle${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-AWS_RUN_ID=$(trigger_workflow "$AWS_WORKFLOW" "$VERSION" "$BRANCH")
+AWS_RUN_ID=$(trigger_workflow "$AWS_WORKFLOW" "$REF")
 if [ $? -ne 0 ] || [ -z "$AWS_RUN_ID" ]; then
     echo -e "${RED}✗ Failed to trigger AWS workflow${NC}"
     exit 1
@@ -167,7 +144,7 @@ echo ""
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${BLUE}Step 2/2: GCP Bundle${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-GCP_RUN_ID=$(trigger_workflow "$GCP_WORKFLOW" "$VERSION" "$BRANCH")
+GCP_RUN_ID=$(trigger_workflow "$GCP_WORKFLOW" "$REF")
 if [ $? -ne 0 ] || [ -z "$GCP_RUN_ID" ]; then
     echo -e "${RED}✗ Failed to trigger GCP workflow${NC}"
     exit 1
