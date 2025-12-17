@@ -53,6 +53,10 @@ fi
 
 # Get branch/ref (default to current branch)
 BRANCH="${2:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')}"
+if [ "$BRANCH" = "HEAD" ]; then
+    echo -e "${RED}Error: Detached HEAD state detected. Please checkout a branch or tag first.${NC}"
+    exit 1
+fi
 if [ -z "$BRANCH" ]; then
     echo -e "${YELLOW}Warning: Could not determine current branch, using 'main'${NC}"
     BRANCH="main"
