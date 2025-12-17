@@ -17,6 +17,9 @@ if [ ! -f "${PATH_TO_REPO}java/pom.xml" ]; then
   exit 1
 fi
 
+printf "${YELLOW}WARNING: this is not recommended; use ${BLUE}gh run publish-mvn-artifacts.yaml --ref v0.5.15${NC}${YELLOW} instead. That will be a more reliable fresh build.${NC}\n"
+
+
 printf "\nPublishing Maven artifacts to GitHub Packages ...\n"
 printf "  (requires GitHub token with ${BLUE}write:packages${NC} permission in ${BLUE}~/.m2/settings.xml${NC})\n"
 
