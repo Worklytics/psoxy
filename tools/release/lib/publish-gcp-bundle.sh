@@ -1,15 +1,12 @@
 #!/bin/bash
 
 # Publish Psoxy GCP JAR to GCS bucket, zipped so can be used as a Cloud Function deployment bundle
-# Usage: ./publish-gcp-bundle.sh [--rc] [--non-interactive] [version]
+# Usage: ./publish-gcp-bundle.sh [--rc] [--non-interactive]
 #   --rc:              Mark this as a release candidate build (adds -rc suffix to artifact name)
 #   --non-interactive: Skip all interactive prompts (auto-confirm all prompts)
-#   version:           Version to publish (optional, will read from pom.xml if not provided)
 #
 # Examples:
 #   ./publish-gcp-bundle.sh                    # Read version from pom.xml
-#   ./publish-gcp-bundle.sh 0.5.15            # Use specified version
-#   ./publish-gcp-bundle.sh --rc 0.5.15        # RC build with specified version
 #   ./publish-gcp-bundle.sh --rc               # RC build, read version from pom.xml
 #   ./publish-gcp-bundle.sh --non-interactive  # Non-interactive mode (for CI)
 
@@ -31,7 +28,6 @@ JAR_NAME="${JAR_NAME:-psoxy-$IMPLEMENTATION}"
 # Parse command-line arguments
 IS_RC_BUILD=false
 NON_INTERACTIVE=false
-VERSION=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -47,6 +43,11 @@ while [[ $# -gt 0 ]]; do
             ;;
         -*)
             echo -e "${RED}Error: Unknown option: $1${NC}"
+            echo "Usage: $0 [--rc] [--non-interactive]"
+            exit 1
+            ;;
+        *)
+            echo -e "${RED}Error: Unexpected argument: $1${NC}"
             echo "Usage: $0 [--rc] [--non-interactive]"
             exit 1
             ;;

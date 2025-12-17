@@ -69,9 +69,9 @@ while [[ $# -gt 0 ]]; do
             exit 1
             ;;
         *)
-            # Treat as version argument
-            VERSION="$1"
-            shift
+            echo -e "${RED}Error: Unexpected argument: $1${NC}"
+            echo "Usage: $0 [--rc] [--non-interactive]"
+            exit 1
             ;;
     esac
 done
