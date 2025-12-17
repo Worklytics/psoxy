@@ -390,6 +390,9 @@ main() {
         echo ""
         echo -e "${BLUE}GCS URL for Terraform:${NC}"
         echo -e "  ${GREEN}gs://${BUCKET_NAME}/${ZIP_FILENAME}${NC}"
+        
+        # Output artifact URI in standardized format for GitHub Actions summary
+        echo "ARTIFACT_URI=gs://${BUCKET_NAME}/${ZIP_FILENAME}"
     else
         echo -e "${RED}✗ Failed to publish to GCS${NC}"
         exit 1

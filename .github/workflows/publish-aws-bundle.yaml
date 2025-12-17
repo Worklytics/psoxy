@@ -84,6 +84,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y jq
 
       - name: Publish AWS Bundle
+        id: publish
         run: |
           # Determine if RC build; assume it is UNLESS ref is tag starting with v (e.g., v0.5.15)
           RC_OPTION="--rc"
@@ -92,16 +93,24 @@ jobs:
             RC_OPTION=""
           fi
           
-          ./tools/release/lib/publish-aws-bundle.sh --non-interactive $RC_OPTION
+          ./tools/release/lib/publish-aws-bundle.sh --non-interactive $RC_OPTION | tee publish-output.log
+          
+          # Extract artifact URIs from output and save to file for summary step
+          grep "^ARTIFACT_URI_" publish-output.log > artifact-uris.txt || true
 
       - name: Summary
         if: success()
         run: |
           echo "## ✅ Successfully published AWS bundle" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** $(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' java/pom.xml)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Regions:** us-east-1, us-east-2, us-west-1, us-west-2" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f artifact-uris.txt ] && [ -s artifact-uris.txt ]; then
+            echo "**Artifact URIs:**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            while IFS='=' read -r key uri; do
+              region=$(echo "$key" | sed 's/^ARTIFACT_URI_//')
+              echo "- **${region}:** \`${uri}\`" >> $GITHUB_STEP_SUMMARY
+            done < artifact-uris.txt
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "Artifacts have been published to S3 buckets in all configured regions." >> $GITHUB_STEP_SUMMARY
 

@@ -378,7 +378,10 @@ publish() {
         echo -e "${BLUE}Download URLs:${NC}"
         for region in "${REGIONS[@]}"; do
             local bucket_name="${BUCKET_PREFIX}-${region}"
-            echo -e "  ${GREEN}${region}:${NC} https://${bucket_name}.s3.${region}.amazonaws.com/${DEPLOYMENT_ARTIFACT}"
+            local artifact_url="https://${bucket_name}.s3.${region}.amazonaws.com/${DEPLOYMENT_ARTIFACT}"
+            echo -e "  ${GREEN}${region}:${NC} ${artifact_url}"
+            # Output artifact URI in standardized format for GitHub Actions summary
+            echo "ARTIFACT_URI_${region}=${artifact_url}"
         done
     else
         echo -e "${YELLOW}⚠ Some regions failed to publish${NC}"

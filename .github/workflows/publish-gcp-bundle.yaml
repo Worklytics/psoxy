@@ -88,6 +88,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y jq
 
       - name: Publish GCP Bundle
+        id: publish
         run: |
           # Determine if RC build; assume it is UNLESS ref is tag starting with v (e.g., v0.5.15)
           RC_OPTION="--rc"
@@ -96,15 +97,21 @@ jobs:
             RC_OPTION=""
           fi
           
-          ./tools/release/lib/publish-gcp-bundle.sh --non-interactive $RC_OPTION
+          ./tools/release/lib/publish-gcp-bundle.sh --non-interactive $RC_OPTION | tee publish-output.log
+          
+          # Extract artifact URI from output
+          ARTIFACT_URI=$(grep "^ARTIFACT_URI=" publish-output.log | cut -d'=' -f2- || echo "")
+          if [ -n "$ARTIFACT_URI" ]; then
+            echo "artifact_uri=$ARTIFACT_URI" >> $GITHUB_OUTPUT
+          fi
           
       - name: Summary
         if: success()
         run: |
           echo "## ✅ Successfully published GCP bundle" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** $(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' java/pom.xml)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Bucket:** psoxy-public-artifacts" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -n "${{ steps.publish.outputs.artifact_uri }}" ]; then
+            echo "**Artifact URI:** \`${{ steps.publish.outputs.artifact_uri }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "Artifact has been published to GCS." >> $GITHUB_STEP_SUMMARY
