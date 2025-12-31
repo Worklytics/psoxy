@@ -14,6 +14,7 @@
     "number":1347,
     "state":"open",
     "locked":true,
+    "title":"Amazing new feature",
     "user":{
       "login":"p~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbN_fPDYrPH3aBnAoR5-ec6f",
       "id":"t~5NL5SaQBwE6c0L1BDjHW-BtBOXQVH8RYwY0tGGw3khk",
@@ -21,6 +22,7 @@
       "type":"User",
       "site_admin":false
     },
+    "body":"Please pull these awesome changes in!",
     "labels":[
       {
         "id":208045946,
