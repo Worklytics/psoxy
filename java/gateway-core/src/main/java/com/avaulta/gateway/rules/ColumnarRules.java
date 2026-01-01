@@ -1,5 +1,6 @@
 package com.avaulta.gateway.rules;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +45,7 @@ import lombok.extern.java.Log;
 @JsonIgnoreProperties("defaultScopeIdForSource") // so compatible with legacy CsvRules
 public class ColumnarRules implements BulkDataRules {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

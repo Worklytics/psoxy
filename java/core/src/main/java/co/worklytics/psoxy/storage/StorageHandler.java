@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -261,6 +262,7 @@ public class StorageHandler {
     @Data
     public static class ObjectTransform implements Serializable {
 
+        @Serial
         private static final long serialVersionUID = 3L;
 
         /**
