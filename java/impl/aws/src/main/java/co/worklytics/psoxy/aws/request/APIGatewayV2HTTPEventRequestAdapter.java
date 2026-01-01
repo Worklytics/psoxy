@@ -1,21 +1,20 @@
 package co.worklytics.psoxy.aws.request;
 
-import co.worklytics.psoxy.gateway.HttpEventRequest;
-import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.google.common.base.Splitter;
+import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Adapter for the APIGatewayV2HTTPEvent to the interface the {@link ApiDataRequestHandler}
@@ -99,8 +98,8 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
         return event.getHeaders().entrySet().stream().map(entry -> Pair.of(entry.getKey(), Splitter.on(',').splitToList(entry.getValue())))
         .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (a, b) -> {
             // merge multi-value headers
-            List<String> merged = ObjectUtils.defaultIfNull(a, List.of());
-            merged.addAll(ObjectUtils.defaultIfNull(b, List.of()));
+            List<String> merged = Objects.requireNonNullElse(a, List.of());
+            merged.addAll(Objects.requireNonNullElse(b, List.of()));
             return merged;
         }));
     }
