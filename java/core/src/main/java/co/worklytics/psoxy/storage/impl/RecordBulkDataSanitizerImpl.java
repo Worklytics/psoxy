@@ -93,7 +93,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
              CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.builder()
                         .setHeader(records.getHeaderNames().toArray(new String[0]))
                         .setRecordSeparator(records.getFirstEndOfLine()) //match source
-                        .build())) {
+                        .get())) {
             Iterator<CSVRecord> iter = records.iterator();
 
             while(iter.hasNext()) {
