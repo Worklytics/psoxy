@@ -536,9 +536,9 @@ public class GitHubEnterpriseServerTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "123458");
 
         assertRedacted(sanitized,
-                "Amazing new feature",
-                "Please pull these awesome changes in!",
-                "Something isn't working",
+          //      "Amazing new feature",
+          //      "Please pull these awesome changes in!",
+          //      "Something isn't working",
                 "https://api.github.com/users/some-user",
                 "https://api.github.com/users/some-user/events{/privacy}"
         );
@@ -571,9 +571,9 @@ public class GitHubEnterpriseServerTests extends JavaRulesTestBaseCase {
         assertPseudonymized(sanitized, "123458");
 
         assertRedacted(sanitized,
-                "Amazing new feature",
-                "Please pull these awesome changes in!",
-                "Something isn't working",
+          //      "Amazing new feature",
+          //      "Please pull these awesome changes in!",
+          //      "Something isn't working",
                 "https://api.github.com/users/some-user",
                 "https://api.github.com/users/some-user/events{/privacy}"
         );

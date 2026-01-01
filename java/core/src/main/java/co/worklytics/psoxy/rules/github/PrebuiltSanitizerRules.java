@@ -1,7 +1,12 @@
 package co.worklytics.psoxy.rules.github;
 
-import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.rules.Rules2;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
@@ -12,10 +17,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
+import co.worklytics.psoxy.rules.RESTRules;
+import co.worklytics.psoxy.rules.Rules2;
 
 /**
  *
@@ -440,14 +443,13 @@ public class PrebuiltSanitizerRules {
             .pathTemplate("/repos/{owner}/{repo}/pulls")
             .allowedQueryParams(pullsAllowedQueryParameters)
             .transform(Transform.Redact.builder()
-                    .jsonPath("$..title")
-                    .jsonPath("$..body")
                     .jsonPath("$..name")
                     .jsonPath("$..description")
                     .jsonPath("$..url")
                     .jsonPath("$..homepage")
                     .jsonPath("$..commit_title")
                     .jsonPath("$..commit_message")
+                    .jsonPath("$..milestone.title")
                     .build())
             .transforms(generateUserTransformations("..", Arrays.asList(
                     // Owner can be a user or an organization user
@@ -466,13 +468,12 @@ public class PrebuiltSanitizerRules {
     static final Endpoint PULL = Endpoint.builder()
             .pathTemplate("/repos/{owner}/{repo}/pulls/{pullNumber}")
             .transform(Transform.Redact.builder()
-                    .jsonPath("$..title")
-                    .jsonPath("$..body")
                     .jsonPath("$..name")
                     .jsonPath("$..description")
                     .jsonPath("$..homepage")
                     .jsonPath("$..commit_title")
                     .jsonPath("$..commit_message")
+                    .jsonPath("$..milestone.title")
                     .build())
             .transforms(generateUserTransformations("..", Arrays.asList(
                     // Owner can be a user or an organization user
@@ -600,7 +601,6 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Redact.builder()
                     .jsonPath("$..path")
                     .jsonPath("$..diff_hunk")
-                    .jsonPath("$..body")
                     .build())
             .transforms(generateUserTransformations("..", Collections.singletonList("user")))
             .build();
@@ -611,7 +611,6 @@ public class PrebuiltSanitizerRules {
             .transform(Transform.Redact.builder()
                     .jsonPath("$..path")
                     .jsonPath("$..diff_hunk")
-                    .jsonPath("$..body")
                     .build())
             .transforms(generateUserTransformations("..", Collections.singletonList("user")))
             .build();

@@ -824,14 +824,13 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$..title"
-          - "$..body"
           - "$..name"
           - "$..description"
           - "$..url"
           - "$..homepage"
           - "$..commit_title"
           - "$..commit_message"
+          - "$..milestone.title"
       - !<redact>
         jsonPaths:
           - "$..['owner','user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
@@ -880,7 +879,6 @@ endpoints:
         jsonPaths:
           - "$..path"
           - "$..diff_hunk"
-          - "$..body"
       - !<redact>
         jsonPaths:
           - "$..['user'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
@@ -902,7 +900,6 @@ endpoints:
         jsonPaths:
           - "$..path"
           - "$..diff_hunk"
-          - "$..body"
       - !<redact>
         jsonPaths:
           - "$..['user'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
@@ -943,13 +940,12 @@ endpoints:
     transforms:
       - !<redact>
         jsonPaths:
-          - "$..title"
-          - "$..body"
           - "$..name"
           - "$..description"
           - "$..homepage"
           - "$..commit_title"
           - "$..commit_message"
+          - "$..milestone.title"
       - !<redact>
         jsonPaths:
           - "$..['owner','user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
