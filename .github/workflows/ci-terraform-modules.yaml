@@ -39,4 +39,4 @@ jobs:
         if: ${{ matrix.module.test }}
         working-directory: infra/modules/${{ matrix.module.name }}
         run: |
-          terraform test
+          terraform test --var="deployment_bundle=gs://psoxy-public-artifacts/psoxy-0.4.28.zip"

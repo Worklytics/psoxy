@@ -443,6 +443,15 @@ output "provisioned_auth_key_pairs" {
   description = "List of ARNs of kms keys provisioned for webhook authentication purposes, if any."
 }
 
+output "test_examples" {
+  value = try(var.example_payload, null) != null ? [{
+    content_base64 = try(var.example_payload, null) != null ? base64encode(var.example_payload) : null
+    signing_key_id = length(local.auth_key_arns_sorted) > 0 ? "aws-kms:${element(local.auth_key_arns_sorted, length(local.auth_key_arns_sorted) - 1)}" : null
+    identity       = try(var.example_identity, null)
+  }] : []
+  description = "Array of test examples with base64-encoded content, signing key, and identity"
+}
+
 output "todo" {
   value = local.todo_content
 }

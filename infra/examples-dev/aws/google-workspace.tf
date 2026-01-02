@@ -8,7 +8,7 @@ provider "google" {
 
 module "worklytics_connectors_google_workspace" {
   source = "../../modules/worklytics-connectors-google-workspace"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors-google-workspace?ref=v0.5.12"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors-google-workspace?ref=rc-v0.5.16"
 
 
   providers = {
@@ -24,6 +24,7 @@ module "worklytics_connectors_google_workspace" {
   provision_gcp_sa_keys          = var.google_workspace_provision_keys
   gcp_sa_key_rotation_days       = var.google_workspace_key_rotation_days
   todos_as_local_files           = var.todos_as_local_files
+  todo_step                      = 1
 }
 
 output "google_workspace_api_clients" {

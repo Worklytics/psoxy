@@ -24,16 +24,18 @@ NOTE: if you're connecting to Google Workspace as a data source, you'll also nee
 
 ### IAM Permissions
 - a GCP (Google) user or Service Account with permissions to provision Service Accounts, Secrets, Storage Buckets, Cloud Run Functions, KMS Keys, Pub/Sub Topics/Subscriptions, and enable APIs within that project. eg:
-  - [Cloud Functions Developer](https://cloud.google.com/iam/docs/understanding-roles#cloudfunctions.developer) - proxy instances are deployed as GCP cloud functions
-  - [Cloud KMS Admin](https://cloud.google.com/iam/docs/understanding-roles#cloudkms.admin) - webhook authentication keys are provisioned as KMS asymmetric signing keys. this is only required for Webhook collection mode.
-  - [Cloud Run Developer](https://cloud.google.com/iam/docs/understanding-roles#cloudrun.developer) - cloud function deployment requires Cloud Run Developer role
+  - [Cloud Functions Developer](https://docs.cloud.google.com/iam/docs/roles-permissions/cloudfunctions#cloudfunctions.developer) - proxy instances are deployed as GCP cloud functions
+  - [Cloud KMS Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/cloudkms#cloudkms.admin) - webhook authentication keys are provisioned as KMS asymmetric signing keys. this is only required for Webhook collection mode.
+  - [Cloud Run Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/run#run.admin) - cloud function deployment requires Cloud Run Admin role
   - [Cloud Scheduler Admin](https://cloud.google.com/iam/docs/roles-permissions/cloudscheduler#cloudscheduler.admin) - cloud scheduler - required if using Webhook Collector mode.
   - [Cloud Storage Admin](https://cloud.google.com/iam/docs/roles-permissions/storage#storage.admin) - processing of bulk data (such as HRIS exports) uses GCS buckets, as does Webhook Collection and async API request mode.
-  - [IAM Role Admin](https://cloud.google.com/iam/docs/understanding-roles#iam.roles.admin) - create custom roles for the proxy, to follow principle of least privilege
-  - [Secret Manager Admin](https://cloud.google.com/iam/docs/understanding-roles#secretmanager.admin) - your API keys and pseudonymization salt is stored in Secret Manager
-  - [Service Account Admin](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountAdmin) - admin Service Accounts that personify Cloud Functions or are used as Google Workspace API connections
-  - [Service Usage Admin](https://cloud.google.com/iam/docs/understanding-roles#serviceusage.serviceUsageAdmin) - you will need to enable various GCP APIs
-  - [Pub/Sub Admin](https://cloud.google.com/iam/docs/understanding-roles#pubsub.admin) - webhook messages are queued in Pub/Sub topics and subscriptions for batch processing; also used for Async API mode requests.
+  - [Compute Viewer](https://docs.cloud.google.com/iam/docs/roles-permissions/compute#compute.viewer) - cloud function deployment requires reading some Compute Engine metadata for the project.
+  - [IAM Role Admin](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.roleAdmin) - create custom roles for the proxy, to follow principle of least privilege
+  - [Project IAM Admin](https://cloud.google.com/iam/docs/roles-permissions/resourcemanager#resourcemanager.projectIamAdmin) - to bind IAM policies at project level. **Note:** If you prefer not to grant this role, you have two options: (1) grant it initially, then replace it with a read-only role after the initial apply, OR (2) set `provision_pubsub_publisher_to_gcs_default_service_account=false` in your Terraform configuration and grant the `roles/pubsub.publisher` role to the default GCS storage service account (format: `service-PROJECT_NUMBER@gs-project-accounts.iam.gserviceaccount.com`) outside of the provided Terraform modules.
+  - [Secret Manager Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/secretmanager#secretmanager.admin) - your API keys and pseudonymization salt is stored in Secret Manager
+  - [Service Account Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountAdmin) - admin Service Accounts that personify Cloud Functions or are used as Google Workspace API connections
+  - [Service Usage Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/serviceusage#serviceusage.serviceUsageAdmin) - you will need to enable various GCP APIs
+  - [Pub/Sub Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/pubsub#pubsub.admin) - webhook messages are queued in Pub/Sub topics and subscriptions for batch processing; also used for Async API mode requests.
 
 NOTE: the above are the least-privileged predefined GCP roles; depending on your use-cases for the proxy, you can likely create a less-privileged [custom GCP IAM role](https://cloud.google.com/iam/docs/creating-custom-roles) that will suffice. 
 

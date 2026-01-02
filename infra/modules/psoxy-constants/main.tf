@@ -16,7 +16,7 @@ locals {
     "arn:aws:iam::aws:policy/CloudWatchFullAccess"             = "CloudWatchFullAccess"
     "arn:aws:iam::aws:policy/AmazonSSMFullAccess"              = "AmazonSSMFullAccess"
     "arn:aws:iam::aws:policy/AWSLambda_FullAccess"             = "AWSLambda_FullAccess"
-    "arn:aws:iam::aws:policy/AmazonSQS_FullAccess"             = "AmazonSQS_FullAccess"             # only if using webhook-collection
+    "arn:aws:iam::aws:policy/AmazonSQSFullAccess"              = "AmazonSQSFullAccess"              # only if using webhook-collection
     "arn:aws:iam::aws:policy/AWSKeyManagementServicePowerUser" = "AWSKeyManagementServicePowerUser" # only if using webhook-collection AND using our terraform modules to manage authentication keys
   }
   # AWS managed policy required to consume Microsoft 365 data
@@ -480,6 +480,18 @@ locals {
     "serviceusage.googleapis.com" = "Service Usage API",
   }
 
+  required_gcp_perms_to_provision_webhook_collectors = [
+    "pubsub.topics.create",
+    "pubsub.topics.get",
+    "pubsub.topics.list",
+    "pubsub.subscriptions.create",
+    "pubsub.subscriptions.get",
+    "pubsub.subscriptions.list",
+    "cloudscheduler.jobs.create",
+    "cloudscheduler.jobs.get",
+    "cloudscheduler.jobs.list",
+  ]
+
   required_gcp_roles_to_provision_host = merge({
     "roles/storage.admin" = {
       display_name    = "Storage Admin",
@@ -489,6 +501,10 @@ locals {
       display_name    = "IAM Role Admin",
       description_url = "https://cloud.google.com/iam/docs/roles-permissions/iam#iam.roleAdmin"
     },
+    "roles/resourcemanager.projectIamAdmin" = {
+      display_name    = "Project IAM Admin",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/resourcemanager#resourcemanager.projectIamAdmin"
+    }
     "roles/secretmanager.admin" = {
       display_name    = "Secret Manager Admin",
       description_url = "https://cloud.google.com/iam/docs/roles-permissions/secretmanager#secretmanager.admin"
@@ -505,11 +521,103 @@ locals {
       display_name    = "Cloud Functions Developer",
       description_url = "https://cloud.google.com/iam/docs/roles-permissions/cloudfunctions#cloudfunctions.developer"
     },
-    "roles/cloudrun.developer" = {
-      display_name    = "Cloud Run Developer",
-      description_url = "https://cloud.google.com/iam/docs/roles-permissions/run#run.developer"
+    "roles/run.admin" = {
+      display_name    = "Cloud Run Admin",
+      description_url = "https://docs.cloud.google.com/iam/docs/roles-permissions/run#run.admin"
+    },
+    "roles/compute.viewer" = {
+      display_name    = "Compute Viewer",
+      description_url = "https://docs.cloud.google.com/iam/docs/roles-permissions/compute#compute.viewer"
     },
   }, local.required_gcp_roles_to_provision_webhook_collectors)
+
+  required_gcp_perms_to_provision_host = concat([
+    # Project IAM administration
+    "resourcemanager.projects.get",
+    "resourcemanager.projects.getIamPolicy",
+    "resourcemanager.projects.setIamPolicy",
+
+    # Service Usage API management
+    "serviceusage.services.enable",
+    "serviceusage.services.get",
+    "serviceusage.services.list",
+
+    # IAM - custom roles and service accounts
+    "iam.roles.create",
+    "iam.roles.delete",
+    "iam.roles.get",
+    "iam.roles.list",
+    "iam.roles.undelete",
+    "iam.roles.update",
+    "iam.serviceAccounts.actAs",
+    "iam.serviceAccounts.create",
+    "iam.serviceAccounts.delete",
+    "iam.serviceAccounts.get",
+    "iam.serviceAccounts.getIamPolicy",
+    "iam.serviceAccounts.list",
+    "iam.serviceAccounts.setIamPolicy",
+    "iam.serviceAccounts.update",
+
+    # Secret Manager
+    "secretmanager.secrets.create",
+    "secretmanager.secrets.delete",
+    "secretmanager.secrets.get",
+    "secretmanager.secrets.getIamPolicy",
+    "secretmanager.secrets.list",
+    "secretmanager.secrets.setIamPolicy",
+    "secretmanager.secrets.update",
+    # TBC: grant terrafrom SA the perms/roles to manage secret versions on those secrets it needs to manage
+    # "secretmanager.versions.access",
+    # "secretmanager.versions.add",
+    # "secretmanager.versions.destroy",
+    # "secretmanager.versions.disable",
+    # "secretmanager.versions.enable",
+    # "secretmanager.versions.get",
+    # "secretmanager.versions.list",
+
+    # Cloud Storage
+    "storage.buckets.create",
+    "storage.buckets.delete",
+    "storage.buckets.get",
+    "storage.buckets.getIamPolicy",
+    "storage.buckets.list",
+    "storage.buckets.setIamPolicy",
+    "storage.buckets.update",
+    # TBC: rather than grant these perms at project level, better for SA to grant itself objectAdmin on the buckets it needs to write to, right??
+    # "storage.objects.create",
+    # "storage.objects.delete",
+    # "storage.objects.get",
+    # "storage.objects.list",
+    # "storage.objects.update",
+    "storage.serviceAccounts.get",
+
+    # Cloud Functions (Gen 2) and Cloud Run
+    "cloudfunctions.functions.create",
+    "cloudfunctions.functions.delete",
+    "cloudfunctions.functions.get",
+    "cloudfunctions.functions.list",
+    "cloudfunctions.functions.setIamPolicy",
+    "cloudfunctions.functions.update",
+    "cloudfunctions.locations.list",
+    "cloudfunctions.operations.get",
+    "run.locations.list",
+    "run.operations.get",
+    "run.services.get",
+    "run.services.getIamPolicy",
+    "run.services.list",
+    "run.services.setIamPolicy",
+    "run.services.update",
+
+    # Artifact Registry
+    "artifactregistry.locations.get",
+    "artifactregistry.repositories.get",
+    "artifactregistry.repositories.list",
+
+    # Compute Engine (read-only for metadata access)
+    "compute.projects.get",
+    "compute.zones.get",
+    "compute.zones.list",
+  ], local.required_gcp_perms_to_provision_webhook_collectors)
 
   # required roles to provision webhook collectors, beyond the core ones needed for any GCP instance
   required_gcp_roles_to_provision_webhook_collectors = {
@@ -523,7 +631,164 @@ locals {
     }
   }
 
+  # assumes you actually need to create the subnetwork, VPC serverless connector; if your VPC, subnetwork, and connector exist,
+  # you probably can avoid
+  required_gcp_roles_to_use_vpc = {
+    "roles/compute.networkAdmin" = {
+      display_name    = "Compute Network Admin",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/compute#compute.networkAdmin"
+    },
+    "roles/vpcaccess.admin" = {
+      display_name    = "VPC Access Admin",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/vpcaccess#vpcaccess.admin"
+    }
+  }
+
   # TODO: add list of permissions, which customer could use to create custom role as alternative
+  min_gcp_permissions_to_host = toset([
+    # Project IAM administration
+    "resourcemanager.projects.get",
+    "resourcemanager.projects.getIamPolicy",
+    "resourcemanager.projects.setIamPolicy",
+
+    # Service Usage API management
+    "serviceusage.services.enable",
+    "serviceusage.services.get",
+    "serviceusage.services.list",
+
+    # IAM - custom roles and service accounts
+    "iam.roles.create",
+    "iam.roles.delete",
+    "iam.roles.get",
+    "iam.roles.list",
+    "iam.roles.undelete",
+    "iam.roles.update",
+    "iam.serviceAccountKeys.create",
+    "iam.serviceAccountKeys.delete",
+    "iam.serviceAccountKeys.get",
+    "iam.serviceAccounts.actAs",
+    "iam.serviceAccounts.create",
+    "iam.serviceAccounts.delete",
+    "iam.serviceAccounts.get",
+    "iam.serviceAccounts.getIamPolicy",
+    "iam.serviceAccounts.list",
+    "iam.serviceAccounts.setIamPolicy",
+    "iam.serviceAccounts.update",
+
+    # Secret Manager
+    "secretmanager.secrets.create",
+    "secretmanager.secrets.delete",
+    "secretmanager.secrets.get",
+    "secretmanager.secrets.getIamPolicy",
+    "secretmanager.secrets.list",
+    "secretmanager.secrets.setIamPolicy",
+    "secretmanager.secrets.update",
+    "secretmanager.versions.access",
+    "secretmanager.versions.add",
+    "secretmanager.versions.destroy",
+    "secretmanager.versions.disable",
+    "secretmanager.versions.enable",
+    "secretmanager.versions.get",
+    "secretmanager.versions.list",
+
+    # Cloud Storage
+    "storage.buckets.create",
+    "storage.buckets.delete",
+    "storage.buckets.get",
+    "storage.buckets.getIamPolicy",
+    "storage.buckets.list",
+    "storage.buckets.setIamPolicy",
+    "storage.buckets.update",
+    "storage.objects.create",
+    "storage.objects.delete",
+    "storage.objects.get",
+    "storage.objects.list",
+    "storage.objects.update",
+    "storage.serviceAccounts.get",
+
+    # Cloud Functions (Gen 2) and Cloud Run
+    "cloudfunctions.functions.create",
+    "cloudfunctions.functions.delete",
+    "cloudfunctions.functions.get",
+    "cloudfunctions.functions.list",
+    "cloudfunctions.functions.setIamPolicy",
+    "cloudfunctions.functions.update",
+    "cloudfunctions.locations.list",
+    "cloudfunctions.operations.get",
+    "run.locations.list",
+    "run.operations.get",
+    "run.services.get",
+    "run.services.getIamPolicy",
+    "run.services.list",
+    "run.services.setIamPolicy",
+    "run.services.update",
+
+    # Artifact Registry
+    "artifactregistry.locations.get",
+    "artifactregistry.repositories.get",
+    "artifactregistry.repositories.list",
+
+    # Pub/Sub
+    "pubsub.subscriptions.create",
+    "pubsub.subscriptions.delete",
+    "pubsub.subscriptions.get",
+    "pubsub.subscriptions.getIamPolicy",
+    "pubsub.subscriptions.list",
+    "pubsub.subscriptions.setIamPolicy",
+    "pubsub.subscriptions.update",
+    "pubsub.topics.create",
+    "pubsub.topics.delete",
+    "pubsub.topics.get",
+    "pubsub.topics.getIamPolicy",
+    "pubsub.topics.list",
+    "pubsub.topics.setIamPolicy",
+    "pubsub.topics.update",
+
+    # Cloud Scheduler - async mode, webhooks
+    "cloudscheduler.jobs.create",
+    "cloudscheduler.jobs.delete",
+    "cloudscheduler.jobs.get",
+    "cloudscheduler.jobs.list",
+    "cloudscheduler.jobs.pause",
+    "cloudscheduler.jobs.resume",
+    "cloudscheduler.jobs.run",
+    "cloudscheduler.jobs.update",
+
+    # Cloud KMS
+    "cloudkms.cryptoKeyVersions.get",
+    "cloudkms.cryptoKeyVersions.list",
+    "cloudkms.cryptoKeyVersions.viewPublicKey",
+    "cloudkms.cryptoKeys.create",
+    "cloudkms.cryptoKeys.get",
+    "cloudkms.cryptoKeys.getIamPolicy",
+    "cloudkms.cryptoKeys.list",
+    "cloudkms.cryptoKeys.setIamPolicy",
+    "cloudkms.keyRings.create",
+    "cloudkms.keyRings.get",
+    "cloudkms.keyRings.list",
+    "cloudkms.keyRings.setIamPolicy",
+
+    # Eventarc (bulk collectors)
+    "eventarc.locations.list",
+    "eventarc.triggers.create",
+    "eventarc.triggers.delete",
+    "eventarc.triggers.get",
+    "eventarc.triggers.list",
+    "eventarc.triggers.update",
+
+    # # VPC Access connectors (optional network egress)
+    # "vpcaccess.connectors.create",
+    # "vpcaccess.connectors.delete",
+    # "vpcaccess.connectors.get",
+    # "vpcaccess.connectors.list",
+    # "vpcaccess.connectors.update",
+
+    # # VPC network lookups referenced by connectors
+    # "compute.networks.get",
+    # "compute.subnetworks.get",
+  ])
+
+
 
 
   # TODO: confirm that this is indeed the same list (believe it is)
@@ -539,7 +804,13 @@ locals {
       description_url = "https://cloud.google.com/iam/docs/roles-permissions/serviceusage#serviceusage.serviceUsageAdmin"
     }
   }
-  # TODO: add list of permissions, which customer could use to create custom role as alternative
+
+  # Permissions required to provision Google Workspace connectors (service account keys)
+  required_gcp_perms_to_provision_google_workspace_source = [
+    "iam.serviceAccountKeys.create",
+    "iam.serviceAccountKeys.delete",
+    "iam.serviceAccountKeys.get",
+  ]
 
   required_azuread_roles_to_provision_msft_365_source = {
     "7ab1d382-f21e-4acd-a863-ba3e13f7da61" = "Cloud Application Administrator",

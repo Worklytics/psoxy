@@ -8,6 +8,7 @@ set -e
 
 # colors
 RED='\e[0;31m'
+GREEN='\e[0;32m'
 BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
@@ -45,17 +46,32 @@ if [[ -z "$JAVA_SOURCE_ROOT" ]]; then
     exit 1
 fi
 
+# Convert to absolute path if relative
+if [[ ! "$JAVA_SOURCE_ROOT" = /* ]]; then
+    JAVA_SOURCE_ROOT="$(cd "${JAVA_SOURCE_ROOT}" && pwd)"
+fi
+
+# Ensure trailing slash for path concatenation
 if [[ "$JAVA_SOURCE_ROOT" != */ ]]; then
     JAVA_SOURCE_ROOT="${JAVA_SOURCE_ROOT}/"
 fi
 
-mvn clean $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}pom.xml"
+PARENT_POM="${JAVA_SOURCE_ROOT}pom.xml"
 
-mvn package install $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}gateway-core/pom.xml"
+# Use reactor build approach: clean all modules, then build dependencies and target module
+# -f specifies the parent pom.xml file
+# -pl specifies the projects to build (gateway-core, core, and the implementation)
+# -am builds all dependencies of the specified projects (ensures correct build order)
 
-mvn package install $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}core/pom.xml"
+# Clean all modules
+mvn clean $QUIET_OPTIONS -f "${PARENT_POM}"
 
-mvn package $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/pom.xml" $DISTRIBUTION_PROFILE
+# Build and install gateway-core and core (dependencies must be installed for impl module)
+mvn install $QUIET_OPTIONS -f "${PARENT_POM}" -pl gateway-core,core -am
+
+# Build the implementation module (package only, not install)
+# The reactor will ensure dependencies are available from the previous install step
+mvn package $QUIET_OPTIONS -f "${PARENT_POM}" -pl impl/${IMPLEMENTATION} -am $DISTRIBUTION_PROFILE
 
 DEPLOYMENT_ARTIFACT=$(ls "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment" | grep -E "^psoxy-.*\.jar$" | head -1)
 

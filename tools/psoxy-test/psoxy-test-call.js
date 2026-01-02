@@ -1,12 +1,12 @@
 import chalk from 'chalk';
+import { constants as httpCodes } from 'http2';
+import _ from 'lodash';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import aws from './lib/aws.js';
 import gcp from './lib/gcp.js';
 import getLogger from './lib/logger.js';
-import path from 'path';
-import _ from 'lodash';
-import { constants as httpCodes } from 'http2';
-import { fileURLToPath } from 'url';
-import { environmentCheck, saveToFile, getFileNameFromURL, pollAsyncResponse } from './lib/utils.js';
+import { environmentCheck, getFileNameFromURL, pollAsyncResponse, saveToFile } from './lib/utils.js';
 
 // Since we're using ESM modules, we need to make `__dirname` available
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -164,6 +164,14 @@ export default async function (options = {}) {
             break;
           case 'API_ERROR':
             errorMessage = 'API error: call to data source failed';
+            break;
+          case 'NETWORK_EGRESS_BLOCKED':
+            errorMessage = 
+              'Network timeout: unable to connect to target API. ' +
+              'This could indicate: ' +
+              '1) Proxy network egress is blocked (VPC/serverless connector misconfiguration, firewall rules, missing Cloud NAT), OR ' +
+              '2) Target API is unreachable or experiencing connectivity issues. ' +
+              'If using VPC connector, verify: VPC connector is active, CIDR range is correct, firewall allows egress, Cloud NAT is configured.';
             break;
         }
       } else if (result.headers['x-amzn-errortype']) {

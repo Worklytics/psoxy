@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>0.5.12</revision>
+        <revision>0.5.16</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.42</dependency.lombok.version>
         <dependency.dagger.version>2.40.5</dependency.dagger.version>
@@ -48,6 +48,14 @@
         <module>core</module>
         <module>impl</module>
     </modules>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/Worklytics/psoxy</url>
+        </repository>
+    </distributionManagement>
 
     <build>
         <plugins>

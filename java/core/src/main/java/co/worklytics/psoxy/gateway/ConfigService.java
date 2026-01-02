@@ -1,16 +1,12 @@
 package co.worklytics.psoxy.gateway;
 
-import com.google.common.util.concurrent.Uninterruptibles;
+import java.io.Serializable;
+import java.time.Instant;
+import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Value;
-import lombok.extern.java.Log;
-
-import java.io.Serializable;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Optional;
 
 public interface ConfigService {
 
@@ -105,5 +101,27 @@ public interface ConfigService {
         public Optional<Instant> getLastModifiedDate() {
             return Optional.ofNullable(lastModifiedDate);
         }
+    }
+
+    /**
+     * Represents a versioned configuration value with metadata
+     */
+    @Builder
+    @Value
+    class ConfigValueVersion implements Serializable {
+        /**
+         * The actual value of the configuration
+         */
+        String value;
+
+        /**
+         * When this version was last modified/created
+         */
+        Instant lastModifiedDate;
+
+        /**
+         * Version identifier (typically numeric, but represented as String for flexibility)
+         */
+        String version;
     }
 }

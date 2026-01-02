@@ -46,7 +46,14 @@ variables {
 }
 
 # Mock provider since we're only testing the logic, not actual GCP resources
-mock_provider "google" {}
+mock_provider "google" {
+  mock_data "google_compute_default_service_account" {
+    defaults = {
+      email = "123456789-compute@developer.gserviceaccount.com"
+      name  = "projects/test-project-123456/serviceAccounts/123456789-compute@developer.gserviceaccount.com"
+    }
+  }
+}
 
 run "rules_environment_variable_set" {
   command = plan

@@ -366,6 +366,14 @@ output "sanitized_bucket" {
   value = module.output_bucket.bucket_name
 }
 
+output "example_files" {
+  value = try(var.example_file, null) != null ? [{
+    path           = var.example_file
+    content_base64 = base64encode(file(local.example_file))
+  }] : []
+  description = "Array of example files with path relative to terraform config root and base64-encoded content"
+}
+
 output "proxy_kind" {
   value       = "bulk"
   description = "The kind of proxy instance this is."

@@ -120,7 +120,7 @@ EOT
     }
     cursor = {
       source_kind : "cursor",
-      availability : "alpha",
+      availability : "beta",
       enable_by_default : false,
       worklytics_connector_id : "cursor-psoxy"
       display_name : "Cursor"
@@ -520,7 +520,7 @@ EOT
     slack-discovery-api = {
       source_kind : "slack"
       availability : "ga",
-      enable_by_default : true
+      enable_by_default : false,
       worklytics_connector_id : "slack-discovery-api-psoxy",
       worklytics_connector_name : "Slack via Psoxy",
       display_name : "Slack via Discovery API"
@@ -633,14 +633,16 @@ EOT
       example_api_calls : [
         "/v2/users",
         "/v2/users/{USER_ID}/meetings",
+        "/v2/users/{USER_ID}/settings",
         "/v2/users/{USER_ID}/recordings",
         "/v2/meetings/{MEETING_ID}",
         "/v2/meetings/{MEETING_ID}/meeting_summary",
         "/v2/past_meetings/{MEETING_ID}",
         "/v2/past_meetings/{MEETING_ID}/instances",
         "/v2/past_meetings/{MEETING_ID}/participants",
-        "/v2/report/users/{userId}/meetings",
-        "/v2/report/meetings/{meetingId}/participants"
+        "/v2/report/users/{USER_ID}/meetings",
+        "/v2/report/meetings/{MEETING_ID}",
+        "/v2/report/meetings/{MEETING_ID}/participants"
       ],
       external_token_todo : <<EOT
 ## Zoom Setup
@@ -845,11 +847,11 @@ EOT
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/rest/api/group/${local.confluence_example_group_id}/membersByGroupId",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/rest/api/content/search?cql=lastmodified>=${formatdate("YYYY-MM-DD", timeadd(var.example_api_calls_sample_date, "-720h"))}%20AND%20lastmodified<=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}&limit=30&expand=body.atlas_doc_format,ancestors,version,history,history.previousVersion&includeArchivedSpaces=true",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/spaces",
-        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/attachments/{attachmentId}/versions",
-        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/blogposts/{blogpostId}/versions",
-        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/pages/{pageId}/versions",
-        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/footer-comments/{commentId}/versions",
-        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/inline-comments/{commentId}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/attachments/{ATTACHMENT_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/blogposts/{BLOGPOST_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/pages/{PAGE_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/footer-comments/{COMMENT_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/inline-comments/{COMMENT_ID}/versions",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/tasks",
         "/oauth/token/accessible-resources", # obtain Confluence Cloud ID from here
       ],
