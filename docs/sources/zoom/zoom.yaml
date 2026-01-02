@@ -122,6 +122,8 @@ endpoints:
         end_time:
           type: "string"
           format: "date-time"
+        has_meeting_summary:
+          type: "boolean"
         host_id:
           type: "string"
         id:
@@ -146,9 +148,7 @@ endpoints:
         uuid:
           type: "string"
   - pathTemplate: "/v2/past_meetings/{occurrenceUuid}/instances"
-    allowedQueryParams:
-      - "page_size"
-      - "next_page_token"
+    allowedQueryParams: []
     responseSchema:
       type: "object"
       properties:
