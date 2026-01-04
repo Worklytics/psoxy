@@ -1,5 +1,6 @@
 package co.worklytics.psoxy.aws.request;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -98,7 +99,7 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
         return event.getHeaders().entrySet().stream().map(entry -> Pair.of(entry.getKey(), Splitter.on(',').splitToList(entry.getValue())))
         .collect(Collectors.toMap(Pair::getKey, Pair::getValue, (a, b) -> {
             // merge multi-value headers
-            List<String> merged = Objects.requireNonNullElse(a, List.of());
+            List<String> merged = new ArrayList<>(Objects.requireNonNullElse(a, List.of()));
             merged.addAll(Objects.requireNonNullElse(b, List.of()));
             return merged;
         }));

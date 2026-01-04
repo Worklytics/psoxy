@@ -99,7 +99,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             while(iter.hasNext()) {
                 CSVRecord record = iter.next();
                 try {
-                    LinkedHashMap result = applyTransforms(record.toMap(), compiledTransforms);
+                    LinkedHashMap<String, Object> result = applyTransforms(record.toMap(), compiledTransforms);
 
                     records.getHeaderNames()
                         .forEach(header -> {
@@ -149,7 +149,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
      * @return the transformed document
      * @throws UnmatchedPseudonymization if a pseudonymization transform should be applied, but nothing matches the path
      */
-    LinkedHashMap applyTransforms(Object document, List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
+    LinkedHashMap<String, Object> applyTransforms(Object document, List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
             throws UnmatchedPseudonymization {
         for (Triple<JsonPath, RecordTransform, MapFunction> compiledTransform : compiledTransforms) {
             if (compiledTransform.getMiddle() instanceof RecordTransform.Pseudonymize) {
@@ -167,7 +167,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
         }
 
         //abusing implementation detail of the JSONPath library
-        return (LinkedHashMap) document;
+        return (LinkedHashMap<String, Object>) document;
     }
 
     private MapFunction getMapFunction(RecordTransform transform,
