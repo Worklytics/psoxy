@@ -1,13 +1,26 @@
 package com.avaulta.gateway.rules;
 
+import java.io.Serial;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.transforms.FieldTransformPipeline;
-import com.fasterxml.jackson.annotation.*;
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.java.Log;
-
-import java.util.*;
 
 /**
  * rules for sanitizing "columnar" bulk files
@@ -32,6 +45,7 @@ import java.util.*;
 @JsonIgnoreProperties("defaultScopeIdForSource") // so compatible with legacy CsvRules
 public class ColumnarRules implements BulkDataRules {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

@@ -1,15 +1,21 @@
 package com.avaulta.gateway.rules;
 
-import com.avaulta.gateway.rules.transforms.Transform;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import lombok.*;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import com.avaulta.gateway.rules.transforms.Transform;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.Singular;
+import lombok.With;
 
 @Builder
 @JsonPropertyOrder({"jwtClaimsToVerify", "endpoints"})  //deterministic serialization order
