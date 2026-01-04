@@ -261,7 +261,8 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
         # example admin for Google Workspace
         printf "# Google Workspace example admin \n" >> $TFVARS_FILE
         printf "#  - this is used to aid testing of Google Workspace connectors against a real account, in cases where an admin is explicitly required\n" >> $TFVARS_FILE
-        GOOGLE_WORKSPACE_EXAMPLE_ADMIN=$(gcloud config get account 2>/dev/null || echo "")
+        # By default, use the same account as GOOGLE_WORKSPACE_EXAMPLE_USER; adjust in terraform.tfvars if a different admin is needed.
+        GOOGLE_WORKSPACE_EXAMPLE_ADMIN="${GOOGLE_WORKSPACE_EXAMPLE_USER}"
         if [ -n "$GOOGLE_WORKSPACE_EXAMPLE_ADMIN" ]; then
           printf "google_workspace_example_admin=\"${GOOGLE_WORKSPACE_EXAMPLE_ADMIN}\"\n\n" >> $TFVARS_FILE
           printf "\tgoogle_workspace_example_admin=${BLUE}\"${GOOGLE_WORKSPACE_EXAMPLE_ADMIN}\"${NC}\n"
