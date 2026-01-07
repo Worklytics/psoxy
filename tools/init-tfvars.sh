@@ -17,6 +17,8 @@ fi
 # colors
 RED='\e[0;31m'
 BLUE='\e[0;34m'
+YELLOW='\e[0;33m'
+GREEN='\e[0;32m'
 NC='\e[0m' # No Color
 
 # Validate DEPLOYMENT_ENV
