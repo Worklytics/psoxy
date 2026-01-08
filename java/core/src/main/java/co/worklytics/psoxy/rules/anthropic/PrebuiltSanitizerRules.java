@@ -1,4 +1,4 @@
-package co.worklytics.psoxy.rules.claude;
+package co.worklytics.psoxy.rules.anthropic;
 
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.Rules2;
@@ -12,10 +12,10 @@ import java.util.Map;
 public class PrebuiltSanitizerRules {
 
 
-    static final RESTRules CLAUDE = Rules2.load("sources/claude/claude.yaml");
+    static final RESTRules CLAUDE_CODE = Rules2.load("sources/anthropic/claude-code/claude-code.yaml");
 
-    static public final Map<String, RESTRules> CURSOR_DEFAULT_RULES_MAP =
+    static public final Map<String, RESTRules> DEFAULT_RULES_MAP =
         ImmutableMap.<String, RESTRules>builder()
-            .put("claude", CLAUDE)
+            .put("claude-code", CLAUDE_CODE)
             .build();
 }

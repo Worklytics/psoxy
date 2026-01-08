@@ -54,6 +54,8 @@
     * [New Relic Monitoring](development/alpha-features/new-relic-monitoring.md)
     * [Webhook Collectors](development/alpha-features/webhook-collectors.md)
 * [Data Sources](sources/README.md)
+  * [Anthropic](sources/anthropic/README.md)
+    * [Claude Code **BETA**](sources/anthropic/claude-code/README.md)
   * [Asana](sources/asana/README.md)
   * [Atlassian](sources/atlassian/README.md)
     * [Confluence Cloud](sources/atlassian/confluence/README.md)

@@ -1,8 +1,7 @@
-package co.worklytics.psoxy.rules.claude;
+package co.worklytics.psoxy.rules.anthropic;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.rules.claude.PrebuiltSanitizerRules;
 import lombok.Getter;
 
 import java.util.stream.Stream;
@@ -10,13 +9,14 @@ import java.util.stream.Stream;
 @Getter
 public class ClaudeTests extends JavaRulesTestBaseCase {
 
-    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.CLAUDE;
+    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.CLAUDE_CODE;
 
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
         .defaultScopeId("claude")
-        .sourceKind("claude")
+        .sourceKind("claude-code")
         .exampleApiResponsesDirectoryPath("example-api-responses/original/")
         .exampleSanitizedApiResponsesPath("example-api-responses/sanitized/")
+        .sourceFamily("anthropic")
         .checkUncompressedSSMLength(false)
         .build();
 

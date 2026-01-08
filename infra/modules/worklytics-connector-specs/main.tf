@@ -118,13 +118,13 @@ EOT
         path_to_instance_parameters = "PSOXY_CHATGPT_ENTERPRISE_"
       })
     }
-    claude = {
-      source_kind : "claude"
-      availability : "alpha",
+    claude-code = {
+      source_kind : "claude-code"
+      availability : "beta",
       enable_by_default : false
-      worklytics_connector_id : "claude-psoxy"
-      display_name : "claude",
-      worklytics_connector_name : "Claude via Psoxy"
+      worklytics_connector_id : "claude-code-psoxy"
+      display_name : "Claude Code",
+      worklytics_connector_name : "Claude Code via Psoxy"
       target_host : "api.anthropic.com"
       source_auth_strategy : "claude_admin_api_key"
       secured_variables : [
