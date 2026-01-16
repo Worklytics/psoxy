@@ -59,8 +59,8 @@ public class ClaudeAuthStrategy implements SourceAuthStrategy {
             @Override
             public Map<String, List<String>> getRequestMetadata() throws IOException {
                 String adminApiKey = secretStore.getConfigPropertyAsOptional(ConfigProperty.ADMIN_API_KEY).orElseThrow(
-                    () -> new IllegalStateException("ADMIN_API_KEY not configured")
-                ););
+                    () -> new IllegalStateException("ADMIN_API_KEY not configured"));
+
                 return ImmutableMap.of("x-api-key", Collections.singletonList(adminApiKey));
             }
 
