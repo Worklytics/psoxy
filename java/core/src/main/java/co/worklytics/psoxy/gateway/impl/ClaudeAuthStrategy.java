@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 /**
  * Passes the admin API key for Claude
+ * @implNote This could be extended to support different header names, not necessarily x-api-key
  */
 @RequiredArgsConstructor(onConstructor_ = {@Inject})
 public class ClaudeAuthStrategy implements SourceAuthStrategy {
@@ -57,7 +58,9 @@ public class ClaudeAuthStrategy implements SourceAuthStrategy {
 
             @Override
             public Map<String, List<String>> getRequestMetadata() throws IOException {
-                String adminApiKey = secretStore.getConfigPropertyAsOptional(ConfigProperty.ADMIN_API_KEY).orElse("");
+                String adminApiKey = secretStore.getConfigPropertyAsOptional(ConfigProperty.ADMIN_API_KEY).orElseThrow(
+                    () -> new IllegalStateException("ADMIN_API_KEY not configured")
+                ););
                 return ImmutableMap.of("x-api-key", Collections.singletonList(adminApiKey));
             }
 
