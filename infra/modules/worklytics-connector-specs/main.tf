@@ -146,7 +146,7 @@ EOT
         }
       ],
       external_token_todo : templatefile("${path.module}/docs/claude/instructions.tftpl", {
-        path_to_instance_parameters = "PSOXY_CLAUDE_"
+        path_to_instance_parameters = "PSOXY_CLAUDE_CODE"
       })
       instructions_template = "${path.module}/docs/claude/instructions.tftpl"
     }
