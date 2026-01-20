@@ -23,6 +23,8 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/Activity"
+        error:
+          $ref: "#/definitions/ErrorResponse"
         first_id:
           type: "string"
         has_more:
@@ -60,6 +62,8 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/Chat"
+        error:
+          $ref: "#/definitions/ErrorResponse"
         first_id:
           type: "string"
         has_more:
@@ -126,6 +130,8 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/Organization"
+        error:
+          $ref: "#/definitions/ErrorResponse"
         first_id:
           type: "string"
         has_more:
@@ -154,6 +160,8 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/User"
+        error:
+          $ref: "#/definitions/ErrorResponse"
         first_id:
           type: "string"
         has_more:
@@ -247,6 +255,11 @@ definitions:
     properties:
       text:
         type: "string"
+      type:
+        type: "string"
+  ErrorResponse:
+    type: "object"
+    properties:
       type:
         type: "string"
   File:

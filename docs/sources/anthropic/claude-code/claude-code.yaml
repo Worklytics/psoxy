@@ -17,6 +17,8 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/ClaudeCodeUsageEntry"
+        error:
+          $ref: "#/definitions/ErrorResponse"
         first_id:
           type: "string"
         has_more:
@@ -44,6 +46,8 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/User"
+        error:
+          $ref: "#/definitions/ErrorResponse"
         first_id:
           type: "string"
         has_more:
@@ -56,11 +60,19 @@ definitions:
   Actor:
     type: "object"
     properties:
-      api_key_name:
+      api_key_id:
         type: "string"
       email_address:
         type: "string"
+      ip_address:
+        type: "string"
       type:
+        type: "string"
+      unauthenticated_email_address:
+        type: "string"
+      user_agent:
+        type: "string"
+      user_id:
         type: "string"
   ClaudeCodeUsageEntry:
     type: "object"
@@ -97,6 +109,11 @@ definitions:
         type: "integer"
       pull_requests_by_claude_code:
         type: "integer"
+  ErrorResponse:
+    type: "object"
+    properties:
+      type:
+        type: "string"
   EstimatedCost:
     type: "object"
     properties:
