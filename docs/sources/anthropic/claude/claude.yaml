@@ -14,8 +14,12 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.data[*].actor['email_address','user_id','ip_address','unauthenticated_email_address']"
+          - "$.data[*].actor['email_address','user_id','unauthenticated_email_address',\
+      \ 'api_key_id']"
         encoding: "URL_SAFE_TOKEN"
+      - !<hashIp>
+        jsonPaths:
+          - "$..ip_address"
     responseSchema:
       type: "object"
       properties:
@@ -52,8 +56,7 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.data[*].user.email_address"
-          - "$.data[*].user.id"
+          - "$.data[*].user['email_address','id']"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
@@ -77,13 +80,11 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.user.email_address"
-          - "$.user.id"
-          - "$.user.ip_address"
+          - "$.user['email_address','id','unauthenticated_email_address']"
         encoding: "URL_SAFE_TOKEN"
-      - !<redact>
+      - !<hashIp>
         jsonPaths:
-          - "$.name"
+          - "$..ip_address"
       - !<textDigest>
         jsonPaths:
           - "$.chat_messages[*].content[*].text"
@@ -119,10 +120,6 @@ endpoints:
     allowedQueryParams:
       - "page"
       - "limit"
-    transforms:
-      - !<redact>
-        jsonPaths:
-          - "$.data[*].name"
     responseSchema:
       type: "object"
       properties:
@@ -147,12 +144,8 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$.data[*].id"
-          - "$.data[*].email"
+          - "$.data[*]['email_address','email','id']"
         encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$.data[*].name"
     responseSchema:
       type: "object"
       properties:

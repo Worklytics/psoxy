@@ -8,8 +8,11 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..actor.email_address"
+          - "$..actor['email_address', 'user_id', 'unauthenticated_email_address', 'api_key_id']"
         encoding: "URL_SAFE_TOKEN"
+      - !<hashIp>
+        jsonPaths:
+          - "$..ip_address"
     responseSchema:
       type: "object"
       properties:
@@ -36,9 +39,6 @@ endpoints:
         jsonPaths:
           - "$..['id','email']"
         encoding: "URL_SAFE_TOKEN"
-      - !<redact>
-        jsonPaths:
-          - "$..['name']"
     responseSchema:
       type: "object"
       properties:
