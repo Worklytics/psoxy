@@ -20,6 +20,10 @@ import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.RecordRules;
 import com.avaulta.gateway.rules.transforms.RecordTransform;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
@@ -46,6 +50,9 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Inject
     UrlSafeTokenPseudonymEncoder encoder;
+
+    @Inject
+    ObjectMapper objectMapper;
 
     RecordRules rules;
 
@@ -74,6 +81,8 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             sanitizeNdjson(reader, writer, compiledTransforms);
         } else if (rules.getFormat() == RecordRules.Format.CSV) {
             sanitizeCsv(reader, writer, compiledTransforms);
+        } else if (rules.getFormat() == RecordRules.Format.JSON_ARRAY) {
+            sanitizeJsonArray(reader, writer, compiledTransforms);
         } else {
             throw new IllegalArgumentException("Unsupported format: " + rules.getFormat());
         }
@@ -137,6 +146,59 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                     log.warning("Skipped record due to UnmatchedPseudonymization: " + e.getPath());
                 }
             }
+        }
+    }
+
+    @VisibleForTesting
+    void sanitizeJsonArray(@NonNull Reader reader,
+                           @NonNull Writer writer,
+                           @NonNull List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms) throws IOException {
+
+        JsonFactory factory = objectMapper.getFactory();
+        try (JsonParser parser = factory.createParser(reader)) {
+            writer.write("[");
+            boolean first = true;
+
+            // Check for START_ARRAY
+            if (parser.nextToken() == JsonToken.START_ARRAY) {
+                // array started
+            } else {
+                // if it's not start array, we could assume it's just values (lenient), or maybe the file started without [?
+                // given the requirement to "strip leading [", we assume it should be there.
+                // If the parser is at START_OBJECT already (e.g. no [), we proceed differently?
+                // Let's stick to standard behavior: if it's NOT an array, iterating until END_ARRAY might fail or finish immediately.
+                // Jackson `nextToken` handles whitespace.
+                // If the stream is `{"a":1}`, nextToken is `START_OBJECT`.
+                // if we don't consume it here, the loop below will catch it.
+                // BUT `END_ARRAY` check in loop requires us to be *inside* an array if we expect `]` to end it.
+                // If input lacks `[` and `]`, then `parser.nextToken()` won't hit `END_ARRAY`.
+                // For now, let's assume valid JSON array input as requested.
+                // If explicit check needed:
+                // if (parser.currentToken() != JsonToken.START_ARRAY) handle error?
+            }
+
+            while (parser.nextToken() != JsonToken.END_ARRAY && parser.currentToken() != null) {
+                // Read the object
+                // We convert to String then parse with Jayway to ensure compatibility with `applyTransforms` logic
+                // that expects Jayway compatible types (Maps, etc) and to match `sanitizeNdjson` behavior.
+                Object document = jsonConfiguration.jsonProvider().parse(
+                    objectMapper.writeValueAsString(objectMapper.readTree(parser))
+                );
+
+                try {
+                    document = applyTransforms(document, compiledTransforms);
+
+                    if (!first) {
+                        writer.write(",");
+                    }
+                    writer.write(jsonConfiguration.jsonProvider().toJson(document));
+                    first = false;
+                } catch (UnmatchedPseudonymization e) {
+                    log.warning("Skipped record due to UnmatchedPseudonymization: " + e.getPath());
+                }
+            }
+            writer.write("]");
+            writer.flush();
         }
     }
 
