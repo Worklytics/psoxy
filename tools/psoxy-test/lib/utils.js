@@ -592,12 +592,15 @@ async function unzip(filePath) {
 }
 
 /**
- * Check if file is gzipped
- * @param {string} filePath
+ * Check if file or buffer is gzipped
+ * @param {string|Buffer} file - filePath or Buffer
  * @returns {boolean}
  */
-async function isGzipped(filePath) {
-  return isgzipBuffer(await fs.readFile(filePath));
+async function isGzipped(file) {
+  if (Buffer.isBuffer(file)) {
+    return isgzipBuffer(file);
+  }
+  return isgzipBuffer(await fs.readFile(file));
 }
 
 /**
@@ -809,6 +812,45 @@ async function pollAsyncResponse(locationUrl, options = {}) {
 }
 
 /**
+ * Compare actual content items against expected content.
+ * 
+ * @param {Array} items - Array of actual items found in the file
+ * @param {string} expectedContent - Expected JSON string
+ * @param {Object} logger - Logger instance
+ * @returns {Object} - { found: boolean }
+ */
+function compareContent(items, expectedContent, logger) {
+    let expectedJson;
+    if (typeof expectedContent === 'string') {
+        expectedJson = JSON.parse(expectedContent);
+    } else {
+        expectedJson = expectedContent;
+    }
+
+    const found = items.some(item => {
+        // 1. Try strict equality first
+        if (_.isEqual(item, expectedJson)) return true;
+
+        // 2. Try relaxed equality (ignoring actor.id for pseudonymization)
+        const itemNoId = _.cloneDeep(item);
+        if (itemNoId.actor) delete itemNoId.actor.id;
+
+        const expectedNoId = _.cloneDeep(expectedJson);
+        if (expectedNoId.actor) delete expectedNoId.actor.id;
+
+        if (_.isEqual(itemNoId, expectedNoId)) {
+            logger.info('Match found with differing actor.id (likely pseudonymized)');
+            return true;
+        }
+        
+        logger.info(`Comparison failed.\nActual (no ID): ${JSON.stringify(itemNoId)}\nExpected (no ID): ${JSON.stringify(expectedNoId)}`);
+        return false;
+    });
+
+    return { found };
+}
+
+/**
  * Sleep for a given number of milliseconds
  * @param {number} ms
  * @returns {Promise<void>}
@@ -818,7 +860,9 @@ function sleep(ms) {
 }
 
 export {
-    environmentCheck, executeCommand,
+    compareContent,
+    environmentCheck,
+    executeCommand,
     executeWithRetry,
     getAWSCredentials,
     getCommonHTTPHeaders,
@@ -831,6 +875,8 @@ export {
     saveToFile,
     signAWSRequestURL,
     signJwtWithAWSKMS,
-    signJwtWithGCPKMS, sleep, transformSpecWithResponse
+    signJwtWithGCPKMS,
+    sleep,
+    transformSpecWithResponse
 };
 

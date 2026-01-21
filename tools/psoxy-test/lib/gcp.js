@@ -5,6 +5,7 @@ import { Storage } from '@google-cloud/storage';
 import _ from 'lodash';
 import getLogger from './logger.js';
 import {
+    compareContent,
     executeCommand,
     executeWithRetry,
     getCommonHTTPHeaders,
@@ -12,7 +13,7 @@ import {
     request,
     resolveHTTPMethod,
     signJwtWithGCPKMS,
-    sleep,
+    sleep
 } from './utils.js';
 
 
@@ -415,41 +416,14 @@ async function verifyBucket(bucketName, expectedContent, startTime, logger) {
         }
 
         if (items.length > 0) {
-             let expectedJson;
-             if (typeof expectedContent === 'string') {
-                 expectedJson = JSON.parse(expectedContent);
-             } else {
-                 expectedJson = expectedContent;
-             }
-             
-             logger.info(`Expected Content: ${JSON.stringify(expectedJson)}`);
-
-             const found = items.some(item => {
-                 // 1. Try strict equality first
-                 if (_.isEqual(item, expectedJson)) return true;
-    
-                 // 2. Try relaxed equality (ignoring actor.id for pseudonymization)
-                 const itemNoId = _.cloneDeep(item);
-                 if (itemNoId.actor) delete itemNoId.actor.id;
-                 
-                 const expectedNoId = _.cloneDeep(expectedJson);
-                 if (expectedNoId.actor) delete expectedNoId.actor.id;
-                 
-                 if (_.isEqual(itemNoId, expectedNoId)) {
-                     logger.info('Match found with differing actor.id (likely pseudonymized)');
-                     return true;
-                 }
-                 
-                 return false;
-             });
-    
-             if (found) {
-                logger.success(`Verification Successful: Content matches.`);
-                return;
-             } else {
-                 logger.error(`Verification Failed: Content does not match.`);
-                 throw new Error(`Verification failed: Content mismatch in file ${file.name}`);
-             }
+          const matchResult = compareContent(items, expectedContent, logger);
+          if (matchResult.found) {
+            logger.success(`Verification Successful: Content matches.`);
+            return;
+          } else {
+            logger.error(`Verification Failed: Content does not match.`);
+            throw new Error(`Verification failed: Content mismatch in file ${file.name}`);
+          }
         } else {
              logger.warn(`File is empty or contains no items.`);
              throw new Error(`Verification failed: Empty file ${file.name}`);

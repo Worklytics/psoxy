@@ -93,27 +93,39 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
     }
 
     if (options.verifyCollection && result.status === 200) {
-       // TODO: delegate based on cloud provider
-       // For now, assuming GCP if gcp.isValidURL(options.url) or force=gcp
-       // We import gcp dynamically or just use the one we have if we refactor psoxy-test-call to return provider
-       // But psoxyTestCall is a default export.
-       
-       // Re-evaluating provider logic mostly duplicates psoxy-test-call logic
-       // Let's use the helper from psoxy-test-call.js imports, but we need to import them here if we want to use them directly.
-       // They are imported: `import gcp from './lib/gcp.js';`
-       
+       // Delegate based on cloud provider logic
        const url = new URL(options.url);
-       // Simple check
-       if (options.force === 'gcp' || gcp.isValidURL(url)) {
-           await gcp.verifyCollection({
-               verifyCollection: options.verifyCollection,
-               schedulerJob: options.schedulerJob,
-               url: options.url,
-               body: options.body,
-               startTime: startTime
-           }, logger);
+       
+       // Dynamically import aws.js for AWS verification to avoid circular deps or if beneficial
+       // But we didn't import aws at the top yet, let's look at imports. 
+       // We only have `import gcp from './lib/gcp.js';` at top.
+       // We should probably import aws dynamically or if it's not imported at all.
+       // `cli-call.js` does NOT import aws.js. I should add `import aws from './lib/aws.js'` or dynamic import.
+       // I will use dynamic import here as a quick fix or updated it properly.
+       // But since replace_file_content targets specific lines, I am inside the block.
+       
+       const isGcp = options.force === 'gcp' || gcp.isValidURL(url);
+       const isAws = options.force === 'aws' || (!isGcp && (url.hostname.endsWith('amazonaws.com') || url.hostname.endsWith('on.aws'))); // rough check or rely on fallback
+
+       if (isGcp) {
+          await gcp.verifyCollection({
+              verifyCollection: options.verifyCollection,
+              schedulerJob: options.schedulerJob,
+              url: options.url,
+              body: options.body,
+              startTime: startTime
+          }, logger);
        } else {
-           logger.warn('Verification only implemented for GCP currently.');
+          // Assume AWS or fallback
+          const aws = (await import('./lib/aws.js')).default;
+          await aws.verifyCollection({
+              verifyCollection: options.verifyCollection,
+              url: options.url,
+              body: options.body,
+              startTime: startTime,
+              role: options.role,
+              region: options.region,
+          }, logger);
        }
     }
 
