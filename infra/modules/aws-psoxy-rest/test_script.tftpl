@@ -7,6 +7,9 @@ BODY=$${4:-""}
 
 echo "Quick test of ${function_name} ..."
 
+# Suppress "punycode" deprecation warnings from Node 21+
+export NODE_OPTIONS="--no-deprecation"
+
 ${command_cli_call} -u "${proxy_endpoint_url}/" --health-check
 HEALTHCHECK_RC=$?
 
