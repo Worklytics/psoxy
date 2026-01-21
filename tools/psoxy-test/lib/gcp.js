@@ -1,15 +1,18 @@
+
 import { Logging } from '@google-cloud/logging';
+import { CloudSchedulerClient } from '@google-cloud/scheduler';
 import { Storage } from '@google-cloud/storage';
 import _ from 'lodash';
 import getLogger from './logger.js';
 import {
-  executeCommand,
-  executeWithRetry,
-  getCommonHTTPHeaders,
-  isGzipped,
-  request,
-  resolveHTTPMethod,
-  signJwtWithGCPKMS,
+    executeCommand,
+    executeWithRetry,
+    getCommonHTTPHeaders,
+    isGzipped,
+    request,
+    resolveHTTPMethod,
+    signJwtWithGCPKMS,
+    sleep,
 } from './utils.js';
 
 
@@ -112,14 +115,25 @@ async function call(options = {}) {
  * @return {Array<Object>} - array of serialized log entries
  */
 async function getLogs(options = {}) {
-  const logging = new Logging();
-  const log = logging.log('cloudfunctions.googleapis.com%2Fcloud-functions');
-  const [entries] = await log.getEntries({
-    filter: `resource.labels.function_name=${options.functionName}`,
+  const logging = new Logging({ projectId: options.projectId });
+  
+  // Support both Gen 1 (cloud_function) and Gen 2 (cloud_run_revision)
+  // Gen 2 logs usually appear under run.googleapis.com/stdout or stderr, but resource.labels.service_name identify the function
+  const filter = `
+    (resource.type="cloud_function" AND resource.labels.function_name="${options.functionName}")
+    OR 
+    (resource.type="cloud_run_revision" AND resource.labels.service_name="${options.functionName}")
+  `;
+
+  const [entries] = await logging.getEntries({
+    filter: filter,
     resourceNames: [`projects/${options.projectId}`],
-    orderBy: 'timestamp asc',
+    orderBy: 'timestamp desc', // Get newest first
+    pageSize: 50,
   });
-  return entries.map(entry => entry.toStructuredJSON());
+  
+  // Return in chronological order
+  return entries.reverse().map(entry => entry.toStructuredJSON());
 }
 
 /**
@@ -195,7 +209,7 @@ function parseLogEntries(entries) {
     return [];
   }
 
-  // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
+  // https://cloud.google.com/logging/docs/reference/v2/rest/v2/entries/list#LogEntry
   const LOG_LEVELS = ['WARNING', 'ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY'];
   const dateRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}/
   return entries.map(entry => {
@@ -335,6 +349,190 @@ async function download(bucketName, fileName, destination, client, logger) {
   return downloadResponse;
 }
 
+/**
+ * Triggers a Cloud Scheduler job to run immediately.
+ *
+ * @param {string} jobName
+ * @param {Object} logger
+ */
+async function triggerScheduler(jobName, logger) {
+  logger.info(`Triggering Cloud Scheduler job: ${jobName}`);
+  const client = new CloudSchedulerClient();
+  const [response] = await client.runJob({ name: jobName });
+  logger.success(`Cloud Scheduler job triggered: ${response.name}`);
+}
+
+/**
+ * Verifies that a file containing the expected content appears in the bucket after startTime.
+ *
+ * @param {string} bucketName
+ * @param {string} expectedContent
+ * @param {number} startTime - timestamp in ms
+ * @param {Object} logger
+ */
+async function verifyBucket(bucketName, expectedContent, startTime, logger) {
+  const timeout = 60000; // 60 seconds
+  const pollInterval = 5000; // 5 seconds
+  const endTime = Date.now() + timeout;
+
+  logger.info(`Verifying content in bucket: ${bucketName}. Will wait up to ${timeout / 1000}s`);
+
+  const client = createStorageClient();
+  const bucket = client.bucket(bucketName);
+  
+  while (Date.now() < endTime) {
+    const elapsed = Math.round((Date.now() - startTime) / 1000); // approx
+    logger.info(`Waiting for content to appear in bucket... [${Math.max(0, elapsed)}s elapsed]`);
+    
+    // Check for new files
+    const [files] = await bucket.getFiles();
+    
+    // Sort files by creation time, newest first
+    const newFiles = files.filter(f => new Date(f.metadata.timeCreated).getTime() > startTime)
+                          .sort((a, b) => new Date(b.metadata.timeCreated).getTime() - new Date(a.metadata.timeCreated).getTime());
+
+    if (newFiles.length > 0) {
+        // Stop polling as soon as we find a file (expecting only one)
+        const file = newFiles[0];
+        logger.info(`New file found: ${file.name} (Created: ${new Date(file.metadata.timeCreated).toISOString()})`);
+        
+        const [content] = await file.download();
+        const contentStr = content.toString();
+        logger.info(`Found Content: ${contentStr}`);
+        
+        // Parse found content
+        let items = [];
+        try {
+            const jsonContent = JSON.parse(contentStr);
+            if (Array.isArray(jsonContent)) {
+                items = jsonContent;
+            } else if (_.isPlainObject(jsonContent)) {
+                items = [jsonContent];
+            }
+        } catch (e) {
+            logger.error(`Failed to parse file content: ${e.message}`);
+            throw new Error(`Verification failed: Invalid JSON in file ${file.name}`);
+        }
+
+        if (items.length > 0) {
+             let expectedJson;
+             if (typeof expectedContent === 'string') {
+                 expectedJson = JSON.parse(expectedContent);
+             } else {
+                 expectedJson = expectedContent;
+             }
+             
+             logger.info(`Expected Content: ${JSON.stringify(expectedJson)}`);
+
+             const found = items.some(item => {
+                 // 1. Try strict equality first
+                 if (_.isEqual(item, expectedJson)) return true;
+    
+                 // 2. Try relaxed equality (ignoring actor.id for pseudonymization)
+                 const itemNoId = _.cloneDeep(item);
+                 if (itemNoId.actor) delete itemNoId.actor.id;
+                 
+                 const expectedNoId = _.cloneDeep(expectedJson);
+                 if (expectedNoId.actor) delete expectedNoId.actor.id;
+                 
+                 if (_.isEqual(itemNoId, expectedNoId)) {
+                     logger.info('Match found with differing actor.id (likely pseudonymized)');
+                     return true;
+                 }
+                 
+                 return false;
+             });
+    
+             if (found) {
+                logger.success(`Verification Successful: Content matches.`);
+                return;
+             } else {
+                 logger.error(`Verification Failed: Content does not match.`);
+                 throw new Error(`Verification failed: Content mismatch in file ${file.name}`);
+             }
+        } else {
+             logger.warn(`File is empty or contains no items.`);
+             throw new Error(`Verification failed: Empty file ${file.name}`);
+        }
+    }
+    
+    await sleep(pollInterval);
+  }
+
+  logger.error('No new files found in bucket within timeout.');
+  throw new Error('Verification failed: Expected content not found in bucket.');
+}
+
+/**
+ * End-to-end verification of webhook collection in GCP.
+ *
+ * @param {Object} options
+ * @param {string} options.verifyCollection - bucket name
+ * @param {string} options.schedulerJob - optional, job name
+ * @param {string} options.url - function URL
+ * @param {string} options.body - original POST body
+ * @param {number} options.startTime - timestamp when test started
+ * @param {Object} logger
+ */
+async function verifyCollection(options, logger) {
+  const bucketName = options.verifyCollection;
+  
+  // 1. Trigger Scheduler
+  let jobName = options.schedulerJob;
+  if (!jobName) {
+    // Attempt to derive job name from function URL
+    // URL: https://REGION-PROJECT.cloudfunctions.net/FUNCTION_NAME or https://FUNCTION_NAME-HASH-REGION.a.run.app
+    // Job convention: ENVIRONMENT-INSTANCE-batch-processing
+    // This is tricky to derive perfectly without more info.
+    // However, if we follow the naming in terraform:
+    // function name: ${env_prefix}${instance_id}
+    // job name: ${env_prefix}${instance_id}-batch-processing
+    
+    // So we just need to extract function name from URL and append "-batch-processing"
+    
+    try {
+        const url = new URL(options.url);
+        let functionName = '';
+        let region = '';
+        let projectId = '';
+        
+        if (isCloudFunctionGen2(url)) {
+            // https://psoxy-dev-erik-llm-portal-bovv3fr26q-uc.a.run.app
+            const re = /^(.+)-([a-z0-9]+)-([a-z]{2})\.a\.run\.app$/;
+            const parts = url.hostname.match(re);
+            if (parts) {
+                functionName = parts[1];
+                 // Map shortCode to region? Or we need region for job name construction?
+                 // Job name is full resource name: projects/PROJECT/locations/REGION/jobs/JOB_NAME
+                 // We don't have region or project easily available unless passed or inferred.
+                 
+                 // wait, TriggerScheduler takes a full job name.
+                 // If we don't have it, we might fail.
+                 // Let's rely on it being passed for now, or assume we can find it.
+            }
+        }
+        
+        if (functionName) {
+            // We need project and region to construct the full name.
+            // If we are running in a context where we can get project ID (e.g. gcloud config), maybe.
+            // But relying on user/terraform to pass it is safer.
+        }
+    } catch (e) {
+        logger.warn('Failed to derive scheduler job name.');
+    }
+  }
+
+  if (jobName) {
+      await triggerScheduler(jobName, logger);
+  } else {
+      logger.warn('Skipping Cloud Scheduler trigger (no job name provided). Waiting for scheduled run...');
+  }
+
+  // 2. Verify Bucket
+  await verifyBucket(bucketName, options.body, options.startTime, logger);
+}
+
+
 export default {
   call,
   createStorageClient,
@@ -347,4 +545,6 @@ export default {
   parseLogEntries,
   listFilesMetadata,
   upload,
+  verifyCollection,
 };
+

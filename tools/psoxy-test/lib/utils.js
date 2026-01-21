@@ -1,8 +1,8 @@
 import { KMSClient, SignCommand } from '@aws-sdk/client-kms';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import {
-  fromNodeProviderChain,
-  fromTemporaryCredentials
+    fromNodeProviderChain,
+    fromTemporaryCredentials
 } from "@aws-sdk/credential-providers";
 import { KeyManagementServiceClient } from '@google-cloud/kms';
 import { Storage } from '@google-cloud/storage';
@@ -808,21 +808,29 @@ async function pollAsyncResponse(locationUrl, options = {}) {
   throw new Error(`Timeout: File not available after ${maxAttempts * 10} seconds of polling`);
 }
 
+/**
+ * Sleep for a given number of milliseconds
+ * @param {number} ms
+ * @returns {Promise<void>}
+ */
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export {
-  addFilenameSuffix, environmentCheck,
-  executeCommand,
-  executeWithRetry,
-  getAWSCredentials,
-  getCommonHTTPHeaders,
-  getFileNameFromURL,
-  isGzipped,
-  parseBucketOption, pollAsyncResponse, requestWrapper as request,
-  resolveAWSRegion,
-  resolveHTTPMethod,
-  saveToFile,
-  signAWSRequestURL,
-  signJwtWithAWSKMS,
-  signJwtWithGCPKMS,
-  transformSpecWithResponse, unzip
+    environmentCheck, executeCommand,
+    executeWithRetry,
+    getAWSCredentials,
+    getCommonHTTPHeaders,
+    getFileNameFromURL,
+    isGzipped,
+    pollAsyncResponse,
+    requestWrapper as request,
+    resolveAWSRegion,
+    resolveHTTPMethod,
+    saveToFile,
+    signAWSRequestURL,
+    signJwtWithAWSKMS,
+    signJwtWithGCPKMS, sleep, transformSpecWithResponse
 };
 

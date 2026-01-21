@@ -4,6 +4,7 @@ import { Command, Option } from 'commander';
 import _ from 'lodash';
 import { createRequire } from 'module';
 import { callDataSourceEndpoints } from './data-sources/runner.js';
+import gcp from './lib/gcp.js';
 import getLogger from './lib/logger.js';
 import psoxyTestCall from './psoxy-test-call.js';
 
@@ -39,6 +40,8 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
     .option('--request-no-response', "Request 'No response body' back from proxy (tests side-output case)", false)
     .option('--async', 'Process request asynchronously (adds X-Psoxy-Process-Async header)', false)
     .option('-b, --body <body>', 'Body to send in request (it expects a JSON string)')
+    .option('--verify-collection <bucket>', 'Verify that the posted data appears in the specified bucket (GCS/S3)')
+    .option('--scheduler-job <name>', 'GCP: Cloud Scheduler job name to trigger batch processing')
     .addOption(new Option('-d, --data-source <name>',
       'Data source to test all available endpoints').choices([
         //TODO: pull this list from terraform console or something??
@@ -82,11 +85,38 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
 
   let result;
   try {
+    const startTime = Date.now();
     if (options.dataSource) {
       result = await callDataSourceEndpoints(options);
     } else {
       result = await psoxyTestCall(options);
     }
+
+    if (options.verifyCollection && result.status === 200) {
+       // TODO: delegate based on cloud provider
+       // For now, assuming GCP if gcp.isValidURL(options.url) or force=gcp
+       // We import gcp dynamically or just use the one we have if we refactor psoxy-test-call to return provider
+       // But psoxyTestCall is a default export.
+       
+       // Re-evaluating provider logic mostly duplicates psoxy-test-call logic
+       // Let's use the helper from psoxy-test-call.js imports, but we need to import them here if we want to use them directly.
+       // They are imported: `import gcp from './lib/gcp.js';`
+       
+       const url = new URL(options.url);
+       // Simple check
+       if (options.force === 'gcp' || gcp.isValidURL(url)) {
+           await gcp.verifyCollection({
+               verifyCollection: options.verifyCollection,
+               schedulerJob: options.schedulerJob,
+               url: options.url,
+               body: options.body,
+               startTime: startTime
+           }, logger);
+       } else {
+           logger.warn('Verification only implemented for GCP currently.');
+       }
+    }
+
   } catch (error) {
     if (error?.name === 'AccessDenied' && error.message &&
       AWS_ACCESS_DENIED_EXCEPTION_REGEXP.test(error.message)) {
