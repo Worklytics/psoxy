@@ -509,6 +509,12 @@ echo "Testing Bulk Connectors ..."
 %{for test_script in values(module.bulk_connector)[*].test_script~}
 ./${test_script}
 %{endfor}
+
+echo "Testing Webhook Collectors ..."
+
+%{for test_script in values(module.webhook_collector)[*].test_script~}
+./${test_script}
+%{endfor}
 EOF
 }
 
