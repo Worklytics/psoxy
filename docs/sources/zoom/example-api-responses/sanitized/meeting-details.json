@@ -1,8 +1,6 @@
 {
   "created_at":"2019-09-09T15:54:24Z",
-  "duration":60,
   "host_id":"t~vo5kKWepk7kE9KmMkB_ETGinPpXTv1uqiwMwwypWZoc",
-  "host_email":"t~H53zSk2P3-D_iGoG9l_KxsD84BJoSCtzfQVAYTQ5CxU@example.com",
   "id":1234555466,
   "settings":{
     "allow_multiple_devices":true,
