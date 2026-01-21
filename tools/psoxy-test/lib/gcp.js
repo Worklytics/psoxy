@@ -474,58 +474,17 @@ async function verifyBucket(bucketName, expectedContent, startTime, logger) {
  * @param {number} options.startTime - timestamp when test started
  * @param {Object} logger
  */
+
 async function verifyCollection(options, logger) {
   const bucketName = options.verifyCollection;
   
   // 1. Trigger Scheduler
   let jobName = options.schedulerJob;
-  if (!jobName) {
-    // Attempt to derive job name from function URL
-    // URL: https://REGION-PROJECT.cloudfunctions.net/FUNCTION_NAME or https://FUNCTION_NAME-HASH-REGION.a.run.app
-    // Job convention: ENVIRONMENT-INSTANCE-batch-processing
-    // This is tricky to derive perfectly without more info.
-    // However, if we follow the naming in terraform:
-    // function name: ${env_prefix}${instance_id}
-    // job name: ${env_prefix}${instance_id}-batch-processing
-    
-    // So we just need to extract function name from URL and append "-batch-processing"
-    
-    try {
-        const url = new URL(options.url);
-        let functionName = '';
-        let region = '';
-        let projectId = '';
-        
-        if (isCloudFunctionGen2(url)) {
-            // https://psoxy-dev-erik-llm-portal-bovv3fr26q-uc.a.run.app
-            const re = /^(.+)-([a-z0-9]+)-([a-z]{2})\.a\.run\.app$/;
-            const parts = url.hostname.match(re);
-            if (parts) {
-                functionName = parts[1];
-                 // Map shortCode to region? Or we need region for job name construction?
-                 // Job name is full resource name: projects/PROJECT/locations/REGION/jobs/JOB_NAME
-                 // We don't have region or project easily available unless passed or inferred.
-                 
-                 // wait, TriggerScheduler takes a full job name.
-                 // If we don't have it, we might fail.
-                 // Let's rely on it being passed for now, or assume we can find it.
-            }
-        }
-        
-        if (functionName) {
-            // We need project and region to construct the full name.
-            // If we are running in a context where we can get project ID (e.g. gcloud config), maybe.
-            // But relying on user/terraform to pass it is safer.
-        }
-    } catch (e) {
-        logger.warn('Failed to derive scheduler job name.');
-    }
-  }
-
+  
   if (jobName) {
       await triggerScheduler(jobName, logger);
   } else {
-      logger.warn('Skipping Cloud Scheduler trigger (no job name provided). Waiting for scheduled run...');
+      logger.info('Skipping Cloud Scheduler trigger (no job name provided). Waiting for scheduled run...');
   }
 
   // 2. Verify Bucket
