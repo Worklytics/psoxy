@@ -1,10 +1,9 @@
-name: Publish GCP Bundle
+name: Publish AWS Bundle
 
-# This workflow publishes GCP bundles to GCS using OIDC authentication.
+# This workflow publishes AWS bundles to S3 using OIDC authentication.
 #
 # Required GitHub Secrets:
-#   - GCP_SERVICE_ACCOUNT: Service account email (e.g., gh-actions@example-project.iam.gserviceaccount.com)
-#   - GCP_WORKLOAD_IDENTITY_PROVIDER: Full provider path (e.g., projects/123456789/locations/global/workloadIdentityPools/github-actions/providers/github)
+#   - AWS_ROLE_ARN: IAM role ARN to assume (e.g., arn:aws:iam::123456789012:role/GithubActionPublishAgent)
 #
 # Security:
 #   - Uses OIDC authentication (no long-lived credentials)
@@ -23,14 +22,14 @@ on:
       - 'rc-*'
 
 env:
-  IMPLEMENTATION: gcp
+  IMPLEMENTATION: aws
   JAVA_SOURCE_ROOT: java/
-  BUCKET_NAME: psoxy-public-artifacts
-  JAR_NAME: psoxy-gcp
+  BUCKET_PREFIX: psoxy-public-artifacts
+  AWS_REGIONS: us-east-1,us-east-2,us-west-1,us-west-2
 
 jobs:
   publish:
-    name: Build and Publish GCP Bundle
+    name: Build and Publish AWS Bundle
     runs-on: ubuntu-latest
     # Security: Only run on authorized triggers
     # - Tags (v*): Regular releases, anyone with push access can create tags
@@ -73,21 +72,18 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-west-2
 
       - name: Install dependencies
         run: |
           # Install jq if not already available
           sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Publish GCP Bundle
+      - name: Publish AWS Bundle
         id: publish
         run: |
           # Determine if RC build; assume it is UNLESS ref is tag starting with v (e.g., v0.5.15)
@@ -97,21 +93,24 @@ jobs:
             RC_OPTION=""
           fi
           
-          ./tools/release/lib/publish-gcp-bundle.sh --non-interactive $RC_OPTION | tee publish-output.log
+          ./tools/release/lib/publish-aws-bundle.sh --non-interactive $RC_OPTION | tee publish-output.log
           
-          # Extract artifact URI from output
-          ARTIFACT_URI=$(grep "^ARTIFACT_URI=" publish-output.log | cut -d'=' -f2- || echo "")
-          if [ -n "$ARTIFACT_URI" ]; then
-            echo "artifact_uri=$ARTIFACT_URI" >> $GITHUB_OUTPUT
-          fi
-          
+          # Extract artifact URIs from output and save to file for summary step
+          grep "^ARTIFACT_URI_" publish-output.log > artifact-uris.txt || true
+
       - name: Summary
         if: success()
         run: |
-          echo "## ✅ Successfully published GCP bundle" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Successfully published AWS bundle" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -n "${{ steps.publish.outputs.artifact_uri }}" ]; then
-            echo "**Artifact URI:** \`${{ steps.publish.outputs.artifact_uri }}\`" >> $GITHUB_STEP_SUMMARY
+          if [ -f artifact-uris.txt ] && [ -s artifact-uris.txt ]; then
+            echo "**Artifact URIs:**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            while IFS='=' read -r key uri; do
+              region=$(echo "$key" | sed 's/^ARTIFACT_URI_//')
+              echo "- **${region}:** \`${uri}\`" >> $GITHUB_STEP_SUMMARY
+            done < artifact-uris.txt
             echo "" >> $GITHUB_STEP_SUMMARY
           fi
-          echo "Artifact has been published to GCS." >> $GITHUB_STEP_SUMMARY
+          echo "Artifacts have been published to S3 buckets in all configured regions." >> $GITHUB_STEP_SUMMARY
+

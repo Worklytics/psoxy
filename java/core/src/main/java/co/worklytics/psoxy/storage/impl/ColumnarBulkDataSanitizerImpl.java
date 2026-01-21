@@ -1,10 +1,37 @@
 package co.worklytics.psoxy.storage.impl;
 
-import co.worklytics.psoxy.PseudonymizedIdentity;
-import co.worklytics.psoxy.Pseudonymizer;
-import co.worklytics.psoxy.PseudonymizerImplFactory;
-import co.worklytics.psoxy.storage.BulkDataSanitizer;
-import co.worklytics.psoxy.utils.ProcessingBuffer;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
+import java.util.regex.Matcher;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.function.TriConsumer;
+import org.apache.commons.lang3.function.TriFunction;
+import org.apache.commons.lang3.tuple.Pair;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.Base64UrlSha256HashPseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
@@ -17,31 +44,20 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import co.worklytics.psoxy.PseudonymizedIdentity;
+import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.PseudonymizerImplFactory;
+import co.worklytics.psoxy.storage.BulkDataSanitizer;
+import co.worklytics.psoxy.utils.ProcessingBuffer;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.Value;
 import lombok.extern.java.Log;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.function.TriConsumer;
-import org.apache.commons.lang3.function.TriFunction;
-import org.apache.commons.lang3.tuple.Pair;
-
-import javax.inject.Inject;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
-import java.util.regex.Matcher;
-import java.util.stream.Collectors;
 
 /**
  * Handles a CSV file to apply the rules pseudonymize the content.
@@ -78,7 +94,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     public void sanitize(@NonNull Reader reader,
                          @NonNull Writer writer,
                          @NonNull Pseudonymizer pseudonymizer) throws IOException {
-        CSVFormat inputCSVFormat = CSVFormat.Builder.create(CSVFormat.DEFAULT)
+        CSVFormat inputCSVFormat = CSVFormat.DEFAULT.builder()
             .setDelimiter(rules.getDelimiter())
             .setHeader() // needed, indicates needs to be parsed from input
             .setSkipHeaderRecord(true)
@@ -86,7 +102,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             .setTrim(true) //removes whitespace potentially inside encapsulated values, eg ` " valA " , " valB " ` becomes `"valA","valB"`
             .setIgnoreSurroundingSpaces(true)  // removes whitespace around delimiters, eg ` "valA"  , "valB"  ` becomes `"valA","valB"`
             .setAllowMissingColumnNames(true) // so we'll ALLOW unnamed columns, which is theoretically allowed in CSV
-            .build();
+            .get();
 
 
         CSVParser records = inputCSVFormat.parse(reader);
@@ -304,11 +320,11 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
             .map( h -> headers.stream().filter(h::equalsIgnoreCase).findFirst().orElse(h))
             .collect(Collectors.toList());
 
-        CSVFormat csvFormat = CSVFormat.Builder.create()
+        CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
             .setHeader(columnNamesForOutputFile.toArray(new String[0]))
             .setRecordSeparator(records.getFirstEndOfLine())
             .setNullString("")
-            .build();
+            .get();
 
         // create an empty record to fill with the transformed values, ensuring all rows have
         // the same columns

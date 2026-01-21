@@ -1,11 +1,14 @@
 package com.avaulta.gateway.rules;
 
-import com.avaulta.gateway.rules.transforms.RecordTransform;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
-
 import java.util.Collections;
 import java.util.List;
+import com.avaulta.gateway.rules.transforms.RecordTransform;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Singular;
+import lombok.experimental.SuperBuilder;
 
 /**
  * **alpha**

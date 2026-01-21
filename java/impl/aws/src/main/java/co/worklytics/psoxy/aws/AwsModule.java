@@ -1,23 +1,31 @@
 package co.worklytics.psoxy.aws;
 
-import co.worklytics.psoxy.aws.request.LambdaEventUtils;
-import co.worklytics.psoxy.gateway.*;
-import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
-import co.worklytics.psoxy.gateway.impl.*;
-import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
-
-import co.worklytics.psoxy.gateway.output.*;
+import java.time.Duration;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
+import co.worklytics.psoxy.gateway.CompositeSecretStore;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.HostEnvironment;
+import co.worklytics.psoxy.gateway.LockService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
+import co.worklytics.psoxy.gateway.impl.CachingConfigServiceDecorator;
+import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
+import co.worklytics.psoxy.gateway.output.OutputFactory;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
-
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
 import software.amazon.awssdk.core.retry.RetryPolicy;
 import software.amazon.awssdk.core.retry.backoff.BackoffStrategy;
@@ -27,10 +35,6 @@ import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.ssm.SsmClient;
-
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.time.Duration;
 
 /**
  * defines how to fulfill dependencies that need platform-specific implementations for GCP platform
@@ -228,10 +232,10 @@ public interface AwsModule {
 
     @Provides @Named("lambdaEventMapper")
     static ObjectMapper provideLambdaEventMapper() {
-        ObjectMapper lambdaEventMapper = new ObjectMapper();
         // Configure the mapper to accept case-insensitive properties
-        lambdaEventMapper.configure(com.fasterxml.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        return lambdaEventMapper;
+        return JsonMapper.builder()
+            .enable(com.fasterxml.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
+            .build();
     }
 
     @Module

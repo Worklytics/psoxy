@@ -1,8 +1,20 @@
 package co.worklytics.psoxy.storage.impl;
 
-import co.worklytics.psoxy.PseudonymizedIdentity;
-import co.worklytics.psoxy.Pseudonymizer;
-import co.worklytics.psoxy.storage.BulkDataSanitizer;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
@@ -13,6 +25,9 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.JsonPathException;
 import com.jayway.jsonpath.MapFunction;
+import co.worklytics.psoxy.PseudonymizedIdentity;
+import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.EqualsAndHashCode;
@@ -20,22 +35,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.extern.java.Log;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Triple;
-
-import javax.inject.Inject;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Log
 public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
@@ -85,21 +84,22 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                      @NonNull Writer writer,
                      @NonNull List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms) throws IOException {
 
-        try (CSVParser records = CSVFormat.DEFAULT
-                .withFirstRecordAsHeader()
-                .withIgnoreHeaderCase()
-                .withTrim()
+        try (CSVParser records = CSVFormat.DEFAULT.builder()
+                .setHeader()
+                .setIgnoreHeaderCase(true)
+                .setTrim(true)
+                .get()
                 .parse(reader);
              CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.builder()
                         .setHeader(records.getHeaderNames().toArray(new String[0]))
                         .setRecordSeparator(records.getFirstEndOfLine()) //match source
-                        .build())) {
+                        .get())) {
             Iterator<CSVRecord> iter = records.iterator();
 
             while(iter.hasNext()) {
                 CSVRecord record = iter.next();
                 try {
-                    LinkedHashMap result = applyTransforms(record.toMap(), compiledTransforms);
+                    LinkedHashMap<String, Object> result = applyTransforms(record.toMap(), compiledTransforms);
 
                     records.getHeaderNames()
                         .forEach(header -> {
@@ -149,7 +149,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
      * @return the transformed document
      * @throws UnmatchedPseudonymization if a pseudonymization transform should be applied, but nothing matches the path
      */
-    LinkedHashMap applyTransforms(Object document, List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
+    LinkedHashMap<String, Object> applyTransforms(Object document, List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
             throws UnmatchedPseudonymization {
         for (Triple<JsonPath, RecordTransform, MapFunction> compiledTransform : compiledTransforms) {
             if (compiledTransform.getMiddle() instanceof RecordTransform.Pseudonymize) {
@@ -167,7 +167,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
         }
 
         //abusing implementation detail of the JSONPath library
-        return (LinkedHashMap) document;
+        return (LinkedHashMap<String, Object>) document;
     }
 
     private MapFunction getMapFunction(RecordTransform transform,

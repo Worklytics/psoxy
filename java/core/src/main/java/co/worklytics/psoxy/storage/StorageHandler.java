@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -94,7 +95,7 @@ public class StorageHandler {
 
     static void warnIfEncodingDoesNotMatchFilename(@NonNull StorageEventRequest request, @Nullable String contentEncoding) {
         if (request.getSourceObjectPath().endsWith(EXTENSION_GZIP)
-            && !StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP)) {
+            && !Objects.equals(contentEncoding, CONTENT_ENCODING_GZIP)) {
             log.warning("Input filename ends with .gz, but 'Content-Encoding' metadata is not 'gzip'; is this correct? Decompression is based on object's 'Content-Encoding'");
         }
     }
@@ -261,6 +262,7 @@ public class StorageHandler {
     @Data
     public static class ObjectTransform implements Serializable {
 
+        @Serial
         private static final long serialVersionUID = 3L;
 
         /**
@@ -463,7 +465,7 @@ public class StorageHandler {
      * @return
      */
     boolean isSourceCompressed(String contentEncoding, String sourceObjectPath) {
-        return StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP) || sourceObjectPath.endsWith(EXTENSION_GZIP);
+        return Objects.equals(contentEncoding, CONTENT_ENCODING_GZIP) || sourceObjectPath.endsWith(EXTENSION_GZIP);
     }
 
     Map<String, BulkDataRules> effectiveTemplates(Map<String, BulkDataRules> original) {
