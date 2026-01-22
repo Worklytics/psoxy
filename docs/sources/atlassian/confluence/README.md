@@ -1,6 +1,6 @@
 # Confluence Cloud
 
-NOTE: These instructions are derived from [worklytics-connector-specs](../../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
+NOTE: These instructions are derived from [worklytics-connector-specs](../../../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
 
 ## Examples
 
@@ -48,7 +48,7 @@ Add following scopes as part of \"Granular Scopes\", first clicking on \`Edit Sc
 3. Go to the "Authorization" section and add an OAuth 2.0 (3LO) authorization type: click on "Add"
    and you will be prompted to provide a "Callback URI". At this point, you could add
    `http://localhost` as value and follow the [Manual steps](#manual-steps), or you could
-   use our [Psoxy OAuth setup tool](#worklytics-psoxy-oauth-setup-tool) (see details below).
+   use our [Psoxy OAuth setup tool](https://github.com/Worklytics/psoxy-oauth-setup-tool) (see details below).
 
 ### Worklytics OAuth setup tool
 Assuming you've created a Confluence Cloud OAuth 2.0 (3LO) integration as described above, from the
@@ -101,7 +101,7 @@ curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Con
             "read:page:confluence",
             "read:space:confluence",
             "read:user:confluence"
-        ],
+        ]
    }
    ```
        NOTE: As per September 2025, scopes don't show `read:task:confluence` in the response.
