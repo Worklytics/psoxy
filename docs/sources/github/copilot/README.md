@@ -9,8 +9,9 @@ The connector uses a GitHub App to authenticate and access the data. You must pr
 ## Examples
 
 - [Example Rules](github-copilot.yaml)
-- Example Data : [original](example-api-responses/original) |
-  [sanitized](example-api-responses/sanitized)
+- Example Data:
+  - [original/user.json](example-api-responses/original/user.json) |
+    [sanitized/user.json](example-api-responses/sanitized/user.json)
 
 ## GitHub Copilot: Steps to connect
 

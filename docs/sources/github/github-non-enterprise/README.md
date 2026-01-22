@@ -8,9 +8,10 @@ The connector uses a GitHub App to authenticate and access the data you must pro
 
 ## Examples
 
-- [Example Rules](github.yaml)
-- Example Data : [original](example-api-responses/original) |
-  [sanitized](example-api-responses/sanitized)
+- [Example Rules](../github/github.yaml)
+- Example Data:
+  - [original/user.json](example-api-responses/original/user.json) |
+    [sanitized/user.json](example-api-responses/sanitized/user.json)
 
 ## GitHub Cloud (Free, Teams, Professional): Steps to Connect
 
