@@ -39,6 +39,9 @@ endpoints:
         jsonPaths:
           - "$..['id','email']"
         encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$..['name']"
     responseSchema:
       type: "object"
       properties:

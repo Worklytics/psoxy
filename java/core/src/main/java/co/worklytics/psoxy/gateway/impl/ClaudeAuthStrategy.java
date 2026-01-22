@@ -40,6 +40,7 @@ public class ClaudeAuthStrategy implements SourceAuthStrategy {
     @NonNull
     SecretStore secretStore;
 
+
     @Getter
     private final String configIdentifier = "claude_admin_api_key";
 
