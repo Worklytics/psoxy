@@ -279,4 +279,31 @@ class RecordBulkDataSanitizerImplTest {
         assertTrue(output.contains("\"foo\":2"));
     }
 
+    @Test
+    void testAutoFormat_JsonArray() {
+        this.setUpWithRules("---\n" +
+            "format: \"AUTO\"\n" +
+            "transforms:\n" +
+            "- redact: \"foo\"\n" +
+            "- pseudonymize: \"bar\"\n");
+
+        String input = "[{\"foo\":1,\"bar\":2,\"other\":\"three\"}]";
+
+        final String objectPath = "export-20231128/file.json";
+        
+        // Manual request construction to set Content-Type
+        co.worklytics.psoxy.gateway.StorageEventRequest request = BulkDataTestUtils.request(objectPath)
+                .withContentType("application/json");
+
+        storageHandler.handle(request,
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes()),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray());
+
+        assertEquals('[', output.charAt(0));
+        assertEquals(']', output.charAt(output.length() - 1));
+        assertTrue(output.contains("\"foo\":null"));
+    }
 }

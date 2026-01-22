@@ -1,18 +1,12 @@
 package co.worklytics.psoxy.storage.impl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
@@ -20,9 +14,6 @@ import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.RecordRules;
 import com.avaulta.gateway.rules.transforms.RecordTransform;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.jayway.jsonpath.Configuration;
@@ -65,6 +56,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Override
     @Override
+    @Override
     public void sanitize(@NonNull co.worklytics.psoxy.gateway.StorageEventRequest request,
                          @NonNull Reader reader,
                          @NonNull Writer writer,
@@ -95,115 +87,46 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             }
         }
 
-        if (format == RecordRules.Format.NDJSON) {
-            sanitizeNdjson(reader, writer, compiledTransforms);
-        } else if (format == RecordRules.Format.CSV) {
-            sanitizeCsv(reader, writer, compiledTransforms);
-        } else if (format == RecordRules.Format.JSON_ARRAY) {
-            sanitizeJsonArray(reader, writer, compiledTransforms);
-        } else {
-            throw new IllegalArgumentException("Unsupported format: " + format);
-        }
-    }
-
-    @VisibleForTesting
-    void sanitizeCsv(@NonNull Reader reader,
-                     @NonNull Writer writer,
-                     @NonNull List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms) throws IOException {
-
-        try (CSVParser records = CSVFormat.DEFAULT.builder()
-                .setHeader()
-                .setIgnoreHeaderCase(true)
-                .setTrim(true)
-                .get()
-                .parse(reader);
-             CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.builder()
-                        .setHeader(records.getHeaderNames().toArray(new String[0]))
-                        .setRecordSeparator(records.getFirstEndOfLine()) //match source
-                        .get())) {
-            Iterator<CSVRecord> iter = records.iterator();
-
-            while(iter.hasNext()) {
-                CSVRecord record = iter.next();
+        try (RecordReader recordReader = createReader(format, reader);
+             RecordWriter recordWriter = createWriter(format, writer)) {
+            
+            recordWriter.beginRecordSet();
+            
+            Object record;
+            while ((record = recordReader.readRecord()) != null) {
                 try {
-                    LinkedHashMap<String, Object> result = applyTransforms(record.toMap(), compiledTransforms);
-
-                    records.getHeaderNames()
-                        .forEach(header -> {
-                            try {
-                                printer.print(result.get(header));
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        });
-
-                    printer.println();
+                    Object sanitized = applyTransforms(record, compiledTransforms);
+                    recordWriter.writeRecord(sanitized);
                 } catch (UnmatchedPseudonymization e) {
                     log.warning("Skipped record due to UnmatchedPseudonymization: " + e.getPath());
                 }
             }
+            
+            recordWriter.endRecordSet();
         }
     }
 
-    @VisibleForTesting
-    void sanitizeNdjson(@NonNull Reader reader,
-                        @NonNull Writer writer,
-                        @NonNull List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms) throws IOException {
-        try (BufferedReader bufferedReader = new BufferedReader(reader)) {
-            String line;
-            while ((line = StringUtils.trimToNull(bufferedReader.readLine())) != null) {
-
-                Object document = jsonConfiguration.jsonProvider().parse(line);
-
-                try {
-                    document = applyTransforms(document, compiledTransforms);
-                    writer.append(jsonConfiguration.jsonProvider().toJson(document));
-                    writer.append('\n'); // NDJSON uses newlines between records
-                    writer.flush(); //after each line
-                } catch (UnmatchedPseudonymization e) {
-                    log.warning("Skipped record due to UnmatchedPseudonymization: " + e.getPath());
-                }
-            }
+    RecordReader createReader(RecordRules.Format format, Reader reader) {
+        switch (format) {
+            case CSV:
+                return new CsvRecordReader(reader);
+            case JSON_ARRAY:
+                return new JsonArrayRecordReader(reader, objectMapper, jsonConfiguration);
+            case NDJSON:
+            default:
+                return new NdjsonRecordReader(reader, jsonConfiguration);
         }
     }
 
-    @VisibleForTesting
-    void sanitizeJsonArray(@NonNull Reader reader,
-                           @NonNull Writer writer,
-                           @NonNull List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms) throws IOException {
-
-        JsonFactory factory = objectMapper.getFactory();
-        try (JsonParser parser = factory.createParser(reader)) {
-            writer.write("[");
-            boolean first = true;
-
-            // Check for START_ARRAY
-            if (parser.nextToken() != JsonToken.START_ARRAY) {
-                throw new IllegalArgumentException("Input is not a JSON array");
-            }
-
-            while (parser.nextToken() != JsonToken.END_ARRAY && parser.currentToken() != null) {
-                // Read the object
-                // We convert to String then parse with Jayway to ensure compatibility with `applyTransforms` logic
-                // that expects Jayway compatible types (Maps, etc) and to match `sanitizeNdjson` behavior.
-                Object document = jsonConfiguration.jsonProvider().parse(
-                    objectMapper.writeValueAsString(objectMapper.readTree(parser))
-                );
-
-                try {
-                    document = applyTransforms(document, compiledTransforms);
-
-                    if (!first) {
-                        writer.write(",");
-                    }
-                    writer.write(jsonConfiguration.jsonProvider().toJson(document));
-                    first = false;
-                } catch (UnmatchedPseudonymization e) {
-                    log.warning("Skipped record due to UnmatchedPseudonymization: " + e.getPath());
-                }
-            }
-            writer.write("]");
-            writer.flush();
+    RecordWriter createWriter(RecordRules.Format format, Writer writer) {
+        switch (format) {
+            case CSV:
+                return new CsvRecordWriter(writer);
+            case JSON_ARRAY:
+                return new JsonArrayRecordWriter(writer, objectMapper, jsonConfiguration);
+            case NDJSON:
+            default:
+                return new NdjsonRecordWriter(writer, jsonConfiguration);
         }
     }
 
