@@ -1,0 +1,14 @@
+{
+  "data":[
+    {
+      "id":"t~jKM-CaMiqY6bEt5D95tRBB7o1c5rdWPsRoS4cJDvjdQ",
+      "added_at":"2024-10-30T23:58:27.427722Z",
+      "email":"t~xDMfdtdRGSrGHouT_RlgtMjJM7WhGaCj1Qwz71dsWIY@emaildomain.com",
+      "role":"user",
+      "type":"user"
+    }
+  ],
+  "first_id":"first_id",
+  "has_more":true,
+  "last_id":"last_id"
+}
