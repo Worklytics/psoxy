@@ -63,4 +63,4 @@ You can repeat steps 3,6,7 at any time to rotate your key.
 
 ## Reference
 
-These instructions have been derived from [worklytics-connector-specs](../../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
+These instructions have been derived from [worklytics-connector-specs](../../../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.

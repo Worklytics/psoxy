@@ -15,7 +15,7 @@ The connector uses a GitHub App to authenticate and access the data. You must ge
 
 ## GitHub Enterprise Server: Steps to connect
 
-We provide a [helper script](../../../tools/github-enterprise-server-auth.sh) to set up the connector, which will guide you through the steps below and automate some of them. Alternatively, you can follow the steps below directly:
+We provide a [helper script](../../../../tools/github-enterprise-server-auth.sh) to set up the connector, which will guide you through the steps below and automate some of them. Alternatively, you can follow the steps below directly:
 
 1. You have to populate:
     - `github_enterprise_server_host` variable in Terraform with the hostname of your GitHub Enterprise Server (example: `github.your-company.com`). This host should be accessible from the proxy instance function, as the connector will need to reach it.
@@ -77,4 +77,4 @@ You will need to copy the value of the `refresh_token`.
 
 ## Reference
 
-These instructions have been derived from [worklytics-connector-specs](../../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
+These instructions have been derived from [worklytics-connector-specs](../../../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
