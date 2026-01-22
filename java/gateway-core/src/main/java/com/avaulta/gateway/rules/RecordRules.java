@@ -32,12 +32,13 @@ public class RecordRules implements BulkDataRules {
      * format of bulk 'Record' data; represents both how to split file into records AND how to parse
      * records.
      *
+     * TODO: consider dropping this entirely in v0.6 ???
      */
     public enum Format {
         NDJSON,
         CSV,
         JSON_ARRAY,
-        AUTO,
+        AUTO, // TODO: in v0.6, make this the default; and fail-back to file extension if no Content-Type provided
         ;
         //AVRO?
 
@@ -45,7 +46,7 @@ public class RecordRules implements BulkDataRules {
 
 
     @Builder.Default
-    Format format = Format.AUTO;
+    Format format = Format.NDJSON;
 
     /**
      * transforms to apply, in order.
