@@ -11,4 +11,7 @@ public interface RecordReader extends AutoCloseable {
      * @throws IOException
      */
     Object readRecord() throws IOException;
+
+    @Override
+    void close() throws IOException;
 }

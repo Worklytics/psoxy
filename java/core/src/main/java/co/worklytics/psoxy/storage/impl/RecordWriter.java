@@ -4,6 +4,9 @@ import java.io.IOException;
 
 public interface RecordWriter extends AutoCloseable {
 
+    @Override
+    void close() throws IOException;
+
     /**
      * Called before writing any records.
      * @throws IOException
