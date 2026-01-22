@@ -37,6 +37,7 @@ public class RecordRules implements BulkDataRules {
         NDJSON,
         CSV,
         JSON_ARRAY,
+        AUTO,
         ;
         //AVRO?
 
@@ -44,7 +45,7 @@ public class RecordRules implements BulkDataRules {
 
 
     @Builder.Default
-    Format format = Format.NDJSON;
+    Format format = Format.AUTO;
 
     /**
      * transforms to apply, in order.

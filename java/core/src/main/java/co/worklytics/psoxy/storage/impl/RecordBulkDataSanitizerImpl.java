@@ -64,7 +64,9 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
 
     @Override
-    public void sanitize(@NonNull Reader reader,
+    @Override
+    public void sanitize(@NonNull co.worklytics.psoxy.gateway.StorageEventRequest request,
+                         @NonNull Reader reader,
                          @NonNull Writer writer,
                          @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
@@ -77,14 +79,30 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                 ))
                 .collect(Collectors.toList());
 
-        if (rules.getFormat() == RecordRules.Format.NDJSON) {
+        RecordRules.Format format = rules.getFormat();
+
+        if (format == RecordRules.Format.AUTO) {
+            String contentType = request.getContentType();
+            if (StringUtils.isBlank(contentType)) {
+                log.warning("Content-Type is missing; defaulting to NDJSON for AUTO format.");
+                format = RecordRules.Format.NDJSON;
+            } else if (StringUtils.containsIgnoreCase(contentType, "application/json")) {
+                format = RecordRules.Format.JSON_ARRAY;
+            } else if (StringUtils.containsIgnoreCase(contentType, "text/csv")) {
+                format = RecordRules.Format.CSV;
+            } else {
+                format = RecordRules.Format.NDJSON;
+            }
+        }
+
+        if (format == RecordRules.Format.NDJSON) {
             sanitizeNdjson(reader, writer, compiledTransforms);
-        } else if (rules.getFormat() == RecordRules.Format.CSV) {
+        } else if (format == RecordRules.Format.CSV) {
             sanitizeCsv(reader, writer, compiledTransforms);
-        } else if (rules.getFormat() == RecordRules.Format.JSON_ARRAY) {
+        } else if (format == RecordRules.Format.JSON_ARRAY) {
             sanitizeJsonArray(reader, writer, compiledTransforms);
         } else {
-            throw new IllegalArgumentException("Unsupported format: " + rules.getFormat());
+            throw new IllegalArgumentException("Unsupported format: " + format);
         }
     }
 
@@ -160,21 +178,8 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             boolean first = true;
 
             // Check for START_ARRAY
-            if (parser.nextToken() == JsonToken.START_ARRAY) {
-                // array started
-            } else {
-                // if it's not start array, we could assume it's just values (lenient), or maybe the file started without [?
-                // given the requirement to "strip leading [", we assume it should be there.
-                // If the parser is at START_OBJECT already (e.g. no [), we proceed differently?
-                // Let's stick to standard behavior: if it's NOT an array, iterating until END_ARRAY might fail or finish immediately.
-                // Jackson `nextToken` handles whitespace.
-                // If the stream is `{"a":1}`, nextToken is `START_OBJECT`.
-                // if we don't consume it here, the loop below will catch it.
-                // BUT `END_ARRAY` check in loop requires us to be *inside* an array if we expect `]` to end it.
-                // If input lacks `[` and `]`, then `parser.nextToken()` won't hit `END_ARRAY`.
-                // For now, let's assume valid JSON array input as requested.
-                // If explicit check needed:
-                // if (parser.currentToken() != JsonToken.START_ARRAY) handle error?
+            if (parser.nextToken() != JsonToken.START_ARRAY) {
+                throw new IllegalArgumentException("Input is not a JSON array");
             }
 
             while (parser.nextToken() != JsonToken.END_ARRAY && parser.currentToken() != null) {

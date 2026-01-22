@@ -1,26 +1,23 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.gateway.StorageEventRequest;
-import co.worklytics.psoxy.storage.StorageHandler;
-import com.google.cloud.ReadChannel;
-import com.google.cloud.WriteChannel;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
-import com.google.cloud.functions.Context;
-
-import lombok.SneakyThrows;
-import lombok.extern.java.Log;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import com.google.cloud.ReadChannel;
+import com.google.cloud.WriteChannel;
+import com.google.cloud.functions.Context;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
+import co.worklytics.psoxy.gateway.StorageEventRequest;
+import co.worklytics.psoxy.storage.StorageHandler;
+import lombok.SneakyThrows;
+import lombok.extern.java.Log;
 
 @Log
 public class GcsFileEventHandler {
@@ -70,7 +67,7 @@ public class GcsFileEventHandler {
         }
 
         StorageEventRequest request =
-            storageHandler.buildRequest(importBucket, sourceName, transform, sourceBlobInfo.getContentEncoding());
+            storageHandler.buildRequest(importBucket, sourceName, transform, sourceBlobInfo.getContentEncoding(), sourceBlobInfo.getContentType());
 
         if (storageHandler.getApplicableRules(transform.getRules(), request.getSourceObjectPath()).isPresent()) {
 
