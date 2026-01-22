@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 class CsvRecordWriter implements RecordWriter {
 
+    // TODO: in the future, we may need to expose configuration to let users change this
     private static final String RECORD_SEPARATOR = "\n";
 
     final Writer writer;

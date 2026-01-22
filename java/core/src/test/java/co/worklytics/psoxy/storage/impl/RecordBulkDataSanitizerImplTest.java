@@ -188,9 +188,9 @@ class RecordBulkDataSanitizerImplTest {
 
         String output = new String(outputStream.toByteArray());
 
-        final String EXPECTED = "foo,bar\r\n" +
-            ",t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\r\n" +
-            ",t~0E6I_002nK2IJjv_KCUeFzIUo5rfuISgx7_g-EhfCxE@company.com\r\n";
+        final String EXPECTED = "foo,bar\n" +
+            ",t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\n" +
+            ",t~0E6I_002nK2IJjv_KCUeFzIUo5rfuISgx7_g-EhfCxE@company.com\n";
         assertEquals(EXPECTED, output);
     }
 
