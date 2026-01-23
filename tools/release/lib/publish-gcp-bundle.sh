@@ -1,8 +1,14 @@
 #!/bin/bash
 
 # Publish Psoxy GCP JAR to GCS bucket, zipped so can be used as a Cloud Function deployment bundle
-# Usage: ./publish-gcp-bundle.sh [version]
-# If version not provided, reads from java/pom.xml
+# Usage: ./publish-gcp-bundle.sh [--rc] [--non-interactive]
+#   --rc:              Mark this as a release candidate build (adds -rc suffix to artifact name)
+#   --non-interactive: Skip all interactive prompts (auto-confirm all prompts)
+#
+# Examples:
+#   ./publish-gcp-bundle.sh                    # Read version from pom.xml
+#   ./publish-gcp-bundle.sh --rc               # RC build, read version from pom.xml
+#   ./publish-gcp-bundle.sh --non-interactive  # Non-interactive mode (for CI)
 
 set -e
 
@@ -13,11 +19,43 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Configuration
-IMPLEMENTATION="gcp"
-JAVA_SOURCE_ROOT="java/"
-BUCKET_NAME="psoxy-public-artifacts"
-JAR_NAME="psoxy-$IMPLEMENTATION"
+# Configuration (use env vars if set, otherwise defaults for local use)
+IMPLEMENTATION="${IMPLEMENTATION:-gcp}"
+JAVA_SOURCE_ROOT="${JAVA_SOURCE_ROOT:-java/}"
+BUCKET_NAME="${BUCKET_NAME:-psoxy-public-artifacts}"
+JAR_NAME="${JAR_NAME:-psoxy-$IMPLEMENTATION}"
+
+# Parse command-line arguments
+IS_RC_BUILD=false
+NON_INTERACTIVE=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --rc)
+            IS_RC_BUILD=true
+            echo -e "${BLUE}RC build flag detected${NC}"
+            shift
+            ;;
+        --non-interactive)
+            NON_INTERACTIVE=true
+            echo -e "${BLUE}Non-interactive mode enabled${NC}"
+            shift
+            ;;
+        -*)
+            echo -e "${RED}Error: Unknown option: $1${NC}"
+            echo "Usage: $0 [--rc] [--non-interactive]"
+            shift
+            exit 1
+            ;;
+        *)
+            echo -e "${RED}Error: Unexpected argument: $1${NC}"
+            echo "Usage: $0 [--rc] [--non-interactive]"
+            shift
+            exit 1
+            ;;
+    esac
+done
+
 
 # ensure current directory is the project root
 if [ ! -f "java/pom.xml" ]; then
@@ -25,16 +63,13 @@ if [ ! -f "java/pom.xml" ]; then
     exit 1
 fi
 
-# Get version from argument or pom.xml
-if [ -n "$1" ]; then
-    VERSION="$1"
-else
-    VERSION=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' "java/pom.xml")
-    if [ -z "$VERSION" ]; then
-        echo -e "${RED}Error: Could not extract version from java/pom.xml${NC}"
-        exit 1
-    fi
+# Get version from pom.xml
+VERSION=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' "java/pom.xml")
+if [ -z "$VERSION" ]; then
+    echo -e "${RED}Error: Could not extract version from java/pom.xml${NC}"
+    exit 1
 fi
+
 
 # Function to validate git branch/tag matches version requirements
 validate_git_branch_or_tag() {
@@ -76,6 +111,12 @@ validate_git_branch_or_tag() {
         echo -e "${YELLOW}Version: ${VERSION}${NC}"
         echo ""
         echo -e "${YELLOW}Recommended: Run from main branch or tag ${expected_tag}${NC}"
+        
+        if [ "$NON_INTERACTIVE" = "true" ]; then
+            echo -e "${BLUE}Non-interactive mode: Auto-proceeding${NC}"
+            return 0
+        fi
+        
         echo -e "${YELLOW}Do you want to proceed anyway? (yes/no):${NC} "
         read -r response
         
@@ -156,7 +197,13 @@ if [ ! -f "$JAR_PATH" ]; then
 fi
 
 # Create ZIP filename for GCP Cloud Functions
-ZIP_FILENAME="${JAR_NAME}-${VERSION}.zip"
+# RC builds should have artifact name like: psoxy-gcp-0.5.15-rc.zip
+# Use explicit boolean check
+if [ "$IS_RC_BUILD" = "true" ] || [ "$IS_RC_BUILD" = "1" ]; then
+    ZIP_FILENAME="${JAR_NAME}-${VERSION}-rc.zip"
+else
+    ZIP_FILENAME="${JAR_NAME}-${VERSION}.zip"
+fi
 ZIP_PATH="/tmp/${ZIP_FILENAME}"
 
 # Create ZIP file containing the JAR (GCP Cloud Functions require ZIP, not JAR)
@@ -195,6 +242,12 @@ prompt_overwrite() {
     echo -e "${YELLOW}Warning: Artifact already exists in GCS:${NC}"
     echo -e "  ${BLUE}${gcs_path}${NC}"
     echo ""
+    
+    if [ "$NON_INTERACTIVE" = "true" ]; then
+        echo -e "${BLUE}Non-interactive mode: Auto-overwriting${NC}"
+        return 0
+    fi
+    
     echo -e "${YELLOW}Do you want to overwrite it? (yes/no):${NC} "
     read -r response
     
@@ -220,11 +273,25 @@ publish_to_gcs() {
     fi
 
     # Upload with metadata
-    gsutil cp "$ZIP_PATH" "$gcs_path"
+    # Add gh_ref metadata if available (from GitHub Actions)
+    # Note: -h flag must come BEFORE cp command
+    if [ -n "${GH_REF:-}" ]; then
+        echo -e "${BLUE}Adding metadata: gh_ref=${GH_REF}${NC}"
+        gsutil -h "x-goog-meta-gh_ref:${GH_REF}" cp "$ZIP_PATH" "$gcs_path"
+    else
+        gsutil cp "$ZIP_PATH" "$gcs_path"
+    fi
 
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}✓ Successfully uploaded to GCS${NC}"
-
+        
+        # Verify metadata was set
+        if [ -n "${GH_REF:-}" ]; then
+            local metadata=$(gsutil stat "$gcs_path" 2>/dev/null | grep "x-goog-meta-gh_ref" || echo "")
+            if [ -n "$metadata" ]; then
+                echo -e "${GREEN}✓ Metadata verified: ${metadata}${NC}"
+            fi
+        fi
     else
         echo -e "${RED}✗ Failed to upload to GCS${NC}"
         return 1
@@ -256,11 +323,43 @@ main() {
     fi
     echo -e "${BLUE}gsutil version: ${GREEN}${GSUTIL_VERSION}${NC}"
 
-    # Check if gsutil is authenticated
-    if ! gsutil ls >/dev/null 2>&1; then
-        echo -e "${RED}Error: gsutil is not authenticated${NC}"
-        echo -e "${YELLOW}Run 'gcloud auth login' to authenticate${NC}"
-        exit 1
+    # Check if authenticated
+    # In CI (GitHub Actions), OIDC authentication sets GOOGLE_APPLICATION_CREDENTIALS
+    # Detect CI environment - check multiple ways
+    IS_CI=false
+    
+    # Check for CI indicators (use parameter expansion to handle empty/unset)
+    if [ "${GITHUB_ACTIONS:-}" = "true" ] || \
+       [ "${GITHUB_ACTIONS:-}" = "1" ] || \
+       [ -n "${CI:-}" ] || \
+       [ -n "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]; then
+        IS_CI=true
+    fi
+
+    if [ "$IS_CI" = true ]; then
+        echo -e "${GREEN}✓ Running in CI environment${NC}"
+        if [ -n "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]; then
+            if [ ! -f "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+                echo -e "${RED}Error: Credentials file not found: $GOOGLE_APPLICATION_CREDENTIALS${NC}"
+                exit 1
+            fi
+            if [ ! -r "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+                echo -e "${RED}Error: Credentials file is not readable: $GOOGLE_APPLICATION_CREDENTIALS${NC}"
+                exit 1
+            fi
+            echo -e "${BLUE}Credentials file: ${GREEN}$GOOGLE_APPLICATION_CREDENTIALS${NC}"
+            # Ensure gsutil uses Application Default Credentials
+            export GOOGLE_APPLICATION_CREDENTIALS
+        fi
+        # In CI, skip the gsutil ls check - let actual gsutil commands fail if auth doesn't work
+        echo -e "${BLUE}Using Application Default Credentials for gsutil${NC}"
+    else
+        # Local execution: check traditional authentication
+        if ! gsutil ls >/dev/null 2>&1; then
+            echo -e "${RED}Error: gsutil is not authenticated${NC}"
+            echo -e "${YELLOW}Run 'gcloud auth login' to authenticate${NC}"
+            exit 1
+        fi
     fi
 
     # Show current GCP project
@@ -294,6 +393,9 @@ main() {
         echo ""
         echo -e "${BLUE}GCS URL for Terraform:${NC}"
         echo -e "  ${GREEN}gs://${BUCKET_NAME}/${ZIP_FILENAME}${NC}"
+        
+        # Output artifact URI in standardized format for GitHub Actions summary
+        echo "ARTIFACT_URI=gs://${BUCKET_NAME}/${ZIP_FILENAME}"
     else
         echo -e "${RED}✗ Failed to publish to GCS${NC}"
         exit 1

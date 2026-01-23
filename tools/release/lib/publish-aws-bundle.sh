@@ -1,8 +1,14 @@
 #!/bin/bash
 
 # Publish Psoxy AWS JAR to multiple S3 buckets across regions
-# Usage: ./publish-aws-bundle.sh [version]
-# If version not provided, reads from java/pom.xml
+# Usage: ./publish-aws-bundle.sh [--rc] [--non-interactive] 
+#   --rc:              Mark this as a release candidate build (adds -rc suffix to artifact name)
+#   --non-interactive: Skip all interactive prompts (auto-confirm all prompts)
+#
+# Examples:
+#   ./publish-aws-bundle.sh                    
+#   ./publish-aws-bundle.sh --rc               # RC build
+#   ./publish-aws-bundle.sh --non-interactive  # Non-interactive mode (for CI)
 
 set -e
 
@@ -13,20 +19,27 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Configuration
-IMPLEMENTATION="aws"
-JAVA_SOURCE_ROOT="java/"
-ROLE_ARN="arn:aws:iam::908404960471:role/InfraAdmin"
-ROLE_SESSION_NAME="psoxy-artifact-publish-$(date +%s)"
-BUCKET_PREFIX="psoxy-public-artifacts"
+# Configuration (use env vars if set, otherwise defaults for local use)
+IMPLEMENTATION="${IMPLEMENTATION:-aws}"
+JAVA_SOURCE_ROOT="${JAVA_SOURCE_ROOT:-java/}"
+ROLE_ARN="${ROLE_ARN:-arn:aws:iam::908404960471:role/InfraAdmin}"
+ROLE_SESSION_NAME="${ROLE_SESSION_NAME:-psoxy-artifact-publish-$(date +%s)}"
+BUCKET_PREFIX="${BUCKET_PREFIX:-psoxy-public-artifacts}"
 
-# AWS regions to publish to
-REGIONS=(
-    "us-east-1"
-    "us-east-2"
-    "us-west-1"
-    "us-west-2"
-)
+# AWS regions to publish to (comma-separated string from env, or default array)
+if [ -n "$AWS_REGIONS" ]; then
+    # Convert comma-separated string to array
+    IFS=',' read -ra REGIONS_ARRAY <<< "$AWS_REGIONS"
+    REGIONS=("${REGIONS_ARRAY[@]}")
+else
+    # Default regions
+    REGIONS=(
+        "us-east-1"
+        "us-east-2"
+        "us-west-1"
+        "us-west-2"
+    )
+fi
 
 # ensure current directory is the project root
 if [ ! -f "java/pom.xml" ]; then
@@ -34,21 +47,40 @@ if [ ! -f "java/pom.xml" ]; then
     exit 1
 fi
 
+# Parse command-line arguments
+IS_RC_BUILD=false
+NON_INTERACTIVE=false
 
-# Get version from argument or pom.xml
-if [ -n "$1" ]; then
-    VERSION="$1"
-else
-    # Read version from pom.xml
-    if [ ! -f "java/pom.xml" ]; then
-        echo -e "${RED}Error: java/pom.xml not found. Run this script from the psoxy root directory.${NC}"
-        exit 1
-    fi
-    VERSION=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' "java/pom.xml")
-    if [ -z "$VERSION" ]; then
-        echo -e "${RED}Error: Could not extract version from java/pom.xml${NC}"
-        exit 1
-    fi
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --rc)
+            IS_RC_BUILD=true
+            echo -e "${BLUE}RC build flag detected${NC}"
+            shift
+            ;;
+        --non-interactive)
+            NON_INTERACTIVE=true
+            echo -e "${BLUE}Non-interactive mode enabled${NC}"
+            shift
+            ;;
+        -*)
+            echo -e "${RED}Error: Unknown option: $1${NC}"
+            echo "Usage: $0 [--rc] [--non-interactive]"
+            exit 1
+            ;;
+        *)
+            echo -e "${RED}Error: Unexpected argument: $1${NC}"
+            echo "Usage: $0 [--rc] [--non-interactive]"
+            exit 1
+            ;;
+    esac
+done
+
+# Get version from pom.xml
+VERSION=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' "java/pom.xml")
+if [ -z "$VERSION" ]; then
+    echo -e "${RED}Error: Could not extract version from java/pom.xml${NC}"
+    exit 1
 fi
 
 # Function to validate git branch/tag matches version requirements
@@ -91,6 +123,12 @@ validate_git_branch_or_tag() {
         echo -e "${YELLOW}Version: ${VERSION}${NC}"
         echo ""
         echo -e "${YELLOW}Recommended: Run from main branch or tag ${expected_tag}${NC}"
+        
+        if [ "$NON_INTERACTIVE" = "true" ]; then
+            echo -e "${BLUE}Non-interactive mode: Auto-proceeding${NC}"
+            return 0
+        fi
+        
         echo -e "${YELLOW}Do you want to proceed anyway? (yes/no):${NC} "
         read -r response
         
@@ -153,14 +191,24 @@ fi
 
 # run build with distribution profile
 ./tools/build.sh -d "$IMPLEMENTATION" "$JAVA_SOURCE_ROOT"
-DEPLOYMENT_ARTIFACT=$(ls "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment" | grep -E "^psoxy-.*\.jar$" | head -1)
+BUILT_ARTIFACT=$(ls "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment" | grep -E "^psoxy-.*\.jar$" | head -1)
 
 # Validate JAR exists
-JAR_PATH="${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment/${DEPLOYMENT_ARTIFACT}"
+JAR_PATH="${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment/${BUILT_ARTIFACT}"
 if [ ! -f "$JAR_PATH" ]; then
     echo -e "${RED}Error: JAR file not found at ${JAR_PATH} after running build script${NC}"
     echo -e "${YELLOW}Check last-build.log for errors${NC}"
     exit 1
+fi
+
+# Construct deployment artifact name
+# RC builds should have artifact name like: psoxy-aws-0.5.15-rc.jar
+# Use explicit boolean check
+if [ "$IS_RC_BUILD" = "true" ] || [ "$IS_RC_BUILD" = "1" ]; then
+    # Add -rc before .jar extension
+    DEPLOYMENT_ARTIFACT="${BUILT_ARTIFACT%.jar}-rc.jar"
+else
+    DEPLOYMENT_ARTIFACT="$BUILT_ARTIFACT"
 fi
 
 echo -e "${BLUE}Publishing Psoxy $IMPLEMENTATION JAR version ${GREEN}${VERSION}${BLUE} to S3 buckets...${NC}"
@@ -201,6 +249,12 @@ prompt_overwrite() {
         echo -e "  ${BLUE}${region}:${NC} ${s3_path}"
     done
     echo ""
+    
+    if [ "$NON_INTERACTIVE" = "true" ]; then
+        echo -e "${BLUE}Non-interactive mode: Auto-overwriting${NC}"
+        return 0
+    fi
+    
     echo -e "${YELLOW}Do you want to overwrite these artifacts? (yes/no):${NC} "
     read -r response
     
@@ -253,14 +307,31 @@ publish_to_region() {
         return 1
     fi
 
+    # Build metadata string
+    local metadata="version=${VERSION},build-date=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    
+    # Add gh_ref metadata if available (from GitHub Actions)
+    if [ -n "${GH_REF:-}" ]; then
+        metadata="${metadata},gh_ref=${GH_REF}"
+        echo -e "${BLUE}Adding metadata: gh_ref=${GH_REF}${NC}"
+    fi
+
     # Upload with metadata
     aws s3 cp "$JAR_PATH" "$s3_path" \
         --region "$region" \
-        --metadata "version=${VERSION},build-date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --metadata "$metadata" \
         --cache-control "public, max-age=3600"
 
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}✓ Successfully published to ${region}${NC}"
+        
+        # Verify metadata was set
+        if [ -n "${GH_REF:-}" ]; then
+            local object_metadata=$(aws s3api head-object --bucket "$bucket_name" --key "$DEPLOYMENT_ARTIFACT" --region "$region" --query 'Metadata.gh_ref' --output text 2>/dev/null || echo "")
+            if [ -n "$object_metadata" ] && [ "$object_metadata" != "None" ]; then
+                echo -e "${GREEN}✓ Metadata verified: gh_ref=${object_metadata}${NC}"
+            fi
+        fi
     else
         echo -e "${RED}✗ Failed to publish to ${region}${NC}"
         return 1
@@ -307,7 +378,10 @@ publish() {
         echo -e "${BLUE}Download URLs:${NC}"
         for region in "${REGIONS[@]}"; do
             local bucket_name="${BUCKET_PREFIX}-${region}"
-            echo -e "  ${GREEN}${region}:${NC} https://${bucket_name}.s3.${region}.amazonaws.com/${DEPLOYMENT_ARTIFACT}"
+            local artifact_url="https://${bucket_name}.s3.${region}.amazonaws.com/${DEPLOYMENT_ARTIFACT}"
+            echo -e "  ${GREEN}${region}:${NC} ${artifact_url}"
+            # Output artifact URI in standardized format for GitHub Actions summary
+            echo "ARTIFACT_URI_${region}=${artifact_url}"
         done
     else
         echo -e "${YELLOW}⚠ Some regions failed to publish${NC}"

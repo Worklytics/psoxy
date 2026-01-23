@@ -7,7 +7,7 @@ all Google Workspace connectors.
 ## Examples
 
 - [Example Rules](directory.yaml)
-- [Example Rules (no App IDs)](directory-no-app-ids.yaml)
+- [Example Rules (no App IDs)](directory_no-app-ids.yaml)
 - Example Data:
   - [original/group-members.json](example-api-responses/original/group-members.json) |
     [sanitized/group-members.json](example-api-responses/sanitized/group-members.json)
