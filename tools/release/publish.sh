@@ -2,7 +2,12 @@
 
 # Arguments: repository name and tag name
 RELEASE="$1"
-PATH_TO_REPO="$2"
+PATH_TO_REPO="${2:-.}"
+
+# Normalize PATH_TO_REPO - ensure it ends with a slash for path concatenation
+if [ -n "$PATH_TO_REPO" ] && [ "${PATH_TO_REPO: -1}" != "/" ]; then
+  PATH_TO_REPO="${PATH_TO_REPO}/"
+fi
 
 GREEN='\e[0;32m'
 RED='\e[0;31m'
@@ -99,10 +104,14 @@ echo    # Move to a new line
 case "$REPLY" in
   [yY][eE][sS]|[yY])
     LOG_FILE="/tmp/release_${RELEASE}_mvn-artifacts.log"
+    set +e  # Temporarily disable exit on error to check exit code
     ./tools/release/publish-mvn-artifacts.sh ${PATH_TO_REPO} &> "${LOG_FILE}"
-    if [ $? -ne 0 ]; then
-      printf "${RED}Failed to publish Maven artifacts to GitHub Packages. Exiting.${NC}\n"
+    EXIT_CODE=$?
+    set -e  # Re-enable exit on error
+    if [ $EXIT_CODE -ne 0 ]; then
+      printf "${RED}Failed to publish Maven artifacts to GitHub Packages.${NC}\n"
       printf "Please review the error logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
+      exit $EXIT_CODE
     else
       printf "${GREEN}✓${NC} Maven artifacts published to GitHub Packages\n"
       printf "See logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
@@ -112,56 +121,23 @@ case "$REPLY" in
     printf "Skipped publishing Maven artifacts to GitHub Packages\n"
     printf "To do so manually, run:\n"
     printf "    ${BLUE}./tools/release/publish-mvn-artifacts.sh ${PATH_TO_REPO}${NC}\n"
+    printf "    or run the GitHub Actions workflow manually: ${BLUE}gh workflow run publish-mvn-artifacts.yaml --ref ${RELEASE}${NC}\n"
     ;;
 esac
 
-
-# aws bundle, as above
-printf "Publish AWS bundle to S3 bucket?\n"
+# publish bundles
+printf "Publish bundles (via GitHub Actions)?\n"
 read -p "(Y/n) " -n 1 -r
 REPLY=${REPLY:-Y}
 echo    # Move to a new line
 case "$REPLY" in
   [yY][eE][sS]|[yY])
-    LOG_FILE="/tmp/release_${RELEASE}_aws-bundle.log"
-    ./tools/release/publish-aws-bundle.sh ${PATH_TO_REPO} &> "${LOG_FILE}"
-    if [ $? -ne 0 ]; then
-      printf "${RED}Failed to publish AWS bundle to S3 bucket. Exiting.${NC}\n"
-      printf "Please review the error logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
-    else
-      printf "${GREEN}✓${NC} AWS bundle published to S3 bucket\n"
-      printf "See logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
-    fi
+    ./tools/release/publish-rc-bundles-via-gh.sh ${RELEASE}
   ;;
   *)
-    printf "Skipped publishing AWS bundle to S3 bucket\n"
+    printf "Skipped publishing bundles (via GitHub Actions)\n"
     printf "To do so manually, run:\n"
-    printf "    ${BLUE}./tools/release/publish-aws-bundle.sh ${PATH_TO_REPO}${NC}\n"
-    ;;
-esac
-
-
-# gcp bundle, as above
-printf "Publish GCP bundle to GCS bucket?\n"
-read -p "(Y/n) " -n 1 -r
-REPLY=${REPLY:-Y}
-echo    # Move to a new line
-case "$REPLY" in
-  [yY][eE][sS]|[yY])
-    LOG_FILE="/tmp/release_${RELEASE}_gcp-bundle.log"
-    ./tools/release/publish-gcp-bundle.sh ${PATH_TO_REPO} &> "${LOG_FILE}"
-    if [ $? -ne 0 ]; then
-      printf "${RED}Failed to publish GCP bundle to GCS bucket. Exiting.${NC}\n"
-      printf "Please review the error logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
-    else
-      printf "${GREEN}✓${NC} GCP bundle published to GCS bucket\n"
-      printf "See logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
-    fi
-  ;;
-  *)
-    printf "Skipped publishing GCP bundle to GCS bucket\n"
-    printf "To do so manually, run:\n"
-    printf "    ${BLUE}./tools/release/publish-gcp-bundle.sh ${PATH_TO_REPO}${NC}\n"
+    printf "    ${BLUE}./tools/release/publish-rc-bundles-via-gh.sh ${RELEASE}${NC}\n"
     ;;
 esac
 
@@ -173,10 +149,14 @@ echo    # Move to a new line
 case "$REPLY" in
   [yY][eE][sS]|[yY])
     LOG_FILE="/tmp/release_${RELEASE}_docs.log"
+    set +e  # Temporarily disable exit on error to check exit code
     ./tools/release/publish-docs.sh ${RELEASE} ${PATH_TO_REPO} &> "${LOG_FILE}"
-    if [ $? -ne 0 ]; then
-      printf "${RED}Failed to publish docs. Exiting.${NC}\n"
+    EXIT_CODE=$?
+    set -e  # Re-enable exit on error
+    if [ $EXIT_CODE -ne 0 ]; then
+      printf "${RED}Failed to publish docs.${NC}\n"
       printf "Please review the error logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
+      exit $EXIT_CODE
     else
       printf "${GREEN}✓${NC} Docs published\n"
       printf "See logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
