@@ -672,6 +672,61 @@ class ApiDataRequestHandlerTest {
             // we expect execute() to fail or something else, but we just want to check headers
         }
 
-        assertEquals(originalValue, headers.get(headerName));
+        assertEquals(List.of(originalValue), headers.get(headerName));
+    }
+
+    @Test
+    @SneakyThrows
+    void handleShouldDecryptAllowedMultiValueHeaders() {
+        setup("gmail", "google.apis.com");
+        ApiDataRequestHandler spy = spy(handler);
+
+        String originalValue1 = "user1@example.com";
+        String encodedValue1 = pseudonymEncoder.encode(Pseudonym.builder()
+            .hash(deterministicTokenizationStrategy.getToken(originalValue1, Function.identity()))
+            .reversible(reversibleTokenizationStrategy.getReversibleToken(originalValue1, Function.identity()))
+            .build());
+
+        String originalValue2 = "user2@example.com";
+        String encodedValue2 = pseudonymEncoder.encode(Pseudonym.builder()
+            .hash(deterministicTokenizationStrategy.getToken(originalValue2, Function.identity()))
+            .reversible(reversibleTokenizationStrategy.getReversibleToken(originalValue2, Function.identity()))
+            .build());
+
+        String headerName = "X-AcmeApi-ActAs";
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
+            .thenReturn(Optional.of(PseudonymImplementation.DEFAULT.getHttpHeaderValue()));
+        when(request.getHttpMethod()).thenReturn("GET");
+        when(request.getPath()).thenReturn("/foo");
+        // mock multi-value header
+        when(request.getMultiValueHeader(headerName)).thenReturn(Optional.of(List.of(encodedValue1, encodedValue2)));
+        // fallback if logic changes, though getMultiValueHeader should be primary
+        when(request.getHeader(headerName)).thenReturn(Optional.of(encodedValue1)); // Just in case
+
+        HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
+        HttpRequest mockSourceApiRequest = mock(HttpRequest.class);
+        com.google.api.client.http.HttpHeaders headers = new com.google.api.client.http.HttpHeaders();
+        when(mockSourceApiRequest.getHeaders()).thenReturn(headers);
+        when(requestFactory.buildRequest(anyString(), any(), any())).thenReturn(mockSourceApiRequest);
+        doReturn(requestFactory).when(spy).getRequestFactory(any());
+
+        RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
+        when(sanitizer.isAllowed(anyString(), any(), anyString(), any())).thenReturn(true);
+        when(sanitizer.getAllowedRequestHeaders(anyString(), any())).thenReturn(Optional.of(List.of(headerName)));
+
+        spy.sanitizer = sanitizer;
+
+        try {
+            spy.handle(request, ApiDataRequestHandler.ProcessingContext.synchronous(clock.instant()));
+        } catch (Exception ignored) {
+            // we expect execute() to fail due to incomplete mock, but we verified header population
+        }
+
+        // Verify that the header was set with the decrypted values
+        Object actualHeader = headers.get(headerName);
+        assertTrue(actualHeader instanceof List);
+        assertEquals(List.of(originalValue1, originalValue2), actualHeader);
     }
 }
