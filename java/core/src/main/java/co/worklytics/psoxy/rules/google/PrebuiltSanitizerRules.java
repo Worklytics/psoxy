@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.transforms.HashIp;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -90,11 +91,6 @@ public class PrebuiltSanitizerRules {
     );
     static final Set<String> GOOGLE_CHAT_EVENT_PARAMETERS_ALLOWED = ImmutableSet.<String>builder()
             .addAll(GOOGLE_CHAT_EVENT_PARAMETERS_PII)
-    static final Set<String> GOOGLE_CHAT_EVENT_PARAMETERS_PII = ImmutableSet.of(
-            "actor"
-    );
-    static final Set<String> GOOGLE_CHAT_EVENT_PARAMETERS_ALLOWED = ImmutableSet.<String>builder()
-            .addAll(GOOGLE_CHAT_EVENT_PARAMETERS_PII)
             .add("room_id", "timestamp_ms", "message_id", "room_name", "ip_address")
             .build();
 
@@ -106,17 +102,11 @@ public class PrebuiltSanitizerRules {
                             .jsonPath("$..email")
                             .jsonPath("$.items[*].events[*].parameters[?(@.name in ['actor'])].value")
                             .build())
-                    .transform(Transform.HashIp.builder()
+                    .transform(HashIp.builder()
                             .jsonPath("$.items[*].ipAddress")
                             .jsonPath("$.items[*].events[*].parameters[?(@.name == 'ip_address')].value")
                             .build())
                     .transform(Transform.Redact.builder()
-                            .jsonPath("$.items[*].events[*].parameters[?(!(@.name =~ /^" +
-                                    String.join("|", GOOGLE_CHAT_EVENT_PARAMETERS_ALLOWED) +
-                                    "$/i))]")
-                            .build())
-                    .build())
-            .build();
                             .jsonPath("$.items[*].events[*].parameters[?(!(@.name =~ /^" +
                                     String.join("|", GOOGLE_CHAT_EVENT_PARAMETERS_ALLOWED) +
                                     "$/i))]")
@@ -342,7 +332,7 @@ public class PrebuiltSanitizerRules {
                             .jsonPath("$..email")
                             .jsonPath("$.items[*].events[*].parameters[?(@.name in ['organizer_email','identifier'])].value")
                             .build())
-                    .transform(Transform.HashIp.builder()
+                    .transform(HashIp.builder()
                             .jsonPath("$.items[*].ipAddress")
                             .jsonPath("$.items[*].events[*].parameters[?(@.name == 'ip_address')].value")
                             .build())
