@@ -5,8 +5,12 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..email"
-          - "$.items[*].events[*].parameters[?(@.name in ['organizer_email','ip_address','identifier'])].value"
+          - "$.items[*].events[*].parameters[?(@.name in ['organizer_email','identifier'])].value"
         encoding: "URL_SAFE_TOKEN"
+      - !<hashIp>
+        jsonPaths:
+          - "$.items[*].ipAddress"
+          - "$.items[*].events[*].parameters[?(@.name == 'ip_address')].value"
       - !<redact>
         jsonPaths:
           - "$.items[*].events[*].parameters[?(!(@.name =~ /^organizer_email|ip_address|identifier|identifier_type|location_country|location_region|is_external|product_type|device_type|duration_seconds|video_send_seconds|video_recv_seconds|screencast_send_seconds|screencast_recv_seconds|audio_send_seconds|audio_recv_seconds|calendar_event_id|endpoint_id|meeting_code|conference_id$/i))]"

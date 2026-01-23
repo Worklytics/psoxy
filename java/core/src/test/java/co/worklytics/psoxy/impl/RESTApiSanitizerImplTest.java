@@ -1,53 +1,62 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.*;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.test.TestModules;
-import com.avaulta.gateway.pseudonyms.Pseudonym;
-import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.avaulta.gateway.rules.Endpoint;
-import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
-import co.worklytics.psoxy.rules.Rules2;
-import com.avaulta.gateway.rules.JsonSchemaFilter;
-import com.avaulta.gateway.rules.transforms.EncryptIp;
-import com.avaulta.gateway.rules.transforms.HashIp;
-import com.avaulta.gateway.rules.transforms.Transform;
-import co.worklytics.test.MockModules;
-import co.worklytics.test.TestUtils;
-import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
-import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
-import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
-import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.MapFunction;
-import dagger.Component;
-import dagger.Module;
-import dagger.Provides;
-import lombok.SneakyThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import java.net.URL;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.net.URL;
-import java.time.Duration;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.assertArg;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.transforms.EncryptIp;
+import com.avaulta.gateway.rules.transforms.HashIp;
+import com.avaulta.gateway.rules.transforms.Transform;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.MapFunction;
+import co.worklytics.psoxy.ConfigRulesModule;
+import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.PseudonymizerImplFactory;
+import co.worklytics.psoxy.PsoxyModule;
+import co.worklytics.psoxy.RESTApiSanitizerFactory;
+import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
+import co.worklytics.psoxy.rules.Rules2;
+import co.worklytics.test.MockModules;
+import co.worklytics.test.TestUtils;
+import dagger.Component;
+import dagger.Module;
+import dagger.Provides;
+import lombok.SneakyThrows;
 
 class RESTApiSanitizerImplTest {
 
@@ -626,5 +635,7 @@ class RESTApiSanitizerImplTest {
                     jsonString);
             });
     }
+
+
 
 }
