@@ -49,7 +49,7 @@ node cli-call.js -u https://us-central1-acme.cloudfunctions.net/outlook-cal/v1.0
 
 ### End-to-End Verification (Webhook Collection)
 
-For Webhook Collection testing, you can use the tool toto verify that the data was successfully collected and written to the expected bucket.
+For Webhook Collection testing, you can use the tool to verify that the data was successfully collected and written to the expected bucket.
 
 ```shell
 node cli-call.js -u https://us-central1-acme.cloudfunctions.net/webhook-collector --method POST --body '{...}' --verify-collection my-output-bucket
