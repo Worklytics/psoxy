@@ -4,6 +4,7 @@ import {
     GetLogEventsCommand,
 } from '@aws-sdk/client-cloudwatch-logs';
 import {
+    DeleteObjectCommand,
     GetObjectCommand,
     ListBucketsCommand,
     ListObjectsV2Command,

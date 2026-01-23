@@ -97,8 +97,8 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
         const url = new URL(options.url);
 
        
-       const isGcp = options.force === 'gcp' || gcp.isValidURL(url);
-       const isAws = options.force === 'aws' || (!isGcp && (url.hostname.endsWith('amazonaws.com') || url.hostname.endsWith('on.aws'))); // rough check or rely on fallback
+       const isGcp = options.force?.toLowerCase() === 'gcp' || gcp.isValidURL(url);
+       const isAws = options.force?.toLowerCase() === 'aws' || (!isGcp && (url.hostname.endsWith('amazonaws.com') || url.hostname.endsWith('on.aws'))); // rough check or rely on fallback
 
        if (isGcp) {
           await gcp.verifyCollection({

@@ -879,6 +879,7 @@ export {
     signJwtWithAWSKMS,
     signJwtWithGCPKMS,
     sleep,
-    transformSpecWithResponse
+    transformSpecWithResponse,
+    unzip
 };
 
