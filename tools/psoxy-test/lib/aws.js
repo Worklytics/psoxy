@@ -436,7 +436,7 @@ async function verifyCollection(options, logger) {
                   const buffer = Buffer.concat(chunks);
                   
                   // Check for gzip
-                  const isGzippedContent = isGzipped(buffer) || getResponse.ContentEncoding === 'gzip';
+                  const isGzippedContent = (await isGzipped(buffer)) || getResponse.ContentEncoding === 'gzip';
                    if (isGzippedContent) {
                        contentStr = (await new Promise((resolve, reject) => {
                            zlib.gunzip(buffer, (err, res) => {
@@ -465,8 +465,8 @@ async function verifyCollection(options, logger) {
              }
 
             if (items.length > 0) {
-                const matchResult = compareContent(items, expectedContent, logger);
-                if (matchResult.found) {
+                const matchFound = compareContent(items, expectedContent, logger);
+                if (matchFound) {
                   logger.success(`Verification Successful: Content matches.`);
                   return;
                 } else {

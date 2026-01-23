@@ -93,26 +93,17 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
     }
 
     if (options.verifyCollection && result.status === 200) {
-       // Delegate based on cloud provider logic
-       const url = new URL(options.url);
-       
-       // Dynamically import aws.js for AWS verification to avoid circular deps or if beneficial
-       // But we didn't import aws at the top yet, let's look at imports. 
-       // We only have `import gcp from './lib/gcp.js';` at top.
-       // We should probably import aws dynamically or if it's not imported at all.
-       // `cli-call.js` does NOT import aws.js. I should add `import aws from './lib/aws.js'` or dynamic import.
-       // I will use dynamic import here as a quick fix or updated it properly.
-       // But since replace_file_content targets specific lines, I am inside the block.
+        // Delegate based on cloud provider logic
+        const url = new URL(options.url);
+
        
        const isGcp = options.force === 'gcp' || gcp.isValidURL(url);
        const isAws = options.force === 'aws' || (!isGcp && (url.hostname.endsWith('amazonaws.com') || url.hostname.endsWith('on.aws'))); // rough check or rely on fallback
 
        if (isGcp) {
           await gcp.verifyCollection({
-              verifyCollection: options.verifyCollection,
-              schedulerJob: options.schedulerJob,
-              url: options.url,
-              body: options.body,
+              ...options,
+              bucketName: options.verifyCollection,
               startTime: startTime
           }, logger);
        } else {

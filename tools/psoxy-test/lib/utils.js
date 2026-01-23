@@ -817,7 +817,7 @@ async function pollAsyncResponse(locationUrl, options = {}) {
  * @param {Array} items - Array of actual items found in the file
  * @param {string} expectedContent - Expected JSON string
  * @param {Object} logger - Logger instance
- * @returns {Object} - { found: boolean }
+ * @returns {boolean}
  */
 function compareContent(items, expectedContent, logger) {
     let expectedJson;
@@ -847,7 +847,7 @@ function compareContent(items, expectedContent, logger) {
         return false;
     });
 
-    return { found };
+    return found;
 }
 
 /**
@@ -860,6 +860,7 @@ function sleep(ms) {
 }
 
 export {
+    addFilenameSuffix,
     compareContent,
     environmentCheck,
     executeCommand,
@@ -868,6 +869,7 @@ export {
     getCommonHTTPHeaders,
     getFileNameFromURL,
     isGzipped,
+    parseBucketOption,
     pollAsyncResponse,
     requestWrapper as request,
     resolveAWSRegion,

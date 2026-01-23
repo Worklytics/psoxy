@@ -416,8 +416,8 @@ async function verifyBucket(bucketName, expectedContent, startTime, logger) {
         }
 
         if (items.length > 0) {
-          const matchResult = compareContent(items, expectedContent, logger);
-          if (matchResult.found) {
+          const matchFound = compareContent(items, expectedContent, logger);
+          if (matchFound) {
             logger.success(`Verification Successful: Content matches.`);
             return;
           } else {
