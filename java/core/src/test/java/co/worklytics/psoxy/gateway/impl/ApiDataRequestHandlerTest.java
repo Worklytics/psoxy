@@ -1,6 +1,8 @@
 package co.worklytics.psoxy.gateway.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -10,7 +12,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -23,13 +24,10 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import com.google.api.client.http.ByteArrayContent;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -633,5 +631,47 @@ class ApiDataRequestHandlerTest {
                 .build());
 
         return sanitizerFactory.create(rules, defaultPseudonymizer);
+    }
+    @Test
+    @SneakyThrows
+    void handleShouldDecryptAllowedHeaders() {
+        setup("gmail", "google.apis.com");
+        ApiDataRequestHandler spy = spy(handler);
+
+        String originalValue = "user@example.com";
+        String encodedValue = pseudonymEncoder.encode(Pseudonym.builder()
+            .hash(deterministicTokenizationStrategy.getToken(originalValue, Function.identity()))
+            .reversible(reversibleTokenizationStrategy.getReversibleToken(originalValue, Function.identity()))
+            .build());
+
+        String headerName = "X-AcmeApi-ActAs";
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
+            .thenReturn(Optional.of(PseudonymImplementation.DEFAULT.getHttpHeaderValue()));
+        when(request.getHttpMethod()).thenReturn("GET");
+        when(request.getPath()).thenReturn("/foo");
+        when(request.getHeader(headerName)).thenReturn(Optional.of(encodedValue));
+
+        HttpRequestFactory requestFactory = mock(HttpRequestFactory.class);
+        HttpRequest mockSourceApiRequest = mock(HttpRequest.class);
+        com.google.api.client.http.HttpHeaders headers = new com.google.api.client.http.HttpHeaders();
+        when(mockSourceApiRequest.getHeaders()).thenReturn(headers);
+        when(requestFactory.buildRequest(anyString(), any(), any())).thenReturn(mockSourceApiRequest);
+        doReturn(requestFactory).when(spy).getRequestFactory(any());
+
+        RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
+        when(sanitizer.isAllowed(anyString(), any(), anyString(), any())).thenReturn(true);
+        when(sanitizer.getAllowedRequestHeaders(anyString(), any())).thenReturn(Optional.of(List.of(headerName)));
+
+        spy.sanitizer = sanitizer;
+
+        try {
+            spy.handle(request, ApiDataRequestHandler.ProcessingContext.synchronous(clock.instant()));
+        } catch (Exception ignored) {
+            // we expect execute() to fail or something else, but we just want to check headers
+        }
+
+        assertEquals(originalValue, headers.get(headerName));
     }
 }

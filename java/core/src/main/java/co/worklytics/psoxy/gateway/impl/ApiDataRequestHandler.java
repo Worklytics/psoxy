@@ -5,6 +5,8 @@ import java.net.ConnectException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -777,11 +779,30 @@ public class ApiDataRequestHandler {
         // type and subtype, such as 'text/plain'."}}
         headers.setAccept(ContentType.APPLICATION_JSON.getMimeType());
 
-        sanitizer.getAllowedRequestHeaders(request.getHttpMethod(), targetUrl)
-                .ifPresent(i -> i.forEach(h -> request.getHeader(h).ifPresent(headerValue -> {
-                    logIfDevelopmentMode(() -> String.format("Header %s included", h));
-                    headers.set(h, headerValue);
-                })));
+        Collection<String> allowedHeaders = sanitizer.getAllowedRequestHeaders(request.getHttpMethod(), targetUrl)
+                .orElse(Collections.emptyList());
+
+        for (String h : allowedHeaders) {
+            // handle multi-valued headers
+            List<String> headerValues = request.getMultiValueHeader(h)
+                    .or(() -> request.getHeader(h).map(List::of)) // fallback if specific multi-value not impl
+                    .orElse(Collections.emptyList());
+
+            if (!headerValues.isEmpty()) {
+               List<String> valuesToForward = headerValues.stream()
+                       .map(v -> pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(v,
+                               reversibleTokenizationStrategy))
+                       .collect(Collectors.toList());
+
+                logIfDevelopmentMode(() -> String.format("Header %s included (values: %s)", h, valuesToForward));
+
+                // google-http-client HttpHeaders uses (String name, Object value);
+                // if value is Collection, it treats as multi-valued
+                // if value is String, single value
+                // so we can just pass the list
+                headers.set(h, valuesToForward);
+            }
+        }
     }
 
     /**
