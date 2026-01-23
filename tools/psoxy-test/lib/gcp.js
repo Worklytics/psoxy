@@ -210,7 +210,7 @@ function parseLogEntries(entries) {
     return [];
   }
 
-  // https://cloud.google.com/logging/docs/reference/v2/rest/v2/entries/list#LogEntry
+  // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
   const LOG_LEVELS = ['WARNING', 'ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY'];
   const dateRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}/
   return entries.map(entry => {
