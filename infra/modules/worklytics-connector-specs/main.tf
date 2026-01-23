@@ -118,6 +118,38 @@ EOT
         path_to_instance_parameters = "PSOXY_CHATGPT_ENTERPRISE_"
       })
     }
+    claude = {
+      source_kind : "claude"
+      availability : "beta",
+      enable_by_default : false
+      worklytics_connector_id : "claude-psoxy"
+      display_name : "Claude",
+      worklytics_connector_name : "Claude via Psoxy"
+      target_host : "api.anthropic.com"
+      source_auth_strategy : "claude_admin_api_key"
+      secured_variables : [
+        {
+          name : "ADMIN_API_KEY"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ]
+      example_api_requests : [
+        {
+          method : "GET"
+          path : "/v1/compliance/organizations"
+        },
+        {
+          method : "GET"
+          path : "/v1/compliance/activities"
+        }
+      ],
+      external_token_todo : templatefile("${path.module}/docs/claude/claude_instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_CLAUDE_"
+      })
+      instructions_template = "${path.module}/docs/claude/instructions.tftpl"
+    }
     claude-code = {
       source_kind : "claude-code"
       availability : "beta",
@@ -145,8 +177,8 @@ EOT
           path : "/v1/organizations/usage_report/claude_code"
         }
       ],
-      external_token_todo : templatefile("${path.module}/docs/claude/instructions.tftpl", {
-        path_to_instance_parameters = "PSOXY_CLAUDE_CODE"
+      external_token_todo : templatefile("${path.module}/docs/claude/claude_code_instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_CLAUDE_CODE_"
       })
       instructions_template = "${path.module}/docs/claude/instructions.tftpl"
     }

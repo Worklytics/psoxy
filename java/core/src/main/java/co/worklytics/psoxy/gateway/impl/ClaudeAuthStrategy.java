@@ -31,12 +31,14 @@ import java.util.stream.Collectors;
 
 /**
  * Passes the admin API key for Claude
+ *
  * @implNote This could be extended to support different header names, not necessarily x-api-key
  */
 @RequiredArgsConstructor(onConstructor_ = {@Inject})
 public class ClaudeAuthStrategy implements SourceAuthStrategy {
 
-    @NonNull SecretStore secretStore;
+    @NonNull
+    SecretStore secretStore;
 
     @Getter
     private final String configIdentifier = "claude_admin_api_key";
