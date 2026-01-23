@@ -45,6 +45,7 @@ public class Rules2 implements RESTRules {
     @Singular
     List<Endpoint> endpoints;
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Singular
     List<String> allowedRequestHeaders;
 
