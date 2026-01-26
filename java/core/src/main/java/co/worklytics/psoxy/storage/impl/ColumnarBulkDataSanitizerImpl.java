@@ -91,7 +91,8 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     }
 
     @Override
-    public void sanitize(@NonNull Reader reader,
+    public void sanitize(@NonNull co.worklytics.psoxy.gateway.StorageEventRequest request,
+                         @NonNull Reader reader,
                          @NonNull Writer writer,
                          @NonNull Pseudonymizer pseudonymizer) throws IOException {
         CSVFormat inputCSVFormat = CSVFormat.DEFAULT.builder()

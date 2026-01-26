@@ -1,9 +1,18 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.aws.DaggerAwsContainer;
-
-import co.worklytics.psoxy.gateway.*;
-import co.worklytics.psoxy.storage.StorageHandler;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import javax.inject.Inject;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification;
@@ -11,12 +20,12 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
+import co.worklytics.psoxy.aws.DaggerAwsContainer;
+import co.worklytics.psoxy.gateway.StorageEventRequest;
+import co.worklytics.psoxy.gateway.StorageEventResponse;
+import co.worklytics.psoxy.storage.StorageHandler;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-
-import javax.inject.Inject;
-import java.io.*;
-import java.util.*;
 
 @Log
 public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<S3Event, String> {
@@ -86,7 +95,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
 
         StorageEventRequest request =
-            storageHandler.buildRequest(importBucket, sourceKey, transform, sourceMetadata.getContentEncoding());
+            storageHandler.buildRequest(importBucket, sourceKey, transform, sourceMetadata.getContentEncoding(), sourceMetadata.getContentType());
 
         // AWS lambdas have a shared ephemeral storage (shared across invocations) of 512MB
         // This can be upped to 10GB, but this should be enough as long as we're not processing
