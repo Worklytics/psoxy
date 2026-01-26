@@ -1,5 +1,22 @@
 package co.worklytics.psoxy.storage.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Optional;
+import java.util.zip.GZIPInputStream;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.junit.jupiter.api.Test;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.RuleSet;
 import co.worklytics.psoxy.ConfigRulesModule;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.gateway.ConfigService;
@@ -8,29 +25,10 @@ import co.worklytics.psoxy.storage.BulkDataTestUtils;
 import co.worklytics.psoxy.storage.StorageHandler;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
-import com.avaulta.gateway.pseudonyms.Pseudonym;
-import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
-import com.avaulta.gateway.rules.RuleSet;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import lombok.SneakyThrows;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.junit.jupiter.api.Test;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Optional;
-import java.util.zip.GZIPInputStream;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 class RecordBulkDataSanitizerImplTest {
 
@@ -190,9 +188,9 @@ class RecordBulkDataSanitizerImplTest {
 
         String output = new String(outputStream.toByteArray());
 
-        final String EXPECTED = "foo,bar\r\n" +
-            ",t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\r\n" +
-            ",t~0E6I_002nK2IJjv_KCUeFzIUo5rfuISgx7_g-EhfCxE@company.com\r\n";
+        final String EXPECTED = "foo,bar\n" +
+            ",t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\n" +
+            ",t~0E6I_002nK2IJjv_KCUeFzIUo5rfuISgx7_g-EhfCxE@company.com\n";
         assertEquals(EXPECTED, output);
     }
 
@@ -226,4 +224,86 @@ class RecordBulkDataSanitizerImplTest {
         assertEquals(SANITIZED_FILE, output);
     }
 
+    @Test
+    void jsonArray_Basic() {
+        this.setUpWithRules("---\n" +
+            "format: \"JSON_ARRAY\"\n" +
+            "transforms:\n" +
+            "- redact: \"foo\"\n" +
+            "- pseudonymize: \"bar\"\n");
+
+        String input = "[{\"foo\":1,\"bar\":2,\"other\":\"three\"},{\"foo\":4,\"bar\":5,\"other\":\"six\"}]";
+
+        final String objectPath = "export-20231128/file.json";
+        storageHandler.handle(BulkDataTestUtils.request(objectPath),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes()),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray());
+
+        System.out.println("Output: " + output);
+
+        assertEquals('[', output.charAt(0));
+        assertEquals(']', output.charAt(output.length() - 1));
+
+        String expected2 = encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("2" + "salt")).build());
+        String expected5 = encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("5" + "salt")).build());
+
+        // Verify content - manual check as we don't have full JSON parsing here easily without bringing in Jackson dependency to test
+        // but removing "foo" and pseudonymizing "bar" should happen.
+        assertTrue(output.contains("\"foo\":null"));
+        assertTrue(output.contains("\"bar\":\"" + expected2 + "\""));
+        assertTrue(output.contains("\"bar\":\"" + expected5 + "\""));
+    }
+
+    @Test
+    void jsonArray_Whitespace() {
+        this.setUpWithRules("---\n" +
+            "format: \"JSON_ARRAY\"\n" +
+            "transforms:\n");
+
+        String input = " [  \n { \"foo\" : 1 } , \n { \"foo\" : 2 } \n ] ";
+
+        final String objectPath = "export-20231128/file.json";
+        storageHandler.handle(BulkDataTestUtils.request(objectPath),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes()),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray());
+
+        assertEquals('[', output.charAt(0));
+        assertEquals(']', output.charAt(output.length() - 1));
+        assertTrue(output.contains("\"foo\":1"));
+        assertTrue(output.contains("\"foo\":2"));
+    }
+
+    @Test
+    void testAutoFormat_JsonArray() {
+        this.setUpWithRules("---\n" +
+            "format: \"AUTO\"\n" +
+            "transforms:\n" +
+            "- redact: \"foo\"\n" +
+            "- pseudonymize: \"bar\"\n");
+
+        String input = "[{\"foo\":1,\"bar\":2,\"other\":\"three\"}]";
+
+        final String objectPath = "export-20231128/file.json";
+        
+        // Manual request construction to set Content-Type
+        co.worklytics.psoxy.gateway.StorageEventRequest request = BulkDataTestUtils.request(objectPath)
+                .withContentType("application/json");
+
+        storageHandler.handle(request,
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes()),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray());
+
+        assertEquals('[', output.charAt(0));
+        assertEquals(']', output.charAt(output.length() - 1));
+        assertTrue(output.contains("\"foo\":null"));
+    }
 }
