@@ -11,6 +11,8 @@ import java.net.URL;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -636,6 +638,35 @@ class RESTApiSanitizerImplTest {
             });
     }
 
+    @SneakyThrows
+    @Test
+    void allowedRequestHeaders_combinesRulesAndEndpoint() {
+        URL url = new URL("https://api.example.com/test");
 
+        RESTApiSanitizerImpl strictSanitizer = sanitizerFactory.create(Rules2.builder()
+                .allowedRequestHeaders(Arrays.asList("Global-Header"))
+                .endpoint(Endpoint.builder()
+                        .pathRegex("^/test$")
+                        .allowedMethods(Collections.singleton("GET"))
+                        .allowedRequestHeaders(Arrays.asList("Endpoint-Header"))
+                        .allowedRequestHeadersToForward(Arrays.asList("Forward-Header"))
+                        .build())
+                .build(), sanitizer.pseudonymizer);
+
+        Optional<Collection<String>> headersOptional = strictSanitizer.getAllowedRequestHeaders("GET", url);
+
+        assertTrue(headersOptional.isPresent());
+        Collection<String> headers = headersOptional.get();
+
+        // ruleSet allowedHeaders are on top of the ones from the endpoint
+        assertTrue(headers.contains("Global-Header"));
+        assertTrue(headers.contains("Endpoint-Header"));
+        assertTrue(headers.contains("Forward-Header"));
+        assertEquals(3, headers.size());
+
+        // verify order: Global first
+        Iterator<String> it = headers.iterator();
+        assertEquals("Global-Header", it.next());
+    }
 
 }
