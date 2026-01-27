@@ -23,7 +23,7 @@ jobs:
           if [[ "$REF_NAME" == "main" ]]; then
             echo "✅ Validated running on main branch."
           elif [[ "$REF_NAME" =~ ^v ]]; then
-             echo "✅ Validated running on release tag."
+            echo "✅ Validated running on release tag."
           else
             echo "::error::Manual trigger is only allowed on 'main' branch or 'v*' release tags. Current ref: $REF_NAME"
             exit 1
