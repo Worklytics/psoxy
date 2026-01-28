@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathTemplate: "/rest/api/v1/getinsights"
+  - pathTemplate: "/rest/api/v1/insights"
     allowedMethods:
       - "POST"
     allowedQueryParams: []

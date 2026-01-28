@@ -23,8 +23,8 @@ public class GleanTests extends JavaRulesTestBaseCase {
     @Override
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
-            InvocationExample.of("https://api.glean.com/rest/api/v1/getinsights", "insights-response.json", "POST"),
-            InvocationExample.of("https://api.glean.com/rest/api/v1/listentities", "list-entities-response.json", "POST")
+            InvocationExample.of("https://acme-be.glean.com/rest/api/v1/listentities", "list-entities-response.json", "POST"),
+            InvocationExample.of("https://acme-be.glean.com/rest/api/v1/insights", "insights-response.json", "POST")
         );
     }
 }

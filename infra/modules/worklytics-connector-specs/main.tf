@@ -42,6 +42,7 @@ locals {
   github_organization                      = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
   github_first_organization                = split(",", coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME"))[0]
   github_example_repository                = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
+  glean_instance_name                      = coalesce(var.glean_instance_name, "YOUR_GLEAN_INSTANCE_NAME")
   salesforce_example_account_id            = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
 
   oauth_long_access_connectors = {
@@ -223,6 +224,55 @@ EOT
       ]
       external_token_todo : templatefile("${path.module}/docs/cursor/instructions.tftpl", {
         path_to_instance_parameters = "PSOXY_CURSOR_"
+      })
+    }
+    glean = {
+      source_kind : "glean",
+      availability : "beta",
+      enable_by_default : false,
+      worklytics_connector_id : "glean-psoxy"
+      display_name : "Glean"
+      worklytics_connector_name : "Glean via Psoxy"
+      target_host : "${local.glean_instance_name}.glean.com"
+      source_auth_strategy : "oauth2_access_token"
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      example_api_requests : [
+        {
+          method = "POST"
+          path   = "/rest/api/v1/listentities"
+          body = jsonencode({
+            entityType = "PERSON"
+            pageSize    = 100
+          })
+        },
+        {
+          method = "POST"
+          path   = "/rest/api/v1/insights"
+          body = jsonencode({
+            request = {
+              overviewRequest = {
+                dayRange = {
+                  start = {
+                    daysFromNow = -30
+                  }
+                  end = {
+                    daysFromNow = 0
+                  }
+                }
+              }
+            }
+          })
+        }
+      ]
+      external_token_todo : templatefile("${path.module}/docs/glean/instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_GLEAN_"
       })
     }
     github = {

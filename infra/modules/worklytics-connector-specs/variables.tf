@@ -167,6 +167,12 @@ variable "github_example_repository" {
   description = "(Only required if using Github connector) Name for the repository to be used as part of example calls for Github (ex: psoxy)"
 }
 
+variable "glean_instance_name" {
+  type        = string
+  default     = null
+  description = "(Only required if using Glean connector) Name of your Glean instance (ex: if your Glean URL is 'acme-be.glean.com', the instance name is 'acme-be')"
+}
+
 variable "salesforce_example_account_id" {
   type        = string
   default     = null
