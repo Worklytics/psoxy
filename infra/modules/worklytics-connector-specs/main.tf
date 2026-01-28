@@ -247,14 +247,16 @@ EOT
         {
           method = "POST"
           path   = "/rest/api/v1/listentities"
+          content_type = "application/json"
           body = jsonencode({
-            entityType = "PERSON"
+            entityType  = "PERSON"
             pageSize    = 100
           })
         },
         {
           method = "POST"
           path   = "/rest/api/v1/insights"
+          content_type = "application/json"
           body = jsonencode({
             request = {
               overviewRequest = {
