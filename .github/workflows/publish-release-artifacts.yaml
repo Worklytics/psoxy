@@ -1,0 +1,112 @@
+name: Publish SBOM/JARs for Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - 'rc-*'
+  workflow_dispatch:
+
+jobs:
+  publish-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Validate Trigger Ref
+        run: |
+          REF_NAME="${{ github.ref_name }}"
+          echo "Running on ref: $REF_NAME"
+          
+          if [[ "$REF_NAME" == "main" ]]; then
+            echo "✅ Validated running on main branch."
+          elif [[ "$REF_NAME" =~ ^v ]]; then
+            echo "✅ Validated running on release tag."
+          elif [[ "$REF_NAME" =~ ^rc- ]]; then
+            echo "✅ Validated running on release candidate branch."
+          else
+            echo "::error::Trigger is only allowed on 'main' branch, 'rc-*' branches, or 'v*' release tags. Current ref: $REF_NAME"
+            exit 1
+          fi
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+          server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+          settings-path: ${{ github.workspace }} # Location for the settings.xml file
+          cache: 'maven'
+
+      - name: Publish Maven Artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # The script expects GITHUB_TOKEN in settings.xml or environment
+          # We need to ensure settings.xml is configured correctly for GitHub Packages
+          # actions/setup-java does this if we set server-id
+          
+          ./tools/release/publish-mvn-artifacts.sh .
+
+      - name: Generate SBOMs and Build Bundles
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          # This script builds the modules and generates SBOMs
+          ./tools/release/generate-sbom.sh
+        
+      - name: Locate Artifacts
+        id: locate-artifacts
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          # Find the generated JARs - verifying path assumptions from build scripts
+          AWS_JAR=$(find java/impl/aws/target/deployment -name "psoxy-aws-*.jar" | head -n 1)
+          GCP_JAR=$(find java/impl/gcp/target/deployment -name "psoxy-gcp-*.jar" | head -n 1)
+          
+          echo "aws_jar=$AWS_JAR" >> $GITHUB_OUTPUT
+          echo "gcp_jar=$GCP_JAR" >> $GITHUB_OUTPUT
+          
+          # Rename SBOMs to likely match the release artifact naming convention if desired, 
+          # or just keep as is. The generate-sbom.sh copies them to docs/aws/sbom.json
+          
+          cp docs/aws/sbom.json psoxy-aws-sbom.json
+          cp docs/gcp/sbom.json psoxy-gcp-sbom.json
+          
+          echo "aws_sbom=psoxy-aws-sbom.json" >> $GITHUB_OUTPUT
+          echo "gcp_sbom=psoxy-gcp-sbom.json" >> $GITHUB_OUTPUT
+
+      - name: Verify Release Exists
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME=${{ github.ref_name }}
+          # Check if release exists; fail if not
+          if ! gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            echo "::error::Release for tag $TAG_NAME not found. This workflow expects the release to be created separately."
+            exit 1
+          fi
+          echo "Release for $TAG_NAME verified."
+
+      - name: Upload Release Assets
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Use the tag that triggered this workflow as the release identifier
+          TAG_NAME=${{ github.ref_name }}
+          
+          AWS_JAR="${{ steps.locate-artifacts.outputs.aws_jar }}"
+          GCP_JAR="${{ steps.locate-artifacts.outputs.gcp_jar }}"
+          AWS_SBOM="${{ steps.locate-artifacts.outputs.aws_sbom }}"
+          GCP_SBOM="${{ steps.locate-artifacts.outputs.gcp_sbom }}"
+          
+          echo "Uploading assets to release $TAG_NAME..."
+          
+          # Upload files with clobber to overwrite if they exist
+          gh release upload "$TAG_NAME" "$AWS_JAR" "$GCP_JAR" "$AWS_SBOM" "$GCP_SBOM" --clobber
