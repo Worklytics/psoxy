@@ -1,19 +1,18 @@
 package co.worklytics.psoxy.rules.google;
 
+import java.util.Map;
+import java.util.Set;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.transforms.HashIp;
+import com.avaulta.gateway.rules.transforms.Transform;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import co.worklytics.psoxy.ConfigRulesModule;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.psoxy.rules.generics.Calendar;
 import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
-import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.avaulta.gateway.rules.Endpoint;
-import com.avaulta.gateway.rules.transforms.Transform;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Prebuilt sanitization rules for Google tools
@@ -92,7 +91,7 @@ public class PrebuiltSanitizerRules {
     );
     static final Set<String> GOOGLE_CHAT_EVENT_PARAMETERS_ALLOWED = ImmutableSet.<String>builder()
             .addAll(GOOGLE_CHAT_EVENT_PARAMETERS_PII)
-            .add("room_id", "timestamp_ms", "message_id", "room_name")
+            .add("room_id", "timestamp_ms", "message_id", "room_name", "ip_address")
             .build();
 
 
@@ -101,9 +100,11 @@ public class PrebuiltSanitizerRules {
                 .pathTemplate("/admin/reports/v1/activity/users/all/applications/chat")
                     .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$..email")
-                            .jsonPath("$.items[*].events[*].parameters[?(@.name in [" +
-                                    GOOGLE_CHAT_EVENT_PARAMETERS_PII.stream().map(s -> "'" + s + "'").collect(Collectors.joining(",")) +
-                                    "])].value")
+                            .jsonPath("$.items[*].events[*].parameters[?(@.name in ['actor'])].value")
+                            .build())
+                    .transform(HashIp.builder()
+                            .jsonPath("$.items[*].ipAddress")
+                            .jsonPath("$.items[*].events[*].parameters[?(@.name == 'ip_address')].value")
                             .build())
                     .transform(Transform.Redact.builder()
                             .jsonPath("$.items[*].events[*].parameters[?(!(@.name =~ /^" +
@@ -311,7 +312,6 @@ public class PrebuiltSanitizerRules {
 
     static final Set<String> GOOGLE_MEET_EVENT_PARAMETERS_PII = ImmutableSet.of(
             "organizer_email",
-            "ip_address",
             "identifier"
     );
 
@@ -330,9 +330,11 @@ public class PrebuiltSanitizerRules {
                 .pathTemplate("/admin/reports/v1/activity/users/all/applications/meet")
                     .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$..email")
-                            .jsonPath("$.items[*].events[*].parameters[?(@.name in [" +
-                                    GOOGLE_MEET_EVENT_PARAMETERS_PII.stream().map(s -> "'" + s + "'").collect(Collectors.joining(",")) +
-                                    "])].value")
+                            .jsonPath("$.items[*].events[*].parameters[?(@.name in ['organizer_email','identifier'])].value")
+                            .build())
+                    .transform(HashIp.builder()
+                            .jsonPath("$.items[*].ipAddress")
+                            .jsonPath("$.items[*].events[*].parameters[?(@.name == 'ip_address')].value")
                             .build())
                     .transform(Transform.Redact.builder()
                             // this build a negated JsonPath predicate for all allowed event parameters, so anything other

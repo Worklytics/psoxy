@@ -1,5 +1,5 @@
-import { createLogger, format, transports, addColors } from 'winston';
 import _ from 'lodash';
+import { addColors, createLogger, format, transports } from 'winston';
 
 const config = {
   levels: {
@@ -39,14 +39,6 @@ export default function getLogger(verbose = false) {
             }
             return message;
           }),
-        )
-      }),
-      new transports.File({
-        filename: 'run.log',
-        level: 'verbose', // log everything
-        format: format.combine(
-          format.timestamp(),
-          format.simple()
         )
       }),
     ]

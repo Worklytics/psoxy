@@ -1,0 +1,17 @@
+{
+  "data":[
+    {
+      "id":"org_123abc",
+      "uuid":"91012d09-e48b-438e-a489-1bebfd8fa6f9",
+      "type":"organization"
+    },
+    {
+      "id":"org_234bcd",
+      "uuid":"82123e10-f59c-549f-b590-2cfcge7gb7g0",
+      "type":"organization"
+    }
+  ],
+  "has_more":false,
+  "first_id":"org_123abc",
+  "last_id":"org_234bcd"
+}
