@@ -16,11 +16,6 @@ name: Publish GCP Bundle
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to publish (optional, will read from pom.xml if not provided)'
-        required: false
-        type: string
   push:
     tags:
       - 'v*'
@@ -87,203 +82,36 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Extract version and determine artifact naming
-        id: extract_version
+      - name: Install dependencies
         run: |
-          # Determine if this is a tag push (regular release)
-          IS_TAG=false
-          if [[ "${{ github.ref_name }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-            IS_TAG=true
-            VERSION="${GITHUB_REF_NAME#v}"
-          elif [ -n "${{ github.event.inputs.version }}" ]; then
-            VERSION="${{ github.event.inputs.version }}"
-          else
-            # Extract version from pom.xml
-            VERSION=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' java/pom.xml)
-          fi
-          
-          if [ -z "$VERSION" ]; then
-            echo "Error: Could not determine version"
-            exit 1
-          fi
-          
-          # Determine if we're on an RC branch
-          IS_RC_BRANCH=false
-          RC_SUFFIX=""
-          if [[ "${{ github.ref_name }}" =~ ^rc- ]]; then
-            IS_RC_BRANCH=true
-            # Create RC suffix from branch name (e.g., rc-0.5.14 -> -rc-0.5.14)
-            # Remove 'rc-' prefix and add '-rc-' prefix to version
-            BRANCH_SUFFIX="${GITHUB_REF_NAME#rc-}"
-            RC_SUFFIX="-rc-${BRANCH_SUFFIX}"
-          fi
-          
-          # Construct base artifact name (without RC suffix for collision check)
-          BASE_ARTIFACT_NAME="${JAR_NAME}-${VERSION}.zip"
-          
-          # Construct final artifact name
-          if [ "$IS_RC_BRANCH" = true ]; then
-            ARTIFACT_NAME="${JAR_NAME}-${VERSION}${RC_SUFFIX}.zip"
-          else
-            ARTIFACT_NAME="${BASE_ARTIFACT_NAME}"
-          fi
-          
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "is_tag=$IS_TAG" >> $GITHUB_OUTPUT
-          echo "is_rc_branch=$IS_RC_BRANCH" >> $GITHUB_OUTPUT
-          echo "artifact_name=$ARTIFACT_NAME" >> $GITHUB_OUTPUT
-          echo "base_artifact_name=$BASE_ARTIFACT_NAME" >> $GITHUB_OUTPUT
-          
-          echo "Extracted version: $VERSION"
-          echo "Is RC branch: $IS_RC_BRANCH"
-          echo "Artifact name: $ARTIFACT_NAME"
+          # Install jq if not already available
+          sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Clean Maven artifacts
+      - name: Publish GCP Bundle
+        id: publish
         run: |
-          echo "Cleaning local Maven repository artifacts to avoid 'bad class file' errors..."
-          
-          # Get Maven local repository path
-          MAVEN_LOCAL_REPO=$(mvn help:evaluate -Dexpression=settings.localRepository -q -DforceStdout 2>/dev/null || echo "${HOME}/.m2/repository")
-          
-          if [ -d "$MAVEN_LOCAL_REPO" ]; then
-            # Remove psoxy artifacts that might be corrupted or incompatible
-            PSOXY_ARTIFACTS=(
-              "co/worklytics/psoxy"
-              "com/avaulta/gateway"
-            )
-            
-            for artifact_path in "${PSOXY_ARTIFACTS[@]}"; do
-              full_path="${MAVEN_LOCAL_REPO}/${artifact_path}"
-              if [ -d "$full_path" ]; then
-                echo "Removing ${full_path}..."
-                rm -rf "$full_path"
-                echo "✓ Removed ${artifact_path}"
-              fi
-            done
-            echo "✓ Maven repository cleanup complete"
-          else
-            echo "No Maven local repository found, skipping cleanup"
-          fi
-
-      - name: Build JAR
-        id: build_jar
-        run: |
-          ./tools/build.sh -d "$IMPLEMENTATION" "$JAVA_SOURCE_ROOT"
-          
-          DEPLOYMENT_ARTIFACT=$(ls "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment" | grep -E "^psoxy-.*\.jar$" | head -1)
-          JAR_PATH="java/impl/gcp/target/deployment/${DEPLOYMENT_ARTIFACT}"
-          
-          if [ ! -f "$JAR_PATH" ]; then
-            echo "Error: JAR file not found at ${JAR_PATH} after running build script"
-            exit 1
+          # Determine if RC build; assume it is UNLESS ref is tag starting with v (e.g., v0.5.15)
+          RC_OPTION="--rc"
+          REF_NAME="${{ github.ref_name }}"
+          if [[ "$REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            RC_OPTION=""
           fi
           
-          echo "jar_path=$JAR_PATH" >> $GITHUB_OUTPUT
-          echo "deployment_artifact=$DEPLOYMENT_ARTIFACT" >> $GITHUB_OUTPUT
-          echo "✓ Built JAR: $DEPLOYMENT_ARTIFACT"
-
-      - name: Validate artifact name (prevent RC collisions)
-        id: validate_artifact
-        run: |
-          # For RC branches, check if the base artifact name (without RC suffix) exists
-          # This prevents RC branches from accidentally overwriting regular releases
-          if [ "${{ steps.extract_version.outputs.is_rc_branch }}" = "true" ]; then
-            BASE_ARTIFACT="${{ steps.extract_version.outputs.base_artifact_name }}"
-            GCS_BASE_PATH="gs://${BUCKET_NAME}/${BASE_ARTIFACT}"
-            
-            echo "Checking for collision with regular release artifact: ${BASE_ARTIFACT}"
-            
-            if gsutil ls "$GCS_BASE_PATH" >/dev/null 2>&1; then
-              echo "❌ ERROR: RC branch would produce artifact that collides with existing release!"
-              echo "Base artifact exists: ${GCS_BASE_PATH}"
-              echo "RC artifact name: ${{ steps.extract_version.outputs.artifact_name }}"
-              echo ""
-              echo "RC branches must produce artifacts with unique names to avoid overwriting releases."
-              echo "Expected artifact name should include RC suffix: ${{ steps.extract_version.outputs.artifact_name }}"
-              exit 1
-            else
-              echo "✓ No collision detected with regular release artifact"
-            fi
+          ./tools/release/lib/publish-gcp-bundle.sh --non-interactive $RC_OPTION | tee publish-output.log
+          
+          # Extract artifact URI from output
+          ARTIFACT_URI=$(grep "^ARTIFACT_URI=" publish-output.log | cut -d'=' -f2- || echo "")
+          if [ -n "$ARTIFACT_URI" ]; then
+            echo "artifact_uri=$ARTIFACT_URI" >> $GITHUB_OUTPUT
           fi
           
-          # Also check if the actual artifact name matches a regular release pattern
-          # (e.g., if someone manually sets version to match a release)
-          ARTIFACT_NAME="${{ steps.extract_version.outputs.artifact_name }}"
-          if [ "${{ steps.extract_version.outputs.is_rc_branch }}" = "true" ] && [[ ! "$ARTIFACT_NAME" =~ -rc- ]]; then
-            echo "❌ ERROR: RC branch artifact name does not include RC suffix!"
-            echo "Artifact name: ${ARTIFACT_NAME}"
-            echo "Expected format: ${JAR_NAME}-<version>-rc-<branch-suffix>.zip"
-            echo ""
-            echo "RC branches must produce artifacts with '-rc-' in the name to avoid collisions."
-            exit 1
-          fi
-
-      - name: Create ZIP file
-        id: create_zip
-        run: |
-          ZIP_FILENAME="${{ steps.extract_version.outputs.artifact_name }}"
-          ZIP_PATH="/tmp/${ZIP_FILENAME}"
-          
-          cd "$(dirname "${{ steps.build_jar.outputs.jar_path }}")"
-          zip -j "$ZIP_PATH" "$(basename "${{ steps.build_jar.outputs.jar_path }}")"
-          
-          echo "zip_filename=$ZIP_FILENAME" >> $GITHUB_OUTPUT
-          echo "zip_path=$ZIP_PATH" >> $GITHUB_OUTPUT
-          echo "✓ Created ZIP file: $ZIP_FILENAME"
-
-      - name: Check if artifact exists in GCS
-        id: check_exists
-        continue-on-error: true
-        run: |
-          GCS_PATH="gs://${BUCKET_NAME}/${{ steps.create_zip.outputs.zip_filename }}"
-          
-          if gsutil ls "$GCS_PATH" >/dev/null 2>&1; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-            
-            # For RC branches, warn but allow overwrite (RC artifacts can be updated)
-            # For tags/releases, this is expected and OK
-            if [ "${{ steps.extract_version.outputs.is_tag }}" = "true" ]; then
-              echo "ℹ Artifact already exists (tag release, will overwrite): $GCS_PATH"
-            elif [ "${{ steps.extract_version.outputs.is_rc_branch }}" = "true" ]; then
-              echo "⚠ Warning: RC artifact already exists (will overwrite): $GCS_PATH"
-            else
-              echo "⚠ Warning: Artifact already exists in GCS: $GCS_PATH"
-            fi
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Upload to GCS
-        run: |
-          GCS_PATH="gs://${BUCKET_NAME}/${{ steps.create_zip.outputs.zip_filename }}"
-          
-          echo "Publishing ${{ steps.create_zip.outputs.zip_path }} to $GCS_PATH"
-          
-          # Check if bucket exists
-          if ! gsutil ls "gs://${BUCKET_NAME}" >/dev/null 2>&1; then
-            echo "⚠ Warning: Bucket ${BUCKET_NAME} does not exist"
-          fi
-          
-          # Upload to GCS
-          gsutil cp "${{ steps.create_zip.outputs.zip_path }}" "$GCS_PATH"
-          
-          if [ $? -eq 0 ]; then
-            echo "✓ Successfully uploaded to GCS"
-          else
-            echo "✗ Failed to upload to GCS"
-            exit 1
-          fi
-
       - name: Summary
         if: success()
         run: |
           echo "## ✅ Successfully published GCP bundle" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** ${{ steps.extract_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Download URL:**" >> $GITHUB_STEP_SUMMARY
-          echo "https://storage.googleapis.com/${BUCKET_NAME}/${{ steps.create_zip.outputs.zip_filename }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**GCS URL for Terraform:**" >> $GITHUB_STEP_SUMMARY
-          echo "gs://${BUCKET_NAME}/${{ steps.create_zip.outputs.zip_filename }}" >> $GITHUB_STEP_SUMMARY
-
+          if [ -n "${{ steps.publish.outputs.artifact_uri }}" ]; then
+            echo "**Artifact URI:** \`${{ steps.publish.outputs.artifact_uri }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "Artifact has been published to GCS." >> $GITHUB_STEP_SUMMARY

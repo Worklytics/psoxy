@@ -1,0 +1,16 @@
+{
+  "data":[
+    {
+      "id":"t~hzNx42jBr-4nE9px0Ear3NuRyZW9y0_o7pegL6tNN-Y",
+      "email":"t~_Mqo2yH0QgDytVpmJhxPaE36fR9YYF4mJyAMtmlLUAY@example.com"
+    },
+    {
+      "id":"t~MT680p8B8HtSIfmVLHXpfEwZri_4xAuLkoHOUnD5ypM",
+      "email":"t~5TglOcyVGpy0s4iFwMoL-G67Itorwak4J4Nm9CwxRkQ@example.com"
+    }
+  ],
+  "has_more":true,
+  "first_id":"user_xyz456",
+  "last_id":"user_abc789",
+  "next_page":"page_01Dd11ZXp4eZNug9r2UZSuqSzmEQbithz"
+}

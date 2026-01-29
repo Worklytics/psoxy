@@ -1,0 +1,298 @@
+---
+endpoints:
+  - pathTemplate: "/v1/compliance/activities"
+    allowedQueryParams:
+      - "after_id"
+      - "limit"
+      - "organization_ids[]"
+      - "actor_ids[]"
+      - "created_at.gte"
+      - "created_at.gt"
+      - "created_at.lte"
+      - "created_at.lt"
+      - "before_id"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].actor['email_address','user_id','unauthenticated_email_address',\
+      \ 'api_key_id']"
+        encoding: "URL_SAFE_TOKEN"
+      - !<hashIp>
+        jsonPaths:
+          - "$..ip_address"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/Activity"
+        error:
+          $ref: "#/definitions/ErrorResponse"
+        first_id:
+          type: "string"
+        has_more:
+          type: "boolean"
+        last_id:
+          type: "string"
+        next_page:
+          type: "string"
+  - pathTemplate: "/v1/compliance/apps/chats"
+    allowedQueryParams:
+      - "after_id"
+      - "limit"
+      - "organization_ids[]"
+      - "project_ids[]"
+      - "user_ids[]"
+      - "created_at.gte"
+      - "created_at.gt"
+      - "created_at.lte"
+      - "created_at.lt"
+      - "updated_at.gte"
+      - "updated_at.gt"
+      - "updated_at.lte"
+      - "updated_at.lt"
+      - "before_id"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].user['email_address','id']"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/Chat"
+        error:
+          $ref: "#/definitions/ErrorResponse"
+        first_id:
+          type: "string"
+        has_more:
+          type: "boolean"
+        last_id:
+          type: "string"
+        next_page:
+          type: "string"
+  - pathTemplate: "/v1/compliance/apps/chats/{chatId}/messages"
+    allowedQueryParams: []
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.user['email_address','id','unauthenticated_email_address']"
+        encoding: "URL_SAFE_TOKEN"
+      - !<hashIp>
+        jsonPaths:
+          - "$..ip_address"
+      - !<textDigest>
+        jsonPaths:
+          - "$.chat_messages[*].content[*].text"
+    responseSchema:
+      type: "object"
+      properties:
+        chat_messages:
+          type: "array"
+          items:
+            $ref: "#/definitions/Message"
+        created_at:
+          type: "string"
+          format: "date-time"
+        deleted_at:
+          type: "string"
+          format: "date-time"
+        id:
+          type: "string"
+        organization_id:
+          type: "string"
+        organization_uuid:
+          type: "string"
+        project_id:
+          type: "string"
+        sourceId:
+          type: "string"
+        updated_at:
+          type: "string"
+          format: "date-time"
+        user:
+          $ref: "#/definitions/User"
+  - pathTemplate: "/v1/compliance/organizations"
+    allowedQueryParams:
+      - "page"
+      - "limit"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/Organization"
+        error:
+          $ref: "#/definitions/ErrorResponse"
+        first_id:
+          type: "string"
+        has_more:
+          type: "boolean"
+        last_id:
+          type: "string"
+        next_page:
+          type: "string"
+  - pathTemplate: "/v1/compliance/organizations/{organizationUuid}/users"
+    allowedQueryParams:
+      - "page"
+      - "limit"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*]['email_address','email','id']"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/User"
+        error:
+          $ref: "#/definitions/ErrorResponse"
+        first_id:
+          type: "string"
+        has_more:
+          type: "boolean"
+        last_id:
+          type: "string"
+        next_page:
+          type: "string"
+definitions:
+  Activity:
+    type: "object"
+    properties:
+      actor:
+        $ref: "#/definitions/Actor"
+      api_key_id:
+        type: "string"
+      claude_chat_id:
+        type: "string"
+      claude_file_id:
+        type: "string"
+      claude_project_id:
+        type: "string"
+      created_at:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      organization_id:
+        type: "string"
+      organization_uuid:
+        type: "string"
+      request_body:
+        type: "string"
+      request_id:
+        type: "string"
+      request_method:
+        type: "string"
+      status_code:
+        type: "integer"
+      type:
+        type: "string"
+      url:
+        type: "string"
+  Actor:
+    type: "object"
+    properties:
+      api_key_id:
+        type: "string"
+      email_address:
+        type: "string"
+      ip_address:
+        type: "string"
+      type:
+        type: "string"
+      unauthenticated_email_address:
+        type: "string"
+      user_agent:
+        type: "string"
+      user_id:
+        type: "string"
+  Chat:
+    type: "object"
+    properties:
+      chat_messages:
+        type: "array"
+        items:
+          $ref: "#/definitions/Message"
+      created_at:
+        type: "string"
+        format: "date-time"
+      deleted_at:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      organization_id:
+        type: "string"
+      organization_uuid:
+        type: "string"
+      project_id:
+        type: "string"
+      sourceId:
+        type: "string"
+      updated_at:
+        type: "string"
+        format: "date-time"
+      user:
+        $ref: "#/definitions/User"
+  ContentBlock:
+    type: "object"
+    properties:
+      text:
+        type: "string"
+      type:
+        type: "string"
+  ErrorResponse:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+  File:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      mime_type:
+        type: "string"
+  Message:
+    type: "object"
+    properties:
+      content:
+        type: "array"
+        items:
+          $ref: "#/definitions/ContentBlock"
+      created_at:
+        type: "string"
+        format: "date-time"
+      files:
+        type: "array"
+        items:
+          $ref: "#/definitions/File"
+      role:
+        type: "string"
+  Organization:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      type:
+        type: "string"
+      uuid:
+        type: "string"
+  User:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      email_address:
+        type: "string"
+      id:
+        type: "string"

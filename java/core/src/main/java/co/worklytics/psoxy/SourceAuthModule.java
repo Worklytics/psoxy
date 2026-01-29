@@ -2,6 +2,7 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.BasicAuthStrategy;
+import co.worklytics.psoxy.gateway.impl.ClaudeAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.GoogleCloudPlatformServiceAccountKeyAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.WindsurfServiceKeyAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.oauth.*;
@@ -20,21 +21,21 @@ public class SourceAuthModule {
     @Provides
     @IntoSet
     SourceAuthStrategy providesOAuthAccessTokenSourceAuthStrategy(
-            OAuthAccessTokenSourceAuthStrategy oAuthAccessTokenSourceAuthStrategy) {
+        OAuthAccessTokenSourceAuthStrategy oAuthAccessTokenSourceAuthStrategy) {
         return oAuthAccessTokenSourceAuthStrategy;
     }
 
     @Provides
     @IntoSet
     SourceAuthStrategy providesOAuthRefreshTokenSourceAuthStrategy(
-            OAuthRefreshTokenSourceAuthStrategy oAuthRefreshTokenSourceAuthStrategy) {
+        OAuthRefreshTokenSourceAuthStrategy oAuthRefreshTokenSourceAuthStrategy) {
         return oAuthRefreshTokenSourceAuthStrategy;
     }
 
     @Provides
     @IntoSet
     SourceAuthStrategy providesSourceAuthStrategy(
-            GoogleCloudPlatformServiceAccountKeyAuthStrategy googleCloudPlatformServiceAccountKeyAuthStrategy) {
+        GoogleCloudPlatformServiceAccountKeyAuthStrategy googleCloudPlatformServiceAccountKeyAuthStrategy) {
         return googleCloudPlatformServiceAccountKeyAuthStrategy;
     }
 
@@ -46,6 +47,12 @@ public class SourceAuthModule {
 
     @Provides
     @IntoSet
+    SourceAuthStrategy providesClaudeAuthStrategy(ClaudeAuthStrategy strategy) {
+        return strategy;
+    }
+
+    @Provides
+    @IntoSet
     SourceAuthStrategy providesWindsurfServiceKeyAuthStrategy(
         WindsurfServiceKeyAuthStrategy windsurfServiceKeyAuthStrategy) {
         return windsurfServiceKeyAuthStrategy;
@@ -53,49 +60,49 @@ public class SourceAuthModule {
 
     @Provides
     OAuth2CredentialsWithRefresh.OAuth2RefreshHandler providesOAuth2RefreshHandler(
-            OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl refreshHandler) {
+        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl refreshHandler) {
         return refreshHandler;
     }
 
     @Provides
     @IntoSet
     OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder refreshTokenPayloadBuilder(
-            RefreshTokenTokenRequestBuilder refreshTokenPayloadBuilder) {
+        RefreshTokenTokenRequestBuilder refreshTokenPayloadBuilder) {
         return refreshTokenPayloadBuilder;
     }
 
     @Provides
     @IntoSet
     OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder clientCredentialsGrantTokenRequestPayloadBuilder(
-            ClientCredentialsGrantTokenRequestBuilder clientCredentialsGrantTokenRequestBuilder) {
+        ClientCredentialsGrantTokenRequestBuilder clientCredentialsGrantTokenRequestBuilder) {
         return clientCredentialsGrantTokenRequestBuilder;
     }
 
     @Provides
     @IntoSet
     OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder accountCredentialsGrantTokenRequestPayloadBuilder(
-            AccountCredentialsGrantTokenRequestBuilder refreshTokenPayloadBuilder) {
+        AccountCredentialsGrantTokenRequestBuilder refreshTokenPayloadBuilder) {
         return refreshTokenPayloadBuilder;
     }
 
     @Provides
     @IntoSet
     OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder certificateCredentialsGrantTokenRequestPayloadBuilder(
-            CertificateGrantTokenRequestBuilder certificateGrantTokenRequestBuilder) {
+        CertificateGrantTokenRequestBuilder certificateGrantTokenRequestBuilder) {
         return certificateGrantTokenRequestBuilder;
     }
 
     @Provides
     @IntoSet
     OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser tokenResponseParser(
-            OAuthRefreshTokenSourceAuthStrategy.TokenResponseParserImpl instance) {
+        OAuthRefreshTokenSourceAuthStrategy.TokenResponseParserImpl instance) {
         return instance;
     }
 
     @Provides
     @IntoSet
     OAuthRefreshTokenSourceAuthStrategy.TokenResponseParser githubResponseParser(
-            GithubAccessTokenResponseParserImpl instance) {
+        GithubAccessTokenResponseParserImpl instance) {
         return instance;
     }
 

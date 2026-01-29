@@ -1,6 +1,9 @@
 #!/bin/bash
 echo "Quick test of ${function_name} ..."
 
+# Suppress "punycode" deprecation warnings from Node 21+
+export NODE_OPTIONS="$${NODE_OPTIONS:+$NODE_OPTIONS }--no-deprecation"
+
 ${command_cli_call} -u "${collector_endpoint_url}/.well-known/openid-configuration"
 OPENID_CONFIG_RC=$?
 
