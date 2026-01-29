@@ -170,10 +170,6 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/DatasourceProfile"
-      emails:
-        type: "array"
-        items:
-          $ref: "#/definitions/TeamEmail"
       id:
         type: "string"
       lastUpdatedAt:
@@ -184,20 +180,11 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/TeamMember"
-  TeamEmail:
-    type: "object"
-    properties:
-      email:
-        type: "string"
-      isUserGenerated:
-        type: "boolean"
-      type:
+      name:
         type: "string"
   TeamMember:
     type: "object"
     properties:
-      customRelationshipStr:
-        type: "string"
       joinDate:
         type: "string"
       person:
