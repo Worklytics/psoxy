@@ -1,13 +1,24 @@
 package com.avaulta.gateway.rules;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import lombok.*;
-
-import java.util.*;
-import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.Singular;
+import lombok.With;
 
 @JsonPropertyOrder({"pathRegex", "pathTemplate", "allowedMethods", "allowedQueryParams", "supportedHeaders",
         "transforms"})
@@ -132,6 +143,9 @@ public class Endpoint {
     /**
      * if provided, headers included here will be forwarded through to the source API endpoint if they are present on the request.
      * this can be used for passing a specific header (for example, pagination, limits, etc.) to the request in the source
+     * <p>
+     * these are in ADDITION to any headers allowed at the top-level RuleSet.
+     * </p>
      *
      * endpoint-matching does NOT take these into account. eg, absence of a header on request will NOT cause the request to not be
      * matched to this endpoint; similarly, presence of a header on a request will NOT cause request to be blocked - the header will

@@ -2,7 +2,7 @@
 
 This section describes many of the pre-configured data sources that can be connected to Worklytics via Psoxy.
 
-The table below enumerates the available connectors, provided via the `worklytics-connector-specs` Terraform module (see [infra/modules/worklytics-connector-specs](infra/modules/worklytics-connector-specs)).
+The table below enumerates the available connectors, provided via the `worklytics-connector-specs` Terraform module (see [infra/modules/worklytics-connector-specs](../../infra/modules/worklytics-connector-specs)).
 
 To add a source, add its Connector ID to the `enabled_connectors` list in your `terraform.tfvars` file.
 

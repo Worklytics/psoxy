@@ -1,13 +1,20 @@
 package com.avaulta.gateway.rules.transforms;
 
-import com.fasterxml.jackson.annotation.*;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
-import lombok.extern.java.Log;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import org.apache.commons.lang3.StringUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.java.Log;
 
 /**
  * a transform to operate on a single field value
@@ -146,7 +153,6 @@ public interface FieldTransform {
     @Log
     class Pseudonymize implements FieldTransform {
 
-        @NonNull
         boolean pseudonymize;
 
         @Override

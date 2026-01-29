@@ -1,21 +1,20 @@
 package co.worklytics.psoxy.aws.request;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
+import org.apache.commons.lang3.tuple.Pair;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Streams;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import software.amazon.awssdk.identity.spi.Identity;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 @RequiredArgsConstructor(staticName = "of")
 public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy.gateway.HttpEventRequest {
@@ -31,9 +30,9 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
 
         String route = event.getResource().replace("{proxy+}", "");
 
-        resourcePath = StringUtils.removeStart(resourcePath, "/" + event.getRequestContext().getStage()  + route);
+        resourcePath = Strings.CS.removeStart(resourcePath, "/" + event.getRequestContext().getStage()  + route);
 
-        return StringUtils.prependIfMissing(resourcePath, "/");
+        return Strings.CS.prependIfMissing(resourcePath, "/");
     }
 
     @Override
@@ -72,8 +71,8 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
             event.getHeaders().entrySet().stream().map(entry -> Pair.of(entry.getKey(), List.of(entry.getValue())))
         ).collect(Collectors.toMap(Pair::getKey, Pair::getValue, (a, b) -> {
             // merge multi-value headers
-            List<String> merged = ObjectUtils.defaultIfNull(a, List.of());
-            merged.addAll(ObjectUtils.defaultIfNull(b, List.of()));
+            List<String> merged = new ArrayList<>(Objects.requireNonNullElse(a, List.of()));
+            merged.addAll(Objects.requireNonNullElse(b, List.of()));
             return merged;
         }));
     }

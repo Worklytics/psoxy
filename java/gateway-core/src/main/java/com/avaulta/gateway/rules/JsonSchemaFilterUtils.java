@@ -1,5 +1,6 @@
 package com.avaulta.gateway.rules;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -34,6 +35,7 @@ public class JsonSchemaFilterUtils {
     @Value
     public static class Options implements Serializable {
 
+        @Serial
         private static final long serialVersionUID = 1L;
 
         /**
