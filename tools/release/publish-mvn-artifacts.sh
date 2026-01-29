@@ -12,6 +12,12 @@ if [ -z "$PATH_TO_REPO" ]; then
   exit 1
 fi
 
+# if PATH_TO_REPO is not blank, but does not end with a slash, add one
+if [[ "$PATH_TO_REPO" != "/"* ]]; then
+  PATH_TO_REPO="$PATH_TO_REPO/"
+fi
+
+
 if [ ! -f "${PATH_TO_REPO}java/pom.xml" ]; then
   printf "${RED}${PATH_TO_REPO}java/pom.xml not found. set <path-to-repo> argument to point to the root of a psoxy checkout. Exiting.${NC}\n"
   exit 1
