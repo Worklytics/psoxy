@@ -4,7 +4,8 @@ on:
   push:
     tags:
       - 'v*'
-
+    branches:
+      - 'rc-*'
   workflow_dispatch:
 
 jobs:
@@ -24,20 +25,24 @@ jobs:
             echo "✅ Validated running on main branch."
           elif [[ "$REF_NAME" =~ ^v ]]; then
             echo "✅ Validated running on release tag."
+          elif [[ "$REF_NAME" =~ ^rc- ]]; then
+            echo "✅ Validated running on release candidate branch."
           else
-            echo "::error::Manual trigger is only allowed on 'main' branch or 'v*' release tags. Current ref: $REF_NAME"
+            echo "::error::Trigger is only allowed on 'main' branch, 'rc-*' branches, or 'v*' release tags. Current ref: $REF_NAME"
             exit 1
           fi
+
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'zulu'
           server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
           settings-path: ${{ github.workspace }} # Location for the settings.xml file
+          cache: 'maven'
 
       - name: Publish Maven Artifacts
         env:
@@ -50,12 +55,14 @@ jobs:
           ./tools/release/publish-mvn-artifacts.sh .
 
       - name: Generate SBOMs and Build Bundles
+        if: startsWith(github.ref, 'refs/tags/v')
         run: |
           # This script builds the modules and generates SBOMs
           ./tools/release/generate-sbom.sh
         
       - name: Locate Artifacts
         id: locate-artifacts
+        if: startsWith(github.ref, 'refs/tags/v')
         run: |
           # Find the generated JARs - verifying path assumptions from build scripts
           AWS_JAR=$(find java/impl/aws/target/deployment -name "psoxy-aws-*.jar" | head -n 1)
@@ -74,6 +81,7 @@ jobs:
           echo "gcp_sbom=psoxy-gcp-sbom.json" >> $GITHUB_OUTPUT
 
       - name: Verify Release Exists
+        if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -86,6 +94,7 @@ jobs:
           echo "Release for $TAG_NAME verified."
 
       - name: Upload Release Assets
+        if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
