@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.storage.impl;
 
 import java.io.IOException;
+import java.util.Map;
 
 public interface RecordWriter extends AutoCloseable {
 
@@ -15,10 +16,10 @@ public interface RecordWriter extends AutoCloseable {
 
     /**
      * Writes a record.
-     * @param record the record to write (JSON-compatible object)
+     * @param record the record to write
      * @throws IOException
      */
-    void writeRecord(Object record) throws IOException;
+    void writeRecord(Map<String, Object> record) throws IOException;
 
     /**
      * Called after writing all records.

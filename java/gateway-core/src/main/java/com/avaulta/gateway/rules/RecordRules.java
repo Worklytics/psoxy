@@ -38,9 +38,9 @@ public class RecordRules implements BulkDataRules {
         NDJSON,
         CSV,
         JSON_ARRAY,
+        PARQUET,
         AUTO, // TODO: in v0.6, make this the default; and fail-back to file extension if no Content-Type provided
         ;
-        //AVRO?
 
     }
 

@@ -16,7 +16,7 @@ class NdjsonRecordReader implements RecordReader {
     BufferedReader bufferedReader;
 
     @Override
-    public Object readRecord() throws IOException {
+    public java.util.Map<String, Object> readRecord() throws IOException {
         if (bufferedReader == null) {
             bufferedReader = new BufferedReader(reader);
         }
@@ -25,7 +25,7 @@ class NdjsonRecordReader implements RecordReader {
         while ((line = bufferedReader.readLine()) != null) {
             line = StringUtils.trimToNull(line);
             if (line != null) {
-                return jsonConfiguration.jsonProvider().parse(line);
+                return (java.util.Map<String, Object>) jsonConfiguration.jsonProvider().parse(line);
             }
         }
         return null;
