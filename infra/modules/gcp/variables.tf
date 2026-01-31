@@ -71,6 +71,18 @@ variable "install_test_tool" {
   default     = true
 }
 
+variable "provision_testing_infra" {
+  type        = bool
+  description = "Whether to provision infra needed to support testing of deployment. If false, it's left to you to ensure the GCP principal you use when running test scripts has the correct permissions."
+  default     = true
+}
+
+variable "gcp_principals_authorized_to_test" {
+  type        = list(string)
+  description = "list of GCP principals authorized to test this deployment - eg 'user:alice@acme.com', 'group:devs@acme.com'; if omitted, up to you to configure necessary perms for people to test if desired."
+  default     = []
+}
+
 variable "custom_artifacts_bucket_name" {
   type        = string
   description = "name of bucket to use for custom artifacts, if you want something other than default"

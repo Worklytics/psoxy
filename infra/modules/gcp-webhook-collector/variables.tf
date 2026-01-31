@@ -274,3 +274,9 @@ variable "vpc_config" {
     error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
   }
 }
+
+variable "data_sanitization_tester_role_id" {
+  type        = string
+  description = "ID of custom role for test principals (includes cloudscheduler.jobs.run). Pass null if testing infra not provisioned."
+  default     = null
+}

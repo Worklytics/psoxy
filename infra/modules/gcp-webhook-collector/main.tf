@@ -426,7 +426,6 @@ resource "google_cloud_scheduler_job" "trigger_batch_processing" {
   }
 }
 
-
 locals {
   proxy_endpoint_url  = google_cloudfunctions2_function.function.service_config[0].uri
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
