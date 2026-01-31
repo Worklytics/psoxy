@@ -147,7 +147,7 @@ if [ -f "${TF_CONFIG_ROOT}/backend.tf" ]; then
   printf "Alternatively, you could replace the 'backend' block with a 'cloud' block, and use Terraform Cloud / Enterprise. See https://developer.hashicorp.com/terraform/language/settings/terraform-cloud\n"
 fi
 
-printf "\n${GREEN}Initialization complete.${NC}"
+printf "\n${GREEN}Initialization complete.${NC} "
 printf "If you wish to remove files created by this initialization, run ${BLUE}${REPO_CLONE_BASE_DIR}tools/reset-example.sh${NC}.\n"
 
 
