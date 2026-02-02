@@ -820,6 +820,11 @@ async function pollAsyncResponse(locationUrl, options = {}) {
  * @returns {boolean}
  */
 function compareContent(items, expectedContent, logger) {
+    if (!expectedContent) {
+        logger.info('No expected content provided. Skipping content match verification (considered success as items were found).');
+        return true;
+    }
+
     let expectedJson;
     if (typeof expectedContent === 'string') {
         expectedJson = JSON.parse(expectedContent);
@@ -835,15 +840,17 @@ function compareContent(items, expectedContent, logger) {
         const itemNoId = _.cloneDeep(item);
         if (itemNoId.actor) delete itemNoId.actor.id;
 
-        const expectedNoId = _.cloneDeep(expectedJson);
-        if (expectedNoId.actor) delete expectedNoId.actor.id;
+        if (expectedJson) { // Guard against null expectedJson though check at top should handle it
+            const expectedNoId = _.cloneDeep(expectedJson);
+            if (expectedNoId.actor) delete expectedNoId.actor.id;
 
-        if (_.isEqual(itemNoId, expectedNoId)) {
-            logger.info('Match found with differing actor.id (likely pseudonymized)');
-            return true;
+            if (_.isEqual(itemNoId, expectedNoId)) {
+                logger.info('Match found with differing actor.id (likely pseudonymized)');
+                return true;
+            }
+            logger.info(`Comparison failed.\nActual (no ID): ${JSON.stringify(itemNoId)}\nExpected (no ID): ${JSON.stringify(expectedNoId)}`);
         }
         
-        logger.info(`Comparison failed.\nActual (no ID): ${JSON.stringify(itemNoId)}\nExpected (no ID): ${JSON.stringify(expectedNoId)}`);
         return false;
     });
 

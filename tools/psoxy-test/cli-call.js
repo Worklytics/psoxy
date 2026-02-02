@@ -4,6 +4,7 @@ import { Command, Option } from 'commander';
 import _ from 'lodash';
 import { createRequire } from 'module';
 import { callDataSourceEndpoints } from './data-sources/runner.js';
+import aws from './lib/aws.js';
 import gcp from './lib/gcp.js';
 import getLogger from './lib/logger.js';
 import psoxyTestCall from './psoxy-test-call.js';
@@ -97,8 +98,8 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
         const url = new URL(options.url);
 
        
-       const isGcp = options.force?.toLowerCase() === 'gcp' || gcp.isValidURL(url);
-       const isAws = options.force?.toLowerCase() === 'aws' || (!isGcp && (url.hostname.endsWith('amazonaws.com') || url.hostname.endsWith('on.aws'))); // rough check or rely on fallback
+       const isGcp = options.force?.toLowerCase() === 'gcp' || (!options.force?.toLowerCase() === 'aws' && gcp.isValidURL(url));
+       const isAws = options.force?.toLowerCase() === 'aws' || (!isGcp && aws.isValidURL(url));
 
        if (isGcp) {
           await gcp.verifyCollection({
@@ -108,7 +109,6 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
           }, logger);
        } else {
           // Assume AWS or fallback
-          const aws = (await import('./lib/aws.js')).default;
           await aws.verifyCollection({
               verifyCollection: options.verifyCollection,
               url: options.url,
