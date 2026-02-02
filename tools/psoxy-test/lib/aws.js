@@ -475,7 +475,7 @@ async function verifyCollection(options, logger) {
                   throw new Error(`Verification failed: Content mismatch in file ${file.Key}`);
                 }
             } else {
-                logger.warn(`File is empty or contains no items.`);
+                logger.info(`File is empty or contains no items.`);
                 throw new Error(`Verification failed: Empty file ${file.Key}`);
             }
         }

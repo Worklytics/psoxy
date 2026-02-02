@@ -425,7 +425,7 @@ async function verifyBucket(bucketName, expectedContent, startTime, logger) {
             throw new Error(`Verification failed: Content mismatch in file ${file.name}`);
           }
         } else {
-             logger.warn(`File is empty or contains no items.`);
+             logger.info(`File is empty or contains no items.`);
              throw new Error(`Verification failed: Empty file ${file.name}`);
         }
     }
