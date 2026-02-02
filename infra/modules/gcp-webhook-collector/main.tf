@@ -505,7 +505,6 @@ resource "local_file" "test_script" {
     collection_path        = "/"
     scheduler_job_name     = google_cloud_scheduler_job.trigger_batch_processing.id
     bucket_name            = module.sanitized_webhook_output.bucket_name
-    output_path_prefix     = var.output_path_prefix
   })
 }
 

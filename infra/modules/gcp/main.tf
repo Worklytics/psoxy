@@ -469,7 +469,7 @@ locals {
       "cloudscheduler.jobs.run",
     ] : [],
     []
-  
+  )
 }
 
 # Custom role to support testing, if needed
