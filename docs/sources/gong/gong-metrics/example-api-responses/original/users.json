@@ -1,0 +1,26 @@
+{
+  "users": [
+    {
+      "id": "5555555555555555",
+      "emailAddress": "john.doe@example.com",
+      "firstName": "John",
+      "lastName": "Doe",
+      "active": true,
+      "userRole": "admin"
+    },
+    {
+      "id": "6666666666666666",
+      "emailAddress": "jane.smith@example.com",
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "active": true,
+      "userRole": "user"
+    }
+  ],
+  "records": {
+    "cursor": "next_page_cursor_123",
+    "totalRecords": 100,
+    "currentPageSize": 2
+  }
+}
+

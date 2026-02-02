@@ -1,0 +1,128 @@
+---
+endpoints:
+  - pathTemplate: "/v2/stats/activity/aggregate"
+    allowedQueryParams: []
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..userId"
+          - "$..userEmailAddress"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        errors:
+          type: "array"
+          items:
+            type: "string"
+        fromDateTime:
+          type: "string"
+          format: "date-time"
+        records:
+          $ref: "#/definitions/RecordsMetadata"
+        requestId:
+          type: "string"
+        timeZone:
+          type: "string"
+        toDateTime:
+          type: "string"
+          format: "date-time"
+        usersAggregateActivityStats:
+          type: "array"
+          items:
+            $ref: "#/definitions/ActivityAggregate"
+  - pathTemplate: "/v2/users"
+    allowedQueryParams: []
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..emailAddress"
+          - "$..id"
+          - "$..emailAliases[*]"
+          - "$..trustedEmailAddress"
+          - "$..managerId"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        errors:
+          type: "array"
+          items:
+            type: "string"
+        records:
+          $ref: "#/definitions/RecordsMetadata"
+        requestId:
+          type: "string"
+        users:
+          type: "array"
+          items:
+            $ref: "#/definitions/GongUser"
+definitions:
+  ActivityAggregate:
+    type: "object"
+    properties:
+      userAggregateActivityStats:
+        $ref: "#/definitions/UserAggregateActivityStats"
+      userEmailAddress:
+        type: "string"
+      userId:
+        type: "string"
+  GongUser:
+    type: "object"
+    properties:
+      active:
+        type: "boolean"
+      emailAddress:
+        type: "string"
+      emailAliases:
+        type: "array"
+        items:
+          type: "string"
+      id:
+        type: "string"
+      trustedEmailAddress:
+        type: "string"
+  RecordsMetadata:
+    type: "object"
+    properties:
+      currentPageNumber:
+        type: "integer"
+      currentPageSize:
+        type: "integer"
+      cursor:
+        type: "string"
+      totalRecords:
+        type: "integer"
+  UserAggregateActivityStats:
+    type: "object"
+    properties:
+      callsAsHost:
+        type: "integer"
+      callsAttended:
+        type: "integer"
+      callsCommentsGiven:
+        type: "integer"
+      callsCommentsReceived:
+        type: "integer"
+      callsGaveFeedback:
+        type: "integer"
+      callsMarkedAsFeedbackGiven:
+        type: "integer"
+      callsMarkedAsFeedbackReceived:
+        type: "integer"
+      callsReceivedFeedback:
+        type: "integer"
+      callsRequestedFeedback:
+        type: "integer"
+      callsScorecardsFilled:
+        type: "integer"
+      callsScorecardsReceived:
+        type: "integer"
+      callsSharedExternally:
+        type: "integer"
+      callsSharedInternally:
+        type: "integer"
+      othersCallsListenedTo:
+        type: "integer"
+      ownCallsListenedTo:
+        type: "integer"
