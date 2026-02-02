@@ -245,7 +245,14 @@ resource "google_cloudfunctions2_function" "function" {
 }
 
 locals {
+  # For backwards compatibility with singular example_file
   example_file = var.example_file == null ? "/path/to/example/file.csv" : "${var.psoxy_base_dir}${var.example_file}"
+
+  # Merge example_files list with singular example_file (if provided)
+  all_example_files = concat(
+    var.example_files,
+    var.example_file != null ? [var.example_file] : []
+  )
 
   # id that is unique for connector, within the environment (eg, files with this token in name, but otherwise equivalent, will not conflict)
   local_file_id = trimprefix(local.instance_id, var.environment_id_prefix)
@@ -367,10 +374,12 @@ output "sanitized_bucket" {
 }
 
 output "example_files" {
-  value = try(var.example_file, null) != null ? [{
-    path           = var.example_file
-    content_base64 = base64encode(file(local.example_file))
-  }] : []
+  value = [
+    for f in local.all_example_files : {
+      path           = f
+      content_base64 = base64encode(file("${var.psoxy_base_dir}${f}"))
+    }
+  ]
   description = "Array of example files with path relative to terraform config root and base64-encoded content"
 }
 
