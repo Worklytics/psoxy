@@ -20,18 +20,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration (use env vars if set, otherwise defaults for local use)
-DEFAULT_ROLE_ARN="arn:aws:iam::908404960471:role/InfraAdmin"
-
-# Configuration (use env vars if set, otherwise defaults for local use)
-# If running in CI (GitHub Actions sets CI=true), default to empty ROLE_ARN (use current creds)
-# forcing the script to use the role already assumed by the workflow OIDC step.
-# Otherwise (local dev), default to InfraAdmin role.
-if [ -n "$CI" ]; then
-    ROLE_ARN="${ROLE_ARN:-}"
-else
-    ROLE_ARN="${ROLE_ARN:-$DEFAULT_ROLE_ARN}"
-fi
-
+ROLE_ARN="${ROLE_ARN:-}"
 IMPLEMENTATION="${IMPLEMENTATION:-aws}"
 JAVA_SOURCE_ROOT="${JAVA_SOURCE_ROOT:-java/}"
 ROLE_SESSION_NAME="${ROLE_SESSION_NAME:-psoxy-artifact-publish-$(date +%s)}"
@@ -74,14 +63,19 @@ while [[ $# -gt 0 ]]; do
             echo -e "${BLUE}Non-interactive mode enabled${NC}"
             shift
             ;;
+        --role-arn)
+            ROLE_ARN="$2"
+            echo -e "${BLUE}Role ARN set to: ${GREEN}${ROLE_ARN}${NC}"
+            shift 2
+            ;;
         -*)
             echo -e "${RED}Error: Unknown option: $1${NC}"
-            echo "Usage: $0 [--rc] [--non-interactive]"
+            echo "Usage: $0 [--rc] [--non-interactive] [--role-arn <arn>]"
             exit 1
             ;;
         *)
             echo -e "${RED}Error: Unexpected argument: $1${NC}"
-            echo "Usage: $0 [--rc] [--non-interactive]"
+            echo "Usage: $0 [--rc] [--non-interactive] [--role-arn <arn>]"
             exit 1
             ;;
     esac
