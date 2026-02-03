@@ -21,6 +21,12 @@ variable "confluence_example_group_id" {
   description = "(Only required if using Confluence Cloud connector) Example of group id of the Confluence Cloud to connect to (ex: 35e417ad-bcb1-45fe-9be0-959239a84327)."
 }
 
+variable "glean_instance_name" {
+  type        = string
+  default     = null
+  description = "(Only required if using Glean connector) Name of your Glean instance (ex: if your Glean URL is 'acme-be.glean.com', the instance name is 'acme-be')"
+}
+
 variable "salesforce_domain" {
   type        = string
   description = "Domain of the Salesforce to connect to (only required if using Salesforce connector). To find your My Domain URL, from Setup, in the Quick Find box, enter My Domain, and then select My Domain"
