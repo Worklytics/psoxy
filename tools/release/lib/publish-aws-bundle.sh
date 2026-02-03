@@ -270,6 +270,22 @@ prompt_overwrite() {
 
 # Function to assume role and get temporary credentials
 assume_role() {
+    # Check if we are already using the correct role
+    local current_arn
+    current_arn=$(aws sts get-caller-identity --query 'Arn' --output text 2>/dev/null)
+    
+    # Check if current ARN matches the target ROLE_ARN or is an assumed role session of it
+    # Expected format for assumed role: arn:aws:sts::ACCOUNT:assumed-role/ROLE_NAME/SESSION_NAME
+    local role_name
+    role_name=$(echo "$ROLE_ARN" | sed 's/.*:role\///')
+    
+    if [[ "$current_arn" == "$ROLE_ARN" ]] || [[ "$current_arn" == *":assumed-role/$role_name/"* ]]; then
+        echo -e "${GREEN}Already authenticated as role ${role_name} (${current_arn})${NC}"
+        echo -e "${YELLOW}Skipping assume-role step${NC}"
+        echo ""
+        return 0
+    fi
+
     echo -e "${BLUE}Assuming role ${GREEN}${ROLE_ARN}${NC}..."
 
     # Assume the role and get temporary credentials
