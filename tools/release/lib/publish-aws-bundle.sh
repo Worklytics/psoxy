@@ -333,11 +333,12 @@ publish_to_region() {
 
     echo -e "${BLUE}Publishing to ${GREEN}${region}${BLUE} (${s3_path})${NC}"
 
-    # Check if bucket exists
+    # Check if bucket exists (or is accessible)
+    # Note: 'aws s3 ls' requires s3:ListBucket permission. If we only have s3:PutObject, this will fail.
+    # So we treat failure here as a warning and proceed to try uploading.
     if ! aws s3 ls "s3://${bucket_name}" >/dev/null 2>&1; then
-        echo -e "${YELLOW}Warning: Bucket ${bucket_name} does not exist in ${region}${NC}"
-        echo -e "${YELLOW}Skipping ${region}${NC}"
-        return 1
+        echo -e "${YELLOW}Warning: Bucket ${bucket_name} not found or not listable (missing s3:ListBucket?).${NC}"
+        echo -e "${YELLOW}Proceeding with upload attempt...${NC}"
     fi
 
     # Build metadata string
