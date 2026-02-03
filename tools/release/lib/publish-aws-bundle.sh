@@ -343,8 +343,13 @@ publish_to_region() {
 # Main execution
 publish() {
     # Check if artifacts already exist and prompt for confirmation
+    # Check if artifacts already exist and prompt for confirmation
+    # Use set +e because check_artifacts_exist returns 1 if NO artifacts exist (normal case)
+    # which would otherwise cause the script to exit immediately
+    set +e
     EXISTING_REGIONS_OUTPUT=$(check_artifacts_exist)
     local check_result=$?
+    set -e
     
     if [ $check_result -eq 0 ]; then
         # Convert output to array
