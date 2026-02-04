@@ -7,7 +7,8 @@ printf "See https://github.com/Worklytics/psoxy#prerequisites for more informati
 
 HOMEBREW_AVAILABLE=`brew -v &> /dev/null`
 
-RED='\e[0;31m'
+RED='\e[0;31m' # 
+YELLOW='\e[0;33m'
 BLUE='\e[0;34m'
 NC='\e[0m' # No Color
 
@@ -25,59 +26,58 @@ fi
 # Check Maven installation
 
 if ! mvn -v &> /dev/null ; then
-  printf "${RED}Maven not installed.${NC} See https://maven.apache.org/install.html\n"
+  printf "${D}Maven not installed.${NC} See https://maven.apache.org/install.html\n"
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${BLUE}brew install maven${NC}\n"; fi
   exit 1
-fi
+else
+  MVN_VERSION=`mvn -v | grep "Apache Maven"`
+  MVN_VERSION_MAJOR_MINOR=$(echo $MVN_VERSION | sed -n 's/^Apache Maven \([0-9]*\.[0-9]*\).*$/\1/p')
+  printf "Your Maven version is ${BLUE}${MVN_VERSION}${NC}.\n"
 
-
-MVN_VERSION=`mvn -v | grep "Apache Maven"`
-MVN_VERSION_MAJOR_MINOR=$(echo $MVN_VERSION | sed -n 's/^Apache Maven \([0-9]*\.[0-9]*\).*$/\1/p')
-printf "Your Maven version is ${BLUE}${MVN_VERSION}${NC}.\n"
-
-# Parse Maven version components
-MVN_MAJOR=$(echo "$MVN_VERSION_MAJOR_MINOR" | cut -d. -f1)
-MVN_MINOR=$(echo "$MVN_VERSION_MAJOR_MINOR" | cut -d. -f2)
-if (( MVN_MAJOR < 3 || (MVN_MAJOR == 3 && MVN_MINOR < 6) )); then
-  printf "${RED}This Maven version appears to be unsupported.${NC} Psoxy requires a supported version of Maven 3.6 or later.\n"
-  printf "We recommend you upgrade. See https://maven.apache.org/install.html\n"
-  printf "Maven is used to build the package that will be deployed to your host platform as an AWS lambda or a GCP Cloud Function\n"
-fi
-
-printf "\n"
-
-# Check Java installation
-
-JAVA_VERSION=`mvn -v | grep Java`
-JAVA_VERSION_MAJOR=$(echo $JAVA_VERSION | sed -n 's/^Java version: \([0-9]*\).*/\1/p')
-
-printf "Your Maven installation uses ${BLUE}${JAVA_VERSION}${NC}.\n"
-
-if [[  "$JAVA_VERSION_MAJOR" != 17 && "$JAVA_VERSION_MAJOR" != 21  && "$JAVA_VERSION_MAJOR" != 23  && "$JAVA_VERSION_MAJOR" != 24 ]]; then
-  printf "${RED}This Java version appears to be unsupported. You should upgrade it, or may have compile errors.${NC} Psoxy requires an Oracle-supported version of Java 17 or later;  as of April 2025, this includes Java 17, 21, or 24. See https://maven.apache.org/install.html\n"
-  if $HOMEBREW_AVAILABLE; then printf "or as you have Homebrew available, run ${BLUE}brew install openjdk@17${NC}\n"; fi
-  printf "If you have an alternative JDK installed, then you must update your ${BLUE}JAVA_HOME${NC} environment variable to point to it.\n"
-fi
-
-printf "\n"
-
-# if java > 23, then mvn must be 3.9.10+
-if (( JAVA_VERSION_MAJOR > 23 )); then
-  # Parse full Maven version for patch comparison
-  MVN_VERSION_FULL=$(echo "$MVN_VERSION" | sed -n 's/^Apache Maven \([0-9]*\.[0-9]*\.[0-9]*\).*$/\1/p')
-  MVN_PATCH=$(echo "$MVN_VERSION_FULL" | cut -d. -f3)
-  if (( MVN_MAJOR < 3 || (MVN_MAJOR == 3 && MVN_MINOR < 9) || (MVN_MAJOR == 3 && MVN_MINOR == 9 && MVN_PATCH < 10) )); then
-    printf "${RED}Maven < 3.9.10 has compatibility issues with Java 24.${NC} If you're using Java 24, psoxy will NOT build correctly unless you upgrade Maven to 3.9.10 or later.\n"
-    printf "See https://maven.apache.org/install.html\n"
+  # Parse Maven version components
+  MVN_MAJOR=$(echo "$MVN_VERSION_MAJOR_MINOR" | cut -d. -f1)
+  MVN_MINOR=$(echo "$MVN_VERSION_MAJOR_MINOR" | cut -d. -f2)
+  if (( MVN_MAJOR < 3 || (MVN_MAJOR == 3 && MVN_MINOR < 6) )); then
+    printf "${RED}This Maven version appears to be unsupported.${NC} Psoxy requires a supported version of Maven 3.6 or later.\n"
+    printf "We recommend you upgrade. See https://maven.apache.org/install.html\n"
+    printf "Maven is used to build the package that will be deployed to your host platform as an AWS lambda or a GCP Cloud Function\n"
   fi
+
+  printf "\n"
+
+  # Check Java installation
+  JAVA_VERSION=`mvn -v | grep Java`
+  JAVA_VERSION_MAJOR=$(echo $JAVA_VERSION | sed -n 's/^Java version: \([0-9]*\).*/\1/p')
+
+  printf "Your Maven installation uses ${BLUE}${JAVA_VERSION}${NC}.\n"
+
+  if [[  "$JAVA_VERSION_MAJOR" != 17 && "$JAVA_VERSION_MAJOR" != 21  && "$JAVA_VERSION_MAJOR" != 23  && "$JAVA_VERSION_MAJOR" != 24 ]]; then
+    printf "${RED}This Java version appears to be unsupported. You should upgrade it, or may have compile errors.${NC} Psoxy requires an Oracle-supported version of Java 17 or later;  as of April 2025, this includes Java 17, 21, or 24. See https://maven.apache.org/install.html\n"
+    if $HOMEBREW_AVAILABLE; then printf "or as you have Homebrew available, run ${BLUE}brew install openjdk@17${NC}\n"; fi
+    printf "If you have an alternative JDK installed, then you must update your ${BLUE}JAVA_HOME${NC} environment variable to point to it.\n"
+  fi
+
+  printf "\n"
+
+  # if java > 23, then mvn must be 3.9.10+
+  if (( JAVA_VERSION_MAJOR > 23 )); then
+    # Parse full Maven version for patch comparison
+    MVN_VERSION_FULL=$(echo "$MVN_VERSION" | sed -n 's/^Apache Maven \([0-9]*\.[0-9]*\.[0-9]*\).*$/\1/p')
+    MVN_PATCH=$(echo "$MVN_VERSION_FULL" | cut -d. -f3)
+    if (( MVN_MAJOR < 3 || (MVN_MAJOR == 3 && MVN_MINOR < 9) || (MVN_MAJOR == 3 && MVN_MINOR == 9 && MVN_PATCH < 10) )); then
+      printf "${RED}Maven < 3.9.10 has compatibility issues with Java 24.${NC} If you're using Java 24, psoxy will NOT build correctly unless you upgrade Maven to 3.9.10 or later.\n"
+      printf "See https://maven.apache.org/install.html\n"
+    fi
+  fi
+
+  printf "\n"
 fi
 
-printf "\n"
 
 # Check NPM installation
 
 if ! npm -v &> /dev/null ; then
-  printf "${RED}NodeJS (node) and Node Package Manager (npm) are not installed but are required for the local test tooling to work. ${NC} While this is optional, we recommend you install them to be able to test your instances. See https://nodejs.org/\n"
+  printf "${YELLOW}NodeJS (node) and Node Package Manager (npm) are not installed but are required for the local test tooling to work. ${NC} While this is optional, we recommend you install them to be able to test your instances. See https://nodejs.org/\n"
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${BLUE}brew install node${NC}\n"; fi
 fi
 
