@@ -124,7 +124,7 @@ If you're managing your Microsoft 365 connectors OUTSIDE of our provided terrafo
 AWS: 
 - **Issuer:** `"https://cognito-identity.amazonaws.com"`
 - **Subject:** `identity_id` of the Cognito within your pool
-- **Audience:** `pool_id` of your AWS Cognito Identity pool
+- **Audience:** `pool_id` of your AWS Cognito Identity pool (despite Entra ID console suggesting `api://AzureADTokenExchange`)
 
 ![Microsoft Entra OIDC Configuration](msft-entra-oidc-config-aws.png)
 
@@ -162,34 +162,25 @@ See
 https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application#import
 for details.
 
-### Certificate creation via Terraform **DEPRECATED**
 
-**DEPRECATED** - will be removed in v0.5; this is not recommended approach, for a variety of
-reasons, since Microsoft released support for
-[federated credentials](https://learn.microsoft.com/en-us/graph/api/resources/federatedidentitycredentials-overview?view=graph-rest-1.0)
-in ~Sept 2022. See our module `azuread-federated-credentials` for preferred alternative.
+#### Error `unauthorized_client`
 
-Psoxy's terraform modules create certificates on your machine, and deploy these to Azure and the
-keys to your AWS/GCP host environment. This all works via APIs.
+Root Cause : Using `Object ID` of Entra ID application instead of its `Application ID`/`Client ID`.
 
-Sometimes Azure is a bit finicky about certificate validity dates, and you get an error message like
-this:
-
+Here's the JSON, which should be visible in the logs of the Psoxy instance if not directly returned to the console by the test tool:
+```json
+{
+  "error": "unauthorized_client",
+  "error_description": "AADSTS700016: Application with identifier 'eb8330dd-d9f2-40ad-a3e8-bda6858c7076' was not found in the directory 'Worklytics, Co'. This can happen if the application has not been installed by the administrator of the tenant or consented to by any user in the tenant. You may have sent your authentication request to the wrong tenant. Trace ID: 5337845d-a896-4e8a-a6a3-93ca72470e00 Correlation ID: 954f8baa-0ccd-4928-a567-9ac648aa0236 Timestamp: 2026-02-03 22:20:10Z",
+  "error_codes": [
+           700016
+      ],
+  "timestamp": "2026-02-03 22:20:10Z",
+  "trace_id": "5337845d-a896-4e8a-a6a3-93ca72470e00",
+  "correlation_id": "954f8baa-0ccd-4928-a567-9ac648aa0236",
+  "error_uri": "https://login.microsoftonline.com/error?code=700016"
+}
 ```
-│ Error: Adding certificate for application with object ID "350c0b06-10d4-4908-8708-d5e549544bd0"
-│
-│   with module.msft-connection-auth["azure-ad"].azuread_application_certificate.certificate,
-│   on ../../modules/azuread-local-cert/main.tf line 27, in resource "azuread_application_certificate" "certificate":
-│   27: resource "azuread_application_certificate" "certificate" {
-│
-│ ApplicationsClient.BaseClient.Patch(): unexpected status 400 with OData
-│ error: KeyCredentialsInvalidEndDate: Key credential end date is invalid.
-╵
-```
-
-Just running `terraform apply` again (and maybe again) usually fixes it. Likely it's something with
-with Azure's clock relative to your machine, plus whatever flight time is required between cert
-generation and it being PUT to Azure.
 
 ### Identity not found error
 
@@ -225,3 +216,42 @@ If there is a new error after doing the admin like this:
 
 Please re-deploy the Psoxy instance again, as it is an error related on an invalid cached token before the admin consent
 has been done.
+
+
+### 400 Bad Request
+Root Cause: **MSFT tenant id wrong**
+
+You might see a `400 bad request` response from the local nodejs test tool, and some message about the proxy failing the parse the request.
+
+This is because the request went to the wrong tenant, such that the Client ID the token request was sent for doesn't exist in that tenant. Microsoft returns a 400 response code for this case.
+
+
+
+### Certificate creation via Terraform **DEPRECATED**
+
+**DEPRECATED** - will be removed in v0.5; this is not recommended approach, for a variety of
+reasons, since Microsoft released support for
+[federated credentials](https://learn.microsoft.com/en-us/graph/api/resources/federatedidentitycredentials-overview?view=graph-rest-1.0)
+in ~Sept 2022. See our module `azuread-federated-credentials` for preferred alternative.
+
+Psoxy's terraform modules create certificates on your machine, and deploy these to Azure and the
+keys to your AWS/GCP host environment. This all works via APIs.
+
+Sometimes Azure is a bit finicky about certificate validity dates, and you get an error message like
+this:
+
+```
+│ Error: Adding certificate for application with object ID "350c0b06-10d4-4908-8708-d5e549544bd0"
+│
+│   with module.msft-connection-auth["azure-ad"].azuread_application_certificate.certificate,
+│   on ../../modules/azuread-local-cert/main.tf line 27, in resource "azuread_application_certificate" "certificate":
+│   27: resource "azuread_application_certificate" "certificate" {
+│
+│ ApplicationsClient.BaseClient.Patch(): unexpected status 400 with OData
+│ error: KeyCredentialsInvalidEndDate: Key credential end date is invalid.
+╵
+```
+
+Just running `terraform apply` again (and maybe again) usually fixes it. Likely it's something with
+with Azure's clock relative to your machine, plus whatever flight time is required between cert
+generation and it being PUT to Azure.
