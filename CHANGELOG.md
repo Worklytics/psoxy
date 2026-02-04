@@ -8,7 +8,7 @@ Changes to be including in future/planned release notes will be added here.
 ## Next
 
 ## [0.5.18](https://github.com/Worklytics/psoxy/release/tag/v0.5.18)
-- `aws`: updated IAM policy for invoking lambda functions, to reflect AWS perm changes; at minimum, NEW aws accounts will need to use this version; unclear when existing/old AWS accounts will need to update.
+- `aws`: updated IAM policy for invoking lambda functions, to reflect AWS perm changes; anyone deploying NEW api connectors on AWS will have to use this version or later, or backport similar change. (See https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html)
 
 ## [0.5.16](https://github.com/Worklytics/psoxy/release/tag/v0.5.16)
 - `Claude Code`: support basic rules for Claude Code
