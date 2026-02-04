@@ -26,9 +26,9 @@ fi
 # Check Maven installation
 
 if ! mvn -v &> /dev/null ; then
-  printf "${D}Maven not installed.${NC} See https://maven.apache.org/install.html\n"
+  printf "${YELLOW}Maven not installed.${NC} It is REQUIRED unless you will use a pre-built JAR. To install, see https://maven.apache.org/install.html\n"
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${BLUE}brew install maven${NC}\n"; fi
-  exit 1
+  printf " (Using a prebuilt jar requires adding ${BLUE}deployment_bundle=""${NC} to your ${BLUE}terraform.tfvars${NC} file, and filling with s3/gcs uri for your desired JAR)\n"
 else
   MVN_VERSION=`mvn -v | grep "Apache Maven"`
   MVN_VERSION_MAJOR_MINOR=$(echo $MVN_VERSION | sed -n 's/^Apache Maven \([0-9]*\.[0-9]*\).*$/\1/p')
