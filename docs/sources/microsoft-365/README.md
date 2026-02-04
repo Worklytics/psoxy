@@ -95,13 +95,17 @@ rather than on behalf of a specific authenticated end-user ('Delegated' scopes).
 will require to do the [admin consent](https://learn.microsoft.com/en-us/entra/identity/enterprise-apps/grant-admin-consent?pivots=portal) of these permissions. Please
 ask to someone with at least the `Privileged Role Administrator` role to do this.
 
+## BYO Entra ID Application(s)
+
+If you don't want to use our provided terraform modules to manage your Entra ID applications, you can create them yourself.
+
 ### Single Entra ID Application for Multiple Connections
 
 Our [AWS example](https://github.com/Worklytics/psoxy-example-aws/tree/main) supports using a SINGLE Entra ID application for multiple connections,
 instead of one for each. This could ease management, but requires that you determine the superset of scopes needed across all connectors you wish to use and create
 the Entra ID application with those scopes via the MSFT CLI or portal.
 
-If you lack the `Cloud Application Administrator` role, you can ask someone in your organization with that rule to create the Application for you.
+If you lack the `Cloud Application Administrator` role, you can ask someone in your organization with that rule to create the Application(S for you.
 
 Then you obtain the `Object ID` of the Entra ID application you created, and set it as the value of `msft_connector_app_object_id`
 in your `terraform.tfvars` file. See:
@@ -114,12 +118,11 @@ https://github.com/Worklytics/psoxy-example-aws/blob/main/msft-365-variables.tf
 
 If you're managing your Microsoft 365 connectors OUTSIDE of our provided terraform modules, you will have to configure authentication yourself.
 
-1. Navigate to Microsoft Entra admin center --> App Registrations; find each connector.
+1. Navigate to Microsoft Entra admin center --> App Registrations; find each connector (or create on).
 
 2. Under "Manage", select "Certificates & Secrets" --> "Federated Credentials" --> "Add Credential" --> "Other Issuer"
 
 3. Fill in the `Issuer` and `Value` fields (leave Type as `Explicit subject identifier`). For `Value`, use the `Subject` value from your OIDC configuration. Name and Description can be whatever you want.
-
 
 AWS: 
 - **Issuer:** `"https://cognito-identity.amazonaws.com"`
