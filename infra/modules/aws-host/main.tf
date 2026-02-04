@@ -68,7 +68,12 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
       "Statement" : [
         # allow caller to invoke the lambda via function url
         {
-          "Action" : ["lambda:InvokeFunctionUrl"],
+          "Action" : [
+            # for new AWS accounts as of Oct 2025, both of these are required
+            # see https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html 
+            "lambda:InvokeFunctionUrl",
+            "lambda:InvokeFunction"
+          ],
           "Effect" : "Allow",
           "Resource" : [for k, v in module.api_connector : v.function_arn]
         }
