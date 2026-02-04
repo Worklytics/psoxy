@@ -46,7 +46,7 @@ public class RecordRules implements BulkDataRules {
 
 
     @Builder.Default
-    Format format = Format.NDJSON;
+    Format format = Format.NDJSON; // TODO: in v0.6, default to AUTO
 
     /**
      * transforms to apply, in order.

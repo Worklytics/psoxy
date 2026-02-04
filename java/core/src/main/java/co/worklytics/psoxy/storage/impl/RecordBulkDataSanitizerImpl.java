@@ -27,6 +27,7 @@ import com.jayway.jsonpath.JsonPathException;
 import com.jayway.jsonpath.MapFunction;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.gateway.BulkModeConfig;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import dagger.assisted.Assisted;
@@ -50,6 +51,9 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Inject
     ObjectMapper objectMapper;
+
+    @Inject
+    BulkModeConfig bulkModeConfig;
 
     RecordRules rules;
 
@@ -93,8 +97,11 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             }
         }
 
+        RecordRules.Format outputFormat = bulkModeConfig.getOutputFormat()
+            .orElse(format);
+
         try (RecordReader recordReader = createReader(format, new InputStreamReader(in, StandardCharsets.UTF_8), in);
-             RecordWriter recordWriter = createWriter(format, new OutputStreamWriter(out, StandardCharsets.UTF_8), out)) {
+             RecordWriter recordWriter = createWriter(outputFormat, new OutputStreamWriter(out, StandardCharsets.UTF_8), out)) {
             
             recordWriter.beginRecordSet();
             
