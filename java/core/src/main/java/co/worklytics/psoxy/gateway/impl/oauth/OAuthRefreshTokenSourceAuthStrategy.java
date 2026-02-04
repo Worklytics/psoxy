@@ -319,6 +319,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          */
         String getGrantType();
 
+
+
         /**
          * @return request paylaod for token request
          */
@@ -330,6 +332,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          * @param httpHeaders the request headers to modify
          */
         default void addHeaders(HttpHeaders httpHeaders) {}
+
+        default String addQueryParameters(String url) {
+            return url;
+        }
     }
 
     public interface TokenResponseParser {
@@ -504,8 +510,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         private CanonicalOAuthAccessTokenResponseDto exchangeRefreshTokenForAccessToken()
                 throws IOException {
-            String refreshEndpoint =
-                    config.getConfigPropertyOrError(ConfigProperty.REFRESH_ENDPOINT);
+            String refreshEndpoint = payloadBuilder.addQueryParameters(
+                    config.getConfigPropertyOrError(ConfigProperty.REFRESH_ENDPOINT));
 
             HttpRequest tokenRequest = httpRequestFactory.buildPostRequest(
                     new GenericUrl(refreshEndpoint), payloadBuilder.buildPayload());

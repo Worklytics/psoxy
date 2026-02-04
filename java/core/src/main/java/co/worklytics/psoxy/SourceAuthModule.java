@@ -73,6 +73,13 @@ public class SourceAuthModule {
 
     @Provides
     @IntoSet
+    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder refreshTokenWithClientAuthBuilder(
+        RefreshTokenTokenWithClientAuthRequestBuilder refreshTokenWithClientAuthBuilder) {
+        return refreshTokenWithClientAuthBuilder;
+    }
+
+    @Provides
+    @IntoSet
     OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder clientCredentialsGrantTokenRequestPayloadBuilder(
         ClientCredentialsGrantTokenRequestBuilder clientCredentialsGrantTokenRequestBuilder) {
         return clientCredentialsGrantTokenRequestBuilder;
