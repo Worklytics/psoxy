@@ -93,6 +93,12 @@ variable "glean_instance_name" {
   description = "(Only required if using Glean connector) Name of your Glean instance (ex: if your Glean URL is 'acme-be.glean.com', the instance name is 'acme-be')"
 }
 
+variable "gong_instance_name" {
+  type        = string
+  default     = null
+  description = "(Only required if using Gong connector) Name of your Gong instance (ex: if your Gong URL is 'acme.gong.io', the instance name is 'acme')"
+}
+
 variable "salesforce_example_account_id" {
   type        = string
   default     = null
@@ -123,5 +129,13 @@ locals {
     "^${local.validate_glean_instance_name_message}$",
     (!local.validate_glean_instance_name
       ? local.validate_glean_instance_name_message
+  : ""))
+
+  validate_gong_instance_name         = (var.gong_instance_name == null || var.gong_instance_name == "") && contains(var.enabled_connectors, "gong")
+  validate_gong_instance_name_message = "The gong_instance_name var should be populated if Gong connector is enabled."
+  validate_gong_instance_name_check = regex(
+    "^${local.validate_gong_instance_name_message}$",
+    (!local.validate_gong_instance_name
+      ? local.validate_gong_instance_name_message
   : ""))
 }

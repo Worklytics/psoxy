@@ -43,6 +43,7 @@ locals {
   github_first_organization                = split(",", coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME"))[0]
   github_example_repository                = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
   glean_instance_name                      = coalesce(var.glean_instance_name, "YOUR_GLEAN_INSTANCE_NAME")
+  gong_instance_name                       = coalesce(var.gong_instance_name, "YOUR_GONG_INSTANCE_NAME")
   salesforce_example_account_id            = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
 
   oauth_long_access_connectors = {
@@ -507,6 +508,81 @@ EOT
       external_token_todo : templatefile("${path.module}/docs/github/non-enterprise-cloud-instructions.tftpl", {
         github_organization         = local.github_organization,
         path_to_instance_parameters = "PSOXY_GITHUB_NON_ENTERPRISE_"
+      })
+    }
+    gong-metrics = {
+      source_kind : "gong-metrics",
+      availability : "beta",
+      enable_by_default : false,
+      worklytics_connector_id : "gong-metrics-psoxy"
+      display_name : "Gong"
+      worklytics_connector_name : "Gong Metrics via Psoxy"
+      target_host : "${local.gong_instance_name}.gong.io"
+      source_auth_strategy : "basic_auth"
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN"
+          writable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "REFRESH_TOKEN"
+          writable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        local.standard_config_values.oauth_refresh_token_lock,
+        {
+          name : "CLIENT_ID"
+          writable : false
+          sensitive : true # not really, but simpler this way; and some may want it treated as sensitive, since would be req'd to brute-force app tokens or something
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_SECRET"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      environment_variables : {
+        GRANT_TYPE : "refresh_token"
+        REFRESH_ENDPOINT : "https://auth.atlassian.com/oauth/token"
+        USE_SHARED_TOKEN : "TRUE"
+      }
+      example_api_requests : [
+        {
+          method = "POST"
+          path   = "/rest/api/v1/listentities"
+          content_type = "application/json"
+          body = jsonencode({
+            entityType  = "PERSON"
+            pageSize    = 100
+          })
+        },
+        {
+          method = "POST"
+          path   = "/rest/api/v1/insights"
+          content_type = "application/json"
+          body = jsonencode({
+            request = {
+              overviewRequest = {
+                dayRange = {
+                  start = {
+                    daysFromNow = -30
+                  }
+                  end = {
+                    daysFromNow = 0
+                  }
+                }
+              }
+            }
+          })
+        }
+      ]
+      external_token_todo : templatefile("${path.module}/docs/glean/instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_GLEAN_"
       })
     }
     salesforce = {

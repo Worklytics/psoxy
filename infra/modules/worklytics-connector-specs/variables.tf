@@ -173,6 +173,12 @@ variable "glean_instance_name" {
   description = "(Only required if using Glean connector) Name of your Glean instance (ex: if your Glean URL is 'acme-be.glean.com', the instance name is 'acme-be')"
 }
 
+variable "gong_instance_name" {
+  type        = string
+  default     = null
+  description = "(Only required if using Gong connector) Name of your Gong instance (ex: if your Gong URL is 'acme.gong.io', the instance name is 'acme')"
+}
+
 variable "salesforce_example_account_id" {
   type        = string
   default     = null
