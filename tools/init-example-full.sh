@@ -1,18 +1,16 @@
 #!/bin/bash
 
 # colors
-RED='\e[0;31m'
-BLUE='\e[0;34m'
-GREEN='\e[0;32m'
-NC='\e[0m' # No Color
+# Source centralized color scheme
+source "$(dirname "$0")/set-term-colorscheme.sh"
 
 REPO_CLONE_BASE_DIR=${1:-".terraform/modules/psoxy/"}
 TF_CONFIG_ROOT=`pwd`
 
 if [[ ! -d "$REPO_CLONE_BASE_DIR" ]]; then
-  printf "Directory ${RED}${REPO_CLONE_BASE_DIR}${NC} does not exist.\n"
+  printf "Directory ${ERROR}${REPO_CLONE_BASE_DIR}${NC} does not exist.\n"
   printf "This usually means the Terraform modules haven't been initialized yet.\n"
-  printf "Please run ${BLUE}./init${NC} again to initialize the Terraform modules first.\n"
+  printf "Please run ${CODE}./init${NC} again to initialize the Terraform modules first.\n"
   exit 1
 fi
 
@@ -27,16 +25,16 @@ else
 fi
 
 UC_HOST=$(echo "$HOST_PLATFORM" | tr '[:lower:]' '[:upper:]')
-printf "Host platform detected as ${GREEN}${UC_HOST}${NC}.\n"
+printf "Host platform detected as ${SUCCESS}${UC_HOST}${NC}.\n"
 
 
 TFVARS_FILE="${TF_CONFIG_ROOT}/terraform.tfvars"
 
 if [ ! -f "${TFVARS_FILE}" ]; then
-  printf "Initializing ${BLUE}terraform.tfvars${NC} file for your configuration ...\n"
+  printf "Initializing ${CODE}terraform.tfvars${NC} file for your configuration ...\n"
 
 
-  printf "Please choose where you intend to run ${BLUE}terraform apply${NC}:\n"
+  printf "Please choose where you intend to run ${CODE}terraform apply${NC}:\n"
   echo "1) locally (here on this machine)"
   echo "2) Terraform Cloud (or similar remote CI/CD pipeline)"
 
@@ -49,7 +47,7 @@ if [ ! -f "${TFVARS_FILE}" ]; then
       DEPLOYMENT_ENV="terraform_cloud"
       ;;
     *)
-      printf "${RED}Invalid choice! Please re-run initialization script.${NC}\n"
+      printf "${ERROR}Invalid choice! Please re-run initialization script.${NC}\n"
       exit 1
       ;;
   esac
@@ -57,7 +55,7 @@ if [ ! -f "${TFVARS_FILE}" ]; then
 
 
   if [[ -z "$DEPLOYMENT_ENV" ]]; then
-    printf "${RED}No deployment environment selected.${NC} Exiting.\n"
+    printf "${ERROR}No deployment environment selected.${NC} Exiting.\n"
     exit 1;
   fi
 
@@ -135,20 +133,20 @@ echo "" # newline
 
 # warn customer to configure their backend
 if [ -f "${TF_CONFIG_ROOT}/backend.tf" ]; then
-  printf "Your Terraform backend is configured in ${BLUE}backend.tf${NC}. We recommend you review that file and customize it to your needs. "
+  printf "Your Terraform backend is configured in ${CODE}backend.tf${NC}. We recommend you review that file and customize it to your needs. "
   printf "By default, your configuration will use a 'local' backend, which is not recommended for production-use.\n"
 
   if [ "$HOST_PLATFORM" == "aws" ]; then
-    printf "As you're hosting proxy in AWS, consider the ${BLUE}s3${NC} backend: https://developer.hashicorp.com/terraform/language/settings/backends/s3\n"
+    printf "As you're hosting proxy in AWS, consider the ${CODE}s3${NC} backend: https://developer.hashicorp.com/terraform/language/settings/backends/s3\n"
   elif [ "$HOST_PLATFORM" == "gcp" ]; then
-    printf "As you're hosting proxy in GCP, consider the ${BLUE}gcs${NC} backend: https://developer.hashicorp.com/terraform/language/settings/backends/gcs\n"
+    printf "As you're hosting proxy in GCP, consider the ${CODE}gcs${NC} backend: https://developer.hashicorp.com/terraform/language/settings/backends/gcs\n"
   fi
 
   printf "Alternatively, you could replace the 'backend' block with a 'cloud' block, and use Terraform Cloud / Enterprise. See https://developer.hashicorp.com/terraform/language/settings/terraform-cloud\n"
 fi
 
-printf "\n${GREEN}Initialization complete.${NC}"
-printf "If you wish to remove files created by this initialization, run ${BLUE}${REPO_CLONE_BASE_DIR}tools/reset-example.sh${NC}.\n"
+printf "\n${SUCCESS}Initialization complete.${NC}"
+printf "If you wish to remove files created by this initialization, run ${CODE}${REPO_CLONE_BASE_DIR}tools/reset-example.sh${NC}.\n"
 
 
 
