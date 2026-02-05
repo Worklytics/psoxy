@@ -105,7 +105,7 @@ Our [AWS example](https://github.com/Worklytics/psoxy-example-aws/tree/main) sup
 instead of one for each. This could ease management, but requires that you determine the superset of scopes needed across all connectors you wish to use and create
 the Entra ID application with those scopes via the MSFT CLI or portal.
 
-If you lack the `Cloud Application Administrator` role, you can ask someone in your organization with that rule to create the Application(S for you.
+If you lack the `Cloud Application Administrator` role, you can ask someone in your organization with that role to create the Application(s) for you.
 
 Then you obtain the `Object ID` of the Entra ID application you created, and set it as the value of `msft_connector_app_object_id`
 in your `terraform.tfvars` file. See:
