@@ -20,9 +20,9 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration (use env vars if set, otherwise defaults for local use)
+ROLE_ARN="${ROLE_ARN:-}"
 IMPLEMENTATION="${IMPLEMENTATION:-aws}"
 JAVA_SOURCE_ROOT="${JAVA_SOURCE_ROOT:-java/}"
-ROLE_ARN="${ROLE_ARN:-arn:aws:iam::908404960471:role/InfraAdmin}"
 ROLE_SESSION_NAME="${ROLE_SESSION_NAME:-psoxy-artifact-publish-$(date +%s)}"
 BUCKET_PREFIX="${BUCKET_PREFIX:-psoxy-public-artifacts}"
 
@@ -63,14 +63,19 @@ while [[ $# -gt 0 ]]; do
             echo -e "${BLUE}Non-interactive mode enabled${NC}"
             shift
             ;;
+        --role-arn)
+            ROLE_ARN="$2"
+            echo -e "${BLUE}Role ARN set to: ${GREEN}${ROLE_ARN}${NC}"
+            shift 2
+            ;;
         -*)
             echo -e "${RED}Error: Unknown option: $1${NC}"
-            echo "Usage: $0 [--rc] [--non-interactive]"
+            echo "Usage: $0 [--rc] [--non-interactive] [--role-arn <arn>]"
             exit 1
             ;;
         *)
             echo -e "${RED}Error: Unexpected argument: $1${NC}"
-            echo "Usage: $0 [--rc] [--non-interactive]"
+            echo "Usage: $0 [--rc] [--non-interactive] [--role-arn <arn>]"
             exit 1
             ;;
     esac
@@ -270,6 +275,28 @@ prompt_overwrite() {
 
 # Function to assume role and get temporary credentials
 assume_role() {
+    # If no role specified, use current credentials
+    if [ -z "$ROLE_ARN" ]; then
+        echo -e "${BLUE}No role specified to assume. Using current credentials.${NC}"
+        return 0
+    fi
+
+    # Check if we are already using the correct role
+    local current_arn
+    current_arn=$(aws sts get-caller-identity --query 'Arn' --output text 2>/dev/null)
+    
+    # Check if current ARN matches the target ROLE_ARN or is an assumed role session of it
+    # Expected format for assumed role: arn:aws:sts::ACCOUNT:assumed-role/ROLE_NAME/SESSION_NAME
+    local role_name
+    role_name=$(echo "$ROLE_ARN" | sed 's/.*:role\///')
+    
+    if [[ "$current_arn" == "$ROLE_ARN" ]] || [[ "$current_arn" == *":assumed-role/$role_name/"* ]]; then
+        echo -e "${GREEN}Already authenticated as role ${role_name} (${current_arn})${NC}"
+        echo -e "${YELLOW}Skipping assume-role step${NC}"
+        echo ""
+        return 0
+    fi
+
     echo -e "${BLUE}Assuming role ${GREEN}${ROLE_ARN}${NC}..."
 
     # Assume the role and get temporary credentials
@@ -300,11 +327,12 @@ publish_to_region() {
 
     echo -e "${BLUE}Publishing to ${GREEN}${region}${BLUE} (${s3_path})${NC}"
 
-    # Check if bucket exists
+    # Check if bucket exists (or is accessible)
+    # Note: 'aws s3 ls' requires s3:ListBucket permission. If we only have s3:PutObject, this will fail.
+    # So we treat failure here as a warning and proceed to try uploading.
     if ! aws s3 ls "s3://${bucket_name}" >/dev/null 2>&1; then
-        echo -e "${YELLOW}Warning: Bucket ${bucket_name} does not exist in ${region}${NC}"
-        echo -e "${YELLOW}Skipping ${region}${NC}"
-        return 1
+        echo -e "${YELLOW}Warning: Bucket ${bucket_name} not found or not listable (missing s3:ListBucket?).${NC}"
+        echo -e "${YELLOW}Proceeding with upload attempt...${NC}"
     fi
 
     # Build metadata string
@@ -343,8 +371,12 @@ publish_to_region() {
 # Main execution
 publish() {
     # Check if artifacts already exist and prompt for confirmation
+    # Use set +e because check_artifacts_exist returns 1 if NO artifacts exist (normal case)
+    # which would otherwise cause the script to exit immediately
+    set +e
     EXISTING_REGIONS_OUTPUT=$(check_artifacts_exist)
     local check_result=$?
+    set -e
     
     if [ $check_result -eq 0 ]; then
         # Convert output to array
