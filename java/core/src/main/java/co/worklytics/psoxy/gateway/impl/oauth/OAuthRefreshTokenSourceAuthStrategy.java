@@ -322,7 +322,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
 
         /**
-         * @return request paylaod for token request
+         * @return request payload for token request
          */
         HttpContent buildPayload();
 
