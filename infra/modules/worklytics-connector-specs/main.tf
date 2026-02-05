@@ -548,41 +548,28 @@ EOT
       ],
       environment_variables : {
         GRANT_TYPE : "refresh_token"
-        REFRESH_ENDPOINT : "https://auth.atlassian.com/oauth/token"
+        REFRESH_ENDPOINT : "https://app.gong.io/oauth2/generate-customer-token"
         USE_SHARED_TOKEN : "TRUE"
       }
       example_api_requests : [
         {
-          method = "POST"
-          path   = "/rest/api/v1/listentities"
-          content_type = "application/json"
-          body = jsonencode({
-            entityType  = "PERSON"
-            pageSize    = 100
-          })
+          method = "GET"
+          path   = "/v2/users"
         },
         {
           method = "POST"
-          path   = "/rest/api/v1/insights"
+          path   = "/v2/stats/activity/aggregate"
           content_type = "application/json"
           body = jsonencode({
-            request = {
-              overviewRequest = {
-                dayRange = {
-                  start = {
-                    daysFromNow = -30
-                  }
-                  end = {
-                    daysFromNow = 0
-                  }
-                }
-              }
+            filter = {
+              fromDateTime = formatdate("YYYY-MM-DD'T'hh:mm:ssZ", timeadd(var.example_api_calls_sample_date, "-720h"))
+              toDateTime   = formatdate("YYYY-MM-DD'T'hh:mm:ssZ", var.example_api_calls_sample_date)
             }
           })
         }
       ]
-      external_token_todo : templatefile("${path.module}/docs/glean/instructions.tftpl", {
-        path_to_instance_parameters = "PSOXY_GLEAN_"
+      external_token_todo : templatefile("${path.module}/docs/gong/metrics.tftpl", {
+        path_to_instance_parameters = "PSOXY_GONG_METRICS_"
       })
     }
     salesforce = {
