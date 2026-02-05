@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +43,8 @@ public class GongTokenRequestBuilder
 
     @Override
     public String addQueryParameters(String url) {
-       return url + "?grant_type=refresh_token&refresh_token=" + secretStore.getConfigPropertyOrError(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN);
+       return url + "?grant_type=refresh_token&refresh_token=" + URLEncoder.encode(secretStore.getConfigPropertyOrError(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN),
+           StandardCharsets.UTF_8);
     }
 
     public HttpContent buildPayload() {
