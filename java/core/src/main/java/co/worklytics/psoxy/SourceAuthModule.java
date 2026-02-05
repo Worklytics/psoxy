@@ -73,9 +73,9 @@ public class SourceAuthModule {
 
     @Provides
     @IntoSet
-    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder gongAuthBuilder(
-        GongAuthRequestBuilder refreshTokenWithClientAuthBuilder) {
-        return refreshTokenWithClientAuthBuilder;
+    OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder gongTokenRequestBuilder(
+        GongTokenRequestBuilder gongTokenRequestBuilder) {
+        return gongTokenRequestBuilder;
     }
 
     @Provides

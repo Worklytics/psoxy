@@ -18,13 +18,13 @@ import java.util.Base64;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-class GongAuthRequestBuilderTest {
+class GongTokenRequestBuilderTest {
 
     @Inject
     SecretStore secretStore;
 
     @Inject
-    GongAuthRequestBuilder requestBuilder;
+    GongTokenRequestBuilder requestBuilder;
 
     @Singleton
     @Component(modules = {
@@ -34,13 +34,13 @@ class GongAuthRequestBuilderTest {
         MockModules.ForSecretStore.class
     })
     public interface Container {
-        void inject(GongAuthRequestBuilderTest test);
+        void inject(GongTokenRequestBuilderTest test);
     }
 
     @BeforeEach
     public void setup() {
-        GongAuthRequestBuilderTest.Container container =
-            DaggerGongAuthRequestBuilderTest_Container.create();
+        GongTokenRequestBuilderTest.Container container =
+            DaggerGongTokenRequestBuilderTest_Container.create();
         container.inject(this);
     }
 
@@ -118,8 +118,8 @@ class GongAuthRequestBuilderTest {
 
         assertEquals(3, requiredProps.size());
         assertTrue(requiredProps.contains(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
-        assertTrue(requiredProps.contains(GongAuthRequestBuilder.ConfigProperty.CLIENT_SECRET));
-        assertTrue(requiredProps.contains(GongAuthRequestBuilder.ConfigProperty.REFRESH_TOKEN));
+        assertTrue(requiredProps.contains(GongTokenRequestBuilder.ConfigProperty.CLIENT_SECRET));
+        assertTrue(requiredProps.contains(GongTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN));
     }
 }
 

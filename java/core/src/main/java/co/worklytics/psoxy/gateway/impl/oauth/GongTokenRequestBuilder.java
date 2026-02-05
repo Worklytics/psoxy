@@ -21,7 +21,7 @@ import java.util.Set;
  * @see OAuthAccessTokenSourceAuthStrategy
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
-public class GongAuthRequestBuilder
+public class GongTokenRequestBuilder
         implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
     private static final Map<String, String> EMPTY_MAP = Collections.emptyMap();
