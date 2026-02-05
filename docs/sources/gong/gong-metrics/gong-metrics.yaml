@@ -38,10 +38,12 @@ endpoints:
         jsonPaths:
           - "$..emailAddress"
           - "$..id"
-          - "$..emailAliases[*]"
-          - "$..trustedEmailAddress"
-          - "$..managerId"
         encoding: "URL_SAFE_TOKEN"
+      - !<redact>
+        jsonPaths:
+          - "$..firstName"
+          - "$..lastName"
+          - "$..userRole"
     responseSchema:
       type: "object"
       properties:
@@ -74,13 +76,7 @@ definitions:
         type: "boolean"
       emailAddress:
         type: "string"
-      emailAliases:
-        type: "array"
-        items:
-          type: "string"
       id:
-        type: "string"
-      trustedEmailAddress:
         type: "string"
   RecordsMetadata:
     type: "object"
