@@ -26,6 +26,7 @@
     <properties>
         <!-- empty for default java builds  (1 7 as of v0.5.0 )-->
         <artifactSuffix></artifactSuffix>
+        <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
 
     <!-- generates a jdk17 compatible jar -->

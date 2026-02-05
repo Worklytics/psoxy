@@ -28,6 +28,7 @@
         <dependency.json-path.version>2.9.0</dependency.json-path.version>
         <dependency.bouncycastle.version>1.82</dependency.bouncycastle.version>
         <plugin.surefire.version>3.5.3</plugin.surefire.version>
+        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
     <dependencyManagement>
