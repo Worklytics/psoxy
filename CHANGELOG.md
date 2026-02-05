@@ -7,45 +7,45 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
-## [0.5.18](https://github.com/Worklytics/psoxy/release/tag/v0.5.18)
+## [0.5.18](https://github.com/Worklytics/psoxy/releases/tag/v0.5.18)
 - `aws`: updated IAM policy for invoking lambda functions, to reflect AWS perm changes; anyone deploying NEW api connectors on AWS will have to use this version or later, or backport similar change. (See https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html)
 
-## [0.5.16](https://github.com/Worklytics/psoxy/release/tag/v0.5.16)
+## [0.5.16](https://github.com/Worklytics/psoxy/releases/tag/v0.5.16)
 - `Claude Code`: support basic rules for Claude Code
 
-## [0.5.14](https://github.com/Worklytics/psoxy/release/tag/v0.5.14)
+## [0.5.14](https://github.com/Worklytics/psoxy/releases/tag/v0.5.14)
 - `gcp`: Cloud function deployment now requires [Compute Viewer](https://docs.cloud.google.com/iam/docs/roles-permissions/compute#compute.viewer) role to read Compute Engine metadata for the project. See [docs/gcp/getting-started.md](docs/gcp/getting-started.md) for details.
 - `gcp`: Cloud function deployment now requires [Cloud Run Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/run#run.admin) role instead of Cloud Run Developer. See [docs/gcp/getting-started.md](docs/gcp/getting-started.md) for details.
 
-## [0.5.11](https://github.com/Worklytics/psoxy/release/tag/v0.5.11)
+## [0.5.11](https://github.com/Worklytics/psoxy/releases/tag/v0.5.11)
 - `Salesforce`: adding support for fetching Task and Events and dropped support for ActivityHistories. No need to use `viewAllData` administrative permission anymore.
 - `aws`: may see some churn in TODO 2 files, due to changing parameters in test tool
 - `outlook-mail`/`gmail` - email handling fixed to deal with non-ASCII chars in names without breaking
 
-## [0.5.10](https://github.com/Worklytics/psoxy/release/tag/v0.5.10)
+## [0.5.10](https://github.com/Worklytics/psoxy/releases/tag/v0.5.10)
 - `GitHub`: adding support for returning `RateLimit` information for GraphQL.
 - `gcp`: `timeout_seconds` configurable for bulk connectors.
 - `Jira Cloud`: removed `read:accounts` permission from documentation.
 
 
-## [0.5.9](https://github.com/Worklytics/psoxy/release/tag/v0.5.9)
+## [0.5.9](https://github.com/Worklytics/psoxy/releases/tag/v0.5.9)
 - `Confluence`: support extensions and previous version from Content Search
 - 'gcp' : for customers who were already on v0.5.x, you'll see identity of eventarc triggers for your bulk connectors change from the Compute Engine default SA --> to the SA of the function itself; and an associated IAM role grant so that your SA can recieve eventarc events; this avoids making assumptions about the default permissions you might have on the Compute Engine service account.
 
-## [0.5.8](https://github.com/Worklytics/psoxy/release/tag/v0.5.8)
+## [0.5.8](https://github.com/Worklytics/psoxy/releases/tag/v0.5.8)
 - **GCP**: Changed default value of `bucket_force_destroy` from `true` to `false` across all GCP modules. Customers upgrading may see this change from `true` → `false`. To maintain the previous behavior, add `bucket_force_destroy = true` to your terraform.tfvars file.
 
-## [0.5.7](https://github.com/Worklytics/psoxy/release/tag/v0.5.7)
+## [0.5.7](https://github.com/Worklytics/psoxy/releases/tag/v0.5.7)
   - `Confluence`: added new connector for supporting fetching Confluence Cloud data, through OAuth 2.0 (3LO)
 
-## [0.5.4](https://github.com/Worklytics/psoxy/release/tag/v0.5.4)
+## [0.5.4](https://github.com/Worklytics/psoxy/releases/tag/v0.5.4)
   - `Slack Analytics`: added new connector for supporting fetching Slack Analytics data, through `api/admin.analytics.getFile` endpoint
   - Side Outputs: added support; see [docs/configuration/side-outputs.md](docs/configuration/side-outputs.md) for details
   - Supported async responses; see [docs/configuration/async-responses.md](docs/configuration/async-api-data.md) for details
   - added `windsurf` connector in **alpha**; see [docs/sources/windsurf/README.md](docs/connectors/windsurf/README.md)
   - added `cursor` connector in **alpha**; see [docs/sources/cursor/README.md](docs/connectors/cursor/README.md)
 
-## [0.5.3](https://github.com/Worklytics/psoxy/release/tag/v0.5.3)
+## [0.5.3](https://github.com/Worklytics/psoxy/releases/tag/v0.5.3)
   - `aws` - removed `ssm:GetParameterVersion` perm from policies; not a thing
   - support for Side Outputs in `gcp` and `aws` modules; see [docs/configuration/side-outputs.md](docs/configuration/side-outputs.md) for details
   - `GitHub`: allowing `before` and `after` query parameters while fetching issues through *org/repo/issues* endpoint
@@ -54,7 +54,7 @@ Changes to be including in future/planned release notes will be added here.
     - support for fetching user settings through `/v2/users/{userId}/settings` endpoint
     - support for fetching cloud recordings through `/v2/users/{userId}/recordings` endpoint
 
-## [0.5.2](https://github.com/Worklytics/psoxy/release/tag/v0.5.2)
+## [0.5.2](https://github.com/Worklytics/psoxy/releases/tag/v0.5.2)
 - `slack` : discovery rules now allow names of accounts with `is_bot==true` and with user id as `USLACKBOT` to pass through; are now "default deny" on API fields, returning only data matching expected fields.
 - `GitHub Copilot`: Added new connector for supporting fetching Copilot data from GitHub.
 - `GitHub`: Rules updated for tokenizing team slug name and redacting URLS not required.
@@ -65,12 +65,12 @@ Changes to be including in future/planned release notes will be added here.
   - support for getting settings from meeting details on `/v2/meetings/{meetingId}`
 
 
-## [0.5.1](https://github.com/Worklytics/psoxy/release/tag/v0.5.1)
+## [0.5.1](https://github.com/Worklytics/psoxy/releases/tag/v0.5.1)
 - `GitHub`: Added rules for fetching commits through repository and pulls using GraphQL
 - `gdirectory` connector: a few redundant oauth scopes removed; no impact on functionality. you can remove these from your DWD grants if you wish, but it's not necessary
 
 
-## [0.5.0](https://github.com/Worklytics/psoxy/release/tag/v0.5.0)
+## [0.5.0](https://github.com/Worklytics/psoxy/releases/tag/v0.5.0)
 
 BREAKING:
   - minimum `azuread` provider version is generally 2.44; if you're using an older version, you'll need to
@@ -89,17 +89,17 @@ BREAKING:
   - `scope` field will no longer be sent with JSON-encoded pseudonyms.
   - minimum java version in now 17; java 11 no longer supported (as it's a deprecated runtime in GCP; and Oracle support has ended)
 
-## [0.4.61](https://github.com/Worklytics/psoxy/release/tag/v0.4.61)
+## [0.4.61](https://github.com/Worklytics/psoxy/releases/tag/v0.4.61)
  - added some `columnsToPseudonymizeIfPresent` to survey bulk connectors; these are to avoid PII
    being sent to Worklytics if these unexpected columns sent, but without errors in usual case, when
    these are omitted.
 
-## [0.4.60](https://github.com/Worklytics/psoxy/release/tag/v0.4.60)
+## [0.4.60](https://github.com/Worklytics/psoxy/releases/tag/v0.4.60)
  - Calendar rules change to allow OOO-related snippets to be passed through event title fields;
     this is required for proper OOO-analysis in Worklytics Calendar 3.0 methodology.
  - MSFT Teams: Support for listing callRecords
 
-## [0.4.58](https://github.com/Worklytics/psoxy/release/tag/v0.4.58)
+## [0.4.58](https://github.com/Worklytics/psoxy/releases/tag/v0.4.58)
  - Rules for Outlook Calendar, Outlook Mail and Teams have been updated for *no app id* and *no group id* cases
    to avoid supporting requests with plain user GUIDs instead of pseudonymized.
  - Slack: Including rules for Slack Huddles through *Rooms* as part of conversation history endpoint
@@ -112,7 +112,7 @@ BREAKING:
    are processed in fewer than 30 seconds, and customers process fewer than 10 files per week. So
    expected cost of this is $0.0000927 - less than one-thousandth of a cent.
 
-## [0.4.57](https://github.com/Worklytics/psoxy/release/tag/v0.4.57)
+## [0.4.57](https://github.com/Worklytics/psoxy/releases/tag/v0.4.57)
 Several changes in this version will result in visible changes during `terraform plan`/`apply`:
 - Permission changes on Microsoft 365:
   - `MailboxSettings.Read` permission has been added for directory connectors (`azure-ad`, `entra-id`)
@@ -124,23 +124,23 @@ Several changes in this version will result in visible changes during `terraform
    if you wish to keep using `java11` runtime, it will work; if you require this, let us know asnd
    we'll expose option to select runtime version in the Terraform module.
 
-## [0.4.56](https://github.com/Worklytics/psoxy/release/tag/v0.4.56)
+## [0.4.56](https://github.com/Worklytics/psoxy/releases/tag/v0.4.56)
  - due to refactoring, users of Microsoft connectors may see some moves of resources in Terraform
    plan; these will be no-ops.
 
-## [0.4.55](https://github.com/Worklytics/psoxy/release/tag/v0.4.55)
+## [0.4.55](https://github.com/Worklytics/psoxy/releases/tag/v0.4.55)
 - For Microsoft Connectors:
   - reference to `msgraph` service principal has been replaced with `data` instead of `terraform` resource.
     For that reason you will see changes in plan related to these resource, but those changes are only related on the resources for Terraform
     state as the kind (*data* from *resource*) has been changed. No change will be done in real Entra ID for that.
   - dropping support for `/beta` endpoints in Microsoft Graph API. All endpoints are now using `/v1.0` version.
 
-## [0.4.53](https://github.com/Worklytics/psoxy/release/tag/v0.4.53)
+## [0.4.53](https://github.com/Worklytics/psoxy/releases/tag/v0.4.53)
   - As Microsoft Azure Active Directory has been [renamed](https://learn.microsoft.com/en-us/entra/fundamentals/new-name)
     to Microsoft Entra ID, there is a new connector `msft-entra-id`. Old connector `azure-ad` is deprecated and in case of
     new connection, the new one `msft-entra-id` should be used.
 
-## [0.4.52](https://github.com/Worklytics/psoxy/release/tag/v0.4.52)
+## [0.4.52](https://github.com/Worklytics/psoxy/releases/tag/v0.4.52)
   - BREAKING: default behavior for sub-addressing aka "plus addressing" of emails has changed; the
     proxy previously considered these canonically distinct. Now, the proxy will consider these
     canonically equivalent. As we don't expect plus addressing to be used hris or directory data,
@@ -163,13 +163,13 @@ Several changes in this version will result in visible changes during `terraform
     is required that functions use *Artifact Registry* instead. All deployments made since this version will use *Artifact Registry*
     default repository for storing all psoxy images. Any previous version before this version will work without any issue.
 
-## [0.4.51](https://github.com/Worklytics/psoxy/release/tag/v0.4.51)
+## [0.4.51](https://github.com/Worklytics/psoxy/releases/tag/v0.4.51)
  - GCP: non-breaking, but noticeable in Terraform plan: `title` attribute of GCP Custom Project
    roles created by our modules are changing to more closely follow conventions GCP uses for its
    built-in roles; as well as prefixing them with your environment ID to group them together
    alphabetically and differentiate in shared project.
 
-## [0.4.50](https://github.com/Worklytics/psoxy/release/tag/v0.4.50)
+## [0.4.50](https://github.com/Worklytics/psoxy/releases/tag/v0.4.50)
   - `todos_as_local_files` properly respected now; if you had it as `false`, you may see some local
     files deleted on your next `terraform apply`.
   - to accommodate this fix, many people will see moves of local_file resources, to append `[0]` to
@@ -177,19 +177,19 @@ Several changes in this version will result in visible changes during `terraform
   - BREAKING - for AWS Secrets Manager (released in 0.4.47 as 'alpha' feature), these will now
     be prefixed by default with the environment ID, unless a `aws_secrets_manager_path` is set.
 
-## [0.4.48](https://github.com/Worklytics/psoxy/release/tag/v0.4.48)
+## [0.4.48](https://github.com/Worklytics/psoxy/releases/tag/v0.4.48)
   - BREAKING - GitHub Enterprise Server: authentication strategy has changed; you will see creation
     and destruction of some secrets that are used for authentication; you MUST generate new auth
     credentials for your proxy instance. see [`docs/sources/github/README.md`](docs/sources/github/README.md)
     or contact support for assistance.
 
-## [0.4.47](https://github.com/Worklytics/psoxy/release/tag/v0.4.47)
+## [0.4.47](https://github.com/Worklytics/psoxy/releases/tag/v0.4.47)
   - AWS: some moved resources due to refactoring to accommodate option to use AWS Secrets Manager
 
 possibility of breaking due to no longer inferring global SSM parameter prefix?
 
 
-## [0.4.46](https://github.com/Worklytics/psoxy/release/tag/v0.4.46)
+## [0.4.46](https://github.com/Worklytics/psoxy/releases/tag/v0.4.46)
   - you'll see several `timestamp_static` resources provisioned by terraform; these are simply
     timestamps persisted into state. various example API calls in TODOs/tests are derived from these.
     using persistent value avoids showing changes on every plan/apply.
@@ -202,7 +202,7 @@ possibility of breaking due to no longer inferring global SSM parameter prefix?
       see [docs/aws/encryption-keys.md](docs/aws/encryption-keys.md) for more details.
 
 
-## [0.4.44](https://github.com/Worklytics/psoxy/release/tag/v0.4.44)
+## [0.4.44](https://github.com/Worklytics/psoxy/releases/tag/v0.4.44)
 * Microsoft 365 - Outlook calendar: new scopes for fetching Online Meetings have been added to the Entra ID Application
   used for Microsoft 365 Outlook Calendar and the proxy connector.
   A Microsoft 365 with admin rights for Entra ID will need to grant admin consent
@@ -212,24 +212,24 @@ possibility of breaking due to no longer inferring global SSM parameter prefix?
   in next major version. Use `github_enterprise_server_host` instead.
 
 
-## [0.4.43](https://github.com/Worklytics/psoxy/release/tag/v0.4.43)
+## [0.4.43](https://github.com/Worklytics/psoxy/releases/tag/v0.4.43)
  * if you're using the NodeJS test tool, it will be re-installed on your next `terraform apply` due
    to a dependency change.
 
-## [0.4.41](https://github.com/Worklytics/psoxy/release/tag/v0.4.41)
+## [0.4.41](https://github.com/Worklytics/psoxy/releases/tag/v0.4.41)
   * GCP only : Compute Engine API will be enabled in the project. Newer versions of GCP terraform
     provider seem to require this. You may see this in your next `terraform plan`, although it may
     also be a no-op if you already have the API enabled.
 
-## [0.4.36](https://github.com/Worklytics/psoxy/release/tag/v0.4.36)
+## [0.4.36](https://github.com/Worklytics/psoxy/releases/tag/v0.4.36)
   * Microsoft 365 - Azure AD Directory - default rules change to return `proxyAddresses` field for
     users, pseudonymized; needed to match user's past email addresses against other data sources
 
-## [0.4.34](https://github.com/Worklytics/psoxy/release/tag/v0.4.34)
+## [0.4.34](https://github.com/Worklytics/psoxy/releases/tag/v0.4.34)
   * AWS Only: you may see System Manager Parameter description changes; these have no functional
     purpose, just helping provide guidance on function of different secrets.
 
-## [0.4.33](https://github.com/Worklytics/psoxy/release/tag/v0.4.33)
+## [0.4.33](https://github.com/Worklytics/psoxy/releases/tag/v0.4.33)
 Changes that may appear in Terraform plans:
  * GCP only: secrets that are managed outside of Terraform will no longer be bound as part of the
    cloud function's environment variables. You will see env changes in some cases, as well as 'moves'
@@ -237,7 +237,7 @@ Changes that may appear in Terraform plans:
    up one level in module hierarchy
  * AWS only: removing CORS from lambda urls - not necessary
 
-## [0.4.31](https://github.com/Worklytics/psoxy/release/tag/v0.4.31)
+## [0.4.31](https://github.com/Worklytics/psoxy/releases/tag/v0.4.31)
 
 Changes:
   * due to split of Terraform vs externally-managed secret values. expect:
