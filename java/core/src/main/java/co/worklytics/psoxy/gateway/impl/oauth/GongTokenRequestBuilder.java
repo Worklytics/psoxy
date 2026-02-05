@@ -59,7 +59,7 @@ public class GongTokenRequestBuilder
 
     @Override
     public Set<ConfigService.ConfigProperty> getAllConfigProperties() {
-        return Set.of(ClientCredentialsGrantTokenRequestBuilder.ConfigProperty.values());
+        return Set.of(ConfigProperty.values());
     }
 
     @Override
