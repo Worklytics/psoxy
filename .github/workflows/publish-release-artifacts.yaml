@@ -22,6 +22,8 @@ jobs:
 
       - name: Setup Java
         uses: actions/setup-java@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           java-version: '21'
           distribution: 'zulu'
