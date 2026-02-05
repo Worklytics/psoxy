@@ -45,7 +45,7 @@ sudo apt install awscli
 
 Or see : [https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 
-5.if deploying to GCP _or_ using Google Workspace data sources, [install Google Cloud CLI](https://cloud.google.com/sdk/docs/install#linux) and authenticate.
+5. if deploying to GCP _or_ using Google Workspace data sources, [install Google Cloud CLI](https://cloud.google.com/sdk/docs/install#linux) and authenticate.
 
 ```shell
 curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-384.0.0-linux-x86_64.tar.gz
