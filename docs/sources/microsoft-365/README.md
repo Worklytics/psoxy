@@ -118,7 +118,7 @@ https://github.com/Worklytics/psoxy-example-aws/blob/main/msft-365-variables.tf
 
 If you're managing your Microsoft 365 connectors OUTSIDE of our provided terraform modules, you will have to configure authentication yourself.
 
-1. Navigate to Microsoft Entra admin center --> App Registrations; find each connector (or create on).
+1. Navigate to Microsoft Entra admin center --> App Registrations; find each connector (or create one).
 
 2. Under "Manage", select "Certificates & Secrets" --> "Federated Credentials" --> "Add Credential" --> "Other Issuer"
 
