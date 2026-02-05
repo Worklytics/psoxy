@@ -41,18 +41,8 @@ if [ -t 1 ]; then
             # Blue is hard to read on Black. Cyan is better on Black. Blue is better on White.
             # Let's try to infer from COLORFGBG if set (rxvt/xterm)
             
-            if [[ "$COLORFGBG" == *";"* ]]; then
-                 # simple heuristic: if bg is 0-6ish it might be dark. 
-                 # But COLORFGBG format varies. often fg;bg. 
-                 # Let's just pick CYAN as a safer default for CODE if we can't be sure, as it's readable on black and usually readable on white (dark cyan preferred there but standard cyan is okay).
-                 # OR, we stick to BLUE as requested in original scripts but the user specifically asked for "work whether terminal bg color is white or black".
-                 # Blue is terrible on black. Cyan is okay on both.
-                 CODE="${CYAN}"
-            else
-                 # Fallback. 
-                 # Let's use Cyan. It's usually readable on both light (if not too bright) and dark. 
-                 CODE="${CYAN}"
-            fi
+            # Use CYAN for CODE: generally readable on both dark and light backgrounds.
+            CODE="${CYAN}"
         fi
     else
         # Fallback to manual escape codes if tput not found
