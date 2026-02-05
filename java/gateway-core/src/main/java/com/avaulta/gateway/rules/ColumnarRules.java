@@ -110,8 +110,7 @@ public class ColumnarRules implements BulkDataRules {
     @JsonSetter(nulls = Nulls.AS_EMPTY)
     @Builder.Default
     @NonNull
-    protected Map<String, String> columnsToRename = new HashMap<>();
-
+    protected Map<String, String> columnsToRename;
     /**
      * if provided, only columns explicitly listed here will be included in output
      *  (inverse of columnsToRedact)
@@ -150,6 +149,8 @@ public class ColumnarRules implements BulkDataRules {
         this.columnsToPseudonymize = new ArrayList<>();
         this.columnsToPseudonymizeIfPresent = new ArrayList<>();
         this.columnsToRedact = new ArrayList<>();
+        this.columnsToRename = new HashMap<>();
+        
     }
 
 }
