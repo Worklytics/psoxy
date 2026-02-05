@@ -18,13 +18,13 @@ import java.util.Base64;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-class GongTokenRequestBuilderTest {
+class RefreshTokenRequestViaQueryParameterBuilderTest {
 
     @Inject
     SecretStore secretStore;
 
     @Inject
-    GongTokenRequestBuilder requestBuilder;
+    RefreshTokenRequestViaQueryParameterBuilder requestBuilder;
 
     @Singleton
     @Component(modules = {
@@ -34,13 +34,13 @@ class GongTokenRequestBuilderTest {
         MockModules.ForSecretStore.class
     })
     public interface Container {
-        void inject(GongTokenRequestBuilderTest test);
+        void inject(RefreshTokenRequestViaQueryParameterBuilderTest test);
     }
 
     @BeforeEach
     public void setup() {
-        GongTokenRequestBuilderTest.Container container =
-            DaggerGongTokenRequestBuilderTest_Container.create();
+        RefreshTokenRequestViaQueryParameterBuilderTest.Container container =
+            DaggerRefreshTokenRequestViaQueryParameterBuilderTest_Container.create();
         container.inject(this);
     }
 
@@ -108,8 +108,8 @@ class GongTokenRequestBuilderTest {
     }
 
     @Test
-    public void getGrantType_shouldReturnGongRefreshToken() {
-        assertEquals("gong_refresh_token", requestBuilder.getGrantType());
+    public void getGrantType_shouldReturnGrantType() {
+        assertEquals("refresh_token_via_query_parameter", requestBuilder.getGrantType());
     }
 
     @Test
@@ -118,8 +118,8 @@ class GongTokenRequestBuilderTest {
 
         assertEquals(3, requiredProps.size());
         assertTrue(requiredProps.contains(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
-        assertTrue(requiredProps.contains(GongTokenRequestBuilder.ConfigProperty.CLIENT_SECRET));
-        assertTrue(requiredProps.contains(GongTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN));
+        assertTrue(requiredProps.contains(RefreshTokenRequestViaQueryParameterBuilder.ConfigProperty.CLIENT_SECRET));
+        assertTrue(requiredProps.contains(RefreshTokenRequestViaQueryParameterBuilder.ConfigProperty.REFRESH_TOKEN));
     }
 }
 

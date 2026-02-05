@@ -23,7 +23,7 @@ import java.util.Set;
  * @see OAuthAccessTokenSourceAuthStrategy
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
-public class GongTokenRequestBuilder
+public class RefreshTokenRequestViaQueryParameterBuilder
         implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
     private static final Map<String, String> EMPTY_MAP = Collections.emptyMap();
@@ -34,7 +34,7 @@ public class GongTokenRequestBuilder
     SecretStore secretStore;
 
     @Getter(onMethod_ = @Override)
-    private final String grantType = "gong_refresh_token";
+    private final String grantType = "refresh_token_via_query_parameter";
 
     public enum ConfigProperty implements ConfigService.ConfigProperty {
         REFRESH_TOKEN, //NOTE: you should configure this as a secret in Secret Manager
