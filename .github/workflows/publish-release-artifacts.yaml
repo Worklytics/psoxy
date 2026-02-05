@@ -16,21 +16,6 @@ jobs:
       packages: write
 
     steps:
-      - name: Validate Trigger Ref
-        run: |
-          REF_NAME="${{ github.ref_name }}"
-          echo "Running on ref: $REF_NAME"
-          
-          if [[ "$REF_NAME" == "main" ]]; then
-            echo "✅ Validated running on main branch."
-          elif [[ "$REF_NAME" =~ ^v ]]; then
-            echo "✅ Validated running on release tag."
-          elif [[ "$REF_NAME" =~ ^rc- ]]; then
-            echo "✅ Validated running on release candidate branch."
-          else
-            echo "::error::Trigger is only allowed on 'main' branch, 'rc-*' branches, or 'v*' release tags. Current ref: $REF_NAME"
-            exit 1
-          fi
 
       - name: Checkout code
         uses: actions/checkout@v4
