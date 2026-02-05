@@ -13,7 +13,7 @@ if [ -z "$PATH_TO_REPO" ]; then
 fi
 
 # if PATH_TO_REPO is not blank, but does not end with a slash, add one
-if [[ "$PATH_TO_REPO" != "/"* ]]; then
+if [[ "$PATH_TO_REPO" != */ ]]; then
   PATH_TO_REPO="$PATH_TO_REPO/"
 fi
 
