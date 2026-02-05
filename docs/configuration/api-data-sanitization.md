@@ -21,9 +21,18 @@ custom_api_connector_rules = {
 
 A ruleset is a list of API endpoints that are permitted to be invoked through the proxy. Requests which do not match a endpoint in this list will be rejected with a `403` response.
 
+### Global Allowed Request Headers
+
+`<allowed-request-headers> ::= "allowedRequestHeaders:" <header-list>`
+`<header-list> ::= <header-name> | <header-name> <header-list>`
+
+A list of headers that are allowed to be passed through to the source API for **all** endpoints. This is useful for headers like `X-AcmeApi-ActAs` or other control headers that are common across many endpoints.
+
+If a header value matches a known reversible pseudonym (encrypted value), the proxy will automatically decrypt it before forwarding to the source API.
+
 ### Endpoint Specification
 
-`<endpoint> ::= <path-template> <allowed-methods> <path-parameter-schemas> <query-parameter-schemas> <response-schema> <transforms>`
+`<endpoint> ::= <path-template> <allowed-methods> <path-parameter-schemas> <query-parameter-schemas> <response-schema> <transforms> <allowed-request-headers>`
 
 `<path-template> ::= "- pathTemplate: " <string>` Each endpoint is specified by a path template, based on OpenAPI Spec v3.0.0 Path Template syntax. Variable path segments are enclosed in curly braces (`{}`) and are matched by any value that does not contain an `/` character.
 

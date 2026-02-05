@@ -182,7 +182,8 @@ public class StorageHandler {
     public StorageEventRequest buildRequest(String sourceBucketName,
                                             String sourceObjectPath,
                                             ObjectTransform transform,
-                                            String sourceContentEncoding) {
+                                            String sourceContentEncoding,
+                                            String sourceContentType) {
 
         String sourceObjectPathWithinBase =
             inputBasePath()
@@ -200,6 +201,7 @@ public class StorageHandler {
             .destinationObjectPath(transform.getPathWithinBucket() + sourceObjectPathWithinBase)
             .decompressInput(isSourceCompressed)
             .compressOutput(compressOutput)
+            .contentType(sourceContentType)
             .build();
 
         warnIfEncodingDoesNotMatchFilename(request, sourceContentEncoding);
@@ -420,7 +422,7 @@ public class StorageHandler {
 
             BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules.get());
 
-            fileHandler.sanitize(reader, writer, pseudonymizer);
+            fileHandler.sanitize(request, reader, writer, pseudonymizer);
         }
     }
 

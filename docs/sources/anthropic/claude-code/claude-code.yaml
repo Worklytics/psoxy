@@ -1,0 +1,181 @@
+---
+endpoints:
+  - pathTemplate: "/v1/organizations/usage_report/claude_code"
+    allowedQueryParams:
+      - "starting_at"
+      - "page"
+      - "limit"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..actor['email_address', 'user_id', 'unauthenticated_email_address', 'api_key_id']"
+        encoding: "URL_SAFE_TOKEN"
+      - !<hashIp>
+        jsonPaths:
+          - "$..ip_address"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/ClaudeCodeUsageEntry"
+        error:
+          $ref: "#/definitions/ErrorResponse"
+        first_id:
+          type: "string"
+        has_more:
+          type: "boolean"
+        last_id:
+          type: "string"
+        next_page:
+          type: "string"
+  - pathTemplate: "/v1/organizations/users"
+    allowedQueryParams:
+      - "after_id"
+      - "limit"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..['id','email']"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/User"
+        error:
+          $ref: "#/definitions/ErrorResponse"
+        first_id:
+          type: "string"
+        has_more:
+          type: "boolean"
+        last_id:
+          type: "string"
+        next_page:
+          type: "string"
+definitions:
+  Actor:
+    type: "object"
+    properties:
+      api_key_id:
+        type: "string"
+      email_address:
+        type: "string"
+      ip_address:
+        type: "string"
+      type:
+        type: "string"
+      unauthenticated_email_address:
+        type: "string"
+      user_agent:
+        type: "string"
+      user_id:
+        type: "string"
+  ClaudeCodeUsageEntry:
+    type: "object"
+    properties:
+      actor:
+        $ref: "#/definitions/Actor"
+      core_metrics:
+        $ref: "#/definitions/CoreMetrics"
+      customer_type:
+        type: "string"
+      date:
+        type: "string"
+        format: "date-time"
+      model_breakdown:
+        type: "array"
+        items:
+          $ref: "#/definitions/ModelBreakdown"
+      organization_id:
+        type: "string"
+      subscription_type:
+        type: "string"
+      terminal_type:
+        type: "string"
+      tool_actions:
+        $ref: "#/definitions/ToolActions"
+  CoreMetrics:
+    type: "object"
+    properties:
+      commits_by_claude_code:
+        type: "integer"
+      lines_of_code:
+        $ref: "#/definitions/LinesOfCode"
+      num_sessions:
+        type: "integer"
+      pull_requests_by_claude_code:
+        type: "integer"
+  ErrorResponse:
+    type: "object"
+    properties:
+      type:
+        type: "string"
+  EstimatedCost:
+    type: "object"
+    properties:
+      amount:
+        type: "number"
+      currency:
+        type: "string"
+  LinesOfCode:
+    type: "object"
+    properties:
+      added:
+        type: "integer"
+      removed:
+        type: "integer"
+  ModelBreakdown:
+    type: "object"
+    properties:
+      estimated_cost:
+        $ref: "#/definitions/EstimatedCost"
+      model:
+        type: "string"
+      tokens:
+        $ref: "#/definitions/Tokens"
+  Tokens:
+    type: "object"
+    properties:
+      cache_creation:
+        type: "integer"
+      cache_read:
+        type: "integer"
+      input:
+        type: "integer"
+      output:
+        type: "integer"
+  ToolAction:
+    type: "object"
+    properties:
+      accepted:
+        type: "integer"
+      rejected:
+        type: "integer"
+  ToolActions:
+    type: "object"
+    properties:
+      edit_tool:
+        $ref: "#/definitions/ToolAction"
+      multi_edit_tool:
+        $ref: "#/definitions/ToolAction"
+      notebook_edit_tool:
+        $ref: "#/definitions/ToolAction"
+      write_tool:
+        $ref: "#/definitions/ToolAction"
+  User:
+    type: "object"
+    properties:
+      added_at:
+        type: "string"
+      email:
+        type: "string"
+      id:
+        type: "string"
+      role:
+        type: "string"
+      type:
+        type: "string"

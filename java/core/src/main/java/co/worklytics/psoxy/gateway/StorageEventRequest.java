@@ -52,5 +52,7 @@ public class StorageEventRequest {
     @Builder.Default
     Boolean compressOutput = false;
 
+    String contentType;
+
 
 }
