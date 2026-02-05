@@ -9,8 +9,11 @@ import com.google.api.client.http.UrlEncodedContent;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.utils.URIBuilder;
 
 import javax.inject.Inject;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -24,7 +27,7 @@ import java.util.Set;
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class RefreshTokenRequestViaQueryParameterBuilder
-        implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
+    implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
     private static final Map<String, String> EMPTY_MAP = Collections.emptyMap();
 
@@ -42,9 +45,16 @@ public class RefreshTokenRequestViaQueryParameterBuilder
     }
 
     @Override
-    public String addQueryParameters(String url) {
-       return url + "?grant_type=refresh_token&refresh_token=" + URLEncoder.encode(secretStore.getConfigPropertyOrError(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN),
-           StandardCharsets.UTF_8);
+    public URI getEndpoint(String baseEndpoint) {
+        try {
+            return new URIBuilder(baseEndpoint)
+                .addParameter("grant_type", "refresh_token")
+                .addParameter("refresh_token", URLEncoder.encode(secretStore.getConfigPropertyOrError(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN),
+                    StandardCharsets.UTF_8))
+                .build();
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Invalid token endpoint URI: " + baseEndpoint, e);
+        }
     }
 
     public HttpContent buildPayload() {
@@ -54,9 +64,9 @@ public class RefreshTokenRequestViaQueryParameterBuilder
     @Override
     public Set<ConfigService.ConfigProperty> getRequiredConfigProperties() {
         return Set.of(
-                OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID,
-                ConfigProperty.CLIENT_SECRET,
-                ConfigProperty.REFRESH_TOKEN
+            OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID,
+            ConfigProperty.CLIENT_SECRET,
+            ConfigProperty.REFRESH_TOKEN
         );
     }
 

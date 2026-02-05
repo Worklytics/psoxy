@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -88,16 +89,16 @@ class RefreshTokenRequestViaQueryParameterBuilderTest {
     }
 
     @Test
-    public void addQueryParameters_shouldAppendGrantTypeAndRefreshToken() {
+    public void getEndpoint() {
         String refreshToken = "test-refresh-token";
         String baseUrl = "https://app.gong.io/oauth2/generate-customer-token";
 
         when(secretStore.getConfigPropertyOrError(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN))
             .thenReturn(refreshToken);
 
-        String result = requestBuilder.addQueryParameters(baseUrl);
+        URI result = requestBuilder.getEndpoint(baseUrl);
 
-        String expectedUrl = baseUrl + "?grant_type=refresh_token&refresh_token=" + refreshToken;
+        URI expectedUrl = URI.create(baseUrl + "?grant_type=refresh_token&refresh_token=" + refreshToken);
         assertEquals(expectedUrl, result);
     }
 
