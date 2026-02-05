@@ -2,7 +2,6 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.SourceAuthModule;
-import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.test.MockModules;
 import com.google.api.client.http.HttpHeaders;
@@ -19,13 +18,13 @@ import java.util.Base64;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-class RefreshTokenTokenWithClientAuthRequestBuilderTest {
+class GongAuthRequestBuilderTest {
 
     @Inject
     SecretStore secretStore;
 
     @Inject
-    RefreshTokenTokenWithClientAuthRequestBuilder requestBuilder;
+    GongAuthRequestBuilder requestBuilder;
 
     @Singleton
     @Component(modules = {
@@ -35,13 +34,13 @@ class RefreshTokenTokenWithClientAuthRequestBuilderTest {
         MockModules.ForSecretStore.class
     })
     public interface Container {
-        void inject(RefreshTokenTokenWithClientAuthRequestBuilderTest test);
+        void inject(GongAuthRequestBuilderTest test);
     }
 
     @BeforeEach
     public void setup() {
-        RefreshTokenTokenWithClientAuthRequestBuilderTest.Container container =
-            DaggerRefreshTokenTokenWithClientAuthRequestBuilderTest_Container.create();
+        GongAuthRequestBuilderTest.Container container =
+            DaggerGongAuthRequestBuilderTest_Container.create();
         container.inject(this);
     }
 
@@ -109,8 +108,8 @@ class RefreshTokenTokenWithClientAuthRequestBuilderTest {
     }
 
     @Test
-    public void getGrantType_shouldReturnRefreshTokenClientAuth() {
-        assertEquals("refresh_token_client_auth", requestBuilder.getGrantType());
+    public void getGrantType_shouldReturnGongRefreshToken() {
+        assertEquals("gong_refresh_token", requestBuilder.getGrantType());
     }
 
     @Test
@@ -119,8 +118,8 @@ class RefreshTokenTokenWithClientAuthRequestBuilderTest {
 
         assertEquals(3, requiredProps.size());
         assertTrue(requiredProps.contains(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
-        assertTrue(requiredProps.contains(RefreshTokenTokenWithClientAuthRequestBuilder.ConfigProperty.CLIENT_SECRET));
-        assertTrue(requiredProps.contains(RefreshTokenTokenWithClientAuthRequestBuilder.ConfigProperty.REFRESH_TOKEN));
+        assertTrue(requiredProps.contains(GongAuthRequestBuilder.ConfigProperty.CLIENT_SECRET));
+        assertTrue(requiredProps.contains(GongAuthRequestBuilder.ConfigProperty.REFRESH_TOKEN));
     }
 }
 

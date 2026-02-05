@@ -11,22 +11,17 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Supports <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1">Client Authentication</a>
- * with Refresh Token Grant Type and client id + client secret as Basic authentication
- * for  <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-6">refreshing the token</a>
+ * Supports <a href="https://help.gong.io/docs/create-an-app-for-gong">refresh token renewal</a> for Gong
  *
  * @see OAuthAccessTokenSourceAuthStrategy
  */
 @NoArgsConstructor(onConstructor_ = @Inject)
-public class RefreshTokenTokenWithClientAuthRequestBuilder
+public class GongAuthRequestBuilder
         implements OAuthRefreshTokenSourceAuthStrategy.TokenRequestBuilder, RequiresConfiguration {
 
     private static final Map<String, String> EMPTY_MAP = Collections.emptyMap();
@@ -37,7 +32,7 @@ public class RefreshTokenTokenWithClientAuthRequestBuilder
     SecretStore secretStore;
 
     @Getter(onMethod_ = @Override)
-    private final String grantType = "refresh_token_client_auth";
+    private final String grantType = "gong_refresh_token";
 
     public enum ConfigProperty implements ConfigService.ConfigProperty {
         REFRESH_TOKEN, //NOTE: you should configure this as a secret in Secret Manager
