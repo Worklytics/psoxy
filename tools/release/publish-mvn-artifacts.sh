@@ -24,35 +24,13 @@ fi
 
 printf "${YELLOW}WARNING: this is not recommended; use ${BLUE}gh run publish-release-artifacts.yaml --ref <version>${NC}${YELLOW} instead. That will be a more reliable fresh build.${NC}\n"
 
-# 1. Branch/Tag Validation
-CURRENT_BRANCH=$(git -C "$PATH_TO_REPO" branch --show-current)
-if [ -z "$CURRENT_BRANCH" ]; then
-  CURRENT_TAG=$(git -C "$PATH_TO_REPO" describe --tags --exact-match 2>/dev/null)
-fi
-
-IS_RC=false
-IS_MAIN=false
-IS_TAG=false
-
-if [[ -n "$CURRENT_TAG" && "$CURRENT_TAG" =~ ^v ]]; then
-  IS_TAG=true
-  printf "Detected release tag: ${BLUE}$CURRENT_TAG${NC}\n"
-elif [[ "$CURRENT_BRANCH" == "main" ]]; then
-  IS_MAIN=true
-  printf "Detected main branch.\n"
-elif [[ "$CURRENT_BRANCH" =~ ^rc- ]]; then
-  IS_RC=true
-  printf "Detected RC branch: ${BLUE}$CURRENT_BRANCH${NC}\n"
-else
-  printf "${RED}Error: This script must be run from 'main', an 'rc-*' branch, or a 'v*' tag.${NC}\n"
-  exit 1
-fi
 
 cd "${PATH_TO_REPO}java"
 
 # 2. Determine Version
 POM_VERSION=$(mvn help:evaluate -Dexpression=revision -q -DforceStdout)
 
+IS_RC=false
 if [ "$IS_RC" = true ]; then
   BASENAME=${CURRENT_BRANCH#rc-}
   VERSION_NUM=${BASENAME#v}
