@@ -18,14 +18,16 @@ public class EndpointTest {
     @Test
     public void toYaml_withHeaders() {
         // Test serialization of Endpoint with allowedRequestHeaders
-        final String EXPECTED = "---\n" +
-            "pathTemplate: \"/api/{id}/users\"\n" +
-            "allowedMethods:\n" +
-            "- \"GET\"\n" +
-            "- \"POST\"\n" +
-            "allowedRequestHeaders:\n" +
-            "- \"Authorization\"\n" +
-            "- \"X-Custom-Header\"\n";
+        final String EXPECTED = """
+            ---
+            pathTemplate: "/api/{id}/users"
+            allowedMethods:
+            - "GET"
+            - "POST"
+            allowedRequestHeaders:
+            - "Authorization"
+            - "X-Custom-Header"
+            """;
 
         Endpoint endpoint = Endpoint.builder()
             .pathTemplate("/api/{id}/users")
@@ -41,14 +43,16 @@ public class EndpointTest {
     @Test
     public void fromYaml_withHeaders() {
         // Test deserialization of Endpoint with allowedRequestHeaders
-        final String YAML = "---\n" +
-            "pathTemplate: \"/api/{id}/users\"\n" +
-            "allowedMethods:\n" +
-            "- \"GET\"\n" +
-            "- \"POST\"\n" +
-            "allowedRequestHeaders:\n" +
-            "- \"Authorization\"\n" +
-            "- \"X-Custom-Header\"\n";
+        final String YAML = """
+            ---
+            pathTemplate: "/api/{id}/users"
+            allowedMethods:
+            - "GET"
+            - "POST"
+            allowedRequestHeaders:
+            - "Authorization"
+            - "X-Custom-Header"
+            """;
 
         Endpoint endpoint = yamlMapper.readerFor(Endpoint.class).readValue(YAML);
 
@@ -124,10 +128,7 @@ public class EndpointTest {
         assertEquals(original.getAllowedMethods(), deserialized.getAllowedMethods());
         assertEquals(original.getAllowedQueryParams(), deserialized.getAllowedQueryParams());
         assertNotNull(deserialized.getAllowedRequestHeaders());
-        assertEquals(
-            new HashSet<>(original.getAllowedRequestHeaders()),
-            new HashSet<>(deserialized.getAllowedRequestHeaders())
-        );
+        assertEquals(original.getAllowedRequestHeaders(), deserialized.getAllowedRequestHeaders());
     }
 
     @SneakyThrows
@@ -152,10 +153,7 @@ public class EndpointTest {
         assertEquals(original.getAllowedMethods(), deserialized.getAllowedMethods());
         assertEquals(original.getAllowedQueryParams(), deserialized.getAllowedQueryParams());
         assertNotNull(deserialized.getAllowedRequestHeaders());
-        assertEquals(
-            new HashSet<>(original.getAllowedRequestHeaders()),
-            new HashSet<>(deserialized.getAllowedRequestHeaders())
-        );
+        assertEquals(original.getAllowedRequestHeaders(), deserialized.getAllowedRequestHeaders());
     }
 
     @SneakyThrows
@@ -176,10 +174,12 @@ public class EndpointTest {
     @Test
     public void toYaml_withPathRegex() {
         // Test with pathRegex instead of pathTemplate
-        final String EXPECTED = "---\n" +
-            "pathRegex: \"^/api/v[0-9]+/users/?.*$\"\n" +
-            "allowedRequestHeaders:\n" +
-            "- \"Authorization\"\n";
+        final String EXPECTED = """
+            ---
+            pathRegex: "^/api/v[0-9]+/users/?.*$"
+            allowedRequestHeaders:
+            - "Authorization"
+            """;
 
         Endpoint endpoint = Endpoint.builder()
             .pathRegex("^/api/v[0-9]+/users/?.*$")
@@ -209,9 +209,6 @@ public class EndpointTest {
         assertEquals(endpoint.getPathTemplate(), deserialized.getPathTemplate());
         assertEquals(endpoint.getAllowedMethods(), deserialized.getAllowedMethods());
         assertEquals(endpoint.getAllowedQueryParams(), deserialized.getAllowedQueryParams());
-        assertEquals(
-            new HashSet<>(endpoint.getAllowedRequestHeaders()),
-            new HashSet<>(deserialized.getAllowedRequestHeaders())
-        );
+        assertEquals(endpoint.getAllowedRequestHeaders(), deserialized.getAllowedRequestHeaders());
     }
 }
