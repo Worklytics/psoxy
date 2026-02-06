@@ -27,23 +27,25 @@ module "tf_runner" {
 module "psoxy" {
   source = "../../modules/gcp"
 
-  project_id                   = var.gcp_project_id
-  gcp_region                   = var.gcp_region
-  environment_id_prefix        = local.environment_id_prefix
-  psoxy_base_dir               = var.psoxy_base_dir
-  deployment_bundle            = var.deployment_bundle
-  force_bundle                 = var.force_bundle
-  bucket_location              = var.gcp_region
-  config_parameter_prefix      = local.config_parameter_prefix
-  install_test_tool            = var.install_test_tool
-  custom_artifacts_bucket_name = var.custom_artifacts_bucket_name
-  default_labels               = var.default_labels
-  support_bulk_mode            = length(var.bulk_connectors) > 0
-  support_webhook_collectors   = length(var.webhook_collectors) > 0
-  vpc_config                   = var.vpc_config
-  bucket_force_destroy         = var.bucket_force_destroy
-  tf_runner_iam_principal      = module.tf_runner.iam_principal
-  provision_project_level_iam  = var.provision_project_level_iam
+  project_id                        = var.gcp_project_id
+  gcp_region                        = var.gcp_region
+  environment_id_prefix             = local.environment_id_prefix
+  psoxy_base_dir                    = var.psoxy_base_dir
+  deployment_bundle                 = var.deployment_bundle
+  force_bundle                      = var.force_bundle
+  bucket_location                   = var.gcp_region
+  config_parameter_prefix           = local.config_parameter_prefix
+  install_test_tool                 = var.install_test_tool
+  provision_testing_infra           = var.provision_testing_infra
+  gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
+  custom_artifacts_bucket_name      = var.custom_artifacts_bucket_name
+  default_labels                    = var.default_labels
+  support_bulk_mode                 = length(var.bulk_connectors) > 0
+  support_webhook_collectors        = length(var.webhook_collectors) > 0
+  vpc_config                        = var.vpc_config
+  bucket_force_destroy              = var.bucket_force_destroy
+  tf_runner_iam_principal           = module.tf_runner.iam_principal
+  provision_project_level_iam       = var.provision_project_level_iam
 }
 
 
@@ -508,6 +510,12 @@ echo "Testing API Connectors ..."
 echo "Testing Bulk Connectors ..."
 
 %{for test_script in values(module.bulk_connector)[*].test_script~}
+./${test_script}
+%{endfor}
+
+echo "Testing Webhook Collectors ..."
+
+%{for test_script in values(module.webhook_collector)[*].test_script~}
 ./${test_script}
 %{endfor}
 EOF

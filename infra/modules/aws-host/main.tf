@@ -68,7 +68,12 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
       "Statement" : [
         # allow caller to invoke the lambda via function url
         {
-          "Action" : ["lambda:InvokeFunctionUrl"],
+          "Action" : [
+            # for new AWS accounts as of Oct 2025, both of these are required
+            # see https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html 
+            "lambda:InvokeFunctionUrl",
+            "lambda:InvokeFunction"
+          ],
           "Effect" : "Allow",
           "Resource" : [for k, v in module.api_connector : v.function_arn]
         }
@@ -389,6 +394,17 @@ resource "aws_iam_policy" "invoke_webhook_collector_urls" {
           ],
           "Effect" : "Allow",
           "Resource" : flatten([for k, v in module.webhook_collectors : v.provisioned_auth_key_pairs])
+        },
+        { # allow test caller to read from sanitized output buckets to verify collection
+          "Action" : [
+            "s3:ListBucket",
+            "s3:GetObject"
+          ],
+          "Effect" : "Allow",
+          "Resource" : flatten([for k, v in module.webhook_collectors : [
+            "arn:aws:s3:::${v.output_sanitized_bucket_id}",
+            "arn:aws:s3:::${v.output_sanitized_bucket_id}/*"
+          ]])
         }
       ]
     }

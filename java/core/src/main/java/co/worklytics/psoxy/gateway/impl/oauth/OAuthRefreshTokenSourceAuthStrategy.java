@@ -34,10 +34,12 @@ import lombok.Setter;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hc.core5.net.URIBuilder;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.net.URI;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -319,8 +321,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          */
         String getGrantType();
 
+
+
         /**
-         * @return request paylaod for token request
+         * @return request payload for token request
          */
         HttpContent buildPayload();
 
@@ -330,6 +334,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          * @param httpHeaders the request headers to modify
          */
         default void addHeaders(HttpHeaders httpHeaders) {}
+
+        default URI getEndpoint(String baseEndpoint) {
+            return URI.create(baseEndpoint);
+        }
     }
 
     public interface TokenResponseParser {
@@ -504,8 +512,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
 
         private CanonicalOAuthAccessTokenResponseDto exchangeRefreshTokenForAccessToken()
                 throws IOException {
-            String refreshEndpoint =
-                    config.getConfigPropertyOrError(ConfigProperty.REFRESH_ENDPOINT);
+            URI refreshEndpoint = payloadBuilder.getEndpoint(
+                    config.getConfigPropertyOrError(ConfigProperty.REFRESH_ENDPOINT));
 
             HttpRequest tokenRequest = httpRequestFactory.buildPostRequest(
                     new GenericUrl(refreshEndpoint), payloadBuilder.buildPayload());

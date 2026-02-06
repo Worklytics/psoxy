@@ -148,18 +148,14 @@ REPLY=${REPLY:-Y}
 echo    # Move to a new line
 case "$REPLY" in
   [yY][eE][sS]|[yY])
-    LOG_FILE="/tmp/release_${RELEASE}_docs.log"
     set +e  # Temporarily disable exit on error to check exit code
-    ./tools/release/publish-docs.sh ${RELEASE} ${PATH_TO_REPO} &> "${LOG_FILE}"
+    ./tools/release/publish-docs.sh ${RELEASE} ${PATH_TO_REPO}
     EXIT_CODE=$?
     set -e  # Re-enable exit on error
     if [ $EXIT_CODE -ne 0 ]; then
       printf "${RED}Failed to publish docs.${NC}\n"
-      printf "Please review the error logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
-      exit $EXIT_CODE
     else
       printf "${GREEN}✓${NC} Docs published\n"
-      printf "See logs: ${BLUE}cat ${LOG_FILE}${NC}\n"
     fi
   ;;
   *)
