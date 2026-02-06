@@ -34,10 +34,10 @@ test('compareContent: empty items', (t) => {
     t.false(compareContent(items, expected, logger));
 });
 
-test('compareContent: expectedContent as object', (t) => {
+test('compareContent: expectedContent from object (stringified)', (t) => {
     const logger = td.object({ info: () => {}, error: () => {}, success: () => {} });
     const items = [{ id: 1, name: 'foo' }];
-    const expected = { id: 1, name: 'foo' };
+    const expected = JSON.stringify({ id: 1, name: 'foo' });
 
     t.true(compareContent(items, expected, logger));
 });
