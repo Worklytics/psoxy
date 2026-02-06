@@ -1,8 +1,8 @@
 import { KMSClient, SignCommand } from '@aws-sdk/client-kms';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import {
-    fromNodeProviderChain,
-    fromTemporaryCredentials
+  fromNodeProviderChain,
+  fromTemporaryCredentials
 } from "@aws-sdk/credential-providers";
 import { KeyManagementServiceClient } from '@google-cloud/kms';
 import { Storage } from '@google-cloud/storage';
@@ -826,10 +826,11 @@ function compareContent(items, expectedContent, logger) {
     }
 
     let expectedJson;
-    if (typeof expectedContent === 'string') {
-        expectedJson = JSON.parse(expectedContent);
-    } else {
-        expectedJson = expectedContent;
+    try {
+      expectedJson = JSON.parse(expectedContent);
+    } catch (e) {
+      logger.error(`Failed to parse expected content: ${e.message}`);
+      throw new Error('Invalid JSON in expected content (check --body argument)');
     }
 
     const found = items.some(item => {
@@ -867,26 +868,26 @@ function sleep(ms) {
 }
 
 export {
-    addFilenameSuffix,
-    compareContent,
-    environmentCheck,
-    executeCommand,
-    executeWithRetry,
-    getAWSCredentials,
-    getCommonHTTPHeaders,
-    getFileNameFromURL,
-    isGzipped,
-    parseBucketOption,
-    pollAsyncResponse,
-    requestWrapper as request,
-    resolveAWSRegion,
-    resolveHTTPMethod,
-    saveToFile,
-    signAWSRequestURL,
-    signJwtWithAWSKMS,
-    signJwtWithGCPKMS,
-    sleep,
-    transformSpecWithResponse,
-    unzip
+  addFilenameSuffix,
+  compareContent,
+  environmentCheck,
+  executeCommand,
+  executeWithRetry,
+  getAWSCredentials,
+  getCommonHTTPHeaders,
+  getFileNameFromURL,
+  isGzipped,
+  parseBucketOption,
+  pollAsyncResponse,
+  requestWrapper as request,
+  resolveAWSRegion,
+  resolveHTTPMethod,
+  saveToFile,
+  signAWSRequestURL,
+  signJwtWithAWSKMS,
+  signJwtWithGCPKMS,
+  sleep,
+  transformSpecWithResponse,
+  unzip
 };
 
