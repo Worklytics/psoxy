@@ -1,15 +1,19 @@
+
 import { Logging } from '@google-cloud/logging';
+import { CloudSchedulerClient } from '@google-cloud/scheduler';
 import { Storage } from '@google-cloud/storage';
 import _ from 'lodash';
 import getLogger from './logger.js';
 import {
-  executeCommand,
-  executeWithRetry,
-  getCommonHTTPHeaders,
-  isGzipped,
-  request,
-  resolveHTTPMethod,
-  signJwtWithGCPKMS,
+    compareContent,
+    executeCommand,
+    executeWithRetry,
+    getCommonHTTPHeaders,
+    isGzipped,
+    request,
+    resolveHTTPMethod,
+    signJwtWithGCPKMS,
+    sleep
 } from './utils.js';
 
 
@@ -112,14 +116,25 @@ async function call(options = {}) {
  * @return {Array<Object>} - array of serialized log entries
  */
 async function getLogs(options = {}) {
-  const logging = new Logging();
-  const log = logging.log('cloudfunctions.googleapis.com%2Fcloud-functions');
-  const [entries] = await log.getEntries({
-    filter: `resource.labels.function_name=${options.functionName}`,
+  const logging = new Logging({ projectId: options.projectId });
+  
+  // Support both Gen 1 (cloud_function) and Gen 2 (cloud_run_revision)
+  // Gen 2 logs usually appear under run.googleapis.com/stdout or stderr, but resource.labels.service_name identify the function
+  const filter = `
+    (resource.type="cloud_function" AND resource.labels.function_name="${options.functionName}")
+    OR 
+    (resource.type="cloud_run_revision" AND resource.labels.service_name="${options.functionName}")
+  `;
+
+  const [entries] = await logging.getEntries({
+    filter: filter,
     resourceNames: [`projects/${options.projectId}`],
-    orderBy: 'timestamp asc',
+    orderBy: 'timestamp desc', // Get newest first
+    pageSize: 50,
   });
-  return entries.map(entry => entry.toStructuredJSON());
+  
+  // Return in chronological order
+  return entries.reverse().map(entry => entry.toStructuredJSON());
 }
 
 /**
@@ -195,7 +210,7 @@ function parseLogEntries(entries) {
     return [];
   }
 
-  // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
+  // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry
   const LOG_LEVELS = ['WARNING', 'ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY'];
   const dateRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}/
   return entries.map(entry => {
@@ -335,6 +350,122 @@ async function download(bucketName, fileName, destination, client, logger) {
   return downloadResponse;
 }
 
+/**
+ * Triggers a Cloud Scheduler job to run immediately.
+ *
+ * @param {string} jobName
+ * @param {Object} logger
+ */
+async function triggerScheduler(jobName, logger) {
+  logger.info(`Triggering Cloud Scheduler job: ${jobName}`);
+  const client = new CloudSchedulerClient();
+  const [response] = await client.runJob({ name: jobName });
+  logger.success(`Cloud Scheduler job triggered: ${response.name}`);
+}
+
+/**
+ * Verifies that a file containing the expected content appears in the bucket after startTime.
+ *
+ * @param {string} bucketName
+ * @param {string} expectedContent
+ * @param {number} startTime - timestamp in ms
+ * @param {Object} logger
+ */
+async function verifyBucket(bucketName, expectedContent, startTime, logger) {
+  const timeout = 60000; // 60 seconds
+  const pollInterval = 5000; // 5 seconds
+  const endTime = Date.now() + timeout;
+
+  logger.info(`Verifying content in bucket: ${bucketName}. Will wait up to ${timeout / 1000}s`);
+
+  const client = createStorageClient();
+  const bucket = client.bucket(bucketName);
+  
+  while (Date.now() < endTime) {
+    const elapsed = Math.round((Date.now() - startTime) / 1000); // approx
+    logger.info(`Waiting for content to appear in bucket... [${Math.max(0, elapsed)}s elapsed]`);
+    
+    // Check for new files
+    const [files] = await bucket.getFiles();
+    
+    // Sort files by creation time, newest first
+    const newFiles = files.filter(f => new Date(f.metadata.timeCreated).getTime() > startTime)
+                          .sort((a, b) => new Date(b.metadata.timeCreated).getTime() - new Date(a.metadata.timeCreated).getTime());
+
+    if (newFiles.length > 0) {
+        // Stop polling as soon as we find a file (expecting only one)
+        const file = newFiles[0];
+        logger.info(`New file found: ${file.name} (Created: ${new Date(file.metadata.timeCreated).toISOString()})`);
+        
+        const [content] = await file.download();
+        const contentStr = content.toString();
+        logger.info(`Found Content: ${contentStr}`);
+        
+        // Parse found content
+        let items = [];
+        try {
+            const jsonContent = JSON.parse(contentStr);
+            if (Array.isArray(jsonContent)) {
+                items = jsonContent;
+            } else if (_.isPlainObject(jsonContent)) {
+                items = [jsonContent];
+            }
+        } catch (e) {
+            logger.error(`Failed to parse file content: ${e.message}`);
+            throw new Error(`Verification failed: Invalid JSON in file ${file.name}`);
+        }
+
+        if (items.length > 0) {
+          const matchFound = compareContent(items, expectedContent, logger);
+          if (matchFound) {
+            logger.success(`Verification Successful: Content matches.`);
+            return;
+          } else {
+            logger.error(`Verification Failed: Content does not match.`);
+            throw new Error(`Verification failed: Content mismatch in file ${file.name}`);
+          }
+        } else {
+             logger.info(`File is empty or contains no items.`);
+             throw new Error(`Verification failed: Empty file ${file.name}`);
+        }
+    }
+    
+    await sleep(pollInterval);
+  }
+
+  logger.error('No new files found in bucket within timeout.');
+  throw new Error('Verification failed: Expected content not found in bucket.');
+}
+
+/**
+ * End-to-end verification of webhook collection in GCP.
+ *
+ * @param {Object} options
+ * @param {string} options.verifyCollection - bucket name
+ * @param {string} options.schedulerJob - optional, job name
+ * @param {string} options.url - function URL
+ * @param {string} options.body - original POST body
+ * @param {number} options.startTime - timestamp when test started
+ * @param {Object} logger
+ */
+
+async function verifyCollection(options, logger) {
+  const bucketName = options.verifyCollection;
+  
+  // 1. Trigger Scheduler
+  let jobName = options.schedulerJob;
+  
+  if (jobName) {
+      await triggerScheduler(jobName, logger);
+  } else {
+      logger.info('Skipping Cloud Scheduler trigger (no job name provided). Waiting for scheduled run...');
+  }
+
+  // 2. Verify Bucket
+  await verifyBucket(bucketName, options.body, options.startTime, logger);
+}
+
+
 export default {
   call,
   createStorageClient,
@@ -347,4 +478,6 @@ export default {
   parseLogEntries,
   listFilesMetadata,
   upload,
+  verifyCollection,
 };
+

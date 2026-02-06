@@ -460,6 +460,48 @@ locals {
 
 
 
+
+
+locals {
+  custom_testing_role_perms = concat(
+    var.support_webhook_collectors ? [
+      "cloudscheduler.jobs.get",
+      "cloudscheduler.jobs.run",
+    ] : [],
+    []
+  )
+}
+
+# Custom role to support testing, if needed
+
+# Custom role for principals who need to test data sanitization (webhook collectors)
+# Only created if webhook collectors are configured and testing infra is enabled
+resource "google_project_iam_custom_role" "data_sanitization_tester" {
+  count = var.provision_testing_infra && length(local.custom_testing_role_perms) > 0 ? 1 : 0
+
+  project     = var.project_id
+  role_id     = "${local.environment_id_role_prefix}DataSanitizationTester"
+  title       = "${local.environment_id_prefix_display}Data Sanitization Tester"
+  description = "Role for principals authorized to test data sanitization. Includes permissions for triggering Cloud Scheduler jobs."
+
+  permissions = local.custom_testing_role_perms
+}
+
+
+# Grant test principals the custom role at project level
+# Note: Cloud Scheduler doesn't support resource-level IAM, so project-level is required
+resource "google_project_iam_member" "data_sanitization_tester_grant" {
+  for_each = var.provision_testing_infra && var.support_webhook_collectors ? toset(var.gcp_principals_authorized_to_test) : toset([])
+
+  project = var.project_id
+  role    = google_project_iam_custom_role.data_sanitization_tester[0].id
+  member  = each.key
+}
+
+## end custom testing infra
+
+
+
 output "artifacts_bucket_name" {
   value = local.artifact_bucket_name
 }
@@ -539,4 +581,9 @@ output "webhook_batch_invoker_sa_email" {
 output "vpc_config" {
   value       = local.vpc_config
   description = "VPC configuration for the Cloud Run function. Possibly 'null' if no VPC is configured."
+}
+
+output "data_sanitization_tester_role_id" {
+  value       = try(google_project_iam_custom_role.data_sanitization_tester[0].id, null)
+  description = "Custom role for test principals. Includes permissions needed for end-to-end testing."
 }

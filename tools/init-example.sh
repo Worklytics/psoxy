@@ -24,9 +24,8 @@
 #     ../../../tools/reset-example.sh
 
 # colors
-RED='\e[0;31m'
-BLUE='\e[0;34m'
-NC='\e[0m' # No Color
+# Source centralized color scheme
+source "$(dirname "$0")/set-term-colorscheme.sh"
 
 
 EXPLICIT_REPO_CLONE_DIR=$1
@@ -34,17 +33,17 @@ EXPLICIT_REPO_CLONE_DIR=$1
 TF_CONFIG_ROOT=`pwd`
 
 if ! terraform -v &> /dev/null ; then
-  printf "${RED}Terraform not available; required for this Psoxy example. See https://github.com/Worklytics/psoxy#prerequisites ${NC}\n"
+  printf "${ERROR}Terraform not available; required for this Psoxy example. See https://github.com/Worklytics/psoxy#prerequisites ${NC}\n"
   exit 1
 fi
 
 # initialize terraform, which downloads dependencies into `.terraform` directory
-printf "Initializing ${BLUE}psoxy${NC} Terraform configuration ...\n"
+printf "Initializing ${CODE}psoxy${NC} Terraform configuration ...\n"
 terraform init
 
 TF_INIT_EXIT_CODE=$?
 if [[ $TF_INIT_EXIT_CODE -ne 0 ]]; then
-  printf "${RED}Terraform init failed. See above for details. Cannot continue to initialize example configuration.${NC}\n"
+  printf "${ERROR}Terraform init failed. See above for details. Cannot continue to initialize example configuration.${NC}\n"
   exit 1
 fi
 
@@ -53,9 +52,9 @@ if [[ -z "$EXPLICIT_REPO_CLONE_DIR" ]]; then
   if [[ -d ".terraform/modules/psoxy/" ]]; then
     REPO_CLONE_BASE_DIR=".terraform/modules/psoxy/"
   else
-    printf "${RED}No explicit path to repo clone provided, and 'psoxy' module in Terraform configuration.${NC}\n"
+    printf "${ERROR}No explicit path to repo clone provided, and 'psoxy' module in Terraform configuration.${NC}\n"
     printf "Try running this script with a Terraform module named 'psoxy' that references to GitHub repo https://github.com/Worklytics/psoxy, or pass the path to a clone of that as the first argument to the script.\n"
-    printf " eg ${BLUE}./init ~/code/psoxy${NC}\n"
+    printf " eg ${CODE}./init ~/code/psoxy${NC}\n"
     exit 1
   fi
 else
