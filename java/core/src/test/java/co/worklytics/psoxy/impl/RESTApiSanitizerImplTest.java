@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -648,7 +649,7 @@ class RESTApiSanitizerImplTest {
                 .endpoint(Endpoint.builder()
                         .pathRegex("^/test$")
                         .allowedMethods(Collections.singleton("GET"))
-                        .allowedRequestHeaders(Arrays.asList("Endpoint-Header"))
+                        .allowedRequestHeaders(Set.of("Endpoint-Header"))
                         .allowedRequestHeadersToForward(Arrays.asList("Forward-Header"))
                         .build())
                 .build(), sanitizer.pseudonymizer);
