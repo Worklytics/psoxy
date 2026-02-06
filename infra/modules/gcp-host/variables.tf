@@ -87,6 +87,12 @@ variable "gcp_principals_authorized_to_test" {
   default     = []
 }
 
+variable "provision_testing_infra" {
+  type        = bool
+  description = "Whether to provision infra needed to support testing of deployment. If false, it's left to you to ensure the GCP principal you use when running test scripts has the correct permissions."
+  default     = true
+}
+
 variable "general_environment_variables" {
   type        = map(string)
   description = "environment variables to add for all connectors"

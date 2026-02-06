@@ -6,3 +6,8 @@ terraform.tfstate**
 # you don't need to commit this directory, even for dev use when you commit your `terraform.tfstate`
 # it is cache of Terraform providers/modules retrieved from remotes
 .terraform/**
+
+
+# stuff our tf modules / init scripts produce, that shouldn't be under version control
+build.sh
+upgrade-terraform-modules.sh
