@@ -11,6 +11,21 @@ set -e
 RELEASE="$1"
 PATH_TO_REPO="$2"
 
+GREEN='\e[0;32m'
+YELLOW='\e[0;33m'
+RED='\e[0;31m'
+BLUE='\e[0;34m'
+NC='\e[0m' # No Color
+
+if [ -z "$RELEASE" ] || [ -z "$PATH_TO_REPO" ]; then
+  printf "${RED}Error: Missing required arguments.${NC}\n"
+  printf "Usage:\n"
+  printf "  ${BLUE}./publish-docs.sh <release> <path-to-repo>${NC}\n"
+  printf "Example:\n"
+  printf "  ${BLUE}./publish-docs.sh v0.5.10 ~/code/psoxy/${NC}\n"
+  exit 1
+fi
+
 # Normalize PATH_TO_REPO - remove trailing slash if present
 PATH_TO_REPO="${PATH_TO_REPO%/}"
 
@@ -84,12 +99,14 @@ fi
 # check if the space has github sync enabled
 GITHUB_SYNC_URL=$(curl -s https://api.gitbook.com/v1/spaces/${SPACE_ID} -H "Authorization: Bearer ${GITBOOK_API_TOKEN}" | jq -r '.gitSync.url')
 if [ -z "$GITHUB_SYNC_URL" ]; then
-  printf "Enabling GitHub sync for space ${BLUE}${SPACE_ID}${NC} to branch ${BLUE}docs-${RELEASE}${NC}...\n"
+  printf "\nEnabling GitHub sync for space ${BLUE}${SPACE_ID}${NC} to branch ${BLUE}docs-${RELEASE}${NC}...\n"
   # patch it to have github sync enabled to target branch
-  curl -s -X PATCH https://api.gitbook.com/v1/spaces/${SPACE_ID} -H "Authorization: Bearer ${GITBOOK_API_TOKEN}" -H "Content-Type: application/json" -d '{"gitSync": {"installationProvider": "github", "integration": "github", "url": "https://github.com/Worklytics/psoxy/blob/docs-'$RELEASE'"}'
+  curl -s -X PATCH https://api.gitbook.com/v1/spaces/${SPACE_ID} -H "Authorization: Bearer ${GITBOOK_API_TOKEN}" -H "Content-Type: application/json" -d '{"gitSync": {"installationProvider": "github", "integration": "github", "url": "https://github.com/Worklytics/psoxy/blob/docs-'$RELEASE'"}' | jq .
 else
-  printf "GitHub sync is already enabled for space ${BLUE}${SPACE_ID}${NC} to ${BLUE}${GITHUB_SYNC_URL}${NC}.\n"
+  printf "\nGitHub sync is already enabled for space ${BLUE}${SPACE_ID}${NC} to ${BLUE}${GITHUB_SYNC_URL}${NC}.\n"
 fi
+
+printf "${YELLOW}NOTE: Although GitHub sync appears enabled in API data, recommend re-enable via the Gitbook UX anyways; relying on github sync after copy doesn't seem reliable${NC}\n"
 
 # if not already added to the site, add it
 SITE_SPACE_ID=$(echo "$SPACES_LIST" | jq -r 'first(.items[]? | select(.space.id == "'$SPACE_ID'")) | .id')
