@@ -38,7 +38,7 @@ public class BulkModeConfig {
 
     @AllArgsConstructor
     @lombok.Getter
-    enum BulkModeConfigProperty implements ConfigService.ConfigProperty {
+    public enum BulkModeConfigProperty implements ConfigService.ConfigProperty {
 
         /**
          * Output format to use when writing sanitized data.
