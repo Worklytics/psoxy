@@ -592,12 +592,15 @@ async function unzip(filePath) {
 }
 
 /**
- * Check if file is gzipped
- * @param {string} filePath
+ * Check if file or buffer is gzipped
+ * @param {string|Buffer} file - filePath or Buffer
  * @returns {boolean}
  */
-async function isGzipped(filePath) {
-  return isgzipBuffer(await fs.readFile(filePath));
+async function isGzipped(file) {
+  if (Buffer.isBuffer(file)) {
+    return isgzipBuffer(file);
+  }
+  return isgzipBuffer(await fs.readFile(file));
 }
 
 /**
@@ -808,21 +811,83 @@ async function pollAsyncResponse(locationUrl, options = {}) {
   throw new Error(`Timeout: File not available after ${maxAttempts * 10} seconds of polling`);
 }
 
+/**
+ * Compare actual content items against expected content.
+ * 
+ * @param {Array} items - Array of actual items found in the file
+ * @param {string} expectedContent - Expected JSON string
+ * @param {Object} logger - Logger instance
+ * @returns {boolean}
+ */
+function compareContent(items, expectedContent, logger) {
+    if (!expectedContent) {
+        logger.info('No expected content provided. Skipping content match verification (considered success as items were found).');
+        return true;
+    }
+
+    let expectedJson;
+    try {
+      expectedJson = JSON.parse(expectedContent);
+    } catch (e) {
+      logger.error(`Failed to parse expected content: ${e.message}`);
+      throw new Error('Invalid JSON in expected content (check --body argument)');
+    }
+
+    const found = items.some(item => {
+        // 1. Try strict equality first
+        if (_.isEqual(item, expectedJson)) return true;
+
+        // 2. Try relaxed equality (ignoring actor.id for pseudonymization)
+        const itemNoId = _.cloneDeep(item);
+        if (itemNoId.actor) delete itemNoId.actor.id;
+
+        if (expectedJson) { // Guard against null expectedJson though check at top should handle it
+            const expectedNoId = _.cloneDeep(expectedJson);
+            if (expectedNoId.actor) delete expectedNoId.actor.id;
+
+            if (_.isEqual(itemNoId, expectedNoId)) {
+                logger.info('Match found with differing actor.id (likely pseudonymized)');
+                return true;
+            }
+            logger.info(`Comparison failed.\nActual (no ID): ${JSON.stringify(itemNoId)}\nExpected (no ID): ${JSON.stringify(expectedNoId)}`);
+        }
+        
+        return false;
+    });
+
+    return found;
+}
+
+/**
+ * Sleep for a given number of milliseconds
+ * @param {number} ms
+ * @returns {Promise<void>}
+ */
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export {
-  addFilenameSuffix, environmentCheck,
+  addFilenameSuffix,
+  compareContent,
+  environmentCheck,
   executeCommand,
   executeWithRetry,
   getAWSCredentials,
   getCommonHTTPHeaders,
   getFileNameFromURL,
   isGzipped,
-  parseBucketOption, pollAsyncResponse, requestWrapper as request,
+  parseBucketOption,
+  pollAsyncResponse,
+  requestWrapper as request,
   resolveAWSRegion,
   resolveHTTPMethod,
   saveToFile,
   signAWSRequestURL,
   signJwtWithAWSKMS,
   signJwtWithGCPKMS,
-  transformSpecWithResponse, unzip
+  sleep,
+  transformSpecWithResponse,
+  unzip
 };
 
