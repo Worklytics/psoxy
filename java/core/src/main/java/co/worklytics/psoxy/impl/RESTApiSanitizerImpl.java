@@ -201,7 +201,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         getEndpoint(httpMethod, url)
                 .map(Pair::getRight)
                 .ifPresent(endpoint -> {
-                    endpoint.getAllowedRequestHeaders().ifPresent(allowedRequestHeaders::addAll);
+                    endpoint.getAllowedRequestHeadersAsOptional().ifPresent(allowedRequestHeaders::addAll);
                     endpoint.getAllowedRequestHeadersToForward().ifPresent(allowedRequestHeaders::addAll);
                 });
 
