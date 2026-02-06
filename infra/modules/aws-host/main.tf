@@ -393,6 +393,17 @@ resource "aws_iam_policy" "invoke_webhook_collector_urls" {
           ],
           "Effect" : "Allow",
           "Resource" : flatten([for k, v in module.webhook_collectors : v.provisioned_auth_key_pairs])
+        },
+        { # allow test caller to read from sanitized output buckets to verify collection
+          "Action" : [
+            "s3:ListBucket",
+            "s3:GetObject"
+          ],
+          "Effect" : "Allow",
+          "Resource" : flatten([for k, v in module.webhook_collectors : [
+            "arn:aws:s3:::${v.output_sanitized_bucket_id}",
+            "arn:aws:s3:::${v.output_sanitized_bucket_id}/*"
+          ]])
         }
       ]
     }
