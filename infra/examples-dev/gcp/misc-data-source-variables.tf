@@ -131,7 +131,7 @@ locals {
       ? local.validate_glean_instance_name_message
       : ""))
 
-  validate_gong_instance_name         = (var.gong_instance_name == null || var.gong_instance_name == "") && contains(var.enabled_connectors, "gong")
+  validate_gong_instance_name         = (var.gong_instance_name == null || var.gong_instance_name == "") && contains(var.enabled_connectors, "gong-metrics")
   validate_gong_instance_name_message = "The gong_instance_name var should be populated if Gong connector is enabled."
   validate_gong_instance_name_check = regex(
     "^${local.validate_gong_instance_name_message}$",
