@@ -547,7 +547,7 @@ EOT
         }
       ],
       environment_variables : {
-        GRANT_TYPE : "refresh_token"
+        GRANT_TYPE : "refresh_token_via_query_parameter"
         REFRESH_ENDPOINT : "https://app.gong.io/oauth2/generate-customer-token"
         USE_SHARED_TOKEN : "TRUE"
       }
