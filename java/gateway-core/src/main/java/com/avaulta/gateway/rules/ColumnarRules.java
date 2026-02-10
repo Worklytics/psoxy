@@ -51,10 +51,10 @@ public class ColumnarRules implements BulkDataRules {
      *
      * in theory, `\t` should also work ...
      */
-    @JsonInclude(JsonInclude.Include.NON_EMPTY) // this doesn't work
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @NonNull
     @Builder.Default
-    protected Character delimiter = ',';
+    protected String delimiter = ",";
 
     /**
      * columns (fields) to duplicate
