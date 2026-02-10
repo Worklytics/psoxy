@@ -43,6 +43,8 @@ import lombok.extern.java.Log;
 @JsonIgnoreProperties("defaultScopeIdForSource") // so compatible with legacy CsvRules
 public class ColumnarRules implements BulkDataRules {
 
+    public static final String DEFAULT_DELIMITER = ",";
+
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -54,7 +56,7 @@ public class ColumnarRules implements BulkDataRules {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @NonNull
     @Builder.Default
-    protected String delimiter = ",";
+    protected String delimiter = DEFAULT_DELIMITER;
 
     /**
      * columns (fields) to duplicate
