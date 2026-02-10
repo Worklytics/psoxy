@@ -81,9 +81,7 @@ public class AccountCredentialsGrantTokenRequestBuilder implements OAuthRefreshT
             .orElseGet(() -> secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_ID)));
 
         String clientSecret = StringUtils.trim(secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET));
-        String token = Base64.getEncoder()
-            .encodeToString(String.join(":", clientId, clientSecret).getBytes(StandardCharsets.UTF_8));
-        httpHeaders.setAuthorization("Basic " + token);
+        AuthUtils.setBasicAuthHeader(httpHeaders, clientId, clientSecret);
     }
 
 }

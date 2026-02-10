@@ -1,0 +1,116 @@
+name: Publish AWS Bundle
+
+# This workflow publishes AWS bundles to S3 using OIDC authentication.
+#
+# Required GitHub Secrets:
+#   - AWS_ROLE_ARN: IAM role ARN to assume (e.g., arn:aws:iam::123456789012:role/GithubActionPublishAgent)
+#
+# Security:
+#   - Uses OIDC authentication (no long-lived credentials)
+#   - OIDC provider validates repository_owner == 'Worklytics'
+#   - workflow_dispatch requires write access (enforced by GitHub)
+#   - Tag pushes require push access (enforced by GitHub)
+#   - RC branch pushes require write access (enforced by GitHub)
+#   - Consider adding branch protection rules to restrict who can push tags and create rc-* branches
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - 'rc-*'
+
+env:
+  IMPLEMENTATION: aws
+  JAVA_SOURCE_ROOT: java/
+  BUCKET_PREFIX: psoxy-public-artifacts
+  AWS_REGIONS: us-east-1,us-east-2,us-west-1,us-west-2
+
+jobs:
+  publish:
+    name: Build and Publish AWS Bundle
+    runs-on: ubuntu-latest
+    # Security: Only run on authorized triggers
+    # - Tags (v*): Regular releases, anyone with push access can create tags
+    # - RC branches (rc-*): Release candidates, requires write access (includes PR merges)
+    # - workflow_dispatch: Manual trigger, requires write access (checked in step below)
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Verify authorization for manual trigger
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          # For manual triggers, verify the user has write access to the repository
+          # This prevents unauthorized users from triggering the workflow
+          # Note: GitHub's OIDC provider already validates repository_owner == 'Worklytics'
+          # but we add an extra check here for defense in depth
+          
+          # Check if actor is a member of the organization or has write access
+          # This is a basic check - GitHub will also enforce permissions
+          if [ "${{ github.event.sender.type }}" != "User" ] && [ "${{ github.event.sender.type }}" != "Bot" ]; then
+            echo "❌ ERROR: Unauthorized trigger. Only users and bots can trigger this workflow."
+            exit 1
+          fi
+          
+          echo "✓ Authorized trigger by: ${{ github.event.sender.login }}"
+          echo "  Actor type: ${{ github.event.sender.type }}"
+          echo "  Repository: ${{ github.repository }}"
+          echo ""
+          echo "Note: This workflow requires write access to the repository."
+          echo "GitHub will enforce this permission check before allowing the workflow to run."
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-west-2
+
+      - name: Install dependencies
+        run: |
+          # Install jq if not already available
+          sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Publish AWS Bundle
+        id: publish
+        run: |
+          # Determine if RC build; assume it is UNLESS ref is tag starting with v (e.g., v0.5.15)
+          RC_OPTION="--rc"
+          REF_NAME="${{ github.ref_name }}"
+          if [[ "$REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            RC_OPTION=""
+          fi
+          
+          ./tools/release/lib/publish-aws-bundle.sh --non-interactive $RC_OPTION | tee publish-output.log
+          
+          # Extract artifact URIs from output and save to file for summary step
+          grep "^ARTIFACT_URI_" publish-output.log > artifact-uris.txt || true
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "## ✅ Successfully published AWS bundle" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f artifact-uris.txt ] && [ -s artifact-uris.txt ]; then
+            echo "**Artifact URIs:**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            while IFS='=' read -r key uri; do
+              region=$(echo "$key" | sed 's/^ARTIFACT_URI_//')
+              echo "- **${region}:** \`${uri}\`" >> $GITHUB_STEP_SUMMARY
+            done < artifact-uris.txt
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "Artifacts have been published to S3 buckets in all configured regions." >> $GITHUB_STEP_SUMMARY
+

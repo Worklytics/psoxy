@@ -1,10 +1,9 @@
 package co.worklytics.psoxy.storage;
 
-import co.worklytics.psoxy.Pseudonymizer;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import co.worklytics.psoxy.Pseudonymizer;
 
 /**
  * sanitize bulk data content according to rules
@@ -22,7 +21,8 @@ public interface BulkDataSanitizer {
      * @param pseudonymizer The pseudonymizer to use
      * @throws IOException  IO problem reading or writing
      */
-    void sanitize(Reader reader,
+    void sanitize(co.worklytics.psoxy.gateway.StorageEventRequest request,
+                  Reader reader,
                   Writer writer,
                   Pseudonymizer pseudonymizer) throws IOException;
 }

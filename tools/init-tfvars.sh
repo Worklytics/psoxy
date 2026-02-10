@@ -7,7 +7,7 @@ PSOXY_BASE_DIR=$2
 DEPLOYMENT_ENV=${3:-"local"}
 HOST_PLATFORM=${4:-"aws"}
 
-SCRIPT_VERSION="rc-v0.5.16"
+SCRIPT_VERSION="rc-v0.5.18"
 
 if [ -z "$PSOXY_BASE_DIR" ]; then
   printf "Usage: init-tfvars.sh <path-to-terraform.tfvars> <path-to-psoxy-base-directory> [DEPLOYMENT_ENV]\n"
@@ -15,17 +15,14 @@ if [ -z "$PSOXY_BASE_DIR" ]; then
 fi
 
 # colors
-RED='\e[0;31m'
-BLUE='\e[0;34m'
-YELLOW='\e[0;33m'
-GREEN='\e[0;32m'
-NC='\e[0m' # No Color
+# Source centralized color scheme
+source "$(dirname "$0")/set-term-colorscheme.sh"
 
 # Validate DEPLOYMENT_ENV
 VALID_DEPLOYMENT_ENVS=("local" "terraform_cloud" "github_actions" "other_nonlocal")
 if [[ ! " ${VALID_DEPLOYMENT_ENVS[@]} " =~ " ${DEPLOYMENT_ENV} " ]]; then
-  printf "${RED}Error: Invalid DEPLOYMENT_ENV '${DEPLOYMENT_ENV}'.${NC}\n"
-  printf "Valid values are: ${BLUE}local${NC}, ${BLUE}terraform_cloud${NC}, ${BLUE}github_actions${NC}, ${BLUE}other_nonlocal${NC}\n"
+  printf "${ERROR}Error: Invalid DEPLOYMENT_ENV '${DEPLOYMENT_ENV}'.${NC}\n"
+  printf "Valid values are: ${CODE}local${NC}, ${CODE}terraform_cloud${NC}, ${CODE}github_actions${NC}, ${CODE}other_nonlocal${NC}\n"
   exit 1
 fi
 
@@ -57,7 +54,7 @@ prompt_confirm_variable_setting() {
   local default_value="$2"
 
   # redirect output to stderr; let us capture stdout as a return value
-  >&2 printf "Do you want to set ${BLUE}${setting_name}${NC} to ${BLUE}${default_value}${NC}"
+  >&2 printf "Do you want to set ${CODE}${setting_name}${NC} to ${CODE}${default_value}${NC}"
   >&2 read -p "? (Y/n) " yn
 
   # Default to 'Yes' if the input is empty
@@ -72,7 +69,7 @@ prompt_confirm_variable_setting() {
   if [[ $yn == "y" || $yn == "yes" ]]; then
     result="$default_value"
   else
-    >&2 printf "Enter value for ${BLUE}${setting_name}${NC}: "
+    >&2 printf "Enter value for ${CODE}${setting_name}${NC}: "
     >&2 read -p " " user_provided_value
     result="$user_provided_value"
   fi
@@ -108,9 +105,9 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
     if [ $? -eq 0 ] && [ -n "$AWS_ACCOUNT_ID" ]; then
       user_value=$(prompt_confirm_variable_setting "aws_account_id" "$AWS_ACCOUNT_ID")
       printf "aws_account_id=\"${user_value}\"\n\n" >> $TFVARS_FILE
-      printf "\taws_account_id=${BLUE}\"${user_value}\"${NC}\n"
+      printf "\taws_account_id=${CODE}\"${user_value}\"${NC}\n"
     else
-      printf "${RED}Failed to determine AWS account ID from your aws CLI configuration. You MUST fill ${BLUE}aws_account_id${NC} in your terraform.tfvars file yourself.${NC}\n"
+      printf "${ERROR}Failed to determine AWS account ID from your aws CLI configuration. You MUST fill ${CODE}aws_account_id${NC} in your terraform.tfvars file yourself.${NC}\n"
       printf "aws_account_id=\"{{FILL_YOUR_VALUE}}\"\n\n" >> $TFVARS_FILE
     fi
 
@@ -120,9 +117,9 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
     if [ $? -eq 0 ] && [ -n "$AWS_REGION" ]; then
       printf "# AWS region in which your Psoxy infrastructure will be deployed\n" >> $TFVARS_FILE
       printf "aws_region=\"${AWS_REGION}\"\n\n" >> $TFVARS_FILE
-      printf "\taws_region=${BLUE}\"${AWS_REGION}\"${NC}\n"
+      printf "\taws_region=${CODE}\"${AWS_REGION}\"${NC}\n"
     else
-      printf "No ${BLUE}aws_region${NC} could be determined from your AWS CLI configuration. You should fill ${BLUE}aws_region${NC} in your terraform.tfvars file if you wish to use a value other than the default.\n"
+      printf "No ${CODE}aws_region${NC} could be determined from your AWS CLI configuration. You should fill ${CODE}aws_region${NC} in your terraform.tfvars file if you wish to use a value other than the default.\n"
     fi
 
     AWS_ARN=$(aws sts get-caller-identity --query Arn --output text 2>/dev/null)
@@ -164,11 +161,11 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
     printf "  # put 'Service Account Unique ID' value, which you can obtain from Worklytics ( https://intl.worklytics.co/analytics/integrations/configuration )\n" >> $TFVARS_FILE
     printf "  # \"123456712345671234567\" # should be 21-digits\n]\n\n" >> $TFVARS_FILE
   else
-    printf "${RED}AWS CLI not available${NC}\n"
+    printf "${ERROR}AWS CLI not available${NC}\n"
   fi
 else
   if [[ "$HOST_PLATFORM" == "aws" ]]; then
-    printf "${RED}HOST_PLATFORM set as 'aws', but no aws provider in Terraform configuration${NC}\n"
+    printf "${ERROR}HOST_PLATFORM set as 'aws', but no aws provider in Terraform configuration${NC}\n"
   else
     printf "No AWS provider found in top-level of Terraform configuration. AWS CLI not required.\n"
   fi
@@ -207,10 +204,10 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
         printf "# GCP project in which required infrastructure will be provisioned\n" >> $TFVARS_FILE
         if [ -n "$GCP_PROJECT_ID" ]; then
           printf "gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
-          printf "\tgcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
+          printf "\tgcp_project_id=${CODE}\"${GCP_PROJECT_ID}\"${NC}\n"
         else
           printf "gcp_project_id=\"{{FILL_YOUR_VALUE}}\"\n\n" >> $TFVARS_FILE
-          printf "${RED}Could not determine GCP project ID from gcloud config. You MUST fill ${BLUE}gcp_project_id${NC} in your terraform.tfvars file yourself.${NC}\n"
+          printf "${ERROR}Could not determine GCP project ID from gcloud config. You MUST fill ${CODE}gcp_project_id${NC} in your terraform.tfvars file yourself.${NC}\n"
         fi
       fi
 
@@ -226,7 +223,7 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
       fi
     fi
 
-    prompt_user_Yn "Do you want to use ${BLUE}Google Workspace${NC} as a data source? (requires ${BLUE}gcloud${NC} to be installed and authenticated in the environment from which this terraform configuration will be applied) "
+    prompt_user_Yn "Do you want to use ${CODE}Google Workspace${NC} as a data source? (requires ${CODE}gcloud${NC} to be installed and authenticated in the environment from which this terraform configuration will be applied) "
 
     if [[ $? -eq 1 ]]; then
       INCLUDE_GWS="true"
@@ -238,10 +235,10 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
         printf "#  - if you're not connecting to Google Workspace data sources via their APIs, you can omit this value\n" >> $TFVARS_FILE
         if [ -n "$GCP_PROJECT_ID" ]; then
           printf "google_workspace_gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
-          printf "\tgoogle_workspace_gcp_project_id=${BLUE}\"${GCP_PROJECT_ID}\"${NC}\n"
+          printf "\tgoogle_workspace_gcp_project_id=${CODE}\"${GCP_PROJECT_ID}\"${NC}\n"
         else
           printf "# google_workspace_gcp_project_id=\"{{FILL_YOUR_VALUE}}\"\n\n" >> $TFVARS_FILE
-          printf "${YELLOW}Could not determine GCP project ID. You MUST fill ${BLUE}google_workspace_gcp_project_id${NC} in your terraform.tfvars file yourself.${NC}\n"
+          printf "${WARNING}Could not determine GCP project ID. You MUST fill ${CODE}google_workspace_gcp_project_id${NC} in your terraform.tfvars file yourself.${NC}\n"
         fi
       fi
 
@@ -254,10 +251,10 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
         GOOGLE_WORKSPACE_EXAMPLE_USER=$(gcloud config get account 2>/dev/null || echo "")
         if [ -n "$GOOGLE_WORKSPACE_EXAMPLE_USER" ]; then
           printf "google_workspace_example_user=\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"\n\n" >> $TFVARS_FILE
-          printf "\tgoogle_workspace_example_user=${BLUE}\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"${NC}\n"
+          printf "\tgoogle_workspace_example_user=${CODE}\"${GOOGLE_WORKSPACE_EXAMPLE_USER}\"${NC}\n"
         else
           printf "# google_workspace_example_user=\"{{FILL_YOUR_VALUE}}\"\n\n" >> $TFVARS_FILE
-          printf "${YELLOW}Could not determine Google Workspace example user. You MUST fill ${BLUE}google_workspace_example_user${NC} in your terraform.tfvars file yourself, if you're using Google Workspace connectors.${NC}\n"
+          printf "${WARNING}Could not determine Google Workspace example user. You MUST fill ${CODE}google_workspace_example_user${NC} in your terraform.tfvars file yourself, if you're using Google Workspace connectors.${NC}\n"
         fi
 
         # example admin for Google Workspace
@@ -267,7 +264,7 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
         GOOGLE_WORKSPACE_EXAMPLE_ADMIN="${GOOGLE_WORKSPACE_EXAMPLE_USER}"
         if [ -n "$GOOGLE_WORKSPACE_EXAMPLE_ADMIN" ]; then
           printf "google_workspace_example_admin=\"${GOOGLE_WORKSPACE_EXAMPLE_ADMIN}\"\n\n" >> $TFVARS_FILE
-          printf "\tgoogle_workspace_example_admin=${BLUE}\"${GOOGLE_WORKSPACE_EXAMPLE_ADMIN}\"${NC}\n"
+          printf "\tgoogle_workspace_example_admin=${CODE}\"${GOOGLE_WORKSPACE_EXAMPLE_ADMIN}\"${NC}\n"
         else
           printf "google_workspace_example_admin=\"{{FILL_YOUR_VALUE}}\"\n\n" >> $TFVARS_FILE
         fi
@@ -276,14 +273,14 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
       remove_google_workspace
     fi
   else
-    printf "${RED}gcloud not available. Skipping Google Workspace initialization. ${NC}\n"
+    printf "${ERROR}gcloud not available. Skipping Google Workspace initialization. ${NC}\n"
     printf "If you need Google Workspace support, install gcloud CLI and re-run initialization.\n"
   fi
 else
   printf "No Google provider found in top-level of Terraform configuration. No gcloud initialization required.\n"
 
   if [ -f google-workspace.tf ]; then
-    printf "If you don't intend to use Google Workspace via APIs as a data source in future, you can ${BLUE}rm google-workspace.tf${NC} and ${BLUE}rm google-workspace-variables.tf${NC} \n"
+    printf "If you don't intend to use Google Workspace via APIs as a data source in future, you can ${CODE}rm google-workspace.tf${NC} and ${CODE}rm google-workspace-variables.tf${NC} \n"
   fi
 fi
 
@@ -313,7 +310,7 @@ if test $AZUREAD_PROVIDER_COUNT -ne 0; then
   if $MSFT_VARIABLES_DEFINED; then
     # Only prompt if az CLI is available, otherwise skip Microsoft 365 initialization
     if az --version &> /dev/null ; then
-      prompt_user_Yn "Do you want to use ${BLUE}Microsoft 365${NC} as a data source? (requires ${BLUE}az${NC} CLI to be installed and authenticated in the environment from which this terraform configuration will be applied) "
+      prompt_user_Yn "Do you want to use ${CODE}Microsoft 365${NC} as a data source? (requires ${BLUE}az${NC} CLI to be installed and authenticated in the environment from which this terraform configuration will be applied) "
 
       if [[ $? -eq 1 ]]; then
         printf "Azure CLI already installed.\n"
@@ -324,10 +321,10 @@ if test $AZUREAD_PROVIDER_COUNT -ne 0; then
         MSFT_TENANT_ID=$(az account show --query tenantId --output tsv 2>/dev/null || echo "")
         if [ -n "$MSFT_TENANT_ID" ]; then
           printf "msft_tenant_id=\"${MSFT_TENANT_ID}\"\n\n" >> $TFVARS_FILE
-          printf "\tmsft_tenant_id=${BLUE}\"${MSFT_TENANT_ID}\"${NC}\n"
+          printf "\tmsft_tenant_id=${CODE}\"${MSFT_TENANT_ID}\"${NC}\n"
         else
           printf "# msft_tenant_id=\"{{FILL_YOUR_VALUE}}\"\n\n" >> $TFVARS_FILE
-          printf "${YELLOW}Could not determine Azure tenant ID. You MUST fill ${BLUE}msft_tenant_id${NC} in your terraform.tfvars file if you are using Microsoft 365 connectors.${NC}\n"
+          printf "${WARNING}Could not determine Azure tenant ID. You MUST fill ${CODE}msft_tenant_id${NC} in your terraform.tfvars file if you are using Microsoft 365 connectors.${NC}\n"
         fi
 
         MSFT_USER_EMAIL=$(az account show --query user.name --output tsv 2>/dev/null || echo "")
@@ -338,14 +335,14 @@ if test $AZUREAD_PROVIDER_COUNT -ne 0; then
           printf "\tmsft_owners_email=${BLUE}[ \"${MSFT_USER_EMAIL}\" ]${NC}\n"
         else
           printf "msft_owners_email=[\n  # \"{{FILL_YOUR_VALUE}}\"\n]\n\n" >> $TFVARS_FILE
-          printf "${RED}Could not determine Azure user email. You MUST fill ${BLUE}msft_owners_email${NC} in your terraform.tfvars file yourself.${NC}\n"
+          printf "${ERROR}Could not determine Azure user email. You MUST fill ${CODE}msft_owners_email${NC} in your terraform.tfvars file yourself.${NC}\n"
         fi
         INCLUDE_MSFT="true"
       else
         remove_msft
       fi
     else
-      printf "${RED}az CLI not available. Skipping Microsoft 365 initialization.${NC}\n"
+      printf "${ERROR}az CLI not available. Skipping Microsoft 365 initialization.${NC}\n"
       printf "If you need Microsoft 365 support, install Azure CLI and re-run initialization.\n"
     fi
   else
@@ -372,7 +369,7 @@ rm -rf "${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs/.terraform" 2>
 rm "${PSOXY_BASE_DIR}infra/modules/worklytics-connector-specs/.terraform.lock.hcl" 2> /dev/null
 
 if [ -z "$DEFAULT_CONNECTORS_TO_ENABLE" ]; then
-  printf "${RED}Failed to generate list of enabled_connectors${NC}; you will need to add an variable assigned for ${BLUE}enabled_connectors${NC} to your ${BLUE}terraform.tfvars${NC} as a list of connector ID strings. Contact support for assistance.\n"
+  printf "${ERROR}Failed to generate list of enabled_connectors${NC}; you will need to add an variable assigned for ${CODE}enabled_connectors${NC} to your ${CODE}terraform.tfvars${NC} as a list of connector ID strings. Contact support for assistance.\n"
 else
   printf "# review following list of connectors below to enable, and comment out what you don't want\n" >> $TFVARS_FILE
   printf "# NOTE: usage of some connectors may require specific license from Worklytics or the data source; or have a usage cost on the data source side. Worklytics is not responsible for any costs incurred on the data source side or by usage of the APIs it provides.\n" >> $TFVARS_FILE
@@ -417,7 +414,7 @@ fi
 
 
 if [ "$DEPLOYMENT_ENV" != "local" ]; then
-  printf "Setting ${BLUE}install_test_tool=false${NC} and ${BLUE}todos_as_outputs=true${NC}, because your ${BLUE}terraform apply${NC} will run remotely.\n\n"
+  printf "Setting ${CODE}install_test_tool=false${NC} and ${CODE}todos_as_outputs=true${NC}, because your ${CODE}terraform apply${NC} will run remotely.\n\n"
 
   echo "install_test_tool = false" >> $TFVARS_FILE
   echo "todos_as_outputs = true" >> $TFVARS_FILE
@@ -477,8 +474,8 @@ check_and_offer_published_bundle() {
 
   if [ "$bundle_exists" = true ]; then
     printf "\n"
-    printf "Found published deployment bundle for version ${BLUE}${version}${NC} at:\n"
-    printf "  ${GREEN}${bundle_path}${NC}\n"
+    printf "Found published deployment bundle for version ${CODE}${version}${NC} at:\n"
+    printf "  ${SUCCESS}${bundle_path}${NC}\n"
     prompt_user_Yn "Do you want to use this published bundle instead of building one locally?"
     if [[ $? -eq 1 ]]; then
       # User wants to use published bundle
@@ -489,7 +486,7 @@ deployment_bundle = \"${bundle_path}\"" "$TFVARS_FILE"
       else
         printf "deployment_bundle = \"${bundle_path}\"\n\n" >> $TFVARS_FILE
       fi
-      printf "Set ${BLUE}deployment_bundle${NC} to ${GREEN}${bundle_path}${NC}\n"
+      printf "Set ${CODE}deployment_bundle${NC} to ${SUCCESS}${bundle_path}${NC}\n"
       return 1  # Indicate bundle was set
     fi
   fi
@@ -517,5 +514,5 @@ fi
 printf "\n\n"
 
 # give user some feedback
-printf "Initialized example terraform vars file. Please open ${BLUE}${TFVARS_FILE}${NC} and customize it to your needs.\n"
-printf "Review ${BLUE}variables.tf${NC} for descriptions of each variable.\n\n"
+printf "Initialized example terraform vars file. Please open ${CODE}${TFVARS_FILE}${NC} and customize it to your needs.\n"
+printf "Review ${CODE}variables.tf${NC} for descriptions of each variable.\n\n"

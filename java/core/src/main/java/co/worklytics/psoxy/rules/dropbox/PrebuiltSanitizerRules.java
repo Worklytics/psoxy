@@ -8,13 +8,14 @@ import com.google.common.collect.ImmutableMap;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Prebuilt sanitization rules for Dropbox API responses
  */
 public class PrebuiltSanitizerRules {
 
-    static private final List<String> DEFAULT_QUERY_HEADERS = List.of("Dropbox-API-Select-User");
+    static private final Set<String> DEFAULT_QUERY_HEADERS = Set.of("Dropbox-API-Select-User");
 
     static private final String DROPBOX_BUSINESS = "dropbox-business";
 

@@ -1,16 +1,16 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.storage.BulkDataSanitizer;
-import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Writer;
+import javax.inject.Inject;
 import com.avaulta.gateway.rules.ColumnarRules;
 import com.google.api.client.util.Lists;
-import com.google.cloud.secretmanager.v1.AccessSecretVersionResponse;
-import com.google.cloud.secretmanager.v1.SecretManagerServiceClient;
+import co.worklytics.psoxy.storage.BulkDataSanitizer;
+import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import lombok.NonNull;
 import lombok.SneakyThrows;
-
-import javax.inject.Inject;
-import java.io.*;
 
 //@NoArgsConstructor(onConstructor_ = @Inject) //q: compile complaints - lombok annotation processing not reliable??
 public class Handler {
@@ -54,7 +54,19 @@ public class Handler {
 
         try (FileReader in = new FileReader(inputFile);
              Writer writer = new AppendableWriter(out)) {
-            sanitizer.sanitize(in, writer, pseudonymizer);
+
+            String contentType = java.net.URLConnection.guessContentTypeFromName(inputFile.getName());
+
+            co.worklytics.psoxy.gateway.StorageEventRequest request =
+                co.worklytics.psoxy.gateway.StorageEventRequest.builder()
+                .sourceBucketName("local-file")
+                .sourceObjectPath(inputFile.getName())
+                .destinationBucketName("local-output")
+                .destinationObjectPath(inputFile.getName() + "-sanitized")
+                .contentType(contentType)
+                .build();
+
+            sanitizer.sanitize(request, in, writer, pseudonymizer);
         }
     }
 
