@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
 import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
@@ -366,6 +364,13 @@ public class StorageHandler {
     void validate(StorageEventRequest request,
                   StorageHandler.ObjectTransform transform,
                   Supplier<InputStream> inputStreamSupplier) {
+        
+        // Skip validation for binary formats like Parquet, as text-based validation corrupts/fails
+        if (request.getSourceObjectPath().toLowerCase().endsWith(".parquet") || 
+            StringUtils.containsIgnoreCase(request.getContentType(), "parquet")) {
+            return;
+        }
+
         int bufferSize = getBufferSize();
         try (
             InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
@@ -408,9 +413,7 @@ public class StorageHandler {
 
         try (
             InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
-            Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8), bufferSize);
-            OutputStream outputStream = writeOutputStream(request, bufferSize, outputStreamSupplier);
-            OutputStreamWriter writer = new OutputStreamWriter(outputStream)
+            OutputStream outputStream = writeOutputStream(request, bufferSize, outputStreamSupplier)
         ) {
 
             Optional<BulkDataRules> applicableRules =
@@ -422,7 +425,7 @@ public class StorageHandler {
 
             BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules.get());
 
-            fileHandler.sanitize(request, reader, writer, pseudonymizer);
+            fileHandler.sanitize(request, inputStream, outputStream, pseudonymizer);
         }
     }
 

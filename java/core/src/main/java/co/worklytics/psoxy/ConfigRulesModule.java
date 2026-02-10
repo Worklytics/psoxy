@@ -1,23 +1,22 @@
 package co.worklytics.psoxy;
 
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.logging.Logger;
+import javax.inject.Singleton;
+import com.avaulta.gateway.rules.BulkDataRules;
+import com.avaulta.gateway.rules.ColumnarRules;
+import com.avaulta.gateway.rules.RecordRules;
+import com.avaulta.gateway.rules.RuleSet;
+import com.google.common.base.Preconditions;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
-import com.avaulta.gateway.rules.BulkDataRules;
-import com.avaulta.gateway.rules.ColumnarRules;
-import com.avaulta.gateway.rules.RecordRules;
-import com.avaulta.gateway.rules.RuleSet;
-import com.google.common.base.Preconditions;
 import dagger.Module;
 import dagger.Provides;
-
-import javax.inject.Singleton;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.logging.Logger;
 
 @Module
 public class ConfigRulesModule {

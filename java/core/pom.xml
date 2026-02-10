@@ -84,6 +84,12 @@
             <version>${dependency.commons-io.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>blue.strategic.parquet</groupId>
+            <artifactId>parquet-floor</artifactId>
+            <version>1.51</version>
+        </dependency>
+
 
         <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
         <dependency>

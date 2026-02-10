@@ -31,6 +31,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.BulkModeConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SecretStore;
@@ -182,6 +183,13 @@ public class PsoxyModule {
     static BulkDataSanitizerFactory fileHandler(BulkDataSanitizerFactoryImpl fileHandlerStrategy) {
         return fileHandlerStrategy;
     }
+
+    @Provides
+    @Singleton
+    static BulkModeConfig bulkModeConfig(ConfigService configService) {
+        return BulkModeConfig.fromConfigService(configService);
+    }
+
 
     @Provides
     @Singleton

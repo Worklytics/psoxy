@@ -27,6 +27,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.TriConsumer;
@@ -91,6 +92,20 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     }
 
     @Override
+    public void sanitize(@NonNull co.worklytics.psoxy.gateway.StorageEventRequest request,
+                         @NonNull java.io.InputStream in,
+                         @NonNull java.io.OutputStream out,
+                         @NonNull Pseudonymizer pseudonymizer) throws IOException {
+
+        // Columnar sanitizer is currently only used for CSVs
+        // So we can just wrap the streams
+        // Wrap with BOMInputStream to strip potentially harmful BOM
+        try (Reader reader = new java.io.InputStreamReader(BOMInputStream.builder().setInputStream(in).get(), java.nio.charset.StandardCharsets.UTF_8);
+             Writer writer = new java.io.OutputStreamWriter(out, java.nio.charset.StandardCharsets.UTF_8)) {
+            sanitize(request, reader, writer, pseudonymizer);
+        }
+    }
+
     public void sanitize(@NonNull co.worklytics.psoxy.gateway.StorageEventRequest request,
                          @NonNull Reader reader,
                          @NonNull Writer writer,

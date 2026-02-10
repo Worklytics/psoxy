@@ -334,6 +334,7 @@ module "bulk_connector" {
   secret_bindings                   = module.psoxy.secrets
   vpc_config                        = module.psoxy.vpc_config
   example_file                      = try(each.value.example_file, null)
+  example_files                     = try(each.value.example_files, [])
   instructions_template             = try(each.value.instructions_template, null)
   input_expiration_days             = var.bulk_input_expiration_days
   sanitized_expiration_days         = var.bulk_sanitized_expiration_days

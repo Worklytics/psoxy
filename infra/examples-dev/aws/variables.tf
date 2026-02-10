@@ -317,6 +317,7 @@ variable "custom_bulk_connectors" {
     memory_size_mb      = optional(number, null)
     settings_to_provide = optional(map(string), {})
     example_file        = optional(string)
+    example_files       = optional(list(string), [])
   }))
   description = "specs of custom bulk connectors to create"
 

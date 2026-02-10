@@ -1,0 +1,32 @@
+# Auto-detect format rules for Slack Discovery Bulk
+# Works with NDJSON, JSON Array, and Parquet files
+# Use prefix patterns (e.g., users*, channels*) to match files regardless of extension
+
+fileRules:
+  users*:
+    format: "AUTO"
+    transforms:
+      - pseudonymize: "$.profile.email"
+      - redact: "$.name"
+      - redact: "$.real_name"
+  channels*:
+    format: "AUTO"
+    transforms:
+      - redact: "$.name"
+  dms*:
+    format: "AUTO"
+    transforms:
+      - redact: "$.text"
+  groups*:
+    format: "AUTO"
+    transforms:
+      - redact: "$.name"
+  mpims*:
+    format: "AUTO"
+    transforms:
+      - redact: "$.text"
+  messages-*:
+    format: "AUTO"
+    transforms:
+      - redact: "$.text"
+      - redact: "$.channel_name"

@@ -20,7 +20,7 @@ class CsvRecordReader implements RecordReader {
     List<String> orderedHeaders;
 
     @Override
-    public Object readRecord() throws IOException {
+    public java.util.Map<String, Object> readRecord() throws IOException {
         if (parser == null) {
             parser = CSVFormat.DEFAULT.builder()
                 .setHeader()
@@ -48,7 +48,7 @@ class CsvRecordReader implements RecordReader {
                 }
                 return map;
             }
-            return record.toMap();
+            return new java.util.LinkedHashMap<>(record.toMap());
         }
         return null;
     }
