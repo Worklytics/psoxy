@@ -1,6 +1,8 @@
 ---
 endpoints:
   - pathRegex: "^/2/team_log/get_events(/continue)?$"
+    allowedRequestHeaders:
+      - "Dropbox-API-Select-User"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -32,6 +34,8 @@ endpoints:
           - "$.events[*].assets[*].path['contextual']"
           - "$.events[*].assets[*].path.namespace_relative['relative_path']"
   - pathRegex: "^/2/files/list_folder(/continue)?$"
+    allowedRequestHeaders:
+      - "Dropbox-API-Select-User"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -48,6 +52,8 @@ endpoints:
           - "$.entries[*].export_info['export_as']"
           - "$.entries[*].file_lock_info['lockholder_name']"
   - pathRegex: "^/2/files/list_revisions$"
+    allowedRequestHeaders:
+      - "Dropbox-API-Select-User"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -64,6 +70,8 @@ endpoints:
           - "$.entries[*].export_info['export_as']"
           - "$.entries[*].file_lock_info['lockholder_name']"
   - pathRegex: "^/2/team/groups/members/list(/continue)?$"
+    allowedRequestHeaders:
+      - "Dropbox-API-Select-User"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -82,6 +90,8 @@ endpoints:
           - "$.members[*].profile['profile_photo_url']"
           - "$.members[*].roles[*]['description', 'name']"
   - pathRegex: "^/2/team/members/list(/continue)?_v2$"
+    allowedRequestHeaders:
+      - "Dropbox-API-Select-User"
     transforms:
       - !<pseudonymize>
         jsonPaths:
