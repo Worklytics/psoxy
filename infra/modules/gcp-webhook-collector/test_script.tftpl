@@ -18,6 +18,8 @@ ${command_cli_call} -u "${collector_endpoint_url}${collection_path}" --method PO
 %{ if example_identity != null ~}
 --identity-subject '${example_identity}' \
 %{ endif ~}
+--verify-collection "${bucket_name}" \
+--scheduler-job "${scheduler_job_name}" \
 --body '${example_payload}'
 COLLECTION_RC=$?
 

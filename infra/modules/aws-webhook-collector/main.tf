@@ -383,6 +383,7 @@ locals {
     example_payload        = coalesce(var.example_payload, "{\"test\": \"data\"}")
     example_identity       = var.example_identity
     collection_path        = local.collection_path
+    sanitized_bucket_name  = module.sanitized_output.bucket_id
   })
 }
 
