@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class PrebuiltSanitizerRules {
 
-    static final RESTRules GONG_METRICS = Rules2.load("sources/gong/gong-metrics.yaml");
+    static final RESTRules GONG_METRICS = Rules2.load("sources/gong/gong-metrics/gong-metrics.yaml");
 
     static public final Map<String, RESTRules> DEFAULT_RULES_MAP =
         ImmutableMap.<String, RESTRules>builder()
