@@ -45,9 +45,13 @@ done
 
 rm ${EXAMPLE_TEMPLATE_REPO}*.bck
 
-# copy the README intended to be published to the example repo
-# q: better name for this README?
-cp README_to_publish.md ${EXAMPLE_TEMPLATE_REPO}README.md
+# copy the README template intended to be published to the example repo
+cp README.template.md ${EXAMPLE_TEMPLATE_REPO}README.md
+
+# copy AGENTS template if it exists
+if [ -f AGENTS.template.md ]; then
+  cp -f AGENTS.template.md ${EXAMPLE_TEMPLATE_REPO}AGENTS.md
+fi
 
 cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/init-example.sh ${EXAMPLE_TEMPLATE_REPO}init
 chmod +x ${EXAMPLE_TEMPLATE_REPO}init
