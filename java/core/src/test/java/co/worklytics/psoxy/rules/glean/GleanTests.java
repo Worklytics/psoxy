@@ -2,7 +2,6 @@ package co.worklytics.psoxy.rules.glean;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.rules.glean.PrebuiltSanitizerRules;
 import lombok.Getter;
 
 import java.util.stream.Stream;

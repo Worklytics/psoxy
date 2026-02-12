@@ -4,6 +4,8 @@ endpoints:
     allowedMethods:
       - "POST"
     allowedQueryParams: []
+    allowedRequestHeaders:
+      - "X-Glean-ActAs"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -23,6 +25,8 @@ endpoints:
     allowedMethods:
       - "POST"
     allowedQueryParams: []
+    allowedRequestHeaders:
+      - "X-Glean-ActAs"
     transforms:
       - !<pseudonymize>
         jsonPaths:
