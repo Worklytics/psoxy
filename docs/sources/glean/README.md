@@ -31,7 +31,7 @@ of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 ### Prerequisites
 
 - A **Global Admin** role in your Glean workspace
-- Your Glean instance name (e.g., if your Glean URL is `acme-be.glean.com`, your instance name is `acme-be`)
+- Your Glean instance name (e.g., if your Glean URL is `acme.glean.com`, your instance name is `acme`)
 
 ### Configuration
 
