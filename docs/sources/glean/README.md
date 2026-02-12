@@ -11,7 +11,7 @@ A **Global Admin** in your Glean workspace needs to create a Glean-issued token.
 
 Based on the endpoints used by this connector, the following scopes are required:
 
-- **`INSIGHTS_READ`** - Required for the `/rest/api/v1/getinsights` endpoint to retrieve user activity insights
+- **`INSIGHTS_READ`** - Required for the `/rest/api/v1/insights` endpoint to retrieve user activity insights
 - **`PEOPLE_READ`** - Required for the `/rest/api/v1/listentities` endpoint to list users and teams
 
 ## Examples
