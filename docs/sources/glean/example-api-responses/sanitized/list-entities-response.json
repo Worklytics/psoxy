@@ -19,6 +19,7 @@
   "teamResults":[
     {
       "id":"team_001",
+      "name":"Engineering Team",
       "datasource":"glean",
       "lastUpdatedAt":"2024-07-29T15:51:28.071Z",
       "members":[
@@ -35,13 +36,6 @@
           },
           "relationship":"MANAGER",
           "joinDate":"2018-03-01T00:00:00.000Z"
-        }
-      ],
-      "emails":[
-        {
-          "email":"t~7bRBKHKe7lHdNtWnrsXq-sRans5UroJ2nMOqHKe_5W8@company.com",
-          "type":"PRIMARY",
-          "isUserGenerated":false
         }
       ],
       "datasourceProfiles":[
