@@ -96,7 +96,7 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
                          @NonNull Writer writer,
                          @NonNull Pseudonymizer pseudonymizer) throws IOException {
         CSVFormat inputCSVFormat = CSVFormat.DEFAULT.builder()
-            .setDelimiter(rules.getDelimiter())
+            .setDelimiter(ObjectUtils.firstNonNull(rules.getDelimiter(), ColumnarRules.DEFAULT_DELIMITER))
             .setHeader() // needed, indicates needs to be parsed from input
             .setSkipHeaderRecord(true)
             .setIgnoreHeaderCase(true)

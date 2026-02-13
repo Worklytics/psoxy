@@ -133,11 +133,11 @@ class ColumnarRulesTest {
         ColumnarRules fromYaml =
             yamlMapper.readerFor(ColumnarRules.class).readValue(yaml);
 
-        assertNotNull(fromYaml.getFieldsToTransform());
-        assertNotNull(fromYaml.getColumnsToPseudonymize());
-        assertNotNull(fromYaml.getColumnsToRedact());
-        assertNotNull(fromYaml.getColumnsToRename());
-        assertNotNull(fromYaml.getColumnsToDuplicate());
+        assertNotNull(fromYaml.getFieldsToTransform(), "fieldsToTransform should not be null");
+        assertNotNull(fromYaml.getColumnsToPseudonymize(), "columnsToPseudonymize should not be null");
+        assertNotNull(fromYaml.getColumnsToRedact(), "columnsToRedact should not be null");
+        assertNotNull(fromYaml.getColumnsToRename(), "columnsToRename should not be null");
+        assertNotNull(fromYaml.getColumnsToDuplicate(), "columnsToDuplicate should not be null");
     }
 
 }

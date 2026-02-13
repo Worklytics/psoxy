@@ -56,6 +56,8 @@ public class OutputUtils {
      *
      * @param processedDataStage the stage of processed data to be written to the side output
      */
+    // generic cast of Output is safe; we know the factory produces the right type
+    @SuppressWarnings("unchecked")
     public ApiDataSideOutput forStage(ProcessedDataStage processedDataStage) {
 
         ProxyConfigProperty configProperty = switch (processedDataStage) {
@@ -72,6 +74,8 @@ public class OutputUtils {
         return outputToSideOutputAdapterFactory.create(outputToAdapt);
     }
 
+    // generic cast of Output is safe
+    @SuppressWarnings("unchecked")
     public ApiSanitizedDataOutput asyncOutput() {
         Output asyncOutput = configService
                 .getConfigPropertyAsOptional(ApiModeConfigProperty.ASYNC_OUTPUT_DESTINATION)
@@ -128,6 +132,8 @@ public class OutputUtils {
         return original;
     }
 
+    // generic cast of Output is safe
+    @SuppressWarnings("unchecked")
     private <T extends Output> T createOutputForLocation(OutputLocation outputLocation) {
         OutputFactory<?> outputFactory = outputFactories.stream()
             .filter(factory -> factory.supports(outputLocation))
