@@ -21,6 +21,22 @@ if ! terraform -v &> /dev/null ; then
   exit 1
 fi
 
+# Check Terraform version
+TERRAFORM_VERSION=`terraform -v | head -n 1`
+TERRAFORM_VERSION_MAJOR_MINOR=$(echo $TERRAFORM_VERSION | sed -n 's/^Terraform v\([0-9]*\.[0-9]*\).*$/\1/p')
+printf "Your Terraform version is ${BLUE}${TERRAFORM_VERSION}${NC}.\n"
+
+# Parse Terraform version components
+TF_MAJOR=$(echo "$TERRAFORM_VERSION_MAJOR_MINOR" | cut -d. -f1)
+TF_MINOR=$(echo "$TERRAFORM_VERSION_MAJOR_MINOR" | cut -d. -f2)
+if (( TF_MAJOR < 1 || (TF_MAJOR == 1 && TF_MINOR < 7) )); then
+  printf "${RED}This Terraform version is unsupported.${NC} Psoxy requires Terraform 1.7.x or later.\n"
+  printf "We recommend you upgrade. See https://developer.hashicorp.com/terraform/downloads\n"
+  printf "Terraform is used to provision the infrastructure that will host your Psoxy instances\n"
+  if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${BLUE}brew install terraform${NC}\n"; fi
+  exit 1
+fi
+
 # Check Maven installation
 
 if ! mvn -v &> /dev/null ; then

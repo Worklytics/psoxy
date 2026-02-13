@@ -227,14 +227,14 @@ You will need all the following in your deployment environment (eg, your laptop)
 | [git](https://git-scm.com/)                  | 2.17+                | `git --version`       |
 | [Maven](https://maven.apache.org/)           | 3.6+ ; 3.9.10+ required for java 24  | `mvn -v`              |
 | [Java JDK 17+](https://openjdk.org/install/) | 17, 21, 24 (see notes) | `mvn -v \| grep Java` |
-| [Terraform](https://www.terraform.io/)       | 1.6+, < 2.0          | `terraform version`   |
+| [Terraform](https://www.terraform.io/)       | 1.7+, < 2.0          | `terraform version`   |
 
 
 NOTE: we will support Java versions for duration of official support windows, in particular the LTS versions. Minor versions, such as 18-20, 22-23 which are out of official support, may work but are not routinely tested.
 
 NOTE: Using `terraform` is not strictly necessary, but it is the only supported method. You may provision your infrastructure via your host's CLI, web console, or another infrastructure provisioning tool, but we don't offer documentation or support in doing so.  Adapting one of our [terraform examples](https://github.com/Worklytics/psoxy/tree/main/infra/examples) or writing your own config that re-uses our [modules](https://github.com/Worklytics/psoxy/tree/main/infra/modules) will simplify things greatly.
 
-NOTE: from v0.4.59, we've relaxed Terraform version constraint on our modules to allow up to 1.9.x. However, we are not officially supporting this, as we strive to maintain compatibility with both OpenTofu and Terraform.
+NOTE: from v0.6.x, we require Terraform 1.7.x as minimum. We strive to maintain compatibility with both OpenTofu and Terraform.
 
 Depending on your Cloud Host / Data Sources, you will need:
 
