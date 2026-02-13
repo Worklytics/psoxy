@@ -1,0 +1,195 @@
+---
+endpoints:
+  - pathTemplate: "/rest/api/v1/insights"
+    allowedMethods:
+      - "POST"
+    allowedQueryParams: []
+    allowedRequestHeaders:
+      - "X-Glean-ActAs"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..obfuscatedId"
+          - "$..emailAddress"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        agentsResponse:
+          $ref: "#/definitions/AgentsResponse"
+        assistantResponse:
+          $ref: "#/definitions/AssistantResponse"
+        overviewResponse:
+          $ref: "#/definitions/OverviewResponse"
+  - pathTemplate: "/rest/api/v1/listentities"
+    allowedMethods:
+      - "POST"
+    allowedQueryParams: []
+    allowedRequestHeaders:
+      - "X-Glean-ActAs"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..email"
+          - "$..obfuscatedId"
+          - "$..aliasEmails[*]"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        cursor:
+          type: "string"
+        hasMoreResults:
+          type: "boolean"
+        results:
+          type: "array"
+          items:
+            $ref: "#/definitions/Person"
+        sortOptions:
+          type: "array"
+          items:
+            type: "string"
+        teamResults:
+          type: "array"
+          items:
+            $ref: "#/definitions/Team"
+        totalCount:
+          type: "integer"
+definitions:
+  AgentUserInsight:
+    type: "object"
+    properties:
+      agentsCreatedCount:
+        type: "integer"
+      agentsUsedCount:
+        type: "integer"
+      averageRunsPerDayCount:
+        type: "number"
+      person:
+        $ref: "#/definitions/Person"
+      runCount:
+        type: "integer"
+  AgentsResponse:
+    type: "object"
+    properties:
+      agentUsersInsights:
+        type: "array"
+        items:
+          $ref: "#/definitions/AgentUserInsight"
+  AssistantResponse:
+    type: "object"
+    properties:
+      perUserInsights:
+        type: "array"
+        items:
+          $ref: "#/definitions/PerUserInsight_1"
+  DatasourceProfile:
+    type: "object"
+    properties:
+      datasource:
+        type: "string"
+      handle:
+        type: "string"
+      isUserGenerated:
+        type: "boolean"
+  OverviewResponse:
+    type: "object"
+    properties:
+      perUserInsights:
+        type: "array"
+        items:
+          $ref: "#/definitions/PerUserInsight"
+  PerUserInsight:
+    type: "object"
+    properties:
+      numActiveSessions:
+        type: "integer"
+      numAgentRuns:
+        type: "integer"
+      numAiAnswers:
+        type: "integer"
+      numChats:
+        type: "integer"
+      numDaysActive:
+        type: "integer"
+      numGleanbotUsefulResponses:
+        type: "integer"
+      numSearches:
+        type: "integer"
+      numSummarizations:
+        type: "integer"
+      person:
+        $ref: "#/definitions/Person"
+  PerUserInsight_1:
+    type: "object"
+    properties:
+      numAiAnswers:
+        type: "integer"
+      numChatMessages:
+        type: "integer"
+      numDaysActive:
+        type: "integer"
+      numGleanbotInteractions:
+        type: "integer"
+      numSummarizations:
+        type: "integer"
+      person:
+        $ref: "#/definitions/Person"
+  Person:
+    type: "object"
+    properties:
+      metadata:
+        $ref: "#/definitions/PersonMetadata"
+      obfuscatedId:
+        type: "string"
+  PersonMetadata:
+    type: "object"
+    properties:
+      aliasEmails:
+        type: "array"
+        items:
+          type: "string"
+      email:
+        type: "string"
+      isSignedUp:
+        type: "boolean"
+      loggingId:
+        type: "string"
+      timezone:
+        type: "string"
+      timezoneIANA:
+        type: "string"
+      timezoneOffset:
+        type: "integer"
+  Team:
+    type: "object"
+    properties:
+      createdFrom:
+        type: "string"
+      datasource:
+        type: "string"
+      datasourceProfiles:
+        type: "array"
+        items:
+          $ref: "#/definitions/DatasourceProfile"
+      id:
+        type: "string"
+      lastUpdatedAt:
+        type: "string"
+      loggingId:
+        type: "string"
+      members:
+        type: "array"
+        items:
+          $ref: "#/definitions/TeamMember"
+      name:
+        type: "string"
+  TeamMember:
+    type: "object"
+    properties:
+      joinDate:
+        type: "string"
+      person:
+        $ref: "#/definitions/Person"
+      relationship:
+        type: "string"

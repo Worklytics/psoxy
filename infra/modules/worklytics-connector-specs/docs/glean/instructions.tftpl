@@ -1,0 +1,28 @@
+See Glean's documentation for the latest: https://developers.glean.com/api-info/client/authentication/glean-issued
+
+A **Global Admin** in your Glean workspace must create a Glean-issued token with the required scopes.
+
+**IMPORTANT: Before proceeding, you must set the `glean_instance_name` variable in your Terraform configuration.**
+
+Your Glean instance name is required for the proxy to connect to the correct endpoint.
+If your Glean URL is 'acme.glean.com', your instance name is 'acme'.
+Add this to your Terraform variables file (e.g., terraform.tfvars):
+
+```
+glean_instance_name = "acme"  # replace with your actual instance name
+```
+
+Then proceed with token creation:
+
+1. Log in to your Glean workspace as a Global Admin
+
+2. Navigate to Setup → API Credentials → Create API Credential
+
+3. Select "Glean-issued token" as the authentication method
+
+4. Configure the required scopes:
+   - `INSIGHTS_READ` - for retrieving user activity insights
+   - `PEOPLE_READ` - for listing users and teams
+
+5. Copy the generated token immediately - you won't see it again; then paste it as the `${path_to_instance_parameters}ACCESS_TOKEN` parameter value in your proxy's host platform.
+
