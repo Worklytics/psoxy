@@ -142,8 +142,6 @@ definitions:
         $ref: "#/definitions/PersonMetadata"
       obfuscatedId:
         type: "string"
-      sourceId:
-        type: "string"
   PersonMetadata:
     type: "object"
     properties:
