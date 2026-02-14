@@ -1,0 +1,87 @@
+### Gong Metrics API Connector Setup
+
+You can use a [guided script](../../../tools/gong-auth.sh) to automate the OAuth setup process. Otherwise, follow the manual steps below.
+
+See Gong's official documentation for the latest OAuth setup: https://help.gong.io/docs/create-an-app-for-gong
+
+**IMPORTANT: Before proceeding, you must set the `gong_instance_name` variable in your Terraform configuration.**
+
+Your Gong instance name is required for the proxy to connect to the correct endpoint.
+If your Gong URL is 'acme.gong.io', your instance name is 'acme'.
+Add this to your Terraform variables file (e.g., terraform.tfvars):
+
+```
+gong_instance_name = "acme"  # replace with your actual instance name
+```
+
+Then proceed with creating your Gong OAuth app:
+
+1. Log in to your Gong workspace with administrative privileges
+
+2. Navigate to **Company Settings** → **Ecosystem** → **Apps & Integrations** → **Create an app**
+
+3. Fill in the required information:
+   - **App Name**: (e.g., "Worklytics Analytics Connector")
+   - **Description**: (describe the purpose of this integration)
+   - **Redirect URL**: You can use `http://localhost` or any valid URL format. This is required by Gong but won't be actively used in the server-to-server flow.
+
+4. Configure the required **scopes** for this connector:
+   - `api:stats:user-actions` - for retrieving user activity statistics
+   - `api:users:read` - for listing users and their details
+
+5. Once the app is created, copy the following credentials:
+   - **Client ID**
+   - **Client Secret**
+
+6. **Obtain OAuth Tokens**: You need to complete the OAuth authorization flow to obtain access and refresh tokens. This is a one-time setup process:
+
+   a. Build the authorization URL by replacing `<CLIENT_ID>` with your actual value:
+   ```
+   https://app.gong.io/oauth2/authorize?client_id=<CLIENT_ID>&response_type=code&scope=api:stats:user-actions%20api:users:read&redirect_uri=http://localhost&state=YOUR_RANDOM_STATE
+   ```
+
+   b. Open this URL in a web browser. You will be prompted to authorize the app.
+
+   c. After authorization, you'll be redirected to your redirect_uri with a `code` parameter in the URL:
+   ```
+   http://localhost?code=<AUTHORIZATION_CODE>&state=YOUR_RANDOM_STATE
+   ```
+   Copy the authorization code from the URL (note: it expires in 10 minutes).
+
+   d. Exchange the authorization code for tokens using the following curl command (replace placeholders with your actual values):
+   ```bash
+   curl --request POST \
+     --url 'https://app.gong.io/oauth2/generate-customer-token' \
+     --header 'Authorization: Basic <BASE64_ENCODED_CLIENT_ID:CLIENT_SECRET>' \
+     --header 'Content-Type: application/x-www-form-urlencoded' \
+     --data 'grant_type=authorization_code&code=<AUTHORIZATION_CODE>&client_id=<CLIENT_ID>&redirect_uri=http://localhost'
+   ```
+
+   To create the Base64-encoded credentials for the Authorization header:
+   ```bash
+   echo -n "<CLIENT_ID>:<CLIENT_SECRET>" | base64
+   ```
+
+   e. The response will contain the tokens you need:
+   ```json
+   {
+     "access_token": "your-access-token",
+     "refresh_token": "your-refresh-token",
+     "expires_in": 86400,
+     "token_type": "Bearer",
+     "api_base_url_for_customer": "https://your-instance.api.gong.io"
+   }
+   ```
+
+7. Store the OAuth credentials in your proxy's secret manager:
+   - `${path_to_instance_parameters}CLIENT_ID` with the Client ID from step 5
+   - `${path_to_instance_parameters}CLIENT_SECRET` with the Client Secret from step 5
+   - `${path_to_instance_parameters}ACCESS_TOKEN` with the `access_token` from step 6e
+   - `${path_to_instance_parameters}REFRESH_TOKEN` with the `refresh_token` from step 6e
+
+**NOTES:**
+- Access tokens expire after 1 day by default. The proxy will automatically refresh them using the refresh token.
+- The `api_base_url_for_customer` returned in the token response is customer-specific. Ensure your `gong_instance_name` variable matches your actual instance.
+- Keep your Client Secret and tokens secure according to your organization's security policies.
+- You can regenerate the Client Secret at any time from the Gong app settings, but you'll need to update it in the proxy configuration and re-obtain tokens.
+

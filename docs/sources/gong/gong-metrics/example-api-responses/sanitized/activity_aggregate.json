@@ -1,0 +1,35 @@
+{
+  "requestId":"4al018gzaztcr8nbukw",
+  "records":{
+    "totalRecords":263,
+    "currentPageSize":100,
+    "currentPageNumber":0,
+    "cursor":"eyJhbGciOiJIUzI1NiJ9.eyJjYWxsSWQiM1M30.6qKwpOcvnuweTZmFRzYdtjs_YwJphJU4QIwWFM"
+  },
+  "usersAggregateActivityStats":[
+    {
+      "userId":"t~KqekpfstwHW5GZM6uPAA0PVE0umgTlSO2jX6Rhks-vs",
+      "userEmailAddress":"t~xyl6xf3-TjNvcDLMUx1BAhuK6uz4wHkFkMz5gpjXfRc@test.com",
+      "userAggregateActivityStats":{
+        "callsAsHost":20,
+        "callsGaveFeedback":35,
+        "callsRequestedFeedback":77,
+        "callsReceivedFeedback":67,
+        "ownCallsListenedTo":668,
+        "othersCallsListenedTo":96,
+        "callsSharedInternally":478,
+        "callsSharedExternally":75,
+        "callsScorecardsFilled":876,
+        "callsScorecardsReceived":876,
+        "callsAttended":46,
+        "callsCommentsGiven":21,
+        "callsCommentsReceived":13,
+        "callsMarkedAsFeedbackGiven":24,
+        "callsMarkedAsFeedbackReceived":35
+      }
+    }
+  ],
+  "toDateTime":"2019-01-21T00:00:00-08:00",
+  "fromDateTime":"2019-01-20T00:00:00-08:00",
+  "timeZone":"US/Pacific"
+}
