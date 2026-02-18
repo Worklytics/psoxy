@@ -605,7 +605,7 @@ definitions:
       remove:
         type: "string"
       target_id:
-        type: "integer"
+        type: "string"
       target_type:
         type: "string"
       to:
@@ -840,7 +840,7 @@ definitions:
         type: "string"
       due_date:
         type: "string"
-        format: "date-time"
+        format: "date"
       expired:
         type: "boolean"
       group_id:
@@ -853,7 +853,7 @@ definitions:
         type: "integer"
       start_date:
         type: "string"
-        format: "date-time"
+        format: "date"
       state:
         type: "string"
       title:

@@ -6,7 +6,7 @@
     "entity_type":"Project",
     "details":{
       "author_email":"t~5TglOcyVGpy0s4iFwMoL-G67Itorwak4J4Nm9CwxRkQ@example.com",
-      "target_id":null,
+      "target_id":"flightjs/flight",
       "target_type":"Project",
       "ip_address":"t~bb1NvTzoh1OD2KSL6AoIiZR4GpdmJLKbVOMhjetrV7g"
     },
@@ -20,7 +20,7 @@
     "details":{
       "add":"group",
       "author_email":"t~5TglOcyVGpy0s4iFwMoL-G67Itorwak4J4Nm9CwxRkQ@example.com",
-      "target_id":null,
+      "target_id":"flightjs",
       "target_type":"Group",
       "ip_address":"t~bb1NvTzoh1OD2KSL6AoIiZR4GpdmJLKbVOMhjetrV7g"
     },
@@ -36,7 +36,7 @@
       "from":"t~5PGHmv1okCQ-bBOBdwn00nam7rPGvksr5SFgVLhISnE@flightjs.com",
       "to":"t~YrsFcvwJifgjvE4BU3MY6SfDCgNPjojme7WHU5MIiJU@flightjs.com",
       "author_email":"t~5TglOcyVGpy0s4iFwMoL-G67Itorwak4J4Nm9CwxRkQ@example.com",
-      "target_id":51,
+      "target_id":null,
       "target_type":"User",
       "ip_address":null
     },
@@ -48,7 +48,7 @@
     "entity_id":1,
     "entity_type":"Gitlab::Audit::InstanceScope",
     "details":{
-      "target_id":32,
+      "target_id":null,
       "target_type":"AuditEvents::Streaming::InstanceHeader",
       "ip_address":"t~bb1NvTzoh1OD2KSL6AoIiZR4GpdmJLKbVOMhjetrV7g"
     },
