@@ -167,6 +167,18 @@ variable "github_example_repository" {
   description = "(Only required if using Github connector) Name for the repository to be used as part of example calls for Github (ex: psoxy)"
 }
 
+variable "gitlab_host" {
+  type        = string
+  default     = "gitlab.com"
+  description = "(Only required if using GitLab connector) Host of the GitLab instance (ex: gitlab.com or gitlab.mycompany.com for self-hosted)"
+}
+
+variable "gitlab_example_group_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using GitLab connector) Example group ID for test API calls (ex: 12345)"
+}
+
 variable "salesforce_example_account_id" {
   type        = string
   default     = null

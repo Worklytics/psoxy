@@ -42,6 +42,8 @@ locals {
   github_organization                      = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
   github_first_organization                = split(",", coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME"))[0]
   github_example_repository                = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
+  gitlab_host                              = coalesce(var.gitlab_host, "gitlab.com")
+  gitlab_example_group_id                  = coalesce(var.gitlab_example_group_id, "YOUR_GITLAB_GROUP_ID")
   salesforce_example_account_id            = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
 
   oauth_long_access_connectors = {
@@ -1240,6 +1242,44 @@ Add the `id` value from that JSON response as the value of the `jira_cloud_id` v
 a proper value.
 
 EOT
+    }
+    gitlab = {
+      source_kind : "gitlab"
+      availability : "beta"
+      enable_by_default : false
+      worklytics_connector_id : "gitlab-psoxy"
+      target_host : local.gitlab_host
+      source_auth_strategy : "oauth2_access_token"
+      display_name : "GitLab"
+      worklytics_connector_name : "GitLab via Psoxy"
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      environment_variables : {}
+      settings_to_provide = {
+        "GitLab Host" = local.gitlab_host
+      }
+      reserved_concurrent_executions : null
+      enable_async_processing : false
+      enable_side_output : false
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/api/v4/groups",
+        "/api/v4/groups/${local.gitlab_example_group_id}/members",
+        "/api/v4/projects",
+        "/api/v4/issues",
+        "/api/v4/merge_requests",
+        "/api/v4/users",
+        "/api/v4/audit_events",
+      ],
+      external_token_todo : templatefile("${path.module}/docs/gitlab/gitlab-instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_GITLAB_"
+      })
     }
   }
 
