@@ -9,6 +9,8 @@ Changes to be including in future/planned release notes will be added here.
 
 ## [0.5.18](https://github.com/Worklytics/psoxy/releases/tag/v0.5.18)
 - `aws`: updated IAM policy for invoking lambda functions, to reflect AWS perm changes; anyone deploying NEW api connectors on AWS will have to use this version or later, or backport similar change. (See https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html)
+- `GitLab`: added support for GitLab (gitlab.com)
+
 
 ## [0.5.16](https://github.com/Worklytics/psoxy/releases/tag/v0.5.16)
 - `Claude Code`: support basic rules for Claude Code
