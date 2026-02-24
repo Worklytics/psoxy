@@ -86,11 +86,25 @@ if [ -z "$SPACE_ID" ]; then
 
   printf "Creating a new space with title ${BLUE}${NUMERIC_RELEASE}${NC}...\n"
   # https://api.gitbook.com/v1/spaces/{spaceId}/duplicate
-  SPACE_ID=$(curl -s -X POST https://api.gitbook.com/v1/spaces/${SPACE_ID_TO_DUPLICATE}/duplicate -H "Authorization: Bearer ${GITBOOK_API_TOKEN}" | jq -r '.id')
+  SPACE_ID=$(curl -s -X POST https://api.gitbook.com/v1/spaces/${SPACE_ID_TO_DUPLICATE}/duplicate -H "Authorization: Bearer ${GITBOOK_API_TOKEN}" | jq -r '.uid // .id // empty')
   printf "New space ID: ${GREEN}${SPACE_ID}${NC}\n"
 
+  printf "${YELLOW}Waiting 10 seconds for GitBook permissions to propagate to the new space...${NC}\n"
+  sleep 10
+
   # update the title of the new space
-  curl -s -X PATCH https://api.gitbook.com/v1/spaces/${SPACE_ID} -H "Authorization: Bearer ${GITBOOK_API_TOKEN}" -H "Content-Type: application/json" -d '{"title": "'$NUMERIC_RELEASE'", "parent": "'$GITBOOK_PROXY_DOCS_SITE_ID'"}'
+  PATCH_RES=$(curl -s -X PATCH https://api.gitbook.com/v1/spaces/${SPACE_ID} -H "Authorization: Bearer ${GITBOOK_API_TOKEN}" -H "Content-Type: application/json" -d '{"title": "'$NUMERIC_RELEASE'"}')
+  if echo "$PATCH_RES" | grep -q '"error"'; then
+    printf "${RED}Error updating space title:${NC}\n"
+    echo "$PATCH_RES" | jq .
+    printf "${YELLOW}Retrying after 5 more seconds...${NC}\n"
+    sleep 5
+    PATCH_RES=$(curl -s -X PATCH https://api.gitbook.com/v1/spaces/${SPACE_ID} -H "Authorization: Bearer ${GITBOOK_API_TOKEN}" -H "Content-Type: application/json" -d '{"title": "'$NUMERIC_RELEASE'"}')
+    if echo "$PATCH_RES" | grep -q '"error"'; then
+      printf "${RED}Failed again on updating space title:${NC}\n"
+      echo "$PATCH_RES" | jq .
+    fi
+  fi
 else
   printf "Space with title ${NUMERIC_RELEASE} already exists.\n"
   SPACE_ID=$(echo "$SPACES_LIST" | jq -r 'first(.items[]? | select(.title == "'$NUMERIC_RELEASE'")) | .space.id')
@@ -109,10 +123,32 @@ fi
 printf "${YELLOW}NOTE: Although GitHub sync appears enabled in API data, recommend re-enable via the Gitbook UX anyways; relying on github sync after copy doesn't seem reliable${NC}\n"
 
 # if not already added to the site, add it
-SITE_SPACE_ID=$(echo "$SPACES_LIST" | jq -r 'first(.items[]? | select(.space.id == "'$SPACE_ID'")) | .id')
-if [ -z "$SITE_SPACE_ID" ]; then
+SITE_SPACE_ID=$(echo "$SPACES_LIST" | jq -r 'first(.items[]? | select(.space.id == "'$SPACE_ID'")) | (.uid // .id // empty)')
+if [ -z "$SITE_SPACE_ID" ] || [ "$SITE_SPACE_ID" = "null" ]; then
   printf "Adding space ${BLUE}${SPACE_ID}${NC} to site ${BLUE}${GITBOOK_PROXY_DOCS_SITE_ID}${NC}...\n"
-  SITE_SPACE_ID=$(curl -s -X POST https://api.gitbook.com/v1/orgs/${GITBOOK_ORGANIZATION_ID}/sites/${GITBOOK_PROXY_DOCS_SITE_ID}/site-spaces -H "Authorization: Bearer ${GITBOOK_API_TOKEN}" -H "Content-Type: application/json" -d '{"spaceId": "'$SPACE_ID'"}' | jq -r '.id')
+  POST_SITE_SPACE_RES=$(curl -s -X POST https://api.gitbook.com/v1/orgs/${GITBOOK_ORGANIZATION_ID}/sites/${GITBOOK_PROXY_DOCS_SITE_ID}/site-spaces -H "Authorization: Bearer ${GITBOOK_API_TOKEN}" -H "Content-Type: application/json" -d '{"space": "'$SPACE_ID'"}')
+  SITE_SPACE_ID=$(echo "$POST_SITE_SPACE_RES" | jq -r '.uid // .id // empty')
+  
+  if [ -z "$SITE_SPACE_ID" ] || [ "$SITE_SPACE_ID" = "null" ]; then
+     # maybe it uses spaceId? rollback and retry
+     printf "${YELLOW}Trying with spaceId payload...${NC}\n"
+     POST_SITE_SPACE_RES=$(curl -s -X POST https://api.gitbook.com/v1/orgs/${GITBOOK_ORGANIZATION_ID}/sites/${GITBOOK_PROXY_DOCS_SITE_ID}/site-spaces -H "Authorization: Bearer ${GITBOOK_API_TOKEN}" -H "Content-Type: application/json" -d '{"spaceId": "'$SPACE_ID'"}')
+     SITE_SPACE_ID=$(echo "$POST_SITE_SPACE_RES" | jq -r '.uid // .id // empty')
+  fi
+
+  if [ -z "$SITE_SPACE_ID" ] || [ "$SITE_SPACE_ID" = "null" ]; then
+    printf "${RED}Failed to add space to site. Response:${NC}\n"
+    echo "$POST_SITE_SPACE_RES" | jq .
+    printf "${YELLOW}Retrying POST site space in 5 seconds...${NC}\n"
+    sleep 5
+    POST_SITE_SPACE_RES=$(curl -s -X POST https://api.gitbook.com/v1/orgs/${GITBOOK_ORGANIZATION_ID}/sites/${GITBOOK_PROXY_DOCS_SITE_ID}/site-spaces -H "Authorization: Bearer ${GITBOOK_API_TOKEN}" -H "Content-Type: application/json" -d '{"space": "'$SPACE_ID'"}')
+    SITE_SPACE_ID=$(echo "$POST_SITE_SPACE_RES" | jq -r '.uid // .id // empty')
+    if [ -z "$SITE_SPACE_ID" ] || [ "$SITE_SPACE_ID" = "null" ]; then
+        printf "${RED}Failed again to add space to site. Giving up. Response:${NC}\n"
+        echo "$POST_SITE_SPACE_RES" | jq .
+        exit 1
+    fi
+  fi
 else
   printf "Space ${BLUE}${SPACE_ID}${NC} is already added to site ${BLUE}${GITBOOK_PROXY_DOCS_SITE_ID}${NC} (site space id ${BLUE}${SITE_SPACE_ID}${NC}).\n"
 fi
