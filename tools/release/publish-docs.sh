@@ -75,11 +75,34 @@ SPACE_ID=$(echo "$SPACES_LIST" | jq -r 'first(.items[]? | select(.title == "'$NU
 if [ -z "$SPACE_ID" ]; then
   printf "Space with title ${BLUE}${NUMERIC_RELEASE}${NC} does not exist.\n"
 
-  # prompt user for space to duplicate
-  read -p "Enter the title of the space to duplicate: (eg, numeric version of previous release, eg, 0.5.9)" SPACE_TO_DUPLICATE
+  SPACE_TO_DUPLICATE=""
+  # Try to guess previous patch release (e.g., 0.5.17 -> 0.5.16)
+  IFS='.' read -ra VERSION_PARTS <<< "$NUMERIC_RELEASE"
+  MAJOR="${VERSION_PARTS[0]}"
+  MINOR="${VERSION_PARTS[1]}"
+  PATCH="${VERSION_PARTS[2]}"
 
-  SPACE_ID_TO_DUPLICATE=$(echo "$SPACES_LIST" | jq -r 'first(.items[]? | select(.title == "'$SPACE_TO_DUPLICATE'")) | .space.id')
-  if [ -z "$SPACE_ID_TO_DUPLICATE" ]; then
+  if [ -n "$PATCH" ] && [ "$PATCH" -gt 0 ] 2>/dev/null; then
+    PREV_PATCH=$((PATCH - 1))
+    GUESSED_PREV="${MAJOR}.${MINOR}.${PREV_PATCH}"
+    
+    # check if guessed space exists
+    GUESSED_SPACE_ID=$(echo "$SPACES_LIST" | jq -r 'first(.items[]? | select(.title == "'$GUESSED_PREV'")) | .space.id')
+    if [ -n "$GUESSED_SPACE_ID" ] && [ "$GUESSED_SPACE_ID" != "null" ]; then
+      printf "Found previous patch release space ${BLUE}${GUESSED_PREV}${NC}. Using it to duplicate.\n"
+      SPACE_TO_DUPLICATE="$GUESSED_PREV"
+      SPACE_ID_TO_DUPLICATE="$GUESSED_SPACE_ID"
+    fi
+  fi
+
+  if [ -z "$SPACE_TO_DUPLICATE" ]; then
+    # prompt user for space to duplicate
+    read -p "Enter the title of the space to duplicate: (eg, numeric version of previous release, eg, 0.5.9) " SPACE_TO_DUPLICATE
+  
+    SPACE_ID_TO_DUPLICATE=$(echo "$SPACES_LIST" | jq -r 'first(.items[]? | select(.title == "'$SPACE_TO_DUPLICATE'")) | .space.id')
+  fi
+
+  if [ -z "$SPACE_ID_TO_DUPLICATE" ] || [ "$SPACE_ID_TO_DUPLICATE" = "null" ]; then
     printf "${RED}Space with title ${SPACE_TO_DUPLICATE} does not exist.${NC}\n"
     exit 1
   fi
