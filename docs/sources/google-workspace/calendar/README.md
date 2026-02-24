@@ -1,7 +1,7 @@
 # Google Calendar&trade;
 
 Please review the [Google Workspace&trade; README](../README.md) for general information applicable to
-all Google Workspace connectors.
+all Google Workspace&trade connectors.
 
 
 ## Examples
