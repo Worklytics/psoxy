@@ -42,8 +42,8 @@ locals {
   github_organization                      = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
   github_first_organization                = split(",", coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME"))[0]
   github_example_repository                = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
-  glean_instance_name                      = coalesce(var.glean_instance_name, "YOUR_GLEAN_INSTANCE_NAME")
-  gong_instance_name                       = coalesce(var.gong_instance_name, "YOUR_GONG_INSTANCE_NAME")
+  gong_instance_subdomain                  = coalesce(var.gong_instance_subdomain, "YOUR_GONG_INSTANCE_SUBDOMAIN")
+  glean_instance_subdomain                 = coalesce(var.glean_instance_subdomain, "YOUR_GLEAN_INSTANCE_SUBDOMAIN")
   salesforce_example_account_id            = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
 
   oauth_long_access_connectors = {
@@ -234,7 +234,7 @@ EOT
       worklytics_connector_id : "glean-psoxy"
       display_name : "Glean"
       worklytics_connector_name : "Glean via Psoxy"
-      target_host : "${local.glean_instance_name}.glean.com"
+      target_host : "${local.glean_instance_subdomain}.glean.com"
       source_auth_strategy : "oauth2_access_token"
       secured_variables : [
         {
@@ -246,17 +246,17 @@ EOT
       ],
       example_api_requests : [
         {
-          method = "POST"
-          path   = "/rest/api/v1/listentities"
+          method       = "POST"
+          path         = "/rest/api/v1/listentities"
           content_type = "application/json"
           body = jsonencode({
-            entityType  = "PERSON"
-            pageSize    = 100
+            entityType = "PERSON"
+            pageSize   = 100
           })
         },
         {
-          method = "POST"
-          path   = "/rest/api/v1/insights"
+          method       = "POST"
+          path         = "/rest/api/v1/insights"
           content_type = "application/json"
           body = jsonencode({
             request = {

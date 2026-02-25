@@ -167,16 +167,16 @@ variable "github_example_repository" {
   description = "(Only required if using Github connector) Name for the repository to be used as part of example calls for Github (ex: psoxy)"
 }
 
-variable "glean_instance_name" {
+variable "glean_instance_subdomain" {
   type        = string
   default     = null
-  description = "(Only required if using Glean connector) Name of your Glean instance (ex: if your Glean URL is 'acme-be.glean.com', the instance name is 'acme-be')"
+  description = "(Only required if using Glean connector) Subdomain of your Glean instance (ex: if your Glean URL is 'acme-be.glean.com', the instance subdomain is 'acme-be')"
 }
 
-variable "gong_instance_name" {
+variable "gong_instance_subdomainu" {
   type        = string
   default     = null
-  description = "(Only required if using Gong connector) Name of your Gong instance (ex: if your Gong URL is 'acme.gong.io', the instance name is 'acme')"
+  description = "(Only required if using Gong connector) Subdomain of your Gong instance (ex: if your Gong URL is 'acme.gong.io', the instance subdomain is 'acme')"
 }
 
 variable "salesforce_example_account_id" {

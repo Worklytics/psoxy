@@ -21,16 +21,16 @@ variable "confluence_example_group_id" {
   description = "(Only required if using Confluence Cloud connector) Example of group id of the Confluence Cloud to connect to (ex: 35e417ad-bcb1-45fe-9be0-959239a84327)."
 }
 
-variable "glean_instance_name" {
+variable "glean_instance_subdomain" {
   type        = string
   default     = null
-  description = "(Only required if using Glean connector) Name of your Glean instance (ex: if your Glean URL is 'acme-be.glean.com', the instance name is 'acme-be')"
+  description = "(Only required if using Glean connector) Subdomain of your Glean instance (ex: if your Glean URL is 'acme-be.glean.com', the instance subdomain is 'acme-be')"
 }
 
-variable "gong_instance_name" {
+variable "gong_instance_subdomain" {
   type        = string
   default     = null
-  description = "(Only required if using Gong connector) Name of your Gong instance (ex: if your Gong URL is 'acme.gong.io', the instance name is 'acme')"
+  description = "(Only required if using Gong connector) Subdomain of your Gong instance (ex: if your Gong URL is 'acme.gong.io', the instance subdomain is 'acme')"
 }
 
 variable "salesforce_domain" {
