@@ -96,7 +96,7 @@ variable "glean_instance_subdomain" {
 variable "gong_instance_subdomain" {
   type        = string
   default     = null
-  description = "(Only required if using Gong connector) Name of your Gong instance (ex: if your Gong URL is 'acme.gong.io', the instance name is 'acme')"
+  description = "(Only required if using Gong connector) Subdomain of your Gong instance (ex: if your Gong URL is 'acme.gong.io', the instance name is 'acme')"
 }
 
 variable "salesforce_example_account_id" {
@@ -123,6 +123,7 @@ locals {
       ? local.validate_github_enterprise_server_host_message
   : ""))
 
+
   validate_glean_instance_subdomain         = (var.glean_instance_subdomain == null || var.glean_instance_subdomain == "") && contains(var.enabled_connectors, "glean")
   validate_glean_instance_subdomain_message = "The glean_instance_subdomain var should be populated if Glean connector is enabled."
   validate_glean_instance_subdomain_check = regex(
@@ -138,4 +139,5 @@ locals {
     (!local.validate_gong_instance_subdomain
       ? local.validate_gong_instance_subdomain_message
   : ""))
+
 }

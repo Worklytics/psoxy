@@ -90,13 +90,13 @@ variable "github_example_repository" {
 variable "glean_instance_subdomain" {
   type        = string
   default     = null
-  description = "(Only required if using Glean connector) Name of your Glean instance (ex: if your Glean URL is 'acme-be.glean.com', the instance name is 'acme-be')"
+  description = "(Only required if using Glean connector) Subdomain of your Glean instance (ex: if your Glean URL is 'acme-be.glean.com', the instance subdomain is 'acme-be')"
 }
 
 variable "gong_instance_subdomain" {
   type        = string
   default     = null
-  description = "(Only required if using Gong connector) Name of your Gong instance (ex: if your Gong URL is 'acme.gong.io', the instance name is 'acme')"
+  description = "(Only required if using Gong connector) Subdomain of your Gong instance (ex: if your Gong URL is 'acme.gong.io', the instance subdomain is 'acme')"
 }
 
 variable "salesforce_example_account_id" {
@@ -122,6 +122,7 @@ locals {
     (!local.validate_github_enterprise_server_host
       ? local.validate_github_enterprise_server_host_message
   : ""))
+
 
   validate_glean_instance_subdomain         = (var.glean_instance_subdomain == null || var.glean_instance_subdomain == "") && contains(var.enabled_connectors, "glean")
   validate_glean_instance_subdomain_message = "The glean_instance_subdomain var should be populated if Glean connector is enabled."
