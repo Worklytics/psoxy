@@ -43,7 +43,7 @@ locals {
   github_first_organization                = split(",", coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME"))[0]
   github_example_repository                = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
   glean_instance_subdomain                 = coalesce(var.glean_instance_subdomain, "YOUR_glean_instance_subdomain")
-  gong_instance_name                       = coalesce(var.gong_instance_name, "YOUR_GONG_INSTANCE_NAME")
+  gong_instance_subdomain                  = coalesce(var.gong_instance_subdomain, "YOUR_gong_instance_subdomain")
   salesforce_example_account_id            = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
 
   oauth_long_access_connectors = {
@@ -517,7 +517,7 @@ EOT
       worklytics_connector_id : "gong-metrics-psoxy"
       display_name : "Gong"
       worklytics_connector_name : "Gong Metrics via Psoxy"
-      target_host : "${local.gong_instance_name}.gong.io"
+      target_host : "${local.gong_instance_subdomain}.gong.io"
       source_auth_strategy : "basic_auth"
       secured_variables : [
         {
@@ -557,8 +557,8 @@ EOT
           path   = "/v2/users"
         },
         {
-          method = "POST"
-          path   = "/v2/stats/activity/aggregate"
+          method       = "POST"
+          path         = "/v2/stats/activity/aggregate"
           content_type = "application/json"
           body = jsonencode({
             filter = {

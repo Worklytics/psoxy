@@ -4,14 +4,14 @@ You can use a [guided script](../../../tools/gong-auth.sh) to automate the OAuth
 
 See Gong's official documentation for the latest OAuth setup: https://help.gong.io/docs/create-an-app-for-gong
 
-**IMPORTANT: Before proceeding, you must set the `gong_instance_name` variable in your Terraform configuration.**
+**IMPORTANT: Before proceeding, you must set the `gong_instance_subdomain` variable in your Terraform configuration.**
 
 Your Gong instance name is required for the proxy to connect to the correct endpoint.
 If your Gong URL is 'acme.gong.io', your instance name is 'acme'.
 Add this to your Terraform variables file (e.g., terraform.tfvars):
 
 ```
-gong_instance_name = "acme"  # replace with your actual instance name
+gong_instance_subdomain = "acme"  # replace with your actual instance name
 ```
 
 Then proceed with creating your Gong OAuth app:
@@ -81,7 +81,7 @@ Then proceed with creating your Gong OAuth app:
 
 **NOTES:**
 - Access tokens expire after 1 day by default. The proxy will automatically refresh them using the refresh token.
-- The `api_base_url_for_customer` returned in the token response is customer-specific. Ensure your `gong_instance_name` variable matches your actual instance.
+- The `api_base_url_for_customer` returned in the token response is customer-specific. Ensure your `gong_instance_subdomain` variable matches your actual instance.
 - Keep your Client Secret and tokens secure according to your organization's security policies.
 - You can regenerate the Client Secret at any time from the Gong app settings, but you'll need to update it in the proxy configuration and re-obtain tokens.
 

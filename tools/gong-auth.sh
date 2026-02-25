@@ -109,7 +109,7 @@ if [ "$API_BASE_URL" != "null" ] && [ -n "$API_BASE_URL" ]; then
     INSTANCE_NAME=$(echo "$API_BASE_URL" | sed -n 's|https://\([^.]*\)\..*|\1|p')
     if [ -n "$INSTANCE_NAME" ]; then
         printf "\n${YELLOW}IMPORTANT:${NC} Set the following in your ${YELLOW}terraform.tfvars${NC} file:\n"
-        printf "${YELLOW}gong_instance_name${NC} = \"${INSTANCE_NAME}\"\n"
+        printf "${YELLOW}gong_instance_subdomain${NC} = \"${INSTANCE_NAME}\"\n"
     fi
 fi
 

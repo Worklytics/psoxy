@@ -31,7 +31,7 @@ See the [official Gong OAuth documentation](https://help.gong.io/docs/create-an-
 
 ### Required Configuration
 
-1. **Terraform Variables**: Set `gong_instance_name` in your `terraform.tfvars` file (e.g., if your Gong URL is `acme.gong.io`, set `gong_instance_name = "acme"`)
+1. **Terraform Variables**: Set `gong_instance_subdomain` in your `terraform.tfvars` file (e.g., if your Gong URL is `acme.gong.io`, set `gong_instance_subdomain = "acme"`)
 
 2. **Secret Manager Parameters**:
    - `PSOXY_GONG_METRICS_CLIENT_ID` - OAuth Client ID from Gong app

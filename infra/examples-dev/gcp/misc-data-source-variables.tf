@@ -93,7 +93,7 @@ variable "glean_instance_subdomain" {
   description = "(Only required if using Glean connector) Name of your Glean instance (ex: if your Glean URL is 'acme-be.glean.com', the instance name is 'acme-be')"
 }
 
-variable "gong_instance_name" {
+variable "gong_instance_subdomain" {
   type        = string
   default     = null
   description = "(Only required if using Gong connector) Name of your Gong instance (ex: if your Gong URL is 'acme.gong.io', the instance name is 'acme')"
@@ -131,11 +131,11 @@ locals {
       ? local.validate_glean_instance_subdomain_message
   : ""))
 
-  validate_gong_instance_name         = (var.gong_instance_name == null || var.gong_instance_name == "") && contains(var.enabled_connectors, "gong-metrics")
-  validate_gong_instance_name_message = "The gong_instance_name var should be populated if Gong connector is enabled."
-  validate_gong_instance_name_check = regex(
-    "^${local.validate_gong_instance_name_message}$",
-    (!local.validate_gong_instance_name
-      ? local.validate_gong_instance_name_message
-      : ""))
+  validate_gong_instance_subdomain         = (var.gong_instance_subdomain == null || var.gong_instance_subdomain == "") && contains(var.enabled_connectors, "gong-metrics")
+  validate_gong_instance_subdomain_message = "The gong_instance_subdomain var should be populated if Gong connector is enabled."
+  validate_gong_instance_subdomain_check = regex(
+    "^${local.validate_gong_instance_subdomain_message}$",
+    (!local.validate_gong_instance_subdomain
+      ? local.validate_gong_instance_subdomain_message
+  : ""))
 }
