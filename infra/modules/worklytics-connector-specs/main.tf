@@ -557,8 +557,8 @@ EOT
           path   = "/v2/users"
         },
         {
-          method = "POST"
-          path   = "/v2/stats/activity/aggregate"
+          method       = "POST"
+          path         = "/v2/stats/activity/aggregate"
           content_type = "application/json"
           body = jsonencode({
             filter = {
