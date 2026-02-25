@@ -13,11 +13,12 @@
 set -e
 
 # Colors for output
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-BLUE='\033[0;34m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+COLORSCHEME_SH="$(dirname "$0")/../../set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+    source "$COLORSCHEME_SH"
+else
+    ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
 
 # Configuration (use env vars if set, otherwise defaults for local use)
 ROLE_ARN="${ROLE_ARN:-}"
@@ -43,7 +44,7 @@ fi
 
 # ensure current directory is the project root
 if [ ! -f "java/pom.xml" ]; then
-    echo -e "${RED}Error: java/pom.xml not found. Run this script from the psoxy root directory.${NC}"
+    echo -e "${ERR}Error: java/pom.xml not found. Run this script from the psoxy root directory.${NC}"
     exit 1
 fi
 
@@ -55,26 +56,26 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --rc)
             IS_RC_BUILD=true
-            echo -e "${BLUE}RC build flag detected${NC}"
+            echo -e "${INFO}RC build flag detected${NC}"
             shift
             ;;
         --non-interactive)
             NON_INTERACTIVE=true
-            echo -e "${BLUE}Non-interactive mode enabled${NC}"
+            echo -e "${INFO}Non-interactive mode enabled${NC}"
             shift
             ;;
         --role-arn)
             ROLE_ARN="$2"
-            echo -e "${BLUE}Role ARN set to: ${GREEN}${ROLE_ARN}${NC}"
+            echo -e "${INFO}Role ARN set to: ${SUCCESS}${ROLE_ARN}${NC}"
             shift 2
             ;;
         -*)
-            echo -e "${RED}Error: Unknown option: $1${NC}"
+            echo -e "${ERR}Error: Unknown option: $1${NC}"
             echo "Usage: $0 [--rc] [--non-interactive] [--role-arn <arn>]"
             exit 1
             ;;
         *)
-            echo -e "${RED}Error: Unexpected argument: $1${NC}"
+            echo -e "${ERR}Error: Unexpected argument: $1${NC}"
             echo "Usage: $0 [--rc] [--non-interactive] [--role-arn <arn>]"
             exit 1
             ;;
@@ -84,7 +85,7 @@ done
 # Get version from pom.xml
 VERSION=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' "java/pom.xml")
 if [ -z "$VERSION" ]; then
-    echo -e "${RED}Error: Could not extract version from java/pom.xml${NC}"
+    echo -e "${ERR}Error: Could not extract version from java/pom.xml${NC}"
     exit 1
 fi
 
@@ -92,13 +93,13 @@ fi
 validate_git_branch_or_tag() {
     # Check if git is available
     if ! command -v git &> /dev/null; then
-        echo -e "${YELLOW}Warning: git is not installed, skipping git validation${NC}"
+        echo -e "${WARN}Warning: git is not installed, skipping git validation${NC}"
         return 0
     fi
     
     # Check if we're in a git repository
     if ! git rev-parse --git-dir >/dev/null 2>&1; then
-        echo -e "${YELLOW}Warning: Not in a git repository, skipping git validation${NC}"
+        echo -e "${WARN}Warning: Not in a git repository, skipping git validation${NC}"
         return 0
     fi
     
@@ -117,33 +118,33 @@ validate_git_branch_or_tag() {
     
     # Check if we're on main branch or matching tag
     if [ "$current_ref" = "main" ]; then
-        echo -e "${GREEN}✓ Running on main branch${NC}"
+        echo -e "${SUCCESS}✓ Running on main branch${NC}"
         return 0
     elif [ "$current_ref" = "$expected_tag" ]; then
-        echo -e "${GREEN}✓ Running on tag ${expected_tag}${NC}"
+        echo -e "${SUCCESS}✓ Running on tag ${expected_tag}${NC}"
         return 0
     else
-        echo -e "${YELLOW}⚠ Warning: Not running on main branch or tag ${expected_tag}${NC}"
-        echo -e "${YELLOW}Current git reference: ${current_ref}${NC}"
-        echo -e "${YELLOW}Version: ${VERSION}${NC}"
+        echo -e "${WARN}⚠ Warning: Not running on main branch or tag ${expected_tag}${NC}"
+        echo -e "${WARN}Current git reference: ${current_ref}${NC}"
+        echo -e "${WARN}Version: ${VERSION}${NC}"
         echo ""
-        echo -e "${YELLOW}Recommended: Run from main branch or tag ${expected_tag}${NC}"
+        echo -e "${WARN}Recommended: Run from main branch or tag ${expected_tag}${NC}"
         
         if [ "$NON_INTERACTIVE" = "true" ]; then
-            echo -e "${BLUE}Non-interactive mode: Auto-proceeding${NC}"
+            echo -e "${INFO}Non-interactive mode: Auto-proceeding${NC}"
             return 0
         fi
         
-        echo -e "${YELLOW}Do you want to proceed anyway? (yes/no):${NC} "
+        echo -e "${WARN}Do you want to proceed anyway? (yes/no):${NC} "
         read -r response
         
         case "$response" in
             [yY][eE][sS]|[yY])
-                echo -e "${YELLOW}Proceeding with publish from ${current_ref}...${NC}"
+                echo -e "${WARN}Proceeding with publish from ${current_ref}...${NC}"
                 return 0
                 ;;
             *)
-                echo -e "${YELLOW}Publishing cancelled by user${NC}"
+                echo -e "${WARN}Publishing cancelled by user${NC}"
                 exit 0
                 ;;
         esac
@@ -154,45 +155,44 @@ validate_git_branch_or_tag() {
 validate_git_branch_or_tag
 echo ""
 
-echo -e "${BLUE}=== Psoxy AWS Artifact Publisher ===${NC}"
-echo -e "${BLUE}Version: ${GREEN}${VERSION}${NC}"
-echo -e "${BLUE}Regions: ${GREEN}${REGIONS[*]}${NC}"
+echo -e "${INFO}=== Psoxy AWS Artifact Publisher ===${NC}"
+echo -e "${INFO}Version: ${SUCCESS}${VERSION}${NC}"
+echo -e "${INFO}Regions: ${SUCCESS}${REGIONS[*]}${NC}"
 echo ""
 
 # Check prerequisites
 if ! command -v aws &> /dev/null; then
-    echo -e "${RED}Error: AWS CLI is not installed${NC}"
-    echo -e "${YELLOW}Install AWS CLI from: https://aws.amazon.com/cli/${NC}"
+    echo -e "${ERR}Error: AWS CLI is not installed${NC}"
+    echo -e "${WARN}Install AWS CLI from: https://aws.amazon.com/cli/${NC}"
     exit 1
 fi
 
 # Check AWS CLI version
 AWS_VERSION=$(aws --version 2>/dev/null | cut -d' ' -f1 | cut -d'/' -f2)
 if [ -z "$AWS_VERSION" ]; then
-    echo -e "${RED}Error: AWS CLI is installed but not working properly${NC}"
+    echo -e "${ERR}Error: AWS CLI is installed but not working properly${NC}"
     exit 1
 fi
-echo -e "${BLUE}AWS CLI version: ${GREEN}${AWS_VERSION}${NC}"
+echo -e "${INFO}AWS CLI version: ${SUCCESS}${AWS_VERSION}${NC}"
 
 # Check if AWS CLI is configured
 if ! aws sts get-caller-identity &> /dev/null; then
-    echo -e "${RED}Error: AWS CLI is not configured/authenticated${NC}"
-    echo -e "${YELLOW}Run 'aws configure' to set up your credentials${NC}"
+    echo -e "${ERR}Error: AWS CLI is not configured/authenticated${NC}"
+    echo -e "${WARN}Run 'aws configure' to set up your credentials${NC}"
     exit 1
 fi
 
 if ! command -v jq &> /dev/null; then
-    echo -e "${RED}Error: jq is not installed${NC}"
-    echo -e "Install with ${YELLOW}brew install jq${NC} or similar"
+    echo -e "${ERR}Error: jq is not installed${NC}"
+    echo -e "Install with ${WARN}brew install jq${NC} or similar"
     exit 1
 fi
 
 # Show current AWS identity
 CURRENT_IDENTITY=$(aws sts get-caller-identity --query 'Arn' --output text 2>/dev/null)
 if [ $? -eq 0 ]; then
-    echo -e "${BLUE}Current AWS identity: ${GREEN}${CURRENT_IDENTITY}${NC}"
+    echo -e "${INFO}Current AWS identity: ${SUCCESS}${CURRENT_IDENTITY}${NC}"
 fi
-
 
 # run build with distribution profile
 ./tools/build.sh -d "$IMPLEMENTATION" "$JAVA_SOURCE_ROOT"
@@ -201,8 +201,8 @@ BUILT_ARTIFACT=$(ls "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment
 # Validate JAR exists
 JAR_PATH="${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment/${BUILT_ARTIFACT}"
 if [ ! -f "$JAR_PATH" ]; then
-    echo -e "${RED}Error: JAR file not found at ${JAR_PATH} after running build script${NC}"
-    echo -e "${YELLOW}Check last-build.log for errors${NC}"
+    echo -e "${ERR}Error: JAR file not found at ${JAR_PATH} after running build script${NC}"
+    echo -e "${WARN}Check last-build.log for errors${NC}"
     exit 1
 fi
 
@@ -216,9 +216,9 @@ else
     DEPLOYMENT_ARTIFACT="$BUILT_ARTIFACT"
 fi
 
-echo -e "${BLUE}Publishing Psoxy $IMPLEMENTATION JAR version ${GREEN}${VERSION}${BLUE} to S3 buckets...${NC}"
-echo -e "${BLUE}JAR file: ${GREEN}${JAR_PATH}${NC}"
-echo -e "${BLUE}Role: ${GREEN}${ROLE_ARN}${NC}"
+echo -e "${INFO}Publishing Psoxy $IMPLEMENTATION JAR version ${SUCCESS}${VERSION}${INFO} to S3 buckets...${NC}"
+echo -e "${INFO}JAR file: ${SUCCESS}${JAR_PATH}${NC}"
+echo -e "${INFO}Role: ${SUCCESS}${ROLE_ARN}${NC}"
 echo ""
 
 # Function to check if artifact already exists in any S3 bucket
@@ -247,20 +247,20 @@ check_artifacts_exist() {
 prompt_overwrite() {
     local existing_regions=("$@")
     
-    echo -e "${YELLOW}Warning: Artifact already exists in the following regions:${NC}"
+    echo -e "${WARN}Warning: Artifact already exists in the following regions:${NC}"
     for region in "${existing_regions[@]}"; do
         local bucket_name="${BUCKET_PREFIX}-${region}"
         local s3_path="s3://${bucket_name}/${DEPLOYMENT_ARTIFACT}"
-        echo -e "  ${BLUE}${region}:${NC} ${s3_path}"
+        echo -e "  ${INFO}${region}:${NC} ${s3_path}"
     done
     echo ""
     
     if [ "$NON_INTERACTIVE" = "true" ]; then
-        echo -e "${BLUE}Non-interactive mode: Auto-overwriting${NC}"
+        echo -e "${INFO}Non-interactive mode: Auto-overwriting${NC}"
         return 0
     fi
     
-    echo -e "${YELLOW}Do you want to overwrite these artifacts? (yes/no):${NC} "
+    echo -e "${WARN}Do you want to overwrite these artifacts? (yes/no):${NC} "
     read -r response
     
     case "$response" in
@@ -277,7 +277,7 @@ prompt_overwrite() {
 assume_role() {
     # If no role specified, use current credentials
     if [ -z "$ROLE_ARN" ]; then
-        echo -e "${BLUE}No role specified to assume. Using current credentials.${NC}"
+        echo -e "${INFO}No role specified to assume. Using current credentials.${NC}"
         return 0
     fi
 
@@ -291,13 +291,13 @@ assume_role() {
     role_name=$(echo "$ROLE_ARN" | sed 's/.*:role\///')
     
     if [[ "$current_arn" == "$ROLE_ARN" ]] || [[ "$current_arn" == *":assumed-role/$role_name/"* ]]; then
-        echo -e "${GREEN}Already authenticated as role ${role_name} (${current_arn})${NC}"
-        echo -e "${YELLOW}Skipping assume-role step${NC}"
+        echo -e "${SUCCESS}Already authenticated as role ${role_name} (${current_arn})${NC}"
+        echo -e "${WARN}Skipping assume-role step${NC}"
         echo ""
         return 0
     fi
 
-    echo -e "${BLUE}Assuming role ${GREEN}${ROLE_ARN}${NC}..."
+    echo -e "${INFO}Assuming role ${SUCCESS}${ROLE_ARN}${NC}..."
 
     # Assume the role and get temporary credentials
     CREDENTIALS=$(aws sts assume-role \
@@ -306,7 +306,7 @@ assume_role() {
         --output json)
 
     if [ $? -ne 0 ]; then
-        echo -e "${RED}Error: Failed to assume role${NC}"
+        echo -e "${ERR}Error: Failed to assume role${NC}"
         exit 1
     fi
 
@@ -315,7 +315,7 @@ assume_role() {
     export AWS_SECRET_ACCESS_KEY=$(echo "$CREDENTIALS" | jq -r '.Credentials.SecretAccessKey')
     export AWS_SESSION_TOKEN=$(echo "$CREDENTIALS" | jq -r '.Credentials.SessionToken')
 
-    echo -e "${GREEN}Successfully assumed role${NC}"
+    echo -e "${SUCCESS}Successfully assumed role${NC}"
     echo ""
 }
 
@@ -325,14 +325,14 @@ publish_to_region() {
     local bucket_name="${BUCKET_PREFIX}-${region}"
     local s3_path="s3://${bucket_name}/${DEPLOYMENT_ARTIFACT}"
 
-    echo -e "${BLUE}Publishing to ${GREEN}${region}${BLUE} (${s3_path})${NC}"
+    echo -e "${INFO}Publishing to ${SUCCESS}${region}${INFO} (${s3_path})${NC}"
 
     # Check if bucket exists (or is accessible)
     # Note: 'aws s3 ls' requires s3:ListBucket permission. If we only have s3:PutObject, this will fail.
     # So we treat failure here as a warning and proceed to try uploading.
     if ! aws s3 ls "s3://${bucket_name}" >/dev/null 2>&1; then
-        echo -e "${YELLOW}Warning: Bucket ${bucket_name} not found or not listable (missing s3:ListBucket?).${NC}"
-        echo -e "${YELLOW}Proceeding with upload attempt...${NC}"
+        echo -e "${WARN}Warning: Bucket ${bucket_name} not found or not listable (missing s3:ListBucket?).${NC}"
+        echo -e "${WARN}Proceeding with upload attempt...${NC}"
     fi
 
     # Build metadata string
@@ -341,7 +341,7 @@ publish_to_region() {
     # Add gh_ref metadata if available (from GitHub Actions)
     if [ -n "${GH_REF:-}" ]; then
         metadata="${metadata},gh_ref=${GH_REF}"
-        echo -e "${BLUE}Adding metadata: gh_ref=${GH_REF}${NC}"
+        echo -e "${INFO}Adding metadata: gh_ref=${GH_REF}${NC}"
     fi
 
     # Upload with metadata
@@ -351,17 +351,17 @@ publish_to_region() {
         --cache-control "public, max-age=3600"
 
     if [ $? -eq 0 ]; then
-        echo -e "${GREEN}✓ Successfully published to ${region}${NC}"
+        echo -e "${SUCCESS}✓ Successfully published to ${region}${NC}"
         
         # Verify metadata was set
         if [ -n "${GH_REF:-}" ]; then
             local object_metadata=$(aws s3api head-object --bucket "$bucket_name" --key "$DEPLOYMENT_ARTIFACT" --region "$region" --query 'Metadata.gh_ref' --output text 2>/dev/null || echo "")
             if [ -n "$object_metadata" ] && [ "$object_metadata" != "None" ]; then
-                echo -e "${GREEN}✓ Metadata verified: gh_ref=${object_metadata}${NC}"
+                echo -e "${SUCCESS}✓ Metadata verified: gh_ref=${object_metadata}${NC}"
             fi
         fi
     else
-        echo -e "${RED}✗ Failed to publish to ${region}${NC}"
+        echo -e "${ERR}✗ Failed to publish to ${region}${NC}"
         return 1
     fi
 
@@ -382,7 +382,7 @@ publish() {
         # Convert output to array
         readarray -t existing_regions_array <<< "$EXISTING_REGIONS_OUTPUT"
         if ! prompt_overwrite "${existing_regions_array[@]}"; then
-            echo -e "${YELLOW}Publishing cancelled by user${NC}"
+            echo -e "${WARN}Publishing cancelled by user${NC}"
             exit 0
         fi
         echo ""
@@ -401,22 +401,22 @@ publish() {
         fi
     done
 
-    echo -e "${BLUE}=== Summary ===${NC}"
-    echo -e "${BLUE}Successfully published to ${GREEN}${success_count}/${total_regions}${BLUE} regions${NC}"
+    echo -e "${INFO}=== Summary ===${NC}"
+    echo -e "${INFO}Successfully published to ${SUCCESS}${success_count}/${total_regions}${INFO} regions${NC}"
 
     if [ $success_count -eq $total_regions ]; then
-        echo -e "${GREEN}✓ All regions published successfully!${NC}"
+        echo -e "${SUCCESS}✓ All regions published successfully!${NC}"
         echo ""
-        echo -e "${BLUE}Download URLs:${NC}"
+        echo -e "${INFO}Download URLs:${NC}"
         for region in "${REGIONS[@]}"; do
             local bucket_name="${BUCKET_PREFIX}-${region}"
             local artifact_url="https://${bucket_name}.s3.${region}.amazonaws.com/${DEPLOYMENT_ARTIFACT}"
-            echo -e "  ${GREEN}${region}:${NC} ${artifact_url}"
+            echo -e "  ${SUCCESS}${region}:${NC} ${artifact_url}"
             # Output artifact URI in standardized format for GitHub Actions summary
             echo "ARTIFACT_URI_${region}=${artifact_url}"
         done
     else
-        echo -e "${YELLOW}⚠ Some regions failed to publish${NC}"
+        echo -e "${WARN}⚠ Some regions failed to publish${NC}"
         exit 1
     fi
 }
