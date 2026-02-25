@@ -1,6 +1,7 @@
 [
   {
     "state":"opened",
+    "description":"{\"length\":46,\"word_count\":6}",
     "author":{
       "state":"active",
       "id":"t~-hmqlzWtTypjk-jYI_SQwPRLQj6Siuv5CfO_3NsrVWU",
@@ -38,10 +39,6 @@
     "title":"{\"length\":65,\"word_count\":8}",
     "created_at":"2016-01-04T15:31:51.081Z",
     "iid":6,
-    "labels":[
-      "foo",
-      "bar"
-    ],
     "upvotes":4,
     "downvotes":0,
     "merge_requests_count":0,

@@ -8,10 +8,12 @@ endpoints:
           - "$.author_id"
           - "$[*].author_id"
           - "$[*].details.author_email"
-          - "$[*].details.ip_address"
           - "$[*].details.from"
           - "$[*].details.to"
         encoding: "URL_SAFE_TOKEN"
+      - !<hashIp>
+        jsonPaths:
+          - "$[*].details.ip_address"
     responseSchema:
       type: "array"
       items:
@@ -245,6 +247,9 @@ endpoints:
         jsonPaths:
           - "$..creator_id"
         encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$..description"
     responseSchema:
       type: "array"
       items:
@@ -588,16 +593,12 @@ definitions:
     properties:
       add:
         type: "string"
-      as_access_level:
-        type: "integer"
       author_email:
         type: "string"
       change:
         type: "string"
       event_type:
         type: "string"
-      failed_login:
-        type: "boolean"
       from:
         type: "string"
       ip_address:
@@ -678,6 +679,8 @@ definitions:
       created_at:
         type: "string"
         format: "date-time"
+      description:
+        type: "string"
       discussion_locked:
         type: "boolean"
       downvotes:
@@ -690,10 +693,6 @@ definitions:
         type: "integer"
       issue_type:
         type: "string"
-      labels:
-        type: "array"
-        items:
-          type: "string"
       merge_requests_count:
         type: "integer"
       milestone:
@@ -912,8 +911,6 @@ definitions:
         type: "integer"
       issues_enabled:
         type: "boolean"
-      jobs_enabled:
-        type: "boolean"
       last_activity_at:
         type: "string"
         format: "date-time"
@@ -921,8 +918,10 @@ definitions:
         type: "boolean"
       open_issues_count:
         type: "integer"
-      snippets_enabled:
-        type: "boolean"
+      path:
+        type: "string"
+      path_with_namespace:
+        type: "string"
       sourceId:
         type: "string"
       star_count:
@@ -932,8 +931,6 @@ definitions:
         format: "date-time"
       visibility:
         type: "string"
-      wiki_enabled:
-        type: "boolean"
   StateEvent:
     type: "object"
     properties:
