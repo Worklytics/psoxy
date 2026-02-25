@@ -69,6 +69,7 @@
     * [GitHub Enterprise Server](sources/github/enterprise-server/README.md)
     * [GitHub Enterprise Cloud](sources/github/github/README.md)
     * [GitHub Non Enterprise Cloud](sources/github/github-non-enterprise/README.md)
+  * [Glean](sources/glean/README.md)
   * [Google Workspace](sources/google-workspace/README.md)
     * [Gemini in Workspace Apps](sources/google-workspace/gemini-in-workspace-apps/README.md)
     * [Gemini Usage](sources/google-workspace/gemini-usage-bulk/README.md)

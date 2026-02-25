@@ -87,6 +87,12 @@ variable "github_example_repository" {
   description = "(Only required if using Github connector) Name for the repository to be used as part of example calls for Github (ex: psoxy)"
 }
 
+variable "glean_instance_subdomain" {
+  type        = string
+  default     = null
+  description = "(Only required if using Glean connector) Name of your Glean instance (ex: if your Glean URL is 'acme-be.glean.com', the instance name is 'acme-be')"
+}
+
 variable "salesforce_example_account_id" {
   type        = string
   default     = null
@@ -109,5 +115,13 @@ locals {
     "^${local.validate_github_enterprise_server_host_message}$",
     (!local.validate_github_enterprise_server_host
       ? local.validate_github_enterprise_server_host_message
+  : ""))
+
+  validate_glean_instance_subdomain         = (var.glean_instance_subdomain == null || var.glean_instance_subdomain == "") && contains(var.enabled_connectors, "glean")
+  validate_glean_instance_subdomain_message = "The glean_instance_subdomain var should be populated if Glean connector is enabled."
+  validate_glean_instance_subdomain_check = regex(
+    "^${local.validate_glean_instance_subdomain_message}$",
+    (!local.validate_glean_instance_subdomain
+      ? local.validate_glean_instance_subdomain_message
   : ""))
 }
