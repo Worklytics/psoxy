@@ -46,7 +46,7 @@ module "worklytics_connectors" {
   github_copilot_installation_id           = var.github_copilot_installation_id
   github_organization                      = var.github_organization
   github_example_repository                = var.github_example_repository
-  glean_instance_name                      = var.glean_instance_name
+  glean_instance_subdomain                 = var.glean_instance_subdomain
   gong_instance_name                       = var.gong_instance_name
   salesforce_example_account_id            = var.salesforce_example_account_id
   todos_as_local_files                     = var.todos_as_local_files

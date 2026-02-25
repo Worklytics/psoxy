@@ -37,7 +37,7 @@ of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
 1. **Instance Name**: Configure your Glean instance name in your Terraform variables:
    ```terraform
-   glean_instance_name = "acme"  # replace with your actual instance name
+   glean_instance_subdomain = "acme"  # replace with your actual instance name
    ```
 
 2. **API Token**: Follow the authentication instructions above to create a Glean-issued token with the required scopes (`INSIGHTS_READ`, `PEOPLE_READ`)
