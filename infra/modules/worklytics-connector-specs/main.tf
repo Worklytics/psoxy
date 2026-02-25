@@ -517,7 +517,7 @@ EOT
       worklytics_connector_id : "gong-metrics-psoxy"
       display_name : "Gong"
       worklytics_connector_name : "Gong Metrics via Psoxy"
-      target_host : "${local.gong_instance_name}.gong.io"
+      target_host : "${local.gong_instance_subdomain}.gong.io"
       source_auth_strategy : "basic_auth"
       secured_variables : [
         {
