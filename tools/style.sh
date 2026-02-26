@@ -1,10 +1,11 @@
 #!/bin/bash
 
-
-RED="\e[31m"
-BLUE="\e[34m"
-NC="\e[0m"
-
+COLORSCHEME_SH="$(dirname "$0")/set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+    source "$COLORSCHEME_SH"
+else
+    ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
 
 # check if prettier installed, if not, offer to install it
 if ! command -v prettier &> /dev/null
@@ -31,19 +32,19 @@ if [ ! -f "README.md" ]; then
 fi
 
 if [ ! -d "infra" ]; then
-    printf "${RED}No infra/ directory found; this script expects to run at root of repo.${NC}\n"
+    printf "${ERR}No infra/ directory found; this script expects to run at root of repo.${NC}\n"
     exit 1
 fi
 
 # run terraform fmt -recursive within infra directory
 cd infra
-printf "Running ${BLUE}terraform fmt -recursive ${NC}...\n"
+printf "Running ${INFO}terraform fmt -recursive ${NC}...\n"
 terraform fmt -recursive
 
 cd -
 
 if [ ! -d "docs" ]; then
-    printf "${RED}No docs/ directory found; this script expects to run at root of repo.${NC}\n"
+    printf "${ERR}No docs/ directory found; this script expects to run at root of repo.${NC}\n"
     exit 1
 fi
 
