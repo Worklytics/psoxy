@@ -1,0 +1,19 @@
+{
+  "users":[
+    {
+      "id":"t~LhVpFt7_p63lwbVyZDnmhUKKWCOW2SAej5Yz0PYUlas",
+      "emailAddress":"t~mZuL9Z-keb7sg2QivvmgUXsokOZjjCdhb-2QqgMaMfA@example.com",
+      "active":true
+    },
+    {
+      "id":"t~qgNYCQ678JU6EuwGcME7eAscp-gMPyLU7dAVqA79gNI",
+      "emailAddress":"t~CqRESK-fVN5QB06CFy0X-YLBVYf8Ucp7LiOynW6AyXI@example.com",
+      "active":true
+    }
+  ],
+  "records":{
+    "cursor":"next_page_cursor_123",
+    "totalRecords":100,
+    "currentPageSize":2
+  }
+}
