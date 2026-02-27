@@ -8,11 +8,14 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
+import com.newrelic.opentracing.LambdaTracer;
+import com.newrelic.opentracing.aws.LambdaTracing;
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
+import io.opentracing.util.GlobalTracer;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
@@ -43,6 +46,9 @@ public class Handler implements
     private static void staticInit() {
         awsContainer = DaggerAwsContainer.create();
         requestHandler = awsContainer.apiDataRequestHandler();
+        //TODO: move into DI??
+        // Register the New Relic OpenTracing LambdaTracer as the Global Tracer
+        GlobalTracer.registerIfAbsent(LambdaTracer.INSTANCE);
         responseCompressionHandler = new ResponseCompressionHandler();
 
         Security.addProvider(new BouncyCastleProvider());
@@ -52,7 +58,10 @@ public class Handler implements
     @Override
     public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent httpEvent,
             Context context) {
+        return LambdaTracing.instrument(httpEvent, context, this::actualHandleRequest);
+    }
 
+    public APIGatewayV2HTTPResponse actualHandleRequest(APIGatewayV2HTTPEvent httpEvent, Context context) {
         // interfaces:
         // - HttpRequestEvent --> HttpResponseEvent
 

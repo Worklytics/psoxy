@@ -5,7 +5,6 @@
         <artifactId>psoxy-core</artifactId>
     </match>
     <mergedLicense>
-      <name>Worklytics Commercial License</name>
       <url>https://github.com/Worklytics/psoxy/blob/main/LICENSE.md</url>
     </mergedLicense>
   </licenseMerge>
@@ -16,7 +15,6 @@
         <artifactId>gateway-core</artifactId>
     </match>
     <mergedLicense>
-      <name>Worklytics Commercial License</name>
       <url>https://github.com/Worklytics/psoxy/blob/main/LICENSE.md</url>
     </mergedLicense>
   </licenseMerge>
