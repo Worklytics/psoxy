@@ -26,6 +26,8 @@ import lombok.extern.java.Log;
  */
 @RequiredArgsConstructor
 @Log
+// AWS SDK deprecated APIGatewayV2HTTPEvent, but replacement structure is unclear/not yet adopted
+@SuppressWarnings("deprecation")
 public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
 
     @NonNull
