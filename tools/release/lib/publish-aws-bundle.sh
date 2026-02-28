@@ -115,12 +115,15 @@ validate_git_branch_or_tag() {
     # Expected tag format: v{VERSION}
     local expected_tag="v${VERSION}"
     
-    # Check if we're on main branch or matching tag
+    # Check if we're on main branch, matching tag, or explicitly allowed branches
     if [ "$current_ref" = "main" ]; then
         echo -e "${GREEN}✓ Running on main branch${NC}"
         return 0
     elif [ "$current_ref" = "$expected_tag" ]; then
         echo -e "${GREEN}✓ Running on tag ${expected_tag}${NC}"
+        return 0
+    elif [[ "$current_ref" == rc-* ]] || [[ "$current_ref" == new-relic_* ]]; then
+        echo -e "${GREEN}✓ Running on branch ${current_ref}${NC}"
         return 0
     else
         echo -e "${YELLOW}⚠ Warning: Not running on main branch or tag ${expected_tag}${NC}"
