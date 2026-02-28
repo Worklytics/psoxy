@@ -139,4 +139,5 @@ locals {
     (!local.validate_gong_instance_subdomain
       ? local.validate_gong_instance_subdomain_message
   : ""))
+
 }

@@ -6,12 +6,12 @@ See Gong's official documentation for the latest OAuth setup: https://help.gong.
 
 **IMPORTANT: Before proceeding, you must set the `gong_instance_subdomain` variable in your Terraform configuration.**
 
-Your Gong instance name is required for the proxy to connect to the correct endpoint.
-If your Gong URL is 'acme.gong.io', your instance name is 'acme'.
+Your Gong instance subdomain is required for the proxy to connect to the correct endpoint.
+If your Gong URL is 'acme.gong.io', your instance subdomain is 'acme'.
 Add this to your Terraform variables file (e.g., terraform.tfvars):
 
 ```
-gong_instance_subdomain = "acme"  # replace with your actual instance name
+gong_instance_subdomain = "acme"  # replace with your actual instance subdomain
 ```
 
 Then proceed with creating your Gong OAuth app:
