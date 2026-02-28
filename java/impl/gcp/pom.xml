@@ -265,7 +265,6 @@
                     </execution>
                 </executions>
             </plugin>
-
             <!-- CycloneDX SBOM generation -->
             <plugin>
                 <groupId>org.cyclonedx</groupId>
@@ -289,7 +288,6 @@
             </plugin>
         </plugins>
     </build>
-
 
     <profiles>
         <profile>
@@ -335,7 +333,6 @@
                             </execution>
                         </executions>
                     </plugin>
-
 
                 </plugins>
             </build>
