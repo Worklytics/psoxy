@@ -76,6 +76,7 @@ resource "aws_s3_bucket" "input" {
 
   lifecycle {
     ignore_changes = [
+      bucket, # avoid recreation of the bucket
       tags
     ]
   }

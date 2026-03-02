@@ -150,6 +150,7 @@ resource "aws_iam_role" "iam_for_lambda" {
 
   lifecycle {
     ignore_changes = [
+      name, # just for backwards compatibility with legacy deployment
       tags
     ]
   }
