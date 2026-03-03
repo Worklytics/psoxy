@@ -4,12 +4,12 @@ A **Global Admin** in your Glean workspace must create a Glean-issued token with
 
 **IMPORTANT: Before proceeding, you must set the `glean_instance_subdomain` variable in your Terraform configuration.**
 
-Your Glean instance name is required for the proxy to connect to the correct endpoint.
-If your Glean URL is 'acme.glean.com', your instance name is 'acme'.
+Your Glean instance subdomain is required for the proxy to connect to the correct endpoint.
+If your Glean URL is 'acme.glean.com', your instance subdomain is 'acme'.
 Add this to your Terraform variables file (e.g., terraform.tfvars):
 
 ```
-glean_instance_subdomain = "acme"  # replace with your actual instance name
+glean_instance_subdomain = "acme"  # replace with your actual instance subdomain
 ```
 
 Then proceed with token creation:

@@ -105,11 +105,11 @@ printf "Access token expires in: ${YELLOW}${EXPIRES_IN}${NC} seconds ($(expr ${E
 printf "Customer API Base URL: ${YELLOW}${API_BASE_URL}${NC}\n"
 
 if [ "$API_BASE_URL" != "null" ] && [ -n "$API_BASE_URL" ]; then
-    # Extract instance name from API base URL (e.g., "acme" from "https://acme.api.gong.io")
-    INSTANCE_NAME=$(echo "$API_BASE_URL" | sed -n 's|https://\([^.]*\)\..*|\1|p')
-    if [ -n "$INSTANCE_NAME" ]; then
+    # Extract instance subdomain from API base URL (e.g., "acme" from "https://acme.api.gong.io")
+    INSTANCE_SUBDOMAIN=$(echo "$API_BASE_URL" | sed -n 's|https://\([^.]*\)\..*|\1|p')
+    if [ -n "$INSTANCE_SUBDOMAIN" ]; then
         printf "\n${YELLOW}IMPORTANT:${NC} Set the following in your ${YELLOW}terraform.tfvars${NC} file:\n"
-        printf "${YELLOW}gong_instance_subdomain${NC} = \"${INSTANCE_NAME}\"\n"
+        printf "${YELLOW}gong_instance_subdomain${NC} = \"${INSTANCE_SUBDOMAIN}\"\n"
     fi
 fi
 
