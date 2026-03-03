@@ -14,7 +14,7 @@ name: Publish AWS Bundle
 #   - Consider adding branch protection rules to restrict who can push tags and create rc-* branches
 #
 # Usage via workflow dispatch gh cli:
-#   gh workflow run publish-aws-bundle.yaml --ref ()
+#   gh workflow run publish-aws-bundle.yaml --ref $(git branch --show-current)
 
 on:
   workflow_dispatch:
