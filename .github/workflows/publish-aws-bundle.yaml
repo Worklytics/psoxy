@@ -12,6 +12,9 @@ name: Publish AWS Bundle
 #   - Tag pushes require push access (enforced by GitHub)
 #   - RC branch pushes require write access (enforced by GitHub)
 #   - Consider adding branch protection rules to restrict who can push tags and create rc-* branches
+#
+# Usage via workflow dispatch gh cli:
+#   gh workflow run publish-aws-bundle.yaml --ref ()
 
 on:
   workflow_dispatch:
@@ -20,7 +23,6 @@ on:
       - 'v*'
     branches:
       - 'rc-*'
-      - 'new-relic_*'
 
 env:
   IMPLEMENTATION: aws
