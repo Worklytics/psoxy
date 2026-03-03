@@ -95,7 +95,7 @@ jobs:
           if [[ "$REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
             RC_OPTION=""
           elif [[ "$REF_NAME" == new-relic_* ]]; then
-            RC_OPTION=""
+            RC_OPTION="--newrelic"
           fi
           
           ./tools/release/lib/publish-aws-bundle.sh --non-interactive $RC_OPTION | tee publish-output.log

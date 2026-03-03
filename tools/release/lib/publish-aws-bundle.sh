@@ -1,13 +1,15 @@
 #!/bin/bash
 
 # Publish Psoxy AWS JAR to multiple S3 buckets across regions
-# Usage: ./publish-aws-bundle.sh [--rc] [--non-interactive] 
+# Usage: ./publish-aws-bundle.sh [--rc] [--newrelic] [--non-interactive] 
 #   --rc:              Mark this as a release candidate build (adds -rc suffix to artifact name)
+#   --newrelic:        Mark this as a New Relic build (adds -newrelic suffix to artifact name)
 #   --non-interactive: Skip all interactive prompts (auto-confirm all prompts)
 #
 # Examples:
 #   ./publish-aws-bundle.sh                    
 #   ./publish-aws-bundle.sh --rc               # RC build
+#   ./publish-aws-bundle.sh --newrelic         # New Relic build
 #   ./publish-aws-bundle.sh --non-interactive  # Non-interactive mode (for CI)
 
 set -e
@@ -49,6 +51,7 @@ fi
 
 # Parse command-line arguments
 IS_RC_BUILD=false
+IS_NEWRELIC_BUILD=false
 NON_INTERACTIVE=false
 
 while [[ $# -gt 0 ]]; do
@@ -56,6 +59,11 @@ while [[ $# -gt 0 ]]; do
         --rc)
             IS_RC_BUILD=true
             echo -e "${BLUE}RC build flag detected${NC}"
+            shift
+            ;;
+        --newrelic|--new-relic|-newrelic|-new-relic)
+            IS_NEWRELIC_BUILD=true
+            echo -e "${BLUE}New Relic build flag detected${NC}"
             shift
             ;;
         --non-interactive)
@@ -70,12 +78,12 @@ while [[ $# -gt 0 ]]; do
             ;;
         -*)
             echo -e "${RED}Error: Unknown option: $1${NC}"
-            echo "Usage: $0 [--rc] [--non-interactive] [--role-arn <arn>]"
+            echo "Usage: $0 [--rc] [--newrelic] [--non-interactive] [--role-arn <arn>]"
             exit 1
             ;;
         *)
             echo -e "${RED}Error: Unexpected argument: $1${NC}"
-            echo "Usage: $0 [--rc] [--non-interactive] [--role-arn <arn>]"
+            echo "Usage: $0 [--rc] [--newrelic] [--non-interactive] [--role-arn <arn>]"
             exit 1
             ;;
     esac
@@ -212,7 +220,9 @@ fi
 # Construct deployment artifact name
 # RC builds should have artifact name like: psoxy-aws-0.5.15-rc.jar
 # Use explicit boolean check
-if [ "$IS_RC_BUILD" = "true" ] || [ "$IS_RC_BUILD" = "1" ]; then
+if [ "$IS_NEWRELIC_BUILD" = "true" ] || [ "$IS_NEWRELIC_BUILD" = "1" ]; then
+    DEPLOYMENT_ARTIFACT="${BUILT_ARTIFACT%.jar}-newrelic.jar"
+elif [ "$IS_RC_BUILD" = "true" ] || [ "$IS_RC_BUILD" = "1" ]; then
     # Add -rc before .jar extension
     DEPLOYMENT_ARTIFACT="${BUILT_ARTIFACT%.jar}-rc.jar"
 else
