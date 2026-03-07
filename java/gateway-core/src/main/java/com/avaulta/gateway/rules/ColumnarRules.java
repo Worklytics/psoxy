@@ -16,7 +16,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
@@ -38,12 +37,13 @@ import lombok.extern.java.Log;
 @SuperBuilder(toBuilder = true)
 @Log
 @AllArgsConstructor //for builder
-@NoArgsConstructor //for Jackson
 @Getter
 @EqualsAndHashCode
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties("defaultScopeIdForSource") // so compatible with legacy CsvRules
 public class ColumnarRules implements BulkDataRules {
+
+    public static final String DEFAULT_DELIMITER = ",";
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -53,10 +53,10 @@ public class ColumnarRules implements BulkDataRules {
      *
      * in theory, `\t` should also work ...
      */
-    @JsonInclude(JsonInclude.Include.NON_EMPTY) // this doesn't work
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @NonNull
     @Builder.Default
-    protected Character delimiter = ',';
+    protected String delimiter = DEFAULT_DELIMITER;
 
     /**
      * columns (fields) to duplicate
@@ -84,20 +84,20 @@ public class ColumnarRules implements BulkDataRules {
     @JsonSetter(nulls = Nulls.AS_EMPTY)
     @NonNull
     @Singular(value = "columnToPseudonymize")
-    protected List<String> columnsToPseudonymize = new ArrayList<>();
+    protected List<String> columnsToPseudonymize;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @JsonSetter(nulls = Nulls.AS_EMPTY)
     @NonNull
     @Singular(value = "columnToPseudonymizeIfPresent")
-    protected List<String> columnsToPseudonymizeIfPresent = new ArrayList<>();
+    protected List<String> columnsToPseudonymizeIfPresent;
 
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @JsonSetter(nulls = Nulls.AS_EMPTY)
     @NonNull
     @Singular(value = "columnToRedact")
-    protected List<String> columnsToRedact = new ArrayList<>();
+    protected List<String> columnsToRedact;
 
     /**
      * columns to rename
@@ -113,7 +113,6 @@ public class ColumnarRules implements BulkDataRules {
     @Builder.Default
     @NonNull
     protected Map<String, String> columnsToRename = new HashMap<>();
-
     /**
      * if provided, only columns explicitly listed here will be included in output
      *  (inverse of columnsToRedact)
@@ -142,5 +141,20 @@ public class ColumnarRules implements BulkDataRules {
     @Builder.Default
     @NonNull
     protected Map<String, FieldTransformPipeline> fieldsToTransform = new HashMap<>();
+
+    /**
+     * No-args constructor.
+     * 1) Needed for Jackson deserialization.
+     * 2) Explicit instantiation of @Singular fields required to avoid Lombok warnings about ignored default values.
+     */
+    public ColumnarRules() {
+        this.columnsToPseudonymize = new ArrayList<>();
+        this.columnsToPseudonymizeIfPresent = new ArrayList<>();
+        this.columnsToRedact = new ArrayList<>();
+        this.columnsToRename = new HashMap<>();
+        this.columnsToDuplicate = new HashMap<>();
+        this.fieldsToTransform = new HashMap<>();
+        
+    }
 
 }

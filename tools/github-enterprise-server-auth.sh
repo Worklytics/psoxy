@@ -6,24 +6,26 @@
 
 # Prefer printf over echo for compatibility and formatting
 # Use colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+COLORSCHEME_SH="$(dirname "$0")/set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+    source "$COLORSCHEME_SH"
+else
+    ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
 
 PREFIX="${1:-PSOXY_}"
 
 # Check if jq is installed
 if ! command -v jq &> /dev/null
 then
-    printf "${RED}jq is not installed.${NC}\n"
+    printf "${ERR}jq is not installed.${NC}\n"
     printf "Please install jq to proceed. For example:\n"
-    printf "macOS: ${YELLOW}brew install jq${NC}\n"
-    printf "Linux: ${YELLOW}sudo apt-get install jq${NC} or ${YELLOW}sudo yum install jq${NC}\n"
+    printf "macOS: ${WARN}brew install jq${NC}\n"
+    printf "Linux: ${WARN}sudo apt-get install jq${NC} or ${WARN}sudo yum install jq${NC}\n"
     exit 1
 fi
 
-printf "${GREEN}This script will guide you through the process of creating an GitHub app in GitHub Enterprise Server, authorizing it for the required permissions, and obtaining authentication credentials that can be used by the proxy connector.${NC}\n"
+printf "${SUCCESS}This script will guide you through the process of creating an GitHub app in GitHub Enterprise Server, authorizing it for the required permissions, and obtaining authentication credentials that can be used by the proxy connector.${NC}\n"
 
 printf "Enter the host where your GitHub Enteprise Server is: "
 read -r GITHUB_ENTERPRISE_SERVER_HOST
@@ -51,7 +53,7 @@ read -r CLIENT_SECRET
 
 # Open authorization URL in user's browser
 AUTH_URL="https://${GITHUB_ENTERPRISE_SERVER_HOST}/login/oauth/authorize?client_id=${CLIENT_ID}"
-printf "${GREEN}Opening the following URL in your default browser:${NC}\n"
+printf "${SUCCESS}Opening the following URL in your default browser:${NC}\n"
 echo $AUTH_URL
 open "${AUTH_URL}" || xdg-open "${AUTH_URL}"
 
@@ -67,6 +69,6 @@ echo $RESPONSE
 ACCESS_TOKEN=$(echo "${RESPONSE}" | jq -r '.access_token')
 REFRESH_TOKEN=$(echo "${RESPONSE}" | jq -r '.refresh_token')
 
-printf "${YELLOW}${PREFIX}GITHUB_ENTERPRISE_SERVER_REFRESH_TOKEN${NC}: ${REFRESH_TOKEN}\n"
-printf "${YELLOW}${PREFIX}GITHUB_ENTERPRISE_SERVER_CLIENT_ID${NC}: ${CLIENT_ID}\n"
-printf "${YELLOW}${PREFIX}GITHUB_ENTERPRISE_SERVER_CLIENT_SECRET${NC}: ${CLIENT_SECRET}\n"
+printf "${WARN}${PREFIX}GITHUB_ENTERPRISE_SERVER_REFRESH_TOKEN${NC}: ${REFRESH_TOKEN}\n"
+printf "${WARN}${PREFIX}GITHUB_ENTERPRISE_SERVER_CLIENT_ID${NC}: ${CLIENT_ID}\n"
+printf "${WARN}${PREFIX}GITHUB_ENTERPRISE_SERVER_CLIENT_SECRET${NC}: ${CLIENT_SECRET}\n"

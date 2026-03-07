@@ -100,7 +100,7 @@ endpoints:
             $ref: "#/definitions/Response"
         totalSize:
           type: "integer"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)*Event(%20|\\\
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/queryAll[?]q=SELECT.*FROM(%20|\\+)*Event(%20|\\\
     +)*.*$"
     allowedQueryParams:
       - "q"
@@ -134,7 +134,7 @@ endpoints:
             $ref: "#/definitions/Event"
         totalSize:
           type: "integer"
-  - pathRegex: "^/services/data/v(\\d*.\\d{1})/query[?]q=SELECT.*FROM(%20|\\+)*Task(%20|\\\
+  - pathRegex: "^/services/data/v(\\d*.\\d{1})/queryAll[?]q=SELECT.*FROM(%20|\\+)*Task(%20|\\\
     +)*.*$"
     allowedQueryParams:
       - "q"

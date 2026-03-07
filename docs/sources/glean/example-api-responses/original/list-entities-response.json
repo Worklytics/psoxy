@@ -1,0 +1,160 @@
+{
+  "results": [
+    {
+      "name": "George Clooney",
+      "obfuscatedId": "abc123",
+      "metadata": {
+        "email": "george.clooney@company.com",
+        "firstName": "George",
+        "lastName": "Clooney",
+        "title": "Senior Engineer",
+        "department": "Engineering",
+        "businessUnit": "Technology",
+        "location": "San Francisco, CA",
+        "phone": "+1-415-555-0123",
+        "startDate": "2020-01-15",
+        "manager": {
+          "name": "Jane Smith",
+          "obfuscatedId": "def456"
+        },
+        "directReportsCount": 3,
+        "orgSizeCount": 12,
+        "photoUrl": "https://example.com/photos/george.jpg",
+        "timezone": "Pacific Standard Time",
+        "timezoneIANA": "America/Los_Angeles",
+        "timezoneOffset": -28800,
+        "type": "FULL_TIME"
+      }
+    },
+    {
+      "name": "Alice Johnson",
+      "obfuscatedId": "xyz789",
+      "metadata": {
+        "email": "alice.johnson@company.com",
+        "firstName": "Alice",
+        "lastName": "Johnson",
+        "title": "Product Manager",
+        "department": "Product",
+        "businessUnit": "Product Development",
+        "location": "New York, NY",
+        "startDate": "2019-06-01",
+        "type": "FULL_TIME"
+      }
+    }
+  ],
+  "teamResults": [
+    {
+      "id": "team_001",
+      "name": "Engineering Team",
+      "description": "Core engineering team responsible for product development",
+      "datasource": "glean",
+      "department": "Engineering",
+      "businessUnit": "Technology",
+      "memberCount": 25,
+      "photoUrl": "https://example.com/photos/eng-team.jpg",
+      "bannerUrl": "https://example.com/banners/eng-team-banner.jpg",
+      "status": "PROCESSED",
+      "lastUpdatedAt": "2024-07-29T15:51:28.071Z",
+      "members": [
+        {
+          "person": {
+            "name": "George Clooney",
+            "obfuscatedId": "abc123"
+          },
+          "relationship": "MEMBER",
+          "joinDate": "2020-01-15T00:00:00.000Z"
+        },
+        {
+          "person": {
+            "name": "Jane Smith",
+            "obfuscatedId": "def456"
+          },
+          "relationship": "MANAGER",
+          "joinDate": "2018-03-01T00:00:00.000Z"
+        }
+      ],
+      "emails": [
+        {
+          "email": "engineering@company.com",
+          "type": "PRIMARY",
+          "isUserGenerated": false
+        }
+      ],
+      "datasourceProfiles": [
+        {
+          "datasource": "github",
+          "handle": "company-engineering",
+          "url": "https://github.com/company-engineering",
+          "isUserGenerated": false
+        }
+      ]
+    }
+  ],
+  "customEntityResults": [
+    {
+      "id": "custom_001",
+      "title": "Q4 OKRs",
+      "datasource": "lattice",
+      "objectType": "okr",
+      "metadata": {
+        "customData": {
+          "quarter": "Q4",
+          "year": 2024,
+          "status": "in_progress"
+        }
+      },
+      "roles": [
+        {
+          "person": {
+            "name": "George Clooney",
+            "obfuscatedId": "abc123"
+          },
+          "role": "OWNER",
+          "sourceDocumentSpec": {
+            "url": "https://lattice.com/okrs/custom_001"
+          }
+        }
+      ]
+    }
+  ],
+  "facetResults": [
+    {
+      "sourceName": "department",
+      "operatorName": "SelectMultiple",
+      "buckets": [
+        {
+          "count": 25,
+          "datasource": "glean",
+          "percentage": 40,
+          "value": {
+            "stringValue": "Engineering",
+            "displayLabel": "Engineering"
+          }
+        },
+        {
+          "count": 15,
+          "datasource": "glean",
+          "percentage": 24,
+          "value": {
+            "stringValue": "Product",
+            "displayLabel": "Product"
+          }
+        }
+      ],
+      "hasMoreBuckets": false
+    }
+  ],
+  "cursor": "eyJvZmZzZXQiOjEwfQ==",
+  "totalCount": 62,
+  "hasMoreResults": true,
+  "sortOptions": [
+    "ENTITY_NAME",
+    "FIRST_NAME",
+    "LAST_NAME"
+  ],
+  "customFacetNames": [
+    "customField1",
+    "customField2"
+  ]
+}
+
