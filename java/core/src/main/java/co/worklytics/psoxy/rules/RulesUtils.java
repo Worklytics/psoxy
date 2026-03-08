@@ -1,10 +1,18 @@
 package co.worklytics.psoxy.rules;
 
-import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
-import co.worklytics.psoxy.storage.StorageHandler;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.zip.GZIPInputStream;
+import javax.inject.Inject;
+import javax.inject.Named;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.avaulta.gateway.rules.ColumnarRules;
 import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
 import com.avaulta.gateway.rules.RecordRules;
@@ -13,21 +21,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteStreams;
+import co.worklytics.psoxy.ErrorCauses;
+import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.storage.StorageHandler;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.zip.GZIPInputStream;
 
 @Log
 @NoArgsConstructor(onConstructor_ = @Inject)
@@ -122,11 +125,21 @@ public class RulesUtils {
                 log.log(Level.INFO, "RULES parsed as {0}", impl.getSimpleName());
                 validator.validate(rules);
                 return rules;
+            } catch (com.fasterxml.jackson.core.JsonParseException | com.fasterxml.jackson.databind.JsonMappingException e) {
+                // If it's the last implementation, throw the error
+                if (impl == rulesImplementations.get(rulesImplementations.size() - 1)) {
+                    ErrorCauses errorCause = (e instanceof com.fasterxml.jackson.core.JsonParseException) ? 
+                        ErrorCauses.RULES_INVALID_YAML : ErrorCauses.RULES_INVALID;
+                    throw new InvalidRulesException("Failed to parse RULES from config", e, errorCause);
+                }
             } catch (IOException e) {
-                //ignore
+                // Ignore other IO exceptions and try next impl
+                if (impl == rulesImplementations.get(rulesImplementations.size() - 1)) {
+                    throw new InvalidRulesException("Failed to read RULES from config", e, ErrorCauses.CONFIGURATION_FAILURE);
+                }
             }
         }
-        throw new RuntimeException("Failed to parse RULES from config");
+        throw new InvalidRulesException("Failed to parse RULES from config", ErrorCauses.RULES_INVALID);
     }
 
     public List<StorageHandler.ObjectTransform> parseAdditionalTransforms(ConfigService config) {

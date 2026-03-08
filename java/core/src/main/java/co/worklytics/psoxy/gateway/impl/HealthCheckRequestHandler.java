@@ -1,24 +1,5 @@
 package co.worklytics.psoxy.gateway.impl;
 
-import co.worklytics.psoxy.ControlHeader;
-import co.worklytics.psoxy.HashUtils;
-import co.worklytics.psoxy.HealthCheckResult;
-import co.worklytics.psoxy.gateway.*;
-import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
-import co.worklytics.psoxy.rules.RulesUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import dagger.Lazy;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.extern.java.Log;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.entity.ContentType;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -27,6 +8,29 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.ContentType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import co.worklytics.psoxy.ControlHeader;
+import co.worklytics.psoxy.HashUtils;
+import co.worklytics.psoxy.HealthCheckResult;
+import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
+import co.worklytics.psoxy.rules.RulesUtils;
+import dagger.Lazy;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.extern.java.Log;
 
 /**
  * Request handler that performs health check duties
@@ -179,6 +183,14 @@ public class HealthCheckRequestHandler {
         try {
             rulesUtils.getRulesFromConfig(config, envVarsConfigService)
                     .ifPresent(rules -> healthCheckResult.rules(rulesUtils.asYaml(rules)));
+        } catch (co.worklytics.psoxy.rules.InvalidRulesException e) {
+            logInDev("Failed to add rules to health check: " + e.getMessage(), e);
+            healthCheckResult.warningMessage("RULES configuration error: " + e.getErrorCause().name());
+            try {
+                config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES)
+                        .ifPresent(healthCheckResult::rules);
+            } catch (Throwable ignored) {
+            }
         } catch (Throwable e) {
             logInDev("Failed to add rules to health check", e);
         }
