@@ -6,7 +6,6 @@ import com.avaulta.gateway.rules.transforms.RecordTransform;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
 
@@ -23,7 +22,7 @@ import lombok.experimental.SuperBuilder;
  *
  */
 @AllArgsConstructor //for builder
-@NoArgsConstructor //for Jackson
+
 @SuperBuilder(toBuilder = true)
 @Data
 public class RecordRules implements BulkDataRules {
@@ -55,7 +54,16 @@ public class RecordRules implements BulkDataRules {
      *
      */
     @Singular
-    List<RecordTransform> transforms = Collections.emptyList();
+    List<RecordTransform> transforms;
+
+    /**
+     * No-args constructor.
+     * 1) Needed for Jackson deserialization.
+     * 2) Explicit instantiation of @Singular fields required to avoid Lombok warnings about ignored default values.
+     */
+    public RecordRules() {
+        this.transforms = Collections.emptyList();
+    }
 
     //setter to ensure we get a List, even when coming through jackson
     public void setTransforms(List<RecordTransform> transforms) {

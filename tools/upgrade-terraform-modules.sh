@@ -10,20 +10,22 @@
 NEXT_RELEASE=$1
 
 # colors
-RED='\e[0;31m'
-BLUE='\e[0;34m'
-GREEN='\e[0;32m'
-NC='\e[0m' # No Color
+COLORSCHEME_SH="$(dirname "$0")/set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+    source "$COLORSCHEME_SH"
+else
+    ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
 
 CURRENT_RELEASE=$(sed -n '/git::https:\/\/github\.com\/worklytics\/psoxy\//{s/.*ref=\([^"&]*\).*/\1/p;q;}' main.tf)
 
 # if $NEXT_RELEASE is not provided, warn user and exit
 if [ -z "$NEXT_RELEASE" ]; then
-  printf "${RED}Next release version not specified. Exiting.${NC}\n"
+  printf "${ERR}Next release version not specified. Exiting.${NC}\n"
   exit 1
 fi
 
-printf "Parsed your current terraform module version as ${BLUE}${CURRENT_RELEASE}${NC}; this script will upgrade it to ${GREEN}${NEXT_RELEASE}${NC}?\n"
+printf "Parsed your current terraform module version as ${INFO}${CURRENT_RELEASE}${NC}; this script will upgrade it to ${SUCCESS}${NEXT_RELEASE}${NC}?\n"
 
 read -p "Do you wish to continue? (Y/n) " -n 1 -r
 REPLY=${REPLY:-Y}
@@ -38,11 +40,10 @@ case "$REPLY" in
     exit 0
     ;;
   *)
-    printf "${RED}Invalid input${NC}\n"
+    printf "${ERR}Invalid input${NC}\n"
     exit 1
     ;;
 esac
-
 
 CURRENT_RELEASE_PATTERN=$(echo $CURRENT_RELEASE | sed 's/\./\\\./g')
 PATTERN="s|ref=${CURRENT_RELEASE_PATTERN}|ref=${NEXT_RELEASE}|"
@@ -55,16 +56,16 @@ find . -type f -name "*.bck" -delete
 
 terraform init
 
-printf "Terraform module versions upgraded to ${GREEN}${NEXT_RELEASE}${NC}.\n"
-printf "To revert: ${BLUE}$0 ${CURRENT_RELEASE}${NC}\n"
+printf "Terraform module versions upgraded to ${SUCCESS}${NEXT_RELEASE}${NC}.\n"
+printf "To revert: ${INFO}$0 ${CURRENT_RELEASE}${NC}\n"
 
 if grep -q '^[[:space:]]*deployment_bundle[[:space:]]*=' terraform.tfvars; then
     # Extract current deployment_bundle value
     CURRENT_BUNDLE=$(grep '^[[:space:]]*deployment_bundle[[:space:]]*=' terraform.tfvars | sed 's/.*=[[:space:]]*"\([^"]*\)".*/\1/' | head -1)
     
     if [ -n "$CURRENT_BUNDLE" ]; then
-        printf "\nYour ${BLUE}terraform.tfvars${NC} file references a pre-built 'deployment_bundle':\n"
-        printf "  ${BLUE}${CURRENT_BUNDLE}${NC}\n\n"
+        printf "\nYour ${INFO}terraform.tfvars${NC} file references a pre-built 'deployment_bundle':\n"
+        printf "  ${INFO}${CURRENT_BUNDLE}${NC}\n\n"
         
         # Check if this is a public bundle (in expected public bucket locations)
         IS_PUBLIC_BUNDLE=false
@@ -114,15 +115,15 @@ if grep -q '^[[:space:]]*deployment_bundle[[:space:]]*=' terraform.tfvars; then
                         # Update bundle reference
                         sed -i.bck "s|^\([[:space:]]*deployment_bundle[[:space:]]*=\).*|\1 \"${NEW_BUNDLE_PATH}\"|" terraform.tfvars
                         rm -f terraform.tfvars.bck 2>/dev/null
-                        printf "Updated ${BLUE}deployment_bundle${NC} to:\n"
-                        printf "  ${GREEN}${NEW_BUNDLE_PATH}${NC}\n\n"
+                        printf "Updated ${INFO}deployment_bundle${NC} to:\n"
+                        printf "  ${SUCCESS}${NEW_BUNDLE_PATH}${NC}\n\n"
                         BUNDLE_UPDATED=true
                     else
-                        printf "${BLUE}Warning:${NC} Bundle for version ${GREEN}${NEXT_VERSION}${NC} not found at ${BLUE}${NEW_BUNDLE_PATH}${NC}\n"
+                        printf "${INFO}Warning:${NC} Bundle for version ${SUCCESS}${NEXT_VERSION}${NC} not found at ${INFO}${NEW_BUNDLE_PATH}${NC}\n"
                         printf "Bundle reference was not updated. You may need to build it locally or wait for it to be published.\n\n"
                     fi
                 else
-                    printf "${BLUE}Note:${NC} AWS CLI not available. Cannot check for updated bundle in public S3 bucket.\n\n"
+                    printf "${INFO}Note:${NC} AWS CLI not available. Cannot check for updated bundle in public S3 bucket.\n\n"
                 fi
             elif [ "$PLATFORM" = "gcp" ]; then
                 if command -v gsutil &> /dev/null; then
@@ -134,23 +135,23 @@ if grep -q '^[[:space:]]*deployment_bundle[[:space:]]*=' terraform.tfvars; then
                         # Update bundle reference
                         sed -i.bck "s|^\([[:space:]]*deployment_bundle[[:space:]]*=\).*|\1 \"${NEW_BUNDLE_PATH}\"|" terraform.tfvars
                         rm -f terraform.tfvars.bck 2>/dev/null
-                        printf "Updated ${BLUE}deployment_bundle${NC} to:\n"
-                        printf "  ${GREEN}${NEW_BUNDLE_PATH}${NC}\n\n"
+                        printf "Updated ${INFO}deployment_bundle${NC} to:\n"
+                        printf "  ${SUCCESS}${NEW_BUNDLE_PATH}${NC}\n\n"
                         BUNDLE_UPDATED=true
                     else
-                        printf "${BLUE}Warning:${NC} Bundle for version ${GREEN}${NEXT_VERSION}${NC} not found at ${BLUE}${NEW_BUNDLE_PATH}${NC}\n"
+                        printf "${INFO}Warning:${NC} Bundle for version ${SUCCESS}${NEXT_VERSION}${NC} not found at ${INFO}${NEW_BUNDLE_PATH}${NC}\n"
                         printf "Bundle reference was not updated. You may need to build it locally or wait for it to be published.\n\n"
                     fi
                 else
-                    printf "${BLUE}Note:${NC} gsutil not available. Cannot check for updated bundle in public GCS bucket.\n\n"
+                    printf "${INFO}Note:${NC} gsutil not available. Cannot check for updated bundle in public GCS bucket.\n\n"
                 fi
             fi
             
             # Warn about compatibility
             if [ "$BUNDLE_UPDATED" = true ]; then
-                printf "${BLUE}Note:${NC} Ensure that the AWS Lambda / GCP Cloud Function bundle you're using is compatible with the Terraform modules version ${GREEN}${NEXT_RELEASE}${NC} you're upgrading to.\n\n"
+                printf "${INFO}Note:${NC} Ensure that the AWS Lambda / GCP Cloud Function bundle you're using is compatible with the Terraform modules version ${SUCCESS}${NEXT_RELEASE}${NC} you're upgrading to.\n\n"
             else
-                printf "${BLUE}Warning:${NC} You have an explicit bundle referenced. Ensure that the AWS Lambda / GCP Cloud Function bundle you're using is compatible with the Terraform modules version ${GREEN}${NEXT_RELEASE}${NC} you're upgrading to.\n"
+                printf "${INFO}Warning:${NC} You have an explicit bundle referenced. Ensure that the AWS Lambda / GCP Cloud Function bundle you're using is compatible with the Terraform modules version ${SUCCESS}${NEXT_RELEASE}${NC} you're upgrading to.\n"
                 printf "If the bundle version doesn't match the module version, you may encounter compatibility issues.\n\n"
             fi
         else
@@ -163,18 +164,17 @@ if grep -q '^[[:space:]]*deployment_bundle[[:space:]]*=' terraform.tfvars; then
                 if [ -f "./update-bundle" ]; then
                     ./update-bundle
                 else
-                    printf "${RED}Error:${NC} ./update-bundle script not found. You may need to build the bundle manually.\n\n"
+                    printf "${ERR}Error:${NC} ./update-bundle script not found. You may need to build the bundle manually.\n\n"
                 fi
             else
                 echo "Bundle not updated."
             fi
             
-            printf "\n${BLUE}Warning:${NC} You have an explicit bundle referenced. Ensure that the AWS Lambda / GCP Cloud Function bundle you're using is compatible with the Terraform modules version ${GREEN}${NEXT_RELEASE}${NC} you're upgrading to.\n"
+            printf "\n${INFO}Warning:${NC} You have an explicit bundle referenced. Ensure that the AWS Lambda / GCP Cloud Function bundle you're using is compatible with the Terraform modules version ${SUCCESS}${NEXT_RELEASE}${NC} you're upgrading to.\n"
             printf "If the bundle version doesn't match the module version, you may encounter compatibility issues.\n\n"
         fi
     fi
 fi
-
 
 # parse NEXT_RELEASE as something of the form `rc-v0.5.6` or `v0.5.6`, as MAJOR.MINOR.PATCH
 NEXT_MAJOR=$(echo $NEXT_RELEASE | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\1/')
@@ -187,6 +187,6 @@ CURRENT_MINOR=$(echo $CURRENT_RELEASE | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]
 CURRENT_PATCH=$(echo $CURRENT_RELEASE | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\3/')
 
 if [ $NEXT_MINOR -gt $CURRENT_MINOR ]; then
-  printf "Next release version *may* include a provider bump. It is recommended to run ${BLUE} terraform init --upgrade${NC} to get the latest versions of all terraform providers that are compatible with your configuration.\n"
-  printf "You may first wish to run ${BLUE}terraform providers${NC} to review the various provider version constraints, and consider revising them in top-level ${BLUE}main.tf${NC} or wherever they're specified.\n"
+  printf "Next release version *may* include a provider bump. It is recommended to run ${INFO} terraform init --upgrade${NC} to get the latest versions of all terraform providers that are compatible with your configuration.\n"
+  printf "You may first wish to run ${INFO}terraform providers${NC} to review the various provider version constraints, and consider revising them in top-level ${INFO}main.tf${NC} or wherever they're specified.\n"
 fi
