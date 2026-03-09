@@ -1,5 +1,20 @@
 package co.worklytics.psoxy.gateway.impl;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.ContentType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.HashUtils;
 import co.worklytics.psoxy.HealthCheckResult;
@@ -12,7 +27,6 @@ import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.rules.RulesUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dagger.Lazy;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -184,6 +198,14 @@ public class HealthCheckRequestHandler {
         try {
             rulesUtils.getRulesFromConfig(config, envVarsConfigService)
                     .ifPresent(rules -> healthCheckResult.rules(rulesUtils.asYaml(rules)));
+        } catch (co.worklytics.psoxy.rules.InvalidRulesException e) {
+            logInDev("Failed to add rules to health check: " + e.getMessage(), e);
+            healthCheckResult.warningMessage("RULES configuration error: " + e.getErrorCause().name());
+            try {
+                config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES)
+                        .ifPresent(healthCheckResult::rules);
+            } catch (Throwable ignored) {
+            }
         } catch (Throwable e) {
             logInDev("Failed to add rules to health check", e);
         }

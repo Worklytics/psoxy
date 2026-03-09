@@ -95,7 +95,7 @@ class ApiDataRequestHandlerTest {
     ApiDataRequestHandler handler;
 
     @Inject
-    RESTRules rules;
+    dagger.Lazy<RESTRules> rules;
 
     ReversibleTokenizationStrategy reversibleTokenizationStrategy;
 
