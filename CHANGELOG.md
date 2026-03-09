@@ -11,7 +11,7 @@ Changes to be including in future/planned release notes will be added here.
 - `aws`: updated IAM policy for invoking lambda functions, to reflect AWS perm changes; anyone deploying NEW api connectors on AWS will have to use this version or later, or backport similar change. (See https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html)
 - `Glean`: Added new connector for supporting fetching user insights and entity listings from Glean's REST API.
 - `Gong Metrics`: Added new connector for supporting fetching Gong user stats data from Gong's REST API.
-- `Salesforce`: Support `queryAll` endpoint for fetching archived records.
+- `Salesforce`: Support `queryAll` endpoint for fetching archived records. Support reversible user IDs when fetching users.
 
 ## [0.5.16](https://github.com/Worklytics/psoxy/releases/tag/v0.5.16)
 - `Claude Code`: support basic rules for Claude Code
