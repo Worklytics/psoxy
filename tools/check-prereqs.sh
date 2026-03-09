@@ -87,6 +87,30 @@ else
   printf "AWS CLI version ${CODE}`aws --version`${NC} is installed.\n"
   printf ""
   printf "\t- make sure ${CODE}aws sts get-caller-identity${NC} returns the user/role/account you expect. $AWSCLI_REASON\n"
+
+  if aws sts get-caller-identity &> /dev/null; then
+    AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text 2>/dev/null)
+    # the || true ensures that we fail silently even if set -e is on, and the 2>/dev/null handles standard error
+    AWS_CONCURRENCY=$(aws lambda get-account-settings --query 'AccountLimit.ConcurrentExecutions' --output text 2>/dev/null || true)
+    if [[ -n "$AWS_CONCURRENCY" && "$AWS_CONCURRENCY" =~ ^[0-9]+$ ]]; then
+      if (( AWS_CONCURRENCY < 1000 )); then
+        printf "\t- ${WARN}Warning: AWS Lambda account-level concurrency quota for account $AWS_ACCOUNT_ID is $AWS_CONCURRENCY, which is < 1000.${NC}\n"
+        printf "\t  If this is the AWS account to which your lambda instances will be deployed, ensure that this amount is sufficient for your use case (we recommend at least 100).\n"
+      else
+        printf "\t- AWS Lambda account-level concurrency quota for account ${CODE}${AWS_ACCOUNT_ID}${NC} is ${CODE}${AWS_CONCURRENCY}${NC}.\n"
+      fi
+    fi
+
+    # Check for IAM Role quotas
+    AWS_IAM_ROLES_QUOTA=$(aws service-quotas get-service-quota --service-code iam --quota-code L-FE177D64 --query 'Quota.Value' --output text 2>/dev/null || true)
+    if [[ -n "$AWS_IAM_ROLES_QUOTA" && "$AWS_IAM_ROLES_QUOTA" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+       AWS_IAM_ROLES_QUOTA=${AWS_IAM_ROLES_QUOTA%.*} # truncate decimals
+       printf "\t- AWS IAM Roles quota for account ${CODE}${AWS_ACCOUNT_ID}${NC} is ${CODE}${AWS_IAM_ROLES_QUOTA}${NC}.\n"
+       if (( AWS_IAM_ROLES_QUOTA < 1000 )); then
+          printf "\t  ${WARN}Warning: you may need a higher limit if deploying many Psoxy instances.${NC}\n"
+       fi
+    fi
+  fi
 fi
 
 printf "\n"
@@ -99,6 +123,18 @@ if ! gcloud --version &> /dev/null ; then
 else
   printf "Google Cloud SDK version ${CODE}`gcloud --version 2> /dev/null | head -n 1`${NC} is installed.\n"
   printf "\t- make sure ${CODE}gcloud auth list --filter=\"status:ACTIVE\"${NC} returns the account you expect. $GCLOUD_REASON\n"
+
+  if gcloud auth list --filter="status:ACTIVE" --format="value(account)" 2>/dev/null | grep -q '@'; then
+    GCP_PROJECT_ID=$(gcloud config get-value project 2>/dev/null || true)
+    if [[ -n "$GCP_PROJECT_ID" ]]; then
+      # Check Cloud Functions Quota
+      GCP_FUNCTIONS_QUOTA=$(gcloud compute project-info describe --project="$GCP_PROJECT_ID" --format="value(quotas.value)" --flatten="quotas[]" --filter="quotas.metric:CLOUD_FUNCTIONS_API_REQUESTS_PER_100_SECONDS" 2>/dev/null || true)
+      if [[ -n "$GCP_FUNCTIONS_QUOTA" && "$GCP_FUNCTIONS_QUOTA" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+         GCP_FUNCTIONS_QUOTA=${GCP_FUNCTIONS_QUOTA%.*} # truncate decimals
+         printf "\t- GCP Cloud Functions (per 100s) quota for project ${CODE}${GCP_PROJECT_ID}${NC} is ${CODE}${GCP_FUNCTIONS_QUOTA}${NC}.\n"
+      fi
+    fi
+  fi
 fi
 
 printf "\n"
