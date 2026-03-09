@@ -31,6 +31,21 @@ import dagger.Lazy;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.ContentType;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
  * Request handler that performs health check duties
@@ -39,7 +54,7 @@ import lombok.extern.java.Log;
 @Log
 public class HealthCheckRequestHandler {
 
-    public static final String JAVA_SOURCE_CODE_VERSION = "v0.5.18";
+    public static final String JAVA_SOURCE_CODE_VERSION = "rc-v0.5.19";
 
     /**
      * a random UUID used to salt the hash of the salt.  Purpose of this is to invalidate any non-purpose built rainbow table solution.
@@ -198,8 +213,9 @@ public class HealthCheckRequestHandler {
         // if SALT configured, as a hash of it to the health check, to enable detection of changes
         // (if salt changes, client needs to know; as all subsequent pseudonyms produced by proxy instance from that point
         // will be inconsistent with the prior ones)
-        config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
-                .ifPresent(salt -> healthCheckResult.saltSha256Hash(hashUtils.hash(salt, SALT_FOR_SALT)));
+        Optional.of(piiSaltHash())
+            .filter(StringUtils::isNotBlank)
+            .ifPresent(healthCheckResult::saltSha256Hash);
 
         try {
             sourceAuthStrategy.get().validateConfigValues().forEach(healthCheckResult::warningMessage);
@@ -230,7 +246,7 @@ public class HealthCheckRequestHandler {
      */
     public String piiSaltHash() {
         if (piiSaltHash == null) {
-            piiSaltHash = config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
+            piiSaltHash = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
                 .map(salt -> hashUtils.hash(salt, SALT_FOR_SALT)).orElse("");
         }
         return piiSaltHash;
