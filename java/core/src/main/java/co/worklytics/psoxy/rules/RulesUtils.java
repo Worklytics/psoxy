@@ -127,7 +127,7 @@ public class RulesUtils {
                 return rules;
             } catch (com.fasterxml.jackson.core.JsonParseException | com.fasterxml.jackson.databind.JsonMappingException e) {
                 // If it's the last implementation, throw the error
-                if (impl == rulesImplementations.get(rulesImplementations.size() - 1)) {
+                if (impl == rulesImplementations.getLast()) {
                     ErrorCauses errorCause = (e instanceof com.fasterxml.jackson.core.JsonParseException) ? 
                         ErrorCauses.RULES_INVALID_YAML : ErrorCauses.RULES_INVALID;
                     throw new InvalidRulesException("Failed to parse RULES from config", e, errorCause);
