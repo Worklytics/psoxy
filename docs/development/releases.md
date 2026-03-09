@@ -17,8 +17,20 @@ From `main`:
 On `rc-`:
 
 ```shell
+git checkout -b  s220-prep-release-v0.4.16
+
 ./tools/release/prep.sh rc-v0.4.16 v0.4.16
+
+
+cd tools/psoxy-test
+npm audit fix
+git commit -a -m "update deps in psoxy-test"
+
+
 ```
+
+TODO: review versions of terraform, java, node uses in github actions. Ensure we're explicitly using the latest of each, and that we're ALSO testing explicitly for latest-1 version, even if it's not officially supported still.
+
 
 QA aws, gcp dev examples by running `terraform apply` for each, and testing various connectors.
 
@@ -28,6 +40,8 @@ Create PR to merge `rc-` to `main`.
 ```shell
 ./tools/release/rc-to-main.sh v0.4.16
 ```
+
+
 
 After merged to `main`:
 
