@@ -7,9 +7,12 @@
 # ./tools/release/example-create-release-pr.sh ~/psoxy/ gcp ~/psoxy-example-gcp
 
 # colors
-RED='\e[0;31m'
-BLUE='\e[0;34m'
-NC='\e[0m' # No Color
+COLORSCHEME_SH="$(dirname "$0")/../set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+    source "$COLORSCHEME_SH"
+else
+    ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
 
 SCRIPT_NAME=$0
 PATH_TO_REPO=$1
@@ -29,17 +32,17 @@ display_usage() {
 }
 
 if [ "$#" -ne 3 ]; then
-  printf "${RED}Unexpected number of parameters.${NC}\n"
+  printf "${ERR}Unexpected number of parameters.${NC}\n"
   display_usage
   exit 1
 fi
 if [ ! -d "$PATH_TO_REPO" ]; then
-  printf "Directory provided for PATH_TO_REPO, ${RED}'${PATH_TO_REPO}'${NC}, does not exist.\n"
+  printf "Directory provided for PATH_TO_REPO, ${ERR}'${PATH_TO_REPO}'${NC}, does not exist.\n"
   display_usage
   exit 1
 fi
 
-printf "Creating PR to update example ${BLUE}${EXAMPLE}${NC} in ${BLUE}${EXAMPLE_TEMPLATE_REPO}${NC} to reference latest release of ${BLUE}${PATH_TO_REPO}${NC} ...\n"
+printf "Creating PR to update example ${INFO}${EXAMPLE}${NC} in ${INFO}${EXAMPLE_TEMPLATE_REPO}${NC} to reference latest release of ${INFO}${PATH_TO_REPO}${NC} ...\n"
 
 # append / if needed
 if [[ "${PATH_TO_REPO: -1}" != "/" ]]; then
@@ -47,7 +50,7 @@ if [[ "${PATH_TO_REPO: -1}" != "/" ]]; then
 fi
 
 if [ ! -f "${PATH_TO_REPO}java/pom.xml" ]; then
-  printf "${RED}${PATH_TO_REPO}java/pom.xml not found. set <path-to-repo> argument to point to the root of a psoxy checkout. Exiting.${NC}\n"
+  printf "${ERR}${PATH_TO_REPO}java/pom.xml not found. set <path-to-repo> argument to point to the root of a psoxy checkout. Exiting.${NC}\n"
   exit 1
 fi
 
@@ -57,7 +60,7 @@ PATH_TO_REPO="$(pwd)/" # get full path
 # ensure on `main`
 CURRENT_SOURCE_BRANCH=$(git branch --show-current)
 if [ "$CURRENT_SOURCE_BRANCH" != "main" ]; then
-  printf "Current branch for ${BLUE}$PATH_TO_REPO${NC} is not ${BLUE}main${NC}. Do you want to switch to main? "
+  printf "Current branch for ${INFO}$PATH_TO_REPO${NC} is not ${INFO}main${NC}. Do you want to switch to main? "
   read -p "(Y/n) " -n 1 -r
   REPLY=${REPLY:-Y}
   echo    # Move to a new line
@@ -66,7 +69,7 @@ if [ "$CURRENT_SOURCE_BRANCH" != "main" ]; then
       git checkout main
       ;;
     *)
-      printf "Did not switch to main. Example will be published from ${BLUE}${CURRENT_SOURCE_BRANCH}${NC}.\n"
+      printf "Did not switch to main. Example will be published from ${INFO}${CURRENT_SOURCE_BRANCH}${NC}.\n"
       ;;
   esac
 fi
@@ -78,14 +81,14 @@ RELEASE_TAG="v${CURRENT_RELEASE_NUMBER}"
 dev_example_path="${PATH_TO_REPO}infra/examples-dev/${EXAMPLE}"
 
 if [ ! -d "$dev_example_path" ]; then
-  printf "Directory provided for EXAMPLE, ${RED}'${EXAMPLE}'${NC} not found at ${dev_example_path}, where it's expected to be.\n"
+  printf "Directory provided for EXAMPLE, ${ERR}'${EXAMPLE}'${NC} not found at ${dev_example_path}, where it's expected to be.\n"
   display_usage
   cd -
   exit 1
 fi
 
 if [ ! -d "$EXAMPLE_TEMPLATE_REPO" ]; then
-  printf "Directory provided for EXAMPLE_TEMPLATE_REPO, ${RED}'${EXAMPLE_TEMPLATE_REPO}'${NC}, does not exist.\n"
+  printf "Directory provided for EXAMPLE_TEMPLATE_REPO, ${ERR}'${EXAMPLE_TEMPLATE_REPO}'${NC}, does not exist.\n"
   display_usage
   cd -
   exit 1
@@ -96,13 +99,12 @@ if [[ "${EXAMPLE_TEMPLATE_REPO: -1}" != "/" ]]; then
     EXAMPLE_TEMPLATE_REPO="$EXAMPLE_TEMPLATE_REPO/"
 fi
 
-
 cd "$EXAMPLE_TEMPLATE_REPO"
 
 # check if any open prs in github
 if gh pr list --state open | grep -q . ; then
   REPO_NAME=$(gh repo view --json nameWithOwner -q .nameWithOwner)
-  printf "${RED}There are open PRs in the ${BLUE}${REPO_NAME}${NC}. Please close them before continuing.${NC}\n"
+  printf "${ERR}There are open PRs in the ${INFO}${REPO_NAME}${NC}. Please close them before continuing.${NC}\n"
   gh pr list --web
   cd -
   exit 1
@@ -110,18 +112,18 @@ fi
 
 CURRENT_BRANCH=$(git branch --show-current)
 if [ "$CURRENT_BRANCH" != "main" ]; then
-  printf "${RED}Current branch in checkout of $EXAMPLE_TEMPLATE_REPO is not main. Please checkout main branch and try again.${NC}\n"
-  printf "try ${BLUE}(cd $EXAMPLE_TEMPLATE_REPO && git checkout main && cd $WORKING_DIRECTORY)${NC}\n"
+  printf "${ERR}Current branch in checkout of $EXAMPLE_TEMPLATE_REPO is not main. Please checkout main branch and try again.${NC}\n"
+  printf "try ${INFO}(cd $EXAMPLE_TEMPLATE_REPO && git checkout main && cd $WORKING_DIRECTORY)${NC}\n"
   exit 1
 fi
 
 BRANCH_STATUS=$(git status --porcelain)
 if [ -n "$BRANCH_STATUS" ]; then
-  printf "${RED}Current status of 'main' branch is not clean. Please commit or stash your changes and try again.${NC}\n"
+  printf "${ERR}Current status of 'main' branch is not clean. Please commit or stash your changes and try again.${NC}\n"
 
   git status
 
-  printf "Do you want to ${BLUE}git reset --hard${NC}?"
+  printf "Do you want to ${INFO}git reset --hard${NC}?"
   read -p "(y/N) " -n 1 -r
   REPLY=${REPLY:-N}
   echo    # Move to a new line
@@ -146,7 +148,7 @@ if git fetch origin main --dry-run | grep -q 'up to date'; then
       echo "The local main branch can be fast-forwarded. Performing 'git pull origin main'..."
       git pull origin main
     else
-      printf "${RED}The local copy of main branch cannot be fast-forwarded. Please resolve any conflicts manually.${NC}"
+      printf "${ERR}The local copy of main branch cannot be fast-forwarded. Please resolve any conflicts manually.${NC}"
       exit 1
     fi
 fi
@@ -157,7 +159,7 @@ cd "$EXAMPLE_TEMPLATE_REPO"
 git checkout -b "rc-${RELEASE_TAG}"
 
 if [ $? -ne 0 ]; then
-  printf "${RED}Failed to create branch rc-${RELEASE_TAG}. does it already exist?${NC}\n"
+  printf "${ERR}Failed to create branch rc-${RELEASE_TAG}. does it already exist?${NC}\n"
   exit 1
 fi
 
@@ -168,7 +170,7 @@ git push origin
 
 if command -v gh &> /dev/null; then
   PR_URL=$(gh pr create --title "update to \`${RELEASE_TAG}\`" --body "update to proxy release https://github.com/Worklytics/psoxy/releases/tag/${RELEASE_TAG}" --assignee "@me")
-  printf "created PR ${BLUE}${PR_URL}${NC}\n"
+  printf "created PR ${INFO}${PR_URL}${NC}\n"
   PR_NUMBER=$(gh pr view $PR_URL --json number | jq -r ".number")
   # Generate a random file name for the comment body file
   COMMENT_BODY_FILE="/tmp/comment-body-file-$(uuidgen).md"

@@ -2,55 +2,54 @@
 
 # Usage ./tools/release/prep.sh <current-release> <next-release>
 
-RED='\e[0;31m'
-GREEN='\e[0;32m'
-BLUE='\e[0;34m'
-NC='\e[0m' # No Color
+COLORSCHEME_SH="$(dirname "$0")/../set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+    source "$COLORSCHEME_SH"
+else
+    ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
 
 CURRENT_RELEASE=$1
 NEXT_RELEASE=$2
 
 if [ -z "$CURRENT_RELEASE" ]; then
-  printf "${RED}Current release version not specified. Exiting.${NC}\n"
-  printf "Usage: ${BLUE}./tools/check-release.sh <current-release> <next-release>${NC}\n"
+  printf "${ERR}Current release version not specified. Exiting.${NC}\n"
+  printf "Usage: ${INFO}./tools/check-release.sh <current-release> <next-release>${NC}\n"
   exit 1
 fi
 
 if [ -z "$NEXT_RELEASE" ]; then
-  printf "${RED}Next release version not specified. Exiting.${NC}\n"
-  printf "Usage: ${BLUE}./tools/check-release.sh <current-release> <next-release>${NC}\n"
+  printf "${ERR}Next release version not specified. Exiting.${NC}\n"
+  printf "Usage: ${INFO}./tools/check-release.sh <current-release> <next-release>${NC}\n"
   exit 1
 fi
 
 if [ ! -f "java/pom.xml" ]; then
-  printf "${RED}java/pom.xml not found. You should run this script from root of psoxy checkout. Exiting.${NC}\n"
+  printf "${ERR}java/pom.xml not found. You should run this script from root of psoxy checkout. Exiting.${NC}\n"
   exit 1
 fi
 
-
-
 IS_RC=$(echo $NEXT_RELEASE | grep -c "rc")
 if [ "$IS_RC" -eq 1 ]; then
-  printf "Preparing release candidate ${GREEN}${NEXT_RELEASE}${NC} ...\n"
+  printf "Preparing release candidate ${SUCCESS}${NEXT_RELEASE}${NC} ...\n"
   CURRENT_BRANCH=$(git branch --show-current)
 
   # check if current branch is clean
   if [ -n "$(git status --porcelain)" ]; then
-    printf "${RED}Current branch is not clean. Please commit or stash your changes and try again to prepare release candidate.${NC}\n"
+    printf "${ERR}Current branch is not clean. Please commit or stash your changes and try again to prepare release candidate.${NC}\n"
     exit 1
   fi
 
   if [ "$CURRENT_BRANCH" != "main" ]; then
 
-    printf "${RED}Current branch is not main. Please checkout main branch and try again to prepare release candidate.${NC}\n"
+    printf "${ERR}Current branch is not main. Please checkout main branch and try again to prepare release candidate.${NC}\n"
     exit 1
   fi
 
   git checkout -b "$NEXT_RELEASE"
 else
-  printf "Preparing release ${GREEN}${NEXT_RELEASE}${NC} ...\n"
+  printf "Preparing release ${SUCCESS}${NEXT_RELEASE}${NC} ...\n"
 fi
-
 
 CURRENT_RELEASE_PATTERN=$(echo $CURRENT_RELEASE | sed 's/\./\\\./g')
 PATTERN="s/ref=${CURRENT_RELEASE_PATTERN}/ref=${NEXT_RELEASE}/"
@@ -63,7 +62,7 @@ find infra/ -type f -name "*.bck" -exec rm {} +
 # deal with pom.xml
 CURRENT_RELEASE_NUMBER=$(echo $CURRENT_RELEASE | sed 's/[^0-9\.]//g')
 NEXT_RELEASE_NUMBER=$(echo $NEXT_RELEASE | sed 's/[^0-9\.]//g')
-printf "Next release number: ${BLUE}${NEXT_RELEASE_NUMBER}${NC}\n"
+printf "Next release number: ${INFO}${NEXT_RELEASE_NUMBER}${NC}\n"
 RELEASE_NUMBER_PATTERN="s/<revision>$(echo $CURRENT_RELEASE_NUMBER | sed 's/\./\\\./g')<\/revision>/<revision>$(echo $NEXT_RELEASE_NUMBER | sed 's/\./\\\./g')\<\/revision>/"
 sed -i .bck $RELEASE_NUMBER_PATTERN java/pom.xml
 rm java/pom.xml.bck
@@ -78,7 +77,7 @@ find tools/ -type f -name "*.sh" -exec sed -i .bck $RELEASE_REF_PATTERN {} +
 find tools/ -type f -name "*.bck" -exec rm {} +
 
 # check for remaining references to current release
-printf "The following files still contain references to the current release ${GREEN}${CURRENT_RELEASE}${NC}; please review:\n"
+printf "The following files still contain references to the current release ${SUCCESS}${CURRENT_RELEASE}${NC}; please review:\n"
 git grep -l "$CURRENT_RELEASE_PATTERN" java/
 git grep -l "$CURRENT_RELEASE_PATTERN" infra/
 git grep -l "$CURRENT_RELEASE_PATTERN" tools/
@@ -115,7 +114,7 @@ git status
 
 COMMIT_MESSAGE="update release refs to ${NEXT_RELEASE}"
 
-printf "See above for status. Commit changes with message ${BLUE}${COMMIT_MESSAGE}${NC}?\n"
+printf "See above for status. Commit changes with message ${INFO}${COMMIT_MESSAGE}${NC}?\n"
 
 read -p "(Y/n) " -n 1 -r
 REPLY=${REPLY:-Y}
@@ -133,7 +132,7 @@ esac
 echo "" # newline
 
 if [ "$IS_RC" -eq 1 ]; then
-  printf "Update open PRs to point to ${GREEN}${NEXT_RELEASE}${NC}?\n"
+  printf "Update open PRs to point to ${SUCCESS}${NEXT_RELEASE}${NC}?\n"
   read -p "(Y/n) " -n 1 -r
   REPLY=${REPLY:-Y}
   echo    # Move to a new line
