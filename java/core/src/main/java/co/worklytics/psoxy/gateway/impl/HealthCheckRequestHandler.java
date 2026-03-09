@@ -3,7 +3,13 @@ package co.worklytics.psoxy.gateway.impl;
 import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.HashUtils;
 import co.worklytics.psoxy.HealthCheckResult;
-import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.rules.RulesUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,7 +24,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -186,8 +191,9 @@ public class HealthCheckRequestHandler {
         // if SALT configured, as a hash of it to the health check, to enable detection of changes
         // (if salt changes, client needs to know; as all subsequent pseudonyms produced by proxy instance from that point
         // will be inconsistent with the prior ones)
-        config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
-                .ifPresent(salt -> healthCheckResult.saltSha256Hash(hashUtils.hash(salt, SALT_FOR_SALT)));
+        Optional.of(piiSaltHash())
+            .filter(StringUtils::isNotBlank)
+            .ifPresent(healthCheckResult::saltSha256Hash);
 
         try {
             sourceAuthStrategy.get().validateConfigValues().forEach(healthCheckResult::warningMessage);
@@ -218,7 +224,7 @@ public class HealthCheckRequestHandler {
      */
     public String piiSaltHash() {
         if (piiSaltHash == null) {
-            piiSaltHash = config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
+            piiSaltHash = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
                 .map(salt -> hashUtils.hash(salt, SALT_FOR_SALT)).orElse("");
         }
         return piiSaltHash;
