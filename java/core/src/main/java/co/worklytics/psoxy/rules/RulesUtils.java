@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Iterables;
 import com.google.common.io.ByteStreams;
 import co.worklytics.psoxy.ErrorCauses;
 import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
@@ -127,14 +128,14 @@ public class RulesUtils {
                 return rules;
             } catch (com.fasterxml.jackson.core.JsonParseException | com.fasterxml.jackson.databind.JsonMappingException e) {
                 // If it's the last implementation, throw the error
-                if (impl == rulesImplementations.getLast()) {
+                if (impl == Iterables.getLast(rulesImplementations)) {
                     ErrorCauses errorCause = (e instanceof com.fasterxml.jackson.core.JsonParseException) ? 
                         ErrorCauses.RULES_INVALID_YAML : ErrorCauses.RULES_INVALID;
                     throw new InvalidRulesException("Failed to parse RULES from config", e, errorCause);
                 }
             } catch (IOException e) {
                 // Ignore other IO exceptions and try next impl
-                if (impl == rulesImplementations.getLast()) {
+                if (impl == Iterables.getLast(rulesImplementations)) {
                     throw new InvalidRulesException("Failed to read RULES from config", e, ErrorCauses.CONFIGURATION_FAILURE);
                 }
             }
