@@ -134,7 +134,7 @@ public class RulesUtils {
                 }
             } catch (IOException e) {
                 // Ignore other IO exceptions and try next impl
-                if (impl == rulesImplementations.get(rulesImplementations.size() - 1)) {
+                if (impl == rulesImplementations.getLast()) {
                     throw new InvalidRulesException("Failed to read RULES from config", e, ErrorCauses.CONFIGURATION_FAILURE);
                 }
             }
