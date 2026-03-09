@@ -7,18 +7,29 @@ printf "See https://github.com/Worklytics/psoxy#prerequisites for more informati
 
 HOMEBREW_AVAILABLE=`brew -v &> /dev/null`
 
+CI_MODE=false
+for arg in "$@"; do
+  if [[ "$arg" == "--ci" ]] || [[ "$arg" == "--non-interactive" ]]; then
+    CI_MODE=true
+  fi
+done
+
 # Source centralized color scheme
 source "$(dirname "$0")/set-term-colorscheme.sh"
 
 if ! git --version &> /dev/null ; then
   printf "${ERR}Git not installed.${NC} Not entirely sure how you got here without it, but to install see https://git-scm.com/book/en/v2/Getting-Started-Installing-Git\n"
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${CODE}brew install git${NC}\n"; fi
-  exit 1
+  if [[ "$CI_MODE" != "true" ]]; then
+    exit 1
+  fi
 fi
 
 if ! terraform -v &> /dev/null ; then
   printf "${ERR}Terraform CLI not available.${NC} Psoxy examples / deployment scripts require it. See ${CODE}https://developer.hashicorp.com/terraform/downloads${NC} for installation options\n"
-  exit 1
+  if [[ "$CI_MODE" != "true" ]]; then
+    exit 1
+  fi
 fi
 
 # Check Maven installation

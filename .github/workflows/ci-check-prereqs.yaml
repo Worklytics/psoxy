@@ -1,0 +1,15 @@
+name: CI - Check Prereqs Script
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  check_prereqs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run check-prereqs.sh in CI Mode
+        run: bash ./tools/check-prereqs.sh --ci
