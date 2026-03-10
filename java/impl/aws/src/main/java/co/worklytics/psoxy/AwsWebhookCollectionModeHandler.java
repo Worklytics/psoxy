@@ -61,7 +61,11 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
         inboundWebhookHandler = awsContainer.inboundWebhookHandler();
         jwksHandler = awsContainer.jwksDecoratorFactory().create(inboundWebhookHandler);
         lambdaEventUtils = awsContainer.lambdaEventUtils();
-        
+
+        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            io.opentracing.util.GlobalTracer.registerIfAbsent(com.newrelic.opentracing.LambdaTracer.INSTANCE);
+        }
+
         // Pre-warm the public key cache during Lambda initialization
         // This ensures first JWKS request doesn't wait for KMS fetch
         warmPublicKeyCache();
@@ -98,7 +102,14 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
             lambdaEventUtils.write(output, response);
         } else if (lambdaEventUtils.isSQSEvent(rootNode)) {
             SQSEvent sqsEvent = lambdaEventUtils.toSQSEvent(rootNode);
-            handleRequest(sqsEvent, context);
+            if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+                com.newrelic.opentracing.aws.LambdaTracing.instrument(sqsEvent, context, (inEvent, ctx) -> {
+                    handleRequest(inEvent, ctx);
+                    return null;
+                });
+            } else {
+                handleRequest(sqsEvent, context);
+            }
 
             // Return empty 200 response
             APIGatewayV2HTTPResponse resp = APIGatewayV2HTTPResponse.builder()
@@ -143,6 +154,15 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
      */
     @SneakyThrows
     public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent httpEvent, Context context) {
+        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            return com.newrelic.opentracing.aws.LambdaTracing.instrument(httpEvent, context, this::actualHandleRequest);
+        } else {
+            return actualHandleRequest(httpEvent, context);
+        }
+    }
+
+    @SneakyThrows
+    public APIGatewayV2HTTPResponse actualHandleRequest(APIGatewayV2HTTPEvent httpEvent, Context context) {
         //interfaces:
         // - HttpRequestEvent --> HttpResponseEvent
 

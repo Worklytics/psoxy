@@ -44,11 +44,25 @@ public class APIGatewayV1Handler implements
         awsContainer = DaggerAwsContainer.create();
         requestHandler = awsContainer.apiDataRequestHandler();
         responseCompressionHandler = new ResponseCompressionHandler();
+
+        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            io.opentracing.util.GlobalTracer.registerIfAbsent(com.newrelic.opentracing.LambdaTracer.INSTANCE);
+        }
+
         Security.addProvider(new BouncyCastleProvider());
     }
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent invocationEvent,
+            Context context) {
+        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            return com.newrelic.opentracing.aws.LambdaTracing.instrument(invocationEvent, context, this::actualHandleRequest);
+        } else {
+            return actualHandleRequest(invocationEvent, context);
+        }
+    }
+
+    public APIGatewayProxyResponseEvent actualHandleRequest(APIGatewayProxyRequestEvent invocationEvent,
             Context context) {
 
         HttpEventResponse response;

@@ -1,13 +1,14 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.aws.AwsContainer;
-import co.worklytics.psoxy.aws.DaggerAwsContainer;
-import co.worklytics.psoxy.aws.request.APIGatewayV1ProxyEventRequestAdapter;
-import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
-import co.worklytics.psoxy.aws.request.LambdaEventUtils;
-import co.worklytics.psoxy.gateway.HttpEventRequest;
-import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.Security;
+import java.time.Instant;
+import java.util.logging.Level;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
@@ -16,17 +17,15 @@ import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import co.worklytics.psoxy.aws.AwsContainer;
+import co.worklytics.psoxy.aws.DaggerAwsContainer;
+import co.worklytics.psoxy.aws.request.APIGatewayV1ProxyEventRequestAdapter;
+import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
+import co.worklytics.psoxy.aws.request.LambdaEventUtils;
+import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.Security;
-import java.time.Instant;
-import java.util.logging.Level;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  * AWS lambda entrypoint that can handle API data requests via any of:
@@ -60,6 +59,11 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
         requestHandler = awsContainer.apiDataRequestHandler();
         responseCompressionHandler = new ResponseCompressionHandler();
         lambdaEventUtils = awsContainer.lambdaEventUtils();
+
+        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            io.opentracing.util.GlobalTracer.registerIfAbsent(com.newrelic.opentracing.LambdaTracer.INSTANCE);
+        }
+
         Security.addProvider(new BouncyCastleProvider());
     }
 
@@ -69,68 +73,88 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
         // Read the full input stream into a tree
         JsonNode rootNode = lambdaEventUtils.read(input);
 
-        ApiDataRequestHandler.ProcessingContext processingContext;
-
-        // whatever the event is, convert to HttpEventRequest and invoke the request handler
-        HttpEventResponse response;
         if (lambdaEventUtils.isSQSEvent(rootNode)) {
             // async invocation case via SQS
             SQSEvent sqsEvent = lambdaEventUtils.toSQSEvent(rootNode);
-
-            int messageCount = sqsEvent.getRecords().size();
-            int failedMessageCount = 0;
-            for (SQSMessage message : sqsEvent.getRecords()) {
-                try {
-                    if (!message.getMessageAttributes().containsKey("processingContext")) {
-                        throw new IllegalArgumentException(
-                                "SQS event record has no processingContext message attribute");
-                    }
-
-                    String processingContextJson = message.getMessageAttributes()
-                            .get("processingContext").getStringValue();
-
-                    processingContext = payloadMapper.readValue(processingContextJson,
-                            ApiDataRequestHandler.ProcessingContext.class);
-                    rootNode = payloadMapper.readTree(message.getBody());
-
-                    handleSingleRequest(rootNode, processingContext, context);
-
-                    // async case - SQS; no response is needed
-                    log.info("Processed async API data request: "
-                            + payloadMapper.writeValueAsString(processingContext));
-                } catch (Throwable e) {
-                    log.log(Level.WARNING,
-                            "Error processing async API data request: " + e.getMessage(), e);
-                    // TODO: send JUST this message to the dead letter queue ??
-                    failedMessageCount++;
-                }
-            }
-            log.info("Processed " + messageCount + " async API data requests; " + failedMessageCount
-                    + " failed");
-            if (failedMessageCount > 0) {
-                throw new RuntimeException(
-                        "Failed to process " + failedMessageCount + " async API data requests");
+            if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+                com.newrelic.opentracing.aws.LambdaTracing.instrument(sqsEvent, context, (inEvent, ctx) -> {
+                    handleSqsEvent(inEvent, ctx);
+                    return null;
+                });
+            } else {
+                handleSqsEvent(sqsEvent, context);
             }
         } else {
             // synchronous invocation case - API Gateway or cloud function URL invocation
-            processingContext = ApiDataRequestHandler.ProcessingContext.builder()
+            ApiDataRequestHandler.ProcessingContext processingContext = ApiDataRequestHandler.ProcessingContext.builder()
                     .requestId(context.getAwsRequestId())
                     .requestReceivedAt(Instant.now())
                     .build();
-            Pair<Boolean, HttpEventResponse> responsePair =
-                    handleSingleRequest(rootNode, processingContext, context);
-            response = responsePair.getRight();
-            Boolean base64Encoded = responsePair.getLeft();
 
-            // need to send the proper response, as client waiting on one
+            Pair<Boolean, HttpEventResponse> responsePair;
             if (lambdaEventUtils.isApiGatewayV1Event(rootNode)) {
-                lambdaEventUtils.writeAsApiGatewayV1Response(response, output, base64Encoded);
+                APIGatewayProxyRequestEvent v1Event = lambdaEventUtils.toAPIGatewayProxyRequestEvent(rootNode);
+                if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+                    responsePair = com.newrelic.opentracing.aws.LambdaTracing.instrument(v1Event, context, (inEvt, ctx) -> {
+                        try { return handleSingleRequest(rootNode, processingContext, ctx); } 
+                        catch (IOException e) { throw new RuntimeException(e); }
+                    });
+                } else {
+                    responsePair = handleSingleRequest(rootNode, processingContext, context);
+                }
+                lambdaEventUtils.writeAsApiGatewayV1Response(responsePair.getRight(), output, responsePair.getLeft());
             } else if (lambdaEventUtils.isApiGatewayV2Event(rootNode)) {
-                lambdaEventUtils.writeAsApiGatewayV2Response(response, output, base64Encoded);
+                APIGatewayV2HTTPEvent v2Event = lambdaEventUtils.toAPIGatewayV2HTTPEvent(rootNode);
+                if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+                    responsePair = com.newrelic.opentracing.aws.LambdaTracing.instrument(v2Event, context, (inEvt, ctx) -> {
+                        try { return handleSingleRequest(rootNode, processingContext, ctx); } 
+                        catch (IOException e) { throw new RuntimeException(e); }
+                    });
+                } else {
+                    responsePair = handleSingleRequest(rootNode, processingContext, context);
+                }
+                lambdaEventUtils.writeAsApiGatewayV2Response(responsePair.getRight(), output, responsePair.getLeft());
             } else {
                 throw new IllegalArgumentException(
                         "Unsupported event type: " + rootNode.getNodeType());
             }
+        }
+    }
+
+    private void handleSqsEvent(SQSEvent sqsEvent, Context context) {
+        int messageCount = sqsEvent.getRecords().size();
+        int failedMessageCount = 0;
+        for (SQSMessage message : sqsEvent.getRecords()) {
+            try {
+                if (!message.getMessageAttributes().containsKey("processingContext")) {
+                    throw new IllegalArgumentException(
+                            "SQS event record has no processingContext message attribute");
+                }
+
+                String processingContextJson = message.getMessageAttributes()
+                        .get("processingContext").getStringValue();
+
+                ApiDataRequestHandler.ProcessingContext processingContext = payloadMapper.readValue(processingContextJson,
+                        ApiDataRequestHandler.ProcessingContext.class);
+                JsonNode rootNode = payloadMapper.readTree(message.getBody());
+
+                handleSingleRequest(rootNode, processingContext, context);
+
+                // async case - SQS; no response is needed
+                log.info("Processed async API data request: "
+                        + payloadMapper.writeValueAsString(processingContext));
+            } catch (Throwable e) {
+                log.log(Level.WARNING,
+                        "Error processing async API data request: " + e.getMessage(), e);
+                // TODO: send JUST this message to the dead letter queue ??
+                failedMessageCount++;
+            }
+        }
+        log.info("Processed " + messageCount + " async API data requests; " + failedMessageCount
+                + " failed");
+        if (failedMessageCount > 0) {
+            throw new RuntimeException(
+                    "Failed to process " + failedMessageCount + " async API data requests");
         }
     }
 

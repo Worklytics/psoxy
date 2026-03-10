@@ -45,12 +45,26 @@ public class Handler implements
         requestHandler = awsContainer.apiDataRequestHandler();
         responseCompressionHandler = new ResponseCompressionHandler();
 
+        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            io.opentracing.util.GlobalTracer.registerIfAbsent(com.newrelic.opentracing.LambdaTracer.INSTANCE);
+        }
+
         Security.addProvider(new BouncyCastleProvider());
     }
 
     @SneakyThrows
     @Override
     public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent httpEvent,
+            Context context) {
+        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            return com.newrelic.opentracing.aws.LambdaTracing.instrument(httpEvent, context, this::actualHandleRequest);
+        } else {
+            return actualHandleRequest(httpEvent, context);
+        }
+    }
+
+    @SneakyThrows
+    public APIGatewayV2HTTPResponse actualHandleRequest(APIGatewayV2HTTPEvent httpEvent,
             Context context) {
 
         // interfaces:

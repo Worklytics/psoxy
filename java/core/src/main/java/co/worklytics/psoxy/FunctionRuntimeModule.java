@@ -152,6 +152,11 @@ public class FunctionRuntimeModule {
         return WebhookCollectorModeConfig.fromConfigService(configService);
     }
 
+    @Provides @Singleton
+    static co.worklytics.psoxy.gateway.LoggingConfiguration loggingConfiguration(ConfigService configService) {
+        return co.worklytics.psoxy.gateway.LoggingConfiguration.fromConfigService(configService);
+    }
+
     //q: right place for this?
     @Module
     public abstract class Bindings {
