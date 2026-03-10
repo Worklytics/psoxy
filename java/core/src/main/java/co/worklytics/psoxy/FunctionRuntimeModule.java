@@ -16,6 +16,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.http.HttpTransportFactory;
 import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.LoggingConfiguration;
 import co.worklytics.psoxy.gateway.ProcessedDataStage;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
@@ -153,8 +154,8 @@ public class FunctionRuntimeModule {
     }
 
     @Provides @Singleton
-    static co.worklytics.psoxy.gateway.LoggingConfiguration loggingConfiguration(ConfigService configService) {
-        return co.worklytics.psoxy.gateway.LoggingConfiguration.fromConfigService(configService);
+    static LoggingConfiguration loggingConfiguration(ConfigService configService) {
+        return LoggingConfiguration.fromConfigService(configService);
     }
 
     //q: right place for this?

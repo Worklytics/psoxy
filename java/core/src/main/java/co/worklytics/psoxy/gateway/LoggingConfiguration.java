@@ -33,11 +33,13 @@ public class LoggingConfiguration {
     }
 
     public static LoggingConfiguration fromConfigService(ConfigService configService) {
-        return LoggingConfiguration.builder()
-            .newRelicAccountId(configService.getConfigPropertyAsOptional(LoggingConfigProperty.NEW_RELIC_ACCOUNT_ID).orElse(null))
-            .newRelicPrimaryApplicationId(configService.getConfigPropertyAsOptional(LoggingConfigProperty.NEW_RELIC_PRIMARY_APPLICATION_ID).orElse(null))
-            .newRelicTrustedAccountKey(configService.getConfigPropertyAsOptional(LoggingConfigProperty.NEW_RELIC_TRUSTED_ACCOUNT_KEY).orElse(null))
-            .newRelicLambdaHandler(configService.getConfigPropertyAsOptional(LoggingConfigProperty.NEW_RELIC_LAMBDA_HANDLER).orElse(null))
-            .build();
+        LoggingConfiguration.LoggingConfigurationBuilder builder = LoggingConfiguration.builder();
+
+        configService.getConfigPropertyAsOptional(LoggingConfigProperty.NEW_RELIC_ACCOUNT_ID).ifPresent(builder::newRelicAccountId);
+        configService.getConfigPropertyAsOptional(LoggingConfigProperty.NEW_RELIC_PRIMARY_APPLICATION_ID).ifPresent(builder::newRelicPrimaryApplicationId);
+        configService.getConfigPropertyAsOptional(LoggingConfigProperty.NEW_RELIC_TRUSTED_ACCOUNT_KEY).ifPresent(builder::newRelicTrustedAccountKey);
+        configService.getConfigPropertyAsOptional(LoggingConfigProperty.NEW_RELIC_LAMBDA_HANDLER).ifPresent(builder::newRelicLambdaHandler);
+        
+        return builder.build();
     }
 }
