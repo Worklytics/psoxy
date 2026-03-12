@@ -82,7 +82,7 @@ public class StorageHandler {
     Pseudonymizer pseudonymizer;
 
     @Inject
-    BulkDataRules defaultRuleSet;
+    dagger.Lazy<BulkDataRules> defaultRuleSet;
 
     @Inject
     RulesUtils rulesUtils;
@@ -303,7 +303,7 @@ public class StorageHandler {
        return ObjectTransform.builder()
             .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
             .pathWithinBucket(outputBasePath().orElse(""))
-            .rules(defaultRuleSet)
+            .rules(defaultRuleSet.get())
             .build();
     }
 

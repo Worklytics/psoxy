@@ -97,6 +97,8 @@ public class JsonSchemaFilterUtils {
     }
 
 
+    // 'oneOf' is deprecated in JsonSchemaFilter, but we still support it for now
+    @SuppressWarnings("deprecation")
     private Object filterBySchema(String path, JsonNode provisionalOutput, JsonSchemaFilter schema,
             JsonSchemaFilter root, List<String> redactionsMade) {
         if (schema.isRef()) {

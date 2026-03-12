@@ -21,7 +21,7 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.5.18"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.5.19"
 
   enabled_connectors                       = var.enabled_connectors
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
@@ -38,6 +38,8 @@ module "worklytics_connectors" {
   github_copilot_installation_id           = var.github_copilot_installation_id
   github_organization                      = var.github_organization
   github_example_repository                = var.github_example_repository
+  gong_instance_subdomain                  = var.gong_instance_subdomain
+  glean_instance_subdomain                 = var.glean_instance_subdomain
   gitlab_host                              = var.gitlab_host
   gitlab_example_group_id                  = var.gitlab_example_group_id
   salesforce_example_account_id            = var.salesforce_example_account_id
@@ -107,7 +109,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=rc-v0.5.18"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=rc-v0.5.19"
 
   environment_name                     = var.environment_name
   aws_account_id                       = var.aws_account_id
@@ -181,7 +183,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=rc-v0.5.18"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=rc-v0.5.19"
 
   proxy_instance_id    = each.key
   worklytics_host      = var.worklytics_host

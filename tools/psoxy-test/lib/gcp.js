@@ -398,13 +398,25 @@ async function verifyBucket(bucketName, expectedContent, startTime, logger) {
         logger.info(`New file found: ${file.name} (Created: ${new Date(file.metadata.timeCreated).toISOString()})`);
         
         const [content] = await file.download();
-        const contentStr = content.toString();
-        logger.info(`Found Content: ${contentStr}`);
         
-        // Parse found content
         let items = [];
         try {
-            const jsonContent = JSON.parse(contentStr);
+            let jsonContent;
+            // The storage client might automatically parse JSON files or return a Buffer.
+            if (Buffer.isBuffer(content)) {
+                const contentStr = content.toString();
+                logger.info(`Found Content: ${contentStr}`);
+                jsonContent = JSON.parse(contentStr);
+            } else if (typeof content === 'string') {
+                logger.info(`Found Content: ${content}`);
+                jsonContent = JSON.parse(content);
+            } else if (typeof content === 'object') {
+                logger.info(`Found Content (Object): ${JSON.stringify(content)}`);
+                jsonContent = content;
+            } else {
+                throw new Error('Unknown content format');
+            }
+
             if (Array.isArray(jsonContent)) {
                 items = jsonContent;
             } else if (_.isPlainObject(jsonContent)) {
