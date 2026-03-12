@@ -1,7 +1,6 @@
 ---
 endpoints:
   - pathTemplate: "/api/v4/audit_events"
-    allowedQueryParams: []
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -19,20 +18,11 @@ endpoints:
       items:
         $ref: "#/definitions/AuditEvent"
   - pathTemplate: "/api/v4/groups"
-    allowedQueryParams:
-      - "order_by"
-      - "sort"
-      - "search"
-      - "top_level_only"
-      - "all_available"
-      - "per_page"
-      - "page"
     responseSchema:
       type: "array"
       items:
         $ref: "#/definitions/Group"
   - pathTemplate: "/api/v4/groups/{id}/members"
-    allowedQueryParams: []
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -48,17 +38,6 @@ endpoints:
       items:
         $ref: "#/definitions/GroupMember"
   - pathTemplate: "/api/v4/issues"
-    allowedQueryParams:
-      - "state"
-      - "updated_after"
-      - "updated_before"
-      - "created_after"
-      - "created_before"
-      - "scope"
-      - "order_by"
-      - "sort"
-      - "per_page"
-      - "page"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -77,17 +56,6 @@ endpoints:
       items:
         $ref: "#/definitions/Issue"
   - pathTemplate: "/api/v4/merge_requests"
-    allowedQueryParams:
-      - "state"
-      - "updated_after"
-      - "updated_before"
-      - "created_after"
-      - "created_before"
-      - "scope"
-      - "order_by"
-      - "sort"
-      - "per_page"
-      - "page"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -109,7 +77,6 @@ endpoints:
       items:
         $ref: "#/definitions/MergeRequest"
   - pathTemplate: "/api/v4/merge_requests/{id}"
-    allowedQueryParams: []
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -129,10 +96,6 @@ endpoints:
     responseSchema:
       type: "object"
       properties:
-        allow_collaboration:
-          type: "boolean"
-        allow_maintainer_to_push:
-          type: "boolean"
         assignee:
           $ref: "#/definitions/User"
         assignees:
@@ -165,8 +128,6 @@ endpoints:
           type: "integer"
         draft:
           type: "boolean"
-        force_remove_source_branch:
-          type: "boolean"
         has_conflicts:
           type: "boolean"
         id:
@@ -175,12 +136,8 @@ endpoints:
           type: "integer"
         merge_commit_sha:
           type: "string"
-        merge_status:
-          type: "string"
         merge_user:
           $ref: "#/definitions/User"
-        merge_when_pipeline_succeeds:
-          type: "boolean"
         merged_at:
           type: "string"
           format: "date-time"
@@ -234,14 +191,6 @@ endpoints:
         work_in_progress:
           type: "boolean"
   - pathTemplate: "/api/v4/projects"
-    allowedQueryParams:
-      - "page"
-      - "per_page"
-      - "archived"
-      - "visibility"
-      - "order_by"
-      - "sort"
-      - "search"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -254,29 +203,71 @@ endpoints:
       type: "array"
       items:
         $ref: "#/definitions/Project"
-  - pathTemplate: "/api/v4/projects/{id}/issues/{issueIid}/notes"
-    allowedQueryParams:
-      - "sort"
-      - "per_page"
-      - "page"
+  - pathTemplate: "/api/v4/projects/{id}/audit_events"
     transforms:
       - !<pseudonymize>
         jsonPaths:
-          - "$..author.id"
-          - "$..author.username"
-          - "$..author.email"
+          - "$.author_id"
+          - "$[*].author_id"
+          - "$[*].details.author_email"
+          - "$[*].details.from"
+          - "$[*].details.to"
         encoding: "URL_SAFE_TOKEN"
+      - !<hashIp>
+        jsonPaths:
+          - "$[*].details.ip_address"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/AuditEvent"
+  - pathTemplate: "/api/v4/projects/{id}/issues/{issueIid}/notes"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$[*].author.id"
+          - "$[*].author.username"
+          - "$[*].author.email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<redactExceptPhrases>
+        jsonPaths:
+          - "$[?(@.system==true)].body"
+        allowedPhrases:
+          - "closed via commit"
+          - "closed via merge request"
+          - "moved to"
+          - "cloned to"
+          - "marked this issue as a duplicate of"
+          - "marked"
+          - "as a duplicate of this issue"
+          - "created task"
+          - "assigned to"
+          - "unassigned"
+          - "changed title from"
+          - "changed the description"
+          - "changed time estimate to"
+          - "removed the time estimate"
+          - "added"
+          - "closed"
+          - "of time spent"
+          - "subtracted"
+          - "removed time spent"
+          - "changed due date to"
+          - "removed the due date"
+          - "locked this issue"
+          - "unlocked this issue"
+          - "made the issue confidential"
+          - "made the issue visible to everyone"
+          - "mentioned in commit"
+          - "mentioned in merge request"
+          - "mentioned in issue"
       - !<textDigest>
         jsonPaths:
-          - "$..body"
+          - "$[?(!@.system)].body"
     responseSchema:
       type: "array"
       items:
         $ref: "#/definitions/Note"
   - pathTemplate: "/api/v4/projects/{id}/issues/{issueIid}/resource_state_events"
-    allowedQueryParams:
-      - "per_page"
-      - "page"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -288,11 +279,6 @@ endpoints:
       items:
         $ref: "#/definitions/StateEvent"
   - pathTemplate: "/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/commits"
-    allowedQueryParams:
-      - "id"
-      - "merge_request_iid"
-      - "per_page"
-      - "page"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -308,10 +294,6 @@ endpoints:
       items:
         $ref: "#/definitions/Commit"
   - pathTemplate: "/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/notes"
-    allowedQueryParams:
-      - "sort"
-      - "per_page"
-      - "page"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -319,17 +301,53 @@ endpoints:
           - "$[*].author.username"
           - "$[*].author.email"
         encoding: "URL_SAFE_TOKEN"
+      - !<redactExceptPhrases>
+        jsonPaths:
+          - "$[?(@.system==true)].body"
+        allowedPhrases:
+          - "approved this merge request"
+          - "unapproved this merge request"
+          - "requested changes to this merge request"
+          - "removed the change request for this merge request"
+          - "requested review from"
+          - "removed review request for"
+          - "marked this merge request as ready"
+          - "marked this merge request as"
+          - "draft"
+          - "closed"
+          - "changed target branch from"
+          - "enabled automatic merge"
+          - "canceled the automatic merge"
+          - "added"
+          - "commit"
+          - "commits"
+          - "resolved all threads"
+          - "assigned to"
+          - "unassigned"
+          - "changed title from"
+          - "changed the description"
+          - "changed time estimate to"
+          - "removed the time estimate"
+          - "of time spent"
+          - "subtracted"
+          - "removed time spent"
+          - "changed due date to"
+          - "removed the due date"
+          - "locked this merge request"
+          - "unlocked this merge request"
+          - "made the issue confidential"
+          - "made the issue visible to everyone"
+          - "mentioned in commit"
+          - "mentioned in merge request"
+          - "mentioned in issue"
       - !<textDigest>
         jsonPaths:
-          - "$..body"
+          - "$[?(@.system!=true)].body"
     responseSchema:
       type: "array"
       items:
         $ref: "#/definitions/Note"
   - pathTemplate: "/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/resource_state_events"
-    allowedQueryParams:
-      - "per_page"
-      - "page"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -341,11 +359,6 @@ endpoints:
       items:
         $ref: "#/definitions/StateEvent"
   - pathTemplate: "/api/v4/projects/{id}/repository/branches"
-    allowedQueryParams:
-      - "id"
-      - "per_page"
-      - "page"
-      - "search"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -361,17 +374,6 @@ endpoints:
       items:
         $ref: "#/definitions/Branch"
   - pathTemplate: "/api/v4/projects/{id}/repository/commits"
-    allowedQueryParams:
-      - "ref_name"
-      - "since"
-      - "until"
-      - "with_stats"
-      - "first_parent"
-      - "order"
-      - "all"
-      - "per_page"
-      - "page"
-      - "trailers"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -387,10 +389,6 @@ endpoints:
       items:
         $ref: "#/definitions/Commit"
   - pathTemplate: "/api/v4/projects/{id}/repository/commits/{sha}"
-    allowedQueryParams:
-      - "id"
-      - "sha"
-      - "stats"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -437,32 +435,7 @@ endpoints:
           type: "string"
         title:
           type: "string"
-  - pathTemplate: "/api/v4/projects/{id}/repository/commits/{sha}/comments"
-    allowedQueryParams:
-      - "per_page"
-      - "page"
-      - "id"
-      - "sha"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$[*].author.id"
-          - "$[*].author.username"
-          - "$[*].author.email"
-        encoding: "URL_SAFE_TOKEN"
-      - !<textDigest>
-        jsonPaths:
-          - "$[*].note"
-    responseSchema:
-      type: "array"
-      items:
-        $ref: "#/definitions/CommitComment"
   - pathTemplate: "/api/v4/projects/{id}/repository/commits/{sha}/discussions"
-    allowedQueryParams:
-      - "per_page"
-      - "page"
-      - "id"
-      - "sha"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -478,13 +451,6 @@ endpoints:
       items:
         $ref: "#/definitions/CommitDiscussion"
   - pathTemplate: "/api/v4/users"
-    allowedQueryParams:
-      - "state"
-      - "order_by"
-      - "sort"
-      - "search"
-      - "per_page"
-      - "page"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -569,13 +535,6 @@ definitions:
       status:
         type: "string"
       title:
-        type: "string"
-  CommitComment:
-    type: "object"
-    properties:
-      author:
-        $ref: "#/definitions/User"
-      note:
         type: "string"
   CommitDiscussion:
     type: "object"
@@ -725,10 +684,6 @@ definitions:
   MergeRequest:
     type: "object"
     properties:
-      allow_collaboration:
-        type: "boolean"
-      allow_maintainer_to_push:
-        type: "boolean"
       assignee:
         $ref: "#/definitions/User"
       assignees:
@@ -761,8 +716,6 @@ definitions:
         type: "integer"
       draft:
         type: "boolean"
-      force_remove_source_branch:
-        type: "boolean"
       has_conflicts:
         type: "boolean"
       id:
@@ -771,12 +724,8 @@ definitions:
         type: "integer"
       merge_commit_sha:
         type: "string"
-      merge_status:
-        type: "string"
       merge_user:
         $ref: "#/definitions/User"
-      merge_when_pipeline_succeeds:
-        type: "boolean"
       merged_at:
         type: "string"
         format: "date-time"

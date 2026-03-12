@@ -65,8 +65,6 @@
       "due_date":"2018-09-22",
       "start_date":"2018-08-08"
     },
-    "merge_when_pipeline_succeeds":true,
-    "merge_status":"can_be_merged",
     "detailed_merge_status":"not_open",
     "sha":"8888888888888888888888888888888888888888",
     "merge_commit_sha":null,
@@ -74,9 +72,6 @@
     "user_notes_count":1,
     "discussion_locked":false,
     "should_remove_source_branch":true,
-    "force_remove_source_branch":false,
-    "allow_collaboration":false,
-    "allow_maintainer_to_push":false,
     "time_stats":{
       "time_estimate":0,
       "total_time_spent":0,

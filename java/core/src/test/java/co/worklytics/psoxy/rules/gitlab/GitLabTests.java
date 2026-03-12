@@ -70,8 +70,8 @@ public class GitLabTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/merge_requests/1/commits?page=2&per_page=20", "merge_request_commits.json"),
 
             // Project Merge Request Notes - initial and paginated
-            InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/merge_requests/1/notes", "merge_request_comments.json"),
-            InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/merge_requests/1/notes?page=2&per_page=20", "merge_request_comments.json"),
+            InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/merge_requests/1/notes", "merge_request_notes.json"),
+            InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/merge_requests/1/notes?page=2&per_page=20", "merge_request_notes.json"),
 
             // Project Merge Request Resource State Events - initial and paginated
             InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/merge_requests/1/resource_state_events", "merge_request_events.json"),
@@ -89,10 +89,6 @@ public class GitLabTests extends JavaRulesTestBaseCase {
             // Single Repository Commit
             InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/repository/commits/abc123def", "commit.json"),
             InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/repository/commits/abc123def?stats=true", "commit.json"),
-
-            // Repository Commit Comments - initial and paginated
-            InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/repository/commits/abc123def/comments", "commit_comments.json"),
-            InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/repository/commits/abc123def/comments?page=2&per_page=20", "commit_comments.json"),
 
             // Repository Commit Discussions - initial and paginated
             InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/repository/commits/abc123def/discussions", "commit_discussion.json"),
