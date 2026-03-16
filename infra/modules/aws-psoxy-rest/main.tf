@@ -221,6 +221,10 @@ module "psoxy_lambda" {
       ASYNC_OUTPUT_DESTINATION    = "s3://${module.async_output[0].bucket_id}",
       ASYNC_API_REQUEST_QUEUE_URL = aws_sqs_queue.async_api_request_queue[0].url
     } : {},
+    var.new_relic_account_id != null && var.new_relic_account_id != "" ? {
+      NEW_RELIC_ACCOUNT_ID     = var.new_relic_account_id
+      NEW_RELIC_LAMBDA_HANDLER = "co.worklytics.psoxy.${local.event_handler_implementation}"
+    } : {},
   )
 }
 

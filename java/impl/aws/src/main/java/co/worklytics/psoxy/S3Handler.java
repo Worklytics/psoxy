@@ -20,6 +20,10 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
+import com.newrelic.opentracing.LambdaTracer;
+import com.newrelic.opentracing.aws.LambdaTracing;
+import io.opentracing.util.GlobalTracer;
+import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
@@ -50,7 +54,20 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     @Override
     public String handleRequest(S3Event s3Event, Context context) {
 
-        DaggerAwsContainer.create().injectS3Handler(this);
+        AwsContainer awsContainer = DaggerAwsContainer.create();
+        awsContainer.injectS3Handler(this);
+
+        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            awsContainer.loggingConfiguration().validateNewRelicHandler(S3Handler.class);
+            GlobalTracer.registerIfAbsent(LambdaTracer.INSTANCE);
+            return LambdaTracing.instrument(s3Event, context, this::actualHandleRequest);
+        } else {
+            return actualHandleRequest(s3Event, context);
+        }
+    }
+
+    @SneakyThrows
+    public String actualHandleRequest(S3Event s3Event, Context context) {
 
         S3EventNotification.S3EventNotificationRecord record = s3Event.getRecords().get(0);
 
