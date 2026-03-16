@@ -3,6 +3,7 @@ package co.worklytics.test;
 import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.core.util.Separators;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -92,7 +93,13 @@ public class TestUtils {
     @SuppressWarnings("unused")
     public static String prettyPrintJson(String json) {
 
-        DefaultPrettyPrinter printer = new DefaultPrettyPrinter();
+        // Use Separators API (Jackson 2.9+) to put a space ONLY after the colon ("key": value),
+        // matching Python json.dumps(indent=2) style used in our example .json files.
+        // Jackson's default DefaultPrettyPrinter adds spaces both before AND after ("key" : value),
+        // and withoutSpacesInObjectEntries() removes all spaces from around the colon ("key":"value").
+        DefaultPrettyPrinter printer = new DefaultPrettyPrinter()
+            .withSeparators(Separators.createDefaultInstance()
+                .withObjectFieldValueSpacing(Separators.Spacing.AFTER));
         printer.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
 
 
