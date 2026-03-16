@@ -212,6 +212,7 @@ module "api_connector" {
   source = "../../modules/aws-psoxy-rest"
 
   environment_name                      = var.environment_name
+  new_relic_account_id                  = var.new_relic_account_id
   instance_id                           = each.key
   source_kind                           = each.value.source_kind
   path_to_function_zip                  = module.psoxy.path_to_deployment_jar
@@ -278,6 +279,7 @@ module "bulk_connector" {
   provision_iam_policy_for_testing     = var.provision_testing_infra
   aws_role_to_assume_when_testing      = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
   environment_name                     = var.environment_name
+  new_relic_account_id                 = var.new_relic_account_id
   instance_id                          = each.key
   source_kind                          = each.value.source_kind
   aws_region                           = data.aws_region.current.id
@@ -326,6 +328,7 @@ module "webhook_collectors" {
   source = "../../modules/aws-webhook-collector"
 
   environment_name                     = var.environment_name
+  new_relic_account_id                 = var.new_relic_account_id
   instance_id                          = each.key
   path_to_function_zip                 = module.psoxy.path_to_deployment_jar
   function_zip_hash                    = module.psoxy.deployment_package_hash
