@@ -63,6 +63,7 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
         lambdaEventUtils = awsContainer.lambdaEventUtils();
 
         if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            awsContainer.loggingConfiguration().validateNewRelicHandler(AwsWebhookCollectionModeHandler.class);
             io.opentracing.util.GlobalTracer.registerIfAbsent(com.newrelic.opentracing.LambdaTracer.INSTANCE);
         }
 

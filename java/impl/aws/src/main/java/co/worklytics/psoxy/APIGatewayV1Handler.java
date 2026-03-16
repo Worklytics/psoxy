@@ -46,6 +46,7 @@ public class APIGatewayV1Handler implements
         responseCompressionHandler = new ResponseCompressionHandler();
 
         if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            awsContainer.loggingConfiguration().validateNewRelicHandler(APIGatewayV1Handler.class);
             io.opentracing.util.GlobalTracer.registerIfAbsent(com.newrelic.opentracing.LambdaTracer.INSTANCE);
         }
 

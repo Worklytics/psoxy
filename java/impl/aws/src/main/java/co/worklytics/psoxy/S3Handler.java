@@ -55,6 +55,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         awsContainer.injectS3Handler(this);
 
         if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            awsContainer.loggingConfiguration().validateNewRelicHandler(S3Handler.class);
             io.opentracing.util.GlobalTracer.registerIfAbsent(com.newrelic.opentracing.LambdaTracer.INSTANCE);
             return com.newrelic.opentracing.aws.LambdaTracing.instrument(s3Event, context, this::actualHandleRequest);
         } else {

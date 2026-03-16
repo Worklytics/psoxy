@@ -61,6 +61,7 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
         lambdaEventUtils = awsContainer.lambdaEventUtils();
 
         if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            awsContainer.loggingConfiguration().validateNewRelicHandler(AwsApiDataModeHybridHandler.class);
             io.opentracing.util.GlobalTracer.registerIfAbsent(com.newrelic.opentracing.LambdaTracer.INSTANCE);
         }
 

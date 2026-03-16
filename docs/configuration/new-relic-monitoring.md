@@ -6,33 +6,39 @@
 
 ## Setup
 
-Add the following to your `terraform.tfvars` to enable New Relic monitoring:
+Add your `new_relic_account_id` to your `terraform.tfvars` to enable New Relic monitoring:
+
+```hcl
+new_relic_account_id = "{YOUR_NEW_RELIC_ACCOUNT_ID}"
+```
+
+When you provide this value, Psoxy's Terraform will automatically configure the `NEW_RELIC_ACCOUNT_ID` and the correct `NEW_RELIC_LAMBDA_HANDLER` environment variables for each Lambda function based on its deployment mode.
+
+### Additional Configuration
+
+You can provide additional environment variables to customize your New Relic configuration, such as your license key or APM tracking. Add these to your `general_environment_variables` in `terraform.tfvars`:
 
 ```hcl
 general_environment_variables = {
-    NEW_RELIC_ACCOUNT_ID          = "{YOUR_NEW_RELIC_ACCOUNT_ID}"
-    NEW_RELIC_LAMBDA_HANDLER      = "{YOUR_ORIGINAL_HANDLER}"
     NEW_RELIC_LICENSE_KEY         = "{YOUR_NEW_RELIC_LICENSE_KEY}"
     NEW_RELIC_APM_LAMBDA_MODE     = "true"
     NEW_RELIC_TRUSTED_ACCOUNT_KEY = "{YOUR_NEW_RELIC_ACCOUNT_ID_OR_PARENT_ID}"
 }
 ```
 
-(If you already have a defined `general_environment_variables` variable, just add the `NEW_RELIC_`
-variables to it.)
+(If you already have a defined `general_environment_variables` variable, just add the `NEW_RELIC_` variables to it.)
 
-## Required Variables
+### Reference: Lambda Handlers
 
-All five of the following environment variables must be set for New Relic monitoring to be enabled.
-If only a subset is present, psoxy will log a warning and fall back to the default CloudWatch logging.
+Psoxy automatically configures the `NEW_RELIC_LAMBDA_HANDLER` depending on the proxy mode. As a reference, the handler mappings are:
 
-| Variable | Description |
+| Proxy Mode / Configuration | AWS Lambda Handler (`NEW_RELIC_LAMBDA_HANDLER`) |
 |---|---|
-| `NEW_RELIC_ACCOUNT_ID` | Your New Relic account ID |
-| `NEW_RELIC_LAMBDA_HANDLER` | Your function's original handler (New Relic wraps it); e.g. `co.worklytics.psoxy.Handler` |
-| `NEW_RELIC_LICENSE_KEY` | Your New Relic ingest license key. Overrides Secrets Manager if set. |
-| `NEW_RELIC_APM_LAMBDA_MODE` | Set to `true` to enable APM monitoring |
-| `NEW_RELIC_TRUSTED_ACCOUNT_KEY` | Your New Relic account ID or parent account ID (required for distributed tracing across account boundaries; often the same value as `NEW_RELIC_ACCOUNT_ID`) |
+| **REST** (Default, API Gateway v2) | `co.worklytics.psoxy.Handler` |
+| **REST** (API Gateway v1) | `co.worklytics.psoxy.APIGatewayV1Handler` |
+| **REST** (Async Processing Enabled) | `co.worklytics.psoxy.AwsApiDataModeHybridHandler` |
+| **Bulk** (S3 Input) | `co.worklytics.psoxy.S3Handler` |
+| **Webhook Collector** | `co.worklytics.psoxy.AwsWebhookCollectionModeHandler` |
 
 For further details on each variable and additional optional configuration, see the
 [New Relic Lambda environment variables documentation](https://docs.newrelic.com/docs/serverless-function-monitoring/aws-lambda-monitoring/instrument-lambda-function/env-variables-lambda/).

@@ -166,6 +166,12 @@ variable "environment_variables" {
   default     = {}
 }
 
+variable "new_relic_account_id" {
+  type        = string
+  description = "New Relic account ID to enable New Relic instrumentation."
+  default     = null
+}
+
 variable "rules" {
   type = object({
     # NOTE: use `optional()` in variables.tf of modules that wrap this one, but omit the default

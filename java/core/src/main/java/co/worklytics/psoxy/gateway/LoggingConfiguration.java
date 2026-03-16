@@ -1,14 +1,13 @@
 package co.worklytics.psoxy.gateway;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.java.Log;
 
 /**
  * Configuration for logging/monitoring behavior, currently New Relic support.
  *
- * <p>New Relic monitoring is enabled when ALL mandatory environment variables are present.
- * If only a subset is set, a warning is logged and New Relic is disabled.
+ * <p>New Relic monitoring is enabled when NEW_RELIC_ACCOUNT_ID is present.
+ * For additional supported environment variables that control New Relic logging behavior, see the
+ * New Relic documentation.
  *
  * @see <a href="https://docs.newrelic.com/docs/serverless-function-monitoring/aws-lambda-monitoring/instrument-lambda-function/env-variables-lambda/">
  *     New Relic: Environment variables for AWS Lambda</a>
@@ -22,24 +21,11 @@ public class LoggingConfiguration {
      * @see <a href="https://docs.newrelic.com/docs/serverless-function-monitoring/aws-lambda-monitoring/instrument-lambda-function/env-variables-lambda/#mandatory-environment-variables">
      *     New Relic: Mandatory environment variables</a>
      */
-    public enum LoggingConfigProperty implements ConfigService.ConfigProperty {
+    public enum NewRelicConfigProperties implements ConfigService.ConfigProperty {
         /** Your New Relic account ID. */
         NEW_RELIC_ACCOUNT_ID,
-        /** The New Relic handler wrapper used to find your function's actual handler. */
-        NEW_RELIC_LAMBDA_HANDLER,
-        /** Your New Relic ingest license key. Overrides Secrets Manager if set. */
-        NEW_RELIC_LICENSE_KEY,
-        /**
-         * Set to {@code true} to enable APM monitoring for your Lambda function.
-         * Recommended value: {@code true}.
-         */
-        NEW_RELIC_APM_LAMBDA_MODE,
-        /**
-         * Your New Relic account ID or parent account ID (if the account has a parent).
-         * Often the same value as NEW_RELIC_ACCOUNT_ID, but required separately for distributed
-         * tracing to work across account boundaries.
-         */
-        NEW_RELIC_TRUSTED_ACCOUNT_KEY;
+        /** The expected Lambda Handler. */
+        NEW_RELIC_LAMBDA_HANDLER;
 
         @Override
         public SupportedSource getSupportedSource() {
@@ -47,34 +33,44 @@ public class LoggingConfiguration {
         }
     }
 
-    private final boolean newRelicEnabled;
+    private final String newRelicAccountId;
 
-    private LoggingConfiguration(boolean newRelicEnabled) {
-        this.newRelicEnabled = newRelicEnabled;
+    private final String newRelicLambdaHandler;
+
+    private LoggingConfiguration(String newRelicAccountId, String newRelicLambdaHandler) {
+        this.newRelicAccountId = newRelicAccountId;
+        this.newRelicLambdaHandler = newRelicLambdaHandler;
     }
 
     /**
-     * Returns {@code true} if all mandatory New Relic environment variables are set.
+     * Returns {@code true} if New Relic monitoring is enabled (i.e. NEW_RELIC_ACCOUNT_ID is set).
      */
     public boolean isNewRelicEnabled() {
-        return newRelicEnabled;
+        return newRelicAccountId != null && !newRelicAccountId.isBlank();
+    }
+
+    /**
+     * Optional method to validate the currently running handler against the configuring NEW_RELIC_LAMBDA_HANDLER.
+     */
+    public void validateNewRelicHandler(Class<?> currentHandlerClass) {
+        if (isNewRelicEnabled()) {
+            if (newRelicLambdaHandler == null || newRelicLambdaHandler.isBlank()) {
+                log.warning("New Relic monitoring is enabled, but NEW_RELIC_LAMBDA_HANDLER is not set. " +
+                    "It should be set to " + currentHandlerClass.getName() + " for this proxy deployment.");
+            } else if (!newRelicLambdaHandler.equals(currentHandlerClass.getName())) {
+                log.warning("New Relic monitoring is enabled, but NEW_RELIC_LAMBDA_HANDLER does not match " +
+                    "the currently running handler. It is set to '" + newRelicLambdaHandler + "' but should be set to " +
+                    "'" + currentHandlerClass.getName() + "'.");
+            }
+        }
     }
 
     public static LoggingConfiguration fromConfigService(ConfigService configService) {
-        List<String> missing = List.of(LoggingConfigProperty.values()).stream()
-            .filter(p -> configService.getConfigPropertyAsOptional(p).isEmpty())
-            .map(Enum::name)
-            .collect(Collectors.toList());
+        String accountId = configService.getConfigPropertyAsOptional(NewRelicConfigProperties.NEW_RELIC_ACCOUNT_ID)
+            .orElse(null);
+        String newRelicLambdaHandler = configService.getConfigPropertyAsOptional(NewRelicConfigProperties.NEW_RELIC_LAMBDA_HANDLER)
+            .orElse(null);
 
-        boolean anySet = missing.size() < LoggingConfigProperty.values().length;
-        boolean allSet = missing.isEmpty();
-
-        if (anySet && !allSet) {
-            log.warning("Some NEW_RELIC_* environment variables are set but not all mandatory ones are present. " +
-                "New Relic monitoring will be DISABLED. Missing variables: " + missing +
-                ". See https://docs.newrelic.com/docs/serverless-function-monitoring/aws-lambda-monitoring/instrument-lambda-function/env-variables-lambda/ for details.");
-        }
-
-        return new LoggingConfiguration(allSet);
+        return new LoggingConfiguration(accountId, newRelicLambdaHandler);
     }
 }
