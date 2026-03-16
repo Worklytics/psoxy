@@ -119,6 +119,12 @@ variable "environment_variables" {
   default     = {}
 }
 
+variable "new_relic_account_id" {
+  type        = string
+  description = "**beta** New Relic account ID to enable New Relic instrumentation."
+  default     = null
+}
+
 variable "global_parameter_arns" {
   # see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter#attributes-reference
   type        = list(string)

@@ -125,6 +125,7 @@ module "psoxy" {
   pseudonymize_app_ids                 = var.pseudonymize_app_ids
   email_canonicalization               = var.email_canonicalization
   general_environment_variables        = var.general_environment_variables
+  new_relic_account_id                 = var.new_relic_account_id
   function_env_kms_key_arn             = var.project_aws_kms_key_arn
   logs_kms_key_arn                     = var.project_aws_kms_key_arn
   log_retention_days                   = var.log_retention_days
