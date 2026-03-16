@@ -22,11 +22,13 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `gdirectory`               | Google Directory                    | API  | GA           |
 | `gemini-in-workspace-apps` | Google Gemini in Workspace Apps     | API  | BETA         |
 | `gemini-usage`             | Gemini Usage                        | Bulk | DEPRECATED   |
+| `glean`                    | [Glean](glean/README.md)            | API  | BETA         |
 | `github`                   | GitHub                              | API  | GA           |
 | `github-copilot`           | GitHub                              | API  | BETA         |
 | `github-enterprise-server` | GitHub Enterprise Server            | API  | GA           |
 | `github-non-enterprise`    | GitHub Non-Enterprise               | API  | GA           |
 | `gmail`                    | Gmail                               | API  | GA           |
+| `gong-metrics`             | [Gong](gong/README.md)              | API  | BETA         |
 | `google-chat`              | Google Chat                         | API  | GA           |
 | `google-meet`              | Google Meet                         | API  | GA           |
 | `hris`                     | HR Information System (eg, Workday) | Bulk | GA           |
