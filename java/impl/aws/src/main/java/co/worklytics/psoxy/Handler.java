@@ -8,6 +8,9 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
+import com.newrelic.opentracing.LambdaTracer;
+import com.newrelic.opentracing.aws.LambdaTracing;
+import io.opentracing.util.GlobalTracer;
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
@@ -47,7 +50,7 @@ public class Handler implements
 
         if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
             awsContainer.loggingConfiguration().validateNewRelicHandler(Handler.class);
-            io.opentracing.util.GlobalTracer.registerIfAbsent(com.newrelic.opentracing.LambdaTracer.INSTANCE);
+            GlobalTracer.registerIfAbsent(LambdaTracer.INSTANCE);
         }
 
         Security.addProvider(new BouncyCastleProvider());
@@ -58,7 +61,7 @@ public class Handler implements
     public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent httpEvent,
             Context context) {
         if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
-            return com.newrelic.opentracing.aws.LambdaTracing.instrument(httpEvent, context, this::actualHandleRequest);
+            return LambdaTracing.instrument(httpEvent, context, this::actualHandleRequest);
         } else {
             return actualHandleRequest(httpEvent, context);
         }

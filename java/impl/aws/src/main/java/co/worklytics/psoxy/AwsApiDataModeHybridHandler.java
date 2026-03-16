@@ -17,6 +17,9 @@ import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.newrelic.opentracing.LambdaTracer;
+import com.newrelic.opentracing.aws.LambdaTracing;
+import io.opentracing.util.GlobalTracer;
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.request.APIGatewayV1ProxyEventRequestAdapter;
@@ -62,7 +65,7 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
 
         if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
             awsContainer.loggingConfiguration().validateNewRelicHandler(AwsApiDataModeHybridHandler.class);
-            io.opentracing.util.GlobalTracer.registerIfAbsent(com.newrelic.opentracing.LambdaTracer.INSTANCE);
+            GlobalTracer.registerIfAbsent(LambdaTracer.INSTANCE);
         }
 
         Security.addProvider(new BouncyCastleProvider());
@@ -78,7 +81,7 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
             // async invocation case via SQS
             SQSEvent sqsEvent = lambdaEventUtils.toSQSEvent(rootNode);
             if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
-                com.newrelic.opentracing.aws.LambdaTracing.instrument(sqsEvent, context, (inEvent, ctx) -> {
+                LambdaTracing.instrument(sqsEvent, context, (inEvent, ctx) -> {
                     handleSqsEvent(inEvent, ctx);
                     return null;
                 });
@@ -96,7 +99,7 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
             if (lambdaEventUtils.isApiGatewayV1Event(rootNode)) {
                 APIGatewayProxyRequestEvent v1Event = lambdaEventUtils.toAPIGatewayProxyRequestEvent(rootNode);
                 if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
-                    responsePair = com.newrelic.opentracing.aws.LambdaTracing.instrument(v1Event, context, (inEvt, ctx) -> {
+                    responsePair = LambdaTracing.instrument(v1Event, context, (inEvt, ctx) -> {
                         try { return handleSingleRequest(rootNode, processingContext, ctx); } 
                         catch (IOException e) { throw new RuntimeException(e); }
                     });
@@ -107,7 +110,7 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
             } else if (lambdaEventUtils.isApiGatewayV2Event(rootNode)) {
                 APIGatewayV2HTTPEvent v2Event = lambdaEventUtils.toAPIGatewayV2HTTPEvent(rootNode);
                 if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
-                    responsePair = com.newrelic.opentracing.aws.LambdaTracing.instrument(v2Event, context, (inEvt, ctx) -> {
+                    responsePair = LambdaTracing.instrument(v2Event, context, (inEvt, ctx) -> {
                         try { return handleSingleRequest(rootNode, processingContext, ctx); } 
                         catch (IOException e) { throw new RuntimeException(e); }
                     });

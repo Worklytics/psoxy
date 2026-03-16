@@ -38,7 +38,7 @@ variable "aws_region" {
 
 variable "new_relic_account_id" {
   type        = string
-  description = "New Relic account ID to enable New Relic instrumentation. If set, this will auto-configure the NEW_RELIC_ACCOUNT_ID and NEW_RELIC_LAMBDA_HANDLER environment variables for proxied lambdas."
+  description = "**beta** New Relic account ID to enable New Relic instrumentation. If set, this will auto-configure the NEW_RELIC_ACCOUNT_ID and NEW_RELIC_LAMBDA_HANDLER environment variables for proxied lambdas."
   default     = null
 }
 

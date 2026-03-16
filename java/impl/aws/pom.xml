@@ -19,6 +19,7 @@
         <!-- dependencies local to module; if you want to re-use across more modules, move up to root pom -->
         <dependency.aws-lambda-core.version>1.2.3</dependency.aws-lambda-core.version>
         <dependency.aws-lambda-java-events.version>3.11.5</dependency.aws-lambda-java-events.version>
+        <dependency.newrelic-lambda.version>2.2.3</dependency.newrelic-lambda.version>
     </properties>
 
 
@@ -155,7 +156,7 @@
         <dependency>
             <groupId>com.newrelic.opentracing</groupId>
             <artifactId>newrelic-java-lambda</artifactId>
-            <version>2.2.3</version>
+            <version>${dependency.newrelic-lambda.version}</version>
         </dependency>
         <dependency>
             <groupId>io.opentracing</groupId>

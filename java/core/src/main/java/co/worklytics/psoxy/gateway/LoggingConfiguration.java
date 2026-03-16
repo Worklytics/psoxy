@@ -1,5 +1,8 @@
 package co.worklytics.psoxy.gateway;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.extern.java.Log;
 
 /**
@@ -13,6 +16,8 @@ import lombok.extern.java.Log;
  *     New Relic: Environment variables for AWS Lambda</a>
  */
 @Log
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class LoggingConfiguration {
 
     /**
@@ -36,11 +41,6 @@ public class LoggingConfiguration {
     private final String newRelicAccountId;
 
     private final String newRelicLambdaHandler;
-
-    private LoggingConfiguration(String newRelicAccountId, String newRelicLambdaHandler) {
-        this.newRelicAccountId = newRelicAccountId;
-        this.newRelicLambdaHandler = newRelicLambdaHandler;
-    }
 
     /**
      * Returns {@code true} if New Relic monitoring is enabled (i.e. NEW_RELIC_ACCOUNT_ID is set).
@@ -71,6 +71,9 @@ public class LoggingConfiguration {
         String newRelicLambdaHandler = configService.getConfigPropertyAsOptional(NewRelicConfigProperties.NEW_RELIC_LAMBDA_HANDLER)
             .orElse(null);
 
-        return new LoggingConfiguration(accountId, newRelicLambdaHandler);
+        return LoggingConfiguration.builder()
+            .newRelicAccountId(accountId)
+            .newRelicLambdaHandler(newRelicLambdaHandler)
+            .build();
     }
 }

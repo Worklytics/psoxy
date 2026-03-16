@@ -168,7 +168,7 @@ variable "environment_variables" {
 
 variable "new_relic_account_id" {
   type        = string
-  description = "New Relic account ID to enable New Relic instrumentation."
+  description = "**beta** New Relic account ID to enable New Relic instrumentation."
   default     = null
 }
 

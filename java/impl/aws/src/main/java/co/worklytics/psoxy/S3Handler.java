@@ -20,6 +20,9 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
+import com.newrelic.opentracing.LambdaTracer;
+import com.newrelic.opentracing.aws.LambdaTracing;
+import io.opentracing.util.GlobalTracer;
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
@@ -56,8 +59,8 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
         if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
             awsContainer.loggingConfiguration().validateNewRelicHandler(S3Handler.class);
-            io.opentracing.util.GlobalTracer.registerIfAbsent(com.newrelic.opentracing.LambdaTracer.INSTANCE);
-            return com.newrelic.opentracing.aws.LambdaTracing.instrument(s3Event, context, this::actualHandleRequest);
+            GlobalTracer.registerIfAbsent(LambdaTracer.INSTANCE);
+            return LambdaTracing.instrument(s3Event, context, this::actualHandleRequest);
         } else {
             return actualHandleRequest(s3Event, context);
         }
