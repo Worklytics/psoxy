@@ -179,6 +179,12 @@ variable "gitlab_example_group_id" {
   description = "(Only required if using GitLab connector) Example group ID for test API calls (ex: 12345)"
 }
 
+variable "gitlab_example_project_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using GitLab connector) Example project ID for test API calls (ex: 12345)"
+}
+
 variable "glean_instance_subdomain" {
   type        = string
   default     = null

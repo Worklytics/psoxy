@@ -29,7 +29,7 @@ public class GitLabTests extends JavaRulesTestBaseCase {
     public Stream<InvocationExample> getExamples() {
         return Stream.of(
             // Audit Events endpoint
-            InvocationExample.of("https://gitlab.example.com/api/v4/audit_events", "audit_log.json"),
+            InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/audit_events", "audit_log.json"),
 
             // Groups endpoint - initial and paginated
             InvocationExample.of("https://gitlab.example.com/api/v4/groups", "groups.json"),
@@ -40,14 +40,14 @@ public class GitLabTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://gitlab.example.com/api/v4/groups/123/members", "group_members.json"),
 
             // Issues endpoint - initial and paginated
-            InvocationExample.of("https://gitlab.example.com/api/v4/issues", "issues.json"),
-            InvocationExample.of("https://gitlab.example.com/api/v4/issues?page=2&per_page=50", "issues.json"),
-            InvocationExample.of("https://gitlab.example.com/api/v4/issues?state=opened&updated_after=2024-01-01&order_by=updated_at&sort=desc", "issues.json"),
+            InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/issues", "issues.json"),
+            InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/issues?page=2&per_page=50", "issues.json"),
+            InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/issues?state=opened&updated_after=2024-01-01&order_by=updated_at&sort=desc", "issues.json"),
 
             // Merge Requests endpoint - initial and paginated
-            InvocationExample.of("https://gitlab.example.com/api/v4/merge_requests", "merge_requests.json"),
-            InvocationExample.of("https://gitlab.example.com/api/v4/merge_requests?page=2&per_page=50", "merge_requests.json"),
-            InvocationExample.of("https://gitlab.example.com/api/v4/merge_requests?state=merged&updated_after=2024-01-01&order_by=updated_at&sort=desc", "merge_requests.json"),
+            InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/merge_requests", "merge_requests.json"),
+            InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/merge_requests?page=2&per_page=50", "merge_requests.json"),
+            InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/merge_requests?state=merged&updated_after=2024-01-01&order_by=updated_at&sort=desc", "merge_requests.json"),
 
             // Single Merge Request
             InvocationExample.of("https://gitlab.example.com/api/v4/merge_requests/1", "merge_request.json"),

@@ -44,6 +44,7 @@ locals {
   github_example_repository                = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
   gitlab_host                              = coalesce(var.gitlab_host, "gitlab.com")
   gitlab_example_group_id                  = coalesce(var.gitlab_example_group_id, "YOUR_GITLAB_GROUP_ID")
+  gitlab_example_project_id                = coalesce(var.gitlab_example_project_id, "YOUR_GITLAB_PROJECT_ID")
   gong_instance_subdomain                  = coalesce(var.gong_instance_subdomain, "YOUR_GONG_INSTANCE_SUBDOMAIN")
   glean_instance_subdomain                 = coalesce(var.glean_instance_subdomain, "YOUR_GLEAN_INSTANCE_SUBDOMAIN")
   salesforce_example_account_id            = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
@@ -1387,10 +1388,10 @@ EOT
         "/api/v4/groups",
         "/api/v4/groups/${local.gitlab_example_group_id}/members",
         "/api/v4/projects",
-        "/api/v4/issues",
-        "/api/v4/merge_requests",
+        "/api/v4/projects/${local.gitlab_example_project_id}/issues",
+        "/api/v4/projects/${local.gitlab_example_project_id}/merge_requests",
         "/api/v4/users",
-        "/api/v4/audit_events",
+        "/api/v4/projects/${local.gitlab_example_project_id}/audit_events",
       ],
       external_token_todo : templatefile("${path.module}/docs/gitlab/gitlab-instructions.tftpl", {
         path_to_instance_parameters = "PSOXY_GITLAB_"

@@ -1,22 +1,5 @@
 ---
 endpoints:
-  - pathTemplate: "/api/v4/audit_events"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$.author_id"
-          - "$[*].author_id"
-          - "$[*].details.author_email"
-          - "$[*].details.from"
-          - "$[*].details.to"
-        encoding: "URL_SAFE_TOKEN"
-      - !<hashIp>
-        jsonPaths:
-          - "$[*].details.ip_address"
-    responseSchema:
-      type: "array"
-      items:
-        $ref: "#/definitions/AuditEvent"
   - pathTemplate: "/api/v4/groups"
     responseSchema:
       type: "array"
@@ -37,45 +20,6 @@ endpoints:
       type: "array"
       items:
         $ref: "#/definitions/GroupMember"
-  - pathTemplate: "/api/v4/issues"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$[*].author.id"
-          - "$[*]..username"
-          - "$[*].assignee.id"
-          - "$[*].assignees[*].id"
-          - "$[*].closed_by.id"
-        encoding: "URL_SAFE_TOKEN"
-      - !<textDigest>
-        jsonPaths:
-          - "$..description"
-          - "$..title"
-    responseSchema:
-      type: "array"
-      items:
-        $ref: "#/definitions/Issue"
-  - pathTemplate: "/api/v4/merge_requests"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$[*].author.id"
-          - "$[*]..username"
-          - "$[*].assignee.id"
-          - "$[*].assignees[*].id"
-          - "$[*].reviewers[*].id"
-          - "$[*].merged_by.id"
-          - "$[*].merge_user.id"
-          - "$[*].closed_by.id"
-        encoding: "URL_SAFE_TOKEN"
-      - !<textDigest>
-        jsonPaths:
-          - "$..title"
-          - "$..description"
-    responseSchema:
-      type: "array"
-      items:
-        $ref: "#/definitions/MergeRequest"
   - pathTemplate: "/api/v4/merge_requests/{id}"
     transforms:
       - !<pseudonymize>
@@ -240,6 +184,10 @@ endpoints:
           - "marked"
           - "as a duplicate of this issue"
           - "created task"
+          - "resolved all threads"
+          - "resolved all discussions"
+          - "to continue this discussion"
+          - "label"
           - "assigned to"
           - "unassigned"
           - "changed title from"
@@ -309,6 +257,7 @@ endpoints:
           - "unapproved this merge request"
           - "requested changes to this merge request"
           - "removed the change request for this merge request"
+          - "merged"
           - "requested review from"
           - "removed review request for"
           - "marked this merge request as ready"
@@ -318,10 +267,12 @@ endpoints:
           - "changed target branch from"
           - "enabled automatic merge"
           - "canceled the automatic merge"
-          - "added"
           - "commit"
           - "commits"
           - "resolved all threads"
+          - "resolved all discussions"
+          - "to continue this discussion"
+          - "label"
           - "assigned to"
           - "unassigned"
           - "changed title from"
@@ -337,6 +288,7 @@ endpoints:
           - "unlocked this merge request"
           - "made the issue confidential"
           - "made the issue visible to everyone"
+          - "marked the checklist item"
           - "mentioned in commit"
           - "mentioned in merge request"
           - "mentioned in issue"
@@ -450,6 +402,45 @@ endpoints:
       type: "array"
       items:
         $ref: "#/definitions/CommitDiscussion"
+  - pathTemplate: "/api/v4/projects/{projectId}/issues"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$[*].author.id"
+          - "$[*]..username"
+          - "$[*].assignee.id"
+          - "$[*].assignees[*].id"
+          - "$[*].closed_by.id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$..description"
+          - "$..title"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/Issue"
+  - pathTemplate: "/api/v4/projects/{projectId}/merge_requests"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$[*].author.id"
+          - "$[*]..username"
+          - "$[*].assignee.id"
+          - "$[*].assignees[*].id"
+          - "$[*].reviewers[*].id"
+          - "$[*].merged_by.id"
+          - "$[*].merge_user.id"
+          - "$[*].closed_by.id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$..title"
+          - "$..description"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/MergeRequest"
   - pathTemplate: "/api/v4/users"
     transforms:
       - !<pseudonymize>

@@ -48,6 +48,7 @@ module "worklytics_connectors" {
   github_example_repository                = var.github_example_repository
   gitlab_host                              = var.gitlab_host
   gitlab_example_group_id                  = var.gitlab_example_group_id
+  gitlab_example_project_id                = var.gitlab_example_project_id
   gong_instance_subdomain                  = var.gong_instance_subdomain
   glean_instance_subdomain                 = var.glean_instance_subdomain
   salesforce_example_account_id            = var.salesforce_example_account_id
