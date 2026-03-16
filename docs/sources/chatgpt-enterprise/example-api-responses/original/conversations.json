@@ -40,13 +40,7 @@
                   ]
                 }
               ]
-            },
-            "files": [
-              {
-                "id": "file_001",
-                "name": "example.pdf"
-              }
-            ]
+            }
           }
         ]
       }

@@ -1,0 +1,599 @@
+{
+  "kind": "admin#reports#activities",
+  "nextPageToken": "R:AQBv9199acGH-DqZ3tT6gfr7PMX5QSTsb2HYoWXiFT0RgYcopBuEnFSlwPvT_hxL_rHN7BYon34ncUnQ0nLdzodBGCFf8BGArHEV-w",
+  "items": [
+    {
+      "id": {
+        "time": "2025-05-26T16:13:00.599Z",
+        "uniqueQualifier": "175054251510436492",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "actor": {
+        "callerType": "USER",
+        "email": "t~BW_M4OHwL0JjjvJLj9d6JRDWoZhvipbRqS3JsjndHwM@example.com",
+        "profileId": "900000000000000000001"
+      },
+      "events": [
+        {
+          "type": "call",
+          "name": "call_ended",
+          "parameters": [
+            {
+              "name": "meeting_code",
+              "value": "THSCAIFUIH"
+            },
+            {
+              "name": "conference_id",
+              "value": "mGXnAmlGnxX3oGuz43r4DxIQOA8MCwMyBwiKAiAAGAMI"
+            },
+            {
+              "name": "organizer_email",
+              "value": "t~BEn6PovseK_qwUQ17LfERXXBFfL2QNuCOgwb0s4PgpU@acme.com"
+            },
+            {
+              "name": "calendar_event_id",
+              "value": "v2o67tfmbcsm7o6h1kqs4ubtj3_20250526T160000Z"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "location_country",
+              "value": "ES"
+            },
+            {
+              "name": "location_region",
+              "value": "León"
+            },
+            {
+              "name": "identifier",
+              "value": "t~WBIjyZE4OPEr5VP6ZgwTj8yrOWDtOpJPm2_P8bt1mOw@acme.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            },
+            {
+              "name": "start_timestamp_seconds",
+              "intValue": "1748275322"
+            },
+            {
+              "name": "duration_seconds",
+              "intValue": "658"
+            },
+            {
+              "name": "ip_address",
+              "value": "t~Zwv-uIKln9vIg-Xe3ZoLHAsq3tk4-vXBS6k0htoWGnE"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": {
+        "time": "2025-05-26T16:12:53.372Z",
+        "uniqueQualifier": "901194898824280659",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "actor": {
+        "callerType": "USER",
+        "email": "t~YEnjMgOD4AJ7m9z5wgIIvJoP2EHmNBISUf5BCBiohZE@acme.com",
+        "profileId": "10323423423423526278"
+      },
+      "events": [
+        {
+          "type": "call",
+          "name": "call_ended",
+          "parameters": [
+            {
+              "name": "meeting_code",
+              "value": "THSCAIFUIH"
+            },
+            {
+              "name": "conference_id",
+              "value": "mGXnAmlGnxX3oGuz43r4DxIQOA8MCwMyBwiKAiAAGAMI"
+            },
+            {
+              "name": "organizer_email",
+              "value": "t~BEn6PovseK_qwUQ17LfERXXBFfL2QNuCOgwb0s4PgpU@acme.com"
+            },
+            {
+              "name": "calendar_event_id",
+              "value": "v2o67tfmbcsm7o6h1kqs4ubtj3_20250526T160000Z"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "location_country",
+              "value": "ES"
+            },
+            {
+              "name": "location_region",
+              "value": "Benidorm"
+            },
+            {
+              "name": "identifier",
+              "value": "t~5pBMaw9tn1vpGzNMrU1FpkIhdgfEBawz0Nb6MVHUD9g@example.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            },
+            {
+              "name": "start_timestamp_seconds",
+              "intValue": "1748275306"
+            },
+            {
+              "name": "duration_seconds",
+              "intValue": "666"
+            },
+            {
+              "name": "ip_address",
+              "value": "t~jbp5tTuVjVRPvojV4NVknWiTufeHbwR29SRYvE7Xj9o"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": {
+        "time": "2025-05-23T18:01:14.428Z",
+        "uniqueQualifier": "5971085161976798695",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "actor": {
+        "callerType": "USER",
+        "email": "t~nV9LNaGvxSTwebrX20e6Q8qSjkbafIPOXprC66qwbUc@acme.com",
+        "profileId": "117616197012971787190"
+      },
+      "events": [
+        {
+          "type": "call",
+          "name": "call_ended",
+          "parameters": [
+            {
+              "name": "meeting_code",
+              "value": "JDIONYVQOZ"
+            },
+            {
+              "name": "conference_id",
+              "value": "vtMRU9U-5w2wQMfwUcdpDxIQOA8MCwMyBwiKAiAAGAEI"
+            },
+            {
+              "name": "organizer_email",
+              "value": "t~BQU5G9KZHEBqea0zPf9Y1ebCEWu656dfw6cqQjKCA_0@acme.com"
+            },
+            {
+              "name": "calendar_event_id",
+              "value": "tc1rdse7crcib8bitqp3n0ukch_20250523T173000Z"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "location_country",
+              "value": "US"
+            },
+            {
+              "name": "location_region",
+              "value": "Healdsburg"
+            },
+            {
+              "name": "identifier",
+              "value": "t~nV9LNaGvxSTwebrX20e6Q8qSjkbafIPOXprC66qwbUc@acme.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            },
+            {
+              "name": "start_timestamp_seconds",
+              "intValue": "1748021458"
+            },
+            {
+              "name": "duration_seconds",
+              "intValue": "1815"
+            },
+            {
+              "name": "ip_address",
+              "value": "t~nKKG90YlC8qG1ZcFnnb001bOJoRhJ7XHvikcr_0cCQY"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": {
+        "time": "2025-05-23T18:01:14.168Z",
+        "uniqueQualifier": "-3370063432472459621",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "actor": {
+        "callerType": "USER",
+        "email": "t~WBIjyZE4OPEr5VP6ZgwTj8yrOWDtOpJPm2_P8bt1mOw@acme.com",
+        "profileId": "103523423442342376278"
+      },
+      "events": [
+        {
+          "type": "call",
+          "name": "call_ended",
+          "parameters": [
+            {
+              "name": "meeting_code",
+              "value": "JDIONYVQOZ"
+            },
+            {
+              "name": "conference_id",
+              "value": "vtMRU9U-5w2wQMfwUcdpDxIQOA8MCwMyBwiKAiAAGAEI"
+            },
+            {
+              "name": "organizer_email",
+              "value": "t~BQU5G9KZHEBqea0zPf9Y1ebCEWu656dfw6cqQjKCA_0@acme.com"
+            },
+            {
+              "name": "calendar_event_id",
+              "value": "tc1rdse7crcib8bitqp3n0ukch_20250523T173000Z"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "location_country",
+              "value": "ES"
+            },
+            {
+              "name": "location_region",
+              "value": "León"
+            },
+            {
+              "name": "identifier",
+              "value": "t~WBIjyZE4OPEr5VP6ZgwTj8yrOWDtOpJPm2_P8bt1mOw@acme.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            },
+            {
+              "name": "start_timestamp_seconds",
+              "intValue": "1748021690"
+            },
+            {
+              "name": "duration_seconds",
+              "intValue": "1583"
+            },
+            {
+              "name": "ip_address",
+              "value": "t~Zwv-uIKln9vIg-Xe3ZoLHAsq3tk4-vXBS6k0htoWGnE"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": {
+        "time": "2025-05-23T18:01:14.139Z",
+        "uniqueQualifier": "2800431183845324408",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "actor": {
+        "callerType": "USER",
+        "email": "t~BQU5G9KZHEBqea0zPf9Y1ebCEWu656dfw6cqQjKCA_0@acme.com",
+        "profileId": "112436199551679550352"
+      },
+      "events": [
+        {
+          "type": "call",
+          "name": "call_ended",
+          "parameters": [
+            {
+              "name": "meeting_code",
+              "value": "JDIONYVQOZ"
+            },
+            {
+              "name": "conference_id",
+              "value": "vtMRU9U-5w2wQMfwUcdpDxIQOA8MCwMyBwiKAiAAGAEI"
+            },
+            {
+              "name": "organizer_email",
+              "value": "t~BQU5G9KZHEBqea0zPf9Y1ebCEWu656dfw6cqQjKCA_0@acme.com"
+            },
+            {
+              "name": "calendar_event_id",
+              "value": "tc1rdse7crcib8bitqp3n0ukch_20250523T173000Z"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "location_country",
+              "value": "US"
+            },
+            {
+              "name": "location_region",
+              "value": "Somerville"
+            },
+            {
+              "name": "identifier",
+              "value": "t~BQU5G9KZHEBqea0zPf9Y1ebCEWu656dfw6cqQjKCA_0@acme.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            },
+            {
+              "name": "start_timestamp_seconds",
+              "intValue": "1748021508"
+            },
+            {
+              "name": "duration_seconds",
+              "intValue": "1765"
+            },
+            {
+              "name": "ip_address",
+              "value": "t~-hCIxUqxq2fp5JP3N1xj2mv0wAE-ZfDefTX214GkTqA"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": {
+        "time": "2025-05-23T18:01:13.607Z",
+        "uniqueQualifier": "-8243036491405512385",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "actor": {
+        "callerType": "USER",
+        "email": "t~5DUZumLpXquqFEMm7QkWRsx8aF4w_aQPH3ToYnKhX6U@acme.com",
+        "profileId": "1035234520618072345278"
+      },
+      "events": [
+        {
+          "type": "call",
+          "name": "call_ended",
+          "parameters": [
+            {
+              "name": "meeting_code",
+              "value": "JDIONYVQOZ"
+            },
+            {
+              "name": "conference_id",
+              "value": "vtMRU9U-5w2wQMfwUcdpDxIQOA8MCwMyBwiKAiAAGAEI"
+            },
+            {
+              "name": "organizer_email",
+              "value": "t~BQU5G9KZHEBqea0zPf9Y1ebCEWu656dfw6cqQjKCA_0@acme.com"
+            },
+            {
+              "name": "calendar_event_id",
+              "value": "tc1rdse7crcib8bitqp3n0ukch_20250523T173000Z"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "location_country",
+              "value": "US"
+            },
+            {
+              "name": "location_region",
+              "value": "Raleigh"
+            },
+            {
+              "name": "identifier",
+              "value": "t~5DUZumLpXquqFEMm7QkWRsx8aF4w_aQPH3ToYnKhX6U@acme.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            },
+            {
+              "name": "start_timestamp_seconds",
+              "intValue": "1748021424"
+            },
+            {
+              "name": "duration_seconds",
+              "intValue": "1848"
+            },
+            {
+              "name": "ip_address",
+              "value": "t~kCRDvP-bGKP3eQAbkY0AJLadlKFrx4fXzatXD_XtzLA"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": {
+        "time": "2025-05-23T18:01:13.492Z",
+        "uniqueQualifier": "-7743218590642771853",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "actor": {
+        "callerType": "USER",
+        "email": "t~QMX1AXKAV7tMbTR1_P84PdMoLdYTJlAHVe-sDZrAaMI@acme.com",
+        "profileId": "114349793749086722850"
+      },
+      "events": [
+        {
+          "type": "call",
+          "name": "call_ended",
+          "parameters": [
+            {
+              "name": "meeting_code",
+              "value": "JDIONYVQOZ"
+            },
+            {
+              "name": "conference_id",
+              "value": "vtMRU9U-5w2wQMfwUcdpDxIQOA8MCwMyBwiKAiAAGAEI"
+            },
+            {
+              "name": "organizer_email",
+              "value": "t~LapP71N2opKZk3UPVa-ztqI7gskgibDdz-kufN7uT2Q@example.com"
+            },
+            {
+              "name": "calendar_event_id",
+              "value": "tc1rdse7crcib8bitqp3n0ukch_20250523T173000Z"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "location_country",
+              "value": "US"
+            },
+            {
+              "name": "location_region",
+              "value": "Mercer Island"
+            },
+            {
+              "name": "identifier",
+              "value": "t~QMX1AXKAV7tMbTR1_P84PdMoLdYTJlAHVe-sDZrAaMI@acme.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            },
+            {
+              "name": "start_timestamp_seconds",
+              "intValue": "1748021518"
+            },
+            {
+              "name": "duration_seconds",
+              "intValue": "1755"
+            },
+            {
+              "name": "ip_address",
+              "value": "t~ZPX-PsI1AmRKP0WUP-H_Cu_f2ZFvbhKRGgj1RDKgcA0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": {
+        "time": "2025-05-23T17:54:38.280Z",
+        "uniqueQualifier": "-4711691235951609061",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "actor": {
+        "callerType": "USER",
+        "email": "t~5DUZumLpXquqFEMm7QkWRsx8aF4w_aQPH3ToYnKhX6U@acme.com",
+        "profileId": "1035234520618072345278"
+      },
+      "events": [
+        {
+          "type": "conference_action",
+          "name": "presentation_started",
+          "parameters": [
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "meeting_code",
+              "value": "JDIONYVQOZ"
+            },
+            {
+              "name": "conference_id",
+              "value": "vtMRU9U-5w2wQMfwUcdpDxIQOA8MCwMyBwiKAiAAGAEI"
+            },
+            {
+              "name": "identifier",
+              "value": "t~5DUZumLpXquqFEMm7QkWRsx8aF4w_aQPH3ToYnKhX6U@acme.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": {
+        "time": "2025-05-23T17:36:43.618Z",
+        "uniqueQualifier": "5729897957548243316",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "actor": {
+        "callerType": "USER",
+        "email": "t~nV9LNaGvxSTwebrX20e6Q8qSjkbafIPOXprC66qwbUc@acme.com",
+        "profileId": "117616197012971787190"
+      },
+      "events": [
+        {
+          "type": "conference_action",
+          "name": "presentation_started",
+          "parameters": [
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "meeting_code",
+              "value": "JDIONYVQOZ"
+            },
+            {
+              "name": "conference_id",
+              "value": "vtMRU9U-5w2wQMfwUcdpDxIQOA8MCwMyBwiKAiAAGAEI"
+            },
+            {
+              "name": "identifier",
+              "value": "t~nV9LNaGvxSTwebrX20e6Q8qSjkbafIPOXprC66qwbUc@acme.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": {
+        "time": "2025-05-23T17:17:15.795Z",
+        "uniqueQualifier": "4129929803739023687",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "actor": {
+        "callerType": "USER",
+        "profileId": "1231290832109183223133"
+      },
+      "events": [
+        {
+          "type": "conference_action",
+          "name": "recording_activity",
+          "parameters": [
+            {
+              "name": "conference_id",
+              "value": "jVU9T23A6a234234234234234556iAAGAEI"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

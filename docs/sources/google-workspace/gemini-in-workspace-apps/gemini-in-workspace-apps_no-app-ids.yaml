@@ -92,7 +92,7 @@ definitions:
       boolValue:
         type: "boolean"
       intValue:
-        type: "integer"
+        type: "string"
       name:
         type: "string"
       value:

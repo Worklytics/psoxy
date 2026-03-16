@@ -1,0 +1,80 @@
+{
+  "ok": true,
+  "enterprise": {
+    "id": "E02DW6UCECM",
+    "name": "Test Grid",
+    "url": "https://test-grid.enterprise.slack.com/",
+    "domain": "test-grid",
+    "email_domain": "",
+    "icon": {
+      "image_102": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0015-102.png",
+      "image_132": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0015-132.png",
+      "image_230": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0015-230.png",
+      "image_34": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0015-34.png",
+      "image_44": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0015-44.png",
+      "image_68": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0015-68.png",
+      "image_88": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0015-88.png",
+      "image_default": true
+    },
+    "avatar_base_url": "https://ca.slack-edge.com/",
+    "is_verified": false,
+    "teams": [
+      {
+        "id": "T02DZ7JEGBE",
+        "name": "DevGrid - W1",
+        "url": "https://testdevgrid-w1.slack.com/",
+        "domain": "testdevgrid-w1",
+        "email_domain": "",
+        "icon": {
+          "image_34": "https://avatars.slack-edge.com/2022-04-29/3454441179510_63fb7156cdaf2f6ca865_34.png",
+          "image_44": "https://avatars.slack-edge.com/2022-04-29/3454441179510_63fb7156cdaf2f6ca865_44.png",
+          "image_68": "https://avatars.slack-edge.com/2022-04-29/3454441179510_63fb7156cdaf2f6ca865_68.png",
+          "image_88": "https://avatars.slack-edge.com/2022-04-29/3454441179510_63fb7156cdaf2f6ca865_88.png",
+          "image_102": "https://avatars.slack-edge.com/2022-04-29/3454441179510_63fb7156cdaf2f6ca865_102.png",
+          "image_132": "https://avatars.slack-edge.com/2022-04-29/3454441179510_63fb7156cdaf2f6ca865_132.png",
+          "image_230": "https://avatars.slack-edge.com/2022-04-29/3454441179510_63fb7156cdaf2f6ca865_230.png"
+        },
+        "is_verified": false,
+        "archived": false,
+        "deleted": false,
+        "discoverable": "open",
+        "enterprise_id": "E02DW6UCECM",
+        "enterprise_domain": "test-grid",
+        "enterprise_name": "Test Grid",
+        "is_enterprise": 0,
+        "created": 1631224594,
+        "description": "1st Workspace under Test Grid"
+      },
+      {
+        "id": "T02MT9XBJL2",
+        "name": "DevGrid - W2",
+        "url": "https://testdevgridw2.slack.com/",
+        "domain": "testdevgridw2",
+        "email_domain": "",
+        "icon": {
+          "image_34": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0001-34.png",
+          "image_44": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0001-44.png",
+          "image_68": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0001-68.png",
+          "image_88": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0001-88.png",
+          "image_102": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0001-102.png",
+          "image_132": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0001-132.png",
+          "image_230": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0001-230.png",
+          "image_default": true
+        },
+        "is_verified": false,
+        "archived": false,
+        "deleted": false,
+        "discoverable": "open",
+        "enterprise_id": "E02DW6UCECM",
+        "enterprise_domain": "test-grid",
+        "enterprise_name": "Test Grid",
+        "is_enterprise": 0,
+        "created": 1637016788,
+        "description": "2nd Workspace under Test Grid"
+      }
+    ]
+  },
+  "response_metadata": {
+    "next_cursor": ""
+  }
+}

@@ -1,0 +1,304 @@
+{
+  "ok": true,
+  "has_edits": true,
+  "messages": [
+    {
+      "type": "message",
+      "text": "Test message!",
+      "user": "W06CA4EAC",
+      "username": "<@U06CA4EAC|bjin>",
+      "ts": "1234561409.000002",
+      "reactions": [
+        {
+          "name": "slightly_smiling_face",
+          "users": [
+            "W0G81RDQT",
+            "W0N0ZQDED",
+            "W0R8EBMXP"
+          ],
+          "count": 3
+        },
+        {
+          "name": "tada",
+          "users": [
+            "W0G81RDQZ"
+          ],
+          "count": 1
+        }
+      ],
+      "permalink": "permalink value"
+    },
+    {
+      "type": "message",
+      "text": "",
+      "files": [
+        {
+          "original_h": 194,
+          "id": "F973098398",
+          "public_url_shared": false,
+          "pretty_type": "JPEG",
+          "timestamp": 1532453547,
+          "title": "test.png",
+          "is_public": true,
+          "thumb_360_w": 259
+        }
+      ],
+      "blocks": [
+        {
+          "type": "rich_text",
+          "block_id": "U5M",
+          "elements": [
+            {
+              "type": "rich_text_section",
+              "elements": [
+                {
+                  "type": "text",
+                  "text": "text with rich block"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "ts": "1234561515.000007",
+      "wibblr": true,
+      "edited": {
+        "user": "W000000",
+        "ts": "38327498237.000000"
+      },
+      "attachments": [
+        {
+          "service_name": "Leg end nary a laugh, Ink.",
+          "text": "This is likely a pun about the weather.",
+          "fallback": "We're withholding a pun from you",
+          "thumb_url": "https://badpuns.example.com/puns/123.png",
+          "thumb_width": 1920,
+          "thumb_height": 700,
+          "id": 1
+        }
+      ]
+    },
+    {
+      "client_msg_id": "314a746d-82c0-4a05-a081-429e4c096c3f",
+      "type": "message",
+      "user": "W000000",
+      "ts": "1651249518.059679",
+      "team": "T02MT9XBJL9",
+      "user_team": "T02MT9XBJL9",
+      "source_team": "T02MT9XBJL9",
+      "user_profile": {
+        "avatar_hash": "g08564a648b3",
+        "image_72": "https://secure.gravatar.com/avatar/08564a648b3575b6be2b6ea1e2ab4370.jpg?s=72&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0017-72.png",
+        "first_name": "Jose",
+        "real_name": "Jose (ENT)",
+        "display_name": "Jose (ENT)",
+        "team": "T02MT9XBJL9",
+        "name": "jose",
+        "is_restricted": false,
+        "is_ultra_restricted": false
+      },
+      "blocks": [
+        {
+          "type": "rich_text",
+          "block_id": "qWw",
+          "elements": [
+            {
+              "type": "rich_text_section",
+              "elements": [
+                {
+                  "type": "text",
+                  "text": "Some new text"
+                },
+                {
+                  "type": "user",
+                  "user_id": "U02DU306H0B"
+                },
+                {
+                  "type": "text",
+                  "text": "check this out!"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "message",
+      "subtype": "bot_message",
+      "ts": "1651598000.000001",
+      "bot_id": "B00000001",
+      "team": "T00000001",
+      "bot_profile": {
+        "id": "B00000001",
+        "app_id": "A00000001",
+        "name": "App name",
+        "icons": {
+          "image_36": "https://avatars.slack-edge.com/YYYY-MM-DD/app_image_36.png",
+          "image_48": "https://avatars.slack-edge.com/YYYY-MM-DD/app_image_48.png",
+          "image_72": "https://avatars.slack-edge.com/YYYY-MM-DD/app_image_72.png"
+        },
+        "deleted": false,
+        "updated": 1630603699,
+        "team_id": "T00000001"
+      },
+      "thread_ts": "1651598000.000001",
+      "reply_count": 7,
+      "reply_users_count": 4,
+      "latest_reply": "1651600000.000001",
+      "reply_users": [
+        "REPLYUSER",
+        "W06CA4EAC",
+        "W0G81RDQT",
+        "W0N0ZQDED"
+      ],
+      "replies": [
+        {
+          "user": "REPLYUSER",
+          "ts": "1651598339.434889"
+        },
+        {
+          "user": "W06CA4EAC",
+          "ts": "1651598395.311239"
+        },
+        {
+          "user": "W0G81RDQT",
+          "ts": "1651598519.298169"
+        },
+        {
+          "user": "W0N0ZQDED",
+          "ts": "1651599241.015189",
+          "parent_user_id": "some parent user"
+        }
+      ],
+      "is_locked": false,
+      "blocks": [
+        {
+          "type": "section",
+          "block_id": "55L5"
+        },
+        {
+          "type": "divider",
+          "block_id": "WmLUu"
+        },
+        {
+          "type": "actions",
+          "block_id": "33Plf",
+          "elements": [
+            {
+              "type": "text",
+              "text": "Some other text"
+            },
+            {
+              "type": "button",
+              "action_id": "callToAction",
+              "value": "buttonValue",
+              "url": "https://somelink.com/whatever"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "user": "USLACKBOT",
+      "channel": "D075J2RKK4Y",
+      "room": {
+        "id": "R07BNSQTZSP",
+        "name": "huddle test topic",
+        "media_server": "",
+        "created_by": "U02K5LRARED",
+        "date_start": 1720542372,
+        "date_end": 1720542756,
+        "participants": [],
+        "participant_history": [
+          "U02K5LRARED",
+          "U074XMEDGUU"
+        ],
+        "participants_events": {
+          "U02K5LRARED": {
+            "user_team": {},
+            "joined": true,
+            "camera_on": false,
+            "camera_off": false,
+            "screenshare_on": true,
+            "screenshare_off": true
+          },
+          "U074XMEDGUU": {
+            "user_team": {},
+            "joined": true,
+            "camera_on": false,
+            "camera_off": false,
+            "screenshare_on": false,
+            "screenshare_off": false
+          },
+          "U060ZTHGQ2H": {
+            "user_team": {},
+            "joined": false,
+            "camera_on": false,
+            "camera_off": false,
+            "screenshare_on": false,
+            "screenshare_off": false
+          }
+        },
+        "participants_camera_on": [],
+        "participants_camera_off": [],
+        "participants_screenshare_on": [],
+        "participants_screenshare_off": [],
+        "canvas_thread_ts": "1720542372.566689",
+        "thread_root_ts": "1720542372.566689",
+        "channels": [
+          "D075J2RKK4Y"
+        ],
+        "is_dm_call": true,
+        "was_rejected": false,
+        "was_missed": false,
+        "was_accepted": true,
+        "has_ended": true,
+        "background_id": "GRADIENT_03",
+        "canvas_background": "GRADIENT_03",
+        "is_prewarmed": false,
+        "is_scheduled": false,
+        "attached_file_ids": [],
+        "media_backend_type": "free_willy",
+        "display_id": "",
+        "external_unique_id": "b88ef6b8-9450-4633-83a2-dfb2cfd12713",
+        "app_id": "A00",
+        "call_family": "huddle",
+        "pending_invitees": {},
+        "last_invite_status_by_user": {
+          "U060ZTHGQ2H": "expired",
+          "U074XMEDGUU": "accepted"
+        },
+        "knocks": {}
+      },
+      "no_notifications": true,
+      "permalink": "https://some-company.enterprise.slack.com/call/R07BNSQTZSP",
+      "subtype": "huddle_thread",
+      "type": "message",
+      "ts": "1720542372.566689",
+      "edited": {
+        "user": "USLACKBOT",
+        "ts": "1720542757.000000"
+      },
+      "text": "",
+      "blocks": [
+        {
+          "type": "rich_text",
+          "block_id": "UoEcF",
+          "elements": [
+            {
+              "type": "rich_text_section",
+              "elements": [
+                {
+                  "type": "text",
+                  "text": "A huddle started"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "offset": "1463084600.000000"
+}

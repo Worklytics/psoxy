@@ -9,7 +9,7 @@
     },
     "usageEvents": [
         {
-            "timestamp" : "1710720000000",
+            "timestamp": "1710720000000",
             "model": "gpt-4",
             "kindLabel": "Usage-based",
             "maxMode": false,
@@ -23,20 +23,22 @@
                 "totalCents": 25
             },
             "isFreeBugbot": false,
+            "chargedCents": 25,
             "userEmail": "developer@company.com"
         },
         {
-            "timestamp" : "1710720000000",
+            "timestamp": "1710720000000",
             "model": "claude-3-opus",
             "kindLabel": "Included in Business",
             "maxMode": true,
             "requestsCosts": 0.0,
             "isTokenBasedCall": false,
             "isFreeBugbot": false,
+            "chargedCents": 0,
             "userEmail": "senior.dev@company.com"
         },
         {
-            "timestamp" : "1710720000000",
+            "timestamp": "1710720000000",
             "model": "gpt-4",
             "kindLabel": "Usage-based",
             "maxMode": false,
@@ -50,6 +52,7 @@
                 "totalCents": 15
             },
             "isFreeBugbot": true,
+            "chargedCents": 0,
             "userEmail": "admin@company.com"
         }
     ],

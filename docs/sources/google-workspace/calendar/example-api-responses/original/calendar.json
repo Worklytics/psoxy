@@ -1,0 +1,12 @@
+{
+  "kind": "calendar#calendar",
+  "etag": "\"4Kld67ZwPRGNgx7K9nJvOiszXxg\"",
+  "id": "erik@worklytics.co",
+  "summary": "erik@worklytics.co",
+  "timeZone": "America/Los_Angeles",
+  "conferenceProperties": {
+    "allowedConferenceSolutionTypes": [
+      "hangoutsMeet"
+    ]
+  }
+}

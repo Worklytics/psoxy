@@ -1,20 +1,28 @@
 {
-  "teamMembers" : [
+  "teamMembers": [
     {
-      "email" : "t~bSkdfjBTY24htUdeLzDD8hBKsXGprapgKEXQFW5AFPU@company.com",
-      "role" : "member"
+      "id": "t~bSkdfjBTY24htUdeLzDD8hBKsXGprapgKEXQFW5AFPU",
+      "email": "t~bSkdfjBTY24htUdeLzDD8hBKsXGprapgKEXQFW5AFPU@company.com",
+      "role": "member",
+      "isRemoved": false
     },
     {
-      "email" : "t~JYdSZrv6Gmaj3htiQnFhB89WYPFcw7pp-Kv9h0nOsbc@company.com",
-      "role" : "owner"
+      "id": "t~JYdSZrv6Gmaj3htiQnFhB89WYPFcw7pp-Kv9h0nOsbc",
+      "email": "t~JYdSZrv6Gmaj3htiQnFhB89WYPFcw7pp-Kv9h0nOsbc@company.com",
+      "role": "owner",
+      "isRemoved": false
     },
     {
-      "email" : "t~I3fHxUsK2qMysD_fKva0I3q09GP06Uqw4G6RKUylNPY@company.com",
-      "role" : "member"
+      "id": "t~I3fHxUsK2qMysD_fKva0I3q09GP06Uqw4G6RKUylNPY",
+      "email": "t~I3fHxUsK2qMysD_fKva0I3q09GP06Uqw4G6RKUylNPY@company.com",
+      "role": "member",
+      "isRemoved": false
     },
     {
-      "email" : "t~mvJ8o_KqSDQW-u-6-7QvE2XwKKf_uMCaJizbbupY03k@company.com",
-      "role" : "admin"
+      "id": "t~mvJ8o_KqSDQW-u-6-7QvE2XwKKf_uMCaJizbbupY03k",
+      "email": "t~mvJ8o_KqSDQW-u-6-7QvE2XwKKf_uMCaJizbbupY03k@company.com",
+      "role": "admin",
+      "isRemoved": true
     }
   ]
 }

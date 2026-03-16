@@ -1,0 +1,1656 @@
+{
+  "kind": "admin#reports#activities",
+  "etag": "\"K9RP2oCoM3-xc8pHjNEPvlShcOlczDvIh41jWjlyo9U/c3zKkdZdgQN2Nqls6yIXb1XgB8g\"",
+  "nextPageToken": "R:AQBv9199acGH-DqZ3tT6gfr7PMX5QSTsb2HYoWXiFT0RgYcopBuEnFSlwPvT_hxL_rHN7BYon34ncUnQ0nLdzodBGCFf8BGArHEV-w",
+  "items": [
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2025-05-26T16:13:00.599Z",
+        "uniqueQualifier": "175054251510436492",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "etag": "\"K9RP2oCoM3-xc8pHjNEPvlShcOlczDvIh41jWjlyo9U/_x9qLdc8PrODNnVirFK28UKfCPg\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "david.smith@example.com",
+        "profileId": "900000000000000000001"
+      },
+      "events": [
+        {
+          "type": "call",
+          "name": "call_ended",
+          "parameters": [
+            {
+              "name": "meeting_code",
+              "value": "THSCAIFUIH"
+            },
+            {
+              "name": "conference_id",
+              "value": "mGXnAmlGnxX3oGuz43r4DxIQOA8MCwMyBwiKAiAAGAMI"
+            },
+            {
+              "name": "organizer_email",
+              "value": "philip@acme.com"
+            },
+            {
+              "name": "calendar_event_id",
+              "value": "v2o67tfmbcsm7o6h1kqs4ubtj3_20250526T160000Z"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "endpoint_id",
+              "value": "boq_hlane_QF0oXIRTtku"
+            },
+            {
+              "name": "device_type",
+              "value": "web"
+            },
+            {
+              "name": "product_type",
+              "value": "meet"
+            },
+            {
+              "name": "display_name",
+              "value": "David Smith"
+            },
+            {
+              "name": "location_country",
+              "value": "ES"
+            },
+            {
+              "name": "location_region",
+              "value": "León"
+            },
+            {
+              "name": "identifier",
+              "value": "daryl@acme.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            },
+            {
+              "name": "start_timestamp_seconds",
+              "intValue": "1748275322"
+            },
+            {
+              "name": "duration_seconds",
+              "intValue": "658"
+            },
+            {
+              "name": "ip_address",
+              "value": "83.54.19.81"
+            },
+            {
+              "name": "network_rtt_msec_mean",
+              "intValue": "12"
+            },
+            {
+              "name": "network_recv_jitter_msec_mean",
+              "intValue": "4"
+            },
+            {
+              "name": "network_recv_jitter_msec_max",
+              "intValue": "21"
+            },
+            {
+              "name": "network_send_jitter_msec_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "network_estimated_upload_kbps_mean",
+              "intValue": "954"
+            },
+            {
+              "name": "network_estimated_download_kbps_mean",
+              "intValue": "1129"
+            },
+            {
+              "name": "audio_recv_seconds",
+              "intValue": "658"
+            },
+            {
+              "name": "audio_send_seconds",
+              "intValue": "658"
+            },
+            {
+              "name": "audio_send_bitrate_kbps_mean",
+              "intValue": "54"
+            },
+            {
+              "name": "audio_recv_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "audio_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "audio_send_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "audio_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_seconds",
+              "intValue": "648"
+            },
+            {
+              "name": "video_send_seconds",
+              "intValue": "658"
+            },
+            {
+              "name": "video_send_bitrate_kbps_mean",
+              "intValue": "884"
+            },
+            {
+              "name": "video_recv_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_send_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "video_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_fps_mean",
+              "intValue": "29"
+            },
+            {
+              "name": "video_send_fps_mean",
+              "intValue": "30"
+            },
+            {
+              "name": "video_recv_long_side_median_pixels",
+              "intValue": "1280"
+            },
+            {
+              "name": "video_recv_short_side_median_pixels",
+              "intValue": "720"
+            },
+            {
+              "name": "video_send_long_side_median_pixels",
+              "intValue": "640"
+            },
+            {
+              "name": "video_send_short_side_median_pixels",
+              "intValue": "360"
+            },
+            {
+              "name": "network_congestion",
+              "intValue": "0"
+            },
+            {
+              "name": "screencast_recv_seconds",
+              "intValue": "0"
+            },
+            {
+              "name": "screencast_send_seconds",
+              "intValue": "0"
+            },
+            {
+              "name": "network_transport_protocol",
+              "value": "udp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2025-05-26T16:12:53.372Z",
+        "uniqueQualifier": "901194898824280659",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "etag": "\"K9RP2oCoM3-xc8pHjNEPvlShcOlczDvIh41jWjlyo9U/eKoXHoIIdd3jcj3e5e4gzDIjbSE\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "adny@acme.com",
+        "profileId": "10323423423423526278"
+      },
+      "events": [
+        {
+          "type": "call",
+          "name": "call_ended",
+          "parameters": [
+            {
+              "name": "meeting_code",
+              "value": "THSCAIFUIH"
+            },
+            {
+              "name": "conference_id",
+              "value": "mGXnAmlGnxX3oGuz43r4DxIQOA8MCwMyBwiKAiAAGAMI"
+            },
+            {
+              "name": "organizer_email",
+              "value": "philip@acme.com"
+            },
+            {
+              "name": "calendar_event_id",
+              "value": "v2o67tfmbcsm7o6h1kqs4ubtj3_20250526T160000Z"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "endpoint_id",
+              "value": "boq_hlane_Ycv2n5zFG0Z"
+            },
+            {
+              "name": "device_type",
+              "value": "web"
+            },
+            {
+              "name": "product_type",
+              "value": "meet"
+            },
+            {
+              "name": "display_name",
+              "value": "Andrew Garcia"
+            },
+            {
+              "name": "location_country",
+              "value": "ES"
+            },
+            {
+              "name": "location_region",
+              "value": "Benidorm"
+            },
+            {
+              "name": "identifier",
+              "value": "andrew.garcia@example.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            },
+            {
+              "name": "start_timestamp_seconds",
+              "intValue": "1748275306"
+            },
+            {
+              "name": "duration_seconds",
+              "intValue": "666"
+            },
+            {
+              "name": "ip_address",
+              "value": "85.235.68.46"
+            },
+            {
+              "name": "network_rtt_msec_mean",
+              "intValue": "23"
+            },
+            {
+              "name": "network_recv_jitter_msec_mean",
+              "intValue": "3"
+            },
+            {
+              "name": "network_recv_jitter_msec_max",
+              "intValue": "15"
+            },
+            {
+              "name": "network_send_jitter_msec_mean",
+              "intValue": "4"
+            },
+            {
+              "name": "network_estimated_upload_kbps_mean",
+              "intValue": "1619"
+            },
+            {
+              "name": "network_estimated_download_kbps_mean",
+              "intValue": "1111"
+            },
+            {
+              "name": "audio_recv_seconds",
+              "intValue": "655"
+            },
+            {
+              "name": "audio_send_seconds",
+              "intValue": "666"
+            },
+            {
+              "name": "audio_send_bitrate_kbps_mean",
+              "intValue": "27"
+            },
+            {
+              "name": "audio_recv_packet_loss_max",
+              "intValue": "5"
+            },
+            {
+              "name": "audio_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "audio_send_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "audio_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_seconds",
+              "intValue": "666"
+            },
+            {
+              "name": "video_send_seconds",
+              "intValue": "666"
+            },
+            {
+              "name": "video_send_bitrate_kbps_mean",
+              "intValue": "1541"
+            },
+            {
+              "name": "video_recv_packet_loss_max",
+              "intValue": "4"
+            },
+            {
+              "name": "video_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_send_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "video_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_fps_mean",
+              "intValue": "29"
+            },
+            {
+              "name": "video_send_fps_mean",
+              "intValue": "30"
+            },
+            {
+              "name": "video_recv_long_side_median_pixels",
+              "intValue": "640"
+            },
+            {
+              "name": "video_recv_short_side_median_pixels",
+              "intValue": "360"
+            },
+            {
+              "name": "video_send_long_side_median_pixels",
+              "intValue": "1280"
+            },
+            {
+              "name": "video_send_short_side_median_pixels",
+              "intValue": "720"
+            },
+            {
+              "name": "network_congestion",
+              "intValue": "0"
+            },
+            {
+              "name": "screencast_recv_seconds",
+              "intValue": "0"
+            },
+            {
+              "name": "screencast_send_seconds",
+              "intValue": "0"
+            },
+            {
+              "name": "network_transport_protocol",
+              "value": "udp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2025-05-23T18:01:14.428Z",
+        "uniqueQualifier": "5971085161976798695",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "etag": "\"K9RP2oCoM3-xc8pHjNEPvlShcOlczDvIh41jWjlyo9U/5eQEi-QhskeO5NNqFneXJX7KALw\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "charles@acme.com",
+        "profileId": "117616197012971787190"
+      },
+      "events": [
+        {
+          "type": "call",
+          "name": "call_ended",
+          "parameters": [
+            {
+              "name": "meeting_code",
+              "value": "JDIONYVQOZ"
+            },
+            {
+              "name": "conference_id",
+              "value": "vtMRU9U-5w2wQMfwUcdpDxIQOA8MCwMyBwiKAiAAGAEI"
+            },
+            {
+              "name": "organizer_email",
+              "value": "carl@acme.com"
+            },
+            {
+              "name": "calendar_event_id",
+              "value": "tc1rdse7crcib8bitqp3n0ukch_20250523T173000Z"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "endpoint_id",
+              "value": "boq_hlane_w9n1uoaQWVi"
+            },
+            {
+              "name": "device_type",
+              "value": "web"
+            },
+            {
+              "name": "product_type",
+              "value": "meet"
+            },
+            {
+              "name": "display_name",
+              "value": "Caitlin Moldvay"
+            },
+            {
+              "name": "location_country",
+              "value": "US"
+            },
+            {
+              "name": "location_region",
+              "value": "Healdsburg"
+            },
+            {
+              "name": "identifier",
+              "value": "charles@acme.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            },
+            {
+              "name": "start_timestamp_seconds",
+              "intValue": "1748021458"
+            },
+            {
+              "name": "duration_seconds",
+              "intValue": "1815"
+            },
+            {
+              "name": "ip_address",
+              "value": "2601:649:200:6f60:f5c8:5ecd:890d:ca0e"
+            },
+            {
+              "name": "network_rtt_msec_mean",
+              "intValue": "24"
+            },
+            {
+              "name": "network_recv_jitter_msec_mean",
+              "intValue": "3"
+            },
+            {
+              "name": "network_recv_jitter_msec_max",
+              "intValue": "11"
+            },
+            {
+              "name": "network_send_jitter_msec_mean",
+              "intValue": "2"
+            },
+            {
+              "name": "network_estimated_upload_kbps_mean",
+              "intValue": "477"
+            },
+            {
+              "name": "network_estimated_download_kbps_mean",
+              "intValue": "1053"
+            },
+            {
+              "name": "audio_recv_seconds",
+              "intValue": "1038"
+            },
+            {
+              "name": "audio_send_seconds",
+              "intValue": "1038"
+            },
+            {
+              "name": "audio_send_bitrate_kbps_mean",
+              "intValue": "24"
+            },
+            {
+              "name": "audio_recv_packet_loss_max",
+              "intValue": "4"
+            },
+            {
+              "name": "audio_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "audio_send_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "audio_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_seconds",
+              "intValue": "1038"
+            },
+            {
+              "name": "video_send_seconds",
+              "intValue": "1038"
+            },
+            {
+              "name": "video_send_bitrate_kbps_mean",
+              "intValue": "431"
+            },
+            {
+              "name": "video_recv_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_send_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "video_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_fps_mean",
+              "intValue": "28"
+            },
+            {
+              "name": "video_send_fps_mean",
+              "intValue": "30"
+            },
+            {
+              "name": "video_recv_long_side_median_pixels",
+              "intValue": "320"
+            },
+            {
+              "name": "video_recv_short_side_median_pixels",
+              "intValue": "180"
+            },
+            {
+              "name": "video_send_long_side_median_pixels",
+              "intValue": "640"
+            },
+            {
+              "name": "video_send_short_side_median_pixels",
+              "intValue": "360"
+            },
+            {
+              "name": "network_congestion",
+              "intValue": "0"
+            },
+            {
+              "name": "screencast_recv_seconds",
+              "intValue": "257"
+            },
+            {
+              "name": "screencast_send_seconds",
+              "intValue": "935"
+            },
+            {
+              "name": "screencast_send_bitrate_kbps_mean",
+              "intValue": "172"
+            },
+            {
+              "name": "screencast_send_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "screencast_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "screencast_send_fps_mean",
+              "intValue": "11"
+            },
+            {
+              "name": "screencast_send_long_side_median_pixels",
+              "intValue": "1844"
+            },
+            {
+              "name": "screencast_send_short_side_median_pixels",
+              "intValue": "1004"
+            },
+            {
+              "name": "network_transport_protocol",
+              "value": "udp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2025-05-23T18:01:14.168Z",
+        "uniqueQualifier": "-3370063432472459621",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "etag": "\"K9RP2oCoM3-xc8pHjNEPvlShcOlczDvIh41jWjlyo9U/_NNqCVAsIkflQTmQOqczI4WDDnA\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "daryl@acme.com",
+        "profileId": "103523423442342376278"
+      },
+      "events": [
+        {
+          "type": "call",
+          "name": "call_ended",
+          "parameters": [
+            {
+              "name": "meeting_code",
+              "value": "JDIONYVQOZ"
+            },
+            {
+              "name": "conference_id",
+              "value": "vtMRU9U-5w2wQMfwUcdpDxIQOA8MCwMyBwiKAiAAGAEI"
+            },
+            {
+              "name": "organizer_email",
+              "value": "carl@acme.com"
+            },
+            {
+              "name": "calendar_event_id",
+              "value": "tc1rdse7crcib8bitqp3n0ukch_20250523T173000Z"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "endpoint_id",
+              "value": "boq_hlane_aacK3RV0pEQ"
+            },
+            {
+              "name": "device_type",
+              "value": "web"
+            },
+            {
+              "name": "product_type",
+              "value": "meet"
+            },
+            {
+              "name": "display_name",
+              "value": "David Smith"
+            },
+            {
+              "name": "location_country",
+              "value": "ES"
+            },
+            {
+              "name": "location_region",
+              "value": "León"
+            },
+            {
+              "name": "identifier",
+              "value": "daryl@acme.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            },
+            {
+              "name": "start_timestamp_seconds",
+              "intValue": "1748021690"
+            },
+            {
+              "name": "duration_seconds",
+              "intValue": "1583"
+            },
+            {
+              "name": "ip_address",
+              "value": "83.54.19.81"
+            },
+            {
+              "name": "network_rtt_msec_mean",
+              "intValue": "11"
+            },
+            {
+              "name": "network_recv_jitter_msec_mean",
+              "intValue": "3"
+            },
+            {
+              "name": "network_recv_jitter_msec_max",
+              "intValue": "12"
+            },
+            {
+              "name": "network_send_jitter_msec_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "network_estimated_upload_kbps_mean",
+              "intValue": "332"
+            },
+            {
+              "name": "network_estimated_download_kbps_mean",
+              "intValue": "1201"
+            },
+            {
+              "name": "audio_recv_seconds",
+              "intValue": "1582"
+            },
+            {
+              "name": "audio_send_seconds",
+              "intValue": "1582"
+            },
+            {
+              "name": "audio_send_bitrate_kbps_mean",
+              "intValue": "23"
+            },
+            {
+              "name": "audio_recv_packet_loss_max",
+              "intValue": "5"
+            },
+            {
+              "name": "audio_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "audio_send_packet_loss_max",
+              "intValue": "1"
+            },
+            {
+              "name": "audio_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_seconds",
+              "intValue": "1582"
+            },
+            {
+              "name": "video_send_seconds",
+              "intValue": "1582"
+            },
+            {
+              "name": "video_send_bitrate_kbps_mean",
+              "intValue": "284"
+            },
+            {
+              "name": "video_recv_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_send_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "video_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_fps_mean",
+              "intValue": "27"
+            },
+            {
+              "name": "video_send_fps_mean",
+              "intValue": "30"
+            },
+            {
+              "name": "video_recv_long_side_median_pixels",
+              "intValue": "320"
+            },
+            {
+              "name": "video_recv_short_side_median_pixels",
+              "intValue": "180"
+            },
+            {
+              "name": "video_send_long_side_median_pixels",
+              "intValue": "320"
+            },
+            {
+              "name": "video_send_short_side_median_pixels",
+              "intValue": "180"
+            },
+            {
+              "name": "network_congestion",
+              "intValue": "0"
+            },
+            {
+              "name": "screencast_recv_seconds",
+              "intValue": "1199"
+            },
+            {
+              "name": "screencast_send_seconds",
+              "intValue": "0"
+            },
+            {
+              "name": "screencast_recv_bitrate_kbps_mean",
+              "intValue": "110"
+            },
+            {
+              "name": "screencast_recv_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "screencast_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "screencast_recv_fps_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "screencast_recv_long_side_median_pixels",
+              "intValue": "1468"
+            },
+            {
+              "name": "screencast_recv_short_side_median_pixels",
+              "intValue": "1200"
+            },
+            {
+              "name": "network_transport_protocol",
+              "value": "udp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2025-05-23T18:01:14.139Z",
+        "uniqueQualifier": "2800431183845324408",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "etag": "\"K9RP2oCoM3-xc8pHjNEPvlShcOlczDvIh41jWjlyo9U/tJKPJFQ_I2B9_KDLehS29PyBF2M\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "carl@acme.com",
+        "profileId": "112436199551679550352"
+      },
+      "events": [
+        {
+          "type": "call",
+          "name": "call_ended",
+          "parameters": [
+            {
+              "name": "meeting_code",
+              "value": "JDIONYVQOZ"
+            },
+            {
+              "name": "conference_id",
+              "value": "vtMRU9U-5w2wQMfwUcdpDxIQOA8MCwMyBwiKAiAAGAEI"
+            },
+            {
+              "name": "organizer_email",
+              "value": "carl@acme.com"
+            },
+            {
+              "name": "calendar_event_id",
+              "value": "tc1rdse7crcib8bitqp3n0ukch_20250523T173000Z"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "endpoint_id",
+              "value": "boq_hlane_bX139L8M36i"
+            },
+            {
+              "name": "device_type",
+              "value": "web"
+            },
+            {
+              "name": "product_type",
+              "value": "meet"
+            },
+            {
+              "name": "display_name",
+              "value": "Catherine Coppinger"
+            },
+            {
+              "name": "location_country",
+              "value": "US"
+            },
+            {
+              "name": "location_region",
+              "value": "Somerville"
+            },
+            {
+              "name": "identifier",
+              "value": "carl@acme.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            },
+            {
+              "name": "start_timestamp_seconds",
+              "intValue": "1748021508"
+            },
+            {
+              "name": "duration_seconds",
+              "intValue": "1765"
+            },
+            {
+              "name": "ip_address",
+              "value": "130.44.132.3"
+            },
+            {
+              "name": "network_rtt_msec_mean",
+              "intValue": "25"
+            },
+            {
+              "name": "network_recv_jitter_msec_mean",
+              "intValue": "3"
+            },
+            {
+              "name": "network_recv_jitter_msec_max",
+              "intValue": "28"
+            },
+            {
+              "name": "network_send_jitter_msec_mean",
+              "intValue": "3"
+            },
+            {
+              "name": "network_estimated_upload_kbps_mean",
+              "intValue": "406"
+            },
+            {
+              "name": "network_estimated_download_kbps_mean",
+              "intValue": "1015"
+            },
+            {
+              "name": "audio_recv_seconds",
+              "intValue": "1765"
+            },
+            {
+              "name": "audio_send_seconds",
+              "intValue": "1765"
+            },
+            {
+              "name": "audio_send_bitrate_kbps_mean",
+              "intValue": "14"
+            },
+            {
+              "name": "audio_recv_packet_loss_max",
+              "intValue": "2"
+            },
+            {
+              "name": "audio_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "audio_send_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "audio_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_seconds",
+              "intValue": "1765"
+            },
+            {
+              "name": "video_send_seconds",
+              "intValue": "1765"
+            },
+            {
+              "name": "video_send_bitrate_kbps_mean",
+              "intValue": "373"
+            },
+            {
+              "name": "video_recv_packet_loss_max",
+              "intValue": "2"
+            },
+            {
+              "name": "video_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_send_packet_loss_max",
+              "intValue": "1"
+            },
+            {
+              "name": "video_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_fps_mean",
+              "intValue": "26"
+            },
+            {
+              "name": "video_send_fps_mean",
+              "intValue": "29"
+            },
+            {
+              "name": "video_recv_long_side_median_pixels",
+              "intValue": "320"
+            },
+            {
+              "name": "video_recv_short_side_median_pixels",
+              "intValue": "180"
+            },
+            {
+              "name": "video_send_long_side_median_pixels",
+              "intValue": "480"
+            },
+            {
+              "name": "video_send_short_side_median_pixels",
+              "intValue": "270"
+            },
+            {
+              "name": "network_congestion",
+              "intValue": "0"
+            },
+            {
+              "name": "screencast_recv_seconds",
+              "intValue": "1198"
+            },
+            {
+              "name": "screencast_send_seconds",
+              "intValue": "0"
+            },
+            {
+              "name": "network_transport_protocol",
+              "value": "udp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2025-05-23T18:01:13.607Z",
+        "uniqueQualifier": "-8243036491405512385",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "etag": "\"K9RP2oCoM3-xc8pHjNEPvlShcOlczDvIh41jWjlyo9U/wt70l01CfnhlWlkqaA8F3rq34-o\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "elvis@acme.com",
+        "profileId": "1035234520618072345278"
+      },
+      "events": [
+        {
+          "type": "call",
+          "name": "call_ended",
+          "parameters": [
+            {
+              "name": "meeting_code",
+              "value": "JDIONYVQOZ"
+            },
+            {
+              "name": "conference_id",
+              "value": "vtMRU9U-5w2wQMfwUcdpDxIQOA8MCwMyBwiKAiAAGAEI"
+            },
+            {
+              "name": "organizer_email",
+              "value": "carl@acme.com"
+            },
+            {
+              "name": "calendar_event_id",
+              "value": "tc1rdse7crcib8bitqp3n0ukch_20250523T173000Z"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "endpoint_id",
+              "value": "boq_hlane_FluyUwuzJlW"
+            },
+            {
+              "name": "device_type",
+              "value": "web"
+            },
+            {
+              "name": "product_type",
+              "value": "meet"
+            },
+            {
+              "name": "display_name",
+              "value": "Eli Holder"
+            },
+            {
+              "name": "location_country",
+              "value": "US"
+            },
+            {
+              "name": "location_region",
+              "value": "Raleigh"
+            },
+            {
+              "name": "identifier",
+              "value": "elvis@acme.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            },
+            {
+              "name": "start_timestamp_seconds",
+              "intValue": "1748021424"
+            },
+            {
+              "name": "duration_seconds",
+              "intValue": "1848"
+            },
+            {
+              "name": "ip_address",
+              "value": "136.56.34.133"
+            },
+            {
+              "name": "network_rtt_msec_mean",
+              "intValue": "18"
+            },
+            {
+              "name": "network_recv_jitter_msec_mean",
+              "intValue": "4"
+            },
+            {
+              "name": "network_recv_jitter_msec_max",
+              "intValue": "22"
+            },
+            {
+              "name": "network_send_jitter_msec_mean",
+              "intValue": "2"
+            },
+            {
+              "name": "network_estimated_upload_kbps_mean",
+              "intValue": "411"
+            },
+            {
+              "name": "network_estimated_download_kbps_mean",
+              "intValue": "880"
+            },
+            {
+              "name": "audio_recv_seconds",
+              "intValue": "1739"
+            },
+            {
+              "name": "audio_send_seconds",
+              "intValue": "1291"
+            },
+            {
+              "name": "audio_send_bitrate_kbps_mean",
+              "intValue": "17"
+            },
+            {
+              "name": "audio_recv_packet_loss_max",
+              "intValue": "6"
+            },
+            {
+              "name": "audio_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "audio_send_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "audio_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_seconds",
+              "intValue": "1739"
+            },
+            {
+              "name": "video_send_seconds",
+              "intValue": "1739"
+            },
+            {
+              "name": "video_send_bitrate_kbps_mean",
+              "intValue": "379"
+            },
+            {
+              "name": "video_recv_packet_loss_max",
+              "intValue": "2"
+            },
+            {
+              "name": "video_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_send_packet_loss_max",
+              "intValue": "1"
+            },
+            {
+              "name": "video_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_fps_mean",
+              "intValue": "27"
+            },
+            {
+              "name": "video_send_fps_mean",
+              "intValue": "30"
+            },
+            {
+              "name": "video_recv_long_side_median_pixels",
+              "intValue": "320"
+            },
+            {
+              "name": "video_recv_short_side_median_pixels",
+              "intValue": "180"
+            },
+            {
+              "name": "video_send_long_side_median_pixels",
+              "intValue": "480"
+            },
+            {
+              "name": "video_send_short_side_median_pixels",
+              "intValue": "270"
+            },
+            {
+              "name": "network_congestion",
+              "intValue": "0"
+            },
+            {
+              "name": "screencast_recv_seconds",
+              "intValue": "940"
+            },
+            {
+              "name": "screencast_send_seconds",
+              "intValue": "262"
+            },
+            {
+              "name": "screencast_send_bitrate_kbps_mean",
+              "intValue": "293"
+            },
+            {
+              "name": "screencast_send_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "screencast_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "screencast_send_fps_mean",
+              "intValue": "17"
+            },
+            {
+              "name": "screencast_send_long_side_median_pixels",
+              "intValue": "1468"
+            },
+            {
+              "name": "screencast_send_short_side_median_pixels",
+              "intValue": "1200"
+            },
+            {
+              "name": "network_transport_protocol",
+              "value": "udp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2025-05-23T18:01:13.492Z",
+        "uniqueQualifier": "-7743218590642771853",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "etag": "\"K9RP2oCoM3-xc8pHjNEPvlShcOlczDvIh41jWjlyo9U/AjlnL2eVfLOL-4jIxkHsYm-kb0Y\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "jose@acme.com",
+        "profileId": "114349793749086722850"
+      },
+      "events": [
+        {
+          "type": "call",
+          "name": "call_ended",
+          "parameters": [
+            {
+              "name": "meeting_code",
+              "value": "JDIONYVQOZ"
+            },
+            {
+              "name": "conference_id",
+              "value": "vtMRU9U-5w2wQMfwUcdpDxIQOA8MCwMyBwiKAiAAGAEI"
+            },
+            {
+              "name": "organizer_email",
+              "value": "carl.miller@example.com"
+            },
+            {
+              "name": "calendar_event_id",
+              "value": "tc1rdse7crcib8bitqp3n0ukch_20250523T173000Z"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "endpoint_id",
+              "value": "boq_hlane_rcwBlEnOS8v"
+            },
+            {
+              "name": "device_type",
+              "value": "web"
+            },
+            {
+              "name": "product_type",
+              "value": "meet"
+            },
+            {
+              "name": "display_name",
+              "value": "Jose Lorenzo"
+            },
+            {
+              "name": "location_country",
+              "value": "US"
+            },
+            {
+              "name": "location_region",
+              "value": "Mercer Island"
+            },
+            {
+              "name": "identifier",
+              "value": "jose@acme.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            },
+            {
+              "name": "start_timestamp_seconds",
+              "intValue": "1748021518"
+            },
+            {
+              "name": "duration_seconds",
+              "intValue": "1755"
+            },
+            {
+              "name": "ip_address",
+              "value": "24.17.17.117"
+            },
+            {
+              "name": "network_rtt_msec_mean",
+              "intValue": "21"
+            },
+            {
+              "name": "network_recv_jitter_msec_mean",
+              "intValue": "3"
+            },
+            {
+              "name": "network_recv_jitter_msec_max",
+              "intValue": "15"
+            },
+            {
+              "name": "network_send_jitter_msec_mean",
+              "intValue": "3"
+            },
+            {
+              "name": "network_estimated_upload_kbps_mean",
+              "intValue": "465"
+            },
+            {
+              "name": "network_estimated_download_kbps_mean",
+              "intValue": "1075"
+            },
+            {
+              "name": "audio_recv_seconds",
+              "intValue": "1754"
+            },
+            {
+              "name": "audio_send_seconds",
+              "intValue": "1754"
+            },
+            {
+              "name": "audio_send_bitrate_kbps_mean",
+              "intValue": "39"
+            },
+            {
+              "name": "audio_recv_packet_loss_max",
+              "intValue": "5"
+            },
+            {
+              "name": "audio_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "audio_send_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "audio_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_seconds",
+              "intValue": "1754"
+            },
+            {
+              "name": "video_send_seconds",
+              "intValue": "1754"
+            },
+            {
+              "name": "video_send_bitrate_kbps_mean",
+              "intValue": "398"
+            },
+            {
+              "name": "video_recv_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_send_packet_loss_max",
+              "intValue": "0"
+            },
+            {
+              "name": "video_send_packet_loss_mean",
+              "intValue": "0"
+            },
+            {
+              "name": "video_recv_fps_mean",
+              "intValue": "27"
+            },
+            {
+              "name": "video_send_fps_mean",
+              "intValue": "28"
+            },
+            {
+              "name": "video_recv_long_side_median_pixels",
+              "intValue": "320"
+            },
+            {
+              "name": "video_recv_short_side_median_pixels",
+              "intValue": "180"
+            },
+            {
+              "name": "video_send_long_side_median_pixels",
+              "intValue": "640"
+            },
+            {
+              "name": "video_send_short_side_median_pixels",
+              "intValue": "360"
+            },
+            {
+              "name": "network_congestion",
+              "intValue": "0"
+            },
+            {
+              "name": "screencast_recv_seconds",
+              "intValue": "1196"
+            },
+            {
+              "name": "screencast_send_seconds",
+              "intValue": "0"
+            },
+            {
+              "name": "network_transport_protocol",
+              "value": "udp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2025-05-23T17:54:38.280Z",
+        "uniqueQualifier": "-4711691235951609061",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "etag": "\"K9RP2oCoM3-xc8pHjNEPvlShcOlczDvIh41jWjlyo9U/3bXssecS4uk2_qqBFRjdBrsOK8Y\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "elvis@acme.com",
+        "profileId": "1035234520618072345278"
+      },
+      "events": [
+        {
+          "type": "conference_action",
+          "name": "presentation_started",
+          "parameters": [
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "meeting_code",
+              "value": "JDIONYVQOZ"
+            },
+            {
+              "name": "conference_id",
+              "value": "vtMRU9U-5w2wQMfwUcdpDxIQOA8MCwMyBwiKAiAAGAEI"
+            },
+            {
+              "name": "action_time",
+              "value": "2025-05-23T17:54:38.280176Z"
+            },
+            {
+              "name": "identifier",
+              "value": "elvis@acme.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2025-05-23T17:36:43.618Z",
+        "uniqueQualifier": "5729897957548243316",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "etag": "\"K9RP2oCoM3-xc8pHjNEPvlShcOlczDvIh41jWjlyo9U/DxqTBHmz6Yhp7EFLFeVyvNW6Soc\"",
+      "actor": {
+        "callerType": "USER",
+        "email": "charles@acme.com",
+        "profileId": "117616197012971787190"
+      },
+      "events": [
+        {
+          "type": "conference_action",
+          "name": "presentation_started",
+          "parameters": [
+            {
+              "name": "is_external",
+              "boolValue": false
+            },
+            {
+              "name": "meeting_code",
+              "value": "JDIONYVQOZ"
+            },
+            {
+              "name": "conference_id",
+              "value": "vtMRU9U-5w2wQMfwUcdpDxIQOA8MCwMyBwiKAiAAGAEI"
+            },
+            {
+              "name": "action_time",
+              "value": "2025-05-23T17:36:43.618215Z"
+            },
+            {
+              "name": "identifier",
+              "value": "charles@acme.com"
+            },
+            {
+              "name": "identifier_type",
+              "value": "email_address"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "admin#reports#activity",
+      "id": {
+        "time": "2025-05-23T17:17:15.795Z",
+        "uniqueQualifier": "4129929803739023687",
+        "applicationName": "meet",
+        "customerId": "DYf30247s"
+      },
+      "etag": "\"K9RP2oCoM3-xc8pHjNEPvlShcOlczDvIh41jWjlyo9U/Rpf4pytEB72k22T5K4-s3Shm3q4\"",
+      "actor": {
+        "callerType": "USER",
+        "profileId": "1231290832109183223133"
+      },
+      "events": [
+        {
+          "type": "conference_action",
+          "name": "recording_activity",
+          "parameters": [
+            {
+              "name": "conference_id",
+              "value": "jVU9T23A6a234234234234234556iAAGAEI"
+            },
+            {
+              "name": "streaming_session_state",
+              "value": "stopped"
+            },
+            {
+              "name": "is_external",
+              "boolValue": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

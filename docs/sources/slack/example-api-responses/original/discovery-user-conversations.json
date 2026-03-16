@@ -1,0 +1,36 @@
+{
+  "ok": true,
+  "offset": "D123ABC890",
+  "channels": [
+    {
+      "id": "G123ABC456",
+      "team_id": "T0123ABC456",
+      "date_joined": 1538411458,
+      "date_left": 0,
+      "is_private": true,
+      "is_im": false,
+      "is_mpim": false,
+      "is_ext_shared": false
+    },
+    {
+      "id": "D0123ABC456",
+      "team_id": "E0123ABC456",
+      "date_joined": 1538411250,
+      "date_left": 0,
+      "is_private": true,
+      "is_im": true,
+      "is_mpim": false,
+      "is_ext_shared": false
+    },
+    {
+      "id": "C123ABC892",
+      "team_id": "T0123ABC456",
+      "date_joined": 1538411250,
+      "date_left": 1538411359,
+      "is_private": false,
+      "is_im": false,
+      "is_mpim": false,
+      "is_ext_shared": false
+    }
+  ]
+}

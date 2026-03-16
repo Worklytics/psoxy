@@ -1,6 +1,6 @@
 ---
 endpoints:
-  - pathTemplate: "/admin/reports/v1/activity/users/{userKey}/applications/gemini_in_workspace_apps"
+  - pathTemplate: "/admin/reports/v1/activity/users/{userKey}/applications/meet"
     allowedQueryParams:
       - "customerId"
       - "maxResults"
@@ -12,10 +12,16 @@ endpoints:
         jsonPaths:
           - "$.items[*].actor.email"
           - "$.items[*].resourceDetails[*]..email"
+          - "$.items[*].events[*].parameters[?(@.name=='organizer_email')].value"
+          - "$.items[*].events[*].parameters[?(@.name=='identifier')].value"
         encoding: "URL_SAFE_TOKEN"
       - !<hashIp>
         jsonPaths:
           - "$.items[*].ipAddress"
+          - "$.items[*].events[*].parameters[?(@.name=='ip_address')].value"
+      - !<redact>
+        jsonPaths:
+          - "$.items[*].events[*].parameters[?(@.name nin ['ip_address','organizer_email','identifier','is_external','location_country','location_region','calendar_event_id','meeting_code','conference_id','start_timestamp_seconds','duration_seconds','identifier_type'])]"
     pathParameterSchemas:
       userKey:
         or:

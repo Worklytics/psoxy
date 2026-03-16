@@ -1,0 +1,94 @@
+{
+  "ok": true,
+  "channels": [
+    {
+      "id": "C2EZXP92B",
+      "name": "project-x",
+      "created": 1532393077,
+      "is_ext_shared": true,
+      "is_private": false,
+      "is_mpim": false,
+      "is_dm": false,
+      "is_deleted": false,
+      "is_archived": false,
+      "is_general": false,
+      "topic": {
+        "text": "This is the topic",
+        "set_by": "W0N9HDWUR",
+        "date_set": 1532394000
+      },
+      "purpose": {
+        "text": "This is the purpose",
+        "set_by": "W0N9HDWUR",
+        "date_set": 1532399999
+      }
+    },
+    {
+      "id": "C9QEQW05V",
+      "name": "project-y",
+      "created": 1533204077,
+      "is_ext_shared": false,
+      "is_private": true,
+      "is_mpim": false,
+      "is_dm": false,
+      "is_deleted": false,
+      "is_archived": false,
+      "is_general": false,
+      "topic": {
+        "text": "",
+        "set_by": "",
+        "date_set": 0
+      },
+      "purpose": {
+        "text": "",
+        "set_by": "",
+        "date_set": 0
+      }
+    },
+    {
+      "id": "GQNNHU22H",
+      "name": "mpdm-primary-owner--first.person--second.person",
+      "created": 1574793332,
+      "is_ext_shared": false,
+      "is_private": true,
+      "is_im": false,
+      "is_mpim": true,
+      "is_deleted": false,
+      "is_archived": false,
+      "is_general": false,
+      "topic": {
+        "text": "",
+        "set_by": "",
+        "date_set": 0
+      },
+      "purpose": {
+        "text": "",
+        "set_by": "",
+        "date_set": 0
+      }
+    },
+    {
+      "id": "DQ7F9GJ2G",
+      "name": "DQ7F9GJ2G",
+      "created": 1572908387,
+      "is_ext_shared": false,
+      "is_private": true,
+      "is_im": true,
+      "is_mpim": false,
+      "is_deleted": false,
+      "is_archived": false,
+      "is_general": false,
+      "topic": {
+        "text": "",
+        "set_by": "",
+        "date_set": 0
+      },
+      "purpose": {
+        "text": "",
+        "set_by": "",
+        "date_set": 0
+      }
+    }
+  ],
+  "offset": "D6RXQY29M"
+}
