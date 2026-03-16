@@ -1,8 +1,8 @@
 [
   {
-    "id":"adcae078-765b-45bf-a38b-7cda232b9a94",
-    "url":"https://some-org.atlassian.net",
-    "scopes":[
+    "id": "adcae078-765b-45bf-a38b-7cda232b9a94",
+    "url": "https://some-org.atlassian.net",
+    "scopes": [
       "read:attachment:confluence",
       "read:blogpost:confluence",
       "read:comment:confluence",

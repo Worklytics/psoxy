@@ -1,7 +1,7 @@
 {
-  "ok" : true,
+  "ok": true,
   "offset": "T2B5NCQZO",
-  "info" : [
+  "info": [
     {
       "id": "C0TDTJLN4",
       "name": "project X",
@@ -20,20 +20,22 @@
       "is_private": false,
       "is_mpim": false,
       "is_dm": false,
-      "previous_names": ["project-y"],
+      "previous_names": [
+        "project-y"
+      ],
       "is_deleted": false,
       "member_count": 52,
-      "purpose" : {
+      "purpose": {
         "text": "Collaboration about Project X",
         "set_by": "W0N9HDWUR",
         "date_set": 1532393077
       },
-      "topic" : {
+      "topic": {
         "text": "Launch date scheduled for 07/01",
         "set_by": "W0MLS082D",
         "date_set": 1533493077
       },
-      "retention" : {
+      "retention": {
         "type": "custom",
         "duration": "360"
       },

@@ -1,13 +1,13 @@
 {
-  "data":[
+  "data": [
     {
-      "gid":"12345",
-      "resource_type":"workspace",
-      "name":"My Company Workspace",
-      "email_domains":[
+      "gid": "12345",
+      "resource_type": "workspace",
+      "name": "My Company Workspace",
+      "email_domains": [
         "asana.com"
       ],
-      "is_organization":false
+      "is_organization": false
     }
   ]
 }

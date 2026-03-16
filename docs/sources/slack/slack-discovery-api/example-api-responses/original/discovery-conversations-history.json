@@ -20,11 +20,13 @@
         },
         {
           "name": "tada",
-          "users": ["W0G81RDQZ"],
+          "users": [
+            "W0G81RDQZ"
+          ],
           "count": 1
         }
       ],
-      "permalink" : "permalink value"
+      "permalink": "permalink value"
     },
     {
       "type": "message",

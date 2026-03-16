@@ -1,52 +1,52 @@
 {
-  "@odata.context":"https://graph.microsoft.com/v1.0/$metadata#communications/callRecords",
-  "value":[
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#communications/callRecords",
+  "value": [
     {
-      "id":"3cf3bbc8-b21d-4f2e-bfd0-b13603ae6c65",
-      "version":2,
-      "type":"unknown",
-      "modalities":[
+      "id": "3cf3bbc8-b21d-4f2e-bfd0-b13603ae6c65",
+      "version": 2,
+      "type": "unknown",
+      "modalities": [
         "audio"
       ],
-      "lastModifiedDateTime":"2023-09-25T10:36:40Z",
-      "startDateTime":"2023-09-25T09:28:38Z",
-      "endDateTime":"2023-09-25T09:28:41Z",
-      "organizer":{
-        "user":{
-          "id":"821809f5-0000-0000-0000-3b5136c0e777",
-          "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
+      "lastModifiedDateTime": "2023-09-25T10:36:40Z",
+      "startDateTime": "2023-09-25T09:28:38Z",
+      "endDateTime": "2023-09-25T09:28:41Z",
+      "organizer": {
+        "user": {
+          "id": "821809f5-0000-0000-0000-3b5136c0e777",
+          "tenantId": "dc368399-474c-4d40-900c-6265431fd81f"
         }
       },
-      "organizer_v2":{
-        "identity":{
-          "user":{
-            "id":"821809f5-0000-0000-0000-3b5136c0e777",
-            "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
+      "organizer_v2": {
+        "identity": {
+          "user": {
+            "id": "821809f5-0000-0000-0000-3b5136c0e777",
+            "tenantId": "dc368399-474c-4d40-900c-6265431fd81f"
           }
         }
       }
     },
     {
-      "id":"c3ad8c4b-4a87-4ab1-bef0-284d2f40ed9f",
-      "version":2,
-      "type":"unknown",
-      "modalities":[
+      "id": "c3ad8c4b-4a87-4ab1-bef0-284d2f40ed9f",
+      "version": 2,
+      "type": "unknown",
+      "modalities": [
         "audio"
       ],
-      "lastModifiedDateTime":"2023-09-25T14:18:13Z",
-      "startDateTime":"2023-09-25T14:03:36Z",
-      "endDateTime":"2023-09-25T14:03:40Z",
-      "organizer":{
-        "user":{
-          "id":"821809f5-0000-0000-0000-3b5136c0e777",
-          "tenantId":"dc368399-474c-4d40-900c-6265431fd81f"
+      "lastModifiedDateTime": "2023-09-25T14:18:13Z",
+      "startDateTime": "2023-09-25T14:03:36Z",
+      "endDateTime": "2023-09-25T14:03:40Z",
+      "organizer": {
+        "user": {
+          "id": "821809f5-0000-0000-0000-3b5136c0e777",
+          "tenantId": "dc368399-474c-4d40-900c-6265431fd81f"
         }
       },
-      "organizer_v2":{
-        "identity":{
-          "user":null,
-          "acsUser":null,
-          "spoolUser":null
+      "organizer_v2": {
+        "identity": {
+          "user": null,
+          "acsUser": null,
+          "spoolUser": null
         }
       }
     }

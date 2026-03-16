@@ -16,8 +16,14 @@
           "id": "pr_cnf_001",
           "name": "Worklytics Migration",
           "description": "Migration project for Worklytics.",
-          "categories": ["migration", "analytics"],
-          "conversation_starters": ["How do I migrate my data?", "Show migration status."],
+          "categories": [
+            "migration",
+            "analytics"
+          ],
+          "conversation_starters": [
+            "How do I migrate my data?",
+            "Show migration status."
+          ],
           "created_at": 1692158100.123456,
           "instructions": "Follow the migration steps.",
           "files": [],
@@ -69,8 +75,14 @@
           "id": "pr_cnf_002",
           "name": "EU Analytics",
           "description": "Analytics for EU region.",
-          "categories": ["analytics", "eu"],
-          "conversation_starters": ["Show EU analytics.", "Export EU data."],
+          "categories": [
+            "analytics",
+            "eu"
+          ],
+          "conversation_starters": [
+            "Show EU analytics.",
+            "Export EU data."
+          ],
           "created_at": 1692158205.111222,
           "instructions": "Analyze EU data.",
           "files": [],

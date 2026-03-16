@@ -92,8 +92,7 @@ public class TestUtils {
     @SuppressWarnings("unused")
     public static String prettyPrintJson(String json) {
 
-        DefaultPrettyPrinter printer = new DefaultPrettyPrinter()
-            .withoutSpacesInObjectEntries();
+        DefaultPrettyPrinter printer = new DefaultPrettyPrinter();
         printer.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
 
 

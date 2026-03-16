@@ -1,26 +1,26 @@
 {
-  "self":"https://your-domain.atlassian.net/rest/api/3/group/member?groupname=jira-administrators&includeInactiveUsers=false&startAt=2&maxResults=2",
-  "nextPage":"https://your-domain.atlassian.net/rest/api/3/group/member?groupname=jira-administrators&includeInactiveUsers=false&startAt=4&maxResults=2",
-  "maxResults":2,
-  "startAt":3,
-  "total":5,
-  "isLast":false,
-  "values":[
+  "self": "https://your-domain.atlassian.net/rest/api/3/group/member?groupname=jira-administrators&includeInactiveUsers=false&startAt=2&maxResults=2",
+  "nextPage": "https://your-domain.atlassian.net/rest/api/3/group/member?groupname=jira-administrators&includeInactiveUsers=false&startAt=4&maxResults=2",
+  "maxResults": 2,
+  "startAt": 3,
+  "total": 5,
+  "isLast": false,
+  "values": [
     {
-      "key":"",
-      "accountId":"t~nrSd0Q7Yg81NfVbwLq6FUnyOBL7lunEWD-2Raiuy9HI",
-      "emailAddress":"t~UltPZuWYQhKbkt6c-42zy9-Fn2K9TKXJrySsEkApt58@example.com",
-      "active":true,
-      "timeZone":"Australia/Sydney",
-      "accountType":"atlassian"
+      "key": "",
+      "accountId": "t~nrSd0Q7Yg81NfVbwLq6FUnyOBL7lunEWD-2Raiuy9HI",
+      "emailAddress": "t~UltPZuWYQhKbkt6c-42zy9-Fn2K9TKXJrySsEkApt58@example.com",
+      "active": true,
+      "timeZone": "Australia/Sydney",
+      "accountType": "atlassian"
     },
     {
-      "key":"",
-      "accountId":"t~R2MoDHOKLMjyo0mcmJkEHExyoMWcr1luvoB4IZEZlDQ",
-      "emailAddress":"t~gNFNvSKDH7Fur6w-eDDOFy_oNi69ZmKLWijejL6TFe0@example.com",
-      "active":false,
-      "timeZone":"Australia/Sydney",
-      "accountType":"atlassian"
+      "key": "",
+      "accountId": "t~R2MoDHOKLMjyo0mcmJkEHExyoMWcr1luvoB4IZEZlDQ",
+      "emailAddress": "t~gNFNvSKDH7Fur6w-eDDOFy_oNi69ZmKLWijejL6TFe0@example.com",
+      "active": false,
+      "timeZone": "Australia/Sydney",
+      "accountType": "atlassian"
     }
   ]
 }

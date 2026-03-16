@@ -1,14 +1,14 @@
 {
-  "data":[
+  "data": [
     {
-      "gid":"p~r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaGzFatT5PGvb7S57rNnHGwT",
-      "resource_type":"user",
-      "email":"t~j-MVT2zWPkD22C8GXQVj1aWjS0DGVErUaRim930Sitw@example.com",
-      "workspaces":[
+      "gid": "p~r4ONZUfEyn9MUkcyDQkQ5MBNpdIerM24MasxFpuQBaGzFatT5PGvb7S57rNnHGwT",
+      "resource_type": "user",
+      "email": "t~j-MVT2zWPkD22C8GXQVj1aWjS0DGVErUaRim930Sitw@example.com",
+      "workspaces": [
         {
-          "gid":"12345",
-          "resource_type":"workspace",
-          "name":"My Company Workspace"
+          "gid": "12345",
+          "resource_type": "workspace",
+          "name": "My Company Workspace"
         }
       ]
     }

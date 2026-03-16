@@ -1,37 +1,37 @@
 {
-  "data":{
-    "organization":{
-      "samlIdentityProvider":{
-        "externalIdentities":{
-          "pageInfo":{
-            "hasNextPage":false,
-            "endCursor":"Y3Vyc29yOnYyOpHOAMl1tg=="
+  "data": {
+    "organization": {
+      "samlIdentityProvider": {
+        "externalIdentities": {
+          "pageInfo": {
+            "hasNextPage": false,
+            "endCursor": "Y3Vyc29yOnYyOpHOAMl1tg=="
           },
-          "edges":[
+          "edges": [
             {
-              "node":{
-                "guid":"t~5yFLE9_eWMz8YE8Fp1Li0TuYIh_eP5WfzjogeJVfLsg",
-                "samlIdentity":{
-                  "nameId":"t~2cclTmgvAaaNoY_a3YFJVu1UUmwFw1MX9nrrF6oH9tM@contoso.com",
-                  "emails":[
+              "node": {
+                "guid": "t~5yFLE9_eWMz8YE8Fp1Li0TuYIh_eP5WfzjogeJVfLsg",
+                "samlIdentity": {
+                  "nameId": "t~2cclTmgvAaaNoY_a3YFJVu1UUmwFw1MX9nrrF6oH9tM@contoso.com",
+                  "emails": [
                     {
-                      "value":"t~tJeMjd4Zz84TzbzdvLTpWPg1z3gf-5Icpqv7Cbg_c2c@contoso.com"
+                      "value": "t~tJeMjd4Zz84TzbzdvLTpWPg1z3gf-5Icpqv7Cbg_c2c@contoso.com"
                     }
                   ]
                 },
-                "user":{
-                  "login":"p~MsZ4qsVoj0TU_io4Cz9mnMBWrZkfI89B-8qznWvl83mYA56fU9HQ_fR3fOvcTHkx"
+                "user": {
+                  "login": "p~MsZ4qsVoj0TU_io4Cz9mnMBWrZkfI89B-8qznWvl83mYA56fU9HQ_fR3fOvcTHkx"
                 }
               }
             },
             {
-              "node":{
-                "guid":"t~rhadwfw52P0hheXmNWvS3KkJavv5p_7Zx7fAac0BjHw",
-                "samlIdentity":{
-                  "nameId":"t~OS0ifbJZXKTBbeGUlEbyacwWGTxBMkrAWSSbcy2OKmA@contoso.com"
+              "node": {
+                "guid": "t~rhadwfw52P0hheXmNWvS3KkJavv5p_7Zx7fAac0BjHw",
+                "samlIdentity": {
+                  "nameId": "t~OS0ifbJZXKTBbeGUlEbyacwWGTxBMkrAWSSbcy2OKmA@contoso.com"
                 },
-                "user":{
-                  "login":"p~IfCQZlVaWKPjwpZn6GtislWJJ2ehfSnlyyONl2LdgTAaP2EggmLxGUnmFuzNnZlY"
+                "user": {
+                  "login": "p~IfCQZlVaWKPjwpZn6GtislWJJ2ehfSnlyyONl2LdgTAaP2EggmLxGUnmFuzNnZlY"
                 }
               }
             }

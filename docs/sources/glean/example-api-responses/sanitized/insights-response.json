@@ -1,45 +1,45 @@
 {
-  "overviewResponse":{
-    "perUserInsights":[
+  "overviewResponse": {
+    "perUserInsights": [
       {
-        "person":{
-          "obfuscatedId":"t~WO6ZqzuAlomZiWLfNpl4m2ubveZggJyxVxGZ6TdrQmQ"
+        "person": {
+          "obfuscatedId": "t~WO6ZqzuAlomZiWLfNpl4m2ubveZggJyxVxGZ6TdrQmQ"
         },
-        "numSearches":0,
-        "numChats":0,
-        "numActiveSessions":0,
-        "numGleanbotUsefulResponses":0,
-        "numDaysActive":0,
-        "numSummarizations":0,
-        "numAiAnswers":0,
-        "numAgentRuns":0
+        "numSearches": 0,
+        "numChats": 0,
+        "numActiveSessions": 0,
+        "numGleanbotUsefulResponses": 0,
+        "numDaysActive": 0,
+        "numSummarizations": 0,
+        "numAiAnswers": 0,
+        "numAgentRuns": 0
       }
     ]
   },
-  "assistantResponse":{
-    "perUserInsights":[
+  "assistantResponse": {
+    "perUserInsights": [
       {
-        "person":{
-          "obfuscatedId":"t~WO6ZqzuAlomZiWLfNpl4m2ubveZggJyxVxGZ6TdrQmQ"
+        "person": {
+          "obfuscatedId": "t~WO6ZqzuAlomZiWLfNpl4m2ubveZggJyxVxGZ6TdrQmQ"
         },
-        "numChatMessages":0,
-        "numSummarizations":0,
-        "numAiAnswers":0,
-        "numGleanbotInteractions":0,
-        "numDaysActive":0
+        "numChatMessages": 0,
+        "numSummarizations": 0,
+        "numAiAnswers": 0,
+        "numGleanbotInteractions": 0,
+        "numDaysActive": 0
       }
     ]
   },
-  "agentsResponse":{
-    "agentUsersInsights":[
+  "agentsResponse": {
+    "agentUsersInsights": [
       {
-        "person":{
-          "obfuscatedId":"t~WO6ZqzuAlomZiWLfNpl4m2ubveZggJyxVxGZ6TdrQmQ"
+        "person": {
+          "obfuscatedId": "t~WO6ZqzuAlomZiWLfNpl4m2ubveZggJyxVxGZ6TdrQmQ"
         },
-        "agentsUsedCount":0,
-        "averageRunsPerDayCount":0,
-        "agentsCreatedCount":0,
-        "runCount":0
+        "agentsUsedCount": 0,
+        "averageRunsPerDayCount": 0,
+        "agentsCreatedCount": 0,
+        "runCount": 0
       }
     ]
   }

@@ -1,62 +1,62 @@
 {
-  "startAt":0,
-  "maxResults":50,
-  "total":1,
-  "issues":[
+  "startAt": 0,
+  "maxResults": 50,
+  "total": 1,
+  "issues": [
     {
-      "id":"10000",
-      "self":"http://localhost:8080/rest/api/latest/issue/10000",
-      "fields":{
-        "issuetype":{
-          "id":"10002",
-          "subtask":false
+      "id": "10000",
+      "self": "http://localhost:8080/rest/api/latest/issue/10000",
+      "fields": {
+        "issuetype": {
+          "id": "10002",
+          "subtask": false
         },
-        "timespent":null,
-        "project":{
-          "id":"10000",
-          "projectTypeKey":"software"
+        "timespent": null,
+        "project": {
+          "id": "10000",
+          "projectTypeKey": "software"
         },
-        "resolutiondate":null,
-        "lastViewed":"2023-05-22T10:14:39.242+0000",
-        "watches":{
-          "watchCount":1,
-          "isWatching":true
+        "resolutiondate": null,
+        "lastViewed": "2023-05-22T10:14:39.242+0000",
+        "watches": {
+          "watchCount": 1,
+          "isWatching": true
         },
-        "creator":{
-          "key":"t~XFMcGkt3HwABpThFffmg84wAjV_V-7EYXA2C4uBCDss",
-          "emailAddress":"t~7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI@contoso.com",
-          "active":true,
-          "timeZone":"GMT"
+        "creator": {
+          "key": "t~XFMcGkt3HwABpThFffmg84wAjV_V-7EYXA2C4uBCDss",
+          "emailAddress": "t~7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI@contoso.com",
+          "active": true,
+          "timeZone": "GMT"
         },
-        "created":"2023-05-19T17:13:53.000+0000",
-        "reporter":{
-          "key":"t~XFMcGkt3HwABpThFffmg84wAjV_V-7EYXA2C4uBCDss",
-          "emailAddress":"t~7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI@contoso.com",
-          "active":true,
-          "timeZone":"GMT"
+        "created": "2023-05-19T17:13:53.000+0000",
+        "reporter": {
+          "key": "t~XFMcGkt3HwABpThFffmg84wAjV_V-7EYXA2C4uBCDss",
+          "emailAddress": "t~7fwD-7Ki3YuYHHeJgtXUw098eDrnFaTVAxcjy3ZcxVI@contoso.com",
+          "active": true,
+          "timeZone": "GMT"
         },
-        "aggregateprogress":{
-          "progress":0,
-          "total":0
+        "aggregateprogress": {
+          "progress": 0,
+          "total": 0
         },
-        "duedate":null,
-        "progress":{
-          "progress":0,
-          "total":0
+        "duedate": null,
+        "progress": {
+          "progress": 0,
+          "total": 0
         },
-        "issuelinks":[ ],
-        "votes":{
-          "votes":0,
-          "hasVoted":false
+        "issuelinks": [],
+        "votes": {
+          "votes": 0,
+          "hasVoted": false
         },
-        "assignee":null,
-        "updated":null,
-        "status":{
-          "id":"10000",
-          "statusCategory":{
-            "id":2,
-            "key":"t~ghSCIzLzTafFlfc1ErWl4k3fig1cwbwSqGD3uwdt3hs",
-            "colorName":"blue-gray"
+        "assignee": null,
+        "updated": null,
+        "status": {
+          "id": "10000",
+          "statusCategory": {
+            "id": 2,
+            "key": "t~ghSCIzLzTafFlfc1ErWl4k3fig1cwbwSqGD3uwdt3hs",
+            "colorName": "blue-gray"
           }
         }
       }

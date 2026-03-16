@@ -44,6 +44,28 @@ To validate terraform changes locally:
 2. Run `terraform init` and `terraform validate`
 3. If modifying modules, you may also need to run `terraform test` within those module directories if tests are defined (e.g. `terraform test --var="deployment_bundle=..."`)
 
+## JSON Formatting Conventions
+
+Example API response files (under `example-api-responses/original/` and `example-api-responses/sanitized/`) must use **pretty-printed JSON** with the following style:
+
+- **2-space indentation** for nested objects and arrays
+- **Space after each colon** in object entries (i.e., `"key": value`, not `"key":value`)
+- **Unix line endings** (`\n`)
+
+This matches the default output of Jackson's `DefaultPrettyPrinter` (without the `withoutSpacesInObjectEntries()` option). Tests in `RulesBaseTestCase.testExamples` compare sanitized output against these files after running it through `TestUtils.prettyPrintJson()`, so the files must match that format exactly.
+
+Example of correct formatting:
+```json
+{
+  "id": "abc123",
+  "labelIds": [
+    "UNREAD",
+    "INBOX"
+  ],
+  "sizeEstimate": 1234
+}
+```
+
 ### Java Testing
 Java changes are tested across multiple Java versions to ensure compatibility. The GitHub Actions workflows test against Java 17, 21 (LTS), 23, 24, and 25. In practice, testing with Java 21 is sufficient for local development.
 

@@ -1,26 +1,26 @@
 {
-  "value":[
+  "value": [
     {
-      "id":"9c4984c7-6c3c-427d-a30c-bd0b2eacee90",
-      "callId":"p~Bvc4jV4RzsaEt4XIerSH40pfOsnpmsA1SuHUaIQ__1rmJYqLjsX9x4FjOXqaJLWshHPYWjB_xi0zPWc-9r6F_Nv5l7DJWsgKi0Kjd3k8hfU",
-      "userId":"t~2ZGitAxyjkjPJ6l2GfLqf2kr0xFtleWfl5XA_zNbtMA",
-      "startDateTime":"2019-11-01T00:00:08.2589935Z",
-      "endDateTime":"2019-11-01T00:03:47.2589935Z",
-      "duration":219,
-      "charge":0.0,
-      "callType":"user_in",
-      "currency":"USD",
-      "usageCountryCode":"US",
-      "tenantCountryCode":"US",
-      "connectionCharge":0.0,
-      "destinationContext":null,
-      "destinationName":"United States",
-      "conferenceId":null,
-      "licenseCapability":"MCOPSTNU",
-      "inventoryType":"Subscriber",
-      "operator":"Microsoft",
-      "callDurationSource":"microsoft"
+      "id": "9c4984c7-6c3c-427d-a30c-bd0b2eacee90",
+      "callId": "p~Bvc4jV4RzsaEt4XIerSH40pfOsnpmsA1SuHUaIQ__1rmJYqLjsX9x4FjOXqaJLWshHPYWjB_xi0zPWc-9r6F_Nv5l7DJWsgKi0Kjd3k8hfU",
+      "userId": "t~2ZGitAxyjkjPJ6l2GfLqf2kr0xFtleWfl5XA_zNbtMA",
+      "startDateTime": "2019-11-01T00:00:08.2589935Z",
+      "endDateTime": "2019-11-01T00:03:47.2589935Z",
+      "duration": 219,
+      "charge": 0.0,
+      "callType": "user_in",
+      "currency": "USD",
+      "usageCountryCode": "US",
+      "tenantCountryCode": "US",
+      "connectionCharge": 0.0,
+      "destinationContext": null,
+      "destinationName": "United States",
+      "conferenceId": null,
+      "licenseCapability": "MCOPSTNU",
+      "inventoryType": "Subscriber",
+      "operator": "Microsoft",
+      "callDurationSource": "microsoft"
     }
   ],
-  "@odata.nextLink":"https://graph.microsoft.com/v1.0/communications/callRecords/getPstnCalls(from=2019-11-01,to=2019-12-01)?$skip=1000"
+  "@odata.nextLink": "https://graph.microsoft.com/v1.0/communications/callRecords/getPstnCalls(from=2019-11-01,to=2019-12-01)?$skip=1000"
 }

@@ -1,25 +1,25 @@
 {
-  "data":{
-    "organization":{
-      "samlIdentityProvider":null
+  "data": {
+    "organization": {
+      "samlIdentityProvider": null
     }
   },
-  "errors":[
+  "errors": [
     {
-      "type":"INVALID_CURSOR_ARGUMENTS",
-      "path":[
+      "type": "INVALID_CURSOR_ARGUMENTS",
+      "path": [
         "organization",
         "samlIdentityProvider",
         "externalIdentities",
         "pageInfo"
       ],
-      "locations":[
+      "locations": [
         {
-          "line":9,
-          "column":9
+          "line": 9,
+          "column": 9
         }
       ],
-      "message":"`asdfasd==` does not appear to be a valid cursor."
+      "message": "`asdfasd==` does not appear to be a valid cursor."
     }
   ]
 }
