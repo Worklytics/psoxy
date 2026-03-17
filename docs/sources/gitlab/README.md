@@ -13,7 +13,6 @@
 
 GitLab through Psoxy uses **Project Access Tokens**, **Group Access Tokens**, or **Personal Access Tokens** for authentication.
 See GitLab documentation:
-- [Project Access Tokens](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html)
 - [Group Access Tokens](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html)
 
 ### Required Scope

@@ -10,35 +10,22 @@ See GitLab documentation:
 The following scope is required:
 - `read_api`: for reading API resources (groups, projects, issues, merge requests, users, etc.)
 
+Maintainer role is required for fetching audit events and group members.
+
 ## Setup Instructions
 
-### Option 1: Group Access Token (Recommended for multiple projects)
-
-Use a Group Access Token if you want to access multiple projects within a group.
+### Use a Group Access Token
 
 1. Go to your GitLab group: **Settings** > **Access Tokens**
 2. Click "Add new token" and configure:
    - **Token name**: A descriptive name (e.g., "Worklytics Psoxy Connector")
    - **Expiration date**: Set an appropriate expiration (or leave blank for no expiration if allowed)
-   - **Role**: Select **Reporter** or higher
+   - **Role**: Select **Maintainer** or higher
    - **Scopes**: Select `read_api`
 3. Click "Create group access token"
 4. **Important**: Copy the token value immediately - it won't be shown again!
 
-### Option 2: Project Access Token (For a single project)
-
-Use a Project Access Token if you only need access to a single project.
-
-1. Go to your GitLab project: **Settings** > **Access Tokens**
-2. Click "Add new token" and configure:
-   - **Token name**: A descriptive name (e.g., "Worklytics Psoxy Connector")
-   - **Expiration date**: Set an appropriate expiration (or leave blank for no expiration if allowed)
-   - **Role**: Select **Reporter** or higher
-   - **Scopes**: Select `read_api`
-3. Click "Create project access token"
-4. **Important**: Copy the token value immediately - it won't be shown again!
-
-### Option 3: Personal Access Token (For testing or broader access)
+### Alternative: Personal Access Token (For testing or broader access)
 
 Use a Personal Access Token if you need access across multiple groups or instance-wide.
 
