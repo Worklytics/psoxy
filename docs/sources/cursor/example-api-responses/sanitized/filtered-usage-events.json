@@ -23,6 +23,7 @@
         "totalCents":25
       },
       "isFreeBugbot":false,
+      "chargedCents":25,
       "userEmail":"t~bSkdfjBTY24htUdeLzDD8hBKsXGprapgKEXQFW5AFPU@company.com"
     },
     {
@@ -33,6 +34,7 @@
       "requestsCosts":0.0,
       "isTokenBasedCall":false,
       "isFreeBugbot":false,
+      "chargedCents":0,
       "userEmail":"t~I3fHxUsK2qMysD_fKva0I3q09GP06Uqw4G6RKUylNPY@company.com"
     },
     {
@@ -50,6 +52,7 @@
         "totalCents":15
       },
       "isFreeBugbot":true,
+      "chargedCents":0,
       "userEmail":"t~JYdSZrv6Gmaj3htiQnFhB89WYPFcw7pp-Kv9h0nOsbc@company.com"
     }
   ],
