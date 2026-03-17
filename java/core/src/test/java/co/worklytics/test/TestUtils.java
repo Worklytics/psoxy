@@ -99,7 +99,9 @@ public class TestUtils {
         // and withoutSpacesInObjectEntries() removes all spaces from around the colon ("key":"value").
         DefaultPrettyPrinter printer = new DefaultPrettyPrinter()
             .withSeparators(Separators.createDefaultInstance()
-                .withObjectFieldValueSpacing(Separators.Spacing.AFTER));
+                .withObjectFieldValueSpacing(Separators.Spacing.AFTER)
+                .withObjectEmptySeparator("")
+                .withArrayEmptySeparator(""));
         printer.indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
 
 
