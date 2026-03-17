@@ -1386,7 +1386,7 @@ EOT
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/api/v4/groups",
-        "/api/v4/groups/${local.gitlab_example_group_id}/members",
+        "/api/v4/groups/${local.gitlab_example_group_id}/members/all",
         "/api/v4/projects",
         "/api/v4/projects/${local.gitlab_example_project_id}/issues",
         "/api/v4/projects/${local.gitlab_example_project_id}/merge_requests",

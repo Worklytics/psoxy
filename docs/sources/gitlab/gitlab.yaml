@@ -5,7 +5,7 @@ endpoints:
       type: "array"
       items:
         $ref: "#/definitions/Group"
-  - pathTemplate: "/api/v4/groups/{id}/members"
+  - pathTemplate: "/api/v4/groups/{id}/members/all"
     transforms:
       - !<pseudonymize>
         jsonPaths:
