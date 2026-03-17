@@ -318,7 +318,7 @@ class RESTApiSanitizerImplTest {
                 "sources/google-workspace/gmail/example-api-responses/original/message.json"));
 
 
-        final URL EXAMPLE_URL = new URL("https://gmail.googleapis.com/gmail/v1/users/me/messages");
+        final URL EXAMPLE_URL = new URL("https://gmail.googleapis.com/gmail/v1/users/me/messages/17c3b1911726ef3f");
 
         String sanitized = sanitizer.sanitize("GET", EXAMPLE_URL, jsonString);
 
