@@ -1,7 +1,8 @@
 ---
 endpoints:
-  - allowedMethods: ["POST"]
-    pathTemplate: "/teams/daily-usage-data"
+  - pathTemplate: "/teams/daily-usage-data"
+    allowedMethods:
+      - "POST"
     allowedQueryParams: []
     transforms:
       - !<pseudonymize>
@@ -18,8 +19,9 @@ endpoints:
             $ref: "#/definitions/AccountUsageData"
         period:
           $ref: "#/definitions/DataPeriod"
-  - allowedMethods: ["POST"]
-    pathTemplate: "/teams/filtered-usage-events"
+  - pathTemplate: "/teams/filtered-usage-events"
+    allowedMethods:
+      - "POST"
     allowedQueryParams: []
     transforms:
       - !<pseudonymize>
@@ -39,14 +41,16 @@ endpoints:
           type: "array"
           items:
             $ref: "#/definitions/UsageEvent"
-  - allowedMethods: ["GET"]
-    pathTemplate: "/teams/members"
+  - pathTemplate: "/teams/members"
+    allowedMethods:
+      - "GET"
     allowedQueryParams: []
     transforms:
       - !<pseudonymize>
         jsonPaths:
           - "$.teamMembers[*].email"
           - "$.teamMembers[*].id"
+        includeReversible: true
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"

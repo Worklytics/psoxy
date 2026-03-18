@@ -1,32 +1,32 @@
 {
   "teamMembers": [
     {
-      "id": 10001,
       "name": "Alex",
       "email": "developer@company.com",
+      "id": 1,
       "role": "member",
       "isRemoved": false
     },
     {
-      "id": 10002,
       "name": "Sam",
       "email": "admin@company.com",
+      "id": 2,
       "role": "owner",
       "isRemoved": false
     },
     {
-      "id": 10003,
       "name": "Jordan",
       "email": "senior.dev@company.com",
+      "id": 3,
       "role": "member",
-      "isRemoved": false
+      "isRemoved": true
     },
     {
-      "id": 10004,
       "name": "Taylor",
       "email": "team.lead@company.com",
+      "id": 4,
       "role": "admin",
-      "isRemoved": true
+      "isRemoved": false
     }
   ]
 }
