@@ -502,7 +502,7 @@ class RESTApiSanitizerImplTest {
     @CsvSource(value = {
         // original cases - must still pass
         "something,.*,t~EN_O0yRLJp7bRnw6HrbdPMLul_uqairwpevQ08HtEn0",
-        "something,blah:.*thing,",                                                    // no match → redact
+        "something,blah:.*thing,",                                                              // no match → redact
         "blah:something,blah:.*thing,t~ltpmWUv-gqwJTPjfusJMo8Cd45xhqDRQx6REW-gS2CU",
         "blah:something,blah:(.*),blah:t~EN_O0yRLJp7bRnw6HrbdPMLul_uqairwpevQ08HtEn0",
 
@@ -510,12 +510,24 @@ class RESTApiSanitizerImplTest {
         "assigned to @alice,@([\\w.-]+),assigned to @t~3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4",
         "requested review from @bob,@([\\w.-]+),requested review from @t~kbEeZaASjfdRzw5DsaEMq4HoESgOdgoKQN3np2Gm_hY",
 
-        // multiple @mentions - both pseudonymized, surrounding text preserved
+        // multiple @mentions - both pseudonymized independently, surrounding text preserved
         "assigned to @alice and unassigned @bob,@([\\w.-]+),assigned to @t~3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4 and unassigned @t~kbEeZaASjfdRzw5DsaEMq4HoESgOdgoKQN3np2Gm_hY",
         "requested review from @alice and removed review request for @bob,@([\\w.-]+),requested review from @t~3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4 and removed review request for @t~kbEeZaASjfdRzw5DsaEMq4HoESgOdgoKQN3np2Gm_hY",
 
         // same username twice - pseudonymized consistently
         "assigned to @alice and unassigned @alice,@([\\w.-]+),assigned to @t~3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4 and unassigned @t~3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4",
+
+        // whitespace-only capture group - should be skipped, no real match → redact
+        "assigned to @alice,(\\s+),",
+
+        // blank input - no match → redact
+        "   ,@([\\w.-]+),",
+        ",@([\\w.-]+),",
+
+        // group(1) text repeated inside group(0) - only exact group(1) span replaced, not all occurrences
+        // pattern: @(alice) where group(0)=@alice, group(1)=alice
+        // 'alice' also appears in surrounding text - only the @alice mention should be pseudonymized
+        "alice requested review from @alice,@([\\w.-]+),alice requested review from @t~3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4",
     })
     @ParameterizedTest
     public void pseudonymizeWithRegexMatches_nonMatchingRedacted(String input, String regex,

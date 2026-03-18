@@ -395,26 +395,45 @@ public class SanitizerUtils {
         return (Object s, Configuration configuration) -> {
 
             String fullString = (String) s;
+
+            if (StringUtils.isBlank(fullString)) {
+                // Return as-is
+                return fullString;
+            }
+
             Matcher matcher = pattern.matcher(fullString);
 
             boolean found = false;
             StringBuilder result = new StringBuilder();
 
             while (matcher.find()) {
-                // skip empty matches (e.g. when pattern is .* or similar)
                 String matchedGroup = matcher.groupCount() > 0 ? matcher.group(1) : matcher.group(0);
-                if (matchedGroup == null || matchedGroup.isEmpty()) {
+
+                // skip empty or blank matches (e.g. when pattern is .* or (\s+))
+                if (StringUtils.isBlank(matchedGroup)) {
+                    continue;
+                }
+
+                PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(matchedGroup, transform);
+
+                // guard against null pseudonymizedIdentity for blank/invalid input
+                if (pseudonymizedIdentity == null) {
                     continue;
                 }
 
                 found = true;
 
-                PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(matchedGroup, transform);
                 String pseudonymizedString = urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym());
 
                 if (matcher.groupCount() > 0) {
-                    // replace only group(1) within the full match, preserving the rest (e.g. the @ prefix)
-                    String replacement = matcher.group(0).replace(matcher.group(1), pseudonymizedString);
+                    // use start(1)/end(1) indices to replace only the exact group(1) span
+                    // within the full match, avoiding replacing repeated occurrences of group(1) in group(0)
+                    String fullMatch = matcher.group(0);
+                    int groupStartInMatch = matcher.start(1) - matcher.start(0);
+                    int groupEndInMatch = matcher.end(1) - matcher.start(0);
+                    String replacement = fullMatch.substring(0, groupStartInMatch)
+                        + pseudonymizedString
+                        + fullMatch.substring(groupEndInMatch);
                     matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
                 } else {
                     matcher.appendReplacement(result, Matcher.quoteReplacement(pseudonymizedString));
