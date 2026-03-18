@@ -398,7 +398,7 @@ public class SanitizerUtils {
             Matcher matcher = pattern.matcher(fullString);
 
             boolean found = false;
-            String result = fullString;
+            StringBuilder result = new StringBuilder();
 
             while (matcher.find()) {
                 // skip empty matches (e.g. when pattern is .* or similar)
@@ -412,11 +412,18 @@ public class SanitizerUtils {
                 PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(matchedGroup, transform);
                 String pseudonymizedString = urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym());
 
-                result = result.replace(matchedGroup, pseudonymizedString);
+                if (matcher.groupCount() > 0) {
+                    // replace only group(1) within the full match, preserving the rest (e.g. the @ prefix)
+                    String replacement = matcher.group(0).replace(matcher.group(1), pseudonymizedString);
+                    matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
+                } else {
+                    matcher.appendReplacement(result, Matcher.quoteReplacement(pseudonymizedString));
+                }
             }
 
             if (found) {
-                return result;
+                matcher.appendTail(result);
+                return result.toString();
             } else {
                 // original behavior: if no real match, redact
                 return null;
