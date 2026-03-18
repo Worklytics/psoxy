@@ -77,7 +77,7 @@ public class SlackDiscoveryBulkTests {
             static ConfigService configService() {
                 ConfigService mock = MockModules.provideMock(ConfigService.class);
                 when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
-                    .thenReturn(Optional.of(new String(TestUtils.getData(rulesPath))));
+                    .thenReturn(Optional.of(new String(co.worklytics.test.TestUtils.getData(rulesPath))));
                 return mock;
             }
         }
@@ -119,6 +119,6 @@ public class SlackDiscoveryBulkTests {
             outputStreamSupplier);
 
         String output = new String(outputStream.toByteArray());
-        assertEquals(new String(TestUtils.getData(pathToSanitized)), output);
+        co.worklytics.test.TestUtils.assertEqualsWithDiff(new String(co.worklytics.test.TestUtils.getData(pathToSanitized)), output);
     }
 }

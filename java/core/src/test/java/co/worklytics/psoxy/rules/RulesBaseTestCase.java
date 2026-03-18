@@ -239,7 +239,7 @@ abstract public class RulesBaseTestCase {
 
                 String expected = TestUtils.getDataAsUtf8UnixString(sanitizedFilepath);
 
-                assertEquals(expected,
+                TestUtils.assertEqualsWithDiff(expected,
                     StringUtils.trim(prettyPrintJson(sanitized)), sanitizedFilepath + " does not match output");
             });
     }
@@ -285,7 +285,7 @@ abstract public class RulesBaseTestCase {
 
     protected void assertSha(String expectedSha) {
         assertNotNull(expectedSha);
-        assertEquals(expectedSha, rulesUtils.sha(sanitizer.getRules()));
+        TestUtils.assertEqualsWithDiff(expectedSha, rulesUtils.sha(sanitizer.getRules()));
     }
 
     protected void assertNotSanitized(String content, Collection<String> shouldContain) {

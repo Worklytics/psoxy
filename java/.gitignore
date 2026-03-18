@@ -14,3 +14,6 @@ target
 
 # don't catch config.yaml, may contain secret salt
 impl/cmd-line/config.yaml
+
+# dont' commit a local maven repo, if it exists
+.m2

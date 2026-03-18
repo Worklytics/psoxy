@@ -17,12 +17,17 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.zip.GZIPOutputStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Assertions;
+
+
 
 public class TestUtils {
+
+    private static final int CONTEXT_LINES = 5;
 
     static ObjectMapper jsonMapper = new ObjectMapper();
 
@@ -138,14 +143,69 @@ public class TestUtils {
      * @param actual output value of test
      */
     public static void assertJsonEquals(String expected, String actual) {
-        assertEquals(prettyPrintJson(expected), prettyPrintJson(actual));
+        assertEqualsWithDiff(prettyPrintJson(expected), prettyPrintJson(actual));
+    }
+
+    public static void assertEqualsWithDiff(String expected, String actual) {
+        assertEqualsWithDiff(expected, actual, null);
+    }
+
+    public static void assertEqualsWithDiff(String expected, String actual, String message) {
+        if (Objects.equals(expected, actual)) return;
+
+        if (expected == null || actual == null) {
+            Assertions.assertEquals(expected, actual, message);
+            return;
+        }
+
+        String[] expectedLines = expected.split("\\r?\\n");
+        String[] actualLines = actual.split("\\r?\\n");
+
+        if (expectedLines.length <= CONTEXT_LINES && actualLines.length <= CONTEXT_LINES) {
+            Assertions.assertEquals(expected, actual, message);
+        }
+
+        int diffLine = -1;
+        int minLines = Math.min(expectedLines.length, actualLines.length);
+        for (int i = 0; i < minLines; i++) {
+            if (!Objects.equals(expectedLines[i], actualLines[i])) {
+                diffLine = i;
+                break;
+            }
+        }
+        if (diffLine == -1) {
+            diffLine = minLines;
+        }
+
+        int startLine = Math.max(0, diffLine - CONTEXT_LINES);
+        int endLineExpected = Math.min(expectedLines.length, diffLine + CONTEXT_LINES);
+        int endLineActual = Math.min(actualLines.length, diffLine + CONTEXT_LINES);
+
+        StringBuilder diffMsg = new StringBuilder();
+        if (message != null) diffMsg.append(message).append("\n");
+        diffMsg.append("Strings differ starting at line ").append(diffLine + 1).append("\n\n");
+
+        diffMsg.append("--- EXPECTED (lines ").append(startLine + 1).append(" to ").append(endLineExpected).append(") ---\n");
+        for (int i = startLine; i < endLineExpected; i++) {
+            diffMsg.append(i == diffLine ? ">> " : "   ");
+            diffMsg.append(String.format("%3d: ", i + 1)).append(expectedLines[i]).append("\n");
+        }
+
+        diffMsg.append("\n+++ ACTUAL (lines ").append(startLine + 1).append(" to ").append(endLineActual).append(") +++\n");
+        for (int i = startLine; i < endLineActual; i++) {
+            diffMsg.append(i == diffLine ? ">> " : "   ");
+            diffMsg.append(String.format("%3d: ", i + 1)).append(actualLines[i]).append("\n");
+        }
+        diffMsg.append("\n");
+
+        throw new org.opentest4j.AssertionFailedError(diffMsg.toString(), expected, actual);
     }
 
     public static void assertNdjsonEquals(String expected, String actual) {
         Function<String, String> ndjsonToJson = (String s) -> "[" + s.replaceAll("\n", ",") + "]";
         String expectedJson = expected.replaceAll("\n", ",");
 
-        assertEquals(expected, actual);
+        assertEqualsWithDiff(expected, actual);
     }
 
     public static SecretKeySpec testKey() {

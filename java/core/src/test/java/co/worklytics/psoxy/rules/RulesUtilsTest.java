@@ -156,7 +156,7 @@ class RulesUtilsTest {
     @ParameterizedTest
     void decodeToYaml(String encoded) {
         String decoded = utils.decodeToYaml(encoded);
-        assertEquals(YAML_REST, decoded);
+        TestUtils.assertEqualsWithDiff(YAML_REST, decoded);
     }
 
     @Test
@@ -184,7 +184,7 @@ class RulesUtilsTest {
 
         String yaml = yamlMapper.writeValueAsString(rules);
         assertTrue(yaml.contains("allowedMethods"));
-        assertEquals(YAML_REST_WITH_ALLOWED_METHODS, yaml);
+        TestUtils.assertEqualsWithDiff(YAML_REST_WITH_ALLOWED_METHODS, yaml);
     }
 
     // if you change YAML_REST, this test will fail; you can copy-paste the expected value to

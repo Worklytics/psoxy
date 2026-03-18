@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.net.URL;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import co.worklytics.test.TestUtils;
 
 
 /**
@@ -30,7 +30,7 @@ public abstract class JavaRulesTestBaseCase extends RulesBaseTestCase {
 
         //NOTE: this is testing equivalence of file-system rules after round-trip; not necessarily
         // that current file-system rules are byte-wise equivalent
-        assertEquals(
+        TestUtils.assertEqualsWithDiff(
             yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rulesFromFilesystem),
             yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(getRulesUnderTest())
         );
