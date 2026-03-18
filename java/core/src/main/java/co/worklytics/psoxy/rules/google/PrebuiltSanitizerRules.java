@@ -21,11 +21,6 @@ public class PrebuiltSanitizerRules {
 
     static final Rules2 GCAL = Rules2.builder()
         .endpoint(Endpoint.builder()
-            .pathTemplate("/calendar/v3/calendars/{accountId}")
-            .transform(Transform.Redact.ofPaths("$.summary"))
-            .transform(Transform.Pseudonymize.ofPaths("$.id"))
-            .build())
-        .endpoint(Endpoint.builder()
             .pathTemplate("/calendar/v3/calendars/{accountId}/events")
             .transform(Transform.Pseudonymize.ofPaths("$..email"))
             .transform(Transform.Redact.ofPaths(
@@ -48,7 +43,7 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$.items[*].conferenceData.entryPoints[*].uri")
                 .build())
             .build())
-        .endpoint( Endpoint.builder()
+        .endpoint(Endpoint.builder()
             .pathTemplate("/calendar/v3/calendars/{accountId}/events/{eventId}")
             .transform(Transform.Redact.ofPaths(
                 "$.summary",
@@ -74,7 +69,9 @@ public class PrebuiltSanitizerRules {
                 .build())
             .build())
         .endpoint(Endpoint.builder()
-            .pathTemplate("/calendar/v3/users/{accountId}/settings")
+            .pathTemplate("/calendar/v3/calendars/{calendarId}")
+            .transform(Transform.Redact.ofPaths("$.summary"))
+            .transform(Transform.Pseudonymize.ofPaths("$.id"))
             .build())
         //calendarList needed to analyze historical calendars
         .endpoint(Endpoint.builder()
@@ -83,6 +80,9 @@ public class PrebuiltSanitizerRules {
                 .jsonPath("$.items[*].summary")
                 .filter("Transferred").build())
             .transform(Transform.Pseudonymize.builder().jsonPath("$.items[*].id").includeReversible(true).encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).build())
+            .build())
+        .endpoint(Endpoint.builder()
+            .pathTemplate("/calendar/v3/users/{accountId}/settings")
             .build())
         .build();
 

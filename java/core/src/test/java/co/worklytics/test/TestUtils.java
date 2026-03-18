@@ -1,9 +1,11 @@
 package co.worklytics.test;
 
 import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.core.util.Separators;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +18,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.zip.GZIPOutputStream;
@@ -29,7 +33,10 @@ public class TestUtils {
 
     private static final int CONTEXT_LINES = 5;
 
-    static ObjectMapper jsonMapper = new ObjectMapper();
+    static ObjectMapper jsonMapper = new ObjectMapper()
+        // Avoid scientific notation in JSON output (e.g., 1234567890.0 instead of 1.23456789E9)
+        .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+        .enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);
 
 
     /**
@@ -165,38 +172,61 @@ public class TestUtils {
             Assertions.assertEquals(expected, actual, message);
         }
 
-        int diffLine = -1;
+        // Collect all diff positions
+        List<Integer> diffLines = new ArrayList<>();
         int minLines = Math.min(expectedLines.length, actualLines.length);
         for (int i = 0; i < minLines; i++) {
             if (!Objects.equals(expectedLines[i], actualLines[i])) {
-                diffLine = i;
-                break;
+                diffLines.add(i);
             }
         }
-        if (diffLine == -1) {
-            diffLine = minLines;
+        // Lines present in one but not the other
+        for (int i = minLines; i < Math.max(expectedLines.length, actualLines.length); i++) {
+            diffLines.add(i);
         }
-
-        int startLine = Math.max(0, diffLine - CONTEXT_LINES);
-        int endLineExpected = Math.min(expectedLines.length, diffLine + CONTEXT_LINES);
-        int endLineActual = Math.min(actualLines.length, diffLine + CONTEXT_LINES);
 
         StringBuilder diffMsg = new StringBuilder();
         if (message != null) diffMsg.append(message).append("\n");
-        diffMsg.append("Strings differ starting at line ").append(diffLine + 1).append("\n\n");
+        diffMsg.append("Strings differ at ").append(diffLines.size()).append(" line(s):\n");
 
-        diffMsg.append("--- EXPECTED (lines ").append(startLine + 1).append(" to ").append(endLineExpected).append(") ---\n");
-        for (int i = startLine; i < endLineExpected; i++) {
-            diffMsg.append(i == diffLine ? ">> " : "   ");
-            diffMsg.append(String.format("%3d: ", i + 1)).append(expectedLines[i]).append("\n");
-        }
+        // Merge nearby diff lines into blocks with context
+        int blockStart = -1;
+        int blockEnd = -1;
+        for (int idx = 0; idx <= diffLines.size(); idx++) {
+            int diffLine = (idx < diffLines.size()) ? diffLines.get(idx) : -1;
+            if (blockStart == -1) {
+                if (diffLine >= 0) {
+                    blockStart = Math.max(0, diffLine - CONTEXT_LINES);
+                    blockEnd = diffLine + CONTEXT_LINES;
+                }
+            } else if (diffLine >= 0 && diffLine <= blockEnd + CONTEXT_LINES) {
+                // extend current block
+                blockEnd = diffLine + CONTEXT_LINES;
+            } else {
+                // emit current block
+                int endLineExpected = Math.min(expectedLines.length, blockEnd + 1);
+                int endLineActual = Math.min(actualLines.length, blockEnd + 1);
 
-        diffMsg.append("\n+++ ACTUAL (lines ").append(startLine + 1).append(" to ").append(endLineActual).append(") +++\n");
-        for (int i = startLine; i < endLineActual; i++) {
-            diffMsg.append(i == diffLine ? ">> " : "   ");
-            diffMsg.append(String.format("%3d: ", i + 1)).append(actualLines[i]).append("\n");
+                diffMsg.append("\n--- EXPECTED (lines ").append(blockStart + 1).append(" to ").append(endLineExpected).append(") ---\n");
+                for (int i = blockStart; i < endLineExpected; i++) {
+                    boolean isDiff = diffLines.contains(i);
+                    diffMsg.append(isDiff ? ">> " : "   ");
+                    diffMsg.append(String.format("%3d: ", i + 1)).append(expectedLines[i]).append("\n");
+                }
+
+                diffMsg.append("\n+++ ACTUAL (lines ").append(blockStart + 1).append(" to ").append(endLineActual).append(") +++\n");
+                for (int i = blockStart; i < endLineActual; i++) {
+                    boolean isDiff = diffLines.contains(i);
+                    diffMsg.append(isDiff ? ">> " : "   ");
+                    diffMsg.append(String.format("%3d: ", i + 1)).append(i < actualLines.length ? actualLines[i] : "<missing>").append("\n");
+                }
+                diffMsg.append("\n");
+
+                // start new block if there's more
+                blockStart = (diffLine >= 0) ? Math.max(0, diffLine - CONTEXT_LINES) : -1;
+                blockEnd = (diffLine >= 0) ? diffLine + CONTEXT_LINES : -1;
+            }
         }
-        diffMsg.append("\n");
 
         throw new org.opentest4j.AssertionFailedError(diffMsg.toString(), expected, actual);
     }
