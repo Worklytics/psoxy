@@ -397,8 +397,8 @@ public class SanitizerUtils {
             String fullString = (String) s;
 
             if (StringUtils.isBlank(fullString)) {
-                // Return as-is
-                return fullString;
+                // Return redacted
+                return null;
             }
 
             Matcher matcher = pattern.matcher(fullString);
