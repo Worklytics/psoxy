@@ -100,22 +100,20 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
                 APIGatewayProxyRequestEvent v1Event = lambdaEventUtils.toAPIGatewayProxyRequestEvent(rootNode);
                 if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
                     responsePair = LambdaTracing.instrument(v1Event, context, (inEvt, ctx) -> {
-                        try { return handleSingleRequest(rootNode, processingContext, ctx); } 
-                        catch (IOException e) { throw new RuntimeException(e); }
+                        return handleSingleRequest(inEvt, processingContext, ctx);
                     });
                 } else {
-                    responsePair = handleSingleRequest(rootNode, processingContext, context);
+                    responsePair = handleSingleRequest(v1Event, processingContext, context);
                 }
                 lambdaEventUtils.writeAsApiGatewayV1Response(responsePair.getRight(), output, responsePair.getLeft());
             } else if (lambdaEventUtils.isApiGatewayV2Event(rootNode)) {
                 APIGatewayV2HTTPEvent v2Event = lambdaEventUtils.toAPIGatewayV2HTTPEvent(rootNode);
                 if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
                     responsePair = LambdaTracing.instrument(v2Event, context, (inEvt, ctx) -> {
-                        try { return handleSingleRequest(rootNode, processingContext, ctx); } 
-                        catch (IOException e) { throw new RuntimeException(e); }
+                        return handleSingleRequest(inEvt, processingContext, ctx);
                     });
                 } else {
-                    responsePair = handleSingleRequest(rootNode, processingContext, context);
+                    responsePair = handleSingleRequest(v2Event, processingContext, context);
                 }
                 lambdaEventUtils.writeAsApiGatewayV2Response(responsePair.getRight(), output, responsePair.getLeft());
             } else {
@@ -165,35 +163,46 @@ public class AwsApiDataModeHybridHandler implements RequestStreamHandler {
     private Pair<Boolean, HttpEventResponse> handleSingleRequest(JsonNode rootNode,
             ApiDataRequestHandler.ProcessingContext processingContext, Context context)
             throws IOException {
-        HttpEventRequest request;
         if (lambdaEventUtils.isApiGatewayV1Event(rootNode)) {
-            APIGatewayProxyRequestEvent v1Event =
-                    lambdaEventUtils.toAPIGatewayProxyRequestEvent(rootNode);
-            if (!processingContext.getAsync()) {
-                // for consistency, take the requestId and requestReceivedAt from the event
-                processingContext = processingContext.toBuilder()
-                        .requestId(v1Event.getRequestContext().getRequestId())
-                        .requestReceivedAt(Instant
-                                .ofEpochMilli(v1Event.getRequestContext().getRequestTimeEpoch()))
-                        .build();
-            }
-            request = APIGatewayV1ProxyEventRequestAdapter.of(v1Event);
+            APIGatewayProxyRequestEvent v1Event = lambdaEventUtils.toAPIGatewayProxyRequestEvent(rootNode);
+            return handleSingleRequest(v1Event, processingContext, context);
         } else if (lambdaEventUtils.isApiGatewayV2Event(rootNode)) {
             APIGatewayV2HTTPEvent v2Event = lambdaEventUtils.toAPIGatewayV2HTTPEvent(rootNode);
-            if (!processingContext.getAsync()) {
-                // for consistency, take the requestId and requestReceivedAt from the event
-                processingContext = processingContext.toBuilder()
-                        .requestId(v2Event.getRequestContext().getRequestId())
-                        .requestReceivedAt(
-                                Instant.ofEpochMilli(v2Event.getRequestContext().getTimeEpoch()))
-                        .build();
-            }
-            request = new APIGatewayV2HTTPEventRequestAdapter(v2Event);
+            return handleSingleRequest(v2Event, processingContext, context);
         } else {
             throw new IllegalArgumentException(
                     "Unsupported event: " + payloadMapper.writeValueAsString(rootNode));
         }
+    }
 
+    private Pair<Boolean, HttpEventResponse> handleSingleRequest(APIGatewayProxyRequestEvent v1Event,
+            ApiDataRequestHandler.ProcessingContext processingContext, Context context) {
+        if (!processingContext.getAsync()) {
+            processingContext = processingContext.toBuilder()
+                    .requestId(v1Event.getRequestContext().getRequestId())
+                    .requestReceivedAt(Instant
+                            .ofEpochMilli(v1Event.getRequestContext().getRequestTimeEpoch()))
+                    .build();
+        }
+        HttpEventRequest request = APIGatewayV1ProxyEventRequestAdapter.of(v1Event);
+        return executeRequest(request, processingContext, context);
+    }
+
+    private Pair<Boolean, HttpEventResponse> handleSingleRequest(APIGatewayV2HTTPEvent v2Event,
+            ApiDataRequestHandler.ProcessingContext processingContext, Context context) {
+        if (!processingContext.getAsync()) {
+            processingContext = processingContext.toBuilder()
+                    .requestId(v2Event.getRequestContext().getRequestId())
+                    .requestReceivedAt(
+                            Instant.ofEpochMilli(v2Event.getRequestContext().getTimeEpoch()))
+                    .build();
+        }
+        HttpEventRequest request = new APIGatewayV2HTTPEventRequestAdapter(v2Event);
+        return executeRequest(request, processingContext, context);
+    }
+
+    private Pair<Boolean, HttpEventResponse> executeRequest(HttpEventRequest request,
+            ApiDataRequestHandler.ProcessingContext processingContext, Context context) {
         HttpEventResponse response;
         try {
             response = requestHandler.handle(request, processingContext);

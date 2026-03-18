@@ -18,6 +18,19 @@ fi
 
 CHECKOUT_ROOT=$(pwd)
 
+# If not running in CI, use a local Maven repository to avoid polluting the global cache.
+# Treat CI as "not in CI" when CI is unset, empty, or explicitly set to "false".
+CI_VALUE="${CI:-}"
+if [ -z "$CI_VALUE" ] || [ "${CI_VALUE,,}" = "false" ]; then
+    mkdir -p "${CHECKOUT_ROOT}/.m2/repository"
+    if [ -n "${MAVEN_OPTS:-}" ]; then
+        export MAVEN_OPTS="${MAVEN_OPTS} -Dmaven.repo.local=${CHECKOUT_ROOT}/.m2/repository"
+    else
+        export MAVEN_OPTS="-Dmaven.repo.local=${CHECKOUT_ROOT}/.m2/repository"
+    fi
+    printf "${INFO}Running locally (not in CI). Using local maven repository at ${CHECKOUT_ROOT}/.m2/repository${NC}\n"
+fi
+
 printf "Generating Software Bill of Materials (SBOM) for AWS and GCP implementations...\n\n"
 
 # Build AWS module with verify phase to generate SBOM
