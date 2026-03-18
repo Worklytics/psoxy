@@ -397,25 +397,28 @@ public class SanitizerUtils {
             String fullString = (String) s;
             Matcher matcher = pattern.matcher(fullString);
 
-            if (matcher.matches()) {
-                String toPseudonymize;
-                if (matcher.groupCount() > 0) {
-                    toPseudonymize = matcher.group(1);
-                } else {
-                    toPseudonymize = matcher.group(0);
-                }
-                PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(toPseudonymize, transform);
+            boolean found = false;
+            String result = fullString;
 
+            while (matcher.find()) {
+                // skip empty matches (e.g. when pattern is .* or similar)
+                String matchedGroup = matcher.groupCount() > 0 ? matcher.group(1) : matcher.group(0);
+                if (matchedGroup == null || matchedGroup.isEmpty()) {
+                    continue;
+                }
+
+                found = true;
+
+                PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(matchedGroup, transform);
                 String pseudonymizedString = urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym());
 
-                if (matcher.groupCount() > 0) {
-                    // return original, replacing match with encoded pseudonym
-                    return fullString.replace(matcher.group(1), pseudonymizedString);
-                } else {
-                    return pseudonymizedString;
-                }
+                result = result.replace(matchedGroup, pseudonymizedString);
+            }
+
+            if (found) {
+                return result;
             } else {
-                //if no match, redact it
+                // original behavior: if no real match, redact
                 return null;
             }
         };

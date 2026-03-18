@@ -458,31 +458,30 @@ class RESTApiSanitizerImplTest {
     void pseudonymizeWithRegexMatches(String input) {
 
         Pseudonymizer pseudonymizer =
-                pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                        .pseudonymImplementation(PseudonymImplementation.DEFAULT).build());
-
+            pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+                .pseudonymImplementation(PseudonymImplementation.DEFAULT).build());
 
         sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"),
-                pseudonymizer);
+            pseudonymizer);
 
         List<MapFunction> transforms = Arrays.asList(
-                sanitizer.sanitizerUtils.getPseudonymizeRegexMatches(sanitizer.getPseudonymizer(),
-                        Transform.PseudonymizeRegexMatches.builder().regex(".*")
-                                .includeReversible(true).build()),
-                sanitizer.sanitizerUtils.getPseudonymizeRegexMatches(sanitizer.getPseudonymizer(),
-                        Transform.PseudonymizeRegexMatches.builder().regex(".*")
-                                .includeReversible(false).build()),
-                sanitizer.sanitizerUtils.getPseudonymize(sanitizer.getPseudonymizer(),
-                        Transform.Pseudonymize.builder().includeReversible(true)
-                                .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).build()),
-                sanitizer.sanitizerUtils.getPseudonymize(sanitizer.getPseudonymizer(),
-                        Transform.Pseudonymize.builder().includeReversible(false)
-                                .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
-                                .build()));
+            sanitizer.sanitizerUtils.getPseudonymizeRegexMatches(sanitizer.getPseudonymizer(),
+                Transform.PseudonymizeRegexMatches.builder().regex(".*")
+                    .includeReversible(true).build()),
+            sanitizer.sanitizerUtils.getPseudonymizeRegexMatches(sanitizer.getPseudonymizer(),
+                Transform.PseudonymizeRegexMatches.builder().regex(".*")
+                    .includeReversible(false).build()),
+            sanitizer.sanitizerUtils.getPseudonymize(sanitizer.getPseudonymizer(),
+                Transform.Pseudonymize.builder().includeReversible(true)
+                    .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).build()),
+            sanitizer.sanitizerUtils.getPseudonymize(sanitizer.getPseudonymizer(),
+                Transform.Pseudonymize.builder().includeReversible(false)
+                    .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+                    .build()));
 
         List<String> pseudonymized = transforms.stream()
-                .map(f -> (String) f.map(input, sanitizer.getJsonConfiguration()))
-                .collect(Collectors.toList());
+            .map(f -> (String) f.map(input, sanitizer.getJsonConfiguration()))
+            .toList();
 
         UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();
 
@@ -492,30 +491,41 @@ class RESTApiSanitizerImplTest {
             } catch (Exception e) {
                 return encoder.decode(StringUtils.replaceChars(s, ".+/", "--_"));
             }
-        }).collect(Collectors.toList());
+        }).toList();
 
         List<String> hashes = pseudonyms.stream().map(Pseudonym::getHash)
-                .map(Base64.getEncoder()::encode).map(String::new).collect(Collectors.toList());
+            .map(Base64.getEncoder()::encode).map(String::new).toList();
 
         assertTrue(hashes.stream().allMatch(p -> Objects.equals(hashes.get(0), p)));
-
     }
 
+    @CsvSource(value = {
+        // original cases - must still pass
+        "something,.*,t~EN_O0yRLJp7bRnw6HrbdPMLul_uqairwpevQ08HtEn0",
+        "something,blah:.*thing,",                                                    // no match → redact
+        "blah:something,blah:.*thing,t~ltpmWUv-gqwJTPjfusJMo8Cd45xhqDRQx6REW-gS2CU",
+        "blah:something,blah:(.*),blah:t~EN_O0yRLJp7bRnw6HrbdPMLul_uqairwpevQ08HtEn0",
 
+        // single @mention - pseudonymize username, preserve surrounding text
+        "assigned to @alice,@([\\w.-]+),assigned to @t~3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4",
+        "requested review from @bob,@([\\w.-]+),requested review from @t~kbEeZaASjfdRzw5DsaEMq4HoESgOdgoKQN3np2Gm_hY",
 
-    @CsvSource(value = {"something,.*,t~EN_O0yRLJp7bRnw6HrbdPMLul_uqairwpevQ08HtEn0",
-            "something,blah:.*thing,", // no match, should redact
-            "blah:something,blah:.*thing,t~ltpmWUv-gqwJTPjfusJMo8Cd45xhqDRQx6REW-gS2CU",
-            "blah:something,blah:(.*),blah:t~EN_O0yRLJp7bRnw6HrbdPMLul_uqairwpevQ08HtEn0",})
+        // multiple @mentions - both pseudonymized, surrounding text preserved
+        "assigned to @alice and unassigned @bob,@([\\w.-]+),assigned to @t~3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4 and unassigned @t~kbEeZaASjfdRzw5DsaEMq4HoESgOdgoKQN3np2Gm_hY",
+        "requested review from @alice and removed review request for @bob,@([\\w.-]+),requested review from @t~3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4 and removed review request for @t~kbEeZaASjfdRzw5DsaEMq4HoESgOdgoKQN3np2Gm_hY",
+
+        // same username twice - pseudonymized consistently
+        "assigned to @alice and unassigned @alice,@([\\w.-]+),assigned to @t~3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4 and unassigned @t~3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4",
+    })
     @ParameterizedTest
     public void pseudonymizeWithRegexMatches_nonMatchingRedacted(String input, String regex,
-            String expected) {
+                                                                 String expected) {
         MapFunction transform = sanitizer.sanitizerUtils.getPseudonymizeRegexMatches(
-                sanitizer.getPseudonymizer(), Transform.PseudonymizeRegexMatches.builder()
-                        .regex(regex).includeReversible(false).build());
+            sanitizer.getPseudonymizer(), Transform.PseudonymizeRegexMatches.builder()
+                .regex(regex).includeReversible(false).build());
 
         assertEquals(StringUtils.trimToNull(expected),
-                transform.map(input, sanitizer.getJsonConfiguration()));
+            transform.map(input, sanitizer.getJsonConfiguration()));
     }
 
     @CsvSource(value = {"123.234.252.12,t~7USliSM4GiS0Xfk1DXIAH-4nK-UkLJlSAA_5ZqQh_CI",
