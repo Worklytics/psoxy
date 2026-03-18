@@ -413,6 +413,21 @@ abstract public class RulesBaseTestCase {
         assertTrue(sanitizer.isAllowed("GET", new URL(url + "?param=value&param2=value2")), "multiple params blocked when appended to url: " + url);
     }
 
+    /**
+     * Assert that the given URL is allowed when specific query params are appended.
+     * Each listed param is tested individually. Additionally, an unlisted param ("unexpectedParam")
+     * must be blocked, to verify that allowedQueryParams is being enforced.
+     */
+    @SneakyThrows
+    protected void assertUrlWithQueryParamsAllowed(String url, String... allowedParams) {
+        for (String param : allowedParams) {
+            assertTrue(sanitizer.isAllowed("GET", new URL(url + "?" + param + "=value")),
+                "allowed param '" + param + "' blocked when appended to url: " + url);
+        }
+        assertFalse(sanitizer.isAllowed("GET", new URL(url + "?unexpectedParam=value")),
+            "unexpected param should be blocked when allowedQueryParams is specified: " + url);
+    }
+
     @SneakyThrows
     protected void assertUrlAllowed(String url) {
         assertTrue(sanitizer.isAllowed("GET", new URL(url)), "api endpoint url blocked : " + url);

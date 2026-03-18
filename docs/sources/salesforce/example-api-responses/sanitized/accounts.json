@@ -1,7 +1,7 @@
 [
   {
     "Id": "0015Y00002c7g95QAA",
-    "AnnualRevenue": 1234567890.0,
+    "AnnualRevenue": 1234567890,
     "CreatedDate": "2021-03-02T16:31:04.000+0000",
     "CreatedById": "t~WREVnRtj0N9dGhZfwAgC8Gw-IBQIGk-7JpUbxVSyEy8",
     "IsDeleted": false,
@@ -18,7 +18,7 @@
   },
   {
     "Id": "0015Y00002c7g8uQAA",
-    "AnnualRevenue": 139000000.0,
+    "AnnualRevenue": 139000000,
     "CreatedDate": "2021-03-02T16:31:04.000+0000",
     "CreatedById": "t~WREVnRtj0N9dGhZfwAgC8Gw-IBQIGk-7JpUbxVSyEy8",
     "IsDeleted": false,
