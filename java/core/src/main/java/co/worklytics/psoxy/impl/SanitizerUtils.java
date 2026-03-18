@@ -444,6 +444,7 @@ public class SanitizerUtils {
                 matcher.appendTail(result);
                 return result.toString();
             } else {
+                // TODO: review this; probably add a new transformation with a more consistent behavior and mark this as deprecated
                 // original behavior: if no real match, redact
                 return null;
             }

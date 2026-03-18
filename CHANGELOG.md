@@ -7,6 +7,9 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
+## [0.5.19](https://github.com/Worklytics/psoxy/releases/tag/v0.5.19)
+- `pseudonymizeRegexMatches`: apply the pseudonymization to any match found in the field instead of the first one.
+
 ## [0.5.18](https://github.com/Worklytics/psoxy/releases/tag/v0.5.18)
 - `aws`: updated IAM policy for invoking lambda functions, to reflect AWS perm changes; anyone deploying NEW api connectors on AWS will have to use this version or later, or backport similar change. (See https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html)
 - `Glean`: Added new connector for supporting fetching user insights and entity listings from Glean's REST API.
