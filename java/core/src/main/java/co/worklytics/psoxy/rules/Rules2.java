@@ -1,6 +1,17 @@
 package co.worklytics.psoxy.rules;
 
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serial;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.transforms.Transform;
@@ -9,15 +20,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Singular;
 import lombok.extern.java.Log;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serial;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Builder(toBuilder = true)
 @Log
@@ -26,7 +35,7 @@ import java.util.stream.Stream;
 @Getter
 @EqualsAndHashCode
 @JsonIgnoreProperties({"defaultScopeIdForSource"})
-@JsonPropertyOrder({"allowAllEndpoints", "endpoints", "defaultScopeIdForSource"})
+@JsonPropertyOrder({"allowAllEndpoints", "allowedRequestHeaders", "endpoints", "defaultScopeIdForSource"})
 @JsonInclude(JsonInclude.Include.NON_NULL) //NOTE: despite name, also affects YAML encoding
 public class Rules2 implements RESTRules {
 
@@ -35,6 +44,10 @@ public class Rules2 implements RESTRules {
 
     @Singular
     List<Endpoint> endpoints;
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @Singular
+    List<String> allowedRequestHeaders;
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     @Deprecated //will be dropped in v0.5

@@ -1,9 +1,9 @@
 import chalk from 'chalk';
+import { constants as httpCodes } from 'http2';
+import _ from 'lodash';
 import aws from './lib/aws.js';
 import gcp from './lib/gcp.js';
 import getLogger from './lib/logger.js';
-import _ from 'lodash';
-import { constants as httpCodes } from 'http2';
 import { environmentCheck } from './lib/utils.js';
 
 /**

@@ -1,11 +1,13 @@
 package com.avaulta.gateway.rules;
 
-import com.avaulta.gateway.rules.transforms.RecordTransform;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
-
 import java.util.Collections;
 import java.util.List;
+import com.avaulta.gateway.rules.transforms.RecordTransform;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Singular;
+import lombok.experimental.SuperBuilder;
 
 /**
  * **alpha**
@@ -20,7 +22,7 @@ import java.util.List;
  *
  */
 @AllArgsConstructor //for builder
-@NoArgsConstructor //for Jackson
+
 @SuperBuilder(toBuilder = true)
 @Data
 public class RecordRules implements BulkDataRules {
@@ -29,10 +31,13 @@ public class RecordRules implements BulkDataRules {
      * format of bulk 'Record' data; represents both how to split file into records AND how to parse
      * records.
      *
+     * TODO: consider dropping this entirely in v0.6 ???
      */
     public enum Format {
         NDJSON,
         CSV,
+        JSON_ARRAY,
+        AUTO, // TODO: in v0.6, make this the default; and fail-back to file extension if no Content-Type provided
         ;
         //AVRO?
 
@@ -49,7 +54,16 @@ public class RecordRules implements BulkDataRules {
      *
      */
     @Singular
-    List<RecordTransform> transforms = Collections.emptyList();
+    List<RecordTransform> transforms;
+
+    /**
+     * No-args constructor.
+     * 1) Needed for Jackson deserialization.
+     * 2) Explicit instantiation of @Singular fields required to avoid Lombok warnings about ignored default values.
+     */
+    public RecordRules() {
+        this.transforms = Collections.emptyList();
+    }
 
     //setter to ensure we get a List, even when coming through jackson
     public void setTransforms(List<RecordTransform> transforms) {

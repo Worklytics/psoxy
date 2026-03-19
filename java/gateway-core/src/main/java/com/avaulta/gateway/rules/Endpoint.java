@@ -1,20 +1,31 @@
 package com.avaulta.gateway.rules;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.Singular;
+import lombok.With;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-@JsonPropertyOrder({"pathRegex", "pathTemplate", "allowedMethods", "allowedQueryParams", "supportedHeaders",
-        "transforms"})
+@JsonPropertyOrder({"pathRegex", "pathTemplate", "allowedMethods", "allowedQueryParams", "allowedRequestHeaders",
+    "transforms"})
 @Builder(toBuilder = true)
 @With
 @AllArgsConstructor // for builder
-@NoArgsConstructor // for Jackson
+
 @Getter
 public class Endpoint {
 
@@ -22,8 +33,8 @@ public class Endpoint {
      * path template, eg, /api/v1/{id}/foo/{bar}
      *
      * @see "https://swagger.io/docs/specification/paths-and-operations/"
-     *      <p>
-     *      if provided, has the effect of pathRegex = "^/api/v1/[^/]+/foo/[^/]+$"
+     * <p>
+     * if provided, has the effect of pathRegex = "^/api/v1/[^/]+/foo/[^/]+$"
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String pathTemplate;
@@ -88,7 +99,7 @@ public class Endpoint {
 
     /**
      * if provided, only HTTP methods in this list will be allowed (eg, GET, HEAD, etc)
-     *
+     * <p>
      * if omitted, any HTTP method is permitted.
      */
     Set<String> allowedMethods;
@@ -115,13 +126,13 @@ public class Endpoint {
     /**
      * if provided, headers included here will be forwarded through to the source API endpoint if they are present on the request.
      * this can be used for passing a specific header (for example, pagination, limits, etc.) to the request in the source
-     *
+     * <p>
      * endpoint-matching does NOT take these into account. eg, absence of a header on request will NOT cause the request to not be
      * matched to this endpoint; similarly, presence of a header on a request will NOT cause request to be blocked - the header will
      * simply be dropped.
-     *
+     * <p>
      * q: should we implement strict request header handling? (block requests will unexpected headers?)
-     *
+     * <p>
      * NOTE: Using List, as Set is not being serializable in YAML
      */
     @Deprecated // use `allowedRequestHeaders` instead
@@ -132,21 +143,37 @@ public class Endpoint {
     /**
      * if provided, headers included here will be forwarded through to the source API endpoint if they are present on the request.
      * this can be used for passing a specific header (for example, pagination, limits, etc.) to the request in the source
-     *
+     * <p>
+     * these are in ADDITION to any headers allowed at the top-level RuleSet.
+     * </p>
+     * <p>
      * endpoint-matching does NOT take these into account. eg, absence of a header on request will NOT cause the request to not be
      * matched to this endpoint; similarly, presence of a header on a request will NOT cause request to be blocked - the header will
      * simply be dropped.
-     *
+     * <p>
      * q: should we implement strict request header handling? (block requests will unexpected headers?)
-     *
+     * <p>
      * NOTE: Using List, as Set is not being serializable in YAML
      */
+    Set<String> allowedRequestHeaders;
+
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    Collection<String> allowedRequestHeaders;
+    public Set<String> getAllowedRequestHeaders() {
+        // our own implementation, so consistently sorted.
+        if (allowedRequestHeaders == null) {
+            return null;
+        } else if (allowedRequestHeaders instanceof TreeSet) {
+            return allowedRequestHeaders;
+        } else {
+            //rely on natural ordering of strings to sort
+            this.allowedRequestHeaders = new TreeSet<>(allowedRequestHeaders);
+            return this.allowedRequestHeaders;
+        }
+    }
 
     @JsonIgnore
-    public Optional<Collection<String>> getAllowedRequestHeaders() {
-        return Optional.ofNullable(allowedRequestHeaders);
+    public Optional<Collection<String>> getAllowedRequestHeadersAsOptional() {
+        return Optional.ofNullable(getAllowedRequestHeaders());
     }
 
     @JsonIgnore
@@ -165,7 +192,7 @@ public class Endpoint {
     /**
      * if provided HTTP response will be *filtered* against this schema, with any nodes in the JSON
      * that are not present in the schema being removed.
-     *
+     * <p>
      * (do not confuse this with plain JSON Schema, which is typically used for validation rather
      * than filtering)
      *
@@ -181,19 +208,28 @@ public class Endpoint {
     @Setter
     @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
     @Singular
-    List<Transform> transforms = new ArrayList<>();
+    List<Transform> transforms;
+
+    /**
+     * No-args constructor.
+     * 1) Needed for Jackson deserialization.
+     * 2) Explicit instantiation of @Singular fields required to avoid Lombok warnings about ignored default values.
+     */
+    public Endpoint() {
+        this.transforms = new ArrayList<>();
+    }
 
     @Override
     public Endpoint clone() {
         return this.toBuilder()
-                .clearTransforms()
-                .transforms(
-                        this.transforms.stream().map(Transform::clone).collect(Collectors.toList()))
-                .allowedQueryParams(
-                        this.getAllowedQueryParamsOptional().map(ArrayList::new).orElse(null))
-                .pathTemplate(this.pathTemplate)
-                .allowedMethods(this.allowedMethods)
-                .allowedRequestHeadersToForward(this.allowedRequestHeadersToForward)
-                .build();
+            .clearTransforms()
+            .transforms(
+                this.transforms.stream().map(Transform::clone).collect(Collectors.toList()))
+            .allowedQueryParams(
+                this.getAllowedQueryParamsOptional().map(ArrayList::new).orElse(null))
+            .pathTemplate(this.pathTemplate)
+            .allowedMethods(this.allowedMethods)
+            .allowedRequestHeadersToForward(this.allowedRequestHeadersToForward)
+            .build();
     }
 }

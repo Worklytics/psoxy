@@ -11,29 +11,32 @@ HOST_PLATFORM=$3
 BUCKET_PATH=$4
 
 # colors
-RED='\e[0;31m'
-BLUE='\e[0;34m'
-NC='\e[0m' # No Color
+COLORSCHEME_SH="$(dirname "$0")/set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+    source "$COLORSCHEME_SH"
+else
+    ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
 
 if [[ -z "$CLONE_BASE_DIR" ]]; then
-  printf "${RED}Error: Missing required argument: CLONE_BASE_DIR${NC}\n"
+  printf "${ERR}Error: Missing required argument: CLONE_BASE_DIR${NC}\n"
   printf "Usage: update-bundle.sh <CLONE_BASE_DIR> <TFVARS_FILE> <HOST_PLATFORM> [BUCKET_PATH]\n"
   exit 1
 fi
 
 if [[ ! -d "$CLONE_BASE_DIR" ]]; then
-  printf "${RED}Error: ${CLONE_BASE_DIR} directory does not exist.${NC}\n"
+  printf "${ERR}Error: ${CLONE_BASE_DIR} directory does not exist.${NC}\n"
   exit 1
 fi
 
 if [[ -z "$TFVARS_FILE" ]]; then
-  printf "${RED}Error: Missing required argument: TFVARS_FILE${NC}\n"
+  printf "${ERR}Error: Missing required argument: TFVARS_FILE${NC}\n"
   printf "Usage: update-bundle.sh <CLONE_BASE_DIR> <TFVARS_FILE> <HOST_PLATFORM> [BUCKET_PATH]\n"
   exit 1
 fi
 
 if [[ ! -f "$TFVARS_FILE" ]]; then
-  printf "${RED}Error: ${TFVARS_FILE} does not exist.${NC}\n"
+  printf "${ERR}Error: ${TFVARS_FILE} does not exist.${NC}\n"
   exit 1
 fi
 
@@ -44,12 +47,11 @@ fi
 
 RELEASE_VERSION=$(sed -n -e 's/.*<revision>\(.*\)<\/revision>.*/\1/p' "${CLONE_BASE_DIR}java/pom.xml")
 
-printf "Building proxy deployment bundle from code checkout at ${BLUE}${CLONE_BASE_DIR}${NC} for ${BLUE}${HOST_PLATFORM}${NC}; this will take a few minutes ...\n"
+printf "Building proxy deployment bundle from code checkout at ${INFO}${CLONE_BASE_DIR}${NC} for ${INFO}${HOST_PLATFORM}${NC}; this will take a few minutes ...\n"
 
 ${CLONE_BASE_DIR}tools/build.sh -q ${HOST_PLATFORM} ${CLONE_BASE_DIR}java
 
 cp ${CLONE_BASE_DIR}java/impl/${HOST_PLATFORM}/target/psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar .
-
 
 if [ "$HOST_PLATFORM" == "gcp" ]; then
   zip psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.zip psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar
@@ -60,7 +62,7 @@ elif [ "$HOST_PLATFORM" == "aws" ]; then
   DEPLOYMENT_BUNDLE="psoxy-${HOST_PLATFORM}-${RELEASE_VERSION}.jar"
   BUCKET_PATH_EXAMPLE="s3://my-artifact-bucket/"
 else
-  printf "${RED}Unsupported host platform: ${HOST_PLATFORM}${NC}\n"
+  printf "${ERR}Unsupported host platform: ${HOST_PLATFORM}${NC}\n"
   exit 1
 fi
 
@@ -68,7 +70,7 @@ fi
 
 if [ -z "$BUCKET_PATH" ]; then
   echo "If you want to upload deployment bundle to a remote storage location, enter the desired bucket url:"
-  printf "  example: ${BLUE}${BUCKET_PATH_EXAMPLE}${NC}\n"
+  printf "  example: ${INFO}${BUCKET_PATH_EXAMPLE}${NC}\n"
   echo "  leave blank to skip uploading bundle"
   read -p "Enter the bucket url: (or leave blank for none) " BUCKET_PATH
 fi
@@ -86,7 +88,7 @@ if [ ! -z "$BUCKET_PATH" ]; then
 
     # If the previous command was not successful (gsutil is not installed)
     if [[ $? -ne 0 ]]; then
-        printf "${RED}Error: gsutil is not installed, but it is required to upload bundle. Please install gsutil and re-run this script - or run it without the <bucket-path> argument.${NC}\n"
+        printf "${ERR}Error: gsutil is not installed, but it is required to upload bundle. Please install gsutil and re-run this script - or run it without the <bucket-path> argument.${NC}\n"
         exit 1
     fi
   elif [ "$HOST_PLATFORM" == "aws" ]; then
@@ -97,33 +99,30 @@ if [ ! -z "$BUCKET_PATH" ]; then
 
     # If the previous command was not successful (gsutil is not installed)
     if [[ $? -ne 0 ]]; then
-      printf "${RED}Error: s3 is not installed, but it is required to upload bundle. Please install s3 (included in AWS CLI tools) and re-run this script - or run it without the <bucket-path> argument.${NC}\n"
+      printf "${ERR}Error: s3 is not installed, but it is required to upload bundle. Please install s3 (included in AWS CLI tools) and re-run this script - or run it without the <bucket-path> argument.${NC}\n"
       exit 1
     fi
   else
-    printf "${RED}Unsupported host platform: ${HOST_PLATFORM}${NC}\n"
+    printf "${ERR}Unsupported host platform: ${HOST_PLATFORM}${NC}\n"
     exit 1
   fi
-
 
   # if bucket path doesn't begin with prefix, prepend it
   if [[ ! "$BUCKET_PATH" == "$prefix"* ]]; then
     BUCKET_PATH="$prefix$BUCKET_PATH"
   fi
 
-
-  printf "Copying deployment bundle from ${BLUE}${DEPLOYMENT_BUNDLE}${NC} to ${BLUE}${BUCKET_PATH}${NC} ...\n"
+  printf "Copying deployment bundle from ${INFO}${DEPLOYMENT_BUNDLE}${NC} to ${INFO}${BUCKET_PATH}${NC} ...\n"
   "${copy_cmd[@]}" "${DEPLOYMENT_BUNDLE}" "${BUCKET_PATH}${DEPLOYMENT_BUNDLE}"
 
   if [[ $? -ne 0 ]]; then
-    printf "${RED}Error: Failed to upload deployment bundle to ${BUCKET_PATH}${DEPLOYMENT_BUNDLE}${NC}\n"
+    printf "${ERR}Error: Failed to upload deployment bundle to ${BUCKET_PATH}${DEPLOYMENT_BUNDLE}${NC}\n"
     exit 1
   fi
 
   DEPLOYMENT_BUNDLE="${BUCKET_PATH}${DEPLOYMENT_BUNDLE}"
-  printf "Deployment bundle uploaded to ${BLUE}${DEPLOYMENT_BUNDLE}${NC}.\n"
+  printf "Deployment bundle uploaded to ${INFO}${DEPLOYMENT_BUNDLE}${NC}.\n"
 fi
-
 
 if grep -q '^[[:space:]]*deployment_bundle' "$TFVARS_FILE" ; then
   sed -i .bck "/^[[:space:]]*deployment_bundle.*/c\\
@@ -133,13 +132,12 @@ else
   printf "deployment_bundle = \"${DEPLOYMENT_BUNDLE}\"\n\n" >> $TFVARS_FILE
 fi
 
-printf "Deployment bundle built: ${BLUE}${DEPLOYMENT_BUNDLE}${NC}.\n"
-
+printf "Deployment bundle built: ${INFO}${DEPLOYMENT_BUNDLE}${NC}.\n"
 
 echo "#!/bin/bash" > ./update-bundle
 printf "\n# Use this script rebuild your deployment bundle and update your terraform.tfvars to use the new one\n" >> ./update-bundle
 echo "${0} ${@}" >> ./update-bundle
 chmod +x ./update-bundle
 
-printf "If you update your proxy version in the future, you can use the ${BLUE}update-bundle${NC} script we've generated in your working directory to update it.\n"
+printf "If you update your proxy version in the future, you can use the ${INFO}update-bundle${NC} script we've generated in your working directory to update it.\n"
 

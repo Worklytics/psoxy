@@ -1,35 +1,48 @@
 package co.worklytics.psoxy.storage;
 
-import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.gateway.*;
-import co.worklytics.test.MockModules;
-import com.avaulta.gateway.rules.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
-import dagger.Component;
-import dagger.Module;
-import dagger.Provides;
-import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-import java.io.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.zip.GZIPOutputStream;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import com.avaulta.gateway.rules.BulkDataRules;
+import com.avaulta.gateway.rules.ColumnarRules;
+import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
+import com.avaulta.gateway.rules.RuleSet;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
+import co.worklytics.psoxy.PsoxyModule;
+import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.StorageEventRequest;
+import co.worklytics.test.MockModules;
+import dagger.Component;
+import dagger.Module;
+import dagger.Provides;
+import lombok.SneakyThrows;
 
 class StorageHandlerTest {
 
@@ -130,7 +143,7 @@ class StorageHandlerTest {
 
 
         StorageEventRequest request =
-            handler.buildRequest("bucket-in", "directory/file.csv", handler.buildDefaultTransform(), null);
+            handler.buildRequest("bucket-in", "directory/file.csv", handler.buildDefaultTransform(), null, null);
 
         assertEquals("directory/file.csv", request.getDestinationObjectPath());
     }
@@ -159,7 +172,7 @@ class StorageHandlerTest {
             .rules(mock(BulkDataRules.class))
             .build();
 
-        StorageEventRequest request = handler.buildRequest("bucket-in", "directory/file.csv", transform, null);
+        StorageEventRequest request = handler.buildRequest("bucket-in", "directory/file.csv", transform, null, null);
 
         assertEquals("bucket-in", request.getSourceBucketName());
         assertEquals("directory/file.csv", request.getSourceObjectPath());
@@ -324,7 +337,7 @@ class StorageHandlerTest {
         when(config.getConfigPropertyAsOptional(BulkModeConfigProperty.COMPRESS_OUTPUT_ALWAYS))
             .thenReturn(Optional.of("false"));
 
-        StorageEventRequest request = handler.buildRequest("bucket", filename, handler.buildDefaultTransform(), contentEncoding);
+        StorageEventRequest request = handler.buildRequest("bucket", filename, handler.buildDefaultTransform(), contentEncoding, null);
         assertEquals(expected, request.getDecompressInput());
         assertEquals(expected, request.getCompressOutput());
     }
@@ -342,7 +355,7 @@ class StorageHandlerTest {
         when(config.getConfigPropertyAsOptional(BulkModeConfigProperty.COMPRESS_OUTPUT_ALWAYS))
             .thenReturn(Optional.of("true"));
 
-        StorageEventRequest request = handler.buildRequest("bucket", filename, handler.buildDefaultTransform(), contentEncoding);
+        StorageEventRequest request = handler.buildRequest("bucket", filename, handler.buildDefaultTransform(), contentEncoding, null);
         assertEquals(expectCompressedInput, request.getDecompressInput());
         assertEquals(expectCompressedOutput, request.getCompressOutput());
     }

@@ -5,6 +5,8 @@ import java.net.ConnectException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -114,7 +116,7 @@ public class ApiDataRequestHandler {
     @Inject
     PseudonymizerImplFactory pseudonymizerImplFactory;
     @Inject
-    RESTRules rules;
+    Lazy<RESTRules> rules;
     @Inject
     HealthCheckRequestHandler healthCheckRequestHandler;
     @Inject
@@ -193,7 +195,7 @@ public class ApiDataRequestHandler {
                 if (this.sanitizer == null) {
                     Pseudonymizer.ConfigurationOptions options =
                             pseudonymizerImplFactory.buildOptions(config);
-                    this.sanitizer = sanitizerFactory.create(rules,
+                    this.sanitizer = sanitizerFactory.create(rules.get(),
                             pseudonymizerImplFactory.create(options));
                 }
             }
@@ -254,6 +256,14 @@ public class ApiDataRequestHandler {
 
         try {
             this.sanitizer = loadSanitizerRules();
+        } catch (co.worklytics.psoxy.rules.InvalidRulesException e) {
+            log.log(Level.SEVERE, "Error loading sanitizer rules: " + e.getMessage(), e);
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                            e.getErrorCause().name())
+                    .body("Error loading sanitizer rules")
+                    .build();
         } catch (Throwable e) {
             log.log(Level.SEVERE, "Error loading sanitizer rules", e);
             return HttpEventResponse.builder()
@@ -321,7 +331,7 @@ public class ApiDataRequestHandler {
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                     ErrorCauses.BLOCKED_BY_RULES.name());
             log.warning(String.format("%s. Blocked call by rules %s", logEntry,
-                    objectMapper.writeValueAsString(rules)));
+                    objectMapper.writeValueAsString(rules.get())));
             return builder.build();
         }
 
@@ -589,7 +599,7 @@ public class ApiDataRequestHandler {
             loadSanitizerRules(); // ensure sanitizer is loaded
             if (!Objects.equals(pseudonymImplementation.get(),
                     sanitizer.getPseudonymizer().getOptions().getPseudonymImplementation())) {
-                return sanitizerFactory.create(rules,
+                return sanitizerFactory.create(rules.get(),
                         pseudonymizerImplFactory.create(sanitizer.getPseudonymizer().getOptions()
                                 .withPseudonymImplementation(pseudonymImplementation.get())));
             }
@@ -777,11 +787,30 @@ public class ApiDataRequestHandler {
         // type and subtype, such as 'text/plain'."}}
         headers.setAccept(ContentType.APPLICATION_JSON.getMimeType());
 
-        sanitizer.getAllowedRequestHeaders(request.getHttpMethod(), targetUrl)
-                .ifPresent(i -> i.forEach(h -> request.getHeader(h).ifPresent(headerValue -> {
-                    logIfDevelopmentMode(() -> String.format("Header %s included", h));
-                    headers.set(h, headerValue);
-                })));
+        Collection<String> allowedHeaders = sanitizer.getAllowedRequestHeaders(request.getHttpMethod(), targetUrl)
+                .orElse(Collections.emptyList());
+
+        for (String h : allowedHeaders) {
+            // handle multi-valued headers
+            List<String> headerValues = request.getMultiValueHeader(h)
+                    .or(() -> request.getHeader(h).map(List::of)) // fallback if specific multi-value not impl
+                    .orElse(Collections.emptyList());
+
+            if (!headerValues.isEmpty()) {
+               List<String> valuesToForward = headerValues.stream()
+                       .map(v -> pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(v,
+                               reversibleTokenizationStrategy))
+                       .collect(Collectors.toList());
+
+                logIfDevelopmentMode(() -> String.format("Header %s included (values: %s)", h, valuesToForward));
+
+                // google-http-client HttpHeaders uses (String name, Object value);
+                // if value is Collection, it treats as multi-valued
+                // if value is String, single value
+                // so we can just pass the list
+                headers.set(h, valuesToForward);
+            }
+        }
     }
 
     /**

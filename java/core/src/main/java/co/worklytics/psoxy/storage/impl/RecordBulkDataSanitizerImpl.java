@@ -1,18 +1,28 @@
 package co.worklytics.psoxy.storage.impl;
 
-import co.worklytics.psoxy.PseudonymizedIdentity;
-import co.worklytics.psoxy.Pseudonymizer;
-import co.worklytics.psoxy.storage.BulkDataSanitizer;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.RecordRules;
 import com.avaulta.gateway.rules.transforms.RecordTransform;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.JsonPathException;
 import com.jayway.jsonpath.MapFunction;
+import co.worklytics.psoxy.PseudonymizedIdentity;
+import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.EqualsAndHashCode;
@@ -20,22 +30,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.extern.java.Log;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Triple;
-
-import javax.inject.Inject;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Log
 public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
@@ -48,6 +42,9 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
     @Inject
     UrlSafeTokenPseudonymEncoder encoder;
 
+    @Inject
+    ObjectMapper objectMapper;
+
     RecordRules rules;
 
     @AssistedInject
@@ -58,7 +55,8 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
 
     @Override
-    public void sanitize(@NonNull Reader reader,
+    public void sanitize(@NonNull co.worklytics.psoxy.gateway.StorageEventRequest request,
+                         @NonNull Reader reader,
                          @NonNull Writer writer,
                          @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
@@ -71,72 +69,62 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                 ))
                 .collect(Collectors.toList());
 
-        if (rules.getFormat() == RecordRules.Format.NDJSON) {
-            sanitizeNdjson(reader, writer, compiledTransforms);
-        } else if (rules.getFormat() == RecordRules.Format.CSV) {
-            sanitizeCsv(reader, writer, compiledTransforms);
-        } else {
-            throw new IllegalArgumentException("Unsupported format: " + rules.getFormat());
+        RecordRules.Format format = rules.getFormat();
+
+        if (format == RecordRules.Format.AUTO) {
+            String contentType = request.getContentType();
+            if (StringUtils.isBlank(contentType)) {
+                log.warning("Content-Type is missing; defaulting to NDJSON for AUTO format.");
+                format = RecordRules.Format.NDJSON;
+            } else if (StringUtils.containsIgnoreCase(contentType, "application/json")) {
+                format = RecordRules.Format.JSON_ARRAY;
+            } else if (StringUtils.containsIgnoreCase(contentType, "text/csv")) {
+                format = RecordRules.Format.CSV;
+            } else {
+                format = RecordRules.Format.NDJSON;
+            }
         }
-    }
 
-    @VisibleForTesting
-    void sanitizeCsv(@NonNull Reader reader,
-                     @NonNull Writer writer,
-                     @NonNull List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms) throws IOException {
-
-        try (CSVParser records = CSVFormat.DEFAULT
-                .withFirstRecordAsHeader()
-                .withIgnoreHeaderCase()
-                .withTrim()
-                .parse(reader);
-             CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.builder()
-                        .setHeader(records.getHeaderNames().toArray(new String[0]))
-                        .setRecordSeparator(records.getFirstEndOfLine()) //match source
-                        .build())) {
-            Iterator<CSVRecord> iter = records.iterator();
-
-            while(iter.hasNext()) {
-                CSVRecord record = iter.next();
+        try (RecordReader recordReader = createReader(format, reader);
+             RecordWriter recordWriter = createWriter(format, writer)) {
+            
+            recordWriter.beginRecordSet();
+            
+            Object record;
+            while ((record = recordReader.readRecord()) != null) {
                 try {
-                    LinkedHashMap result = applyTransforms(record.toMap(), compiledTransforms);
-
-                    records.getHeaderNames()
-                        .forEach(header -> {
-                            try {
-                                printer.print(result.get(header));
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        });
-
-                    printer.println();
+                    Object sanitized = applyTransforms(record, compiledTransforms);
+                    recordWriter.writeRecord(sanitized);
                 } catch (UnmatchedPseudonymization e) {
                     log.warning("Skipped record due to UnmatchedPseudonymization: " + e.getPath());
                 }
             }
+            
+            recordWriter.endRecordSet();
         }
     }
 
-    @VisibleForTesting
-    void sanitizeNdjson(@NonNull Reader reader,
-                        @NonNull Writer writer,
-                        @NonNull List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms) throws IOException {
-        try (BufferedReader bufferedReader = new BufferedReader(reader)) {
-            String line;
-            while ((line = StringUtils.trimToNull(bufferedReader.readLine())) != null) {
+    RecordReader createReader(RecordRules.Format format, Reader reader) {
+        switch (format) {
+            case CSV:
+                return new CsvRecordReader(reader);
+            case JSON_ARRAY:
+                return new JsonArrayRecordReader(reader, objectMapper, jsonConfiguration);
+            case NDJSON:
+            default:
+                return new NdjsonRecordReader(reader, jsonConfiguration);
+        }
+    }
 
-                Object document = jsonConfiguration.jsonProvider().parse(line);
-
-                try {
-                    document = applyTransforms(document, compiledTransforms);
-                    writer.append(jsonConfiguration.jsonProvider().toJson(document));
-                    writer.append('\n'); // NDJSON uses newlines between records
-                    writer.flush(); //after each line
-                } catch (UnmatchedPseudonymization e) {
-                    log.warning("Skipped record due to UnmatchedPseudonymization: " + e.getPath());
-                }
-            }
+    RecordWriter createWriter(RecordRules.Format format, Writer writer) {
+        switch (format) {
+            case CSV:
+                return new CsvRecordWriter(writer);
+            case JSON_ARRAY:
+                return new JsonArrayRecordWriter(writer, objectMapper, jsonConfiguration);
+            case NDJSON:
+            default:
+                return new NdjsonRecordWriter(writer, jsonConfiguration);
         }
     }
 
@@ -149,7 +137,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
      * @return the transformed document
      * @throws UnmatchedPseudonymization if a pseudonymization transform should be applied, but nothing matches the path
      */
-    LinkedHashMap applyTransforms(Object document, List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
+    LinkedHashMap<String, Object> applyTransforms(Object document, List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
             throws UnmatchedPseudonymization {
         for (Triple<JsonPath, RecordTransform, MapFunction> compiledTransform : compiledTransforms) {
             if (compiledTransform.getMiddle() instanceof RecordTransform.Pseudonymize) {
@@ -167,7 +155,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
         }
 
         //abusing implementation detail of the JSONPath library
-        return (LinkedHashMap) document;
+        return (LinkedHashMap<String, Object>) document;
     }
 
     private MapFunction getMapFunction(RecordTransform transform,

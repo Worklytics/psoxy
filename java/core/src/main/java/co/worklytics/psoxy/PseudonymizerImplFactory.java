@@ -1,18 +1,18 @@
 package co.worklytics.psoxy;
 
+import java.util.Optional;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.SecretStore;
-import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import dagger.assisted.AssistedFactory;
-
-import java.util.Optional;
 
 @AssistedFactory
 public interface PseudonymizerImplFactory {
 
     PseudonymizerImpl create(Pseudonymizer.ConfigurationOptions configurationOptions);
 
+    // explicitly checking for LEGACY to warn user, so must suppress deprecation warning
+    @SuppressWarnings("deprecation")
     default Pseudonymizer.ConfigurationOptions buildOptions(ConfigService config) {
         Pseudonymizer.ConfigurationOptions.ConfigurationOptionsBuilder builder = Pseudonymizer.ConfigurationOptions.builder();
 

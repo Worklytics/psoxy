@@ -9,11 +9,12 @@
 set -euo pipefail
 
 # Color definitions
-BLUE='\033[0;34m'
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+COLORSCHEME_SH="$(dirname "$0")/../set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+    source "$COLORSCHEME_SH"
+else
+    ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
 
 # Function to display usage information
 usage() {
@@ -105,7 +106,7 @@ else
             # Linux
             TIMESTAMP=$(date -u -d '1 week ago' '+%Y-%m-%dT%H:%M:%SZ')
         fi
-        echo -e "No timestamp provided, defaulting to one week ago: ${BLUE}$TIMESTAMP${NC}"
+        echo -e "No timestamp provided, defaulting to one week ago: ${INFO}$TIMESTAMP${NC}"
     fi
     
     # Validate bucket name (basic check)
@@ -130,13 +131,13 @@ fi
 
 # Check if user is authenticated
 if ! aws sts get-caller-identity &> /dev/null; then
-    echo -e "${RED}Error: Not authenticated with AWS. Please configure your AWS credentials.${NC}"
+    echo -e "${ERR}Error: Not authenticated with AWS. Please configure your AWS credentials.${NC}"
     exit 1
 fi
 
 # Assume role if provided
 if [ -n "$ROLE_ARN" ]; then
-    echo -e "Assuming role: ${BLUE}$ROLE_ARN${NC}"
+    echo -e "Assuming role: ${INFO}$ROLE_ARN${NC}"
     
     # Generate a session name
     SESSION_NAME="replay-s3-writes-$(date +%s)"
@@ -148,7 +149,7 @@ if [ -n "$ROLE_ARN" ]; then
         --output json 2>&1)
     
     if [ $? -ne 0 ]; then
-        echo -e "${RED}Error: Failed to assume role${NC}"
+        echo -e "${ERR}Error: Failed to assume role${NC}"
         echo "$ASSUME_ROLE_OUTPUT"
         exit 1
     fi
@@ -167,11 +168,11 @@ if [ -n "$ROLE_ARN" ]; then
     fi
     
     if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ] || [ -z "$AWS_SESSION_TOKEN" ]; then
-        echo -e "${RED}Error: Failed to extract credentials from assume-role response${NC}"
+        echo -e "${ERR}Error: Failed to extract credentials from assume-role response${NC}"
         exit 1
     fi
     
-    echo -e "${GREEN}✓ Successfully assumed role${NC}"
+    echo -e "${SUCCESS}✓ Successfully assumed role${NC}"
     echo ""
 fi
 
@@ -183,7 +184,7 @@ echo "  • s3:GetObjectTagging   (required for copy operation)"
 echo "  • s3:PutObject          (to copy objects to themselves and trigger write events)"
 echo "  • s3:PutObjectTagging   (required for copy operation)"
 echo ""
-echo -e "${BLUE}A custom policy or appropriate role${NC} should provide these permissions."
+echo -e "${INFO}A custom policy or appropriate role${NC} should provide these permissions."
 echo ""
 echo -e "NOTE: This script adds/updates a 'psoxy-last-replay' metadata field on each object."
 echo "      Existing metadata, tags, and content are preserved."
@@ -191,7 +192,7 @@ echo ""
 
 # Handle single object mode
 if [[ "$SINGLE_OBJECT_MODE" == true ]]; then
-    echo -e "Single object mode: Replaying write on ${BLUE}s3://$BUCKET_NAME/$OBJECT_KEY${NC}"
+    echo -e "Single object mode: Replaying write on ${INFO}s3://$BUCKET_NAME/$OBJECT_KEY${NC}"
     echo ""
     
     # Perform the write replay operation on the single object by copying to itself
@@ -203,7 +204,7 @@ if [[ "$SINGLE_OBJECT_MODE" == true ]]; then
     # Get existing metadata
     EXISTING_METADATA=$(aws s3api head-object --bucket "$BUCKET_NAME" --key "$OBJECT_KEY" --query 'Metadata' --output json 2>"$ERROR_OUTPUT")
     if [ $? -ne 0 ]; then
-        echo -e "${RED}✗ Failed to get object metadata${NC}"
+        echo -e "${ERR}✗ Failed to get object metadata${NC}"
         cat "$ERROR_OUTPUT"
         exit 1
     fi
@@ -229,13 +230,13 @@ if [[ "$SINGLE_OBJECT_MODE" == true ]]; then
         --metadata-directive REPLACE \
         --tagging-directive COPY \
         > /dev/null 2>"$ERROR_OUTPUT"; then
-        echo -e "${GREEN}✓ Successfully replayed write on s3://$BUCKET_NAME/$OBJECT_KEY${NC}"
+        echo -e "${SUCCESS}✓ Successfully replayed write on s3://$BUCKET_NAME/$OBJECT_KEY${NC}"
         exit 0
     else
-        echo -e "${RED}✗ Failed to replay write on s3://$BUCKET_NAME/$OBJECT_KEY${NC}"
+        echo -e "${ERR}✗ Failed to replay write on s3://$BUCKET_NAME/$OBJECT_KEY${NC}"
         ERROR_MSG=$(cat "$ERROR_OUTPUT")
         if echo "$ERROR_MSG" | grep -q -i "AccessDenied\|Forbidden\|403"; then
-            echo -e "${RED}Permission Error: Access denied. Please verify you have the required permissions.${NC}"
+            echo -e "${ERR}Permission Error: Access denied. Please verify you have the required permissions.${NC}"
         fi
         echo "$ERROR_MSG"
         exit 1
@@ -247,7 +248,7 @@ TEMP_FILE=$(mktemp)
 trap 'rm -f "$TEMP_FILE"' EXIT
 
 # List objects created after the timestamp and store in temp file
-echo -e "Enumerating objects created after ${BLUE}$TIMESTAMP${NC}..."
+echo -e "Enumerating objects created after ${INFO}$TIMESTAMP${NC}..."
 
 # Convert our timestamp to epoch for comparison
 TIMESTAMP_EPOCH=""
@@ -271,12 +272,12 @@ LIST_OUTPUT=$(aws s3api list-objects-v2 --bucket "$BUCKET_NAME" --query 'Content
 LIST_EXIT_CODE=$?
 
 if [ $LIST_EXIT_CODE -ne 0 ]; then
-    echo -e "${RED}Error: Failed to list objects in bucket${NC}"
+    echo -e "${ERR}Error: Failed to list objects in bucket${NC}"
     ERROR_MSG=$(cat "$ERROR_FILE")
     if echo "$ERROR_MSG" | grep -q -i "AccessDenied\|Forbidden\|403"; then
-        echo -e "${RED}Permission Error: Access denied. Please verify you have s3:ListBucket permission on the bucket.${NC}"
+        echo -e "${ERR}Permission Error: Access denied. Please verify you have s3:ListBucket permission on the bucket.${NC}"
     elif echo "$ERROR_MSG" | grep -q -i "NoSuchBucket"; then
-        echo -e "${RED}Error: Bucket does not exist or you don't have permission to access it.${NC}"
+        echo -e "${ERR}Error: Bucket does not exist or you don't have permission to access it.${NC}"
     fi
     echo "$ERROR_MSG"
     exit 1
@@ -312,11 +313,11 @@ mv "$FILTERED_FILE" "$TEMP_FILE"
 TOTAL_OBJECTS=$(wc -l < "$TEMP_FILE" | tr -d ' ')
 
 if [ "$TOTAL_OBJECTS" -eq 0 ]; then
-    echo -e "${YELLOW}No objects found modified after $TIMESTAMP${NC}"
+    echo -e "${WARN}No objects found modified after $TIMESTAMP${NC}"
     exit 0
 fi
 
-echo -e "Found ${BLUE}$TOTAL_OBJECTS${NC} objects to replay writes on"
+echo -e "Found ${INFO}$TOTAL_OBJECTS${NC} objects to replay writes on"
 echo ""
 
 # Process each object
@@ -326,7 +327,7 @@ FAILED_COUNT=0
 
 while IFS= read -r object_key; do
     CURRENT=$((CURRENT + 1))
-    echo -e "[$CURRENT/$TOTAL_OBJECTS] Replaying write of object: ${BLUE}s3://$BUCKET_NAME/$object_key${NC}"
+    echo -e "[$CURRENT/$TOTAL_OBJECTS] Replaying write of object: ${INFO}s3://$BUCKET_NAME/$object_key${NC}"
     
     # Perform the write replay operation by copying object to itself
     # AWS requires changing something when copying to self, so we add a metadata field
@@ -337,7 +338,7 @@ while IFS= read -r object_key; do
     EXISTING_METADATA=$(aws s3api head-object --bucket "$BUCKET_NAME" --key "$object_key" --query 'Metadata' --output json 2>"$ERROR_OUTPUT")
     if [ $? -ne 0 ]; then
         FAILED_COUNT=$((FAILED_COUNT + 1))
-        echo -e "  ${RED}✗ Failed to get object metadata${NC}"
+        echo -e "  ${ERR}✗ Failed to get object metadata${NC}"
         if [ "$FAILED_COUNT" -le 3 ]; then
             cat "$ERROR_OUTPUT"
         fi
@@ -367,14 +368,14 @@ while IFS= read -r object_key; do
         --tagging-directive COPY \
         > /dev/null 2>"$ERROR_OUTPUT"; then
         SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-        echo -e "  ${GREEN}✓ Success${NC}"
+        echo -e "  ${SUCCESS}✓ Success${NC}"
     else
         FAILED_COUNT=$((FAILED_COUNT + 1))
         ERROR_MSG=$(cat "$ERROR_OUTPUT")
         if echo "$ERROR_MSG" | grep -q -i "AccessDenied\|Forbidden\|403"; then
-            echo -e "  ${RED}✗ Failed - Permission Error${NC}"
+            echo -e "  ${ERR}✗ Failed - Permission Error${NC}"
         else
-            echo -e "  ${RED}✗ Failed${NC}"
+            echo -e "  ${ERR}✗ Failed${NC}"
         fi
         # Only show detailed error for first few failures to avoid spam
         if [ "$FAILED_COUNT" -le 3 ]; then
@@ -390,13 +391,13 @@ done < "$TEMP_FILE"
 
 echo ""
 echo -e "Write replay process completed!"
-echo -e "Total objects processed: ${BLUE}$TOTAL_OBJECTS${NC}"
-echo -e "Successful write replays: ${GREEN}$SUCCESS_COUNT${NC}"
-echo -e "Failed write replays: ${RED}$FAILED_COUNT${NC}"
+echo -e "Total objects processed: ${INFO}$TOTAL_OBJECTS${NC}"
+echo -e "Successful write replays: ${SUCCESS}$SUCCESS_COUNT${NC}"
+echo -e "Failed write replays: ${ERR}$FAILED_COUNT${NC}"
 
 if [ "$FAILED_COUNT" -gt 0 ]; then
     echo ""
-    echo -e "${YELLOW}Note: If you encountered permission errors, consider:${NC}"
+    echo -e "${WARN}Note: If you encountered permission errors, consider:${NC}"
     echo "  • Using --role option to assume a role with appropriate permissions"
     echo "  • Verifying your IAM user/role has the required S3 permissions"
     exit 1

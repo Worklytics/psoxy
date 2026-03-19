@@ -235,6 +235,9 @@ locals {
   secrets_to_grant_access_to = {
     AUTH_ISSUER = {
       secret_id = module.auth_issuer_secret.secret_ids_within_project["AUTH_ISSUER"]
+    },
+    SERVICE_URL = {
+      secret_id = module.auth_issuer_secret.secret_ids_within_project["SERVICE_URL"]
     }
   }
 }
@@ -423,7 +426,6 @@ resource "google_cloud_scheduler_job" "trigger_batch_processing" {
   }
 }
 
-
 locals {
   proxy_endpoint_url  = google_cloudfunctions2_function.function.service_config[0].uri
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
@@ -501,6 +503,8 @@ resource "local_file" "test_script" {
     example_payload        = coalesce(var.example_payload, "{\"test\": \"data\"}")
     example_identity       = var.example_identity
     collection_path        = "/"
+    scheduler_job_name     = google_cloud_scheduler_job.trigger_batch_processing.id
+    bucket_name            = module.sanitized_webhook_output.bucket_name
   })
 }
 

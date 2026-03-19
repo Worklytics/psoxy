@@ -9,11 +9,12 @@
 set -euo pipefail
 
 # Color definitions
-BLUE='\033[0;34m'
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+COLORSCHEME_SH="$(dirname "$0")/../set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+    source "$COLORSCHEME_SH"
+else
+    ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
 
 # Function to display usage information
 usage() {
@@ -85,7 +86,7 @@ else
             # Linux
             TIMESTAMP=$(date -u -d '1 week ago' '+%Y-%m-%dT%H:%M:%SZ')
         fi
-        echo -e "No timestamp provided, defaulting to one week ago: ${BLUE}$TIMESTAMP${NC}"
+        echo -e "No timestamp provided, defaulting to one week ago: ${INFO}$TIMESTAMP${NC}"
     fi
     
     # Validate bucket name (basic check)
@@ -120,20 +121,20 @@ echo "  • storage.objects.list    (to list objects in the bucket)"
 echo "  • storage.objects.get     (to get object metadata including creation time)"
 echo "  • storage.objects.update  (to rewrite objects and trigger write events)"
 echo ""
-echo -e "${BLUE}roles/storage.objectAdmin${NC} is the least-privileged predefined role that provides these permissions."
+echo -e "${INFO}roles/storage.objectAdmin${NC} is the least-privileged predefined role that provides these permissions."
 echo ""
 
 # Handle single object mode
 if [[ "$SINGLE_OBJECT_MODE" == true ]]; then
-    echo -e "Single object mode: Replaying write on ${BLUE}$OBJECT_PATH${NC}"
+    echo -e "Single object mode: Replaying write on ${INFO}$OBJECT_PATH${NC}"
     echo ""
     
     # Perform the write replay operation on the single object
     if gsutil rewrite -kO "$OBJECT_PATH" > /dev/null 2>&1; then
-        echo -e "${GREEN}✓ Successfully replayed write on $OBJECT_PATH${NC}"
+        echo -e "${SUCCESS}✓ Successfully replayed write on $OBJECT_PATH${NC}"
         exit 0
     else
-        echo -e "${RED}✗ Failed to replay write on $OBJECT_PATH${NC}"
+        echo -e "${ERR}✗ Failed to replay write on $OBJECT_PATH${NC}"
         exit 1
     fi
 fi
@@ -143,7 +144,7 @@ TEMP_FILE=$(mktemp)
 trap 'rm -f "$TEMP_FILE"' EXIT
 
 # List objects created after the timestamp and store in temp file
-echo -e "Enumerating objects created after ${BLUE}$TIMESTAMP${NC}..."
+echo -e "Enumerating objects created after ${INFO}$TIMESTAMP${NC}..."
 
 # First, get all objects in the bucket
 echo "Getting list of all objects in bucket..."
@@ -196,11 +197,11 @@ mv "$FILTERED_FILE" "$TEMP_FILE"
 TOTAL_OBJECTS=$(wc -l < "$TEMP_FILE" | tr -d ' ')
 
 if [ "$TOTAL_OBJECTS" -eq 0 ]; then
-    echo -e "${YELLOW}No objects found created after $TIMESTAMP${NC}"
+    echo -e "${WARN}No objects found created after $TIMESTAMP${NC}"
     exit 0
 fi
 
-echo -e "Found ${BLUE}$TOTAL_OBJECTS${NC} objects to replay writes on"
+echo -e "Found ${INFO}$TOTAL_OBJECTS${NC} objects to replay writes on"
 echo ""
 
 # Process each object
@@ -210,15 +211,15 @@ FAILED_COUNT=0
 
 while IFS= read -r object_path; do
     CURRENT=$((CURRENT + 1))
-    echo -e "[$CURRENT/$TOTAL_OBJECTS] Replaying write of object: ${BLUE}$object_path${NC}"
+    echo -e "[$CURRENT/$TOTAL_OBJECTS] Replaying write of object: ${INFO}$object_path${NC}"
     
     # Perform the write replay operation
     if gsutil rewrite -kO "$object_path" > /dev/null 2>&1; then
         SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-        echo -e "  ${GREEN}✓ Success${NC}"
+        echo -e "  ${SUCCESS}✓ Success${NC}"
     else
         FAILED_COUNT=$((FAILED_COUNT + 1))
-        echo -e "  ${RED}✗ Failed${NC}"
+        echo -e "  ${ERR}✗ Failed${NC}"
     fi
     
     # Add small delay to avoid overwhelming the API
@@ -228,9 +229,9 @@ done < "$TEMP_FILE"
 
 echo ""
 echo -e "Write replay process completed!"
-echo -e "Total objects processed: ${BLUE}$TOTAL_OBJECTS${NC}"
-echo -e "Successful write replays: ${GREEN}$SUCCESS_COUNT${NC}"
-echo -e "Failed write replays: ${RED}$FAILED_COUNT${NC}"
+echo -e "Total objects processed: ${INFO}$TOTAL_OBJECTS${NC}"
+echo -e "Successful write replays: ${SUCCESS}$SUCCESS_COUNT${NC}"
+echo -e "Failed write replays: ${ERR}$FAILED_COUNT${NC}"
 
 if [ "$FAILED_COUNT" -gt 0 ]; then
     exit 1

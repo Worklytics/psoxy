@@ -1,17 +1,17 @@
-import { constants as httpCodes } from 'http2';
 import { execFileSync } from 'child_process';
-import {
-  addFilenameSuffix,
-  environmentCheck,
-  isGzipped,
-  parseBucketOption,
-  unzip,
-} from './lib/utils.js';
-import aws from './lib/aws.js';
 import fs from 'fs';
+import { constants as httpCodes } from 'http2';
+import path from 'path';
+import aws from './lib/aws.js';
 import gcp from './lib/gcp.js';
 import getLogger from './lib/logger.js';
-import path from 'path';
+import {
+    addFilenameSuffix,
+    environmentCheck,
+    isGzipped,
+    parseBucketOption,
+    unzip,
+} from './lib/utils.js';
 
 const TIMESTAMP = Date.now();
 const SANITIZED_FILE_SUFFIX = 'sanitized';
@@ -200,10 +200,13 @@ export default async function (options = {}) {
     logger.info(diff);
   }
 
-  if (isOriginalGzipped) {
-    // delete unzipped files
-    [originalDiffPath, sanitizedDiffPath]
-      .forEach(filePath => fs.unlinkSync(filePath));
+  if (originalDiffPath !== original) {
+    // delete unzipped file
+    fs.unlinkSync(originalDiffPath);
+  }
+  if (sanitizedDiffPath !== sanitized) {
+    // delete unzipped file
+    fs.unlinkSync(sanitizedDiffPath);
   }
 
   if (!options.saveSanitizedFile) {

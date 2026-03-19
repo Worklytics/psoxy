@@ -66,6 +66,14 @@ import lombok.SneakyThrows;
 
 public class BulkDataSanitizerImplTest {
 
+    private static final co.worklytics.psoxy.gateway.StorageEventRequest DUMMY_REQUEST = 
+        co.worklytics.psoxy.gateway.StorageEventRequest.builder()
+            .sourceBucketName("test-bucket")
+            .sourceObjectPath("test-object")
+            .destinationBucketName("test-dest-bucket")
+            .destinationObjectPath("test-dest-object")
+            .build();
+
     @Inject
     ColumnarBulkDataSanitizerImplFactory columnarFileSanitizerImplFactory;
 
@@ -139,7 +147,7 @@ public class BulkDataSanitizerImplTest {
         columnarFileSanitizerImpl.setRules(rules);
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
     }
@@ -163,7 +171,7 @@ public class BulkDataSanitizerImplTest {
         columnarFileSanitizerImpl.setRules(rules);
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
     }
@@ -187,7 +195,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
     }
@@ -207,7 +215,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
 
             assertTrue(out.toString().contains(pseudonymizer.pseudonymize("1").getHash()));
@@ -227,7 +235,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
             assertTrue(out.toString().contains(pseudonymizer.pseudonymize("1").getHash()));
         }
@@ -258,7 +266,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
     }
@@ -283,7 +291,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
     }
@@ -316,7 +324,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
     }
@@ -344,7 +352,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
     }
@@ -365,7 +373,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
     }
@@ -386,7 +394,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
     }
@@ -420,7 +428,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, defaultPseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, defaultPseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
     }
@@ -459,7 +467,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, defaultPseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, defaultPseudonymizer);
             String output = out.toString();
             assertEquals(EXPECTED, output);
         }
@@ -494,7 +502,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, defaultPseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, defaultPseudonymizer);
             String output = out.toString();
             assertEquals(EXPECTED, output);
         }
@@ -532,7 +540,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, defaultPseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, defaultPseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
     }
@@ -552,7 +560,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
 
@@ -582,7 +590,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
     }
@@ -649,7 +657,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
 
             String resultString = out.toString();
@@ -709,7 +717,7 @@ public class BulkDataSanitizerImplTest {
         String resultString;
         try (StringReader in = new StringReader(INITIAL);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
 
             resultString = out.toString();
             assertEquals(EXPECTED, resultString);
@@ -749,7 +757,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
             StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
 
             try (CSVParser parser = CSVParser.parse(out.toString(), CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
@@ -788,7 +796,7 @@ public class BulkDataSanitizerImplTest {
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
     }
@@ -821,7 +829,7 @@ public class BulkDataSanitizerImplTest {
 
         try (StringReader in = new StringReader(SOURCE);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
     }
@@ -841,7 +849,7 @@ public class BulkDataSanitizerImplTest {
 
         try (StringReader in = new StringReader(SOURCE);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals("EMPLOYEE_ID,SWIPE DATE,BUILDING_ID,BUILDING_ASSIGNED\n" +
                 "t~uxVHJj4JLZrUDfo7bwUePfhD5-rd34W1BvTqO4B2PNk,01/01/2024 3:10PM,B1,B2\n", out.toString());
 
@@ -880,7 +888,7 @@ User Name,Email,Action,Feature used,Department,\r
 
         try (Reader in = safeFileReader(inputFile);
              StringWriter out = new StringWriter()) {
-            columnarFileSanitizerImpl.sanitize(in, out, pseudonymizer);
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString());
         }
     }

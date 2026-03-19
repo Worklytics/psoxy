@@ -106,9 +106,6 @@ export default async function (options = {}) {
       const filename = getFileNameFromURL(url);
       await saveToFile(__dirname, filename, JSON.stringify(result, undefined, 2));
       logger.success(`Results saved to: ${__dirname}/${filename}`);
-    } else {
-      // Response potentially long, let's remind to check logs for complete results
-      logger.success(`Check out run log to see complete results: ${__dirname}/run.log`);
     }
 
     logger.success(`${resultMessagePrefix} ${result.statusMessage} - ${result.status}`,

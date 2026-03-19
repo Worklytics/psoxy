@@ -9,7 +9,9 @@ The connector uses a GitHub App to authenticate and access the data. You must pr
 ## Examples
 
 - [Example Rules](github.yaml)
-- Example Data: [original](example-api-responses/original) | [sanitized](example-api-responses/sanitized)
+- Example Data:
+  - [original/user.json](example-api-responses/original/user.json) |
+    [sanitized/user.json](example-api-responses/sanitized/user.json)
 
 ## GitHub Enterprise: Steps to Connect
 
@@ -61,4 +63,4 @@ You can repeat steps 3,6,7 at any time to rotate your key.
 
 ## Reference
 
-These instructions have been derived from [worklytics-connector-specs](../../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
+These instructions have been derived from [worklytics-connector-specs](../../../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.

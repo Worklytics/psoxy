@@ -14,11 +14,12 @@ import org.junit.jupiter.api.Test;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.ByteArrayOutputStream;
+import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-class RefreshTokenTokenRequestBuilderTest {
+class RefreshTokenRequestBuilderTest {
 
     @Inject
     SecretStore secretStore;
@@ -34,13 +35,13 @@ class RefreshTokenTokenRequestBuilderTest {
         MockModules.ForSecretStore.class
     })
     public interface Container {
-        void inject(RefreshTokenTokenRequestBuilderTest test);
+        void inject(RefreshTokenRequestBuilderTest test);
     }
 
     @BeforeEach
     public void setup() {
-        RefreshTokenTokenRequestBuilderTest.Container container =
-            DaggerRefreshTokenTokenRequestBuilderTest_Container.create();
+        RefreshTokenRequestBuilderTest.Container container =
+            DaggerRefreshTokenRequestBuilderTest_Container.create();
         container.inject(this);
     }
 
@@ -62,5 +63,15 @@ class RefreshTokenTokenRequestBuilderTest {
         payload.writeTo(out);
         assertEquals("refresh_token=tokenValue&grant_type=refresh_token&client_secret=secretValue&client_id=1",
             out.toString());
+    }
+
+    @Test
+    public void getEndpoint() {
+        String baseUrl = "https://some-auth-endpoint.com/token";
+
+        URI result = refreshTokenPayloadBuilder.getEndpoint(baseUrl);
+
+        URI expectedUrl = URI.create(baseUrl);
+        assertEquals(expectedUrl, result);
     }
 }

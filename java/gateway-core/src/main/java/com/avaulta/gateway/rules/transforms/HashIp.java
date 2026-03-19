@@ -7,11 +7,12 @@ import lombok.experimental.SuperBuilder;
 /**
  * canonicalize IP address and hash result.
  *
- * "format-preserving", although everything will end up IPv6 (128-bit) even if original was IPv4;
- * this provides slightly wider range of possible values than preserving IPv4 format would, but
- * biggest benefit is simplicity of implementation (using MD5 hash, which is available in many
- * systems)
+ * NOTE: this is explicitly NOT format-preserving; we want it to be clear that the data
+ * has been sanitized, so we use standard tokenization (e.g. "t~..." strings).
  *
+ * Format-preserving encryption/hashing (e.g. to IPv6 addresses) was considered but rejected
+ * because it would make sanitized data appear to contain valid, unsanitized IP addresses, which
+ * could be confusing for compliance/auditing.
  */
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor //for Jackson

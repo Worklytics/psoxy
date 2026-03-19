@@ -1,26 +1,28 @@
 import {
-  CloudWatchLogsClient,
-  DescribeLogStreamsCommand,
-  GetLogEventsCommand,
+    CloudWatchLogsClient,
+    DescribeLogStreamsCommand,
+    GetLogEventsCommand,
 } from '@aws-sdk/client-cloudwatch-logs';
 import {
-  DeleteObjectCommand,
-  GetObjectCommand,
-  ListBucketsCommand,
-  ListObjectsV2Command,
-  PutObjectCommand,
-  S3Client
+    DeleteObjectCommand,
+    GetObjectCommand,
+    ListBucketsCommand,
+    ListObjectsV2Command,
+    PutObjectCommand,
+    S3Client
 } from '@aws-sdk/client-s3';
 import {
-  executeWithRetry,
-  getAWSCredentials,
-  getCommonHTTPHeaders,
-  isGzipped,
-  request,
-  resolveAWSRegion,
-  resolveHTTPMethod,
-  signAWSRequestURL,
-  signJwtWithAWSKMS
+    compareContent,
+    executeWithRetry,
+    getAWSCredentials,
+    getCommonHTTPHeaders,
+    isGzipped,
+    request,
+    resolveAWSRegion,
+    resolveHTTPMethod,
+    signAWSRequestURL,
+    signJwtWithAWSKMS,
+    sleep,
 } from './utils.js';
 
 import fs from 'fs';
@@ -374,6 +376,116 @@ async function deleteObject(bucket, key, options, client) {
     // BypassGovernanceRetention: true,
   }));
 }
+/**
+ * Verifies that a file containing the expected content appears in the bucket after startTime.
+ *
+ * @param {Object} options
+ * @param {string} options.verifyCollection - bucket name
+ * @param {string} options.body - expected content
+ * @param {number} options.startTime - timestamp in ms
+ * @param {string} options.role
+ * @param {string} options.region
+ * @param {Object} logger
+ */
+async function verifyCollection(options, logger) {
+    const bucketName = options.verifyCollection;
+    const expectedContent = options.body;
+    const startTime = options.startTime;
+    const timeout = 90000; // 90 seconds
+    const pollInterval = 5000; // 5 seconds
+    const endTime = Date.now() + timeout;
+
+    logger.info(`Verifying content in bucket: ${bucketName}. Will wait up to ${timeout / 1000}s`);
+
+    const client = await createS3Client(options.role, options.region);
+
+    while (Date.now() < endTime) {
+        const elapsed = Math.round((Date.now() - startTime) / 1000);
+        logger.info(`Waiting for content to appear in bucket... [${Math.max(0, elapsed)}s elapsed]`);
+
+        // List objects
+        // We might want to list only recent objects or just list all and filter.
+        // AWS S3 ListObjectsV2 returns up to 1000 keys.
+        const command = new ListObjectsV2Command({
+            Bucket: bucketName
+        });
+        const response = await client.send(command);
+        
+        const files = response.Contents || [];
+        
+        // Filter by LastModified > startTime
+        const newFiles = files.filter(f => f.LastModified && new Date(f.LastModified).getTime() > startTime)
+                              .sort((a, b) => new Date(b.LastModified).getTime() - new Date(a.LastModified).getTime());
+
+        if (newFiles.length > 0) {
+             const file = newFiles[0];
+             logger.info(`New file found: ${file.Key} (Created: ${new Date(file.LastModified).toISOString()})`);
+             
+             // Download content
+             const getObjCmd = new GetObjectCommand({
+                 Bucket: bucketName,
+                 Key: file.Key
+             });
+             const getResponse = await client.send(getObjCmd);
+             
+             let contentStr = '';
+             if (getResponse.Body) {
+                  const chunks = [];
+                  for await (const chunk of getResponse.Body) {
+                      chunks.push(chunk);
+                  }
+                  const buffer = Buffer.concat(chunks);
+                  
+                  // Check for gzip
+                  const isGzippedContent = (await isGzipped(buffer)) || getResponse.ContentEncoding === 'gzip';
+                   if (isGzippedContent) {
+                       contentStr = (await new Promise((resolve, reject) => {
+                           zlib.gunzip(buffer, (err, res) => {
+                               if (err) reject(err);
+                               else resolve(res);
+                           });
+                       })).toString();
+                   } else {
+                       contentStr = buffer.toString();
+                   }
+             }
+
+             logger.info(`Found Content: ${contentStr}`);
+
+             let items = [];
+             try {
+                 const jsonContent = JSON.parse(contentStr);
+                 if (Array.isArray(jsonContent)) {
+                     items = jsonContent;
+                 } else if (_.isPlainObject(jsonContent)) {
+                     items = [jsonContent];
+                 }
+             } catch (e) {
+                 logger.error(`Failed to parse file content: ${e.message}`);
+                 throw new Error(`Verification failed: Invalid JSON in file ${file.Key}`);
+             }
+
+            if (items.length > 0) {
+                const matchFound = compareContent(items, expectedContent, logger);
+                if (matchFound) {
+                  logger.success(`Verification Successful: Content matches.`);
+                  return;
+                } else {
+                  logger.error(`Verification Failed: Content does not match.`);
+                  throw new Error(`Verification failed: Content mismatch in file ${file.Key}`);
+                }
+            } else {
+                logger.info(`File is empty or contains no items.`);
+                throw new Error(`Verification failed: Empty file ${file.Key}`);
+            }
+        }
+
+        await sleep(pollInterval);
+    }
+    
+    logger.error('No new files found in bucket within timeout.');
+    throw new Error('Verification failed: Expected content not found in bucket.');
+}
 
 export default {
   call,
@@ -389,4 +501,5 @@ export default {
   listObjects,
   parseLogEvents,
   upload,
+  verifyCollection,
 }
