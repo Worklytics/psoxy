@@ -5,7 +5,6 @@
   "total_records":4,
   "meetings":[
     {
-      "uuid":"mlghmfghlBBB",
       "id":11111,
       "host_id":"t~YCq-iwWo1b500r_AH_4tKLuP0oBLrlwoHEpY7DSxi8c",
       "type":2,
@@ -15,7 +14,6 @@
       "created_at":"2019-08-16T01:13:12Z"
     },
     {
-      "uuid":"J8H8eavweUcd321==",
       "id":2222,
       "host_id":"t~YCq-iwWo1b500r_AH_4tKLuP0oBLrlwoHEpY7DSxi8c",
       "type":2,
@@ -25,7 +23,6 @@
       "created_at":"2019-08-16T18:30:46Z"
     },
     {
-      "uuid":"SGVTAcfSfCbbbb",
       "id":33333,
       "host_id":"t~YCq-iwWo1b500r_AH_4tKLuP0oBLrlwoHEpY7DSxi8c",
       "type":2,
@@ -35,7 +32,6 @@
       "created_at":"2019-08-16T21:15:56Z"
     },
     {
-      "uuid":"64123avdfsMVA==",
       "id":44444,
       "host_id":"t~YCq-iwWo1b500r_AH_4tKLuP0oBLrlwoHEpY7DSxi8c",
       "type":2,
