@@ -9,10 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.io.ByteArrayOutputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
+import java.util.zip.GZIPOutputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,14 +26,8 @@ public class ZoomRulesTests extends JavaRulesTestBaseCase {
 
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
         .sourceKind("zoom")
+        .checkUncompressedSSMLength(false)
         .build();
-
-    @Test
-    @Override
-    @Disabled
-    public void yamlLength() {
-        // Do nothing, as response schema is bigger than we allow for advanced parameters
-    }
 
     @SneakyThrows
     @ValueSource(strings = {
