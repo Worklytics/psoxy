@@ -9,10 +9,12 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Base64;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -55,13 +57,15 @@ public class UrlSafeTokenPseudonymEncoderTest {
         assertArrayEquals(decoded.getReversible(), pseudonym.getReversible());
     }
 
-    @Test
-    void reversibleDomain() {
-        String expected = "p~FLIM5xLgQ5m5vrONCMIiijaoUeFSBBLdaKBXGHqa5OQcZWU39HniZ3phdmegLotuacdckYPaf9zpKnrv9Ez-SQ@worklytics.co";
-        String original = "juan@worklytics.co";
+    @CsvSource(value = {
+        "juan, worklytics.co, p~FLIM5xLgQ5m5vrONCMIiijaoUeFSBBLdaKBXGHqa5OQcZWU39HniZ3phdmegLotuacdckYPaf9zpKnrv9Ez-SQ@worklytics.co",
+        "juan, internal.worklytics.co, p~b3L-lcamqefZ4pvw0gqJ2KJRVQ2H8XlW4y2QMm5ATWeQDc1khHNTXbikRg2I86-lLYcFuLJdUNdgWYGxjaf3Jw@internal.worklytics.co"})
+    @ParameterizedTest
+    void reversibleDomain(String username, String domain, String expected) {
+        String original = username + "@" + domain;
         Pseudonym pseudonym = Pseudonym.builder()
             .hash(deterministicTokenizationStrategy.getToken(original, Function.identity()))
-            .domain("worklytics.co")
+            .domain(domain)
             .reversible(pseudonymizationStrategy.getReversibleToken(original, Function.identity()))
             .build();
 
@@ -73,8 +77,20 @@ public class UrlSafeTokenPseudonymEncoderTest {
         Pseudonym decoded = pseudonymEncoder.decode(encoded);
         assertArrayEquals(decoded.getHash(), pseudonym.getHash());
         assertArrayEquals(decoded.getReversible(), pseudonym.getReversible());
-        assertEquals("worklytics.co", decoded.getDomain());
+        assertEquals(domain, decoded.getDomain());
         assertEquals(original, pseudonymizationStrategy.getOriginalDatum(decoded.getReversible()));
+    }
+
+    @CsvSource(value = {
+        "juan, worklytics.co, p~FLIM5xLgQ5m5vrONCMIiijaoUeFSBBLdaKBXGHqa5OQcZWU39HniZ3phdmegLotuacdckYPaf9zpKnrv9Ez-SQ@worklytics.co",
+        "juan, internal.worklytics.co, p~b3L-lcamqefZ4pvw0gqJ2KJRVQ2H8XlW4y2QMm5ATWeQDc1khHNTXbikRg2I86-lLYcFuLJdUNdgWYGxjaf3Jw@internal.worklytics.co"})
+    @ParameterizedTest
+    void reversiblePatternCapturesTokenAndDomainSeparately(String username, String domain, String value) {
+        Matcher matcher = UrlSafeTokenPseudonymEncoder.REVERSIBLE_PSEUDONYM_WITH_OPTIONAL_DOMAIN_PATTERN.matcher(value);
+
+        assertTrue(matcher.find());
+        assertEquals(value.substring(0, value.indexOf('@')), matcher.group(1));
+        assertEquals("@" + domain, matcher.group(2));
     }
 
     @ParameterizedTest
@@ -101,6 +117,22 @@ public class UrlSafeTokenPseudonymEncoderTest {
             pseudonymizationStrategy);
 
         assertEquals(String.format(template, original, original), r);
+    }
+
+    @Test
+    @SneakyThrows
+    void reverseAll_reversibleEmailWithDomainSuffixMatched() {
+        String original = "juan@worklytics.co";
+        String encodedPseudonym = pseudonymEncoder.encode(Pseudonym.builder()
+            .hash(deterministicTokenizationStrategy.getToken(original, Function.identity()))
+            .domain("worklytics.co")
+            .reversible(pseudonymizationStrategy.getReversibleToken(original, Function.identity()))
+            .build());
+
+        String reversed = pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(
+            "user=" + encodedPseudonym, pseudonymizationStrategy);
+
+        assertEquals("user=" + original, reversed);
     }
 
     @Test
