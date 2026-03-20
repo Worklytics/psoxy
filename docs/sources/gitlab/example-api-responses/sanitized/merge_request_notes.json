@@ -22,7 +22,7 @@
   },
   {
     "id":302,
-    "body":"approved this merge request",
+    "body":"@t~2j-pIx1IlJFGiNWibpTKTO977LOUEJiUKMdlKPBePIo approved this merge request",
     "author":{
       "id":"t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc",
       "username":"t~2j-pIx1IlJFGiNWibpTKTO977LOUEJiUKMdlKPBePIo",
@@ -40,5 +40,26 @@
     "resolvable":false,
     "confidential":false,
     "internal":false
+  },
+  {
+    "id":3164720903,
+    "body":"requested review from @t~f3fmfPcyHai6PalooeSnvBfXkSWSZiy6V2-_8xBXO0I and removed review request for @t~hEqBzGfuPHpNxWtEKv0hxEHN-b1wJYRjy3yvW5XspMg",
+    "author":{
+      "id":"t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc",
+      "username":"t~2j-pIx1IlJFGiNWibpTKTO977LOUEJiUKMdlKPBePIo",
+      "email":"t~5TglOcyVGpy0s4iFwMoL-G67Itorwak4J4Nm9CwxRkQ@example.com",
+      "state":"active",
+      "created_at":"2013-09-30T13:46:01Z"
+    },
+    "created_at":"2026-03-17T00:57:42.432Z",
+    "updated_at":"2026-03-17T00:57:42.435Z",
+    "system":true,
+    "noteable_id":464595555,
+    "noteable_type":"MergeRequest",
+    "project_id":79782420,
+    "resolvable":false,
+    "confidential":false,
+    "internal":false,
+    "noteable_iid":1
   }
 ]
