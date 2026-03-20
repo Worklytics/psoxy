@@ -1,7 +1,7 @@
 package com.avaulta.gateway.pseudonyms.impl;
 
-import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.AESReversibleTokenizationStrategy;
 import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
@@ -53,6 +53,28 @@ public class UrlSafeTokenPseudonymEncoderTest {
         Pseudonym decoded = pseudonymEncoder.decode(encoded);
         assertArrayEquals(decoded.getHash(), pseudonym.getHash());
         assertArrayEquals(decoded.getReversible(), pseudonym.getReversible());
+    }
+
+    @Test
+    void reversibleDomain() {
+        String expected = "p~FLIM5xLgQ5m5vrONCMIiijaoUeFSBBLdaKBXGHqa5OQcZWU39HniZ3phdmegLotuacdckYPaf9zpKnrv9Ez-SQ@worklytics.co";
+        String original = "juan@worklytics.co";
+        Pseudonym pseudonym = Pseudonym.builder()
+            .hash(deterministicTokenizationStrategy.getToken(original, Function.identity()))
+            .domain("worklytics.co")
+            .reversible(pseudonymizationStrategy.getReversibleToken(original, Function.identity()))
+            .build();
+
+        String encoded = pseudonymEncoder.encode(pseudonym);
+
+        assertEquals(expected, encoded);
+        assertArrayEquals(deterministicTokenizationStrategy.getToken(original, Function.identity()), pseudonym.getHash());
+
+        Pseudonym decoded = pseudonymEncoder.decode(encoded);
+        assertArrayEquals(decoded.getHash(), pseudonym.getHash());
+        assertArrayEquals(decoded.getReversible(), pseudonym.getReversible());
+        assertEquals("worklytics.co", decoded.getDomain());
+        assertEquals(original, pseudonymizationStrategy.getOriginalDatum(decoded.getReversible()));
     }
 
     @ParameterizedTest
