@@ -90,7 +90,12 @@ public class GitLabTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/repository/commits/abc123def/discussions", "commit_discussion.json"),
             InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/repository/commits/abc123def/discussions?page=2&per_page=20", "commit_discussion.json"),
 
-            InvocationExample.of("https://gitlab.example.com/api/v4/namespaces/3", "namespace.json")
+            InvocationExample.of("https://gitlab.example.com/api/v4/namespaces/3", "namespace.json"),
+
+            // Users endpoint - initial and paginated
+            InvocationExample.of("https://gitlab.example.com/api/v4/users", "users.json"),
+            InvocationExample.of("https://gitlab.example.com/api/v4/users?page=2&per_page=50", "users.json"),
+            InvocationExample.of("https://gitlab.example.com/api/v4/users?state=active&order_by=name&sort=asc&search=john", "users.json")
         );
     }
 }
