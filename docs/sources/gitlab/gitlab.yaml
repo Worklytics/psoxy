@@ -370,18 +370,6 @@ endpoints:
       type: "array"
       items:
         $ref: "#/definitions/MergeRequest"
-  - pathTemplate: "/api/v4/users"
-    transforms:
-      - !<pseudonymize>
-        jsonPaths:
-          - "$[*].id"
-          - "$[*].username"
-          - "$[*].email"
-        encoding: "URL_SAFE_TOKEN"
-    responseSchema:
-      type: "array"
-      items:
-        $ref: "#/definitions/User"
 definitions:
   AuditEvent:
     type: "object"
