@@ -3,6 +3,7 @@ package co.worklytics.psoxy.storage.impl;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import com.jayway.jsonpath.Configuration;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ class NdjsonRecordReader implements RecordReader {
     BufferedReader bufferedReader;
 
     @Override
-    public java.util.Map<String, Object> readRecord() throws IOException {
+    public Map<String, Object> readRecord() throws IOException {
         if (bufferedReader == null) {
             bufferedReader = new BufferedReader(reader);
         }
@@ -25,7 +26,11 @@ class NdjsonRecordReader implements RecordReader {
         while ((line = bufferedReader.readLine()) != null) {
             line = StringUtils.trimToNull(line);
             if (line != null) {
-                return (java.util.Map<String, Object>) jsonConfiguration.jsonProvider().parse(line);
+                Object parsed = jsonConfiguration.jsonProvider().parse(line);
+                if (!(parsed instanceof Map)) {
+                    throw new IOException("Supported NDJSON contract requires each line to be a JSON object");
+                }
+                return (Map<String, Object>) parsed;
             }
         }
         return null;
