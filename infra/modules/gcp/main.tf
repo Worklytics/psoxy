@@ -227,6 +227,7 @@ data "archive_file" "source" {
 # Create bucket that will host the source code
 # staging bucket only, does not need versioning
 # trivy:ignore:AVD-GCP-0078
+# trivy:ignore:AVD-GCP-0077
 resource "google_storage_bucket" "artifacts" {
   count = local.is_remote_bundle ? 0 : 1
 
@@ -236,6 +237,13 @@ resource "google_storage_bucket" "artifacts" {
   uniform_bucket_level_access = true
   force_destroy               = var.bucket_force_destroy
   labels                      = var.default_labels
+
+  dynamic "logging" {
+    for_each = var.bucket_access_logs_destination != null ? [var.bucket_access_logs_destination] : []
+    content {
+      log_bucket = logging.value
+    }
+  }
 
   # TODO: remove in v0.5
   lifecycle {

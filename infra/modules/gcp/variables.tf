@@ -168,3 +168,9 @@ variable "provision_project_level_iam" {
   type        = bool
   default     = true
 }
+
+variable "bucket_access_logs_destination" {
+  description = "The name of the GCS bucket to route access logs to for all buckets managed by this module"
+  type        = string
+  default     = null
+}

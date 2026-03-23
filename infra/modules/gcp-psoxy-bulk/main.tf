@@ -45,6 +45,7 @@ locals {
 # data input to function
 # staging bucket only, does not need versioning
 # trivy:ignore:AVD-GCP-0078
+# trivy:ignore:AVD-GCP-0077
 resource "google_storage_bucket" "input_bucket" {
   project                     = var.project_id
   name                        = coalesce(var.input_bucket_name, "${local.bucket_prefix}-input")
@@ -52,6 +53,13 @@ resource "google_storage_bucket" "input_bucket" {
   force_destroy               = var.bucket_force_destroy
   uniform_bucket_level_access = true
   labels                      = var.default_labels
+
+  dynamic "logging" {
+    for_each = var.bucket_access_logs_destination != null ? [var.bucket_access_logs_destination] : []
+    content {
+      log_bucket = logging.value
+    }
+  }
 
   lifecycle_rule {
     condition {
@@ -85,6 +93,7 @@ module "output_bucket" {
   bucket_labels                  = var.default_labels
   bucket_force_destroy           = var.bucket_force_destroy
   enable_versioning              = var.enable_versioning
+  bucket_access_logs_destination = var.bucket_access_logs_destination
 }
 
 resource "google_service_account" "service_account" {

@@ -280,3 +280,9 @@ variable "enable_versioning" {
   description = "Enable object versioning for the webhook output buckets"
   default     = false
 }
+
+variable "bucket_access_logs_destination" {
+  description = "The name of the GCS bucket to route access logs to for all buckets managed by this module"
+  type        = string
+  default     = null
+}

@@ -46,6 +46,7 @@ module "psoxy" {
   bucket_force_destroy              = var.bucket_force_destroy
   tf_runner_iam_principal           = module.tf_runner.iam_principal
   provision_project_level_iam       = var.provision_project_level_iam
+  bucket_access_logs_destination    = var.bucket_access_logs_destination
 }
 
 
@@ -202,6 +203,7 @@ module "api_connector" {
   todos_as_local_files                  = var.todos_as_local_files
   tf_runner_iam_principal               = module.tf_runner.iam_principal
   enable_versioning                     = var.version_sanitized_buckets
+  bucket_access_logs_destination        = var.bucket_access_logs_destination
 
 
   environment_variables = merge(
@@ -288,6 +290,7 @@ module "webhook_collector" {
   todos_as_local_files               = var.todos_as_local_files
   tf_runner_iam_principal            = module.tf_runner.iam_principal
   enable_versioning                  = var.version_sanitized_buckets
+  bucket_access_logs_destination     = var.bucket_access_logs_destination
   key_ring_id                        = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
   oidc_token_verifier_role_id        = module.psoxy.oidc_token_verifier_role_id
   provision_auth_key                 = each.value.provision_auth_key
@@ -349,6 +352,7 @@ module "bulk_connector" {
   gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
   bucket_force_destroy              = var.bucket_force_destroy
   enable_versioning                 = var.version_sanitized_buckets
+  bucket_access_logs_destination    = var.bucket_access_logs_destination
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -386,6 +390,7 @@ module "lookup_output" {
   bucket_labels                  = var.default_labels
   bucket_force_destroy           = var.bucket_force_destroy
   enable_versioning              = var.version_sanitized_buckets
+  bucket_access_logs_destination = var.bucket_access_logs_destination
 }
 
 locals {

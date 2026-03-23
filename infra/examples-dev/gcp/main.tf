@@ -129,6 +129,7 @@ module "psoxy" {
   bucket_force_destroy            = var.bucket_force_destroy
   tf_gcp_principal_email          = var.gcp_terraform_sa_account_email
   provision_project_level_iam     = var.provision_project_level_iam
+  bucket_access_logs_destination  = var.bucket_access_logs_destination
 }
 
 locals {
