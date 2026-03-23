@@ -20,7 +20,7 @@ jobs:
 
         # see: https://github.com/marketplace/actions/aqua-security-trivy#inputs
       - name: trivy-all
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-ref: infra/${{ inputs.example_path }}
           scan-type: 'config'
@@ -29,7 +29,7 @@ jobs:
           trivyignores: infra/${{ inputs.example_path }}/.trivyignore
           tf-vars: .github/workflows/tfvars-examples/${{ inputs.example_path }}.tfvars
       - name: trivy-severe
-        uses: aquasecurity/trivy-action@0.20.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-ref: infra/${{ inputs.example_path }}
           scan-type: 'config'
