@@ -82,10 +82,10 @@ public class UrlSafeTokenPseudonymEncoderTest {
     }
 
     @CsvSource(value = {
-        "juan, worklytics.co, p~FLIM5xLgQ5m5vrONCMIiijaoUeFSBBLdaKBXGHqa5OQcZWU39HniZ3phdmegLotuacdckYPaf9zpKnrv9Ez-SQ@worklytics.co",
-        "juan, internal.worklytics.co, p~b3L-lcamqefZ4pvw0gqJ2KJRVQ2H8XlW4y2QMm5ATWeQDc1khHNTXbikRg2I86-lLYcFuLJdUNdgWYGxjaf3Jw@internal.worklytics.co"})
+        "worklytics.co, p~FLIM5xLgQ5m5vrONCMIiijaoUeFSBBLdaKBXGHqa5OQcZWU39HniZ3phdmegLotuacdckYPaf9zpKnrv9Ez-SQ@worklytics.co",
+        "internal.worklytics.co, p~b3L-lcamqefZ4pvw0gqJ2KJRVQ2H8XlW4y2QMm5ATWeQDc1khHNTXbikRg2I86-lLYcFuLJdUNdgWYGxjaf3Jw@internal.worklytics.co"})
     @ParameterizedTest
-    void reversiblePatternCapturesTokenAndDomainSeparately(String username, String domain, String value) {
+    void reversiblePatternCapturesTokenAndDomainSeparately(String domain, String value) {
         Matcher matcher = UrlSafeTokenPseudonymEncoder.REVERSIBLE_PSEUDONYM_WITH_OPTIONAL_DOMAIN_PATTERN.matcher(value);
 
         assertTrue(matcher.find());
