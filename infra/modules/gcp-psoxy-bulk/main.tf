@@ -43,6 +43,8 @@ locals {
 }
 
 # data input to function
+# staging bucket only, does not need versioning
+# trivy:ignore:AVD-GCP-0078
 resource "google_storage_bucket" "input_bucket" {
   project                     = var.project_id
   name                        = coalesce(var.input_bucket_name, "${local.bucket_prefix}-input")
@@ -82,6 +84,7 @@ module "output_bucket" {
   expiration_days                = var.sanitized_expiration_days
   bucket_labels                  = var.default_labels
   bucket_force_destroy           = var.bucket_force_destroy
+  enable_versioning              = var.enable_versioning
 }
 
 resource "google_service_account" "service_account" {

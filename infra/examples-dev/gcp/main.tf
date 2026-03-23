@@ -216,10 +216,17 @@ output "bulk_connector_instances" {
 
 output "webhook_collector_instances" {
   value = { for k, v in module.psoxy.webhook_collector_instances : k => {
-    endpoint_url     = try(v.cloud_function_url, null)
-    sanitized_bucket = v.output_sanitized_bucket_id
-    test_examples    = try(v.test_examples, [])
+    endpoint_url                    = try(v.cloud_function_url, null)
+    sanitized_bucket                = v.output_sanitized_bucket_id
+    side_output_sanitized_bucket_id = try(v.side_output_sanitized_bucket_id, null)
+    side_output_original_bucket_id  = try(v.side_output_original_bucket_id, null)
+    test_examples                   = try(v.test_examples, [])
   } }
+}
+
+output "artifacts_bucket_id" {
+  description = "The ID of the artifacts google_storage_bucket resource"
+  value       = module.psoxy.artifacts_bucket_id
 }
 
 output "todos_1" {

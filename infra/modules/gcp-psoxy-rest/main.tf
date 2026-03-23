@@ -64,6 +64,7 @@ module "async_output" {
     var.gcp_principals_authorized_to_test,
     [for email in var.invoker_sa_emails : "serviceAccount:${email}"]
   )
+  enable_versioning = var.enable_versioning
 }
 
 # Pub/Sub topic for async output (if enabled)
@@ -147,6 +148,7 @@ module "side_output_bucket" {
   bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence[0].result}-"
   bucket_name_suffix             = "side-output"
   sanitizer_accessor_principals  = each.value.allowed_readers
+  enable_versioning              = var.enable_versioning
 }
 
 # TODO: will this work cross-project ?? concern would be that `bucket_write_role_id` is likely a project-level role

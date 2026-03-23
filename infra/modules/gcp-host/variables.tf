@@ -385,3 +385,9 @@ variable "provision_project_level_iam" {
   type        = bool
   default     = true
 }
+
+variable "version_sanitized_buckets" {
+  description = "Whether to enable versioning for all -sanitized buckets. Provided because some security standards want ALL buckets to enable versioning; from our perspective, it is not needed as these buckets are not storing primary data."
+  type        = bool
+  default     = false
+}

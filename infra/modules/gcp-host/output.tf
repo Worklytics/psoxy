@@ -14,6 +14,11 @@ output "path_to_deployment_jar" {
   value       = module.psoxy.path_to_deployment_jar
 }
 
+output "artifacts_bucket_id" {
+  description = "The ID of the artifacts google_storage_bucket resource"
+  value       = module.psoxy.artifacts_bucket_id
+}
+
 output "api_connector_instances" {
   value = local.api_instances
 }

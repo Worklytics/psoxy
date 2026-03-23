@@ -148,6 +148,7 @@ resource "random_string" "bucket_name_random_sequence" {
 module "sanitized_webhook_output" {
   source = "../gcp-output-bucket"
 
+  enable_versioning              = var.enable_versioning
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
@@ -165,6 +166,7 @@ module "side_output_bucket" {
 
   for_each = local.side_outputs_to_provision
 
+  enable_versioning              = var.enable_versioning
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email

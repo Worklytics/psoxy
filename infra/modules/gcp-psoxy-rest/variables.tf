@@ -222,3 +222,9 @@ variable "vpc_config" {
     error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
   }
 }
+
+variable "enable_versioning" {
+  type        = bool
+  description = "Enable object versioning for the async output bucket"
+  default     = false
+}

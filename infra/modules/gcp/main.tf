@@ -225,6 +225,8 @@ data "archive_file" "source" {
 }
 
 # Create bucket that will host the source code
+# staging bucket only, does not need versioning
+# trivy:ignore:AVD-GCP-0078
 resource "google_storage_bucket" "artifacts" {
   count = local.is_remote_bundle ? 0 : 1
 
@@ -504,6 +506,11 @@ resource "google_project_iam_member" "data_sanitization_tester_grant" {
 
 output "artifacts_bucket_name" {
   value = local.artifact_bucket_name
+}
+
+output "artifacts_bucket_id" {
+  value       = try(google_storage_bucket.artifacts[0].id, null)
+  description = "The ID of the artifacts google_storage_bucket resource"
 }
 
 output "deployment_bundle_object_name" {
