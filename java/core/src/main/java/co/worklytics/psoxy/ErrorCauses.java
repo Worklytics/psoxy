@@ -82,5 +82,15 @@ public enum ErrorCauses {
     UNKNOWN,
 
     INVALID_REQUEST,
+    
+    /**
+     * Rules YAML is invalid or malformed
+     */
+    RULES_INVALID_YAML,
+    
+    /**
+     * Rules don't match expected schema/pojo structure
+     */
+    RULES_INVALID,
     ;
 }

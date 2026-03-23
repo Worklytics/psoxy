@@ -5,9 +5,12 @@
 # Usage: ./make-review-bundle.sh <path-to-terraform-configuration>
 
 # colors
-RED='\e[0;31m'
-BLUE='\e[0;34m'
-NC='\e[0m' # No Color
+COLORSCHEME_SH="$(dirname "$0")/set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+    source "$COLORSCHEME_SH"
+else
+    ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
 
 # Function to prompt the user
 prompt_continue() {
@@ -36,13 +39,13 @@ if [[ "$TERRAFORM_CONFIG_PATH" != */ ]]; then
 fi
 
 if [ ! -d "$TERRAFORM_CONFIG_PATH" ]; then
-  printf "${RED}Directory doesn't exist: $TERRAFORM_CONFIG_PATH\n${NC}"
+  printf "${ERR}Directory doesn't exist: $TERRAFORM_CONFIG_PATH\n${NC}"
   exit 1
 fi
 
 printf "This script will prepare a Terraform plan based on your configuration in "
-printf "${BLUE}${TERRAFORM_CONFIG_PATH}${NC}, and bundle it along with the relevant files "
-printf "(${BLUE}.tf${NC}, ${BLUE}.tfvars${NC}), into a zip file you can send for review.\n"
+printf "${INFO}${TERRAFORM_CONFIG_PATH}${NC}, and bundle it along with the relevant files "
+printf "(${INFO}.tf${NC}, ${INFO}.tfvars${NC}), into a zip file you can send for review.\n"
 printf "Your Terraform state file, if any, will not be included.\n"
 
 prompt_continue "Continue?"
@@ -61,11 +64,10 @@ else
   mv "$ERROR_LOG" "$TERRAFORM_CONFIG_PATH$ERROR_LOG"
 
   FILES_TO_INCLUDE="$FILES_TO_INCLUDE $ERROR_LOG"
-  printf "${RED}Terraform plan failed.${NC} A log file ${BLUE}${ERROR_LOG}${NC} has been created "
+  printf "${ERR}Terraform plan failed.${NC} A log file ${INFO}${ERROR_LOG}${NC} has been created "
   printf "and added to the review bundle. You can send as-is or review that log "
   printf "file to attempt a fix.${NC}\n"
 fi
-
 
 cd "$TERRAFORM_CONFIG_PATH" || exit 1
 tar -czvf "$TERRAFORM_REVIEW_BUNDLE" *.tf *.tfvars $FILES_TO_INCLUDE
@@ -73,5 +75,5 @@ cd - || exit 1
 mv "${TERRAFORM_CONFIG_PATH}${TERRAFORM_REVIEW_BUNDLE}" .
 mv "${TERRAFORM_CONFIG_PATH}${ERROR_LOG}" .
 
-printf "Review bundle created: ${BLUE}${TERRAFORM_REVIEW_BUNDLE}${NC}\n"
+printf "Review bundle created: ${INFO}${TERRAFORM_REVIEW_BUNDLE}${NC}\n"
 

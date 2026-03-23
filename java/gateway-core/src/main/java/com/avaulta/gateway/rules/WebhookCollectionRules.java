@@ -46,7 +46,7 @@ public class WebhookCollectionRules implements Serializable {
     @Builder(toBuilder = true)
     @With
     @AllArgsConstructor //for builder
-    @NoArgsConstructor //for Jackson
+
     @Getter
     public static class WebhookEndpoint implements Serializable {
 
@@ -79,7 +79,16 @@ public class WebhookCollectionRules implements Serializable {
         @Setter
         @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
         @Singular
-        List<Transform> transforms = new ArrayList<>();
+        List<Transform> transforms;
+
+        /**
+         * No-args constructor.
+         * 1) Needed for Jackson deserialization.
+         * 2) Explicit instantiation of @Singular fields required to avoid Lombok warnings about ignored default values.
+         */
+        public WebhookEndpoint() {
+            this.transforms = new ArrayList<>();
+        }
     }
 
     @Data

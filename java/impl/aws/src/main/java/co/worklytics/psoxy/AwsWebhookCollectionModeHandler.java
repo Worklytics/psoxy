@@ -15,6 +15,9 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.newrelic.opentracing.LambdaTracer;
+import com.newrelic.opentracing.aws.LambdaTracing;
+import io.opentracing.util.GlobalTracer;
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.SQSOutput;
@@ -61,7 +64,12 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
         inboundWebhookHandler = awsContainer.inboundWebhookHandler();
         jwksHandler = awsContainer.jwksDecoratorFactory().create(inboundWebhookHandler);
         lambdaEventUtils = awsContainer.lambdaEventUtils();
-        
+
+        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            awsContainer.loggingConfiguration().validateNewRelicHandler(AwsWebhookCollectionModeHandler.class);
+            GlobalTracer.registerIfAbsent(LambdaTracer.INSTANCE);
+        }
+
         // Pre-warm the public key cache during Lambda initialization
         // This ensures first JWKS request doesn't wait for KMS fetch
         warmPublicKeyCache();
@@ -98,7 +106,14 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
             lambdaEventUtils.write(output, response);
         } else if (lambdaEventUtils.isSQSEvent(rootNode)) {
             SQSEvent sqsEvent = lambdaEventUtils.toSQSEvent(rootNode);
-            handleRequest(sqsEvent, context);
+            if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+                LambdaTracing.instrument(sqsEvent, context, (inEvent, ctx) -> {
+                    handleRequest(inEvent, ctx);
+                    return null;
+                });
+            } else {
+                handleRequest(sqsEvent, context);
+            }
 
             // Return empty 200 response
             APIGatewayV2HTTPResponse resp = APIGatewayV2HTTPResponse.builder()
@@ -143,6 +158,15 @@ public class AwsWebhookCollectionModeHandler implements RequestStreamHandler {
      */
     @SneakyThrows
     public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent httpEvent, Context context) {
+        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            return LambdaTracing.instrument(httpEvent, context, this::actualHandleRequest);
+        } else {
+            return actualHandleRequest(httpEvent, context);
+        }
+    }
+
+    @SneakyThrows
+    public APIGatewayV2HTTPResponse actualHandleRequest(APIGatewayV2HTTPEvent httpEvent, Context context) {
         //interfaces:
         // - HttpRequestEvent --> HttpResponseEvent
 

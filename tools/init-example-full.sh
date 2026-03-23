@@ -8,7 +8,7 @@ REPO_CLONE_BASE_DIR=${1:-".terraform/modules/psoxy/"}
 TF_CONFIG_ROOT=`pwd`
 
 if [[ ! -d "$REPO_CLONE_BASE_DIR" ]]; then
-  printf "Directory ${ERROR}${REPO_CLONE_BASE_DIR}${NC} does not exist.\n"
+  printf "Directory ${ERR}${REPO_CLONE_BASE_DIR}${NC} does not exist.\n"
   printf "This usually means the Terraform modules haven't been initialized yet.\n"
   printf "Please run ${CODE}./init${NC} again to initialize the Terraform modules first.\n"
   exit 1
@@ -27,12 +27,10 @@ fi
 UC_HOST=$(echo "$HOST_PLATFORM" | tr '[:lower:]' '[:upper:]')
 printf "Host platform detected as ${SUCCESS}${UC_HOST}${NC}.\n"
 
-
 TFVARS_FILE="${TF_CONFIG_ROOT}/terraform.tfvars"
 
 if [ ! -f "${TFVARS_FILE}" ]; then
   printf "Initializing ${CODE}terraform.tfvars${NC} file for your configuration ...\n"
-
 
   printf "Please choose where you intend to run ${CODE}terraform apply${NC}:\n"
   echo "1) locally (here on this machine)"
@@ -47,18 +45,16 @@ if [ ! -f "${TFVARS_FILE}" ]; then
       DEPLOYMENT_ENV="terraform_cloud"
       ;;
     *)
-      printf "${ERROR}Invalid choice! Please re-run initialization script.${NC}\n"
+      printf "${ERR}Invalid choice! Please re-run initialization script.${NC}\n"
       exit 1
       ;;
   esac
   echo "" # newline
 
-
   if [[ -z "$DEPLOYMENT_ENV" ]]; then
-    printf "${ERROR}No deployment environment selected.${NC} Exiting.\n"
+    printf "${ERR}No deployment environment selected.${NC} Exiting.\n"
     exit 1;
   fi
-
 
   if [ -f "${TF_CONFIG_ROOT}/terraform.tfvars.example.hcl" ]; then
     cp "${TF_CONFIG_ROOT}/terraform.tfvars.example.hcl" "${TFVARS_FILE}"
@@ -68,8 +64,6 @@ if [ ! -f "${TFVARS_FILE}" ]; then
 
   ${REPO_CLONE_BASE_DIR}tools/init-tfvars.sh "${TFVARS_FILE}" "${REPO_CLONE_BASE_DIR}" "${DEPLOYMENT_ENV}" $HOST_PLATFORM
 fi
-
-
 
 # define reusable check for git clone of proxy repo directory
 # (in shared team, one person may have initially cloned/forked the example repo, ran `./init`; so they have a .terraform directory; 
@@ -116,7 +110,6 @@ echo "" >> $UPGRADE_TF_MODULE_SCRIPT
 echo "\"${REPO_CLONE_BASE_DIR}tools/upgrade-terraform-modules.sh\" \$1" >> $UPGRADE_TF_MODULE_SCRIPT
 chmod +x "$UPGRADE_TF_MODULE_SCRIPT"
 
-
 # Install test tool (if user agrees)
 read -p "Do you want to install the NodeJS-based tooling to test your psoxy instance from this machine? (requires NodeJS/npm) (Y/n) " -n 1 -r
 REPLY=${REPLY:-Y}
@@ -146,4 +139,4 @@ if [ -f "${TF_CONFIG_ROOT}/backend.tf" ]; then
 fi
 
 printf "\n${SUCCESS}Initialization complete.${NC}"
-printf "If you wish to remove files created by this initialization, run ${CODE}${REPO_CLONE_BASE_DIR}tools/reset-example.sh${NC}.\n
+printf "If you wish to remove files created by this initialization, run ${CODE}${REPO_CLONE_BASE_DIR}tools/reset-example.sh${NC}.\n"
