@@ -11,7 +11,9 @@ import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import blue.strategic.parquet.Hydrator;
 import blue.strategic.parquet.ParquetReader;
+import lombok.extern.java.Log;
 
+@Log
 public class ParquetRecordReader implements RecordReader {
 
     private final File tempFile;
@@ -21,30 +23,41 @@ public class ParquetRecordReader implements RecordReader {
     public ParquetRecordReader(InputStream in) throws IOException {
         // Create temp file
         this.tempFile = Files.createTempFile("input-", ".parquet").toFile();
-        this.tempFile.deleteOnExit();
 
-        // Copy input stream to temp file
-        FileUtils.copyInputStreamToFile(in, tempFile);
+        try {
+            // Copy input stream to temp file
+            FileUtils.copyInputStreamToFile(in, tempFile);
 
-        // Open stream of content as Maps using custom Hydrator
-        this.stream = ParquetReader.streamContent(tempFile, (descriptors) -> new Hydrator<Map<String, Object>, Map<String, Object>>() {
-            @Override
-            public Map<String, Object> start() {
-                return new LinkedHashMap<>();
+            // Open stream of content as Maps using custom Hydrator
+            this.stream = ParquetReader.streamContent(tempFile, (descriptors) -> new Hydrator<Map<String, Object>, Map<String, Object>>() {
+                @Override
+                public Map<String, Object> start() {
+                    return new LinkedHashMap<>();
+                }
+
+                @Override
+                public Map<String, Object> add(Map<String, Object> map, String key, Object value) {
+                    map.put(key, value);
+                    return map;
+                }
+
+                @Override
+                public Map<String, Object> finish(Map<String, Object> map) {
+                    return map;
+                }
+            });
+            this.iterator = stream.iterator();
+        } catch (Exception e) {
+            if (this.tempFile.exists()) {
+                if (!this.tempFile.delete()) {
+                    log.warning("Failed to delete temporary parquet file during initialization failure: " + this.tempFile.getAbsolutePath());
+                }
             }
-
-            @Override
-            public Map<String, Object> add(Map<String, Object> map, String key, Object value) {
-                map.put(key, value);
-                return map;
+            if (e instanceof IOException) {
+                throw (IOException) e;
             }
-
-            @Override
-            public Map<String, Object> finish(Map<String, Object> map) {
-                return map;
-            }
-        });
-        this.iterator = stream.iterator();
+            throw new IOException("Failed to initialize ParquetRecordReader", e);
+        }
     }
 
     @Override
@@ -57,11 +70,16 @@ public class ParquetRecordReader implements RecordReader {
 
     @Override
     public void close() throws IOException {
-        if (stream != null) {
-            stream.close();
-        }
-        if (tempFile.exists()) {
-            tempFile.delete();
+        try {
+            if (stream != null) {
+                stream.close();
+            }
+        } finally {
+            if (tempFile != null && tempFile.exists()) {
+                if (!tempFile.delete()) {
+                    log.warning("Failed to delete temporary parquet file on close: " + tempFile.getAbsolutePath());
+                }
+            }
         }
     }
 }

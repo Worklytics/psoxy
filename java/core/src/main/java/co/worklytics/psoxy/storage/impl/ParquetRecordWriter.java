@@ -14,7 +14,9 @@ import org.apache.parquet.schema.LogicalTypeAnnotation;
 import org.apache.parquet.schema.PrimitiveType;
 import org.apache.parquet.schema.Types;
 import blue.strategic.parquet.ParquetWriter;
+import lombok.extern.java.Log;
 
+@Log
 public class ParquetRecordWriter implements RecordWriter {
 
     private final OutputStream outputStream;
@@ -30,7 +32,6 @@ public class ParquetRecordWriter implements RecordWriter {
     public void beginRecordSet() throws IOException {
         // Create temp file
         this.tempFile = Files.createTempFile("psoxy-parquet-out-", ".parquet").toFile();
-        this.tempFile.deleteOnExit();
     }
 
     @Override
@@ -46,6 +47,10 @@ public class ParquetRecordWriter implements RecordWriter {
 
     @Override
     public void endRecordSet() throws IOException {
+        if (!initialized) {
+            throw new IOException("Cannot write Parquet file without records; at least one record is required to infer the schema.");
+        }
+
         if (writer != null) {
             writer.close();
             writer = null; // Prevent double close
@@ -67,7 +72,9 @@ public class ParquetRecordWriter implements RecordWriter {
             }
         }
         if (tempFile != null && tempFile.exists()) {
-            tempFile.delete();
+            if (!tempFile.delete()) {
+                log.warning("Failed to delete temporary parquet file on close: " + tempFile.getAbsolutePath());
+            }
         }
     }
 

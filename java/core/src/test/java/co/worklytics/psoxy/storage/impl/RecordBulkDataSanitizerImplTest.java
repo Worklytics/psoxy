@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.zip.GZIPInputStream;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,6 +25,7 @@ import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.gateway.BulkModeConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.storage.BulkDataTestUtils;
 import co.worklytics.psoxy.storage.StorageHandler;
 import co.worklytics.test.MockModules;
@@ -47,7 +49,7 @@ class RecordBulkDataSanitizerImplTest {
     @Inject
     UrlSafeTokenPseudonymEncoder encoder;
 
-    java.util.function.Supplier<OutputStream> outputStreamSupplier;
+    Supplier<OutputStream> outputStreamSupplier;
 
     ByteArrayOutputStream outputStream;
 
@@ -56,7 +58,7 @@ class RecordBulkDataSanitizerImplTest {
     void setUpWithRules(String rawRules) {
         this.rawRules = rawRules;
 
-        RecordBulkDataSanitizerImplTest.Container container = DaggerRecordBulkDataSanitizerImplTest_Container.builder()
+        Container container = DaggerRecordBulkDataSanitizerImplTest_Container.builder()
             .forConfigService(new Container.ForConfigService())
             .build();
         container.inject(this);
@@ -302,7 +304,7 @@ class RecordBulkDataSanitizerImplTest {
         final String objectPath = "export-20231128/file.json";
         
         // Manual request construction to set Content-Type
-        co.worklytics.psoxy.gateway.StorageEventRequest request = BulkDataTestUtils.request(objectPath)
+        StorageEventRequest request = BulkDataTestUtils.request(objectPath)
                 .withContentType("application/json");
 
         storageHandler.handle(request,
@@ -422,7 +424,7 @@ class RecordBulkDataSanitizerImplTest {
         // Run sanitizer
         final String objectPath = "export-20231128/file_complex.parquet";
         
-        co.worklytics.psoxy.gateway.StorageEventRequest request = BulkDataTestUtils.request(objectPath)
+        StorageEventRequest request = BulkDataTestUtils.request(objectPath)
                 .withContentType("application/vnd.apache.parquet");
 
         storageHandler.handle(request,
@@ -452,7 +454,7 @@ class RecordBulkDataSanitizerImplTest {
     void explicitOutputFormat() throws IOException {
         String bulkOutputFormat = "CSV";
         // Override setup to inject BulkModeConfig settings
-        RecordBulkDataSanitizerImplTest.Container container = DaggerRecordBulkDataSanitizerImplTest_Container.builder()
+        Container container = DaggerRecordBulkDataSanitizerImplTest_Container.builder()
             .forConfigService(new Container.ForConfigService() {
                 @Provides
                 @Singleton
