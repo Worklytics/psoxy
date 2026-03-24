@@ -207,6 +207,7 @@ resource "google_cloudfunctions2_function" "function" {
     runtime           = "java21"
     docker_repository = var.artifact_repository_id
     entry_point       = "co.worklytics.psoxy.Route"
+    service_account   = var.builder_sa_id
 
     source {
       storage_source {

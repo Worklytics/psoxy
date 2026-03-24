@@ -177,8 +177,9 @@ resource "google_cloudfunctions2_function" "function" {
   location    = var.region
 
   build_config {
-    runtime     = "java21"
-    entry_point = "co.worklytics.psoxy.GCSFileEvent"
+    runtime         = "java21"
+    entry_point     = "co.worklytics.psoxy.GCSFileEvent"
+    service_account = var.builder_sa_id
 
     docker_repository = var.artifact_repository_id
 

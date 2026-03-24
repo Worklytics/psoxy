@@ -397,3 +397,9 @@ variable "bucket_access_logs_destination" {
   type        = string
   default     = null
 }
+
+variable "builder_sa_email" {
+  description = "An optional custom builder service account. If not provided, this module will create one."
+  type        = string
+  default     = null
+}

@@ -202,3 +202,8 @@ variable "bucket_access_logs_destination" {
   type        = string
   default     = null
 }
+
+variable "builder_sa_id" {
+  description = "The fully-qualified ID of the custom builder service account used to build the Cloud Function."
+  type        = string
+}

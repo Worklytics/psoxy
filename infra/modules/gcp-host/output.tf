@@ -58,6 +58,10 @@ output "setup_todos" {
   value       = values(module.bulk_connector)[*].todo_setup
 }
 
+output "builder_sa_id" {
+  value = module.psoxy.builder_sa_id
+}
+
 output "next_todo_step" {
   value = max(concat(
     values(module.api_connector)[*].next_todo_step,

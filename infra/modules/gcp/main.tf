@@ -313,15 +313,29 @@ resource "google_project_iam_member" "grant_gcs-sa_pub-sub-publisher" {
   member  = "serviceAccount:${data.google_storage_project_service_account.gcs_default_service_account.email_address}"
 }
 
-# Grant Cloud Build builder role to Compute Engine default service account
+locals {
+  builder_sa_email = var.builder_sa_email != null ? var.builder_sa_email : try(google_service_account.proxy_builder_sa[0].email, data.google_compute_default_service_account.default.email)
+}
+
+# Create a custom builder SA to avoid using the Compute Engine default SA for builds (fixes GCP-0006)
+resource "google_service_account" "proxy_builder_sa" {
+  count = var.provision_project_level_iam && var.builder_sa_email == null ? 1 : 0
+
+  account_id   = substr("${var.environment_id_prefix}proxy-builder-sa", 0, 30)
+  display_name = "${local.environment_id_prefix_display} Psoxy Cloud Build Service Account"
+  description  = "Service account used by Cloud Build to build Psoxy Cloud Functions."
+  project      = var.project_id
+}
+
+# Grant Cloud Build builder role to the custom builder service account
 # Required for Cloud Functions Gen2 deployment to build the function
 # See: https://cloud.google.com/functions/docs/troubleshooting#build-service-account
-resource "google_project_iam_member" "grant_compute_default_sa_cloudbuild_builder" {
+resource "google_project_iam_member" "grant_builder_sa_cloudbuild_builder" {
   count = var.provision_project_level_iam ? 1 : 0
 
   project = var.project_id
   role    = "roles/cloudbuild.builds.builder"
-  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  member  = "serviceAccount:${local.builder_sa_email}"
 }
 
 

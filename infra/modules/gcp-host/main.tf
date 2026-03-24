@@ -47,6 +47,7 @@ module "psoxy" {
   tf_runner_iam_principal           = module.tf_runner.iam_principal
   provision_project_level_iam       = var.provision_project_level_iam
   bucket_access_logs_destination    = var.bucket_access_logs_destination
+  builder_sa_email                  = var.builder_sa_email
 }
 
 
@@ -204,6 +205,7 @@ module "api_connector" {
   tf_runner_iam_principal               = module.tf_runner.iam_principal
   enable_versioning                     = var.version_sanitized_buckets
   bucket_access_logs_destination        = var.bucket_access_logs_destination
+  builder_sa_id                         = module.psoxy.builder_sa_id
 
 
   environment_variables = merge(
@@ -291,6 +293,7 @@ module "webhook_collector" {
   tf_runner_iam_principal            = module.tf_runner.iam_principal
   enable_versioning                  = var.version_sanitized_buckets
   bucket_access_logs_destination     = var.bucket_access_logs_destination
+  builder_sa_id                      = module.psoxy.builder_sa_id
   key_ring_id                        = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
   oidc_token_verifier_role_id        = module.psoxy.oidc_token_verifier_role_id
   provision_auth_key                 = each.value.provision_auth_key
@@ -353,6 +356,7 @@ module "bulk_connector" {
   bucket_force_destroy              = var.bucket_force_destroy
   enable_versioning                 = var.version_sanitized_buckets
   bucket_access_logs_destination    = var.bucket_access_logs_destination
+  builder_sa_id                     = module.psoxy.builder_sa_id
 
   environment_variables = merge(
     var.general_environment_variables,
