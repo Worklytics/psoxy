@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.storage.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -371,17 +372,7 @@ class RecordBulkDataSanitizerImplTest {
             assertNotNull(r1);
             
             // "foo" should be null (redacted)
-            // Parquet redaction might result in null or empty string depending on implementation details of sanitizer/writer interaction
-            // In our impl, Redact returns null. Parquet writer skips nulls. Reader might read as null or missing.
-            // Our reader fills map with null if missing? No, our reader iterates available columns? 
-            // Wait, ParquetReader.streamContentToStrings returns String[], but headers logic expects positional match.
-            // If values are missing in Parquet (null), does array have nulls?
-            // "streamContentToStrings" usually fills with nulls for optional fields.
-            
-            // Let's assert based on expected behavior: null/missing in map.
-            // But sanitized record has "foo": null. writer skips. reader sees null.
-            Object fooVal = r1.get("foo");
-            assertTrue(fooVal == null || "null".equals(fooVal)); // Parquet redaction
+            assertNull(r1.get("foo"));
 
             // "bar" should be pseudonymized
             String expected2 = encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("2" + "salt")).build());
@@ -446,7 +437,7 @@ class RecordBulkDataSanitizerImplTest {
             assertEquals(true, r1.get("boolVal"));
             
             // "secret" should be null (redacted)
-            assertTrue(r1.get("secret") == null || "null".equals(r1.get("secret")));
+            assertNull(r1.get("secret"));
         }
     }
 
