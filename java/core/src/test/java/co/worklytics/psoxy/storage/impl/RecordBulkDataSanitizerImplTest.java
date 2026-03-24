@@ -429,7 +429,7 @@ class RecordBulkDataSanitizerImplTest {
         try (ParquetRecordReader reader = new ParquetRecordReader(new ByteArrayInputStream(outputBytes))) {
             Map<String, Object> r1 = reader.readRecord();
             
-            assertTrue(r1 != null);
+            assertNotNull(r1);
             
             assertEquals("hello", r1.get("stringVal"));
             assertEquals(123, r1.get("intVal"));
