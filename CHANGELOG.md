@@ -8,6 +8,7 @@ Changes to be including in future/planned release notes will be added here.
 ## Next
 
 ## [0.5.19](https://github.com/Worklytics/psoxy/release/tag/v0.5.19)
+- `gcp`: Dedicated `proxy_builder_sa` service account is now provisioned and used for Cloud Build operations when provisioning Cloud Functions, eliminating project-level IAM dependencies on the default Compute Engine service account.
 - `zoom`: Default rules for Zoom have been updated, removing fields and endpoints not required.
 - `pseudonymizeRegexMatches`: apply the pseudonymization to any match found in the field instead of the first one.
 - `GitLab`: added support for GitLab (gitlab.com)
