@@ -353,7 +353,7 @@ class RecordBulkDataSanitizerImplTest {
         final String objectPath = "export-20231128/file.parquet";
         
         // Manual request construction to set Content-Type correctly for Parquet
-        co.worklytics.psoxy.gateway.StorageEventRequest request = BulkDataTestUtils.request(objectPath)
+        StorageEventRequest request = BulkDataTestUtils.request(objectPath)
                 .withContentType("application/vnd.apache.parquet");
 
         storageHandler.handle(request,
