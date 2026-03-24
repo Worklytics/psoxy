@@ -19,11 +19,6 @@ public class GitLabTests extends JavaRulesTestBaseCase {
         .checkUncompressedSSMLength(false)
         .build();
 
-    @Test
-    @Override
-    public void yamlLength() {
-        // Do nothing, as response schema is bigger than we allow for advanced parameters
-    }
 
     @Override
     public Stream<InvocationExample> getExamples() {

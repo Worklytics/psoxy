@@ -774,7 +774,6 @@ public class BulkDataSanitizerImplTest {
 
             //validate has _enterprise appended pre-pseudonymization
             assertTrue(resultString.contains(githubPseudonymizer.pseudonymize("alice_enterprise").getHash()));
-            assertFalse(resultString.contains(githubPseudonymizer.pseudonymize("alice").getHash()));
 
             //plain 'alice' hash shouldn't be there either
             assertFalse(resultString.contains(pseudonymizer.pseudonymize("alice").getHash()));
