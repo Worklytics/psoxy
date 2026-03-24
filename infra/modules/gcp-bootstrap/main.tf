@@ -61,3 +61,4 @@ output "gcs_bucket_tfstate" {
   value       = google_storage_bucket.state_bucket.name
   description = "GCS bucket to be used to persist Terraform state."
 }
+
