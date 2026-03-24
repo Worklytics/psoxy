@@ -102,7 +102,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
         try (InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
         RecordReader recordReader = createReader(format, reader, in);
-        OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)
+        OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
              RecordWriter recordWriter = createWriter(outputFormat, writer, out)) {
             
             recordWriter.beginRecordSet();

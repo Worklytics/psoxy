@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -230,7 +231,7 @@ class RecordBulkDataSanitizerImplTest {
                 decompressed.write(buffer, 0, len);
             }
         }
-        String output = decompressed.toString();
+        String output = decompressed.toString(StandardCharsets.UTF_8);
 
         String SANITIZED_FILE = new String(TestUtils.getData("bulk/users-sanitized.ndjson"));
 

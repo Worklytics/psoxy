@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -62,7 +63,7 @@ class RefreshTokenRequestBuilderTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         payload.writeTo(out);
         assertEquals("refresh_token=tokenValue&grant_type=refresh_token&client_secret=secretValue&client_id=1",
-            out.toString());
+            out.toString(StandardCharsets.UTF_8));
     }
 
     @Test
