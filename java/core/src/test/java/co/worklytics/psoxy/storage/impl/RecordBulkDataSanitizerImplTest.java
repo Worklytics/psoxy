@@ -368,7 +368,7 @@ class RecordBulkDataSanitizerImplTest {
             Map<String, Object> r1 = reader.readRecord();
             Map<String, Object> r2 = reader.readRecord();
             
-            assertTrue(r1 != null);
+            assertNotNull(r1);
             
             // "foo" should be null (redacted)
             // Parquet redaction might result in null or empty string depending on implementation details of sanitizer/writer interaction
