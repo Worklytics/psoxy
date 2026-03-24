@@ -388,7 +388,7 @@ class RecordBulkDataSanitizerImplTest {
         }
     }
     @Test
-    void parquet_Complex() throws IOException {
+    void parquet_with_multiple_types_in_schema() throws IOException {
         this.setUpWithRules("---\n" +
             "format: \"PARQUET\"\n" +
             "transforms:\n" +
