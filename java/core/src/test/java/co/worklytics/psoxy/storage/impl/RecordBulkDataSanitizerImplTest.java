@@ -390,7 +390,7 @@ class RecordBulkDataSanitizerImplTest {
             assertEquals("three", r1.get("other"));
 
             // Check second record
-            assertTrue(r2 != null);
+            assertNotNull(r2);
             
             String expected5 = encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("5" + "salt")).build());
              assertEquals(expected5, r2.get("bar"));
