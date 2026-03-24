@@ -100,8 +100,10 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
         RecordRules.Format outputFormat = bulkModeConfig.getOutputFormat()
             .orElse(format);
 
-        try (RecordReader recordReader = createReader(format, new InputStreamReader(in, StandardCharsets.UTF_8), in);
-             RecordWriter recordWriter = createWriter(outputFormat, new OutputStreamWriter(out, StandardCharsets.UTF_8), out)) {
+        try (InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
+        RecordReader recordReader = createReader(format, reader, in);
+        OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)
+             RecordWriter recordWriter = createWriter(outputFormat, writer, out)) {
             
             recordWriter.beginRecordSet();
             
