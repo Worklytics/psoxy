@@ -29,6 +29,7 @@ jobs:
           trivyignores: infra/${{ inputs.example_path }}/.trivyignore
           tf-vars: .github/workflows/tfvars-examples/${{ inputs.example_path }}.tfvars
       - name: trivy-severe
+        id: trivy-severe
         uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-ref: infra/${{ inputs.example_path }}
@@ -38,6 +39,12 @@ jobs:
           hide-progress: true
           trivyignores: infra/${{ inputs.example_path }}/.trivyignore
           tf-vars: .github/workflows/tfvars-examples/${{ inputs.example_path }}.tfvars
+          # Trivy now prints a summary table even if there are 0 vulnerabilities, making
+          # the output file non-empty. Use exit-code: '1' to natively fail if vulnerabilities are found.
+          exit-code: '1'
+        # continue-on-error ensures the workflow proceeds to the next step to publish the
+        # Report Summary to the GitHub Actions job summary, where we will check the outcome.
+        continue-on-error: true
       - name: Publish Trivy Output to Summary
         run: |
           if [[ -s trivy.txt ]]; then
@@ -52,7 +59,9 @@ jobs:
             } >> $GITHUB_STEP_SUMMARY
             cat trivy.txt
           fi
-          if [[ -s trivy-severe.txt ]]; then
+          # Use the step outcome instead of checking file size, because newer Trivy
+          # versions always create the file with a scan summary table.
+          if [[ "${{ steps.trivy-severe.outcome }}" == "failure" ]]; then
             echo "failing bc severe/critical vulnerabilities found"
             exit 1
           fi
