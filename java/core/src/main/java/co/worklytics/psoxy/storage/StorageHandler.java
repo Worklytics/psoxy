@@ -366,8 +366,8 @@ public class StorageHandler {
                   Supplier<InputStream> inputStreamSupplier) {
         
         // Skip validation for binary formats like Parquet, as text-based validation corrupts/fails
-        if (request.getSourceObjectPath().toLowerCase().endsWith(".parquet") || 
-            StringUtils.containsIgnoreCase(request.getContentType(), "parquet")) {
+        if (isSupportedBinaryType(request)) {
+            log.info("Skipping text-based validation for supported binary format: " + request.getSourceObjectPath());
             return;
         }
 
@@ -471,6 +471,16 @@ public class StorageHandler {
      */
     boolean isSourceCompressed(String contentEncoding, String sourceObjectPath) {
         return Objects.equals(contentEncoding, CONTENT_ENCODING_GZIP) || sourceObjectPath.endsWith(EXTENSION_GZIP);
+    }
+
+    /**
+     * Check if the source content is a supported binary type
+     * @param request the storage event request
+     * @return true if the format is a supported binary type
+     */
+    boolean isSupportedBinaryType(StorageEventRequest request) {
+        return request.getSourceObjectPath().toLowerCase().endsWith(".parquet") || 
+            StringUtils.containsIgnoreCase(request.getContentType(), "parquet");
     }
 
     Map<String, BulkDataRules> effectiveTemplates(Map<String, BulkDataRules> original) {
