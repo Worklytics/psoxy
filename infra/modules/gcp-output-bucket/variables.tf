@@ -82,3 +82,16 @@ variable "bucket_force_destroy" {
   description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this module"
   default     = false
 }
+
+variable "enable_versioning" {
+  type        = bool
+  description = "Enable object versioning for the bucket"
+  default     = false
+}
+
+variable "bucket_access_logs_destination" {
+  description = "The name of the GCS bucket to route access logs to for all buckets managed by this module"
+  type        = string
+  default     = null
+}
+
