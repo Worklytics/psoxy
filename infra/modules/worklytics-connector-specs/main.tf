@@ -1388,9 +1388,10 @@ EOT
         "/api/v4/groups",
         "/api/v4/groups/${local.gitlab_example_group_id}/members/all",
         "/api/v4/projects",
+        "/api/v4/projects/${local.gitlab_example_project_id}/repository/branches",
+        "/api/v4/projects/${local.gitlab_example_project_id}/repository/commits",
         "/api/v4/projects/${local.gitlab_example_project_id}/issues",
         "/api/v4/projects/${local.gitlab_example_project_id}/merge_requests",
-        "/api/v4/users",
         "/api/v4/projects/${local.gitlab_example_project_id}/audit_events",
       ],
       external_token_todo : templatefile("${path.module}/docs/gitlab/gitlab-instructions.tftpl", {
