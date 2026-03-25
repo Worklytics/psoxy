@@ -327,7 +327,7 @@ resource "google_service_account" "proxy_builder_sa" {
   project      = var.project_id
 }
 
-resource "google_storage_bucket_iam_member" "grant_proxy_builder_as_storage_object_viewer" {
+resource "google_storage_bucket_iam_member" "grant_proxy_builder_object_viewer_on_artifacts" {
   count = local.is_remote_bundle ? 0 : 1
 
   bucket = google_storage_bucket.artifacts[0].name
