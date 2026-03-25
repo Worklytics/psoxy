@@ -345,12 +345,10 @@ publish_to_region() {
     fi
 
     # Upload with metadata
-    aws s3 cp "$JAR_PATH" "$s3_path" \
+    if aws s3 cp "$JAR_PATH" "$s3_path" \
         --region "$region" \
         --metadata "$metadata" \
-        --cache-control "public, max-age=3600"
-
-    if [ $? -eq 0 ]; then
+        --cache-control "public, max-age=3600"; then
         echo -e "${SUCCESS}✓ Successfully published to ${region}${NC}"
         
         # Verify metadata was set
@@ -397,7 +395,7 @@ publish() {
 
     for region in "${REGIONS[@]}"; do
         if publish_to_region "$region"; then
-            ((success_count++))
+            success_count=$((success_count + 1))
         fi
     done
 

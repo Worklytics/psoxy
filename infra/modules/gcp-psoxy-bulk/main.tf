@@ -43,6 +43,9 @@ locals {
 }
 
 # data input to function
+# staging bucket only, does not need versioning
+# trivy:ignore:AVD-GCP-0078
+# trivy:ignore:AVD-GCP-0077
 resource "google_storage_bucket" "input_bucket" {
   project                     = var.project_id
   name                        = coalesce(var.input_bucket_name, "${local.bucket_prefix}-input")
@@ -50,6 +53,13 @@ resource "google_storage_bucket" "input_bucket" {
   force_destroy               = var.bucket_force_destroy
   uniform_bucket_level_access = true
   labels                      = var.default_labels
+
+  dynamic "logging" {
+    for_each = var.bucket_access_logs_destination != null ? [var.bucket_access_logs_destination] : []
+    content {
+      log_bucket = logging.value
+    }
+  }
 
   lifecycle_rule {
     condition {
@@ -82,6 +92,8 @@ module "output_bucket" {
   expiration_days                = var.sanitized_expiration_days
   bucket_labels                  = var.default_labels
   bucket_force_destroy           = var.bucket_force_destroy
+  enable_versioning              = var.enable_versioning
+  bucket_access_logs_destination = var.bucket_access_logs_destination
 }
 
 resource "google_service_account" "service_account" {
@@ -165,8 +177,9 @@ resource "google_cloudfunctions2_function" "function" {
   location    = var.region
 
   build_config {
-    runtime     = "java21"
-    entry_point = "co.worklytics.psoxy.GCSFileEvent"
+    runtime         = "java21"
+    entry_point     = "co.worklytics.psoxy.GCSFileEvent"
+    service_account = var.builder_sa_id
 
     docker_repository = var.artifact_repository_id
 

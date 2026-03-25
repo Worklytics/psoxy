@@ -29,7 +29,7 @@ locals {
 # call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.5.18"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.5.19"
 
   enabled_connectors                       = var.enabled_connectors
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
@@ -89,7 +89,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.5.18"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.5.19"
 
   gcp_project_id                    = var.gcp_project_id
   environment_name                  = var.environment_name
@@ -129,6 +129,7 @@ module "psoxy" {
   bucket_force_destroy            = var.bucket_force_destroy
   tf_gcp_principal_email          = var.gcp_terraform_sa_account_email
   provision_project_level_iam     = var.provision_project_level_iam
+  bucket_access_logs_destination  = var.bucket_access_logs_destination
 }
 
 locals {
@@ -150,7 +151,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.5.18"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.5.19"
 
   host_platform_id     = local.host_platform_id
   proxy_instance_id    = each.key
@@ -216,10 +217,17 @@ output "bulk_connector_instances" {
 
 output "webhook_collector_instances" {
   value = { for k, v in module.psoxy.webhook_collector_instances : k => {
-    endpoint_url     = try(v.cloud_function_url, null)
-    sanitized_bucket = v.output_sanitized_bucket_id
-    test_examples    = try(v.test_examples, [])
+    endpoint_url                    = try(v.cloud_function_url, null)
+    sanitized_bucket                = v.output_sanitized_bucket_id
+    side_output_sanitized_bucket_id = try(v.side_output_sanitized_bucket_id, null)
+    side_output_original_bucket_id  = try(v.side_output_original_bucket_id, null)
+    test_examples                   = try(v.test_examples, [])
   } }
+}
+
+output "artifacts_bucket_id" {
+  description = "The ID of the artifacts google_storage_bucket resource"
+  value       = module.psoxy.artifacts_bucket_id
 }
 
 output "todos_1" {

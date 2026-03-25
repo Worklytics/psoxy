@@ -56,7 +56,10 @@ trigger_workflow() {
     
     echo -e "${INFO}Triggering workflow: ${SUCCESS}${workflow_name}${NC}" >&2
     
-    gh workflow run "$workflow_name" --ref "$ref"
+    if ! gh workflow run "$workflow_name" --ref "$ref" >&2; then
+        echo -e "${ERR}Error: 'gh workflow run' failed for ${workflow_name}${NC}" >&2
+        return 1
+    fi
     
     # Wait for the workflow to start and get the run ID
     local run_id=""
@@ -119,8 +122,7 @@ echo ""
 echo -e "${INFO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${INFO}Step 1/2: AWS Bundle${NC}"
 echo -e "${INFO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-AWS_RUN_ID=$(trigger_workflow "$AWS_WORKFLOW" "$REF")
-if [ $? -ne 0 ] || [ -z "$AWS_RUN_ID" ]; then
+if ! AWS_RUN_ID=$(trigger_workflow "$AWS_WORKFLOW" "$REF") || [ -z "$AWS_RUN_ID" ]; then
     echo -e "${ERR}✗ Failed to trigger AWS workflow${NC}"
     exit 1
 fi
@@ -145,8 +147,7 @@ echo ""
 echo -e "${INFO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${INFO}Step 2/2: GCP Bundle${NC}"
 echo -e "${INFO}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-GCP_RUN_ID=$(trigger_workflow "$GCP_WORKFLOW" "$REF")
-if [ $? -ne 0 ] || [ -z "$GCP_RUN_ID" ]; then
+if ! GCP_RUN_ID=$(trigger_workflow "$GCP_WORKFLOW" "$REF") || [ -z "$GCP_RUN_ID" ]; then
     echo -e "${ERR}✗ Failed to trigger GCP workflow${NC}"
     exit 1
 fi

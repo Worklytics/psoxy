@@ -225,6 +225,9 @@ data "archive_file" "source" {
 }
 
 # Create bucket that will host the source code
+# staging bucket only, does not need versioning
+# trivy:ignore:AVD-GCP-0078
+# trivy:ignore:AVD-GCP-0077
 resource "google_storage_bucket" "artifacts" {
   count = local.is_remote_bundle ? 0 : 1
 
@@ -234,6 +237,13 @@ resource "google_storage_bucket" "artifacts" {
   uniform_bucket_level_access = true
   force_destroy               = var.bucket_force_destroy
   labels                      = var.default_labels
+
+  dynamic "logging" {
+    for_each = var.bucket_access_logs_destination != null ? [var.bucket_access_logs_destination] : []
+    content {
+      log_bucket = logging.value
+    }
+  }
 
   # TODO: remove in v0.5
   lifecycle {
@@ -303,15 +313,29 @@ resource "google_project_iam_member" "grant_gcs-sa_pub-sub-publisher" {
   member  = "serviceAccount:${data.google_storage_project_service_account.gcs_default_service_account.email_address}"
 }
 
-# Grant Cloud Build builder role to Compute Engine default service account
+locals {
+  builder_sa_email = var.builder_sa_email != null ? var.builder_sa_email : try(google_service_account.proxy_builder_sa[0].email, data.google_compute_default_service_account.default.email)
+}
+
+# Create a custom builder SA to avoid using the Compute Engine default SA for builds (fixes GCP-0006)
+resource "google_service_account" "proxy_builder_sa" {
+  count = var.provision_project_level_iam && var.builder_sa_email == null ? 1 : 0
+
+  account_id   = substr("${var.environment_id_prefix}proxy-builder-sa", 0, 30)
+  display_name = "${local.environment_id_prefix_display} Psoxy Cloud Build Service Account"
+  description  = "Service account used by Cloud Build to build Psoxy Cloud Functions."
+  project      = var.project_id
+}
+
+# Grant Cloud Build builder role to the custom builder service account
 # Required for Cloud Functions Gen2 deployment to build the function
 # See: https://cloud.google.com/functions/docs/troubleshooting#build-service-account
-resource "google_project_iam_member" "grant_compute_default_sa_cloudbuild_builder" {
+resource "google_project_iam_member" "grant_builder_sa_cloudbuild_builder" {
   count = var.provision_project_level_iam ? 1 : 0
 
   project = var.project_id
   role    = "roles/cloudbuild.builds.builder"
-  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  member  = "serviceAccount:${local.builder_sa_email}"
 }
 
 
@@ -504,6 +528,11 @@ resource "google_project_iam_member" "data_sanitization_tester_grant" {
 
 output "artifacts_bucket_name" {
   value = local.artifact_bucket_name
+}
+
+output "artifacts_bucket_id" {
+  value       = try(google_storage_bucket.artifacts[0].id, null)
+  description = "The ID of the artifacts google_storage_bucket resource"
 }
 
 output "deployment_bundle_object_name" {
