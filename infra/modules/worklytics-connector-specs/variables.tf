@@ -167,6 +167,24 @@ variable "github_example_repository" {
   description = "(Only required if using Github connector) Name for the repository to be used as part of example calls for Github (ex: psoxy)"
 }
 
+variable "gitlab_host" {
+  type        = string
+  default     = "gitlab.com"
+  description = "(Only required if using GitLab connector) Host of the GitLab instance (ex: gitlab.com or gitlab.mycompany.com for self-hosted)"
+}
+
+variable "gitlab_example_group_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using GitLab connector) Example group ID for test API calls (ex: 12345)"
+}
+
+variable "gitlab_example_project_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using GitLab connector) Example project ID for test API calls (ex: 12345)"
+}
+
 variable "glean_instance_subdomain" {
   type        = string
   default     = null

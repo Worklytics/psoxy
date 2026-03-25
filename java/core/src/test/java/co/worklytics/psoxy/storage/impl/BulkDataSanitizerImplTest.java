@@ -66,7 +66,7 @@ import lombok.SneakyThrows;
 
 public class BulkDataSanitizerImplTest {
 
-    private static final co.worklytics.psoxy.gateway.StorageEventRequest DUMMY_REQUEST = 
+    private static final co.worklytics.psoxy.gateway.StorageEventRequest DUMMY_REQUEST =
         co.worklytics.psoxy.gateway.StorageEventRequest.builder()
             .sourceBucketName("test-bucket")
             .sourceObjectPath("test-object")
@@ -733,6 +733,52 @@ public class BulkDataSanitizerImplTest {
         }
     }
 
+    @SneakyThrows
+    @Test
+    void transform_gitlab_username() {
+
+        final String EXPECTED = "EMPLOYEE_ID,EMPLOYEE_EMAIL,DEPARTMENT,SNAPSHOT,MANAGER_ID,JOIN_DATE,LEAVE_DATE,GITLAB_USERNAME\n" +
+            "2,bob@workltyics.co,Sales,2023-01-06,1,2020-01-01,,\"{\"\"hash\"\":\"\"hgs2zOvvnp8YG1adeeZCwUmAI_BUk5CFTPF_tca6OmQ\"\"}\"\n" +
+            "1,alice@worklytics.co,Engineering,2023-01-06,,2019-11-11,,\"{\"\"hash\"\":\"\"sbIXAryuJzPz0dxRh4swzuxCY9_ZetgbAQlcrI-W30g\"\"}\"\n" +
+            "4,,Engineering,2023-01-06,1,2018-06-03,,\n" +
+            "3,charles@workltycis.co,Engineering,2023-01-06,1,2019-10-06,2022-12-08,\"{\"\"hash\"\":\"\"1RaWPpeCqO4wTAc849d9KY41PEXdkHcxJ32ifrLzsjQ\"\"}\"\n";
+        ColumnarRules rules = ColumnarRules.builder()
+            .fieldsToTransform(Map.of("EMPLOYEE_EMAIL", FieldTransformPipeline.builder()
+                .newName("GITLAB_USERNAME")
+                .transforms(Arrays.asList(
+                    FieldTransform.filter("(.*)@.*"),
+                    FieldTransform.formatString("%s_enterprise"),
+                    FieldTransform.pseudonymize(true)
+                )).build()))
+            .build();
+        columnarFileSanitizerImpl.setRules(rules);
+
+        File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
+
+        // replace shuffler implementation with one that reverses the list, so deterministic
+        columnarFileSanitizerImpl.setRecordShuffleChunkSize(2);
+        columnarFileSanitizerImpl.makeShuffleDeterministic();
+
+
+        try (Reader in = safeFileReader(inputFile);
+             StringWriter out = new StringWriter()) {
+            columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
+            assertEquals(EXPECTED, out.toString());
+
+            String resultString = out.toString();
+
+            assertEquals(EXPECTED, resultString);
+
+            PseudonymizerImpl githubPseudonymizer =
+                pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder().build());
+
+            //validate has _enterprise appended pre-pseudonymization
+            assertTrue(resultString.contains(githubPseudonymizer.pseudonymize("alice_enterprise").getHash()));
+
+            //plain 'alice' hash shouldn't be there either
+            assertFalse(resultString.contains(pseudonymizer.pseudonymize("alice").getHash()));
+        }
+    }
 
     @SneakyThrows
     @Test
@@ -774,6 +820,7 @@ public class BulkDataSanitizerImplTest {
             }
         }
     }
+
 
     @SneakyThrows
     @Test
@@ -894,7 +941,7 @@ User Name,Email,Action,Feature used,Department,\r
     }
 
 
-    class StubPseudonymizer implements Pseudonymizer {
+    static class StubPseudonymizer implements Pseudonymizer {
 
         @Override
         public PseudonymizedIdentity pseudonymize(Object identifier) {
