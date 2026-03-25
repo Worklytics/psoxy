@@ -327,6 +327,14 @@ resource "google_service_account" "proxy_builder_sa" {
   project      = var.project_id
 }
 
+resource "google_storage_bucket_iam_member" "grant_proxy_builder_object_viewer_on_artifacts" {
+  count = local.is_remote_bundle ? 0 : 1
+
+  bucket = google_storage_bucket.artifacts[0].name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${local.builder_sa_email}"
+}
+
 # Grant Cloud Build builder role to the custom builder service account
 # Required for Cloud Functions Gen2 deployment to build the function
 # See: https://cloud.google.com/functions/docs/troubleshooting#build-service-account
