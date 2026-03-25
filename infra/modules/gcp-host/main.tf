@@ -225,6 +225,10 @@ module "api_connector" {
     module.psoxy.secrets,
     module.psoxy.artifact_repository
   )
+
+  depends_on = [
+    module.psoxy
+  ]
 }
 
 module "custom_api_connector_rules" {
@@ -316,7 +320,9 @@ module "webhook_collector" {
 
   secret_bindings = module.psoxy.secrets
 
-
+  depends_on = [
+    module.psoxy
+  ]
 }
 
 # END WEBHOOK COLLECTORS
