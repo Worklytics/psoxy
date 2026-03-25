@@ -327,12 +327,12 @@ resource "google_service_account" "proxy_builder_sa" {
   project      = var.project_id
 }
 
-resource "google_project_iam_member" "grant_proxy_builder_as_storage_object_viewer" {
-  count = var.provision_project_level_iam && var.builder_sa_email == null ? 1 : 0
+resource "google_storage_bucket_iam_member" "grant_proxy_builder_as_storage_object_viewer" {
+  count = local.is_remote_bundle ? 0 : 1
 
-  project = var.project_id
-  role    = "roles/storage.objectViewer"
-  member  = "serviceAccount:${google_service_account.proxy_builder_sa[0].email}"
+  bucket = google_storage_bucket.artifacts[0].name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${local.builder_sa_email}"
 }
 
 # Grant Cloud Build builder role to the custom builder service account
