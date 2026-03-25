@@ -115,6 +115,12 @@ variable "example_file" {
   default     = null
 }
 
+variable "example_files" {
+  type        = list(string)
+  description = "list of paths to example files to use for testing, from psoxy_base_dir"
+  default     = []
+}
+
 variable "instructions_template" {
   type        = string
   description = "path to instructions template file, from psoxy_base_dir"

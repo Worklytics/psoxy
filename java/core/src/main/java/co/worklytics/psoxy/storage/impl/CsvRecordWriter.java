@@ -25,15 +25,10 @@ class CsvRecordWriter implements RecordWriter {
     }
 
     @Override
-    public void writeRecord(Object record) throws IOException {
-        if (!(record instanceof Map)) {
-            throw new IllegalArgumentException("CsvRecordWriter expects Map records");
-        }
-        Map<String, Object> map = (Map<String, Object>) record;
-        
+    public void writeRecord(Map<String, Object> record) throws IOException {
         if (printer == null) {
             // this is the first row; create printer, initialized with headers we see in first record
-            Set<String> keys = map.keySet();
+            Set<String> keys = record.keySet();
             headers = keys.toArray(new String[0]);
             printer = new CSVPrinter(writer, CSVFormat.DEFAULT.builder()
                 .setHeader(headers)
@@ -42,7 +37,7 @@ class CsvRecordWriter implements RecordWriter {
         }
         
         for (String header : headers) {
-            printer.print(map.get(header));
+            printer.print(record.get(header));
         }
         printer.println();
     }

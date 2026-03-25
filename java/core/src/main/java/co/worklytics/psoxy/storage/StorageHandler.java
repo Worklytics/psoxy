@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
 import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
@@ -366,6 +364,13 @@ public class StorageHandler {
     void validate(StorageEventRequest request,
                   StorageHandler.ObjectTransform transform,
                   Supplier<InputStream> inputStreamSupplier) {
+        
+        // Skip validation for binary formats like Parquet, as text-based validation corrupts/fails
+        if (isSupportedBinaryType(request)) {
+            log.info("Skipping text-based validation for supported binary format: " + request.getSourceObjectPath());
+            return;
+        }
+
         int bufferSize = getBufferSize();
         try (
             InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
@@ -408,9 +413,7 @@ public class StorageHandler {
 
         try (
             InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
-            Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8), bufferSize);
-            OutputStream outputStream = writeOutputStream(request, bufferSize, outputStreamSupplier);
-            OutputStreamWriter writer = new OutputStreamWriter(outputStream)
+            OutputStream outputStream = writeOutputStream(request, bufferSize, outputStreamSupplier)
         ) {
 
             Optional<BulkDataRules> applicableRules =
@@ -422,7 +425,7 @@ public class StorageHandler {
 
             BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules.get());
 
-            fileHandler.sanitize(request, reader, writer, pseudonymizer);
+            fileHandler.sanitize(request, inputStream, outputStream, pseudonymizer);
         }
     }
 
@@ -468,6 +471,16 @@ public class StorageHandler {
      */
     boolean isSourceCompressed(String contentEncoding, String sourceObjectPath) {
         return Objects.equals(contentEncoding, CONTENT_ENCODING_GZIP) || sourceObjectPath.endsWith(EXTENSION_GZIP);
+    }
+
+    /**
+     * Check if the source content is a supported binary type
+     * @param request the storage event request
+     * @return true if the format is a supported binary type
+     */
+    boolean isSupportedBinaryType(StorageEventRequest request) {
+        return request.getSourceObjectPath().toLowerCase().endsWith(".parquet") || 
+            StringUtils.containsIgnoreCase(request.getContentType(), "parquet");
     }
 
     Map<String, BulkDataRules> effectiveTemplates(Map<String, BulkDataRules> original) {
