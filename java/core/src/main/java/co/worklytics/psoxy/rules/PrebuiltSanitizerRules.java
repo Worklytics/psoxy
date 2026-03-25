@@ -15,6 +15,7 @@ public class PrebuiltSanitizerRules {
         .putAll(co.worklytics.psoxy.rules.github.PrebuiltSanitizerRules.RULES_MAP)
         .putAll(co.worklytics.psoxy.rules.glean.PrebuiltSanitizerRules.DEFAULT_RULES_MAP)
         .putAll(co.worklytics.psoxy.rules.gong.PrebuiltSanitizerRules.DEFAULT_RULES_MAP)
+        .putAll(co.worklytics.psoxy.rules.gitlab.PrebuiltSanitizerRules.DEFAULT_RULES_MAP)
         .putAll(co.worklytics.psoxy.rules.google.PrebuiltSanitizerRules.GOOGLE_DEFAULT_RULES_MAP)
         .putAll(co.worklytics.psoxy.rules.atlassian.jira.PrebuiltSanitizerRules.RULES_MAP)
         .putAll(co.worklytics.psoxy.rules.msft.PrebuiltSanitizerRules.MSFT_DEFAULT_RULES_MAP)

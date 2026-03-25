@@ -69,6 +69,7 @@
     * [GitHub Enterprise Server](sources/github/enterprise-server/README.md)
     * [GitHub Enterprise Cloud](sources/github/github/README.md)
     * [GitHub Non Enterprise Cloud](sources/github/github-non-enterprise/README.md)
+  * [GitLab](sources/gitlab/README.md)
   * [Glean](sources/glean/README.md)
   * [Gong](sources/gong/README.md)
     * [Gong Metrics](sources/gong/gong-metrics/README.md)
