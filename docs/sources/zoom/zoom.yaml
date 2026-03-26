@@ -445,6 +445,8 @@ definitions:
         type: "string"
       type:
         type: "integer"
+      uuid:
+        type: "string"
   MeetingInvitee:
     type: "object"
     properties:
