@@ -22,6 +22,7 @@ import javax.inject.Singleton;
 
 import java.io.*;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -38,7 +39,7 @@ public class WorkDataGenericTests {
     @Inject
     StorageHandler storageHandler;
 
-    java.util.function.Supplier<OutputStream> outputStreamSupplier;
+    Supplier<OutputStream> outputStreamSupplier;
 
     ByteArrayOutputStream outputStream;
 

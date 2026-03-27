@@ -1511,12 +1511,15 @@ EOT
     }
     "workdata-generic" = {
       source_kind               = "workdata-generic"
-      availability              = "ga"
+      availability              = "alpha"
       enable_by_default         = false
       worklytics_connector_id   = "workdata-generic-psoxy"
       worklytics_connector_name = "Workplace Metadata via Psoxy"
-      rules                     = {}
-      example_file              = "docs/sources/workdata-generic/example-bulk/original/events.ndjson"
+      example_files = [
+        "docs/sources/workdata-generic/example-bulk/original/events0.ndjson",
+        "docs/sources/workdata-generic/example-bulk/original/items0.ndjson",
+        "docs/sources/workdata-generic/example-bulk/original/accounts0.ndjson"
+      ]
     }
   }
 
