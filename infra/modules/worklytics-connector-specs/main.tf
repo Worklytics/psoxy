@@ -1509,6 +1509,15 @@ EOT
       }
       example_file = "docs/sources/survey/survey-example.csv"
     }
+    "workdata-generic" = {
+      source_kind               = "workdata-generic"
+      availability              = "ga"
+      enable_by_default         = false
+      worklytics_connector_id   = "workdata-generic-psoxy"
+      worklytics_connector_name = "Workplace Metadata via Psoxy"
+      rules                     = {}
+      example_file              = "docs/sources/workdata-generic/example-bulk/original/events.ndjson"
+    }
   }
 
   oauth_long_access_connectors_backwards = { for k, v in local.oauth_long_access_connectors :

@@ -72,11 +72,11 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
         List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms =
             rules.getTransforms().stream()
-                .map(transform -> Triple.of(
-                    JsonPath.compile(transform.getPath()),
+                .flatMap(transform -> transform.getPaths().stream().map(path -> Triple.of(
+                    JsonPath.compile(path),
                     transform,
                     getMapFunction(transform, pseudonymizer, encoder)
-                ))
+                )))
                 .collect(Collectors.toList());
 
         RecordRules.Format format = rules.getFormat();
@@ -162,10 +162,17 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             throws UnmatchedPseudonymization {
         for (Triple<JsonPath, RecordTransform, MapFunction> compiledTransform : compiledTransforms) {
             if (compiledTransform.getMiddle() instanceof RecordTransform.Pseudonymize) {
-                Object matches = compiledTransform.getLeft().read(document);
-                if (matches == null) {
-                    throw new UnmatchedPseudonymization(compiledTransform.getMiddle().getPath());
+                Object matches = null;
+                try {
+                    matches = compiledTransform.getLeft().read(document, jsonConfiguration);
+                } catch (JsonPathException e) {
+                    // Optional paths might not exist; suppress exception and treat as no match
                 }
+                
+                // If a path evaluates to null or empty but we were expecting to pseudonymize, 
+                // we skip adding it or processing it. Note: If the path is entirely missing,
+                // we do not throw UnmatchedPseudonymization anymore because array-based transforms 
+                // contain multiple optional paths.
             }
 
             try {

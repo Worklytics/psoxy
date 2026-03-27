@@ -36,9 +36,10 @@ public interface RecordTransform {
 
 
     /**
-     * json path to field to transform
+     * json paths to fields to transform
      */
-    String getPath();
+    @JsonIgnore
+    List<String> getPaths();
 
 
     @JsonTypeName("redact")
@@ -48,13 +49,15 @@ public interface RecordTransform {
     class Redact implements RecordTransform {
 
         /**
-         * json path to field to redact
+         * json paths to fields to redact
          */
-        String redact;
+        @Singular("redact")
+        @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+        List<String> redact;
 
         @Override
         @JsonIgnore
-        public String getPath() {
+        public List<String> getPaths() {
             return redact;
         }
     }
@@ -67,13 +70,15 @@ public interface RecordTransform {
     class Pseudonymize implements RecordTransform {
 
         /**
-         * json path to field to pseudonymize
+         * json paths to fields to pseudonymize
          */
-        String pseudonymize;
+        @Singular("pseudonymize")
+        @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+        List<String> pseudonymize;
 
         @Override
         @JsonIgnore
-        public String getPath() {
+        public List<String> getPaths() {
             return pseudonymize;
         }
     }
