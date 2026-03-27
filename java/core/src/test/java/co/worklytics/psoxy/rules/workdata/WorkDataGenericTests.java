@@ -89,14 +89,14 @@ public class WorkDataGenericTests {
 
     @SneakyThrows
     @CsvSource({
-        "sources/workdata-generic/workdata-generic.yaml,events.ndjson",
-        "sources/workdata-generic/workdata-generic.yaml,items.ndjson",
-        "sources/workdata-generic/workdata-generic.yaml,accounts.ndjson"
+        "sources/workdata-generic/workdata-generic.yaml,events0.ndjson",
+        "sources/workdata-generic/workdata-generic.yaml,items0.ndjson",
+        "sources/workdata-generic/workdata-generic.yaml,accounts0.ndjson"
     })
     @ParameterizedTest
     public void files(String rulesPath, String file) {
         setUp(rulesPath);
-        final String objectPath = "export-20231128/" + file + ".gz";
+        final String objectPath = "export-20231128/" + file;
         final String pathToOriginal = "sources/workdata-generic/example-bulk/original/" + file;
         final String pathToSanitized = "sources/workdata-generic/example-bulk/sanitized/" + file;
         
