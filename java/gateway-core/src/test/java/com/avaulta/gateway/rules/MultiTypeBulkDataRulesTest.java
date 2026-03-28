@@ -50,8 +50,10 @@ public class MultiTypeBulkDataRulesTest {
             "  /export/{week}/index_{shard}.ndjson:\n" +
             "    format: \"NDJSON\"\n" +
             "    transforms:\n" +
-            "    - redact: \"foo\"\n" +
-            "    - pseudonymize: \"bar\"\n";
+            "    - redact:\n" +
+            "      - \"foo\"\n" +
+            "    - pseudonymize:\n" +
+            "      - \"bar\"\n";
 
         RecordRules recordRules = RecordRules.builder()
             .transform(RecordTransform.Redact.builder()
