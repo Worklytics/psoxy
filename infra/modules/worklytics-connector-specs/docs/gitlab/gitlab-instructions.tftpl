@@ -10,31 +10,28 @@ See GitLab documentation:
 The following scope is required:
 - `read_api`: for reading API resources (groups, projects, issues, merge requests, users, etc.)
 
-Maintainer role is required for fetching audit events and group members.
+`Maintainer` role is required as it is needed for fetching audit events and group members.
 
 ## Endpoints Used
 
-| Endpoint                                                        | Scope      | Minimum Role |
-|-----------------------------------------------------------------|------------|--------------|
-| `/api/v4/groups`                                                | `read_api` | Reporter     |
-| `/api/v4/groups/{id}/members/all`                               | `read_api` | Maintainer   |
-| `/api/v4/merge_requests/{id}`                                   | `read_api` | Reporter     |
-| `/api/v4/projects`                                              | `read_api` | Reporter     |
-| `/api/v4/projects/{id}/audit_events`                            | `read_api` | Maintainer   |
-| `/api/v4/projects/{id}/issues/{issueIid}/notes`                 | `read_api` | Reporter     |
-| `/api/v4/projects/{id}/issues/{issueIid}/resource_state_events` | `read_api` | Reporter     |
-| `/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/commits`| `read_api` | Reporter     |
-| `/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/notes`  | `read_api` | Reporter     |
-| `/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/resource_state_events` | `read_api` | Reporter |
-| `/api/v4/projects/{id}/repository/branches`                     | `read_api` | Reporter     |
-| `/api/v4/projects/{id}/repository/commits`                      | `read_api` | Reporter     |
-| `/api/v4/projects/{id}/repository/commits/{sha}`                | `read_api` | Reporter     |
-| `/api/v4/projects/{id}/repository/commits/{sha}/discussions`    | `read_api` | Reporter     |
-| `/api/v4/projects/{projectId}/issues`                           | `read_api` | Reporter     |
-| `/api/v4/projects/{projectId}/merge_requests`                   | `read_api` | Reporter     |
-
-- The `read_api` scope is required for all endpoints.
-- "Minimum Role" is the lowest GitLab role that can access the endpoint with the required scope.
+| Endpoint                                                                       |
+|--------------------------------------------------------------------------------|
+| `/api/v4/groups`                                                               |
+| `/api/v4/groups/{id}/members/all`                                              |
+| `/api/v4/merge_requests/{id}`                                                  |
+| `/api/v4/projects`                                                             |
+| `/api/v4/projects/{id}/audit_events`                                           |
+| `/api/v4/projects/{id}/issues/{issueIid}/notes`                                |
+| `/api/v4/projects/{id}/issues/{issueIid}/resource_state_events`                |
+| `/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/commits`               |
+| `/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/notes`                 |
+| `/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/resource_state_events` |
+| `/api/v4/projects/{id}/repository/branches`                                    |
+| `/api/v4/projects/{id}/repository/commits`                                     |
+| `/api/v4/projects/{id}/repository/commits/{sha}`                               |
+| `/api/v4/projects/{id}/repository/commits/{sha}/discussions`                   |
+| `/api/v4/projects/{projectId}/issues`                                          |
+| `/api/v4/projects/{projectId}/merge_requests`                                  |
 
 ## Setup Instructions
 
