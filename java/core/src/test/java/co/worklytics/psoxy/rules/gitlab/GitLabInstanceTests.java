@@ -3,17 +3,16 @@ package co.worklytics.psoxy.rules.gitlab;
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
 import co.worklytics.psoxy.rules.RESTRules;
 import lombok.Getter;
-import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
 
 @Getter
-public class GitLabTests extends JavaRulesTestBaseCase {
+public class GitLabInstanceTests extends JavaRulesTestBaseCase {
 
-    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GITLAB;
+    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GITLAB_INSTANCE;
 
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
-        .sourceKind("gitlabcom")
+        .sourceKind("instance")
         .exampleApiResponsesDirectoryPath("example-api-responses/original/")
         .exampleSanitizedApiResponsesPath("example-api-responses/sanitized/")
         .sourceFamily("gitlab")
@@ -90,8 +89,10 @@ public class GitLabTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/repository/commits/abc123def/discussions", "commit_discussion.json"),
             InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/repository/commits/abc123def/discussions?page=2&per_page=20", "commit_discussion.json"),
 
-            InvocationExample.of("https://gitlab.example.com/api/v4/namespaces", "namespaces.json"),
-            InvocationExample.of("https://gitlab.example.com/api/v4/namespaces?page=2&per_page=20", "namespaces.json")
+            InvocationExample.of("https://gitlab.example.com/api/v4/users/{userId}/emails", "user_emails.json"),
+
+            InvocationExample.of("https://gitlab.example.com/api/v4/licenses", "licenses.json"),
+            InvocationExample.of("https://gitlab.example.com/api/v4/licenses?page=2&per_page=20", "licenses.json")
         );
     }
 }

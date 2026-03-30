@@ -20,6 +20,11 @@ endpoints:
       type: "array"
       items:
         $ref: "#/definitions/GroupMember"
+  - pathTemplate: "/api/v4/licenses"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/License"
   - pathTemplate: "/api/v4/merge_requests/{id}"
     transforms:
       - !<pseudonymize>
@@ -370,6 +375,16 @@ endpoints:
       type: "array"
       items:
         $ref: "#/definitions/MergeRequest"
+  - pathTemplate: "/api/v4/users/{id}/emails"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..email"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/UserEmail"
 definitions:
   AuditEvent:
     type: "object"
@@ -589,6 +604,15 @@ definitions:
         type: "integer"
       weight:
         type: "integer"
+  License:
+    type: "object"
+    properties:
+      expired:
+        type: "boolean"
+      id:
+        type: "integer"
+      plan:
+        type: "string"
   MergeRequest:
     type: "object"
     properties:
@@ -853,3 +877,13 @@ definitions:
         type: "string"
       username:
         type: "string"
+  UserEmail:
+    type: "object"
+    properties:
+      confirmed_at:
+        type: "string"
+        format: "date-time"
+      email:
+        type: "string"
+      id:
+        type: "integer"

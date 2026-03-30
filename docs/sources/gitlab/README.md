@@ -2,13 +2,13 @@
 
 ## Examples
 
-- [Example Rules](gitlab.yaml)
+- [Example Rules](gitlabcom/gitlab.yaml)
 - Example Data:
-  - [original/groups.json](example-api-responses/original/groups.json) | [sanitized/groups.json](example-api-responses/sanitized/groups.json)
-  - [original/group_members.json](example-api-responses/original/group_members.json) | [sanitized/group_members.json](example-api-responses/sanitized/group_members.json)
-  - [original/projects.json](example-api-responses/original/projects.json) | [sanitized/projects.json](example-api-responses/sanitized/projects.json)
-  - [original/issues.json](example-api-responses/original/issues.json) | [sanitized/issues.json](example-api-responses/sanitized/issues.json)
-  - [original/merge_requests.json](example-api-responses/original/merge_requests.json) | [sanitized/merge_requests.json](example-api-responses/sanitized/merge_requests.json)
+  - [original/groups.json](gitlabcom/example-api-responses/original/groups.json) | [sanitized/groups.json](gitlabcom/example-api-responses/sanitized/groups.json)
+  - [original/group_members.json](gitlabcom/example-api-responses/original/group_members.json) | [sanitized/group_members.json](gitlabcom/example-api-responses/sanitized/group_members.json)
+  - [original/projects.json](gitlabcom/example-api-responses/original/projects.json) | [sanitized/projects.json](gitlabcom/example-api-responses/sanitized/projects.json)
+  - [original/issues.json](gitlabcom/example-api-responses/original/issues.json) | [sanitized/issues.json](gitlabcom/example-api-responses/sanitized/issues.json)
+  - [original/merge_requests.json](gitlabcom/example-api-responses/original/merge_requests.json) | [sanitized/merge_requests.json](gitlabcom/example-api-responses/sanitized/merge_requests.json)
 
 ## Steps to Connect
 
