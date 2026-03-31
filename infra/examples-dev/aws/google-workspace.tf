@@ -2,7 +2,7 @@ provider "google" {
   alias = "google_workspace"
 
   project                     = var.google_workspace_gcp_project_id
-  impersonate_service_account = var.google_workspace_sa_to_impersonate != null ? var.google_workspace_sa_to_impersonate : var.google_workspace_terraform_sa_account_email # TODO: remove ternary in 0.6.x
+  impersonate_service_account = var.google_workspace_sa_to_impersonate
 }
 
 

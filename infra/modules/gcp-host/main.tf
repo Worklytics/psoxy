@@ -67,11 +67,10 @@ locals {
     for k, v in var.api_connectors :
     k => {
       for var_def in v.secured_variables :
-      # TODO: in v0.5, the prefix with the instance_id can be removed
       "${replace(upper(var_def.name), "-", "_")}" =>
       merge({
         instance_id        = k
-        instance_secret_id = "${replace(upper(k), "-", "_")}_${replace(upper(var_def.name), "-", "_")}"
+        instance_secret_id = replace(upper(var_def.name), "-", "_")
         value              = "TODO: fill me"
         description        = ""
         },
@@ -358,7 +357,7 @@ module "bulk_connector" {
   todos_as_local_files              = var.todos_as_local_files
   tf_runner_iam_principal           = module.tf_runner.iam_principal
   available_memory_mb               = coalesce(try(var.custom_bulk_connector_arguments[each.key].available_memory_mb, null), try(each.value.available_memory_mb, null), 512)
-  timeout_seconds                   = coalesce(try(var.custom_bulk_connector_arguments[each.key].timeout_seconds, null), try(each.value.timeout_seconds, null), 540) # TODO: bump to 1800 (30 minutes) in 0.6.x
+  timeout_seconds                   = coalesce(try(var.custom_bulk_connector_arguments[each.key].timeout_seconds, null), try(each.value.timeout_seconds, null), 1800)
   gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
   bucket_force_destroy              = var.bucket_force_destroy
   enable_versioning                 = var.version_sanitized_buckets

@@ -10,6 +10,8 @@ terraform {
 
 
 locals {
+  api_function_name_prefix = coalesce(var.api_function_name_prefix, "${lower(var.deployment_id)}-")
+
   aws_caller_statements = [
     for arn in var.caller_aws_arns :
     {
@@ -331,4 +333,9 @@ output "webhook_collection_gateway" {
 
 output "webhook_collection_gateway_stage" {
   value = var.provision_webhook_collection_infra ? aws_apigatewayv2_stage.webhook_collector[0] : null
+}
+
+output "api_function_name_prefix" {
+  description = "The prefix used for API function names"
+  value       = local.api_function_name_prefix
 }

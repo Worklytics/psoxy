@@ -24,10 +24,9 @@ import lombok.extern.java.Log;
  *
  * works with 1) lambda function URL invocations, or 2) API Gateway v2 HTTP proxy invocations
  *
- * TODO: in 0.6, rename this to AwsApiGatewayV2ApiDataRequestHandler, or something similar
  */
 @Log
-public class Handler implements
+public class AwsApiGatewayV2ApiDataRequestHandler implements
         com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
 
     /**
@@ -49,7 +48,7 @@ public class Handler implements
         responseCompressionHandler = new ResponseCompressionHandler();
 
         if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
-            awsContainer.loggingConfiguration().validateNewRelicHandler(Handler.class);
+            awsContainer.loggingConfiguration().validateNewRelicHandler(AwsApiGatewayV2ApiDataRequestHandler.class);
             GlobalTracer.registerIfAbsent(LambdaTracer.INSTANCE);
         }
 

@@ -176,7 +176,7 @@ variable "rules" {
   type = object({
     # NOTE: use `optional()` in variables.tf of modules that wrap this one, but omit the default
     # value so that the one here prevails (unless should really be different for your use-case)
-    pseudonymFormat                = optional(string, "JSON") # TODO: change to URL_SAFE_TOKEN in v0.5
+    pseudonymFormat                = optional(string, "URL_SAFE_TOKEN")
     columnsToRedact                = optional(list(string), [])
     columnsToInclude               = optional(list(string), null)
     columnsToPseudonymize          = optional(list(string), [])

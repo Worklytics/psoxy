@@ -57,7 +57,6 @@ resource "google_secret_manager_secret_version" "version" {
   lifecycle {
     create_before_destroy = true
 
-    # TODO: remove this in v0.5
     ignore_changes = [
       enabled, # if secret version disabled after creation, let it be (placeholder case)
     ]

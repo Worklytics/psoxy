@@ -3,7 +3,7 @@ terraform {
 
   required_providers {
     google = {
-      version = "~> 5.0" # TODO: actually go to 6.0 for proxy v0.5
+      version = "~> 6.0"
     }
   }
 

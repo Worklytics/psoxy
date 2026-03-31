@@ -78,7 +78,7 @@ variable "log_retention_days" {
 variable "handler_class" {
   type        = string
   description = "Class to handle the request"
-  default     = "co.worklytics.psoxy.Handler"
+  default     = "co.worklytics.psoxy.AwsApiGatewayV2ApiDataRequestHandler::handleRequest"
 }
 
 variable "reserved_concurrent_executions" {

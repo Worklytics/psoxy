@@ -27,7 +27,7 @@ variable "region" {
 variable "handler_class" {
   type        = string
   description = "Class to handle the request"
-  default     = "co.worklytics.psoxy.Handler"
+  default     = "co.worklytics.psoxy.AwsApiGatewayV2ApiDataRequestHandler::handleRequest"
 }
 
 # TODO: remove after 0.4.x

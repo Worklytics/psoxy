@@ -105,8 +105,8 @@ variable "available_memory_mb" {
 
 variable "timeout_seconds" {
   type        = number
-  description = "Timeout (in seconds) for the function. Default value is 540 (9 minutes)."
-  default     = 540 # TODO: bump to 1800 (30 minutes) in 0.6.x
+  description = "Timeout (in seconds) for the function. Default value is 1800 (30 minutes)."
+  default     = 1800
 }
 
 variable "example_file" {
