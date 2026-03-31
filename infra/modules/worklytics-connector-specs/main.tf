@@ -1511,7 +1511,7 @@ EOT
     }
     "workdata-generic" = {
       source_kind               = "workdata-generic"
-      availability              = "alpha"
+      availability              = "beta"
       enable_by_default         = false
       worklytics_connector_id   = "workdata-generic-psoxy"
       worklytics_connector_name = "Workplace Metadata via Psoxy"
