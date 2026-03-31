@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     google = {
-      version = ">= 3.74, <= 4.0"
+      version = "~> 7.0"
     }
   }
 
@@ -31,7 +31,7 @@ Ensure the `terraform` block at the top of your Terraform configuration is somet
 terraform {
   required_providers {
     google = {
-      version = "~> 4.0.0"
+      version = "~> 7.0.0"
     }
   }
   backend "gcs" {

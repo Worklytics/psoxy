@@ -1,12 +1,12 @@
 terraform {
-  required_version = ">= 1.3, < 2.0"
+  required_version = "~> 1.3"
 }
 
 terraform {
   required_providers {
     # for the API connections to Google Workspace
     google = {
-      version = "~> 5.0"
+      version = "~> 7.0"
     }
   }
 }
