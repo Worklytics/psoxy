@@ -167,12 +167,17 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                     matches = compiledTransform.getLeft().read(document, jsonConfiguration);
                 } catch (JsonPathException e) {
                     // Optional paths might not exist; suppress exception and treat as no match
+                    continue;
                 }
                 
-                // If a path evaluates to null or empty but we were expecting to pseudonymize, 
-                // we skip adding it or processing it. Note: If the path is entirely missing,
-                // we do not throw UnmatchedPseudonymization anymore because array-based transforms 
-                // contain multiple optional paths.
+   
+                if (matches == null) {
+                    // If a path evaluates to null or empty but we were expecting to pseudonymize, 
+                    // we skip adding it or processing it. Note: If the path is entirely missing,
+                    // we do not throw UnmatchedPseudonymization anymore because array-based transforms 
+                    // contain multiple optional paths.
+                    continue;
+                }
             }
 
             try {
