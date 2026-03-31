@@ -7,6 +7,8 @@ Changes to be including in future/planned release notes will be added here.
 
 ## Next
 
+- `gcp`: We have modernized GCP networking to use native Direct VPC egress instead of Serverless VPC Access Connectors. If you use `vpc_config`, you **must** update your `terraform.tfvars` to remove the `serverless_connector` attribute. If you were NOT providing a connector but only passing `network` and `subnet`, the Serverless VPC Access Connector that our modules previously provisioned for you will be naturally destroyed on your next apply, saving you costs, and traffic will seamlessly route using native Direct VPC egress instead.
+
 ## [0.5.19](https://github.com/Worklytics/psoxy/release/tag/v0.5.19)
 - `gcp`: Dedicated `proxy_builder_sa` service account is now provisioned and used for Cloud Build operations when provisioning Cloud Functions, eliminating project-level IAM dependencies on the default Compute Engine service account.
 - `zoom`: Default rules for Zoom have been updated, removing fields and endpoints not required.
