@@ -1,26 +1,19 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
-import co.worklytics.psoxy.storage.impl.ColumnarBulkDataSanitizerImpl;
-import co.worklytics.test.TestModules;
-import com.avaulta.gateway.rules.ColumnarRules;
-import dagger.Component;
-import dagger.Module;
-import dagger.Provides;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.File;
-import java.io.StringWriter;
-import java.util.Collections;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import com.avaulta.gateway.rules.ColumnarRules;
+import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
+import co.worklytics.psoxy.storage.impl.ColumnarBulkDataSanitizerImpl;
 
 public class HandlerTest {
 
@@ -65,10 +58,11 @@ public class HandlerTest {
 
         File inputFile = new File(getClass().getResource("/hris-example.csv").getFile());
 
-        StringWriter s = new StringWriter();
+        ByteArrayOutputStream s = new ByteArrayOutputStream();
+
 
         handler.sanitize(configService.getCliConfig(), inputFile, s);
-        assertEquals(EXPECTED, s.toString());
+        assertEquals(EXPECTED, s.toString(StandardCharsets.UTF_8));
     }
 
 
@@ -86,10 +80,10 @@ public class HandlerTest {
 
         File inputFile = new File(getClass().getResource("/hris-example.csv").getFile());
 
-        StringWriter s = new StringWriter();
+        ByteArrayOutputStream s = new ByteArrayOutputStream();
         handler.sanitize(config, inputFile, s);
 
-        assertEquals(EXPECTED, s.toString());
+        assertEquals(EXPECTED, s.toString(StandardCharsets.UTF_8));
     }
 
     @Test
@@ -103,10 +97,10 @@ public class HandlerTest {
 
         File inputFile = new File(getClass().getResource("/hris-example-headers-w-spaces.csv").getFile());
 
-        StringWriter s = new StringWriter();
+        ByteArrayOutputStream s = new ByteArrayOutputStream();
         handler.sanitize(config, inputFile, s);
 
-        assertEquals(EXPECTED, s.toString());
+        assertEquals(EXPECTED, s.toString(StandardCharsets.UTF_8));
     }
 
 }

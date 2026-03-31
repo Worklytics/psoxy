@@ -114,6 +114,10 @@ module "gate_instance" {
     length(local.accepted_auth_keys) > 0 ? {
       AUTH_ISSUER        = local.auth_issuer
       ACCEPTED_AUTH_KEYS = join(",", local.accepted_auth_keys)
+    } : {},
+    var.new_relic_account_id != null && var.new_relic_account_id != "" ? {
+      NEW_RELIC_ACCOUNT_ID     = var.new_relic_account_id
+      NEW_RELIC_LAMBDA_HANDLER = var.handler_class
     } : {}
   )
 }

@@ -36,6 +36,12 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
+variable "new_relic_account_id" {
+  type        = string
+  description = "**beta** New Relic account ID to enable New Relic instrumentation. If set, this will auto-configure the NEW_RELIC_ACCOUNT_ID and NEW_RELIC_LAMBDA_HANDLER environment variables for proxied lambdas."
+  default     = null
+}
+
 variable "iam_roles_permissions_boundary" {
   type        = string
   description = "*beta* ARN of the permissions boundary to attach to IAM roles created by this module."
@@ -317,6 +323,7 @@ variable "custom_bulk_connectors" {
     memory_size_mb      = optional(number, null)
     settings_to_provide = optional(map(string), {})
     example_file        = optional(string)
+    example_files       = optional(list(string), [])
   }))
   description = "specs of custom bulk connectors to create"
 

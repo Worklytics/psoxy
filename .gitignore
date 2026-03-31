@@ -25,4 +25,5 @@
 # Log files
 *.log
 
-
+# local maven cache
+.m2/

@@ -67,7 +67,11 @@ module "psoxy_lambda" {
     {
       INPUT_BUCKET  = aws_s3_bucket.input.bucket,
       OUTPUT_BUCKET = aws_s3_bucket.sanitized.bucket,
-    }
+    },
+    var.new_relic_account_id != null && var.new_relic_account_id != "" ? {
+      NEW_RELIC_ACCOUNT_ID     = var.new_relic_account_id
+      NEW_RELIC_LAMBDA_HANDLER = "co.worklytics.psoxy.S3Handler"
+    } : {}
   )
 }
 
@@ -258,6 +262,12 @@ locals {
   accessor_role_names = concat([var.api_caller_role_name], var.sanitized_accessor_role_names)
   command_npm_install = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
   example_file        = var.example_file == null ? "/path/to/example.csv" : "${var.psoxy_base_dir}${var.example_file}"
+
+  # Merge example_files list with singular example_file (if provided)
+  all_example_files = concat(
+    var.example_files,
+    var.example_file != null ? [var.example_file] : []
+  )
 }
 
 resource "aws_iam_role_policy_attachment" "reader_policy_to_accessor_role" {
@@ -426,10 +436,12 @@ output "sanitized_bucket" {
 }
 
 output "example_files" {
-  value = try(var.example_file, null) != null ? [{
-    path           = var.example_file
-    content_base64 = base64encode(file(local.example_file))
-  }] : []
+  value = [
+    for f in local.all_example_files : {
+      path           = f
+      content_base64 = base64encode(file("${var.psoxy_base_dir}${f}"))
+    }
+  ]
   description = "Array of example files with path relative to terraform config root and base64-encoded content"
 }
 

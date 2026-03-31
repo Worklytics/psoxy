@@ -64,6 +64,8 @@ module "async_output" {
     var.gcp_principals_authorized_to_test,
     [for email in var.invoker_sa_emails : "serviceAccount:${email}"]
   )
+  enable_versioning              = var.enable_versioning
+  bucket_access_logs_destination = var.bucket_access_logs_destination
 }
 
 # Pub/Sub topic for async output (if enabled)
@@ -147,6 +149,8 @@ module "side_output_bucket" {
   bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence[0].result}-"
   bucket_name_suffix             = "side-output"
   sanitizer_accessor_principals  = each.value.allowed_readers
+  enable_versioning              = var.enable_versioning
+  bucket_access_logs_destination = var.bucket_access_logs_destination
 }
 
 # TODO: will this work cross-project ?? concern would be that `bucket_write_role_id` is likely a project-level role
@@ -203,6 +207,7 @@ resource "google_cloudfunctions2_function" "function" {
     runtime           = "java21"
     docker_repository = var.artifact_repository_id
     entry_point       = "co.worklytics.psoxy.Route"
+    service_account   = var.builder_sa_id
 
     source {
       storage_source {

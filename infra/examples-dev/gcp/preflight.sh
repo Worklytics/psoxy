@@ -1,0 +1,1 @@
+../aws/preflight.sh

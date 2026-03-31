@@ -200,10 +200,13 @@ export default async function (options = {}) {
     logger.info(diff);
   }
 
-  if (isOriginalGzipped) {
-    // delete unzipped files
-    [originalDiffPath, sanitizedDiffPath]
-      .forEach(filePath => fs.unlinkSync(filePath));
+  if (originalDiffPath !== original) {
+    // delete unzipped file
+    fs.unlinkSync(originalDiffPath);
+  }
+  if (sanitizedDiffPath !== sanitized) {
+    // delete unzipped file
+    fs.unlinkSync(sanitizedDiffPath);
   }
 
   if (!options.saveSanitizedFile) {

@@ -170,6 +170,12 @@ variable "general_environment_variables" {
   default     = {}
 }
 
+variable "new_relic_account_id" {
+  type        = string
+  description = "**beta** New Relic account ID to enable New Relic instrumentation."
+  default     = null
+}
+
 variable "api_connectors" {
   type = map(object({
     source_kind             = string
@@ -235,6 +241,7 @@ variable "bulk_connectors" {
     }))
     rules_file            = optional(string)
     example_file          = optional(string)
+    example_files         = optional(list(string), [])
     instructions_template = optional(string)
     memory_size_mb        = optional(number)
     settings_to_provide   = optional(map(string), {})
