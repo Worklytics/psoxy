@@ -135,3 +135,11 @@ variable "enable_webhook_testing" {
   description = "whether to provision/enable webhook testing functionality"
   default     = true
 }
+
+variable "artifacts_bucket_name" {
+  type        = string
+  description = "Name of an existing S3 bucket to use for deployment artifacts. If null, one will be provisioned if needed."
+  default     = null
+}
+
+

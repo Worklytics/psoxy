@@ -414,3 +414,10 @@ variable "todo_step" {
   description = "of all todos, where does this one logically fall in sequence"
   default     = 2
 }
+
+variable "artifacts_bucket_name" {
+  type        = string
+  description = "Name of an existing S3 bucket to use for deployment artifacts. If null, one will be provisioned if needed."
+  default     = null
+}
+
