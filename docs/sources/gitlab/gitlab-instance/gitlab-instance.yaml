@@ -20,11 +20,6 @@ endpoints:
       type: "array"
       items:
         $ref: "#/definitions/GroupMember"
-  - pathTemplate: "/api/v4/licenses"
-    responseSchema:
-      type: "array"
-      items:
-        $ref: "#/definitions/License"
   - pathTemplate: "/api/v4/merge_requests/{id}"
     transforms:
       - !<pseudonymize>
@@ -397,6 +392,13 @@ endpoints:
       type: "array"
       items:
         $ref: "#/definitions/UserEmail"
+  - pathTemplate: "/api/v4/version"
+    allowedQueryParams: []
+    responseSchema:
+      type: "object"
+      properties:
+        enterprise:
+          type: "boolean"
 definitions:
   AuditEvent:
     type: "object"

@@ -91,8 +91,7 @@ public class GitLabInstanceTests extends JavaRulesTestBaseCase {
 
             InvocationExample.of("https://gitlab.example.com/api/v4/users/{userId}/emails", "user_emails.json"),
 
-            InvocationExample.of("https://gitlab.example.com/api/v4/licenses", "licenses.json"),
-            InvocationExample.of("https://gitlab.example.com/api/v4/licenses?page=2&per_page=20", "licenses.json")
+            InvocationExample.of("https://gitlab.example.com/api/v4/version", "version.json")
         );
     }
 }
