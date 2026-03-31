@@ -177,17 +177,19 @@ variable "todo_step" {
 
 variable "vpc_config" {
   type = object({
-    serverless_connector = string # Format: projects/{project}/locations/{location}/connectors/{connector}
+    network = string
+    subnet  = string
   })
-  description = "VPC configuration for the Cloud Run function."
+  description = "VPC configuration for the Cloud Run function (direct VPC egress)."
   default     = null
 
   validation {
     condition = (
       var.vpc_config == null ||
-      can(regex("^projects/[^/]+/locations/[^/]+/connectors/[^/]+$", var.vpc_config.serverless_connector))
+      can(regex("^[a-z0-9-]+$", try(var.vpc_config.network, ""))) ||
+      can(regex("^projects/[^/]+/(global|regions/[^/]+)/networks/[^/]+$", try(var.vpc_config.network, "")))
     )
-    error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
+    error_message = "vpc_config.network must be lowercase letters, numbers, or dashes, or a valid self-link."
   }
 }
 

@@ -222,8 +222,14 @@ resource "google_cloudfunctions2_function" "function" {
     available_memory      = "${var.available_memory_mb}M"
     ingress_settings      = "ALLOW_ALL"
 
-    vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector
-    vpc_connector_egress_settings = var.vpc_config == null ? null : "ALL_TRAFFIC"
+    dynamic "direct_vpc_network_interface" {
+      for_each = var.vpc_config != null ? [var.vpc_config] : []
+      content {
+        network    = direct_vpc_network_interface.value.network
+        subnetwork = direct_vpc_network_interface.value.subnet
+      }
+    }
+    direct_vpc_egress = var.vpc_config != null ? "VPC_EGRESS_ALL_TRAFFIC" : null
 
     environment_variables = merge(
       # { LOG_EXECUTION_ID = "true" }, # NOTE that the google provider > 5.x seems to magically add this here, seemingly bc that's the defalt behavior of the version gcloud cli / API its using

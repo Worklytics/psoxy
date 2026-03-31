@@ -199,8 +199,14 @@ resource "google_cloudfunctions2_function" "function" {
     timeout_seconds       = var.timeout_seconds
     ingress_settings      = "ALLOW_INTERNAL_ONLY"
 
-    vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector
-    vpc_connector_egress_settings = var.vpc_config == null ? null : "ALL_TRAFFIC"
+    dynamic "direct_vpc_network_interface" {
+      for_each = var.vpc_config != null ? [var.vpc_config] : []
+      content {
+        network    = direct_vpc_network_interface.value.network
+        subnetwork = direct_vpc_network_interface.value.subnet
+      }
+    }
+    direct_vpc_egress = var.vpc_config != null ? "VPC_EGRESS_ALL_TRAFFIC" : null
 
     environment_variables = merge(tomap({
       INPUT_BUCKET  = google_storage_bucket.input_bucket.name,
