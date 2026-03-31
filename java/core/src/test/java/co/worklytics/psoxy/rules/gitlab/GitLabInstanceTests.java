@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.rules.gitlab;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
+import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.RESTRules;
 import lombok.Getter;
 
@@ -9,7 +10,7 @@ import java.util.stream.Stream;
 @Getter
 public class GitLabInstanceTests extends JavaRulesTestBaseCase {
 
-    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GITLAB_INSTANCE;
+    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.DEFAULTS.get("gitlab-instance");
 
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
         .sourceKind("gitlab-instance")

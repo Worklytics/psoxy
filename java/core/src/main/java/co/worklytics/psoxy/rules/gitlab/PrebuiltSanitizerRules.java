@@ -12,7 +12,7 @@ import java.util.Map;
 public class PrebuiltSanitizerRules {
 
 
-    static final RESTRules GITLAB = Rules2.load("sources/gitlab//gitlabcom/gitlabcom.yaml");
+    static final RESTRules GITLAB = Rules2.load("sources/gitlab/gitlabcom/gitlabcom.yaml");
     static final RESTRules GITLAB_INSTANCE = Rules2.load("sources/gitlab/gitlab-instance/gitlab-instance.yaml");
 
     static public final Map<String, RESTRules> DEFAULT_RULES_MAP =
