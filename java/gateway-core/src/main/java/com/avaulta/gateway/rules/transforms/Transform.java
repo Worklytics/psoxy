@@ -459,7 +459,7 @@ public abstract class Transform {
                 result.put("length", text.length());
                 result.put("word_count", text.trim().split("\\s+").length);
 
-                java.util.Set<String> keys = getSearchKeys();
+                Set<String> keys = getSearchKeys();
                 if (!keys.isEmpty()) {
                     String[] wordTokens = text.toLowerCase().split("\\W+");
                     Map<String, Integer> matchedKeywords = new TreeMap<>();
