@@ -143,7 +143,7 @@ Eg, the following redacts all headers that have a name value other than those ex
 
 Options:
 
-- `keywords` - an optional list of keyword strings to search for within the text. If provided, the original text is tokenized into words and a frequency count is generated. The resulting JSON object will include a `keywords` property, containing a map of the configured keywords that were found in the text along with their occurrence counts.
+- `keywords` (BETA - behavior subject to change) - an optional list of keyword strings to search for within the text. If provided, the original text is tokenized into words and a frequency count is generated. The resulting JSON object will include a `keywords` property, containing a map of the configured keywords that were found in the text along with their occurrence counts.
 
 Use case are values that _may_ be sensitive, but are opaque. For example, page tokens in Microsoft Graph API do not have a defined structure, but in practice contain PII.
 

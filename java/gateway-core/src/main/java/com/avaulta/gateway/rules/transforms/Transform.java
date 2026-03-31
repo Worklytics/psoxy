@@ -3,6 +3,7 @@ package com.avaulta.gateway.rules.transforms;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.*;
@@ -413,6 +414,10 @@ public abstract class Transform {
         @Builder.Default
         String jsonPathToProcessWhenEscaped = null;
 
+        /**
+         * BETA - behavior subject to change or removal.
+         */
+        @JsonPropertyDescription("BETA - behavior subject to change or removal")
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         @Builder.Default
         List<String> keywords = new ArrayList<>();
