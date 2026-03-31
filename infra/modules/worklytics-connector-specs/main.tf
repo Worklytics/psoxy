@@ -42,7 +42,6 @@ locals {
   github_organization                      = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
   github_first_organization                = split(",", coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME"))[0]
   github_example_repository                = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
-  gitlab_host                              = coalesce(var.gitlab_host, "gitlab.com")
   gitlab_example_group_id                  = coalesce(var.gitlab_example_group_id, "YOUR_GITLAB_GROUP_ID")
   gitlab_example_project_id                = coalesce(var.gitlab_example_project_id, "YOUR_GITLAB_PROJECT_ID")
   gong_instance_subdomain                  = coalesce(var.gong_instance_subdomain, "YOUR_GONG_INSTANCE_SUBDOMAIN")
@@ -1364,7 +1363,7 @@ EOT
       availability : "beta"
       enable_by_default : false
       worklytics_connector_id : "gitlab-psoxy"
-      target_host : local.gitlab_host
+      target_host : "gitlab.com"
       source_auth_strategy : "oauth2_access_token"
       display_name : "GitLab"
       worklytics_connector_name : "GitLab via Psoxy"
@@ -1377,15 +1376,13 @@ EOT
         }
       ],
       environment_variables : {}
-      settings_to_provide = {
-        "GitLab Host" = local.gitlab_host
-      }
       reserved_concurrent_executions : null
       enable_async_processing : false
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
         "/api/v4/groups",
+        "/api/v4/namespaces",
         "/api/v4/groups/${local.gitlab_example_group_id}/members/all",
         "/api/v4/projects",
         "/api/v4/projects/${local.gitlab_example_project_id}/repository/branches",
@@ -1396,6 +1393,45 @@ EOT
       ],
       external_token_todo : templatefile("${path.module}/docs/gitlab/gitlab-instructions.tftpl", {
         path_to_instance_parameters = "PSOXY_GITLAB_"
+      })
+    }
+    gitlab-instance = {
+      source_kind : "gitlab-instance"
+      availability : "beta"
+      enable_by_default : false
+      worklytics_connector_id : "gitlab-instance-psoxy"
+      target_host : var.gitlab_url
+      source_auth_strategy : "oauth2_access_token"
+      display_name : "GitLab Self-Hosted/Dedicated"
+      worklytics_connector_name : "GitLab Self-Hosted or Dedicated via Psoxy"
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      environment_variables : {}
+      reserved_concurrent_executions : null
+      enable_async_processing : false
+      enable_side_output : false
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/api/v4/groups",
+        "/api/v4/users",
+        "/api/v4/version",
+        "/api/v4/groups/${local.gitlab_example_group_id}/members/all",
+        "/api/v4/projects",
+        "/api/v4/projects/${local.gitlab_example_project_id}/repository/branches",
+        "/api/v4/projects/${local.gitlab_example_project_id}/repository/commits",
+        "/api/v4/projects/${local.gitlab_example_project_id}/issues",
+        "/api/v4/projects/${local.gitlab_example_project_id}/merge_requests",
+        "/api/v4/projects/${local.gitlab_example_project_id}/audit_events",
+      ],
+      external_token_todo : templatefile("${path.module}/docs/gitlab/gitlab-instance-instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_GITLAB_INSTANCE_",
+        gitlab_url = var.gitlab_url
       })
     }
   }
