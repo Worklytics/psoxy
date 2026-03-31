@@ -321,7 +321,7 @@ locals {
 resource "google_service_account" "proxy_builder_sa" {
   count = var.provision_project_level_iam && var.builder_sa_email == null ? 1 : 0
 
-  account_id   = substr("${var.environment_id_prefix}proxy-builder-sa", 0, 30)
+  account_id   = trim(substr("${var.environment_id_prefix}proxy-builder-sa", 0, 30), "-")
   display_name = "${local.environment_id_prefix_display} Psoxy Cloud Build Service Account"
   description  = "Service account used by Cloud Build to build Psoxy Cloud Functions."
   project      = var.project_id
@@ -372,7 +372,7 @@ resource "google_service_account" "webhook_batch_invoker" {
   count = var.support_webhook_collectors ? 1 : 0
 
   project      = var.project_id
-  account_id   = "${var.environment_id_prefix}webhook-batch"
+  account_id   = trim(substr("${var.environment_id_prefix}webhook-batch", 0, 30), "-")
   display_name = "${local.environment_id_prefix_display} Webhook Batch Invoker"
   description  = "Service account that will invoke the batch processing of webhooks"
 }

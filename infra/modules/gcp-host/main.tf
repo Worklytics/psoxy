@@ -57,7 +57,7 @@ resource "google_service_account" "api_connectors" {
   for_each = var.api_connectors
 
   project      = var.gcp_project_id
-  account_id   = substr("${local.sa_prefix}${replace(each.key, "_", "-")}", 0, local.SA_NAME_MAX_LENGTH)
+  account_id   = trim(substr("${local.sa_prefix}${replace(each.key, "_", "-")}", 0, local.SA_NAME_MAX_LENGTH), "-")
   display_name = "${local.environment_id_display_name_qualifier} ${each.key} API Connector Cloud Function"
   description  = "Service account that cloud function for ${each.key} API Connector will run as"
 }
@@ -266,7 +266,7 @@ resource "google_service_account" "webhook_collector" {
   for_each = var.webhook_collectors
 
   project      = var.gcp_project_id
-  account_id   = substr("${local.sa_prefix}${replace(each.key, "_", "-")}", 0, local.SA_NAME_MAX_LENGTH)
+  account_id   = trim(substr("${local.sa_prefix}${replace(each.key, "_", "-")}", 0, local.SA_NAME_MAX_LENGTH), "-")
   display_name = "${local.environment_id_display_name_qualifier} ${each.key} Webhook Collector"
   description  = "Service account that cloud run function for ${each.key} Webhook Collector will run as"
 }
