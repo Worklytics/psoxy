@@ -43,6 +43,9 @@ locals {
 }
 
 # data input to function
+# staging bucket only, does not need versioning
+# trivy:ignore:AVD-GCP-0078
+# trivy:ignore:AVD-GCP-0077
 resource "google_storage_bucket" "input_bucket" {
   project                     = var.project_id
   name                        = coalesce(var.input_bucket_name, "${local.bucket_prefix}-input")
@@ -50,6 +53,13 @@ resource "google_storage_bucket" "input_bucket" {
   force_destroy               = var.bucket_force_destroy
   uniform_bucket_level_access = true
   labels                      = var.default_labels
+
+  dynamic "logging" {
+    for_each = var.bucket_access_logs_destination != null ? [var.bucket_access_logs_destination] : []
+    content {
+      log_bucket = logging.value
+    }
+  }
 
   lifecycle_rule {
     condition {
@@ -82,6 +92,8 @@ module "output_bucket" {
   expiration_days                = var.sanitized_expiration_days
   bucket_labels                  = var.default_labels
   bucket_force_destroy           = var.bucket_force_destroy
+  enable_versioning              = var.enable_versioning
+  bucket_access_logs_destination = var.bucket_access_logs_destination
 }
 
 resource "google_service_account" "service_account" {
@@ -165,8 +177,9 @@ resource "google_cloudfunctions2_function" "function" {
   location    = var.region
 
   build_config {
-    runtime     = "java21"
-    entry_point = "co.worklytics.psoxy.GCSFileEvent"
+    runtime         = "java21"
+    entry_point     = "co.worklytics.psoxy.GCSFileEvent"
+    service_account = var.builder_sa_id
 
     docker_repository = var.artifact_repository_id
 
@@ -245,7 +258,14 @@ resource "google_cloudfunctions2_function" "function" {
 }
 
 locals {
+  # For backwards compatibility with singular example_file
   example_file = var.example_file == null ? "/path/to/example/file.csv" : "${var.psoxy_base_dir}${var.example_file}"
+
+  # Merge example_files list with singular example_file (if provided)
+  all_example_files = concat(
+    var.example_files,
+    var.example_file != null ? [var.example_file] : []
+  )
 
   # id that is unique for connector, within the environment (eg, files with this token in name, but otherwise equivalent, will not conflict)
   local_file_id = trimprefix(local.instance_id, var.environment_id_prefix)
@@ -367,10 +387,12 @@ output "sanitized_bucket" {
 }
 
 output "example_files" {
-  value = try(var.example_file, null) != null ? [{
-    path           = var.example_file
-    content_base64 = base64encode(file(local.example_file))
-  }] : []
+  value = [
+    for f in local.all_example_files : {
+      path           = f
+      content_base64 = base64encode(file("${var.psoxy_base_dir}${f}"))
+    }
+  ]
   description = "Array of example files with path relative to terraform config root and base64-encoded content"
 }
 

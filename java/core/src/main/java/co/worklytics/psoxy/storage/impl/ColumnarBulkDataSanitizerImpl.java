@@ -1,8 +1,13 @@
 package co.worklytics.psoxy.storage.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +32,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.TriConsumer;
@@ -47,6 +53,7 @@ import com.google.common.collect.Sets;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.PseudonymizerImplFactory;
+import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import co.worklytics.psoxy.utils.ProcessingBuffer;
 import dagger.assisted.Assisted;
@@ -91,7 +98,21 @@ public class ColumnarBulkDataSanitizerImpl implements BulkDataSanitizer {
     }
 
     @Override
-    public void sanitize(@NonNull co.worklytics.psoxy.gateway.StorageEventRequest request,
+    public void sanitize(@NonNull StorageEventRequest request,
+                         @NonNull InputStream in,
+                         @NonNull OutputStream out,
+                         @NonNull Pseudonymizer pseudonymizer) throws IOException {
+
+        // Columnar sanitizer is currently only used for CSVs
+        // So we can just wrap the streams
+        // Wrap with BOMInputStream to strip potentially harmful BOM
+        try (Reader reader = new InputStreamReader(BOMInputStream.builder().setInputStream(in).get(), StandardCharsets.UTF_8);
+             Writer writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
+            sanitize(request, reader, writer, pseudonymizer);
+        }
+    }
+
+    public void sanitize(@NonNull StorageEventRequest request,
                          @NonNull Reader reader,
                          @NonNull Writer writer,
                          @NonNull Pseudonymizer pseudonymizer) throws IOException {

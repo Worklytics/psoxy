@@ -185,3 +185,14 @@ Notes:
 - The script preserves object content, tags, and existing metadata
 - A `psoxy-last-replay` metadata field is added/updated with the current timestamp
 - This is safe to run on production data
+
+## API Connector Errors
+
+### 403 X-Amzn-Error-Type: AccessDeniedException
+- double check that the function URL is correct (eg, what's configured in Worklytics, or what you're hitting from CLI, matches the value you see in AWS Lambda console)
+
+
+### 502 X-Amzn-Error-Type: BadGatewayException
+
+- failure to start-up lambda?
+

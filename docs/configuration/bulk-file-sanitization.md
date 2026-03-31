@@ -98,9 +98,15 @@ columnsToDuplicate:
 
 ### Record-Oriented Formats (RecordRules)
 
-_As of Oct 2023, this is a **beta** feature_
-
 `RecordRules` parses files as records, presuming the specified format. It performs transforms in order on each record to sanitize your data, and serializes the result back to the specified format.
+
+Supported Formats:
+- `NDJSON` (default) - Newline Delimited JSON
+- `CSV` - Comma Separated Values
+- `JSON_ARRAY` (**beta**) - A JSON array of objects. Entire file must be a single valid JSON array.
+- `PARQUET` (**beta**) - [Apache Parquet](https://parquet.apache.org/) column-oriented file format.
+
+Formats are specified by including a `format` property in the `RecordRules` yaml. If `format` is omitted, `NDJSON` is presumed. Specify `AUTO` to infer the format from the `Content-Type` metadata of the file, if available.
 
 eg.
 

@@ -222,3 +222,20 @@ variable "vpc_config" {
     error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
   }
 }
+
+variable "enable_versioning" {
+  type        = bool
+  description = "Enable object versioning for the async output bucket"
+  default     = false
+}
+
+variable "bucket_access_logs_destination" {
+  description = "The name of the GCS bucket to route access logs to for all buckets managed by this module"
+  type        = string
+  default     = null
+}
+
+variable "builder_sa_id" {
+  description = "The fully-qualified ID of the custom builder service account used to build the Cloud Function."
+  type        = string
+}

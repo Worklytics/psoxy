@@ -14,6 +14,11 @@ output "path_to_deployment_jar" {
   value       = module.psoxy.path_to_deployment_jar
 }
 
+output "artifacts_bucket_id" {
+  description = "The ID of the artifacts google_storage_bucket resource"
+  value       = module.psoxy.artifacts_bucket_id
+}
+
 output "api_connector_instances" {
   value = local.api_instances
 }
@@ -51,6 +56,10 @@ output "todos" {
 output "setup_todos" {
   description = "List of todo steps to complete for setup, in markdown format."
   value       = values(module.bulk_connector)[*].todo_setup
+}
+
+output "builder_sa_id" {
+  value = module.psoxy.builder_sa_id
 }
 
 output "next_todo_step" {

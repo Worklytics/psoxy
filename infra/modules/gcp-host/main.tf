@@ -46,6 +46,8 @@ module "psoxy" {
   bucket_force_destroy              = var.bucket_force_destroy
   tf_runner_iam_principal           = module.tf_runner.iam_principal
   provision_project_level_iam       = var.provision_project_level_iam
+  bucket_access_logs_destination    = var.bucket_access_logs_destination
+  builder_sa_email                  = var.builder_sa_email
 }
 
 
@@ -201,6 +203,9 @@ module "api_connector" {
   enable_async_processing               = try(each.value.enable_async_processing, false)
   todos_as_local_files                  = var.todos_as_local_files
   tf_runner_iam_principal               = module.tf_runner.iam_principal
+  enable_versioning                     = var.version_sanitized_buckets
+  bucket_access_logs_destination        = var.bucket_access_logs_destination
+  builder_sa_id                         = module.psoxy.builder_sa_id
 
 
   environment_variables = merge(
@@ -220,6 +225,10 @@ module "api_connector" {
     module.psoxy.secrets,
     module.psoxy.artifact_repository
   )
+
+  depends_on = [
+    module.psoxy
+  ]
 }
 
 module "custom_api_connector_rules" {
@@ -286,6 +295,9 @@ module "webhook_collector" {
   side_output_sanitized              = try(local.sanitized_side_outputs[each.key], null)
   todos_as_local_files               = var.todos_as_local_files
   tf_runner_iam_principal            = module.tf_runner.iam_principal
+  enable_versioning                  = var.version_sanitized_buckets
+  bucket_access_logs_destination     = var.bucket_access_logs_destination
+  builder_sa_id                      = module.psoxy.builder_sa_id
   key_ring_id                        = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
   oidc_token_verifier_role_id        = module.psoxy.oidc_token_verifier_role_id
   provision_auth_key                 = each.value.provision_auth_key
@@ -308,7 +320,9 @@ module "webhook_collector" {
 
   secret_bindings = module.psoxy.secrets
 
-
+  depends_on = [
+    module.psoxy
+  ]
 }
 
 # END WEBHOOK COLLECTORS
@@ -334,6 +348,7 @@ module "bulk_connector" {
   secret_bindings                   = module.psoxy.secrets
   vpc_config                        = module.psoxy.vpc_config
   example_file                      = try(each.value.example_file, null)
+  example_files                     = try(each.value.example_files, [])
   instructions_template             = try(each.value.instructions_template, null)
   input_expiration_days             = var.bulk_input_expiration_days
   sanitized_expiration_days         = var.bulk_sanitized_expiration_days
@@ -346,6 +361,9 @@ module "bulk_connector" {
   timeout_seconds                   = coalesce(try(var.custom_bulk_connector_arguments[each.key].timeout_seconds, null), try(each.value.timeout_seconds, null), 540) # TODO: bump to 1800 (30 minutes) in 0.6.x
   gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
   bucket_force_destroy              = var.bucket_force_destroy
+  enable_versioning                 = var.version_sanitized_buckets
+  bucket_access_logs_destination    = var.bucket_access_logs_destination
+  builder_sa_id                     = module.psoxy.builder_sa_id
 
   environment_variables = merge(
     var.general_environment_variables,
@@ -382,6 +400,8 @@ module "lookup_output" {
   sanitizer_accessor_principals  = each.value.sanitized_accessor_principals
   bucket_labels                  = var.default_labels
   bucket_force_destroy           = var.bucket_force_destroy
+  enable_versioning              = var.version_sanitized_buckets
+  bucket_access_logs_destination = var.bucket_access_logs_destination
 }
 
 locals {
