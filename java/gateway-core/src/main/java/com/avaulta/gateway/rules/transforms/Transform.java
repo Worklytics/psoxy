@@ -11,8 +11,10 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
@@ -435,11 +437,11 @@ public abstract class Transform {
         }
 
         @JsonIgnore
-        private transient java.util.Set<String> searchKeys;
+        private transient Set<String> searchKeys;
 
-        private java.util.Set<String> getSearchKeys() {
+        private Set<String> getSearchKeys() {
             if (searchKeys == null) {
-                searchKeys = new java.util.HashSet<>();
+                searchKeys = new HashSet<>();
                 if (keywords != null) {
                     for (String k : keywords) {
                         searchKeys.add(k.toLowerCase());
