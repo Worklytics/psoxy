@@ -6,11 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -144,7 +148,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
         columnarFileSanitizerImpl.setRules(rules);
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
         }
@@ -168,7 +172,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
         columnarFileSanitizerImpl.setRules(rules);
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
         }
@@ -192,7 +196,7 @@ public class BulkDataSanitizerImplTest {
         columnarFileSanitizerImpl.setRules(rules);
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
         }
@@ -212,7 +216,7 @@ public class BulkDataSanitizerImplTest {
         columnarFileSanitizerImpl.setRules(rules);
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             String output = out.toString(StandardCharsets.UTF_8);
             assertEquals(EXPECTED, output);
@@ -233,7 +237,7 @@ public class BulkDataSanitizerImplTest {
         columnarFileSanitizerImpl.setRules(rules);
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             String output = out.toString(StandardCharsets.UTF_8);
             assertEquals(EXPECTED, output);
@@ -265,7 +269,7 @@ public class BulkDataSanitizerImplTest {
         columnarFileSanitizerImpl.setRules(rules);
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
         }
@@ -290,7 +294,7 @@ public class BulkDataSanitizerImplTest {
         columnarFileSanitizerImpl.setRules(rules);
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
         }
@@ -323,7 +327,7 @@ public class BulkDataSanitizerImplTest {
         columnarFileSanitizerImpl.setRules(rules);
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
         }
@@ -351,7 +355,7 @@ public class BulkDataSanitizerImplTest {
         columnarFileSanitizerImpl.setRules(rules);
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
         }
@@ -372,7 +376,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example-headers-w-spaces.csv").getFile());
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
         }
@@ -393,7 +397,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
         }
@@ -427,7 +431,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, defaultPseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
         }
@@ -466,7 +470,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, defaultPseudonymizer);
             String output = out.toString(StandardCharsets.UTF_8);
             assertEquals(EXPECTED, output);
@@ -501,7 +505,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, defaultPseudonymizer);
             String output = out.toString(StandardCharsets.UTF_8);
             assertEquals(EXPECTED, output);
@@ -539,7 +543,7 @@ public class BulkDataSanitizerImplTest {
 
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, defaultPseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
         }
@@ -559,7 +563,7 @@ public class BulkDataSanitizerImplTest {
         File inputFile = new File(getClass().getResource("/csv/hris-example-quotes.csv").getFile());
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
         }
@@ -589,7 +593,7 @@ public class BulkDataSanitizerImplTest {
         columnarFileSanitizerImpl.makeShuffleDeterministic();
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
         }
@@ -656,7 +660,7 @@ public class BulkDataSanitizerImplTest {
 
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
 
@@ -715,8 +719,8 @@ public class BulkDataSanitizerImplTest {
 
 
         String resultString;
-        try (java.io.InputStream in = new java.io.ByteArrayInputStream(INITIAL.getBytes(StandardCharsets.UTF_8));
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+        try (InputStream in = new ByteArrayInputStream(INITIAL.getBytes(StandardCharsets.UTF_8));
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
 
             resultString = out.toString(StandardCharsets.UTF_8);
@@ -802,7 +806,7 @@ public class BulkDataSanitizerImplTest {
         Pseudonymizer pseudonymizer = new StubPseudonymizer();
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
 
@@ -842,7 +846,7 @@ public class BulkDataSanitizerImplTest {
         Pseudonymizer pseudonymizer = new StubPseudonymizer();
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
         }
@@ -874,8 +878,8 @@ public class BulkDataSanitizerImplTest {
 
         File inputFile = new File(getClass().getResource("/csv/hris-example.csv").getFile());
 
-        try (java.io.InputStream in = new java.io.ByteArrayInputStream(SOURCE.getBytes(StandardCharsets.UTF_8));
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+        try (InputStream in = new ByteArrayInputStream(SOURCE.getBytes(StandardCharsets.UTF_8));
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
         }
@@ -894,8 +898,8 @@ public class BulkDataSanitizerImplTest {
             .build();
         columnarFileSanitizerImpl.setRules(rules);
 
-        try (java.io.InputStream in = new java.io.ByteArrayInputStream(SOURCE.getBytes(StandardCharsets.UTF_8));
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+        try (InputStream in = new ByteArrayInputStream(SOURCE.getBytes(StandardCharsets.UTF_8));
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals("EMPLOYEE_ID,SWIPE DATE,BUILDING_ID,BUILDING_ASSIGNED\n" +
                 "t~uxVHJj4JLZrUDfo7bwUePfhD5-rd34W1BvTqO4B2PNk,01/01/2024 3:10PM,B1,B2\n", out.toString(StandardCharsets.UTF_8));
@@ -934,7 +938,7 @@ User Name,Email,Action,Feature used,Department,\r
         columnarFileSanitizerImpl.setRules(rules);
 
         try (FileInputStream in = new FileInputStream(inputFile);
-             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream()) {
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             columnarFileSanitizerImpl.sanitize(DUMMY_REQUEST, in, out, pseudonymizer);
             assertEquals(EXPECTED, out.toString(StandardCharsets.UTF_8));
         }
