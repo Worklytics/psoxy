@@ -35,9 +35,11 @@ fi
 # Check Maven installation
 
 if ! mvn -v &> /dev/null ; then
-  printf "${WARN}Maven not installed.${NC} It is REQUIRED unless you will use a pre-built JAR. To install, see https://maven.apache.org/install.html\n"
+  printf "${WARN}Maven not installed.${NC} It is REQUIRED unless you will use a pre-built JAR.\n"
+  printf " Note: Java JDK and Maven are only needed if building and bundling the java from source.\n"
+  printf " To install Maven, see https://maven.apache.org/install.html\n"
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${CODE}brew install maven${NC}\n"; fi
-  printf " (Using a prebuilt jar requires adding ${CODE}deployment_bundle=""${NC} to your ${CODE}terraform.tfvars${NC} file, and filling with s3/gcs uri for your desired JAR)\n"
+  printf " (Using a prebuilt jar requires adding ${CODE}deployment_bundle=""${NC} to your ${CODE}terraform.tfvars${NC} file, and filling with s3/gcs uri for your desired JAR. The JRE of your host platform (AWS/GCP) will still be used at runtime).\n"
 else
   MVN_VERSION=`mvn -v | grep "Apache Maven"`
   MVN_VERSION_MAJOR_MINOR=$(echo $MVN_VERSION | sed -n 's/^Apache Maven \([0-9]*\.[0-9]*\).*$/\1/p')
@@ -60,9 +62,9 @@ else
 
   printf "Your Maven installation uses ${CODE}${JAVA_VERSION}${NC}.\n"
 
-  if [[  "$JAVA_VERSION_MAJOR" != 17 && "$JAVA_VERSION_MAJOR" != 21  && "$JAVA_VERSION_MAJOR" != 23  && "$JAVA_VERSION_MAJOR" != 24 ]]; then
-    printf "${ERR}This Java version appears to be unsupported. You should upgrade it, or may have compile errors.${NC} Psoxy requires an Oracle-supported version of Java 17 or later;  as of April 2025, this includes Java 17, 21, or 24. See https://maven.apache.org/install.html\n"
-    if $HOMEBREW_AVAILABLE; then printf "or as you have Homebrew available, run ${CODE}brew install openjdk@17${NC}\n"; fi
+  if [[  "$JAVA_VERSION_MAJOR" != 21  && "$JAVA_VERSION_MAJOR" != 25 && "$JAVA_VERSION_MAJOR" != 26 ]]; then
+    printf "${ERR}This Java version appears to be unsupported. You should upgrade it, or may have compile errors.${NC} Psoxy requires an Oracle-supported version of Java 21 or later;  as of March 2026, this includes Java 21, 25, and 26. See https://maven.apache.org/install.html\n"
+    if $HOMEBREW_AVAILABLE; then printf "or as you have Homebrew available, run ${CODE}brew install openjdk@21${NC}\n"; fi
     printf "If you have an alternative JDK installed, then you must update your ${CODE}JAVA_HOME${NC} environment variable to point to it.\n"
   fi
 

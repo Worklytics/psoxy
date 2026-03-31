@@ -11,13 +11,13 @@ Otherwise, these shell command examples presume Ubuntu; you may need to translat
 sudo apt update
 ```
 
-2. install Java + maven (as of v0.5.x, these are optional; you can use a pre-built JAR instead]
+2. install Java + maven (as of v0.5.x, these are optional; you can use a pre-built JAR instead. At runtime, the JRE of your host platform will be used.)
 
 ```shell
-sudo apt install openjdk-17-jdk
+sudo apt install openjdk-21-jdk
 sudo apt install maven
 
-# check that maven version at least 3.6+ and java 17+
+# check that maven version at least 3.6+ and java 17+ (testing with 21 or later is recommended)
 mvn -v
 
 # if not, get latest direct from Apache Maven
