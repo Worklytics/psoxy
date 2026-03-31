@@ -12,7 +12,7 @@ public class GitLabInstanceTests extends JavaRulesTestBaseCase {
     final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GITLAB_INSTANCE;
 
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
-        .sourceKind("instance")
+        .sourceKind("gitlab-instance")
         .exampleApiResponsesDirectoryPath("example-api-responses/original/")
         .exampleSanitizedApiResponsesPath("example-api-responses/sanitized/")
         .sourceFamily("gitlab")

@@ -375,6 +375,18 @@ endpoints:
       type: "array"
       items:
         $ref: "#/definitions/MergeRequest"
+  - pathTemplate: "/api/v4/users"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$[*].id"
+          - "$[*].username"
+          - "$[*].email"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/User"
   - pathTemplate: "/api/v4/users/{id}/emails"
     transforms:
       - !<pseudonymize>
