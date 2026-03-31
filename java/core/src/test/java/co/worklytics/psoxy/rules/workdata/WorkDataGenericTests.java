@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -71,7 +72,7 @@ public class WorkDataGenericTests {
             static ConfigService configService() {
                 ConfigService mock = MockModules.provideMock(ConfigService.class);
                 when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
-                    .thenReturn(Optional.of(new String(TestUtils.getData(rulesPath))));
+                    .thenReturn(Optional.of(new String(TestUtils.getData(rulesPath), StandardCharsets.UTF_8)));
                 return mock;
             }
         }
@@ -106,7 +107,7 @@ public class WorkDataGenericTests {
             BulkDataTestUtils.inputStreamSupplier(pathToOriginal),
             outputStreamSupplier);
 
-        String output = new String(outputStream.toByteArray());
-        assertEquals(new String(TestUtils.getData(pathToSanitized)), output);
+        String output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        assertEquals(new String(TestUtils.getData(pathToSanitized), StandardCharsets.UTF_8), output );
     }
 }
