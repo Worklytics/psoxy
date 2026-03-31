@@ -48,7 +48,10 @@ endpoints:
           - "email"
         jsonPaths:
           - "$.data[*]..title"
-          - "$.data[*]..content.value"
+          - "$.data[*]..messages.data[?(@.author.role == 'user')]..content.value"
+      - !<textDigest>
+        jsonPaths:
+          - "$.data[*]..messages.data[?(@.author.role != 'user')]..content.value"
     responseSchema:
       type: "object"
       properties:
@@ -76,7 +79,10 @@ endpoints:
           - "write"
           - "email"
         jsonPaths:
-          - "$.data[*].content.value"
+          - "$.data[?(@.author.role == 'user')]..content.value"
+      - !<textDigest>
+        jsonPaths:
+          - "$.data[?(@.author.role != 'user')]..content.value"
     responseSchema:
       type: "object"
       properties:
