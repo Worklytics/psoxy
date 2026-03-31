@@ -6,6 +6,9 @@ in each release's notes.
 Changes to be including in future/planned release notes will be added here.
 
 ## Next
+- `textDigest` rule now accepts an optional list of `keywords` to tally the occurrence of specific keywords in the text.
+- `chatgpt-enterprise`: added `write` and `email` keyword tracking to prompt/title texts via `textDigest`.
+- performance: optimized `redactExceptPhrases` rule to use non-reluctant matchers.
 
 ## [0.5.19](https://github.com/Worklytics/psoxy/release/tag/v0.5.19)
 - `gcp`: Dedicated `proxy_builder_sa` service account is now provisioned and used for Cloud Build operations when provisioning Cloud Functions, eliminating project-level IAM dependencies on the default Compute Engine service account.

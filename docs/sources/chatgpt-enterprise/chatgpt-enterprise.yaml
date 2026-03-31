@@ -6,6 +6,9 @@ endpoints:
       - "limit"
     transforms:
       - !<textDigest>
+        keywords:
+          - "write"
+          - "email"
         jsonPaths:
           - "$.data[*].title"
           - "$.data[*].prompt"
@@ -40,6 +43,9 @@ endpoints:
           - "$.data[*].files[*].name"
           - "$.data[*].files[*].downloadUrl"
       - !<textDigest>
+        keywords:
+          - "write"
+          - "email"
         jsonPaths:
           - "$.data[*]..title"
           - "$.data[*]..content.value"
@@ -66,6 +72,9 @@ endpoints:
           - "$.data[*].user_email"
         encoding: "URL_SAFE_TOKEN"
       - !<textDigest>
+        keywords:
+          - "write"
+          - "email"
         jsonPaths:
           - "$.data[*].content.value"
     responseSchema:
@@ -98,6 +107,9 @@ endpoints:
           - "$.data[*].latest_config[*].name"
           - "$.data[*].latest_config[*].description"
       - !<textDigest>
+        keywords:
+          - "write"
+          - "email"
         jsonPaths:
           - "$..conversation_starters[*]"
           - "$..instructions"

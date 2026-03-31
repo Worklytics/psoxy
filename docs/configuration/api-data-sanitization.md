@@ -91,7 +91,7 @@ Each transform is specified by a transform type and a list of [JSON paths](https
 
 Supported Transform Types:
 
-`<transform-type> ::= "!<pseudonymizeEmailHeader>" | "!<pseudonymize>" | "!<redact>" | "!<redactRegexMatches>" | "!<tokenize>" | "<!filterTokenByRegex>" | "!<redactExceptSubstringsMatchingRegexes>"`
+`<transform-type> ::= "!<pseudonymizeEmailHeader>" | "!<pseudonymize>" | "!<redact>" | "!<redactRegexMatches>" | "!<tokenize>" | "<!filterTokenByRegex>" | "!<redactExceptSubstringsMatchingRegexes>" | "!<textDigest>"`
 
 NOTE: these are implementations of `com.avaulta.gateway.rules.transforms.Transform` class in the Psoxy codebase.
 
@@ -136,6 +136,14 @@ Eg, the following redacts all headers that have a name value other than those ex
 #### Tokenize
 
 `!<tokenize>` - replaces matching values it with a reversible token, which proxy can reverse to the original value using `ENCRYPTION_KEY` secret stored in the proxy in subsequent requests.
+
+#### Text Digest
+
+`!<textDigest>` - replaces the matching string value with a JSON object containing metadata about the text: `length` and `word_count`. The original text content is completely removed.
+
+Options:
+
+- `keywords` - an optional list of keyword strings to search for within the text. If provided, the original text is tokenized into words and a frequency count is generated. The resulting JSON object will include a `keywords` property, containing a map of the configured keywords that were found in the text along with their occurrence counts.
 
 Use case are values that _may_ be sensitive, but are opaque. For example, page tokens in Microsoft Graph API do not have a defined structure, but in practice contain PII.
 

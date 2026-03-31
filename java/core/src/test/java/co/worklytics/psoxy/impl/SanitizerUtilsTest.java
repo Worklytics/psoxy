@@ -215,6 +215,32 @@ class SanitizerUtilsTest {
 
     @SneakyThrows
     @Test
+    void textDigest_with_keywords() {
+        String input = "Please WRITE an Email and summarize the results of the write operation. Don't email me again!";
+        Transform.TextDigest transform = Transform.TextDigest.builder()
+            .keywords(Arrays.asList("eMail", "write", "Summarize", "not_present"))
+            .build();
+        MapFunction textDigestFunction = sanitizerUtils.getTextDigest(transform);
+
+        String resultJson = (String) textDigestFunction.map(input, jsonConfiguration);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = new ObjectMapper().readValue(resultJson, Map.class);
+
+        assertEquals(16, result.get("word_count"));
+        assertEquals(95, result.get("length"));
+        assertTrue(result.containsKey("keywords"));
+
+        @SuppressWarnings("unchecked")
+        Map<String, Integer> keywordsMap = (Map<String, Integer>) result.get("keywords");
+        assertEquals(3, keywordsMap.size());
+        assertEquals(2, keywordsMap.get("email"));
+        assertEquals(2, keywordsMap.get("write"));
+        assertEquals(1, keywordsMap.get("summarize"));
+        assertNull(keywordsMap.get("not_present"));
+    }
+
+    @SneakyThrows
+    @Test
     void textDigest_with_escaping() {
         String input = "{\n" + "  \"type\": \"AdaptiveCard\",\n" + "  \"version\": \"1.0\",\n"
             + "  \"body\": [\n" + "    {\n" + "      \"type\": \"TextBlock\",\n"
