@@ -48,11 +48,11 @@ public interface RecordTransform {
     @Data
     class Redact implements RecordTransform {
 
-        /**
-         * json paths to fields to redact
-         */
         @Singular("redact")
-        @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+        @JsonFormat(with = {
+            JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY,
+            JsonFormat.Feature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED
+        })
         List<String> redact;
 
         @Override
@@ -69,11 +69,11 @@ public interface RecordTransform {
     @Data
     class Pseudonymize implements RecordTransform {
 
-        /**
-         * json paths to fields to pseudonymize
-         */
         @Singular("pseudonymize")
-        @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+        @JsonFormat(with = {
+            JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY,
+            JsonFormat.Feature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED
+        })
         List<String> pseudonymize;
 
         @Override

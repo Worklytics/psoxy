@@ -88,10 +88,8 @@ public class RecordRulesTest {
         final String EXPECTED = "---\n" +
             "format: \"NDJSON\"\n" +
             "transforms:\n" +
-            "- redact:\n" +
-            "  - \"foo\"\n" +
-            "- pseudonymize:\n" +
-            "  - \"bar\"\n";
+            "- redact: \"foo\"\n" +
+            "- pseudonymize: \"bar\"\n";
 
         RecordRules recordRules = RecordRules.builder()
             .transform(RecordTransform.Redact.builder()
