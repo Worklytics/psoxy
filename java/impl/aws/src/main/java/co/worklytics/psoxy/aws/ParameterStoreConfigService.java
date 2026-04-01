@@ -6,7 +6,7 @@ import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.utils.DevLogUtils;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
-import com.amazonaws.SdkClientException;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Uninterruptibles;

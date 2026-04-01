@@ -3,7 +3,7 @@ package co.worklytics.psoxy.aws;
 import co.worklytics.psoxy.gateway.auth.PublicKeyRef;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStore;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
-import com.amazonaws.services.kms.model.KMSInvalidStateException;
+import software.amazon.awssdk.services.kms.model.KmsInvalidStateException;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -110,7 +110,7 @@ public class AwsKmsPublicKeyStoreClient implements PublicKeyStoreClient {
             } catch (Exception e) {
                 throw new RuntimeException("Failed to parse public key from KMS", e);
             }
-        } catch (KMSInvalidStateException e) {
+        } catch (KmsInvalidStateException e) {
             log.log(Level.SEVERE, "Failed to get public key from KMS", e);
             return null;
         }
