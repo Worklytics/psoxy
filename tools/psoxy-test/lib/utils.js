@@ -562,6 +562,14 @@ async function signJwtWithGCPKMS(claims, keyId) {
 }
 
 /**
+ * Known compound extensions where the "real" extension precedes a compression
+ * extension (e.g. `.ndjson.gz`, `.csv.gz`).  We treat the entire compound
+ * extension as one unit so the suffix is inserted before it:
+ *   `events0.ndjson.gz` + timestamp  →  `events0-<timestamp>.ndjson.gz`
+ */
+const COMPOUND_EXTENSIONS = ['.ndjson.gz', '.csv.gz', '.json.gz', '.tsv.gz', '.parquet.gz'];
+
+/**
  * Append suffix to filename (before extension)
  * @param {string} filename
  * @param {string} suffix
@@ -570,7 +578,21 @@ async function signJwtWithGCPKMS(claims, keyId) {
 function addFilenameSuffix(filename, suffix) {
   let result = '';
   if (!_.isEmpty(filename)) {
-    const { name, ext } = path.parse(filename);
+    // Strip any leading directory components – we only manipulate the basename
+    const base = path.basename(filename);
+
+    // Check for compound extensions first (e.g. .ndjson.gz)
+    const lowerBase = base.toLowerCase();
+    const compound = COMPOUND_EXTENSIONS.find(ext => lowerBase.endsWith(ext));
+
+    let name, ext;
+    if (compound) {
+      ext = base.slice(base.length - compound.length); // preserve original casing
+      name = base.slice(0, base.length - compound.length);
+    } else {
+      ({ name, ext } = path.parse(base));
+    }
+
     result = `${name}-${suffix}${ext}`;
   }
   return result;
