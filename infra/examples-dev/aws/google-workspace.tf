@@ -16,6 +16,7 @@ module "worklytics_connectors_google_workspace" {
   }
 
   environment_id                 = var.environment_name
+  base_dir                       = var.psoxy_base_dir
   enabled_connectors             = var.enabled_connectors
   gcp_project_id                 = var.google_workspace_gcp_project_id
   tf_gcp_principal_email         = var.google_workspace_terraform_principal_email

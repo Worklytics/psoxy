@@ -16,6 +16,7 @@ resource "time_static" "month_start" {
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
+  base_dir                                   = var.base_dir
   enabled_connectors                         = var.enabled_connectors
   msft_tenant_id                             = var.msft_tenant_id
   example_msft_user_guid                     = var.example_msft_user_guid

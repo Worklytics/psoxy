@@ -15,6 +15,12 @@ locals {
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
 
   api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
+
+  # API connectors with rules_raw that don't have file-based overrides
+  api_connector_rules_raw = {
+    for k, v in var.api_connectors : k => v.rules_raw
+    if try(v.rules_raw, null) != null && !contains(keys(local.api_connector_rules_files), k)
+  }
 }
 
 # TODO: probably pull all the way to the top level bc 1) proper tf style, 2) simplifies customization if it doesn't work for a particular environment
@@ -215,7 +221,9 @@ module "api_connector" {
       BUNDLE_FILENAME        = module.psoxy.filename
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
-      CUSTOM_RULES_SHA       = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : null
+      CUSTOM_RULES_SHA       = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : (
+        try(local.api_connector_rules_raw[each.key], null) != null ? sha1(local.api_connector_rules_raw[each.key]) : null
+      )
       EMAIL_CANONICALIZATION = var.email_canonicalization
     }
   )
@@ -239,6 +247,19 @@ module "custom_api_connector_rules" {
   project_id        = var.gcp_project_id
   prefix            = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
   file_path         = each.value
+  default_labels    = var.default_labels
+  instance_sa_email = module.api_connector[each.key].service_account_email
+}
+
+# Rules provisioned from rules_raw (content string, not file path)
+module "api_connector_rules_raw" {
+  for_each = local.api_connector_rules_raw
+
+  source = "../../modules/gcp-sm-rules"
+
+  project_id        = var.gcp_project_id
+  prefix            = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
+  content           = each.value
   default_labels    = var.default_labels
   instance_sa_email = module.api_connector[each.key].service_account_email
 }
@@ -370,7 +391,13 @@ module "bulk_connector" {
     try(each.value.environment_variables, {}),
     {
       SOURCE                 = each.value.source_kind
-      RULES                  = each.value.rules_file == null ? yamlencode(try(var.custom_bulk_connector_rules[each.key], each.value.rules)) : file(each.value.rules_file)
+      RULES = (
+        try(var.custom_bulk_connector_rules[each.key], null) != null ? yamlencode(var.custom_bulk_connector_rules[each.key]) :
+        try(each.value.rules_raw, null) != null ? each.value.rules_raw :
+        each.value.rules_file != null ? file(each.value.rules_file) :
+        try(each.value.rules, null) != null ? yamlencode(each.value.rules) :
+        null
+      )
       BUNDLE_FILENAME        = module.psoxy.filename
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
       EMAIL_CANONICALIZATION = var.email_canonicalization
