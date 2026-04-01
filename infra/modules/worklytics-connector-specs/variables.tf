@@ -3,6 +3,12 @@ variable "enabled_connectors" {
   description = "ids of connectors to enable"
 }
 
+variable "base_dir" {
+  type        = string
+  description = "Base directory for resolving relative file paths (eg rules_file) in connector specs. Should end with a slash."
+  default     = null
+}
+
 variable "chat_gpt_enterprise_example_workspace_id" {
   type        = string
   description = "Workspace id to use for example calls"
