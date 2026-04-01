@@ -1,4 +1,14 @@
-## Prerequisites
+# GitLab Instance for Self-Managed / Dedicated through Psoxy
+
+## Examples
+
+- [Example Rules](gitlab-instance/gitlab-instance.yaml)
+- Example Data:
+  - [original/groups.json](gitlab-instance/example-api-responses/original/groups.json) | [sanitized/groups.json](gitlab-instance/example-api-responses/sanitized/groups.json)
+  - [original/group_members.json](gitlab-instance/example-api-responses/original/group_members.json) | [sanitized/group_members.json](gitlab-instance/example-api-responses/sanitized/group_members.json)
+  - [original/projects.json](gitlab-instance/example-api-responses/original/projects.json) | [sanitized/projects.json](gitlab-instance/example-api-responses/sanitized/projects.json)
+  - [original/issues.json](gitlab-instance/example-api-responses/original/issues.json) | [sanitized/issues.json](gitlab-instance/example-api-responses/sanitized/issues.json)
+  - [original/merge_requests.json](gitlab-instance/example-api-responses/original/merge_requests.json) | [sanitized/merge_requests.json](gitlab-instance/example-api-responses/sanitized/merge_requests.json)
 
 GitLab for Self-Managed / Dedicated through Psoxy uses an **Admin Access token** for authentication.
 
@@ -29,34 +39,11 @@ The following scope is required:
 | `/api/v4/projects/{projectId}/issues`                                          |
 | `/api/v4/projects/{projectId}/merge_requests`                                  |
 
-## Setup Instructions
 
-### Creating a dedicated user as service account
+### Setup
 
-1. We recommend to create a [dedicated service account](https://docs.gitlab.com/user/profile/account/create_accounts/#create-a-user-in-the-admin-area) and generate a Personal Access Token for that account with the required permissions.
-2. As an administrator, go to [${gitlab_url}/admin/users/new](https://${gitlab_url}/admin/users/new)
-3. Ensure that the `User type` is marked as `Administrator`
+1. Create a Group Access Token (recommended), Project Access Token, or Personal Access Token with the `read_api` scope.
+2. Update the content of `PSOXY_GITLAB_ACCESS_TOKEN` variable or `ACCESS_TOKEN` environment variable with the token value obtained in the previous step.
 
-### Creating a Personal Access Token for the service account
-1. Go to the user settings of the [service account](${gitlab_url}/admin/users) you just created
-2. Go to `Impersonation Tokens`
-3. Click "Add new token" and configure:
-   - **Token name**: A descriptive name (e.g., "Worklytics Psoxy Connector")
-   - **Expiration date**: Set an appropriate expiration (or leave blank for no expiration if allowed)
-   - **Scopes**: Select `read_api`
-4. **Important**: Copy the token value immediately - it won't be shown again!
+NOTE: derived from [worklytics-connector-specs](../../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
 
-## Configure Psoxy
-
-Set the following variable in AWS System Manager parameters store / GCP Cloud Secrets:
-
-- `${path_to_instance_parameters}ACCESS_TOKEN`: The access token value you copied
-
-## Token Expiration
-
-GitLab access tokens may have expiration dates. It is your responsibility to:
-1. Monitor token expiration
-2. Generate a new token before the current one expires
-3. Update the secret in your cloud provider's secret manager
-
-**Note**: Some GitLab instances allow tokens without expiration dates. Check with your GitLab administrator.

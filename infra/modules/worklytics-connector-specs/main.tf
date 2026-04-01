@@ -1402,8 +1402,8 @@ EOT
       worklytics_connector_id : "gitlab-instance-psoxy"
       target_host : var.gitlab_url
       source_auth_strategy : "oauth2_access_token"
-      display_name : "GitLab Self-Hosted/Dedicated"
-      worklytics_connector_name : "GitLab Self-Hosted or Dedicated via Psoxy"
+      display_name : "GitLab Self-Managed/Dedicated"
+      worklytics_connector_name : "GitLab Self-Managed or Dedicated via Psoxy"
       secured_variables : [
         {
           name : "ACCESS_TOKEN"
