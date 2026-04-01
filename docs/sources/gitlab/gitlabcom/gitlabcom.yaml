@@ -134,11 +134,18 @@ endpoints:
           type: "integer"
         work_in_progress:
           type: "boolean"
-  - pathTemplate: "/api/v4/namespaces"
+  - pathTemplate: "/api/v4/namespaces/{id}"
+    allowedQueryParams: []
     responseSchema:
-      type: "array"
-      items:
-        $ref: "#/definitions/Namespace"
+      type: "object"
+      properties:
+        end_date:
+          type: "string"
+          format: "date"
+        id:
+          type: "integer"
+        plan:
+          type: "string"
   - pathTemplate: "/api/v4/projects"
     transforms:
       - !<pseudonymize>
@@ -730,12 +737,6 @@ definitions:
         format: "date-time"
       id:
         type: "integer"
-      kind:
-        type: "string"
-      name:
-        type: "string"
-      path:
-        type: "string"
       plan:
         type: "string"
   Note:
@@ -794,6 +795,8 @@ definitions:
         format: "date-time"
       merge_requests_enabled:
         type: "boolean"
+      namespace:
+        $ref: "#/definitions/Namespace"
       open_issues_count:
         type: "integer"
       path:

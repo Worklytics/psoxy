@@ -618,15 +618,6 @@ definitions:
         type: "integer"
       weight:
         type: "integer"
-  License:
-    type: "object"
-    properties:
-      expired:
-        type: "boolean"
-      id:
-        type: "integer"
-      plan:
-        type: "string"
   MergeRequest:
     type: "object"
     properties:
@@ -755,6 +746,16 @@ definitions:
       updated_at:
         type: "string"
         format: "date-time"
+  Namespace:
+    type: "object"
+    properties:
+      end_date:
+        type: "string"
+        format: "date"
+      id:
+        type: "integer"
+      plan:
+        type: "string"
   Note:
     type: "object"
     properties:
@@ -811,6 +812,8 @@ definitions:
         format: "date-time"
       merge_requests_enabled:
         type: "boolean"
+      namespace:
+        $ref: "#/definitions/Namespace"
       open_issues_count:
         type: "integer"
       path:
