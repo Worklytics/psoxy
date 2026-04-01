@@ -74,11 +74,6 @@ variable "deployment_bundle_object_name" {
 }
 
 
-variable "path_to_config" {
-  type        = string
-  description = "path to config file (usually something in ../../configs/, eg configs/gdirectory.yaml"
-  default     = null
-}
 
 variable "psoxy_base_dir" {
   type        = string
@@ -88,7 +83,7 @@ variable "psoxy_base_dir" {
 
 variable "environment_variables" {
   type        = map(string)
-  description = "Non-sensitive values to add to functions environment variables; NOTE: will override anything in `path_to_config`"
+  description = "Non-sensitive values to add to functions environment variables"
   default     = {}
 }
 

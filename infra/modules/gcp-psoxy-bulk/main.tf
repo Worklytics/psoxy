@@ -203,7 +203,6 @@ resource "google_cloudfunctions2_function" "function" {
       INPUT_BUCKET  = google_storage_bucket.input_bucket.name,
       OUTPUT_BUCKET = module.output_bucket.bucket_name,
       }),
-      var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
       var.environment_variables,
       var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
       var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${replace(upper(var.instance_id), "-", "_")}_" },

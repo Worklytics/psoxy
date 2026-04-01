@@ -193,7 +193,6 @@ module "psoxy_lambda" {
   memory_size_mb                       = var.memory_size_mb
   timeout_seconds                      = 55
   reserved_concurrent_executions       = var.reserved_concurrent_executions
-  path_to_config                       = var.path_to_config
   source_kind                          = var.source_kind
   function_parameters                  = var.function_parameters
   path_to_instance_ssm_parameters      = var.path_to_instance_ssm_parameters

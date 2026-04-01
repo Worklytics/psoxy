@@ -115,11 +115,6 @@ variable "function_zip_hash" {
   description = "hash of base64-encoded zipped lambda bundle"
 }
 
-variable "path_to_config" {
-  type        = string
-  description = "DEPRECATED; path to config file (usually someting in ../../configs/, eg configs/gdirectory.yaml"
-  default     = null
-}
 
 variable "target_host" {
   type        = string
@@ -168,7 +163,7 @@ variable "example_api_calls_user_to_impersonate" {
 
 variable "environment_variables" {
   type        = map(string)
-  description = "Non-sensitive values to add to functions environment variables; NOTE: will override anything in `path_to_config`"
+  description = "Non-sensitive values to add to functions environment variables"
   default     = {}
 }
 

@@ -224,7 +224,6 @@ resource "google_cloudfunctions2_function" "function" {
     environment_variables = merge(
       # { LOG_EXECUTION_ID = "true" }, # NOTE that the google provider > 5.x seems to magically add this here, seemingly bc that's the defalt behavior of the version gcloud cli / API its using
       local.required_env_vars,
-      var.path_to_config == null ? {} : yamldecode(file(var.path_to_config)),
       var.environment_variables,
       var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
       var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${replace(upper(var.instance_id), "-", "_")}_" },
