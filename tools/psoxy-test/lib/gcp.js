@@ -288,7 +288,29 @@ async function upload(bucketName, filePath, client, filename) {
   }
 
   if (await isGzipped(filePath)) {
-    uploadOptions.metadata = { contentEncoding: 'gzip' };
+    // Set Content-Type to the underlying data type (not application/gzip).
+    // GCS auto-detects Content-Type from extensions, so for .ndjson.gz it would
+    // incorrectly set application/gzip. We override to the actual data type.
+    //
+    // NOTE: We intentionally do NOT set Content-Encoding: gzip here. Setting it
+    // triggers GCS decompressive transcoding (GCS transparently decompresses on
+    // download), which causes "Not in GZIP format" errors when psoxy then tries
+    // to decompress. Psoxy detects gzip from the .gz file extension instead.
+    const dest = uploadOptions.destination;
+    const nameWithoutGz = dest.endsWith('.gz') ? dest.slice(0, -3) : dest;
+    const ext = nameWithoutGz.slice(nameWithoutGz.lastIndexOf('.')).toLowerCase();
+    const MIME_TYPES = {
+      '.ndjson': 'application/x-ndjson',
+      '.json': 'application/json',
+      '.csv': 'text/csv',
+      '.tsv': 'text/tab-separated-values',
+      '.parquet': 'application/vnd.apache.parquet',
+    };
+    const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+
+    uploadOptions.metadata = {
+      contentType: contentType,
+    };
   }
 
   return client.bucket(bucketName).upload(filePath, uploadOptions);

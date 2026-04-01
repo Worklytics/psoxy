@@ -1515,7 +1515,7 @@ EOT
       enable_by_default         = false
       worklytics_connector_id   = "workdata-generic-psoxy"
       worklytics_connector_name = "Workplace Metadata via Psoxy"
-      rules_file = "docs/sources/workdata-generic/workdata-generic.yaml"
+      rules_file                = "docs/sources/workdata-generic/workdata-generic.yaml"
       example_files = [
         "docs/sources/workdata-generic/example-bulk/original/events0.ndjson",
         "docs/sources/workdata-generic/example-bulk/original/items0.ndjson",

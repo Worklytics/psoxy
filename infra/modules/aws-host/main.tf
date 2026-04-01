@@ -259,10 +259,10 @@ module "api_connector" {
     {
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
       EMAIL_CANONICALIZATION = var.email_canonicalization
-      CUSTOM_RULES_SHA       = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : (
+      CUSTOM_RULES_SHA = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : (
         try(local.api_connector_rules_raw[each.key], null) != null ? sha1(local.api_connector_rules_raw[each.key]) : null
       )
-      IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
+      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
   )
 }
@@ -293,20 +293,20 @@ module "bulk_connector" {
 
   source = "../../modules/aws-psoxy-bulk"
 
-  aws_account_id                       = var.aws_account_id
-  provision_iam_policy_for_testing     = var.provision_testing_infra
-  aws_role_to_assume_when_testing      = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
-  environment_name                     = var.environment_name
-  new_relic_account_id                 = var.new_relic_account_id
-  instance_id                          = each.key
-  source_kind                          = each.value.source_kind
-  aws_region                           = data.aws_region.current.id
-  path_to_function_zip                 = module.psoxy.path_to_deployment_jar
-  function_zip_hash                    = module.psoxy.deployment_package_hash
-  function_env_kms_key_arn             = var.function_env_kms_key_arn
-  logs_kms_key_arn                     = var.logs_kms_key_arn
-  log_retention_days                   = var.log_retention_days
-  psoxy_base_dir                       = var.psoxy_base_dir
+  aws_account_id                   = var.aws_account_id
+  provision_iam_policy_for_testing = var.provision_testing_infra
+  aws_role_to_assume_when_testing  = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
+  environment_name                 = var.environment_name
+  new_relic_account_id             = var.new_relic_account_id
+  instance_id                      = each.key
+  source_kind                      = each.value.source_kind
+  aws_region                       = data.aws_region.current.id
+  path_to_function_zip             = module.psoxy.path_to_deployment_jar
+  function_zip_hash                = module.psoxy.deployment_package_hash
+  function_env_kms_key_arn         = var.function_env_kms_key_arn
+  logs_kms_key_arn                 = var.logs_kms_key_arn
+  log_retention_days               = var.log_retention_days
+  psoxy_base_dir                   = var.psoxy_base_dir
   rules = (
     try(var.custom_bulk_connector_rules[each.key], null) != null ? var.custom_bulk_connector_rules[each.key] :
     each.value.rules
