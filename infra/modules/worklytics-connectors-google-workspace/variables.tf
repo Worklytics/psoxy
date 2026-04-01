@@ -14,6 +14,12 @@ variable "enabled_connectors" {
   description = "ids of connectors to enable"
 }
 
+variable "base_dir" {
+  type        = string
+  description = "Base directory for resolving relative file paths (eg rules_file) in connector specs."
+  default     = null
+}
+
 variable "gcp_project_id" {
   type        = string
   description = "id of GCP project that will host OAuth Clients for Google Workspace API connectors"

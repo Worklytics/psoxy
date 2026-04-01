@@ -137,9 +137,24 @@ You can process multiple file formats through a single proxy instance using `Mul
 
 These rules are structured with a field `fileRules`, which is a map from parameterized path template within the "input" bucket to one of the above rule types (`RecordRules`,`ColumnarRules`) to be applied to files matching that path template.
 
+#### Path Template Syntax
+
+Path templates follow [OpenAPI 3.0 Path Templating](https://swagger.io/specification/) conventions.
+Variable segments are enclosed in curly braces and matched against the file's object key (path).
+
+- **`{param}`** — matches one or more characters (excluding `/`). The parameter is **required**.
+- **`{param?}`** — matches zero or more characters (excluding `/`). The parameter is **optional**,
+  allowing it to match even when absent from the path. This is useful for optional suffixes like
+  compression extensions (`.gz`).
+
+For example, `/{exportId}/events{shard}.ndjson{suffix?}` will match all of:
+- `export1/events0.ndjson`
+- `export1/events0-1234567890.ndjson`
+- `export1/events0-1234567890.ndjson.gz`
+
 ```yaml
 fileRules:
-  /export/{week}/index_{shard}.ndjson:
+  /export/{week}/index_{shard}.ndjson{suffix?}:
     format: "NDJSON"
     transforms:
       - redact: "$.foo"

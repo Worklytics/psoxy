@@ -5,6 +5,7 @@ terraform {
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
+  base_dir                                 = var.base_dir
   enabled_connectors                       = var.enabled_connectors
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
   confluence_example_cloud_id              = var.confluence_example_cloud_id

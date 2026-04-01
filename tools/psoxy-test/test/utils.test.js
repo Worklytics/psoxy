@@ -120,4 +120,10 @@ test('Add filename suffix', (t) => {
     'example-001-1701711533220.csv');
   t.is(addFilenameSuffix('', 1701711533220), '');
   t.is(addFilenameSuffix(null, 'foo'), '');
+  // Compound extensions: suffix goes before the full compound extension
+  t.is(addFilenameSuffix('events0.ndjson.gz', 1775019339023),
+    'events0-1775019339023.ndjson.gz');
+  t.is(addFilenameSuffix('data.csv.gz', 'bar'), 'data-bar.csv.gz');
+  t.is(addFilenameSuffix('folder/test/data.ndjson.gz', 1701711533220),
+    'data-1701711533220.ndjson.gz');
 })
