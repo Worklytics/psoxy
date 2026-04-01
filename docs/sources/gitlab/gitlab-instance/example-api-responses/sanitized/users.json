@@ -1,0 +1,14 @@
+[
+  {
+    "id":"t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc",
+    "username":"t~UDDuqXMfBxj4Q9f8DtG7zH0QOwZlYK2wDYxFWfkvbsE",
+    "state":"active",
+    "locked":false
+  },
+  {
+    "id":"t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI",
+    "username":"t~ktpGmv-B60Om-QXQ5qFZrHUPwlrlFJsFH7xcCTegPKQ",
+    "state":"blocked",
+    "locked":false
+  }
+]

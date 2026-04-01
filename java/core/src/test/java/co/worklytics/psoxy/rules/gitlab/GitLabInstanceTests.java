@@ -92,7 +92,12 @@ public class GitLabInstanceTests extends JavaRulesTestBaseCase {
 
             InvocationExample.of("https://gitlab.example.com/api/v4/users/{userId}/emails", "user_emails.json"),
 
-            InvocationExample.of("https://gitlab.example.com/api/v4/version", "version.json")
+            InvocationExample.of("https://gitlab.example.com/api/v4/version", "version.json"),
+
+            // Users endpoint - initial and paginated
+            InvocationExample.of("https://gitlab.example.com/api/v4/users", "users.json"),
+            InvocationExample.of("https://gitlab.example.com/api/v4/users?page=2&per_page=50", "users.json"),
+            InvocationExample.of("https://gitlab.example.com/api/v4/users?state=active&order_by=name&sort=asc&search=john", "users.json")
         );
     }
 }
