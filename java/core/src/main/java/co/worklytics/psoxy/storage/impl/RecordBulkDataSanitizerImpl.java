@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.tuple.Triple;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
@@ -86,11 +87,11 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             if (StringUtils.isBlank(contentType)) {
                 log.warning("Content-Type is missing; defaulting to NDJSON for AUTO format.");
                 format = RecordRules.Format.NDJSON;
-            } else if (StringUtils.containsIgnoreCase(contentType, "application/json")) {
+            } else if (Strings.CI.contains(contentType, "application/json")) {
                 format = RecordRules.Format.JSON_ARRAY;
-            } else if (StringUtils.containsIgnoreCase(contentType, "text/csv")) {
+            } else if (Strings.CI.contains(contentType, "text/csv")) {
                 format = RecordRules.Format.CSV;
-            } else if (StringUtils.containsIgnoreCase(contentType, "parquet") || StringUtils.containsIgnoreCase(contentType, "application/vnd.apache.parquet")) {
+            } else if (Strings.CI.contains(contentType, "parquet")) {
                  format = RecordRules.Format.PARQUET;
             } else {
                 format = RecordRules.Format.NDJSON;
