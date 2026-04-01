@@ -209,7 +209,7 @@ module "instance_secrets_secrets_manager" {
 module "api_connector" {
   for_each = var.api_connectors
 
-  source = "../../modules/aws-psoxy-api"
+  source = "../../modules/aws-proxy-api"
 
   environment_name                      = var.environment_name
   new_relic_account_id                  = var.new_relic_account_id

@@ -274,6 +274,28 @@ resource "google_project_iam_custom_role" "bucket_write" {
   ]
 }
 
+resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
+  project     = var.project_id
+  role_id     = "${local.environment_id_role_prefix}secretVersionManager"
+  title       = "${local.environment_id_prefix_display}Secret Version Manager"
+  description = "Manage secret versions for writable/lockable secrets used by proxy instances"
+
+  permissions = [
+    "resourcemanager.projects.get",
+    "secretmanager.secrets.get",
+    "secretmanager.secrets.getIamPolicy",
+    "secretmanager.secrets.list",
+    "secretmanager.secrets.update",
+    "secretmanager.versions.access",
+    "secretmanager.versions.add",
+    "secretmanager.versions.destroy",
+    "secretmanager.versions.disable",
+    "secretmanager.versions.enable",
+    "secretmanager.versions.get",
+    "secretmanager.versions.list",
+  ]
+}
+
 
 # to avoid error 'The Cloud Storage service account for your bucket is unable to publish to Cloud Pub/Sub topics in the specified project'
 # see: https://cloud.google.com/eventarc/docs/run/quickstart-storage#before-you-begin
@@ -529,6 +551,7 @@ output "path_to_deployment_jar" {
   description = "Path to the package to deploy (JAR)."
   value       = module.psoxy_package.path_to_deployment_jar
 }
+
 
 output "psoxy_instance_secret_locker_role_id" {
   value = google_project_iam_custom_role.psoxy_instance_secret_role.id

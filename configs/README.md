@@ -8,7 +8,7 @@ from values in the `worklytics-connector-specs` module.
 If your Terraform config uses a `modular-example` with version > 0.4.13, this directory is
 irrelevant to you.
 
-If your Terraform config directly uses `modules`, such as `aws-psoxy-api`/`gcp-psoxy-api`, you
+If your Terraform config directly uses `modules`, such as `aws-proxy-api`/`gcp-proxy-api`, you
 should review the variables.tf in those modules and ensure you're filling everything that would
 normally be in the YAML files in this directory. If so, you can pass `null` for the config
 path and the corresponding YAML file in this directory will be ignored.

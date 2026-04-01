@@ -169,7 +169,7 @@ locals {
 module "api_connector" {
   for_each = var.api_connectors
 
-  source = "../../modules/gcp-psoxy-api"
+  source = "../../modules/gcp-proxy-api"
 
   project_id                            = var.gcp_project_id
   region                                = var.gcp_region

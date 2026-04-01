@@ -146,7 +146,7 @@ resource "aws_apigatewayv2_stage" "live" {
   }
 }
 
-# TODO: it would maximize granularity of policy to push this into `aws-psoxy-api` module, and
+# TODO: it would maximize granularity of policy to push this into `aws-proxy-api` module, and
 # do the statements based on configured list of http methods; but cost of that is policy + attachment
 # for each instance, instead of one per deployment
 resource "aws_iam_policy" "invoke_api" {
