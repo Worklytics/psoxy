@@ -2,13 +2,32 @@
   {
     "id":"t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc",
     "username":"t~UDDuqXMfBxj4Q9f8DtG7zH0QOwZlYK2wDYxFWfkvbsE",
+    "email":"t~qUgEvTk5RoKRf7UzpTE_v38yLCp9NzffMw5LPAa3WYU@example.com",
     "state":"active",
-    "locked":false
+    "locked":false,
+    "created_at":"2012-05-23T08:00:58Z",
+    "identities":[
+      {
+        "provider":"github",
+        "extern_uid":"t~iYNJ2-i46txJS4SFu0YMw3dJySVBreQpmRrugH5Heo8"
+      },
+      {
+        "provider":"bitbucket",
+        "extern_uid":"t~0C1bEzPy9edgqTjMdHNcjj3CI3FOP-oZCjb8YsZcapA"
+      },
+      {
+        "provider":"google_oauth2",
+        "extern_uid":"t~VmB-Hea3MCLHUIAEjVThRVh78EE8hsFuKrlVe9EU4tg"
+      }
+    ]
   },
   {
     "id":"t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI",
     "username":"t~ktpGmv-B60Om-QXQ5qFZrHUPwlrlFJsFH7xcCTegPKQ",
+    "email":"t~lXPp76qJaJHaXSV6lxP_ConVG2NzqPcprACsx5UifuA@example.com",
     "state":"blocked",
-    "locked":false
+    "locked":false,
+    "created_at":"2012-05-23T08:01:01Z",
+    "identities":[ ]
   }
 ]

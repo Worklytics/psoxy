@@ -316,8 +316,6 @@ endpoints:
           type: "array"
           items:
             type: "string"
-        project_id:
-          type: "integer"
         short_id:
           type: "string"
         sourceId:
@@ -444,8 +442,6 @@ definitions:
         type: "array"
         items:
           type: "string"
-      project_id:
-        type: "integer"
       short_id:
         type: "string"
       sourceId:
@@ -519,7 +515,7 @@ definitions:
       expires_at:
         type: "string"
       group_saml_identity:
-        $ref: "#/definitions/GroupSamlIdentity"
+        $ref: "#/definitions/SamlIdentity"
       id:
         type: "integer"
       is_using_seat:
@@ -528,15 +524,6 @@ definitions:
         type: "string"
       username:
         type: "string"
-  GroupSamlIdentity:
-    type: "object"
-    properties:
-      extern_uid:
-        type: "string"
-      provider:
-        type: "string"
-      saml_provider_id:
-        type: "integer"
   Issue:
     type: "object"
     properties:
@@ -734,7 +721,7 @@ definitions:
     properties:
       end_date:
         type: "string"
-        format: "date-time"
+        format: "date"
       id:
         type: "integer"
       plan:
@@ -812,6 +799,13 @@ definitions:
         format: "date-time"
       visibility:
         type: "string"
+  SamlIdentity:
+    type: "object"
+    properties:
+      extern_uid:
+        type: "string"
+      provider:
+        type: "string"
   StateEvent:
     type: "object"
     properties:
@@ -871,6 +865,10 @@ definitions:
         type: "string"
       id:
         type: "integer"
+      identities:
+        type: "array"
+        items:
+          $ref: "#/definitions/SamlIdentity"
       locked:
         type: "boolean"
       state:

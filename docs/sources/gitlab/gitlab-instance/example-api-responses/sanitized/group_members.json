@@ -27,8 +27,7 @@
     "email":"t~qUgEvTk5RoKRf7UzpTE_v38yLCp9NzffMw5LPAa3WYU@example.com",
     "group_saml_identity":{
       "extern_uid":"t~AcF_iJl0iQstw7f9wmv8j-3f6pQbiMviQzjZsGj00A4",
-      "provider":"group_saml",
-      "saml_provider_id":10
+      "provider":"group_saml"
     }
   }
 ]
