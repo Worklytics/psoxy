@@ -4,7 +4,7 @@
 # settings (role ARN, region, etc.)
 
 module "generic" {
-  source = "../worklytics-psoxy-connection-generic"
+  source = "../worklytics-proxy-connection-generic"
 
   proxy_instance_id    = var.proxy_instance_id
   host_platform_id     = "AWS"

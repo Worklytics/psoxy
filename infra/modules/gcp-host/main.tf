@@ -324,7 +324,7 @@ module "webhook_collector" {
 module "bulk_connector" {
   for_each = var.bulk_connectors
 
-  source = "../../modules/gcp-psoxy-bulk"
+  source = "../../modules/gcp-proxy-bulk"
 
   project_id                        = var.gcp_project_id
   region                            = var.gcp_region
@@ -400,7 +400,7 @@ locals {
 }
 
 # TODO: this would be cleaner as env var, but creates a cycle:
-# Error: Cycle: module.psoxy.module.psoxy-bulk.local_file.todo-gcp-psoxy-bulk-test, module.psoxy.module.lookup_output.var.function_service_account_email (expand), module.psoxy.module.lookup_output.google_storage_bucket_iam_member.write_to_output_bucket, module.psoxy.module.lookup_output.output.bucket_name (expand), module.psoxy.module.lookup_output.var.bucket_name_prefix (expand), module.psoxy.module.lookup_output.google_storage_bucket.bucket, module.psoxy.module.lookup_output.google_storage_bucket_iam_member.accessors, module.psoxy.module.lookup_output (close), module.psoxy.module.psoxy-bulk.var.environment_variables (expand), module.psoxy.module.psoxy-bulk.google_cloudfunctions_function.function, module.psoxy.module.psoxy-bulk (close)
+# Error: Cycle: module.psoxy.module.psoxy-bulk.local_file.todo-gcp-proxy-bulk-test, module.psoxy.module.lookup_output.var.function_service_account_email (expand), module.psoxy.module.lookup_output.google_storage_bucket_iam_member.write_to_output_bucket, module.psoxy.module.lookup_output.output.bucket_name (expand), module.psoxy.module.lookup_output.var.bucket_name_prefix (expand), module.psoxy.module.lookup_output.google_storage_bucket.bucket, module.psoxy.module.lookup_output.google_storage_bucket_iam_member.accessors, module.psoxy.module.lookup_output (close), module.psoxy.module.psoxy-bulk.var.environment_variables (expand), module.psoxy.module.psoxy-bulk.google_cloudfunctions_function.function, module.psoxy.module.psoxy-bulk (close)
 resource "google_secret_manager_secret" "additional_transforms" {
   for_each = local.inputs_to_build_lookups_for
 

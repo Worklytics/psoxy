@@ -1,9 +1,9 @@
 # creates a Bulk processing instance of Psoxy, with existing S3 bucket as the input
-# TODO: highly duplicative with regular `aws-psoxy-bulk` case, and could likely be unified in future
+# TODO: highly duplicative with regular `aws-proxy-bulk` case, and could likely be unified in future
 # version
 
 module "psoxy_lambda" {
-  source = "../aws-psoxy-lambda"
+  source = "../aws-proxy-lambda"
 
   environment_name                     = var.environment_name
   instance_id                          = var.instance_id
@@ -91,7 +91,7 @@ resource "aws_iam_role_policy_attachment" "read_policy_for_import_bucket" {
 }
 
 module "sanitized_output_bucket" {
-  source = "../aws-psoxy-output-bucket"
+  source = "../aws-proxy-output-bucket"
 
   instance_id                          = var.instance_id
   iam_role_for_lambda_name             = module.psoxy_lambda.iam_role_for_lambda_name

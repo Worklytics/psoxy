@@ -1,10 +1,10 @@
-# NOTE: coupled to REST use case; use `worklytics-psoxy-connection-generic` to cover REST or bulk
+# NOTE: coupled to REST use case; use `worklytics-proxy-connection-generic` to cover REST or bulk
 # cases.
 
 # DEPRECATED: use generic one directly
 
 module "generic" {
-  source = "../worklytics-psoxy-connection-generic"
+  source = "../worklytics-proxy-connection-generic"
 
   proxy_instance_id    = var.proxy_instance_id
   connector_id         = var.connector_id

@@ -22,7 +22,7 @@ locals {
 }
 
 # TODO: this has 5 remote modules; combine some?
-#  eg, worklytics-connectors + gcp-host + worklytics-psoxy-connection-generic into a single
+#  eg, worklytics-connectors + gcp-host + worklytics-proxy-connection-generic into a single
 #     gcp-host-for-worklytics? poor TF style, but simplifies root module?
 
 # in effect, these are for sources for which authentication/authorization cannot (or need not)
@@ -153,8 +153,8 @@ locals {
 module "connection_in_worklytics" {
   for_each = local.all_instances
 
-  source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.5.19"
+  source = "../../modules/worklytics-proxy-connection-generic"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-generic?ref=v0.5.19"
 
   host_platform_id     = local.host_platform_id
   proxy_instance_id    = each.key

@@ -181,7 +181,7 @@ locals {
 }
 
 module "psoxy_lambda" {
-  source = "../aws-psoxy-lambda"
+  source = "../aws-proxy-lambda"
 
   environment_name                     = var.environment_name
   instance_id                          = var.instance_id
