@@ -15,12 +15,9 @@ resource "google_secret_manager_secret" "secret" {
 
   project   = var.secret_project
   secret_id = "${var.path_prefix}${each.key}"
-  labels = merge(
-    var.default_labels,
-    {
-      terraform_managed_value = each.value.value_managed_by_tf
-    }
-  )
+  labels = {
+    terraform_managed_value = each.value.value_managed_by_tf
+  }
 
   # TODO: put each.value.description somewhere; shouldn't be a 'label'; annotations not yet supprted
   # by google terraform provider
@@ -39,7 +36,6 @@ resource "google_secret_manager_secret" "secret" {
   lifecycle {
     ignore_changes = [
       replication, # for backwards compatibility; replication can't be changed after secrets created
-      labels
     ]
   }
 }

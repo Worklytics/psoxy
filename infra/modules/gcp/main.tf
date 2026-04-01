@@ -74,12 +74,9 @@ resource "google_artifact_registry_repository" "psoxy-functions-repo" {
 resource "google_secret_manager_secret" "pseudonym_salt" {
   project   = var.project_id
   secret_id = "${var.config_parameter_prefix}PSOXY_SALT"
-  labels = merge(
-    var.default_labels,
-    {
-      terraform_managed_value = true
-    }
-  )
+  labels = {
+    terraform_managed_value = true
+  }
 
   replication {
     user_managed {
@@ -95,7 +92,6 @@ resource "google_secret_manager_secret" "pseudonym_salt" {
   lifecycle {
     ignore_changes = [
       replication, # can't change replication after creation
-      labels
     ]
   }
 
@@ -132,12 +128,9 @@ resource "google_secret_manager_secret_version" "initial_version" {
 resource "google_secret_manager_secret" "pseudonymization_key" {
   project   = var.project_id
   secret_id = "${var.config_parameter_prefix}PSOXY_ENCRYPTION_KEY"
-  labels = merge(
-    var.default_labels,
-    {
-      terraform_managed_value = true
-    }
-  )
+  labels = {
+    terraform_managed_value = true
+  }
 
   replication {
     user_managed {
@@ -153,7 +146,6 @@ resource "google_secret_manager_secret" "pseudonymization_key" {
   lifecycle {
     ignore_changes = [
       replication, # can't change replication after creation
-      labels
     ]
   }
 
@@ -226,7 +218,6 @@ resource "google_storage_bucket" "artifacts" {
   location                    = var.bucket_location
   uniform_bucket_level_access = true
   force_destroy               = var.bucket_force_destroy
-  labels                      = var.default_labels
 
   dynamic "logging" {
     for_each = var.bucket_access_logs_destination != null ? [var.bucket_access_logs_destination] : []

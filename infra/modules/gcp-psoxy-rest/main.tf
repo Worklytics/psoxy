@@ -74,8 +74,6 @@ resource "google_pubsub_topic" "async_output_topic" {
 
   project = var.project_id
   name    = "${var.environment_id_prefix}${var.instance_id}-async-output"
-
-  labels = var.default_labels
 }
 
 # Pub/Sub push subscription for async output (if enabled)
@@ -104,8 +102,6 @@ resource "google_pubsub_subscription" "async_output_subscription" {
   expiration_policy {
     ttl = "" # No expiration
   }
-
-  labels = var.default_labels
 }
 
 # IAM permissions for Pub/Sub async processing
@@ -249,14 +245,6 @@ resource "google_cloudfunctions2_function" "function" {
     }
   }
 
-  labels = var.default_labels
-
-  lifecycle {
-    ignore_changes = [
-      labels
-    ]
-  }
-
   depends_on = [
     google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret,
     google_service_account_iam_member.act_as,
@@ -280,7 +268,6 @@ module "service_url_parameter" {
       description = "URL of the function as a web service"
     },
   }
-  default_labels = var.default_labels
 }
 
 

@@ -14,6 +14,7 @@ terraform {
 
 provider "google" {
   impersonate_service_account = var.gcp_terraform_sa_account_email
+  default_labels              = var.default_labels
 }
 
 locals {
@@ -97,7 +98,6 @@ module "psoxy" {
   gcp_project_id                    = var.gcp_project_id
   environment_name                  = var.environment_name
   config_parameter_prefix           = var.config_parameter_prefix
-  default_labels                    = var.default_labels
   worklytics_sa_emails              = var.worklytics_sa_emails
   psoxy_base_dir                    = var.psoxy_base_dir
   deployment_bundle                 = var.deployment_bundle

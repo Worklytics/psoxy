@@ -52,7 +52,6 @@ resource "google_storage_bucket" "input_bucket" {
   location                    = var.region
   force_destroy               = var.bucket_force_destroy
   uniform_bucket_level_access = true
-  labels                      = var.default_labels
 
   dynamic "logging" {
     for_each = var.bucket_access_logs_destination != null ? [var.bucket_access_logs_destination] : []
@@ -74,7 +73,6 @@ resource "google_storage_bucket" "input_bucket" {
   lifecycle {
     ignore_changes = [
       name, # avoid recreation of bucket just on name change alone
-      labels
     ]
   }
 }
@@ -90,7 +88,6 @@ module "output_bucket" {
   bucket_name_suffix             = var.sanitized_bucket_name == null ? "-sanitized" : ""
   region                         = var.region
   expiration_days                = var.sanitized_expiration_days
-  bucket_labels                  = var.default_labels
   bucket_force_destroy           = var.bucket_force_destroy
   enable_versioning              = var.enable_versioning
   bucket_access_logs_destination = var.bucket_access_logs_destination
@@ -239,14 +236,6 @@ resource "google_cloudfunctions2_function" "function" {
       attribute = "bucket"
       value     = google_storage_bucket.input_bucket.name
     }
-  }
-
-  labels = var.default_labels
-
-  lifecycle {
-    ignore_changes = [
-      labels
-    ]
   }
 
   # can't provision function until various IAM grants complete

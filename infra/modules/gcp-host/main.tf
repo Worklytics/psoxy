@@ -39,7 +39,6 @@ module "psoxy" {
   provision_testing_infra           = var.provision_testing_infra
   gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
   custom_artifacts_bucket_name      = var.custom_artifacts_bucket_name
-  default_labels                    = var.default_labels
   support_bulk_mode                 = length(var.bulk_connectors) > 0
   support_webhook_collectors        = length(var.webhook_collectors) > 0
   vpc_config                        = var.vpc_config
@@ -107,7 +106,6 @@ module "secrets" {
   secret_project    = var.gcp_project_id
   path_prefix       = "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_"
   secrets           = local.secrets_to_provision[each.key]
-  default_labels    = var.default_labels
   replica_locations = var.secret_replica_locations
 }
 
@@ -194,7 +192,6 @@ module "api_connector" {
   oauth_scopes                          = try(each.value.oauth_scopes_needed, [])
   config_parameter_prefix               = local.config_parameter_prefix
   invoker_sa_emails                     = var.worklytics_sa_emails
-  default_labels                        = var.default_labels
   gcp_principals_authorized_to_test     = var.gcp_principals_authorized_to_test
   bucket_write_role_id                  = module.psoxy.bucket_write_role_id
   side_output_original                  = try(local.custom_original_side_outputs[each.key], null)
@@ -238,7 +235,6 @@ module "custom_api_connector_rules" {
   project_id        = var.gcp_project_id
   prefix            = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
   file_path         = each.value
-  default_labels    = var.default_labels
   instance_sa_email = module.api_connector[each.key].service_account_email
 }
 # END API CONNECTORS
@@ -287,7 +283,6 @@ module "webhook_collector" {
   config_parameter_prefix            = local.config_parameter_prefix
   invoker_sa_emails                  = var.worklytics_sa_emails
   vpc_config                         = module.psoxy.vpc_config
-  default_labels                     = var.default_labels
   gcp_principals_authorized_to_test  = var.gcp_principals_authorized_to_test
   bucket_write_role_id               = module.psoxy.bucket_write_role_id
   side_output_original               = try(local.custom_original_side_outputs[each.key], null)
@@ -353,7 +348,6 @@ module "bulk_connector" {
   sanitized_expiration_days         = var.bulk_sanitized_expiration_days
   input_bucket_name                 = try(each.value.input_bucket_name, null)
   sanitized_bucket_name             = try(each.value.sanitized_bucket_name, null)
-  default_labels                    = var.default_labels
   todos_as_local_files              = var.todos_as_local_files
   tf_runner_iam_principal           = module.tf_runner.iam_principal
   available_memory_mb               = coalesce(try(var.custom_bulk_connector_arguments[each.key].available_memory_mb, null), try(each.value.available_memory_mb, null), 512)
@@ -397,7 +391,6 @@ module "lookup_output" {
   bucket_name_suffix             = "-lookup" # TODO: what if multiple lookups from same source??
   expiration_days                = each.value.expiration_days
   sanitizer_accessor_principals  = each.value.sanitized_accessor_principals
-  bucket_labels                  = var.default_labels
   bucket_force_destroy           = var.bucket_force_destroy
   enable_versioning              = var.version_sanitized_buckets
   bucket_access_logs_destination = var.bucket_access_logs_destination
@@ -414,7 +407,6 @@ resource "google_secret_manager_secret" "additional_transforms" {
 
   project   = var.gcp_project_id
   secret_id = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_ADDITIONAL_TRANSFORMS"
-  labels    = var.default_labels
 
   replication {
     user_managed {
@@ -425,12 +417,6 @@ resource "google_secret_manager_secret" "additional_transforms" {
         }
       }
     }
-  }
-
-  lifecycle {
-    ignore_changes = [
-      labels
-    ]
   }
 }
 
