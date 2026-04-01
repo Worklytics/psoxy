@@ -10,11 +10,11 @@ The following scope is required:
 | Endpoint                                                                       |
 |--------------------------------------------------------------------------------|
 | `/api/v4/groups`                                                               |
-| `/api/v4/version`                                                               |
+| `/api/v4/version`                                                              |
 | `/api/v4/groups/{id}/members/all`                                              |
 | `/api/v4/merge_requests/{id}`                                                  |
-| `/api/v4/users`                                                             |
-| `/api/v4/users/{id}/emails`                                                             |
+| `/api/v4/users`                                                                |
+| `/api/v4/users/{id}/emails`                                                    |
 | `/api/v4/projects`                                                             |
 | `/api/v4/projects/{id}/audit_events`                                           |
 | `/api/v4/projects/{id}/issues/{issueIid}/notes`                                |
@@ -34,7 +34,7 @@ The following scope is required:
 ### Creating a dedicated user as service account
 
 1. We recommend to create a [dedicated service account](https://docs.gitlab.com/user/profile/account/create_accounts/#create-a-user-in-the-admin-area) and generate a Personal Access Token for that account with the required permissions.
-2. As an adminstrator, go to [${gitlab_url}/admin/users/new](https://${gitlab_url}/admin/users/new)
+2. As an administrator, go to [${gitlab_url}/admin/users/new](https://${gitlab_url}/admin/users/new)
 3. Ensure that the `User type` is marked as `Administrator`
 
 ### Creating a Personal Access Token for the service account
