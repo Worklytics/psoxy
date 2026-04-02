@@ -375,6 +375,7 @@ endpoints:
           - "$[*].id"
           - "$[*].username"
           - "$[*].email"
+          - "$[*].commit_email"
           - "$[*]..extern_uid"
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
@@ -876,6 +877,8 @@ definitions:
     properties:
       active:
         type: "boolean"
+      commit_email:
+        type: "string"
       created_at:
         type: "string"
         format: "date-time"

@@ -858,6 +858,8 @@ definitions:
     properties:
       active:
         type: "boolean"
+      commit_email:
+        type: "string"
       created_at:
         type: "string"
         format: "date-time"
