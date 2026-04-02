@@ -122,6 +122,46 @@ module "psoxy_package" {
   force_bundle       = var.force_bundle
 }
 
+locals {
+  # determine if the JAR is local and should be uploaded directly from plan-time variables
+  is_local_jar            = var.deployment_bundle == null || !startswith(coalesce(var.deployment_bundle, "unknown"), "s3://")
+  should_provision_bucket = local.is_local_jar && var.artifacts_bucket_name == null
+  target_artifacts_bucket = var.artifacts_bucket_name != null ? var.artifacts_bucket_name : (local.should_provision_bucket ? aws_s3_bucket.artifacts[0].bucket : null)
+  should_upload_object    = local.is_local_jar && (var.artifacts_bucket_name != null || local.should_provision_bucket)
+}
+
+resource "aws_s3_bucket" "artifacts" {
+  count = local.should_provision_bucket ? 1 : 0
+
+  bucket_prefix = "${var.deployment_id}-artifacts-"
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "artifacts" {
+  count = local.should_provision_bucket ? 1 : 0
+
+  bucket = aws_s3_bucket.artifacts[0].bucket
+
+  block_public_acls       = true
+  block_public_policy     = true
+  restrict_public_buckets = true
+  ignore_public_acls      = true
+}
+
+resource "aws_s3_object" "proxy_jar" {
+  count = local.should_upload_object ? 1 : 0
+
+  bucket      = local.target_artifacts_bucket
+  key         = "${var.deployment_id}/${basename(module.psoxy_package.filename)}"
+  source      = module.psoxy_package.path_to_deployment_jar
+  source_hash = module.psoxy_package.deployment_package_hash == "unknown" ? null : module.psoxy_package.deployment_package_hash
+}
+
 resource "aws_apigatewayv2_api" "proxy_api" {
   count = var.use_api_gateway_v2 ? 1 : 0
 
@@ -288,7 +328,11 @@ output "deployment_package_hash" {
 }
 
 output "path_to_deployment_jar" {
-  value = module.psoxy_package.path_to_deployment_jar
+  value = local.should_upload_object ? "s3://${aws_s3_object.proxy_jar[0].bucket}/${aws_s3_object.proxy_jar[0].key}" : module.psoxy_package.path_to_deployment_jar
+}
+
+output "artifacts_bucket_name" {
+  value = local.target_artifacts_bucket
 }
 
 output "filename" {
