@@ -3,6 +3,12 @@ variable "enabled_connectors" {
   description = "ids of connectors to enable"
 }
 
+variable "base_dir" {
+  type        = string
+  description = "Base directory for resolving relative file paths (eg rules_file) in connector specs."
+  default     = null
+}
+
 variable "environment_id" {
   type        = string
   description = "Qualifier to append to names/ids of resources. If not empty, A-Za-z0-9 or - characters only. Max length 10. Useful to distinguish between deployments into same GCP project."

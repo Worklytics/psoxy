@@ -42,9 +42,14 @@ public class MultiTypeBulkDataRules implements BulkDataRules {
      * will be trimmed off if present. eg, `/export/{week}/data_{shard}.csv` and
      * `export/{week}/data_{shard}.csv` will be considered equivalent path templates, both interpreted
      * as regex `^export/[^/]+/data_[^/]+\.csv$`
-
+     *
      * as S3/GCS/etc implement file system abstraction only as a convention, object key for matching
      * will not begin with `/`; hence why we trim this off
+     *
+     * Path parameters:
+     *  - `{param}`  - required, matches one or more characters (excluding `/`)
+     *  - `{param?}` - optional, matches zero or more characters (excluding `/`);
+     *                  useful for optional suffixes like compression extensions (`.gz`)
      *
      * see: https://swagger.io/specification/ , section "Path Templating"
      *

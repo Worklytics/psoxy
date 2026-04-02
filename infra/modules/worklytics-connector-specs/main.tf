@@ -1545,6 +1545,19 @@ EOT
       }
       example_file = "docs/sources/survey/survey-example.csv"
     }
+    "workdata-generic" = {
+      source_kind               = "workdata-generic"
+      availability              = "beta"
+      enable_by_default         = false
+      worklytics_connector_id   = "workdata-generic-psoxy"
+      worklytics_connector_name = "Workplace Metadata via Psoxy"
+      rules_file                = "docs/sources/workdata-generic/workdata-generic.yaml"
+      example_files = [
+        "docs/sources/workdata-generic/example-bulk/original/events0.ndjson",
+        "docs/sources/workdata-generic/example-bulk/original/items0.ndjson",
+        "docs/sources/workdata-generic/example-bulk/original/accounts0.ndjson"
+      ]
+    }
   }
 
   oauth_long_access_connectors_backwards = { for k, v in local.oauth_long_access_connectors :
@@ -1578,13 +1591,29 @@ EOT
 # computed values filtered by enabled connectors
 locals {
 
+  # helper to compute rules_raw from a connector map entry
+  # reads file content if rules_file is set and base_dir is available
+  _resolve_rules_raw = {
+    for k, v in local.all_default_connectors :
+    k => try(v.rules_file, null) != null && var.base_dir != null ? file("${var.base_dir}${v.rules_file}") : null
+  }
+
   # backwards-compatible for v0.4.x; remove in v0.5.x
   google_workspace_sources_backwards = { for k, v in local.google_workspace_sources :
-  k => merge(v, { example_calls : try(v.example_api_calls, []) }) }
+  k => merge(v, { example_calls : try(v.example_api_calls, []), rules_raw : try(local._resolve_rules_raw[k], null) }) }
 
   # backwards-compatible for v0.4.x; remove in v0.5.x
   msft_365_connectors_backwards = { for k, v in local.msft_365_connectors :
-  k => merge(v, { example_calls : try(v.example_api_calls, []) }) }
+  k => merge(v, { example_calls : try(v.example_api_calls, []), rules_raw : try(local._resolve_rules_raw[k], null) }) }
+
+  oauth_long_access_connectors_with_rules_raw = { for k, v in local.oauth_long_access_connectors :
+  k => merge(v, { rules_raw : try(local._resolve_rules_raw[k], null) }) }
+
+  oauth_long_access_connectors_backwards_with_rules_raw = { for k, v in local.oauth_long_access_connectors :
+  k => merge(v, { example_calls : try(v.example_api_calls, []), rules_raw : try(local._resolve_rules_raw[k], null) }) }
+
+  bulk_connectors_with_rules_raw = { for k, v in local.bulk_connectors :
+  k => merge(v, { rules_raw : try(local._resolve_rules_raw[k], null) }) }
 
   enabled_google_workspace_connectors = {
     for k, v in local.google_workspace_sources_backwards : k => v if contains(var.enabled_connectors, k)
@@ -1592,7 +1621,7 @@ locals {
   enabled_msft_365_connectors = {
     for k, v in local.msft_365_connectors_backwards : k => v if contains(var.enabled_connectors, k) && length(try(var.msft_tenant_id, "")) > 0
   }
-  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors_backwards : k => v if contains(var.enabled_connectors, k) }
+  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors_backwards_with_rules_raw : k => v if contains(var.enabled_connectors, k) }
 
   enabled_oauth_long_access_connectors_todos = { for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
   # list of pair of [(conn1, secret1), (conn1, secret2), ... (connN, secretM)]
@@ -1609,7 +1638,7 @@ locals {
   ]))
 
   enabled_bulk_connectors = {
-    for k, v in local.bulk_connectors : k => v if contains(var.enabled_connectors, k)
+    for k, v in local.bulk_connectors_with_rules_raw : k => v if contains(var.enabled_connectors, k)
   }
 
   enabled_lockable_oauth_secrets_to_create = distinct(flatten([
@@ -1621,3 +1650,4 @@ locals {
     ]
   ]))
 }
+
