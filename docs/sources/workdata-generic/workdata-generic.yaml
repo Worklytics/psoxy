@@ -1,0 +1,54 @@
+fileRules:
+  # events (with export directory prefix)
+  /{exportId}/events{shardIndex}.ndjson{suffix?}:
+    format: "NDJSON"
+    transforms:
+      - pseudonymize:
+          - "$.actor.id"
+          - "$.actor.identity.id"
+          - "$.object.collaborators[*].id"
+          - "$.object.collaborators[*].identity.id"
+  # events (flat, at bucket root)
+  /events{shardIndex}.ndjson{suffix?}:
+    format: "NDJSON"
+    transforms:
+      - pseudonymize:
+          - "$.actor.id"
+          - "$.actor.identity.id"
+          - "$.object.collaborators[*].id"
+          - "$.object.collaborators[*].identity.id"
+
+  # items (with export directory prefix)
+  /{exportId}/items{shardIndex}.ndjson{suffix?}:
+    format: "NDJSON"
+    transforms:
+      - pseudonymize:
+          - "$.collaborators[*].id"
+          - "$.collaborators[*].identity.id"
+          - "$.object.collaborators[*].id"
+          - "$.object.collaborators[*].identity.id"
+  # items (flat, at bucket root)
+  /items{shardIndex}.ndjson{suffix?}:
+    format: "NDJSON"
+    transforms:
+      - pseudonymize:
+          - "$.collaborators[*].id"
+          - "$.collaborators[*].identity.id"
+          - "$.object.collaborators[*].id"
+          - "$.object.collaborators[*].identity.id"
+
+  # accounts (with export directory prefix)
+  /{exportId}/accounts{shardIndex}.ndjson{suffix?}:
+    format: "NDJSON"
+    transforms:
+      - pseudonymize:
+          - "$.accountId"
+          - "$.associatedIdentities[*].id"
+  # accounts (flat, at bucket root)
+  /accounts{shardIndex}.ndjson{suffix?}:
+    format: "NDJSON"
+    transforms:
+      - pseudonymize:
+          - "$.accountId"
+          - "$.associatedIdentities[*].id"
+

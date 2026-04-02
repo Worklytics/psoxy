@@ -287,8 +287,26 @@ async function upload(bucketName, filePath, client, filename) {
     destination: filename ?? path.basename(filePath),
   }
 
+  // Determine Content-Type from the base filename (stripping .gz if present)
+  const dest = uploadOptions.destination;
+  const baseName = dest.endsWith('.gz') ? dest.slice(0, -3) : dest;
+  const ext = baseName.slice(baseName.lastIndexOf('.')).toLowerCase();
+  const MIME_TYPES = {
+    '.ndjson': 'application/x-ndjson',
+    '.json': 'application/json',
+    '.csv': 'text/csv',
+    '.tsv': 'text/tab-separated-values',
+    '.parquet': 'application/vnd.apache.parquet',
+  };
+  const contentType = MIME_TYPES[ext] || undefined; // let GCS auto-detect if unknown
+
   if (await isGzipped(filePath)) {
-    uploadOptions.metadata = { contentEncoding: 'gzip' };
+    uploadOptions.metadata = {
+      contentEncoding: 'gzip',
+      ...(contentType && { contentType }),
+    };
+  } else if (contentType) {
+    uploadOptions.metadata = { contentType };
   }
 
   return client.bucket(bucketName).upload(filePath, uploadOptions);

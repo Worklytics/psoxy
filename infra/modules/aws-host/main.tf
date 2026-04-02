@@ -31,6 +31,12 @@ locals {
 
   api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
 
+  # API connectors with rules_raw that don't have file-based overrides
+  api_connector_rules_raw = {
+    for k, v in var.api_connectors : k => v.rules_raw
+    if try(v.rules_raw, null) != null && !contains(keys(local.api_connector_rules_files), k)
+  }
+
   # proxy caller role requires direct lambda access if API Gateway v2 is not used and there are API connectors
   caller_requires_direct_lambda_access = !local.use_api_gateway_v2 && length(module.api_connector) > 0
 }
@@ -254,8 +260,10 @@ module "api_connector" {
     {
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
       EMAIL_CANONICALIZATION = var.email_canonicalization
-      CUSTOM_RULES_SHA       = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : null
-      IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
+      CUSTOM_RULES_SHA = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : (
+        try(local.api_connector_rules_raw[each.key], null) != null ? sha1(local.api_connector_rules_raw[each.key]) : null
+      )
+      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     }
   )
 }
@@ -271,27 +279,44 @@ module "custom_api_connector_rules" {
   file_path = each.value
 }
 
+# Rules provisioned from rules_raw (content string, not file path)
+module "api_connector_rules_raw" {
+  source = "../../modules/aws-ssm-rules"
+
+  for_each = local.api_connector_rules_raw
+
+  prefix  = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
+  content = each.value
+}
+
 module "bulk_connector" {
   for_each = var.bulk_connectors
 
   source = "../../modules/aws-psoxy-bulk"
 
-  aws_account_id                       = var.aws_account_id
-  provision_iam_policy_for_testing     = var.provision_testing_infra
-  aws_role_to_assume_when_testing      = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
-  environment_name                     = var.environment_name
-  new_relic_account_id                 = var.new_relic_account_id
-  instance_id                          = each.key
-  source_kind                          = each.value.source_kind
-  aws_region                           = data.aws_region.current.id
-  path_to_function_zip                 = module.psoxy.path_to_deployment_jar
-  function_zip_hash                    = module.psoxy.deployment_package_hash
-  function_env_kms_key_arn             = var.function_env_kms_key_arn
-  logs_kms_key_arn                     = var.logs_kms_key_arn
-  log_retention_days                   = var.log_retention_days
-  psoxy_base_dir                       = var.psoxy_base_dir
-  rules                                = try(var.custom_bulk_connector_rules[each.key], each.value.rules)
-  rules_file                           = each.value.rules_file
+  aws_account_id                   = var.aws_account_id
+  provision_iam_policy_for_testing = var.provision_testing_infra
+  aws_role_to_assume_when_testing  = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
+  environment_name                 = var.environment_name
+  new_relic_account_id             = var.new_relic_account_id
+  instance_id                      = each.key
+  source_kind                      = each.value.source_kind
+  aws_region                       = data.aws_region.current.id
+  path_to_function_zip             = module.psoxy.path_to_deployment_jar
+  function_zip_hash                = module.psoxy.deployment_package_hash
+  function_env_kms_key_arn         = var.function_env_kms_key_arn
+  logs_kms_key_arn                 = var.logs_kms_key_arn
+  log_retention_days               = var.log_retention_days
+  psoxy_base_dir                   = var.psoxy_base_dir
+  rules = (
+    try(var.custom_bulk_connector_rules[each.key], null) != null ? var.custom_bulk_connector_rules[each.key] :
+    each.value.rules
+  )
+  rules_file = (
+    # rules_file only applies when custom_bulk_connector_rules and rules_raw don't take precedence
+    try(var.custom_bulk_connector_rules[each.key], null) == null && try(each.value.rules_raw, null) == null ? each.value.rules_file :
+    null
+  )
   secrets_store_implementation         = var.secrets_store_implementation
   global_parameter_arns                = try(module.global_secrets_ssm[0].secret_arns, [])
   global_secrets_manager_secret_arns   = try(module.global_secrets_secrets_manager[0].secret_arns, {})
@@ -320,6 +345,10 @@ module "bulk_connector" {
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
       EMAIL_CANONICALIZATION = var.email_canonicalization
     },
+    # If rules_raw is set and there's no custom override, pass it as RULES env var
+    try(var.custom_bulk_connector_rules[each.key], null) == null && try(each.value.rules_raw, null) != null ? {
+      RULES = each.value.rules_raw
+    } : {},
   )
 }
 
