@@ -60,6 +60,7 @@ module "psoxy" {
   provision_webhook_collection_infra = local.has_enabled_webhook_collectors
   enable_webhook_testing             = local.enable_webhook_testing
   webhook_allow_origins              = distinct(flatten([for v in var.webhook_collectors : v.allow_origins]))
+  artifacts_bucket_name              = var.artifacts_bucket_name
 }
 
 resource "aws_iam_policy" "execution_lambda_to_caller" {
@@ -542,3 +543,6 @@ echo "Testing Webhook Collectors ..."
 EOF
 }
 
+output "artifacts_bucket_name" {
+  value = module.psoxy.artifacts_bucket_name
+}
