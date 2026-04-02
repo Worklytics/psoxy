@@ -124,7 +124,7 @@ module "psoxy_package" {
 
 locals {
   # determine if the JAR is local and should be uploaded directly from plan-time variables
-  is_local_jar            = var.deployment_bundle == null || (!startswith(coalesce(var.deployment_bundle, "unknown"), "s3://") && !startswith(coalesce(var.deployment_bundle, "unknown"), "http"))
+  is_local_jar            = var.deployment_bundle == null || !startswith(coalesce(var.deployment_bundle, "unknown"), "s3://")
   should_provision_bucket = local.is_local_jar && var.artifacts_bucket_name == null
   target_artifacts_bucket = var.artifacts_bucket_name != null ? var.artifacts_bucket_name : (local.should_provision_bucket ? aws_s3_bucket.artifacts[0].bucket : null)
   should_upload_object    = local.is_local_jar && (var.artifacts_bucket_name != null || local.should_provision_bucket)
@@ -157,7 +157,7 @@ resource "aws_s3_object" "proxy_jar" {
   count = local.should_upload_object ? 1 : 0
 
   bucket      = local.target_artifacts_bucket
-  key         = module.psoxy_package.filename
+  key         = "${var.deployment_id}/${basename(module.psoxy_package.filename)}"
   source      = module.psoxy_package.path_to_deployment_jar
   source_hash = module.psoxy_package.deployment_package_hash == "unknown" ? null : module.psoxy_package.deployment_package_hash
 }

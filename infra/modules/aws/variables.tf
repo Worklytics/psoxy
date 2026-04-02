@@ -28,6 +28,11 @@ variable "deployment_bundle" {
   type        = string
   description = "path to deployment bundle to use (if not provided, will build one)"
   default     = null
+
+  validation {
+    condition     = var.deployment_bundle == null || !can(regex("^https?://", var.deployment_bundle))
+    error_message = "HTTP(S) URLs are not supported for deployment_bundle. Use an s3:// URL or a local file path."
+  }
 }
 
 variable "force_bundle" {
