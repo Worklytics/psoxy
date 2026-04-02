@@ -46,6 +46,7 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `slack-ai-snapshot`        | Slack AI Snapshot                   | Bulk | BETA         |
 | `survey`                   | Survey                              | Bulk | GA           |
 | `windsurf`                 | Windsurf                            | API  | ALPHA        |
+| `workdata-generic`         | Generic Work Data                   | Bulk | BETA         |
 | `zoom`                     | Zoom                                | API  | GA           |
 | `zoom-ai-snapshot-bulk`    | Zoom AI Snapshot Bulk               | Bulk | ALPHA        |
 

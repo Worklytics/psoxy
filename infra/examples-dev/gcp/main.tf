@@ -32,6 +32,7 @@ module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.5.19"
 
+  base_dir                                 = var.psoxy_base_dir
   enabled_connectors                       = var.enabled_connectors
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
   confluence_example_cloud_id              = var.confluence_example_cloud_id

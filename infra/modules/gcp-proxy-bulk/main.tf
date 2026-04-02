@@ -9,7 +9,8 @@ locals {
 locals {
   # legacy pre 0.5 may not pass instance_id
   instance_id         = coalesce(var.instance_id, substr(var.source_kind, 0, local.CLOUD_FUNCTION_NAME_MAX_LENGTH - length(var.environment_id_prefix)))
-  default_sa_name     = coalesce("${var.environment_id_prefix}${local.instance_id}", substr("${var.environment_id_prefix}fn-${var.source_kind}", 0, local.SA_NAME_MAX_LENGTH - 3 - length(var.environment_id_prefix)))
+  raw_default_sa_name = coalesce("${var.environment_id_prefix}${local.instance_id}", substr("${var.environment_id_prefix}fn-${var.source_kind}", 0, local.SA_NAME_MAX_LENGTH - 3 - length(var.environment_id_prefix)))
+  default_sa_name     = trim(substr(local.raw_default_sa_name, 0, local.SA_NAME_MAX_LENGTH), "-")
   sa_name             = length(local.default_sa_name) < local.SA_NAME_MIN_LENGTH ? "psoxy-${local.default_sa_name}" : local.default_sa_name
   function_name       = "${var.environment_id_prefix}${local.instance_id}"
   command_npm_install = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
@@ -255,6 +256,9 @@ locals {
     var.example_file != null ? [var.example_file] : []
   )
 
+  example_files_csv = join(",", [for f in local.all_example_files : "${var.psoxy_base_dir}${f}"])
+
+
   # id that is unique for connector, within the environment (eg, files with this token in name, but otherwise equivalent, will not conflict)
   local_file_id = trimprefix(local.instance_id, var.environment_id_prefix)
 
@@ -272,7 +276,7 @@ Check that the Psoxy works as expected and it transforms the files of your input
 the rules you have defined:
 
 ```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_files_csv} -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
 ```
 EOT
   test_todo_content = <<EOT
@@ -326,26 +330,34 @@ resource "local_file" "test_script" {
   file_permission = "755"
   content         = <<EOT
 #!/bin/bash
-FILE_PATH=$${1:-${try(local.example_file, "")}}
+FILE_PATH=$${1:-${try(local.example_files_csv, "")}}
 BLUE='\e[0;34m'
 NC='\e[0m'
 
 printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"
 
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $FILE_PATH -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
+# Process multiple files separated by comma
+IFS=',' read -ra FILES <<< "$FILE_PATH"
+for FILE in "$${FILES[@]}"; do
+  # trim whitespace
+  FILE=$(echo "$FILE" | xargs)
+  if [ -z "$FILE" ]; then continue; fi
+  
+  printf "Testing file: $FILE\n"
+  node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$FILE" -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
 
-if gzip -t "$FILE_PATH" 2>/dev/null; then
-  printf "test file was compressed, so not testing compression as a separate case\n"
-else
-  printf "testing with compressed input file ... \n"
-  # extract the file name from the path
-  TEST_FILE_NAME=/tmp/$(basename $FILE_PATH)
-
-  gzip -c $FILE_PATH > $TEST_FILE_NAME
-  node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f $TEST_FILE_NAME -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
-  rm $TEST_FILE_NAME
-fi
-
+  if gzip -t "$FILE" 2>/dev/null; then
+    printf "test file was compressed, so not testing compression as a separate case\n"
+  else
+    printf "testing with compressed input file ... \n"
+    # extract the file name from the path
+    TEST_FILE_NAME=/tmp/$(basename "$FILE").gz
+    
+    gzip -c "$FILE" > "$TEST_FILE_NAME"
+    node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$TEST_FILE_NAME" -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
+    rm "$TEST_FILE_NAME"
+  fi
+done
 EOT
 
 }

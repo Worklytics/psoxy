@@ -350,13 +350,16 @@ locals {
   setup_todo_content = var.instructions_template == null ? "" : templatefile(var.instructions_template, {
     input_bucket_url = "s3://${aws_s3_bucket.input.bucket}",
   })
+
+  example_files_csv = join(",", [for f in local.all_example_files : "${var.psoxy_base_dir}${f}"])
+
   todo_brief = <<EOT
 ## Test ${var.instance_id}
 Check that the Psoxy works as expected, and it transforms the files of your input bucket following
 the rules you have defined:
 
 ```shell
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_file} ${local.role_option_for_tests} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} --region ${data.aws_region.current.id}
+node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f ${local.example_files_csv} ${local.role_option_for_tests} -d AWS -i ${aws_s3_bucket.input.bucket} -o ${aws_s3_bucket.sanitized.bucket} --region ${data.aws_region.current.id}
 ```
 EOT
 
@@ -407,13 +410,22 @@ resource "local_file" "todo_test" {
 locals {
   test_script = <<EOT
 #!/bin/bash
-FILE_PATH=$${1:-${try(local.example_file, "")}}
+FILE_PATH=$${1:-${try(local.example_files_csv, "")}}
 BLUE='\e[0;34m'
 NC='\e[0m'
 
 printf "Quick test of $${BLUE}${var.instance_id}$${NC} ...\n"
 
-node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$${FILE_PATH}" -d "AWS" -i "${aws_s3_bucket.input.bucket}" -o "${aws_s3_bucket.sanitized.bucket}" ${local.role_option_for_tests} --region "${var.aws_region}"
+# Process multiple files separated by comma
+IFS=',' read -ra FILES <<< "$FILE_PATH"
+for FILE in "$${FILES[@]}"; do
+  # trim whitespace
+  FILE=$(echo "$FILE" | xargs)
+  if [ -z "$FILE" ]; then continue; fi
+  
+  printf "Testing file: $FILE\n"
+  node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$FILE" -d "AWS" -i "${aws_s3_bucket.input.bucket}" -o "${aws_s3_bucket.sanitized.bucket}" ${local.role_option_for_tests} --region "${var.aws_region}"
+done
 EOT
 }
 

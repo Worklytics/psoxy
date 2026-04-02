@@ -39,6 +39,11 @@ variable "deployment_bundle" {
   type        = string
   description = "path to deployment bundle to use (if not provided, will build one). Can be a local file path or GCS URL (e.g., 'gs://psoxy-public-artifacts/psoxy-0.4.28.zip')."
   default     = null
+
+  validation {
+    condition     = var.deployment_bundle == null || !can(regex("^https?://", var.deployment_bundle))
+    error_message = "HTTP(S) URLs are not supported for deployment_bundle. Use a gs:// URL or a local file path."
+  }
 }
 
 variable "force_bundle" {
