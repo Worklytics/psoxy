@@ -36,8 +36,8 @@ run "oauth_refresh_token_locks" {
 run "oauth_refresh_token_access_tokens" {
 
   assert {
-    error_message = "all 17 oauth connectors use ACCESS_TOKEN (all except dropbox??)"
-    condition = 17 == length([for k, v in output.available_oauth_data_source_connectors :
+    error_message = "all 18 oauth connectors use ACCESS_TOKEN (all except dropbox??)"
+    condition = 18 == length([for k, v in output.available_oauth_data_source_connectors :
       v if anytrue([for var in v.secured_variables : var.name == "ACCESS_TOKEN"])
     ])
   }
