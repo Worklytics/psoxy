@@ -339,16 +339,19 @@ public class SanitizerUtils {
                     List<EmailAddress> addresses =
                         emailAddressParser.parseEmailAddressesFromHeader((String) value);
 
-                    return addresses.stream().map(EmailAddress::asFormattedString)
-                            .map(pseudonymizer::pseudonymize).map(pseudonymizedIdentity -> {
-                                if (transformOptions
-                                    .getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
-                                    return urlSafePseudonymEncoder
-                                        .encode(pseudonymizedIdentity.asPseudonym());
-                                } else {
-                                    return jsonConfiguration.jsonProvider().toJson(pseudonymizedIdentity);
-                                }
-                            }).collect(Collectors.joining(","));
+                    if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
+                        return addresses.stream()
+                            .map(EmailAddress::asFormattedString)
+                            .map(pseudonymizer::pseudonymize)
+                            .map(pseudonymizedIdentity -> urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym()))
+                            .collect(Collectors.joining(","));
+                    } else {
+                        List<PseudonymizedIdentity> pseudonymizedIdentities = addresses.stream()
+                            .map(EmailAddress::asFormattedString)
+                            .map(pseudonymizer::pseudonymize)
+                            .collect(Collectors.toList());
+                        return jsonConfiguration.jsonProvider().toJson(pseudonymizedIdentities);
+                    }
                 } else {
                     log.log(Level.WARNING,
                         "Valued matched by emailHeader rule is not valid address list, but not blank");
