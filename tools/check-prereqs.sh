@@ -30,6 +30,17 @@ if ! terraform -v &> /dev/null ; then
   if [[ "$CI_MODE" != "true" ]]; then
     exit 1
   fi
+else
+  TF_VERSION_FULL=$(terraform -version | head -n 1)
+  TF_VERSION_MAJOR_MINOR=$(echo "$TF_VERSION_FULL" | sed -n 's/^Terraform v\([0-9]*\.[0-9]*\).*$/\1/p')
+  TF_MAJOR=$(echo "$TF_VERSION_MAJOR_MINOR" | cut -d. -f1)
+  TF_MINOR=$(echo "$TF_VERSION_MAJOR_MINOR" | cut -d. -f2)
+  if (( TF_MAJOR < 1 || (TF_MAJOR == 1 && TF_MINOR < 7) )); then
+    printf "${ERR}This Terraform version appears to be unsupported.${NC} Psoxy requires a supported version of Terraform 1.7 or later.\n"
+    printf "We recommend you upgrade. See https://developer.hashicorp.com/terraform/downloads\n"
+  else
+    printf "Your Terraform version is ${CODE}${TF_VERSION_FULL}${NC}.\n"
+  fi
 fi
 
 # Check Maven installation
