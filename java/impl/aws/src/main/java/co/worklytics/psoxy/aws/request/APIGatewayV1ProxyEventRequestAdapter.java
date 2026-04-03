@@ -81,7 +81,7 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
     public String getHttpMethod() {
         if (event.getRequestContext().getHttpMethod() == null) {
             //q: better exception to throw here???
-            throw new IllegalStateException("Psoxy expects API Gateway V1 REST API proxy payload * (for example if attempting to use AwsApiGatewayV2ApiDataRequestHandler with a cloudfront distribution or function URL), please set the handler as co.worklytics.psoxy.Handler");
+            throw new IllegalStateException("Psoxy expects API Gateway V1 REST API proxy payload. If using an ALB (or API Gateway HTTP API/v2 with a cloudfront distribution or function URL), please set the handler as co.worklytics.psoxy.AwsApiGatewayV2ApiDataRequestHandler. If you expect API Gateway V1, use co.worklytics.psoxy.APIGatewayV1Handler");
         }
 
         return event.getRequestContext().getHttpMethod();
