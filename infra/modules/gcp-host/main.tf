@@ -254,7 +254,6 @@ module "api_connector_rules_raw" {
   project_id        = var.gcp_project_id
   prefix            = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
   content           = each.value
-  default_labels    = var.default_labels
   instance_sa_email = module.api_connector[each.key].service_account_email
 }
 # END API CONNECTORS
