@@ -1,8 +1,0 @@
-# Terraform state - NOTE: for prod use, recommend you use a secure backend, such as S3/GCS for
-# terraform state - not storing state on local disk / repo
-terraform.tfstate**
-.terraform.tfstate.lock.info
-
-# you don't need to commit this directory, even for dev use when you commit your `terraform.tfstate`
-# it is cache of Terraform providers/modules retrieved from remotes
-.terraform/**

@@ -1,9 +1,8 @@
 terraform {
-  required_version = ">= 1.3, < 2.0"
+  required_version = "~> 1.7"
 
   required_providers {
     aws = {
-      version = ">= 4.22, < 5.0"
     }
   }
 }
@@ -216,7 +215,7 @@ module "instance_secrets_secrets_manager" {
 module "api_connector" {
   for_each = var.api_connectors
 
-  source = "../../modules/aws-psoxy-rest"
+  source = "../../modules/aws-proxy-api"
 
   environment_name                      = var.environment_name
   new_relic_account_id                  = var.new_relic_account_id
@@ -292,7 +291,7 @@ module "api_connector_rules_raw" {
 module "bulk_connector" {
   for_each = var.bulk_connectors
 
-  source = "../../modules/aws-psoxy-bulk"
+  source = "../../modules/aws-proxy-bulk"
 
   aws_account_id                   = var.aws_account_id
   provision_iam_policy_for_testing = var.provision_testing_infra
@@ -455,7 +454,7 @@ resource "aws_iam_role_policy_attachment" "invoke_webhook_collector_urls_to_test
 module "lookup_output" {
   for_each = var.lookup_table_builders
 
-  source = "../../modules/aws-psoxy-output-bucket"
+  source = "../../modules/aws-proxy-output-bucket"
 
   environment_name              = var.environment_name
   instance_id                   = each.key

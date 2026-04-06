@@ -27,6 +27,12 @@ variable "aws_account_id" {
   }
 }
 
+variable "region" {
+  type        = string
+  description = "IGNORED; inferred from provider"
+  default     = "us-east-1"
+}
+
 variable "path_to_instance_ssm_parameters" {
   type        = string
   description = "path to instance config parameters in SSM Parameter Store (`null` for default, which is `PSOXY_{function_name}_`); lambda will be able to read/write params beneath this path/prefix"
@@ -45,17 +51,6 @@ variable "function_env_kms_key_arn" {
   default     = null
 }
 
-variable "sanitized_accessor_role_names" {
-  type        = list(string)
-  description = "list of names of AWS IAM Roles which should be able to access the sanitized (output) bucket"
-}
-
-variable "output_path_prefix" {
-  type        = string
-  description = "optional path prefix to prepend to webhook output files in the bucket (e.g., 'events_', 'webhooks/')"
-  default     = ""
-}
-
 variable "logs_kms_key_arn" {
   type        = string
   description = "AWS KMS key ARN to use to encrypt lambdas' logs. NOTE: ensure CloudWatch is setup to use this key (cloudwatch principal has perms, log group in same region as key, etc) - see https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html ."
@@ -70,7 +65,7 @@ variable "ssm_kms_key_ids" {
 
 variable "iam_roles_permissions_boundary" {
   type        = string
-  description = "ARN of the permissions boundary to attach to IAM roles created by this module."
+  description = "*beta* ARN of the permissions boundary to attach to IAM roles created by this module."
   default     = null
 }
 
@@ -83,13 +78,25 @@ variable "log_retention_days" {
 variable "handler_class" {
   type        = string
   description = "Class to handle the request"
-  default     = "co.worklytics.psoxy.AwsWebhookCollectionModeHandler"
+  default     = "co.worklytics.psoxy.AwsApiGatewayV2ApiDataRequestHandler::handleRequest"
 }
 
 variable "reserved_concurrent_executions" {
   type        = number
   description = "Max number of concurrent instances for the function"
   default     = null # meaning no reserved concurrency
+}
+
+# TODO: remove after 0.4.x
+variable "aws_assume_role_arn" {
+  type        = string
+  description = "IGNORED; arn of role used to test the lambda"
+  default     = null
+}
+
+variable "source_kind" {
+  type        = string
+  description = "kind of source (eg, 'gmail', 'google-chat', etc)"
 }
 
 variable "path_to_repo_root" {
@@ -103,14 +110,55 @@ variable "path_to_function_zip" {
   description = "path to zip archive of lambda bundle"
 }
 
-variable "rules_file" {
-  type        = string
-  description = "path to rules file, which contains rules for the webhook collector"
-}
-
 variable "function_zip_hash" {
   type        = string
   description = "hash of base64-encoded zipped lambda bundle"
+}
+
+
+variable "target_host" {
+  type        = string
+  description = "The target host to which to forward requests."
+  default     = null # for v0.4, this is optional; assumed to be in config if not defined here
+}
+
+variable "source_auth_strategy" {
+  type        = string
+  description = "The authentication strategy to use when connecting to the source."
+  default     = null # for v0.4, this is optional; assumed to be in config if not defined here
+}
+
+variable "oauth_scopes" {
+  type        = list(string)
+  description = "The OAuth scopes to use when connecting to the source."
+  default     = []
+}
+
+variable "api_caller_role_arn" {
+  type        = string
+  description = "arn of role which can be assumed to call API"
+}
+
+variable "example_api_calls" {
+  type        = list(string)
+  description = "example endpoints that can be called via proxy"
+}
+
+variable "example_api_requests" {
+  type = list(object({
+    method       = optional(string, "GET")
+    path         = string
+    content_type = optional(string, "application/json")
+    body         = optional(string, null)
+  }))
+  description = "example API requests with method, content_type and body parameters that can be called via proxy"
+  default     = []
+}
+
+variable "example_api_calls_user_to_impersonate" {
+  type        = string
+  description = "if example endpoints require impersonation of a specific user, use this id"
+  default     = null
 }
 
 variable "environment_variables" {
@@ -136,6 +184,16 @@ variable "global_secrets_manager_secret_arns" {
   type        = map(string)
   description = "Secrets Manager Secrets ARNs to expose to proxy instance, expected to contain global shared secrets, like salt or encryption keys"
   default     = {}
+}
+
+# remove after v0.4.x
+variable "function_parameters" {
+  type = list(object({
+    name     = string
+    writable = bool
+  }))
+  description = "IGNORED; Parameter names and expected grant to create for function"
+  default     = []
 }
 
 variable "vpc_config" {
@@ -175,48 +233,8 @@ variable "api_gateway_v2" {
 
 variable "http_methods" {
   type        = list(string)
-  description = "HTTP methods to expose; NOTE: 'OPTIONS' is always added to this list, so you don't need to include it; if you want to allow all methods, use ['*']"
-  default     = ["POST"]
-}
-
-# examples:
-# `aws-kms:aws-kms:arn:aws:kms:REGION:ACCOUNT_ID:alias/ALIAS_NAME`
-# `base64:BASE64_ENCODED_PUBLIC_KEY` - must be RSA public key in base64 format
-variable "webhook_auth_public_keys" {
-  type        = list(string)
-  description = "list of public keys to use for verifying webhook signatures; if empty, no signature verification will be performed. see docs for schema"
-  default     = []
-}
-
-variable "provision_auth_key" {
-  type = object({
-    rotation_days = optional(number, null)       # null means no rotation; if > 0, will rotate every N days
-    key_spec      = optional(string, "RSA_2048") # RSA_2048, RSA_3072, or RSA_4096; defaults to RSA_2048, which should be sufficient this use-case
-  })
-  description = "if provided, will module will provision a public-private key pair for authenticating webhooks and signing payloads for integrity checks. the id of the key pair will be exposed as an output, and the public-key configured as accepted auth key in the lambda"
-  default     = null
-
-  validation {
-    condition = (
-      var.provision_auth_key == null ||
-      (
-        try(var.provision_auth_key.rotation_days, null) == null ||
-        try(var.provision_auth_key.rotation_days, 0) > 0
-      )
-    )
-    error_message = "If `provision_auth_key` is provided, `rotation_days` must be a positive number or null."
-  }
-
-  validation {
-    condition = (
-      var.provision_auth_key == null ||
-      (
-        try(var.provision_auth_key.key_spec, null) == null ||
-        can(regex("^(RSA_2048|RSA_3072|RSA_4096)$", var.provision_auth_key.key_spec))
-      )
-    )
-    error_message = "If `provision_auth_key` is provided, `key_spec` must be one of 'RSA_2048', 'RSA_3072', or 'RSA_4096'."
-  }
+  description = "HTTP methods to expose; has no effect unless api_gateway is also provided"
+  default     = ["HEAD", "GET", "POST"]
 }
 
 variable "secrets_store_implementation" {
@@ -225,17 +243,24 @@ variable "secrets_store_implementation" {
   default     = "aws_ssm_parameter_store"
 }
 
-variable "allow_origins" {
-  type        = list(string)
-  description = "list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)"
-  default     = ["*"]
-}
-
-variable "test_caller_role_arn" {
-  type        = string
-  description = "optional ARN of an AWS role to assume when making test calls, if any; leave `null` for none"
+variable "side_output_original" {
+  type = object({
+    bucket          = optional(string, null),     # if omitted, a bucket will be created
+    allowed_readers = optional(list(string), []), # a list of ARNs of aws principals that should be allowed to read the bucket
+  })
+  description = "**ALPHA** Configures the side output to create. If not bucket provided, one will be provisioned."
   default     = null
 }
+
+variable "side_output_sanitized" {
+  type = object({
+    bucket          = optional(string, null),     # if omitted, a bucket will be created
+    allowed_readers = optional(list(string), []), # a list of ARNs of aws principals that should be allowed to read the bucket
+  })
+  description = "**ALPHA** Configures the side output to create. If not bucket provided, one will be provisioned."
+  default     = null
+}
+
 
 variable "todos_as_local_files" {
   type        = bool
@@ -243,25 +268,15 @@ variable "todos_as_local_files" {
   default     = true
 }
 
-variable "example_payload" {
-  type        = string
-  description = "Example payload content to use for testing; if provided, will be used in the test script."
-  default     = null
+variable "enable_async_processing" {
+  type        = bool
+  description = "whether to enable async processing for this connector"
+  default     = false
 }
 
-variable "example_identity" {
-  type        = string
-  description = "Example identity to use for testing; if provided, will be used in the test script."
-  default     = null
-}
-
-variable "keep_warm_instances" {
+variable "todo_step" {
   type        = number
-  description = "Number of Lambda execution environments to keep warm (at minimum). If null (default), Lambda will cold-start as needed. If set to 1 or more, AWS will keep at least that many instances ready, eliminating cold starts for the JWKS endpoint used by the JWT authorizer. This significantly improves webhook collection reliability. Cost: ~$0.015/hour per instance (~$11/month for 1 instance)."
-  default     = null
-
-  validation {
-    condition     = var.keep_warm_instances == null ? true : var.keep_warm_instances >= 1
-    error_message = "If keep_warm_instances is set, it must be at least 1."
-  }
+  description = "of all todos, where does this one logically fall in sequence"
+  default     = 2
 }
+
