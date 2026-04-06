@@ -204,6 +204,7 @@ variable "api_connectors" {
     [])
     settings_to_provide = optional(map(string), {})
     rules_file          = optional(string, null)
+    rules_raw           = optional(string, null)
   }))
 
   description = "map of API connectors to provision"
@@ -240,6 +241,7 @@ variable "bulk_connectors" {
       })))
     }))
     rules_file            = optional(string)
+    rules_raw             = optional(string, null)
     example_file          = optional(string)
     example_files         = optional(list(string), [])
     instructions_template = optional(string)
@@ -414,3 +416,10 @@ variable "todo_step" {
   description = "of all todos, where does this one logically fall in sequence"
   default     = 2
 }
+
+variable "artifacts_bucket_name" {
+  type        = string
+  description = "Name of an existing S3 bucket to use for deployment artifacts. If null, one will be provisioned if needed."
+  default     = null
+}
+

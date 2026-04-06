@@ -38,11 +38,6 @@ variable "config_parameter_prefix" {
   }
 }
 
-variable "default_labels" {
-  type        = map(string)
-  description = "*Alpha* in v0.4, only respected for new resources. Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
-  default     = {}
-}
 
 variable "worklytics_sa_emails" {
   type        = list(string)
@@ -190,6 +185,7 @@ variable "api_connectors" {
     [])
     settings_to_provide = optional(map(string), {})
     rules_file          = optional(string, null)
+    rules_raw           = optional(string, null)
   }))
 
   description = "map of API connectors to provision"
@@ -241,6 +237,7 @@ variable "bulk_connectors" {
       })))
     }))
     rules_file            = optional(string)
+    rules_raw             = optional(string, null)
     example_file          = optional(string)
     example_files         = optional(list(string), [])
     instructions_template = optional(string)

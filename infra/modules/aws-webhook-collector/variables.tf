@@ -115,7 +115,7 @@ variable "function_zip_hash" {
 
 variable "environment_variables" {
   type        = map(string)
-  description = "Non-sensitive values to add to functions environment variables; NOTE: will override anything in `path_to_config`"
+  description = "Non-sensitive values to add to functions environment variables"
   default     = {}
 }
 

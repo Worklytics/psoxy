@@ -5,6 +5,7 @@ module "worklytics_connectors_msft_365" {
   # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors-msft-365?ref=v0.5.19"
 
   enabled_connectors                         = var.enabled_connectors
+  base_dir                                   = var.psoxy_base_dir
   environment_id                             = var.environment_name
   msft_tenant_id                             = var.msft_tenant_id
   example_msft_user_guid                     = var.example_msft_user_guid
