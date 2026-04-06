@@ -80,14 +80,9 @@ class ApiDataRequestHandlerTest {
         MockModules.ForSideOutputs.class,
         MockModules.ForAsyncApiDataRequestHandler.class,
         TestModules.ForWebhookCollectorModeConfig.class,
-<<<<<<< s222-configurable-user-agent
-        TestModules.ForFixedUUID.class, 
+        TestModules.ForFixedUUID.class,
         TestModules.ForFixedClock.class,
         TestModules.ForProxyConstants.class,})
-=======
-        TestModules.ForFixedUUID.class,
-        TestModules.ForFixedClock.class,})
->>>>>>> rc-v0.6.0
     public interface Container {
         void inject(ApiDataRequestHandlerTest test);
     }
