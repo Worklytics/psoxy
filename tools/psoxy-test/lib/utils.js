@@ -848,11 +848,15 @@ function compareContent(items, expectedContent, logger) {
     }
 
     let expectedJson;
-    try {
-      expectedJson = JSON.parse(expectedContent);
-    } catch (e) {
-      logger.error(`Failed to parse expected content: ${e.message}`);
-      throw new Error('Invalid JSON in expected content (check --body argument)');
+    if (typeof expectedContent === 'object') {
+      expectedJson = expectedContent;
+    } else {
+      try {
+        expectedJson = JSON.parse(expectedContent);
+      } catch (e) {
+        logger.error(`Failed to parse expected content: ${e.message}`);
+        throw new Error('Invalid JSON in expected content (check --body argument)');
+      }
     }
 
     const found = items.some(item => {
