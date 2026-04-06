@@ -204,15 +204,15 @@ module "api_connector" {
 
 
   environment_variables = merge(
-    var.general_environment_variables,
-    try(each.value.environment_variables, {}),
     {
       BUNDLE_FILENAME        = module.psoxy.filename
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
       CUSTOM_RULES_SHA       = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : null
       EMAIL_CANONICALIZATION = var.email_canonicalization
-    }
+    },
+    try(each.value.environment_variables, {}),
+    var.general_environment_variables,
   )
 
   secret_bindings = merge(
@@ -297,13 +297,13 @@ module "webhook_collector" {
   example_payload                    = try(each.value.example_payload, null)
 
   environment_variables = merge(
-    var.general_environment_variables,
-    try(each.value.environment_variables, {}),
     {
       BUNDLE_FILENAME        = module.psoxy.filename
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
       EMAIL_CANONICALIZATION = var.email_canonicalization
-    }
+    },
+    try(each.value.environment_variables, {}),
+    var.general_environment_variables,
   )
 
   secret_bindings = module.psoxy.secrets
@@ -348,15 +348,15 @@ module "bulk_connector" {
   bucket_force_destroy              = var.bucket_force_destroy
 
   environment_variables = merge(
-    var.general_environment_variables,
-    try(each.value.environment_variables, {}),
     {
       SOURCE                 = each.value.source_kind
       RULES                  = each.value.rules_file == null ? yamlencode(try(var.custom_bulk_connector_rules[each.key], each.value.rules)) : file(each.value.rules_file)
       BUNDLE_FILENAME        = module.psoxy.filename
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
       EMAIL_CANONICALIZATION = var.email_canonicalization
-    }
+    },
+    try(each.value.environment_variables, {}),
+    var.general_environment_variables,
   )
 
   depends_on = [

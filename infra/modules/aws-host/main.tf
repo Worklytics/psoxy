@@ -247,14 +247,14 @@ module "api_connector" {
   todo_step            = var.todo_step
 
   environment_variables = merge(
-    var.general_environment_variables,
-    try(each.value.environment_variables, {}),
     {
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
       EMAIL_CANONICALIZATION = var.email_canonicalization
       CUSTOM_RULES_SHA       = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : null
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
-    }
+    },
+    try(each.value.environment_variables, {}),
+    var.general_environment_variables,
   )
 }
 
@@ -310,12 +310,12 @@ module "bulk_connector" {
 
 
   environment_variables = merge(
-    var.general_environment_variables,
-    try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
       EMAIL_CANONICALIZATION = var.email_canonicalization
     },
+    try(each.value.environment_variables, {}),
+    var.general_environment_variables,
   )
 }
 
@@ -357,13 +357,12 @@ module "webhook_collectors" {
   todos_as_local_files = var.todos_as_local_files
 
   environment_variables = merge(
-    var.general_environment_variables,
-    ## try(each.value.environment_variables, {}),
     {
       EMAIL_CANONICALIZATION = var.email_canonicalization
       ##CUSTOM_RULES_SHA       = try(var.custom_api_connector_rules[each.key], null) != null ? filesha1(var.custom_api_connector_rules[each.key]) : null
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-    }
+    },
+    var.general_environment_variables,
   )
 }
 
