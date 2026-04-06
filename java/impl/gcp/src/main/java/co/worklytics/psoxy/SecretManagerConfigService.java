@@ -250,9 +250,11 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
 
     private static void updateLabelFromSecret(SecretManagerServiceClient client, SecretName secretName, String label, String labelValue) {
         try {
+            // Read the existing secret first to preserve all existing labels
+            Secret existingSecret = client.getSecret(secretName);
+
             client.updateSecret(UpdateSecretRequest.newBuilder()
-                    .setSecret(Secret.newBuilder()
-                            .setName(secretName.toString())
+                    .setSecret(Secret.newBuilder(existingSecret)
                             // Label format is https://cloud.google.com/compute/docs/labeling-resources#requirements
                             .putLabels(label, labelValue)
                             .build())
