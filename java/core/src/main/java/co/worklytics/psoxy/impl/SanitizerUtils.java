@@ -339,20 +339,19 @@ public class SanitizerUtils {
                     List<EmailAddress> addresses =
                         emailAddressParser.parseEmailAddressesFromHeader((String) value);
 
-                    //TODO: in v0.6, we should use a String instead of List<PseudonymizedIdentity>/List<String>;
-                    // encode EVERYTHING according to encoding option, then join with comma back into a CSV string
-
-                    return jsonConfiguration.jsonProvider()
-                        .toJson(addresses.stream().map(EmailAddress::asFormattedString)
-                            .map(pseudonymizer::pseudonymize).map(pseudonymizedIdentity -> {
-                                if (transformOptions
-                                    .getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
-                                    return urlSafePseudonymEncoder
-                                        .encode(pseudonymizedIdentity.asPseudonym());
-                                } else {
-                                    return pseudonymizedIdentity;
-                                }
-                            }).collect(Collectors.toList()));
+                    if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
+                        return addresses.stream()
+                            .map(EmailAddress::asFormattedString)
+                            .map(pseudonymizer::pseudonymize)
+                            .map(pseudonymizedIdentity -> urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym()))
+                            .collect(Collectors.joining(","));
+                    } else {
+                        List<PseudonymizedIdentity> pseudonymizedIdentities = addresses.stream()
+                            .map(EmailAddress::asFormattedString)
+                            .map(pseudonymizer::pseudonymize)
+                            .collect(Collectors.toList());
+                        return jsonConfiguration.jsonProvider().toJson(pseudonymizedIdentities);
+                    }
                 } else {
                     log.log(Level.WARNING,
                         "Valued matched by emailHeader rule is not valid address list, but not blank");

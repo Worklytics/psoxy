@@ -1,0 +1,205 @@
+variable "project_id" {
+  type        = string
+  description = "id of GCP project that will host psoxy instance"
+}
+
+variable "tf_runner_iam_principal" {
+  description = "The IAM principal (e.g., 'user:alice@example.com' or 'serviceAccount:terraform@project.iam.gserviceaccount.com') that Terraform is running as, used for granting necessary permissions to provision Cloud Functions."
+  type        = string
+
+  validation {
+    condition     = can(regex("^(user:|serviceAccount:|group:|domain:).*", var.tf_runner_iam_principal))
+    error_message = "The tf_runner_iam_principal value should be a valid IAM principal (e.g., 'user:alice@example.com' or 'serviceAccount:terraform@project.iam.gserviceaccount.com')."
+  }
+}
+
+variable "environment_id_prefix" {
+  type        = string
+  description = "A prefix to give to all resources created/consumed by this module."
+  default     = "psoxy-"
+}
+
+variable "config_parameter_prefix" {
+  type        = string
+  description = "Prefix for psoxy config parameters, unique to environment"
+  default     = null
+}
+
+variable "instance_id" {
+  type        = string
+  description = "id of psoxy instance, given environment"
+  default     = null
+}
+
+variable "worklytics_sa_emails" {
+  type        = list(string)
+  description = "service accounts for your organization's Worklytics instances (list supported for test/dev scenarios)"
+}
+
+variable "region" {
+  type        = string
+  description = "region into which to deploy function / its buckets"
+  default     = "us-central1"
+}
+
+variable "source_kind" {
+  type        = string
+  description = "Kind of the content to process"
+}
+
+variable "secret_bindings" {
+  type = map(object({
+    secret_id      = string # NOT the full resource ID; just the secret_id within GCP project
+    version_number = string # could be 'latest'
+  }))
+  description = "map of Secret Manager Secrets to expose to cloud function by ENV_VAR_NAME"
+  default     = {}
+}
+
+
+variable "artifacts_bucket_name" {
+  type        = string
+  description = "Name of the bucket where artifacts are stored"
+}
+
+variable "artifact_repository_id" {
+  type        = string
+  description = "(NOTE: it will be available since 0.5 psoxy version) ID of the artifact repository"
+  default     = null
+}
+
+variable "deployment_bundle_object_name" {
+  type        = string
+  description = "Name of the object containing the deployment bundle"
+}
+
+
+
+variable "psoxy_base_dir" {
+  type        = string
+  description = "the path where your psoxy repo resides. Preferably a full path, /home/user/repos/, avoid tilde (~) shortcut to $HOME"
+  default     = "../../.."
+}
+
+variable "environment_variables" {
+  type        = map(string)
+  description = "Non-sensitive values to add to functions environment variables"
+  default     = {}
+}
+
+variable "bucket_write_role_id" {
+  type        = string
+  description = "The id of role to grant on bucket to enable writes"
+}
+
+variable "available_memory_mb" {
+  type        = number
+  description = "Memory (in MB), available to the function. Default value is 1024. Possible values include 128, 256, 512, 1024, 2048, 4096; above that requires multiple CPUs, beyond scope of our built-in configurations."
+  default     = 1024
+}
+
+variable "timeout_seconds" {
+  type        = number
+  description = "Timeout (in seconds) for the function. Default value is 1800 (30 minutes)."
+  default     = 1800
+}
+
+variable "example_file" {
+  type        = string
+  description = "path to example file to use for testing, from psoxy_base_dir"
+  default     = null
+}
+
+variable "example_files" {
+  type        = list(string)
+  description = "list of paths to example files to use for testing, from psoxy_base_dir"
+  default     = []
+}
+
+variable "instructions_template" {
+  type        = string
+  description = "path to instructions template file, from psoxy_base_dir"
+  default     = null
+}
+
+variable "input_expiration_days" {
+  type        = number
+  description = "**alpha** Number of days after which objects in the bucket will expire"
+  default     = 30
+}
+
+variable "sanitized_expiration_days" {
+  type        = number
+  description = "**alpha** Number of days after which objects in the bucket will expire"
+  default     = 720
+}
+
+variable "input_bucket_name" {
+  type        = string
+  description = "Name of the bucket to create for input files. If null, one will be generated for you."
+  default     = null
+}
+
+variable "sanitized_bucket_name" {
+  type        = string
+  description = "Name of the bucket to create for sanitized files. If null, one will be generated for you."
+  default     = null
+}
+
+
+variable "gcp_principals_authorized_to_test" {
+  type        = list(string)
+  description = "list of GCP principals authorized to test this deployment - eg 'user:alice@acme.com', 'group:devs@acme.com'; if omitted, up to you to configure necessary perms for people to test if desired."
+  default     = []
+}
+
+variable "todos_as_local_files" {
+  type        = bool
+  description = "whether to render TODOs as flat files"
+  default     = true
+}
+
+variable "todo_step" {
+  type        = number
+  description = "of all todos, where does this one logically fall in sequence"
+  default     = 2
+}
+
+variable "vpc_config" {
+  type = object({
+    serverless_connector = string # Format: projects/{project}/locations/{location}/connectors/{connector}
+  })
+  description = "VPC configuration for the Cloud Run function."
+  default     = null
+
+  validation {
+    condition = (
+      var.vpc_config == null ||
+      can(regex("^projects/[^/]+/locations/[^/]+/connectors/[^/]+$", var.vpc_config.serverless_connector))
+    )
+    error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
+  }
+}
+
+variable "bucket_force_destroy" {
+  type        = bool
+  description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this module"
+  default     = false
+}
+
+variable "enable_versioning" {
+  type        = bool
+  description = "Enable object versioning for the sanitized bucket"
+  default     = false
+}
+
+variable "bucket_access_logs_destination" {
+  description = "The name of the GCS bucket to route access logs to for all buckets managed by this module"
+  type        = string
+  default     = null
+}
+
+variable "builder_sa_id" {
+  description = "The fully-qualified ID of the custom builder service account used to build the Cloud Function."
+  type        = string
+}

@@ -33,7 +33,7 @@ variable "config_parameter_prefix" {
 
 variable "default_labels" {
   type        = map(string)
-  description = "Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
+  description = "Labels to apply to all GCP resources created by this configuration. Passed to the Google provider's native `default_labels`."
   default     = {}
 
   validation {

@@ -6,7 +6,6 @@
 terraform {
   required_providers {
     azuread = {
-      version = ">= 2.44, < 4.0"
     }
   }
 }
@@ -47,18 +46,4 @@ output "private_key" {
   value     = base64decode(data.external.certificate.result.key_pkcs8)
   sensitive = true
 }
-
-# for 3-legged OAuth flows, which believe aren't needed in this case as we have no OIDC/sign-on
-# flow for psoxy use-cases
-#resource "azuread_application_password" "oauth-client-secret" {
-#  application_object_id = var.application_id # oauthClientId
-#
-#  rotate_when_changed = {
-#    rotation = time_rotating.rotation.id
-#  }
-#}
-
-#output "oauth_client_secret" {
-#  value = azuread_application_password.oauth-client-secret.value
-#}
 
