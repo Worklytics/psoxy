@@ -49,9 +49,13 @@ if [ ! -f $PATH_TO_DEPLOYMENT_JAR ] || [ ! -z "$FORCE_BUILD" ] ; then
   mvn package $OPTIONAL_TEST_SKIP -f "${JAVA_SOURCE_ROOT}/impl/${IMPLEMENTATION}/pom.xml" >> ${LOG_FILE} 2>&1
 fi
 
+# compute the hash using openssl, ensuring no newlines
+JAR_HASH=$(openssl dgst -sha256 -binary "$PATH_TO_DEPLOYMENT_JAR" | openssl base64 | tr -d '\n')
+
 # output back to Terraform (forces Terraform to be dependent on output)
 printf "{\n"
 printf "\t\"path_to_deployment_jar\": \"${PATH_TO_DEPLOYMENT_JAR}\",\n"
 printf "\t\"filename\":\"${ARTIFACT_FILE_NAME}\",\n"
-printf "\t\"version\": \"${VERSION}\"\n"
+printf "\t\"version\": \"${VERSION}\",\n"
+printf "\t\"deployment_package_hash\": \"${JAR_HASH}\"\n"
 printf "}\n"

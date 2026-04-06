@@ -38,6 +38,7 @@ module "psoxy" {
   environment_id_prefix             = local.environment_id_prefix
   psoxy_base_dir                    = var.psoxy_base_dir
   deployment_bundle                 = var.deployment_bundle
+  deployment_bundle_hash            = var.deployment_bundle_hash
   force_bundle                      = var.force_bundle
   bucket_location                   = var.gcp_region
   config_parameter_prefix           = local.config_parameter_prefix

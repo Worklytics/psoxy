@@ -49,6 +49,7 @@ module "psoxy" {
   caller_aws_arns                    = var.caller_aws_arns
   caller_gcp_service_account_ids     = var.caller_gcp_service_account_ids
   deployment_bundle                  = var.deployment_bundle
+  deployment_bundle_hash             = var.deployment_bundle_hash
   force_bundle                       = var.force_bundle
   install_test_tool                  = var.install_test_tool
   deployment_id                      = module.env_id.id
