@@ -348,6 +348,7 @@ module "bulk_connector" {
       RULES = each.value.rules_raw
     } : {},
     var.general_environment_variables
+  )
 }
 
 
