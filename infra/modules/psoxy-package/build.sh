@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # errors halt execution
-set -e
+set -eo pipefail
 
 # psoxy build script to be invoked from Terraform 'external' data resource
 # usage ./build.sh -sf /Users/erik/code/psoxy/java aws
