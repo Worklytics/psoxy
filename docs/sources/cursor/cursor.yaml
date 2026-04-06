@@ -1,6 +1,8 @@
 ---
 endpoints:
   - pathTemplate: "/teams/daily-usage-data"
+    allowedMethods:
+      - "POST"
     allowedQueryParams: []
     transforms:
       - !<pseudonymize>
@@ -18,6 +20,8 @@ endpoints:
         period:
           $ref: "#/definitions/DataPeriod"
   - pathTemplate: "/teams/filtered-usage-events"
+    allowedMethods:
+      - "POST"
     allowedQueryParams: []
     transforms:
       - !<pseudonymize>
@@ -38,11 +42,15 @@ endpoints:
           items:
             $ref: "#/definitions/UsageEvent"
   - pathTemplate: "/teams/members"
+    allowedMethods:
+      - "GET"
     allowedQueryParams: []
     transforms:
       - !<pseudonymize>
         jsonPaths:
           - "$.teamMembers[*].email"
+          - "$.teamMembers[*].id"
+        includeReversible: true
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"
@@ -128,6 +136,10 @@ definitions:
     properties:
       email:
         type: "string"
+      id:
+        type: "integer"
+      isRemoved:
+        type: "boolean"
       role:
         type: "string"
   TokenUsage:
@@ -146,6 +158,8 @@ definitions:
   UsageEvent:
     type: "object"
     properties:
+      chargedCents:
+        type: "integer"
       isFreeBugbot:
         type: "boolean"
       isTokenBasedCall:

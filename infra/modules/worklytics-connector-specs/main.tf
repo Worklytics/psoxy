@@ -42,6 +42,9 @@ locals {
   github_organization                      = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
   github_first_organization                = split(",", coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME"))[0]
   github_example_repository                = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
+  gitlab_host                              = coalesce(var.gitlab_host, "gitlab.com")
+  gitlab_example_group_id                  = coalesce(var.gitlab_example_group_id, "YOUR_GITLAB_GROUP_ID")
+  gitlab_example_project_id                = coalesce(var.gitlab_example_project_id, "YOUR_GITLAB_PROJECT_ID")
   gong_instance_subdomain                  = coalesce(var.gong_instance_subdomain, "YOUR_GONG_INSTANCE_SUBDOMAIN")
   glean_instance_subdomain                 = coalesce(var.glean_instance_subdomain, "YOUR_GLEAN_INSTANCE_SUBDOMAIN")
   salesforce_example_account_id            = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
@@ -1356,6 +1359,45 @@ a proper value.
 
 EOT
     }
+    gitlab = {
+      source_kind : "gitlab"
+      availability : "beta"
+      enable_by_default : false
+      worklytics_connector_id : "gitlab-psoxy"
+      target_host : local.gitlab_host
+      source_auth_strategy : "oauth2_access_token"
+      display_name : "GitLab"
+      worklytics_connector_name : "GitLab via Psoxy"
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      environment_variables : {}
+      settings_to_provide = {
+        "GitLab Host" = local.gitlab_host
+      }
+      reserved_concurrent_executions : null
+      enable_async_processing : false
+      enable_side_output : false
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/api/v4/groups",
+        "/api/v4/groups/${local.gitlab_example_group_id}/members/all",
+        "/api/v4/projects",
+        "/api/v4/projects/${local.gitlab_example_project_id}/repository/branches",
+        "/api/v4/projects/${local.gitlab_example_project_id}/repository/commits",
+        "/api/v4/projects/${local.gitlab_example_project_id}/issues",
+        "/api/v4/projects/${local.gitlab_example_project_id}/merge_requests",
+        "/api/v4/projects/${local.gitlab_example_project_id}/audit_events",
+      ],
+      external_token_todo : templatefile("${path.module}/docs/gitlab/gitlab-instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_GITLAB_"
+      })
+    }
   }
 
   bulk_connectors = {
@@ -1467,6 +1509,19 @@ EOT
       }
       example_file = "docs/sources/survey/survey-example.csv"
     }
+    "workdata-generic" = {
+      source_kind               = "workdata-generic"
+      availability              = "beta"
+      enable_by_default         = false
+      worklytics_connector_id   = "workdata-generic-psoxy"
+      worklytics_connector_name = "Workplace Metadata via Psoxy"
+      rules_file                = "docs/sources/workdata-generic/workdata-generic.yaml"
+      example_files = [
+        "docs/sources/workdata-generic/example-bulk/original/events0.ndjson",
+        "docs/sources/workdata-generic/example-bulk/original/items0.ndjson",
+        "docs/sources/workdata-generic/example-bulk/original/accounts0.ndjson"
+      ]
+    }
   }
 
   oauth_long_access_connectors_backwards = { for k, v in local.oauth_long_access_connectors :
@@ -1500,13 +1555,29 @@ EOT
 # computed values filtered by enabled connectors
 locals {
 
+  # helper to compute rules_raw from a connector map entry
+  # reads file content if rules_file is set and base_dir is available
+  _resolve_rules_raw = {
+    for k, v in local.all_default_connectors :
+    k => try(v.rules_file, null) != null && var.base_dir != null ? file("${var.base_dir}${v.rules_file}") : null
+  }
+
   # backwards-compatible for v0.4.x; remove in v0.5.x
   google_workspace_sources_backwards = { for k, v in local.google_workspace_sources :
-  k => merge(v, { example_calls : try(v.example_api_calls, []) }) }
+  k => merge(v, { example_calls : try(v.example_api_calls, []), rules_raw : try(local._resolve_rules_raw[k], null) }) }
 
   # backwards-compatible for v0.4.x; remove in v0.5.x
   msft_365_connectors_backwards = { for k, v in local.msft_365_connectors :
-  k => merge(v, { example_calls : try(v.example_api_calls, []) }) }
+  k => merge(v, { example_calls : try(v.example_api_calls, []), rules_raw : try(local._resolve_rules_raw[k], null) }) }
+
+  oauth_long_access_connectors_with_rules_raw = { for k, v in local.oauth_long_access_connectors :
+  k => merge(v, { rules_raw : try(local._resolve_rules_raw[k], null) }) }
+
+  oauth_long_access_connectors_backwards_with_rules_raw = { for k, v in local.oauth_long_access_connectors :
+  k => merge(v, { example_calls : try(v.example_api_calls, []), rules_raw : try(local._resolve_rules_raw[k], null) }) }
+
+  bulk_connectors_with_rules_raw = { for k, v in local.bulk_connectors :
+  k => merge(v, { rules_raw : try(local._resolve_rules_raw[k], null) }) }
 
   enabled_google_workspace_connectors = {
     for k, v in local.google_workspace_sources_backwards : k => v if contains(var.enabled_connectors, k)
@@ -1514,7 +1585,7 @@ locals {
   enabled_msft_365_connectors = {
     for k, v in local.msft_365_connectors_backwards : k => v if contains(var.enabled_connectors, k) && length(try(var.msft_tenant_id, "")) > 0
   }
-  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors_backwards : k => v if contains(var.enabled_connectors, k) }
+  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors_backwards_with_rules_raw : k => v if contains(var.enabled_connectors, k) }
 
   enabled_oauth_long_access_connectors_todos = { for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
   # list of pair of [(conn1, secret1), (conn1, secret2), ... (connN, secretM)]
@@ -1531,7 +1602,7 @@ locals {
   ]))
 
   enabled_bulk_connectors = {
-    for k, v in local.bulk_connectors : k => v if contains(var.enabled_connectors, k)
+    for k, v in local.bulk_connectors_with_rules_raw : k => v if contains(var.enabled_connectors, k)
   }
 
   enabled_lockable_oauth_secrets_to_create = distinct(flatten([
@@ -1543,3 +1614,4 @@ locals {
     ]
   ]))
 }
+

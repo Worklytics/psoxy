@@ -163,6 +163,7 @@ The API key/secret will be used to authenticate with the source's REST API and a
 | Claude Code (**beta**)    | [sources/anthropic/claude-code](sources/anthropic/claude-code/README.md) |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | API Key                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | Confluence Cloud          | [sources/atlassian/confluence](sources/atlassian/confluence/README.md)   | "Granular scopes" in Confluence API:  `read:blogpost:confluence`, `read:comment:confluence`, `read:group:confluence`, `read:space:confluence`, `read:attachment:confluence`, `read:page:confluence`, `read:user:confluence`, `read:task:confluence`, `read:content-details:confluence`                                                                                                                                                                                                   |
 | Cursor (**beta**)         | [sources/cursor](sources/cursor/README.md)                               | Admin API key (Basic Authentication)                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| GitLab (**beta**)         | [sources/gitlab](sources/gitlab/README.md)                               | `read_api` (via [Project](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html) / [Group](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html) Access Token)                                                                                                                                                                                                                                                                                  |
 | Glean (**beta**)          | [sources/glean](sources/glean/README.md)                                 | `INSIGHTS_READ` `PEOPLE_READ`                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | Gong Metrics              | [sources/gong/gong-metrics](sources/gong/gong-metrics/README.md)         | `api:stats:user-actions` `api:users:read`                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | Jira Cloud                | [sources/atlassian/jira-cloud](sources/atlassian/jira/README.md)         | "Classic Scopes": `read:jira-user` `read:jira-work` "Granular Scopes": `read:group:jira` `read:user:jira`  "User Identity API" `read:account`                                                                                                                                                                                                                                                                                                                                            |
@@ -187,6 +188,7 @@ See also: [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
 |--------------------------|--------------------|
 | Badge                    | [sources/badge](sources/badge/README.md) |
 | HRIS                     | [sources/hris](sources/hris/README.md) |
+| Generic Work Data        | [sources/workdata-generic](sources/workdata-generic/README.md) |
 | Miro AI Bulk (**alpha**) | [sources/miro/miro-ai-bulk](sources/miro/miro-ai-bulk/README.md) |
 | Survey                   | [sources/survey](sources/survey/README.md) |
 
@@ -220,19 +222,22 @@ You, or the IAM Role / GCP Service account you use to deploy Psoxy, usually does
 
 #### Required Software and Permissions
 
-As of April 2025, Psoxy is implemented with Java 17 and built via Maven. The proxy infrastructure is provisioned and the Psoxy code deployed using Terraform, relying on Azure, Google Cloud, and/or AWS command line tools.
+As of March 2026, Psoxy is implemented with Java 21 and built via Maven. The proxy infrastructure is provisioned and the Psoxy code deployed using Terraform, relying on Azure, Google Cloud, and/or AWS command line tools.
+
+> [!NOTE]
+> Java JDK and Maven are **only required if you are building and bundling the Psoxy Java code from source**. Alternatively, you can deploy a pre-existing release bundle (JAR) by specifying `deployment_bundle="<url-to-jar>"` in your Terraform variables. At runtime, the JRE provided by your host platform (AWS Lambda or GCP Cloud Functions) will be used to execute the code.
 
 You will need all the following in your deployment environment (eg, your laptop):
 
 | Tool                                         | Version              | Test Command          |
 |----------------------------------------------|----------------------|-----------------------|
 | [git](https://git-scm.com/)                  | 2.17+                | `git --version`       |
-| [Maven](https://maven.apache.org/)           | 3.6+ ; 3.9.10+ required for java 24  | `mvn -v`              |
-| [Java JDK 17+](https://openjdk.org/install/) | 17, 21, 24 (see notes) | `mvn -v \| grep Java` |
-| [Terraform](https://www.terraform.io/)       | 1.6+, < 2.0          | `terraform version`   |
+| [Maven](https://maven.apache.org/)           | 3.6+ ; 3.9.10+ required for java 24+ | `mvn -v`              |
+| [Java JDK 21+](https://openjdk.org/install/) | 21, 25, 26 (see notes) | `mvn -v \| grep Java` |
+| [Terraform](https://www.terraform.io/)       | 1.7+, < 2.0          | `terraform version`   |
 
 
-NOTE: we will support Java versions for duration of official support windows, in particular the LTS versions. Minor versions, such as 18-20, 22-23 which are out of official support, may work but are not routinely tested.
+NOTE: we will support Java versions for duration of official support windows, in particular the LTS versions. Minor versions may work but are not routinely tested. As of March 2026, officially tested versions include Java 21 (LTS), 25, and 26.
 
 NOTE: Using `terraform` is not strictly necessary, but it is the only supported method. You may provision your infrastructure via your host's CLI, web console, or another infrastructure provisioning tool, but we don't offer documentation or support in doing so.  Adapting one of our [terraform examples](https://github.com/Worklytics/psoxy/tree/main/infra/examples) or writing your own config that re-uses our [modules](https://github.com/Worklytics/psoxy/tree/main/infra/modules) will simplify things greatly.
 

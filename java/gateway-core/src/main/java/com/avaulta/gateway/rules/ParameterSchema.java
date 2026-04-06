@@ -78,15 +78,6 @@ public class ParameterSchema {
     @JsonProperty("enum") //align to JsonSchema
     List<String> enumValues;
 
-    /**
-     * DEPRECATED, use anyOf instead
-     * values matching any schema in this list are valid
-     */
-    @Deprecated
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    @JsonProperty("or") //align to JsonSchema
-    @Singular
-    List<ParameterSchema> ors;
 
     /**
      * values matching any schema in this list are valid

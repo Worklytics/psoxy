@@ -1,10 +1,11 @@
 terraform {
-  required_version = ">= 1.3, < 2.0"
+  required_version = "~> 1.7"
 }
 
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
+  base_dir                                 = var.base_dir
   enabled_connectors                       = var.enabled_connectors
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
   confluence_example_cloud_id              = var.confluence_example_cloud_id
@@ -21,6 +22,9 @@ module "worklytics_connector_specs" {
   github_copilot_installation_id           = var.github_copilot_installation_id
   github_organization                      = var.github_organization
   github_example_repository                = var.github_example_repository
+  gitlab_host                              = var.gitlab_host
+  gitlab_example_group_id                  = var.gitlab_example_group_id
+  gitlab_example_project_id                = var.gitlab_example_project_id
   gong_instance_subdomain                  = var.gong_instance_subdomain
   glean_instance_subdomain                 = var.glean_instance_subdomain
   salesforce_example_account_id            = var.salesforce_example_account_id

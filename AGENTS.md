@@ -37,7 +37,7 @@ printf "${SUCCESS}Operation completed successfully.${NC}\n"
 When modifying code in this repository, you should ensure that your changes pass our standardized tests. 
 
 ### Terraform Testing
-Terraform changes should be validated against multiple versions. CI tests against Terraform versions from `~1.6.0` up to `~1.12.0` and `latest`. In practice, testing with `latest` is OK for local / pre-commit testing.
+Terraform changes should be validated against multiple versions. CI tests against Terraform versions from `~1.7.0` up to `~1.14.0` and `latest`. In practice, testing with `latest` is OK for local / pre-commit testing.
 
 To validate terraform changes locally:
 1. Navigate to the example directories (`infra/examples-dev/aws` and `infra/examples-dev/gcp`)
@@ -45,7 +45,7 @@ To validate terraform changes locally:
 3. If modifying modules, you may also need to run `terraform test` within those module directories if tests are defined (e.g. `terraform test --var="deployment_bundle=..."`)
 
 ### Java Testing
-Java changes are tested across multiple Java versions to ensure compatibility. The GitHub Actions workflows test against Java 17, 21 (LTS), 23, 24, and 25. In practice, testing with Java 21 is sufficient for local development.
+Java changes are tested across multiple Java versions to ensure compatibility. The GitHub Actions workflows test against Java 21 (LTS), 25 (LTS), and latest (26). In practice, testing with Java 21 is sufficient for local development.
 
 When testing Java code locally:
 1. Ensure your code builds and tests pass using Maven.
@@ -57,3 +57,12 @@ When testing Java code locally:
    ```bash
    mvn clean test
    ```
+
+## Java Coding Conventions
+
+When modifying Java files, follow these guidelines:
+
+1. **Avoid Fully Qualified Names (FQNs)**: Prefer explicitly importing classes and using their simple names instead of using fully qualified names in the code, except where there are intractable naming collisions.
+2. **Prefer Fluid Builders**: We generally prefer using fluid-builder patterns, leveraging Lombok's `@Builder` annotation for object construction instead of constructors with many parameters.
+3. **Stylistic Changes**: Agents should avoid making stylistic changes (e.g., reformatting code, optimizing all imports, or resolving linting issues irrelevant to the functional change) to the repository unless explicitly directed by the user. 
+4. **Separate Commits**: When explicitly directed to make stylistic changes or broad refactoring, these should be separated into distinct commits from functional changes to simplify review.

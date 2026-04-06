@@ -117,7 +117,7 @@ public class ApiDataRequestHandler {
     @Inject
     PseudonymizerImplFactory pseudonymizerImplFactory;
     @Inject
-    RESTRules rules;
+    Lazy<RESTRules> rules;
     @Inject
     HealthCheckRequestHandler healthCheckRequestHandler;
     @Inject
@@ -198,7 +198,7 @@ public class ApiDataRequestHandler {
                 if (this.sanitizer == null) {
                     Pseudonymizer.ConfigurationOptions options =
                             pseudonymizerImplFactory.buildOptions(config);
-                    this.sanitizer = sanitizerFactory.create(rules,
+                    this.sanitizer = sanitizerFactory.create(rules.get(),
                             pseudonymizerImplFactory.create(options));
                 }
             }
@@ -259,6 +259,14 @@ public class ApiDataRequestHandler {
 
         try {
             this.sanitizer = loadSanitizerRules();
+        } catch (co.worklytics.psoxy.rules.InvalidRulesException e) {
+            log.log(Level.SEVERE, "Error loading sanitizer rules: " + e.getMessage(), e);
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                            e.getErrorCause().name())
+                    .body("Error loading sanitizer rules")
+                    .build();
         } catch (Throwable e) {
             log.log(Level.SEVERE, "Error loading sanitizer rules", e);
             return HttpEventResponse.builder()
@@ -326,7 +334,7 @@ public class ApiDataRequestHandler {
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                     ErrorCauses.BLOCKED_BY_RULES.name());
             log.warning(String.format("%s. Blocked call by rules %s", logEntry,
-                    objectMapper.writeValueAsString(rules)));
+                    objectMapper.writeValueAsString(rules.get())));
             return builder.build();
         }
 
@@ -594,7 +602,7 @@ public class ApiDataRequestHandler {
             loadSanitizerRules(); // ensure sanitizer is loaded
             if (!Objects.equals(pseudonymImplementation.get(),
                     sanitizer.getPseudonymizer().getOptions().getPseudonymImplementation())) {
-                return sanitizerFactory.create(rules,
+                return sanitizerFactory.create(rules.get(),
                         pseudonymizerImplFactory.create(sanitizer.getPseudonymizer().getOptions()
                                 .withPseudonymImplementation(pseudonymImplementation.get())));
             }

@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import co.worklytics.psoxy.ControlHeader;
+import co.worklytics.psoxy.HealthCheckResult;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
@@ -9,18 +10,20 @@ import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import dagger.Component;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.io.IOException;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class HealthCheckRequestHandlerTest {
@@ -58,7 +61,7 @@ public class HealthCheckRequestHandlerTest {
     HttpEventRequest request;
 
     @Test
-    void handleIfHealthCheck_should_serialize_response() {
+    void handleIfHealthCheck_should_serialize_response() throws IOException {
         when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
                 .thenReturn(Optional.of(""));
 
@@ -68,6 +71,13 @@ public class HealthCheckRequestHandlerTest {
         Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
 
         assertTrue(response.isPresent());
+        HealthCheckResult result = handler.objectMapper.readValue(response.get().getBody(), HealthCheckResult.class);
+        assertEquals("something", result.getConfiguredSource());
+        assertEquals("host", result.getConfiguredHost());
+        assertTrue(result.getNonDefaultSalt());
+        assertEquals(Collections.emptySet(), result.getMissingConfigProperties());
+        assertTrue(StringUtils.isNotBlank(result.getSaltSha256Hash()));
+        assertTrue(result.passed());
 
         assertEquals(HttpStatus.SC_OK, response.get().getStatusCode());
     }

@@ -4,7 +4,6 @@
   "page_number":1,
   "page_size":30,
   "total_records":20,
-  "from":"2020-07-14",
   "meetings":[
     {
       "duration":6,
@@ -23,6 +22,5 @@
       "join_time":"12/22/2021 16:20",
       "leave_time":"12/22/2021 17:13"
     }
-  ],
-  "to":"2020-08-14"
+  ]
 }

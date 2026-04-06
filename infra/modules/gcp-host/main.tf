@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.6, < 2.0" # should work with 1.6, but we don't automate testing against that version anymore
+  required_version = "~> 1.7" # should work with 1.7, but we don't automate testing against that version anymore
 }
 
 # constants
@@ -15,6 +15,12 @@ locals {
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
 
   api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
+
+  # API connectors with rules_raw that don't have file-based overrides
+  api_connector_rules_raw = {
+    for k, v in var.api_connectors : k => v.rules_raw
+    if try(v.rules_raw, null) != null && !contains(keys(local.api_connector_rules_files), k)
+  }
 }
 
 # TODO: probably pull all the way to the top level bc 1) proper tf style, 2) simplifies customization if it doesn't work for a particular environment
@@ -39,13 +45,14 @@ module "psoxy" {
   provision_testing_infra           = var.provision_testing_infra
   gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
   custom_artifacts_bucket_name      = var.custom_artifacts_bucket_name
-  default_labels                    = var.default_labels
   support_bulk_mode                 = length(var.bulk_connectors) > 0
   support_webhook_collectors        = length(var.webhook_collectors) > 0
   vpc_config                        = var.vpc_config
   bucket_force_destroy              = var.bucket_force_destroy
   tf_runner_iam_principal           = module.tf_runner.iam_principal
   provision_project_level_iam       = var.provision_project_level_iam
+  bucket_access_logs_destination    = var.bucket_access_logs_destination
+  builder_sa_email                  = var.builder_sa_email
 }
 
 
@@ -55,7 +62,7 @@ resource "google_service_account" "api_connectors" {
   for_each = var.api_connectors
 
   project      = var.gcp_project_id
-  account_id   = substr("${local.sa_prefix}${replace(each.key, "_", "-")}", 0, local.SA_NAME_MAX_LENGTH)
+  account_id   = trim(substr("${local.sa_prefix}${replace(each.key, "_", "-")}", 0, local.SA_NAME_MAX_LENGTH), "-")
   display_name = "${local.environment_id_display_name_qualifier} ${each.key} API Connector Cloud Function"
   description  = "Service account that cloud function for ${each.key} API Connector will run as"
 }
@@ -65,11 +72,10 @@ locals {
     for k, v in var.api_connectors :
     k => {
       for var_def in v.secured_variables :
-      # TODO: in v0.5, the prefix with the instance_id can be removed
       "${replace(upper(var_def.name), "-", "_")}" =>
       merge({
         instance_id        = k
-        instance_secret_id = "${replace(upper(k), "-", "_")}_${replace(upper(var_def.name), "-", "_")}"
+        instance_secret_id = replace(upper(var_def.name), "-", "_")
         value              = "TODO: fill me"
         description        = ""
         },
@@ -106,7 +112,6 @@ module "secrets" {
   secret_project    = var.gcp_project_id
   path_prefix       = "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_"
   secrets           = local.secrets_to_provision[each.key]
-  default_labels    = var.default_labels
   replica_locations = var.secret_replica_locations
 }
 
@@ -170,7 +175,7 @@ locals {
 module "api_connector" {
   for_each = var.api_connectors
 
-  source = "../../modules/gcp-psoxy-rest"
+  source = "../../modules/gcp-proxy-api"
 
   project_id                            = var.gcp_project_id
   region                                = var.gcp_region
@@ -182,7 +187,6 @@ module "api_connector" {
   deployment_bundle_object_name         = module.psoxy.deployment_bundle_object_name
   artifact_repository_id                = module.psoxy.artifact_repository
   vpc_config                            = module.psoxy.vpc_config
-  path_to_config                        = null
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
   example_api_requests                  = each.value.example_api_requests
@@ -193,7 +197,6 @@ module "api_connector" {
   oauth_scopes                          = try(each.value.oauth_scopes_needed, [])
   config_parameter_prefix               = local.config_parameter_prefix
   invoker_sa_emails                     = var.worklytics_sa_emails
-  default_labels                        = var.default_labels
   gcp_principals_authorized_to_test     = var.gcp_principals_authorized_to_test
   bucket_write_role_id                  = module.psoxy.bucket_write_role_id
   side_output_original                  = try(local.custom_original_side_outputs[each.key], null)
@@ -201,14 +204,19 @@ module "api_connector" {
   enable_async_processing               = try(each.value.enable_async_processing, false)
   todos_as_local_files                  = var.todos_as_local_files
   tf_runner_iam_principal               = module.tf_runner.iam_principal
+  enable_versioning                     = var.version_sanitized_buckets
+  bucket_access_logs_destination        = var.bucket_access_logs_destination
+  builder_sa_id                         = module.psoxy.builder_sa_id
 
 
   environment_variables = merge(
     {
-      BUNDLE_FILENAME        = module.psoxy.filename
-      IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
-      PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
-      CUSTOM_RULES_SHA       = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : null
+      BUNDLE_FILENAME      = module.psoxy.filename
+      IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
+      PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
+      CUSTOM_RULES_SHA = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : (
+        try(local.api_connector_rules_raw[each.key], null) != null ? sha1(local.api_connector_rules_raw[each.key]) : null
+      )
       EMAIL_CANONICALIZATION = var.email_canonicalization
     },
     try(each.value.environment_variables, {}),
@@ -220,6 +228,10 @@ module "api_connector" {
     module.psoxy.secrets,
     module.psoxy.artifact_repository
   )
+
+  depends_on = [
+    module.psoxy
+  ]
 }
 
 module "custom_api_connector_rules" {
@@ -230,7 +242,18 @@ module "custom_api_connector_rules" {
   project_id        = var.gcp_project_id
   prefix            = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
   file_path         = each.value
-  default_labels    = var.default_labels
+  instance_sa_email = module.api_connector[each.key].service_account_email
+}
+
+# Rules provisioned from rules_raw (content string, not file path)
+module "api_connector_rules_raw" {
+  for_each = local.api_connector_rules_raw
+
+  source = "../../modules/gcp-sm-rules"
+
+  project_id        = var.gcp_project_id
+  prefix            = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
+  content           = each.value
   instance_sa_email = module.api_connector[each.key].service_account_email
 }
 # END API CONNECTORS
@@ -257,7 +280,7 @@ resource "google_service_account" "webhook_collector" {
   for_each = var.webhook_collectors
 
   project      = var.gcp_project_id
-  account_id   = substr("${local.sa_prefix}${replace(each.key, "_", "-")}", 0, local.SA_NAME_MAX_LENGTH)
+  account_id   = trim(substr("${local.sa_prefix}${replace(each.key, "_", "-")}", 0, local.SA_NAME_MAX_LENGTH), "-")
   display_name = "${local.environment_id_display_name_qualifier} ${each.key} Webhook Collector"
   description  = "Service account that cloud run function for ${each.key} Webhook Collector will run as"
 }
@@ -279,13 +302,15 @@ module "webhook_collector" {
   config_parameter_prefix            = local.config_parameter_prefix
   invoker_sa_emails                  = var.worklytics_sa_emails
   vpc_config                         = module.psoxy.vpc_config
-  default_labels                     = var.default_labels
   gcp_principals_authorized_to_test  = var.gcp_principals_authorized_to_test
   bucket_write_role_id               = module.psoxy.bucket_write_role_id
   side_output_original               = try(local.custom_original_side_outputs[each.key], null)
   side_output_sanitized              = try(local.sanitized_side_outputs[each.key], null)
   todos_as_local_files               = var.todos_as_local_files
   tf_runner_iam_principal            = module.tf_runner.iam_principal
+  enable_versioning                  = var.version_sanitized_buckets
+  bucket_access_logs_destination     = var.bucket_access_logs_destination
+  builder_sa_id                      = module.psoxy.builder_sa_id
   key_ring_id                        = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
   oidc_token_verifier_role_id        = module.psoxy.oidc_token_verifier_role_id
   provision_auth_key                 = each.value.provision_auth_key
@@ -308,7 +333,9 @@ module "webhook_collector" {
 
   secret_bindings = module.psoxy.secrets
 
-
+  depends_on = [
+    module.psoxy
+  ]
 }
 
 # END WEBHOOK COLLECTORS
@@ -317,7 +344,7 @@ module "webhook_collector" {
 module "bulk_connector" {
   for_each = var.bulk_connectors
 
-  source = "../../modules/gcp-psoxy-bulk"
+  source = "../../modules/gcp-proxy-bulk"
 
   project_id                        = var.gcp_project_id
   region                            = var.gcp_region
@@ -334,23 +361,32 @@ module "bulk_connector" {
   secret_bindings                   = module.psoxy.secrets
   vpc_config                        = module.psoxy.vpc_config
   example_file                      = try(each.value.example_file, null)
+  example_files                     = try(each.value.example_files, [])
   instructions_template             = try(each.value.instructions_template, null)
   input_expiration_days             = var.bulk_input_expiration_days
   sanitized_expiration_days         = var.bulk_sanitized_expiration_days
   input_bucket_name                 = try(each.value.input_bucket_name, null)
   sanitized_bucket_name             = try(each.value.sanitized_bucket_name, null)
-  default_labels                    = var.default_labels
   todos_as_local_files              = var.todos_as_local_files
   tf_runner_iam_principal           = module.tf_runner.iam_principal
   available_memory_mb               = coalesce(try(var.custom_bulk_connector_arguments[each.key].available_memory_mb, null), try(each.value.available_memory_mb, null), 512)
-  timeout_seconds                   = coalesce(try(var.custom_bulk_connector_arguments[each.key].timeout_seconds, null), try(each.value.timeout_seconds, null), 540) # TODO: bump to 1800 (30 minutes) in 0.6.x
+  timeout_seconds                   = coalesce(try(var.custom_bulk_connector_arguments[each.key].timeout_seconds, null), try(each.value.timeout_seconds, null), 1800)
   gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
   bucket_force_destroy              = var.bucket_force_destroy
+  enable_versioning                 = var.version_sanitized_buckets
+  bucket_access_logs_destination    = var.bucket_access_logs_destination
+  builder_sa_id                     = module.psoxy.builder_sa_id
 
   environment_variables = merge(
     {
-      SOURCE                 = each.value.source_kind
-      RULES                  = each.value.rules_file == null ? yamlencode(try(var.custom_bulk_connector_rules[each.key], each.value.rules)) : file(each.value.rules_file)
+      SOURCE = each.value.source_kind
+      RULES = (
+        try(var.custom_bulk_connector_rules[each.key], null) != null ? yamlencode(var.custom_bulk_connector_rules[each.key]) :
+        try(each.value.rules_raw, null) != null ? each.value.rules_raw :
+        each.value.rules_file != null ? file(each.value.rules_file) :
+        try(each.value.rules, null) != null ? yamlencode(each.value.rules) :
+        null
+      )
       BUNDLE_FILENAME        = module.psoxy.filename
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
       EMAIL_CANONICALIZATION = var.email_canonicalization
@@ -380,8 +416,9 @@ module "lookup_output" {
   bucket_name_suffix             = "-lookup" # TODO: what if multiple lookups from same source??
   expiration_days                = each.value.expiration_days
   sanitizer_accessor_principals  = each.value.sanitized_accessor_principals
-  bucket_labels                  = var.default_labels
   bucket_force_destroy           = var.bucket_force_destroy
+  enable_versioning              = var.version_sanitized_buckets
+  bucket_access_logs_destination = var.bucket_access_logs_destination
 }
 
 locals {
@@ -389,13 +426,12 @@ locals {
 }
 
 # TODO: this would be cleaner as env var, but creates a cycle:
-# Error: Cycle: module.psoxy.module.psoxy-bulk.local_file.todo-gcp-psoxy-bulk-test, module.psoxy.module.lookup_output.var.function_service_account_email (expand), module.psoxy.module.lookup_output.google_storage_bucket_iam_member.write_to_output_bucket, module.psoxy.module.lookup_output.output.bucket_name (expand), module.psoxy.module.lookup_output.var.bucket_name_prefix (expand), module.psoxy.module.lookup_output.google_storage_bucket.bucket, module.psoxy.module.lookup_output.google_storage_bucket_iam_member.accessors, module.psoxy.module.lookup_output (close), module.psoxy.module.psoxy-bulk.var.environment_variables (expand), module.psoxy.module.psoxy-bulk.google_cloudfunctions_function.function, module.psoxy.module.psoxy-bulk (close)
+# Error: Cycle: module.psoxy.module.psoxy-bulk.local_file.todo-gcp-proxy-bulk-test, module.psoxy.module.lookup_output.var.function_service_account_email (expand), module.psoxy.module.lookup_output.google_storage_bucket_iam_member.write_to_output_bucket, module.psoxy.module.lookup_output.output.bucket_name (expand), module.psoxy.module.lookup_output.var.bucket_name_prefix (expand), module.psoxy.module.lookup_output.google_storage_bucket.bucket, module.psoxy.module.lookup_output.google_storage_bucket_iam_member.accessors, module.psoxy.module.lookup_output (close), module.psoxy.module.psoxy-bulk.var.environment_variables (expand), module.psoxy.module.psoxy-bulk.google_cloudfunctions_function.function, module.psoxy.module.psoxy-bulk (close)
 resource "google_secret_manager_secret" "additional_transforms" {
   for_each = local.inputs_to_build_lookups_for
 
   project   = var.gcp_project_id
   secret_id = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_ADDITIONAL_TRANSFORMS"
-  labels    = var.default_labels
 
   replication {
     user_managed {
@@ -406,12 +442,6 @@ resource "google_secret_manager_secret" "additional_transforms" {
         }
       }
     }
-  }
-
-  lifecycle {
-    ignore_changes = [
-      labels
-    ]
   }
 }
 

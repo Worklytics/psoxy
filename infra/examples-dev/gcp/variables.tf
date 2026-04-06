@@ -33,7 +33,7 @@ variable "config_parameter_prefix" {
 
 variable "default_labels" {
   type        = map(string)
-  description = "Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
+  description = "Labels to apply to all GCP resources created by this configuration. Passed to the Google provider's native `default_labels`."
   default     = {}
 
   validation {
@@ -335,6 +335,7 @@ variable "custom_bulk_connectors" {
     rules_file          = optional(string)
     settings_to_provide = optional(map(string), {})
     example_file        = optional(string)
+    example_files       = optional(list(string), [])
   }))
   description = "specs of custom bulk connectors to create"
 
@@ -460,4 +461,16 @@ variable "provision_project_level_iam" {
   description = "Whether to provision project-level IAM bindings required for Psoxy operation. Set to false if you prefer to manage these IAM bindings outside of Terraform."
   type        = bool
   default     = true
+}
+
+variable "version_sanitized_buckets" {
+  description = "Whether to enable versioning for all -sanitized buckets. Provided because some security standards want ALL buckets to enable versioning; from our perspective, it is not needed as these buckets are not storing primary data."
+  type        = bool
+  default     = false
+}
+
+variable "bucket_access_logs_destination" {
+  description = "The name of the GCS bucket to route access logs to for all buckets managed by this module"
+  type        = string
+  default     = null
 }

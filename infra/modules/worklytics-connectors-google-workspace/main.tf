@@ -1,12 +1,11 @@
 terraform {
-  required_version = ">= 1.3, < 2.0"
+  required_version = "~> 1.7"
 }
 
 terraform {
   required_providers {
     # for the API connections to Google Workspace
     google = {
-      version = "~> 5.0"
     }
   }
 }
@@ -19,6 +18,7 @@ locals {
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
+  base_dir                       = var.base_dir
   enabled_connectors             = var.enabled_connectors
   google_workspace_example_admin = var.google_workspace_example_admin
   google_workspace_example_user  = var.google_workspace_example_user

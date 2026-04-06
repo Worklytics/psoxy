@@ -71,7 +71,7 @@ See: [https://developer.hashicorp.com/terraform/language/settings/backends/local
 
 ## Bootstrap
 
-For some help in bootstraping a GCP environment, see also: [infra/modules/gcp-bootstrap/README.md](../../infra/modules/gcp-bootstrap/README.md)
+
 
 The module [psoxy-constants](../../infra/modules/psoxy-constants) is a dependency-free module that provides lists of GCP roles, etc needed for bootstraping a GCP project in which your proxy instances will reside.
 
