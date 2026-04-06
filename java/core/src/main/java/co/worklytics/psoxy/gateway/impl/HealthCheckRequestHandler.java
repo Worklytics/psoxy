@@ -18,7 +18,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -34,8 +33,6 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
 public class HealthCheckRequestHandler {
-
-    public static final String JAVA_SOURCE_CODE_VERSION = "v0.5.18";
 
     /**
      * a random UUID used to salt the hash of the salt.  Purpose of this is to invalidate any non-purpose built rainbow table solution.
@@ -63,6 +60,8 @@ public class HealthCheckRequestHandler {
     RulesUtils rulesUtils;
     @Inject
     HashUtils hashUtils;
+    @Inject
+    ProxyConstants proxyConstants;
 
     String piiSaltHash;
 
@@ -115,7 +114,8 @@ public class HealthCheckRequestHandler {
         }
 
         HealthCheckResult.HealthCheckResultBuilder healthCheckResult = HealthCheckResult.builder()
-                .javaSourceCodeVersion(JAVA_SOURCE_CODE_VERSION)
+                .javaSourceCodeVersion(ProxyConstants.JAVA_SOURCE_CODE_VERSION)
+                .userAgent(proxyConstants.getUserAgent())
                 .configuredSource(config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
                 .configuredHost(config.getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST).orElse(null))
                 .nonDefaultSalt(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())

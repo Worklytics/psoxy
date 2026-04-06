@@ -7,6 +7,7 @@ import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
 import dagger.Component;
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +31,7 @@ public class HealthCheckRequestHandlerTest {
             MockModules.ForSecretStore.class,
             MockModules.ForRules.class,
             MockModules.ForSourceAuthStrategySet.class,
+            TestModules.ForProxyConstants.class,
 
     })
     public interface Container {
