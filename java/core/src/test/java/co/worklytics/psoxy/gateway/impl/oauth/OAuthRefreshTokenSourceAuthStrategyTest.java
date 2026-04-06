@@ -174,7 +174,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
 
         tokenRefreshHandler.storeSharedAccessTokenIfSupported(token);
 
-        verify(strategy.secretStore, times(1)).putConfigProperty(eq(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN),
+        verify(strategy.secretStore, times(1)).writeSecret(eq(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.ACCESS_TOKEN),
             eq("{\"token\":\"my-token\",\"expirationDate\":1639526410000}"),
             eq(OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl.WRITE_RETRIES));
     }
@@ -295,7 +295,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         exampleResponse.refreshToken = newToken;
         tokenRefreshHandler.storeRefreshTokenIfRotated(exampleResponse);
 
-        verify(strategy.secretStore, times(shouldRotate ? 1 : 0)).putConfigProperty(eq(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN), eq(newToken), eq(OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl.WRITE_RETRIES));
+        verify(strategy.secretStore, times(shouldRotate ? 1 : 0)).writeSecret(eq(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN), eq(newToken), eq(OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl.WRITE_RETRIES));
     }
 
     @Test
