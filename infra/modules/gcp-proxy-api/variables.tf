@@ -213,6 +213,15 @@ variable "vpc_config" {
     )
     error_message = "vpc_config.network must be lowercase letters, numbers, or dashes, or a valid self-link."
   }
+
+  validation {
+    condition = (
+      var.vpc_config == null ||
+      can(regex("^[a-z0-9-]+$", try(var.vpc_config.subnet, ""))) ||
+      can(regex("^projects/[^/]+/regions/[^/]+/subnetworks/[^/]+$", try(var.vpc_config.subnet, "")))
+    )
+    error_message = "vpc_config.subnet must be lowercase letters, numbers, or dashes, or a valid self-link."
+  }
 }
 
 variable "enable_versioning" {
