@@ -1,26 +1,26 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.psoxy.gateway.WritableConfigService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 
+/**
+ * Caching decorator for read-only ConfigService.
+ * For a secret-store-aware variant with write support, see {@link CachingSecretStoreDecorator}.
+ */
 @RequiredArgsConstructor
-public class CachingConfigServiceDecorator implements WritableConfigService, SecretStore {
+public class CachingConfigServiceDecorator implements ConfigService {
 
     final ConfigService delegate;
     final Duration defaultTtl;
@@ -41,7 +41,7 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
                         .maximumSize(100)
                         .expireAfterWrite(defaultTtl.getSeconds(), TimeUnit.SECONDS)
                         .recordStats()
-                        .build(new CacheLoader<ConfigProperty, String>() {  //req for java8-backwards compatibility
+                        .build(new CacheLoader<ConfigProperty, String>() {
                             @Override
                             public String load(ConfigProperty key) {
                                 return delegate.getConfigPropertyAsOptional(key).orElse(NEGATIVE_VALUE);
@@ -51,18 +51,6 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
             }
         }
         return cache;
-    }
-
-    @Override
-    public void putConfigProperty(ConfigProperty property, String value) {
-        if (delegate instanceof WritableConfigService) {
-            if (!property.noCache()) {
-                getCache().put(property, value);
-            }
-            ((WritableConfigService) delegate).putConfigProperty(property, value);
-        } else {
-            throw new UnsupportedOperationException("ConfigService does not support writes: " + delegate.getClass().getName());
-        }
     }
 
     @SneakyThrows
@@ -94,19 +82,6 @@ public class CachingConfigServiceDecorator implements WritableConfigService, Sec
                 }
             }
         }
-    }
-
-    @Override
-    public List<ConfigService.ConfigValueVersion> getAvailableVersions(ConfigProperty property, int limit) {
-        // Don't cache version lists, always delegate to underlying implementation
-        if (delegate instanceof SecretStore) {
-            return ((SecretStore) delegate).getAvailableVersions(property, limit);
-        }
-        return delegate.getConfigPropertyWithMetadata(property).map(value -> ConfigService.ConfigValueVersion.builder()
-            .value(value.getValue())
-            .lastModifiedDate(value.getLastModifiedDate().orElse(null))
-            .version(null)
-            .build()).stream().collect(Collectors.toList());
     }
 
 }

@@ -35,10 +35,6 @@ public class CompositeSecretStore implements SecretStore {    //open to feedback
             .or(() -> fallback.getConfigPropertyWithMetadata(configProperty));
     }
 
-    @Override
-    public void putConfigProperty(ConfigProperty property, String value) {
-        preferred.putConfigProperty(property, value);
-    }
 
     @Override
     public Optional<String> getSecret(ConfigProperty property) {

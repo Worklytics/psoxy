@@ -18,7 +18,7 @@ import lombok.extern.java.Log;
  * Read-only ConfigService implementation backed by GCP Parameter Manager.
  *
  * Used for non-secret configuration values (e.g., RULES, SERVICE_URL).
- * Secrets remain in Secret Manager via {@link SecretManagerConfigService}.
+ * Secrets remain in Secret Manager via {@link SecretManagerSecretStore}.
  *
  * Parameters are addressed using hierarchical paths, e.g.:
  *   projects/{project}/locations/global/parameters/{namespace}RULES/versions/latest

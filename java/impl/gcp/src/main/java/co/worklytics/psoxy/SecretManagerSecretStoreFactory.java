@@ -4,9 +4,9 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 
 @AssistedFactory
-public interface SecretManagerConfigServiceFactory {
+public interface SecretManagerSecretStoreFactory {
 
 
-    SecretManagerConfigService create(@Assisted("projectId") String projectId,
+    SecretManagerSecretStore create(@Assisted("projectId") String projectId,
                                       @Assisted("namespace") String namespace);
 }

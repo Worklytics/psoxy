@@ -538,7 +538,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             if (!StringUtils.isBlank(tokenResponse.getRefreshToken())) {
                 // if a refresh_token came back from server, potentially update it
                 secretStore
-                        .getConfigPropertyWithMetadata(
+                        .getSecretWithMetadata(
                                 RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN)
                         .filter(storedToken -> !Objects.equals(storedToken.getValue(),
                                 tokenResponse.getRefreshToken()))

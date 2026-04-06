@@ -1,10 +1,13 @@
 package co.worklytics.psoxy.gateway;
 
+import com.google.common.util.concurrent.Uninterruptibles;
+
+import java.time.Duration;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-public interface SecretStore extends WritableConfigService {
+public interface SecretStore extends ConfigService {
 
     /**
      * Get available versions of a secret, ordered by version DESC (most recent first).
@@ -19,7 +22,7 @@ public interface SecretStore extends WritableConfigService {
     List<ConfigService.ConfigValueVersion> getAvailableVersions(ConfigProperty property, int limit);
 
 
-    // --- New secret-specific API ---
+    // --- Secret-specific API ---
 
     /**
      * Read a secret value, returning empty if not found.
@@ -59,9 +62,7 @@ public interface SecretStore extends WritableConfigService {
      * @param property identifying the secret
      * @param value the secret value to write
      */
-    default void writeSecret(ConfigProperty property, String value) {
-        putConfigProperty(property, value);
-    }
+    void writeSecret(ConfigProperty property, String value);
 
     /**
      * Write a secret value with retries.
@@ -72,7 +73,20 @@ public interface SecretStore extends WritableConfigService {
      * @throws WritePropertyRetriesExhaustedException if write fails after designated retries
      */
     default void writeSecret(ConfigProperty property, String value, int retries) throws WritePropertyRetriesExhaustedException {
-        putConfigProperty(property, value, retries);
+        if (retries <= 0) {
+            throw new IllegalArgumentException("retries must be > 0");
+        }
+        Exception lastException;
+        do {
+            try {
+                writeSecret(property, value);
+                return;
+            } catch (Exception e) {
+                lastException = e;
+                Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(150));
+            }
+        } while (--retries > 0);
+        throw new WritePropertyRetriesExhaustedException("Failed to write secret " + property, lastException);
     }
 
 }

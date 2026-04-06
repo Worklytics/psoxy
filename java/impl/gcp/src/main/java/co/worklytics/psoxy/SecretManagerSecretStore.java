@@ -41,7 +41,7 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 @Log
-public class SecretManagerConfigService implements LockService, SecretStore {
+public class SecretManagerSecretStore implements LockService, SecretStore {
 
     private static final String LOCK_LABEL = "locked";
     private static final String VERSION_LABEL = "latest-version";
@@ -73,7 +73,7 @@ public class SecretManagerConfigService implements LockService, SecretStore {
     final String projectId;
 
     @AssistedInject
-    public SecretManagerConfigService(@Assisted("projectId") @NonNull String projectId,
+    public SecretManagerSecretStore(@Assisted("projectId") @NonNull String projectId,
                                       @Assisted("namespace") @NonNull String namespace) {
         this.projectId = projectId;
         this.namespace = namespace;
@@ -81,7 +81,7 @@ public class SecretManagerConfigService implements LockService, SecretStore {
 
 
     @Override
-    public void putConfigProperty(ConfigProperty property, String value) {
+    public void writeSecret(ConfigProperty property, String value) {
         Preconditions.checkArgument(!property.isEnvVarOnly(), "Can't put env-only config property: " + property);
 
         String key = parameterName(property);

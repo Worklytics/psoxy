@@ -61,7 +61,7 @@ public class SecretsManagerSecretStore implements SecretStore {
     }
 
     @Override
-    public void putConfigProperty(ConfigProperty property, String value) {
+    public void writeSecret(ConfigProperty property, String value) {
         Preconditions.checkArgument(!property.isEnvVarOnly(), "Can't put env-only config property: " + property);
 
         String id = secretId(property);

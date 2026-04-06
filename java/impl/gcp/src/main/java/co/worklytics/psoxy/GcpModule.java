@@ -12,6 +12,7 @@ import com.google.cloud.kms.v1.KeyManagementServiceClient;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
+import co.worklytics.psoxy.gateway.CompositeSecretStore;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.LockService;
@@ -19,6 +20,7 @@ import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.CachingConfigServiceDecorator;
+import co.worklytics.psoxy.gateway.impl.CachingSecretStoreDecorator;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
@@ -62,20 +64,20 @@ public interface GcpModule {
 
 
     @Provides @Named("instance") @Singleton
-    static SecretManagerConfigService instanceConfigService(HostEnvironment hostEnvironment,
+    static SecretManagerSecretStore instanceConfigService(HostEnvironment hostEnvironment,
                                                EnvVarsConfigService envVarsConfigService,
-                                               SecretManagerConfigServiceFactory secretManagerConfigServiceFactory) {
+                                               SecretManagerSecretStoreFactory secretManagerSecretStoreFactory) {
         // For secrets, prefer PATH_TO_INSTANCE_SECRETS if set; else fall back to PATH_TO_INSTANCE_CONFIG
         String pathToInstanceSecrets =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_SECRETS)
                 .or(() -> envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG))
                 .orElseGet(() -> asSecretManagerNamespace(Optional.ofNullable(hostEnvironment.getInstanceId()).orElse("")));
 
-        return secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToInstanceSecrets);
+        return secretManagerSecretStoreFactory.create(ServiceOptions.getDefaultProjectId(), pathToInstanceSecrets);
     }
 
     @Provides @Singleton
-    static LockService lockService(@Named("instance") SecretManagerConfigService instanceConfigService) {
+    static LockService lockService(@Named("instance") SecretManagerSecretStore instanceConfigService) {
         return instanceConfigService;
     }
 
@@ -96,20 +98,20 @@ public interface GcpModule {
      */
     @Provides @Singleton @Named("Native")
     static SecretStore nativeSecretStore(EnvVarsConfigService envVarsConfigService,
-                                         SecretManagerConfigServiceFactory secretManagerConfigServiceFactory,
-                                         @Named("instance") SecretManagerConfigService instanceConfigService) {
+                                         SecretManagerSecretStoreFactory secretManagerSecretStoreFactory,
+                                         @Named("instance") SecretManagerSecretStore instanceConfigService) {
         String pathToSharedSecrets =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_SECRETS)
                 .or(() -> envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG))
                 .orElse("");
 
-        SecretManagerConfigService shared = secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToSharedSecrets);
+        SecretManagerSecretStore shared = secretManagerSecretStoreFactory.create(ServiceOptions.getDefaultProjectId(), pathToSharedSecrets);
 
         Duration proxyInstanceConfigCacheTtl = Duration.ofMinutes(5);
         Duration sharedConfigCacheTtl = Duration.ofMinutes(20);
-        return CompositeConfigService.builder()
-            .preferred(new CachingConfigServiceDecorator(instanceConfigService, proxyInstanceConfigCacheTtl))
-            .fallback(new CachingConfigServiceDecorator(shared, sharedConfigCacheTtl))
+        return CompositeSecretStore.builder()
+            .preferred(new CachingSecretStoreDecorator(instanceConfigService, proxyInstanceConfigCacheTtl))
+            .fallback(new CachingSecretStoreDecorator(shared, sharedConfigCacheTtl))
             .build();
     }
 

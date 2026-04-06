@@ -114,7 +114,7 @@ public class CommandLineConfigService implements ConfigService, SecretStore {
     }
 
     @Override
-    public void putConfigProperty(ConfigProperty property, String value) {
+    public void writeSecret(ConfigProperty property, String value) {
         throw new UnsupportedOperationException("Not implemented");
     }
 

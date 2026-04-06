@@ -1,23 +1,25 @@
 package co.worklytics.psoxy.gateway.impl;
 
-import co.worklytics.psoxy.gateway.WritableConfigService;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 /**
- * implementation of config service for tests
- *
+ * In-memory SecretStore implementation for tests.
  */
 @RequiredArgsConstructor
-public class MemoryConfigService implements WritableConfigService {
+public class InMemorySecretStore implements SecretStore {
 
     final Map<String, String> map;
 
     @Override
-    public void putConfigProperty(ConfigProperty property, String value) {
+    public void writeSecret(ConfigProperty property, String value) {
         map.put(property.name(), value);
     }
 
@@ -30,5 +32,10 @@ public class MemoryConfigService implements WritableConfigService {
     @Override
     public Optional<String> getConfigPropertyAsOptional(@NonNull ConfigProperty property) {
         return Optional.ofNullable(map.get(property.name()));
+    }
+
+    @Override
+    public List<ConfigService.ConfigValueVersion> getAvailableVersions(ConfigProperty property, int limit) {
+        return Collections.emptyList();
     }
 }

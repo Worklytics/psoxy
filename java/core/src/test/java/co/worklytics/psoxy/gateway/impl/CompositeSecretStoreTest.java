@@ -92,7 +92,7 @@ class CompositeSecretStoreTest {
     }
 
     @Test
-    void putConfigProperty() {
+    void writeSecret() {
         SecretStore preferred = MockModules.provideMock(SecretStore.class);
         SecretStore fallback = MockModules.provideMock(SecretStore.class);
 
@@ -103,23 +103,23 @@ class CompositeSecretStoreTest {
 
         SecretStore.ConfigProperty anyProperty = Properties.DEFINED_IN_NEITHER;
         String anyValue = "any-value";
-        configService.putConfigProperty(anyProperty, anyValue);
-        verify(fallback, never()).putConfigProperty(eq(anyProperty), anyString());
-        verify(preferred, atMostOnce()).putConfigProperty(eq(anyProperty), eq(anyValue));
+        configService.writeSecret(anyProperty, anyValue);
+        verify(fallback, never()).writeSecret(eq(anyProperty), anyString());
+        verify(preferred, atMostOnce()).writeSecret(eq(anyProperty), eq(anyValue));
     }
 
     /**
-     * These tests mostly cover SecretStore.putConfigProperty(ConfigProperty, String, int), defined in
+     * These tests mostly cover SecretStore.writeSecret(ConfigProperty, String, int), defined in
      * the SecretStore interface. But tested along with the composite to check proper behavior
      * as is the usual case.
      */
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 3})
-    void putConfigPropertyWithRetriesFails(int retries) throws WritePropertyRetriesExhaustedException {
+    void writeSecretWithRetriesFails(int retries) throws WritePropertyRetriesExhaustedException {
         SecretStore preferred = MockModules.provideMock(SecretStore.class);
         doAnswer(invocation -> {
             throw new IOException("write failed");
-        }).when(preferred).putConfigProperty(any(), anyString());
+        }).when(preferred).writeSecret(any(), anyString());
 
         SecretStore fallback = MockModules.provideMock(SecretStore.class);
         CompositeSecretStore secretStore = CompositeSecretStore.builder()
@@ -131,12 +131,12 @@ class CompositeSecretStoreTest {
         String anyValue = "any-value";
 
         assertThrows(WritePropertyRetriesExhaustedException.class, () -> secretStore.writeSecret(anyProperty, anyValue, retries));
-        verify(preferred, times(retries)).putConfigProperty(eq(anyProperty), eq(anyValue));
-        verify(fallback, never()).putConfigProperty(eq(anyProperty), anyString());
+        verify(preferred, times(retries)).writeSecret(eq(anyProperty), eq(anyValue));
+        verify(fallback, never()).writeSecret(eq(anyProperty), anyString());
     }
 
     @Test
-    void putConfigPropertyWithNoRetriesFails() {
+    void writeSecretWithNoRetriesFails() {
         SecretStore supportsWriting = MockModules.provideMock(SecretStore.class);
 
         SecretStore doesNotSupportWriting = MockModules.provideMock(SecretStore.class);
@@ -149,12 +149,12 @@ class CompositeSecretStoreTest {
         SecretStore.ConfigProperty anyProperty = Properties.DEFINED_IN_NEITHER;
         String anyValue = "any-value";
 
-        assertThrows(IllegalArgumentException.class, () -> configService.putConfigProperty(anyProperty, anyValue, 0));
+        assertThrows(IllegalArgumentException.class, () -> configService.writeSecret(anyProperty, anyValue, 0));
     }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 3})
-    void putConfigPropertyWithRetriesWorks(int retries) {
+    void writeSecretWithRetriesWorks(int retries) {
         SecretStore preferred = MockModules.provideMock(SecretStore.class);
 
         SecretStore fallback = MockModules.provideMock(SecretStore.class);
@@ -167,9 +167,9 @@ class CompositeSecretStoreTest {
         String anyValue = "any-value";
 
         try {
-            configService.putConfigProperty(anyProperty, anyValue, retries);
-            verify(fallback, never()).putConfigProperty(eq(anyProperty), anyString());
-            verify(preferred).putConfigProperty(eq(anyProperty), eq(anyValue));
+            configService.writeSecret(anyProperty, anyValue, retries);
+            verify(fallback, never()).writeSecret(eq(anyProperty), anyString());
+            verify(preferred).writeSecret(eq(anyProperty), eq(anyValue));
         } catch (WritePropertyRetriesExhaustedException e) {
            fail("shouldn't throw exception");
         }

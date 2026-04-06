@@ -17,7 +17,8 @@ import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
-import co.worklytics.psoxy.gateway.impl.CachingConfigServiceDecorator;
+
+import co.worklytics.psoxy.gateway.impl.CachingSecretStoreDecorator;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
@@ -131,8 +132,8 @@ public interface AwsModule {
         Duration sharedConfigCacheTtl = Duration.ofMinutes(20);
 
         return CompositeSecretStore.builder()
-            .preferred(new CachingConfigServiceDecorator(instanceConfigService, proxyInstanceConfigCacheTtl))
-            .fallback(new CachingConfigServiceDecorator(sharedConfigService, sharedConfigCacheTtl))
+            .preferred(new CachingSecretStoreDecorator(instanceConfigService, proxyInstanceConfigCacheTtl))
+            .fallback(new CachingSecretStoreDecorator(sharedConfigService, sharedConfigCacheTtl))
             .build();
     }
 
@@ -154,8 +155,8 @@ public interface AwsModule {
         Duration proxyInstanceConfigCacheTtl = Duration.ofMinutes(5);
         Duration sharedConfigCacheTtl = Duration.ofMinutes(20);
         return CompositeConfigService.builder()
-                .preferred(new CachingConfigServiceDecorator(instanceScopedParameterConfigService, proxyInstanceConfigCacheTtl))
-                .fallback(new CachingConfigServiceDecorator(sharedParameterConfigService, sharedConfigCacheTtl))
+                .preferred(new CachingSecretStoreDecorator(instanceScopedParameterConfigService, proxyInstanceConfigCacheTtl))
+                .fallback(new CachingSecretStoreDecorator(sharedParameterConfigService, sharedConfigCacheTtl))
                 .build();
     }
 
