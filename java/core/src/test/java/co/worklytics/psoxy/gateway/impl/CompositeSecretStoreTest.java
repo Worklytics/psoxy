@@ -130,7 +130,7 @@ class CompositeSecretStoreTest {
         SecretStore.ConfigProperty anyProperty = Properties.DEFINED_IN_NEITHER;
         String anyValue = "any-value";
 
-        assertThrows(WritePropertyRetriesExhaustedException.class, () -> secretStore.putConfigProperty(anyProperty, anyValue, retries));
+        assertThrows(WritePropertyRetriesExhaustedException.class, () -> secretStore.writeSecret(anyProperty, anyValue, retries));
         verify(preferred, times(retries)).putConfigProperty(eq(anyProperty), eq(anyValue));
         verify(fallback, never()).putConfigProperty(eq(anyProperty), anyString());
     }

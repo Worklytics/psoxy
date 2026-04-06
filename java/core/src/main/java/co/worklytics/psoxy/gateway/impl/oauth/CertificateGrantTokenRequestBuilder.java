@@ -60,7 +60,7 @@ public class CertificateGrantTokenRequestBuilder
     public void addHeaders(HttpHeaders httpHeaders) {
         String oauthClientId =
             config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID)
-                .orElseGet(() -> secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
+                .orElseGet(() -> secretStore.getSecretOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
 
         String tokenEndpoint =
             config.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.REFRESH_ENDPOINT);

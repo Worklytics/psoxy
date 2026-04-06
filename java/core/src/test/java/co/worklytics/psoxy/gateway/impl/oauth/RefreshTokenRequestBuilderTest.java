@@ -51,11 +51,11 @@ class RefreshTokenRequestBuilderTest {
     @Test
     public void tokenRequestPayload() {
 
-        when(secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID))
+        when(secretStore.getSecretOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID))
             .thenReturn("1");
-        when(secretStore.getConfigPropertyOrError(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN))
+        when(secretStore.getSecretOrError(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN))
             .thenReturn("tokenValue");
-        when(secretStore.getConfigPropertyOrError(RefreshTokenTokenRequestBuilder.ConfigProperty.CLIENT_SECRET))
+        when(secretStore.getSecretOrError(RefreshTokenTokenRequestBuilder.ConfigProperty.CLIENT_SECRET))
             .thenReturn("secretValue");
 
         HttpContent payload = refreshTokenPayloadBuilder.buildPayload();

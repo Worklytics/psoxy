@@ -67,13 +67,13 @@ public class TestModules {
 
         //String key = new String(Base64.getEncoder().encode(tmp.getEncoded()));
 
-        when(secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY)))
+        when(secretStore.getSecret(eq(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY)))
             .thenReturn(Optional.of("secret"));
-        when(secretStore.getConfigPropertyOrError(eq(ProxyConfigProperty.PSOXY_SALT)))
+        when(secretStore.getSecretOrError(eq(ProxyConfigProperty.PSOXY_SALT)))
             .thenReturn("salt");
-        when(secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
+        when(secretStore.getSecret(eq(ProxyConfigProperty.PSOXY_SALT)))
             .thenReturn(Optional.of("salt"));
-       // when(secretStore.getConfigPropertyAsOptional(eq(roxyConfigProperty.PSOXY_SALT)))
+       // when(secretStore.getSecret(eq(roxyConfigProperty.PSOXY_SALT)))
        //     .thenReturn(Optional.of("salt"));
     }
 

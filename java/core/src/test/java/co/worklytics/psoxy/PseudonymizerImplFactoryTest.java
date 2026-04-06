@@ -26,7 +26,7 @@ class PseudonymizerImplFactoryTest {
     public void setup() {
         configService = MockModules.provideMock(ConfigService.class);
         secretStore = MockModules.provideMock(SecretStore.class);
-        when(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)).thenReturn(Optional.of("salt"));
+        when(secretStore.getSecret(ProxyConfigProperty.PSOXY_SALT)).thenReturn(Optional.of("salt"));
 
         //interested in API case, when this is not set (expect legacy pseudonyms requested w header)
         when(configService.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION))

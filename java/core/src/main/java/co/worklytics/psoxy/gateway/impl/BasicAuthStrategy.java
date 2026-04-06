@@ -55,8 +55,8 @@ public class BasicAuthStrategy implements SourceAuthStrategy {
 
     @Override
     public Credentials getCredentials(Optional<String> userToImpersonate) {
-        String userId = secretStore.getConfigPropertyAsOptional(ConfigProperty.BASIC_AUTH_USER_ID).orElse("");
-        String password = secretStore.getConfigPropertyAsOptional(ConfigProperty.BASIC_AUTH_PASSWORD).orElse("");
+        String userId = secretStore.getSecret(ConfigProperty.BASIC_AUTH_USER_ID).orElse("");
+        String password = secretStore.getSecret(ConfigProperty.BASIC_AUTH_PASSWORD).orElse("");
         return new BasicCredentials(userId, password);
     }
 

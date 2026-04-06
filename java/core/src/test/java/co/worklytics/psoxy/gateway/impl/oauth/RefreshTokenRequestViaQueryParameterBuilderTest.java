@@ -51,9 +51,9 @@ class RefreshTokenRequestViaQueryParameterBuilderTest {
         String clientId = "test-client-id";
         String clientSecret = "test-client-secret";
 
-        when(secretStore.getConfigPropertyOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID))
+        when(secretStore.getSecretOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID))
             .thenReturn(clientId);
-        when(secretStore.getConfigPropertyOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_SECRET))
+        when(secretStore.getSecretOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_SECRET))
             .thenReturn(clientSecret);
 
         HttpHeaders headers = new HttpHeaders();
@@ -72,9 +72,9 @@ class RefreshTokenRequestViaQueryParameterBuilderTest {
         String clientId = "  test-client-id  ";
         String clientSecret = "  test-client-secret  ";
 
-        when(secretStore.getConfigPropertyOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID))
+        when(secretStore.getSecretOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID))
             .thenReturn(clientId);
-        when(secretStore.getConfigPropertyOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_SECRET))
+        when(secretStore.getSecretOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_SECRET))
             .thenReturn(clientSecret);
 
         HttpHeaders headers = new HttpHeaders();
@@ -93,7 +93,7 @@ class RefreshTokenRequestViaQueryParameterBuilderTest {
         String refreshToken = "test-refresh-token";
         String baseUrl = "https://app.gong.io/oauth2/generate-customer-token";
 
-        when(secretStore.getConfigPropertyOrError(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN))
+        when(secretStore.getSecretOrError(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN))
             .thenReturn(refreshToken);
 
         URI result = requestBuilder.getEndpoint(baseUrl);

@@ -194,7 +194,7 @@ public class PsoxyModule {
     @Provides
     @Singleton
     DeterministicTokenizationStrategy deterministicPseudonymStrategy(SecretStore secretStore) {
-        String salt = secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT);
+        String salt = secretStore.getSecretOrError(ProxyConfigProperty.PSOXY_SALT);
         return new Sha256DeterministicTokenizationStrategy(salt);
     }
 
@@ -203,9 +203,9 @@ public class PsoxyModule {
     ReversibleTokenizationStrategy pseudonymizationStrategy(SecretStore secretStore,
             DeterministicTokenizationStrategy deterministicTokenizationStrategy) {
 
-        String salt = secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT);
+        String salt = secretStore.getSecretOrError(ProxyConfigProperty.PSOXY_SALT);
         Optional<SecretKeySpec> keyFromConfig =
-                secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY)
+                secretStore.getSecret(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY)
                         .map(passkey -> AESReversibleTokenizationStrategy
                                 .aesKeyFromPassword(passkey, salt));
         // q: do we need to support actual fully AES keys?
@@ -228,14 +228,14 @@ public class PsoxyModule {
     @Singleton
     ReversibleTokenizationStrategy ipEncryptionStrategy(SecretStore secretStore,
             @Named("ipHashStrategy") DeterministicTokenizationStrategy deterministicTokenizationStrategy) {
-        String salt = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.SALT_IP)
-                .orElse(secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
+        String salt = secretStore.getSecret(ProxyConfigProperty.SALT_IP)
+                .orElse(secretStore.getSecretOrError(ProxyConfigProperty.PSOXY_SALT));
 
         Optional<SecretKeySpec> keyFromConfig =
                 firstPresent(
                         secretStore
-                                .getConfigPropertyAsOptional(ProxyConfigProperty.ENCRYPTION_KEY_IP),
-                        secretStore.getConfigPropertyAsOptional(
+                                .getSecret(ProxyConfigProperty.ENCRYPTION_KEY_IP),
+                        secretStore.getSecret(
                                 ProxyConfigProperty.PSOXY_ENCRYPTION_KEY))
                                         .map(passkey -> AESReversibleTokenizationStrategy
                                                 .aesKeyFromPassword(passkey, salt));
@@ -260,14 +260,14 @@ public class PsoxyModule {
     ReversibleTokenizationStrategy emailDomainsEncryptionStrategy(SecretStore secretStore,
             @Named("emailDomains") DeterministicTokenizationStrategy deterministicTokenizationStrategy) {
         String salt = secretStore
-                .getConfigPropertyAsOptional(ProxyConfigProperty.SALT_EMAIL_DOMAINS)
-                .orElse(secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
+                .getSecret(ProxyConfigProperty.SALT_EMAIL_DOMAINS)
+                .orElse(secretStore.getSecretOrError(ProxyConfigProperty.PSOXY_SALT));
 
         Optional<SecretKeySpec> keyFromConfig =
                 firstPresent(
-                        secretStore.getConfigPropertyAsOptional(
+                        secretStore.getSecret(
                                 ProxyConfigProperty.ENCRYPTION_KEY_EMAIL_DOMAINS),
-                        secretStore.getConfigPropertyAsOptional(
+                        secretStore.getSecret(
                                 ProxyConfigProperty.PSOXY_ENCRYPTION_KEY))
                                         .map(passkey -> AESReversibleTokenizationStrategy
                                                 .aesKeyFromPassword(passkey, salt));
@@ -290,8 +290,8 @@ public class PsoxyModule {
     @Named("ipHashStrategy")
     @Singleton
     DeterministicTokenizationStrategy deterministicTokenizationStrategy(SecretStore secretStore) {
-        String salt = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.SALT_IP)
-                .orElse(secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
+        String salt = secretStore.getSecret(ProxyConfigProperty.SALT_IP)
+                .orElse(secretStore.getSecretOrError(ProxyConfigProperty.PSOXY_SALT));
 
         return new Sha256DeterministicTokenizationStrategy(salt);
     }
@@ -304,8 +304,8 @@ public class PsoxyModule {
     DeterministicTokenizationStrategy deterministicTokenizationStrategyEmailDomains(
             SecretStore secretStore) {
         String salt = secretStore
-                .getConfigPropertyAsOptional(ProxyConfigProperty.SALT_EMAIL_DOMAINS)
-                .orElse(secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT));
+                .getSecret(ProxyConfigProperty.SALT_EMAIL_DOMAINS)
+                .orElse(secretStore.getSecretOrError(ProxyConfigProperty.PSOXY_SALT));
 
         return new Sha256DeterministicTokenizationStrategy(salt);
     }

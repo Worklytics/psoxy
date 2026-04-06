@@ -65,7 +65,7 @@ public class AccountCredentialsGrantTokenRequestBuilder implements OAuthRefreshT
         //trim to avoid copy-paste errors
         //q : check for non-printable chars or anything like that
         String accountId = StringUtils.trim(config.getConfigPropertyAsOptional(ConfigProperty.ACCOUNT_ID)
-            .orElseGet(() -> secretStore.getConfigPropertyOrError(ConfigProperty.ACCOUNT_ID)));
+            .orElseGet(() -> secretStore.getSecretOrError(ConfigProperty.ACCOUNT_ID)));
 
         // The documentation doesn't say anything to use POST data, but passes everything in the URL
         // Tested manually and, for the moment, it is accepted as POST data
@@ -78,9 +78,9 @@ public class AccountCredentialsGrantTokenRequestBuilder implements OAuthRefreshT
     @Override
     public void addHeaders(HttpHeaders httpHeaders) {
         String clientId = StringUtils.trim(config.getConfigPropertyAsOptional(ConfigProperty.CLIENT_ID)
-            .orElseGet(() -> secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_ID)));
+            .orElseGet(() -> secretStore.getSecretOrError(ConfigProperty.CLIENT_ID)));
 
-        String clientSecret = StringUtils.trim(secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET));
+        String clientSecret = StringUtils.trim(secretStore.getSecretOrError(ConfigProperty.CLIENT_SECRET));
         AuthUtils.setBasicAuthHeader(httpHeaders, clientId, clientSecret);
     }
 

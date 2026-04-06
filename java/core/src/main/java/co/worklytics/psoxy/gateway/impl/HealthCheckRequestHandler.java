@@ -114,7 +114,7 @@ public class HealthCheckRequestHandler {
             missing =
                 sourceAuthStrategy.get().getRequiredConfigProperties().stream()
                     .filter(configProperty -> config.getConfigPropertyAsOptional(configProperty).isEmpty())
-                    .filter(configProperty -> secretStore.getConfigPropertyAsOptional(configProperty).isEmpty())
+                    .filter(configProperty -> secretStore.getSecret(configProperty).isEmpty())
                     .map(ConfigService.ConfigProperty::name)
                     .collect(Collectors.toSet());
         } catch (Throwable e) {
@@ -137,7 +137,7 @@ public class HealthCheckRequestHandler {
                 .javaSourceCodeVersion(JAVA_SOURCE_CODE_VERSION)
                 .configuredSource(config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
                 .configuredHost(config.getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST).orElse(null))
-                .nonDefaultSalt(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
+                .nonDefaultSalt(secretStore.getSecret(ProxyConfigProperty.PSOXY_SALT).isPresent())
                 .pseudonymImplementation(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION).orElse(null))
                 .missingConfigProperties(missing)
                 .callerIp(request.getClientIp().orElse("unknown"));
@@ -159,7 +159,7 @@ public class HealthCheckRequestHandler {
                     .map(param -> {
                         Optional<ConfigService.ConfigValueWithMetadata> fromConfig = config.getConfigPropertyWithMetadata(param);
                         if (fromConfig.isEmpty()) {
-                            fromConfig = secretStore.getConfigPropertyWithMetadata(param);
+                            fromConfig = secretStore.getSecretWithMetadata(param);
                         }
 
                         return Pair.of(param, fromConfig);
@@ -246,7 +246,7 @@ public class HealthCheckRequestHandler {
      */
     public String piiSaltHash() {
         if (piiSaltHash == null) {
-            piiSaltHash = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
+            piiSaltHash = secretStore.getSecret(ProxyConfigProperty.PSOXY_SALT)
                 .map(salt -> hashUtils.hash(salt, SALT_FOR_SALT)).orElse("");
         }
         return piiSaltHash;

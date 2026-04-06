@@ -95,7 +95,7 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
     @SneakyThrows
     synchronized GoogleCredentials getBaseCredentials() {
         if (baseCredentials == null) {
-            Optional<String> key = secretStore.getConfigPropertyAsOptional(ConfigProperty.SERVICE_ACCOUNT_KEY);
+            Optional<String> key = secretStore.getSecret(ConfigProperty.SERVICE_ACCOUNT_KEY);
 
             GoogleCredentials provisional;
 

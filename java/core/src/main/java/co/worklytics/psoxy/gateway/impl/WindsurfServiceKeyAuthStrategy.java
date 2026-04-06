@@ -117,7 +117,7 @@ public class WindsurfServiceKeyAuthStrategy implements SourceAuthStrategy {
 
     void fillServiceKey(Map<String, Object> pojoBody) {
         // Add the service_key property
-        String serviceKey = secretStore.getConfigPropertyOrError(ConfigProperty.SERVICE_KEY);
+        String serviceKey = secretStore.getSecretOrError(ConfigProperty.SERVICE_KEY);
         pojoBody.put("service_key", serviceKey);
     }
 

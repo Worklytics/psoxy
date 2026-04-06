@@ -79,7 +79,7 @@ class GoogleCloudPlatformServiceAccountKeyAuthStrategyTest {
 
         when(authStrategy.config.getConfigPropertyOrError(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.OAUTH_SCOPES))
             .thenReturn(oauthScopes);
-        when(authStrategy.secretStore.getConfigPropertyAsOptional(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.SERVICE_ACCOUNT_KEY))
+        when(authStrategy.secretStore.getSecret(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.SERVICE_ACCOUNT_KEY))
             .thenReturn(Optional.of(new String(Base64.getEncoder().encode(KEY.getBytes()))));
 
 
@@ -184,7 +184,7 @@ class GoogleCloudPlatformServiceAccountKeyAuthStrategyTest {
 
         when(authStrategy.config.getConfigPropertyOrError(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.OAUTH_SCOPES))
             .thenReturn(oauthScopes);
-        when(authStrategy.secretStore.getConfigPropertyAsOptional(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.SERVICE_ACCOUNT_KEY))
+        when(authStrategy.secretStore.getSecret(GoogleCloudPlatformServiceAccountKeyAuthStrategy.ConfigProperty.SERVICE_ACCOUNT_KEY))
             .thenReturn(Optional.of(KEY)); // Plain JSON format
 
         Credentials credentials = authStrategy.getCredentials(Optional.empty());

@@ -23,7 +23,7 @@ class WindsurfServiceKeyAuthStrategyTest {
     })
     void addServiceKeyToRequestBody(String originalContent, String expectedKey) {
         SecretStore secretStore = MockModules.provideMock(SecretStore.class);
-        when(secretStore.getConfigPropertyOrError(WindsurfServiceKeyAuthStrategy.ConfigProperty.SERVICE_KEY))
+        when(secretStore.getSecretOrError(WindsurfServiceKeyAuthStrategy.ConfigProperty.SERVICE_KEY))
             .thenReturn("test-key");
 
         ObjectMapper objectMapper = new ObjectMapper();

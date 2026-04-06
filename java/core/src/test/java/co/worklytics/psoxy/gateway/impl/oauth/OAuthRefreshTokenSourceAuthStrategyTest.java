@@ -286,9 +286,9 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         tokenRefreshHandler.secretStore = strategy.secretStore;
         tokenRefreshHandler.sourceAuthStrategy = strategy;
         
-        when(strategy.secretStore.getConfigPropertyAsOptional(eq(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN)))
+        when(strategy.secretStore.getSecret(eq(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN)))
             .thenReturn(Optional.of(originalToken));
-        when(strategy.secretStore.getConfigPropertyWithMetadata(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN))
+        when(strategy.secretStore.getSecretWithMetadata(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN))
             .thenReturn(Optional.of(ConfigService.ConfigValueWithMetadata.builder().value(originalToken).build()));
 
         CanonicalOAuthAccessTokenResponseDto exampleResponse = new CanonicalOAuthAccessTokenResponseDto();

@@ -553,7 +553,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                             try {
                                 log.info(
                                         "New oauth refresh_token came with access_token response; updating stored value");
-                                secretStore.putConfigProperty(
+                                secretStore.writeSecret(
                                         RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN,
                                         tokenResponse.getRefreshToken(), WRITE_RETRIES);
                             } catch (WritePropertyRetriesExhaustedException e) {
@@ -618,7 +618,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         @VisibleForTesting
         void storeSharedAccessTokenIfSupported(@NonNull AccessToken accessToken) {
             try {
-                secretStore.putConfigProperty(
+                secretStore.writeSecret(
                         ConfigProperty.ACCESS_TOKEN, objectMapper.writerFor(AccessTokenDto.class)
                                 .writeValueAsString(AccessTokenDto.toAccessTokenDto(accessToken)),
                         WRITE_RETRIES);

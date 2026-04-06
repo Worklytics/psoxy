@@ -33,7 +33,6 @@ import com.google.protobuf.FieldMask;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.psoxy.gateway.WritableConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
@@ -42,7 +41,7 @@ import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
 @Log
-public class SecretManagerConfigService implements WritableConfigService, LockService, SecretStore {
+public class SecretManagerConfigService implements LockService, SecretStore {
 
     private static final String LOCK_LABEL = "locked";
     private static final String VERSION_LABEL = "latest-version";
@@ -89,6 +88,9 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
         SecretName secretName = SecretName.of(projectId, key);
         try {
             try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
+                // Read the secret first so we can preserve its labels when updating
+                Secret existingSecret = client.getSecret(secretName);
+
                 SecretPayload payload =
                         SecretPayload.newBuilder()
                                 .setData(ByteString.copyFrom(value.getBytes()))
@@ -99,7 +101,7 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
                 SecretVersionName secretVersionName = SecretVersionName.parse(version.getName());
                 log.info(String.format("Property: %s, stored version %s", secretName, version.getName()));
 
-                updateLabelFromSecret(client, secretName, VERSION_LABEL, secretVersionName.getSecretVersion());
+                updateLabelOnSecret(client, existingSecret, VERSION_LABEL, secretVersionName.getSecretVersion());
 
                 destroyOldSecretVersions(client, secretName, version);
             }
@@ -214,7 +216,7 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
             if (lockedAt.isBefore(clock.instant().minusSeconds(expires.getSeconds()))) {
                 log.warning("Lock " + lockId + " is stale or unset; will try to acquire it");
 
-                updateLabelFromSecret(client, lockSecretName, LOCK_LABEL, Long.toString(Instant.now(clock).toEpochMilli()));
+                updateLabelOnSecret(client, lockSecret, LOCK_LABEL, Long.toString(Instant.now(clock).toEpochMilli()));
                 //due to etag, update should have FAILED if was modified since our read
                 return true;
             } else {
@@ -248,13 +250,21 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
         }
     }
 
-    private static void updateLabelFromSecret(SecretManagerServiceClient client, SecretName secretName, String label, String labelValue) {
+    /**
+     * Updates a single label on a secret, preserving all existing labels.
+     *
+     * @param client   the SM client
+     * @param secret   the existing secret (with its current labels and etag)
+     * @param label    the label key to set
+     * @param labelValue the label value to set
+     */
+    private static void updateLabelOnSecret(SecretManagerServiceClient client, Secret secret, String label, String labelValue) {
         try {
-            // Read the existing secret first to preserve all existing labels
-            Secret existingSecret = client.getSecret(secretName);
-
             client.updateSecret(UpdateSecretRequest.newBuilder()
-                    .setSecret(Secret.newBuilder(existingSecret)
+                    // newBuilder(secret) copies all fields from the existing secret,
+                    // including its full labels map; putLabels then adds/updates just
+                    // this one entry, preserving everything else.
+                    .setSecret(Secret.newBuilder(secret)
                             // Label format is https://cloud.google.com/compute/docs/labeling-resources#requirements
                             .putLabels(label, labelValue)
                             .build())
@@ -263,7 +273,7 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
                             .build())
                     .build());
         } catch (Exception e) {
-            log.log(Level.SEVERE, String.format("Cannot put the label of the version on the secret %s", secretName.toString()), e);
+            log.log(Level.SEVERE, String.format("Cannot put the label of the version on the secret %s", secret.getName()), e);
             throw e;
         }
     }

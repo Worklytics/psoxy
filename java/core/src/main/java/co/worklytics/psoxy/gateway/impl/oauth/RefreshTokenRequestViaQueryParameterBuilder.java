@@ -49,7 +49,7 @@ public class RefreshTokenRequestViaQueryParameterBuilder
         try {
             return new URIBuilder(baseEndpoint)
                 .addParameter("grant_type", "refresh_token")
-                .addParameter("refresh_token", URLEncoder.encode(secretStore.getConfigPropertyOrError(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN),
+                .addParameter("refresh_token", URLEncoder.encode(secretStore.getSecretOrError(RefreshTokenTokenRequestBuilder.ConfigProperty.REFRESH_TOKEN),
                     StandardCharsets.UTF_8))
                 .build();
         } catch (URISyntaxException e) {
@@ -78,9 +78,9 @@ public class RefreshTokenRequestViaQueryParameterBuilder
     @Override
     public void addHeaders(HttpHeaders httpHeaders) {
         String clientId = StringUtils.trim(config.getConfigPropertyAsOptional(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID)
-            .orElseGet(() -> secretStore.getConfigPropertyOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID)));
+            .orElseGet(() -> secretStore.getSecretOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID)));
 
-        String clientSecret = StringUtils.trim(secretStore.getConfigPropertyOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_SECRET));
+        String clientSecret = StringUtils.trim(secretStore.getSecretOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_SECRET));
 
         AuthUtils.setBasicAuthHeader(httpHeaders, clientId, clientSecret);
     }

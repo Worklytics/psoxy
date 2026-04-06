@@ -44,7 +44,7 @@ public class HealthCheckRequestHandlerTest {
         HealthCheckRequestHandlerTest.Container container = DaggerHealthCheckRequestHandlerTest_Container.create();
         container.inject(this);
 
-        when(handler.secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.PSOXY_SALT)))
+        when(handler.secretStore.getSecret(eq(ProxyConfigProperty.PSOXY_SALT)))
                 .thenReturn(Optional.of("salt"));
 
         when(handler.config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE))

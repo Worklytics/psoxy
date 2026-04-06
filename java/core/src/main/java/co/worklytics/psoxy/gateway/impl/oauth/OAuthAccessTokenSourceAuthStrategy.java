@@ -46,7 +46,7 @@ public class OAuthAccessTokenSourceAuthStrategy implements SourceAuthStrategy {
 
     @Override
     public Credentials getCredentials(Optional<String> userToImpersonateIgnored) {
-        String token = secretStore.getConfigPropertyOrError(ConfigProperty.ACCESS_TOKEN);
+        String token = secretStore.getSecretOrError(ConfigProperty.ACCESS_TOKEN);
         // Some date into far future. Expiration is required
         Instant expire = clock.instant().plus(365L, ChronoUnit.DAYS);
         AccessToken accessToken = new AccessToken(token, Date.from(expire));

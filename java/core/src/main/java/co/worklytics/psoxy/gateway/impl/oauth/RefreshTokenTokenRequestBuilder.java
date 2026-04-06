@@ -46,9 +46,9 @@ public class RefreshTokenTokenRequestBuilder
         Map<String, String> data = new HashMap<>();
 
         data.put("grant_type", getGrantType());
-        data.put("refresh_token", secretStore.getConfigPropertyOrError(ConfigProperty.REFRESH_TOKEN));
+        data.put("refresh_token", secretStore.getSecretOrError(ConfigProperty.REFRESH_TOKEN));
         data.put("client_id", getClientId());
-        data.put("client_secret", secretStore.getConfigPropertyOrError(ConfigProperty.CLIENT_SECRET));
+        data.put("client_secret", secretStore.getSecretOrError(ConfigProperty.CLIENT_SECRET));
 
         return new UrlEncodedContent(data);
 
@@ -56,7 +56,7 @@ public class RefreshTokenTokenRequestBuilder
 
     private String getClientId() {
         return config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID)
-                .orElseGet(() -> secretStore.getConfigPropertyOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
+                .orElseGet(() -> secretStore.getSecretOrError(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.CLIENT_ID));
 
     }
 

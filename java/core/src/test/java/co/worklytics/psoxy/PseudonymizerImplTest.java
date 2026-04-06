@@ -170,9 +170,9 @@ class PseudonymizerImplTest {
     @ParameterizedTest
     void emailDomainHandling(EmailDomainHandling policy, String emailAddress, String expectedDomain) {
        // use specific email domain handling values, to ensure that it's using CORRECT hash/encryption strategies that are seeing these values
-        when(this.secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.SALT_EMAIL_DOMAINS)))
+        when(this.secretStore.getSecret(eq(ProxyConfigProperty.SALT_EMAIL_DOMAINS)))
             .thenReturn(Optional.of("salt-domains"));
-        when(this.secretStore.getConfigPropertyAsOptional(eq(ProxyConfigProperty.ENCRYPTION_KEY_EMAIL_DOMAINS)))
+        when(this.secretStore.getSecret(eq(ProxyConfigProperty.ENCRYPTION_KEY_EMAIL_DOMAINS)))
             .thenReturn(Optional.of("asdfasdf"));
 
         pseudonymizer = pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()

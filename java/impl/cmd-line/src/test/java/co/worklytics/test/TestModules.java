@@ -46,10 +46,10 @@ public class TestModules {
 
             String key = new String(Base64.getEncoder().encode(tmp.getEncoded()));
 
-            when(secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY))
+            when(secretStore.getSecretOrError(ProxyConfigProperty.PSOXY_ENCRYPTION_KEY))
                 .thenReturn(key);
 
-            when(secretStore.getConfigPropertyOrError(ProxyConfigProperty.PSOXY_SALT))
+            when(secretStore.getSecretOrError(ProxyConfigProperty.PSOXY_SALT))
                 .thenReturn("secret");
             return secretStore;
         }

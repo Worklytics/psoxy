@@ -41,6 +41,22 @@ public class CompositeSecretStore implements SecretStore {    //open to feedback
     }
 
     @Override
+    public Optional<String> getSecret(ConfigProperty property) {
+        return preferred.getSecret(property).or(() -> fallback.getSecret(property));
+    }
+
+    @Override
+    public String getSecretOrError(ConfigProperty property) {
+        return getSecret(property)
+            .orElseThrow(() -> new NoSuchElementException("Missing secret: no value for " + property));
+    }
+
+    @Override
+    public void writeSecret(ConfigProperty property, String value) {
+        preferred.writeSecret(property, value);
+    }
+
+    @Override
     public List<ConfigService.ConfigValueVersion> getAvailableVersions(ConfigProperty property, int limit) {
         // Try preferred first, fall back to fallback if preferred returns empty
         List<ConfigService.ConfigValueVersion> versions = preferred.getAvailableVersions(property, limit);
