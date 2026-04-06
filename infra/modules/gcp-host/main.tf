@@ -190,7 +190,7 @@ module "api_connector" {
   vpc_config                            = module.psoxy.vpc_config
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
-  example_api_requests                  = each.value.example_api_requests
+  example_api_requests                  = try(each.value.example_api_requests, [])
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = var.todo_step
   target_host                           = each.value.target_host

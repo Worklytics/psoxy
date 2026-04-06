@@ -229,6 +229,7 @@ module "api_connector" {
   log_retention_days                    = var.log_retention_days
   api_caller_role_arn                   = module.psoxy.api_caller_role_arn
   example_api_calls                     = each.value.example_api_calls
+  example_api_requests                  = try(each.value.example_api_requests, [])
   aws_account_id                        = var.aws_account_id
   region                                = data.aws_region.current.id
   path_to_repo_root                     = var.psoxy_base_dir
