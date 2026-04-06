@@ -837,7 +837,7 @@ async function pollAsyncResponse(locationUrl, options = {}) {
  * Compare actual content items against expected content.
  * 
  * @param {Array} items - Array of actual items found in the file
- * @param {string} expectedContent - Expected JSON string
+ * @param {string|object|Array} expectedContent - Expected JSON string or parsed object/array
  * @param {Object} logger - Logger instance
  * @returns {boolean}
  */
@@ -848,11 +848,15 @@ function compareContent(items, expectedContent, logger) {
     }
 
     let expectedJson;
-    try {
-      expectedJson = JSON.parse(expectedContent);
-    } catch (e) {
-      logger.error(`Failed to parse expected content: ${e.message}`);
-      throw new Error('Invalid JSON in expected content (check --body argument)');
+    if (typeof expectedContent === 'object') {
+        expectedJson = expectedContent;
+    } else {
+        try {
+            expectedJson = JSON.parse(expectedContent);
+        } catch (e) {
+            logger.error(`Failed to parse expected content: ${e.message}`);
+            throw new Error('Invalid JSON in expected content (check --body argument)');
+        }
     }
 
     const found = items.some(item => {
