@@ -58,6 +58,9 @@ locals {
 
   path_to_instance_config_parameters = "${coalesce(var.config_parameter_prefix, "")}${replace(upper(var.instance_id), "-", "_")}_"
 
+  # Hierarchical paths for Parameter Manager (using / separator)
+  path_to_shared_params   = coalesce(var.config_parameter_prefix, "psoxy") != "" ? "${replace(coalesce(var.config_parameter_prefix, "psoxy"), "_", "/")}/" : "psoxy/"
+  path_to_instance_params = "${local.path_to_shared_params}${replace(var.instance_id, "-", "/")}/"
 }
 
 # BEGIN AUTH KEYS
@@ -208,58 +211,41 @@ locals {
   }
 }
 
-# TODO: in 0.6, make this a 'google_parameter_manager_parameter' (requires google provide 6.25+)
-# bc AUTH_ISSUER is the url of function, and not known at deploy-time, we cannot fill it in ENV VARS
-# similarly, bc version number is not known at deploy-time, we cannot bind it via secret env vars
-module "auth_issuer_secret" {
-  source = "../../modules/gcp-secrets"
+# AUTH_ISSUER and SERVICE_URL are not known at deploy-time, so stored as Parameter Manager parameters
+resource "google_parameter_manager_parameter" "auth_issuer" {
+  project      = var.project_id
+  parameter_id = "${local.path_to_instance_params}AUTH_ISSUER"
+  format       = "UNFORMATTED"
+}
 
-  secret_project    = var.project_id
-  path_prefix       = local.path_to_instance_config_parameters
-  replica_locations = var.secret_replica_locations
-  secrets = {
-    AUTH_ISSUER = {
-      value       = google_cloudfunctions2_function.function.service_config[0].uri
-      description = "Expected issuer of identity tokens for this collector"
-    },
-    SERVICE_URL = {
-      value       = google_cloudfunctions2_function.function.service_config[0].uri
-      description = "URL of the function as a web service"
-    },
+resource "google_parameter_manager_parameter_version" "auth_issuer" {
+  parameter            = google_parameter_manager_parameter.auth_issuer.id
+  parameter_version_id = "v1"
+  parameter_data       = google_cloudfunctions2_function.function.service_config[0].uri
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
-# grant access to secrets known AFTER function is deployed
-# (eg, AUTH_ISSUER)
-# distinct from var.secret_bindings; bc those are bound into the function's ENV VARS at deploy-time, grants must be done BEFORE deploy
-locals {
-  secrets_to_grant_access_to = {
-    AUTH_ISSUER = {
-      secret_id = module.auth_issuer_secret.secret_ids_within_project["AUTH_ISSUER"]
-    },
-    SERVICE_URL = {
-      secret_id = module.auth_issuer_secret.secret_ids_within_project["SERVICE_URL"]
-    }
+resource "google_parameter_manager_parameter" "service_url" {
+  project      = var.project_id
+  parameter_id = "${local.path_to_instance_params}SERVICE_URL"
+  format       = "UNFORMATTED"
+}
+
+resource "google_parameter_manager_parameter_version" "service_url" {
+  parameter            = google_parameter_manager_parameter.service_url.id
+  parameter_version_id = "v1"
+  parameter_data       = google_cloudfunctions2_function.function.service_config[0].uri
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
-resource "google_secret_manager_secret_iam_member" "grant_sa_viewer_on_parameter" {
-  for_each = local.secrets_to_grant_access_to
-
-  project   = var.project_id
-  secret_id = each.value.secret_id
-  member    = "serviceAccount:${var.service_account_email}"
-  role      = "roles/secretmanager.viewer"
-}
-
-resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_parameter" {
-  for_each = local.secrets_to_grant_access_to
-
-  project   = var.project_id
-  secret_id = each.value.secret_id
-  member    = "serviceAccount:${var.service_account_email}"
-  role      = "roles/secretmanager.secretAccessor" # this is ONLY accessing payload of a secret version
-}
+# NOTE: IAM access to parameters is granted at the project level via the custom
+# parameter_reader role in the gcp module.
 
 
 data "google_service_account" "function" {
@@ -315,7 +301,9 @@ resource "google_cloudfunctions2_function" "function" {
       var.environment_variables,
       {
         PATH_TO_SHARED_CONFIG   = coalesce(var.config_parameter_prefix, ""),
-        PATH_TO_INSTANCE_CONFIG = local.path_to_instance_config_parameters
+        PATH_TO_INSTANCE_CONFIG = local.path_to_instance_config_parameters,
+        PATH_TO_SHARED_PARAMS   = local.path_to_shared_params,
+        PATH_TO_INSTANCE_PARAMS = local.path_to_instance_params,
       },
       local.side_output_env_vars,
     )

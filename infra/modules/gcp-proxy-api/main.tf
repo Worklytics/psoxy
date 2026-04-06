@@ -27,6 +27,10 @@ locals {
   bucket_provisioning_required = var.enable_async_processing || length(local.side_outputs_to_provision) > 0
 
   path_to_instance_config_parameters = "${coalesce(var.config_parameter_prefix, "")}${replace(upper(var.instance_id), "-", "_")}_"
+
+  # Hierarchical paths for Parameter Manager (using / separator)
+  path_to_shared_params   = coalesce(var.config_parameter_prefix, "psoxy") != "" ? "${replace(coalesce(var.config_parameter_prefix, "psoxy"), "_", "/")}/" : "psoxy/"
+  path_to_instance_params = "${local.path_to_shared_params}${replace(var.instance_id, "-", "/")}/"
 }
 
 resource "random_string" "bucket_name_random_sequence" {
@@ -227,6 +231,8 @@ resource "google_cloudfunctions2_function" "function" {
       var.environment_variables,
       var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
       var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${replace(upper(var.instance_id), "-", "_")}_" },
+      { PATH_TO_SHARED_PARAMS = local.path_to_shared_params },
+      { PATH_TO_INSTANCE_PARAMS = local.path_to_instance_params },
       local.side_output_env_vars,
       var.enable_async_processing ? { ASYNC_OUTPUT_DESTINATION = "gs://${module.async_output[0].bucket_name}" } : {},
     )
@@ -250,54 +256,30 @@ resource "google_cloudfunctions2_function" "function" {
   ]
 }
 
-# TODO: in 0.6, make this a 'google_parameter_manager_parameter' (requires google provide 6.25+)
-# bc SERVICE_URL is the url of function, and not known at deploy-time, we cannot fill it in ENV VARS
-# similarly, bc version number is not known at deploy-time, we cannot bind it via secret env vars
-module "service_url_parameter" {
-  source = "../../modules/gcp-secrets"
-
+# SERVICE_URL is not known at deploy-time, so stored as a Parameter Manager parameter
+# (not a secret — it's a configuration value)
+resource "google_parameter_manager_parameter" "service_url" {
   count = var.enable_async_processing ? 1 : 0
 
-  secret_project    = var.project_id
-  path_prefix       = local.path_to_instance_config_parameters
-  replica_locations = var.secret_replica_locations
-  secrets = {
-    SERVICE_URL = {
-      value       = google_cloudfunctions2_function.function.service_config[0].uri
-      description = "URL of the function as a web service"
-    },
+  project      = var.project_id
+  parameter_id = "${local.path_to_instance_params}SERVICE_URL"
+  format       = "UNFORMATTED"
+}
+
+resource "google_parameter_manager_parameter_version" "service_url" {
+  count = var.enable_async_processing ? 1 : 0
+
+  parameter            = google_parameter_manager_parameter.service_url[0].id
+  parameter_version_id = "v1"
+  parameter_data       = google_cloudfunctions2_function.function.service_config[0].uri
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
-
-# grant access to secrets known AFTER function is deployed
-# (eg, SERVICE_URL)
-# distinct from var.secret_bindings; bc those are bound into the function's ENV VARS at deploy-time, grants must be done BEFORE deploy
-locals {
-  secrets_to_grant_access_to = try({
-    SERVICE_URL = {
-      secret_id = module.service_url_parameter[0].secret_ids_within_project["SERVICE_URL"]
-    }
-  }, {})
-}
-
-resource "google_secret_manager_secret_iam_member" "grant_sa_viewer_on_parameter" {
-  for_each = local.secrets_to_grant_access_to
-
-  project   = var.project_id
-  secret_id = each.value.secret_id
-  member    = "serviceAccount:${var.service_account_email}"
-  role      = "roles/secretmanager.viewer"
-}
-
-resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_parameter" {
-  for_each = local.secrets_to_grant_access_to
-
-  project   = var.project_id
-  secret_id = each.value.secret_id
-  member    = "serviceAccount:${var.service_account_email}"
-  role      = "roles/secretmanager.secretAccessor" # this is ONLY accessing payload of a secret version
-}
+# NOTE: IAM access to parameters is granted at the project level via the custom
+# parameter_reader role in the gcp module.
 
 
 # bizarrely, `google_cloudfunctions2_function_iam_binding` doesn't work for this; wtf?

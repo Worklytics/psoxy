@@ -1,7 +1,8 @@
 # stores rules as GCP Secret Manager Secret
-
-# not the 'right' solution, as this data isn't secret. But there's no "Config Parameter" service
-# solution in GCP really and this makes GCP setup most analogous to AWS.
+#
+# DEPRECATED in v0.6.0 - Use gcp-pm-rules module instead.
+# This module is retained ONLY for backward compatibility with existing deployments.
+# New deployments should use GCP Parameter Manager (gcp-pm-rules) for non-secret config.
 
 locals {
   # size limits, in bytes

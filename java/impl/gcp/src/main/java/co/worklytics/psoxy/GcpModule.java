@@ -40,6 +40,8 @@ import lombok.SneakyThrows;
 )
 public interface GcpModule {
 
+    java.util.logging.Logger log = java.util.logging.Logger.getLogger(GcpModule.class.getName());
+
 
     //NOTE: this is just convention; `-` is allowed in GCP Secret Manager Secret IDs
     static String asSecretManagerNamespace(String functionName) {
@@ -63,11 +65,13 @@ public interface GcpModule {
     static SecretManagerConfigService instanceConfigService(HostEnvironment hostEnvironment,
                                                EnvVarsConfigService envVarsConfigService,
                                                SecretManagerConfigServiceFactory secretManagerConfigServiceFactory) {
-        String pathToInstanceConfig =
-            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
+        // For secrets, prefer PATH_TO_INSTANCE_SECRETS if set; else fall back to PATH_TO_INSTANCE_CONFIG
+        String pathToInstanceSecrets =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_SECRETS)
+                .or(() -> envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG))
                 .orElseGet(() -> asSecretManagerNamespace(Optional.ofNullable(hostEnvironment.getInstanceId()).orElse("")));
 
-        return secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToInstanceConfig);
+        return secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToInstanceSecrets);
     }
 
     @Provides @Singleton
@@ -86,28 +90,20 @@ public interface GcpModule {
     }
 
     /**
-     * in GCP cloud function, we should be able to configure everything via env vars; either
-     * directly or by binding them to secrets at function deployment:
-     *
-     * @see "https://cloud.google.com/functions/docs/configuring/env-var"
-     * @see "https://cloud.google.com/functions/docs/configuring/secrets"
-     *
-     * but using env vars is problematic because it's bound at boot-time for two reasons:
-     *  - even if reference 'latest' version of secret, it won't be updated until next boot
-     *  - if an enabled, accessible version of the secret doesn't exist at boot-time, cloud function
-     *    fails to boot (or even deploy from Terraform - it just times out)
-     *
+     * Secret store: backed by GCP Secret Manager.
+     * Uses PATH_TO_INSTANCE_SECRETS / PATH_TO_SHARED_SECRETS if defined; else falls back to
+     * PATH_TO_INSTANCE_CONFIG / PATH_TO_SHARED_CONFIG for backward compatibility.
      */
     @Provides @Singleton @Named("Native")
     static SecretStore nativeSecretStore(EnvVarsConfigService envVarsConfigService,
                                          SecretManagerConfigServiceFactory secretManagerConfigServiceFactory,
                                          @Named("instance") SecretManagerConfigService instanceConfigService) {
-        String pathToSharedConfig =
-            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
-                // Default is considered as empty; otherwise it will fail due a NPE
+        String pathToSharedSecrets =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_SECRETS)
+                .or(() -> envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG))
                 .orElse("");
 
-        SecretManagerConfigService shared = secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToSharedConfig);
+        SecretManagerConfigService shared = secretManagerConfigServiceFactory.create(ServiceOptions.getDefaultProjectId(), pathToSharedSecrets);
 
         Duration proxyInstanceConfigCacheTtl = Duration.ofMinutes(5);
         Duration sharedConfigCacheTtl = Duration.ofMinutes(20);
@@ -117,10 +113,41 @@ public interface GcpModule {
             .build();
     }
 
-
+    /**
+     * Config service: backed by GCP Parameter Manager (for non-secret configuration).
+     * Lookup order: EnvVars → PM (instance-scoped) → PM (shared/global)
+     * No fallback to Secret Manager for config values.
+     */
     @Provides @Named("Native") @Singleton
-    static ConfigService nativeConfigService(@Named("Native") SecretStore secretStore) {
-        return secretStore;
+    static ConfigService nativeConfigService(EnvVarsConfigService envVarsConfigService,
+                                             ParameterManagerConfigServiceFactory parameterManagerConfigServiceFactory) {
+        String projectId = ServiceOptions.getDefaultProjectId();
+
+        String pathToInstanceParams =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_PARAMS)
+                .orElse("");
+
+        String pathToSharedParams =
+            envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_PARAMS)
+                .orElse("");
+
+        if (pathToInstanceParams.isEmpty() && pathToSharedParams.isEmpty()) {
+            log.warning("Neither PATH_TO_INSTANCE_PARAMS nor PATH_TO_SHARED_PARAMS is set; " +
+                "Parameter Manager config will not be available.");
+            // return env vars only — no PM backing
+            return envVarsConfigService;
+        }
+
+        ParameterManagerConfigService instancePm = parameterManagerConfigServiceFactory.create(projectId, pathToInstanceParams);
+        ParameterManagerConfigService sharedPm = parameterManagerConfigServiceFactory.create(projectId, pathToSharedParams);
+
+        Duration instanceCacheTtl = Duration.ofMinutes(5);
+        Duration sharedCacheTtl = Duration.ofMinutes(20);
+
+        return CompositeConfigService.builder()
+            .preferred(new CachingConfigServiceDecorator(instancePm, instanceCacheTtl))
+            .fallback(new CachingConfigServiceDecorator(sharedPm, sharedCacheTtl))
+            .build();
     }
 
     @Provides

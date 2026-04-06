@@ -14,6 +14,9 @@ locals {
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
 
+  # Hierarchical paths for Parameter Manager (using / separator)
+  pm_shared_prefix = length(var.environment_name) == 0 ? "psoxy/" : "${var.environment_name}/"
+
   api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
 
   # API connectors with rules_raw that don't have file-based overrides
@@ -237,10 +240,10 @@ module "api_connector" {
 module "custom_api_connector_rules" {
   for_each = local.api_connector_rules_files
 
-  source = "../../modules/gcp-sm-rules"
+  source = "../../modules/gcp-pm-rules"
 
   project_id        = var.gcp_project_id
-  prefix            = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
+  prefix            = "${local.pm_shared_prefix}${replace(each.key, "-", "/")}/"
   file_path         = each.value
   instance_sa_email = module.api_connector[each.key].service_account_email
 }
@@ -249,14 +252,25 @@ module "custom_api_connector_rules" {
 module "api_connector_rules_raw" {
   for_each = local.api_connector_rules_raw
 
-  source = "../../modules/gcp-sm-rules"
+  source = "../../modules/gcp-pm-rules"
 
   project_id        = var.gcp_project_id
-  prefix            = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
+  prefix            = "${local.pm_shared_prefix}${replace(each.key, "-", "/")}/"
   content           = each.value
   instance_sa_email = module.api_connector[each.key].service_account_email
 }
 # END API CONNECTORS
+
+# Grant all API connector SAs the Parameter Reader role at project level
+# (per-parameter IAM is not yet available in the Google provider for PM)
+resource "google_project_iam_member" "api_connector_parameter_reader" {
+  for_each = var.api_connectors
+
+  project = var.gcp_project_id
+  role    = module.psoxy.parameter_reader_role_id
+  member  = "serviceAccount:${google_service_account.api_connectors[each.key].email}"
+}
+
 
 # BEGIN WEBHOOK COLLECTORS
 locals {
@@ -338,6 +352,15 @@ module "webhook_collector" {
   ]
 }
 
+# Grant webhook collector SAs the Parameter Reader role at project level
+resource "google_project_iam_member" "webhook_collector_parameter_reader" {
+  for_each = var.webhook_collectors
+
+  project = var.gcp_project_id
+  role    = module.psoxy.parameter_reader_role_id
+  member  = "serviceAccount:${google_service_account.webhook_collector[each.key].email}"
+}
+
 # END WEBHOOK COLLECTORS
 
 # BEGIN BULK CONNECTORS
@@ -400,6 +423,15 @@ module "bulk_connector" {
   ]
 }
 
+# Grant bulk connector SAs the Parameter Reader role at project level
+resource "google_project_iam_member" "bulk_connector_parameter_reader" {
+  for_each = var.bulk_connectors
+
+  project = var.gcp_project_id
+  role    = module.psoxy.parameter_reader_role_id
+  member  = "serviceAccount:${module.bulk_connector[each.key].instance_sa_email}"
+}
+
 # END BULK CONNECTORS
 
 # BEGIN LOOKUP TABLES
@@ -427,29 +459,20 @@ locals {
 
 # TODO: this would be cleaner as env var, but creates a cycle:
 # Error: Cycle: module.psoxy.module.psoxy-bulk.local_file.todo-gcp-proxy-bulk-test, module.psoxy.module.lookup_output.var.function_service_account_email (expand), module.psoxy.module.lookup_output.google_storage_bucket_iam_member.write_to_output_bucket, module.psoxy.module.lookup_output.output.bucket_name (expand), module.psoxy.module.lookup_output.var.bucket_name_prefix (expand), module.psoxy.module.lookup_output.google_storage_bucket.bucket, module.psoxy.module.lookup_output.google_storage_bucket_iam_member.accessors, module.psoxy.module.lookup_output (close), module.psoxy.module.psoxy-bulk.var.environment_variables (expand), module.psoxy.module.psoxy-bulk.google_cloudfunctions_function.function, module.psoxy.module.psoxy-bulk (close)
-resource "google_secret_manager_secret" "additional_transforms" {
+resource "google_parameter_manager_parameter" "additional_transforms" {
   for_each = local.inputs_to_build_lookups_for
 
-  project   = var.gcp_project_id
-  secret_id = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_ADDITIONAL_TRANSFORMS"
-
-  replication {
-    user_managed {
-      dynamic "replicas" {
-        for_each = var.secret_replica_locations
-        content {
-          location = replicas.value
-        }
-      }
-    }
-  }
+  project      = var.gcp_project_id
+  parameter_id = "${local.pm_shared_prefix}${replace(each.key, "-", "/")}/ADDITIONAL_TRANSFORMS"
+  format       = "UNFORMATTED"
 }
 
-resource "google_secret_manager_secret_version" "additional_transforms" {
+resource "google_parameter_manager_parameter_version" "additional_transforms" {
   for_each = local.inputs_to_build_lookups_for
 
-  secret = google_secret_manager_secret.additional_transforms[each.key].name
-  secret_data = yamlencode([
+  parameter            = google_parameter_manager_parameter.additional_transforms[each.key].id
+  parameter_version_id = "v1"
+  parameter_data = yamlencode([
     for k, v in var.lookup_tables : {
       destinationBucketName : module.lookup_output[k].bucket_name
       rules : {
@@ -464,27 +487,15 @@ resource "google_secret_manager_secret_version" "additional_transforms" {
       compressOutput : v.compress_output
     } if v.source_connector_id == each.key
   ])
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 
-
-# Needs to list versions, to find most recent
-resource "google_secret_manager_secret_iam_member" "additional_transforms_viewer" {
-  for_each = local.inputs_to_build_lookups_for
-
-  secret_id = google_secret_manager_secret.additional_transforms[each.key].id
-  member    = "serviceAccount:${module.bulk_connector[each.key].instance_sa_email}"
-  role      = "roles/secretmanager.viewer"
-}
-
-# needs to access payload of the versions
-resource "google_secret_manager_secret_iam_member" "additional_transforms" {
-  for_each = local.inputs_to_build_lookups_for
-
-  secret_id = google_secret_manager_secret.additional_transforms[each.key].id
-  member    = "serviceAccount:${module.bulk_connector[each.key].instance_sa_email}"
-  role      = "roles/secretmanager.secretAccessor"
-}
+# NOTE: IAM access to parameters is granted at the project level via the custom
+# parameter_reader role in the gcp module — see below.
 
 
 # END LOOKUP TABLES

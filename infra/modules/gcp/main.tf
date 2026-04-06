@@ -34,6 +34,7 @@ resource "google_project_service" "gcp_infra_api" {
     "compute.googleapis.com", # seems required w newer Google provider versions, for resources we use
     "iam.googleapis.com",     # manage IAM via terraform (as of 2023-04-17, internal dev envs didn't have this; so really needed?)
     "run.googleapis.com",     # required for cloud run functions gen2
+    "parametermanager.googleapis.com",
     "secretmanager.googleapis.com",
     "storage.googleapis.com", # required for both API and bulk modes, bc gcs used to stage bundles (artifacts) for function deployment
     # "serviceusage.googleapis.com", # manage service APIs via terraform (prob already
@@ -293,6 +294,21 @@ resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
     "secretmanager.versions.enable",
     "secretmanager.versions.get",
     "secretmanager.versions.list",
+  ]
+}
+
+resource "google_project_iam_custom_role" "parameter_reader" {
+  project     = var.project_id
+  role_id     = "${local.environment_id_role_prefix}parameterReader"
+  title       = "${local.environment_id_prefix_display}Parameter Reader"
+  description = "Read configuration parameters from GCP Parameter Manager"
+
+  permissions = [
+    "parametermanager.parameters.get",
+    "parametermanager.parameters.list",
+    "parametermanager.versions.get",
+    "parametermanager.versions.list",
+    "resourcemanager.projects.get",
   ]
 }
 
@@ -559,6 +575,11 @@ output "psoxy_instance_secret_locker_role_id" {
 
 output "psoxy_instance_secret_role_id" {
   value = google_project_iam_custom_role.psoxy_instance_secret_role.id
+}
+
+output "parameter_reader_role_id" {
+  value       = google_project_iam_custom_role.parameter_reader.id
+  description = "Role to grant to proxy instance service accounts so they can read configuration parameters from Parameter Manager."
 }
 
 output "pseudonym_salt" {

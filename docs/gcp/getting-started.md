@@ -11,6 +11,7 @@ This includes:
 - [Cloud Run Functions](https://cloud.google.com/run/docs) - serverless containerized applications
 - [Service Accounts](https://cloud.google.com/iam/docs/service-accounts) - identity and access management
 - [Secret Manager](https://cloud.google.com/secret-manager/docs) - to hold pseudonymization salt, encryption keys, and data source API keys
+- [Parameter Manager](https://cloud.google.com/secret-manager/docs/parameter-manager-overview) - to store configuration parameters such as sanitization rules
 - [Cloud Storage Buckets](https://cloud.google.com/storage/docs) (GCS), if using Psoxy to sanitize bulk file data, such as CSVs; collecting data via webhooks; or async API requests.
 - [Cloud KMS Keys](https://cloud.google.com/kms/docs) for webhook authentication (if using webhook collection mode).
 - [Pub/Sub Topics and Subscriptions](https://cloud.google.com/pubsub/docs), for webhook message queuing and batch processing (if using webhook collectors); and async API requests (if using an API connector that supports/requires async mode).
@@ -36,6 +37,7 @@ NOTE: if you're connecting to Google Workspace as a data source, you'll also nee
   - [Service Account Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountAdmin) - admin Service Accounts that personify Cloud Functions or are used as Google Workspace API connections
   - [Service Usage Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/serviceusage#serviceusage.serviceUsageAdmin) - you will need to enable various GCP APIs
   - [Pub/Sub Admin](https://docs.cloud.google.com/iam/docs/roles-permissions/pubsub#pubsub.admin) - webhook messages are queued in Pub/Sub topics and subscriptions for batch processing; also used for Async API mode requests.
+  - [Parameter Manager Admin](https://cloud.google.com/iam/docs/roles-permissions/parametermanager#parametermanager.admin) - configuration parameters (e.g., sanitization rules) are stored in Parameter Manager. _(New in v0.6.0)_
 
 NOTE: the above are the least-privileged predefined GCP roles; depending on your use-cases for the proxy, you can likely create a less-privileged [custom GCP IAM role](https://cloud.google.com/iam/docs/creating-custom-roles) that will suffice. 
 
@@ -53,6 +55,7 @@ NOTE: the above are the least-privileged predefined GCP roles; depending on your
   - [IAM API](https://console.cloud.google.com/apis/library/iam.googleapis.com) (`iam.googleapis.com`)
   - [Pub/Sub API](https://console.cloud.google.com/apis/library/pubsub.googleapis.com) (`pubsub.googleapis.com`)
   - [Secret Manager API](https://console.cloud.google.com/apis/library/secretmanager.googleapis.com) (`secretmanager.googleapis.com`)
+  - [Parameter Manager API](https://console.cloud.google.com/apis/library/parametermanager.googleapis.com) (`parametermanager.googleapis.com`) _(New in v0.6.0)_
   - [Storage API](https://console.cloud.google.com/apis/library/storage-api.googleapis.com) (`storage-api.googleapis.com`)
   - [VPC Accesss API](https://console.cloud.google/com/apis/library/vpcaccess.googleapis.com) (`vpcaccess.googleapis.com`), if relying on our provisioning a Serverless VPC Connector
 
