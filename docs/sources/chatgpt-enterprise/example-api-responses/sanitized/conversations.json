@@ -31,7 +31,7 @@
             "content":{
               "object":"compliance.workspace.conversation.message.content",
               "type":"text",
-              "value":"{\"length\":53,\"word_count\":10,\"keywords\":{\"email\":1,\"write\":1}}"
+              "value":"{\"keywords\":{\"email\":1,\"write\":1},\"length\":51,\"word_count\":11}"
             },
             "files":[
               {
@@ -54,7 +54,7 @@
             "content":{
               "object":"compliance.workspace.conversation.message.content",
               "type":"text",
-              "value":"{\"length\":70,\"word_count\":11}"
+              "value":"{\"length\":70,\"word_count\":12}"
             }
           }
         ]
