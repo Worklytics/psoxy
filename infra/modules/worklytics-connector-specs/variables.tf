@@ -124,6 +124,12 @@ variable "jira_example_issue_id" {
   description = "If using Jira Server/Cloud connector, provide id of an issue for only to be used as part of example calls for Jira (ex: ETV-12)"
 }
 
+variable "atlassian_organization_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using Atlassian Organization connector) ID of the Atlassian Organization (ex: 1324a887-45db-1bf4-1e99-ef0ff456d421)"
+}
+
 # DEPRECATED
 variable "github_api_host" {
   type        = string
