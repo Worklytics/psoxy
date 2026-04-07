@@ -90,6 +90,7 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.extern.java.Log;
+import co.worklytics.psoxy.gateway.ProxyConstants;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
@@ -144,6 +145,8 @@ public class ApiDataRequestHandler {
     Lazy<AsyncApiDataRequestHandler> asyncApiDataRequestHandler;
     @Inject
     Provider<UUID> uuidProvider;
+    @Inject
+    ProxyConstants proxyConstants;
 
     /**
      * Basic headers to pass: content, caching, retries. Can be expanded by connection later.
@@ -555,7 +558,7 @@ public class ApiDataRequestHandler {
         Map<String, String> metadata = new HashMap<>(originalContent.getMetadata());
         metadata.put(ProcessedDataMetadataFields.RULES_SHA.getMetadataKey(), rulesSha);
         metadata.put(ProcessedDataMetadataFields.PROXY_VERSION.getMetadataKey(),
-                HealthCheckRequestHandler.JAVA_SOURCE_CODE_VERSION);
+                ProxyConstants.JAVA_SOURCE_CODE_VERSION);
         metadata.put(ProcessedDataMetadataFields.PII_SALT_SHA256.getMetadataKey(),
                 healthCheckRequestHandler.piiSaltHash());
 
@@ -713,8 +716,9 @@ public class ApiDataRequestHandler {
         // do we capture the new one?? ideally do this with listener/handler/trigger in Credential
         // itself, if that's possible
 
+
         ComposedHttpRequestInitializer initializer = ComposedHttpRequestInitializer
-                .of(initializeWithCredentials, new GzipedContentHttpRequestInitializer("Psoxy"));
+                .of(initializeWithCredentials, new GzipedContentHttpRequestInitializer(proxyConstants.getUserAgent()));
 
         return transport.createRequestFactory(initializer);
     }
@@ -735,6 +739,7 @@ public class ApiDataRequestHandler {
             return false;
         }
     }
+
 
     private void logRequestIfVerbose(HttpEventRequest request) {
         if (envVarsConfigService.isDevelopment()) {

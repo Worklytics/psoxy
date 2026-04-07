@@ -33,7 +33,7 @@ variable "config_parameter_prefix" {
 
 variable "default_labels" {
   type        = map(string)
-  description = "Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
+  description = "Labels to apply to all GCP resources created by this configuration. Passed to the Google provider's native `default_labels`."
   default     = {}
 
   validation {
@@ -114,6 +114,11 @@ variable "general_environment_variables" {
   validation {
     condition     = !contains(keys(var.general_environment_variables), "IS_DEVELOPMENT_MODE")
     error_message = "Cannot pass IS_DEVELOPMENT_MODE as a general environment variable; add connector id to `non_production_connectors` instead."
+  }
+
+  validation {
+    condition     = !contains(keys(var.general_environment_variables), "PSEUDONYMIZE_APP_IDS")
+    error_message = "Use 'pseudonymize_app_ids' to set value of PSEUDONYMIZE_APP_IDS environment variable for all sources, rather than passing it as a general environment variable."
   }
 
   validation {

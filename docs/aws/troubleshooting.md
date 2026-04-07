@@ -123,7 +123,7 @@ Error: error creating Lambda Function URL (psoxy-outlook-mail): ResourceConflict
 │ }
 │
 │   with module.psoxy-msft-connector["outlook-mail"].aws_lambda_function_url.lambda_url,
-│   on ../../modules/aws-psoxy-rest/main.tf line 26, in resource "aws_lambda_function_url" "lambda_url":
+│   on ../../modules/aws-proxy-api/main.tf line 26, in resource "aws_lambda_function_url" "lambda_url":
 │   26: resource "aws_lambda_function_url" "lambda_url" {
 ```
 

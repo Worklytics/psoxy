@@ -35,6 +35,12 @@ variable "deployment_bundle" {
   }
 }
 
+variable "deployment_bundle_hash" {
+  type        = string
+  description = "precomputed base64 SHA256 hash of the deployment bundle, if any"
+  default     = null
+}
+
 variable "force_bundle" {
   type        = bool
   description = "whether to force build of deployment bundle, even if it already exists"
@@ -91,18 +97,11 @@ variable "deployment_id" {
   default     = "Psoxy"
 }
 
-# TODO: remove in v0.5
-variable "rest_function_name_prefix" {
-  type        = string
-  description = "DEPRECATED - use `api_function_name_prefix`; prefix for REST function names"
-  default     = null
-}
 
-# TODO : change default in v0.5, or remove; should be based on deployment_id
 variable "api_function_name_prefix" {
   type        = string
-  description = "prefix for API function names"
-  default     = "psoxy-"
+  description = "prefix for API function names; if omitted, will default to value based on deployment_id"
+  default     = null
 }
 
 variable "use_api_gateway_v2" {

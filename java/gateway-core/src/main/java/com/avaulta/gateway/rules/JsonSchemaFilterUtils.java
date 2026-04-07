@@ -97,8 +97,6 @@ public class JsonSchemaFilterUtils {
     }
 
 
-    // 'oneOf' is deprecated in JsonSchemaFilter, but we still support it for now
-    @SuppressWarnings("deprecation")
     private Object filterBySchema(String path, JsonNode provisionalOutput, JsonSchemaFilter schema,
             JsonSchemaFilter root, List<String> redactionsMade) {
         if (schema.isRef()) {
@@ -116,25 +114,6 @@ public class JsonSchemaFilterUtils {
                 // cases like URLs relative to schema URI are not supported
                 throw new RuntimeException("unsupported ref: " + schema.getRef());
             }
-        } else if (schema.hasOneOf()) {
-            // Get first schema with matches its inner condition.
-            // See https://json-schema.org/understanding-json-schema/reference/combining.html#oneof
-            // NOTE: If is expected that the "oneOf" candidate should hava an if-else-then or
-            // if-then nodes
-            // inside, otherwise the condition will not be evaluated and only the first occurrence
-            // appearing in the list
-            // will be chosen
-            // DEPRECATED, bc case above is weird to me
-            for (JsonSchemaFilter oneOfCandidate : schema.getOneOf()) {
-                Object result = filterBySchema(path, provisionalOutput, oneOfCandidate, root,
-                        redactionsMade);
-
-                if (!(result instanceof NotMatchedConstant)) {
-                    return result;
-                }
-            }
-
-            return null;
         } else if (schema.hasAnyOf()) {
             // Get first schema with matches its inner condition.
             // See https://json-schema.org/understanding-json-schema/reference/combining#anyOf

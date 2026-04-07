@@ -85,18 +85,7 @@ public class JsonSchemaFilter {
     // --> take whichever schema produces the "largest" result (eg, longest as a string??)
     //List<CompoundJsonSchema> anyOf;
 
-    // part of JSON schema standard, but how to support for filters?
-    //  what if something validates against multiple of these, but filtering by the valid ones
-    //  yields different result??
-    // ultimately, don't see a use case anyways
-    /**
-     * passes filter if matches ANY of the schemas in the list (at least one)
-     * --> current implementation (as of 0.5.5) is NOT semantically equivalent to JSONS schema's oneOf, which seems wrong!! 
-     * JSON schema oneOf is exclusiveOr, not inclusiveOr; so in theory we should filter value OUT if it matches 0, or >1 
-     * of the schemas in the list; what's the use of that??? 
-     */
-    @Deprecated // use anyOf instead, which is cleaer
-    List<JsonSchemaFilter> oneOf;
+
 
     /**
      * passes filter if matches ANY of the schemas in the list (at least one)
@@ -198,11 +187,7 @@ public class JsonSchemaFilter {
         return this.constant != null;
     }
 
-    @Deprecated
-    @JsonIgnore
-    public boolean hasOneOf() {
-        return this.oneOf != null && !this.oneOf.isEmpty();
-    }
+
 
     @JsonIgnore
     public boolean hasAnyOf() {

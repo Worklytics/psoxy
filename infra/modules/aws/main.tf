@@ -3,13 +3,15 @@
 terraform {
   required_providers {
     aws = {
-      version = ">= 4.12, < 5.0"
+      source = "hashicorp/aws"
     }
   }
 }
 
 
 locals {
+  api_function_name_prefix = coalesce(var.api_function_name_prefix, "${lower(var.deployment_id)}-")
+
   aws_caller_statements = [
     for arn in var.caller_aws_arns :
     {
@@ -116,10 +118,11 @@ resource "random_password" "encryption_key" {
 module "psoxy_package" {
   source = "../psoxy-package"
 
-  implementation     = "aws"
-  path_to_psoxy_java = "${var.psoxy_base_dir}java"
-  deployment_bundle  = var.deployment_bundle
-  force_bundle       = var.force_bundle
+  implementation         = "aws"
+  path_to_psoxy_java     = "${var.psoxy_base_dir}java"
+  deployment_bundle      = var.deployment_bundle
+  deployment_bundle_hash = var.deployment_bundle_hash
+  force_bundle           = var.force_bundle
 }
 
 locals {
@@ -183,7 +186,7 @@ resource "aws_apigatewayv2_stage" "live" {
   }
 }
 
-# TODO: it would maximize granularity of policy to push this into `aws-psoxy-rest` module, and
+# TODO: it would maximize granularity of policy to push this into `aws-proxy-api` module, and
 # do the statements based on configured list of http methods; but cost of that is policy + attachment
 # for each instance, instead of one per deployment
 resource "aws_iam_policy" "invoke_api" {
@@ -375,4 +378,9 @@ output "webhook_collection_gateway" {
 
 output "webhook_collection_gateway_stage" {
   value = var.provision_webhook_collection_infra ? aws_apigatewayv2_stage.webhook_collector[0] : null
+}
+
+output "api_function_name_prefix" {
+  description = "The prefix used for API function names"
+  value       = local.api_function_name_prefix
 }

@@ -46,6 +46,12 @@ variable "deployment_bundle" {
   }
 }
 
+variable "deployment_bundle_hash" {
+  type        = string
+  description = "precomputed base64 SHA256 hash of the deployment bundle, if any"
+  default     = null
+}
+
 variable "force_bundle" {
   type        = bool
   description = "whether to force build of deployment bundle, even if it already exists"
@@ -94,11 +100,6 @@ variable "custom_artifacts_bucket_name" {
   default     = null
 }
 
-variable "default_labels" {
-  type        = map(string)
-  description = "*Alpha* in v0.4, only respected for new resources. Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
-  default     = {}
-}
 
 variable "support_bulk_mode" {
   type        = bool

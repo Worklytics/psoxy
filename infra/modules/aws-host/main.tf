@@ -1,9 +1,8 @@
 terraform {
-  required_version = ">= 1.3, < 2.0"
+  required_version = "~> 1.7"
 
   required_providers {
     aws = {
-      version = ">= 4.22, < 5.0"
     }
   }
 }
@@ -50,6 +49,7 @@ module "psoxy" {
   caller_aws_arns                    = var.caller_aws_arns
   caller_gcp_service_account_ids     = var.caller_gcp_service_account_ids
   deployment_bundle                  = var.deployment_bundle
+  deployment_bundle_hash             = var.deployment_bundle_hash
   force_bundle                       = var.force_bundle
   install_test_tool                  = var.install_test_tool
   deployment_id                      = module.env_id.id
@@ -216,7 +216,7 @@ module "instance_secrets_secrets_manager" {
 module "api_connector" {
   for_each = var.api_connectors
 
-  source = "../../modules/aws-psoxy-rest"
+  source = "../../modules/aws-proxy-api"
 
   environment_name                      = var.environment_name
   new_relic_account_id                  = var.new_relic_account_id
@@ -229,6 +229,7 @@ module "api_connector" {
   log_retention_days                    = var.log_retention_days
   api_caller_role_arn                   = module.psoxy.api_caller_role_arn
   example_api_calls                     = each.value.example_api_calls
+  example_api_requests                  = try(each.value.example_api_requests, [])
   aws_account_id                        = var.aws_account_id
   region                                = data.aws_region.current.id
   path_to_repo_root                     = var.psoxy_base_dir
@@ -255,8 +256,6 @@ module "api_connector" {
   todo_step            = var.todo_step
 
   environment_variables = merge(
-    var.general_environment_variables,
-    try(each.value.environment_variables, {}),
     {
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
       EMAIL_CANONICALIZATION = var.email_canonicalization
@@ -264,7 +263,9 @@ module "api_connector" {
         try(local.api_connector_rules_raw[each.key], null) != null ? sha1(local.api_connector_rules_raw[each.key]) : null
       )
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-    }
+    },
+    try(each.value.environment_variables, {}),
+    var.general_environment_variables,
   )
 }
 
@@ -292,7 +293,7 @@ module "api_connector_rules_raw" {
 module "bulk_connector" {
   for_each = var.bulk_connectors
 
-  source = "../../modules/aws-psoxy-bulk"
+  source = "../../modules/aws-proxy-bulk"
 
   aws_account_id                   = var.aws_account_id
   provision_iam_policy_for_testing = var.provision_testing_infra
@@ -339,16 +340,16 @@ module "bulk_connector" {
 
 
   environment_variables = merge(
-    var.general_environment_variables,
-    try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
       EMAIL_CANONICALIZATION = var.email_canonicalization
     },
+    try(each.value.environment_variables, {}),
     # If rules_raw is set and there's no custom override, pass it as RULES env var
     try(var.custom_bulk_connector_rules[each.key], null) == null && try(each.value.rules_raw, null) != null ? {
       RULES = each.value.rules_raw
     } : {},
+    var.general_environment_variables
   )
 }
 
@@ -391,13 +392,12 @@ module "webhook_collectors" {
   todos_as_local_files = var.todos_as_local_files
 
   environment_variables = merge(
-    var.general_environment_variables,
-    ## try(each.value.environment_variables, {}),
     {
       EMAIL_CANONICALIZATION = var.email_canonicalization
       ##CUSTOM_RULES_SHA       = try(var.custom_api_connector_rules[each.key], null) != null ? filesha1(var.custom_api_connector_rules[each.key]) : null
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-    }
+    },
+    var.general_environment_variables,
   )
 }
 
@@ -455,7 +455,7 @@ resource "aws_iam_role_policy_attachment" "invoke_webhook_collector_urls_to_test
 module "lookup_output" {
   for_each = var.lookup_table_builders
 
-  source = "../../modules/aws-psoxy-output-bucket"
+  source = "../../modules/aws-proxy-output-bucket"
 
   environment_name              = var.environment_name
   instance_id                   = each.key

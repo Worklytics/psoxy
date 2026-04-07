@@ -2,13 +2,13 @@ provider "google" {
   alias = "google_workspace"
 
   project                     = var.google_workspace_gcp_project_id
-  impersonate_service_account = var.google_workspace_sa_to_impersonate != null ? var.google_workspace_sa_to_impersonate : var.google_workspace_terraform_sa_account_email # TODO: remove ternary in 0.6.x
+  impersonate_service_account = var.google_workspace_sa_to_impersonate
 }
 
 
 module "worklytics_connectors_google_workspace" {
   source = "../../modules/worklytics-connectors-google-workspace"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors-google-workspace?ref=v0.5.19"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors-google-workspace?ref=v0.6.0"
 
 
   providers = {
