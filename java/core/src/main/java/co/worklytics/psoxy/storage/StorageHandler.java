@@ -97,9 +97,6 @@ public class StorageHandler {
     @Inject
     PathTemplateUtils pathTemplateUtils;
 
-    @Inject
-    ProxyConstants proxyConstants;
-
     static void warnIfEncodingDoesNotMatchFilename(@NonNull StorageEventRequest request, @Nullable String contentEncoding) {
         if (request.getSourceObjectPath().endsWith(EXTENSION_GZIP)
             && !Objects.equals(contentEncoding, CONTENT_ENCODING_GZIP)) {
