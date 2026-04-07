@@ -124,7 +124,11 @@ public interface GcpModule {
      */
     @Provides @Named("Native") @Singleton
     static ConfigService nativeConfigService(EnvVarsConfigService envVarsConfigService,
-                                             ParameterManagerConfigServiceFactory parameterManagerConfigServiceFactory) {
+                                             ParameterManagerConfigServiceFactory parameterManagerConfigServiceFactory,
+                                             SecretManagerSecretStoreFactory secretManagerSecretStoreFactory) {
+        String configStore = envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.CONFIG_STORE)
+            .orElse("PARAMETER_MANAGER");
+
         String projectId = ServiceOptions.getDefaultProjectId();
 
         // Prefer PATH_TO_INSTANCE_PARAMS if set; else fall back to PATH_TO_INSTANCE_CONFIG
@@ -141,16 +145,26 @@ public interface GcpModule {
 
         if (pathToInstanceParams.isEmpty() && pathToSharedParams.isEmpty()) {
             log.warning("Neither PATH_TO_INSTANCE_PARAMS/PATH_TO_INSTANCE_CONFIG nor PATH_TO_SHARED_PARAMS/PATH_TO_SHARED_CONFIG is set; " +
-                "Parameter Manager config will not be available.");
-            // return env vars only — no PM backing
+                "Native config will not be available.");
+            // return env vars only — no native backing
             return envVarsConfigService;
+        }
+
+        Duration instanceCacheTtl = Duration.ofMinutes(5);
+        Duration sharedCacheTtl = Duration.ofMinutes(20);
+
+        if ("SECRET_MANAGER".equals(configStore)) {
+            SecretManagerSecretStore instanceSm = secretManagerSecretStoreFactory.create(projectId, pathToInstanceParams);
+            SecretManagerSecretStore sharedSm = secretManagerSecretStoreFactory.create(projectId, pathToSharedParams);
+            
+            return CompositeConfigService.builder()
+                .preferred(new CachingConfigServiceDecorator(instanceSm, instanceCacheTtl))
+                .fallback(new CachingConfigServiceDecorator(sharedSm, sharedCacheTtl))
+                .build();
         }
 
         ParameterManagerConfigService instancePm = parameterManagerConfigServiceFactory.create(projectId, pathToInstanceParams);
         ParameterManagerConfigService sharedPm = parameterManagerConfigServiceFactory.create(projectId, pathToSharedParams);
-
-        Duration instanceCacheTtl = Duration.ofMinutes(5);
-        Duration sharedCacheTtl = Duration.ofMinutes(20);
 
         return CompositeConfigService.builder()
             .preferred(new CachingConfigServiceDecorator(instancePm, instanceCacheTtl))

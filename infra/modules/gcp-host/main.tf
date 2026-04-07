@@ -9,6 +9,9 @@ locals {
 }
 
 locals {
+  # determine whether to use Parameter Manager or Secret Manager for the configuration store
+  config_store = var.provision_project_level_iam ? "PARAMETER_MANAGER" : "SECRET_MANAGER"
+
   default_config_parameter_prefix       = length(var.environment_name) == 0 ? "psoxy_" : "${var.environment_name}_"
   config_parameter_prefix               = var.config_parameter_prefix == "" ? local.default_config_parameter_prefix : var.config_parameter_prefix
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
@@ -20,10 +23,13 @@ locals {
   api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
 
   # API connectors with rules_raw that don't have file-based overrides
-  api_connector_rules_raw = {
-    for k, v in var.api_connectors : k => v.rules_raw
-    if try(v.rules_raw, null) != null && !contains(keys(local.api_connector_rules_files), k)
-  }
+  api_connector_rules_content = merge(
+    {
+      for k, v in var.api_connectors : k => v.rules_raw
+      if try(v.rules_raw, null) != null && !contains(keys(local.api_connector_rules_files), k)
+    },
+    { for k, v in local.api_connector_rules_files : k => file(v) }
+  )
 }
 
 # TODO: probably pull all the way to the top level bc 1) proper tf style, 2) simplifies customization if it doesn't work for a particular environment
@@ -215,13 +221,12 @@ module "api_connector" {
 
   environment_variables = merge(
     {
-      BUNDLE_FILENAME      = module.psoxy.filename
-      IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
-      PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-      CUSTOM_RULES_SHA = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : (
-        try(local.api_connector_rules_raw[each.key], null) != null ? sha1(local.api_connector_rules_raw[each.key]) : null
-      )
+      BUNDLE_FILENAME        = module.psoxy.filename
+      IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
+      PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
+      CUSTOM_RULES_SHA       = try(local.api_connector_rules_content[each.key], null) != null ? sha1(local.api_connector_rules_content[each.key]) : null,
       EMAIL_CANONICALIZATION = var.email_canonicalization
+      CONFIG_STORE           = local.config_store
     },
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
@@ -238,39 +243,47 @@ module "api_connector" {
   ]
 }
 
-module "custom_api_connector_rules" {
-  for_each = local.api_connector_rules_files
-
-  source = "../../modules/gcp-pm-rules"
-
-  project_id        = var.gcp_project_id
-  prefix            = "${local.pm_shared_prefix}${replace(each.key, "-", "/")}/"
-  file_path         = each.value
-  instance_sa_email = module.api_connector[each.key].service_account_email
-}
 
 # Rules provisioned from rules_raw (content string, not file path)
-module "api_connector_rules_raw" {
-  for_each = local.api_connector_rules_raw
+module "api_connector_rules_pm" {
+  for_each = local.config_store == "PARAMETER_MANAGER" ? local.api_connector_rules_content : {}
 
-  source = "../../modules/gcp-pm-rules"
+  source = "../../modules/gcp-rules-pm"
 
-  project_id        = var.gcp_project_id
-  prefix            = "${local.pm_shared_prefix}${replace(each.key, "-", "/")}/"
-  content           = each.value
-  instance_sa_email = module.api_connector[each.key].service_account_email
+  project_id = var.gcp_project_id
+  prefix     = "${local.pm_shared_prefix}${each.key}/"
+  content    = each.value
 }
-# END API CONNECTORS
+
+module "api_connector_rules_sm" {
+  for_each = local.config_store == "SECRET_MANAGER" ? local.api_connector_rules_content : {}
+
+  source = "../../modules/gcp-sm-rules"
+
+  project_id = var.gcp_project_id
+  content    = each.value
+  prefix     = "${local.pm_shared_prefix}${replace(each.key, "-", "/")}/"
+}
 
 # Grant all API connector SAs the Parameter Reader role at project level
 # (per-parameter IAM is not yet available in the Google provider for PM)
 resource "google_project_iam_member" "api_connector_parameter_reader" {
-  for_each = var.api_connectors
+  for_each = local.config_store == "PARAMETER_MANAGER" ? var.api_connectors : {}
 
   project = var.gcp_project_id
   role    = module.psoxy.parameter_reader_role_id
   member  = "serviceAccount:${google_service_account.api_connectors[each.key].email}"
+
+  condition {
+    title       = "Restrict read parameter to instances own parameters"
+    description = "Allow reading parameter"
+    expression  = "resource.name.startsWith('projects/_/locations/global/parameters/${local.pm_shared_prefix}${each.key}/')"
+  }
 }
+
+# END API CONNECTORS
+
+
 
 
 # BEGIN WEBHOOK COLLECTORS
@@ -335,12 +348,14 @@ module "webhook_collector" {
   output_path_prefix                 = each.value.output_path_prefix
   example_identity                   = try(each.value.example_identity, null)
   example_payload                    = try(each.value.example_payload, null)
+  config_store                       = local.config_store
 
   environment_variables = merge(
     {
       BUNDLE_FILENAME        = module.psoxy.filename
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
       EMAIL_CANONICALIZATION = var.email_canonicalization
+      CONFIG_STORE           = local.config_store
     },
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
@@ -355,11 +370,17 @@ module "webhook_collector" {
 
 # Grant webhook collector SAs the Parameter Reader role at project level
 resource "google_project_iam_member" "webhook_collector_parameter_reader" {
-  for_each = var.webhook_collectors
+  for_each = local.config_store == "PARAMETER_MANAGER" ? var.webhook_collectors : {}
 
   project = var.gcp_project_id
   role    = module.psoxy.parameter_reader_role_id
   member  = "serviceAccount:${google_service_account.webhook_collector[each.key].email}"
+
+  condition {
+    title       = "Restrict read parameter to instances own parameters"
+    description = "Allow reading parameter"
+    expression  = "resource.name.startsWith('projects/_/locations/global/parameters/${local.pm_shared_prefix}${each.key}/') || resource.name.startsWith('projects/_/locations/global/parameters/${local.pm_shared_prefix}${replace(upper(each.key), "-", "_")}/')"
+  }
 }
 
 # END WEBHOOK COLLECTORS
@@ -414,6 +435,7 @@ module "bulk_connector" {
       BUNDLE_FILENAME        = module.psoxy.filename
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
       EMAIL_CANONICALIZATION = var.email_canonicalization
+      CONFIG_STORE           = local.config_store
     },
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
@@ -426,11 +448,17 @@ module "bulk_connector" {
 
 # Grant bulk connector SAs the Parameter Reader role at project level
 resource "google_project_iam_member" "bulk_connector_parameter_reader" {
-  for_each = var.bulk_connectors
+  for_each = local.config_store == "PARAMETER_MANAGER" ? var.bulk_connectors : {}
 
   project = var.gcp_project_id
   role    = module.psoxy.parameter_reader_role_id
   member  = "serviceAccount:${module.bulk_connector[each.key].instance_sa_email}"
+
+  condition {
+    title       = "Restrict read parameter to instances own parameters"
+    description = "Allow reading parameter"
+    expression  = "resource.name.startsWith('projects/_/locations/global/parameters/${local.pm_shared_prefix}${each.key}/') || resource.name.startsWith('projects/_/locations/global/parameters/${local.pm_shared_prefix}${replace(upper(each.key), "-", "_")}/')"
+  }
 }
 
 # END BULK CONNECTORS

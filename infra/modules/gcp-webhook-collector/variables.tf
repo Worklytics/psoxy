@@ -286,3 +286,14 @@ variable "builder_sa_id" {
   description = "The fully-qualified ID of the custom builder service account used to build the Cloud Function."
   type        = string
 }
+
+variable "config_store" {
+  type        = string
+  description = "The storage mechanism to use for config: PARAMETER_MANAGER or SECRET_MANAGER"
+  default     = "PARAMETER_MANAGER"
+
+  validation {
+    condition     = contains(["PARAMETER_MANAGER", "SECRET_MANAGER"], var.config_store)
+    error_message = "The config_store must be either PARAMETER_MANAGER or SECRET_MANAGER."
+  }
+}

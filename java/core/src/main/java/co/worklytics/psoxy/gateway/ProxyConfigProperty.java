@@ -162,6 +162,12 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
      * in the bulk mode cases.
      */
     SOURCE,
+    
+    /**
+     * Store mechanism to use for configuration. E.g. "PARAMETER_MANAGER" or "SECRET_MANAGER"
+     * Default depends on the platform configuration.
+     */
+    CONFIG_STORE,
     ;
 
 

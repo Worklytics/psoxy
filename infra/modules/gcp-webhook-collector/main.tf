@@ -117,12 +117,21 @@ resource "google_kms_crypto_key_iam_member" "allow_function_to_access_public_key
 # END AUTH KEYS
 
 module "rules_parameter" {
+  count  = var.config_store == "PARAMETER_MANAGER" ? 1 : 0
+  source = "../gcp-rules-pm"
+
+  project_id = var.project_id
+  content    = file(var.rules_file)
+  prefix     = local.path_to_instance_config_parameters
+}
+
+module "rules_secret_sm" {
+  count  = var.config_store == "SECRET_MANAGER" ? 1 : 0
   source = "../gcp-sm-rules"
 
-  project_id        = var.project_id
-  instance_sa_email = var.service_account_email
-  file_path         = var.rules_file
-  prefix            = local.path_to_instance_config_parameters
+  project_id = var.project_id
+  content    = file(var.rules_file)
+  prefix     = local.path_to_instance_config_parameters
 }
 
 
@@ -304,6 +313,7 @@ resource "google_cloudfunctions2_function" "function" {
         PATH_TO_INSTANCE_CONFIG = local.path_to_instance_config_parameters,
         PATH_TO_SHARED_PARAMS   = local.path_to_shared_params,
         PATH_TO_INSTANCE_PARAMS = local.path_to_instance_params,
+        CONFIG_STORE            = var.config_store,
       },
       local.side_output_env_vars,
     )
