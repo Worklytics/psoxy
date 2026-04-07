@@ -31,6 +31,7 @@ module "worklytics_connectors" {
   jira_cloud_id                            = var.jira_cloud_id
   jira_server_url                          = var.jira_server_url
   jira_example_issue_id                    = var.jira_example_issue_id
+  atlassian_organization_id                = var.atlassian_organization_id
   salesforce_domain                        = var.salesforce_domain
   github_api_host                          = var.github_api_host
   github_enterprise_server_host            = var.github_enterprise_server_host
