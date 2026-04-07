@@ -1,6 +1,7 @@
 package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import dagger.Module;
@@ -85,4 +86,16 @@ public class TestModules {
             return WebhookCollectorModeConfig.builder().build();
         }
     }
+
+    @Module
+    public interface ForProxyConstants {
+        @Provides
+        @Singleton
+        static ProxyConstants proxyConstants() {
+            return ProxyConstants.builder()
+                .userAgent(ProxyConstants.buildDefaultUserAgent())
+                .build();
+        }
+    }
 }
+

@@ -39,6 +39,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
@@ -58,6 +59,7 @@ class StorageHandlerTest {
         MockModules.ForConfigService.class,
         MockModules.ForHostEnvironment.class,
         MockModules.ForSecretStore.class,
+        TestModules.ForProxyConstants.class,
     })
     public interface Container {
         void inject( StorageHandlerTest test);

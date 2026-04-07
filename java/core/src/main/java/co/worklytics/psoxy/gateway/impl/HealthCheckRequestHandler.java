@@ -23,6 +23,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
@@ -31,21 +32,7 @@ import dagger.Lazy;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.entity.ContentType;
 
-import javax.inject.Inject;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 /**
  * Request handler that performs health check duties
@@ -53,8 +40,6 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
 public class HealthCheckRequestHandler {
-
-    public static final String JAVA_SOURCE_CODE_VERSION = "v0.6.0";
 
     /**
      * a random UUID used to salt the hash of the salt.  Purpose of this is to invalidate any non-purpose built rainbow table solution.
@@ -82,6 +67,8 @@ public class HealthCheckRequestHandler {
     RulesUtils rulesUtils;
     @Inject
     HashUtils hashUtils;
+    @Inject
+    ProxyConstants proxyConstants;
 
     String piiSaltHash;
 
@@ -134,7 +121,8 @@ public class HealthCheckRequestHandler {
         }
 
         HealthCheckResult.HealthCheckResultBuilder healthCheckResult = HealthCheckResult.builder()
-                .javaSourceCodeVersion(JAVA_SOURCE_CODE_VERSION)
+                .javaSourceCodeVersion(ProxyConstants.JAVA_SOURCE_CODE_VERSION)
+                .userAgent(proxyConstants.getUserAgent())
                 .configuredSource(config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
                 .configuredHost(config.getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST).orElse(null))
                 .nonDefaultSalt(secretStore.getSecret(ProxyConfigProperty.PSOXY_SALT).isPresent())

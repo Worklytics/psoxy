@@ -38,6 +38,7 @@ import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
 import co.worklytics.psoxy.rules.RulesUtils;
@@ -234,7 +235,7 @@ public class StorageHandler {
         // applied, to aid traceability of pipelines
         return Map.of(
             BulkMetaData.INSTANCE_ID.getMetaDataKey(), hostEnvironment.getInstanceId(),
-            BulkMetaData.VERSION.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.BUNDLE_FILENAME).orElse("unknown"),
+            BulkMetaData.VERSION.getMetaDataKey(), ProxyConstants.JAVA_SOURCE_CODE_VERSION,
             BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), sourceBucket + "/" + sourceKey,
             BulkMetaData.RULES_SHA.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES).map(DigestUtils::sha1Hex).orElse("unknown")
         );

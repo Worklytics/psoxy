@@ -6,6 +6,7 @@ import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.storage.BulkDataTestUtils;
 import co.worklytics.psoxy.storage.StorageHandler;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
 import com.avaulta.gateway.rules.MultiTypeBulkDataRules;
 import com.avaulta.gateway.rules.RuleSet;
@@ -65,6 +66,7 @@ public class SlackDiscoveryBulkTests {
         Container.ForConfigService.class,
         MockModules.ForSecretStore.class,
         MockModules.ForHostEnvironment.class,
+        TestModules.ForProxyConstants.class,
     })
     public interface Container {
         void inject(SlackDiscoveryBulkTests test);
