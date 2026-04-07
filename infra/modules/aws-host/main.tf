@@ -49,6 +49,7 @@ module "psoxy" {
   caller_aws_arns                    = var.caller_aws_arns
   caller_gcp_service_account_ids     = var.caller_gcp_service_account_ids
   deployment_bundle                  = var.deployment_bundle
+  deployment_bundle_hash             = var.deployment_bundle_hash
   force_bundle                       = var.force_bundle
   install_test_tool                  = var.install_test_tool
   deployment_id                      = module.env_id.id
@@ -228,6 +229,7 @@ module "api_connector" {
   log_retention_days                    = var.log_retention_days
   api_caller_role_arn                   = module.psoxy.api_caller_role_arn
   example_api_calls                     = each.value.example_api_calls
+  example_api_requests                  = try(each.value.example_api_requests, [])
   aws_account_id                        = var.aws_account_id
   region                                = data.aws_region.current.id
   path_to_repo_root                     = var.psoxy_base_dir

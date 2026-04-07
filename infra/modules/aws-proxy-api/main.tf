@@ -33,9 +33,9 @@ locals {
   # but in latter case, seems to urldecode the path; such that /foo%25/bar becomes /foo//bar, which is not what we want
   # so oddly, for APIGatewayV2 we need to use 1.0 format instead of its default , even though that default is our usual case otherwise
   # AwsApiDataModeHybridHandler can apigateway v1, v2, or SQS events - but has to do the parsing itself
-  # Handler is for v2; APIGatewayV1Handler is for v1
+  # AwsApiGatewayV2ApiDataRequestHandler is for v2; APIGatewayV1Handler is for v1
 
-  sync_event_handler_implementation = local.use_api_gateway ? "APIGatewayV1Handler" : "Handler"
+  sync_event_handler_implementation = local.use_api_gateway ? "APIGatewayV1Handler" : "AwsApiGatewayV2ApiDataRequestHandler"
   event_handler_implementation      = var.enable_async_processing ? "AwsApiDataModeHybridHandler" : local.sync_event_handler_implementation
 
   provision_side_output_original_bucket  = try(var.side_output_original != null && var.side_output_original.bucket == null, false)

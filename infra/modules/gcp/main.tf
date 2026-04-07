@@ -175,10 +175,11 @@ resource "google_secret_manager_secret_version" "pseudonym_encryption_key_initia
 module "psoxy_package" {
   source = "../psoxy-package"
 
-  implementation     = "gcp"
-  path_to_psoxy_java = "${var.psoxy_base_dir}java"
-  deployment_bundle  = var.deployment_bundle
-  force_bundle       = var.force_bundle
+  implementation         = "gcp"
+  path_to_psoxy_java     = "${var.psoxy_base_dir}java"
+  deployment_bundle      = var.deployment_bundle
+  deployment_bundle_hash = var.deployment_bundle_hash
+  force_bundle           = var.force_bundle
 }
 
 locals {
