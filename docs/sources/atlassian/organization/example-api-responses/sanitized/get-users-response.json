@@ -1,0 +1,31 @@
+{
+  "data":[
+    {
+      "account_id":"p~eIeVD4DZOhLhu3hIvHUuQpwXpb6G4wevlT5nU_7YcerVUgpgwIUUPj63YCStKpH6kTLeZHyrC5rm_XTdrsrgZf2KMORsKOMg08cMnyb96uo",
+      "account_type":"atlassian",
+      "account_status":"active",
+      "email":"t~mZuL9Z-keb7sg2QivvmgUXsokOZjjCdhb-2QqgMaMfA@example.com",
+      "access_billable":true,
+      "last_active":"2024-01-15T10:30:00.000Z"
+    },
+    {
+      "account_id":"p~HhRofKzxVuj5HdJum2jZJbTHlyxvUHG1SVSvgpTY4xi_RPn4prfPEdzMDckhzADq0DpaHPFw0jyp2W7VZRAXycqLUKgtQFlBmB-xqKvgllo",
+      "account_type":"atlassian",
+      "account_status":"active",
+      "email":"t~CqRESK-fVN5QB06CFy0X-YLBVYf8Ucp7LiOynW6AyXI@example.com",
+      "access_billable":true,
+      "last_active":"2024-01-14T15:45:00.000Z"
+    },
+    {
+      "account_id":"p~qhwrU1-PafU343ZHSkivJ2a3eIFrjBePeQVCtY_t40vLq_s9BWzFG0OEuypqvDgmPNtfG45ic7M27u__ERIWUIuQfIxw6JopnM7IVGvw8UQ",
+      "account_type":"atlassian",
+      "account_status":"inactive",
+      "email":"t~IyjpQeu6QNdS9LZaEeQ4iYK9npTzQNd4wnOqwUfTcwo@example.com",
+      "access_billable":false,
+      "last_active":"2023-12-01T08:00:00.000Z"
+    }
+  ],
+  "links":{
+    "next":"https://api.atlassian.com/admin/v2/orgs/org-456/directories/dir-789/users?cursor=xyz789"
+  }
+}
