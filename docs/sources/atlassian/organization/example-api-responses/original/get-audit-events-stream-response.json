@@ -1,0 +1,112 @@
+{
+  "data": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440011",
+      "type": "rovo_agent_chat_started",
+      "time": "2024-01-16T08:15:00.000Z",
+      "attributes": {
+        "action": "rovo_agent_chat_started",
+        "actionCategory": "rovo",
+        "product": "rovo"
+      },
+      "actor": {
+        "id": "5b0c5b7a-1234-5678-90ab-cdef01234567",
+        "type": "user",
+        "auth": {
+          "authType": "session"
+        },
+        "onBehalfOf": {
+          "id": "5b0c5b7a-8888-5678-90ab-cdef01234567",
+          "email": "bob.smith@example.com"
+        },
+        "app": {
+          "id": "app-confluence",
+          "type": "first-party"
+        }
+      },
+      "context": {
+        "id": "site-123",
+        "type": "site"
+      },
+      "container": {
+        "id": "org-456",
+        "type": "organization"
+      },
+      "message": {
+        "content": "User initiated a Rovo agent chat session",
+        "format": "text/plain"
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440012",
+      "type": "rovo_search_performed",
+      "time": "2024-01-16T09:30:00.000Z",
+      "attributes": {
+        "action": "rovo_search_performed",
+        "actionCategory": "rovo",
+        "product": "rovo"
+      },
+      "actor": {
+        "id": "5b0c5b7a-1234-5678-90ab-cdef01234568",
+        "type": "user"
+      },
+      "context": {
+        "id": "site-123",
+        "type": "site"
+      },
+      "container": {
+        "id": "org-456",
+        "type": "organization"
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440013",
+      "type": "rovo_agent_updated",
+      "time": "2024-01-16T10:45:00.000Z",
+      "attributes": {
+        "action": "rovo_agent_updated",
+        "actionCategory": "rovo",
+        "product": "rovo"
+      },
+      "actor": {
+        "id": "5b0c5b7a-1234-5678-90ab-cdef01234569",
+        "type": "user"
+      },
+      "context": {
+        "id": "site-123",
+        "type": "site"
+      },
+      "container": {
+        "id": "org-456",
+        "type": "organization"
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440014",
+      "type": "user_login",
+      "time": "2024-01-16T07:00:00.000Z",
+      "attributes": {
+        "action": "user_login",
+        "actionCategory": "authentication",
+        "product": "admin"
+      },
+      "actor": {
+        "id": "5b0c5b7a-1234-5678-90ab-cdef01234570",
+        "type": "user"
+      },
+      "context": {
+        "id": "site-123",
+        "type": "site"
+      },
+      "container": {
+        "id": "org-456",
+        "type": "organization"
+      }
+    }
+  ],
+  "links": {
+    "next": "https://api.atlassian.com/admin/v1/orgs/org-456/events-stream?cursor=stream_cursor_123"
+  }
+}
+
+

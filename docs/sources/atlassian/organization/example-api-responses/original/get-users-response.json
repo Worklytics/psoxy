@@ -1,0 +1,33 @@
+{
+  "data": [
+    {
+      "account_id": "5b0c5b7a-1234-5678-90ab-cdef01234567",
+      "account_type": "atlassian",
+      "account_status": "active",
+      "email": "john.doe@example.com",
+      "access_billable": true,
+      "last_active": "2024-01-15T10:30:00.000Z"
+    },
+    {
+      "account_id": "5b0c5b7a-1234-5678-90ab-cdef01234568",
+      "account_type": "atlassian",
+      "account_status": "active",
+      "email": "jane.smith@example.com",
+      "access_billable": true,
+      "last_active": "2024-01-14T15:45:00.000Z"
+    },
+    {
+      "account_id": "5b0c5b7a-1234-5678-90ab-cdef01234569",
+      "account_type": "atlassian",
+      "account_status": "inactive",
+      "email": "bob.johnson@example.com",
+      "access_billable": false,
+      "last_active": "2023-12-01T08:00:00.000Z"
+    }
+  ],
+  "links": {
+    "next": "https://api.atlassian.com/admin/v2/orgs/org-456/directories/dir-789/users?cursor=xyz789"
+  }
+}
+
+
