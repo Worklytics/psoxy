@@ -19,6 +19,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LoggingConfiguration;
 import co.worklytics.psoxy.gateway.ProcessedDataStage;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
@@ -70,8 +71,21 @@ public class FunctionRuntimeModule {
     }
 
     @Provides
-    static HttpRequestFactory providesHttpRequestFactory(HttpTransportFactory httpTransportFactory) {
-        return httpTransportFactory.create().createRequestFactory();
+    @Singleton
+    static ProxyConstants providesProxyConstants(ConfigService configService) {
+        String userAgent = configService.getConfigPropertyAsOptional(ProxyConfigProperty.USER_AGENT)
+                .orElse(ProxyConstants.buildDefaultUserAgent());
+
+        return ProxyConstants.builder()
+            .userAgent(userAgent)
+            .build();
+    }
+
+    @Provides
+    static HttpRequestFactory providesHttpRequestFactory(HttpTransportFactory httpTransportFactory, ProxyConstants proxyConstants) {
+        return httpTransportFactory.create().createRequestFactory(request -> {
+            request.getHeaders().setUserAgent(proxyConstants.getUserAgent());
+        });
     }
 
     // q: should we just replace this with a Provider<HttpTransport>, rather than having more coupling to google-http-client classes?

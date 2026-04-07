@@ -256,8 +256,6 @@ module "api_connector" {
   todo_step            = var.todo_step
 
   environment_variables = merge(
-    var.general_environment_variables,
-    try(each.value.environment_variables, {}),
     {
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
       EMAIL_CANONICALIZATION = var.email_canonicalization
@@ -265,7 +263,9 @@ module "api_connector" {
         try(local.api_connector_rules_raw[each.key], null) != null ? sha1(local.api_connector_rules_raw[each.key]) : null
       )
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-    }
+    },
+    try(each.value.environment_variables, {}),
+    var.general_environment_variables,
   )
 }
 
@@ -340,16 +340,16 @@ module "bulk_connector" {
 
 
   environment_variables = merge(
-    var.general_environment_variables,
-    try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
       EMAIL_CANONICALIZATION = var.email_canonicalization
     },
+    try(each.value.environment_variables, {}),
     # If rules_raw is set and there's no custom override, pass it as RULES env var
     try(var.custom_bulk_connector_rules[each.key], null) == null && try(each.value.rules_raw, null) != null ? {
       RULES = each.value.rules_raw
     } : {},
+    var.general_environment_variables
   )
 }
 
@@ -392,13 +392,12 @@ module "webhook_collectors" {
   todos_as_local_files = var.todos_as_local_files
 
   environment_variables = merge(
-    var.general_environment_variables,
-    ## try(each.value.environment_variables, {}),
     {
       EMAIL_CANONICALIZATION = var.email_canonicalization
       ##CUSTOM_RULES_SHA       = try(var.custom_api_connector_rules[each.key], null) != null ? filesha1(var.custom_api_connector_rules[each.key]) : null
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-    }
+    },
+    var.general_environment_variables,
   )
 }
 

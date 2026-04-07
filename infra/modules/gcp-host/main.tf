@@ -211,8 +211,6 @@ module "api_connector" {
 
 
   environment_variables = merge(
-    var.general_environment_variables,
-    try(each.value.environment_variables, {}),
     {
       BUNDLE_FILENAME      = module.psoxy.filename
       IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
@@ -221,7 +219,9 @@ module "api_connector" {
         try(local.api_connector_rules_raw[each.key], null) != null ? sha1(local.api_connector_rules_raw[each.key]) : null
       )
       EMAIL_CANONICALIZATION = var.email_canonicalization
-    }
+    },
+    try(each.value.environment_variables, {}),
+    var.general_environment_variables,
   )
 
   secret_bindings = merge(
@@ -323,13 +323,13 @@ module "webhook_collector" {
   example_payload                    = try(each.value.example_payload, null)
 
   environment_variables = merge(
-    var.general_environment_variables,
-    try(each.value.environment_variables, {}),
     {
       BUNDLE_FILENAME        = module.psoxy.filename
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
       EMAIL_CANONICALIZATION = var.email_canonicalization
-    }
+    },
+    try(each.value.environment_variables, {}),
+    var.general_environment_variables,
   )
 
   secret_bindings = module.psoxy.secrets
@@ -379,8 +379,6 @@ module "bulk_connector" {
   builder_sa_id                     = module.psoxy.builder_sa_id
 
   environment_variables = merge(
-    var.general_environment_variables,
-    try(each.value.environment_variables, {}),
     {
       SOURCE = each.value.source_kind
       RULES = (
@@ -393,7 +391,9 @@ module "bulk_connector" {
       BUNDLE_FILENAME        = module.psoxy.filename
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
       EMAIL_CANONICALIZATION = var.email_canonicalization
-    }
+    },
+    try(each.value.environment_variables, {}),
+    var.general_environment_variables,
   )
 
   depends_on = [
