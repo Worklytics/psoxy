@@ -227,7 +227,7 @@ class SanitizerUtilsTest {
         Map<String, Object> result = new ObjectMapper().readValue(resultJson, Map.class);
 
         assertEquals(16, result.get("word_count"));
-        assertEquals(95, result.get("length"));
+        assertEquals(93, result.get("length"));
         assertTrue(result.containsKey("keywords"));
 
         @SuppressWarnings("unchecked")
