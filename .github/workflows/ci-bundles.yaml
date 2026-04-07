@@ -80,6 +80,9 @@ jobs:
         run: |
           # uber-jar should be something like: psoxy-aws-{VERSION}.jar
           JAR_FILE=$(find . -name "*.jar" | head -n1) 
+          
+          JAR_HASH=$(openssl dgst -sha256 -binary "$JAR_FILE" | openssl base64 | tr -d '\n')
+          echo "Bundle Hash: $JAR_HASH"
           echo "Uploading $JAR_FILE to s3://$S3_BUCKET/"
 
-          aws s3 cp "$JAR_FILE" "s3://$S3_BUCKET/" --region "$AWS_REGION"
+          aws s3 cp "$JAR_FILE" "s3://$S3_BUCKET/" --metadata bundle_hash="$JAR_HASH" --region "$AWS_REGION"

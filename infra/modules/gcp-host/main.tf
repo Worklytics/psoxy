@@ -38,6 +38,7 @@ module "psoxy" {
   environment_id_prefix             = local.environment_id_prefix
   psoxy_base_dir                    = var.psoxy_base_dir
   deployment_bundle                 = var.deployment_bundle
+  deployment_bundle_hash            = var.deployment_bundle_hash
   force_bundle                      = var.force_bundle
   bucket_location                   = var.gcp_region
   config_parameter_prefix           = local.config_parameter_prefix
@@ -189,7 +190,7 @@ module "api_connector" {
   vpc_config                            = module.psoxy.vpc_config
   path_to_repo_root                     = var.psoxy_base_dir
   example_api_calls                     = each.value.example_api_calls
-  example_api_requests                  = each.value.example_api_requests
+  example_api_requests                  = try(each.value.example_api_requests, [])
   example_api_calls_user_to_impersonate = each.value.example_api_calls_user_to_impersonate
   todo_step                             = var.todo_step
   target_host                           = each.value.target_host

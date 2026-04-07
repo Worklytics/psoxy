@@ -35,6 +35,12 @@ variable "deployment_bundle" {
   }
 }
 
+variable "deployment_bundle_hash" {
+  type        = string
+  description = "precomputed base64 SHA256 hash of the deployment bundle, if any"
+  default     = null
+}
+
 variable "force_bundle" {
   type        = bool
   description = "whether to force build of deployment bundle, even if it already exists"
