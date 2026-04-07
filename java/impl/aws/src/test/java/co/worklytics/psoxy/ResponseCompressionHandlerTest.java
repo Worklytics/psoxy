@@ -23,9 +23,10 @@ class ResponseCompressionHandlerTest {
     @ParameterizedTest
     @ValueSource(ints = {0, 512, 1024, 2047, 2048, 100_000})
     void compress(int bodySize) {
+        RandomStringUtils randomStringUtils = RandomStringUtils.insecure();
 
         ResponseCompressionHandler responseCompressionHandler = new ResponseCompressionHandler();
-        String uncompressed = RandomStringUtils.random(bodySize);
+        String uncompressed = randomStringUtils.next(bodySize);
 
         HttpEventResponse originalResponse =
             HttpEventResponse.builder().statusCode(200).headers(new HashMap<>()).body(uncompressed).build();
