@@ -241,7 +241,7 @@ NOTE: we will support Java versions for duration of official support windows, in
 
 NOTE: Using `terraform` is not strictly necessary, but it is the only supported method. You may provision your infrastructure via your host's CLI, web console, or another infrastructure provisioning tool, but we don't offer documentation or support in doing so.  Adapting one of our [terraform examples](https://github.com/Worklytics/psoxy/tree/main/infra/examples) or writing your own config that re-uses our [modules](https://github.com/Worklytics/psoxy/tree/main/infra/modules) will simplify things greatly.
 
-NOTE: from v0.4.59, we've relaxed Terraform version constraint on our modules to allow up to 1.9.x. However, we are not officially supporting this, as we strive to maintain compatibility with both OpenTofu and Terraform.
+NOTE: from v0.6.x, we require Terraform 1.7.x as minimum. We strive to maintain compatibility with both OpenTofu and Terraform.
 
 Depending on your Cloud Host / Data Sources, you will need:
 
