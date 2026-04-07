@@ -61,6 +61,8 @@
     * [Confluence Cloud](sources/atlassian/confluence/README.md)
     * [Jira Cloud](sources/atlassian/jira/README.md)
     * [Jira Data Center](sources/atlassian/jira/jira-server.md)
+    * [Audit Events](sources/atlassian/organization/README.md)
+    * [Rovo](sources/atlassian/organization/README.md)
   * [ChatGPT Enterprise](sources/chatgpt-enterprise/README.md)
   * [Cursor](sources/cursor/README.md)
   * [Dropbox](sources/dropbox-business/README.md)

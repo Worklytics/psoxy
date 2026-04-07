@@ -1,6 +1,6 @@
-# Atlassian Organization Admin API
+# Atlassian Audit Event / Rovo through Organization API
 
-This connector provides access to Atlassian Organization Admin API for audit logs and directory information.
+This connector provides access to Atlassian Audit Event for audit logs and directory information, including Atlassian Rovo usage
 
 ## Overview
 
