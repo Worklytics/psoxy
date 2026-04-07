@@ -28,3 +28,8 @@ variable "content" {
   default     = null
 }
 
+variable "instance_sa_email" {
+  type        = string
+  description = "The email address of the service account to use for the proxy instance that will access the rules."
+}
+

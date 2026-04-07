@@ -260,9 +260,10 @@ module "api_connector_rules_sm" {
 
   source = "../../modules/gcp-sm-rules"
 
-  project_id = var.gcp_project_id
-  content    = each.value
-  prefix     = "${local.pm_shared_prefix}${replace(each.key, "-", "/")}/"
+  project_id        = var.gcp_project_id
+  content           = each.value
+  prefix            = "${local.pm_shared_prefix}${replace(each.key, "-", "/")}/"
+  instance_sa_email = module.api_connector[each.key].service_account_email
 }
 
 # Grant all API connector SAs the Parameter Reader role at project level

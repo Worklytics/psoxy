@@ -129,9 +129,10 @@ module "rules_secret_sm" {
   count  = var.config_store == "SECRET_MANAGER" ? 1 : 0
   source = "../gcp-sm-rules"
 
-  project_id = var.project_id
-  content    = file(var.rules_file)
-  prefix     = local.path_to_instance_config_parameters
+  project_id        = var.project_id
+  content           = file(var.rules_file)
+  prefix            = local.path_to_instance_config_parameters
+  instance_sa_email = var.service_account_email
 }
 
 
