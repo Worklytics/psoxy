@@ -3,5 +3,5 @@
 ## Examples
 
 - Example Data : 
-  - Original [surve-example.csv](surve-example.csv) |
-  - Sanitized [surve-example-sanitized.csv](surve-example-sanitized.csv)
+  - Original [survey-example.csv](survey-example.csv) |
+  - Sanitized [survey-example-sanitized.csv](survey-example-sanitized.csv)

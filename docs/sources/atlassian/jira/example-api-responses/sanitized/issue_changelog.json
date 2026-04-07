@@ -104,7 +104,7 @@
           "fieldtype":"jira",
           "fieldId":"assignee",
           "tmpFromAccountId":"t~7Z5-G-SoDUxVDxHtoJZFqVZ-ri3XiGo3ylaDNUVtY6Q",
-          "tmpToAccountId":"null"
+          "tmpToAccountId":null
         }
       ]
     }

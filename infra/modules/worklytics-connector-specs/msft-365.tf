@@ -34,7 +34,7 @@ locals {
       "/v1.0/users",
       "/v1.0/users/${var.example_msft_user_guid}",
       "/v1.0/groups",
-      "/v1.0/groups/{group-id}/members"
+      "/v1.0/groups/{GROUP_ID}/members"
     ]
   }
 
@@ -71,7 +71,7 @@ locals {
         "/v1.0/users/${var.example_msft_user_guid}/calendarView?startDateTime=${timeadd(var.example_api_calls_sample_date, "-4320h")}&endDateTime=${var.example_api_calls_sample_date}",
         "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
         "/v1.0/groups",
-        "/v1.0/groups/{group-id}/members"
+        "/v1.0/groups/{GROUP_ID}/members"
       ]
     },
     "outlook-mail" : {
@@ -97,7 +97,7 @@ locals {
         "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
         "/v1.0/users/${var.example_msft_user_guid}/mailFolders/SentItems/messages",
         "/v1.0/groups",
-        "/v1.0/groups/{group-id}/members"
+        "/v1.0/groups/{GROUP_ID}/members"
       ]
     },
     "msft-teams" : {

@@ -1,10 +1,9 @@
 #!/usr/bin/env node
-import { createRequire } from 'module';
-import { Command, Option } from 'commander';
 import chalk from 'chalk';
-import psoxyTestFileUpload from './psoxy-test-file-upload.js';
+import { Command, Option } from 'commander';
+import { createRequire } from 'module';
 import getLogger from './lib/logger.js';
-import _ from 'lodash';
+import psoxyTestFileUpload from './psoxy-test-file-upload.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('./package.json');
@@ -30,7 +29,7 @@ const { version } = require('./package.json');
     .requiredOption('-f, --file <path/to/file>', 'Path of the file to be processed')
     .requiredOption('-o, --output <bucketName>', 'Output bucket\'s name')
     .option('-r, --role <arn>', 'ARN of AWS role to assume; if omitted, AWS CLI must be authenticated as a principal with perms to write to input bucket and read from output bucket')
-    .option('-re, --region <region>', 'AWS region of the buckets (input/output)',
+    .option('--region <region>', 'AWS region of the buckets (input/output)',
       'us-east-1')
     .option('-v, --verbose', 'Verbose output', false)
     .option('-s, --save-sanitized-file', 'Save sanitized file to disk', false)
@@ -42,7 +41,7 @@ const { version } = require('./package.json');
   program.addHelpText(
     'after',
     `
-      AWS example call: node cli-file-upload.js -d AWS -i my-input-bucket -o my-output-bucket -f /path/to/file -r arn:aws:iam::id:myRole -re us-east-1
+      AWS example call: node cli-file-upload.js -d AWS -i my-input-bucket -o my-output-bucket -f /path/to/file -r arn:aws:iam::id:myRole --region us-east-1
       GCP example call: node cli-file-upload.js -d GCP -i my-input-bucket -o my-output-bucket -f /path/to/file
     `
   );

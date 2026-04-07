@@ -1,5 +1,6 @@
 package com.avaulta.gateway.rules;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -34,6 +35,7 @@ public class JsonSchemaFilterUtils {
     @Value
     public static class Options implements Serializable {
 
+        @Serial
         private static final long serialVersionUID = 1L;
 
         /**
@@ -112,25 +114,6 @@ public class JsonSchemaFilterUtils {
                 // cases like URLs relative to schema URI are not supported
                 throw new RuntimeException("unsupported ref: " + schema.getRef());
             }
-        } else if (schema.hasOneOf()) {
-            // Get first schema with matches its inner condition.
-            // See https://json-schema.org/understanding-json-schema/reference/combining.html#oneof
-            // NOTE: If is expected that the "oneOf" candidate should hava an if-else-then or
-            // if-then nodes
-            // inside, otherwise the condition will not be evaluated and only the first occurrence
-            // appearing in the list
-            // will be chosen
-            // DEPRECATED, bc case above is weird to me
-            for (JsonSchemaFilter oneOfCandidate : schema.getOneOf()) {
-                Object result = filterBySchema(path, provisionalOutput, oneOfCandidate, root,
-                        redactionsMade);
-
-                if (!(result instanceof NotMatchedConstant)) {
-                    return result;
-                }
-            }
-
-            return null;
         } else if (schema.hasAnyOf()) {
             // Get first schema with matches its inner condition.
             // See https://json-schema.org/understanding-json-schema/reference/combining#anyOf
@@ -231,7 +214,9 @@ public class JsonSchemaFilterUtils {
                     return null;
                 }
             } else if (schema.isInteger()) {
-                if (provisionalOutput.canConvertToInt() || provisionalOutput.isNull()) {
+                if (provisionalOutput.isNull()) {
+                    return null;
+                } else if (provisionalOutput.canConvertToInt()) {
                     return provisionalOutput.intValue();
                 } else if (provisionalOutput.canConvertToLong()) {
                     return provisionalOutput.longValue();
@@ -243,7 +228,9 @@ public class JsonSchemaFilterUtils {
                     return null;
                 }
             } else if (schema.isNumber()) {
-                if (provisionalOutput.isNumber() || provisionalOutput.isNull()) {
+                if (provisionalOutput.isNull()) {
+                    return null;
+                } else if (provisionalOutput.isNumber()) {
                     return provisionalOutput.numberValue();
                 } else {
                     if (options.getLogRedactions()) {

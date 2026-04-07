@@ -1,7 +1,6 @@
 package co.worklytics.psoxy;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +25,7 @@ import com.google.pubsub.v1.ReceivedMessage;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProcessedContent;
-import co.worklytics.psoxy.gateway.WebhookCollectorModeConfigProperty;
+import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.impl.BatchMergeHandler;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.InboundWebhookHandler;
@@ -43,9 +42,10 @@ public class GcpWebhookCollectionHandler {
     GcpEnvironment gcpEnvironment;
     BatchMergeHandler batchMergeHandler;
     ConfigService configService;
+    WebhookCollectorModeConfig webhookCollectorModeConfig;
     JwksDecorator jwksResource;
     EnvVarsConfigService envVarsConfigService;
-    Lazy<GcpEnvironment.WebhookCollectorModeConfig> webhookCollectorModeConfig;
+    Lazy<GcpEnvironment.GcpWebhookCollectorModeConfig> gcpWebhookCollectorModeConfig;
 
     // standard Bearer token prefix on Authorization header
     static final String BEARER_PREFIX = "Bearer ";
@@ -57,16 +57,41 @@ public class GcpWebhookCollectionHandler {
                                        BatchMergeHandler batchMergeHandler,
                                        JwksDecorator.Factory jwksDecoratorFactory,
                                        ConfigService configService,
+                                       WebhookCollectorModeConfig webhookCollectorModeConfig,
                                        EnvVarsConfigService envVarsConfigService,
-                                       Lazy<GcpEnvironment.WebhookCollectorModeConfig> webhookCollectorModeConfig) {
+                                       Lazy<GcpEnvironment.GcpWebhookCollectorModeConfig> gcpWebhookCollectorModeConfig) {
         this.gcpEnvironment = gcpEnvironment;
         this.inboundWebhookHandler = inboundWebhookHandler;
         this.googleIdTokenVerifierFactory = googleIdTokenVerifierFactory;
         this.batchMergeHandler = batchMergeHandler;
         this.jwksResource = jwksDecoratorFactory.create(inboundWebhookHandler);
         this.configService = configService;
-        this.envVarsConfigService = envVarsConfigService;
         this.webhookCollectorModeConfig = webhookCollectorModeConfig;
+        this.envVarsConfigService = envVarsConfigService;
+        this.gcpWebhookCollectorModeConfig = gcpWebhookCollectorModeConfig;
+
+        
+        // Pre-warm the public key cache during function initialization
+        // This ensures first JWKS request doesn't wait for KMS fetch
+        warmPublicKeyCache();
+    }
+    
+    /**
+     * Pre-fetches public keys from KMS to populate the cache during Cloud Function initialization.
+     * This reduces latency for the first JWKS endpoint request after the function starts.
+     * Failures are logged but don't prevent function from starting.
+     */
+    private void warmPublicKeyCache() {
+        try {
+            log.info("Pre-warming public key cache during Cloud Function initialization");
+            // Trigger cache population by fetching keys
+            int keyCount = inboundWebhookHandler.acceptableAuthKeys().size();
+            log.info("Successfully pre-warmed cache with " + keyCount + " public key(s)");
+        } catch (Exception e) {
+            // Don't fail function initialization if key fetch fails
+            // Keys will be fetched on-demand when first needed
+            log.warning("Failed to pre-warm public key cache during initialization (keys will be fetched on-demand): " + e.getMessage());
+        }
     }
 
     /**
@@ -149,7 +174,8 @@ public class GcpWebhookCollectionHandler {
         // use that as Issuer in the inbound webhook context, Audience in the internal service context
 
         //TODO: fill
-        String endpointUrl = configService.getConfigPropertyOrError(WebhookCollectorModeConfigProperty.AUTH_ISSUER);
+        String endpointUrl = webhookCollectorModeConfig.getAuthIssuer()
+            .orElseThrow(() -> new IllegalStateException("AUTH_ISSUER is required but not configured"));
 
         GoogleIdTokenVerifier internalServiceVerifier = googleIdTokenVerifierFactory.getVerifierForAudience(endpointUrl);
 
@@ -191,7 +217,7 @@ public class GcpWebhookCollectionHandler {
     @SneakyThrows
     void processBatch() {
         ProjectSubscriptionName subscriptionName  =
-            ProjectSubscriptionName.parse(webhookCollectorModeConfig.get().getBatchMergeSubscription());
+            ProjectSubscriptionName.parse(gcpWebhookCollectorModeConfig.get().getBatchMergeSubscription());
 
         SubscriberStubSettings settings = SubscriberStubSettings.newBuilder().build();
 
@@ -201,7 +227,7 @@ public class GcpWebhookCollectionHandler {
         try (SubscriberStub subscriber = settings.createStub()) {
             do {
                 PullRequest pullRequest = PullRequest.newBuilder()
-                    .setMaxMessages(webhookCollectorModeConfig.get().getBatchSize())
+                    .setMaxMessages(gcpWebhookCollectorModeConfig.get().getBatchSize())
                     .setSubscription(subscriptionName.toString())
                     .build();
 
@@ -227,14 +253,14 @@ public class GcpWebhookCollectionHandler {
                 subscriber.acknowledgeCallable().call(ackRequest);
                 log.log(Level.INFO, "Processed " + ackIds.size() + " messages");
 
-                if (ackIds.size() == webhookCollectorModeConfig.get().getBatchSize()) {
+                if (ackIds.size() == gcpWebhookCollectorModeConfig.get().getBatchSize()) {
                     possibleAdditionalMessagesWaiting = true;
                     log.log(Level.INFO, "Processed a full batch; if timeout NOT reached, will attempt to process another batch");
                 } else {
                     possibleAdditionalMessagesWaiting = false;
                 }
             } while (possibleAdditionalMessagesWaiting
-                && stopWatch.getTime(TimeUnit.SECONDS) < webhookCollectorModeConfig.get().getBatchInvocationTimeoutSeconds());
+                && stopWatch.getTime(TimeUnit.SECONDS) < gcpWebhookCollectorModeConfig.get().getBatchInvocationTimeoutSeconds());
 
             if (possibleAdditionalMessagesWaiting) {
                 log.log(Level.WARNING, "Batch processed stopped due to timeout; consider increasing BATCH_SIZE, cron frequency and concurrency, or batch timeout if this happens repeatedly");

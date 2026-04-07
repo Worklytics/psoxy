@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">= 1.7, < 2.0"
+  required_version = "~> 1.7"
 
   required_providers {
     google = {
-      version = "~> 5.0" # TODO: actually go to 6.0 for proxy v0.5
+      version = "~> 7.0"
     }
   }
 
@@ -14,6 +14,7 @@ terraform {
 
 provider "google" {
   impersonate_service_account = var.gcp_terraform_sa_account_email
+  default_labels              = var.default_labels
 }
 
 locals {
@@ -21,7 +22,7 @@ locals {
 }
 
 # TODO: this has 5 remote modules; combine some?
-#  eg, worklytics-connectors + gcp-host + worklytics-psoxy-connection-generic into a single
+#  eg, worklytics-connectors + gcp-host + worklytics-proxy-connection-generic into a single
 #     gcp-host-for-worklytics? poor TF style, but simplifies root module?
 
 # in effect, these are for sources for which authentication/authorization cannot (or need not)
@@ -29,8 +30,9 @@ locals {
 # call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.5.10"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.6.0"
 
+  base_dir                                 = var.psoxy_base_dir
   enabled_connectors                       = var.enabled_connectors
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
   confluence_example_cloud_id              = var.confluence_example_cloud_id
@@ -46,7 +48,14 @@ module "worklytics_connectors" {
   github_copilot_installation_id           = var.github_copilot_installation_id
   github_organization                      = var.github_organization
   github_example_repository                = var.github_example_repository
+  gitlab_host                              = var.gitlab_host
+  gitlab_example_group_id                  = var.gitlab_example_group_id
+  gitlab_example_project_id                = var.gitlab_example_project_id
+  gong_instance_subdomain                  = var.gong_instance_subdomain
+  glean_instance_subdomain                 = var.glean_instance_subdomain
   salesforce_example_account_id            = var.salesforce_example_account_id
+  todos_as_local_files                     = var.todos_as_local_files
+  todo_step                                = 1
 }
 
 # sources which require additional dependencies are split into distinct Terraform files, following
@@ -60,6 +69,12 @@ locals {
     var.custom_api_connectors,
     {}
   )
+
+  bulk_connectors = merge(
+    module.worklytics_connectors.enabled_bulk_connectors,
+    var.custom_bulk_connectors,
+  )
+
 
   source_authorization_todos = concat(
     module.worklytics_connectors.todos,
@@ -76,21 +91,14 @@ locals {
   )
 }
 
-locals {
-  bulk_connectors = merge(
-    module.worklytics_connectors.enabled_bulk_connectors,
-    var.custom_bulk_connectors,
-  )
-}
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=rc-v0.5.10"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.6.0"
 
   gcp_project_id                    = var.gcp_project_id
   environment_name                  = var.environment_name
   config_parameter_prefix           = var.config_parameter_prefix
-  default_labels                    = var.default_labels
   worklytics_sa_emails              = var.worklytics_sa_emails
   psoxy_base_dir                    = var.psoxy_base_dir
   deployment_bundle                 = var.deployment_bundle
@@ -124,34 +132,50 @@ module "psoxy" {
   todo_step                       = local.max_auth_todo_step
   bucket_force_destroy            = var.bucket_force_destroy
   tf_gcp_principal_email          = var.gcp_terraform_sa_account_email
+  provision_project_level_iam     = var.provision_project_level_iam
+  bucket_access_logs_destination  = var.bucket_access_logs_destination
 }
 
 locals {
-  all_connectors = merge(local.api_connectors, local.bulk_connectors)
-  all_instances  = merge(module.psoxy.bulk_connector_instances, module.psoxy.api_connector_instances)
+  # Webhook collectors are handled separately to avoid cycles - their metadata comes from outputs
+  webhook_connectors_for_worklytics = {
+    for k, v in module.psoxy.webhook_collector_instances : k => {
+      source_kind           = var.webhook_collectors[k].source_kind
+      sanitized_bucket_name = v.output_sanitized_bucket_id
+      display_name          = var.webhook_collectors[k].display_name
+      settings_to_provide   = {}
+    }
+  }
+
+  all_connectors = merge(local.api_connectors, local.bulk_connectors, local.webhook_connectors_for_worklytics)
+  all_instances  = merge(module.psoxy.bulk_connector_instances, module.psoxy.api_connector_instances, module.psoxy.webhook_collector_instances)
 }
 
 module "connection_in_worklytics" {
   for_each = local.all_instances
 
-  source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=rc-v0.5.10"
+  source = "../../modules/worklytics-proxy-connection-generic"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-generic?ref=v0.6.0"
 
-  host_platform_id  = local.host_platform_id
-  proxy_instance_id = each.key
-  worklytics_host   = var.worklytics_host
-  connector_id      = try(local.all_connectors[each.key].worklytics_connector_id, "")
-  display_name      = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
-  todo_step         = module.psoxy.next_todo_step
+  host_platform_id     = local.host_platform_id
+  proxy_instance_id    = each.key
+  worklytics_host      = var.worklytics_host
+  connector_id         = try(local.all_connectors[each.key].worklytics_connector_id, "")
+  display_name         = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
+  todo_step            = module.psoxy.next_todo_step
+  todos_as_local_files = var.todos_as_local_files
 
   settings_to_provide = merge(
     # Source API case
     try({
       "Psoxy Base URL" = each.value.endpoint_url
     }, {}),
-    # Source Bucket (file) case
+    # Source Bucket (file) case - handles both bulk connectors and webhook collectors
     try({
-      "Bucket Name" = each.value.sanitized_bucket
+      "Bucket Name" = coalesce(
+        try(each.value.sanitized_bucket, null),
+        try(each.value.output_sanitized_bucket_id, null)
+      )
     }, {}),
   try(each.value.settings_to_provide, {}))
 }
@@ -166,20 +190,48 @@ output "api_connector_instances" {
     endpoint_url = v.endpoint_url
     }, v.sanitized_bucket != null ? {
     sanitized_bucket = v.sanitized_bucket
-    } : {})
-  }
+    } : {}, {
+    test_examples = merge({
+      api_requests = concat(
+        [for path in try(v.example_api_calls, []) : "GET ${path}"],
+        [for req in try(v.example_api_requests, []) : merge(
+          {
+            request = "${try(req.method, "GET")} ${req.path}"
+          },
+          try(req.method, "GET") == "POST" || try(req.method, "GET") == "PUT" ? merge(
+            try(req.content_type, null) != null ? { content_type = req.content_type } : {},
+            try(req.body, null) != null ? { body = req.body } : {}
+          ) : {}
+        )]
+      )
+      },
+      try(v.enable_async_processing, false) ? { supports_async = true } : {},
+      try(v.example_api_calls_user_to_impersonate, null) != null ? { user_to_impersonate = try(v.example_api_calls_user_to_impersonate, null) } : {}
+    ) }
+  ) }
 }
 
 output "bulk_connector_instances" {
   value = { for k, v in module.psoxy.bulk_connector_instances : k => {
+    input_bucket     = try(v.input_bucket, null)
     sanitized_bucket = v.sanitized_bucket
+    example_files    = try(v.example_files, [])
   } }
 }
 
 output "webhook_collector_instances" {
   value = { for k, v in module.psoxy.webhook_collector_instances : k => {
-    sanitized_bucket = v.output_sanitized_bucket_id
+    endpoint_url                    = try(v.cloud_function_url, null)
+    sanitized_bucket                = v.output_sanitized_bucket_id
+    side_output_sanitized_bucket_id = try(v.side_output_sanitized_bucket_id, null)
+    side_output_original_bucket_id  = try(v.side_output_original_bucket_id, null)
+    test_examples                   = try(v.test_examples, [])
   } }
+}
+
+output "artifacts_bucket_id" {
+  description = "The ID of the artifacts google_storage_bucket resource"
+  value       = module.psoxy.artifacts_bucket_id
 }
 
 output "todos_1" {

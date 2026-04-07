@@ -562,6 +562,14 @@ async function signJwtWithGCPKMS(claims, keyId) {
 }
 
 /**
+ * Known compound extensions where the "real" extension precedes a compression
+ * extension (e.g. `.ndjson.gz`, `.csv.gz`).  We treat the entire compound
+ * extension as one unit so the suffix is inserted before it:
+ *   `events0.ndjson.gz` + timestamp  →  `events0-<timestamp>.ndjson.gz`
+ */
+const COMPOUND_EXTENSIONS = ['.ndjson.gz', '.csv.gz', '.json.gz', '.tsv.gz', '.parquet.gz'];
+
+/**
  * Append suffix to filename (before extension)
  * @param {string} filename
  * @param {string} suffix
@@ -570,7 +578,21 @@ async function signJwtWithGCPKMS(claims, keyId) {
 function addFilenameSuffix(filename, suffix) {
   let result = '';
   if (!_.isEmpty(filename)) {
-    const { name, ext } = path.parse(filename);
+    // Strip any leading directory components – we only manipulate the basename
+    const base = path.basename(filename);
+
+    // Check for compound extensions first (e.g. .ndjson.gz)
+    const lowerBase = base.toLowerCase();
+    const compound = COMPOUND_EXTENSIONS.find(ext => lowerBase.endsWith(ext));
+
+    let name, ext;
+    if (compound) {
+      ext = base.slice(base.length - compound.length); // preserve original casing
+      name = base.slice(0, base.length - compound.length);
+    } else {
+      ({ name, ext } = path.parse(base));
+    }
+
     result = `${name}-${suffix}${ext}`;
   }
   return result;
@@ -592,12 +614,15 @@ async function unzip(filePath) {
 }
 
 /**
- * Check if file is gzipped
- * @param {string} filePath
+ * Check if file or buffer is gzipped
+ * @param {string|Buffer} file - filePath or Buffer
  * @returns {boolean}
  */
-async function isGzipped(filePath) {
-  return isgzipBuffer(await fs.readFile(filePath));
+async function isGzipped(file) {
+  if (Buffer.isBuffer(file)) {
+    return isgzipBuffer(file);
+  }
+  return isgzipBuffer(await fs.readFile(file));
 }
 
 /**
@@ -808,21 +833,87 @@ async function pollAsyncResponse(locationUrl, options = {}) {
   throw new Error(`Timeout: File not available after ${maxAttempts * 10} seconds of polling`);
 }
 
+/**
+ * Compare actual content items against expected content.
+ * 
+ * @param {Array} items - Array of actual items found in the file
+ * @param {string|object|Array} expectedContent - Expected JSON string or parsed object/array
+ * @param {Object} logger - Logger instance
+ * @returns {boolean}
+ */
+function compareContent(items, expectedContent, logger) {
+    if (!expectedContent) {
+        logger.info('No expected content provided. Skipping content match verification (considered success as items were found).');
+        return true;
+    }
+
+    let expectedJson;
+    if (typeof expectedContent === 'object') {
+        expectedJson = expectedContent;
+    } else {
+        try {
+            expectedJson = JSON.parse(expectedContent);
+        } catch (e) {
+            logger.error(`Failed to parse expected content: ${e.message}`);
+            throw new Error('Invalid JSON in expected content (check --body argument)');
+        }
+    }
+
+    const found = items.some(item => {
+        // 1. Try strict equality first
+        if (_.isEqual(item, expectedJson)) return true;
+
+        // 2. Try relaxed equality (ignoring actor.id for pseudonymization)
+        const itemNoId = _.cloneDeep(item);
+        if (itemNoId.actor) delete itemNoId.actor.id;
+
+        if (expectedJson) { // Guard against null expectedJson though check at top should handle it
+            const expectedNoId = _.cloneDeep(expectedJson);
+            if (expectedNoId.actor) delete expectedNoId.actor.id;
+
+            if (_.isEqual(itemNoId, expectedNoId)) {
+                logger.info('Match found with differing actor.id (likely pseudonymized)');
+                return true;
+            }
+            logger.info(`Comparison failed.\nActual (no ID): ${JSON.stringify(itemNoId)}\nExpected (no ID): ${JSON.stringify(expectedNoId)}`);
+        }
+        
+        return false;
+    });
+
+    return found;
+}
+
+/**
+ * Sleep for a given number of milliseconds
+ * @param {number} ms
+ * @returns {Promise<void>}
+ */
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export {
-  addFilenameSuffix, environmentCheck,
+  addFilenameSuffix,
+  compareContent,
+  environmentCheck,
   executeCommand,
   executeWithRetry,
   getAWSCredentials,
   getCommonHTTPHeaders,
   getFileNameFromURL,
   isGzipped,
-  parseBucketOption, pollAsyncResponse, requestWrapper as request,
+  parseBucketOption,
+  pollAsyncResponse,
+  requestWrapper as request,
   resolveAWSRegion,
   resolveHTTPMethod,
   saveToFile,
   signAWSRequestURL,
   signJwtWithAWSKMS,
   signJwtWithGCPKMS,
-  transformSpecWithResponse, unzip
+  sleep,
+  transformSpecWithResponse,
+  unzip
 };
 

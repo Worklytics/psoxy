@@ -1,7 +1,9 @@
 package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import dagger.Module;
 import dagger.Provides;
 import lombok.SneakyThrows;
@@ -75,4 +77,25 @@ public class TestModules {
        // when(secretStore.getConfigPropertyAsOptional(eq(roxyConfigProperty.PSOXY_SALT)))
        //     .thenReturn(Optional.of("salt"));
     }
+
+    @Module
+    public interface ForWebhookCollectorModeConfig {
+        @Provides
+        @Singleton
+        static WebhookCollectorModeConfig webhookCollectorModeConfig() {
+            return WebhookCollectorModeConfig.builder().build();
+        }
+    }
+
+    @Module
+    public interface ForProxyConstants {
+        @Provides
+        @Singleton
+        static ProxyConstants proxyConstants() {
+            return ProxyConstants.builder()
+                .userAgent(ProxyConstants.buildDefaultUserAgent())
+                .build();
+        }
+    }
 }
+

@@ -1,0 +1,25 @@
+{
+  "data": [
+    {
+      "id": "user_xyz456",
+      "added_at": "2024-10-30T23:58:27.427722Z",
+      "email": "user@example.com",
+      "name": "Jane Doe",
+      "role": "user",
+      "type": "user"
+    },
+    {
+      "id": "user_abc789",
+      "added_at": "2024-11-15T14:32:10.123456Z",
+      "email": "admin@example.com",
+      "name": "John Smith",
+      "role": "admin",
+      "type": "user"
+    }
+  ],
+  "has_more": true,
+  "first_id": "user_xyz456",
+  "last_id": "user_abc789",
+  "next_page": "page_01Dd11ZXp4eZNug9r2UZSuqSzmEQbithz"
+}
+

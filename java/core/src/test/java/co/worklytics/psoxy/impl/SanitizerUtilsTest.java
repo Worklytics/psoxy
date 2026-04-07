@@ -12,6 +12,7 @@ import com.avaulta.gateway.rules.transforms.Transform;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.MapFunction;
 import dagger.Component;
 import lombok.SneakyThrows;
@@ -20,21 +21,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class SanitizerUtilsTest {
-
-
 
 
     @Singleton
@@ -68,8 +71,8 @@ class SanitizerUtilsTest {
         SanitizerUtilsTest.Container container = DaggerSanitizerUtilsTest_Container.create();
         container.inject(this);
 
-       pseudonymizer = pseudonymizerImplFactory
-           .create(Pseudonymizer.ConfigurationOptions.builder().build());
+        pseudonymizer = pseudonymizerImplFactory
+            .create(Pseudonymizer.ConfigurationOptions.builder().build());
 
     }
 
@@ -258,4 +261,53 @@ class SanitizerUtilsTest {
         assertTrue(
             pseudonyms.stream().allMatch(p -> Objects.equals("worklytics.co", p.getDomain())));
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "   ", "\r\n",})
+    @NullSource
+    void applyTransform_applyOnlyWhen_blankOrNull_applies(String applyOnlyWhen) {
+        Map<String, Object> doc = new HashMap<>(Map.of("foo", "bar"));
+        Map<Transform, List<JsonPath>> compiledTransforms = new ConcurrentHashMap<>();
+        Transform.RedactRegexMatches transformBlank = Transform.RedactRegexMatches.builder()
+            .applyOnlyWhen(applyOnlyWhen)
+            .redaction("bar")
+            .jsonPath("$.foo")
+            .build();
+
+        sanitizerUtils.applyTransform(pseudonymizer, transformBlank, doc, compiledTransforms);
+        assertEquals("", doc.get("foo"));
+    }
+
+    @Test
+    void applyTransform_applyOnlyWhen_valid_appliesConditionally() {
+        List<Map<String, Object>> doc = new ArrayList<>();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("type", "User");
+        dataMap.put("id", 1234);
+        Map<String, Object> outerMap = new HashMap<>();
+        outerMap.put("data", dataMap);
+        doc.add(outerMap);
+
+        Map<Transform, List<JsonPath>> compiledTransforms = new ConcurrentHashMap<>();
+        Transform.Redact transform = Transform.Redact.builder()
+            .applyOnlyWhen("$[?(@.data.type == 'User')]")
+            .jsonPath("$..id")
+            .build();
+
+        sanitizerUtils.applyTransform(pseudonymizer, transform, doc, compiledTransforms);
+        assertFalse(doc.get(0).get("data").toString().contains("1234"));
+
+        doc.clear();
+        Map<String, Object> dataMap2 = new HashMap<>();
+        dataMap2.put("type", "app");
+        dataMap2.put("id", 1234);
+        Map<String, Object> outerMap2 = new HashMap<>();
+        outerMap2.put("data", dataMap2);
+        doc.add(outerMap2);
+
+        sanitizerUtils.applyTransform(pseudonymizer, transform, doc, compiledTransforms);
+        assertTrue(doc.get(0).get("data").toString().contains("1234"));
+    }
+
+
 }

@@ -1,12 +1,12 @@
 package co.worklytics.psoxy.gateway;
 
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Builder
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
@@ -38,5 +38,15 @@ public class CompositeSecretStore implements SecretStore {    //open to feedback
     @Override
     public void putConfigProperty(ConfigProperty property, String value) {
         preferred.putConfigProperty(property, value);
+    }
+
+    @Override
+    public List<ConfigService.ConfigValueVersion> getAvailableVersions(ConfigProperty property, int limit) {
+        // Try preferred first, fall back to fallback if preferred returns empty
+        List<ConfigService.ConfigValueVersion> versions = preferred.getAvailableVersions(property, limit);
+        if (versions.isEmpty()) {
+            return fallback.getAvailableVersions(property, limit);
+        }
+        return versions;
     }
 }

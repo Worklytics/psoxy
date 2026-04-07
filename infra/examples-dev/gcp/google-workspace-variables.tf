@@ -61,7 +61,7 @@ variable "google_workspace_key_rotation_days" {
 
   validation {
     condition     = var.google_workspace_key_rotation_days > 0
-    error_message = "google_workspace_key_rotation_days must be greater than 0"
+    error_message = "gcp_sa_keygoogle_workspace_key_rotation_days_rotation_days must be greater than 0"
   }
 }
 

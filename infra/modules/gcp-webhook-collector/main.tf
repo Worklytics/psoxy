@@ -78,8 +78,6 @@ resource "google_kms_crypto_key" "webhook_auth_key" {
   version_template {
     algorithm = var.provision_auth_key.key_spec
   }
-
-  labels = var.default_labels
 }
 
 locals {
@@ -148,6 +146,8 @@ resource "random_string" "bucket_name_random_sequence" {
 module "sanitized_webhook_output" {
   source = "../gcp-output-bucket"
 
+  enable_versioning              = var.enable_versioning
+  bucket_access_logs_destination = var.bucket_access_logs_destination
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
@@ -165,6 +165,8 @@ module "side_output_bucket" {
 
   for_each = local.side_outputs_to_provision
 
+  enable_versioning              = var.enable_versioning
+  bucket_access_logs_destination = var.bucket_access_logs_destination
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
@@ -200,7 +202,7 @@ locals {
     BATCH_MERGE_SUBSCRIPTION         = google_pubsub_subscription.webhook_subscription.id
     BATCH_SIZE                       = local.batch_size
     BATCH_INVOCATION_TIMEOUT_SECONDS = local.batch_invocation_timeout_seconds
-    WEBHOOK_BATCH_OUTPUT             = "gs://${module.sanitized_webhook_output.bucket_name}"
+    WEBHOOK_BATCH_OUTPUT             = "gs://${module.sanitized_webhook_output.bucket_name}/${var.output_path_prefix}"
     }
     : k => v if v != null
   }
@@ -225,7 +227,6 @@ module "auth_issuer_secret" {
       description = "URL of the function as a web service"
     },
   }
-  default_labels = var.default_labels
 }
 
 # grant access to secrets known AFTER function is deployed
@@ -235,6 +236,9 @@ locals {
   secrets_to_grant_access_to = {
     AUTH_ISSUER = {
       secret_id = module.auth_issuer_secret.secret_ids_within_project["AUTH_ISSUER"]
+    },
+    SERVICE_URL = {
+      secret_id = module.auth_issuer_secret.secret_ids_within_project["SERVICE_URL"]
     }
   }
 }
@@ -282,6 +286,7 @@ resource "google_cloudfunctions2_function" "function" {
     runtime           = "java21"
     docker_repository = var.artifact_repository_id
     entry_point       = "co.worklytics.psoxy.GcpWebhookCollectorRoute"
+    service_account   = var.builder_sa_id
 
     source {
       storage_source {
@@ -328,8 +333,6 @@ resource "google_cloudfunctions2_function" "function" {
     }
   }
 
-  labels = var.default_labels
-
   depends_on = [
     google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret,
     google_service_account_iam_member.act_as
@@ -354,8 +357,6 @@ resource "google_cloud_run_service_iam_binding" "invokers" {
 resource "google_pubsub_topic" "webhook_topic" {
   name    = "${var.environment_id_prefix}${var.instance_id}-webhooks"
   project = var.project_id
-
-  labels = var.default_labels
 }
 
 # Pub/Sub subscription for batch processing
@@ -375,8 +376,6 @@ resource "google_pubsub_subscription" "webhook_subscription" {
   expiration_policy {
     ttl = "" # No expiration
   }
-
-  labels = var.default_labels
 }
 
 # IAM binding to allow the Cloud Function to publish to the topic
@@ -423,13 +422,12 @@ resource "google_cloud_scheduler_job" "trigger_batch_processing" {
   }
 }
 
-
 locals {
   proxy_endpoint_url  = google_cloudfunctions2_function.function.service_config[0].uri
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
   command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js"
-
-  command_test_logs = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${google_cloudfunctions2_function.function.project}\" -f \"${google_cloudfunctions2_function.function.name}\""
+  signing_key_id      = var.provision_auth_key == null ? null : google_kms_crypto_key.webhook_auth_key[0].id
+  command_test_logs   = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js -p \"${google_cloudfunctions2_function.function.project}\" -f \"${google_cloudfunctions2_function.function.name}\""
 }
 
 locals {
@@ -458,7 +456,12 @@ ${local.command_cli_call} -u ${local.proxy_endpoint_url} --health-check
 Then, based on your configuration, these are some example test calls you can try (YMMV):
 
 ```shell
-${local.command_cli_call} -u ${local.proxy_endpoint_url} --body '${coalesce(var.example_payload, "{\"test\": \"body\"}")}' --identity '${var.example_identity}'
+${local.command_cli_call} --method POST \
+ -u ${local.proxy_endpoint_url} \
+ --signing-key "gcp-kms:${local.signing_key_id}" \
+ --identity-issuer ${local.proxy_endpoint_url} \
+ --identity-subject '${var.example_identity}' \
+ --body '${coalesce(var.example_payload, "{\"test\": \"body\"}")}' 
 ```
 
 Feel free to try the above calls, and reference to the source's API docs for other parameters /
@@ -492,14 +495,16 @@ resource "local_file" "test_script" {
     collector_endpoint_url = local.proxy_endpoint_url,
     function_name          = var.instance_id,
     command_cli_call       = local.command_cli_call,
-    signing_key_id         = var.provision_auth_key == null ? null : google_kms_crypto_key.webhook_auth_key[0].id,
+    signing_key_id         = local.signing_key_id,
     example_payload        = coalesce(var.example_payload, "{\"test\": \"data\"}")
     example_identity       = var.example_identity
     collection_path        = "/"
+    scheduler_job_name     = google_cloud_scheduler_job.trigger_batch_processing.id
+    bucket_name            = module.sanitized_webhook_output.bucket_name
   })
 }
 
-resource "local_file" "review" {
+resource "local_file" "test_todo" {
   count = var.todos_as_local_files ? 1 : 0
 
   filename = "TODO ${var.todo_step} - test ${google_cloudfunctions2_function.function.name}.md"
@@ -550,6 +555,15 @@ output "side_output_original_bucket_id" {
 output "provisioned_auth_key_pairs" {
   value       = local.auth_key_ids_sorted
   description = "List of IDs of kms keys provisioned for webhook authentication purposes, if any."
+}
+
+output "test_examples" {
+  value = try(var.example_payload, null) != null ? [{
+    content_base64 = try(var.example_payload, null) != null ? base64encode(var.example_payload) : null
+    signing_key_id = length(local.auth_key_ids_sorted) > 0 ? "gcp-kms:${element(local.auth_key_ids_sorted, 0)}" : null
+    identity       = try(var.example_identity, null)
+  }] : []
+  description = "Array of test examples with base64-encoded content, signing key, and identity"
 }
 
 output "todo" {

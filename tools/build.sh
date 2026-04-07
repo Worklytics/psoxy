@@ -7,9 +7,12 @@
 set -e
 
 # colors
-RED='\e[0;31m'
-BLUE='\e[0;34m'
-NC='\e[0m' # No Color
+COLORSCHEME_SH="$(dirname "$0")/set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+    source "$COLORSCHEME_SH"
+else
+    ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
 
 while getopts ":qd" opt; do
   case $opt in
@@ -34,29 +37,44 @@ IMPLEMENTATION=${@:$OPTIND:1}
 JAVA_SOURCE_ROOT=${@:$OPTIND+1:1}
 
 if [[ "$IMPLEMENTATION" != "aws" && "$IMPLEMENTATION" != "gcp" ]]; then
-    printf "${RED}Error: HOST_PLATFORM value '${IMPLEMENTATION}' must be 'aws' or 'gcp'.${NC}\n"
+    printf "${ERR}Error: HOST_PLATFORM value '${IMPLEMENTATION}' must be 'aws' or 'gcp'.${NC}\n"
     printf "Usage: build.sh [-qd] <IMPLEMENTATION> <JAVA_SOURCE_ROOT>\n"
     exit 1
 fi
 
 if [[ -z "$JAVA_SOURCE_ROOT" ]]; then
-    printf "${RED}Error: JAVA_SOURCE_ROOT value is required.${NC}\n"
+    printf "${ERR}Error: JAVA_SOURCE_ROOT value is required.${NC}\n"
     printf "Usage: build.sh [-qd] <IMPLEMENTATION> <JAVA_SOURCE_ROOT>\n"
     exit 1
 fi
 
+# Convert to absolute path if relative
+if [[ ! "$JAVA_SOURCE_ROOT" = /* ]]; then
+    JAVA_SOURCE_ROOT="$(cd "${JAVA_SOURCE_ROOT}" && pwd)"
+fi
+
+# Ensure trailing slash for path concatenation
 if [[ "$JAVA_SOURCE_ROOT" != */ ]]; then
     JAVA_SOURCE_ROOT="${JAVA_SOURCE_ROOT}/"
 fi
 
-mvn clean $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}pom.xml"
+PARENT_POM="${JAVA_SOURCE_ROOT}pom.xml"
 
-mvn package install $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}gateway-core/pom.xml"
+# Use reactor build approach: clean all modules, then build dependencies and target module
+# -f specifies the parent pom.xml file
+# -pl specifies the projects to build (gateway-core, core, and the implementation)
+# -am builds all dependencies of the specified projects (ensures correct build order)
 
-mvn package install $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}core/pom.xml"
+# Clean all modules
+mvn clean $QUIET_OPTIONS -f "${PARENT_POM}"
 
-mvn package $QUIET_OPTIONS -f "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/pom.xml" $DISTRIBUTION_PROFILE
+# Build and install gateway-core and core (dependencies must be installed for impl module)
+mvn install $QUIET_OPTIONS -f "${PARENT_POM}" -pl gateway-core,core -am
+
+# Build the implementation module (package only, not install)
+# The reactor will ensure dependencies are available from the previous install step
+mvn package $QUIET_OPTIONS -f "${PARENT_POM}" -pl impl/${IMPLEMENTATION} -am $DISTRIBUTION_PROFILE
 
 DEPLOYMENT_ARTIFACT=$(ls "${JAVA_SOURCE_ROOT}impl/${IMPLEMENTATION}/target/deployment" | grep -E "^psoxy-.*\.jar$" | head -1)
 
-printf "${GREEN}Build complete.${NC} Deployment artifact: ${BLUE}${DEPLOYMENT_ARTIFACT}${NC}\n"
+printf "${SUCCESS}Build complete.${NC} Deployment artifact: ${INFO}${DEPLOYMENT_ARTIFACT}${NC}\n"

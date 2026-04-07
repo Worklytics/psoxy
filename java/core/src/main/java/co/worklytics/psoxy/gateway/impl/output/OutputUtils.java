@@ -16,7 +16,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.ProcessedDataStage;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.WebhookCollectorModeConfigProperty;
+import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
 import co.worklytics.psoxy.gateway.output.Output;
@@ -42,6 +42,8 @@ public class OutputUtils {
     @Inject
     ConfigService configService;
     @Inject
+    WebhookCollectorModeConfig webhookCollectorModeConfig;
+    @Inject
     Provider<NoOutput> noSideProvider;
     @Inject
     Set<OutputFactory<?>> outputFactories;
@@ -54,6 +56,8 @@ public class OutputUtils {
      *
      * @param processedDataStage the stage of processed data to be written to the side output
      */
+    // generic cast of Output is safe; we know the factory produces the right type
+    @SuppressWarnings("unchecked")
     public ApiDataSideOutput forStage(ProcessedDataStage processedDataStage) {
 
         ProxyConfigProperty configProperty = switch (processedDataStage) {
@@ -70,6 +74,8 @@ public class OutputUtils {
         return outputToSideOutputAdapterFactory.create(outputToAdapt);
     }
 
+    // generic cast of Output is safe
+    @SuppressWarnings("unchecked")
     public ApiSanitizedDataOutput asyncOutput() {
         Output asyncOutput = configService
                 .getConfigPropertyAsOptional(ApiModeConfigProperty.ASYNC_OUTPUT_DESTINATION)
@@ -90,17 +96,14 @@ public class OutputUtils {
 
     @VisibleForTesting
     OutputLocation locationForWebhooks() {
-        return configService
-                .getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.WEBHOOK_OUTPUT)
+        return webhookCollectorModeConfig.getWebhookOutput()
                 .map(OutputLocationImpl::of).orElseThrow(
                         () -> new IllegalStateException("No side output configured for webhooks"));
     }
 
     @VisibleForTesting
     OutputLocation locationForWebhookQueue() {
-        return configService
-                .getConfigPropertyAsOptional(
-                        WebhookCollectorModeConfigProperty.WEBHOOK_BATCH_OUTPUT)
+        return webhookCollectorModeConfig.getWebhookBatchOutput()
                 .map(OutputLocationImpl::of).orElseThrow(() -> new IllegalStateException(
                         "No side output configured for webhook queue"));
     }
@@ -129,6 +132,8 @@ public class OutputUtils {
         return original;
     }
 
+    // generic cast of Output is safe
+    @SuppressWarnings("unchecked")
     private <T extends Output> T createOutputForLocation(OutputLocation outputLocation) {
         OutputFactory<?> outputFactory = outputFactories.stream()
             .filter(factory -> factory.supports(outputLocation))
@@ -138,10 +143,8 @@ public class OutputUtils {
         return (T) outputFactory.create(outputLocation);
     }
 
-    // Ensure the path prefix ends with a slash, if non-empty
+    // Format the path prefix, trimming whitespace but preserving the exact prefix (including whether it ends with slash, underscore, etc)
     public static String formatObjectPathPrefix(String rawPathPrefix) {
-        String trimmedPath = StringUtils.trimToEmpty(rawPathPrefix);
-        return (trimmedPath.endsWith("/") || StringUtils.isEmpty(trimmedPath)) ? trimmedPath
-                : trimmedPath + "/";
+        return StringUtils.trimToEmpty(rawPathPrefix);
     }
 }

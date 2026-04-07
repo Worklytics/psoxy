@@ -29,30 +29,6 @@
         <artifactSuffix></artifactSuffix>
     </properties>
 
-    <!-- generates a jdk17 compatible jar -->
-    <!-- mvn clean install -P java17 -->
-    <profiles>
-        <profile>
-            <id>java17</id>
-            <properties>
-                <artifactSuffix>-jdk17</artifactSuffix>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.13.0</version>
-                        <configuration>
-                            <source>17</source>
-                            <target>17</target>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -82,6 +58,12 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>${dependency.commons-io.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>blue.strategic.parquet</groupId>
+            <artifactId>parquet-floor</artifactId>
+            <version>1.64</version>
         </dependency>
 
 
@@ -177,7 +159,7 @@
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
-            <version>10.3</version>
+            <version>10.5</version>
         </dependency>
 
         <dependency>

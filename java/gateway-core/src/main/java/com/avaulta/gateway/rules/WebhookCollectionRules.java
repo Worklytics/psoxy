@@ -1,15 +1,21 @@
 package com.avaulta.gateway.rules;
 
-import com.avaulta.gateway.rules.transforms.Transform;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import lombok.*;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import com.avaulta.gateway.rules.transforms.Transform;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.Singular;
+import lombok.With;
 
 @Builder
 @JsonPropertyOrder({"jwtClaimsToVerify", "endpoints"})  //deterministic serialization order
@@ -40,7 +46,7 @@ public class WebhookCollectionRules implements Serializable {
     @Builder(toBuilder = true)
     @With
     @AllArgsConstructor //for builder
-    @NoArgsConstructor //for Jackson
+
     @Getter
     public static class WebhookEndpoint implements Serializable {
 
@@ -73,7 +79,16 @@ public class WebhookCollectionRules implements Serializable {
         @Setter
         @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
         @Singular
-        List<Transform> transforms = new ArrayList<>();
+        List<Transform> transforms;
+
+        /**
+         * No-args constructor.
+         * 1) Needed for Jackson deserialization.
+         * 2) Explicit instantiation of @Singular fields required to avoid Lombok warnings about ignored default values.
+         */
+        public WebhookEndpoint() {
+            this.transforms = new ArrayList<>();
+        }
     }
 
     @Data

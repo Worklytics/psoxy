@@ -39,6 +39,18 @@ This may be due to an [Organization Policy](https://cloud.google.com/resource-ma
 
 You may need define an exception for the GCP project in which you're deploying the proxy, or add the domain of your Worklytics Tenant SA to the list of allowed domains.
 
+## Error 400: Validation failed for trigger, Permission denied while using the Eventarc Service Agent
+
+If you receive an error such as:
+
+```
+Error: Error creating function: googleapi: Error 400: Validation failed for trigger projects/my-project-id/locations/us-central1/triggers/survey-495732: Invalid resource state for "": Permission denied while using the Eventarc Service Agent. If you recently started to use Eventarc, it may take a few minutes before all necessary permissions are propagated to the Service Agent. Otherwise, verify that it has Eventarc Service Agent role.
+```
+
+This error occurs when the Eventarc Service Agent doesn't have the necessary permissions to create triggers for Cloud Functions. The Eventarc Service Agent is a Google-managed service account that handles event routing.
+
+In our experience, this DOES resolve itself after a few minutes; so wait and try again. If still fails, confirm Eventarc service is activated in the project.
+
 ## Warning like 'Failed to find a usable hardware address from the network interfaces; using random bytes: '
 
 This is benign and can be safely ignored.
@@ -74,5 +86,22 @@ terraform {
 
 2. `terraform init --upgrade` and `terraform apply`
 
-You will likely see MANY changes. These are caused by the provider version difference and should be benign. The vast majority are label changes; we utilize the `default_labels` functionality in google provider `5.x` to label all the infra created by this configuration; 
+You will likely see MANY changes. These are caused by the provider version difference and should be benign. The vast majority are label changes; we utilize the `default_labels` functionality in google provider `5.x` to label all the infra created by this configuration;
+
+## Bulk processing failures
+
+If you need to re-trigger bulk processing of objects that have already been written to GCS (e.g., for webhook collectors), you can use the `replay-gcs-writes.sh` script.
+
+This script uses `gsutil rewrite -kO` to replay write events on GCS objects, which triggers Cloud Storage write events that will cause the Cloud Function to re-process those objects.
+
+```bash
+# Re-trigger processing for all objects created in the last week
+./tools/gcp/replay-gcs-writes.sh my-bucket-name
+
+# Re-trigger processing for objects created since a specific date
+./tools/gcp/replay-gcs-writes.sh my-bucket-name 2024-01-01T00:00:00Z
+
+# Re-trigger processing for a single object
+./tools/gcp/replay-gcs-writes.sh gs://my-bucket-name/path/to/object.json
+```
 

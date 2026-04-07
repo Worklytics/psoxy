@@ -11,8 +11,12 @@ if [[ $OSTYPE == 'darwin'* ]]; then
   MD5_CMD='md5 -r'
 fi
 
-BLUE='\e[0;34m'
-NC='\e[0m' # No Color
+COLORSCHEME_SH="$(dirname "$0")/../../../tools/set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+    source "$COLORSCHEME_SH"
+else
+    ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
 
 # avoid conflict if building multiple connectors concurrently
 RAND_ID=`echo $RANDOM | $MD5_CMD | head -c 20`
@@ -43,14 +47,14 @@ appendToFile "Upload the contents of ``${CERT_FILE}`` to the ${AZURE_TOOL} app i
 appendToFile "When done, you should delete your local copy of ``${CERT_FILE}``"
 appendToFile "\n"
 
-printf "Certificate generated, stored in ${BLUE}${CERT_FILE}${NC}. Upload this to Azure AD console for your App.\n"
+printf "Certificate generated, stored in ${INFO}${CERT_FILE}${NC}. Upload this to Azure AD console for your App.\n"
 
 appendToFile "## TODO 2. Secret Manager"
 appendToFile "Update the value of PSOXY_${AZURE_TOOL}_PRIVATE_KEY_ID in the secret manager of choice with the certificate fingerprint:"
 appendToFile ${CODE_BLOCK}
 appendToFile "$FINGERPRINT_RESULT"
 appendToFile "${CODE_BLOCK}\n"
-printf "Certificate thumbprint: ${BLUE}${FINGERPRINT_RESULT}${NC} (this value is the 'PRIVATE_KEY_ID')\n"
+printf "Certificate thumbprint: ${INFO}${FINGERPRINT_RESULT}${NC} (this value is the 'PRIVATE_KEY_ID')\n"
 
 appendToFile "## TODO 3. Secret Manager"
 appendToFile "Update the value of PSOXY_${AZURE_TOOL}_PRIVATE_KEY in the secret manager of choice with the following certificate:"
@@ -62,6 +66,4 @@ appendToFile "${CODE_BLOCK}\n"
 rm $KEY_FILE
 rm $KEY_FILE_PKCS8
 
-
-
-printf "\nOpen $BLUE${OUTPUT_FILE}$NC and follow the instructions to complete the setup.\n"
+printf "\nOpen $INFO${OUTPUT_FILE}$NC and follow the instructions to complete the setup.\n"

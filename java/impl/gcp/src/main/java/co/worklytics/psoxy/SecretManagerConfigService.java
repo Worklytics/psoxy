@@ -1,38 +1,52 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.gateway.LockService;
-import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.psoxy.gateway.WritableConfigService;
-import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
-import com.google.api.gax.rpc.PermissionDeniedException;
-import com.google.cloud.secretmanager.v1.*;
-import com.google.common.base.Preconditions;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.FieldMask;
-import dagger.assisted.Assisted;
-import dagger.assisted.AssistedInject;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.extern.java.Log;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.inject.Inject;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+import javax.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
+import com.google.api.gax.rpc.PermissionDeniedException;
+import com.google.cloud.secretmanager.v1.AccessSecretVersionResponse;
+import com.google.cloud.secretmanager.v1.DestroySecretVersionRequest;
+import com.google.cloud.secretmanager.v1.ListSecretVersionsRequest;
+import com.google.cloud.secretmanager.v1.Secret;
+import com.google.cloud.secretmanager.v1.SecretManagerServiceClient;
+import com.google.cloud.secretmanager.v1.SecretName;
+import com.google.cloud.secretmanager.v1.SecretPayload;
+import com.google.cloud.secretmanager.v1.SecretVersion;
+import com.google.cloud.secretmanager.v1.SecretVersionName;
+import com.google.cloud.secretmanager.v1.UpdateSecretRequest;
+import com.google.common.base.Preconditions;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.FieldMask;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.LockService;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.WritableConfigService;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedInject;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.extern.java.Log;
 
 @Log
 public class SecretManagerConfigService implements WritableConfigService, LockService, SecretStore {
 
     private static final String LOCK_LABEL = "locked";
     private static final String VERSION_LABEL = "latest-version";
-    private static final int NUMBER_OF_VERSIONS_TO_RETRIEVE = 20;
+    private static final int MIN_NUMBER_OF_VERSIONS_TO_RETRIEVE = 20;
 
     /**
      *  GCP-level alias for the latest version of the secret
@@ -261,7 +275,7 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
                                     .setFilter("state:ENABLED")
                                     .setParent(secretName.toString())
                                     // Reduce the page, as each version will be disabled one by one
-                                    .setPageSize(NUMBER_OF_VERSIONS_TO_RETRIEVE)
+                                    .setPageSize(MIN_NUMBER_OF_VERSIONS_TO_RETRIEVE)
                                     .build())
                             .getPage();
 
@@ -300,7 +314,7 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
                                             .withZone(ZoneOffset.UTC)
                                             .format(until))
                                     .setParent(secretName.toString())
-                                    .setPageSize(NUMBER_OF_VERSIONS_TO_RETRIEVE)
+                                    .setPageSize(MIN_NUMBER_OF_VERSIONS_TO_RETRIEVE)
                                     .build())
                             .getPage();
 
@@ -327,6 +341,102 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
             return property.name();
         } else {
             return this.namespace + property.name();
+        }
+    }
+
+    @Override
+    public List<ConfigService.ConfigValueVersion> getAvailableVersions(ConfigProperty property, int limit) {
+        if (property.isEnvVarOnly()) {
+            return Collections.emptyList();
+        }
+
+        String paramName = parameterName(property);
+        SecretName secretName = SecretName.of(projectId, paramName);
+
+        try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
+            // List enabled versions of the secret
+            ListSecretVersionsRequest request = ListSecretVersionsRequest.newBuilder()
+                .setParent(secretName.toString())
+                .setFilter("state:ENABLED")
+                .setPageSize(Math.max(limit, MIN_NUMBER_OF_VERSIONS_TO_RETRIEVE))
+                .build();
+
+            SecretManagerServiceClient.ListSecretVersionsPagedResponse response = client.listSecretVersions(request);
+
+            // Convert to list and sort by version number descending
+            List<SecretVersion> versions = StreamSupport.stream(response.iterateAll().spliterator(), false)
+                .collect(Collectors.toList());
+
+            if (versions.isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            return versions.stream()
+                .sorted((v1, v2) -> {
+                    // Sort by version number (extracted from name) descending
+                    Integer ver1 = extractVersionNumber(v1.getName());
+                    Integer ver2 = extractVersionNumber(v2.getName());
+                    if (ver1 != null && ver2 != null) {
+                        return ver2.compareTo(ver1);
+                    }
+                    // Fallback to creation time (compare by seconds)
+                    long time1 = v1.getCreateTime().getSeconds();
+                    long time2 = v2.getCreateTime().getSeconds();
+                    return Long.compare(time2, time1);
+                })
+                .limit(limit)
+                .map(version -> {
+                    try {
+                        SecretVersionName secretVersionName = SecretVersionName.parse(version.getName());
+                        Optional<String> value = accessSecretVersion(client, secretVersionName);
+                        
+                        if (value.isPresent()) {
+                            return ConfigService.ConfigValueVersion.builder()
+                                .value(value.get())
+                                .lastModifiedDate(Instant.ofEpochSecond(version.getCreateTime().getSeconds()))
+                                .version(extractVersionNumber(version.getName()).toString())
+                                .build();
+                        }
+                        return null;
+                    } catch (Exception e) {
+                        log.log(Level.WARNING, "Failed to retrieve version " + version.getName() + " of secret " + paramName, e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        } catch (com.google.api.gax.rpc.NotFoundException e) {
+            if (envVarsConfigService.isDevelopment()) {
+                log.log(Level.INFO, "Could not find secret " + paramName + " when listing versions", e);
+            }
+            return Collections.emptyList();
+        } catch (PermissionDeniedException e) {
+            if (envVarsConfigService.isDevelopment()) {
+                log.log(Level.INFO, "PermissionDeniedException listing versions for secret " + paramName, e);
+            }
+            return Collections.emptyList();
+        } catch (Exception e) {
+            log.log(Level.WARNING, "Unexpected error listing secret versions for " + paramName, e);
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Extract version number from GCP Secret Manager version name.
+     * Version names are in format: projects/{project}/secrets/{secret}/versions/{version}
+     */
+    private Integer extractVersionNumber(String versionName) {
+        if (versionName == null) {
+            return null;
+        }
+        try {
+            SecretVersionName secretVersionName = SecretVersionName.parse(versionName);
+            String versionStr = secretVersionName.getSecretVersion();
+            // Try to parse as integer; if it fails (e.g., "latest"), return null
+            return Integer.parseInt(versionStr);
+        } catch (Exception e) {
+            return null;
         }
     }
 }

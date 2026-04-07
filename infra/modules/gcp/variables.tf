@@ -39,6 +39,17 @@ variable "deployment_bundle" {
   type        = string
   description = "path to deployment bundle to use (if not provided, will build one). Can be a local file path or GCS URL (e.g., 'gs://psoxy-public-artifacts/psoxy-0.4.28.zip')."
   default     = null
+
+  validation {
+    condition     = var.deployment_bundle == null || !can(regex("^https?://", var.deployment_bundle))
+    error_message = "HTTP(S) URLs are not supported for deployment_bundle. Use a gs:// URL or a local file path."
+  }
+}
+
+variable "deployment_bundle_hash" {
+  type        = string
+  description = "precomputed base64 SHA256 hash of the deployment bundle, if any"
+  default     = null
 }
 
 variable "force_bundle" {
@@ -71,17 +82,24 @@ variable "install_test_tool" {
   default     = true
 }
 
+variable "provision_testing_infra" {
+  type        = bool
+  description = "Whether to provision infra needed to support testing of deployment. If false, it's left to you to ensure the GCP principal you use when running test scripts has the correct permissions."
+  default     = true
+}
+
+variable "gcp_principals_authorized_to_test" {
+  type        = list(string)
+  description = "list of GCP principals authorized to test this deployment - eg 'user:alice@acme.com', 'group:devs@acme.com'; if omitted, up to you to configure necessary perms for people to test if desired."
+  default     = []
+}
+
 variable "custom_artifacts_bucket_name" {
   type        = string
   description = "name of bucket to use for custom artifacts, if you want something other than default"
   default     = null
 }
 
-variable "default_labels" {
-  type        = map(string)
-  description = "*Alpha* in v0.4, only respected for new resources. Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
-  default     = {}
-}
 
 variable "support_bulk_mode" {
   type        = bool
@@ -97,18 +115,74 @@ variable "support_webhook_collectors" {
 
 variable "vpc_config" {
   type = object({
-    network                         = optional(string)                # Local name of the VPC network resource on which to provision the VPC connector (if `serverless_connector` is not provided)
-    subnetwork                      = optional(string)                # Local name of the VPC subnetwork resource on which to provision the VPC connector (if `serverless_connector` is not provided)
-    serverless_connector            = optional(string)                # Format: projects/{project}/locations/{location}/connectors/{connector}
-    serverless_connector_cidr_range = optional(string, "10.8.0.0/28") # ignored if serverless_connector is provided
+    network              = string           # Local name of the VPC network resource on which to provision the VPC connector (required if `serverless_connector` is not provided)
+    subnet               = string           # Local name of the VPC subnet resource on which to provision the VPC connector (required if `serverless_connector` is not provided). NOTE: Subnet MUST have /28 netmask (required by Google Cloud for VPC connectors)
+    serverless_connector = optional(string) # Format: projects/{project}/locations/{location}/connectors/{connector}
   })
 
   description = "**alpha** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
   default     = null
+  # serverless_connector: allow null; if provided, must match the full resource name
+  validation {
+    condition = (
+      var.vpc_config == null
+      || try(var.vpc_config.serverless_connector, null) == null
+      || can(regex("^projects/[^/]+/locations/[^/]+/connectors/[^/]+$", try(var.vpc_config.serverless_connector, "")))
+    )
+    error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
+  }
+
+  validation {
+    condition = (
+      var.vpc_config == null
+      || try(var.vpc_config.serverless_connector, null) != null
+      ||
+      (
+        # Accepts a simple network name: lowercase letters, digits, dashes
+        can(regex("^[a-z0-9-]+$", try(var.vpc_config.network, "")))
+        ||
+        # Accepts a full self-link (Compute URL format)
+        can(regex("^projects/[^/]+/(global|regions/[^/]+)/networks/[^/]+$", try(var.vpc_config.network, "")))
+      )
+    )
+    error_message = "vpc_config.network must be lowercase letters, numbers, or dashes."
+  }
+
+  validation {
+    condition = (
+      var.vpc_config == null
+      || try(var.vpc_config.serverless_connector, null) != null
+      || (try(var.vpc_config.network, null) != null && try(var.vpc_config.subnet, null) != null)
+    )
+    error_message = "If vpc_config is provided without serverless_connector, both network and subnet are required."
+  }
 }
 
 variable "bucket_force_destroy" {
   type        = bool
   description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this module"
   default     = false
+}
+
+variable "tf_runner_iam_principal" {
+  description = "The IAM principal (e.g., 'user:alice@example.com' or 'serviceAccount:terraform@project.iam.gserviceaccount.com') that Terraform is running as, used for granting necessary permissions to provision Cloud Functions."
+  type        = string
+}
+
+variable "provision_project_level_iam" {
+  description = "Whether to provision project-level IAM bindings required for Psoxy operation. This includes granting the Pub/Sub Publisher role to the GCS default service account and the Cloud Build Builder role to the Compute Engine default service account. Set to false if you prefer to manage these IAM bindings outside of Terraform."
+  type        = bool
+  default     = true
+}
+
+variable "bucket_access_logs_destination" {
+  description = "The name of the GCS bucket to route access logs to for all buckets managed by this module"
+  type        = string
+  default     = null
+}
+
+variable "builder_sa_email" {
+  description = "An optional custom builder service account. If not provided, this module will create one."
+  type        = string
+  default     = null
 }

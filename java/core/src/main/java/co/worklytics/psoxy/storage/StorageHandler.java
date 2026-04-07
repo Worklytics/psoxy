@@ -1,14 +1,14 @@
 package co.worklytics.psoxy.storage;
 
 import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -38,6 +38,7 @@ import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
 import co.worklytics.psoxy.rules.RulesUtils;
@@ -64,6 +65,10 @@ public class StorageHandler {
     public static final String CONTENT_ENCODING_GZIP = "gzip";
     public static final String EXTENSION_GZIP = ".gz";
 
+    // gzip magic number bytes (RFC 1952)
+    private static final int GZIP_MAGIC_BYTE_1 = 0x1f;
+    private static final int GZIP_MAGIC_BYTE_2 = 0x8b;
+
     /**
      * how many lines to process as a 'validation' of the file/transform/etc; if fails, then we abort
      * whole attempt w/o processing file at all. errors after this number could result in partial
@@ -81,7 +86,7 @@ public class StorageHandler {
     Pseudonymizer pseudonymizer;
 
     @Inject
-    BulkDataRules defaultRuleSet;
+    dagger.Lazy<BulkDataRules> defaultRuleSet;
 
     @Inject
     RulesUtils rulesUtils;
@@ -94,7 +99,7 @@ public class StorageHandler {
 
     static void warnIfEncodingDoesNotMatchFilename(@NonNull StorageEventRequest request, @Nullable String contentEncoding) {
         if (request.getSourceObjectPath().endsWith(EXTENSION_GZIP)
-            && !StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP)) {
+            && !Objects.equals(contentEncoding, CONTENT_ENCODING_GZIP)) {
             log.warning("Input filename ends with .gz, but 'Content-Encoding' metadata is not 'gzip'; is this correct? Decompression is based on object's 'Content-Encoding'");
         }
     }
@@ -181,7 +186,8 @@ public class StorageHandler {
     public StorageEventRequest buildRequest(String sourceBucketName,
                                             String sourceObjectPath,
                                             ObjectTransform transform,
-                                            String sourceContentEncoding) {
+                                            String sourceContentEncoding,
+                                            String sourceContentType) {
 
         String sourceObjectPathWithinBase =
             inputBasePath()
@@ -199,6 +205,7 @@ public class StorageHandler {
             .destinationObjectPath(transform.getPathWithinBucket() + sourceObjectPathWithinBase)
             .decompressInput(isSourceCompressed)
             .compressOutput(compressOutput)
+            .contentType(sourceContentType)
             .build();
 
         warnIfEncodingDoesNotMatchFilename(request, sourceContentEncoding);
@@ -228,7 +235,7 @@ public class StorageHandler {
         // applied, to aid traceability of pipelines
         return Map.of(
             BulkMetaData.INSTANCE_ID.getMetaDataKey(), hostEnvironment.getInstanceId(),
-            BulkMetaData.VERSION.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.BUNDLE_FILENAME).orElse("unknown"),
+            BulkMetaData.VERSION.getMetaDataKey(), ProxyConstants.JAVA_SOURCE_CODE_VERSION,
             BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), sourceBucket + "/" + sourceKey,
             BulkMetaData.RULES_SHA.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES).map(DigestUtils::sha1Hex).orElse("unknown")
         );
@@ -261,6 +268,7 @@ public class StorageHandler {
     @Data
     public static class ObjectTransform implements Serializable {
 
+        @Serial
         private static final long serialVersionUID = 3L;
 
         /**
@@ -299,7 +307,7 @@ public class StorageHandler {
        return ObjectTransform.builder()
             .destinationBucketName(config.getConfigPropertyOrError(BulkModeConfigProperty.OUTPUT_BUCKET))
             .pathWithinBucket(outputBasePath().orElse(""))
-            .rules(defaultRuleSet)
+            .rules(defaultRuleSet.get())
             .build();
     }
 
@@ -362,6 +370,13 @@ public class StorageHandler {
     void validate(StorageEventRequest request,
                   StorageHandler.ObjectTransform transform,
                   Supplier<InputStream> inputStreamSupplier) {
+        
+        // Skip validation for binary formats like Parquet, as text-based validation corrupts/fails
+        if (isSupportedBinaryType(request)) {
+            log.info("Skipping text-based validation for supported binary format: " + request.getSourceObjectPath());
+            return;
+        }
+
         int bufferSize = getBufferSize();
         try (
             InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
@@ -404,9 +419,7 @@ public class StorageHandler {
 
         try (
             InputStream inputStream = readInputStream(request, bufferSize, inputStreamSupplier);
-            Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8), bufferSize);
-            OutputStream outputStream = writeOutputStream(request, bufferSize, outputStreamSupplier);
-            OutputStreamWriter writer = new OutputStreamWriter(outputStream)
+            OutputStream outputStream = writeOutputStream(request, bufferSize, outputStreamSupplier)
         ) {
 
             Optional<BulkDataRules> applicableRules =
@@ -418,7 +431,7 @@ public class StorageHandler {
 
             BulkDataSanitizer fileHandler = bulkDataSanitizerFactory.get(applicableRules.get());
 
-            fileHandler.sanitize(reader, writer, pseudonymizer);
+            fileHandler.sanitize(request, inputStream, outputStream, pseudonymizer);
         }
     }
 
@@ -426,8 +439,13 @@ public class StorageHandler {
 
     /**
      * Reads an input stream, decompressing if necessary; and stripping BOM if present
-     * 
-     * 
+     *
+     * If decompression is requested, verifies the stream actually contains gzip data
+     * by checking for the gzip magic bytes (0x1f 0x8b). This guards against cases where
+     * a cloud storage provider (e.g., GCS decompressive transcoding) has already
+     * decompressed the content server-side despite the object's Content-Encoding metadata
+     * still indicating gzip.
+     *
      * @param request
      * @param bufferSize
      * @param inputStreamSupplier
@@ -435,7 +453,28 @@ public class StorageHandler {
      * @throws IOException
      */
     private InputStream readInputStream(StorageEventRequest request, int bufferSize, Supplier<InputStream> inputStreamSupplier) throws IOException {
-        InputStream decompressed = request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
+        InputStream raw = inputStreamSupplier.get();
+
+        InputStream decompressed;
+        if (request.getDecompressInput()) {
+            // wrap in BufferedInputStream so we can peek at the first bytes
+            BufferedInputStream buffered = new BufferedInputStream(raw, bufferSize);
+            buffered.mark(2);
+            int b0 = buffered.read();
+            int b1 = buffered.read();
+            buffered.reset();
+
+            // gzip magic number: 0x1f 0x8b
+            if (b0 == GZIP_MAGIC_BYTE_1 && b1 == GZIP_MAGIC_BYTE_2) {
+                decompressed = new GZIPInputStream(buffered, bufferSize);
+            } else {
+                log.warning("Decompression requested but stream does not start with gzip magic bytes; "
+                    + "cloud provider may have already decompressed. Proceeding without decompression.");
+                decompressed = buffered;
+            }
+        } else {
+            decompressed = raw;
+        }
 
         // BOMInputStream is a wrapper around InputStream, which strips byte order mark (BOM) if present
 
@@ -463,7 +502,17 @@ public class StorageHandler {
      * @return
      */
     boolean isSourceCompressed(String contentEncoding, String sourceObjectPath) {
-        return StringUtils.equals(contentEncoding, CONTENT_ENCODING_GZIP) || sourceObjectPath.endsWith(EXTENSION_GZIP);
+        return Objects.equals(contentEncoding, CONTENT_ENCODING_GZIP) || sourceObjectPath.endsWith(EXTENSION_GZIP);
+    }
+
+    /**
+     * Check if the source content is a supported binary type
+     * @param request the storage event request
+     * @return true if the format is a supported binary type
+     */
+    boolean isSupportedBinaryType(StorageEventRequest request) {
+        return request.getSourceObjectPath().toLowerCase().endsWith(".parquet") || 
+            StringUtils.containsIgnoreCase(request.getContentType(), "parquet");
     }
 
     Map<String, BulkDataRules> effectiveTemplates(Map<String, BulkDataRules> original) {

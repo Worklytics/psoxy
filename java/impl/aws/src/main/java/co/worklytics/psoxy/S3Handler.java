@@ -1,9 +1,18 @@
 package co.worklytics.psoxy;
 
-import co.worklytics.psoxy.aws.DaggerAwsContainer;
-
-import co.worklytics.psoxy.gateway.*;
-import co.worklytics.psoxy.storage.StorageHandler;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import javax.inject.Inject;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification;
@@ -11,12 +20,16 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
+import com.newrelic.opentracing.LambdaTracer;
+import com.newrelic.opentracing.aws.LambdaTracing;
+import io.opentracing.util.GlobalTracer;
+import co.worklytics.psoxy.aws.AwsContainer;
+import co.worklytics.psoxy.aws.DaggerAwsContainer;
+import co.worklytics.psoxy.gateway.StorageEventRequest;
+import co.worklytics.psoxy.gateway.StorageEventResponse;
+import co.worklytics.psoxy.storage.StorageHandler;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-
-import javax.inject.Inject;
-import java.io.*;
-import java.util.*;
 
 @Log
 public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<S3Event, String> {
@@ -41,7 +54,20 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     @Override
     public String handleRequest(S3Event s3Event, Context context) {
 
-        DaggerAwsContainer.create().injectS3Handler(this);
+        AwsContainer awsContainer = DaggerAwsContainer.create();
+        awsContainer.injectS3Handler(this);
+
+        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            awsContainer.loggingConfiguration().validateNewRelicHandler(S3Handler.class);
+            GlobalTracer.registerIfAbsent(LambdaTracer.INSTANCE);
+            return LambdaTracing.instrument(s3Event, context, this::actualHandleRequest);
+        } else {
+            return actualHandleRequest(s3Event, context);
+        }
+    }
+
+    @SneakyThrows
+    public String actualHandleRequest(S3Event s3Event, Context context) {
 
         S3EventNotification.S3EventNotificationRecord record = s3Event.getRecords().get(0);
 
@@ -86,7 +112,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
 
         StorageEventRequest request =
-            storageHandler.buildRequest(importBucket, sourceKey, transform, sourceMetadata.getContentEncoding());
+            storageHandler.buildRequest(importBucket, sourceKey, transform, sourceMetadata.getContentEncoding(), sourceMetadata.getContentType());
 
         // AWS lambdas have a shared ephemeral storage (shared across invocations) of 512MB
         // This can be upped to 10GB, but this should be enough as long as we're not processing

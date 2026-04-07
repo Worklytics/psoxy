@@ -330,7 +330,7 @@ public class SanitizerUtils {
             com.google.api.client.util.Preconditions.checkArgument(value instanceof String, "Value must be string");
 
             if (StringUtils.isBlank((String) value)) {
-                return new ArrayList<>();
+                return ""; // empty string
             } else {
                 // NOTE: this does NOT seem to work for lists containing empty values (eg ",,"),
                 // which
@@ -339,17 +339,19 @@ public class SanitizerUtils {
                     List<EmailAddress> addresses =
                         emailAddressParser.parseEmailAddressesFromHeader((String) value);
 
-                    return jsonConfiguration.jsonProvider()
-                        .toJson(addresses.stream().map(EmailAddress::asFormattedString)
-                            .map(pseudonymizer::pseudonymize).map(pseudonymizedIdentity -> {
-                                if (transformOptions
-                                    .getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
-                                    return urlSafePseudonymEncoder
-                                        .encode(pseudonymizedIdentity.asPseudonym());
-                                } else {
-                                    return pseudonymizedIdentity;
-                                }
-                            }).collect(Collectors.toList()));
+                    if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
+                        return addresses.stream()
+                            .map(EmailAddress::asFormattedString)
+                            .map(pseudonymizer::pseudonymize)
+                            .map(pseudonymizedIdentity -> urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym()))
+                            .collect(Collectors.joining(","));
+                    } else {
+                        List<PseudonymizedIdentity> pseudonymizedIdentities = addresses.stream()
+                            .map(EmailAddress::asFormattedString)
+                            .map(pseudonymizer::pseudonymize)
+                            .collect(Collectors.toList());
+                        return jsonConfiguration.jsonProvider().toJson(pseudonymizedIdentities);
+                    }
                 } else {
                     log.log(Level.WARNING,
                         "Valued matched by emailHeader rule is not valid address list, but not blank");
@@ -366,7 +368,8 @@ public class SanitizerUtils {
                 return configuration.jsonProvider().toJson(pseudonymizedIdentity);
             } else if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
                 if (pseudonymizedIdentity == null) {
-                    return configuration.jsonProvider().toJson(null);
+                    // Forcing null instead of configuration.jsonProvider().toJson(null), which is going to return "null" string
+                    return null;
                 }
                 if (pseudonymizedIdentity.getReversible() != null
                     && pseudonymizer.getOptions().getPseudonymImplementation() == PseudonymImplementation.LEGACY) {
@@ -391,27 +394,57 @@ public class SanitizerUtils {
         return (Object s, Configuration configuration) -> {
 
             String fullString = (String) s;
+
+            if (StringUtils.isBlank(fullString)) {
+                // Return redacted
+                return null;
+            }
+
             Matcher matcher = pattern.matcher(fullString);
 
-            if (matcher.matches()) {
-                String toPseudonymize;
-                if (matcher.groupCount() > 0) {
-                    toPseudonymize = matcher.group(1);
-                } else {
-                    toPseudonymize = matcher.group(0);
+            boolean found = false;
+            StringBuilder result = new StringBuilder();
+
+            while (matcher.find()) {
+                String matchedGroup = matcher.groupCount() > 0 ? matcher.group(1) : matcher.group(0);
+
+                // skip empty or blank matches (e.g. when pattern is .* or (\s+))
+                if (StringUtils.isBlank(matchedGroup)) {
+                    continue;
                 }
-                PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(toPseudonymize, transform);
+
+                PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(matchedGroup, transform);
+
+                // guard against null pseudonymizedIdentity for blank/invalid input
+                if (pseudonymizedIdentity == null) {
+                    continue;
+                }
+
+                found = true;
 
                 String pseudonymizedString = urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym());
 
                 if (matcher.groupCount() > 0) {
-                    // return original, replacing match with encoded pseudonym
-                    return fullString.replace(matcher.group(1), pseudonymizedString);
+                    // use start(1)/end(1) indices to replace only the exact group(1) span
+                    // within the full match, avoiding replacing repeated occurrences of group(1) in group(0)
+                    String fullMatch = matcher.group(0);
+                    int groupStartInMatch = matcher.start(1) - matcher.start(0);
+                    int groupEndInMatch = matcher.end(1) - matcher.start(0);
+                    String replacement = fullMatch.substring(0, groupStartInMatch)
+                        + pseudonymizedString
+                        + fullMatch.substring(groupEndInMatch);
+                    matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
                 } else {
-                    return pseudonymizedString;
+                    matcher.appendReplacement(result, Matcher.quoteReplacement(pseudonymizedString));
                 }
+            }
+
+            if (found) {
+                matcher.appendTail(result);
+                return result.toString();
             } else {
-                //if no match, redact it
+                // TODO: review this; probably add a new transformation with a more consistent behavior and mark this as deprecated
+                // original behavior: if no real match, redact
                 return null;
             }
         };
@@ -511,9 +544,8 @@ public class SanitizerUtils {
         }
     }
 
-
     private static boolean transformApplies(Transform transform, Object document) {
-        if (transform.getApplyOnlyWhen() != null) {
+        if (StringUtils.isNotBlank(transform.getApplyOnlyWhen())) {
             Object filterResult = JsonPath.compile(transform.getApplyOnlyWhen()).read(document);
 
             ArrayList<?> results = (ArrayList<?>) filterResult;

@@ -1,9 +1,8 @@
 terraform {
-  required_version = ">= 1.7, < 2.0"
+  required_version = "~> 1.7"
 
   required_providers {
     aws = {
-      version = ">= 4.22, < 5.0"
     }
   }
 }
@@ -30,6 +29,15 @@ locals {
   enable_webhook_testing         = var.provision_testing_infra && local.has_enabled_webhook_collectors
 
   api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
+
+  # API connectors with rules_raw that don't have file-based overrides
+  api_connector_rules_raw = {
+    for k, v in var.api_connectors : k => v.rules_raw
+    if try(v.rules_raw, null) != null && !contains(keys(local.api_connector_rules_files), k)
+  }
+
+  # proxy caller role requires direct lambda access if API Gateway v2 is not used and there are API connectors
+  caller_requires_direct_lambda_access = !local.use_api_gateway_v2 && length(module.api_connector) > 0
 }
 
 module "psoxy" {
@@ -41,6 +49,7 @@ module "psoxy" {
   caller_aws_arns                    = var.caller_aws_arns
   caller_gcp_service_account_ids     = var.caller_gcp_service_account_ids
   deployment_bundle                  = var.deployment_bundle
+  deployment_bundle_hash             = var.deployment_bundle_hash
   force_bundle                       = var.force_bundle
   install_test_tool                  = var.install_test_tool
   deployment_id                      = module.env_id.id
@@ -51,31 +60,31 @@ module "psoxy" {
   provision_webhook_collection_infra = local.has_enabled_webhook_collectors
   enable_webhook_testing             = local.enable_webhook_testing
   webhook_allow_origins              = distinct(flatten([for v in var.webhook_collectors : v.allow_origins]))
+  artifacts_bucket_name              = var.artifacts_bucket_name
 }
 
 resource "aws_iam_policy" "execution_lambda_to_caller" {
-  count = local.use_api_gateway_v2 ? 0 : 1
+  count = local.caller_requires_direct_lambda_access ? 1 : 0
 
-  name        = "${module.env_id.id}ExecuteLambdas"
-  description = "Allow caller role to execute the lambda url directly"
+  name        = "${module.env_id.id}ExecuteLambdas" # TODO: change this name in next major version
+  description = "Allow caller to invoke the lambda via function url"
 
   policy = jsonencode(
     {
       "Version" : "2012-10-17",
-      "Statement" : concat([
+      "Statement" : [
+        # allow caller to invoke the lambda via function url
         {
-          "Action" : ["lambda:InvokeFunctionUrl"],
+          "Action" : [
+            # for new AWS accounts as of Oct 2025, both of these are required
+            # see https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html 
+            "lambda:InvokeFunctionUrl",
+            "lambda:InvokeFunction"
+          ],
           "Effect" : "Allow",
           "Resource" : [for k, v in module.api_connector : v.function_arn]
         }
-        ],
-        # allow caller to read from async output buckets
-        [for k, v in module.api_connector : {
-          "Action" : ["s3:GetObject", "s3:ListBucket"],
-          "Effect" : "Allow",
-          "Resource" : ["arn:aws:s3:::${v.async_output_bucket_id}", "arn:aws:s3:::${v.async_output_bucket_id}/*"]
-        } if v.async_output_bucket_id != null]
-      )
+      ],
   })
 
   lifecycle {
@@ -86,12 +95,42 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
 }
 
 resource "aws_iam_role_policy_attachment" "invoker_url_lambda_execution" {
-  count = var.use_api_gateway_v2 ? 0 : 1
+  count = local.caller_requires_direct_lambda_access ? 1 : 0
 
   role       = module.psoxy.api_caller_role_name
   policy_arn = aws_iam_policy.execution_lambda_to_caller[0].arn
 }
 
+# access to async output buckets
+# this is independent of whether API connectors are otherwise invoked via API Gateway v2 or function urls
+locals {
+  async_output_buckets = [for k, v in module.api_connector : v.async_output_bucket_id if v.async_output_bucket_id != null]
+}
+
+resource "aws_iam_policy" "async_output_access" {
+  count = length(local.async_output_buckets) > 0 ? 1 : 0
+
+  name        = "${module.env_id.id}AsyncOutputAccess"
+  description = "Allow caller to read from async output buckets (sanitized output)"
+
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [for k, v in module.api_connector : {
+        "Action" : ["s3:GetObject", "s3:ListBucket"],
+        "Effect" : "Allow",
+        "Resource" : ["arn:aws:s3:::${v.async_output_bucket_id}", "arn:aws:s3:::${v.async_output_bucket_id}/*"]
+      } if v.async_output_bucket_id != null]
+    }
+  )
+}
+
+resource "aws_iam_role_policy_attachment" "async_output_access_to_caller" {
+  count = length(local.async_output_buckets) > 0 ? 1 : 0
+
+  role       = module.psoxy.api_caller_role_name
+  policy_arn = aws_iam_policy.async_output_access[0].arn
+}
 
 
 # secrets shared across all instances
@@ -177,9 +216,10 @@ module "instance_secrets_secrets_manager" {
 module "api_connector" {
   for_each = var.api_connectors
 
-  source = "../../modules/aws-psoxy-rest"
+  source = "../../modules/aws-proxy-api"
 
   environment_name                      = var.environment_name
+  new_relic_account_id                  = var.new_relic_account_id
   instance_id                           = each.key
   source_kind                           = each.value.source_kind
   path_to_function_zip                  = module.psoxy.path_to_deployment_jar
@@ -189,6 +229,7 @@ module "api_connector" {
   log_retention_days                    = var.log_retention_days
   api_caller_role_arn                   = module.psoxy.api_caller_role_arn
   example_api_calls                     = each.value.example_api_calls
+  example_api_requests                  = try(each.value.example_api_requests, [])
   aws_account_id                        = var.aws_account_id
   region                                = data.aws_region.current.id
   path_to_repo_root                     = var.psoxy_base_dir
@@ -215,14 +256,16 @@ module "api_connector" {
   todo_step            = var.todo_step
 
   environment_variables = merge(
-    var.general_environment_variables,
-    try(each.value.environment_variables, {}),
     {
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
       EMAIL_CANONICALIZATION = var.email_canonicalization
-      CUSTOM_RULES_SHA       = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : null
-      IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
-    }
+      CUSTOM_RULES_SHA = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : (
+        try(local.api_connector_rules_raw[each.key], null) != null ? sha1(local.api_connector_rules_raw[each.key]) : null
+      )
+      IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
+    },
+    try(each.value.environment_variables, {}),
+    var.general_environment_variables,
   )
 }
 
@@ -237,26 +280,44 @@ module "custom_api_connector_rules" {
   file_path = each.value
 }
 
+# Rules provisioned from rules_raw (content string, not file path)
+module "api_connector_rules_raw" {
+  source = "../../modules/aws-ssm-rules"
+
+  for_each = local.api_connector_rules_raw
+
+  prefix  = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
+  content = each.value
+}
+
 module "bulk_connector" {
   for_each = var.bulk_connectors
 
-  source = "../../modules/aws-psoxy-bulk"
+  source = "../../modules/aws-proxy-bulk"
 
-  aws_account_id                       = var.aws_account_id
-  provision_iam_policy_for_testing     = var.provision_testing_infra
-  aws_role_to_assume_when_testing      = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
-  environment_name                     = var.environment_name
-  instance_id                          = each.key
-  source_kind                          = each.value.source_kind
-  aws_region                           = data.aws_region.current.id
-  path_to_function_zip                 = module.psoxy.path_to_deployment_jar
-  function_zip_hash                    = module.psoxy.deployment_package_hash
-  function_env_kms_key_arn             = var.function_env_kms_key_arn
-  logs_kms_key_arn                     = var.logs_kms_key_arn
-  log_retention_days                   = var.log_retention_days
-  psoxy_base_dir                       = var.psoxy_base_dir
-  rules                                = try(var.custom_bulk_connector_rules[each.key], each.value.rules)
-  rules_file                           = each.value.rules_file
+  aws_account_id                   = var.aws_account_id
+  provision_iam_policy_for_testing = var.provision_testing_infra
+  aws_role_to_assume_when_testing  = var.provision_testing_infra ? module.psoxy.api_caller_role_arn : null
+  environment_name                 = var.environment_name
+  new_relic_account_id             = var.new_relic_account_id
+  instance_id                      = each.key
+  source_kind                      = each.value.source_kind
+  aws_region                       = data.aws_region.current.id
+  path_to_function_zip             = module.psoxy.path_to_deployment_jar
+  function_zip_hash                = module.psoxy.deployment_package_hash
+  function_env_kms_key_arn         = var.function_env_kms_key_arn
+  logs_kms_key_arn                 = var.logs_kms_key_arn
+  log_retention_days               = var.log_retention_days
+  psoxy_base_dir                   = var.psoxy_base_dir
+  rules = (
+    try(var.custom_bulk_connector_rules[each.key], null) != null ? var.custom_bulk_connector_rules[each.key] :
+    each.value.rules
+  )
+  rules_file = (
+    # rules_file only applies when custom_bulk_connector_rules and rules_raw don't take precedence
+    try(var.custom_bulk_connector_rules[each.key], null) == null && try(each.value.rules_raw, null) == null ? each.value.rules_file :
+    null
+  )
   secrets_store_implementation         = var.secrets_store_implementation
   global_parameter_arns                = try(module.global_secrets_ssm[0].secret_arns, [])
   global_secrets_manager_secret_arns   = try(module.global_secrets_secrets_manager[0].secret_arns, {})
@@ -268,6 +329,7 @@ module "bulk_connector" {
   sanitized_expiration_days            = var.bulk_sanitized_expiration_days
   input_expiration_days                = var.bulk_input_expiration_days
   example_file                         = each.value.example_file
+  example_files                        = try(each.value.example_files, [])
   instructions_template                = each.value.instructions_template
   vpc_config                           = var.vpc_config
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
@@ -278,12 +340,16 @@ module "bulk_connector" {
 
 
   environment_variables = merge(
-    var.general_environment_variables,
-    try(each.value.environment_variables, {}),
     {
       IS_DEVELOPMENT_MODE    = contains(var.non_production_connectors, each.key)
       EMAIL_CANONICALIZATION = var.email_canonicalization
     },
+    try(each.value.environment_variables, {}),
+    # If rules_raw is set and there's no custom override, pass it as RULES env var
+    try(var.custom_bulk_connector_rules[each.key], null) == null && try(each.value.rules_raw, null) != null ? {
+      RULES = each.value.rules_raw
+    } : {},
+    var.general_environment_variables
   )
 }
 
@@ -294,6 +360,7 @@ module "webhook_collectors" {
   source = "../../modules/aws-webhook-collector"
 
   environment_name                     = var.environment_name
+  new_relic_account_id                 = var.new_relic_account_id
   instance_id                          = each.key
   path_to_function_zip                 = module.psoxy.path_to_deployment_jar
   function_zip_hash                    = module.psoxy.deployment_package_hash
@@ -317,19 +384,20 @@ module "webhook_collectors" {
   rules_file                           = each.value.rules_file
   webhook_auth_public_keys             = each.value.auth_public_keys
   provision_auth_key                   = each.value.provision_auth_key
+  output_path_prefix                   = each.value.output_path_prefix
+  keep_warm_instances                  = try(each.value.keep_warm_instances, null)
   example_payload                      = try(each.value.example_payload, null)
   example_identity                     = try(each.value.example_identity, null)
 
   todos_as_local_files = var.todos_as_local_files
 
   environment_variables = merge(
-    var.general_environment_variables,
-    ## try(each.value.environment_variables, {}),
     {
       EMAIL_CANONICALIZATION = var.email_canonicalization
       ##CUSTOM_RULES_SHA       = try(var.custom_api_connector_rules[each.key], null) != null ? filesha1(var.custom_api_connector_rules[each.key]) : null
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
-    }
+    },
+    var.general_environment_variables,
   )
 }
 
@@ -359,6 +427,17 @@ resource "aws_iam_policy" "invoke_webhook_collector_urls" {
           ],
           "Effect" : "Allow",
           "Resource" : flatten([for k, v in module.webhook_collectors : v.provisioned_auth_key_pairs])
+        },
+        { # allow test caller to read from sanitized output buckets to verify collection
+          "Action" : [
+            "s3:ListBucket",
+            "s3:GetObject"
+          ],
+          "Effect" : "Allow",
+          "Resource" : flatten([for k, v in module.webhook_collectors : [
+            "arn:aws:s3:::${v.output_sanitized_bucket_id}",
+            "arn:aws:s3:::${v.output_sanitized_bucket_id}/*"
+          ]])
         }
       ]
     }
@@ -376,7 +455,7 @@ resource "aws_iam_role_policy_attachment" "invoke_webhook_collector_urls_to_test
 module "lookup_output" {
   for_each = var.lookup_table_builders
 
-  source = "../../modules/aws-psoxy-output-bucket"
+  source = "../../modules/aws-proxy-output-bucket"
 
   environment_name              = var.environment_name
   instance_id                   = each.key
@@ -464,3 +543,6 @@ echo "Testing Webhook Collectors ..."
 EOF
 }
 
+output "artifacts_bucket_name" {
+  value = module.psoxy.artifacts_bucket_name
+}

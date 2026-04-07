@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.WebhookCollectorModeConfigProperty;
+import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
 import co.worklytics.psoxy.gateway.auth.JwtAuthorizedResource;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
@@ -25,6 +25,7 @@ public class JwksDecoratorTest {
 
     JwksDecorator handler;
     ConfigService configService;
+    WebhookCollectorModeConfig webhookCollectorModeConfig;
     Set<PublicKeyStoreClient> keyClients;
 
     static final String EXPECTED_JSON = """
@@ -54,13 +55,20 @@ public class JwksDecoratorTest {
         generatedBase64Key = Base64.getEncoder().encodeToString(publicKey.getEncoded());
 
         configService = MockModules.ForConfigService.configService();
-        when(configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ACCEPTED_AUTH_KEYS))
-            .thenReturn(java.util.Optional.of("base64:" + generatedBase64Key));
+        
+        // Mock WebhookCollectorModeConfig
+        webhookCollectorModeConfig = WebhookCollectorModeConfig.builder()
+        .acceptedAuthKeys("base64:" + generatedBase64Key)
+        .build();
+
+
+        
         keyClients = Collections.singleton(new Base64KeyClient());
         handler = new JwksDecorator(new InboundWebhookHandler(
             () -> MockModules.provideMock(WebhookSanitizer.class),
             new NoOutput(),
             configService,
+            webhookCollectorModeConfig,
             keyClients,
             Clock.systemDefaultZone()
         ));

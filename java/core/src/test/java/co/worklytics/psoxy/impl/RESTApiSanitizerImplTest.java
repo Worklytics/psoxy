@@ -1,53 +1,64 @@
 package co.worklytics.psoxy.impl;
 
-import co.worklytics.psoxy.*;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.test.TestModules;
-import com.avaulta.gateway.pseudonyms.Pseudonym;
-import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
-import com.avaulta.gateway.rules.Endpoint;
-import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
-import co.worklytics.psoxy.rules.Rules2;
-import com.avaulta.gateway.rules.JsonSchemaFilter;
-import com.avaulta.gateway.rules.transforms.EncryptIp;
-import com.avaulta.gateway.rules.transforms.HashIp;
-import com.avaulta.gateway.rules.transforms.Transform;
-import co.worklytics.test.MockModules;
-import co.worklytics.test.TestUtils;
-import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
-import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
-import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
-import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.MapFunction;
-import dagger.Component;
-import dagger.Module;
-import dagger.Provides;
-import lombok.SneakyThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import java.net.URL;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Pattern;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.net.URL;
-import java.time.Duration;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.assertArg;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
+import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.transforms.EncryptIp;
+import com.avaulta.gateway.rules.transforms.HashIp;
+import com.avaulta.gateway.rules.transforms.Transform;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import com.avaulta.gateway.tokens.impl.Sha256DeterministicTokenizationStrategy;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.MapFunction;
+import co.worklytics.psoxy.ConfigRulesModule;
+import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.PseudonymizerImplFactory;
+import co.worklytics.psoxy.PsoxyModule;
+import co.worklytics.psoxy.RESTApiSanitizerFactory;
+import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
+import co.worklytics.psoxy.rules.Rules2;
+import co.worklytics.test.MockModules;
+import co.worklytics.test.TestUtils;
+import dagger.Component;
+import dagger.Module;
+import dagger.Provides;
+import lombok.SneakyThrows;
 
 class RESTApiSanitizerImplTest {
 
@@ -446,31 +457,30 @@ class RESTApiSanitizerImplTest {
     void pseudonymizeWithRegexMatches(String input) {
 
         Pseudonymizer pseudonymizer =
-                pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
-                        .pseudonymImplementation(PseudonymImplementation.DEFAULT).build());
-
+            pseudonymizerImplFactory.create(Pseudonymizer.ConfigurationOptions.builder()
+                .pseudonymImplementation(PseudonymImplementation.DEFAULT).build());
 
         sanitizer = sanitizerFactory.create(PrebuiltSanitizerRules.DEFAULTS.get("gmail"),
-                pseudonymizer);
+            pseudonymizer);
 
         List<MapFunction> transforms = Arrays.asList(
-                sanitizer.sanitizerUtils.getPseudonymizeRegexMatches(sanitizer.getPseudonymizer(),
-                        Transform.PseudonymizeRegexMatches.builder().regex(".*")
-                                .includeReversible(true).build()),
-                sanitizer.sanitizerUtils.getPseudonymizeRegexMatches(sanitizer.getPseudonymizer(),
-                        Transform.PseudonymizeRegexMatches.builder().regex(".*")
-                                .includeReversible(false).build()),
-                sanitizer.sanitizerUtils.getPseudonymize(sanitizer.getPseudonymizer(),
-                        Transform.Pseudonymize.builder().includeReversible(true)
-                                .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).build()),
-                sanitizer.sanitizerUtils.getPseudonymize(sanitizer.getPseudonymizer(),
-                        Transform.Pseudonymize.builder().includeReversible(false)
-                                .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
-                                .build()));
+            sanitizer.sanitizerUtils.getPseudonymizeRegexMatches(sanitizer.getPseudonymizer(),
+                Transform.PseudonymizeRegexMatches.builder().regex(".*")
+                    .includeReversible(true).build()),
+            sanitizer.sanitizerUtils.getPseudonymizeRegexMatches(sanitizer.getPseudonymizer(),
+                Transform.PseudonymizeRegexMatches.builder().regex(".*")
+                    .includeReversible(false).build()),
+            sanitizer.sanitizerUtils.getPseudonymize(sanitizer.getPseudonymizer(),
+                Transform.Pseudonymize.builder().includeReversible(true)
+                    .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN).build()),
+            sanitizer.sanitizerUtils.getPseudonymize(sanitizer.getPseudonymizer(),
+                Transform.Pseudonymize.builder().includeReversible(false)
+                    .encoding(PseudonymEncoder.Implementations.URL_SAFE_TOKEN)
+                    .build()));
 
         List<String> pseudonymized = transforms.stream()
-                .map(f -> (String) f.map(input, sanitizer.getJsonConfiguration()))
-                .collect(Collectors.toList());
+            .map(f -> (String) f.map(input, sanitizer.getJsonConfiguration()))
+            .toList();
 
         UrlSafeTokenPseudonymEncoder encoder = new UrlSafeTokenPseudonymEncoder();
 
@@ -480,30 +490,53 @@ class RESTApiSanitizerImplTest {
             } catch (Exception e) {
                 return encoder.decode(StringUtils.replaceChars(s, ".+/", "--_"));
             }
-        }).collect(Collectors.toList());
+        }).toList();
 
         List<String> hashes = pseudonyms.stream().map(Pseudonym::getHash)
-                .map(Base64.getEncoder()::encode).map(String::new).collect(Collectors.toList());
+            .map(Base64.getEncoder()::encode).map(String::new).toList();
 
         assertTrue(hashes.stream().allMatch(p -> Objects.equals(hashes.get(0), p)));
-
     }
 
+    @CsvSource(value = {
+        // original cases - must still pass
+        "something,.*,t~EN_O0yRLJp7bRnw6HrbdPMLul_uqairwpevQ08HtEn0",
+        "something,blah:.*thing,",                                                              // no match → redact
+        "blah:something,blah:.*thing,t~ltpmWUv-gqwJTPjfusJMo8Cd45xhqDRQx6REW-gS2CU",
+        "blah:something,blah:(.*),blah:t~EN_O0yRLJp7bRnw6HrbdPMLul_uqairwpevQ08HtEn0",
 
+        // single @mention - pseudonymize username, preserve surrounding text
+        "assigned to @alice,@([\\w.-]+),assigned to @t~3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4",
+        "requested review from @bob,@([\\w.-]+),requested review from @t~kbEeZaASjfdRzw5DsaEMq4HoESgOdgoKQN3np2Gm_hY",
 
-    @CsvSource(value = {"something,.*,t~EN_O0yRLJp7bRnw6HrbdPMLul_uqairwpevQ08HtEn0",
-            "something,blah:.*thing,", // no match, should redact
-            "blah:something,blah:.*thing,t~ltpmWUv-gqwJTPjfusJMo8Cd45xhqDRQx6REW-gS2CU",
-            "blah:something,blah:(.*),blah:t~EN_O0yRLJp7bRnw6HrbdPMLul_uqairwpevQ08HtEn0",})
+        // multiple @mentions - both pseudonymized independently, surrounding text preserved
+        "assigned to @alice and unassigned @bob,@([\\w.-]+),assigned to @t~3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4 and unassigned @t~kbEeZaASjfdRzw5DsaEMq4HoESgOdgoKQN3np2Gm_hY",
+        "requested review from @alice and removed review request for @bob,@([\\w.-]+),requested review from @t~3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4 and removed review request for @t~kbEeZaASjfdRzw5DsaEMq4HoESgOdgoKQN3np2Gm_hY",
+
+        // same username twice - pseudonymized consistently
+        "assigned to @alice and unassigned @alice,@([\\w.-]+),assigned to @t~3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4 and unassigned @t~3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4",
+
+        // whitespace-only capture group - should be skipped, no real match → redact
+        "assigned to @alice,(\\s+),",
+
+        // blank input - no match → redact
+        "   ,@([\\w.-]+),",
+        ",@([\\w.-]+),",
+
+        // group(1) text repeated inside group(0) - only exact group(1) span replaced, not all occurrences
+        // pattern: @(alice) where group(0)=@alice, group(1)=alice
+        // 'alice' also appears in surrounding text - only the @alice mention should be pseudonymized
+        "alice requested review from @alice,@([\\w.-]+),alice requested review from @t~3YAoyBkqpKrO4rk5ISA0dZSABykOBC7pEMmkL1L0HK4",
+    })
     @ParameterizedTest
     public void pseudonymizeWithRegexMatches_nonMatchingRedacted(String input, String regex,
-            String expected) {
+                                                                 String expected) {
         MapFunction transform = sanitizer.sanitizerUtils.getPseudonymizeRegexMatches(
-                sanitizer.getPseudonymizer(), Transform.PseudonymizeRegexMatches.builder()
-                        .regex(regex).includeReversible(false).build());
+            sanitizer.getPseudonymizer(), Transform.PseudonymizeRegexMatches.builder()
+                .regex(regex).includeReversible(false).build());
 
         assertEquals(StringUtils.trimToNull(expected),
-                transform.map(input, sanitizer.getJsonConfiguration()));
+            transform.map(input, sanitizer.getJsonConfiguration()));
     }
 
     @CsvSource(value = {"123.234.252.12,t~7USliSM4GiS0Xfk1DXIAH-4nK-UkLJlSAA_5ZqQh_CI",
@@ -625,6 +658,37 @@ class RESTApiSanitizerImplTest {
                         "/gmail/v1/users/me/messages/17c3b1911726ef3f\\?format=metadata"),
                     jsonString);
             });
+    }
+
+    @SneakyThrows
+    @Test
+    void allowedRequestHeaders_combinesRulesAndEndpoint() {
+        URL url = new URL("https://api.example.com/test");
+
+        RESTApiSanitizerImpl strictSanitizer = sanitizerFactory.create(Rules2.builder()
+                .allowedRequestHeaders(Arrays.asList("Global-Header"))
+                .endpoint(Endpoint.builder()
+                        .pathRegex("^/test$")
+                        .allowedMethods(Collections.singleton("GET"))
+                        .allowedRequestHeaders(Set.of("Endpoint-Header"))
+                        .allowedRequestHeadersToForward(Arrays.asList("Forward-Header"))
+                        .build())
+                .build(), sanitizer.pseudonymizer);
+
+        Optional<Collection<String>> headersOptional = strictSanitizer.getAllowedRequestHeaders("GET", url);
+
+        assertTrue(headersOptional.isPresent());
+        Collection<String> headers = headersOptional.get();
+
+        // ruleSet allowedHeaders are on top of the ones from the endpoint
+        assertTrue(headers.contains("Global-Header"));
+        assertTrue(headers.contains("Endpoint-Header"));
+        assertTrue(headers.contains("Forward-Header"));
+        assertEquals(3, headers.size());
+
+        // verify order: Global first
+        Iterator<String> it = headers.iterator();
+        assertEquals("Global-Header", it.next());
     }
 
 }

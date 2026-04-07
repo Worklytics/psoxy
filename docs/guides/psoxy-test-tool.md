@@ -47,6 +47,24 @@ node cli-call.js -u https://us-central1-acme.cloudfunctions.net/outlook-cal/v1.0
 
 (*) You can obtain it by running `gcloud auth print-identity-token` (using [Google Cloud SDK])
 
+### End-to-End Verification (Webhook Collection)
+
+For Webhook Collection testing, you can use the tool to verify that the data was successfully collected and written to the expected bucket.
+
+```shell
+node cli-call.js -u https://us-central1-acme.cloudfunctions.net/webhook-collector --method POST --body '{...}' --verify-collection my-output-bucket
+```
+
+This will:
+1. Make the POST request to the webhook collector.
+2. In GCP case, trigger the associated Cloud Scheduler job processing the batch (GCP).
+3. Poll the specified bucket until the output file appears (up to 60s).
+4. Verify that the content of the output file matches the uploaded data.
+
+**Options:**
+*   `--verify-collection <bucketName>`: Enables verification mode and specifies the target bucket.
+*   `--scheduler-job <jobName>`: (only for GCP case) Specify the Cloud Scheduler job that batch-processes pending webhooks from the pubsub topic.
+
 ### Psoxy Test Call: Health Check option
 Use the `--health-check` option to check if your deploy is correctly configured:
 
@@ -95,7 +113,7 @@ Notice how the URL changes, and any other option the Psoxy may need doesn't.
 Assuming that you've successfully deployed the Psoxy to AWS, you can inspect the logs by running the following command:
 
 ```shell
-node cli-logs.js -r <role> -re <region> -l <logGroupName>
+node cli-logs.js -r <role> --region <region> -l <logGroupName>
 ```
 
 ## Psoxy Logs: GCP
@@ -119,7 +137,7 @@ perform the upload and download operations.
 
 Example:
 ```shell
-node cli-file-upload.js -d AWS -i input-bucket-name -o output-bucket-name -f /path/to/file.csv -r <ROLE> -re <REGION>
+node cli-file-upload.js -d AWS -i input-bucket-name -o output-bucket-name -f /path/to/file.csv -r <ROLE> --region <REGION>
 ```
 
 ## Psoxy Bulk Instances: GCP

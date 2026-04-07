@@ -12,9 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import javax.inject.Inject;
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -132,7 +132,7 @@ public class GcpApiDataRequestHandler {
             fillGcpResponseFromGenericResponse(response, abstractResponse);
 
             // sample 1% of requests, warning if compression not requested
-            if (RandomUtils.nextInt(0, 99) == 0 && !cloudFunctionRequest.getWarnings().isEmpty()) {
+            if (ThreadLocalRandom.current().nextInt(0, 100) == 0 && !cloudFunctionRequest.getWarnings().isEmpty()) {
                 response.appendHeader(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
                     Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode());
             }

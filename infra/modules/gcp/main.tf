@@ -49,23 +49,13 @@ resource "google_project_service" "gcp_infra_api" {
   disable_on_destroy         = false # disabling on destroy has potential to conflict with other uses of the project
 }
 
-# TODO: This is will supported since 0.5 psoxy version, as google provider needs to be updated
-/*resource "google_artifact_registry_repository" "psoxy-functions-repo" {
+resource "google_artifact_registry_repository" "psoxy-functions-repo" {
   location      = var.bucket_location
   project       = var.project_id
   repository_id = "psoxy-functions"
   description   = "Docker repository used on the cloud functions"
   format        = "DOCKER"
 
-  ## Not supported in current google providers, needs 5.14 as there it is GA
-  # See https://github.com/hashicorp/terraform-provider-google/blob/main/CHANGELOG.md#5140-jan-29-2024
-  # but even is present in the documentation (https://registry.terraform.io/providers/hashicorp/google/4.80.0/docs/resources/artifact_registry_repository#argument-reference)
-  # when applied it throws an error with the message: "An argument named "cleanup_policy_dry_run" is not expected here"
-  # and "no block for cleanup_policies" is expected
-  */ /*cleanup_policy_dry_run = false
-
-  # https://cloud.google.com/artifact-registry/docs/repositories/cleanup-policy#json_2
-  # https://registry.terraform.io/providers/hashicorp/google/4.80.0/docs/resources/artifact_registry_repository#argument-reference
   cleanup_policies {
     id     = "keep-most-recent-versions"
     action = "KEEP"
@@ -73,23 +63,20 @@ resource "google_project_service" "gcp_infra_api" {
     most_recent_versions {
       keep_count = 3
     }
-  }*/ /*
+  }
 
   depends_on = [
     google_project_service.gcp_infra_api
   ]
-}*/
+}
 
 # pseudo secret
 resource "google_secret_manager_secret" "pseudonym_salt" {
   project   = var.project_id
   secret_id = "${var.config_parameter_prefix}PSOXY_SALT"
-  labels = merge(
-    var.default_labels,
-    {
-      terraform_managed_value = true
-    }
-  )
+  labels = {
+    terraform_managed_value = true
+  }
 
   replication {
     user_managed {
@@ -105,7 +92,6 @@ resource "google_secret_manager_secret" "pseudonym_salt" {
   lifecycle {
     ignore_changes = [
       replication, # can't change replication after creation
-      labels
     ]
   }
 
@@ -142,12 +128,9 @@ resource "google_secret_manager_secret_version" "initial_version" {
 resource "google_secret_manager_secret" "pseudonymization_key" {
   project   = var.project_id
   secret_id = "${var.config_parameter_prefix}PSOXY_ENCRYPTION_KEY"
-  labels = merge(
-    var.default_labels,
-    {
-      terraform_managed_value = true
-    }
-  )
+  labels = {
+    terraform_managed_value = true
+  }
 
   replication {
     user_managed {
@@ -163,7 +146,6 @@ resource "google_secret_manager_secret" "pseudonymization_key" {
   lifecycle {
     ignore_changes = [
       replication, # can't change replication after creation
-      labels
     ]
   }
 
@@ -193,10 +175,11 @@ resource "google_secret_manager_secret_version" "pseudonym_encryption_key_initia
 module "psoxy_package" {
   source = "../psoxy-package"
 
-  implementation     = "gcp"
-  path_to_psoxy_java = "${var.psoxy_base_dir}java"
-  deployment_bundle  = var.deployment_bundle
-  force_bundle       = var.force_bundle
+  implementation         = "gcp"
+  path_to_psoxy_java     = "${var.psoxy_base_dir}java"
+  deployment_bundle      = var.deployment_bundle
+  deployment_bundle_hash = var.deployment_bundle_hash
+  force_bundle           = var.force_bundle
 }
 
 locals {
@@ -225,6 +208,9 @@ data "archive_file" "source" {
 }
 
 # Create bucket that will host the source code
+# staging bucket only, does not need versioning
+# trivy:ignore:AVD-GCP-0078
+# trivy:ignore:AVD-GCP-0077
 resource "google_storage_bucket" "artifacts" {
   count = local.is_remote_bundle ? 0 : 1
 
@@ -233,14 +219,15 @@ resource "google_storage_bucket" "artifacts" {
   location                    = var.bucket_location
   uniform_bucket_level_access = true
   force_destroy               = var.bucket_force_destroy
-  labels                      = var.default_labels
 
-  # TODO: remove in v0.5
-  lifecycle {
-    ignore_changes = [
-      labels
-    ]
+  dynamic "logging" {
+    for_each = var.bucket_access_logs_destination != null ? [var.bucket_access_logs_destination] : []
+    content {
+      log_bucket = logging.value
+    }
   }
+
+
 }
 
 # add zipped JAR to bucket
@@ -288,6 +275,28 @@ resource "google_project_iam_custom_role" "bucket_write" {
   ]
 }
 
+resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
+  project     = var.project_id
+  role_id     = "${local.environment_id_role_prefix}secretVersionManager"
+  title       = "${local.environment_id_prefix_display}Secret Version Manager"
+  description = "Manage secret versions for writable/lockable secrets used by proxy instances"
+
+  permissions = [
+    "resourcemanager.projects.get",
+    "secretmanager.secrets.get",
+    "secretmanager.secrets.getIamPolicy",
+    "secretmanager.secrets.list",
+    "secretmanager.secrets.update",
+    "secretmanager.versions.access",
+    "secretmanager.versions.add",
+    "secretmanager.versions.destroy",
+    "secretmanager.versions.disable",
+    "secretmanager.versions.enable",
+    "secretmanager.versions.get",
+    "secretmanager.versions.list",
+  ]
+}
+
 
 # to avoid error 'The Cloud Storage service account for your bucket is unable to publish to Cloud Pub/Sub topics in the specified project'
 # see: https://cloud.google.com/eventarc/docs/run/quickstart-storage#before-you-begin
@@ -296,11 +305,44 @@ data "google_storage_project_service_account" "gcs_default_service_account" {
 }
 
 resource "google_project_iam_member" "grant_gcs-sa_pub-sub-publisher" {
-  count = var.support_bulk_mode ? 1 : 0
+  count = var.support_bulk_mode && var.provision_project_level_iam ? 1 : 0
 
   project = var.project_id
   role    = "roles/pubsub.publisher"
   member  = "serviceAccount:${data.google_storage_project_service_account.gcs_default_service_account.email_address}"
+}
+
+locals {
+  builder_sa_email = var.builder_sa_email != null ? var.builder_sa_email : try(google_service_account.proxy_builder_sa[0].email, data.google_compute_default_service_account.default.email)
+}
+
+# Create a custom builder SA to avoid using the Compute Engine default SA for builds (fixes GCP-0006)
+resource "google_service_account" "proxy_builder_sa" {
+  count = var.provision_project_level_iam && var.builder_sa_email == null ? 1 : 0
+
+  account_id   = trim(substr("${var.environment_id_prefix}proxy-builder-sa", 0, 30), "-")
+  display_name = "${local.environment_id_prefix_display} Psoxy Cloud Build Service Account"
+  description  = "Service account used by Cloud Build to build Psoxy Cloud Functions."
+  project      = var.project_id
+}
+
+resource "google_storage_bucket_iam_member" "grant_proxy_builder_object_viewer_on_artifacts" {
+  count = local.is_remote_bundle ? 0 : 1
+
+  bucket = google_storage_bucket.artifacts[0].name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${local.builder_sa_email}"
+}
+
+# Grant Cloud Build builder role to the custom builder service account
+# Required for Cloud Functions Gen2 deployment to build the function
+# See: https://cloud.google.com/functions/docs/troubleshooting#build-service-account
+resource "google_project_iam_member" "grant_builder_sa_cloudbuild_builder" {
+  count = var.provision_project_level_iam ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/cloudbuild.builds.builder"
+  member  = "serviceAccount:${local.builder_sa_email}"
 }
 
 
@@ -323,12 +365,13 @@ resource "google_project_iam_custom_role" "oidc_token_verifier" {
 
 
 # q: is there a default Cloud Scheduler service account, that needs tokencreator role on the webhook_batch_invoker SA?
-# GCP docs don't show one, and ChatGPT didn't say one needed until I asked - at which point it gave me example email for the SA that doesn't look to follow usual pattern ...
+# GCP docs don't show one, and ChatGPT didn't say one needed until I asked - at which point it gave me example email
+# for the SA that doesn't look to follow usual pattern ...
 resource "google_service_account" "webhook_batch_invoker" {
   count = var.support_webhook_collectors ? 1 : 0
 
   project      = var.project_id
-  account_id   = "${var.environment_id_prefix}webhook-batch"
+  account_id   = trim(substr("${var.environment_id_prefix}webhook-batch", 0, 30), "-")
   display_name = "${local.environment_id_prefix_display} Webhook Batch Invoker"
   description  = "Service account that will invoke the batch processing of webhooks"
 }
@@ -337,11 +380,24 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
+# Cloud Functions Gen2 deployment REQUIRES the terraform principal to have roles/iam.serviceAccountUser
+# on the Compute Engine default service account in order to provision the Cloud Functions Gen2 instance
+# with a specific service account (which we do, and seems like good practice)
+data "google_compute_default_service_account" "default" {
+  project = var.project_id
+}
+
+resource "google_service_account_iam_member" "tf_runner_act_as_compute_default" {
+  service_account_id = data.google_compute_default_service_account.default.name
+  member             = var.tf_runner_iam_principal
+  role               = "roles/iam.serviceAccountUser"
+}
+
 # q: is this needed????
 # doubt is, without it, what is allowing the scheduler to generate OIDC tokens on behalf of the webhook_batch_invoker SA?
 # but admittedly, I'm unclear if it's this SA that needs the grant, or if  instead granting `roles/iam.serviceAccountUser`
 # to the GCP principal terraform is running as is the proper approach (eg, idea is that terraform is 'scheduling' the job
-# as the service account's identity) 
+# as the service account's identity)
 resource "google_service_account_iam_member" "allow_scheduler_impersonation" {
   count = var.support_webhook_collectors ? 1 : 0
 
@@ -350,56 +406,48 @@ resource "google_service_account_iam_member" "allow_scheduler_impersonation" {
   member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudscheduler.iam.gserviceaccount.com"
 }
 
-# TODO: remove in v0.6.x
-# Deprecated; only keep to support old installations
-resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
-  project     = var.project_id
-  role_id     = "${local.environment_id_role_prefix}PsoxyInstanceSecretHandler"
-  title       = "${local.environment_id_prefix_display}Instance Secret Handler"
-  description = "Role to grant on secret that is to be managed by a Psoxy instance (cloud function); subset of roles/secretmanager.admin, to support reading/updating the secret and managing their versions"
-
-  permissions = [
-    "resourcemanager.projects.get",
-    "secretmanager.secrets.get",
-    "secretmanager.secrets.getIamPolicy",
-    "secretmanager.secrets.list",
-    "secretmanager.secrets.update",
-    "secretmanager.versions.add",
-    "secretmanager.versions.access",
-    "secretmanager.versions.destroy",
-    "secretmanager.versions.disable",
-    "secretmanager.versions.enable",
-    "secretmanager.versions.get",
-    "secretmanager.versions.list"
-  ]
-}
-
 
 # BEGIN Serverless VPC Access connector (conditional)
 locals {
   MAX_SERVERLESS_CONNECTOR_NAME_LENGTH = 25
 
-  provision_serverless_connector = var.vpc_config != null && try(var.vpc_config.serverless_connector, null) == null
+  vpc_defined = var.vpc_config != null
+
+  provision_serverless_connector = local.vpc_defined && try(var.vpc_config.serverless_connector, null) == null
   legal_connector_prefix         = substr(var.environment_id_prefix, 0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH)
   legal_connector_suffix         = substr("connector", 0, max(0, local.MAX_SERVERLESS_CONNECTOR_NAME_LENGTH - length(var.environment_id_prefix)))
+
+  # check if shared VPC
+  vpc_connector_network_project = coalesce(
+    try(regex("^projects/([^/]+)", var.vpc_config.network)[0], null),
+  var.project_id)
+  shared = var.project_id != local.vpc_connector_network_project
+
+  # if shared, expect network, expect everything set-up
+
+  # network argument to vpc_access_connector resource; must be provided if subnet isn't
+  vpc_connector_network = try(local.shared || !local.vpc_defined ? null : var.vpc_config.network, null)
+
+  # extract region from subnetwork (if shared)
+  vpc_connector_region = coalesce(
+    try(regex("projects/[^/]+/regions/([^/]+)", var.vpc_config.subnet)[0], null),
+  var.gcp_region)
+
+  vpc_connector_subnetwork_name = !local.provision_serverless_connector ? null : coalesce(
+    try(regex(".*/([^/]+)$", var.vpc_config.subnet)[0], null),
+  try(local.vpc_defined ? var.vpc_config.subnet : null, null))
 }
 
 resource "google_vpc_access_connector" "connector" {
   count = local.provision_serverless_connector ? 1 : 0
 
-  project       = var.project_id
-  region        = var.gcp_region
-  network       = try(var.vpc_config.network, null) # network MUST be provided if serverless_connector is not provided
-  name          = "${local.legal_connector_prefix}${local.legal_connector_suffix}"
-  ip_cidr_range = try(var.vpc_config.serverless_connector_cidr_range, null) # seems like MUST be a /28 ??? not documented, but others give errors
+  project = var.project_id
+  region  = local.vpc_connector_region
+  name    = "${local.legal_connector_prefix}${local.legal_connector_suffix}"
 
-  dynamic "subnet" {
-    for_each = try(var.vpc_config.subnetwork, null) == null ? [] : [var.vpc_config.subnetwork]
-
-    content {
-      name       = subnet.value
-      project_id = var.project_id
-    }
+  subnet {
+    name       = local.vpc_connector_subnetwork_name
+    project_id = local.vpc_connector_network_project
   }
 
 }
@@ -419,8 +467,55 @@ locals {
 
 
 
+
+
+locals {
+  custom_testing_role_perms = concat(
+    var.support_webhook_collectors ? [
+      "cloudscheduler.jobs.get",
+      "cloudscheduler.jobs.run",
+    ] : [],
+    []
+  )
+}
+
+# Custom role to support testing, if needed
+
+# Custom role for principals who need to test data sanitization (webhook collectors)
+# Only created if webhook collectors are configured and testing infra is enabled
+resource "google_project_iam_custom_role" "data_sanitization_tester" {
+  count = var.provision_testing_infra && length(local.custom_testing_role_perms) > 0 ? 1 : 0
+
+  project     = var.project_id
+  role_id     = "${local.environment_id_role_prefix}DataSanitizationTester"
+  title       = "${local.environment_id_prefix_display}Data Sanitization Tester"
+  description = "Role for principals authorized to test data sanitization. Includes permissions for triggering Cloud Scheduler jobs."
+
+  permissions = local.custom_testing_role_perms
+}
+
+
+# Grant test principals the custom role at project level
+# Note: Cloud Scheduler doesn't support resource-level IAM, so project-level is required
+resource "google_project_iam_member" "data_sanitization_tester_grant" {
+  for_each = var.provision_testing_infra && var.support_webhook_collectors ? toset(var.gcp_principals_authorized_to_test) : toset([])
+
+  project = var.project_id
+  role    = google_project_iam_custom_role.data_sanitization_tester[0].id
+  member  = each.key
+}
+
+## end custom testing infra
+
+
+
 output "artifacts_bucket_name" {
   value = local.artifact_bucket_name
+}
+
+output "artifacts_bucket_id" {
+  value       = try(google_storage_bucket.artifacts[0].id, null)
+  description = "The ID of the artifacts google_storage_bucket resource"
 }
 
 output "deployment_bundle_object_name" {
@@ -457,6 +552,7 @@ output "path_to_deployment_jar" {
   description = "Path to the package to deploy (JAR)."
   value       = module.psoxy_package.path_to_deployment_jar
 }
+
 
 output "psoxy_instance_secret_locker_role_id" {
   value = google_project_iam_custom_role.psoxy_instance_secret_role.id
@@ -498,4 +594,9 @@ output "webhook_batch_invoker_sa_email" {
 output "vpc_config" {
   value       = local.vpc_config
   description = "VPC configuration for the Cloud Run function. Possibly 'null' if no VPC is configured."
+}
+
+output "data_sanitization_tester_role_id" {
+  value       = try(google_project_iam_custom_role.data_sanitization_tester[0].id, null)
+  description = "Custom role for test principals. Includes permissions needed for end-to-end testing."
 }

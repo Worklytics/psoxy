@@ -3,6 +3,12 @@ variable "enabled_connectors" {
   description = "ids of connectors to enable"
 }
 
+variable "base_dir" {
+  type        = string
+  description = "Base directory for resolving relative file paths (eg rules_file) in connector specs."
+  default     = null
+}
+
 variable "chat_gpt_enterprise_example_workspace_id" {
   type        = string
   description = "Workspace id to use for example calls"
@@ -19,6 +25,18 @@ variable "confluence_example_group_id" {
   type        = string
   default     = null
   description = "(Only required if using Confluence Cloud connector) Example of group id of the Confluence Cloud to connect to (ex: 35e417ad-bcb1-45fe-9be0-959239a84327)."
+}
+
+variable "glean_instance_subdomain" {
+  type        = string
+  default     = null
+  description = "(Only required if using Glean connector) Subdomain of your Glean instance (ex: if your Glean URL is 'acme-be.glean.com', the instance subdomain is 'acme-be')"
+}
+
+variable "gong_instance_subdomain" {
+  type        = string
+  default     = null
+  description = "(Only required if using Gong connector) Subdomain of your Gong instance (ex: if your Gong URL is 'acme.gong.io', the instance subdomain is 'acme')"
 }
 
 variable "salesforce_domain" {
@@ -93,6 +111,24 @@ variable "github_example_repository" {
   type        = string
   default     = null
   description = "(Only required if using Github connector) Name for the repository to be used as part of example calls for Github (ex: psoxy)"
+}
+
+variable "gitlab_host" {
+  type        = string
+  default     = "gitlab.com"
+  description = "(Only required if using GitLab connector) Host of the GitLab instance (ex: gitlab.com or gitlab.mycompany.com for self-hosted)"
+}
+
+variable "gitlab_example_group_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using GitLab connector) Example group ID for test API calls (ex: 12345)"
+}
+
+variable "gitlab_example_project_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using GitLab connector) Example project ID for test API calls (ex: 12345)"
 }
 
 variable "salesforce_example_account_id" {

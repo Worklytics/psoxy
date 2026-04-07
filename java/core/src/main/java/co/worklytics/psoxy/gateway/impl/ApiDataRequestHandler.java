@@ -5,6 +5,8 @@ import java.net.ConnectException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -88,6 +90,7 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.extern.java.Log;
+import co.worklytics.psoxy.gateway.ProxyConstants;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
@@ -114,7 +117,7 @@ public class ApiDataRequestHandler {
     @Inject
     PseudonymizerImplFactory pseudonymizerImplFactory;
     @Inject
-    RESTRules rules;
+    Lazy<RESTRules> rules;
     @Inject
     HealthCheckRequestHandler healthCheckRequestHandler;
     @Inject
@@ -142,6 +145,8 @@ public class ApiDataRequestHandler {
     Lazy<AsyncApiDataRequestHandler> asyncApiDataRequestHandler;
     @Inject
     Provider<UUID> uuidProvider;
+    @Inject
+    ProxyConstants proxyConstants;
 
     /**
      * Basic headers to pass: content, caching, retries. Can be expanded by connection later.
@@ -193,7 +198,7 @@ public class ApiDataRequestHandler {
                 if (this.sanitizer == null) {
                     Pseudonymizer.ConfigurationOptions options =
                             pseudonymizerImplFactory.buildOptions(config);
-                    this.sanitizer = sanitizerFactory.create(rules,
+                    this.sanitizer = sanitizerFactory.create(rules.get(),
                             pseudonymizerImplFactory.create(options));
                 }
             }
@@ -254,6 +259,14 @@ public class ApiDataRequestHandler {
 
         try {
             this.sanitizer = loadSanitizerRules();
+        } catch (co.worklytics.psoxy.rules.InvalidRulesException e) {
+            log.log(Level.SEVERE, "Error loading sanitizer rules: " + e.getMessage(), e);
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                            e.getErrorCause().name())
+                    .body("Error loading sanitizer rules")
+                    .build();
         } catch (Throwable e) {
             log.log(Level.SEVERE, "Error loading sanitizer rules", e);
             return HttpEventResponse.builder()
@@ -321,7 +334,7 @@ public class ApiDataRequestHandler {
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                     ErrorCauses.BLOCKED_BY_RULES.name());
             log.warning(String.format("%s. Blocked call by rules %s", logEntry,
-                    objectMapper.writeValueAsString(rules)));
+                    objectMapper.writeValueAsString(rules.get())));
             return builder.build();
         }
 
@@ -355,7 +368,14 @@ public class ApiDataRequestHandler {
                     .setConnectTimeout(SOURCE_API_REQUEST_CONNECT_TIMEOUT_MS)
                     .setReadTimeout(SOURCE_API_REQUEST_READ_TIMEOUT_MS);
 
+        } catch (java.net.SocketTimeoutException e) {
+            return buildNetworkTimeoutErrorResponse(builder, e);
         } catch (IOException e) {
+            // Check if the root cause is a SocketTimeoutException
+            if (isSocketTimeoutException(e)) {
+                return buildNetworkTimeoutErrorResponse(builder, e);
+            }
+            
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             builder.body("Failed to parse request; review logs");
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
@@ -538,7 +558,7 @@ public class ApiDataRequestHandler {
         Map<String, String> metadata = new HashMap<>(originalContent.getMetadata());
         metadata.put(ProcessedDataMetadataFields.RULES_SHA.getMetadataKey(), rulesSha);
         metadata.put(ProcessedDataMetadataFields.PROXY_VERSION.getMetadataKey(),
-                HealthCheckRequestHandler.JAVA_SOURCE_CODE_VERSION);
+                ProxyConstants.JAVA_SOURCE_CODE_VERSION);
         metadata.put(ProcessedDataMetadataFields.PII_SALT_SHA256.getMetadataKey(),
                 healthCheckRequestHandler.piiSaltHash());
 
@@ -582,7 +602,7 @@ public class ApiDataRequestHandler {
             loadSanitizerRules(); // ensure sanitizer is loaded
             if (!Objects.equals(pseudonymImplementation.get(),
                     sanitizer.getPseudonymizer().getOptions().getPseudonymImplementation())) {
-                return sanitizerFactory.create(rules,
+                return sanitizerFactory.create(rules.get(),
                         pseudonymizerImplFactory.create(sanitizer.getPseudonymizer().getOptions()
                                 .withPseudonymImplementation(pseudonymImplementation.get())));
             }
@@ -696,8 +716,9 @@ public class ApiDataRequestHandler {
         // do we capture the new one?? ideally do this with listener/handler/trigger in Credential
         // itself, if that's possible
 
+
         ComposedHttpRequestInitializer initializer = ComposedHttpRequestInitializer
-                .of(initializeWithCredentials, new GzipedContentHttpRequestInitializer("Psoxy"));
+                .of(initializeWithCredentials, new GzipedContentHttpRequestInitializer(proxyConstants.getUserAgent()));
 
         return transport.createRequestFactory(initializer);
     }
@@ -718,6 +739,7 @@ public class ApiDataRequestHandler {
             return false;
         }
     }
+
 
     private void logRequestIfVerbose(HttpEventRequest request) {
         if (envVarsConfigService.isDevelopment()) {
@@ -770,11 +792,30 @@ public class ApiDataRequestHandler {
         // type and subtype, such as 'text/plain'."}}
         headers.setAccept(ContentType.APPLICATION_JSON.getMimeType());
 
-        sanitizer.getAllowedRequestHeaders(request.getHttpMethod(), targetUrl)
-                .ifPresent(i -> i.forEach(h -> request.getHeader(h).ifPresent(headerValue -> {
-                    logIfDevelopmentMode(() -> String.format("Header %s included", h));
-                    headers.set(h, headerValue);
-                })));
+        Collection<String> allowedHeaders = sanitizer.getAllowedRequestHeaders(request.getHttpMethod(), targetUrl)
+                .orElse(Collections.emptyList());
+
+        for (String h : allowedHeaders) {
+            // handle multi-valued headers
+            List<String> headerValues = request.getMultiValueHeader(h)
+                    .or(() -> request.getHeader(h).map(List::of)) // fallback if specific multi-value not impl
+                    .orElse(Collections.emptyList());
+
+            if (!headerValues.isEmpty()) {
+               List<String> valuesToForward = headerValues.stream()
+                       .map(v -> pseudonymEncoder.decodeAndReverseAllContainedKeyedPseudonyms(v,
+                               reversibleTokenizationStrategy))
+                       .collect(Collectors.toList());
+
+                logIfDevelopmentMode(() -> String.format("Header %s included (values: %s)", h, valuesToForward));
+
+                // google-http-client HttpHeaders uses (String name, Object value);
+                // if value is Collection, it treats as multi-valued
+                // if value is String, single value
+                // so we can just pass the list
+                headers.set(h, valuesToForward);
+            }
+        }
     }
 
     /**
@@ -982,5 +1023,44 @@ public class ApiDataRequestHandler {
         }
     }
 
+    /**
+     * Check if an exception or any of its causes is a SocketTimeoutException
+     */
+    private boolean isSocketTimeoutException(Throwable throwable) {
+        Throwable cause = throwable;
+        while (cause != null) {
+            if (cause instanceof java.net.SocketTimeoutException) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
+    }
+
+    /**
+     * Build error response for network timeout issues
+     * Cannot distinguish between:
+     * 1) Network egress blocked from proxy (VPC/serverless connector misconfiguration)
+     * 2) Target API being unreachable/slow (their infrastructure issue)
+     */
+    private HttpEventResponse buildNetworkTimeoutErrorResponse(
+            HttpEventResponse.HttpEventResponseBuilder builder, Throwable e) {
+        
+        builder.statusCode(HttpStatus.SC_BAD_GATEWAY);
+        builder.body("Network timeout: unable to connect to target API. " +
+                "This could indicate: " +
+                "1) Proxy network egress is blocked (VPC/serverless connector misconfiguration, firewall rules, missing Cloud NAT), OR " +
+                "2) Target API is unreachable or experiencing connectivity issues. " +
+                "If using VPC connector, verify: VPC connector is active, CIDR range is correct, firewall allows egress, Cloud NAT is configured.");
+        builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                ErrorCauses.NETWORK_EGRESS_BLOCKED.name());
+        
+        log.log(Level.SEVERE, "SocketTimeoutException: Network timeout connecting to target API", e);
+        log.log(Level.SEVERE, "Possible causes: " +
+                "1) Proxy network egress blocked - check VPC connector configuration, firewall rules, Cloud NAT; " +
+                "2) Target API unreachable or slow - check API status, DNS resolution");
+        
+        return builder.build();
+    }
 
 }

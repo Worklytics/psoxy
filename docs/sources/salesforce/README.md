@@ -16,33 +16,30 @@ Before running the example, you have to populate the following variables in terr
 - `salesforce_domain`. This is the [domain](https://help.salesforce.com/s/articleView?id=sf.faq_domain_name_what.htm&type=5) your instance is using.
 - `salesforce_example_account_id`: An example of any account id; this is only applicable for example calls.
 
-1. Create a [Salesforce application + client credentials flow](https://help.salesforce.com/s/articleView?language=en_US&id=sf.remoteaccess_oauth_client_credentials_flow.htm&type=5)with following permissions:
-
+1. Create a [Salesforce external application](https://help.salesforce.com/s/articleView?id=xcloud.create_a_local_external_client_app.htm&type=5):
+    - Ensure "Enable OAuth" is checked
+    - "Callback URL" MUST be filled; can be anything as not required in this flow, but required to be set by Salesforce. Something dummy like `http://localhost` will work
+    - Select following OAuth scopes:
     - Manage user data via APIs (`api`)
     - Access Connect REST API resources (`chatter_api`)
     - Perform requests at any time (`refresh_token`, `offline_access`)
-    - Access unique user identifiers (`openid`)
-    - Access Lightning applications (`lightning`)
     - Access content resources (`content`)
     - Perform ANSI SQL queries on Customer Data Platform data (`cdp_query_api`)
 
    Apart from Salesforce instructions above, please review the following:
 
-    - "Callback URL" MUST be filled; can be anything as not required in this flow, but required
-      to be set by Salesforce.
     - Application MUST be marked with "Enable Client Credentials Flow"
-    - You MUST assign a user for Client Credentials, be sure:
-        - you associate a "run as" user marked with "API Only Permission"
-        - The policy associated to the user MUST have the following Administrative Permissions
-          enabled:
-            - API Enabled
-            - APEX REST Services
-    - The policy MUST have the application marked as "enabled" in "Connected App Access".
-      Otherwise requests will return 401 with INVALID_SESSION_ID
+    - You MUST assign a user for Client Credentials. A user with a valid `Salesforce License` should be enough. Also, user should have a [Permission Set](https://help.salesforce.com/s/articleView?id=platform.perm_sets_overview.htm&type=5) with following permissions:
+        - `Access Activities`: For reading Tasks, Events, Calendar and Emails.
+        - `View All Users`: For reading Users information.
 
-  The user set for "run as" on the connector should have, between its `Permission Sets` and`Profile`, the permission of `View All Data`. This is required to support the queries used to retrieve [Activity Histories](https://developer.salesforce.com/docs/atlas.en-us.object_reference.meta/object_reference/sforce_api_objects_activityhistory.htm) by _account id_.
-
-2. Once created, open "Manage Consumer Details"
+    After finishing this, this how your application should look like:
+    ![Salesforce Application Example](img/app_creation_settings.png)
+2. Once created, edit the application.
+    - In Policies tab, ensure "Enable Client Credentials Flow" is checked with the user assigned.
+    ![Salesforce Application Policies Example](img/app_policies.png)
+    - In Settings, go to `OAuth Settings` and click on `Consumer Key and Consumer Secret` link to get the values required for the next step.
+    ![Salesforce Application Settings Example](img/app_settings.png)
 3. Update the content of `PSOXY_SALESFORCE_CLIENT_ID` from Consumer Key and
    `PSOXY_SALESFORCE_CLIENT_SECRET` from Consumer Secret
 4. Finally, we recommend to run `test-salesforce` script with all the queries in the example to ensure the expected information covered by rules can be obtained from Salesforce API. Some test calls may fail with a 400 (bad request) response. That is something expected if parameters requested on the query are not available (for example, running a SOQL query with fields that are NOT present in your model will force a 400 response from Salesforce API). If that is the case, a double check in the function logs can be done to ensure that this is the actual error happening, you should see an error like the following one:

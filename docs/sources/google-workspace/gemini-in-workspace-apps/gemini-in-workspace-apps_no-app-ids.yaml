@@ -19,7 +19,7 @@ endpoints:
           - "$.items[*].ipAddress"
     pathParameterSchemas:
       userKey:
-        or:
+        anyOf:
           - type: "string"
             enum:
               - "all"

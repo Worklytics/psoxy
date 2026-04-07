@@ -28,6 +28,17 @@ variable "deployment_bundle" {
   type        = string
   description = "path to deployment bundle to use (if not provided, will build one)"
   default     = null
+
+  validation {
+    condition     = var.deployment_bundle == null || !can(regex("^https?://", var.deployment_bundle))
+    error_message = "HTTP(S) URLs are not supported for deployment_bundle. Use an s3:// URL or a local file path."
+  }
+}
+
+variable "deployment_bundle_hash" {
+  type        = string
+  description = "precomputed base64 SHA256 hash of the deployment bundle, if any"
+  default     = null
 }
 
 variable "force_bundle" {
@@ -86,18 +97,11 @@ variable "deployment_id" {
   default     = "Psoxy"
 }
 
-# TODO: remove in v0.5
-variable "rest_function_name_prefix" {
-  type        = string
-  description = "DEPRECATED - use `api_function_name_prefix`; prefix for REST function names"
-  default     = null
-}
 
-# TODO : change default in v0.5, or remove; should be based on deployment_id
 variable "api_function_name_prefix" {
   type        = string
-  description = "prefix for API function names"
-  default     = "psoxy-"
+  description = "prefix for API function names; if omitted, will default to value based on deployment_id"
+  default     = null
 }
 
 variable "use_api_gateway_v2" {
@@ -135,3 +139,11 @@ variable "enable_webhook_testing" {
   description = "whether to provision/enable webhook testing functionality"
   default     = true
 }
+
+variable "artifacts_bucket_name" {
+  type        = string
+  description = "Name of an existing S3 bucket to use for deployment artifacts. If null, one will be provisioned if needed."
+  default     = null
+}
+
+

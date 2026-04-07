@@ -1,21 +1,24 @@
 #!/bin/bash
 
-RED='\033[0;31m'
-NC='\033[0m' # No Color
+COLORSCHEME_SH="$(dirname "$0")/../set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+    source "$COLORSCHEME_SH"
+else
+    ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
 
 EXAMPLE_TO_COPY_FROM=$1
 EXAMPLE_TEMPLATE_REPO=$2
 PATH_TO_MAIN_REPO_ROOT=$3
 
 if [ -z "$EXAMPLE_TO_COPY_FROM" ]; then
-  printf "${RED}Path to example is required.${NC}\n"
+  printf "${ERR}Path to example is required.${NC}\n"
   printf "Usage: ./example-copy.sh <path-to-example> <path-to-example-repo>\n"
   exit 1
 fi
 
-
 if [ -z "$EXAMPLE_TEMPLATE_REPO" ]; then
-  printf "${RED}Path to example repo is required.${NC}\n"
+  printf "${ERR}Path to example repo is required.${NC}\n"
   printf "Usage: ./example-copy.sh <path-to-example> <path-to-example-repo>\n"
   exit 1
 fi
@@ -24,7 +27,6 @@ fi
 if [[ "${EXAMPLE_TEMPLATE_REPO: -1}" != "/" ]]; then
     EXAMPLE_TEMPLATE_REPO="$EXAMPLE_TEMPLATE_REPO/"
 fi
-
 
 cd "$EXAMPLE_TO_COPY_FROM"
 FILES_TO_COPY=( *.tf )
@@ -45,16 +47,24 @@ done
 
 rm ${EXAMPLE_TEMPLATE_REPO}*.bck
 
-# copy the README intended to be published to the example repo
-# q: better name for this README?
-cp README_to_publish.md ${EXAMPLE_TEMPLATE_REPO}README.md
+# copy the README template intended to be published to the example repo
+cp README.template.md ${EXAMPLE_TEMPLATE_REPO}README.md
+
+# copy AGENTS template if it exists
+if [ -f AGENTS.template.md ]; then
+  cp -f AGENTS.template.md ${EXAMPLE_TEMPLATE_REPO}AGENTS.md
+fi
 
 cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/init-example.sh ${EXAMPLE_TEMPLATE_REPO}init
 chmod +x ${EXAMPLE_TEMPLATE_REPO}init
 
-
 cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/check-prereqs.sh ${EXAMPLE_TEMPLATE_REPO}check-prereqs
 chmod +x ${EXAMPLE_TEMPLATE_REPO}check-prereqs
+
+if [ -f ${EXAMPLE_TO_COPY_FROM}/preflight.sh ]; then
+  cp -f ${EXAMPLE_TO_COPY_FROM}/preflight.sh ${EXAMPLE_TEMPLATE_REPO}preflight
+  chmod +x ${EXAMPLE_TEMPLATE_REPO}preflight
+fi
 
 cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/reset-example.sh ${EXAMPLE_TEMPLATE_REPO}reset-example
 chmod +x ${EXAMPLE_TEMPLATE_REPO}reset-example

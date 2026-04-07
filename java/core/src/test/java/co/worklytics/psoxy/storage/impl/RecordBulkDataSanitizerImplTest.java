@@ -1,36 +1,43 @@
 package co.worklytics.psoxy.storage.impl;
 
-import co.worklytics.psoxy.ConfigRulesModule;
-import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.storage.BulkDataTestUtils;
-import co.worklytics.psoxy.storage.StorageHandler;
-import co.worklytics.test.MockModules;
-import co.worklytics.test.TestUtils;
-import com.avaulta.gateway.pseudonyms.Pseudonym;
-import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
-import com.avaulta.gateway.rules.RuleSet;
-import dagger.Component;
-import dagger.Module;
-import dagger.Provides;
-import lombok.SneakyThrows;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.junit.jupiter.api.Test;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.zip.GZIPInputStream;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.junit.jupiter.api.Test;
+import com.avaulta.gateway.pseudonyms.Pseudonym;
+import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
+import com.avaulta.gateway.rules.RuleSet;
+import co.worklytics.psoxy.ConfigRulesModule;
+import co.worklytics.psoxy.PsoxyModule;
+import co.worklytics.psoxy.gateway.BulkModeConfig;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.StorageEventRequest;
+import co.worklytics.psoxy.storage.BulkDataTestUtils;
+import co.worklytics.psoxy.storage.StorageHandler;
+import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
+import co.worklytics.test.TestUtils;
+import dagger.Component;
+import dagger.Module;
+import dagger.Provides;
+import lombok.SneakyThrows;
 
 class RecordBulkDataSanitizerImplTest {
 
@@ -46,7 +53,7 @@ class RecordBulkDataSanitizerImplTest {
     @Inject
     UrlSafeTokenPseudonymEncoder encoder;
 
-    java.util.function.Supplier<OutputStream> outputStreamSupplier;
+    Supplier<OutputStream> outputStreamSupplier;
 
     ByteArrayOutputStream outputStream;
 
@@ -55,7 +62,9 @@ class RecordBulkDataSanitizerImplTest {
     void setUpWithRules(String rawRules) {
         this.rawRules = rawRules;
 
-        RecordBulkDataSanitizerImplTest.Container container = DaggerRecordBulkDataSanitizerImplTest_Container.create();
+        Container container = DaggerRecordBulkDataSanitizerImplTest_Container.builder()
+            .forConfigService(new Container.ForConfigService())
+            .build();
         container.inject(this);
 
         outputStream = new ByteArrayOutputStream();
@@ -69,23 +78,29 @@ class RecordBulkDataSanitizerImplTest {
         Container.ForConfigService.class,
         MockModules.ForSecretStore.class,
         MockModules.ForHostEnvironment.class,
+        TestModules.ForProxyConstants.class,
     })
     public interface Container {
 
         void inject(RecordBulkDataSanitizerImplTest test);
 
         @Module
-        interface ForConfigService {
+        class ForConfigService {
+            
+            // This method allows overriding the default behavior if needed, 
+            // but for simplicity let's stick to the static one if we can,
+            // or just use instance methods and update setUp.
+            
+            // Let's use instance method so we can override it in the new test.
             @Provides
             @Singleton
-            static ConfigService configService() {
+            ConfigService configService() {
                 ConfigService mock = MockModules.provideMock(ConfigService.class);
                 when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
                     .thenReturn(Optional.of(rawRules));
                 return mock;
             }
         }
-
     }
 
     @SneakyThrows
@@ -190,9 +205,9 @@ class RecordBulkDataSanitizerImplTest {
 
         String output = new String(outputStream.toByteArray());
 
-        final String EXPECTED = "foo,bar\r\n" +
-            ",t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\r\n" +
-            ",t~0E6I_002nK2IJjv_KCUeFzIUo5rfuISgx7_g-EhfCxE@company.com\r\n";
+        final String EXPECTED = "foo,bar\n" +
+            ",t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI\n" +
+            ",t~0E6I_002nK2IJjv_KCUeFzIUo5rfuISgx7_g-EhfCxE@company.com\n";
         assertEquals(EXPECTED, output);
     }
 
@@ -219,11 +234,259 @@ class RecordBulkDataSanitizerImplTest {
                 decompressed.write(buffer, 0, len);
             }
         }
-        String output = decompressed.toString();
+        String output = decompressed.toString(StandardCharsets.UTF_8);
 
         String SANITIZED_FILE = new String(TestUtils.getData("bulk/users-sanitized.ndjson"));
 
         assertEquals(SANITIZED_FILE, output);
     }
 
+    @Test
+    void jsonArray_Basic() {
+        this.setUpWithRules("---\n" +
+            "format: \"JSON_ARRAY\"\n" +
+            "transforms:\n" +
+            "- redact: \"foo\"\n" +
+            "- pseudonymize: \"bar\"\n");
+
+        String input = "[{\"foo\":1,\"bar\":2,\"other\":\"three\"},{\"foo\":4,\"bar\":5,\"other\":\"six\"}]";
+
+        final String objectPath = "export-20231128/file.json";
+        storageHandler.handle(BulkDataTestUtils.request(objectPath),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes()),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray());
+
+        System.out.println("Output: " + output);
+
+        assertEquals('[', output.charAt(0));
+        assertEquals(']', output.charAt(output.length() - 1));
+
+        String expected2 = encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("2" + "salt")).build());
+        String expected5 = encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("5" + "salt")).build());
+
+        // Verify content - manual check as we don't have full JSON parsing here easily without bringing in Jackson dependency to test
+        // but removing "foo" and pseudonymizing "bar" should happen.
+        assertTrue(output.contains("\"foo\":null"));
+        assertTrue(output.contains("\"bar\":\"" + expected2 + "\""));
+        assertTrue(output.contains("\"bar\":\"" + expected5 + "\""));
+    }
+
+    @Test
+    void jsonArray_Whitespace() {
+        this.setUpWithRules("---\n" +
+            "format: \"JSON_ARRAY\"\n" +
+            "transforms:\n");
+
+        String input = " [  \n { \"foo\" : 1 } , \n { \"foo\" : 2 } \n ] ";
+
+        final String objectPath = "export-20231128/file.json";
+        storageHandler.handle(BulkDataTestUtils.request(objectPath),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes()),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray());
+
+        assertEquals('[', output.charAt(0));
+        assertEquals(']', output.charAt(output.length() - 1));
+        assertTrue(output.contains("\"foo\":1"));
+        assertTrue(output.contains("\"foo\":2"));
+    }
+
+    @Test
+    void testAutoFormat_JsonArray() {
+        this.setUpWithRules("---\n" +
+            "format: \"AUTO\"\n" +
+            "transforms:\n" +
+            "- redact: \"foo\"\n" +
+            "- pseudonymize: \"bar\"\n");
+
+        String input = "[{\"foo\":1,\"bar\":2,\"other\":\"three\"}]";
+
+        final String objectPath = "export-20231128/file.json";
+        
+        // Manual request construction to set Content-Type
+        StorageEventRequest request = BulkDataTestUtils.request(objectPath)
+                .withContentType("application/json");
+
+        storageHandler.handle(request,
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes()),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray());
+
+        assertEquals('[', output.charAt(0));
+        assertEquals(']', output.charAt(output.length() - 1));
+        assertTrue(output.contains("\"foo\":null"));
+    }
+    @Test
+    void parquet() throws IOException {
+        this.setUpWithRules("---\n" +
+            "format: \"PARQUET\"\n" +
+            "transforms:\n" +
+            "- redact: \"foo\"\n" +
+            "- pseudonymize: \"bar\"\n");
+
+        // Create sample data
+        Map<String, Object> record1 = new LinkedHashMap<>();
+        record1.put("foo", "1");
+        record1.put("bar", "2"); // should be pseudonymized
+        record1.put("other", "three");
+
+        Map<String, Object> record2 = new LinkedHashMap<>();
+        record2.put("foo", "4");
+        record2.put("bar", "5");
+        record2.put("other", "six");
+
+        // Write sample data to Parquet bytes using our own writer implementation
+        ByteArrayOutputStream sourceOut = new ByteArrayOutputStream();
+        try (ParquetRecordWriter writer = new ParquetRecordWriter(sourceOut)) {
+            writer.beginRecordSet();
+            writer.writeRecord(record1);
+            writer.writeRecord(record2);
+            writer.endRecordSet();
+        }
+
+        byte[] inputBytes = sourceOut.toByteArray();
+
+
+        // Run sanitizer
+        final String objectPath = "export-20231128/file.parquet";
+        
+        // Manual request construction to set Content-Type correctly for Parquet
+        StorageEventRequest request = BulkDataTestUtils.request(objectPath)
+                .withContentType("application/vnd.apache.parquet");
+
+        storageHandler.handle(request,
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(inputBytes),
+            outputStreamSupplier);
+
+        byte[] outputBytes = outputStream.toByteArray();
+
+        // Verify output is valid Parquet and contains expected data
+        try (ParquetRecordReader reader = new ParquetRecordReader(new ByteArrayInputStream(outputBytes))) {
+            Map<String, Object> r1 = reader.readRecord();
+            Map<String, Object> r2 = reader.readRecord();
+            
+            assertNotNull(r1);
+            
+            // "foo" should be null (redacted)
+            assertNull(r1.get("foo"));
+
+            // "bar" should be pseudonymized
+            String expected2 = encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("2" + "salt")).build());
+            assertEquals(expected2, r1.get("bar"));
+            
+            assertEquals("three", r1.get("other"));
+
+            // Check second record
+            assertNotNull(r2);
+            
+            String expected5 = encoder.encode(Pseudonym.builder().hash(DigestUtils.sha256("5" + "salt")).build());
+             assertEquals(expected5, r2.get("bar"));
+        }
+    }
+    @Test
+    void parquet_with_multiple_types_in_schema() throws IOException {
+        this.setUpWithRules("---\n" +
+            "format: \"PARQUET\"\n" +
+            "transforms:\n" +
+            "- redact: \"secret\"\n");
+
+        // Create complex sample data
+        Map<String, Object> record = new LinkedHashMap<>();
+        record.put("stringVal", "hello");
+        record.put("intVal", 123);
+        record.put("doubleVal", 45.67);
+        record.put("boolVal", true);
+        record.put("secret", "sensitive");
+
+        // Write sample data
+        ByteArrayOutputStream sourceOut = new ByteArrayOutputStream();
+        try (ParquetRecordWriter writer = new ParquetRecordWriter(sourceOut)) {
+            writer.beginRecordSet();
+            writer.writeRecord(record);
+            writer.endRecordSet();
+        }
+
+        byte[] inputBytes = sourceOut.toByteArray();
+
+        // Run sanitizer
+        final String objectPath = "export-20231128/file_complex.parquet";
+        
+        StorageEventRequest request = BulkDataTestUtils.request(objectPath)
+                .withContentType("application/vnd.apache.parquet");
+
+        storageHandler.handle(request,
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(inputBytes),
+            outputStreamSupplier);
+
+        byte[] outputBytes = outputStream.toByteArray();
+
+        // Verify output
+        try (ParquetRecordReader reader = new ParquetRecordReader(new ByteArrayInputStream(outputBytes))) {
+            Map<String, Object> r1 = reader.readRecord();
+            
+            assertNotNull(r1);
+            
+            assertEquals("hello", r1.get("stringVal"));
+            assertEquals(123, r1.get("intVal"));
+            assertEquals(45.67, r1.get("doubleVal"));
+            assertEquals(true, r1.get("boolVal"));
+            
+            // "secret" should be null (redacted)
+            assertNull(r1.get("secret"));
+        }
+    }
+
+    @Test
+    void explicitOutputFormat() throws IOException {
+        String bulkOutputFormat = "CSV";
+        // Override setup to inject BulkModeConfig settings
+        Container container = DaggerRecordBulkDataSanitizerImplTest_Container.builder()
+            .forConfigService(new Container.ForConfigService() {
+                @Provides
+                @Singleton
+                public ConfigService configService() {
+                    ConfigService mock = MockModules.provideMock(ConfigService.class);
+                    when(mock.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
+                        .thenReturn(Optional.of("---\n" +
+                            "format: \"JSON_ARRAY\"\n" + // Input is JSON_ARRAY
+                            "transforms:\n" +
+                            "- redact: \"foo\"\n"));
+                    when(mock.getConfigPropertyAsOptional(eq(BulkModeConfig.BulkModeConfigProperty.BULK_OUTPUT_FORMAT)))
+                        .thenReturn(Optional.of(bulkOutputFormat)); // Output should be CSV
+                    return mock;
+                }
+            })
+            .build();
+        container.inject(this);
+        outputStream = new ByteArrayOutputStream();
+        outputStreamSupplier = () -> outputStream;
+
+
+        String input = "[{\"foo\":1,\"bar\":2}]";
+        final String objectPath = "export/file.json";
+
+        storageHandler.handle(BulkDataTestUtils.request(objectPath),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes()),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray());
+        
+        // Expect CSV output
+        // Header + record
+        // foo redacted -> null/empty
+        String expected = "foo,bar\n" +
+            ",2\n";
+        
+        assertEquals(expected, output);
+    }
 }

@@ -24,7 +24,7 @@ And always remember: an IP is **not** an authenticated identity for a client, an
 
 Yes - and prior to March 2022 this was necessary. But AWS has released [Lambda function urls](https://docs.aws.amazon.com/lambda/latest/dg/lambda-urls.html), which provide a simpler and more direct way to securely invoke lambdas via HTTP. As such, the Worklytics-provided Terraform modules use function URLs rather than API gateways.
 
-API gateways provide a layer of indirection that can be useful in certain cases, but is overkill for psoxy deployments - which do little more than provide a transformed, read-only view of a subset of endpoints within a data source API. The indirection provides flexibility and control, but at the cost of complexity in infrastructure and management - as you must provision a gateway, route, stage, and extra IAM policies to make that all work, compared to a function URL.
+API gateways provide a layer of indirection that can be useful in certain cases, but is overkill for Psoxy deployments - which do little more than provide a transformed, read-only view of a subset of endpoints within a data source API. The indirection provides flexibility and control, but at the cost of complexity in infrastructure and management - as you must provision a gateway, route, stage, and extra IAM policies to make that all work, compared to a function URL.
 
 That said, the payload lambdas receive when invoked via a function URL is equivalent to the payload of API Gateway v2, so the proxy itself is compatible with either API Gateway v2 or function urls.
 

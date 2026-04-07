@@ -33,7 +33,7 @@ variable "config_parameter_prefix" {
 
 variable "default_labels" {
   type        = map(string)
-  description = "Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
+  description = "Labels to apply to all GCP resources created by this configuration. Passed to the Google provider's native `default_labels`."
   default     = {}
 
   validation {
@@ -117,6 +117,11 @@ variable "general_environment_variables" {
   }
 
   validation {
+    condition     = !contains(keys(var.general_environment_variables), "PSEUDONYMIZE_APP_IDS")
+    error_message = "Use 'pseudonymize_app_ids' to set value of PSEUDONYMIZE_APP_IDS environment variable for all sources, rather than passing it as a general environment variable."
+  }
+
+  validation {
     condition     = !contains(keys(var.general_environment_variables), "EMAIL_CANONICALIZATION")
     error_message = "Use `email_canonicalization` instead of passing EMAIL_CANONICALIZATION as a general environment variable."
   }
@@ -147,15 +152,13 @@ variable "gcp_region" {
 
 variable "vpc_config" {
   type = object({
-    network                         = optional(string)                # Local name of the VPC network resource on which to provision the VPC connector (if `serverless_connector` is not provided)
-    subnetwork                      = optional(string)                # Local name of the VPC subnetwork resource on which to provision the VPC connector (if `serverless_connector` is not provided)
-    serverless_connector            = optional(string)                # Format: projects/{project}/locations/{location}/connectors/{connector}
-    serverless_connector_cidr_range = optional(string, "10.8.0.0/28") # ignored if serverless_connector is provided
+    network              = string           # Local name of the VPC network resource on which to provision the VPC connector (required if `serverless_connector` is not provided)
+    subnet               = string           # Local name of the VPC subnet resource on which to provision the VPC connector (required if `serverless_connector` is not provided). NOTE: Subnet MUST have /28 netmask (required by Google Cloud for VPC connectors)
+    serverless_connector = optional(string) # Format: projects/{project}/locations/{location}/connectors/{connector}
   })
 
   description = "**alpha** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
   default     = null
-
   # serverless_connector: allow null; if provided, must match the full resource name
   validation {
     condition = (
@@ -166,21 +169,18 @@ variable "vpc_config" {
     error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
   }
 
-  # serverless_connector_cidr_range: allow null; if provided, must look like CIDR
   validation {
     condition = (
       var.vpc_config == null
-      || try(var.vpc_config.serverless_connector_cidr_range, null) == null
-      || can(regex("^[0-9.]+/[0-9]+$", try(var.vpc_config.serverless_connector_cidr_range, "")))
-    )
-    error_message = "If vpc_config.serverless_connector_cidr_range is provided, it must match the format: {ip}/{mask}"
-  }
-
-  validation {
-    condition = (
-      var.vpc_config == null
-      || try(var.vpc_config.network, null) == null
-      || can(regex("^[a-z0-9-]+$", try(var.vpc_config.network, "")))
+      || try(var.vpc_config.serverless_connector, null) != null
+      ||
+      (
+        # Accepts a simple network name: lowercase letters, digits, dashes
+        can(regex("^[a-z0-9-]+$", try(var.vpc_config.network, "")))
+        ||
+        # Accepts a full self-link (Compute URL format)
+        can(regex("^projects/[^/]+/(global|regions/[^/]+)/networks/[^/]+$", try(var.vpc_config.network, "")))
+      )
     )
     error_message = "vpc_config.network must be lowercase letters, numbers, or dashes."
   }
@@ -188,10 +188,10 @@ variable "vpc_config" {
   validation {
     condition = (
       var.vpc_config == null
-      || try(var.vpc_config.network, null) != null
       || try(var.vpc_config.serverless_connector, null) != null
+      || (try(var.vpc_config.network, null) != null && try(var.vpc_config.subnet, null) != null)
     )
-    error_message = "If vpc_config is provided, it must either specify a serverless_connector or a network on which to provision a serverless connector."
+    error_message = "If vpc_config is provided without serverless_connector, both network and subnet are required."
   }
 }
 
@@ -288,16 +288,22 @@ variable "custom_api_connector_rules" {
 
 variable "webhook_collectors" {
   type = map(object({
-    rules_file = string
+    worklytics_connector_id   = optional(string, "work-data-generic-psoxy")
+    worklytics_connector_name = optional(string, "Workplace Metadata via Psoxy")
+    display_name              = optional(string, "Webhooks Collected via Psoxy")
+    source_kind               = optional(string, "work-event") # source kind for this webhook collector, used for labeling and categorization
+    rules_file                = string
     provision_auth_key = optional(object({                           # whether to provision auth keys for webhook collector; if not provided, will not provision any
       rotation_days = optional(number, null)                         # null means no rotation; if > 0, will rotate every N days
       key_spec      = optional(string, "RSA_SIGN_PKCS1_2048_SHA256") # see https://cloud.google.com/kms/docs/reference/rest/v1/CryptoKeyVersionAlgorithm
     }), null)
     auth_public_keys     = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
     allow_origins        = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
-    example_payload_file = optional(string, null)        # path to file with example payload to use in test payloads; if provided, will override `example_payload`
-    example_identity     = optional(string, null)        # example identity to use in test payloads
+    output_path_prefix   = optional(string, "")          # optional path prefix to prepend to webhook output files in bucket (e.g., 'events_', 'webhooks/')
+    example_payload_file = optional(string, null)        # path to example payload file to use for testing; if provided, will be used in the test script
+    example_identity     = optional(string, null)        # example identity to use for testing; if provided, will be used to test the collector
   }))
+
   default = {}
 
   description = "map of webhook collector id --> webhook collector configuration"
@@ -329,6 +335,7 @@ variable "custom_bulk_connectors" {
     rules_file          = optional(string)
     settings_to_provide = optional(map(string), {})
     example_file        = optional(string)
+    example_files       = optional(list(string), [])
   }))
   description = "specs of custom bulk connectors to create"
 
@@ -448,4 +455,22 @@ variable "bucket_force_destroy" {
   type        = bool
   description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this configuration"
   default     = false
+}
+
+variable "provision_project_level_iam" {
+  description = "Whether to provision project-level IAM bindings required for Psoxy operation. Set to false if you prefer to manage these IAM bindings outside of Terraform."
+  type        = bool
+  default     = true
+}
+
+variable "version_sanitized_buckets" {
+  description = "Whether to enable versioning for all -sanitized buckets. Provided because some security standards want ALL buckets to enable versioning; from our perspective, it is not needed as these buckets are not storing primary data."
+  type        = bool
+  default     = false
+}
+
+variable "bucket_access_logs_destination" {
+  description = "The name of the GCS bucket to route access logs to for all buckets managed by this module"
+  type        = string
+  default     = null
 }

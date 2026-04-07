@@ -1,5 +1,26 @@
 package co.worklytics.psoxy.rules;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import com.avaulta.gateway.rules.ColumnarRules;
+import com.avaulta.gateway.rules.Endpoint;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
@@ -8,27 +29,8 @@ import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.storage.StorageHandler;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestUtils;
-
-import com.avaulta.gateway.rules.ColumnarRules;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
 import dagger.Component;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 class RulesUtilsTest {
 
@@ -64,6 +66,14 @@ class RulesUtilsTest {
             "      jsonPaths:\n" +
             "      - \"$..displayName\"\n" +
             "      - \"$..employeeId\"\n";
+
+    static final String YAML_REST_WITH_ALLOWED_METHODS =
+        "---\n" +
+            "endpoints:\n" +
+            "- pathTemplate: \"/some/{path}\"\n" +
+            "  allowedMethods:\n" +
+            "  - \"GET\"\n" +
+            "  - \"POST\"\n";
 
     static final String YAML_CSV =
         "columnsToPseudonymize:\n" +
@@ -147,6 +157,34 @@ class RulesUtilsTest {
     void decodeToYaml(String encoded) {
         String decoded = utils.decodeToYaml(encoded);
         assertEquals(YAML_REST, decoded);
+    }
+
+    @Test
+    @SneakyThrows
+    void check_allowed_methods_is_not_included_if_empty() {
+        RESTRules rules = Rules2.builder()
+            .endpoint(Endpoint.builder()
+                .pathTemplate("/some/{path}")
+                .build())
+            .build();
+
+        String yaml = yamlMapper.writeValueAsString(rules);
+        assertFalse(yaml.contains("allowedMethods"));
+    }
+
+    @Test
+    @SneakyThrows
+    void check_allowed_methods_is_included() {
+        RESTRules rules = Rules2.builder()
+            .endpoint(Endpoint.builder()
+                .pathTemplate("/some/{path}")
+                .allowedMethods(Set.of("GET", "POST"))
+                .build())
+            .build();
+
+        String yaml = yamlMapper.writeValueAsString(rules);
+        assertTrue(yaml.contains("allowedMethods"));
+        assertEquals(YAML_REST_WITH_ALLOWED_METHODS, yaml);
     }
 
     // if you change YAML_REST, this test will fail; you can copy-paste the expected value to

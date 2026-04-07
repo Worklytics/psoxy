@@ -17,6 +17,13 @@
     <version>${revision}</version>
     <packaging>pom</packaging>
 
+    <properties>
+        <!-- Skip deployment for impl modules - these are environment-specific implementations
+             and should not be published to Maven repositories. Only gateway-core and psoxy-core
+             are intended as public artifacts. -->
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <profiles>
         <profile>
             <id>gcp</id>

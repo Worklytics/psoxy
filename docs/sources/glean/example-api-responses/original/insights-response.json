@@ -1,0 +1,464 @@
+{
+  "overviewResponse": {
+    "monthlyActiveUsers": 0,
+    "weeklyActiveUsers": 0,
+    "departments": [
+      "string"
+    ],
+    "employeeCount": 0,
+    "totalSignups": 0,
+    "searchSummary": {
+      "monthlyActiveUsers": 0,
+      "weeklyActiveUsers": 0,
+      "numSearches": 0,
+      "numSearchUsers": 0
+    },
+    "chatSummary": {
+      "monthlyActiveUsers": 0,
+      "weeklyActiveUsers": 0,
+      "numChats": 0,
+      "numChatUsers": 0
+    },
+    "extensionSummary": {
+      "monthlyActiveUsers": 0,
+      "weeklyActiveUsers": 0
+    },
+    "ugcSummary": {
+      "monthlyActiveUsers": 0,
+      "weeklyActiveUsers": 0
+    },
+    "lastUpdatedTs": 0,
+    "searchSessionSatisfaction": 0,
+    "monthlyActiveUserTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    },
+    "weeklyActiveUserTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    },
+    "dailyActiveUserTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    },
+    "searchDatasourceCounts": {},
+    "chatDatasourceCounts": {},
+    "perUserInsights": [
+      {
+        "person": {
+          "name": "George Clooney",
+          "obfuscatedId": "abc123"
+        },
+        "numSearches": 0,
+        "numChats": 0,
+        "numActiveSessions": 0,
+        "numGleanbotUsefulResponses": 0,
+        "numDaysActive": 0,
+        "numSummarizations": 0,
+        "numAiAnswers": 0,
+        "numAgentRuns": 0
+      }
+    ]
+  },
+  "assistantResponse": {
+    "monthlyActiveUsers": 0,
+    "weeklyActiveUsers": 0,
+    "lastUpdatedTs": 0,
+    "monthlyActiveUserTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    },
+    "weeklyActiveUserTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    },
+    "dailyActiveUserTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    },
+    "totalSignups": 0,
+    "chatMessagesTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    },
+    "summarizationsTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    },
+    "aiAnswersTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    },
+    "gleanbotInteractionsTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    },
+    "perUserInsights": [
+      {
+        "person": {
+          "name": "George Clooney",
+          "obfuscatedId": "abc123"
+        },
+        "numChatMessages": 0,
+        "numSummarizations": 0,
+        "numAiAnswers": 0,
+        "numGleanbotInteractions": 0,
+        "numDaysActive": 0
+      }
+    ],
+    "upvotesTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    },
+    "downvotesTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    }
+  },
+  "agentsResponse": {
+    "monthlyActiveUsers": 0,
+    "weeklyActiveUsers": 0,
+    "monthlyActiveUserTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    },
+    "weeklyActiveUserTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    },
+    "dailyActiveUserTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    },
+    "sharedAgentsCount": 0,
+    "topAgentsInsights": [
+      {
+        "agentId": "string",
+        "agentName": "string",
+        "icon": {
+          "color": "#343CED",
+          "key": "person_icon",
+          "iconType": "GLYPH",
+          "name": "user"
+        },
+        "isDeleted": true,
+        "userCount": 0,
+        "runCount": 0,
+        "upvoteCount": 0,
+        "downvoteCount": 0
+      }
+    ],
+    "agentsUsageByDepartmentInsights": [
+      {
+        "department": "string",
+        "agentAdoptionRate": 0,
+        "userCount": 0,
+        "runCount": 0,
+        "agentId": "string",
+        "agentName": "string",
+        "icon": {
+          "color": "#343CED",
+          "key": "person_icon",
+          "iconType": "GLYPH",
+          "name": "user"
+        },
+        "isDeleted": true
+      }
+    ],
+    "agentUsersInsights": [
+      {
+        "person": {
+          "name": "George Clooney",
+          "obfuscatedId": "abc123"
+        },
+        "departmentName": "string",
+        "agentsUsedCount": 0,
+        "averageRunsPerDayCount": 0,
+        "agentsCreatedCount": 0,
+        "runCount": 0
+      }
+    ],
+    "dailyAgentRunsTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    },
+    "upvotesTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    },
+    "downvotesTimeseries": {
+      "label": "string",
+      "countInfo": [
+        {
+          "count": 0,
+          "period": {
+            "start": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            },
+            "end": {
+              "epochSeconds": 0,
+              "daysFromNow": 0
+            }
+          },
+          "org": "string"
+        }
+      ]
+    }
+  }
+}

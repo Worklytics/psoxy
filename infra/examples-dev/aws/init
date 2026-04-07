@@ -59,12 +59,28 @@ if [[ -z "$EXPLICIT_REPO_CLONE_DIR" ]]; then
     exit 1
   fi
 else
-  # append trailing slash if not present
-  if [[ "${EXPLICIT_REPO_CLONE_DIR}" != */ ]]; then
-      EXPLICIT_REPO_CLONE_DIR="${EXPLICIT_REPO_CLONE_DIR}/"
+  # Walk up from the given path to find the repo root (identified by tools/init-example-full.sh)
+  CANDIDATE="$EXPLICIT_REPO_CLONE_DIR"
+  # strip trailing slash for consistent dirname handling
+  CANDIDATE="${CANDIDATE%/}"
+  FOUND_REPO_ROOT=""
+  while [[ "$CANDIDATE" != "/" ]]; do
+    if [[ -f "${CANDIDATE}/tools/init-example-full.sh" ]]; then
+      FOUND_REPO_ROOT="$CANDIDATE"
+      break
+    fi
+    CANDIDATE="$(dirname "$CANDIDATE")"
+  done
+
+  if [[ -z "$FOUND_REPO_ROOT" ]]; then
+    printf "${RED}Could not find repo root (tools/init-example-full.sh) at or above: ${EXPLICIT_REPO_CLONE_DIR}${NC}\n"
+    printf "Pass the path to the root of a clone of https://github.com/Worklytics/psoxy as the first argument.\n"
+    printf " eg ${BLUE}./init ~/code/psoxy${NC}\n"
+    exit 1
   fi
 
-  REPO_CLONE_BASE_DIR="$EXPLICIT_REPO_CLONE_DIR"
+  # append trailing slash
+  REPO_CLONE_BASE_DIR="${FOUND_REPO_ROOT}/"
 fi
 
 # pass control to the full init script.

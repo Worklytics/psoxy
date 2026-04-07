@@ -1,14 +1,16 @@
 #!/bin/bash
 
 # Constants for colored output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+COLORSCHEME_SH="$(dirname "$0")/../set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+    source "$COLORSCHEME_SH"
+else
+    ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
 
 # Function to print error and exit
 error_exit() {
-    printf "${RED}%s${NC}\n" "$1"
+    printf "${ERR}%s${NC}\n" "$1"
     exit 1
 }
 
@@ -21,7 +23,6 @@ fi
 if ! command -v python3 &> /dev/null; then
     error_exit "Error: python3 is not installed. Please install python3 to use this script."
 fi
-
 
 # Check if terraform.tfvars file exists
 TFVARS_FILE="terraform.tfvars"
@@ -54,7 +55,7 @@ if [[ -z "$account_id" || -z "$role_name" ]]; then
 fi
 
 # Assume the role using AWS CLI
-printf "Parsed ${BLUE}%s${NC} from your ${BLUE}terraform.tfvars${NC}\n" "$aws_assume_role_arn"
+printf "Parsed ${INFO}%s${NC} from your ${INFO}terraform.tfvars${NC}\n" "$aws_assume_role_arn"
 printf "Do you want to open AWS Management Console as this role in your web browser? This will log you out of any existing AWS session in that browser. (Y/n): "
 # prompt user to confirm opening the console, default to Y
 read -r OPEN_CONSOLE
@@ -64,7 +65,6 @@ if [[ ! $OPEN_CONSOLE =~ ^[Yy]$ ]]; then
     printf "Aborting...\n"
     exit 0
 fi
-
 
 credentials=$(aws sts assume-role --role-arn "$aws_assume_role_arn" --role-session-name "OpenAwsConsole" --output json)
 
@@ -95,5 +95,5 @@ fi
 console_url="https://signin.aws.amazon.com/federation?Action=login&Issuer=Example&Destination=https%3A%2F%2Fconsole.aws.amazon.com%2F&SigninToken=$signin_token"
 
 # Open the AWS Management Console in the default browser
-printf "${GREEN}Opening AWS Management Console for account %s and role %s...${NC}\n" "$account_id" "$role_name"
+printf "${SUCCESS}Opening AWS Management Console for account %s and role %s...${NC}\n" "$account_id" "$role_name"
 open "$console_url"

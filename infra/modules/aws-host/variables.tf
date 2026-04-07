@@ -134,6 +134,12 @@ variable "deployment_bundle" {
   default     = null
 }
 
+variable "deployment_bundle_hash" {
+  type        = string
+  description = "precomputed base64 SHA256 hash of the deployment bundle, if any"
+  default     = null
+}
+
 variable "force_bundle" {
   type        = bool
   description = "whether to force build of deployment bundle, even if it already exists"
@@ -170,6 +176,12 @@ variable "general_environment_variables" {
   default     = {}
 }
 
+variable "new_relic_account_id" {
+  type        = string
+  description = "**beta** New Relic account ID to enable New Relic instrumentation."
+  default     = null
+}
+
 variable "api_connectors" {
   type = map(object({
     source_kind             = string
@@ -198,6 +210,7 @@ variable "api_connectors" {
     [])
     settings_to_provide = optional(map(string), {})
     rules_file          = optional(string, null)
+    rules_raw           = optional(string, null)
   }))
 
   description = "map of API connectors to provision"
@@ -234,7 +247,9 @@ variable "bulk_connectors" {
       })))
     }))
     rules_file            = optional(string)
+    rules_raw             = optional(string, null)
     example_file          = optional(string)
+    example_files         = optional(list(string), [])
     instructions_template = optional(string)
     memory_size_mb        = optional(number)
     settings_to_provide   = optional(map(string), {})
@@ -315,11 +330,12 @@ variable "webhook_collectors" {
       rotation_days = optional(number, null)       # null means no rotation; if > 0, will rotate every N days
       key_spec      = optional(string, "RSA_2048") # RSA_2048, RSA_3072, or RSA_4096; defaults to RSA_2048, which should be sufficient this use-case
     }), null)
-    auth_public_keys = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
-    allow_origins    = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
-
-    example_identity = optional(string, null) # example identity to use in test payloads
-    example_payload  = optional(string, null) # example payload to use in test payloads
+    auth_public_keys    = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
+    allow_origins       = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
+    output_path_prefix  = optional(string, "")          # optional path prefix to prepend to webhook output files in bucket
+    keep_warm_instances = optional(number, null)        # if set, keeps N Lambda instances warm to eliminate cold starts; adds cost (~$11/month per instance) but improves reliability
+    example_identity    = optional(string, null)        # example identity to use in test payloads
+    example_payload     = optional(string, null)        # example payload content to use in test scripts
   }))
   default = {}
 
@@ -406,3 +422,10 @@ variable "todo_step" {
   description = "of all todos, where does this one logically fall in sequence"
   default     = 2
 }
+
+variable "artifacts_bucket_name" {
+  type        = string
+  description = "Name of an existing S3 bucket to use for deployment artifacts. If null, one will be provisioned if needed."
+  default     = null
+}
+

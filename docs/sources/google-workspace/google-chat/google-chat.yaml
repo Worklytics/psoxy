@@ -7,6 +7,10 @@ endpoints:
           - "$..email"
           - "$.items[*].events[*].parameters[?(@.name in ['actor'])].value"
         encoding: "URL_SAFE_TOKEN"
+      - !<hashIp>
+        jsonPaths:
+          - "$.items[*].ipAddress"
+          - "$.items[*].events[*].parameters[?(@.name == 'ip_address')].value"
       - !<redact>
         jsonPaths:
-          - "$.items[*].events[*].parameters[?(!(@.name =~ /^actor|room_id|timestamp_ms|message_id|room_name$/i))]"
+          - "$.items[*].events[*].parameters[?(!(@.name =~ /^actor|room_id|timestamp_ms|message_id|room_name|ip_address$/i))]"

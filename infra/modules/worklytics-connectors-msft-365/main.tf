@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.7, < 2.0"
+  required_version = "~> 1.7"
 }
 
 locals {
@@ -15,6 +15,7 @@ resource "time_rotating" "example_timestamp" {
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
+  base_dir                                   = var.base_dir
   enabled_connectors                         = var.enabled_connectors
   msft_tenant_id                             = var.msft_tenant_id
   example_msft_user_guid                     = var.example_msft_user_guid

@@ -50,6 +50,12 @@ variable "sanitized_accessor_role_names" {
   description = "list of names of AWS IAM Roles which should be able to access the sanitized (output) bucket"
 }
 
+variable "output_path_prefix" {
+  type        = string
+  description = "optional path prefix to prepend to webhook output files in the bucket (e.g., 'events_', 'webhooks/')"
+  default     = ""
+}
+
 variable "logs_kms_key_arn" {
   type        = string
   description = "AWS KMS key ARN to use to encrypt lambdas' logs. NOTE: ensure CloudWatch is setup to use this key (cloudwatch principal has perms, log group in same region as key, etc) - see https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html ."
@@ -109,8 +115,14 @@ variable "function_zip_hash" {
 
 variable "environment_variables" {
   type        = map(string)
-  description = "Non-sensitive values to add to functions environment variables; NOTE: will override anything in `path_to_config`"
+  description = "Non-sensitive values to add to functions environment variables"
   default     = {}
+}
+
+variable "new_relic_account_id" {
+  type        = string
+  description = "**beta** New Relic account ID to enable New Relic instrumentation."
+  default     = null
 }
 
 variable "global_parameter_arns" {
@@ -233,7 +245,7 @@ variable "todos_as_local_files" {
 
 variable "example_payload" {
   type        = string
-  description = "Example payload to use for testing; if provided, will be used in the test script."
+  description = "Example payload content to use for testing; if provided, will be used in the test script."
   default     = null
 }
 
@@ -241,4 +253,15 @@ variable "example_identity" {
   type        = string
   description = "Example identity to use for testing; if provided, will be used in the test script."
   default     = null
+}
+
+variable "keep_warm_instances" {
+  type        = number
+  description = "Number of Lambda execution environments to keep warm (at minimum). If null (default), Lambda will cold-start as needed. If set to 1 or more, AWS will keep at least that many instances ready, eliminating cold starts for the JWKS endpoint used by the JWT authorizer. This significantly improves webhook collection reliability. Cost: ~$0.015/hour per instance (~$11/month for 1 instance)."
+  default     = null
+
+  validation {
+    condition     = var.keep_warm_instances == null ? true : var.keep_warm_instances >= 1
+    error_message = "If keep_warm_instances is set, it must be at least 1."
+  }
 }

@@ -11,7 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        terraform_version: [ '~1.7.0', '~1.8.0', '~1.9.0', '~1.10.0', '~1.11.0', '~1.12.0', 'latest' ]
+        terraform_version: [ 
+          # '~1.6.0', # doesn't support mock_provider
+          '~1.7.0', '~1.8.0', '~1.9.0', '~1.10.0', '~1.11.0', '~1.12.0', '~1.13.0', '~1.14.0', 'latest' ]
         module:
           # Modules that only need validation
           - { name: 'psoxy-constants', test: false }
@@ -37,4 +39,4 @@ jobs:
         if: ${{ matrix.module.test }}
         working-directory: infra/modules/${{ matrix.module.name }}
         run: |
-          terraform test
+          terraform test --var="deployment_bundle=gs://psoxy-public-artifacts/psoxy-0.4.28.zip"

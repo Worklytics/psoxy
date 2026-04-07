@@ -23,7 +23,7 @@ If you DO intend to use Google Workspace as a data source, you must install and 
 
 ### Verify Pre-Requisites
 
-Our example templates include a script to check for the prerequisites for running the psoxy. You can run this prior to `./init` to get feedback/suggestions on what prerequisites you may be missing and how to install them.
+Our example templates include a script to check for the prerequisites for running Psoxy. You can run this prior to `./init` to get feedback/suggestions on what prerequisites you may be missing and how to install them.
 
 ```shell
 ./check-prereqs
@@ -68,7 +68,7 @@ Some problems we've seen:
 
 ### Upgrading Psoxy Code
 
-If you upgrade your psoxy code, it may be worth trying `terraform init --upgrade` to make sure you have the latest versions of all Terraform providers on which our configuration depends.
+If you upgrade your Psoxy code, it may be worth trying `terraform init --upgrade` to make sure you have the latest versions of all Terraform providers on which our configuration depends.
 
 By default, terraform locks providers to the version that was the latest when you first ran `terraform init`. It does not upgrade them unless you explicitly instruct it to. It will not prompt you to upgrade them unless we update the version constraints in our modules.
 
@@ -92,11 +92,11 @@ terraform import module.psoxy-msft-connector\[\"outlook-cal\"\].aws_lambda_funct
 
 Errors such as the following on `terraform plan`?
 ```shell
-Module module.psoxy (from git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.4.51) does not support Terraform version 1.8.1. To proceed, either choose another supported Terraform version or update
+Module module.psoxy (from git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.4.51) does not support Terraform version 1.6.0. To proceed, either choose another supported Terraform version or update
 │ this version constraint. Version constraints are normally set for good reason, so updating the constraint may lead to other errors or unexpected behavior.
 ```
 
-The solution is to use a Terraform version that's supported by our modules (>= 1.7.x, < 2.0 as of v0.6.x).
+The solution is to upgrade your Terraform version to one that's supported by our modules (>= 1.7.x).
 
 _If you're running Terraform in cloud/CI environment,_ including Terraform Cloud, GitHub Actions, etc, you can likely explicitly set the desired Terraform version in your workspace settings / terraform setup action.
 

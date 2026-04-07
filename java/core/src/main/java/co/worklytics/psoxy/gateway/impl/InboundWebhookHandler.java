@@ -1,32 +1,40 @@
 package co.worklytics.psoxy.gateway.impl;
 
+import java.security.interfaces.RSAPublicKey;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.inject.Named;
+import org.apache.http.HttpStatus;
+import org.apache.http.ParseException;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jwt.SignedJWT;
 import co.worklytics.psoxy.ControlHeader;
-import co.worklytics.psoxy.gateway.*;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.ProcessedContent;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.auth.JwtAuthorizedResource;
 import co.worklytics.psoxy.gateway.auth.PublicKeyRef;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient.PublicKeyVersionId;
 import co.worklytics.psoxy.gateway.output.Output;
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.crypto.RSASSAVerifier;
-import com.nimbusds.jwt.SignedJWT;
 import dagger.Lazy;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.http.HttpStatus;
-import org.apache.http.ParseException;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.security.interfaces.RSAPublicKey;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.*;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 /**
  * general handler for inbound webhooks (Webhook Collector mode of proxy)
@@ -48,6 +56,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
     private final Output output;
     private final WebhookSanitizer webhookSanitizer;
     private final ConfigService configService;
+    private final WebhookCollectorModeConfig webhookCollectorModeConfig;
     private final Set<PublicKeyStoreClient> publicKeyStoreClients;
     private final Clock clock;
 
@@ -55,11 +64,13 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
     public InboundWebhookHandler(Lazy<WebhookSanitizer> webhookSanitizerProvider,
                                  @Named("forWebhooks") Output output,
                                  ConfigService configService,
+                                 WebhookCollectorModeConfig webhookCollectorModeConfig,
                                  Set<PublicKeyStoreClient> publicKeyStoreClients,
                                  Clock clock) {
         this.webhookSanitizer = webhookSanitizerProvider.get(); // avoids trying to instantiate WebhookSanitizerImpl when we don't need one
         this.output = output;
         this.configService = configService;
+        this.webhookCollectorModeConfig = webhookCollectorModeConfig;
         this.publicKeyStoreClients = publicKeyStoreClients;
         this.clock = clock;
     }
@@ -106,7 +117,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
             return HttpEventResponse.builder()
                 .statusCode(HttpStatus.SC_NO_CONTENT)
                 .header("Connection", "keep-alive") // correct??
-                .header("Access-Control-Allow-Origin", configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ALLOW_ORIGINS).orElse("*")) // q: configurable? what's the use-case to restrict this? if auth is based on Authorization header, no way for a malicious site to obtain and forge that, right?
+                .header("Access-Control-Allow-Origin", webhookCollectorModeConfig.getAllowOrigins()) // q: configurable? what's the use-case to restrict this? if auth is based on Authorization header, no way for a malicious site to obtain and forge that, right?
                 .header("Access-Control-Allow-Methods", "POST, OPTIONS") // TODO: make this configurable
                 .header("Access-Control-Allow-Headers", "*")  // TODO: make this explicit?
                 .build();
@@ -115,7 +126,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
         Optional<SignedJWT> authToken;
 
         if (authorizationHeader.isEmpty()) {
-            boolean authHeaderRequired = configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.REQUIRE_AUTHORIZATION_HEADER).map(Boolean::parseBoolean).orElse(true);
+            boolean authHeaderRequired = webhookCollectorModeConfig.getRequireAuthorizationHeader();
             // validate that configuration doesn't require verification of Authorization headers
             if (authHeaderRequired) {
                 return HttpEventResponse.builder()
@@ -216,7 +227,8 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
 
     @Override
     public String getIssuer() {
-        return configService.getConfigPropertyOrError(WebhookCollectorModeConfigProperty.AUTH_ISSUER);
+        return webhookCollectorModeConfig.getAuthIssuer()
+            .orElseThrow(() -> new IllegalStateException("AUTH_ISSUER is required but not configured"));
     }
 
     /**
@@ -275,7 +287,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
 
     public Map<PublicKeyVersionId, RSAPublicKey> acceptableAuthKeys() {
         return Arrays.stream(
-                    configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ACCEPTED_AUTH_KEYS)
+                    webhookCollectorModeConfig.getAcceptedAuthKeys()
                         .orElse("")
                         .split(",")
                 )

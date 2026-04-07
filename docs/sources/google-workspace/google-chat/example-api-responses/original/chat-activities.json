@@ -45,6 +45,10 @@
             {
               "name": "room_name",
               "value": ""
+            },
+            {
+              "name": "ip_address",
+              "value": "1.2.3.4"
             }
           ]
         }

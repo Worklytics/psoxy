@@ -137,8 +137,8 @@ public interface GcpModule {
 
     @Provides
     @Singleton
-    static GcpEnvironment.WebhookCollectorModeConfig webhookCollectorModeConfig(ConfigService configService) {
-        return GcpEnvironment.WebhookCollectorModeConfig.fromConfigService(configService);
+    static GcpEnvironment.GcpWebhookCollectorModeConfig webhookCollectorModeConfig(ConfigService configService) {
+        return GcpEnvironment.GcpWebhookCollectorModeConfig.fromConfigService(configService);
     }
 
     @Provides

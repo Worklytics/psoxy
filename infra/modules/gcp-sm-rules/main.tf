@@ -8,8 +8,8 @@ locals {
   # see: https://cloud.google.com/secret-manager/quotas
   secret_manager_size_limit = 65536
 
-  # read rules from file
-  rules_plain = file(var.file_path)
+  # read rules from file or use content directly
+  rules_plain = var.content != null ? var.content : file(var.file_path)
 
   # compress if necessary; but otherwise leave plain so human readable
   use_compressed = length(local.rules_plain) > local.secret_manager_size_limit
@@ -19,7 +19,6 @@ locals {
 resource "google_secret_manager_secret" "rules" {
   project   = var.project_id
   secret_id = "${var.prefix}RULES"
-  labels    = var.default_labels
 
   # no need to encrypt with CMEK; it's actually configuration value, not "secret"
 
@@ -27,12 +26,6 @@ resource "google_secret_manager_secret" "rules" {
     auto {
 
     }
-  }
-
-  lifecycle {
-    ignore_changes = [
-      labels
-    ]
   }
 }
 
@@ -43,7 +36,7 @@ resource "google_secret_manager_secret_version" "rules" {
   lifecycle {
     precondition {
       condition     = length(local.param_value) < local.secret_manager_size_limit
-      error_message = "Rules on file ${var.file_path} are too big to store"
+      error_message = "Rules are too big to store as a Secret Manager secret."
     }
   }
 }

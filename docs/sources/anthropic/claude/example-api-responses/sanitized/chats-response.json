@@ -1,0 +1,20 @@
+{
+  "data":[
+    {
+      "id":"claude_chat_abc123",
+      "created_at":"2025-06-07T08:09:10Z",
+      "updated_at":"2025-06-07T09:10:11Z",
+      "deleted_at":null,
+      "organization_id":"org_abc123",
+      "organization_uuid":"abcdef0123-4567-89ab-cdef-0123456789ab",
+      "project_id":"claude_proj_xyz789",
+      "user":{
+        "id":"t~hzNx42jBr-4nE9px0Ear3NuRyZW9y0_o7pegL6tNN-Y",
+        "email_address":"t~_Mqo2yH0QgDytVpmJhxPaE36fR9YYF4mJyAMtmlLUAY@example.com"
+      }
+    }
+  ],
+  "has_more":false,
+  "first_id":"claude_chat_abc123",
+  "last_id":"claude_chat_abc123"
+}

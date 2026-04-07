@@ -1,41 +1,36 @@
 {
   "totalSize":2,
   "done":true,
+  "nextRecordsUrl":"/services/data/v57.0/query/01gRO0000016PIAYA2-500",
   "records":[
     {
-      "attributes":{
-        "type":"User"
-      },
       "AccountId":null,
-      "ContactId":"null",
+      "ContactId":null,
       "CreatedDate":"2021-03-02T16:31:04.000+0000",
       "CreatedById":"t~WREVnRtj0N9dGhZfwAgC8Gw-IBQIGk-7JpUbxVSyEy8",
       "Email":"t~JMXUidwYSB43dLmUcrQSf1JqJaLEr2e8HlkceIs6y34@chatter.salesforce.com",
       "EmailEncodingKey":"UTF-8",
-      "Id":"t~kQY8YvX3epA-POQrl7CEKuXauq4godtAeaooSbbrEV8",
+      "Id":"p~kQY8YvX3epA-POQrl7CEKuXauq4godtAeaooSbbrEV8YjLn8Jf3fxEV8WxxUWjO3otx75qClzJf5rGJdMT2uNQ",
       "IsActive":true,
       "LastLoginDate":null,
       "LastModifiedDate":"2021-03-02T16:31:04.000+0000",
-      "ManagerId":"null",
+      "ManagerId":null,
       "TimeZoneSidKey":"America/Los_Angeles",
       "UserRoleId":null,
       "UserType":"CsnOnly"
     },
     {
-      "attributes":{
-        "type":"User"
-      },
       "AccountId":null,
-      "ContactId":"null",
+      "ContactId":null,
       "CreatedDate":"2021-03-02T16:31:04.000+0000",
       "CreatedById":"t~WREVnRtj0N9dGhZfwAgC8Gw-IBQIGk-7JpUbxVSyEy8",
       "Email":"t~wofbf_MBpIWTEVLl1KLYaAz0a6LjHgu-YwEz1eY0FjY@example.com",
       "EmailEncodingKey":"UTF-8",
-      "Id":"t~VHQj5a2FSR2YogZdBv94Tthgdcps003--2mMbJwjClU",
+      "Id":"p~VHQj5a2FSR2YogZdBv94Tthgdcps003--2mMbJwjClXYNFS8-0cFkZo_V5-HxfshvRD9L2OpBWJ00cjhyT1BPg",
       "IsActive":true,
       "LastLoginDate":"2023-03-17T10:40:29.000+0000",
       "LastModifiedDate":"2021-03-02T16:31:04.000+0000",
-      "ManagerId":"null",
+      "ManagerId":null,
       "TimeZoneSidKey":"America/Los_Angeles",
       "UserRoleId":null,
       "UserType":"Standard"

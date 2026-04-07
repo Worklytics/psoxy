@@ -42,6 +42,11 @@ locals {
   github_organization                      = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
   github_first_organization                = split(",", coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME"))[0]
   github_example_repository                = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
+  gitlab_host                              = coalesce(var.gitlab_host, "gitlab.com")
+  gitlab_example_group_id                  = coalesce(var.gitlab_example_group_id, "YOUR_GITLAB_GROUP_ID")
+  gitlab_example_project_id                = coalesce(var.gitlab_example_project_id, "YOUR_GITLAB_PROJECT_ID")
+  gong_instance_subdomain                  = coalesce(var.gong_instance_subdomain, "YOUR_GONG_INSTANCE_SUBDOMAIN")
+  glean_instance_subdomain                 = coalesce(var.glean_instance_subdomain, "YOUR_GLEAN_INSTANCE_SUBDOMAIN")
   salesforce_example_account_id            = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
 
   oauth_long_access_connectors = {
@@ -118,9 +123,73 @@ EOT
         path_to_instance_parameters = "PSOXY_CHATGPT_ENTERPRISE_"
       })
     }
+    claude = {
+      source_kind : "claude"
+      availability : "beta",
+      enable_by_default : false
+      worklytics_connector_id : "claude-psoxy"
+      display_name : "Claude",
+      worklytics_connector_name : "Claude via Psoxy"
+      target_host : "api.anthropic.com"
+      source_auth_strategy : "claude_admin_api_key"
+      secured_variables : [
+        {
+          name : "ADMIN_API_KEY"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ]
+      example_api_requests : [
+        {
+          method : "GET"
+          path : "/v1/compliance/organizations"
+        },
+        {
+          method : "GET"
+          path : "/v1/compliance/activities"
+        }
+      ],
+      external_token_todo : templatefile("${path.module}/docs/claude/claude_instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_CLAUDE_"
+      })
+      instructions_template = "${path.module}/docs/claude/instructions.tftpl"
+    }
+    claude-code = {
+      source_kind : "claude-code"
+      availability : "beta",
+      enable_by_default : false
+      worklytics_connector_id : "claude-code-psoxy"
+      display_name : "Claude Code",
+      worklytics_connector_name : "Claude Code via Psoxy"
+      target_host : "api.anthropic.com"
+      source_auth_strategy : "claude_admin_api_key"
+      secured_variables : [
+        {
+          name : "ADMIN_API_KEY"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ]
+      example_api_requests : [
+        {
+          method : "GET"
+          path : "/v1/organizations/users"
+        },
+        {
+          method : "GET"
+          path : "/v1/organizations/usage_report/claude_code"
+        }
+      ],
+      external_token_todo : templatefile("${path.module}/docs/claude/claude_code_instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_CLAUDE_CODE_"
+      })
+      instructions_template = "${path.module}/docs/claude/instructions.tftpl"
+    }
     cursor = {
       source_kind : "cursor",
-      availability : "alpha",
+      availability : "beta",
       enable_by_default : false,
       worklytics_connector_id : "cursor-psoxy"
       display_name : "Cursor"
@@ -159,6 +228,57 @@ EOT
       ]
       external_token_todo : templatefile("${path.module}/docs/cursor/instructions.tftpl", {
         path_to_instance_parameters = "PSOXY_CURSOR_"
+      })
+    }
+    glean = {
+      source_kind : "glean",
+      availability : "beta",
+      enable_by_default : false,
+      worklytics_connector_id : "glean-psoxy"
+      display_name : "Glean"
+      worklytics_connector_name : "Glean via Psoxy"
+      target_host : "${local.glean_instance_subdomain}.glean.com"
+      source_auth_strategy : "oauth2_access_token"
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      example_api_requests : [
+        {
+          method       = "POST"
+          path         = "/rest/api/v1/listentities"
+          content_type = "application/json"
+          body = jsonencode({
+            entityType = "PERSON"
+            pageSize   = 100
+          })
+        },
+        {
+          method       = "POST"
+          path         = "/rest/api/v1/insights"
+          content_type = "application/json"
+          body = jsonencode({
+            request = {
+              overviewRequest = {
+                dayRange = {
+                  start = {
+                    daysFromNow = -30
+                  }
+                  end = {
+                    daysFromNow = 0
+                  }
+                }
+              }
+            }
+          })
+        }
+      ]
+      external_token_todo : templatefile("${path.module}/docs/glean/instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_GLEAN_"
       })
     }
     github = {
@@ -393,6 +513,68 @@ EOT
         path_to_instance_parameters = "PSOXY_GITHUB_NON_ENTERPRISE_"
       })
     }
+    gong-metrics = {
+      source_kind : "gong-metrics",
+      availability : "beta",
+      enable_by_default : false,
+      worklytics_connector_id : "gong-metrics-psoxy"
+      display_name : "Gong"
+      worklytics_connector_name : "Gong Metrics via Psoxy"
+      target_host : "${local.gong_instance_subdomain}.gong.io"
+      source_auth_strategy : "basic_auth"
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN"
+          writable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        {
+          name : "REFRESH_TOKEN"
+          writable : true
+          sensitive : true
+          value_managed_by_tf : false
+        },
+        local.standard_config_values.oauth_refresh_token_lock,
+        {
+          name : "CLIENT_ID"
+          writable : false
+          sensitive : true # not really, but simpler this way; and some may want it treated as sensitive, since would be req'd to brute-force app tokens or something
+          value_managed_by_tf : false
+        },
+        {
+          name : "CLIENT_SECRET"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      environment_variables : {
+        GRANT_TYPE : "refresh_token_via_query_parameter"
+        REFRESH_ENDPOINT : "https://app.gong.io/oauth2/generate-customer-token"
+        USE_SHARED_TOKEN : "TRUE"
+      }
+      example_api_requests : [
+        {
+          method = "GET"
+          path   = "/v2/users"
+        },
+        {
+          method       = "POST"
+          path         = "/v2/stats/activity/aggregate"
+          content_type = "application/json"
+          body = jsonencode({
+            filter = {
+              fromDateTime = formatdate("YYYY-MM-DD'T'hh:mm:ssZ", timeadd(var.example_api_calls_sample_date, "-720h"))
+              toDateTime   = formatdate("YYYY-MM-DD'T'hh:mm:ssZ", var.example_api_calls_sample_date)
+            }
+          })
+        }
+      ]
+      external_token_todo : templatefile("${path.module}/docs/gong/metrics.tftpl", {
+        path_to_instance_parameters = "PSOXY_GONG_METRICS_"
+      })
+    }
     salesforce = {
       source_kind : "salesforce",
       availability : "ga",
@@ -434,44 +616,37 @@ EOT
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/services/data/v57.0/sobjects/Account/describe",
-        "/services/data/v57.0/sobjects/ActivityHistory/describe",
-        "/services/data/v57.0/sobjects/Account/updated?start=${urlencode(timeadd(var.example_api_calls_sample_date, "-48h"))}&end=${urlencode(var.example_api_calls_sample_date)}",
-        "/services/data/v57.0/composite/sobjects/User?ids=${local.salesforce_example_account_id}&fields=Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType",
-        "/services/data/v57.0/composite/sobjects/Account?ids=${local.salesforce_example_account_id}&fields=Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,ParentId,Rating,Sic,Type",
-        "/services/data/v57.0/query?q=SELECT%20%28SELECT%20AccountId%2CActivityDate%2CActivityDateTime%2CActivitySubtype%2CActivityType%2CCallDurationInSeconds%2CCallType%2CCreatedDate%2CCreatedById%2CDurationInMinutes%2CEndDateTime%2CId%2CIsAllDayEvent%2CIsDeleted%2CIsHighPriority%2CIsTask%2CLastModifiedDate%2CLastModifiedById%2COwnerId%2CPriority%2CStartDateTime%2CStatus%2CWhatId%2CWhoId%20FROM%20ActivityHistories%20ORDER%20BY%20LastModifiedDate%20DESC%20NULLS%20LAST%29%20FROM%20Account%20where%20id%3D%27${local.salesforce_example_account_id}%27",
-        "/services/data/v57.0/query?q=SELECT+Alias,AccountId,ContactId,CreatedDate,CreatedById,Email,EmailEncodingKey,Id,IsActive,LastLoginDate,LastModifiedDate,ManagerId,Name,TimeZoneSidKey,Username,UserRoleId,UserType+FROM+User+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
-        "/services/data/v57.0/query?q=SELECT+Id,AnnualRevenue,CreatedDate,CreatedById,IsDeleted,LastActivityDate,LastModifiedDate,LastModifiedById,NumberOfEmployees,OwnerId,ParentId,Rating,Sic,Type+FROM+Account+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST"
+        "/services/data/v64.0/sobjects/Account/describe",
+        "/services/data/v64.0/sobjects/Task/describe",
+        "/services/data/v64.0/query?q=SELECT+Id,Email,IsActive+FROM+User+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
+        "/services/data/v64.0/queryAll?q=SELECT+Id,AccountId,WhoId+FROM+Task+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST",
+        "/services/data/v64.0/queryAll?q=SELECT+Id,AccountId,WhoId+FROM+Event+WHERE+LastModifiedDate+%3E%3D+${urlencode(timeadd(var.example_api_calls_sample_date, "-72h"))}+AND+LastModifiedDate+%3C+${urlencode(var.example_api_calls_sample_date)}+ORDER+BY+LastModifiedDate+DESC+NULLS+LAST"
       ]
       external_token_todo : <<EOT
   Before running the example, you have to populate the following variables in terraform:
   - `salesforce_domain`. This is the [domain](https://help.salesforce.com/s/articleView?id=sf.faq_domain_name_what.htm&type=5) your instance is using.
   - `salesforce_example_account_id`: An example of any account id; this is only applicable for example calls.
 
-  1. Create a [Salesforce application + client credentials flow](https://help.salesforce.com/s/articleView?language=en_US&id=sf.remoteaccess_oauth_client_credentials_flow.htm&type=5)
-    with following permissions:
-    - Manage user data via APIs (`api`)
-    - Access Connect REST API resources (`chatter_api`)
-    - Perform requests at any time (`refresh_token`, `offline_access`)
-    - Access unique user identifiers (`openid`)
-    - Access Lightning applications (`lightning`)
-    - Access content resources (`content`)
-    - Perform ANSI SQL queries on Customer Data Platform data (`cdp_query_api`)
+  1. Create a [Salesforce external application](https://help.salesforce.com/s/articleView?id=xcloud.create_a_local_external_client_app.htm&type=5):
+     - Ensure "Enable OAuth" is checked
+     - "Callback URL" MUST be filled; can be anything as not required in this flow, but required to be set by Salesforce. Something dummy like `http://localhost` will work
+     - Select following OAuth scopes:
+      - Manage user data via APIs (`api`)
+      - Access Connect REST API resources (`chatter_api`)
+      - Perform requests at any time (`refresh_token`, `offline_access`)
+      - Access content resources (`content`)
+      - Perform ANSI SQL queries on Customer Data Platform data (`cdp_query_api`)
 
      Apart from Salesforce instructions above, please review the following:
-     - "Callback URL" MUST be filled; can be anything as not required in this flow, but required to be set by Salesforce.
+
      - Application MUST be marked with "Enable Client Credentials Flow"
-     - You MUST assign a user for Client Credentials, be sure:
-        - you associate a "run as" user marked with "API Only Permission"
-        - The policy associated to the user MUST have the following Administrative Permissions enabled:
-          - API Enabled
-          - APEX REST Services
-      - The policy MUST have the application marked as "enabled" in "Connected App Access". Otherwise requests will return 401 with INVALID_SESSION_ID
+     - You MUST assign a user for Client Credentials. A user with a valid `Salesforce License` should be enough. Also, user should have a [Permission Set](https://help.salesforce.com/s/articleView?id=platform.perm_sets_overview.htm&type=5) with following permissions:
+       - `Access Activities`: For reading Tasks, Events, Calendar and Emails.
+       - `View All Users`: For reading Users information.
 
-     The user set for "run as" on the connector should have, between its `Permission Sets` and `Profile`, the permission of `View All Data`. This is required
-     to support the queries used to retrieve [Activity Histories](https://developer.salesforce.com/docs/atlas.en-us.object_reference.meta/object_reference/sforce_api_objects_activityhistory.htm) by *account id*.
-
-  2. Once created, open "Manage Consumer Details"
+  2. Once created, edit the application.
+     - In Policies tab, ensure "Enable Client Credentials Flow" is checked with the user assigned.
+     - In Settings, go to `OAuth Settings` and click on `Consumer Key and Consumer Secret` link to get the values required for the next step.
   3. Update the content of `PSOXY_SALESFORCE_CLIENT_ID` from Consumer Key	and `PSOXY_SALESFORCE_CLIENT_SECRET` from Consumer Secret
   4. Finally, we recommend to run `test-salesforce` script with all the queries in the example to ensure the expected information covered by rules can be obtained from Salesforce API.
      Some test calls may fail with a 400 (bad request) response. That is something expected if parameters requested on the query are not available (for example, running a SOQL query
@@ -527,7 +702,7 @@ EOT
     slack-discovery-api = {
       source_kind : "slack"
       availability : "ga",
-      enable_by_default : true
+      enable_by_default : false,
       worklytics_connector_id : "slack-discovery-api-psoxy",
       worklytics_connector_name : "Slack via Psoxy",
       display_name : "Slack via Discovery API"
@@ -647,9 +822,9 @@ EOT
         "/v2/past_meetings/{MEETING_ID}",
         "/v2/past_meetings/{MEETING_ID}/instances",
         "/v2/past_meetings/{MEETING_ID}/participants",
-        "/v2/report/users/{userId}/meetings",
-        "/v2/report/meetings/{meetingId}",
-        "/v2/report/meetings/{meetingId}/participants"
+        "/v2/report/users/{USER_ID}/meetings",
+        "/v2/report/meetings/{MEETING_ID}",
+        "/v2/report/meetings/{MEETING_ID}/participants"
       ],
       external_token_todo : <<EOT
 ## Zoom Setup
@@ -854,11 +1029,11 @@ EOT
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/rest/api/group/${local.confluence_example_group_id}/membersByGroupId",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/rest/api/content/search?cql=lastmodified>=${formatdate("YYYY-MM-DD", timeadd(var.example_api_calls_sample_date, "-720h"))}%20AND%20lastmodified<=${formatdate("YYYY-MM-DD", var.example_api_calls_sample_date)}&limit=30&expand=body.atlas_doc_format,ancestors,version,history,history.previousVersion&includeArchivedSpaces=true",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/spaces",
-        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/attachments/{attachmentId}/versions",
-        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/blogposts/{blogpostId}/versions",
-        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/pages/{pageId}/versions",
-        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/footer-comments/{commentId}/versions",
-        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/inline-comments/{commentId}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/attachments/{ATTACHMENT_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/blogposts/{BLOGPOST_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/pages/{PAGE_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/footer-comments/{COMMENT_ID}/versions",
+        "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/inline-comments/{COMMENT_ID}/versions",
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/tasks",
         "/oauth/token/accessible-resources", # obtain Confluence Cloud ID from here
       ],
@@ -1184,6 +1359,45 @@ a proper value.
 
 EOT
     }
+    gitlab = {
+      source_kind : "gitlab"
+      availability : "beta"
+      enable_by_default : false
+      worklytics_connector_id : "gitlab-psoxy"
+      target_host : local.gitlab_host
+      source_auth_strategy : "oauth2_access_token"
+      display_name : "GitLab"
+      worklytics_connector_name : "GitLab via Psoxy"
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      environment_variables : {}
+      settings_to_provide = {
+        "GitLab Host" = local.gitlab_host
+      }
+      reserved_concurrent_executions : null
+      enable_async_processing : false
+      enable_side_output : false
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/api/v4/groups",
+        "/api/v4/groups/${local.gitlab_example_group_id}/members/all",
+        "/api/v4/projects",
+        "/api/v4/projects/${local.gitlab_example_project_id}/repository/branches",
+        "/api/v4/projects/${local.gitlab_example_project_id}/repository/commits",
+        "/api/v4/projects/${local.gitlab_example_project_id}/issues",
+        "/api/v4/projects/${local.gitlab_example_project_id}/merge_requests",
+        "/api/v4/projects/${local.gitlab_example_project_id}/audit_events",
+      ],
+      external_token_todo : templatefile("${path.module}/docs/gitlab/gitlab-instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_GITLAB_"
+      })
+    }
   }
 
   bulk_connectors = {
@@ -1295,6 +1509,19 @@ EOT
       }
       example_file = "docs/sources/survey/survey-example.csv"
     }
+    "workdata-generic" = {
+      source_kind               = "workdata-generic"
+      availability              = "beta"
+      enable_by_default         = false
+      worklytics_connector_id   = "workdata-generic-psoxy"
+      worklytics_connector_name = "Workplace Metadata via Psoxy"
+      rules_file                = "docs/sources/workdata-generic/workdata-generic.yaml"
+      example_files = [
+        "docs/sources/workdata-generic/example-bulk/original/events0.ndjson",
+        "docs/sources/workdata-generic/example-bulk/original/items0.ndjson",
+        "docs/sources/workdata-generic/example-bulk/original/accounts0.ndjson"
+      ]
+    }
   }
 
   oauth_long_access_connectors_backwards = { for k, v in local.oauth_long_access_connectors :
@@ -1328,13 +1555,29 @@ EOT
 # computed values filtered by enabled connectors
 locals {
 
+  # helper to compute rules_raw from a connector map entry
+  # reads file content if rules_file is set and base_dir is available
+  _resolve_rules_raw = {
+    for k, v in local.all_default_connectors :
+    k => try(v.rules_file, null) != null && var.base_dir != null ? file("${var.base_dir}${v.rules_file}") : null
+  }
+
   # backwards-compatible for v0.4.x; remove in v0.5.x
   google_workspace_sources_backwards = { for k, v in local.google_workspace_sources :
-  k => merge(v, { example_calls : try(v.example_api_calls, []) }) }
+  k => merge(v, { example_calls : try(v.example_api_calls, []), rules_raw : try(local._resolve_rules_raw[k], null) }) }
 
   # backwards-compatible for v0.4.x; remove in v0.5.x
   msft_365_connectors_backwards = { for k, v in local.msft_365_connectors :
-  k => merge(v, { example_calls : try(v.example_api_calls, []) }) }
+  k => merge(v, { example_calls : try(v.example_api_calls, []), rules_raw : try(local._resolve_rules_raw[k], null) }) }
+
+  oauth_long_access_connectors_with_rules_raw = { for k, v in local.oauth_long_access_connectors :
+  k => merge(v, { rules_raw : try(local._resolve_rules_raw[k], null) }) }
+
+  oauth_long_access_connectors_backwards_with_rules_raw = { for k, v in local.oauth_long_access_connectors :
+  k => merge(v, { example_calls : try(v.example_api_calls, []), rules_raw : try(local._resolve_rules_raw[k], null) }) }
+
+  bulk_connectors_with_rules_raw = { for k, v in local.bulk_connectors :
+  k => merge(v, { rules_raw : try(local._resolve_rules_raw[k], null) }) }
 
   enabled_google_workspace_connectors = {
     for k, v in local.google_workspace_sources_backwards : k => v if contains(var.enabled_connectors, k)
@@ -1342,7 +1585,7 @@ locals {
   enabled_msft_365_connectors = {
     for k, v in local.msft_365_connectors_backwards : k => v if contains(var.enabled_connectors, k) && length(try(var.msft_tenant_id, "")) > 0
   }
-  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors_backwards : k => v if contains(var.enabled_connectors, k) }
+  enabled_oauth_long_access_connectors = { for k, v in local.oauth_long_access_connectors_backwards_with_rules_raw : k => v if contains(var.enabled_connectors, k) }
 
   enabled_oauth_long_access_connectors_todos = { for k, v in local.enabled_oauth_long_access_connectors : k => v if v.external_token_todo != null }
   # list of pair of [(conn1, secret1), (conn1, secret2), ... (connN, secretM)]
@@ -1359,7 +1602,7 @@ locals {
   ]))
 
   enabled_bulk_connectors = {
-    for k, v in local.bulk_connectors : k => v if contains(var.enabled_connectors, k)
+    for k, v in local.bulk_connectors_with_rules_raw : k => v if contains(var.enabled_connectors, k)
   }
 
   enabled_lockable_oauth_secrets_to_create = distinct(flatten([
@@ -1371,3 +1614,4 @@ locals {
     ]
   ]))
 }
+

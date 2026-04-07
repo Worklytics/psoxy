@@ -38,11 +38,6 @@ variable "config_parameter_prefix" {
   }
 }
 
-variable "default_labels" {
-  type        = map(string)
-  description = "*Alpha* in v0.4, only respected for new resources. Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
-  default     = {}
-}
 
 variable "worklytics_sa_emails" {
   type        = list(string)
@@ -69,6 +64,12 @@ variable "deployment_bundle" {
   default     = null
 }
 
+variable "deployment_bundle_hash" {
+  type        = string
+  description = "precomputed base64 SHA256 hash of the deployment bundle, if any"
+  default     = null
+}
+
 variable "force_bundle" {
   type        = bool
   description = "whether to force build of deployment bundle, even if it already exists"
@@ -85,6 +86,12 @@ variable "gcp_principals_authorized_to_test" {
   type        = list(string)
   description = "list of GCP principals authorized to test this deployment - eg 'user:alice@acme.com', 'group:devs@acme.com'; if omitted, up to you to configure necessary perms for people to test if desired."
   default     = []
+}
+
+variable "provision_testing_infra" {
+  type        = bool
+  description = "Whether to provision infra needed to support testing of deployment. If false, it's left to you to ensure the GCP principal you use when running test scripts has the correct permissions."
+  default     = true
 }
 
 variable "general_environment_variables" {
@@ -123,15 +130,13 @@ variable "secret_replica_locations" {
 
 variable "vpc_config" {
   type = object({
-    network                         = optional(string)                # Local name of the VPC network resource on which to provision the VPC connector (if `serverless_connector` is not provided)
-    subnetwork                      = optional(string)                # Local name of the VPC subnetwork resource on which to provision the VPC connector (if `serverless_connector` is not provided)
-    serverless_connector            = optional(string)                # Format: projects/{project}/locations/{location}/connectors/{connector}
-    serverless_connector_cidr_range = optional(string, "10.8.0.0/28") # ignored if serverless_connector is provided
+    network              = string           # Local name of the VPC network resource on which to provision the VPC connector (required if `serverless_connector` is not provided)
+    subnet               = string           # Local name of the VPC subnet resource on which to provision the VPC connector (required if `serverless_connector` is not provided). NOTE: Subnet MUST have /28 netmask (required by Google Cloud for VPC connectors)
+    serverless_connector = optional(string) # Format: projects/{project}/locations/{location}/connectors/{connector}
   })
 
   description = "**alpha** configuration of a VPC to be used by the Psoxy instances, if any (null for none)."
   default     = null
-
   # serverless_connector: allow null; if provided, must match the full resource name
   validation {
     condition = (
@@ -142,21 +147,18 @@ variable "vpc_config" {
     error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
   }
 
-  # serverless_connector_cidr_range: allow null; if provided, must look like CIDR
   validation {
     condition = (
       var.vpc_config == null
-      || try(var.vpc_config.serverless_connector_cidr_range, null) == null
-      || can(regex("^[0-9.]+/[0-9]+$", try(var.vpc_config.serverless_connector_cidr_range, "")))
-    )
-    error_message = "If vpc_config.serverless_connector_cidr_range is provided, it must match the format: {ip}/{mask}"
-  }
-
-  validation {
-    condition = (
-      var.vpc_config == null
-      || try(var.vpc_config.network, null) == null
-      || can(regex("^[a-z0-9-]+$", try(var.vpc_config.network, "")))
+      || try(var.vpc_config.serverless_connector, null) != null
+      ||
+      (
+        # Accepts a simple network name: lowercase letters, digits, dashes
+        can(regex("^[a-z0-9-]+$", try(var.vpc_config.network, "")))
+        ||
+        # Accepts a full self-link (Compute URL format)
+        can(regex("^projects/[^/]+/(global|regions/[^/]+)/networks/[^/]+$", try(var.vpc_config.network, "")))
+      )
     )
     error_message = "vpc_config.network must be lowercase letters, numbers, or dashes."
   }
@@ -164,10 +166,10 @@ variable "vpc_config" {
   validation {
     condition = (
       var.vpc_config == null
-      || try(var.vpc_config.network, null) != null
       || try(var.vpc_config.serverless_connector, null) != null
+      || (try(var.vpc_config.network, null) != null && try(var.vpc_config.subnet, null) != null)
     )
-    error_message = "If vpc_config is provided, it must either specify a serverless_connector or a network on which to provision a serverless connector."
+    error_message = "If vpc_config is provided without serverless_connector, both network and subnet are required."
   }
 }
 
@@ -211,6 +213,7 @@ variable "api_connectors" {
     [])
     settings_to_provide = optional(map(string), {})
     rules_file          = optional(string, null)
+    rules_raw           = optional(string, null)
   }))
 
   description = "map of API connectors to provision"
@@ -233,9 +236,10 @@ variable "webhook_collectors" {
     auth_public_keys                   = optional(list(string), [])    # list of public keys to use for verifying webhook signatures; if empty AND no auth keys provision, no app-level auth will be done
     allow_origins                      = optional(list(string), ["*"]) # list of origins to allow for CORS, eg 'https://my-app.com'; if you want to allow all origins, use ['*'] (the default)
     batch_processing_frequency_minutes = optional(number, 5)           # frequency (in minutes) at which to batch process webhooks
+    output_path_prefix                 = optional(string, "")          # optional path prefix to prepend to webhook output files in bucket
 
     example_identity = optional(string, null) # example identity to use in test payloads
-    example_payload  = optional(string, null) # example payload to use in test payloads
+    example_payload  = optional(string, null) # example payload content to use in test scripts
   }))
   default = {}
 
@@ -261,7 +265,9 @@ variable "bulk_connectors" {
       })))
     }))
     rules_file            = optional(string)
+    rules_raw             = optional(string, null)
     example_file          = optional(string)
+    example_files         = optional(list(string), [])
     instructions_template = optional(string)
     settings_to_provide   = optional(map(string), {})
     available_memory_mb   = optional(number)
@@ -376,4 +382,28 @@ variable "bucket_force_destroy" {
   type        = bool
   description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this module"
   default     = false
+}
+
+variable "provision_project_level_iam" {
+  description = "Whether to provision project-level IAM bindings required for Psoxy operation. Set to false if you prefer to manage these IAM bindings outside of Terraform."
+  type        = bool
+  default     = true
+}
+
+variable "version_sanitized_buckets" {
+  description = "Whether to enable versioning for all -sanitized buckets. Provided because some security standards want ALL buckets to enable versioning; from our perspective, it is not needed as these buckets are not storing primary data."
+  type        = bool
+  default     = false
+}
+
+variable "bucket_access_logs_destination" {
+  description = "The name of the GCS bucket to route access logs to for all buckets managed by this module"
+  type        = string
+  default     = null
+}
+
+variable "builder_sa_email" {
+  description = "An optional custom builder service account. If not provided, this module will create one."
+  type        = string
+  default     = null
 }

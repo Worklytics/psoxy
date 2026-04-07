@@ -192,15 +192,20 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @Override
     public Optional<Collection<String>> getAllowedRequestHeaders(String httpMethod, URL url) {
-        return getEndpoint(httpMethod, url)
+        Collection<String> allowedRequestHeaders = Lists.newArrayList();
+
+        if (rules.getAllowedRequestHeaders() != null) {
+            allowedRequestHeaders.addAll(rules.getAllowedRequestHeaders());
+        }
+
+        getEndpoint(httpMethod, url)
                 .map(Pair::getRight)
-                .map(endpoint -> {
-                    Collection<String> allowedRequestHeaders = Lists.newArrayList();
-                    endpoint.getAllowedRequestHeaders().ifPresent(allowedRequestHeaders::addAll);
+                .ifPresent(endpoint -> {
+                    endpoint.getAllowedRequestHeadersAsOptional().ifPresent(allowedRequestHeaders::addAll);
                     endpoint.getAllowedRequestHeadersToForward().ifPresent(allowedRequestHeaders::addAll);
-                    return Optional.of(allowedRequestHeaders);
-                })
-                .orElse(Optional.empty());
+                });
+
+        return allowedRequestHeaders.isEmpty() ? Optional.empty() : Optional.of(allowedRequestHeaders);
     }
 
     @SneakyThrows
@@ -405,7 +410,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @VisibleForTesting
     Predicate<Endpoint> allowsHttpMethod(@NonNull String httpMethod) {
-        return (endpoint) -> endpoint.getAllowedMethods()
+        return (endpoint) -> endpoint.getAllowedMethodsOptional()
                 .map(methods -> methods.stream().map(String::toUpperCase)
                         .collect(Collectors.toList())
                         .contains(httpMethod.toUpperCase()))

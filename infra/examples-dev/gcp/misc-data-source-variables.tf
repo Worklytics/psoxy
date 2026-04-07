@@ -87,6 +87,36 @@ variable "github_example_repository" {
   description = "(Only required if using Github connector) Name for the repository to be used as part of example calls for Github (ex: psoxy)"
 }
 
+variable "gitlab_host" {
+  type        = string
+  default     = "gitlab.com"
+  description = "(Only required if using GitLab connector) Host of the GitLab instance (ex: gitlab.com or gitlab.mycompany.com for self-hosted)"
+}
+
+variable "gitlab_example_group_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using GitLab connector) Example group ID for test API calls (ex: 12345)"
+}
+
+variable "gitlab_example_project_id" {
+  type        = string
+  default     = null
+  description = "(Only required if using GitLab connector) Example project ID for test API calls (ex: 12345)"
+}
+
+variable "glean_instance_subdomain" {
+  type        = string
+  default     = null
+  description = "(Only required if using Glean connector) Subdomain of your Glean instance (ex: if your Glean URL is 'acme-be.glean.com', the instance subdomain is 'acme-be')"
+}
+
+variable "gong_instance_subdomain" {
+  type        = string
+  default     = null
+  description = "(Only required if using Gong connector) Subdomain of your Gong instance (ex: if your Gong URL is 'acme.gong.io', the instance subdomain is 'acme')"
+}
+
 variable "salesforce_example_account_id" {
   type        = string
   default     = null
@@ -110,4 +140,22 @@ locals {
     (!local.validate_github_enterprise_server_host
       ? local.validate_github_enterprise_server_host_message
   : ""))
+
+
+  validate_glean_instance_subdomain         = (var.glean_instance_subdomain == null || var.glean_instance_subdomain == "") && contains(var.enabled_connectors, "glean")
+  validate_glean_instance_subdomain_message = "The glean_instance_subdomain var should be populated if Glean connector is enabled."
+  validate_glean_instance_subdomain_check = regex(
+    "^${local.validate_glean_instance_subdomain_message}$",
+    (!local.validate_glean_instance_subdomain
+      ? local.validate_glean_instance_subdomain_message
+  : ""))
+
+  validate_gong_instance_subdomain         = (var.gong_instance_subdomain == null || var.gong_instance_subdomain == "") && contains(var.enabled_connectors, "gong-metrics")
+  validate_gong_instance_subdomain_message = "The gong_instance_subdomain var should be populated if Gong connector is enabled."
+  validate_gong_instance_subdomain_check = regex(
+    "^${local.validate_gong_instance_subdomain_message}$",
+    (!local.validate_gong_instance_subdomain
+      ? local.validate_gong_instance_subdomain_message
+  : ""))
+
 }

@@ -5,7 +5,6 @@
 terraform {
   required_providers {
     aws = {
-      version = ">= 4.12, < 5.0"
     }
   }
 }
@@ -64,7 +63,7 @@ module "rules_parameter" {
 # it's an instance of a gate/gateway, implemented as a lambda function
 # and in this particular case, it's inverted in a sense, as data goes INTO it, rather than OUT (via API requests)
 module "gate_instance" {
-  source = "../aws-psoxy-lambda"
+  source = "../aws-proxy-lambda"
 
   environment_name                     = var.environment_name
   instance_id                          = var.instance_id
@@ -106,7 +105,7 @@ module "gate_instance" {
     local.required_env_vars,
     {
       WEBHOOK_OUTPUT               = aws_sqs_queue.sanitized_webhooks_to_batch.url
-      WEBHOOK_BATCH_OUTPUT         = "s3://${module.sanitized_output.bucket_id}"
+      WEBHOOK_BATCH_OUTPUT         = "s3://${module.sanitized_output.bucket_id}/${var.output_path_prefix}"
       REQUIRE_AUTHORIZATION_HEADER = length(local.accepted_auth_keys) > 0
       ALLOW_ORIGINS                = join(",", var.allow_origins)
       CUSTOM_RULES_SHA             = module.rules_parameter.rules_hash
@@ -114,6 +113,10 @@ module "gate_instance" {
     length(local.accepted_auth_keys) > 0 ? {
       AUTH_ISSUER        = local.auth_issuer
       ACCEPTED_AUTH_KEYS = join(",", local.accepted_auth_keys)
+    } : {},
+    var.new_relic_account_id != null && var.new_relic_account_id != "" ? {
+      NEW_RELIC_ACCOUNT_ID     = var.new_relic_account_id
+      NEW_RELIC_LAMBDA_HANDLER = var.handler_class
     } : {}
   )
 }
@@ -134,6 +137,7 @@ resource "aws_apigatewayv2_authorizer" "jwt" {
   api_id           = var.api_gateway_v2.id
   authorizer_type  = "JWT"
   identity_sources = ["$request.header.Authorization"]
+
 
   jwt_configuration {
     issuer = local.auth_issuer
@@ -193,6 +197,29 @@ resource "aws_lambda_event_source_mapping" "sqs_trigger" {
   depends_on = [
     module.gate_instance
   ]
+}
+
+# Provisioned concurrency configuration to keep Lambda warm and eliminate cold starts
+# This is particularly important for the JWKS endpoint used by the JWT authorizer
+resource "aws_lambda_alias" "provisioned" {
+  count = var.keep_warm_instances != null ? 1 : 0
+
+  name             = "provisioned"
+  description      = "Alias for provisioned concurrency to eliminate cold starts"
+  function_name    = module.gate_instance.function_name
+  function_version = "$LATEST"
+
+  lifecycle {
+    ignore_changes = [function_version]
+  }
+}
+
+resource "aws_lambda_provisioned_concurrency_config" "keep_warm" {
+  count = var.keep_warm_instances != null ? 1 : 0
+
+  function_name                     = module.gate_instance.function_name
+  qualifier                         = aws_lambda_alias.provisioned[0].name
+  provisioned_concurrent_executions = var.keep_warm_instances
 }
 
 resource "aws_iam_policy" "sanitized_bucket_read" {
@@ -298,8 +325,8 @@ locals {
   role_param = var.test_caller_role_arn == null ? "" : " -r \"${var.test_caller_role_arn}\""
 
   command_npm_install = "npm --prefix ${var.path_to_repo_root}tools/psoxy-test install"
-  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} -re \"${data.aws_region.current.id}\""
-  command_test_logs   = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} -re \"${data.aws_region.current.id}\" -l \"${module.gate_instance.log_group}\""
+  command_cli_call    = "node ${var.path_to_repo_root}tools/psoxy-test/cli-call.js ${local.role_param} --region \"${data.aws_region.current.id}\""
+  command_test_logs   = "node ${var.path_to_repo_root}tools/psoxy-test/cli-logs.js ${local.role_param} --region \"${data.aws_region.current.id}\" -l \"${module.gate_instance.log_group}\""
 
   todo_content = <<EOT
 
@@ -359,6 +386,7 @@ locals {
     example_payload        = coalesce(var.example_payload, "{\"test\": \"data\"}")
     example_identity       = var.example_identity
     collection_path        = local.collection_path
+    sanitized_bucket_name  = module.sanitized_output.bucket_id
   })
 }
 
@@ -419,7 +447,26 @@ output "provisioned_auth_key_pairs" {
   description = "List of ARNs of kms keys provisioned for webhook authentication purposes, if any."
 }
 
+output "test_examples" {
+  value = try(var.example_payload, null) != null ? [{
+    content_base64 = try(var.example_payload, null) != null ? base64encode(var.example_payload) : null
+    signing_key_id = length(local.auth_key_arns_sorted) > 0 ? "aws-kms:${element(local.auth_key_arns_sorted, length(local.auth_key_arns_sorted) - 1)}" : null
+    identity       = try(var.example_identity, null)
+  }] : []
+  description = "Array of test examples with base64-encoded content, signing key, and identity"
+}
+
 output "todo" {
   value = local.todo_content
+}
+
+output "provisioned_concurrency" {
+  value = var.keep_warm_instances != null ? {
+    enabled                           = true
+    provisioned_concurrent_executions = var.keep_warm_instances
+    alias_name                        = aws_lambda_alias.provisioned[0].name
+    alias_arn                         = aws_lambda_alias.provisioned[0].arn
+  } : null
+  description = "Provisioned concurrency configuration, if enabled. This keeps Lambda execution environments warm to eliminate cold starts for the JWKS endpoint."
 }
 

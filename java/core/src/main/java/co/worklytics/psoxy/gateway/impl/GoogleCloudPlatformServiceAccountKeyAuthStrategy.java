@@ -1,8 +1,17 @@
 package co.worklytics.psoxy.gateway.impl;
 
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Optional;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.Credentials;
 import com.google.auth.http.HttpTransportFactory;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -11,17 +20,14 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.inject.Inject;
-import java.io.ByteArrayInputStream;
-import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Log
@@ -45,6 +51,7 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
     @Inject ConfigService config;
     @Inject SecretStore secretStore;
     @Inject HttpTransportFactory httpTransportFactory;
+    @Inject ObjectMapper objectMapper;
 
 
     /**
@@ -138,12 +145,31 @@ public class GoogleCloudPlatformServiceAccountKeyAuthStrategy implements SourceA
     }
 
     @VisibleForTesting
-    ByteArrayInputStream toStream(String base64encodedKey) {
-        return new ByteArrayInputStream(Base64.getDecoder().decode(
-            //strip whitespace around base64-encoded string; have seen these with artifacts from
-            // copy-paste of the SA key into cloud consoles
-            StringUtils.strip(base64encodedKey))
-        );
+    ByteArrayInputStream toStream(String key) {
+        String trimmedKey = StringUtils.strip(key);
+        
+        // Check if the key is plain JSON (starts with '{')
+        if (trimmedKey.startsWith("{")) {
+            // Plain JSON format - convert directly to bytes using UTF-8
+            log.fine("Service account key detected as plain JSON format");
+
+            try {
+                @SuppressWarnings("unused") // we're just checking if it's valid JSON, not using the result
+                JsonNode jsonNode = objectMapper.readTree(trimmedKey);
+            } catch (IOException e) {
+                log.log(Level.WARNING, "GCP Service Account Key retrieved from config appears to be JSON, but parsing failed. Will passed it to Google's library for parsing, but most likely that will fail", e);
+            }
+            return new ByteArrayInputStream(trimmedKey.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        } else {
+            // Assume base64-encoded format
+            log.fine("Service account key detected as base64-encoded format");
+            try {
+                return new ByteArrayInputStream(Base64.getDecoder().decode(trimmedKey));
+            } catch (IllegalArgumentException e) {
+                // re-throw variant, but add information to aid debugging 
+                throw new IllegalArgumentException("GCP Service Account Key retrieved from config does not appear to be be JSON, or base64-encoded JSON", e);
+            }
+        }
     }
 
 }
