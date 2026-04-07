@@ -117,7 +117,8 @@ public interface GcpModule {
 
     /**
      * Config service: backed by GCP Parameter Manager (for non-secret configuration).
-     * Lookup order: EnvVars → PM (instance-scoped) → PM (shared/global)
+     * Lookup order within this native service: PM (instance-scoped) → PM (shared/global).
+     * Environment-variable precedence is applied by higher-level composition outside this method.
      * No fallback to Secret Manager for config values.
      */
     @Provides @Named("Native") @Singleton
