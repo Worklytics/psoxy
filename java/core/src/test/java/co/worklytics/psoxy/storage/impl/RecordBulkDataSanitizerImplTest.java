@@ -32,6 +32,7 @@ import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.storage.BulkDataTestUtils;
 import co.worklytics.psoxy.storage.StorageHandler;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
 import dagger.Component;
 import dagger.Module;
@@ -77,6 +78,7 @@ class RecordBulkDataSanitizerImplTest {
         Container.ForConfigService.class,
         MockModules.ForSecretStore.class,
         MockModules.ForHostEnvironment.class,
+        TestModules.ForProxyConstants.class,
     })
     public interface Container {
 
