@@ -35,6 +35,7 @@ locals {
   confluence_example_group_id              = coalesce(var.confluence_example_group_id, "YOUR_confluence_example_group_id")
   jira_example_cloud_id                    = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
   jira_example_issue_id                    = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
+  atlassian_organization_id                = coalesce(var.atlassian_organization_id, "YOUR_ATLASSIAN_ORG_ID")
   github_installation_id                   = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
   github_copilot_installation_id           = coalesce(var.github_copilot_installation_id, "YOUR_GITHUB_COPILOT_INSTALLATION_ID")
   github_enterprise_server_host            = coalesce(var.github_api_host, var.github_enterprise_server_host, "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
@@ -1037,130 +1038,9 @@ EOT
         "/ex/confluence/${local.confluence_example_cloud_id}/wiki/api/v2/tasks",
         "/oauth/token/accessible-resources", # obtain Confluence Cloud ID from here
       ],
-      external_token_todo : <<EOT
-## Prerequisites
-Confluence OAuth 2.0 (3LO) through Psoxy requires a Confluence Cloud account with following granular scopes:
-
-Add following scopes as part of \"Granular Scopes\", first clicking on \`Edit Scopes\` and then selecting them:
-    - read:blogpost:confluence: for getting [blogposts and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-blogposts-id-versions-get)
-    - read:comment:confluence: for getting [footer-comments](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-footer-comments-id-versions-get) and [inline-comments](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-inline-comments-id-versions-get) and their versions
-    - read:group:confluence: for getting [groups](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-group/#api-wiki-rest-api-group-get)
-    - read:user:confluence: for getting [users from groups](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-group/#api-wiki-rest-api-group-groupid-membersbygroupid-get)
-    - read:space:confluence: for getting [spaces](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-space/#api-spaces-get)
-    - read:attachment:confluence: for getting [attachments and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-attachments-id-versions-get)
-    - read:page:confluence: for getting [pages and their versions](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-version/#api-pages-id-versions-get)
-    - read:task:confluence: for getting [tasks](https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-task/#api-tasks-get)
-    - read:content-details:confluence: for using [content search endpoint](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-search/#api-wiki-rest-api-search-get)
-
-## Setup Instructions
-
-### App configuration
-1. Go to the [Atlassian Developer Console](https://developer.atlassian.com/console/myapps/) and
-   click on "Create" (OAuth 2.0 integration).
-2. Now navigate to "Permissions" and click on "Add" for Confluence. Once added, click on "Configure".
-   Add following scopes as part of \"Granular Scopes\", first clicking on \`Edit Scopes\` and then selecting them:
-    - `read:blogpost:confluence`
-    - `read:comment:confluence`
-    - `read:group:confluence`
-    - `read:space:confluence`
-    - `read:attachment:confluence`
-    - `read:page:confluence`
-    - `read:user:confluence`
-    - `read:task:confluence`
-    - `read:content-details:confluence`
-
-3. Go to the "Authorization" section and add an OAuth 2.0 (3LO) authorization type: click on "Add"
-   and you will be prompted to provide a "Callback URI". At this point, you could add
-   `http://localhost` as value and follow the [Manual steps](#manual-steps), or you could
-   use our [Psoxy OAuth setup tool](#worklytics-psoxy-oauth-setup-tool) (see details below).
-
-### Worklytics OAuth setup tool
-Assuming you've created a Confluence Cloud OAuth 2.0 (3LO) integration as described above, from the
-use our [Psoxy OAuth setup tool](https://github.com/Worklytics/psoxy-oauth-setup-tool) to obtain
-the necessary OAuth tokens and your Confluence Cloud ID.
-Once you've installed and run the tool, you will get a Callback URI like this:
-`http://localhost:9000/psoxy-setup-callback` (instead of just `http://localhost`) that you can
-use in the "Authorization" section of the Developer Console. The tool is interactive, and you
-will be prompted to confirm that you've registered the Callback URI before continuing.
-Then, you will be prompted to enter the "Client ID" and "Secret" from the Developer Console, and
-the tool will open a web browser to perform the authentication and authorization flows. After that,
-it will print the all the values to complete the configuration:
-- OAuth tokens, Client ID and Secret to be stored in AWS System Manager parameters store / GCP
-  Cloud Secrets (if default implementation).
-
-### Manual steps
-1. Assuming you've created a Confluence Cloud OAuth 2.0 (3LO) integration as described above, go to
-   "Settings" and copy the "Client ID" and "Secret". You will use these to obtain an OAuth
-   `refresh_token`.
-2. Build an OAuth authorization endpoint URL by copying the value for "Client Id" obtained in the
-   previous step into the URL below. Then open the result in a web browser:
-   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:task:confluence%20read%3Ablogpost%3Aconfluence%20read%3Acomment%3Aconfluence%20read%3Agroup%3Aconfluence%20read%3Aspace%3Aconfluence%20read%3Aattachment%3Aconfluence%20read%3Apage%3Aconfluence%20read%3Auser%3Aconfluence%20read%3Atask%3Aconfluence%20read%3Acontent-details%3Aconfluence%20read%3Acontent%3Aconfluence&redirect_uri=http%3A%2F%2Flocalhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
-3. Choose a site in your Confluence workspace to allow access for this application and click "Accept".
-   As the callback does not exist, you will see an error. But in the URL of your browser you will
-   see something like this as URL:
-   `http://localhost/?state=YOUR_USER_BOUND_VALUE&code=eyJhbGc...`
-   Copy the value of the `code` parameter from that URI. It is the "authorization code" required
-   for next step.
-   **NOTE** This "Authorization Code" is single-use; if it expires or is used, you will need to
-   obtain a new code by  again pasting the authorization URL in the browser.
-4. Now, replace the values in following URL and run it from command line in your terminal. Replace
-   `YOUR_AUTHENTICATION_CODE`, `YOUR_CLIENT_ID` and `YOUR_CLIENT_SECRET` in the placeholders:
-   `curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Content-Type: application/json' --data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET", "code": "YOUR_AUTHENTICATION_CODE", "redirect_uri": "http://localhost"}'`
-5. After running that command, if successful you will see a
-   [JSON response](https://developer.atlassian.com/cloud/confluence/platform/oauth-2-3lo-apps/#2--exchange-authorization-code-for-access-token) like this:
-   ```json
-   {
-    "access_token": "some short live access token",
-    "expires_in": 3600,
-    "token_type": "Bearer",
-    "refresh_token": "some long live token we are going to use",
-    "scopes": [
-            "read:attachment:confluence",
-            "read:blogpost:confluence",
-            "read:comment:confluence",
-            "read:content-details:confluence",
-            "read:group:confluence",
-            "read:page:confluence",
-            "read:space:confluence",
-            "read:user:confluence"
-        ],
-   }
-   ```
-    NOTE: As per September 2025, scopes don't show `read:task:confluence` in the response.
-6. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
-   - `PSOXY_CONFLUENCE_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
-   - `PSOXY_CONFLUENCE_CLOUD_CLIENT_ID` with `Client Id` value.
-   - `PSOXY_CONFLUENCE_CLOUD_CLIENT_SECRET` with `Client Secret` value.
-7. Optional, obtain the "Cloud ID" of your Jira instance. Use the following command, with the
-   `access_token` obtained in the previous step in place of `<ACCESS_TOKEN>` below:
-   `curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'`
-   And its response will be something like:
-   ```json
-   [
-     {
-       "id":"SOME UUID",
-       "url":"https://your-site.atlassian.net",
-       "name":"your-site-name",
-        "scopes": [
-            "read:attachment:confluence",
-            "read:blogpost:confluence",
-            "read:comment:confluence",
-            "read:content-details:confluence",
-            "read:content:confluence",
-            "read:group:confluence",
-            "read:page:confluence",
-            "read:space:confluence",
-            "read:user:confluence"
-        ],
-       "avatarUrl":"https://site-admin-avatar-cdn.prod.public.atl-paas.net/avatars/240/rocket.png"
-     }
-   ]
-   ```
-Add the `id` value from that JSON response as the value of the `confluence_example_cloud_id` variable in the
-`terraform.tfvars` file of your Terraform configuration. This will generate all the test URLs with
-a proper value.
-
-EOT
+      external_token_todo : templatefile("${path.module}/docs/atlassian/confluence-instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_CONFLUENCE_CLOUD"
+      })
     }
     jira-server = {
       source_kind : "jira-server"
@@ -1190,20 +1070,9 @@ EOT
         "/rest/api/latest/issue/${local.jira_example_issue_id}/comment?maxResults=25",
         "/rest/api/latest/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
       ],
-      external_token_todo : <<EOT
-  1. Follow the instructions to create a [Personal Access Token](https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html) in your instance.
-     As this is coupled to a specific User in Jira, we recommend first creating a dedicated Jira user
-     to be a "Service Account" in effect for the connection (name it `svc-worklytics` or something).
-     This will give you better visibility into activity of the data connector as well as avoid
-     connection inadvertently breaking if the Jira user who owns the token is disabled or deleted.
-
-     That service account must have *READ* permissions over your Jira instance, to be able to read issues, worklogs and comments, including their changelog where possible.
-     If you're required to specify a classical scope, you can add:
-     - `read:jira-work`
-  2. Disable or set a reasonable expiration time for the token. If you set an expiration time, it is your responsibility to re-generate the token and reset it in your host environment to maintain your connection.
-  3. Copy the value of the token in `PSOXY_JIRA_SERVER_ACCESS_TOKEN` variable as part of AWS System
-     Manager Parameter Store / GCP Cloud Secrets.
-EOT
+      external_token_todo : templatefile("${path.module}/docs/atlassian/jira-server-instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_JIRA_SERVER"
+      })
     }
     jira-cloud = {
       source_kind : "jira-cloud"
@@ -1260,104 +1129,41 @@ EOT
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/issue/${local.jira_example_issue_id}/worklog?maxResults=25",
         "/ex/jira/${local.jira_example_cloud_id}/rest/api/3/project/search?maxResults=25",
       ],
-      external_token_todo : <<EOT
-## Prerequisites
-Jira Cloud through Psoxy uses Jira OAuth 2.0 (3LO) with following classical scopes:
-- `read:jira-user`: for getting [users](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-users/#api-rest-api-3-users-search-get)
-- `read:jira-work`: for getting information about [issue](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-get), [issue search](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-get), [changelogs](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-changelog-get), [comments](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-comments/#api-rest-api-3-issue-issueidorkey-comment-get), [projects](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-projects/#api-rest-api-3-project-search-get) and [worklogs](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-worklogs/#api-rest-api-3-issue-issueidorkey-worklog-get)
-
-And following granular scopes:
-- `read:user:jira`: for retrieving [group members](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-member-get)
-- `read:group:jira`: for retrieving [groups](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-bulk-get) and [group members](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-member-get)
-- `read:avatar:jira`: for retrieving [group members](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-member-get)
-
-## Setup Instructions
-
-### App configuration
-1. Go to the [Atlassian Developer Console](https://developer.atlassian.com/console/myapps/) and
-   click on "Create" (OAuth 2.0 integration).
-2. Now navigate to "Permissions" and click on "Add" for Jira. Once added, click on "Configure".
-   Add the following scopes as part of "Classic Scopes":
-   - `read:jira-user`
-   - `read:jira-work`
-   And these from "Granular Scopes":
-   - `read:group:jira`
-   - `read:avatar:jira`
-   - `read:user:jira`
-3. Go to the "Authorization" section and add an OAuth 2.0 (3LO) authorization type: click on "Add"
-   and you will be prompted to provide a "Callback URI". At this point, you could add
-   `http://localhost` as value and follow the [Manual steps](#manual-steps), or you could
-   use our [Psoxy OAuth setup tool](#worklytics-psoxy-oauth-setup-tool) (see details below).
-
-### Worklytics OAuth setup tool
-Assuming you've created a Jira Cloud OAuth 2.0 (3LO) integration as described above, from the
-use our [Psoxy OAuth setup tool](https://github.com/Worklytics/psoxy-oauth-setup-tool) to obtain
-the necessary OAuth tokens and your Jira Cloud ID.
-Once you've installed and run the tool, you will get a Callback URI like this:
-`http://localhost:9000/psoxy-setup-callback` (instead of just `http://localhost`) that you can
-use in the "Authorization" section of the Developer Console. The tool is interactive, and you
-will be prompted to confirm that you've registered the Callback URI before continuing.
-Then, you will be prompted to enter the "Client ID" and "Secret" from the Developer Console, and
-the tool will open a web browser to perform the authentication and authorization flows. After that,
-it will print the all the values to complete the configuration:
-- OAuth tokens, Client ID and Secret to be stored in AWS System Manager parameters store / GCP
-  Cloud Secrets (if default implementation).
-- Jira Cloud ID as value of the `jira_cloud_id` variable in the `terraform.tfvars` file of your
-  Terraform configuration.
-
-### Manual steps
-1. Assuming you've created a Jira Cloud OAuth 2.0 (3LO) integration as described above, go to
-   "Settings" and copy the "Client ID" and "Secret". You will use these to obtain an OAuth
-   `refresh_token`.
-2. Build an OAuth authorization endpoint URL by copying the value for "Client Id" obtained in the
-   previous step into the URL below. Then open the result in a web browser:
-   `https://auth.atlassian.com/authorize?audience=api.atlassian.com&client_id=<CLIENT ID>&scope=offline_access%20read:group:jira%20read:avatar:jira%20read:user:jira%20read:jira-user%20read:jira-work&redirect_uri=http://localhost&state=YOUR_USER_BOUND_VALUE&response_type=code&prompt=consent`
-3. Choose a site in your Jira workspace to allow access for this application and click "Accept".
-   As the callback does not exist, you will see an error. But in the URL of your browser you will
-   see something like this as URL:
-   `http://localhost/?state=YOUR_USER_BOUND_VALUE&code=eyJhbGc...`
-   Copy the value of the `code` parameter from that URI. It is the "authorization code" required
-   for next step.
-   **NOTE** This "Authorization Code" is single-use; if it expires or is used, you will need to
-   obtain a new code by  again pasting the authorization URL in the browser.
-4. Now, replace the values in following URL and run it from command line in your terminal. Replace
-   `YOUR_AUTHENTICATION_CODE`, `YOUR_CLIENT_ID` and `YOUR_CLIENT_SECRET` in the placeholders:
-   `curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Content-Type: application/json' --data '{"grant_type": "authorization_code","client_id": "YOUR_CLIENT_ID","client_secret": "YOUR_CLIENT_SECRET", "code": "YOUR_AUTHENTICATION_CODE", "redirect_uri": "http://localhost"}'`
-5. After running that command, if successful you will see a
-   [JSON response](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/#2--exchange-authorization-code-for-access-token) like this:
-   ```json
-   {
-     "access_token": "some short live access token",
-     "expires_in": 3600,
-     "token_type": "Bearer",
-     "refresh_token": "some long live token we are going to use",
-     "scope": "read:jira-work offline_access read:jira-user"
-   }
-   ```
-6. Set the following variables in AWS System Manager parameters store / GCP Cloud Secrets (if default implementation):
-   - `PSOXY_JIRA_CLOUD_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
-   - `PSOXY_JIRA_CLOUD_CLIENT_ID` with `Client Id` value.
-   - `PSOXY_JIRA_CLOUD_CLIENT_SECRET` with `Client Secret` value.
-7. Optional, obtain the "Cloud ID" of your Jira instance. Use the following command, with the
-   `access_token` obtained in the previous step in place of `<ACCESS_TOKEN>` below:
-   `curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'`
-   And its response will be something like:
-   ```json
-   [
-     {
-       "id":"SOME UUID",
-       "url":"https://your-site.atlassian.net",
-       "name":"your-site-name",
-       "scopes":["read:jira-user","read:jira-work"],
-       "avatarUrl":"https://site-admin-avatar-cdn.prod.public.atl-paas.net/avatars/240/rocket.png"
-     }
-   ]
-   ```
-Add the `id` value from that JSON response as the value of the `jira_cloud_id` variable in the
-`terraform.tfvars` file of your Terraform configuration. This will generate all the test URLs with
-a proper value.
-
-EOT
+      external_token_todo : templatefile("${path.module}/docs/atlassian/jira-cloud-instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_JIRA_CLOUD"
+      })
+    }
+    atlassian-organization = {
+      source_kind : "atlassian-organization"
+      availability : "beta"
+      enable_by_default : false
+      worklytics_connector_id : "atlassian-organization-psoxy"
+      target_host : "api.atlassian.com"
+      source_auth_strategy : "oauth2_access_token"
+      display_name : "Atlassian Organization"
+      worklytics_connector_name : "Atlassian Organization Admin API via Psoxy"
+      secured_variables : [
+        {
+          name : "ACCESS_TOKEN"
+          writable : false
+          sensitive : true
+          value_managed_by_tf : false
+        }
+      ],
+      settings_to_provide = {
+        "Organization Id" = local.atlassian_organization_id
+      }
+      reserved_concurrent_executions : null
+      enable_side_output : false
+      example_api_calls_user_to_impersonate : null
+      example_api_calls : [
+        "/admin/v1/orgs/${local.atlassian_organization_id}/events",
+        "/admin/v1/orgs/${local.atlassian_organization_id}/events-stream",
+        "/admin/v2/orgs/${local.atlassian_organization_id}/directories/{DIRECTORY_ID}/users",
+      ],
+      external_token_todo : templatefile("${path.module}/docs/atlassian/atlassian-organization-instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_ATLASSIAN_ORGANIZATION"
+      })
     }
     gitlab = {
       source_kind : "gitlab"
