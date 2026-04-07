@@ -100,8 +100,13 @@ variable "available_memory_mb" {
 
 variable "timeout_seconds" {
   type        = number
-  description = "Timeout (in seconds) for the function. Default value is 1800 (30 minutes)."
-  default     = 1800
+  description = "Timeout (in seconds) for the function. Maximum 540 for event-triggered functions."
+  default     = 540
+
+  validation {
+    condition     = var.timeout_seconds <= 540
+    error_message = "timeout_seconds cannot exceed 540 for event-triggered Cloud Functions."
+  }
 }
 
 variable "example_file" {

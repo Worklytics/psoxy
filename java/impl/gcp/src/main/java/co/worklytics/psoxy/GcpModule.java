@@ -67,7 +67,7 @@ public interface GcpModule {
     static SecretManagerSecretStore instanceConfigService(HostEnvironment hostEnvironment,
                                                EnvVarsConfigService envVarsConfigService,
                                                SecretManagerSecretStoreFactory secretManagerSecretStoreFactory) {
-        // For secrets, prefer PATH_TO_INSTANCE_SECRETS if set; else fall back to PATH_TO_INSTANCE_CONFIG
+        // Prefer PATH_TO_INSTANCE_SECRETS if set; else fall back to PATH_TO_INSTANCE_CONFIG
         String pathToInstanceSecrets =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_SECRETS)
                 .or(() -> envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG))
@@ -93,13 +93,14 @@ public interface GcpModule {
 
     /**
      * Secret store: backed by GCP Secret Manager.
-     * Uses PATH_TO_INSTANCE_SECRETS / PATH_TO_SHARED_SECRETS if defined; else falls back to
-     * PATH_TO_INSTANCE_CONFIG / PATH_TO_SHARED_CONFIG for backward compatibility.
+     * Uses PATH_TO_INSTANCE_SECRETS / PATH_TO_SHARED_SECRETS if set;
+     * falls back to PATH_TO_INSTANCE_CONFIG / PATH_TO_SHARED_CONFIG.
      */
     @Provides @Singleton @Named("Native")
     static SecretStore nativeSecretStore(EnvVarsConfigService envVarsConfigService,
                                          SecretManagerSecretStoreFactory secretManagerSecretStoreFactory,
                                          @Named("instance") SecretManagerSecretStore instanceConfigService) {
+        // Prefer PATH_TO_SHARED_SECRETS if set; else fall back to PATH_TO_SHARED_CONFIG
         String pathToSharedSecrets =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_SECRETS)
                 .or(() -> envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG))
@@ -117,25 +118,29 @@ public interface GcpModule {
 
     /**
      * Config service: backed by GCP Parameter Manager (for non-secret configuration).
-     * Lookup order within this native service: PM (instance-scoped) → PM (shared/global).
+     * Uses PATH_TO_INSTANCE_PARAMS / PATH_TO_SHARED_PARAMS if set;
+     * falls back to PATH_TO_INSTANCE_CONFIG / PATH_TO_SHARED_CONFIG.
      * Environment-variable precedence is applied by higher-level composition outside this method.
-     * No fallback to Secret Manager for config values.
      */
     @Provides @Named("Native") @Singleton
     static ConfigService nativeConfigService(EnvVarsConfigService envVarsConfigService,
                                              ParameterManagerConfigServiceFactory parameterManagerConfigServiceFactory) {
         String projectId = ServiceOptions.getDefaultProjectId();
 
+        // Prefer PATH_TO_INSTANCE_PARAMS if set; else fall back to PATH_TO_INSTANCE_CONFIG
         String pathToInstanceParams =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_PARAMS)
+                .or(() -> envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG))
                 .orElse("");
 
+        // Prefer PATH_TO_SHARED_PARAMS if set; else fall back to PATH_TO_SHARED_CONFIG
         String pathToSharedParams =
             envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_PARAMS)
+                .or(() -> envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG))
                 .orElse("");
 
         if (pathToInstanceParams.isEmpty() && pathToSharedParams.isEmpty()) {
-            log.warning("Neither PATH_TO_INSTANCE_PARAMS nor PATH_TO_SHARED_PARAMS is set; " +
+            log.warning("Neither PATH_TO_INSTANCE_PARAMS/PATH_TO_INSTANCE_CONFIG nor PATH_TO_SHARED_PARAMS/PATH_TO_SHARED_CONFIG is set; " +
                 "Parameter Manager config will not be available.");
             // return env vars only — no PM backing
             return envVarsConfigService;

@@ -39,11 +39,14 @@ class AccountCredentialsGrantTokenRequestBuilderTest {
 
     @Test
     void addHeaders() {
+        when(payloadBuilder.config
+            .getConfigPropertyAsOptional(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID))
+            .thenReturn(java.util.Optional.of("client"));
         when(payloadBuilder.secretStore
-            .getConfigPropertyOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID))
+            .getSecretOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_ID))
             .thenReturn("client");
         when(payloadBuilder.secretStore
-            .getConfigPropertyOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_SECRET))
+            .getSecretOrError(AccountCredentialsGrantTokenRequestBuilder.ConfigProperty.CLIENT_SECRET))
             .thenReturn("secret");
 
         HttpHeaders headers = new HttpHeaders();

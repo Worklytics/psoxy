@@ -33,3 +33,8 @@ variable "content" {
   description = "Raw rules content string. Mutually exclusive with file_path; one of the two must be provided."
   default     = null
 }
+
+variable "instance_sa_email" {
+  type        = string
+  description = "The email address of the service account to use for the proxy instance that will access the rules."
+}

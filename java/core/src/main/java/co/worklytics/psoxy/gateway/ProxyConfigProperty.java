@@ -57,26 +57,26 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     PATH_TO_INSTANCE_CONFIG,
 
     /**
-     * hierarchical path prefix for shared parameters in GCP Parameter Manager
-     * e.g. "psoxy/"
+     * optional override: hierarchical path prefix for shared parameters in GCP Parameter Manager
+     * if set, takes preference over PATH_TO_SHARED_CONFIG for config lookups
      */
     PATH_TO_SHARED_PARAMS,
 
     /**
-     * hierarchical path prefix for instance-specific parameters in GCP Parameter Manager
-     * e.g. "psoxy/gmail/"
+     * optional override: hierarchical path prefix for instance-specific parameters in GCP Parameter Manager
+     * if set, takes preference over PATH_TO_INSTANCE_CONFIG for config lookups
      */
     PATH_TO_INSTANCE_PARAMS,
 
     /**
-     * optional override: hierarchical path prefix for shared secrets in Secret Manager
-     * if set, takes preference over PATH_TO_SHARED_PARAMS for secret lookups
+     * optional override: hierarchical path prefix for shared secrets in GCP Secret Manager
+     * if set, takes preference over PATH_TO_SHARED_CONFIG for secret lookups
      */
     PATH_TO_SHARED_SECRETS,
 
     /**
-     * optional override: hierarchical path prefix for instance-specific secrets in Secret Manager
-     * if set, takes preference over PATH_TO_INSTANCE_PARAMS for secret lookups
+     * optional override: hierarchical path prefix for instance-specific secrets in GCP Secret Manager
+     * if set, takes preference over PATH_TO_INSTANCE_CONFIG for secret lookups
      */
     PATH_TO_INSTANCE_SECRETS,
 
