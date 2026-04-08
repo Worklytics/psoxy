@@ -31,13 +31,31 @@
             "content":{
               "object":"compliance.workspace.conversation.message.content",
               "type":"text",
-              "value":"{\"length\":39,\"word_count\":9}"
+              "value":"{\"keywords\":{\"email\":1,\"write\":1},\"length\":51,\"word_count\":11}"
             },
             "files":[
               {
                 "id":"file_001"
               }
             ]
+          },
+          {
+            "object":"compliance.workspace.conversation.message",
+            "id":"msg_123456789X",
+            "parent_id":"msg_1234567890",
+            "created_at":1.716990005123123E9,
+            "gpt_id":null,
+            "project_id":null,
+            "author":{
+              "object":"compliance.workspace.bot",
+              "role":"assistant",
+              "tool_name":null
+            },
+            "content":{
+              "object":"compliance.workspace.conversation.message.content",
+              "type":"text",
+              "value":"{\"length\":70,\"word_count\":12}"
+            }
           }
         ]
       }
