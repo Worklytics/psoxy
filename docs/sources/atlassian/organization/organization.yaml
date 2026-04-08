@@ -1,0 +1,198 @@
+---
+endpoints:
+  - pathTemplate: "/admin/v1/orgs/{orgId}/events"
+    allowedQueryParams:
+      - "cursor"
+      - "q"
+      - "from"
+      - "to"
+      - "action"
+      - "actor"
+      - "ip"
+      - "product"
+      - "location"
+      - "limit"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].actor.id"
+          - "$.data[*].actor.onBehalfOf.id"
+          - "$.data[*].actor.onBehalfOf.email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$.data[*].message.content"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/AuditEvent"
+        links:
+          $ref: "#/definitions/Links"
+  - pathTemplate: "/admin/v1/orgs/{orgId}/events-stream"
+    allowedQueryParams:
+      - "cursor"
+      - "q"
+      - "from"
+      - "to"
+      - "action"
+      - "actor"
+      - "ip"
+      - "product"
+      - "location"
+      - "limit"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].actor.id"
+          - "$.data[*].actor.onBehalfOf.id"
+          - "$.data[*].actor.onBehalfOf.email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$.data[*].message.content"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/AuditEvent"
+        links:
+          $ref: "#/definitions/Links"
+  - pathTemplate: "/admin/v2/orgs/{orgId}/directories/{directoryId}/users"
+    allowedQueryParams:
+      - "cursor"
+      - "limit"
+      - "accountIds"
+      - "directoryIds"
+      - "resourceIds"
+      - "groupIds"
+      - "mfaEnabled"
+      - "claimStatus"
+      - "status"
+      - "accountStatus"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].email"
+          - "$.data[*].links.self"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.data[*].account_id"
+        includeReversible: true
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/definitions/DirectoryUser"
+        links:
+          $ref: "#/definitions/Links"
+definitions:
+  Actor:
+    type: "object"
+    properties:
+      app:
+        $ref: "#/definitions/ActorApp"
+      auth:
+        $ref: "#/definitions/ActorAuth"
+      id:
+        type: "string"
+      onBehalfOf:
+        $ref: "#/definitions/OnBehalfOf"
+      type:
+        type: "string"
+  ActorApp:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      type:
+        type: "string"
+  ActorAuth:
+    type: "object"
+    properties:
+      authType:
+        type: "string"
+  Attributes:
+    type: "object"
+    properties:
+      action:
+        type: "string"
+      actionCategory:
+        type: "string"
+      product:
+        type: "string"
+  AuditEvent:
+    type: "object"
+    properties:
+      actor:
+        $ref: "#/definitions/Actor"
+      attributes:
+        $ref: "#/definitions/Attributes"
+      container:
+        $ref: "#/definitions/Container"
+      context:
+        $ref: "#/definitions/Context"
+      id:
+        type: "string"
+      message:
+        $ref: "#/definitions/Message"
+      time:
+        type: "string"
+        format: "date-time"
+      type:
+        type: "string"
+  Container:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      type:
+        type: "string"
+  Context:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      type:
+        type: "string"
+  DirectoryUser:
+    type: "object"
+    properties:
+      accountId:
+        type: "string"
+      accountStatus:
+        type: "string"
+      accountType:
+        type: "string"
+      addedToOrg:
+        type: "string"
+        format: "date-time"
+      email:
+        type: "string"
+  Links:
+    type: "object"
+    properties:
+      next:
+        type: "string"
+  Message:
+    type: "object"
+    properties:
+      content:
+        type: "string"
+      format:
+        type: "string"
+  OnBehalfOf:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+      id:
+        type: "string"
