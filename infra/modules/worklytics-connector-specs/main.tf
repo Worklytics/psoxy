@@ -1151,7 +1151,7 @@ EOT
         }
       ],
       settings_to_provide = {
-        "Organization Id" = local.atlassian_organization_id
+        "Atlassian Organization Id" = local.atlassian_organization_id
       }
       reserved_concurrent_executions : null
       enable_side_output : false
@@ -1159,7 +1159,7 @@ EOT
       example_api_calls : [
         "/admin/v1/orgs/${local.atlassian_organization_id}/events",
         "/admin/v1/orgs/${local.atlassian_organization_id}/events-stream",
-        "/admin/v2/orgs/${local.atlassian_organization_id}/directories/{DIRECTORY_ID}/users",
+        "/admin/v2/orgs/${local.atlassian_organization_id}/directories/-/users",
       ],
       external_token_todo : templatefile("${path.module}/docs/atlassian/atlassian-organization-instructions.tftpl", {
         path_to_instance_parameters = "PSOXY_ATLASSIAN_ORGANIZATION"
