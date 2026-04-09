@@ -12,6 +12,7 @@ endpoints:
       - "product"
       - "location"
       - "limit"
+      - "sortOrder"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -34,15 +35,10 @@ endpoints:
   - pathTemplate: "/admin/v1/orgs/{orgId}/events-stream"
     allowedQueryParams:
       - "cursor"
-      - "q"
       - "from"
       - "to"
-      - "action"
-      - "actor"
-      - "ip"
-      - "product"
-      - "location"
       - "limit"
+      - "sortOrder"
     transforms:
       - !<pseudonymize>
         jsonPaths:
