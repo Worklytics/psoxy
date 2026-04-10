@@ -28,9 +28,9 @@ locals {
 
   path_to_instance_config_parameters = "${coalesce(var.config_parameter_prefix, "")}${replace(upper(var.instance_id), "-", "_")}_"
 
-  # Hierarchical paths for Parameter Manager (using / separator)
-  path_to_shared_params   = coalesce(var.config_parameter_prefix, "psoxy") != "" ? "${replace(coalesce(var.config_parameter_prefix, "psoxy"), "_", "/")}/" : "psoxy/"
-  path_to_instance_params = "${local.path_to_shared_params}${replace(var.instance_id, "-", "/")}/"
+  # NOTE: that / would be prefered, but isn't legal in gcp secret/parameter names
+  path_to_shared_params   = var.environment_id_prefix
+  path_to_instance_params = "${local.path_to_shared_params}${var.instance_id}-"
 }
 
 resource "random_string" "bucket_name_random_sequence" {

@@ -53,7 +53,7 @@ resource "google_project_service" "gcp_infra_api" {
 resource "google_artifact_registry_repository" "psoxy-functions-repo" {
   location      = var.bucket_location
   project       = var.project_id
-  repository_id = "psoxy-functions"
+  repository_id = "${var.environment_id_prefix}functions"
   description   = "Docker repository used on the cloud functions"
   format        = "DOCKER"
 

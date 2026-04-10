@@ -17,9 +17,6 @@ locals {
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
 
-  # Hierarchical paths for Parameter Manager (using / separator)
-  pm_shared_prefix = length(var.environment_name) == 0 ? "psoxy/" : "${var.environment_name}/"
-
   api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
 
   # API connectors with rules_raw that don't have file-based overrides
@@ -126,29 +123,21 @@ module "secrets" {
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionManager_on_writable_secret" {
-  for_each = { for secret in local.secrets_writable_by_instance : secret.instance_secret_id => secret }
+  for_each = { for secret in local.secrets_writable_by_instance : "${secret.instance_id}_${secret.instance_secret_id}" => secret }
 
   project   = var.gcp_project_id
-  secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
+  secret_id = module.secrets[each.value.instance_id].secret_ids_within_project[each.value.instance_secret_id]
   member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
   role      = module.psoxy.psoxy_instance_secret_role_id
-
-  depends_on = [
-    module.secrets
-  ]
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_secretAccessor_on_non_tf_secret" {
-  for_each = { for secret in local.secrets_access_only_but_not_managed_by_terraform : secret.instance_secret_id => secret }
+  for_each = { for secret in local.secrets_access_only_but_not_managed_by_terraform : "${secret.instance_id}_${secret.instance_secret_id}" => secret }
 
   project   = var.gcp_project_id
-  secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
+  secret_id = module.secrets[each.value.instance_id].secret_ids_within_project[each.value.instance_secret_id]
   member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
   role      = "roles/secretmanager.secretAccessor"
-
-  depends_on = [
-    module.secrets
-  ]
 }
 
 
@@ -251,7 +240,7 @@ module "api_connector_rules_pm" {
   source = "../../modules/gcp-rules-pm"
 
   project_id = var.gcp_project_id
-  prefix     = "${local.pm_shared_prefix}${each.key}/"
+  prefix     = "${local.environment_id_prefix}${each.key}-"
   content    = each.value
 }
 
@@ -262,8 +251,8 @@ module "api_connector_rules_sm" {
 
   project_id        = var.gcp_project_id
   content           = each.value
-  prefix            = "${local.pm_shared_prefix}${replace(each.key, "-", "/")}/"
-  instance_sa_email = module.api_connector[each.key].service_account_email
+  prefix            = "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_"
+  instance_sa_email = google_service_account.api_connectors[each.key].email
 }
 
 # Grant all API connector SAs the Parameter Reader role at project level
@@ -278,7 +267,7 @@ resource "google_project_iam_member" "api_connector_parameter_reader" {
   condition {
     title       = "Restrict read parameter to instances own parameters"
     description = "Allow reading parameter"
-    expression  = "resource.name.startsWith('projects/_/locations/global/parameters/${local.pm_shared_prefix}${each.key}/')"
+    expression  = "resource.name.startsWith('projects/_/locations/global/parameters/${local.environment_id_prefix}${each.key}-')"
   }
 }
 
@@ -380,7 +369,7 @@ resource "google_project_iam_member" "webhook_collector_parameter_reader" {
   condition {
     title       = "Restrict read parameter to instances own parameters"
     description = "Allow reading parameter"
-    expression  = "resource.name.startsWith('projects/_/locations/global/parameters/${local.pm_shared_prefix}${each.key}/') || resource.name.startsWith('projects/_/locations/global/parameters/${local.pm_shared_prefix}${replace(upper(each.key), "-", "_")}/')"
+    expression  = "resource.name.startsWith('projects/_/locations/global/parameters/${local.environment_id_prefix}${each.key}-') || resource.name.startsWith('projects/_/locations/global/parameters/${local.environment_id_prefix}${replace(upper(each.key), "-", "_")}-')"
   }
 }
 
@@ -458,7 +447,7 @@ resource "google_project_iam_member" "bulk_connector_parameter_reader" {
   condition {
     title       = "Restrict read parameter to instances own parameters"
     description = "Allow reading parameter"
-    expression  = "resource.name.startsWith('projects/_/locations/global/parameters/${local.pm_shared_prefix}${each.key}/') || resource.name.startsWith('projects/_/locations/global/parameters/${local.pm_shared_prefix}${replace(upper(each.key), "-", "_")}/')"
+    expression  = "resource.name.startsWith('projects/_/locations/global/parameters/${local.environment_id_prefix}${each.key}-') || resource.name.startsWith('projects/_/locations/global/parameters/${local.environment_id_prefix}${replace(upper(each.key), "-", "_")}-')"
   }
 }
 
@@ -493,7 +482,7 @@ resource "google_parameter_manager_parameter" "additional_transforms" {
   for_each = local.inputs_to_build_lookups_for
 
   project      = var.gcp_project_id
-  parameter_id = "${local.pm_shared_prefix}${replace(each.key, "-", "/")}/ADDITIONAL_TRANSFORMS"
+  parameter_id = "${local.environment_id_prefix}${each.key}-ADDITIONAL_TRANSFORMS"
   format       = "UNFORMATTED"
 }
 

@@ -58,9 +58,9 @@ locals {
 
   path_to_instance_config_parameters = "${coalesce(var.config_parameter_prefix, "")}${replace(upper(var.instance_id), "-", "_")}_"
 
-  # Hierarchical paths for Parameter Manager (using / separator)
-  path_to_shared_params   = coalesce(var.config_parameter_prefix, "psoxy") != "" ? "${replace(coalesce(var.config_parameter_prefix, "psoxy"), "_", "/")}/" : "psoxy/"
-  path_to_instance_params = "${local.path_to_shared_params}${replace(var.instance_id, "-", "/")}/"
+  # NOTE: that / would be prefered, but isn't legal in gcp secret/parameter names
+  path_to_shared_params   = var.environment_id_prefix
+  path_to_instance_params = "${local.path_to_shared_params}${var.instance_id}-"
 }
 
 # BEGIN AUTH KEYS
@@ -117,12 +117,13 @@ resource "google_kms_crypto_key_iam_member" "allow_function_to_access_public_key
 # END AUTH KEYS
 
 module "rules_parameter" {
-  count  = var.config_store == "PARAMETER_MANAGER" ? 1 : 0
+  count = var.config_store == "PARAMETER_MANAGER" ? 1 : 0
+
   source = "../gcp-rules-pm"
 
   project_id = var.project_id
   content    = file(var.rules_file)
-  prefix     = local.path_to_instance_config_parameters
+  prefix     = local.path_to_instance_params
 }
 
 module "rules_secret_sm" {

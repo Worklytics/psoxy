@@ -9,7 +9,7 @@ resource "google_parameter_manager_parameter" "rules" {
 
 resource "google_parameter_manager_parameter_version" "rules" {
   parameter            = google_parameter_manager_parameter.rules.id
-  parameter_version_id = "latest"
+  parameter_version_id = "v-${substr(sha1(var.content), 0, 8)}"
   parameter_data       = var.content
 
   lifecycle {

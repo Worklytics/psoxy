@@ -8,8 +8,8 @@ variable "prefix" {
   description = "Hierarchical prefix for parameter ID, e.g. 'psoxy/gmail/'. Must end with '/'."
 
   validation {
-    condition     = can(regex("/$", var.prefix))
-    error_message = "The prefix must end with a '/'."
+    condition     = can(regex("-$", var.prefix))
+    error_message = "The prefix must end with a '-'."
   }
 }
 
