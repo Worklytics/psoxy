@@ -476,6 +476,8 @@ locals {
   required_gcp_apis_to_host = {
     # https://console.cloud.google.com/apis/library/iamcredentials.googleapis.com
     "iamcredentials.googleapis.com" = "IAM Service Account Credentials API",
+    # https://console.cloud.google.com/apis/library/parametermanager.googleapis.com
+    "parametermanager.googleapis.com" = "Parameter Manager API",
     # https://console.cloud.google.com/apis/library/serviceusage.googleapis.com
     "serviceusage.googleapis.com" = "Service Usage API",
   }
@@ -508,6 +510,10 @@ locals {
     "roles/secretmanager.admin" = {
       display_name    = "Secret Manager Admin",
       description_url = "https://cloud.google.com/iam/docs/roles-permissions/secretmanager#secretmanager.admin"
+    },
+    "roles/parametermanager.admin" = {
+      display_name    = "Parameter Manager Admin",
+      description_url = "https://cloud.google.com/iam/docs/roles-permissions/parametermanager#parametermanager.admin"
     },
     "roles/iam.serviceAccountAdmin" = {
       display_name    = "Service Account Admin",
@@ -574,6 +580,21 @@ locals {
     # "secretmanager.versions.enable",
     # "secretmanager.versions.get",
     # "secretmanager.versions.list",
+
+    # Parameter Manager
+    "parametermanager.locations.get",
+    "parametermanager.locations.list",
+    "parametermanager.parameters.create",
+    "parametermanager.parameters.delete",
+    "parametermanager.parameters.get",
+    "parametermanager.parameters.list",
+    "parametermanager.parameters.update",
+    "parametermanager.parameterVersions.create",
+    "parametermanager.parameterVersions.delete",
+    "parametermanager.parameterVersions.get",
+    "parametermanager.parameterVersions.list",
+    "parametermanager.parameterVersions.render",
+    "parametermanager.parameterVersions.update",
 
     # Cloud Storage
     "storage.buckets.create",
@@ -690,6 +711,21 @@ locals {
     "secretmanager.versions.enable",
     "secretmanager.versions.get",
     "secretmanager.versions.list",
+
+    # Parameter Manager
+    "parametermanager.locations.get",
+    "parametermanager.locations.list",
+    "parametermanager.parameters.create",
+    "parametermanager.parameters.delete",
+    "parametermanager.parameters.get",
+    "parametermanager.parameters.list",
+    "parametermanager.parameters.update",
+    "parametermanager.parameterVersions.create",
+    "parametermanager.parameterVersions.delete",
+    "parametermanager.parameterVersions.get",
+    "parametermanager.parameterVersions.list",
+    "parametermanager.parameterVersions.render",
+    "parametermanager.parameterVersions.update",
 
     # Cloud Storage
     "storage.buckets.create",
