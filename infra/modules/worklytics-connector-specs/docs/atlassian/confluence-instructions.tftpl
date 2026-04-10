@@ -91,7 +91,7 @@ it will print the all the values to complete the configuration:
    - `${path_to_instance_parameters}_REFRESH_TOKEN` secret variable with value of `refresh_token` received in previous response
    - `${path_to_instance_parameters}_CLIENT_ID` with `Client Id` value.
    - `${path_to_instance_parameters}_CLIENT_SECRET` with `Client Secret` value.
-7. Optional, obtain the "Cloud ID" of your Jira instance. Use the following command, with the
+7. Optional, obtain the "Cloud ID" of your Confluence instance. Use the following command, with the
    `access_token` obtained in the previous step in place of `<ACCESS_TOKEN>` below:
    `curl --header 'Authorization: Bearer <ACCESS_TOKEN>' --url 'https://api.atlassian.com/oauth/token/accessible-resources'`
    And its response will be something like:

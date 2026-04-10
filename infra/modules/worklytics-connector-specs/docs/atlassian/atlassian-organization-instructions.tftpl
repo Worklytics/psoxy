@@ -15,12 +15,12 @@ Required scopes for the API token:
    - `read:events:admin`
 4. Copy the generated API key immediately as it will only be shown once.
 5. Set the API key as the `ACCESS_TOKEN` in AWS System Manager Parameter Store / GCP Cloud Secrets:
-   - `${path_to_instance_parameters}_ORGANIZATION_ACCESS_TOKEN` with the API key value.
+   - `${path_to_instance_parameters}_ACCESS_TOKEN` with the API key value.
 6. Find your Organization ID:
    - Organization ID: In the Atlassian Admin console URL (e.g., `https://admin.atlassian.com/o/{org-id}/overview`)
 7. Add this value to your `terraform.tfvars` file:
    - `atlassian_organization_id = "your-org-id"`
 
 **IMPORTANT**: API keys expire periodically. You must renew your API key before expiration and update the
-`${path_to_instance_parameters}_ORGANIZATION_ACCESS_TOKEN` secret to ensure the connector continues to work.
+`${path_to_instance_parameters}_ACCESS_TOKEN` secret to ensure the connector continues to work.
 Set a reminder to check and renew the key before it expires.
