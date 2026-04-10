@@ -20,20 +20,11 @@ This connector uses API token authentication. See the [Atlassian Organization Ad
 
 ## API Endpoints
 
-### Audit Events
-- **Endpoint**: `/admin/v1/orgs/{orgId}/events`
-- **Purpose**: Retrieve organization audit events
-- **Supported Query Parameters**: cursor, q, from, to, action, actor, ip, product, location, limit
-
-### Audit Events Stream
-- **Endpoint**: `/admin/v1/orgs/{orgId}/events-stream`
-- **Purpose**: Stream organization audit events in real-time
-- **Supported Query Parameters**: cursor, q, from, to, action, actor, ip, product, location, limit
-
-### Directory Users
-- **Endpoint**: `/admin/v2/orgs/{orgId}/directories/{directoryId}/users`
-- **Purpose**: Retrieve users from organization directories
-- **Supported Query Parameters**: cursor, limit, accountIds, directoryIds, resourceIds, groupIds, mfaEnabled, claimStatus, status, accountStatus
+| Endpoint                                                 | Purpose                                      | Scope Required           |
+|----------------------------------------------------------|----------------------------------------------|--------------------------|
+| `/admin/v1/orgs/{orgId}/events`                          | Retrieve organization audit events           | `read:events:admin`      |
+| `/admin/v1/orgs/{orgId}/events-stream`                   | Stream organization audit events             | `read:events:admin`      |
+| `/admin/v2/orgs/{orgId}/directories/{directoryId}/users` | Retrieve users from organization directories | `read:directories:admin` |
 
 ## Example API Responses
 
