@@ -78,7 +78,7 @@ endpoints:
         encoding: "URL_SAFE_TOKEN"
       - !<pseudonymize>
         jsonPaths:
-          - "$.data[*].account_id"
+          - "$.data[*].accountId"
         includeReversible: true
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
