@@ -12,6 +12,7 @@ endpoints:
       - "product"
       - "location"
       - "limit"
+      - "sortOrder"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -34,15 +35,10 @@ endpoints:
   - pathTemplate: "/admin/v1/orgs/{orgId}/events-stream"
     allowedQueryParams:
       - "cursor"
-      - "q"
       - "from"
       - "to"
-      - "action"
-      - "actor"
-      - "ip"
-      - "product"
-      - "location"
       - "limit"
+      - "sortOrder"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -166,19 +162,17 @@ definitions:
   DirectoryUser:
     type: "object"
     properties:
-      access_billable:
-        type: "boolean"
-      account_id:
+      accountId:
         type: "string"
-      account_status:
+      accountStatus:
         type: "string"
-      account_type:
+      accountType:
         type: "string"
-      email:
-        type: "string"
-      last_active:
+      addedToOrg:
         type: "string"
         format: "date-time"
+      email:
+        type: "string"
   Links:
     type: "object"
     properties:
