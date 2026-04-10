@@ -2,7 +2,7 @@
   "data":[
     {
       "id":"550e8400-e29b-41d4-a716-446655440011",
-      "type":"rovo_agent_chat_started",
+      "type":"events",
       "time":"2024-01-16T08:15:00.000Z",
       "attributes":{
         "action":"rovo_agent_chat_started",
@@ -39,7 +39,7 @@
     },
     {
       "id":"550e8400-e29b-41d4-a716-446655440012",
-      "type":"rovo_search_performed",
+      "type":"events",
       "time":"2024-01-16T09:30:00.000Z",
       "attributes":{
         "action":"rovo_search_performed",
@@ -61,7 +61,7 @@
     },
     {
       "id":"550e8400-e29b-41d4-a716-446655440013",
-      "type":"rovo_agent_updated",
+      "type":"events",
       "time":"2024-01-16T10:45:00.000Z",
       "attributes":{
         "action":"rovo_agent_updated",
@@ -83,7 +83,7 @@
     },
     {
       "id":"550e8400-e29b-41d4-a716-446655440014",
-      "type":"user_login",
+      "type":"events",
       "time":"2024-01-16T07:00:00.000Z",
       "attributes":{
         "action":"user_login",
