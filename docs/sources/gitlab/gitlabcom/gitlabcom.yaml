@@ -20,6 +20,84 @@ endpoints:
       type: "array"
       items:
         $ref: "#/definitions/GroupMember"
+  - pathTemplate: "/api/v4/issues/{id}"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..author.id"
+          - "$..username"
+          - "$..assignee.id"
+          - "$..assignees[*].id"
+          - "$..closed_by.id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$..description"
+          - "$..title"
+    responseSchema:
+      type: "object"
+      properties:
+        assignee:
+          $ref: "#/definitions/User"
+        assignees:
+          type: "array"
+          items:
+            $ref: "#/definitions/User"
+        author:
+          $ref: "#/definitions/User"
+        closed_at:
+          type: "string"
+          format: "date-time"
+        closed_by:
+          $ref: "#/definitions/User"
+        confidential:
+          type: "boolean"
+        created_at:
+          type: "string"
+          format: "date-time"
+        description:
+          type: "string"
+        discussion_locked:
+          type: "boolean"
+        downvotes:
+          type: "integer"
+        has_tasks:
+          type: "boolean"
+        id:
+          type: "integer"
+        iid:
+          type: "integer"
+        issue_type:
+          type: "string"
+        merge_requests_count:
+          type: "integer"
+        milestone:
+          $ref: "#/definitions/Milestone"
+        project_id:
+          type: "integer"
+        severity:
+          type: "string"
+        sourceId:
+          type: "string"
+        state:
+          type: "string"
+        task_completion_status:
+          $ref: "#/definitions/TaskCompletionStatus"
+        time_stats:
+          $ref: "#/definitions/TimeStats"
+        title:
+          type: "string"
+        type:
+          type: "string"
+        updated_at:
+          type: "string"
+          format: "date-time"
+        upvotes:
+          type: "integer"
+        user_notes_count:
+          type: "integer"
+        weight:
+          type: "integer"
   - pathTemplate: "/api/v4/merge_requests/{id}"
     transforms:
       - !<pseudonymize>
@@ -514,6 +592,7 @@ definitions:
         type: "string"
       expires_at:
         type: "string"
+        format: "date"
       group_saml_identity:
         $ref: "#/definitions/SamlIdentity"
       id:
