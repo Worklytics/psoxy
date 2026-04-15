@@ -110,6 +110,9 @@ module "gate_instance" {
       ALLOW_ORIGINS                = join(",", var.allow_origins)
       CUSTOM_RULES_SHA             = module.rules_parameter.rules_hash
     },
+    length(var.allowed_webhook_ip_blocks) > 0 ? {
+      ALLOWED_WEBHOOK_IP_BLOCKS = join(",", var.allowed_webhook_ip_blocks)
+    } : {},
     length(local.accepted_auth_keys) > 0 ? {
       AUTH_ISSUER        = local.auth_issuer
       ACCEPTED_AUTH_KEYS = join(",", local.accepted_auth_keys)

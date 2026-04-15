@@ -208,7 +208,7 @@ module "api_connector" {
   enable_versioning                     = var.version_sanitized_buckets
   bucket_access_logs_destination        = var.bucket_access_logs_destination
   builder_sa_id                         = module.psoxy.builder_sa_id
-
+  allowed_data_access_ip_blocks         = var.allowed_data_access_ip_blocks
 
   environment_variables = merge(
     {
@@ -321,6 +321,7 @@ module "webhook_collector" {
   output_path_prefix                 = each.value.output_path_prefix
   example_identity                   = try(each.value.example_identity, null)
   example_payload                    = try(each.value.example_payload, null)
+  allowed_webhook_ip_blocks          = var.allowed_webhook_ip_blocks
 
   environment_variables = merge(
     {

@@ -1,16 +1,23 @@
 package co.worklytics.psoxy.gateway;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.NonNull;
 import lombok.Value;
+import lombok.extern.java.Log;
+import org.apache.commons.net.util.SubnetUtils;
 
 /**
  * POJO collecting all configuration values for webhook collector mode
  */
+@Log
 @Value
 @Builder
 public class WebhookCollectorModeConfig {
@@ -34,6 +41,13 @@ public class WebhookCollectorModeConfig {
             .ifPresent(builder::webhookOutput);
         configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.WEBHOOK_BATCH_OUTPUT)
             .ifPresent(builder::webhookBatchOutput);
+
+        String ipBlocksCsv = configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ALLOWED_WEBHOOK_IP_BLOCKS)
+            .orElse(null);
+        List<String> ipBlocks = (ipBlocksCsv != null && !ipBlocksCsv.isBlank()) ? 
+                com.google.common.base.Splitter.on(',').trimResults().omitEmptyStrings().splitToList(ipBlocksCsv) : 
+                Collections.emptyList();
+        builder.allowedWebhookIpBlocks(ipBlocks);
         
         return builder.build();
     }
@@ -136,6 +150,11 @@ public class WebhookCollectorModeConfig {
     }
 
     /**
+     * A list of IPs or CIDR blocks allowed to send webhooks. If empty, all are allowed.
+     */
+    List<String> allowedWebhookIpBlocks;
+
+    /**
      * Internal enum for config property keys
      * 
      * arguably these should be per-endpoint??
@@ -210,6 +229,11 @@ public class WebhookCollectorModeConfig {
          * should be something URI-like, with the 'type' of the Output able to be inferred from the URI scheme.
          */
         WEBHOOK_BATCH_OUTPUT,
+
+        /**
+         * A CSV of IPs or CIDR blocks allowed to send webhooks.
+         */
+        ALLOWED_WEBHOOK_IP_BLOCKS,
 
         ;
 

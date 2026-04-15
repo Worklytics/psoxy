@@ -451,6 +451,18 @@ variable "todos_as_local_files" {
   default     = true
 }
 
+variable "allowed_data_access_ip_blocks" {
+  description = "List of IPs or CIDR blocks allowed to make data access requests."
+  type        = list(string)
+  default     = []
+}
+
+variable "allowed_webhook_ip_blocks" {
+  description = "List of IPs or CIDR blocks allowed to send webhooks."
+  type        = list(string)
+  default     = []
+}
+
 variable "bucket_force_destroy" {
   type        = bool
   description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this configuration"

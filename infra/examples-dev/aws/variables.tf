@@ -470,3 +470,15 @@ variable "todos_as_local_files" {
   description = "whether to render TODOs as flat files"
   default     = true
 }
+
+variable "allowed_data_access_ip_blocks" {
+  description = "List of IPs or CIDR blocks allowed to make data access requests."
+  type        = list(string)
+  default     = []
+}
+
+variable "allowed_webhook_ip_blocks" {
+  description = "List of IPs or CIDR blocks allowed to send webhooks."
+  type        = list(string)
+  default     = []
+}

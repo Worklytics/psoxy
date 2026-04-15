@@ -265,3 +265,9 @@ variable "keep_warm_instances" {
     error_message = "If keep_warm_instances is set, it must be at least 1."
   }
 }
+
+variable "allowed_webhook_ip_blocks" {
+  description = "List of IPs or CIDR blocks allowed to send webhooks."
+  type        = list(string)
+  default     = []
+}

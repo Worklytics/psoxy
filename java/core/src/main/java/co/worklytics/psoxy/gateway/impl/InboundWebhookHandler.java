@@ -123,6 +123,16 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
                 .build();
         }
 
+        // IP lockdown enforcement
+        if (!webhookCollectorModeConfig.isAllowed(request.getClientIp().orElse(null))) {
+            return HttpEventResponse.builder()
+                .statusCode(HttpStatus.SC_FORBIDDEN)
+                .header(co.worklytics.psoxy.ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                        co.worklytics.psoxy.ErrorCauses.UNAUTHORIZED_IP_ADDRESS.name())
+                .body("Client IP is not authorized to send webhooks to this proxy instance.")
+                .build();
+        }
+
         Optional<SignedJWT> authToken;
 
         if (authorizationHeader.isEmpty()) {

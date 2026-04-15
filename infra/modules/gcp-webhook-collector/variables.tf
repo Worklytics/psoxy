@@ -286,3 +286,10 @@ variable "builder_sa_id" {
   description = "The fully-qualified ID of the custom builder service account used to build the Cloud Function."
   type        = string
 }
+
+variable "allowed_webhook_ip_blocks" {
+  description = "List of IPs or CIDR blocks allowed to send webhooks."
+  type        = list(string)
+  default     = []
+}
+

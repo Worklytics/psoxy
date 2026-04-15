@@ -147,6 +147,8 @@ public class ApiDataRequestHandler {
     Provider<UUID> uuidProvider;
     @Inject
     ProxyConstants proxyConstants;
+    @Inject
+    co.worklytics.psoxy.gateway.InstanceSecurityConfiguration instanceSecurityConfiguration;
 
     /**
      * Basic headers to pass: content, caching, retries. Can be expanded by connection later.
@@ -229,6 +231,16 @@ public class ApiDataRequestHandler {
                 healthCheckRequestHandler.handleIfHealthCheck(requestToProxy);
         if (healthCheckResponse.isPresent()) {
             return healthCheckResponse.get();
+        }
+
+        // IP lockdown enforcement
+        if (!NetworkSecurityUtils.isAllowed(requestToProxy.getClientIp().orElse(null), instanceSecurityConfiguration.getAllowedDataAccessIpBlocks())) {
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_FORBIDDEN)
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                            ErrorCauses.UNAUTHORIZED_IP_ADDRESS.name())
+                    .body("Client IP is not authorized to access this proxy instance.")
+                    .build();
         }
 
 

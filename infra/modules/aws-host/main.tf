@@ -252,8 +252,9 @@ module "api_connector" {
   enable_async_processing               = each.value.enable_async_processing
   memory_size_mb                        = each.value.enable_async_processing ? 1024 : 512 # default is 512; double it for async case, to give additional margin
 
-  todos_as_local_files = var.todos_as_local_files
-  todo_step            = var.todo_step
+  todos_as_local_files          = var.todos_as_local_files
+  todo_step                     = var.todo_step
+  allowed_data_access_ip_blocks = var.allowed_data_access_ip_blocks
 
   environment_variables = merge(
     {
@@ -389,7 +390,8 @@ module "webhook_collectors" {
   example_payload                      = try(each.value.example_payload, null)
   example_identity                     = try(each.value.example_identity, null)
 
-  todos_as_local_files = var.todos_as_local_files
+  todos_as_local_files      = var.todos_as_local_files
+  allowed_webhook_ip_blocks = var.allowed_webhook_ip_blocks
 
   environment_variables = merge(
     {

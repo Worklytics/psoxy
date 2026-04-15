@@ -215,6 +215,9 @@ module "psoxy_lambda" {
   environment_variables = merge(
     var.environment_variables,
     local.required_env_vars,
+    length(var.allowed_data_access_ip_blocks) > 0 ? {
+      ALLOWED_DATA_ACCESS_IP_BLOCKS = join(",", var.allowed_data_access_ip_blocks)
+    } : {},
     var.enable_async_processing ? {
       ASYNC_OUTPUT_DESTINATION    = "s3://${module.async_output[0].bucket_id}",
       ASYNC_API_REQUEST_QUEUE_URL = aws_sqs_queue.async_api_request_queue[0].url

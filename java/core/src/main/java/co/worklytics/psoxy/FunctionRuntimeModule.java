@@ -168,6 +168,11 @@ public class FunctionRuntimeModule {
     }
 
     @Provides @Singleton
+    static co.worklytics.psoxy.gateway.InstanceSecurityConfiguration instanceSecurityConfiguration(ConfigService configService) {
+        return co.worklytics.psoxy.gateway.InstanceSecurityConfiguration.fromConfigService(configService);
+    }
+
+    @Provides @Singleton
     static LoggingConfiguration loggingConfiguration(ConfigService configService) {
         return LoggingConfiguration.fromConfigService(configService);
     }

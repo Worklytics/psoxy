@@ -222,6 +222,24 @@ variable "non_production_connectors" {
   default     = []
 }
 
+variable "api_connector_rules" {
+  description = "DEPRECATED -> custom_api_connector_rules. map of specific connector id -> JSON representation of Rules to be provided in environment variable proxy instance handling it"
+  type        = any
+  default     = {}
+}
+
+variable "allowed_data_access_ip_blocks" {
+  description = "List of IPs or CIDR blocks allowed to make data access requests."
+  type        = list(string)
+  default     = []
+}
+
+variable "allowed_webhook_ip_blocks" {
+  description = "List of IPs or CIDR blocks allowed to send webhooks."
+  type        = list(string)
+  default     = []
+}
+
 variable "custom_api_connector_rules" {
   type        = map(string)
   description = "map of connector id --> YAML file with custom rules"
