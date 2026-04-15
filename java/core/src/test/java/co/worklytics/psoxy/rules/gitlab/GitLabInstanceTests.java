@@ -35,6 +35,9 @@ public class GitLabInstanceTests extends JavaRulesTestBaseCase {
             // Group Members endpoint - initial and paginated
             InvocationExample.of("https://gitlab.example.com/api/v4/groups/123/members/all", "group_members.json"),
 
+            // Single issue
+            InvocationExample.of("https://gitlab.example.com/api/v4/issues/42", "issue.json"),
+
             // Issues endpoint - initial and paginated
             InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/issues", "issues.json"),
             InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/issues?page=2&per_page=50", "issues.json"),
