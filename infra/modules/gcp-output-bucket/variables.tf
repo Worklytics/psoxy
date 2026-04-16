@@ -90,3 +90,9 @@ variable "bucket_access_logs_destination" {
   default     = null
 }
 
+variable "allowed_accessor_ip_blocks" {
+  description = "List of IP addresses or CIDR blocks allowed to access the objects in this bucket."
+  type        = list(string)
+  default     = []
+}
+

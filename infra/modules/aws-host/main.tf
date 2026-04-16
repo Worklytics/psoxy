@@ -51,6 +51,8 @@ module "psoxy" {
   deployment_bundle                  = var.deployment_bundle
   deployment_bundle_hash             = var.deployment_bundle_hash
   force_bundle                       = var.force_bundle
+  allowed_data_access_ip_blocks      = var.allowed_data_access_ip_blocks
+  allowed_webhook_ip_blocks          = var.allowed_webhook_ip_blocks
   install_test_tool                  = var.install_test_tool
   deployment_id                      = module.env_id.id
   api_function_name_prefix           = "${lower(module.env_id.id)}-"

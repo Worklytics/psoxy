@@ -66,6 +66,7 @@ module "async_output" {
   )
   enable_versioning              = var.enable_versioning
   bucket_access_logs_destination = var.bucket_access_logs_destination
+  allowed_accessor_ip_blocks     = var.allowed_data_access_ip_blocks
 }
 
 # Pub/Sub topic for async output (if enabled)
@@ -147,6 +148,7 @@ module "side_output_bucket" {
   sanitizer_accessor_principals  = each.value.allowed_readers
   enable_versioning              = var.enable_versioning
   bucket_access_logs_destination = var.bucket_access_logs_destination
+  allowed_accessor_ip_blocks     = var.allowed_data_access_ip_blocks
 }
 
 # TODO: will this work cross-project ?? concern would be that `bucket_write_role_id` is likely a project-level role
@@ -317,6 +319,15 @@ resource "google_cloud_run_service_iam_binding" "invokers" {
     # itself, if async processing is enabled
     var.enable_async_processing ? ["serviceAccount:${var.service_account_email}"] : [],
   )
+
+  dynamic "condition" {
+    for_each = length(var.allowed_data_access_ip_blocks) > 0 ? [1] : []
+    content {
+      title       = "ip-restriction"
+      description = "Lock proxy invoke permissions strictly to the provided IPs"
+      expression  = join(" || ", [for ip in var.allowed_data_access_ip_blocks : "inIpRange(request.origin.ip, '${ip}')"])
+    }
+  }
 }
 
 locals {
