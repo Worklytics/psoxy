@@ -124,7 +124,8 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
         }
 
         // IP lockdown enforcement
-        if (!webhookCollectorModeConfig.isAllowed(request.getClientIp().orElse(null))) {
+        if (!NetworkSecurityUtils.isAllowed(request.getClientIp().orElse(null),
+                webhookCollectorModeConfig.getAllowedWebhookIpBlocks())) {
             return HttpEventResponse.builder()
                 .statusCode(HttpStatus.SC_FORBIDDEN)
                 .header(co.worklytics.psoxy.ProcessedDataMetadataFields.ERROR.getHttpHeader(),
