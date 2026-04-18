@@ -68,6 +68,7 @@ import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
@@ -148,7 +149,7 @@ public class ApiDataRequestHandler {
     @Inject
     ProxyConstants proxyConstants;
     @Inject
-    co.worklytics.psoxy.gateway.InstanceSecurityConfiguration instanceSecurityConfiguration;
+    NetworkSecurityUtils networkSecurityUtils;
 
     /**
      * Basic headers to pass: content, caching, retries. Can be expanded by connection later.
@@ -234,7 +235,7 @@ public class ApiDataRequestHandler {
         }
 
         // IP lockdown enforcement
-        if (!NetworkSecurityUtils.isAllowed(requestToProxy.getClientIp().orElse(null), instanceSecurityConfiguration.getAllowedDataAccessIpBlocks())) {
+        if (!networkSecurityUtils.isDataAccessIpAllowed(requestToProxy.getClientIp().orElse(null))) {
             return HttpEventResponse.builder()
                     .statusCode(HttpStatus.SC_FORBIDDEN)
                     .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),

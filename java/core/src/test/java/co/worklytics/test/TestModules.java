@@ -1,5 +1,6 @@
 package co.worklytics.test;
 
+import co.worklytics.psoxy.gateway.InstanceSecurityConfiguration;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.SecretStore;
@@ -13,6 +14,7 @@ import javax.inject.Singleton;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -84,6 +86,17 @@ public class TestModules {
         @Singleton
         static WebhookCollectorModeConfig webhookCollectorModeConfig() {
             return WebhookCollectorModeConfig.builder().build();
+        }
+    }
+
+    @Module
+    public interface ForInstanceSecurityConfiguration {
+        @Provides
+        @Singleton
+        static InstanceSecurityConfiguration instanceSecurityConfiguration() {
+            return InstanceSecurityConfiguration.builder()
+                    .allowedDataAccessIpBlocks(Collections.emptyList())
+                    .build();
         }
     }
 

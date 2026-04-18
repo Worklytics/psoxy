@@ -1,6 +1,6 @@
 package co.worklytics.psoxy.gateway;
 
-import java.util.ArrayList;
+import com.google.common.base.Splitter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -9,10 +9,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.NonNull;
 import lombok.Value;
 import lombok.extern.java.Log;
-import org.apache.commons.net.util.SubnetUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * POJO collecting all configuration values for webhook collector mode
@@ -44,11 +43,11 @@ public class WebhookCollectorModeConfig {
 
         String ipBlocksCsv = configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ALLOWED_WEBHOOK_IP_BLOCKS)
             .orElse(null);
-        List<String> ipBlocks = (ipBlocksCsv != null && !ipBlocksCsv.isBlank()) ? 
-                com.google.common.base.Splitter.on(',').trimResults().omitEmptyStrings().splitToList(ipBlocksCsv) : 
-                Collections.emptyList();
+        List<String> ipBlocks = StringUtils.isNotBlank(ipBlocksCsv)
+                ? Splitter.on(',').trimResults().omitEmptyStrings().splitToList(ipBlocksCsv)
+                : Collections.emptyList();
         builder.allowedWebhookIpBlocks(ipBlocks);
-        
+
         return builder.build();
     }
 
@@ -122,6 +121,13 @@ public class WebhookCollectorModeConfig {
     String webhookBatchOutput;
 
     /**
+     * IPs or CIDR blocks allowed to send webhooks. If empty, all client IPs are allowed.
+     */
+    @NonNull
+    @Builder.Default
+    List<String> allowedWebhookIpBlocks = Collections.emptyList();
+
+    /**
      * Get accepted auth keys as optional
      */
     public Optional<String> getAcceptedAuthKeys() {
@@ -148,11 +154,6 @@ public class WebhookCollectorModeConfig {
     public Optional<String> getWebhookBatchOutput() {
         return Optional.ofNullable(webhookBatchOutput);
     }
-
-    /**
-     * A list of IPs or CIDR blocks allowed to send webhooks. If empty, all are allowed.
-     */
-    List<String> allowedWebhookIpBlocks;
 
     /**
      * Internal enum for config property keys

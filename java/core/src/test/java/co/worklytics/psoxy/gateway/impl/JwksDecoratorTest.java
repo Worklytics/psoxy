@@ -12,7 +12,9 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.InstanceSecurityConfiguration;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
@@ -69,6 +71,9 @@ public class JwksDecoratorTest {
             new NoOutput(),
             configService,
             webhookCollectorModeConfig,
+            new NetworkSecurityUtils(
+                    InstanceSecurityConfiguration.builder().build(),
+                    webhookCollectorModeConfig),
             keyClients,
             Clock.systemDefaultZone()
         ));

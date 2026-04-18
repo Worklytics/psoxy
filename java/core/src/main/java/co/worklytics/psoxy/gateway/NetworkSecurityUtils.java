@@ -1,67 +1,132 @@
 package co.worklytics.psoxy.gateway;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.net.InetAddresses;
 import lombok.extern.java.Log;
 import org.apache.commons.net.util.SubnetUtils;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Utility for network security checks, like IP allowlists.
+ * Network security helpers (IP allowlists, etc.) built from injected configuration POJOs.
  */
 @Log
+@Singleton
 public class NetworkSecurityUtils {
 
-    // Cache SubnetUtils to avoid re-compiling CIDR blocks on every evaluation
-    private static final LoadingCache<String, SubnetUtils> SUBNET_UTILS_CACHE = CacheBuilder.newBuilder()
-            .maximumSize(200)
-            .build(new CacheLoader<String, SubnetUtils>() {
-                @Override
-                public SubnetUtils load(String key) {
-                    SubnetUtils utils = new SubnetUtils(key);
-                    utils.setInclusiveHostCount(true);
-                    return utils;
-                }
-            });
+    private final IpAllowlistRules dataAccessRules;
+    private final IpAllowlistRules webhookRules;
+
+    @Inject
+    public NetworkSecurityUtils(InstanceSecurityConfiguration instanceSecurityConfiguration,
+                                WebhookCollectorModeConfig webhookCollectorModeConfig) {
+        this.dataAccessRules = IpAllowlistRules.fromBlocks(instanceSecurityConfiguration.getAllowedDataAccessIpBlocks());
+        this.webhookRules = IpAllowlistRules.fromBlocks(webhookCollectorModeConfig.getAllowedWebhookIpBlocks());
+    }
+
+    public boolean isDataAccessIpAllowed(String rawClientIp) {
+        return dataAccessRules.isAllowed(rawClientIp);
+    }
+
+    public boolean isWebhookIpAllowed(String rawClientIp) {
+        return webhookRules.isAllowed(rawClientIp);
+    }
 
     /**
-     * Checks if the given client IP is authorized according to the configured list of allowed block/IPs.
-     * If no blocks are configured, it defaults to open.
-     *
-     * @param clientIp The IP address to check
-     * @param allowedBlocks A definitive list of specific allowed IP/CIDR string definitions
-     * @return true if authorized, false otherwise
+     * Parsed allowlist rules for one endpoint (data access or webhooks).
      */
-    public static boolean isAllowed(String clientIp, List<String> allowedBlocks) {
-        if (allowedBlocks == null || allowedBlocks.isEmpty()) {
-            return true;
+    private static final class IpAllowlistRules {
+
+        private final boolean lockdownEnabled;
+        private final Set<String> exactIps;
+        private final Map<String, SubnetUtils> cidrs;
+
+        static IpAllowlistRules fromBlocks(Collection<String> allowedBlocks) {
+            boolean anyConfigured = allowedBlocks != null && !allowedBlocks.isEmpty();
+            if (!anyConfigured) {
+                return new IpAllowlistRules(false, Set.of(), Map.of());
+            }
+
+            ImmutableSet.Builder<String> exactBuilder = ImmutableSet.builder();
+            ImmutableMap.Builder<String, SubnetUtils> cidrBuilder = ImmutableMap.builder();
+            for (String block : allowedBlocks) {
+                if (block == null || block.isBlank()) {
+                    continue;
+                }
+                String trimmed = block.trim();
+                if (trimmed.contains("/")) {
+                    try {
+                        SubnetUtils utils = new SubnetUtils(trimmed);
+                        utils.setInclusiveHostCount(true);
+                        utils.getInfo().getNetworkAddress();
+                        cidrBuilder.put(trimmed, utils);
+                    } catch (RuntimeException e) {
+                        log.warning("Invalid CIDR in allowlist, ignoring: " + trimmed);
+                    }
+                } else if (InetAddresses.isInetAddress(trimmed)) {
+                    exactBuilder.add(trimmed);
+                } else {
+                    log.warning("Invalid exact IP in allowlist, ignoring: " + trimmed);
+                }
+            }
+            return new IpAllowlistRules(true, exactBuilder.build(), cidrBuilder.build());
         }
 
-        if (clientIp == null || clientIp.isBlank()) {
-            log.warning("IP lockdown is enabled but client IP could not be determined. Rejecting request.");
+        private IpAllowlistRules(boolean lockdownEnabled, Set<String> exactIps, Map<String, SubnetUtils> cidrs) {
+            this.lockdownEnabled = lockdownEnabled;
+            this.exactIps = exactIps;
+            this.cidrs = cidrs;
+        }
+
+        boolean isAllowed(String rawClientIp) {
+            if (!lockdownEnabled) {
+                return true;
+            }
+
+            String clientIp = normalizeClientIp(rawClientIp);
+            if (clientIp == null || !InetAddresses.isInetAddress(clientIp)) {
+                log.warning("IP lockdown is enabled but client IP could not be determined. Rejecting request.");
+                return false;
+            }
+
+            if (exactIps.contains(clientIp)) {
+                return true;
+            }
+            for (SubnetUtils utils : cidrs.values()) {
+                if (utils.getInfo().isInRange(clientIp)) {
+                    return true;
+                }
+            }
             return false;
         }
 
-        for (String block : allowedBlocks) {
-            try {
-                if (block.contains("/")) {
-                    SubnetUtils utils = SUBNET_UTILS_CACHE.get(block);
-                    if (utils.getInfo().isInRange(clientIp)) {
-                        return true;
-                    }
-                } else {
-                    if (block.equals(clientIp)) {
-                        return true;
-                    }
-                }
-            } catch (ExecutionException | IllegalArgumentException e) {
-                log.warning("Invalid IP or CIDR block configured in allowlist: " + block);
+        private static String normalizeClientIp(String raw) {
+            if (raw == null || raw.isBlank()) {
+                return null;
             }
+            List<String> parts = Splitter.on(',').trimResults().omitEmptyStrings().splitToList(raw);
+            if (parts.isEmpty()) {
+                return null;
+            }
+            String first = parts.get(0);
+            if (first.indexOf(':') >= 0 && first.chars().filter(ch -> ch == ':').count() == 1) {
+                String beforePort = first.substring(0, first.indexOf(':'));
+                if (InetAddresses.isInetAddress(beforePort)) {
+                    return beforePort;
+                }
+            }
+            int zone = first.indexOf('%');
+            if (zone >= 0) {
+                return first.substring(0, zone);
+            }
+            return first;
         }
-
-        return false;
     }
 }

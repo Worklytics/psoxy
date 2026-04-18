@@ -29,6 +29,8 @@ import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.SignedJWT;
 import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.InstanceSecurityConfiguration;
+import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.impl.output.NoOutput;
 import dagger.Lazy;
@@ -41,11 +43,15 @@ class InboundWebhookHandlerTest {
     @BeforeEach
     void setUp() {
         fixedClock = Clock.fixed(FIXED_NOW, ZoneOffset.UTC);
+        WebhookCollectorModeConfig webhookConfig = WebhookCollectorModeConfig.builder().build();
         handler = new InboundWebhookHandler(
             mock(Lazy.class),
             new NoOutput(),
             mock(ConfigService.class),
-            WebhookCollectorModeConfig.builder().build(),
+            webhookConfig,
+            new NetworkSecurityUtils(
+                    InstanceSecurityConfiguration.builder().build(),
+                    webhookConfig),
             Collections.emptySet(),
             fixedClock);
     }
