@@ -227,7 +227,7 @@ resource "google_cloudfunctions2_function" "function" {
       var.environment_variables,
       var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
       var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${replace(upper(var.instance_id), "-", "_")}_" },
-      length(var.allowed_data_access_ip_blocks) > 0 ? { ALLOWED_DATA_ACCESS_IP_BLOCKS = join(",", var.allowed_data_access_ip_blocks) } : {},
+      var.allowed_data_access_ip_blocks != null ? { ALLOWED_DATA_ACCESS_IP_BLOCKS = join(",", var.allowed_data_access_ip_blocks) } : {},
       local.side_output_env_vars,
       var.enable_async_processing ? { ASYNC_OUTPUT_DESTINATION = "gs://${module.async_output[0].bucket_name}" } : {},
     )

@@ -215,7 +215,7 @@ module "psoxy_lambda" {
   environment_variables = merge(
     var.environment_variables,
     local.required_env_vars,
-    length(var.allowed_data_access_ip_blocks) > 0 ? {
+    var.allowed_data_access_ip_blocks != null ? {
       ALLOWED_DATA_ACCESS_IP_BLOCKS = join(",", var.allowed_data_access_ip_blocks)
     } : {},
     var.enable_async_processing ? {

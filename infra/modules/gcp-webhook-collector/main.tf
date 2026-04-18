@@ -317,7 +317,7 @@ resource "google_cloudfunctions2_function" "function" {
         PATH_TO_SHARED_CONFIG   = coalesce(var.config_parameter_prefix, ""),
         PATH_TO_INSTANCE_CONFIG = local.path_to_instance_config_parameters
       },
-      length(var.allowed_webhook_ip_blocks) > 0 ? { ALLOWED_WEBHOOK_IP_BLOCKS = join(",", var.allowed_webhook_ip_blocks) } : {},
+      var.allowed_webhook_ip_blocks != null ? { ALLOWED_WEBHOOK_IP_BLOCKS = join(",", var.allowed_webhook_ip_blocks) } : {},
       local.side_output_env_vars,
     )
 

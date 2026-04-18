@@ -267,7 +267,16 @@ variable "keep_warm_instances" {
 }
 
 variable "allowed_webhook_ip_blocks" {
-  description = "List of IPs or CIDR blocks allowed to send webhooks."
+  description = <<-EOT
+    IPs or CIDR blocks allowed to send webhooks at the application layer.
+    Use null (default) for no restriction in configuration (all IPs allowed). If set, the list must contain at least one value.
+  EOT
   type        = list(string)
-  default     = []
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.allowed_webhook_ip_blocks == null || length(var.allowed_webhook_ip_blocks) > 0
+    error_message = "allowed_webhook_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
+  }
 }
