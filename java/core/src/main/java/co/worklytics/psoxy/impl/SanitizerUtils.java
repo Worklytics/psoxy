@@ -168,12 +168,12 @@ public class SanitizerUtils {
                     List<String> texts = jsonContext.read(transform.getJsonPathToProcessWhenEscaped());
 
                     for (String text : texts) {
-                        jsonContext.set(transform.getJsonPathToProcessWhenEscaped(), jsonConfiguration.jsonProvider().toJson(Transform.TextDigest.generate(text)));
+                        jsonContext.set(transform.getJsonPathToProcessWhenEscaped(), jsonConfiguration.jsonProvider().toJson(transform.generate(text)));
                     }
 
                     return jsonContext.jsonString();
                 } else {
-                    return jsonConfiguration.jsonProvider().toJson(Transform.TextDigest.generate(toTokenize));
+                    return jsonConfiguration.jsonProvider().toJson(transform.generate(toTokenize));
                 }
             }
         };
@@ -246,7 +246,6 @@ public class SanitizerUtils {
         List<Pattern> patterns = transform.getAllowedPhrases().stream()
             .map(p -> "\\Q" + p + "\\E") // quote it
             .map(p -> "\\b(" + p + ")[\\s:]*\\b") //boundary match, with optional whitespace or colon at end
-            .map(p -> ".*?" + p + ".*?") //wrap in .*? to match anywhere in the string, but reluctantly
             .map(p -> Pattern.compile(p, CASE_INSENSITIVE))
             .collect(Collectors.toList());
 
@@ -261,7 +260,7 @@ public class SanitizerUtils {
             } else {
                 return patterns.stream()
                     .map(p -> p.matcher((String) s))
-                    .filter(Matcher::matches)
+                    .filter(Matcher::find)
                     .map(m -> m.group(1)) //group 1, bc we created caputuring group in regex above
                     .collect(Collectors.joining(",")); //q: something better? if , in phrases, can't reparse
 
