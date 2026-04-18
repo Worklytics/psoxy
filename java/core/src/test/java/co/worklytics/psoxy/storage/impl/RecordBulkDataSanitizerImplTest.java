@@ -74,6 +74,7 @@ class RecordBulkDataSanitizerImplTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        TestModules.ForApiModeConfig.class,
         ConfigRulesModule.class,
         Container.ForConfigService.class,
         MockModules.ForSecretStore.class,

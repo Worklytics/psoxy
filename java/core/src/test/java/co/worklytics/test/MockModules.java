@@ -114,8 +114,10 @@ public class MockModules {
     @Module
     public interface ForSourceAuthStrategySet {
         @Provides @IntoSet
-        static SourceAuthStrategy sourceStratey() {
-            return mock(SourceAuthStrategy.class);
+        static SourceAuthStrategy sourceStrategy() {
+            SourceAuthStrategy strategy = mock(SourceAuthStrategy.class);
+            when(strategy.getConfigIdentifier()).thenReturn("test-source-auth");
+            return strategy;
         }
     }
 

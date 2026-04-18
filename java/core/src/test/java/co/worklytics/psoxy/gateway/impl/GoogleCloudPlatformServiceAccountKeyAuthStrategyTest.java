@@ -18,6 +18,7 @@ import com.google.auth.Credentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
 import dagger.Component;
 import lombok.SneakyThrows;
 
@@ -26,6 +27,7 @@ class GoogleCloudPlatformServiceAccountKeyAuthStrategyTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        TestModules.ForApiModeConfig.class,
         MockModules.ForConfigService.class,
         MockModules.ForHttpTransportFactory.class,
         MockModules.ForSecretStore.class,

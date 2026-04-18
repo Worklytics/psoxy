@@ -28,6 +28,7 @@ import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.storage.StorageHandler;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
 import dagger.Component;
 import lombok.SneakyThrows;
@@ -43,6 +44,7 @@ class RulesUtilsTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        TestModules.ForApiModeConfig.class,
         MockModules.ForConfigService.class
     })
     public interface Container {
