@@ -1,7 +1,6 @@
 package co.worklytics.psoxy.gateway;
 
 import com.google.common.base.Splitter;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -41,12 +40,13 @@ public class WebhookCollectorModeConfig {
         configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.WEBHOOK_BATCH_OUTPUT)
             .ifPresent(builder::webhookBatchOutput);
 
-        String ipBlocksCsv = configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ALLOWED_WEBHOOK_IP_BLOCKS)
-            .orElse(null);
-        List<String> ipBlocks = StringUtils.isNotBlank(ipBlocksCsv)
-                ? Splitter.on(',').trimResults().omitEmptyStrings().splitToList(ipBlocksCsv)
-                : Collections.emptyList();
-        builder.allowedWebhookIpBlocks(ipBlocks);
+        configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ALLOWED_WEBHOOK_IP_BLOCKS)
+            .ifPresent(csv -> {
+                List<String> ipBlocks = StringUtils.isNotBlank(csv)
+                    ? Splitter.on(',').trimResults().omitEmptyStrings().splitToList(csv)
+                    : List.of();
+                builder.allowedWebhookIpBlocks(Optional.of(List.copyOf(ipBlocks)));
+            });
 
         return builder.build();
     }
@@ -121,11 +121,12 @@ public class WebhookCollectorModeConfig {
     String webhookBatchOutput;
 
     /**
-     * IPs or CIDR blocks allowed to send webhooks. If empty, all client IPs are allowed.
+     * When absent, no IP filter is applied (any client IP is allowed).
+     * When present, only client IPs matching these entries (exact IPv4 or CIDR) are allowed.
      */
     @NonNull
     @Builder.Default
-    List<String> allowedWebhookIpBlocks = Collections.emptyList();
+    Optional<List<String>> allowedWebhookIpBlocks = Optional.empty();
 
     /**
      * Get accepted auth keys as optional

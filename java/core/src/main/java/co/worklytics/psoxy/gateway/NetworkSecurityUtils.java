@@ -28,7 +28,8 @@ public class NetworkSecurityUtils {
     public NetworkSecurityUtils(ApiModeConfig apiModeConfig,
                                 WebhookCollectorModeConfig webhookCollectorModeConfig) {
         this.dataAccessRules = IpAllowlistRules.fromBlocks(apiModeConfig.getAllowedDataAccessIpBlocks());
-        this.webhookRules = IpAllowlistRules.fromBlocks(webhookCollectorModeConfig.getAllowedWebhookIpBlocks());
+        this.webhookRules = IpAllowlistRules.fromBlocks(
+            webhookCollectorModeConfig.getAllowedWebhookIpBlocks().orElseGet(List::of));
     }
 
     public boolean isDataAccessIpAllowed(String rawClientIp) {
