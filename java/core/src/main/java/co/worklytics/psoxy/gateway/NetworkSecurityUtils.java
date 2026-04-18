@@ -25,9 +25,9 @@ public class NetworkSecurityUtils {
     private final IpAllowlistRules webhookRules;
 
     @Inject
-    public NetworkSecurityUtils(InstanceSecurityConfiguration instanceSecurityConfiguration,
+    public NetworkSecurityUtils(ApiModeConfig apiModeConfig,
                                 WebhookCollectorModeConfig webhookCollectorModeConfig) {
-        this.dataAccessRules = IpAllowlistRules.fromBlocks(instanceSecurityConfiguration.getAllowedDataAccessIpBlocks());
+        this.dataAccessRules = IpAllowlistRules.fromBlocks(apiModeConfig.getAllowedDataAccessIpBlocks());
         this.webhookRules = IpAllowlistRules.fromBlocks(webhookCollectorModeConfig.getAllowedWebhookIpBlocks());
     }
 

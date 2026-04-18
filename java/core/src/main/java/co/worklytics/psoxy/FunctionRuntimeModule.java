@@ -16,7 +16,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.http.HttpTransportFactory;
 import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.InstanceSecurityConfiguration;
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.LoggingConfiguration;
 import co.worklytics.psoxy.gateway.ProcessedDataStage;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -169,8 +169,8 @@ public class FunctionRuntimeModule {
     }
 
     @Provides @Singleton
-    static InstanceSecurityConfiguration instanceSecurityConfiguration(ConfigService configService) {
-        return InstanceSecurityConfiguration.fromConfigService(configService);
+    static ApiModeConfig apiModeConfig(ConfigService configService) {
+        return ApiModeConfig.fromConfigService(configService);
     }
 
     @Provides @Singleton

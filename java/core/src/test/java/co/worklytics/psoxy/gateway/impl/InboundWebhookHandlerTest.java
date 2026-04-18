@@ -29,7 +29,7 @@ import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.SignedJWT;
 import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.InstanceSecurityConfiguration;
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.impl.output.NoOutput;
@@ -50,7 +50,7 @@ class InboundWebhookHandlerTest {
             mock(ConfigService.class),
             webhookConfig,
             new NetworkSecurityUtils(
-                    InstanceSecurityConfiguration.builder().build(),
+                    ApiModeConfig.builder().build(),
                     webhookConfig),
             Collections.emptySet(),
             fixedClock);

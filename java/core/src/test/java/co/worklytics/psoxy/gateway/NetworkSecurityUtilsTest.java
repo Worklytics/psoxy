@@ -13,7 +13,7 @@ class NetworkSecurityUtilsTest {
 
     private static NetworkSecurityUtils dataAccessUtils(List<String> blocks) {
         return new NetworkSecurityUtils(
-                InstanceSecurityConfiguration.builder().allowedDataAccessIpBlocks(blocks).build(),
+                ApiModeConfig.builder().allowedDataAccessIpBlocks(blocks).build(),
                 WebhookCollectorModeConfig.builder().build());
     }
 

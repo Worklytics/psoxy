@@ -1,6 +1,6 @@
 package co.worklytics.test;
 
-import co.worklytics.psoxy.gateway.InstanceSecurityConfiguration;
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.SecretStore;
@@ -90,11 +90,11 @@ public class TestModules {
     }
 
     @Module
-    public interface ForInstanceSecurityConfiguration {
+    public interface ForApiModeConfig {
         @Provides
         @Singleton
-        static InstanceSecurityConfiguration instanceSecurityConfiguration() {
-            return InstanceSecurityConfiguration.builder()
+        static ApiModeConfig apiModeConfig() {
+            return ApiModeConfig.builder()
                     .allowedDataAccessIpBlocks(Collections.emptyList())
                     .build();
         }
