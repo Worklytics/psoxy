@@ -44,9 +44,11 @@ locals {
   github_example_repository                = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
   gitlab_example_group_id                  = coalesce(var.gitlab_example_group_id, "YOUR_GITLAB_GROUP_ID")
   gitlab_example_project_id                = coalesce(var.gitlab_example_project_id, "YOUR_GITLAB_PROJECT_ID")
-  gong_instance_subdomain                  = coalesce(var.gong_instance_subdomain, "YOUR_GONG_INSTANCE_SUBDOMAIN")
-  glean_instance_subdomain                 = coalesce(var.glean_instance_subdomain, "YOUR_GLEAN_INSTANCE_SUBDOMAIN")
-  salesforce_example_account_id            = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
+  # Normalize gitlab_url by stripping protocol prefix (https:// or http://) and trailing slash
+  gitlab_url                    = trimprefix(trimsuffix(var.gitlab_url, "/"), "https://")
+  gong_instance_subdomain       = coalesce(var.gong_instance_subdomain, "YOUR_GONG_INSTANCE_SUBDOMAIN")
+  glean_instance_subdomain      = coalesce(var.glean_instance_subdomain, "YOUR_GLEAN_INSTANCE_SUBDOMAIN")
+  salesforce_example_account_id = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
 
   oauth_long_access_connectors = {
     asana = {
@@ -1402,7 +1404,7 @@ EOT
       availability : "beta"
       enable_by_default : false
       worklytics_connector_id : "gitlab-managed-psoxy"
-      target_host : var.gitlab_url
+      target_host : local.gitlab_url
       source_auth_strategy : "oauth2_access_token"
       display_name : "GitLab Self-Managed/Dedicated"
       worklytics_connector_name : "GitLab Self-Managed or Dedicated via Psoxy"
@@ -1433,7 +1435,7 @@ EOT
       ],
       external_token_todo : templatefile("${path.module}/docs/gitlab/gitlab-managed-instructions.tftpl", {
         path_to_instance_parameters = "PSOXY_GITLAB_MANAGED_",
-        gitlab_url                  = var.gitlab_url
+        gitlab_url                  = local.gitlab_url
       })
     }
   }
