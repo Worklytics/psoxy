@@ -1,22 +1,22 @@
 package co.worklytics.psoxy.rules.gitlab;
 
 import co.worklytics.psoxy.rules.JavaRulesTestBaseCase;
+import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.RESTRules;
 import lombok.Getter;
-import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
 
 @Getter
-public class GitLabTests extends JavaRulesTestBaseCase {
+public class GitLabManagedTests extends JavaRulesTestBaseCase {
 
-    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.GITLAB;
+    final RESTRules rulesUnderTest = PrebuiltSanitizerRules.DEFAULTS.get("gitlab-managed");
 
     final RulesTestSpec rulesTestSpec = RulesTestSpec.builder()
-        .sourceKind("gitlabcom")
-        .exampleApiResponsesDirectoryPath("example-api-responses/original/")
-        .exampleSanitizedApiResponsesPath("example-api-responses/sanitized/")
-        .sourceFamily("gitlab")
+        .sourceKind("gitlab")
+        .exampleApiResponsesDirectoryPathFull("sources/gitlab/gitlab-managed/example-api-responses/original/")
+        .exampleSanitizedApiResponsesPathFull("sources/gitlab/gitlab-managed/example-api-responses/sanitized/")
+        .rulesFile("gitlab-managed/gitlab-managed")
         .checkUncompressedSSMLength(false)
         .build();
 
@@ -93,7 +93,14 @@ public class GitLabTests extends JavaRulesTestBaseCase {
             InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/repository/commits/abc123def/discussions", "commit_discussion.json"),
             InvocationExample.of("https://gitlab.example.com/api/v4/projects/1/repository/commits/abc123def/discussions?page=2&per_page=20", "commit_discussion.json"),
 
-            InvocationExample.of("https://gitlab.example.com/api/v4/namespaces/3", "namespace.json")
+            InvocationExample.of("https://gitlab.example.com/api/v4/users/{userId}/emails", "user_emails.json"),
+
+            InvocationExample.of("https://gitlab.example.com/api/v4/version", "version.json"),
+
+            // Users endpoint - initial and paginated
+            InvocationExample.of("https://gitlab.example.com/api/v4/users", "users.json"),
+            InvocationExample.of("https://gitlab.example.com/api/v4/users?page=2&per_page=50", "users.json"),
+            InvocationExample.of("https://gitlab.example.com/api/v4/users?state=active&order_by=name&sort=asc&search=john", "users.json")
         );
     }
 }

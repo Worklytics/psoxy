@@ -1,4 +1,4 @@
-# GitLab Instance for Self-Managed / Dedicated through Psoxy
+# GitLab Managed for Self-Managed / Dedicated through Psoxy
 
 ## Examples
 
@@ -43,7 +43,7 @@ The following scope is required:
 ### Setup
 
 1. Create a Group Access Token (recommended), Project Access Token, or Personal Access Token with the `read_api` scope.
-2. Update the content of `PSOXY_GITLAB_ACCESS_TOKEN` variable or `ACCESS_TOKEN` environment variable with the token value obtained in the previous step.
+2. Update the content of `PSOXY_GITLAB_MANAGED_ACCESS_TOKEN` variable or `ACCESS_TOKEN` environment variable with the token value obtained in the previous step.
 
 NOTE: derived from [worklytics-connector-specs](../../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
 
