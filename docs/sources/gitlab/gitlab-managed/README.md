@@ -2,13 +2,13 @@
 
 ## Examples
 
-- [Example Rules](gitlab-instance/gitlab-instance.yaml)
+- [Example Rules](gitlab-managed/gitlab-managed.yaml)
 - Example Data:
-  - [original/groups.json](gitlab-instance/example-api-responses/original/groups.json) | [sanitized/groups.json](gitlab-instance/example-api-responses/sanitized/groups.json)
-  - [original/group_members.json](gitlab-instance/example-api-responses/original/group_members.json) | [sanitized/group_members.json](gitlab-instance/example-api-responses/sanitized/group_members.json)
-  - [original/projects.json](gitlab-instance/example-api-responses/original/projects.json) | [sanitized/projects.json](gitlab-instance/example-api-responses/sanitized/projects.json)
-  - [original/issues.json](gitlab-instance/example-api-responses/original/issues.json) | [sanitized/issues.json](gitlab-instance/example-api-responses/sanitized/issues.json)
-  - [original/merge_requests.json](gitlab-instance/example-api-responses/original/merge_requests.json) | [sanitized/merge_requests.json](gitlab-instance/example-api-responses/sanitized/merge_requests.json)
+  - [original/groups.json](gitlab-managed/example-api-responses/original/groups.json) | [sanitized/groups.json](gitlab-managed/example-api-responses/sanitized/groups.json)
+  - [original/group_members.json](gitlab-managed/example-api-responses/original/group_members.json) | [sanitized/group_members.json](gitlab-managed/example-api-responses/sanitized/group_members.json)
+  - [original/projects.json](gitlab-managed/example-api-responses/original/projects.json) | [sanitized/projects.json](gitlab-managed/example-api-responses/sanitized/projects.json)
+  - [original/issues.json](gitlab-managed/example-api-responses/original/issues.json) | [sanitized/issues.json](gitlab-managed/example-api-responses/sanitized/issues.json)
+  - [original/merge_requests.json](gitlab-managed/example-api-responses/original/merge_requests.json) | [sanitized/merge_requests.json](gitlab-managed/example-api-responses/sanitized/merge_requests.json)
 
 GitLab for Self-Managed / Dedicated through Psoxy uses an **Admin Access token** for authentication.
 
