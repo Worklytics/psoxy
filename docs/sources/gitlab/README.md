@@ -1,5 +1,5 @@
 # GitLab
 
-- [GitLab.com](gitlabcom/README.md) - for GitLab instances hosted on gitlab.com
-- [GitLab Instance for Self-Managed / Dedicated through Psoxy](gitlab-instance/README.md) - for self-managed GitLab instances or dedicated GitLab instances through Psoxy.
+- [GitLab.com](gitlab-cloud/README.md) - for GitLab cloud instances hosted on gitlab.com
+- [GitLab Managed for Self-Managed / Dedicated through Psoxy](gitlab-managed/README.md) - for self-managed GitLab instances or dedicated GitLab instances through Psoxy.
 

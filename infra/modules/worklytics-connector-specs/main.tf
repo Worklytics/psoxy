@@ -1358,15 +1358,16 @@ a proper value.
 
 EOT
     }
-    gitlab = {
+    gitlab-cloud = {
       source_kind : "gitlab"
+      rules_file : "docs/sources/gitlab/gitlab-cloud/gitlab-cloud.yaml"
       availability : "beta"
       enable_by_default : false
       worklytics_connector_id : "gitlab-psoxy"
       target_host : "gitlab.com"
       source_auth_strategy : "oauth2_access_token"
       display_name : "GitLab"
-      worklytics_connector_name : "GitLab via Psoxy"
+      worklytics_connector_name : "GitLab Cloud via Psoxy"
       secured_variables : [
         {
           name : "ACCESS_TOKEN"
@@ -1391,15 +1392,16 @@ EOT
         "/api/v4/projects/${local.gitlab_example_project_id}/merge_requests",
         "/api/v4/projects/${local.gitlab_example_project_id}/audit_events",
       ],
-      external_token_todo : templatefile("${path.module}/docs/gitlab/gitlab-instructions.tftpl", {
-        path_to_instance_parameters = "PSOXY_GITLAB_"
+      external_token_todo : templatefile("${path.module}/docs/gitlab/gitlab-cloud-instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_GITLAB_CLOUD_"
       })
     }
-    gitlab-instance = {
-      source_kind : "gitlab-instance"
+    gitlab-managed = {
+      source_kind : "gitlab"
+      rules_file : "docs/sources/gitlab/gitlab-managed/gitlab-managed.yaml"
       availability : "beta"
       enable_by_default : false
-      worklytics_connector_id : "gitlab-instance-psoxy"
+      worklytics_connector_id : "gitlab-managed-psoxy"
       target_host : var.gitlab_url
       source_auth_strategy : "oauth2_access_token"
       display_name : "GitLab Self-Managed/Dedicated"
@@ -1429,9 +1431,9 @@ EOT
         "/api/v4/projects/${local.gitlab_example_project_id}/merge_requests",
         "/api/v4/projects/${local.gitlab_example_project_id}/audit_events",
       ],
-      external_token_todo : templatefile("${path.module}/docs/gitlab/gitlab-instance-instructions.tftpl", {
-        path_to_instance_parameters = "PSOXY_GITLAB_INSTANCE_",
-        gitlab_url = var.gitlab_url
+      external_token_todo : templatefile("${path.module}/docs/gitlab/gitlab-managed-instructions.tftpl", {
+        path_to_instance_parameters = "PSOXY_GITLAB_MANAGED_",
+        gitlab_url                  = var.gitlab_url
       })
     }
   }
