@@ -1602,20 +1602,38 @@ locals {
 
   # backwards-compatible for v0.4.x; remove in v0.5.x
   google_workspace_sources_backwards = { for k, v in local.google_workspace_sources :
-  k => merge(v, { example_calls : try(v.example_api_calls, []), rules_raw : try(local._resolve_rules_raw[k], null) }) }
+    k => merge(v,
+      { example_calls : try(v.example_api_calls, []) },
+      try(local._resolve_rules_raw[k], null) != null ? { rules_raw : local._resolve_rules_raw[k], rules_file : null } : {}
+    )
+  }
 
   # backwards-compatible for v0.4.x; remove in v0.5.x
   msft_365_connectors_backwards = { for k, v in local.msft_365_connectors :
-  k => merge(v, { example_calls : try(v.example_api_calls, []), rules_raw : try(local._resolve_rules_raw[k], null) }) }
+    k => merge(v,
+      { example_calls : try(v.example_api_calls, []) },
+      try(local._resolve_rules_raw[k], null) != null ? { rules_raw : local._resolve_rules_raw[k], rules_file : null } : {}
+    )
+  }
 
   oauth_long_access_connectors_with_rules_raw = { for k, v in local.oauth_long_access_connectors :
-  k => merge(v, { rules_raw : try(local._resolve_rules_raw[k], null) }) }
+    k => merge(v,
+      try(local._resolve_rules_raw[k], null) != null ? { rules_raw : local._resolve_rules_raw[k], rules_file : null } : {}
+    )
+  }
 
   oauth_long_access_connectors_backwards_with_rules_raw = { for k, v in local.oauth_long_access_connectors :
-  k => merge(v, { example_calls : try(v.example_api_calls, []), rules_raw : try(local._resolve_rules_raw[k], null) }) }
+    k => merge(v,
+      { example_calls : try(v.example_api_calls, []) },
+      try(local._resolve_rules_raw[k], null) != null ? { rules_raw : local._resolve_rules_raw[k], rules_file : null } : {}
+    )
+  }
 
   bulk_connectors_with_rules_raw = { for k, v in local.bulk_connectors :
-  k => merge(v, { rules_raw : try(local._resolve_rules_raw[k], null) }) }
+    k => merge(v,
+      try(local._resolve_rules_raw[k], null) != null ? { rules_raw : local._resolve_rules_raw[k], rules_file : null } : {}
+    )
+  }
 
   enabled_google_workspace_connectors = {
     for k, v in local.google_workspace_sources_backwards : k => v if contains(var.enabled_connectors, k)
