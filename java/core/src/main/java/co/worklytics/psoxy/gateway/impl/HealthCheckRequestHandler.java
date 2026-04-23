@@ -41,18 +41,6 @@ import lombok.extern.java.Log;
 @Log
 public class HealthCheckRequestHandler {
 
-    /**
-     * a random UUID used to salt the hash of the salt.  Purpose of this is to invalidate any non-purpose built rainbow table solution.
-     *   (Eg, if we just directly hashed the salt, a general rainbow table of hashes could be used to determine the salt value)
-     *
-     *  That said, if salt is 20+ random characters, there is no *general* rainbow table of that length in existence and one is impossible to
-     *  build, as storing it requires ~10e25 petabytes - which is about 10e20 more storage than humanity actually has. So this additional
-     *  protection isn't so necessary, but whatever.
-     *
-     *  do NOT change this value. if you do, we won't be able to detect that proxy-side salts of changed.
-     */
-    private static final String SALT_FOR_SALT = "f33c366c-ae91-4819-b221-f9794ebb8145";
-
     @Inject
     EnvVarsConfigService envVarsConfigService;
     @Inject
@@ -235,7 +223,7 @@ public class HealthCheckRequestHandler {
     public String piiSaltHash() {
         if (piiSaltHash == null) {
             piiSaltHash = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
-                .map(salt -> hashUtils.hash(salt, SALT_FOR_SALT)).orElse("");
+                .map(salt -> hashUtils.hash(salt, ProxyConstants.SALT_FOR_SALT)).orElse("");
         }
         return piiSaltHash;
     }

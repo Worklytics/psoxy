@@ -41,6 +41,8 @@ import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.HashUtils;
 import co.worklytics.psoxy.rules.RulesUtils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -97,6 +99,12 @@ public class StorageHandler {
     @Inject
     PathTemplateUtils pathTemplateUtils;
 
+    @Inject
+    SecretStore secretStore;
+
+    @Inject
+    HashUtils hashUtils;
+
     static void warnIfEncodingDoesNotMatchFilename(@NonNull StorageEventRequest request, @Nullable String contentEncoding) {
         if (request.getSourceObjectPath().endsWith(EXTENSION_GZIP)
             && !Objects.equals(contentEncoding, CONTENT_ENCODING_GZIP)) {
@@ -112,6 +120,9 @@ public class StorageHandler {
 
         //SHA-1 of rules
         RULES_SHA,
+
+        // SHA-256 hash of the salt, to aid in detecting changes to the salt value
+        SALT_SHA,
         ;
 
         // aws prepends `x-amz-meta-` to this; but per documentation, that's not visible via the
@@ -233,12 +244,29 @@ public class StorageHandler {
     public Map<String, String> buildObjectMetadata(String sourceBucket, String sourceKey, ObjectTransform transform) {
         //transform currently unused; in future we probably want to record what transform was
         // applied, to aid traceability of pipelines
-        return Map.of(
+        Map<String, String> metadata = new java.util.HashMap<>(Map.of(
             BulkMetaData.INSTANCE_ID.getMetaDataKey(), hostEnvironment.getInstanceId(),
             BulkMetaData.VERSION.getMetaDataKey(), ProxyConstants.JAVA_SOURCE_CODE_VERSION,
             BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), sourceBucket + "/" + sourceKey,
             BulkMetaData.RULES_SHA.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES).map(DigestUtils::sha1Hex).orElse("unknown")
-        );
+        ));
+
+        String hash = piiSaltHash();
+        if (StringUtils.isNotBlank(hash)) {
+            metadata.put(BulkMetaData.SALT_SHA.getMetaDataKey(), hash);
+        }
+
+        return metadata;
+    }
+
+    String piiSaltHash;
+
+    public String piiSaltHash() {
+        if (piiSaltHash == null) {
+            piiSaltHash = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
+                .map(salt -> hashUtils.hash(salt, ProxyConstants.SALT_FOR_SALT)).orElse("");
+        }
+        return piiSaltHash;
     }
 
     /**
