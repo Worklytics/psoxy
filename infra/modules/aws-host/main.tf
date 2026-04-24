@@ -79,7 +79,7 @@ resource "aws_iam_policy" "execution_lambda_to_caller" {
         {
           "Action" : [
             # for new AWS accounts as of Oct 2025, both of these are required
-            # see https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html 
+            # see https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html
             "lambda:InvokeFunctionUrl",
             "lambda:InvokeFunction"
           ],

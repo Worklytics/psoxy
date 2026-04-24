@@ -25,6 +25,18 @@ public class ProxyConstants {
     public static final String JAVA_SOURCE_CODE_VERSION = "v0.6.0";
 
     /**
+     * a random UUID used to salt the hash of the salt.  Purpose of this is to invalidate any non-purpose built rainbow table solution.
+     *   (Eg, if we just directly hashed the salt, a general rainbow table of hashes could be used to determine the salt value)
+     *
+     *  That said, if salt is 20+ random characters, there is no *general* rainbow table of that length in existence and one is impossible to
+     *  build, as storing it requires ~10e25 petabytes - which is about 10e20 more storage than humanity actually has. So this additional
+     *  protection isn't so necessary, but whatever.
+     *
+     *  do NOT change this value. if you do, we won't be able to detect that proxy-side salts of changed.
+     */
+    public static final String SALT_FOR_SALT = "f33c366c-ae91-4819-b221-f9794ebb8145";
+
+    /**
      * Java runtime version, captured at construction time.
      */
     @NonNull

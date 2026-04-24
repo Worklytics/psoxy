@@ -3,6 +3,7 @@ package com.avaulta.gateway.rules.transforms;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.*;
@@ -10,7 +11,10 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
@@ -412,6 +416,14 @@ public abstract class Transform {
         @Builder.Default
         String jsonPathToProcessWhenEscaped = null;
 
+        /**
+         * BETA - behavior subject to change or removal.
+         */
+        @JsonPropertyDescription("BETA - behavior subject to change or removal")
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        @Builder.Default
+        List<String> keywords = new ArrayList<>();
+
         public TextDigest clone() {
             return this.toBuilder()
                 .clearJsonPaths()
@@ -420,19 +432,47 @@ public abstract class Transform {
                 .fields(new ArrayList<>(this.fields))
                 .isJsonEscaped(isJsonEscaped)
                 .jsonPathToProcessWhenEscaped(jsonPathToProcessWhenEscaped)
+                .keywords(new ArrayList<>(this.keywords))
                 .build();
         }
 
-        public static TreeMap<String, Object> generate(String text) {
+        @JsonIgnore
+        private transient Set<String> searchKeys;
+
+        private Set<String> getSearchKeys() {
+            if (searchKeys == null) {
+                searchKeys = new HashSet<>();
+                if (keywords != null) {
+                    for (String k : keywords) {
+                        searchKeys.add(k.toLowerCase());
+                    }
+                }
+            }
+            return searchKeys;
+        }
+
+        public TreeMap<String, Object> generate(String text) {
             if (text == null || text.isEmpty()) {
                 return DEFAULT_TRANSFORM_RESULT;
             } else {
-                return new TreeMap<>() {
-                    {
-                        put("length", text.length());
-                        put("word_count", text.trim().split("\\s+").length);
+                TreeMap<String, Object> result = new TreeMap<>();
+                result.put("length", text.length());
+                result.put("word_count", text.trim().split("\\s+").length);
+
+                Set<String> keys = getSearchKeys();
+                if (!keys.isEmpty()) {
+                    String[] wordTokens = text.toLowerCase().split("\\W+");
+                    Map<String, Integer> matchedKeywords = new TreeMap<>();
+                    for (String t : wordTokens) {
+                        if (keys.contains(t)) {
+                            matchedKeywords.put(t, matchedKeywords.getOrDefault(t, 0) + 1);
+                        }
                     }
-                };
+                    if (!matchedKeywords.isEmpty()) {
+                        result.put("keywords", matchedKeywords);
+                    }
+                }
+                return result;
             }
         }
     }
