@@ -30,9 +30,13 @@ endpoints:
     transforms:
       - !<pseudonymize>
         jsonPaths:
+          - "$..aliasEmails[*]"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymize>
+        jsonPaths:
           - "$..email"
           - "$..obfuscatedId"
-          - "$..aliasEmails[*]"
+        includeReversible: true
         encoding: "URL_SAFE_TOKEN"
     responseSchema:
       type: "object"

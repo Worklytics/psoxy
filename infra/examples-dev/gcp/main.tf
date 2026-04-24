@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">= 1.3, < 2.0"
+  required_version = "~> 1.7"
 
   required_providers {
     google = {
-      version = "~> 5.0" # TODO: actually go to 6.0 for proxy v0.5
+      version = "~> 7.0"
     }
   }
 
@@ -14,6 +14,7 @@ terraform {
 
 provider "google" {
   impersonate_service_account = var.gcp_terraform_sa_account_email
+  default_labels              = var.default_labels
 }
 
 locals {
@@ -21,7 +22,7 @@ locals {
 }
 
 # TODO: this has 5 remote modules; combine some?
-#  eg, worklytics-connectors + gcp-host + worklytics-psoxy-connection-generic into a single
+#  eg, worklytics-connectors + gcp-host + worklytics-proxy-connection-generic into a single
 #     gcp-host-for-worklytics? poor TF style, but simplifies root module?
 
 # in effect, these are for sources for which authentication/authorization cannot (or need not)
@@ -29,8 +30,9 @@ locals {
 # call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.5.19"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.6.0"
 
+  base_dir                                 = var.psoxy_base_dir
   enabled_connectors                       = var.enabled_connectors
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
   confluence_example_cloud_id              = var.confluence_example_cloud_id
@@ -46,7 +48,7 @@ module "worklytics_connectors" {
   github_copilot_installation_id           = var.github_copilot_installation_id
   github_organization                      = var.github_organization
   github_example_repository                = var.github_example_repository
-  gitlab_host                              = var.gitlab_host
+  gitlab_url                               = var.gitlab_url
   gitlab_example_group_id                  = var.gitlab_example_group_id
   gitlab_example_project_id                = var.gitlab_example_project_id
   gong_instance_subdomain                  = var.gong_instance_subdomain
@@ -92,12 +94,11 @@ locals {
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.5.19"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.6.0"
 
   gcp_project_id                    = var.gcp_project_id
   environment_name                  = var.environment_name
   config_parameter_prefix           = var.config_parameter_prefix
-  default_labels                    = var.default_labels
   worklytics_sa_emails              = var.worklytics_sa_emails
   psoxy_base_dir                    = var.psoxy_base_dir
   deployment_bundle                 = var.deployment_bundle
@@ -153,8 +154,8 @@ locals {
 module "connection_in_worklytics" {
   for_each = local.all_instances
 
-  source = "../../modules/worklytics-psoxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-generic?ref=v0.5.19"
+  source = "../../modules/worklytics-proxy-connection-generic"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-generic?ref=v0.6.0"
 
   host_platform_id     = local.host_platform_id
   proxy_instance_id    = each.key

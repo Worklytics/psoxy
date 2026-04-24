@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.storage;
 
 import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +39,11 @@ import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.HashUtils;
 import co.worklytics.psoxy.rules.RulesUtils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -62,6 +67,10 @@ public class StorageHandler {
 
     public static final String CONTENT_ENCODING_GZIP = "gzip";
     public static final String EXTENSION_GZIP = ".gz";
+
+    // gzip magic number bytes (RFC 1952)
+    private static final int GZIP_MAGIC_BYTE_1 = 0x1f;
+    private static final int GZIP_MAGIC_BYTE_2 = 0x8b;
 
     /**
      * how many lines to process as a 'validation' of the file/transform/etc; if fails, then we abort
@@ -91,6 +100,14 @@ public class StorageHandler {
     @Inject
     PathTemplateUtils pathTemplateUtils;
 
+    @Inject
+    SecretStore secretStore;
+
+    @Inject
+    HashUtils hashUtils;
+
+    private volatile String piiSaltHash;
+
     static void warnIfEncodingDoesNotMatchFilename(@NonNull StorageEventRequest request, @Nullable String contentEncoding) {
         if (request.getSourceObjectPath().endsWith(EXTENSION_GZIP)
             && !Objects.equals(contentEncoding, CONTENT_ENCODING_GZIP)) {
@@ -106,6 +123,9 @@ public class StorageHandler {
 
         //SHA-1 of rules
         RULES_SHA,
+
+        // SHA-256 hash of the salt, to aid in detecting changes to the salt value
+        SALT_SHA,
         ;
 
         // aws prepends `x-amz-meta-` to this; but per documentation, that's not visible via the
@@ -227,12 +247,35 @@ public class StorageHandler {
     public Map<String, String> buildObjectMetadata(String sourceBucket, String sourceKey, ObjectTransform transform) {
         //transform currently unused; in future we probably want to record what transform was
         // applied, to aid traceability of pipelines
-        return Map.of(
+        Map<String, String> metadata = new LinkedHashMap<>(Map.of(
             BulkMetaData.INSTANCE_ID.getMetaDataKey(), hostEnvironment.getInstanceId(),
-            BulkMetaData.VERSION.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.BUNDLE_FILENAME).orElse("unknown"),
+            BulkMetaData.VERSION.getMetaDataKey(), ProxyConstants.JAVA_SOURCE_CODE_VERSION,
             BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), sourceBucket + "/" + sourceKey,
             BulkMetaData.RULES_SHA.getMetaDataKey(), config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES).map(DigestUtils::sha1Hex).orElse("unknown")
-        );
+        ));
+
+        String hash = piiSaltHash();
+        if (StringUtils.isNotBlank(hash)) {
+            metadata.put(BulkMetaData.SALT_SHA.getMetaDataKey(), hash);
+        }
+
+        return Collections.unmodifiableMap(metadata);
+    }
+
+    public String piiSaltHash() {
+        if (StringUtils.isEmpty(piiSaltHash)) {
+            synchronized (this) {
+                if (StringUtils.isEmpty(piiSaltHash)) {
+                    String hash = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
+                        .map(salt -> hashUtils.hash(salt, ProxyConstants.SALT_FOR_SALT)).orElse("");
+                    if (StringUtils.isNotEmpty(hash)) {
+                        piiSaltHash = hash;
+                    }
+                    return hash;
+                }
+            }
+        }
+        return piiSaltHash;
     }
 
     /**
@@ -433,8 +476,13 @@ public class StorageHandler {
 
     /**
      * Reads an input stream, decompressing if necessary; and stripping BOM if present
-     * 
-     * 
+     *
+     * If decompression is requested, verifies the stream actually contains gzip data
+     * by checking for the gzip magic bytes (0x1f 0x8b). This guards against cases where
+     * a cloud storage provider (e.g., GCS decompressive transcoding) has already
+     * decompressed the content server-side despite the object's Content-Encoding metadata
+     * still indicating gzip.
+     *
      * @param request
      * @param bufferSize
      * @param inputStreamSupplier
@@ -442,7 +490,28 @@ public class StorageHandler {
      * @throws IOException
      */
     private InputStream readInputStream(StorageEventRequest request, int bufferSize, Supplier<InputStream> inputStreamSupplier) throws IOException {
-        InputStream decompressed = request.getDecompressInput() ? new GZIPInputStream(inputStreamSupplier.get(), bufferSize) : inputStreamSupplier.get();
+        InputStream raw = inputStreamSupplier.get();
+
+        InputStream decompressed;
+        if (request.getDecompressInput()) {
+            // wrap in BufferedInputStream so we can peek at the first bytes
+            BufferedInputStream buffered = new BufferedInputStream(raw, bufferSize);
+            buffered.mark(2);
+            int b0 = buffered.read();
+            int b1 = buffered.read();
+            buffered.reset();
+
+            // gzip magic number: 0x1f 0x8b
+            if (b0 == GZIP_MAGIC_BYTE_1 && b1 == GZIP_MAGIC_BYTE_2) {
+                decompressed = new GZIPInputStream(buffered, bufferSize);
+            } else {
+                log.warning("Decompression requested but stream does not start with gzip magic bytes; "
+                    + "cloud provider may have already decompressed. Proceeding without decompression.");
+                decompressed = buffered;
+            }
+        } else {
+            decompressed = raw;
+        }
 
         // BOMInputStream is a wrapper around InputStream, which strips byte order mark (BOM) if present
 

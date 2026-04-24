@@ -38,7 +38,6 @@ jobs:
         run: |
           proxy/tools/release/example-copy.sh proxy/${{ inputs.example-to-copy }} example
       - name: Commit changes to example repo
-        working-directory: example
         uses: planetscale/ghcommit-action@v0.1.6
         with:
           commit_message: "update example to ${{ inputs.release }}"

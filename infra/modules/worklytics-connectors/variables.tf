@@ -3,6 +3,12 @@ variable "enabled_connectors" {
   description = "ids of connectors to enable"
 }
 
+variable "base_dir" {
+  type        = string
+  description = "Base directory for resolving relative file paths (eg rules_file) in connector specs."
+  default     = null
+}
+
 variable "chat_gpt_enterprise_example_workspace_id" {
   type        = string
   description = "Workspace id to use for example calls"
@@ -107,10 +113,10 @@ variable "github_example_repository" {
   description = "(Only required if using Github connector) Name for the repository to be used as part of example calls for Github (ex: psoxy)"
 }
 
-variable "gitlab_host" {
+variable "gitlab_url" {
   type        = string
-  default     = "gitlab.com"
-  description = "(Only required if using GitLab connector) Host of the GitLab instance (ex: gitlab.com or gitlab.mycompany.com for self-hosted)"
+  default     = "https://gitlab.com"
+  description = "(Only required if using GitLab Managed connector) URL of the GitLab instance (ex: https://gitlab.mycompany.com, https://mycompany.com/gitlab, https://my-instance-gitlab.com, etc)"
 }
 
 variable "gitlab_example_group_id" {

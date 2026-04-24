@@ -5,7 +5,6 @@
 terraform {
   required_providers {
     aws = {
-      version = ">= 4.12, < 5.0"
     }
   }
 }
@@ -64,7 +63,7 @@ module "rules_parameter" {
 # it's an instance of a gate/gateway, implemented as a lambda function
 # and in this particular case, it's inverted in a sense, as data goes INTO it, rather than OUT (via API requests)
 module "gate_instance" {
-  source = "../aws-psoxy-lambda"
+  source = "../aws-proxy-lambda"
 
   environment_name                     = var.environment_name
   instance_id                          = var.instance_id

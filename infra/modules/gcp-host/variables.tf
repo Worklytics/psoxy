@@ -38,11 +38,6 @@ variable "config_parameter_prefix" {
   }
 }
 
-variable "default_labels" {
-  type        = map(string)
-  description = "*Alpha* in v0.4, only respected for new resources. Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
-  default     = {}
-}
 
 variable "worklytics_sa_emails" {
   type        = list(string)
@@ -66,6 +61,12 @@ variable "psoxy_base_dir" {
 variable "deployment_bundle" {
   type        = string
   description = "path to deployment bundle to use (if not provided, will build one). Can be a local file path or GCS URL (e.g., 'gs://psoxy-public-artifacts/psoxy-0.4.28.zip')."
+  default     = null
+}
+
+variable "deployment_bundle_hash" {
+  type        = string
+  description = "precomputed base64 SHA256 hash of the deployment bundle, if any"
   default     = null
 }
 
@@ -212,6 +213,7 @@ variable "api_connectors" {
     [])
     settings_to_provide = optional(map(string), {})
     rules_file          = optional(string, null)
+    rules_raw           = optional(string, null)
   }))
 
   description = "map of API connectors to provision"
@@ -263,6 +265,7 @@ variable "bulk_connectors" {
       })))
     }))
     rules_file            = optional(string)
+    rules_raw             = optional(string, null)
     example_file          = optional(string)
     example_files         = optional(list(string), [])
     instructions_template = optional(string)

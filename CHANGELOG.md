@@ -6,12 +6,15 @@ in each release's notes.
 Changes to be including in future/planned release notes will be added here.
 
 ## Next
+- `textDigest` rule now accepts an optional list of `keywords` to tally the occurrence of specific keywords in the text.
+- `chatgpt-enterprise`: added `write` and `email` keyword tracking to prompt/title texts via `textDigest`.
+- performance: optimized `redactExceptPhrases` rule to use non-reluctant matchers.
 
 ## [0.5.19](https://github.com/Worklytics/psoxy/release/tag/v0.5.19)
 - `gcp`: Dedicated `proxy_builder_sa` service account is now provisioned and used for Cloud Build operations when provisioning Cloud Functions, eliminating project-level IAM dependencies on the default Compute Engine service account.
 - `zoom`: Default rules for Zoom have been updated, removing fields and endpoints not required.
 - `pseudonymizeRegexMatches`: apply the pseudonymization to any match found in the field instead of the first one.
-- `GitLab`: added support for GitLab (gitlab.com)
+- `GitLab`: added support for GitLab (gitlab.com) and Self-Managed/Dedicated instances
 
 ## [0.5.18](https://github.com/Worklytics/psoxy/releases/tag/v0.5.18)
 - `aws`: updated IAM policy for invoking lambda functions, to reflect AWS perm changes; anyone deploying NEW api connectors on AWS will have to use this version or later, or backport similar change. (See https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html)
@@ -415,7 +418,7 @@ Features:
 - From `gcp` module, output variables `salt_secret_id` and `salt_secret_version_number` have been
   marked as deprecated,  and they will be removed on next version. Instead, use `secrets` output
   variable with the right secrets to use when populating the function.
-- For same reason, `gcp-psoxy-rest` will not use `salt_secret_id` and `salt_secret_version_number`
+- For same reason, `gcp-proxy-api` will not use `salt_secret_id` and `salt_secret_version_number`
   input variables, they are going to be  dropped in next version. Use `secret_bindings` instead
   for providing any secret that needs to be used by the function.
 - values passed for GCP folder ID, GCP org ID, GCP billing account to the examples
