@@ -1,0 +1,12 @@
+[
+  {
+    "id":1,
+    "email":"t~qUgEvTk5RoKRf7UzpTE_v38yLCp9NzffMw5LPAa3WYU@example.com",
+    "confirmed_at":"2021-03-26T19:03:44.000Z"
+  },
+  {
+    "id":2,
+    "email":"t~eZUBbiUskw9UqLQMXEy5x4EzPBUZIkJCYIVR6RTTJUI@gmail.com",
+    "confirmed_at":"2022-01-15T10:30:00.000Z"
+  }
+]
