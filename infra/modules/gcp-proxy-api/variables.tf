@@ -240,7 +240,7 @@ variable "allowed_data_access_ip_blocks" {
   default     = null
 
   validation {
-    condition     = var.allowed_data_access_ip_blocks == null || length(var.allowed_data_access_ip_blocks) > 0
+    condition     = var.allowed_data_access_ip_blocks == null || try(length(var.allowed_data_access_ip_blocks) > 0, false)
     error_message = "allowed_data_access_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
   }
 }
