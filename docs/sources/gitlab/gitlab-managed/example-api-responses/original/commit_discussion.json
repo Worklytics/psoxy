@@ -1,0 +1,31 @@
+[
+  {
+    "id": "4604744a1c64de00ff62e1e8a6766919923d2b41",
+    "individual_note": true,
+    "notes": [
+      {
+        "id": 334686748,
+        "type": null,
+        "body": "Nice piece of code!",
+        "attachment": null,
+        "author": {
+          "id": 28,
+          "name": "Jane Doe",
+          "username": "janedoe",
+          "web_url": "https://gitlab.example.com/janedoe",
+          "state": "active",
+          "avatar_url": "https://gitlab.example.com/uploads/user/avatar/28/jane-doe-400-400.png"
+        },
+        "created_at": "2020-04-30T18:48:11.432Z",
+        "updated_at": "2020-04-30T18:48:11.432Z",
+        "system": false,
+        "noteable_id": null,
+        "noteable_type": "Commit",
+        "resolvable": false,
+        "confidential": null,
+        "noteable_iid": null,
+        "commands_changes": {}
+      }
+    ]
+  }
+]

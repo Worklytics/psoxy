@@ -87,10 +87,10 @@ variable "github_example_repository" {
   description = "(Only required if using Github connector) Name for the repository to be used as part of example calls for Github (ex: psoxy)"
 }
 
-variable "gitlab_host" {
+variable "gitlab_url" {
   type        = string
-  default     = "gitlab.com"
-  description = "(Only required if using GitLab connector) Host of the GitLab instance (ex: gitlab.com or gitlab.mycompany.com for self-hosted)"
+  default     = "https://gitlab.com"
+  description = "(Only required if using GitLab Managed connector) URL of the GitLab instance (ex: https://gitlab.mycompany.com, https://mycompany.com/gitlab, https://my-instance-gitlab.com, etc)"
 }
 
 variable "gitlab_example_group_id" {
@@ -141,6 +141,13 @@ locals {
       ? local.validate_github_enterprise_server_host_message
   : ""))
 
+  validate_gitlab_managed_url         = !can(regex("^https://", try(var.gitlab_url, ""))) && contains(var.enabled_connectors, "gitlab-managed")
+  validate_gitlab_managed_url_message = "The gitlab_url var should be populated with HTTPS protocol if GitLab Managed is enabled."
+  validate_gitlab_managed_url_check = regex(
+    "^${local.validate_gitlab_managed_url_message}$",
+    (!local.validate_gitlab_managed_url
+      ? local.validate_gitlab_managed_url_message
+  : ""))
 
   validate_glean_instance_subdomain         = (var.glean_instance_subdomain == null || var.glean_instance_subdomain == "") && contains(var.enabled_connectors, "glean")
   validate_glean_instance_subdomain_message = "The glean_instance_subdomain var should be populated if Glean connector is enabled."

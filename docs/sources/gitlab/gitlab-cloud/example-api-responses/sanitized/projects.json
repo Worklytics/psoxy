@@ -9,6 +9,9 @@
     "forks_count":0,
     "star_count":0,
     "last_activity_at":"2022-06-24T17:11:26.841Z",
+    "namespace":{
+      "id":3
+    },
     "empty_repo":false,
     "archived":false,
     "visibility":"public",
