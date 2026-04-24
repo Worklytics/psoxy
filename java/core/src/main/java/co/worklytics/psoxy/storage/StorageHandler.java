@@ -12,6 +12,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,6 +105,8 @@ public class StorageHandler {
 
     @Inject
     HashUtils hashUtils;
+
+    private volatile String piiSaltHash;
 
     static void warnIfEncodingDoesNotMatchFilename(@NonNull StorageEventRequest request, @Nullable String contentEncoding) {
         if (request.getSourceObjectPath().endsWith(EXTENSION_GZIP)
@@ -244,7 +247,7 @@ public class StorageHandler {
     public Map<String, String> buildObjectMetadata(String sourceBucket, String sourceKey, ObjectTransform transform) {
         //transform currently unused; in future we probably want to record what transform was
         // applied, to aid traceability of pipelines
-        Map<String, String> metadata = new java.util.HashMap<>(Map.of(
+        Map<String, String> metadata = new LinkedHashMap<>(Map.of(
             BulkMetaData.INSTANCE_ID.getMetaDataKey(), hostEnvironment.getInstanceId(),
             BulkMetaData.VERSION.getMetaDataKey(), ProxyConstants.JAVA_SOURCE_CODE_VERSION,
             BulkMetaData.ORIGINAL_OBJECT_KEY.getMetaDataKey(), sourceBucket + "/" + sourceKey,
@@ -256,15 +259,21 @@ public class StorageHandler {
             metadata.put(BulkMetaData.SALT_SHA.getMetaDataKey(), hash);
         }
 
-        return metadata;
+        return Collections.unmodifiableMap(metadata);
     }
 
-    String piiSaltHash;
-
     public String piiSaltHash() {
-        if (piiSaltHash == null) {
-            piiSaltHash = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
-                .map(salt -> hashUtils.hash(salt, ProxyConstants.SALT_FOR_SALT)).orElse("");
+        if (StringUtils.isEmpty(piiSaltHash)) {
+            synchronized (this) {
+                if (StringUtils.isEmpty(piiSaltHash)) {
+                    String hash = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
+                        .map(salt -> hashUtils.hash(salt, ProxyConstants.SALT_FOR_SALT)).orElse("");
+                    if (StringUtils.isNotEmpty(hash)) {
+                        piiSaltHash = hash;
+                    }
+                    return hash;
+                }
+            }
         }
         return piiSaltHash;
     }
