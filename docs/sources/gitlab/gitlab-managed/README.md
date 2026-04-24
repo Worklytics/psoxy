@@ -2,13 +2,13 @@
 
 ## Examples
 
-- [Example Rules](gitlab-managed/gitlab-managed.yaml)
+- [Example Rules](gitlab-managed.yaml)
 - Example Data:
-  - [original/groups.json](gitlab-managed/example-api-responses/original/groups.json) | [sanitized/groups.json](gitlab-managed/example-api-responses/sanitized/groups.json)
-  - [original/group_members.json](gitlab-managed/example-api-responses/original/group_members.json) | [sanitized/group_members.json](gitlab-managed/example-api-responses/sanitized/group_members.json)
-  - [original/projects.json](gitlab-managed/example-api-responses/original/projects.json) | [sanitized/projects.json](gitlab-managed/example-api-responses/sanitized/projects.json)
-  - [original/issues.json](gitlab-managed/example-api-responses/original/issues.json) | [sanitized/issues.json](gitlab-managed/example-api-responses/sanitized/issues.json)
-  - [original/merge_requests.json](gitlab-managed/example-api-responses/original/merge_requests.json) | [sanitized/merge_requests.json](gitlab-managed/example-api-responses/sanitized/merge_requests.json)
+  - [original/groups.json](example-api-responses/original/groups.json) | [sanitized/groups.json](example-api-responses/sanitized/groups.json)
+  - [original/group_members.json](example-api-responses/original/group_members.json) | [sanitized/group_members.json](example-api-responses/sanitized/group_members.json)
+  - [original/projects.json](example-api-responses/original/projects.json) | [sanitized/projects.json](example-api-responses/sanitized/projects.json)
+  - [original/issues.json](example-api-responses/original/issues.json) | [sanitized/issues.json](example-api-responses/sanitized/issues.json)
+  - [original/merge_requests.json](example-api-responses/original/merge_requests.json) | [sanitized/merge_requests.json](example-api-responses/sanitized/merge_requests.json)
 
 GitLab for Self-Managed / Dedicated through Psoxy uses an **Admin Access token** for authentication.
 
@@ -42,7 +42,8 @@ The following scope is required:
 
 ### Setup
 
-1. Create a Group Access Token (recommended), Project Access Token, or Personal Access Token with the `read_api` scope.
+1. We recommend to create an [admin dedicated service account](https://docs.gitlab.com/user/profile/account/create_accounts/#create-a-user-in-the-admin-area) and generate a Personal Access Token for that account with the required permissions.
+2. Create the token with `read_api` scope.
 2. Update the content of `PSOXY_GITLAB_MANAGED_ACCESS_TOKEN` variable or `ACCESS_TOKEN` environment variable with the token value obtained in the previous step.
 
 NOTE: derived from [worklytics-connector-specs](../../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.

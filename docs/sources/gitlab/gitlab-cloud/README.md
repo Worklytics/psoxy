@@ -2,13 +2,13 @@
 
 ## Examples
 
-- [Example Rules](gitlabcom/gitlabcom.yaml)
+- [Example Rules](gitlab-cloud.yaml)
 - Example Data:
-  - [original/groups.json](gitlabcom/example-api-responses/original/groups.json) | [sanitized/groups.json](gitlabcom/example-api-responses/sanitized/groups.json)
-  - [original/group_members.json](gitlabcom/example-api-responses/original/group_members.json) | [sanitized/group_members.json](gitlabcom/example-api-responses/sanitized/group_members.json)
-  - [original/projects.json](gitlabcom/example-api-responses/original/projects.json) | [sanitized/projects.json](gitlabcom/example-api-responses/sanitized/projects.json)
-  - [original/issues.json](gitlabcom/example-api-responses/original/issues.json) | [sanitized/issues.json](gitlabcom/example-api-responses/sanitized/issues.json)
-  - [original/merge_requests.json](gitlabcom/example-api-responses/original/merge_requests.json) | [sanitized/merge_requests.json](gitlabcom/example-api-responses/sanitized/merge_requests.json)
+  - [original/groups.json](example-api-responses/original/groups.json) | [sanitized/groups.json](gitlab-cloud/example-api-responses/sanitized/groups.json)
+  - [original/group_members.json](gitlab-cloud/example-api-responses/original/group_members.json) | [sanitized/group_members.json](gitlab-cloud/example-api-responses/sanitized/group_members.json)
+  - [original/projects.json](gitlab-cloud/example-api-responses/original/projects.json) | [sanitized/projects.json](gitlab-cloud/example-api-responses/sanitized/projects.json)
+  - [original/issues.json](gitlab-cloud/example-api-responses/original/issues.json) | [sanitized/issues.json](gitlab-cloud/example-api-responses/sanitized/issues.json)
+  - [original/merge_requests.json](example-api-responses/original/merge_requests.json) | [sanitized/merge_requests.json](example-api-responses/sanitized/merge_requests.json)
 
 ## Steps to Connect
 
@@ -50,7 +50,7 @@ The following scope is required:
 ### Setup
 
 1. Create a Group Access Token (recommended), Project Access Token, or Personal Access Token with the `read_api` scope.
-2. Update the content of `PSOXY_GITLAB_ACCESS_TOKEN` variable or `ACCESS_TOKEN` environment variable with the token value obtained in the previous step.
+2. Update the content of `PSOXY_GITLAB_CLOUD_ACCESS_TOKEN` variable or `ACCESS_TOKEN` environment variable with the token value obtained in the previous step.
 
 NOTE: derived from [worklytics-connector-specs](../../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
 
