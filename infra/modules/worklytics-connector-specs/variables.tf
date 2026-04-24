@@ -175,8 +175,8 @@ variable "github_example_repository" {
 
 variable "gitlab_url" {
   type        = string
-  default     = "gitlab.com"
-  description = "(Only required if using GitLab connector) URL of the GitLab instance (ex: gitlab.mycompany.com, mycompany.com/gitlab, my-instance-gitlab.com, etc)"
+  default     = "https://gitlab.com"
+  description = "(Only required if using GitLab Managed connector) URL of the GitLab instance (ex: https://gitlab.mycompany.com, https://mycompany.com/gitlab, https://my-instance-gitlab.com, etc)"
 }
 
 variable "gitlab_example_group_id" {

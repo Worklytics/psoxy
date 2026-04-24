@@ -45,7 +45,7 @@ locals {
   gitlab_example_group_id                  = coalesce(var.gitlab_example_group_id, "YOUR_GITLAB_GROUP_ID")
   gitlab_example_project_id                = coalesce(var.gitlab_example_project_id, "YOUR_GITLAB_PROJECT_ID")
   # Normalize gitlab_url by stripping protocol prefix (https:// or http://) and trailing slash
-  gitlab_url                    = trimprefix(trimsuffix(var.gitlab_url, "/"), "https://")
+  gitlab_url                    = replace(trimsuffix(var.gitlab_url, "/"), "/^https?:\\/\\//", "")
   gong_instance_subdomain       = coalesce(var.gong_instance_subdomain, "YOUR_GONG_INSTANCE_SUBDOMAIN")
   glean_instance_subdomain      = coalesce(var.glean_instance_subdomain, "YOUR_GLEAN_INSTANCE_SUBDOMAIN")
   salesforce_example_account_id = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
