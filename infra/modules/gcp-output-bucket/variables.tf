@@ -71,11 +71,6 @@ variable "expiration_days" {
   default     = 365 * 5 # 5 years
 }
 
-variable "bucket_labels" {
-  type        = map(string)
-  description = "*alpha*; in v0.4.x only respected for new resources. Labels to apply to bucket"
-  default     = {}
-}
 
 variable "bucket_force_destroy" {
   type        = bool

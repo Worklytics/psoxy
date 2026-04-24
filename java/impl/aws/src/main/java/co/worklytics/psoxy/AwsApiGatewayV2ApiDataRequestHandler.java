@@ -1,0 +1,130 @@
+package co.worklytics.psoxy;
+
+import java.security.Security;
+import java.time.Instant;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
+import com.newrelic.opentracing.LambdaTracer;
+import com.newrelic.opentracing.aws.LambdaTracing;
+import io.opentracing.util.GlobalTracer;
+import co.worklytics.psoxy.aws.AwsContainer;
+import co.worklytics.psoxy.aws.DaggerAwsContainer;
+import co.worklytics.psoxy.aws.request.APIGatewayV2HTTPEventRequestAdapter;
+import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
+import lombok.SneakyThrows;
+import lombok.extern.java.Log;
+
+/**
+ * default AWS lambda handler
+ *
+ * works with 1) lambda function URL invocations, or 2) API Gateway v2 HTTP proxy invocations
+ *
+ */
+@Log
+public class AwsApiGatewayV2ApiDataRequestHandler implements
+        com.amazonaws.services.lambda.runtime.RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
+
+    /**
+     * Static initialization allows reuse in containers
+     * {@link "https://aws.amazon.com/premiumsupport/knowledge-center/lambda-improve-java-function-performance/"}
+     */
+    static AwsContainer awsContainer;
+    static ApiDataRequestHandler requestHandler;
+
+    static ResponseCompressionHandler responseCompressionHandler;
+
+    static {
+        staticInit();
+    }
+
+    private static void staticInit() {
+        awsContainer = DaggerAwsContainer.create();
+        requestHandler = awsContainer.apiDataRequestHandler();
+        responseCompressionHandler = new ResponseCompressionHandler();
+
+        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            awsContainer.loggingConfiguration().validateNewRelicHandler(AwsApiGatewayV2ApiDataRequestHandler.class);
+            GlobalTracer.registerIfAbsent(LambdaTracer.INSTANCE);
+        }
+
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
+    @SneakyThrows
+    @Override
+    public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent httpEvent,
+            Context context) {
+        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            return LambdaTracing.instrument(httpEvent, context, this::actualHandleRequest);
+        } else {
+            return actualHandleRequest(httpEvent, context);
+        }
+    }
+
+    @SneakyThrows
+    public APIGatewayV2HTTPResponse actualHandleRequest(APIGatewayV2HTTPEvent httpEvent,
+            Context context) {
+
+        // interfaces:
+        // - HttpRequestEvent --> HttpResponseEvent
+
+        // q: what's the component?
+        // - request handler?? but it's abstract ...
+        // - make it bound with interface, rather than generic? --> prob best approach
+        // - objectMapper
+        //
+
+        HttpEventResponse response;
+        boolean base64Encoded = false;
+        try {
+            APIGatewayV2HTTPEventRequestAdapter httpEventRequestAdapter =
+                    new APIGatewayV2HTTPEventRequestAdapter(httpEvent);
+            response = requestHandler.handle(httpEventRequestAdapter,
+                    ApiDataRequestHandler.ProcessingContext.builder().async(false)
+                            .requestReceivedAt(Instant
+                                    .ofEpochMilli(httpEvent.getRequestContext().getTimeEpoch()))
+                            .requestId(httpEvent.getRequestContext().getRequestId()).build());
+
+            if (responseCompressionHandler.isCompressionRequested(httpEventRequestAdapter)) {
+                Pair<Boolean, HttpEventResponse> compressedResponse =
+                        responseCompressionHandler.compressIfNeeded(response);
+                base64Encoded = compressedResponse.getLeft();
+                response = compressedResponse.getRight();
+            } else {
+                response =
+                        response.toBuilder()
+                                .header(ProcessedDataMetadataFields.WARNING.getHttpHeader(),
+                                        Warning.COMPRESSION_NOT_REQUESTED.asHttpHeaderCode())
+                                .build();
+            }
+
+        } catch (Throwable e) {
+            context.getLogger()
+                    .log(String.format("%s - %s", e.getClass().getName(), e.getMessage()));
+            context.getLogger().log(ExceptionUtils.getStackTrace(e));
+            response = HttpEventResponse.builder().statusCode(500)
+                    .body("Unknown error: " + e.getClass().getName())
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(), "Unknown error")
+                    .build();
+        }
+
+        try {
+            // NOTE: AWS seems to give 502 Bad Gateway errors without explanation or any info
+            // in the lambda logs if this is malformed somehow (Eg, missing statusCode)
+            return APIGatewayV2HTTPResponse.builder().withStatusCode(response.getStatusCode())
+                    .withHeaders(response.getHeaders())
+                    .withMultiValueHeaders(response.getMultivaluedHeaders())
+                    .withBody(response.getBody()).withIsBase64Encoded(base64Encoded).build();
+        } catch (Throwable e) {
+            context.getLogger().log("Error writing response as Lambda return");
+            throw new Error(e);
+        }
+    }
+
+
+}

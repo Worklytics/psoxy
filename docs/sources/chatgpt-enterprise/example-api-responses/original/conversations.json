@@ -31,7 +31,7 @@
             "content": {
               "object": "compliance.workspace.conversation.message.content",
               "type": "text",
-              "value": "What are the key trends in AI for 2024?",
+              "value": "Write an email about the key trends in AI for 2024.",
               "annotations": [
                 {
                   "type": "url_citation",
@@ -47,6 +47,25 @@
                 "name": "example.pdf"
               }
             ]
+          },
+          {
+            "object": "compliance.workspace.conversation.message",
+            "id": "msg_123456789X",
+            "parent_id": "msg_1234567890",
+            "created_at": 1716990005.123123,
+            "gpt_id": null,
+            "project_id": null,
+            "author": {
+              "object": "compliance.workspace.bot",
+              "role": "assistant",
+              "tool_name": null
+            },
+            "content": {
+              "object": "compliance.workspace.conversation.message.content",
+              "type": "text",
+              "value": "The key trends in AI include generative models writing email and code.",
+              "annotations": []
+            }
           }
         ]
       }

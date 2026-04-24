@@ -14,8 +14,10 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import com.google.api.gax.rpc.NotFoundException;
 import com.google.api.gax.rpc.PermissionDeniedException;
 import com.google.cloud.secretmanager.v1.AccessSecretVersionResponse;
 import com.google.cloud.secretmanager.v1.DestroySecretVersionRequest;
@@ -99,7 +101,8 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
                 SecretVersionName secretVersionName = SecretVersionName.parse(version.getName());
                 log.info(String.format("Property: %s, stored version %s", secretName, version.getName()));
 
-                updateLabelFromSecret(client, secretName, VERSION_LABEL, secretVersionName.getSecretVersion());
+                
+                updateLabelFromSecret(client, secretName, VERSION_LABEL, secretVersionName.getSecretVersion(), null);
 
                 destroyOldSecretVersions(client, secretName, version);
             }
@@ -154,7 +157,7 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
 
             return accessSecretVersion(client, secretVersionName);
 
-        } catch (com.google.api.gax.rpc.NotFoundException e) {
+        } catch (NotFoundException e) {
             if (accessViaExplicitVersion) {
                 // in this case, manual rotation of the secret without relying on our code may have occurred; a new version was written, but the value of the label referencing the latest version was not updated
                 // log that we're here, then try to failover to getting the latest version using the GCP Secret Manager 'latest' reference.
@@ -165,7 +168,7 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
                     SecretVersionName secretVersionName =
                             SecretVersionName.of(projectId, secretName.getSecret(), LATEST_VERSION_ALIAS);
                     return accessSecretVersion(client, secretVersionName);
-                } catch (com.google.api.gax.rpc.NotFoundException notFoundException) {
+                } catch (NotFoundException notFoundException) {
                     log.log(Level.WARNING, "Failover to getting 'latest' version of secret " + paramName + " also failed; check if secret exists and has versions.", notFoundException);
                 } catch (Exception ignored) {
                     log.log(Level.WARNING, "Failover to getting 'latest' version of secret " + paramName + " failed due to something other than 'NotFound' case.", ignored);
@@ -202,7 +205,7 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
             Secret lockSecret;
             try {
                 lockSecret = client.getSecret(lockSecretName);
-            } catch (com.google.api.gax.rpc.NotFoundException e) {
+            } catch (NotFoundException e) {
                 // It should not happen, as the secret should have been created by Terraform
                 throw new RuntimeException(String.format("Secret %s does not exist, but should have be created by Terraform", lockSecretName));
             }
@@ -214,7 +217,8 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
             if (lockedAt.isBefore(clock.instant().minusSeconds(expires.getSeconds()))) {
                 log.warning("Lock " + lockId + " is stale or unset; will try to acquire it");
 
-                updateLabelFromSecret(client, lockSecretName, LOCK_LABEL, Long.toString(Instant.now(clock).toEpochMilli()));
+                
+                updateLabelFromSecret(client, lockSecretName, LOCK_LABEL, Long.toString(Instant.now(clock).toEpochMilli()), lockSecret);
                 //due to etag, update should have FAILED if was modified since our read
                 return true;
             } else {
@@ -233,7 +237,7 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
 
         try (SecretManagerServiceClient client = SecretManagerServiceClient.create()) {
             Secret lockSecret = client.getSecret(lockSecretName);
-            Secret updated = client.updateSecret(UpdateSecretRequest.newBuilder()
+            client.updateSecret(UpdateSecretRequest.newBuilder()
                     .setSecret(Secret.newBuilder(lockSecret)
                             .removeLabels(LOCK_LABEL)
                             .build())
@@ -248,11 +252,21 @@ public class SecretManagerConfigService implements WritableConfigService, LockSe
         }
     }
 
-    private static void updateLabelFromSecret(SecretManagerServiceClient client, SecretName secretName, String label, String labelValue) {
+    private static void updateLabelFromSecret(SecretManagerServiceClient client, 
+                          SecretName secretName,
+                          String label,
+                          String labelValue,
+                          Secret existingSecret) {
         try {
+            if (existingSecret == null) {
+                try {
+                    existingSecret = client.getSecret(secretName);
+                } catch (NotFoundException e) {
+                    throw new RuntimeException(String.format("Secret %s on which trying to write label does not exist", secretName), e);
+                }
+            }
             client.updateSecret(UpdateSecretRequest.newBuilder()
-                    .setSecret(Secret.newBuilder()
-                            .setName(secretName.toString())
+                    .setSecret(Secret.newBuilder(existingSecret)
                             // Label format is https://cloud.google.com/compute/docs/labeling-resources#requirements
                             .putLabels(label, labelValue)
                             .build())
