@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
@@ -110,7 +111,7 @@ public class HealthCheckRequestHandler {
         } catch (Throwable e) {
             // will fail if sourceAuthStrategy is not set up properly
             logInDev(e.getMessage(), e);
-            missing = Collections.emptySet();
+            missing = new HashSet<>();
         }
 
         try {
