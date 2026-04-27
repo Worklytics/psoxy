@@ -240,7 +240,7 @@ public class ApiDataRequestHandler {
                     .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
                     .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                         ErrorCauses.FAILED_TO_BUILD_URL.name())
-                    .body("Error parsing request URL. Error " + ite.getErrorCode().getCode())
+                    .header(ProcessedDataMetadataFields.ERROR_CODE.getHttpHeader(), ite.getErrorCode().getCode())
                     .build();
             }
 
@@ -400,7 +400,9 @@ public class ApiDataRequestHandler {
             // should this be 422 Unprocessable Content, rather than conflict?
             builder.statusCode(HttpStatus.SC_CONFLICT);
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
-                ErrorCauses.TOKENIZED_REQUEST_PARAMETER_INVALID.name() + ":" + e.getErrorCode().getCode());
+                ErrorCauses.TOKENIZED_REQUEST_PARAMETER_INVALID.name());
+            builder.header(ProcessedDataMetadataFields.ERROR_CODE.getHttpHeader(), e.getErrorCode().getCode());
+
             log.log(Level.WARNING, e.getMessage(), e);
             return builder.build();
         }
