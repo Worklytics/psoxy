@@ -24,6 +24,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.Security;
 import java.time.Clock;
 import java.util.Optional;
@@ -152,7 +153,7 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         payload.writeTo(out);
-        assertEquals(EXPECTED_ASSERTION, out.toString());
+        assertEquals(EXPECTED_ASSERTION, out.toString(StandardCharsets.UTF_8));
     }
 
     @SneakyThrows
@@ -169,7 +170,7 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         payload.writeTo(out);
-        assertEquals(expected_payload, out.toString());
+        assertEquals(expected_payload, out.toString(StandardCharsets.UTF_8));
     }
 
     @SneakyThrows

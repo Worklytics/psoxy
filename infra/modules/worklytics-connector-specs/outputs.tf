@@ -49,20 +49,20 @@ output "default_enabled_connector_ids" {
 
 output "available_google_workspace_connectors" {
   description = "List of available Google Workspace connectors"
-  value       = local.google_workspace_sources_backwards
+  value       = local.google_workspace_sources_backwards # includes rules_raw
 }
 
 output "available_msft_365_connectors" {
   description = "List of available Microsoft 365 connectors"
-  value       = local.msft_365_connectors_backwards
+  value       = local.msft_365_connectors_backwards # includes rules_raw
 }
 
 output "available_oauth_data_source_connectors" {
   description = "List of available OAuth data source connectors (non-MSFT 365 / Google Workspace)"
-  value       = local.oauth_long_access_connectors_backwards
+  value       = local.oauth_long_access_connectors_backwards_with_rules_raw
 }
 
 output "available_bulk_connectors" {
   description = "List of available bulk connectors"
-  value       = local.bulk_connectors
+  value       = local.bulk_connectors_with_rules_raw
 }

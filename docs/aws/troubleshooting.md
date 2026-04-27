@@ -123,7 +123,7 @@ Error: error creating Lambda Function URL (psoxy-outlook-mail): ResourceConflict
 │ }
 │
 │   with module.psoxy-msft-connector["outlook-mail"].aws_lambda_function_url.lambda_url,
-│   on ../../modules/aws-psoxy-rest/main.tf line 26, in resource "aws_lambda_function_url" "lambda_url":
+│   on ../../modules/aws-proxy-api/main.tf line 26, in resource "aws_lambda_function_url" "lambda_url":
 │   26: resource "aws_lambda_function_url" "lambda_url" {
 ```
 
@@ -185,3 +185,14 @@ Notes:
 - The script preserves object content, tags, and existing metadata
 - A `psoxy-last-replay` metadata field is added/updated with the current timestamp
 - This is safe to run on production data
+
+## API Connector Errors
+
+### 403 X-Amzn-Error-Type: AccessDeniedException
+- double check that the function URL is correct (eg, what's configured in Worklytics, or what you're hitting from CLI, matches the value you see in AWS Lambda console)
+
+
+### 502 X-Amzn-Error-Type: BadGatewayException
+
+- failure to start-up lambda?
+

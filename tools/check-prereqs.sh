@@ -7,26 +7,50 @@ printf "See https://github.com/Worklytics/psoxy#prerequisites for more informati
 
 HOMEBREW_AVAILABLE=`brew -v &> /dev/null`
 
+CI_MODE=false
+for arg in "$@"; do
+  if [[ "$arg" == "--ci" ]] || [[ "$arg" == "--non-interactive" ]]; then
+    CI_MODE=true
+  fi
+done
+
 # Source centralized color scheme
 source "$(dirname "$0")/set-term-colorscheme.sh"
 
 if ! git --version &> /dev/null ; then
   printf "${ERR}Git not installed.${NC} Not entirely sure how you got here without it, but to install see https://git-scm.com/book/en/v2/Getting-Started-Installing-Git\n"
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${CODE}brew install git${NC}\n"; fi
-  exit 1
+  if [[ "$CI_MODE" != "true" ]]; then
+    exit 1
+  fi
 fi
 
 if ! terraform -v &> /dev/null ; then
   printf "${ERR}Terraform CLI not available.${NC} Psoxy examples / deployment scripts require it. See ${CODE}https://developer.hashicorp.com/terraform/downloads${NC} for installation options\n"
-  exit 1
+  if [[ "$CI_MODE" != "true" ]]; then
+    exit 1
+  fi
+else
+  TF_VERSION_FULL=$(terraform -version | head -n 1)
+  TF_VERSION_MAJOR_MINOR=$(echo "$TF_VERSION_FULL" | sed -n 's/^Terraform v\([0-9]*\.[0-9]*\).*$/\1/p')
+  TF_MAJOR=$(echo "$TF_VERSION_MAJOR_MINOR" | cut -d. -f1)
+  TF_MINOR=$(echo "$TF_VERSION_MAJOR_MINOR" | cut -d. -f2)
+  if (( TF_MAJOR < 1 || (TF_MAJOR == 1 && TF_MINOR < 7) )); then
+    printf "${ERR}This Terraform version appears to be unsupported.${NC} Psoxy requires a supported version of Terraform 1.7 or later.\n"
+    printf "We recommend you upgrade. See https://developer.hashicorp.com/terraform/downloads\n"
+  else
+    printf "Your Terraform version is ${CODE}${TF_VERSION_FULL}${NC}.\n"
+  fi
 fi
 
 # Check Maven installation
 
 if ! mvn -v &> /dev/null ; then
-  printf "${WARN}Maven not installed.${NC} It is REQUIRED unless you will use a pre-built JAR. To install, see https://maven.apache.org/install.html\n"
+  printf "${WARN}Maven not installed.${NC} It is REQUIRED unless you will use a pre-built JAR.\n"
+  printf " Note: Java JDK and Maven are only needed if building and bundling the java from source.\n"
+  printf " To install Maven, see https://maven.apache.org/install.html\n"
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${CODE}brew install maven${NC}\n"; fi
-  printf " (Using a prebuilt jar requires adding ${CODE}deployment_bundle=""${NC} to your ${CODE}terraform.tfvars${NC} file, and filling with s3/gcs uri for your desired JAR)\n"
+  printf " (Using a prebuilt jar requires adding ${CODE}deployment_bundle=""${NC} to your ${CODE}terraform.tfvars${NC} file, and filling with s3/gcs uri for your desired JAR. The JRE of your host platform (AWS/GCP) will still be used at runtime).\n"
 else
   MVN_VERSION=`mvn -v | grep "Apache Maven"`
   MVN_VERSION_MAJOR_MINOR=$(echo $MVN_VERSION | sed -n 's/^Apache Maven \([0-9]*\.[0-9]*\).*$/\1/p')
@@ -49,9 +73,9 @@ else
 
   printf "Your Maven installation uses ${CODE}${JAVA_VERSION}${NC}.\n"
 
-  if [[  "$JAVA_VERSION_MAJOR" != 17 && "$JAVA_VERSION_MAJOR" != 21  && "$JAVA_VERSION_MAJOR" != 23  && "$JAVA_VERSION_MAJOR" != 24 ]]; then
-    printf "${ERR}This Java version appears to be unsupported. You should upgrade it, or may have compile errors.${NC} Psoxy requires an Oracle-supported version of Java 17 or later;  as of April 2025, this includes Java 17, 21, or 24. See https://maven.apache.org/install.html\n"
-    if $HOMEBREW_AVAILABLE; then printf "or as you have Homebrew available, run ${CODE}brew install openjdk@17${NC}\n"; fi
+  if [[  "$JAVA_VERSION_MAJOR" != 21  && "$JAVA_VERSION_MAJOR" != 25 && "$JAVA_VERSION_MAJOR" != 26 ]]; then
+    printf "${ERR}This Java version appears to be unsupported. You should upgrade it, or may have compile errors.${NC} Psoxy requires an Oracle-supported version of Java 21 or later;  as of March 2026, this includes Java 21, 25, and 26. See https://maven.apache.org/install.html\n"
+    if $HOMEBREW_AVAILABLE; then printf "or as you have Homebrew available, run ${CODE}brew install openjdk@21${NC}\n"; fi
     printf "If you have an alternative JDK installed, then you must update your ${CODE}JAVA_HOME${NC} environment variable to point to it.\n"
   fi
 
@@ -87,6 +111,30 @@ else
   printf "AWS CLI version ${CODE}`aws --version`${NC} is installed.\n"
   printf ""
   printf "\t- make sure ${CODE}aws sts get-caller-identity${NC} returns the user/role/account you expect. $AWSCLI_REASON\n"
+
+  if aws sts get-caller-identity &> /dev/null; then
+    AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text 2>/dev/null)
+    # the || true ensures that we fail silently even if set -e is on, and the 2>/dev/null handles standard error
+    AWS_CONCURRENCY=$(aws lambda get-account-settings --query 'AccountLimit.ConcurrentExecutions' --output text 2>/dev/null || true)
+    if [[ -n "$AWS_CONCURRENCY" && "$AWS_CONCURRENCY" =~ ^[0-9]+$ ]]; then
+      if (( AWS_CONCURRENCY < 1000 )); then
+        printf "\t- ${WARN}Warning: AWS Lambda account-level concurrency quota for account $AWS_ACCOUNT_ID is $AWS_CONCURRENCY, which is < 1000.${NC}\n"
+        printf "\t  If this is the AWS account to which your lambda instances will be deployed, ensure that this amount is sufficient for your use case (we recommend at least 100).\n"
+      else
+        printf "\t- AWS Lambda account-level concurrency quota for account ${CODE}${AWS_ACCOUNT_ID}${NC} is ${CODE}${AWS_CONCURRENCY}${NC}.\n"
+      fi
+    fi
+
+    # Check for IAM Role quotas
+    AWS_IAM_ROLES_QUOTA=$(aws service-quotas get-service-quota --service-code iam --quota-code L-FE177D64 --query 'Quota.Value' --output text 2>/dev/null || true)
+    if [[ -n "$AWS_IAM_ROLES_QUOTA" && "$AWS_IAM_ROLES_QUOTA" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+       AWS_IAM_ROLES_QUOTA=${AWS_IAM_ROLES_QUOTA%.*} # truncate decimals
+       printf "\t- AWS IAM Roles quota for account ${CODE}${AWS_ACCOUNT_ID}${NC} is ${CODE}${AWS_IAM_ROLES_QUOTA}${NC}.\n"
+       if (( AWS_IAM_ROLES_QUOTA < 1000 )); then
+          printf "\t  ${WARN}Warning: you may need a higher limit if deploying many Psoxy instances.${NC}\n"
+       fi
+    fi
+  fi
 fi
 
 printf "\n"
@@ -99,6 +147,18 @@ if ! gcloud --version &> /dev/null ; then
 else
   printf "Google Cloud SDK version ${CODE}`gcloud --version 2> /dev/null | head -n 1`${NC} is installed.\n"
   printf "\t- make sure ${CODE}gcloud auth list --filter=\"status:ACTIVE\"${NC} returns the account you expect. $GCLOUD_REASON\n"
+
+  if gcloud auth list --filter="status:ACTIVE" --format="value(account)" 2>/dev/null | grep -q '@'; then
+    GCP_PROJECT_ID=$(gcloud config get-value project 2>/dev/null || true)
+    if [[ -n "$GCP_PROJECT_ID" ]]; then
+      # Check Cloud Functions Quota
+      GCP_FUNCTIONS_QUOTA=$(gcloud compute project-info describe --project="$GCP_PROJECT_ID" --format="value(quotas.value)" --flatten="quotas[]" --filter="quotas.metric:CLOUD_FUNCTIONS_API_REQUESTS_PER_100_SECONDS" 2>/dev/null || true)
+      if [[ -n "$GCP_FUNCTIONS_QUOTA" && "$GCP_FUNCTIONS_QUOTA" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+         GCP_FUNCTIONS_QUOTA=${GCP_FUNCTIONS_QUOTA%.*} # truncate decimals
+         printf "\t- GCP Cloud Functions (per 100s) quota for project ${CODE}${GCP_PROJECT_ID}${NC} is ${CODE}${GCP_FUNCTIONS_QUOTA}${NC}.\n"
+      fi
+    fi
+  fi
 fi
 
 printf "\n"

@@ -1,11 +1,21 @@
-
+# trivy:ignore:AVD-GCP-0077
 resource "google_storage_bucket" "bucket" {
   project                     = var.project_id
   name                        = "${var.bucket_name_prefix}${var.bucket_name_suffix}"
   location                    = var.region
   force_destroy               = var.bucket_force_destroy
   uniform_bucket_level_access = true
-  labels                      = var.bucket_labels
+
+  dynamic "logging" {
+    for_each = var.bucket_access_logs_destination != null ? [var.bucket_access_logs_destination] : []
+    content {
+      log_bucket = logging.value
+    }
+  }
+
+  versioning {
+    enabled = var.enable_versioning
+  }
 
   lifecycle_rule {
     condition {
@@ -22,7 +32,6 @@ resource "google_storage_bucket" "bucket" {
   lifecycle {
     ignore_changes = [
       name, # due to name change from -output --> -sanitized, ignore name change to avoid recreating bucket
-      labels
     ]
   }
 }

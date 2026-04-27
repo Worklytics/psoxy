@@ -12,10 +12,13 @@ terraform {
 
   # example backend (this GCS bucket must already be provisioned, and gcloud CLI where terraform is
   # applied from must be to read/write to it)
+  # Terraform will impersonate the gcp_terraform_sa_account_email service account to read/write 
+  # state to the bucket; comment this out to rely on however your gcloud client is auth'd
   # see https://www.terraform.io/docs/backends/types/gcs.html for more details
   #  backend "gcs" {
   #    bucket  = "tf-state-prod"
   #    prefix  = "proxy/terraform-state"
+  #    impersonate_service_account = var.gcp_terraform_sa_account_email
   #  }
 
 }
