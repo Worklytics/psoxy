@@ -1,0 +1,13 @@
+[
+  {
+    "id": 1,
+    "email": "john@example.com",
+    "confirmed_at": "2021-03-26T19:03:44.000Z"
+  },
+  {
+    "id": 2,
+    "email": "john.personal@gmail.com",
+    "confirmed_at": "2022-01-15T10:30:00.000Z"
+  }
+]
+

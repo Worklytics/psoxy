@@ -25,8 +25,8 @@ locals {
   ssm_advanced_size_limit = 8192
   ssm_standard_size_limit = 4096
 
-  # read rules from file
-  rules_plain = file(var.file_path)
+  # read rules from file or use content directly
+  rules_plain = var.content != null ? var.content : file(var.file_path)
 
   # compress if necessary; but otherwise leave plain so human readable
   use_compressed = length(local.rules_plain) > local.ssm_advanced_size_limit
@@ -42,7 +42,7 @@ resource "aws_ssm_parameter" "rules" {
   lifecycle {
     precondition {
       condition     = length(local.param_value) < local.ssm_advanced_size_limit
-      error_message = "Rules on file ${var.file_path} are too big to store"
+      error_message = "Rules are too big to store as an SSM parameter."
     }
   }
 }

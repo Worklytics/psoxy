@@ -190,3 +190,6 @@ if [ $NEXT_MINOR -gt $CURRENT_MINOR ]; then
   printf "Next release version *may* include a provider bump. It is recommended to run ${INFO} terraform init --upgrade${NC} to get the latest versions of all terraform providers that are compatible with your configuration.\n"
   printf "You may first wish to run ${INFO}terraform providers${NC} to review the various provider version constraints, and consider revising them in top-level ${INFO}main.tf${NC} or wherever they're specified.\n"
 fi
+
+printf "\n${WARN}NOTE:${NC} No changes have yet been made to your infrastructure.\n"
+printf "The updated Terraform configuration must still be applied. Run ${CODE}terraform plan${NC} followed by ${CODE}terraform apply${NC} to provision these upgrades.\n"

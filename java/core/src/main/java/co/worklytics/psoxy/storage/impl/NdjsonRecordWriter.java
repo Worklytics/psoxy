@@ -3,6 +3,7 @@ package co.worklytics.psoxy.storage.impl;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Map;
 import com.jayway.jsonpath.Configuration;
 import lombok.RequiredArgsConstructor;
 
@@ -20,7 +21,7 @@ class NdjsonRecordWriter implements RecordWriter {
     }
 
     @Override
-    public void writeRecord(Object record) throws IOException {
+    public void writeRecord(Map<String, Object> record) throws IOException {
         bufferedWriter.write(jsonConfiguration.jsonProvider().toJson(record));
         bufferedWriter.newLine();
     }

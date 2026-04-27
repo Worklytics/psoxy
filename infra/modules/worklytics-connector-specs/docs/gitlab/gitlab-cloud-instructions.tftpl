@@ -1,0 +1,75 @@
+## Prerequisites
+
+GitLab Cloud through Psoxy uses **Project Access Tokens** or **Group Access Tokens** for authentication.
+These are long-lived tokens that provide API access without requiring user interaction.
+
+See GitLab documentation:
+- [Project Access Tokens](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html)
+- [Group Access Tokens](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html)
+
+The following scope is required:
+- `read_api`: for reading API resources (groups, projects, issues, merge requests, users, etc.)
+
+`Maintainer` role is required as it is needed for fetching audit events and group members.
+
+## Endpoints Used
+
+| Endpoint                                                                       |
+|--------------------------------------------------------------------------------|
+| `/api/v4/groups`                                                               |
+| `/api/v4/groups/{id}/members/all`                                              |
+| `/api/v4/merge_requests/{id}`                                                  |
+| `/api/v4/namespaces/{id}`                                                      |
+| `/api/v4/projects`                                                             |
+| `/api/v4/projects/{id}/audit_events`                                           |
+| `/api/v4/projects/{id}/issues/{issueIid}/notes`                                |
+| `/api/v4/projects/{id}/issues/{issueIid}/resource_state_events`                |
+| `/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/commits`               |
+| `/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/notes`                 |
+| `/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/resource_state_events` |
+| `/api/v4/projects/{id}/repository/branches`                                    |
+| `/api/v4/projects/{id}/repository/commits`                                     |
+| `/api/v4/projects/{id}/repository/commits/{sha}`                               |
+| `/api/v4/projects/{id}/repository/commits/{sha}/discussions`                   |
+| `/api/v4/projects/{id}/issues`                                                 |
+| `/api/v4/projects/{id}/merge_requests`                                         |
+
+## Setup Instructions
+
+### Use a Group Access Token
+
+1. Go to your GitLab group: **Settings** > **Access Tokens**
+2. Click "Add new token" and configure:
+   - **Token name**: A descriptive name (e.g., "Worklytics Psoxy Connector")
+   - **Expiration date**: Set an appropriate expiration (or leave blank for no expiration if allowed)
+   - **Role**: Select **Maintainer** or higher
+   - **Scopes**: Select `read_api`
+3. Click "Create group access token"
+4. **Important**: Copy the token value immediately - it won't be shown again!
+
+### Alternative: Personal Access Token (For testing or broader access)
+
+Use a Personal Access Token if you need access across multiple groups or instance-wide.
+
+1. Go to GitLab: **User Settings** > **Access Tokens**
+2. Click "Add new token" and configure:
+   - **Token name**: A descriptive name (e.g., "Worklytics Psoxy Connector")
+   - **Expiration date**: Set an appropriate expiration
+   - **Scopes**: Select `read_api`
+3. Click "Create personal access token"
+4. **Important**: Copy the token value immediately - it won't be shown again!
+
+## Configure Psoxy
+
+Set the following variable in AWS System Manager parameters store / GCP Cloud Secrets:
+
+- `${path_to_instance_parameters}ACCESS_TOKEN`: The access token value you copied
+
+## Token Expiration
+
+GitLab access tokens may have expiration dates. It is your responsibility to:
+1. Monitor token expiration
+2. Generate a new token before the current one expires
+3. Update the secret in your cloud provider's secret manager
+
+**Note**: Some GitLab instances allow tokens without expiration dates. Check with your GitLab administrator.

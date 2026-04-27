@@ -39,6 +39,17 @@ variable "deployment_bundle" {
   type        = string
   description = "path to deployment bundle to use (if not provided, will build one). Can be a local file path or GCS URL (e.g., 'gs://psoxy-public-artifacts/psoxy-0.4.28.zip')."
   default     = null
+
+  validation {
+    condition     = var.deployment_bundle == null || !can(regex("^https?://", var.deployment_bundle))
+    error_message = "HTTP(S) URLs are not supported for deployment_bundle. Use a gs:// URL or a local file path."
+  }
+}
+
+variable "deployment_bundle_hash" {
+  type        = string
+  description = "precomputed base64 SHA256 hash of the deployment bundle, if any"
+  default     = null
 }
 
 variable "force_bundle" {
@@ -89,11 +100,6 @@ variable "custom_artifacts_bucket_name" {
   default     = null
 }
 
-variable "default_labels" {
-  type        = map(string)
-  description = "*Alpha* in v0.4, only respected for new resources. Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
-  default     = {}
-}
 
 variable "support_bulk_mode" {
   type        = bool
@@ -167,4 +173,16 @@ variable "provision_project_level_iam" {
   description = "Whether to provision project-level IAM bindings required for Psoxy operation. This includes granting the Pub/Sub Publisher role to the GCS default service account and the Cloud Build Builder role to the Compute Engine default service account. Set to false if you prefer to manage these IAM bindings outside of Terraform."
   type        = bool
   default     = true
+}
+
+variable "bucket_access_logs_destination" {
+  description = "The name of the GCS bucket to route access logs to for all buckets managed by this module"
+  type        = string
+  default     = null
+}
+
+variable "builder_sa_email" {
+  description = "An optional custom builder service account. If not provided, this module will create one."
+  type        = string
+  default     = null
 }

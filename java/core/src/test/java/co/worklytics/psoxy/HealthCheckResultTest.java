@@ -34,6 +34,7 @@ class HealthCheckResultTest {
   "saltSha256Hash" : null,
   "sourceAuthGrantType" : null,
   "sourceAuthStrategy" : null,
+  "userAgent" : null,
   "version" : "rc-v0.1.15",
   "warningMessages" : [ ]
 }""";

@@ -1,11 +1,11 @@
 terraform {
-  required_version = ">= 1.3, < 2.0"
+  required_version = "~> 1.7"
 
   required_providers {
     # for the infra that will host Psoxy instances
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.22"
+      version = "~> 6.0"
     }
   }
 
@@ -21,9 +21,10 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.5.18"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.6.0"
 
   enabled_connectors                       = var.enabled_connectors
+  base_dir                                 = var.psoxy_base_dir
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
   confluence_example_cloud_id              = var.confluence_example_cloud_id
   confluence_example_group_id              = var.confluence_example_group_id
@@ -38,6 +39,9 @@ module "worklytics_connectors" {
   github_copilot_installation_id           = var.github_copilot_installation_id
   github_organization                      = var.github_organization
   github_example_repository                = var.github_example_repository
+  gitlab_url                               = var.gitlab_url
+  gitlab_example_group_id                  = var.gitlab_example_group_id
+  gitlab_example_project_id                = var.gitlab_example_project_id
   gong_instance_subdomain                  = var.gong_instance_subdomain
   glean_instance_subdomain                 = var.glean_instance_subdomain
   salesforce_example_account_id            = var.salesforce_example_account_id
@@ -107,7 +111,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.5.18"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.6.0"
 
   environment_name                     = var.environment_name
   aws_account_id                       = var.aws_account_id
@@ -125,6 +129,7 @@ module "psoxy" {
   pseudonymize_app_ids                 = var.pseudonymize_app_ids
   email_canonicalization               = var.email_canonicalization
   general_environment_variables        = var.general_environment_variables
+  new_relic_account_id                 = var.new_relic_account_id
   function_env_kms_key_arn             = var.project_aws_kms_key_arn
   logs_kms_key_arn                     = var.project_aws_kms_key_arn
   log_retention_days                   = var.log_retention_days
@@ -180,8 +185,8 @@ locals {
 module "connection_in_worklytics" {
   for_each = local.all_instances
 
-  source = "../../modules/worklytics-psoxy-connection-aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-psoxy-connection-aws?ref=v0.5.18"
+  source = "../../modules/worklytics-proxy-connection-aws"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-aws?ref=v0.6.0"
 
   proxy_instance_id    = each.key
   worklytics_host      = var.worklytics_host

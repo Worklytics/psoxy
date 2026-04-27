@@ -21,6 +21,12 @@ variable "deployment_bundle" {
   default     = null
 }
 
+variable "deployment_bundle_hash" {
+  type        = string
+  description = "precomputed base64 SHA256 hash of the deployment bundle, if any"
+  default     = null
+}
+
 variable "skip_tests" {
   type        = bool
   description = "whether to skip tests when building the deployment bundle"

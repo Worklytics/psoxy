@@ -49,23 +49,13 @@ resource "google_project_service" "gcp_infra_api" {
   disable_on_destroy         = false # disabling on destroy has potential to conflict with other uses of the project
 }
 
-# TODO: This is will supported since 0.5 psoxy version, as google provider needs to be updated
-/*resource "google_artifact_registry_repository" "psoxy-functions-repo" {
+resource "google_artifact_registry_repository" "psoxy-functions-repo" {
   location      = var.bucket_location
   project       = var.project_id
   repository_id = "psoxy-functions"
   description   = "Docker repository used on the cloud functions"
   format        = "DOCKER"
 
-  ## Not supported in current google providers, needs 5.14 as there it is GA
-  # See https://github.com/hashicorp/terraform-provider-google/blob/main/CHANGELOG.md#5140-jan-29-2024
-  # but even is present in the documentation (https://registry.terraform.io/providers/hashicorp/google/4.80.0/docs/resources/artifact_registry_repository#argument-reference)
-  # when applied it throws an error with the message: "An argument named "cleanup_policy_dry_run" is not expected here"
-  # and "no block for cleanup_policies" is expected
-  */ /*cleanup_policy_dry_run = false
-
-  # https://cloud.google.com/artifact-registry/docs/repositories/cleanup-policy#json_2
-  # https://registry.terraform.io/providers/hashicorp/google/4.80.0/docs/resources/artifact_registry_repository#argument-reference
   cleanup_policies {
     id     = "keep-most-recent-versions"
     action = "KEEP"
@@ -73,23 +63,20 @@ resource "google_project_service" "gcp_infra_api" {
     most_recent_versions {
       keep_count = 3
     }
-  }*/ /*
+  }
 
   depends_on = [
     google_project_service.gcp_infra_api
   ]
-}*/
+}
 
 # pseudo secret
 resource "google_secret_manager_secret" "pseudonym_salt" {
   project   = var.project_id
   secret_id = "${var.config_parameter_prefix}PSOXY_SALT"
-  labels = merge(
-    var.default_labels,
-    {
-      terraform_managed_value = true
-    }
-  )
+  labels = {
+    terraform_managed_value = true
+  }
 
   replication {
     user_managed {
@@ -105,7 +92,6 @@ resource "google_secret_manager_secret" "pseudonym_salt" {
   lifecycle {
     ignore_changes = [
       replication, # can't change replication after creation
-      labels
     ]
   }
 
@@ -142,12 +128,9 @@ resource "google_secret_manager_secret_version" "initial_version" {
 resource "google_secret_manager_secret" "pseudonymization_key" {
   project   = var.project_id
   secret_id = "${var.config_parameter_prefix}PSOXY_ENCRYPTION_KEY"
-  labels = merge(
-    var.default_labels,
-    {
-      terraform_managed_value = true
-    }
-  )
+  labels = {
+    terraform_managed_value = true
+  }
 
   replication {
     user_managed {
@@ -163,7 +146,6 @@ resource "google_secret_manager_secret" "pseudonymization_key" {
   lifecycle {
     ignore_changes = [
       replication, # can't change replication after creation
-      labels
     ]
   }
 
@@ -193,10 +175,11 @@ resource "google_secret_manager_secret_version" "pseudonym_encryption_key_initia
 module "psoxy_package" {
   source = "../psoxy-package"
 
-  implementation     = "gcp"
-  path_to_psoxy_java = "${var.psoxy_base_dir}java"
-  deployment_bundle  = var.deployment_bundle
-  force_bundle       = var.force_bundle
+  implementation         = "gcp"
+  path_to_psoxy_java     = "${var.psoxy_base_dir}java"
+  deployment_bundle      = var.deployment_bundle
+  deployment_bundle_hash = var.deployment_bundle_hash
+  force_bundle           = var.force_bundle
 }
 
 locals {
@@ -225,6 +208,9 @@ data "archive_file" "source" {
 }
 
 # Create bucket that will host the source code
+# staging bucket only, does not need versioning
+# trivy:ignore:AVD-GCP-0078
+# trivy:ignore:AVD-GCP-0077
 resource "google_storage_bucket" "artifacts" {
   count = local.is_remote_bundle ? 0 : 1
 
@@ -233,14 +219,15 @@ resource "google_storage_bucket" "artifacts" {
   location                    = var.bucket_location
   uniform_bucket_level_access = true
   force_destroy               = var.bucket_force_destroy
-  labels                      = var.default_labels
 
-  # TODO: remove in v0.5
-  lifecycle {
-    ignore_changes = [
-      labels
-    ]
+  dynamic "logging" {
+    for_each = var.bucket_access_logs_destination != null ? [var.bucket_access_logs_destination] : []
+    content {
+      log_bucket = logging.value
+    }
   }
+
+
 }
 
 # add zipped JAR to bucket
@@ -288,6 +275,28 @@ resource "google_project_iam_custom_role" "bucket_write" {
   ]
 }
 
+resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
+  project     = var.project_id
+  role_id     = "${local.environment_id_role_prefix}secretVersionManager"
+  title       = "${local.environment_id_prefix_display}Secret Version Manager"
+  description = "Manage secret versions for writable/lockable secrets used by proxy instances"
+
+  permissions = [
+    "resourcemanager.projects.get",
+    "secretmanager.secrets.get",
+    "secretmanager.secrets.getIamPolicy",
+    "secretmanager.secrets.list",
+    "secretmanager.secrets.update",
+    "secretmanager.versions.access",
+    "secretmanager.versions.add",
+    "secretmanager.versions.destroy",
+    "secretmanager.versions.disable",
+    "secretmanager.versions.enable",
+    "secretmanager.versions.get",
+    "secretmanager.versions.list",
+  ]
+}
+
 
 # to avoid error 'The Cloud Storage service account for your bucket is unable to publish to Cloud Pub/Sub topics in the specified project'
 # see: https://cloud.google.com/eventarc/docs/run/quickstart-storage#before-you-begin
@@ -303,15 +312,37 @@ resource "google_project_iam_member" "grant_gcs-sa_pub-sub-publisher" {
   member  = "serviceAccount:${data.google_storage_project_service_account.gcs_default_service_account.email_address}"
 }
 
-# Grant Cloud Build builder role to Compute Engine default service account
+locals {
+  builder_sa_email = var.builder_sa_email != null ? var.builder_sa_email : try(google_service_account.proxy_builder_sa[0].email, data.google_compute_default_service_account.default.email)
+}
+
+# Create a custom builder SA to avoid using the Compute Engine default SA for builds (fixes GCP-0006)
+resource "google_service_account" "proxy_builder_sa" {
+  count = var.provision_project_level_iam && var.builder_sa_email == null ? 1 : 0
+
+  account_id   = trim(substr("${var.environment_id_prefix}proxy-builder-sa", 0, 30), "-")
+  display_name = "${local.environment_id_prefix_display} Psoxy Cloud Build Service Account"
+  description  = "Service account used by Cloud Build to build Psoxy Cloud Functions."
+  project      = var.project_id
+}
+
+resource "google_storage_bucket_iam_member" "grant_proxy_builder_object_viewer_on_artifacts" {
+  count = local.is_remote_bundle ? 0 : 1
+
+  bucket = google_storage_bucket.artifacts[0].name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${local.builder_sa_email}"
+}
+
+# Grant Cloud Build builder role to the custom builder service account
 # Required for Cloud Functions Gen2 deployment to build the function
 # See: https://cloud.google.com/functions/docs/troubleshooting#build-service-account
-resource "google_project_iam_member" "grant_compute_default_sa_cloudbuild_builder" {
+resource "google_project_iam_member" "grant_builder_sa_cloudbuild_builder" {
   count = var.provision_project_level_iam ? 1 : 0
 
   project = var.project_id
   role    = "roles/cloudbuild.builds.builder"
-  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  member  = "serviceAccount:${local.builder_sa_email}"
 }
 
 
@@ -340,7 +371,7 @@ resource "google_service_account" "webhook_batch_invoker" {
   count = var.support_webhook_collectors ? 1 : 0
 
   project      = var.project_id
-  account_id   = "${var.environment_id_prefix}webhook-batch"
+  account_id   = trim(substr("${var.environment_id_prefix}webhook-batch", 0, 30), "-")
   display_name = "${local.environment_id_prefix_display} Webhook Batch Invoker"
   description  = "Service account that will invoke the batch processing of webhooks"
 }
@@ -373,30 +404,6 @@ resource "google_service_account_iam_member" "allow_scheduler_impersonation" {
   service_account_id = google_service_account.webhook_batch_invoker[0].id
   role               = "roles/iam.serviceAccountTokenCreator"
   member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloudscheduler.iam.gserviceaccount.com"
-}
-
-# TODO: remove in v0.6.x
-# Deprecated; only keep to support old installations
-resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
-  project     = var.project_id
-  role_id     = "${local.environment_id_role_prefix}PsoxyInstanceSecretHandler"
-  title       = "${local.environment_id_prefix_display}Instance Secret Handler"
-  description = "Role to grant on secret that is to be managed by a Psoxy instance (cloud function); subset of roles/secretmanager.admin, to support reading/updating the secret and managing their versions"
-
-  permissions = [
-    "resourcemanager.projects.get",
-    "secretmanager.secrets.get",
-    "secretmanager.secrets.getIamPolicy",
-    "secretmanager.secrets.list",
-    "secretmanager.secrets.update",
-    "secretmanager.versions.add",
-    "secretmanager.versions.access",
-    "secretmanager.versions.destroy",
-    "secretmanager.versions.disable",
-    "secretmanager.versions.enable",
-    "secretmanager.versions.get",
-    "secretmanager.versions.list"
-  ]
 }
 
 
@@ -506,6 +513,11 @@ output "artifacts_bucket_name" {
   value = local.artifact_bucket_name
 }
 
+output "artifacts_bucket_id" {
+  value       = try(google_storage_bucket.artifacts[0].id, null)
+  description = "The ID of the artifacts google_storage_bucket resource"
+}
+
 output "deployment_bundle_object_name" {
   value = local.deployment_bundle_object_name
 }
@@ -540,6 +552,7 @@ output "path_to_deployment_jar" {
   description = "Path to the package to deploy (JAR)."
   value       = module.psoxy_package.path_to_deployment_jar
 }
+
 
 output "psoxy_instance_secret_locker_role_id" {
   value = google_project_iam_custom_role.psoxy_instance_secret_role.id
