@@ -1,12 +1,14 @@
 package com.avaulta.gateway.tokens.impl;
 
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.KeySpec;
-import java.util.Arrays;
-import java.util.function.Function;
+import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
+import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.Value;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -16,14 +18,13 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-import com.avaulta.gateway.tokens.DeterministicTokenizationStrategy;
-import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.Value;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.KeySpec;
+import java.util.Arrays;
+import java.util.function.Function;
 
 @Builder
 @RequiredArgsConstructor
@@ -130,13 +131,13 @@ public class AESReversibleTokenizationStrategy implements ReversibleTokenization
         } catch (InvalidKeyException e) {
             throw new RuntimeException("Invalid encryption key configuration", e);
         } catch (InvalidAlgorithmParameterException e) {
-            throw new InvalidTokenException("Failed to decrypt token; some algorithm parameter, such as iv, is wrong", e);
+            throw new InvalidTokenException(InvalidTokenException.ErrorCode.ALGORITHM_PARAMETER_ERROR, e);
         } catch (BadPaddingException e) {
-            throw new InvalidTokenException("Failed to decrypt token; token appears to be corrupted or invalid, due to mismatch between token's padding and the padding expected by the cipher mode", e);
+            throw new InvalidTokenException(InvalidTokenException.ErrorCode.BAD_PADDING, e);
         } catch (IllegalBlockSizeException e) {
-            throw new InvalidTokenException("Failed to decrypt token; token appears to be corrupted or invalid, as block size seems to differ from expected", e);
+            throw new InvalidTokenException(InvalidTokenException.ErrorCode.ILLEGAL_BLOCK_SIZE, e);
         } catch (RuntimeException e) {
-            throw new InvalidTokenException("Failed to decrypt token; most likely because encryption key has been rotated", e);
+            throw new InvalidTokenException(InvalidTokenException.ErrorCode.DECRYPTION_FAILED, e);
         }
     }
 

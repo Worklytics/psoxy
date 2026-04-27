@@ -1,39 +1,31 @@
 package co.worklytics.psoxy.gateway.impl;
 
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.classic.methods.HttpHead;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.HttpHeaders;
-import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.core5.http.message.BasicNameValuePair;
-import org.apache.hc.core5.net.WWWFormCodec;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.utils.URIBuilder;
+import co.worklytics.psoxy.ControlHeader;
+import co.worklytics.psoxy.ErrorCauses;
+import co.worklytics.psoxy.ProcessedDataMetadataFields;
+import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.PseudonymizerImplFactory;
+import co.worklytics.psoxy.RESTApiSanitizer;
+import co.worklytics.psoxy.RESTApiSanitizerFactory;
+import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.ProcessedContent;
+import co.worklytics.psoxy.gateway.ProxyConstants;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
+import co.worklytics.psoxy.gateway.output.ApiDataOutputUtils;
+import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
+import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
+import co.worklytics.psoxy.gateway.output.Output;
+import co.worklytics.psoxy.rules.RESTRules;
+import co.worklytics.psoxy.rules.RulesUtils;
+import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
+import co.worklytics.psoxy.utils.GzipedContentHttpRequestInitializer;
+import co.worklytics.psoxy.utils.URLUtils;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
@@ -56,31 +48,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import co.worklytics.psoxy.ControlHeader;
-import co.worklytics.psoxy.ErrorCauses;
-import co.worklytics.psoxy.ProcessedDataMetadataFields;
-import co.worklytics.psoxy.Pseudonymizer;
-import co.worklytics.psoxy.PseudonymizerImplFactory;
-import co.worklytics.psoxy.RESTApiSanitizer;
-import co.worklytics.psoxy.RESTApiSanitizerFactory;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
-import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
-import co.worklytics.psoxy.gateway.ConfigService;
-import co.worklytics.psoxy.gateway.HttpEventRequest;
-import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.ProcessedContent;
-import co.worklytics.psoxy.gateway.SecretStore;
-import co.worklytics.psoxy.gateway.SourceAuthStrategy;
-import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
-import co.worklytics.psoxy.gateway.output.ApiDataOutputUtils;
-import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
-import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
-import co.worklytics.psoxy.gateway.output.Output;
-import co.worklytics.psoxy.rules.RESTRules;
-import co.worklytics.psoxy.rules.RulesUtils;
-import co.worklytics.psoxy.utils.ComposedHttpRequestInitializer;
-import co.worklytics.psoxy.utils.GzipedContentHttpRequestInitializer;
-import co.worklytics.psoxy.utils.URLUtils;
 import dagger.Lazy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -90,7 +57,32 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.extern.java.Log;
-import co.worklytics.psoxy.gateway.ProxyConstants;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.hc.core5.net.WWWFormCodec;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.utils.URIBuilder;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Provider;
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
@@ -241,6 +233,17 @@ public class ApiDataRequestHandler {
             // our canonicalization code for this to go wrong
             log.log(Level.WARNING, "Error parsing  / building request URL", e);
 
+            // InvalidTokenException extends RuntimeException
+            if (e instanceof ReversibleTokenizationStrategy.InvalidTokenException ite) {
+                return HttpEventResponse.builder()
+                    // should this be a 500? Maybe 422 Unprocessable Content?
+                    .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                        ErrorCauses.FAILED_TO_BUILD_URL.name())
+                    .body("Error parsing request URL. Error " + ite.getErrorCode().getCode())
+                    .build();
+            }
+
             return HttpEventResponse.builder()
                     .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
                     .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
@@ -375,7 +378,7 @@ public class ApiDataRequestHandler {
             if (isSocketTimeoutException(e)) {
                 return buildNetworkTimeoutErrorResponse(builder, e);
             }
-            
+
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             builder.body("Failed to parse request; review logs");
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
@@ -394,9 +397,10 @@ public class ApiDataRequestHandler {
             log.log(Level.WARNING, e.getMessage(), e);
             return builder.build();
         } catch (ReversibleTokenizationStrategy.InvalidTokenException e) {
+            // should this be 422 Unprocessable Content, rather than conflict?
             builder.statusCode(HttpStatus.SC_CONFLICT);
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
-                ErrorCauses.TOKENIZED_REQUEST_PARAMETER_INVALID.name());
+                ErrorCauses.TOKENIZED_REQUEST_PARAMETER_INVALID.name() + ":" + e.getErrorCode().getCode());
             log.log(Level.WARNING, e.getMessage(), e);
             return builder.build();
         }
@@ -1045,7 +1049,7 @@ public class ApiDataRequestHandler {
      */
     private HttpEventResponse buildNetworkTimeoutErrorResponse(
             HttpEventResponse.HttpEventResponseBuilder builder, Throwable e) {
-        
+
         builder.statusCode(HttpStatus.SC_BAD_GATEWAY);
         builder.body("Network timeout: unable to connect to target API. " +
                 "This could indicate: " +
@@ -1054,12 +1058,12 @@ public class ApiDataRequestHandler {
                 "If using VPC connector, verify: VPC connector is active, CIDR range is correct, firewall allows egress, Cloud NAT is configured.");
         builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                 ErrorCauses.NETWORK_EGRESS_BLOCKED.name());
-        
+
         log.log(Level.SEVERE, "SocketTimeoutException: Network timeout connecting to target API", e);
         log.log(Level.SEVERE, "Possible causes: " +
                 "1) Proxy network egress blocked - check VPC connector configuration, firewall rules, Cloud NAT; " +
                 "2) Target API unreachable or slow - check API status, DNS resolution");
-        
+
         return builder.build();
     }
 
