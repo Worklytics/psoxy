@@ -10,10 +10,11 @@ Changes to be including in future/planned release notes will be added here.
 - `chatgpt-enterprise`: added `write` and `email` keyword tracking to prompt/title texts via `textDigest`.
 - performance: optimized `redactExceptPhrases` rule to use non-reluctant matchers.
 
-## [0.5.19](https://github.com/Worklytics/psoxy/release/tag/v0.5.19)
+## [0.6.0](https://github.com/Worklytics/psoxy/releases/tag/v0.6.0)
 - `gcp`: Dedicated `proxy_builder_sa` service account is now provisioned and used for Cloud Build operations when provisioning Cloud Functions, eliminating project-level IAM dependencies on the default Compute Engine service account.
 - `zoom`: Default rules for Zoom have been updated, removing fields and endpoints not required.
 - `pseudonymizeRegexMatches`: apply the pseudonymization to any match found in the field instead of the first one.
+- `Atlassian Organization API`: added new connector for fetching audit events from Atlassian Organization API, which provides access to audit events from users and tools like Rovo.
 - `GitLab`: added support for GitLab (gitlab.com) and Self-Managed/Dedicated instances
 
 ## [0.5.18](https://github.com/Worklytics/psoxy/releases/tag/v0.5.18)
