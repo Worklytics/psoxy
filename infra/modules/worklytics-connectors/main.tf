@@ -23,7 +23,7 @@ module "worklytics_connector_specs" {
   github_copilot_installation_id           = var.github_copilot_installation_id
   github_organization                      = var.github_organization
   github_example_repository                = var.github_example_repository
-  gitlab_host                              = var.gitlab_host
+  gitlab_url                               = var.gitlab_url
   gitlab_example_group_id                  = var.gitlab_example_group_id
   gitlab_example_project_id                = var.gitlab_example_project_id
   gong_instance_subdomain                  = var.gong_instance_subdomain

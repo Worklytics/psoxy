@@ -179,10 +179,10 @@ variable "github_example_repository" {
   description = "(Only required if using Github connector) Name for the repository to be used as part of example calls for Github (ex: psoxy)"
 }
 
-variable "gitlab_host" {
+variable "gitlab_url" {
   type        = string
-  default     = "gitlab.com"
-  description = "(Only required if using GitLab connector) Host of the GitLab instance (ex: gitlab.com or gitlab.mycompany.com for self-hosted)"
+  default     = "https://gitlab.com"
+  description = "(Only required if using GitLab Managed connector) URL of the GitLab instance (ex: https://gitlab.mycompany.com, https://mycompany.com/gitlab, https://my-instance-gitlab.com, etc)"
 }
 
 variable "gitlab_example_group_id" {

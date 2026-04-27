@@ -1,0 +1,44 @@
+[
+  {
+    "id":302,
+    "body":"closed",
+    "author":{
+      "id":"t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc",
+      "username":"t~2j-pIx1IlJFGiNWibpTKTO977LOUEJiUKMdlKPBePIo",
+      "email":"t~5TglOcyVGpy0s4iFwMoL-G67Itorwak4J4Nm9CwxRkQ@example.com",
+      "state":"active",
+      "created_at":"2013-09-30T13:46:01Z"
+    },
+    "created_at":"2013-10-02T09:22:45Z",
+    "updated_at":"2013-10-02T10:22:45Z",
+    "system":true,
+    "noteable_id":377,
+    "noteable_type":"Issue",
+    "project_id":5,
+    "noteable_iid":377,
+    "resolvable":false,
+    "confidential":false,
+    "internal":false
+  },
+  {
+    "id":305,
+    "body":"Text of the comment\r\n",
+    "author":{
+      "id":"t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc",
+      "username":"t~2j-pIx1IlJFGiNWibpTKTO977LOUEJiUKMdlKPBePIo",
+      "email":"t~5TglOcyVGpy0s4iFwMoL-G67Itorwak4J4Nm9CwxRkQ@example.com",
+      "state":"active",
+      "created_at":"2013-09-30T13:46:01Z"
+    },
+    "created_at":"2013-10-02T09:56:03Z",
+    "updated_at":"2013-10-02T09:56:03Z",
+    "system":true,
+    "noteable_id":121,
+    "noteable_type":"Issue",
+    "project_id":5,
+    "noteable_iid":121,
+    "resolvable":false,
+    "confidential":true,
+    "internal":true
+  }
+]
