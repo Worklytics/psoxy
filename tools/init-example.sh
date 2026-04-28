@@ -65,13 +65,26 @@ else
   CANDIDATE="$EXPLICIT_REPO_CLONE_DIR"
   # strip trailing slash for consistent dirname handling
   CANDIDATE="${CANDIDATE%/}"
+  # normalize to an absolute path so dirname traversal always makes progress toward /
+  if [[ -d "$CANDIDATE" ]]; then
+    CANDIDATE="$(cd "$CANDIDATE" 2>/dev/null && pwd -P)"
+  else
+    CANDIDATE_PARENT="$(dirname "$CANDIDATE")"
+    CANDIDATE_BASENAME="$(basename "$CANDIDATE")"
+    CANDIDATE="$(cd "$CANDIDATE_PARENT" 2>/dev/null && printf "%s/%s" "$(pwd -P)" "$CANDIDATE_BASENAME")"
+  fi
+
   FOUND_REPO_ROOT=""
   while [[ -n "$CANDIDATE" ]] && [[ "$CANDIDATE" != "/" ]]; do
     if [[ -f "${CANDIDATE}/tools/init-example-full.sh" ]]; then
       FOUND_REPO_ROOT="$CANDIDATE"
       break
     fi
-    CANDIDATE="$(dirname "$CANDIDATE")"
+    NEXT_CANDIDATE="$(dirname "$CANDIDATE")"
+    if [[ "$NEXT_CANDIDATE" == "$CANDIDATE" ]]; then
+      break
+    fi
+    CANDIDATE="$NEXT_CANDIDATE"
   done
 
   if [[ -z "$FOUND_REPO_ROOT" ]]; then
