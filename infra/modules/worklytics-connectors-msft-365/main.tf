@@ -74,10 +74,7 @@ data "azuread_application" "existing_connector_app" {
 module "msft_365_grants" {
   for_each = local.connectors_needing_apps
 
-  source = "../../modules/azuread-grant-all-users"
-
-  psoxy_instance_id        = each.key
-  application_id           = module.msft_connection[each.key].connector.client_id
+  source = "../../modules/entra-grant-all-users"
   oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
   app_roles                = each.value.required_app_roles
   application_name         = each.key
@@ -88,7 +85,7 @@ module "msft_365_grants" {
 module "msft_365_grant_to_shared" {
   count = local.provision_entraid_apps ? 0 : 1
 
-  source = "../../modules/azuread-grant-all-users"
+  source = "../../modules/entra-grant-all-users"
 
   psoxy_instance_id        = "msft-365"
   application_id           = data.azuread_application.existing_connector_app[0].client_id
@@ -101,7 +98,7 @@ module "msft_365_grant_to_shared" {
 }
 
 
-# NOTE: this OVERWRITES the todo_file created by the azuread-grant-all-users module, if there's an
+# NOTE: this OVERWRITES the todo_file created by the entra-grant-all-users module, if there's an
 # external_token_todo to append to that file
 locals {
   todos_to_populate = { for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors :

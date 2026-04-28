@@ -1,8 +1,12 @@
 # Microsoft Entra ID Local Certificate **deprecated**
 
-**DEPRECATED** - will be removed in v0.5; this is not recommended approach, for a variety of
-reasons, since Microsoft release support for federated credentials in ~Sept 202. See our module
-`azuread-federated-credentials` for preferred alternative.
+**DEPRECATED** - not the recommended approach for a variety of reasons, since Microsoft released
+support for federated credentials in ~Sept 2022. See our module `azuread-federated-credentials`
+for the preferred alternative.
+
+NOTE: this module is named 'azuread-*' because it uses the HashiCorp 'azuread' Terraform provider;
+the provider itself retains its original name as a convention and to avoid breaking changes for
+provider users, so we follow that convention in this module name.
 
 Module to generate a certificate locally, using `openssl`, and push it to target Microsoft Entra ID application.
 

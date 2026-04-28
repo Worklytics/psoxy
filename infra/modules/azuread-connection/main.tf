@@ -1,6 +1,10 @@
 # provisions infra for a Microsoft Data Source connector (in Microsoft Entra ID)
 #  - the connector application
 #  - granting connector access on behalf of the users in your Microsoft Entra ID tenant
+#
+# NOTE: this module is named 'azuread-*' because it uses the HashiCorp 'azuread' Terraform provider;
+# the provider itself retains its original name as a convention and to avoid breaking changes for
+# provider users, so we follow that convention in this module name.
 
 terraform {
   required_providers {
