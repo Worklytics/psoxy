@@ -540,3 +540,8 @@ EOF
 output "secrets_to_provision" {
   value = local.secrets_writable_by_instance
 }
+
+output "bulk_connector" {
+  description = "INTERNAL USE ONLY - For testing purposes."
+  value       = module.bulk_connector
+}
