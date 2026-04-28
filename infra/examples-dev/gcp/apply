@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Sandbox Azure CLI auth to the current directory to prevent conflicts with other Azure tenants
+# Use a local Azure CLI config directory if present to help prevent conflicts with other Azure tenants
 if [ -d "${PWD}/.azure" ]; then
     export AZURE_CONFIG_DIR="${PWD}/.azure"
 fi
