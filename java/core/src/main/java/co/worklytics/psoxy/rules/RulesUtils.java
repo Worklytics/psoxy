@@ -72,7 +72,18 @@ public class RulesUtils {
             // some other mechanism (eg, directly from the SSM Parameter Store UX in AWS Console),
             // which is fairly legitimate
 
-            return Optional.of(parse(yamlEncodedRules));
+            try {
+                return Optional.of(parse(yamlEncodedRules));
+            } catch (InvalidRulesException e) {
+                if (!yamlEncodedRules.equals(configuredRules.get())) {
+                    try {
+                        return Optional.of(parse(configuredRules.get()));
+                    } catch (InvalidRulesException ignored) {
+                        // ignore this fallback exception, throw original
+                    }
+                }
+                throw e;
+            }
         } else {
             if (envVarsConfigService != null // legacy case
                 && envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.CUSTOM_RULES_SHA).map(StringUtils::isNotBlank).orElse(false)) {
