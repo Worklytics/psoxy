@@ -196,7 +196,7 @@ function getLogsURL(cloudFunctionURL = '') {
       try {
         if (fs.existsSync('terraform.tfvars')) {
           const tfvars = fs.readFileSync('terraform.tfvars', 'utf8');
-          const match = tfvars.match(/^gcp_project_id\s*=\s*["']([^"']+)["']/m);
+          const match = tfvars.match(/gcp_project_id\s*=\s*["']([^"']+)["']/);
           if (match) {
             projectId = match[1].trim();
           }
