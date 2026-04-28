@@ -2,6 +2,8 @@
 import { Logging } from '@google-cloud/logging';
 import { CloudSchedulerClient } from '@google-cloud/scheduler';
 import { Storage } from '@google-cloud/storage';
+import fs from 'fs';
+import path from 'path';
 import _ from 'lodash';
 import getLogger from './logger.js';
 import {
@@ -190,6 +192,19 @@ function getLogsURL(cloudFunctionURL = '') {
     // TODO
     //  should pass `projectId` somehow and append to the resulting URL as query param `project`
     //  in gen 2 use-case
+    if (_.isEmpty(projectId)) {
+      try {
+        if (fs.existsSync('terraform.tfvars')) {
+          const tfvars = fs.readFileSync('terraform.tfvars', 'utf8');
+          const match = tfvars.match(/^gcp_project_id\s*=\s*["']([^"']+)["']/m);
+          if (match) {
+            projectId = match[1].trim();
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
     if (_.isEmpty(projectId)) {
       try {
         const out = executeCommand('gcloud config get-value project 2>/dev/null');
