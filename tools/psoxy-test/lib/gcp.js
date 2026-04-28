@@ -186,10 +186,20 @@ function getLogsURL(cloudFunctionURL = '') {
 
   let googleConsoleURL = 'https://console.cloud.google.com';
   if (!_.isEmpty(region) && !_.isEmpty(functionName)) {
-    googleConsoleURL += `/run/detail/${region}/${functionName}/logs`;
+    googleConsoleURL += `/run/detail/${region}/${functionName}/observability/logs`;
     // TODO
     //  should pass `projectId` somehow and append to the resulting URL as query param `project`
     //  in gen 2 use-case
+    if (_.isEmpty(projectId)) {
+      try {
+        const out = executeCommand('gcloud config get-value project 2>/dev/null');
+        if (out) {
+          projectId = out.trim();
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
     if (!_.isEmpty(projectId)) {
       googleConsoleURL += `?project=${projectId}`;
     }
