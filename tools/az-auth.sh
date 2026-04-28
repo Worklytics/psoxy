@@ -2,6 +2,9 @@
 
 # Copyright 2025 Worklytics, Co.
 
+# Sandbox Azure CLI auth to the current directory to prevent conflicts with other Azure tenants
+export AZURE_CONFIG_DIR="${PWD}/.azure"
+
 COLORSCHEME_SH="$(dirname "$0")/set-term-colorscheme.sh"
 if [ -f "$COLORSCHEME_SH" ]; then
     source "$COLORSCHEME_SH"

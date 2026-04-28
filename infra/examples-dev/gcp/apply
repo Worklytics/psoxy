@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Sandbox Azure CLI auth to the current directory to prevent conflicts with other Azure tenants
+if [ -d "${PWD}/.azure" ]; then
+    export AZURE_CONFIG_DIR="${PWD}/.azure"
+fi
 # prompt if user wants to force_bundle or not; default to Y
 read -p "Do you want to force rebuild of the bundle? (eg, have you made java code changes?) (Y/n): " force_bundle
 

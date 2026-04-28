@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Sandbox Azure CLI auth to the current directory to prevent conflicts with other Azure tenants
+if [ -d "${PWD}/.azure" ]; then
+    export AZURE_CONFIG_DIR="${PWD}/.azure"
+fi
 # Psoxy init script - lite version
 #
 # Usage:
