@@ -98,8 +98,7 @@ public class RulesUtils {
         }
     }
 
-    @VisibleForTesting
-    String decodeToYaml(String valueFromConfig) {
+    public String decodeToYaml(String valueFromConfig) {
         //possible encodings: 1) base64-encoded YAML, 2) plain YAML, 3) base64-encoded gzipped YAML
         String yamlEncodedRules;
         try {
