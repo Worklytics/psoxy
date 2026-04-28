@@ -18,7 +18,7 @@ Steps (1) and (2) are handled by the `terraform` examples. To perform them, the 
 `terraform` must be authenticated with [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/) as
 a Microsoft Entra ID user with, at minimum, the following role in your Microsoft 365 tenant:
 
-- [Cloud Application Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#cloud-application-administrator)
+- [Cloud Application Administrator](https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#cloud-application-administrator)
   to create/update/delete Entra ID applications and its settings during Terraform apply command.
 
 Please note that this role is the least-privileged role sufficient for this task (creating a Microsoft Entra ID
@@ -201,7 +201,7 @@ If you see an error like this:
 }
 ```
 
-Please ensure that admin consent has been granted to the application in the Azure AD console.
+Please ensure that admin consent has been granted to the application in the Microsoft Entra admin center.
 If there is a new error after doing the admin like this:
 
 ```json

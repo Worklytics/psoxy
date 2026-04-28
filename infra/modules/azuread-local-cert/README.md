@@ -1,13 +1,13 @@
-# Azure AD Local Certificate **deprecated**
+# Microsoft Entra ID Local Certificate **deprecated**
 
 **DEPRECATED** - will be removed in v0.5; this is not recommended approach, for a variety of
 reasons, since Microsoft release support for federated credentials in ~Sept 202. See our module
 `azuread-federated-credentials` for preferred alternative.
 
-Module to generate a certificate locally, using `openssl`, and push it to target Azure AD application.
+Module to generate a certificate locally, using `openssl`, and push it to target Microsoft Entra ID application.
 
 Prereqs:
-  - auth'd in Azure CLI as user who can update certificate on Azure AD enterprise application listing
+  - auth'd in Azure CLI as user who can update certificate on Microsoft Entra ID application listing
   - `openssl` We have not documented exact version required, so YMMV.
   - [`jq`](https://stedolan.github.io/jq/)
 

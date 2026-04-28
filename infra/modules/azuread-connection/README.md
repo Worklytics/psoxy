@@ -1,6 +1,6 @@
 # azuread-connection
 
-This module registers an Azure AD Application in a Microsoft 365 tenant.
+This module registers a Microsoft Entra ID Application in a Microsoft 365 tenant.
 
 ## Troubleshooting
 

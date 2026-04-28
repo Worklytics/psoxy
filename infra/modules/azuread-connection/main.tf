@@ -1,6 +1,6 @@
-# provisions infra for a Microsoft Data Source connector (in Azure AD)
+# provisions infra for a Microsoft Data Source connector (in Microsoft Entra ID)
 #  - the connector application
-#  - granting connector access on behalf of the users in your Azure AD directory
+#  - granting connector access on behalf of the users in your Microsoft Entra ID tenant
 
 terraform {
   required_providers {

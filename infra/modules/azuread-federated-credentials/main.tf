@@ -1,4 +1,4 @@
-# provisions infra for a federated credential on a Microsoft Data Source connector (in Azure AD)
+# provisions infra for a federated credential on a Microsoft Data Source connector (in Microsoft Entra ID)
 
 terraform {
   required_providers {

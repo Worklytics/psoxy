@@ -68,7 +68,7 @@ data "azuread_application" "existing_connector_app" {
 }
 
 
-# grant required permissions to connectors via Azure AD
+# grant required permissions to connectors via Microsoft Entra ID
 # (requires terraform configuration being applied by an Azure User with privileges to do this; it
 #  usually requires a 'Global Administrator' for your tenant)
 module "msft_365_grants" {

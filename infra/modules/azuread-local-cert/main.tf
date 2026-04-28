@@ -1,4 +1,4 @@
-# generate certificate for Azure AD application locally and deploy it to Azure AD
+# generate certificate for Microsoft Entra ID application locally and deploy it to Microsoft Entra ID
 # NOTE: certificate will only be temporarily written to your local file system, but out of abundance
 # of caution should:
 #  - run this only in an environment that is approved from key generation in your organization
