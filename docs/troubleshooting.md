@@ -25,14 +25,27 @@ If you DO intend to use Google Workspace as a data source, you must install and 
 
 If you are inspecting your deployed configuration (e.g. looking at environment variables in the AWS or GCP console) and expecting to see plain YAML, you may instead see a seemingly unintelligible string. This is because Psoxy's Terraform modules automatically base64-encode and gzip your custom rules to bypass cloud provider constraints on the size or contents of environment variables.
 
-You can decode this payload back to plain YAML using macOS/Linux CLI tools:
+You can decode this payload back to plain YAML using CLI tools. The exact command depends on your operating system:
 
+**macOS:**
 ```sh
 # Example: decoding a base64-gzipped rules payload copied to your clipboard
-pbpaste | base64 -d | gunzip
+pbpaste | base64 -D | gunzip
+
+# Or if stored in a shell variable
+echo "$RULES" | base64 -D | gunzip
 ```
 
-(Or via `echo "$RULES" | base64 -d | gunzip` if stored in a shell variable). Psoxy natively understands both plain YAML and this base64-gzipped format.
+**Linux:**
+```sh
+# Example: decoding a base64-gzipped rules payload from your clipboard (requires xclip)
+xclip -selection clipboard -o | base64 -d | gunzip
+
+# Or if stored in a shell variable
+echo "$RULES" | base64 -d | gunzip
+```
+
+Psoxy natively understands both plain YAML and this base64-gzipped format.
 
 ### Verify Pre-Requisites
 
