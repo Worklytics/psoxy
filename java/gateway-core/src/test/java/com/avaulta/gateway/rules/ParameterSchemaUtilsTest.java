@@ -103,10 +103,10 @@ class ParameterSchemaUtilsTest {
 
 
     @Test
-    public void validate_or(){
+    public void validate_anyOf(){
         ParameterSchema schema = ParameterSchema.builder()
-            .or(ParameterSchema.builder().pattern("^all$").build())
-            .or(ParameterSchema.integer())
+            .anyOf(ParameterSchema.builder().pattern("^all$").build())
+            .anyOf(ParameterSchema.integer())
             .build();
 
         assertTrue(parameterSchemaUtils.validate(schema, "all"));

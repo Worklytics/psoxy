@@ -78,8 +78,6 @@ resource "google_kms_crypto_key" "webhook_auth_key" {
   version_template {
     algorithm = var.provision_auth_key.key_spec
   }
-
-  labels = var.default_labels
 }
 
 locals {
@@ -115,14 +113,7 @@ resource "google_kms_crypto_key_iam_member" "allow_function_to_access_public_key
 
 # END AUTH KEYS
 
-module "rules_parameter" {
-  source = "../gcp-sm-rules"
-
-  project_id        = var.project_id
-  instance_sa_email = var.service_account_email
-  file_path         = var.rules_file
-  prefix            = local.path_to_instance_config_parameters
-}
+# (rules_parameter module removed)
 
 
 resource "random_string" "bucket_name_random_sequence" {
@@ -148,6 +139,8 @@ resource "random_string" "bucket_name_random_sequence" {
 module "sanitized_webhook_output" {
   source = "../gcp-output-bucket"
 
+  enable_versioning              = var.enable_versioning
+  bucket_access_logs_destination = var.bucket_access_logs_destination
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
@@ -165,6 +158,8 @@ module "side_output_bucket" {
 
   for_each = local.side_outputs_to_provision
 
+  enable_versioning              = var.enable_versioning
+  bucket_access_logs_destination = var.bucket_access_logs_destination
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
@@ -201,6 +196,7 @@ locals {
     BATCH_SIZE                       = local.batch_size
     BATCH_INVOCATION_TIMEOUT_SECONDS = local.batch_invocation_timeout_seconds
     WEBHOOK_BATCH_OUTPUT             = "gs://${module.sanitized_webhook_output.bucket_name}/${var.output_path_prefix}"
+    RULES                            = var.rules_file != null ? base64gzip(file(var.rules_file)) : null
     }
     : k => v if v != null
   }
@@ -225,7 +221,6 @@ module "auth_issuer_secret" {
       description = "URL of the function as a web service"
     },
   }
-  default_labels = var.default_labels
 }
 
 # grant access to secrets known AFTER function is deployed
@@ -285,6 +280,7 @@ resource "google_cloudfunctions2_function" "function" {
     runtime           = "java21"
     docker_repository = var.artifact_repository_id
     entry_point       = "co.worklytics.psoxy.GcpWebhookCollectorRoute"
+    service_account   = var.builder_sa_id
 
     source {
       storage_source {
@@ -331,8 +327,6 @@ resource "google_cloudfunctions2_function" "function" {
     }
   }
 
-  labels = var.default_labels
-
   depends_on = [
     google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret,
     google_service_account_iam_member.act_as
@@ -357,8 +351,6 @@ resource "google_cloud_run_service_iam_binding" "invokers" {
 resource "google_pubsub_topic" "webhook_topic" {
   name    = "${var.environment_id_prefix}${var.instance_id}-webhooks"
   project = var.project_id
-
-  labels = var.default_labels
 }
 
 # Pub/Sub subscription for batch processing
@@ -378,8 +370,6 @@ resource "google_pubsub_subscription" "webhook_subscription" {
   expiration_policy {
     ttl = "" # No expiration
   }
-
-  labels = var.default_labels
 }
 
 # IAM binding to allow the Cloud Function to publish to the topic

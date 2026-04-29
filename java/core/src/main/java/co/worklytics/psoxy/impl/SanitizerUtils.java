@@ -168,12 +168,12 @@ public class SanitizerUtils {
                     List<String> texts = jsonContext.read(transform.getJsonPathToProcessWhenEscaped());
 
                     for (String text : texts) {
-                        jsonContext.set(transform.getJsonPathToProcessWhenEscaped(), jsonConfiguration.jsonProvider().toJson(Transform.TextDigest.generate(text)));
+                        jsonContext.set(transform.getJsonPathToProcessWhenEscaped(), jsonConfiguration.jsonProvider().toJson(transform.generate(text)));
                     }
 
                     return jsonContext.jsonString();
                 } else {
-                    return jsonConfiguration.jsonProvider().toJson(Transform.TextDigest.generate(toTokenize));
+                    return jsonConfiguration.jsonProvider().toJson(transform.generate(toTokenize));
                 }
             }
         };
@@ -246,7 +246,6 @@ public class SanitizerUtils {
         List<Pattern> patterns = transform.getAllowedPhrases().stream()
             .map(p -> "\\Q" + p + "\\E") // quote it
             .map(p -> "\\b(" + p + ")[\\s:]*\\b") //boundary match, with optional whitespace or colon at end
-            .map(p -> ".*?" + p + ".*?") //wrap in .*? to match anywhere in the string, but reluctantly
             .map(p -> Pattern.compile(p, CASE_INSENSITIVE))
             .collect(Collectors.toList());
 
@@ -261,7 +260,7 @@ public class SanitizerUtils {
             } else {
                 return patterns.stream()
                     .map(p -> p.matcher((String) s))
-                    .filter(Matcher::matches)
+                    .filter(Matcher::find)
                     .map(m -> m.group(1)) //group 1, bc we created caputuring group in regex above
                     .collect(Collectors.joining(",")); //q: something better? if , in phrases, can't reparse
 
@@ -339,20 +338,19 @@ public class SanitizerUtils {
                     List<EmailAddress> addresses =
                         emailAddressParser.parseEmailAddressesFromHeader((String) value);
 
-                    //TODO: in v0.6, we should use a String instead of List<PseudonymizedIdentity>/List<String>;
-                    // encode EVERYTHING according to encoding option, then join with comma back into a CSV string
-
-                    return jsonConfiguration.jsonProvider()
-                        .toJson(addresses.stream().map(EmailAddress::asFormattedString)
-                            .map(pseudonymizer::pseudonymize).map(pseudonymizedIdentity -> {
-                                if (transformOptions
-                                    .getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
-                                    return urlSafePseudonymEncoder
-                                        .encode(pseudonymizedIdentity.asPseudonym());
-                                } else {
-                                    return pseudonymizedIdentity;
-                                }
-                            }).collect(Collectors.toList()));
+                    if (transformOptions.getEncoding() == PseudonymEncoder.Implementations.URL_SAFE_TOKEN) {
+                        return addresses.stream()
+                            .map(EmailAddress::asFormattedString)
+                            .map(pseudonymizer::pseudonymize)
+                            .map(pseudonymizedIdentity -> urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym()))
+                            .collect(Collectors.joining(","));
+                    } else {
+                        List<PseudonymizedIdentity> pseudonymizedIdentities = addresses.stream()
+                            .map(EmailAddress::asFormattedString)
+                            .map(pseudonymizer::pseudonymize)
+                            .collect(Collectors.toList());
+                        return jsonConfiguration.jsonProvider().toJson(pseudonymizedIdentities);
+                    }
                 } else {
                     log.log(Level.WARNING,
                         "Valued matched by emailHeader rule is not valid address list, but not blank");
@@ -395,27 +393,57 @@ public class SanitizerUtils {
         return (Object s, Configuration configuration) -> {
 
             String fullString = (String) s;
+
+            if (StringUtils.isBlank(fullString)) {
+                // Return redacted
+                return null;
+            }
+
             Matcher matcher = pattern.matcher(fullString);
 
-            if (matcher.matches()) {
-                String toPseudonymize;
-                if (matcher.groupCount() > 0) {
-                    toPseudonymize = matcher.group(1);
-                } else {
-                    toPseudonymize = matcher.group(0);
+            boolean found = false;
+            StringBuilder result = new StringBuilder();
+
+            while (matcher.find()) {
+                String matchedGroup = matcher.groupCount() > 0 ? matcher.group(1) : matcher.group(0);
+
+                // skip empty or blank matches (e.g. when pattern is .* or (\s+))
+                if (StringUtils.isBlank(matchedGroup)) {
+                    continue;
                 }
-                PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(toPseudonymize, transform);
+
+                PseudonymizedIdentity pseudonymizedIdentity = pseudonymizer.pseudonymize(matchedGroup, transform);
+
+                // guard against null pseudonymizedIdentity for blank/invalid input
+                if (pseudonymizedIdentity == null) {
+                    continue;
+                }
+
+                found = true;
 
                 String pseudonymizedString = urlSafePseudonymEncoder.encode(pseudonymizedIdentity.asPseudonym());
 
                 if (matcher.groupCount() > 0) {
-                    // return original, replacing match with encoded pseudonym
-                    return fullString.replace(matcher.group(1), pseudonymizedString);
+                    // use start(1)/end(1) indices to replace only the exact group(1) span
+                    // within the full match, avoiding replacing repeated occurrences of group(1) in group(0)
+                    String fullMatch = matcher.group(0);
+                    int groupStartInMatch = matcher.start(1) - matcher.start(0);
+                    int groupEndInMatch = matcher.end(1) - matcher.start(0);
+                    String replacement = fullMatch.substring(0, groupStartInMatch)
+                        + pseudonymizedString
+                        + fullMatch.substring(groupEndInMatch);
+                    matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
                 } else {
-                    return pseudonymizedString;
+                    matcher.appendReplacement(result, Matcher.quoteReplacement(pseudonymizedString));
                 }
+            }
+
+            if (found) {
+                matcher.appendTail(result);
+                return result.toString();
             } else {
-                //if no match, redact it
+                // TODO: review this; probably add a new transformation with a more consistent behavior and mark this as deprecated
+                // original behavior: if no real match, redact
                 return null;
             }
         };

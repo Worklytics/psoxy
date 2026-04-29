@@ -226,7 +226,8 @@ class ParameterStoreConfigServiceTest {
 
         // Use a dummy ConfigProperty
         ConfigService.ConfigProperty property = () -> "DUMMY";
-        List<ConfigService.ConfigValueVersion> versions = parameterStoreConfigService.getAvailableVersions(property, 5);
+        List<ConfigService.ConfigValueVersion> versions = 
+            parameterStoreConfigService.getAvailableVersions(property, 5);
 
         // Should only return v2 and v1, sorted by version descending
         assertEquals(2, versions.size());

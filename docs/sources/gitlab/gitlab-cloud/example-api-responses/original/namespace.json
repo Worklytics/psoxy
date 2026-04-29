@@ -1,0 +1,20 @@
+{
+  "id": 2,
+  "name": "group1",
+  "path": "group1",
+  "kind": "group",
+  "full_path": "group1",
+  "parent_id": null,
+  "avatar_url": null,
+  "web_url": "https://gitlab.example.com/groups/group1",
+  "members_count_with_descendants": 2,
+  "billable_members_count": 2,
+  "max_seats_used": 0,
+  "seats_in_use": 0,
+  "plan": "default",
+  "end_date": "2026-03-27",
+  "trial_ends_on": null,
+  "trial": false,
+  "root_repository_size": 100,
+  "projects_count": 3
+}

@@ -2,6 +2,7 @@ package co.worklytics.psoxy.storage.impl;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Map;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -19,7 +20,7 @@ class JsonArrayRecordReader implements RecordReader {
     JsonParser parser;
 
     @Override
-    public Object readRecord() throws IOException {
+    public Map<String, Object> readRecord() throws IOException {
         if (parser == null) {
             JsonFactory factory = objectMapper.getFactory();
             parser = factory.createParser(reader);
@@ -37,7 +38,8 @@ class JsonArrayRecordReader implements RecordReader {
             Object node = objectMapper.readValue(parser, Object.class);
             // Convert to Jayway compatible object (Map/List) via JSON string intermediate
             // This sustains compatibility with existing logic which cleanses based on Jayway structures
-            return jsonConfiguration.jsonProvider().parse(
+            
+            return (Map<String, Object>) jsonConfiguration.jsonProvider().parse(
                 objectMapper.writeValueAsString(node)
             );
         }

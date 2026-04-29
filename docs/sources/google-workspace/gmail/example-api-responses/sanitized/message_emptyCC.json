@@ -20,7 +20,7 @@
       },
       {
         "name":"From",
-        "value":"[\"t~EsXNVTaSltmDUIO4v8CixL66qkCKLlpLB_RHysHbQSQ@worklytics.co\"]"
+        "value":"t~EsXNVTaSltmDUIO4v8CixL66qkCKLlpLB_RHysHbQSQ@worklytics.co"
       },
       {
         "name":"Message-ID",
@@ -28,7 +28,7 @@
       },
       {
         "name":"To",
-        "value":"[\"t~t9en8zJVP-3M_f0Zce7WRyACl2EWLeGy_fSnrtJpHm4@worklytics.co\"]"
+        "value":"t~t9en8zJVP-3M_f0Zce7WRyACl2EWLeGy_fSnrtJpHm4@worklytics.co"
       },
       {
         "name":"Cc",
@@ -36,7 +36,7 @@
       },
       {
         "name":"bcC",
-        "value":"[\"t~TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4@worklytics.co\",\"t~p4EqhPet-p2vhJbMJD5jrbrlJtF21L0TOl8bBtjrNpk@worklytics.co\"]"
+        "value":"t~TtDWXFAQxNE8O2w7DuMtEKzTSZXERuUVLCjmd9r6KQ4@worklytics.co,t~p4EqhPet-p2vhJbMJD5jrbrlJtF21L0TOl8bBtjrNpk@worklytics.co"
       },
       {
         "name":"X-Original-Sender",

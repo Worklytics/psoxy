@@ -1,0 +1,11 @@
+{
+  "version": "18.10.1",
+  "revision": "6bef35b5226",
+  "kas": {
+    "enabled": true,
+    "externalUrl": "ws://some-url",
+    "externalK8sProxyUrl": "http://some-url/-/kubernetes-agent/k8s-proxy/",
+    "version": "18.10.1"
+  },
+  "enterprise": false
+}

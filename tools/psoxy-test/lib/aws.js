@@ -269,12 +269,23 @@ async function upload(bucket, key, file, options, client) {
     Body: fs.createReadStream(file),
   }
 
-  if (await isGzipped(file)) {
-    commandOptions.ContentEncoding = 'gzip';
+  // Determine Content-Type from the base filename (stripping .gz if present)
+  const baseName = key.endsWith('.gz') ? key.slice(0, -3) : key;
+  const ext = baseName.slice(baseName.lastIndexOf('.')).toLowerCase();
+  const MIME_TYPES = {
+    '.ndjson': 'application/x-ndjson',
+    '.json': 'application/json',
+    '.csv': 'text/csv',
+    '.tsv': 'text/tab-separated-values',
+    '.parquet': 'application/vnd.apache.parquet',
+  };
+  const contentType = MIME_TYPES[ext];
+  if (contentType) {
+    commandOptions.ContentType = contentType;
   }
 
-  if(path.extname(key)?.toLowerCase() === '.csv') {
-    commandOptions.ContentType = 'text/csv';
+  if (await isGzipped(file)) {
+    commandOptions.ContentEncoding = 'gzip';
   }
 
   return await client.send(new PutObjectCommand(commandOptions));

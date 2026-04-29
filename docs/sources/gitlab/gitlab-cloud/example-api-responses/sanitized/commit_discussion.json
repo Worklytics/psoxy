@@ -1,0 +1,25 @@
+[
+  {
+    "id":"4604744a1c64de00ff62e1e8a6766919923d2b41",
+    "individual_note":true,
+    "notes":[
+      {
+        "id":334686748,
+        "body":"{\"length\":19,\"word_count\":4}",
+        "author":{
+          "id":"t~P7rIKRza9vpCeuMVrEU-SgJ03YrU1zuWDYw-b6dZEiM",
+          "username":"t~LkgqLj0_m7wVOT1QQjH4Ey3ldMJBlYGDbUIBT9O4_V0",
+          "state":"active"
+        },
+        "created_at":"2020-04-30T18:48:11.432Z",
+        "updated_at":"2020-04-30T18:48:11.432Z",
+        "system":false,
+        "noteable_id":null,
+        "noteable_type":"Commit",
+        "resolvable":false,
+        "confidential":false,
+        "noteable_iid":null
+      }
+    ]
+  }
+]
