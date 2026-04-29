@@ -10,6 +10,11 @@ on:
         required: true
         type: string
         description: "release to publish (eg, v0.4.49)"
+    secrets:
+      PSOXY_EXAMPLE_AWS_TOKEN:
+        required: true
+      PSOXY_EXAMPLE_GCP_TOKEN:
+        required: true
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -20,12 +25,14 @@ jobs:
     with:
       example-repo: 'Worklytics/psoxy-example-aws'
       example-to-copy: 'infra/examples-dev/aws'
-      example-repo-token: ${{ secrets.PSOXY_EXAMPLE_AWS_TOKEN }}
       release: ${{ inputs.release }}
+    secrets:
+      example-repo-token: ${{ secrets.PSOXY_EXAMPLE_AWS_TOKEN }}
   publish-example-gcp:
     uses: ./.github/workflows/publish-example.yaml
     with:
       example-repo: 'Worklytics/psoxy-example-gcp'
       example-to-copy: 'infra/examples-dev/gcp'
-      example-repo-token: ${{ secrets.PSOXY_EXAMPLE_GCP_TOKEN }}
       release: ${{ inputs.release }}
+    secrets:
+      example-repo-token: ${{ secrets.PSOXY_EXAMPLE_GCP_TOKEN }}

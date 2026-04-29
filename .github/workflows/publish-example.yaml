@@ -9,14 +9,14 @@ on:
         required: true
         type: string
         description: "path to example to copy"
-      example-repo-token:
-        required: true
-        type: string
-        description: "token to use to publish example"
       release:
         required: true
         type: string
         description: "release to publish (eg, v0.4.49)"
+    secrets:
+      example-repo-token:
+        required: true
+        description: "token to use to publish example"
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -36,7 +36,7 @@ jobs:
           path: 'example'
           repository: ${{ inputs.example-repo }}
           ref: 'main'
-          token: ${{ inputs.example-repo-token }}
+          token: ${{ secrets.example-repo-token }}
       - name: Copy Example from examples-dev/ to example repo
         run: |
           proxy/tools/release/example-copy.sh proxy/${{ inputs.example-to-copy }} example
@@ -47,10 +47,10 @@ jobs:
           repo: ${{ inputs.example-repo }}
           branch: rc-${{ inputs.release }}
         env:
-          GITHUB_TOKEN: ${{ inputs.example-repo-token }}
+          GITHUB_TOKEN: ${{ secrets.example-repo-token }}
       - name: Open PR in example repo to merge update back to its mainline
         env:
-          GH_TOKEN: ${{ inputs.example-repo-token }}
+          GH_TOKEN: ${{ secrets.example-repo-token }}
         run: |
           gh pr create --base main --head rc-${{ inputs.release }} --title "Update release to ${{ inputs.release }}" --body "Update release to ${{ inputs.release }}"
 
