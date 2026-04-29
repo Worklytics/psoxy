@@ -277,7 +277,17 @@ variable "custom_api_connectors" {
   }))
 
   description = "map of custom API connectors to provision"
-  default     = {}
+  default = {
+    # "custom-api" = {
+    #   source_kind          = "my-custom-api"
+    #   source_auth_strategy = "bearer"
+    #   target_host          = "api.example.com"
+    #   example_api_calls    = ["/v1/users"]
+    #   secured_variables = [
+    #     { name = "API_KEY" }
+    #   ]
+    # }
+  }
 }
 
 variable "custom_api_connector_rules" {
