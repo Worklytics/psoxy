@@ -17,6 +17,7 @@ import javax.inject.Singleton;
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import co.worklytics.psoxy.PseudonymizerImplFactory;
+import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.RESTApiSanitizerFactory;
 import co.worklytics.psoxy.gateway.ApiModeConfigProperty;

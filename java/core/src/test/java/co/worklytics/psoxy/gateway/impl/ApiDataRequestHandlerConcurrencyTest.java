@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.concurrent.CyclicBarrier;
