@@ -46,7 +46,7 @@ locals {
   gitlab_example_group_id                  = coalesce(var.gitlab_example_group_id, "YOUR_GITLAB_GROUP_ID")
   gitlab_example_project_id                = coalesce(var.gitlab_example_project_id, "YOUR_GITLAB_PROJECT_ID")
   # Normalize gitlab_url by stripping protocol prefix (https:// or http://) and trailing slash
-  gitlab_url                    = replace(trimsuffix(var.gitlab_url, "/"), "/^https?:\\/\\//", "")
+  gitlab_url = replace(trimsuffix(var.gitlab_url, "/"), "/^https?:\\/\\//", "")
   gong_instance_subdomain = (
     endswith(coalesce(var.gong_instance_subdomain, "YOUR_GONG_INSTANCE_SUBDOMAIN"), ".api")
     ? coalesce(var.gong_instance_subdomain, "YOUR_GONG_INSTANCE_SUBDOMAIN")
