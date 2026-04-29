@@ -6,12 +6,16 @@ proxy workloads.
 
 ## Variables
 
-Both `gcp-proxy-api` and `gcp-webhook-collector` modules expose:
+Both `gcp-proxy-api` and `gcp-webhook-collector` modules expose `instance_concurrency`.
+Only `gcp-proxy-api` currently exposes `max_instance_count` as an input.
 
 | Variable               | Type   | Default | Description                                        |
 |------------------------|--------|---------|----------------------------------------------------|
 | `instance_concurrency` | number | 5       | Max concurrent requests per instance               |
-| `max_instance_count`   | number | 20 (API) / 5 (webhook) | Max number of Cloud Run instances    |
+| `max_instance_count`   | number | 20      | Max number of Cloud Run instances (`gcp-proxy-api` only) |
+
+> **Note**: `gcp-webhook-collector` currently uses a fixed internal `max_instance_count`
+> of 5 and does not expose it as a module input.
 
 ### Example: Overriding defaults
 

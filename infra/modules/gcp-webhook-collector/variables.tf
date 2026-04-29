@@ -107,6 +107,11 @@ variable "instance_concurrency" {
   type        = number
   description = "Max concurrent requests per instance. Default 5 is suitable for I/O-bound proxy workloads."
   default     = 5
+
+  validation {
+    condition     = var.instance_concurrency >= 1 && var.instance_concurrency <= 1000
+    error_message = "instance_concurrency must be between 1 and 1000."
+  }
 }
 
 variable "gcp_principals_authorized_to_test" {
