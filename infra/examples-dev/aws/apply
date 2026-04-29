@@ -1,5 +1,26 @@
 #!/bin/bash
 
+# Use a local Azure CLI config directory if present to help prevent conflicts with other Azure tenants
+if [ -d "${PWD}/.azure" ]; then
+    export AZURE_CONFIG_DIR="${PWD}/.azure"
+fi
+
+printf "Running preflight auth checks...\n"
+
+if ! aws sts get-caller-identity &> /dev/null; then
+  printf "\033[0;31mERROR: AWS CLI is not authenticated or token is expired.\033[0m\n"
+  printf "Please authenticate (e.g. via aws sso login or exporting credentials) before applying.\n"
+  exit 1
+fi
+
+if grep -E "^msft_tenant_id" terraform.tfvars &> /dev/null; then
+  if ! az account show &> /dev/null; then
+    printf "\033[0;31mERROR: Azure CLI is not authenticated but msft_tenant_id is set in terraform.tfvars.\033[0m\n"
+    printf "Please run './az-auth' to authenticate before applying.\n"
+    exit 1
+  fi
+fi
+
 # prompt if user wants to force_bundle or not; default to Y
 read -p "Do you want to force rebuild of the bundle? (eg, have you made java code changes?) (Y/n): " force_bundle
 
