@@ -29,7 +29,6 @@ class HealthCheckResultTest {
   "javaSourceCodeVersion" : "v0.EXAMPLE",
   "missingConfigProperties" : [ "SERVICE_ACCOUNT_KEY" ],
   "nonDefaultSalt" : true,
-  "pseudonymImplementation" : null,
   "pseudonymizeAppIds" : null,
   "saltSha256Hash" : null,
   "sourceAuthGrantType" : null,
