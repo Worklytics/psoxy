@@ -8,6 +8,9 @@ on:
       - 'rc-*'
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   publish-release:
     runs-on: ubuntu-latest

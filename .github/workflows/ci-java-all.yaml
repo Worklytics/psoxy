@@ -13,6 +13,9 @@ on:
       - 'main'
       - 'rc-*'
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   # Java 21 - released 19 Sept 2023, supported until Sept 2028 (LTS)
   ci_java21:

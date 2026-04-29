@@ -27,6 +27,9 @@ env:
   BUCKET_PREFIX: psoxy-public-artifacts
   AWS_REGIONS: us-east-1,us-east-2,us-west-1,us-west-2
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   publish:
     name: Build and Publish AWS Bundle

@@ -18,6 +18,9 @@ on:
         type: string
         description: "release to publish (eg, v0.4.49)"
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   checkout-and-modify:
     runs-on: ubuntu-latest

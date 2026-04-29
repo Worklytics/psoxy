@@ -28,6 +28,9 @@ env:
   BUCKET_NAME: psoxy-public-artifacts
   JAR_NAME: psoxy-gcp
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   publish:
     name: Build and Publish GCP Bundle
