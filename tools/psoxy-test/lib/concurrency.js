@@ -66,9 +66,28 @@ export async function runConcurrencyTest(options, callFn, logger) {
   const p95 = latencies[Math.floor(latencies.length * 0.95)];
 
   // Cross-contamination check: for identical requests, all successful responses should match
+  // after stripping known non-deterministic fields (pagination tokens, etc.)
   let contamination = false;
+
+  /**
+   * Strips fields known to vary between otherwise-identical API responses.
+   * Pagination cursors (e.g. nextPageToken, nextSyncToken) embed server-side timestamps
+   * and will differ across concurrent requests to the same upstream API.
+   */
+  function stripNonDeterministic(data) {
+    if (typeof data === 'string') {
+      try { data = JSON.parse(data); } catch { return data; }
+    }
+    const copy = { ...data };
+    delete copy.nextPageToken;
+    delete copy.nextSyncToken;
+    delete copy['@odata.nextLink'];
+    delete copy['@odata.deltaLink'];
+    return JSON.stringify(copy);
+  }
+
   const successfulData = passed
-    .map(r => typeof r.data === 'string' ? r.data : JSON.stringify(r.data))
+    .map(r => stripNonDeterministic(r.data))
     .filter(Boolean);
 
   if (successfulData.length > 1) {
