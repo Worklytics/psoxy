@@ -90,6 +90,7 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.extern.java.Log;
+import co.worklytics.psoxy.gateway.ProxyConstants;
 
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
@@ -116,7 +117,7 @@ public class ApiDataRequestHandler {
     @Inject
     PseudonymizerImplFactory pseudonymizerImplFactory;
     @Inject
-    RESTRules rules;
+    Lazy<RESTRules> rules;
     @Inject
     HealthCheckRequestHandler healthCheckRequestHandler;
     @Inject
@@ -144,6 +145,8 @@ public class ApiDataRequestHandler {
     Lazy<AsyncApiDataRequestHandler> asyncApiDataRequestHandler;
     @Inject
     Provider<UUID> uuidProvider;
+    @Inject
+    ProxyConstants proxyConstants;
 
     /**
      * Basic headers to pass: content, caching, retries. Can be expanded by connection later.
@@ -195,7 +198,7 @@ public class ApiDataRequestHandler {
                 if (this.sanitizer == null) {
                     Pseudonymizer.ConfigurationOptions options =
                             pseudonymizerImplFactory.buildOptions(config);
-                    this.sanitizer = sanitizerFactory.create(rules,
+                    this.sanitizer = sanitizerFactory.create(rules.get(),
                             pseudonymizerImplFactory.create(options));
                 }
             }
@@ -256,6 +259,14 @@ public class ApiDataRequestHandler {
 
         try {
             this.sanitizer = loadSanitizerRules();
+        } catch (co.worklytics.psoxy.rules.InvalidRulesException e) {
+            log.log(Level.SEVERE, "Error loading sanitizer rules: " + e.getMessage(), e);
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                            e.getErrorCause().name())
+                    .body("Error loading sanitizer rules")
+                    .build();
         } catch (Throwable e) {
             log.log(Level.SEVERE, "Error loading sanitizer rules", e);
             return HttpEventResponse.builder()
@@ -323,7 +334,7 @@ public class ApiDataRequestHandler {
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                     ErrorCauses.BLOCKED_BY_RULES.name());
             log.warning(String.format("%s. Blocked call by rules %s", logEntry,
-                    objectMapper.writeValueAsString(rules)));
+                    objectMapper.writeValueAsString(rules.get())));
             return builder.build();
         }
 
@@ -547,7 +558,7 @@ public class ApiDataRequestHandler {
         Map<String, String> metadata = new HashMap<>(originalContent.getMetadata());
         metadata.put(ProcessedDataMetadataFields.RULES_SHA.getMetadataKey(), rulesSha);
         metadata.put(ProcessedDataMetadataFields.PROXY_VERSION.getMetadataKey(),
-                HealthCheckRequestHandler.JAVA_SOURCE_CODE_VERSION);
+                ProxyConstants.JAVA_SOURCE_CODE_VERSION);
         metadata.put(ProcessedDataMetadataFields.PII_SALT_SHA256.getMetadataKey(),
                 healthCheckRequestHandler.piiSaltHash());
 
@@ -591,7 +602,7 @@ public class ApiDataRequestHandler {
             loadSanitizerRules(); // ensure sanitizer is loaded
             if (!Objects.equals(pseudonymImplementation.get(),
                     sanitizer.getPseudonymizer().getOptions().getPseudonymImplementation())) {
-                return sanitizerFactory.create(rules,
+                return sanitizerFactory.create(rules.get(),
                         pseudonymizerImplFactory.create(sanitizer.getPseudonymizer().getOptions()
                                 .withPseudonymImplementation(pseudonymImplementation.get())));
             }
@@ -705,8 +716,9 @@ public class ApiDataRequestHandler {
         // do we capture the new one?? ideally do this with listener/handler/trigger in Credential
         // itself, if that's possible
 
+
         ComposedHttpRequestInitializer initializer = ComposedHttpRequestInitializer
-                .of(initializeWithCredentials, new GzipedContentHttpRequestInitializer("Psoxy"));
+                .of(initializeWithCredentials, new GzipedContentHttpRequestInitializer(proxyConstants.getUserAgent()));
 
         return transport.createRequestFactory(initializer);
     }
@@ -727,6 +739,7 @@ public class ApiDataRequestHandler {
             return false;
         }
     }
+
 
     private void logRequestIfVerbose(HttpEventRequest request) {
         if (envVarsConfigService.isDevelopment()) {

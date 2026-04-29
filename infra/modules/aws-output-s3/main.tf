@@ -1,6 +1,6 @@
 # This module creates an S3 bucket for output data from a proxy instance.
 #
-# TODO: unify with aws-psoxy-output-bucket module? why is that different?
+# TODO: unify with aws-proxy-output-bucket module? why is that different?
 #  - that carries implicit policy, which is not ideal vs combining single unified policies
 #
 #

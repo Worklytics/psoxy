@@ -1,0 +1,4 @@
+[
+  {"id":"U999999999","team_id":"TEAM_ID","profile":{"email":"j@acme.com"}, "is_bot":false},
+  {"id":"U999999998","team_id":"TEAM_ID","profile":{"email":"a@acme.com"}, "is_bot":false}
+]

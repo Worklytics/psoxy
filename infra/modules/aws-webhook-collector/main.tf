@@ -5,7 +5,6 @@
 terraform {
   required_providers {
     aws = {
-      version = ">= 4.12, < 5.0"
     }
   }
 }
@@ -64,7 +63,7 @@ module "rules_parameter" {
 # it's an instance of a gate/gateway, implemented as a lambda function
 # and in this particular case, it's inverted in a sense, as data goes INTO it, rather than OUT (via API requests)
 module "gate_instance" {
-  source = "../aws-psoxy-lambda"
+  source = "../aws-proxy-lambda"
 
   environment_name                     = var.environment_name
   instance_id                          = var.instance_id
@@ -114,6 +113,10 @@ module "gate_instance" {
     length(local.accepted_auth_keys) > 0 ? {
       AUTH_ISSUER        = local.auth_issuer
       ACCEPTED_AUTH_KEYS = join(",", local.accepted_auth_keys)
+    } : {},
+    var.new_relic_account_id != null && var.new_relic_account_id != "" ? {
+      NEW_RELIC_ACCOUNT_ID     = var.new_relic_account_id
+      NEW_RELIC_LAMBDA_HANDLER = var.handler_class
     } : {}
   )
 }

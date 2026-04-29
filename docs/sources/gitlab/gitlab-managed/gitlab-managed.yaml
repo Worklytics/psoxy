@@ -1,0 +1,987 @@
+---
+endpoints:
+  - pathTemplate: "/api/v4/groups"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/Group"
+  - pathTemplate: "/api/v4/groups/{id}/members/all"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$[*].id"
+          - "$[*].username"
+          - "$[*].email"
+          - "$[*].created_by.id"
+          - "$[*].created_by.username"
+          - "$[*].group_saml_identity.extern_uid"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/GroupMember"
+  - pathTemplate: "/api/v4/issues/{id}"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..author.id"
+          - "$..username"
+          - "$..assignee.id"
+          - "$..assignees[*].id"
+          - "$..closed_by.id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$..description"
+          - "$..title"
+    responseSchema:
+      type: "object"
+      properties:
+        assignee:
+          $ref: "#/definitions/User"
+        assignees:
+          type: "array"
+          items:
+            $ref: "#/definitions/User"
+        author:
+          $ref: "#/definitions/User"
+        closed_at:
+          type: "string"
+          format: "date-time"
+        closed_by:
+          $ref: "#/definitions/User"
+        confidential:
+          type: "boolean"
+        created_at:
+          type: "string"
+          format: "date-time"
+        description:
+          type: "string"
+        discussion_locked:
+          type: "boolean"
+        downvotes:
+          type: "integer"
+        has_tasks:
+          type: "boolean"
+        id:
+          type: "integer"
+        iid:
+          type: "integer"
+        issue_type:
+          type: "string"
+        merge_requests_count:
+          type: "integer"
+        milestone:
+          $ref: "#/definitions/Milestone"
+        project_id:
+          type: "integer"
+        severity:
+          type: "string"
+        sourceId:
+          type: "string"
+        state:
+          type: "string"
+        task_completion_status:
+          $ref: "#/definitions/TaskCompletionStatus"
+        time_stats:
+          $ref: "#/definitions/TimeStats"
+        title:
+          type: "string"
+        type:
+          type: "string"
+        updated_at:
+          type: "string"
+          format: "date-time"
+        upvotes:
+          type: "integer"
+        user_notes_count:
+          type: "integer"
+        weight:
+          type: "integer"
+  - pathTemplate: "/api/v4/merge_requests/{id}"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..author.id"
+          - "$..username"
+          - "$..assignee.id"
+          - "$..assignees[*].id"
+          - "$..reviewers[*].id"
+          - "$..merged_by.id"
+          - "$..merge_user.id"
+          - "$..closed_by.id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$..title"
+          - "$..description"
+    responseSchema:
+      type: "object"
+      properties:
+        assignee:
+          $ref: "#/definitions/User"
+        assignees:
+          type: "array"
+          items:
+            $ref: "#/definitions/User"
+        author:
+          $ref: "#/definitions/User"
+        blocking_discussions_resolved:
+          type: "boolean"
+        changes_count:
+          type: "integer"
+        closed_at:
+          type: "string"
+          format: "date-time"
+        closed_by:
+          $ref: "#/definitions/User"
+        created_at:
+          type: "string"
+          format: "date-time"
+        description:
+          type: "string"
+        detailed_merge_status:
+          type: "string"
+        diff_refs:
+          $ref: "#/definitions/DiffRefs"
+        discussion_locked:
+          type: "boolean"
+        downvotes:
+          type: "integer"
+        draft:
+          type: "boolean"
+        has_conflicts:
+          type: "boolean"
+        id:
+          type: "integer"
+        iid:
+          type: "integer"
+        merge_commit_sha:
+          type: "string"
+        merge_user:
+          $ref: "#/definitions/User"
+        merged_at:
+          type: "string"
+          format: "date-time"
+        merged_by:
+          $ref: "#/definitions/User"
+        milestone:
+          $ref: "#/definitions/Milestone"
+        overflow:
+          type: "boolean"
+        project_id:
+          type: "integer"
+        reviewers:
+          type: "array"
+          items:
+            $ref: "#/definitions/User"
+        sha:
+          type: "string"
+        should_remove_source_branch:
+          type: "boolean"
+        sourceId:
+          type: "string"
+        source_branch:
+          type: "string"
+        source_project_id:
+          type: "integer"
+        squash:
+          type: "boolean"
+        squash_commit_sha:
+          type: "string"
+        squash_on_merge:
+          type: "boolean"
+        state:
+          type: "string"
+        target_branch:
+          type: "string"
+        target_project_id:
+          type: "integer"
+        task_completion_status:
+          $ref: "#/definitions/TaskCompletionStatus"
+        time_stats:
+          $ref: "#/definitions/TimeStats"
+        title:
+          type: "string"
+        updated_at:
+          type: "string"
+          format: "date-time"
+        upvotes:
+          type: "integer"
+        user_notes_count:
+          type: "integer"
+        work_in_progress:
+          type: "boolean"
+  - pathTemplate: "/api/v4/projects"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..creator_id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$..description"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/Project"
+  - pathTemplate: "/api/v4/projects/{id}/audit_events"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$.author_id"
+          - "$[*].author_id"
+          - "$[*].details.author_email"
+          - "$[*].details.from"
+          - "$[*].details.to"
+        encoding: "URL_SAFE_TOKEN"
+      - !<hashIp>
+        jsonPaths:
+          - "$[*].details.ip_address"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/AuditEvent"
+  - pathTemplate: "/api/v4/projects/{id}/issues/{issueIid}/notes"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$[*].author.id"
+          - "$[*].author.username"
+          - "$[*].author.email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$[?(@.system==true && @.body =~ /.*@.*/)].body"
+        regex: "@([\\w.-]+)"
+      - !<textDigest>
+        jsonPaths:
+          - "$[?(@.system!=true)].body"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/Note"
+  - pathTemplate: "/api/v4/projects/{id}/issues/{issueIid}/resource_state_events"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$[*].user.id"
+          - "$[*].user.username"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/StateEvent"
+  - pathTemplate: "/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/commits"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$[*].author_email"
+          - "$[*].committer_email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$[*].message"
+          - "$[*].title"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/Commit"
+  - pathTemplate: "/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/notes"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$[*].author.id"
+          - "$[*].author.username"
+          - "$[*].author.email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<pseudonymizeRegexMatches>
+        jsonPaths:
+          - "$[?(@.system==true && @.body =~ /.*@.*/)].body"
+        regex: "@([\\w.-]+)"
+      - !<textDigest>
+        jsonPaths:
+          - "$[?(@.system!=true)].body"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/Note"
+  - pathTemplate: "/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/resource_state_events"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$[*].user.id"
+          - "$[*].user.username"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/StateEvent"
+  - pathTemplate: "/api/v4/projects/{id}/repository/branches"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..author_email"
+          - "$..committer_email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$..message"
+          - "$..title"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/Branch"
+  - pathTemplate: "/api/v4/projects/{id}/repository/commits"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..author_email"
+          - "$..committer_email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$..message"
+          - "$..title"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/Commit"
+  - pathTemplate: "/api/v4/projects/{id}/repository/commits/{sha}"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..author_email"
+          - "$..committer_email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$..message"
+          - "$..title"
+    responseSchema:
+      type: "object"
+      properties:
+        author_email:
+          type: "string"
+        authored_date:
+          type: "string"
+          format: "date-time"
+        committed_date:
+          type: "string"
+          format: "date-time"
+        committer_email:
+          type: "string"
+        created_at:
+          type: "string"
+          format: "date-time"
+        id:
+          type: "string"
+        message:
+          type: "string"
+        parent_ids:
+          type: "array"
+          items:
+            type: "string"
+        short_id:
+          type: "string"
+        sourceId:
+          type: "string"
+        stats:
+          $ref: "#/definitions/Stats"
+        status:
+          type: "string"
+        title:
+          type: "string"
+  - pathTemplate: "/api/v4/projects/{id}/repository/commits/{sha}/discussions"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$[*].notes[*].author.id"
+          - "$[*]..username"
+          - "$[*]..email"
+        encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$[*]..body"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/CommitDiscussion"
+  - pathTemplate: "/api/v4/projects/{projectId}/issues"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$[*].author.id"
+          - "$[*]..username"
+          - "$[*].assignee.id"
+          - "$[*].assignees[*].id"
+          - "$[*].closed_by.id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$..description"
+          - "$..title"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/Issue"
+  - pathTemplate: "/api/v4/projects/{projectId}/merge_requests"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$[*].author.id"
+          - "$[*]..username"
+          - "$[*].assignee.id"
+          - "$[*].assignees[*].id"
+          - "$[*].reviewers[*].id"
+          - "$[*].merged_by.id"
+          - "$[*].merge_user.id"
+          - "$[*].closed_by.id"
+        encoding: "URL_SAFE_TOKEN"
+      - !<textDigest>
+        jsonPaths:
+          - "$..title"
+          - "$..description"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/MergeRequest"
+  - pathTemplate: "/api/v4/users"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$[*].id"
+          - "$[*].username"
+          - "$[*].email"
+          - "$[*].commit_email"
+          - "$[*]..extern_uid"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/User"
+  - pathTemplate: "/api/v4/users/{id}/emails"
+    transforms:
+      - !<pseudonymize>
+        jsonPaths:
+          - "$..email"
+        encoding: "URL_SAFE_TOKEN"
+    responseSchema:
+      type: "array"
+      items:
+        $ref: "#/definitions/UserEmail"
+  - pathTemplate: "/api/v4/version"
+    allowedQueryParams: []
+    responseSchema:
+      type: "object"
+      properties:
+        enterprise:
+          type: "boolean"
+definitions:
+  AuditEvent:
+    type: "object"
+    properties:
+      author_id:
+        type: "integer"
+      created_at:
+        type: "string"
+        format: "date-time"
+      details:
+        $ref: "#/definitions/Details"
+      entity_id:
+        type: "integer"
+      entity_type:
+        type: "string"
+      id:
+        type: "integer"
+  Branch:
+    type: "object"
+    properties:
+      can_push:
+        type: "boolean"
+      commit:
+        $ref: "#/definitions/Commit"
+      default:
+        type: "boolean"
+      developers_can_merge:
+        type: "boolean"
+      developers_can_push:
+        type: "boolean"
+      merged:
+        type: "boolean"
+      name:
+        type: "string"
+      protected:
+        type: "boolean"
+      sourceId:
+        type: "string"
+  Commit:
+    type: "object"
+    properties:
+      author_email:
+        type: "string"
+      authored_date:
+        type: "string"
+        format: "date-time"
+      committed_date:
+        type: "string"
+        format: "date-time"
+      committer_email:
+        type: "string"
+      created_at:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "string"
+      message:
+        type: "string"
+      parent_ids:
+        type: "array"
+        items:
+          type: "string"
+      short_id:
+        type: "string"
+      sourceId:
+        type: "string"
+      stats:
+        $ref: "#/definitions/Stats"
+      status:
+        type: "string"
+      title:
+        type: "string"
+  CommitDiscussion:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      individual_note:
+        type: "boolean"
+      notes:
+        type: "array"
+        items:
+          $ref: "#/definitions/Note"
+  Details:
+    type: "object"
+    properties:
+      add:
+        type: "string"
+      author_email:
+        type: "string"
+      change:
+        type: "string"
+      event_type:
+        type: "string"
+      from:
+        type: "string"
+      ip_address:
+        type: "string"
+      remove:
+        type: "string"
+      target_id:
+        type: "string"
+      target_type:
+        type: "string"
+      to:
+        type: "string"
+  DiffRefs:
+    type: "object"
+    properties:
+      base_sha:
+        type: "string"
+      head_sha:
+        type: "string"
+      start_sha:
+        type: "string"
+  Group:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+  GroupMember:
+    type: "object"
+    properties:
+      created_at:
+        type: "string"
+        format: "date-time"
+      created_by:
+        $ref: "#/definitions/User"
+      email:
+        type: "string"
+      expires_at:
+        type: "string"
+        format: "date"
+      group_saml_identity:
+        $ref: "#/definitions/SamlIdentity"
+      id:
+        type: "integer"
+      is_using_seat:
+        type: "boolean"
+      state:
+        type: "string"
+      username:
+        type: "string"
+  Issue:
+    type: "object"
+    properties:
+      assignee:
+        $ref: "#/definitions/User"
+      assignees:
+        type: "array"
+        items:
+          $ref: "#/definitions/User"
+      author:
+        $ref: "#/definitions/User"
+      closed_at:
+        type: "string"
+        format: "date-time"
+      closed_by:
+        $ref: "#/definitions/User"
+      confidential:
+        type: "boolean"
+      created_at:
+        type: "string"
+        format: "date-time"
+      description:
+        type: "string"
+      discussion_locked:
+        type: "boolean"
+      downvotes:
+        type: "integer"
+      has_tasks:
+        type: "boolean"
+      id:
+        type: "integer"
+      iid:
+        type: "integer"
+      issue_type:
+        type: "string"
+      merge_requests_count:
+        type: "integer"
+      milestone:
+        $ref: "#/definitions/Milestone"
+      project_id:
+        type: "integer"
+      severity:
+        type: "string"
+      sourceId:
+        type: "string"
+      state:
+        type: "string"
+      task_completion_status:
+        $ref: "#/definitions/TaskCompletionStatus"
+      time_stats:
+        $ref: "#/definitions/TimeStats"
+      title:
+        type: "string"
+      type:
+        type: "string"
+      updated_at:
+        type: "string"
+        format: "date-time"
+      upvotes:
+        type: "integer"
+      user_notes_count:
+        type: "integer"
+      weight:
+        type: "integer"
+  MergeRequest:
+    type: "object"
+    properties:
+      assignee:
+        $ref: "#/definitions/User"
+      assignees:
+        type: "array"
+        items:
+          $ref: "#/definitions/User"
+      author:
+        $ref: "#/definitions/User"
+      blocking_discussions_resolved:
+        type: "boolean"
+      changes_count:
+        type: "integer"
+      closed_at:
+        type: "string"
+        format: "date-time"
+      closed_by:
+        $ref: "#/definitions/User"
+      created_at:
+        type: "string"
+        format: "date-time"
+      description:
+        type: "string"
+      detailed_merge_status:
+        type: "string"
+      diff_refs:
+        $ref: "#/definitions/DiffRefs"
+      discussion_locked:
+        type: "boolean"
+      downvotes:
+        type: "integer"
+      draft:
+        type: "boolean"
+      has_conflicts:
+        type: "boolean"
+      id:
+        type: "integer"
+      iid:
+        type: "integer"
+      merge_commit_sha:
+        type: "string"
+      merge_user:
+        $ref: "#/definitions/User"
+      merged_at:
+        type: "string"
+        format: "date-time"
+      merged_by:
+        $ref: "#/definitions/User"
+      milestone:
+        $ref: "#/definitions/Milestone"
+      overflow:
+        type: "boolean"
+      project_id:
+        type: "integer"
+      reviewers:
+        type: "array"
+        items:
+          $ref: "#/definitions/User"
+      sha:
+        type: "string"
+      should_remove_source_branch:
+        type: "boolean"
+      sourceId:
+        type: "string"
+      source_branch:
+        type: "string"
+      source_project_id:
+        type: "integer"
+      squash:
+        type: "boolean"
+      squash_commit_sha:
+        type: "string"
+      squash_on_merge:
+        type: "boolean"
+      state:
+        type: "string"
+      target_branch:
+        type: "string"
+      target_project_id:
+        type: "integer"
+      task_completion_status:
+        $ref: "#/definitions/TaskCompletionStatus"
+      time_stats:
+        $ref: "#/definitions/TimeStats"
+      title:
+        type: "string"
+      updated_at:
+        type: "string"
+        format: "date-time"
+      upvotes:
+        type: "integer"
+      user_notes_count:
+        type: "integer"
+      work_in_progress:
+        type: "boolean"
+  Milestone:
+    type: "object"
+    properties:
+      created_at:
+        type: "string"
+        format: "date-time"
+      description:
+        type: "string"
+      due_date:
+        type: "string"
+        format: "date"
+      expired:
+        type: "boolean"
+      group_id:
+        type: "integer"
+      id:
+        type: "integer"
+      iid:
+        type: "integer"
+      project_id:
+        type: "integer"
+      start_date:
+        type: "string"
+        format: "date"
+      state:
+        type: "string"
+      title:
+        type: "string"
+      updated_at:
+        type: "string"
+        format: "date-time"
+  Namespace:
+    type: "object"
+    properties:
+      end_date:
+        type: "string"
+        format: "date"
+      id:
+        type: "integer"
+      plan:
+        type: "string"
+  Note:
+    type: "object"
+    properties:
+      author:
+        $ref: "#/definitions/User"
+      body:
+        type: "string"
+      confidential:
+        type: "boolean"
+      created_at:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "integer"
+      internal:
+        type: "boolean"
+      noteable_id:
+        type: "integer"
+      noteable_iid:
+        type: "integer"
+      noteable_type:
+        type: "string"
+      project_id:
+        type: "integer"
+      resolvable:
+        type: "boolean"
+      system:
+        type: "boolean"
+      updated_at:
+        type: "string"
+        format: "date-time"
+  Project:
+    type: "object"
+    properties:
+      archived:
+        type: "boolean"
+      created_at:
+        type: "string"
+        format: "date-time"
+      creator_id:
+        type: "integer"
+      default_branch:
+        type: "string"
+      empty_repo:
+        type: "boolean"
+      forks_count:
+        type: "integer"
+      id:
+        type: "integer"
+      issues_enabled:
+        type: "boolean"
+      last_activity_at:
+        type: "string"
+        format: "date-time"
+      merge_requests_enabled:
+        type: "boolean"
+      namespace:
+        $ref: "#/definitions/Namespace"
+      open_issues_count:
+        type: "integer"
+      path:
+        type: "string"
+      path_with_namespace:
+        type: "string"
+      sourceId:
+        type: "string"
+      star_count:
+        type: "integer"
+      updated_at:
+        type: "string"
+        format: "date-time"
+      visibility:
+        type: "string"
+  SamlIdentity:
+    type: "object"
+    properties:
+      extern_uid:
+        type: "string"
+      provider:
+        type: "string"
+  StateEvent:
+    type: "object"
+    properties:
+      created_at:
+        type: "string"
+        format: "date-time"
+      id:
+        type: "integer"
+      resource_id:
+        type: "integer"
+      resource_type:
+        type: "string"
+      source_commit:
+        type: "string"
+      source_merge_request_id:
+        type: "integer"
+      state:
+        type: "string"
+      user:
+        $ref: "#/definitions/User"
+  Stats:
+    type: "object"
+    properties:
+      additions:
+        type: "integer"
+      deletions:
+        type: "integer"
+      total:
+        type: "integer"
+  TaskCompletionStatus:
+    type: "object"
+    properties:
+      completed_count:
+        type: "integer"
+      count:
+        type: "integer"
+  TimeStats:
+    type: "object"
+    properties:
+      human_time_estimate:
+        type: "string"
+      human_total_time_spent:
+        type: "string"
+      time_estimate:
+        type: "integer"
+      total_time_spent:
+        type: "integer"
+  User:
+    type: "object"
+    properties:
+      active:
+        type: "boolean"
+      commit_email:
+        type: "string"
+      created_at:
+        type: "string"
+        format: "date-time"
+      email:
+        type: "string"
+      id:
+        type: "integer"
+      identities:
+        type: "array"
+        items:
+          $ref: "#/definitions/SamlIdentity"
+      locked:
+        type: "boolean"
+      state:
+        type: "string"
+      username:
+        type: "string"
+  UserEmail:
+    type: "object"
+    properties:
+      confirmed_at:
+        type: "string"
+        format: "date-time"
+      email:
+        type: "string"
+      id:
+        type: "integer"

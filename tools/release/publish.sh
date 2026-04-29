@@ -121,7 +121,7 @@ case "$REPLY" in
     printf "Skipped publishing Maven artifacts to GitHub Packages\n"
     printf "To do so manually, run:\n"
     printf "    ${INFO}./tools/release/publish-mvn-artifacts.sh ${PATH_TO_REPO}${NC}\n"
-    printf "    or run the GitHub Actions workflow manually: ${INFO}gh workflow run publish-mvn-artifacts.yaml --ref ${RELEASE}${NC}\n"
+    printf "    or run the GitHub Actions workflow manually: ${INFO}gh workflow run publish-release-artifacts.yaml --ref ${RELEASE}${NC}\n"
     ;;
 esac
 

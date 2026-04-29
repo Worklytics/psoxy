@@ -81,11 +81,6 @@ public class ParameterSchemaUtils {
                     anyOfSubSchema -> validate(anyOfSubSchema, value));
             }
 
-            // TODO remove in v0.6
-            if (ObjectUtils.isNotEmpty(schema.getOrs())) {
-                return schema.getOrs().stream().anyMatch(
-                    orSubSchema -> validate(orSubSchema, value));
-            }
         }
         return true;
     }

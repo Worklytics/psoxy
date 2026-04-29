@@ -1,0 +1,79 @@
+[
+  {
+    "id": 1,
+    "author_id": 1,
+    "entity_id": 6,
+    "entity_type": "Project",
+    "details": {
+      "custom_message": "Project archived",
+      "author_name": "Administrator",
+      "author_email": "admin@example.com",
+      "target_id": "flightjs/flight",
+      "target_type": "Project",
+      "target_details": "flightjs/flight",
+      "ip_address": "127.0.0.1",
+      "entity_path": "flightjs/flight"
+    },
+    "created_at": "2019-08-30T07:00:41.885Z"
+  },
+  {
+    "id": 2,
+    "author_id": 1,
+    "entity_id": 60,
+    "entity_type": "Group",
+    "details": {
+      "add": "group",
+      "author_name": "Administrator",
+      "author_email": "admin@example.com",
+      "target_id": "flightjs",
+      "target_type": "Group",
+      "target_details": "flightjs",
+      "ip_address": "127.0.0.1",
+      "entity_path": "flightjs"
+    },
+    "created_at": "2019-08-27T18:36:44.162Z"
+  },
+  {
+    "id": 3,
+    "author_id": 51,
+    "entity_id": 51,
+    "entity_type": "User",
+    "details": {
+      "change": "email address",
+      "from": "hello@flightjs.com",
+      "to": "maintainer@flightjs.com",
+      "author_name": "Andreas",
+      "author_email": "admin@example.com",
+      "target_id": 51,
+      "target_type": "User",
+      "target_details": "Andreas",
+      "ip_address": null,
+      "entity_path": "Andreas"
+    },
+    "created_at": "2019-08-22T16:34:25.639Z"
+  },
+  {
+    "id": 4,
+    "author_id": 43,
+    "entity_id": 1,
+    "entity_type": "Gitlab::Audit::InstanceScope",
+    "details": {
+      "author_name": "Administrator",
+      "author_class": "User",
+      "target_id": 32,
+      "target_type": "AuditEvents::Streaming::InstanceHeader",
+      "target_details": "unknown",
+      "custom_message": "Created custom HTTP header with key X-arg.",
+      "ip_address": "127.0.0.1",
+      "entity_path": "gitlab_instance"
+    },
+    "ip_address": "127.0.0.1",
+    "author_name": "Administrator",
+    "entity_path": "gitlab_instance",
+    "target_details": "unknown",
+    "created_at": "2023-08-01T11:29:44.764Z",
+    "target_type": "AuditEvents::Streaming::InstanceHeader",
+    "target_id": 32,
+    "event_type": "audit_events_streaming_instance_headers_create"
+  }
+]

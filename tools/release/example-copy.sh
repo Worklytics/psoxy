@@ -61,8 +61,16 @@ chmod +x ${EXAMPLE_TEMPLATE_REPO}init
 cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/check-prereqs.sh ${EXAMPLE_TEMPLATE_REPO}check-prereqs
 chmod +x ${EXAMPLE_TEMPLATE_REPO}check-prereqs
 
+if [ -f ${EXAMPLE_TO_COPY_FROM}/preflight.sh ]; then
+  cp -f ${EXAMPLE_TO_COPY_FROM}/preflight.sh ${EXAMPLE_TEMPLATE_REPO}preflight
+  chmod +x ${EXAMPLE_TEMPLATE_REPO}preflight
+fi
+
 cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/reset-example.sh ${EXAMPLE_TEMPLATE_REPO}reset-example
 chmod +x ${EXAMPLE_TEMPLATE_REPO}reset-example
 
 cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/available-connectors.sh ${EXAMPLE_TEMPLATE_REPO}available-connectors
 chmod +x ${EXAMPLE_TEMPLATE_REPO}available-connectors
+
+cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/az-auth.sh ${EXAMPLE_TEMPLATE_REPO}az-auth
+chmod +x ${EXAMPLE_TEMPLATE_REPO}az-auth

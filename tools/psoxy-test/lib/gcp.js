@@ -2,6 +2,8 @@
 import { Logging } from '@google-cloud/logging';
 import { CloudSchedulerClient } from '@google-cloud/scheduler';
 import { Storage } from '@google-cloud/storage';
+import fs from 'fs';
+import path from 'path';
 import _ from 'lodash';
 import getLogger from './logger.js';
 import {
@@ -186,10 +188,33 @@ function getLogsURL(cloudFunctionURL = '') {
 
   let googleConsoleURL = 'https://console.cloud.google.com';
   if (!_.isEmpty(region) && !_.isEmpty(functionName)) {
-    googleConsoleURL += `/run/detail/${region}/${functionName}/logs`;
+    googleConsoleURL += `/run/detail/${region}/${functionName}/observability/logs`;
     // TODO
     //  should pass `projectId` somehow and append to the resulting URL as query param `project`
     //  in gen 2 use-case
+    if (_.isEmpty(projectId)) {
+      try {
+        if (fs.existsSync('terraform.tfvars')) {
+          const tfvars = fs.readFileSync('terraform.tfvars', 'utf8');
+          const match = tfvars.match(/gcp_project_id\s*=\s*["']([^"']+)["']/);
+          if (match) {
+            projectId = match[1].trim();
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    if (_.isEmpty(projectId)) {
+      try {
+        const out = executeCommand('gcloud config get-value project 2>/dev/null');
+        if (out) {
+          projectId = out.trim();
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
     if (!_.isEmpty(projectId)) {
       googleConsoleURL += `?project=${projectId}`;
     }
@@ -287,8 +312,26 @@ async function upload(bucketName, filePath, client, filename) {
     destination: filename ?? path.basename(filePath),
   }
 
+  // Determine Content-Type from the base filename (stripping .gz if present)
+  const dest = uploadOptions.destination;
+  const baseName = dest.endsWith('.gz') ? dest.slice(0, -3) : dest;
+  const ext = baseName.slice(baseName.lastIndexOf('.')).toLowerCase();
+  const MIME_TYPES = {
+    '.ndjson': 'application/x-ndjson',
+    '.json': 'application/json',
+    '.csv': 'text/csv',
+    '.tsv': 'text/tab-separated-values',
+    '.parquet': 'application/vnd.apache.parquet',
+  };
+  const contentType = MIME_TYPES[ext] || undefined; // let GCS auto-detect if unknown
+
   if (await isGzipped(filePath)) {
-    uploadOptions.metadata = { contentEncoding: 'gzip' };
+    uploadOptions.metadata = {
+      contentEncoding: 'gzip',
+      ...(contentType && { contentType }),
+    };
+  } else if (contentType) {
+    uploadOptions.metadata = { contentType };
   }
 
   return client.bucket(bucketName).upload(filePath, uploadOptions);
@@ -398,13 +441,25 @@ async function verifyBucket(bucketName, expectedContent, startTime, logger) {
         logger.info(`New file found: ${file.name} (Created: ${new Date(file.metadata.timeCreated).toISOString()})`);
         
         const [content] = await file.download();
-        const contentStr = content.toString();
-        logger.info(`Found Content: ${contentStr}`);
         
-        // Parse found content
         let items = [];
         try {
-            const jsonContent = JSON.parse(contentStr);
+            let jsonContent;
+            // The storage client might automatically parse JSON files or return a Buffer.
+            if (Buffer.isBuffer(content)) {
+                const contentStr = content.toString();
+                logger.info(`Found Content: ${contentStr}`);
+                jsonContent = JSON.parse(contentStr);
+            } else if (typeof content === 'string') {
+                logger.info(`Found Content: ${content}`);
+                jsonContent = JSON.parse(content);
+            } else if (typeof content === 'object') {
+                logger.info(`Found Content (Object): ${JSON.stringify(content)}`);
+                jsonContent = content;
+            } else {
+                throw new Error('Unknown content format');
+            }
+
             if (Array.isArray(jsonContent)) {
                 items = jsonContent;
             } else if (_.isPlainObject(jsonContent)) {
