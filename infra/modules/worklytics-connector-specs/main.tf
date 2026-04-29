@@ -30,26 +30,29 @@ locals {
   # 3 days before the sample date, for interesting API calls (without repeating computation a dozen times)
   example_api_calls_sample_interval_start = timeadd(var.example_api_calls_sample_date, "-72h")
 
-  chat_gpt_enterprise_example_workspace_id = coalesce(var.chat_gpt_enterprise_example_workspace_id, "YOUR_WORKSPACEID")
-  confluence_example_cloud_id              = coalesce(var.confluence_example_cloud_id, "YOUR_confluence_example_cloud_id")
-  confluence_example_group_id              = coalesce(var.confluence_example_group_id, "YOUR_confluence_example_group_id")
-  jira_example_cloud_id                    = coalesce(var.jira_cloud_id, "YOUR_JIRA_CLOUD_ID")
-  jira_example_issue_id                    = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, "YOUR_JIRA_EXAMPLE_ISSUE_ID")
-  atlassian_organization_id                = coalesce(var.atlassian_organization_id, "YOUR_ATLASSIAN_ORG_ID")
-  github_installation_id                   = coalesce(var.github_installation_id, "YOUR_GITHUB_INSTALLATION_ID")
-  github_copilot_installation_id           = coalesce(var.github_copilot_installation_id, "YOUR_GITHUB_COPILOT_INSTALLATION_ID")
-  github_enterprise_server_host            = coalesce(var.github_api_host, var.github_enterprise_server_host, "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
-  github_enterprise_server_version         = coalesce(var.github_enterprise_server_version, "v3")
-  github_organization                      = coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME")
-  github_first_organization                = split(",", coalesce(var.github_organization, "YOUR_GITHUB_ORGANIZATION_NAME"))[0]
-  github_example_repository                = coalesce(var.github_example_repository, "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
-  gitlab_example_group_id                  = coalesce(var.gitlab_example_group_id, "YOUR_GITLAB_GROUP_ID")
-  gitlab_example_project_id                = coalesce(var.gitlab_example_project_id, "YOUR_GITLAB_PROJECT_ID")
+  chat_gpt_enterprise_example_workspace_id = coalesce(var.chat_gpt_enterprise_example_workspace_id, try(var.connector_settings["chat_gpt_enterprise_example_workspace_id"], null), "YOUR_WORKSPACEID")
+  confluence_example_cloud_id              = coalesce(var.confluence_example_cloud_id, try(var.connector_settings["confluence_example_cloud_id"], null), "YOUR_confluence_example_cloud_id")
+  confluence_example_group_id              = coalesce(var.confluence_example_group_id, try(var.connector_settings["confluence_example_group_id"], null), "YOUR_confluence_example_group_id")
+  jira_example_cloud_id                    = coalesce(var.jira_cloud_id, try(var.connector_settings["jira_cloud_id"], null), "YOUR_JIRA_CLOUD_ID")
+  jira_server_url                          = coalesce(var.jira_server_url, try(var.connector_settings["jira_server_url"], null), "YOUR_JIRA_SERVER_URL")
+  jira_example_issue_id                    = coalesce(var.jira_example_issue_id, var.example_jira_issue_id, try(var.connector_settings["jira_example_issue_id"], null), "YOUR_JIRA_EXAMPLE_ISSUE_ID")
+  atlassian_organization_id                = coalesce(var.atlassian_organization_id, try(var.connector_settings["atlassian_organization_id"], null), "YOUR_ATLASSIAN_ORG_ID")
+  github_installation_id                   = coalesce(var.github_installation_id, try(var.connector_settings["github_installation_id"], null), "YOUR_GITHUB_INSTALLATION_ID")
+  github_copilot_installation_id           = coalesce(var.github_copilot_installation_id, try(var.connector_settings["github_copilot_installation_id"], null), "YOUR_GITHUB_COPILOT_INSTALLATION_ID")
+  github_enterprise_server_host            = coalesce(var.github_api_host, var.github_enterprise_server_host != "" ? var.github_enterprise_server_host : null, try(var.connector_settings["github_enterprise_server_host"], null), "YOUR_GITHUB_ENTERPRISE_SERVER_HOST")
+  github_enterprise_server_version         = var.github_enterprise_server_version != "v3" ? var.github_enterprise_server_version : try(var.connector_settings["github_enterprise_server_version"], "v3")
+  github_organization                      = coalesce(var.github_organization, try(var.connector_settings["github_organization"], null), "YOUR_GITHUB_ORGANIZATION_NAME")
+  github_first_organization                = split(",", local.github_organization)[0]
+  github_example_repository                = coalesce(var.github_example_repository, try(var.connector_settings["github_example_repository"], null), "YOUR_GITHUB_EXAMPLE_REPOSITORY_NAME")
+  gitlab_example_group_id                  = coalesce(var.gitlab_example_group_id, try(var.connector_settings["gitlab_example_group_id"], null), "YOUR_GITLAB_GROUP_ID")
+  gitlab_example_project_id                = coalesce(var.gitlab_example_project_id, try(var.connector_settings["gitlab_example_project_id"], null), "YOUR_GITLAB_PROJECT_ID")
   # Normalize gitlab_url by stripping protocol prefix (https:// or http://) and trailing slash
-  gitlab_url                    = replace(trimsuffix(var.gitlab_url, "/"), "/^https?:\\/\\//", "")
-  gong_instance_subdomain       = trimsuffix(coalesce(var.gong_instance_subdomain, "YOUR_GONG_INSTANCE_SUBDOMAIN"), ".api")
-  glean_instance_subdomain      = coalesce(var.glean_instance_subdomain, "YOUR_GLEAN_INSTANCE_SUBDOMAIN")
-  salesforce_example_account_id = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
+  gitlab_url_raw                = var.gitlab_url != "https://gitlab.com" ? var.gitlab_url : try(var.connector_settings["gitlab_url"], "https://gitlab.com")
+  gitlab_url                    = replace(trimsuffix(local.gitlab_url_raw, "/"), "/^https?:\\/\\//", "")
+  gong_instance_subdomain       = trimsuffix(coalesce(var.gong_instance_subdomain, try(var.connector_settings["gong_instance_subdomain"], null), "YOUR_GONG_INSTANCE_SUBDOMAIN"), ".api")
+  glean_instance_subdomain      = coalesce(var.glean_instance_subdomain, try(var.connector_settings["glean_instance_subdomain"], null), "YOUR_GLEAN_INSTANCE_SUBDOMAIN")
+  salesforce_example_account_id = coalesce(var.salesforce_example_account_id, try(var.connector_settings["salesforce_example_account_id"], null), "{ANY ACCOUNT ID}")
+  salesforce_domain             = var.salesforce_domain != "" ? var.salesforce_domain : try(var.connector_settings["salesforce_domain"], "")
 
   oauth_long_access_connectors = {
     asana = {
@@ -584,12 +587,12 @@ EOT
       worklytics_connector_id : "salesforce-psoxy"
       display_name : "Salesforce"
       worklytics_connector_name : "Salesforce via Psoxy"
-      target_host : var.salesforce_domain
+      target_host : local.salesforce_domain
       source_auth_strategy : "oauth2_refresh_token"
       environment_variables : {
         GRANT_TYPE : "client_credentials"
         CREDENTIALS_FLOW : "client_secret"
-        REFRESH_ENDPOINT : "https://${var.salesforce_domain}/services/oauth2/token"
+        REFRESH_ENDPOINT : "https://${local.salesforce_domain}/services/oauth2/token"
         ACCESS_TOKEN_CACHEABLE : "true",
         USE_SHARED_TOKEN : "TRUE"
       }
@@ -1048,7 +1051,7 @@ EOT
       availability : "ga",
       enable_by_default : false
       worklytics_connector_id : "jira-server-psoxy"
-      target_host : var.jira_server_url
+      target_host : local.jira_server_url
       source_auth_strategy : "oauth2_access_token"
       display_name : "Jira Data Center"
       worklytics_connector_name : "Jira Server REST API via Psoxy"

@@ -484,3 +484,9 @@ variable "bucket_access_logs_destination" {
   type        = string
   default     = null
 }
+
+variable "connector_settings" {
+  type        = map(string)
+  default     = {}
+  description = "Connector-specific settings."
+}

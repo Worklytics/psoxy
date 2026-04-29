@@ -220,3 +220,9 @@ variable "example_api_calls_sample_date" {
   default     = "2025-08-01T00:00:00Z"
   description = "RFC3339 date to use for example API calls; should be in the past, but not so far in the past as to not return interesting data from example API calls."
 }
+
+variable "connector_settings" {
+  type        = map(string)
+  default     = {}
+  description = "Connector-specific settings to pass down to connector configurations."
+}

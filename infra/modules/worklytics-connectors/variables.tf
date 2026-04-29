@@ -154,3 +154,9 @@ variable "todo_step" {
   description = "of all todos, where does this one logically fall in sequence"
   default     = 1
 }
+
+variable "connector_settings" {
+  type        = map(string)
+  default     = {}
+  description = "Connector-specific settings to pass down to connector configurations."
+}

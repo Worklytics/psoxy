@@ -480,3 +480,9 @@ variable "todos_as_local_files" {
   description = "whether to render TODOs as flat files"
   default     = true
 }
+
+variable "connector_settings" {
+  type        = map(string)
+  default     = {}
+  description = "Connector-specific settings."
+}

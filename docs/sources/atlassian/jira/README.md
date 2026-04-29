@@ -106,6 +106,6 @@ And its response will be something like:
 ]
 ```
 
-In your Terraform configuration's `terraform.tfvars` file, set the `jira_cloud_id` variable to the `id` value from the JSON response. This will ensure that all **test URLs** are generated with the correct value, targeting a valid Jira Cloud instance.
+In your Terraform configuration's `terraform.tfvars` file, set the `jira_cloud_id` variable in your `connector_settings` to the `id` value from the JSON response (e.g. `connector_settings = { jira_cloud_id = "..." }`). This will ensure that all **test URLs** are generated with the correct value, targeting a valid Jira Cloud instance.
 
 NOTE: A "token family" includes the initial access/refresh tokens generated above as well as all subsequent access/refresh tokens that Jira returns to any future token refresh requests. By default, Jira enforces a maximum lifetime of 1 year for each **token family**. So you MUST repeat steps 5-9 at least annually or your proxy instance will stop working when the token family expires.
