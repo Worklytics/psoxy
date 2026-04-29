@@ -71,3 +71,6 @@ chmod +x ${EXAMPLE_TEMPLATE_REPO}reset-example
 
 cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/available-connectors.sh ${EXAMPLE_TEMPLATE_REPO}available-connectors
 chmod +x ${EXAMPLE_TEMPLATE_REPO}available-connectors
+
+cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/az-auth.sh ${EXAMPLE_TEMPLATE_REPO}az-auth
+chmod +x ${EXAMPLE_TEMPLATE_REPO}az-auth
