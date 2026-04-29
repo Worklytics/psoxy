@@ -163,6 +163,11 @@ variable "max_instance_count" {
   type        = number
   description = "Max number of Cloud Run instances. With instance_concurrency=5 and max_instance_count=20, global capacity is 100 concurrent requests."
   default     = 20
+
+  validation {
+    condition     = var.max_instance_count >= 1
+    error_message = "max_instance_count must be greater than or equal to 1."
+  }
 }
 
 variable "gcp_principals_authorized_to_test" {
