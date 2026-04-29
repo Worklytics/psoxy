@@ -47,7 +47,7 @@ locals {
   gitlab_example_project_id                = coalesce(var.gitlab_example_project_id, "YOUR_GITLAB_PROJECT_ID")
   # Normalize gitlab_url by stripping protocol prefix (https:// or http://) and trailing slash
   gitlab_url                    = replace(trimsuffix(var.gitlab_url, "/"), "/^https?:\\/\\//", "")
-  gong_instance_subdomain       = coalesce(var.gong_instance_subdomain, "YOUR_GONG_INSTANCE_SUBDOMAIN")
+  gong_instance_subdomain       = trimsuffix(coalesce(var.gong_instance_subdomain, "YOUR_GONG_INSTANCE_SUBDOMAIN"), ".api")
   glean_instance_subdomain      = coalesce(var.glean_instance_subdomain, "YOUR_GLEAN_INSTANCE_SUBDOMAIN")
   salesforce_example_account_id = coalesce(var.salesforce_example_account_id, "{ANY ACCOUNT ID}")
 
@@ -522,8 +522,8 @@ EOT
       worklytics_connector_id : "gong-metrics-psoxy"
       display_name : "Gong"
       worklytics_connector_name : "Gong Metrics via Psoxy"
-      target_host : "${local.gong_instance_subdomain}.gong.io"
-      source_auth_strategy : "basic_auth"
+      target_host : "${local.gong_instance_subdomain}.api.gong.io"
+      source_auth_strategy : "oauth2_refresh_token"
       secured_variables : [
         {
           name : "ACCESS_TOKEN"
