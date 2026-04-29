@@ -1,8 +1,10 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicReference;
@@ -10,8 +12,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.RESTApiSanitizer;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import dagger.Component;
@@ -24,8 +26,8 @@ import org.junit.jupiter.api.RepeatedTest;
  * Concurrency tests for {@link ApiDataRequestHandler}.
  *
  * Verifies that the double-checked locking on the lazy-loaded sanitizer field works correctly
- * under concurrent access. We use {@code getSanitizerForRequest()} as the public entry point
- * that triggers the DCL initialization of the sanitizer field.
+ * under concurrent access. We call loadSanitizerRules() directly via reflection since it is
+ * private and is the method that contains the DCL pattern we are testing.
  */
 class ApiDataRequestHandlerConcurrencyTest {
 
@@ -51,8 +53,10 @@ class ApiDataRequestHandlerConcurrencyTest {
         void inject(ApiDataRequestHandlerConcurrencyTest test);
     }
 
+    private Method loadSanitizerRulesMethod;
+
     @BeforeEach
-    public void setup() {
+    public void setup() throws NoSuchMethodException {
         Container container = DaggerApiDataRequestHandlerConcurrencyTest_Container.create();
         container.inject(this);
 
@@ -63,17 +67,20 @@ class ApiDataRequestHandlerConcurrencyTest {
             .thenReturn("gmail");
         when(handler.config.getConfigPropertyOrError(ApiModeConfigProperty.TARGET_HOST))
             .thenReturn("gmail.googleapis.com");
+
+        // Get access to the private loadSanitizerRules() method which contains the DCL
+        loadSanitizerRulesMethod = ApiDataRequestHandler.class.getDeclaredMethod("loadSanitizerRules");
+        loadSanitizerRulesMethod.setAccessible(true);
     }
 
     /**
-     * Two threads race to call getSanitizerForRequest() which triggers the DCL on the
-     * sanitizer field. Both must get a valid, non-null sanitizer. Since getSanitizerForRequest()
-     * may return different instances (it can create per-request sanitizers for different
-     * pseudonym implementations), we verify the underlying shared sanitizer field is consistent.
+     * Two threads race to call loadSanitizerRules() which contains the DCL pattern.
+     * Both must get a valid, non-null sanitizer, and both must get the same instance
+     * (the DCL should only create it once).
      */
     @SneakyThrows
     @RepeatedTest(10)
-    void getSanitizer_threadSafe() {
+    void loadSanitizerRules_threadSafe() {
         // ensure sanitizer is null before each repetition
         handler.sanitizer = null;
 
@@ -82,13 +89,10 @@ class ApiDataRequestHandlerConcurrencyTest {
         AtomicReference<RESTApiSanitizer> result2 = new AtomicReference<>();
         AtomicReference<Throwable> error = new AtomicReference<>();
 
-        // Use a mock request that doesn't override pseudonym implementation
-        // so both threads get the default sanitizer (which triggers DCL)
         Thread t1 = new Thread(() -> {
             try {
                 barrier.await();
-                result1.set(handler.getSanitizerForRequest(
-                    MockModules.provideMock(co.worklytics.psoxy.gateway.HttpEventRequest.class)));
+                result1.set((RESTApiSanitizer) loadSanitizerRulesMethod.invoke(handler));
             } catch (Throwable t) {
                 error.compareAndSet(null, t);
             }
@@ -97,8 +101,7 @@ class ApiDataRequestHandlerConcurrencyTest {
         Thread t2 = new Thread(() -> {
             try {
                 barrier.await();
-                result2.set(handler.getSanitizerForRequest(
-                    MockModules.provideMock(co.worklytics.psoxy.gateway.HttpEventRequest.class)));
+                result2.set((RESTApiSanitizer) loadSanitizerRulesMethod.invoke(handler));
             } catch (Throwable t) {
                 error.compareAndSet(null, t);
             }
@@ -116,7 +119,11 @@ class ApiDataRequestHandlerConcurrencyTest {
         assertNotNull(result1.get(), "Thread 1 got null sanitizer");
         assertNotNull(result2.get(), "Thread 2 got null sanitizer");
 
-        // After both threads complete, the handler's shared sanitizer field should be non-null
+        // DCL should produce the same instance — only one thread creates it
+        assertTrue(result1.get() == result2.get(),
+            "Both threads should get the same sanitizer instance from DCL");
+
+        // The shared field should be set
         assertNotNull(handler.sanitizer, "Shared sanitizer field should be initialized after concurrent access");
     }
 }
