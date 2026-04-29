@@ -527,7 +527,7 @@ EOT
       display_name : "Gong"
       worklytics_connector_name : "Gong Metrics via Psoxy"
       target_host : "${local.gong_instance_subdomain}.api.gong.io"
-      source_auth_strategy : "basic_auth"
+      source_auth_strategy : "oauth2_refresh_token"
       secured_variables : [
         {
           name : "ACCESS_TOKEN"
