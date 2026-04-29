@@ -27,8 +27,6 @@ env:
   JAVA_SOURCE_ROOT: java/
   BUCKET_NAME: psoxy-public-artifacts
   JAR_NAME: psoxy-gcp
-
-env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
