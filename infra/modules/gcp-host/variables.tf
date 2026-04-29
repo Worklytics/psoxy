@@ -407,3 +407,15 @@ variable "builder_sa_email" {
   type        = string
   default     = null
 }
+
+variable "api_connector_instance_concurrency" {
+  type        = number
+  description = "Max concurrent requests per Cloud Run instance for API connectors. Default 5 is suitable for I/O-bound proxy workloads."
+  default     = 5
+}
+
+variable "max_instances_per_api_connector" {
+  type        = number
+  description = "Max number of Cloud Run instances per API connector. With instance_concurrency=5 and max_instances=20, global capacity is 100 concurrent requests per connector."
+  default     = 20
+}

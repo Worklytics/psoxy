@@ -18,6 +18,7 @@ import com.avaulta.gateway.rules.transforms.Transform;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import lombok.AllArgsConstructor;
@@ -57,15 +58,31 @@ public class Rules2 implements RESTRules {
     Map<String, JsonSchemaFilter> definitions;
 
     /**
+     * Ensures definitions is stored as a TreeMap at deserialization time.
+     * Jackson deserializes YAML maps as LinkedHashMap by default; wrapping eagerly here
+     * avoids repeated allocation in {@link #getDefinitions()}.
+     */
+    @JsonSetter("definitions")
+    void setDefinitions(Map<String, JsonSchemaFilter> definitions) {
+        this.definitions = definitions == null ? null : new TreeMap<>(definitions);
+    }
+
+    /**
      * root definitions, to be in scope across all endpoints
      *
      * @return definitions, in a TreeMap so that serialization is deterministic
      */
     public Map<String, JsonSchemaFilter> getDefinitions() {
-        if (definitions != null && !(definitions instanceof TreeMap)) {
-            definitions = new TreeMap<>(definitions);
+        if (definitions == null) {
+            return null;
         }
-        return definitions;
+        if (definitions instanceof TreeMap) {
+            return definitions;
+        }
+        // should not happen: definitions should be set as TreeMap via setDefinitions() or builder
+        log.warning("definitions field is not a TreeMap; allocating reactively. "
+                + "Check that all assignment paths wrap definitions in a TreeMap.");
+        return new TreeMap<>(definitions);
     }
 
 
@@ -130,7 +147,7 @@ public class Rules2 implements RESTRules {
     //TODO: fix YAML serialization with something like
     // https://stackoverflow.com/questions/55878770/how-to-use-jsonsubtypes-for-polymorphic-type-handling-with-jackson-yaml-mapper
 
-    static ObjectMapper mapper = new YAMLMapper();
+    static final ObjectMapper mapper = new YAMLMapper();
 
     public static synchronized Rules2 load(String path) {
         try (InputStream is = Rules2.class.getClassLoader().getResourceAsStream(path)) {

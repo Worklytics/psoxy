@@ -103,6 +103,12 @@ variable "available_memory_mb" {
   default     = 1024
 }
 
+variable "instance_concurrency" {
+  type        = number
+  description = "Max concurrent requests per instance. Default 5 is suitable for I/O-bound proxy workloads."
+  default     = 5
+}
+
 variable "gcp_principals_authorized_to_test" {
   type        = list(string)
   description = "list of GCP principals authorized to test this deployment - eg 'user:alice@acme.com', 'group:devs@acme.com'; if omitted, up to you to configure necessary perms for people to test if desired."

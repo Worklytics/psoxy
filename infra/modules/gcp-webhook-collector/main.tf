@@ -302,8 +302,8 @@ resource "google_cloudfunctions2_function" "function" {
     ingress_settings      = "ALLOW_ALL"
     timeout_seconds       = local.function_exec_timeout_seconds
 
-    # TODO: setting this > 1 gives error: │ Error: Error updating function: googleapi: Error 400: Could not update Cloud Run service projects/psoxy-dev-erik/locations/us-central1/services/psoxy-dev-erik-llm-portal. spec.template.spec.containers.resources.limits.cpu: Invalid value specified for cpu. Total cpu < 1 is not supported with concurrency > 1.
-    # max_instance_request_concurrency = 5 # q: make configurable? default is 1
+    max_instance_request_concurrency = var.instance_concurrency
+    available_cpu                    = var.instance_concurrency > 1 ? "1" : null
 
     vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector
     vpc_connector_egress_settings = var.vpc_config == null ? null : "ALL_TRAFFIC"
