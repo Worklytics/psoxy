@@ -21,6 +21,13 @@ locals {
     for k, v in var.api_connectors : k => v.rules_raw
     if try(v.rules_raw, null) != null && !contains(keys(local.api_connector_rules_files), k)
   }
+
+  api_connector_rules = {
+    for k, v in var.api_connectors :
+    k => try(local.api_connector_rules_files[k], null) != null ? file(local.api_connector_rules_files[k]) : (
+      try(local.api_connector_rules_raw[k], null) != null ? local.api_connector_rules_raw[k] : null
+    )
+  }
 }
 
 # TODO: probably pull all the way to the top level bc 1) proper tf style, 2) simplifies customization if it doesn't work for a particular environment
@@ -117,10 +124,10 @@ module "secrets" {
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionManager_on_writable_secret" {
-  for_each = { for secret in local.secrets_writable_by_instance : secret.instance_secret_id => secret }
+  for_each = { for secret in local.secrets_writable_by_instance : "${secret.instance_id}_${secret.instance_secret_id}" => secret }
 
   project   = var.gcp_project_id
-  secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
+  secret_id = module.secrets[each.value.instance_id].secret_ids_within_project[each.value.instance_secret_id]
   member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
   role      = module.psoxy.psoxy_instance_secret_role_id
 
@@ -130,10 +137,10 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_secretVersionManage
 }
 
 resource "google_secret_manager_secret_iam_member" "grant_sa_secretAccessor_on_non_tf_secret" {
-  for_each = { for secret in local.secrets_access_only_but_not_managed_by_terraform : secret.instance_secret_id => secret }
+  for_each = { for secret in local.secrets_access_only_but_not_managed_by_terraform : "${secret.instance_id}_${secret.instance_secret_id}" => secret }
 
   project   = var.gcp_project_id
-  secret_id = "${local.config_parameter_prefix}${each.value.instance_secret_id}"
+  secret_id = module.secrets[each.value.instance_id].secret_ids_within_project[each.value.instance_secret_id]
   member    = "serviceAccount:${google_service_account.api_connectors[each.value.instance_id].email}"
   role      = "roles/secretmanager.secretAccessor"
 
@@ -218,6 +225,7 @@ module "api_connector" {
       CUSTOM_RULES_SHA = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : (
         try(local.api_connector_rules_raw[each.key], null) != null ? sha1(local.api_connector_rules_raw[each.key]) : null
       )
+      RULES                  = local.api_connector_rules[each.key] != null ? base64gzip(local.api_connector_rules[each.key]) : null
       EMAIL_CANONICALIZATION = var.email_canonicalization
     },
     try(each.value.environment_variables, {}),
@@ -235,28 +243,6 @@ module "api_connector" {
   ]
 }
 
-module "custom_api_connector_rules" {
-  for_each = local.api_connector_rules_files
-
-  source = "../../modules/gcp-sm-rules"
-
-  project_id        = var.gcp_project_id
-  prefix            = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
-  file_path         = each.value
-  instance_sa_email = module.api_connector[each.key].service_account_email
-}
-
-# Rules provisioned from rules_raw (content string, not file path)
-module "api_connector_rules_raw" {
-  for_each = local.api_connector_rules_raw
-
-  source = "../../modules/gcp-sm-rules"
-
-  project_id        = var.gcp_project_id
-  prefix            = "${local.config_parameter_prefix}${upper(replace(each.key, "-", "_"))}_"
-  content           = each.value
-  instance_sa_email = module.api_connector[each.key].service_account_email
-}
 # END API CONNECTORS
 
 # BEGIN WEBHOOK COLLECTORS
@@ -382,10 +368,10 @@ module "bulk_connector" {
     {
       SOURCE = each.value.source_kind
       RULES = (
-        try(var.custom_bulk_connector_rules[each.key], null) != null ? yamlencode(var.custom_bulk_connector_rules[each.key]) :
-        try(each.value.rules_raw, null) != null ? each.value.rules_raw :
-        each.value.rules_file != null ? file(each.value.rules_file) :
-        try(each.value.rules, null) != null ? yamlencode(each.value.rules) :
+        try(var.custom_bulk_connector_rules[each.key], null) != null ? base64gzip(yamlencode(var.custom_bulk_connector_rules[each.key])) :
+        try(each.value.rules_raw, null) != null ? base64gzip(each.value.rules_raw) :
+        each.value.rules_file != null ? base64gzip(file(each.value.rules_file)) :
+        try(each.value.rules, null) != null ? base64gzip(yamlencode(each.value.rules)) :
         null
       )
       BUNDLE_FILENAME        = module.psoxy.filename
@@ -553,4 +539,9 @@ EOF
 
 output "secrets_to_provision" {
   value = local.secrets_writable_by_instance
+}
+
+output "bulk_connector" {
+  description = "INTERNAL USE ONLY - For testing purposes."
+  value       = module.bulk_connector
 }

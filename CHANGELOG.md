@@ -6,6 +6,7 @@ in each release's notes.
 Changes to be including in future/planned release notes will be added here.
 
 ## Next
+- `gcp`: custom rules previously stored as secrets will now be configured as environment variables on the Cloud Run function, as gen 2 supports sufficiently large environment variables to accommodate this.
 - `textDigest` rule now accepts an optional list of `keywords` to tally the occurrence of specific keywords in the text.
 - `chatgpt-enterprise`: added `write` and `email` keyword tracking to prompt/title texts via `textDigest`.
 - performance: optimized `redactExceptPhrases` rule to use non-reluctant matchers.

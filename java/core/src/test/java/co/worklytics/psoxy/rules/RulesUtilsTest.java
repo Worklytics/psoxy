@@ -19,6 +19,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import com.avaulta.gateway.rules.ColumnarRules;
 import com.avaulta.gateway.rules.Endpoint;
+import com.avaulta.gateway.rules.RuleSet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import co.worklytics.psoxy.PsoxyModule;
@@ -118,8 +119,26 @@ class RulesUtilsTest {
         when(config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
             .thenReturn("hris");
 
-        com.avaulta.gateway.rules.RuleSet rules = utils.getRulesFromConfig(config, new EnvVarsConfigService()).get();
+        RuleSet rules = utils.getRulesFromConfig(config, new EnvVarsConfigService()).get();
         assertNotNull(rules);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        YAML_REST,
+        YAML_CSV,
+        YAML_MULTI,
+        YAML_RECORD,
+    })
+    void getRulesFromConfig_base64Gzipped(String rule) {
+        String encoded = TestUtils.asBase64Gzipped(rule);
+        when(config.getConfigPropertyAsOptional(eq(ProxyConfigProperty.RULES)))
+            .thenReturn(Optional.of(encoded));
+        when(config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
+            .thenReturn("hris");
+
+        RuleSet rules = utils.getRulesFromConfig(config, new EnvVarsConfigService()).get();
+        assertNotNull(rules, "Failed to parse gzipped rule");
     }
 
 

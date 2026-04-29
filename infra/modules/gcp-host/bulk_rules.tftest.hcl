@@ -55,13 +55,27 @@ mock_provider "google" {
   }
 }
 
+run "setup" {
+  command = plan
+}
+
 run "rules_environment_variable_set" {
   command = plan
 
   # Test that RULES environment variable is properly set
   assert {
     error_message = "RULES environment variable should be set for test-hris"
-    condition     = can(module.bulk_connector["test-hris"].function_config.service_config[0].environment_variables.RULES)
+    condition     = can(run.setup.bulk_connector["test-hris"].function_config.service_config[0].environment_variables.RULES)
+  }
+}
+
+run "decode_hris" {
+  command = plan
+  module {
+    source = "./tests/decode_rules"
+  }
+  variables {
+    encoded = run.setup.bulk_connector["test-hris"].function_config.service_config[0].environment_variables.RULES
   }
 }
 
@@ -71,7 +85,7 @@ run "rules_contains_valid_yaml" {
   # Test that RULES contains valid YAML
   assert {
     error_message = "RULES should contain valid YAML that can be decoded"
-    condition     = can(yamldecode(module.bulk_connector["test-hris"].function_config.service_config[0].environment_variables.RULES))
+    condition     = can(run.decode_hris.decoded)
   }
 }
 
@@ -81,7 +95,7 @@ run "columnsToPseudonymizeIfPresent_present" {
   # Test that columnsToPseudonymizeIfPresent is included in the YAML
   assert {
     error_message = "columnsToPseudonymizeIfPresent should be present in RULES YAML"
-    condition     = contains(keys(yamldecode(module.bulk_connector["test-hris"].function_config.service_config[0].environment_variables.RULES)), "columnsToPseudonymizeIfPresent")
+    condition     = contains(keys(run.decode_hris.decoded), "columnsToPseudonymizeIfPresent")
   }
 }
 
@@ -91,7 +105,7 @@ run "columnsToPseudonymizeIfPresent_values" {
   # Test that the values are correct (should be from custom_bulk_connector_rules, not bulk_connectors)
   assert {
     error_message = "columnsToPseudonymizeIfPresent should contain 'wrong_optional_field' from custom_bulk_connector_rules"
-    condition     = contains(yamldecode(module.bulk_connector["test-hris"].function_config.service_config[0].environment_variables.RULES).columnsToPseudonymizeIfPresent, "wrong_optional_field")
+    condition     = contains(run.decode_hris.decoded.columnsToPseudonymizeIfPresent, "wrong_optional_field")
   }
 }
 
@@ -101,27 +115,27 @@ run "other_rule_types_preserved" {
   # Test that other rule types are also preserved
   assert {
     error_message = "columnsToPseudonymize should be preserved"
-    condition     = contains(keys(yamldecode(module.bulk_connector["test-hris"].function_config.service_config[0].environment_variables.RULES)), "columnsToPseudonymize")
+    condition     = contains(keys(run.decode_hris.decoded), "columnsToPseudonymize")
   }
 
   assert {
     error_message = "columnsToDuplicate should be preserved"
-    condition     = contains(keys(yamldecode(module.bulk_connector["test-hris"].function_config.service_config[0].environment_variables.RULES)), "columnsToDuplicate")
+    condition     = contains(keys(run.decode_hris.decoded), "columnsToDuplicate")
   }
 
   assert {
     error_message = "columnsToRedact should be preserved"
-    condition     = contains(keys(yamldecode(module.bulk_connector["test-hris"].function_config.service_config[0].environment_variables.RULES)), "columnsToRedact")
+    condition     = contains(keys(run.decode_hris.decoded), "columnsToRedact")
   }
 
   assert {
     error_message = "columnsToRename should be preserved"
-    condition     = contains(keys(yamldecode(module.bulk_connector["test-hris"].function_config.service_config[0].environment_variables.RULES)), "columnsToRename")
+    condition     = contains(keys(run.decode_hris.decoded), "columnsToRename")
   }
 
   assert {
     error_message = "pseudonymFormat should be preserved"
-    condition     = contains(keys(yamldecode(module.bulk_connector["test-hris"].function_config.service_config[0].environment_variables.RULES)), "pseudonymFormat")
+    condition     = contains(keys(run.decode_hris.decoded), "pseudonymFormat")
   }
 }
 
@@ -132,16 +146,16 @@ run "rules_precedence_test" {
   # The test-hris should use "wrong_field" from custom_bulk_connector_rules, not "employee_id" from bulk_connectors
   assert {
     error_message = "Should use rules from custom_bulk_connector_rules (which takes precedence)"
-    condition     = contains(yamldecode(module.bulk_connector["test-hris"].function_config.service_config[0].environment_variables.RULES).columnsToPseudonymize, "wrong_field")
+    condition     = contains(run.decode_hris.decoded.columnsToPseudonymize, "wrong_field")
   }
 
   assert {
     error_message = "Should NOT use rules from bulk_connectors when custom_bulk_connector_rules is present"
-    condition     = !contains(yamldecode(module.bulk_connector["test-hris"].function_config.service_config[0].environment_variables.RULES).columnsToPseudonymize, "employee_id")
+    condition     = !contains(run.decode_hris.decoded.columnsToPseudonymize, "employee_id")
   }
 }
 
-run "fallback_behavior" {
+run "setup_fallback" {
   command = plan
 
   variables {
@@ -153,15 +167,29 @@ run "fallback_behavior" {
       }
     }
   }
+}
+
+run "decode_fallback" {
+  command = plan
+  module {
+    source = "./tests/decode_rules"
+  }
+  variables {
+    encoded = run.setup_fallback.bulk_connector["test-fallback"].function_config.service_config[0].environment_variables.RULES
+  }
+}
+
+run "fallback_behavior" {
+  command = plan
 
   # Test that custom_bulk_connector_rules is used as fallback
   assert {
     error_message = "Should fall back to custom_bulk_connector_rules when bulk_connectors.rules is null"
-    condition     = can(yamldecode(module.bulk_connector["test-fallback"].function_config.service_config[0].environment_variables.RULES))
+    condition     = can(run.decode_fallback.decoded)
   }
 
   assert {
     error_message = "Fallback should include columnsToPseudonymizeIfPresent from custom_bulk_connector_rules"
-    condition     = contains(keys(yamldecode(module.bulk_connector["test-fallback"].function_config.service_config[0].environment_variables.RULES)), "columnsToPseudonymizeIfPresent")
+    condition     = contains(keys(run.decode_fallback.decoded), "columnsToPseudonymizeIfPresent")
   }
 }

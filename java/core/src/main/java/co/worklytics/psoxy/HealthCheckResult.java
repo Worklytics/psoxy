@@ -52,6 +52,7 @@ public class HealthCheckResult {
     /**
      * from config, if any. (if null, the computed logically)
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String pseudonymImplementation;
 
     String sourceAuthStrategy;
