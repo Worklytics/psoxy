@@ -74,7 +74,10 @@ data "azuread_application" "existing_connector_app" {
 module "msft_365_grants" {
   for_each = local.connectors_needing_apps
 
-  source                   = "../../modules/entra-grant-all-users"
+  source = "../../modules/entra-grant-all-users"
+
+  psoxy_instance_id        = each.key
+  application_id           = module.msft_connection[each.key].connector.client_id
   oauth2_permission_scopes = each.value.required_oauth2_permission_scopes
   app_roles                = each.value.required_app_roles
   application_name         = each.key
