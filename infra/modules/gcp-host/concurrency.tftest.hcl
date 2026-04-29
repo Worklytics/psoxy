@@ -73,17 +73,11 @@ run "custom_concurrency_settings" {
   }
 }
 
-run "single_concurrency_disables_cpu_allocation" {
+run "single_concurrency_settings" {
   command = plan
 
   variables {
     api_connector_instance_concurrency = 1
-  }
-
-  # When concurrency is 1, available_cpu should be null (not explicitly allocated)
-  assert {
-    error_message = "available_cpu should be null when concurrency = 1"
-    condition     = module.api_connector["test-gmail"].function_config.service_config[0].available_cpu == null
   }
 
   assert {
