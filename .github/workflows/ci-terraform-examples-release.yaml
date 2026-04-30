@@ -9,6 +9,9 @@ on:
     branches:
       - 'main'
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   validate_tf_examples_remotes:
     strategy:
