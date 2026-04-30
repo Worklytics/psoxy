@@ -63,5 +63,10 @@ output "builder_sa_id" {
 }
 
 output "next_todo_step" {
-  value = (length(var.api_connectors) > 0 || length(var.bulk_connectors) > 0 || length(var.webhook_collectors) > 0) ? var.todo_step + 1 : var.todo_step
+  value = max(
+    var.todo_step,
+    length(var.api_connectors) > 0 ? var.todo_step + 1 : var.todo_step,
+    length(var.bulk_connectors) > 0 ? max(var.todo_step, 2) + 1 : var.todo_step,
+    length(var.webhook_collectors) > 0 ? max(var.todo_step, 2) + 1 : var.todo_step
+  )
 }
