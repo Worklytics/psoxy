@@ -5,7 +5,7 @@ variable "psoxy_instance_id" {
 
 variable "application_id" {
   type        = string
-  description = "object ID of the Azure AD application to authorize"
+  description = "object ID of the Microsoft Entra ID application to authorize"
 }
 
 variable "oauth2_permission_scopes" {
