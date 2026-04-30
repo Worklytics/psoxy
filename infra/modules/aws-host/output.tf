@@ -70,5 +70,10 @@ output "setup_todos" {
 }
 
 output "next_todo_step" {
-  value = (length(var.api_connectors) > 0 || length(var.bulk_connectors) > 0 || length(var.webhook_collectors) > 0) ? var.todo_step + 1 : var.todo_step
+  value = max(concat(
+    [var.todo_step],
+    values(module.api_connector)[*].next_todo_step,
+    values(module.bulk_connector)[*].next_todo_step,
+    values(module.webhook_collector)[*].next_todo_step
+  )...)
 }
