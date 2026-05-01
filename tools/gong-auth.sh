@@ -80,6 +80,7 @@ RESPONSE=$(curl --silent -X POST \
 
 # Parse access token, refresh token, and API base URL
 echo $RESPONSE
+ACCESS_TOKEN=$(echo "${RESPONSE}" | jq -r '.access_token')
 REFRESH_TOKEN=$(echo "${RESPONSE}" | jq -r '.refresh_token')
 API_BASE_URL=$(echo "${RESPONSE}" | jq -r '.api_base_url_for_customer')
 EXPIRES_IN=$(echo "${RESPONSE}" | jq -r '.expires_in')
