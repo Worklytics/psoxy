@@ -27,6 +27,8 @@ public class GongMetricsTest extends JavaRulesTestBaseCase {
                 "activity_aggregate.json",
                 "POST"),
             InvocationExample.of("https://api.gong.io/v2/users", "users.json",
+                "GET"),
+            InvocationExample.of("https://api.gong.io/v2/users?cursor=some_cursor", "users.json",
                 "GET")
         );
     }
