@@ -80,7 +80,6 @@ RESPONSE=$(curl --silent -X POST \
 
 # Parse access token, refresh token, and API base URL
 echo $RESPONSE
-ACCESS_TOKEN=$(echo "${RESPONSE}" | jq -r '.access_token')
 REFRESH_TOKEN=$(echo "${RESPONSE}" | jq -r '.refresh_token')
 API_BASE_URL=$(echo "${RESPONSE}" | jq -r '.api_base_url_for_customer')
 EXPIRES_IN=$(echo "${RESPONSE}" | jq -r '.expires_in')
@@ -97,7 +96,6 @@ printf "${GREEN}Use the following values in the secret manager chosen for your h
 
 printf "${YELLOW}${PREFIX}GONG_METRICS_CLIENT_ID${NC}: ${CLIENT_ID}\n"
 printf "${YELLOW}${PREFIX}GONG_METRICS_CLIENT_SECRET${NC}: ${CLIENT_SECRET}\n"
-printf "${YELLOW}${PREFIX}GONG_METRICS_ACCESS_TOKEN${NC}: ${ACCESS_TOKEN}\n"
 printf "${YELLOW}${PREFIX}GONG_METRICS_REFRESH_TOKEN${NC}: ${REFRESH_TOKEN}\n"
 
 printf "\n${GREEN}Additional information:${NC}\n"
