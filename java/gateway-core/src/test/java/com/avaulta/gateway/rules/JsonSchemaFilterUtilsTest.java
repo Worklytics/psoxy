@@ -294,4 +294,131 @@ class JsonSchemaFilterUtilsTest {
         List<SimplePojoPlus> additionalSimplePojos;
     }
 
+
+    // --- exemptPropertyPrefix tests ---
+
+    @SneakyThrows
+    @Test
+    void filterBySchema_exemptPrefix_passesAugmentProperties() {
+        jsonSchemaFilterUtils.options = JsonSchemaFilterUtils.Options.builder()
+            .exemptPropertyPrefix("+")
+            .build();
+
+        // Schema only declares "name"
+        String schema = "{\n" +
+            "  \"type\": \"object\",\n" +
+            "  \"properties\": {\n" +
+            "    \"name\": { \"type\": \"string\" }\n" +
+            "  }\n" +
+            "}";
+
+        // Input has "name", an undeclared "extra", and an augment "+name:textDigest"
+        String json = "{\n" +
+            "  \"name\": \"hello\",\n" +
+            "  \"extra\": \"should-be-redacted\",\n" +
+            "  \"+name:textDigest\": { \"length\": 5, \"word_count\": 1 }\n" +
+            "}";
+
+        String filtered = jsonSchemaFilterUtils.filterJsonBySchema(json,
+            schemaReader.readValue(schema), schemaReader.readValue(schema));
+
+        // "name" kept, "extra" redacted, "+name:textDigest" passed through
+        assertTrue(filtered.contains("\"name\""));
+        assertFalse(filtered.contains("extra"));
+        assertTrue(filtered.contains("+name:textDigest"));
+        assertTrue(filtered.contains("\"length\""));
+        assertTrue(filtered.contains("\"word_count\""));
+    }
+
+    @SneakyThrows
+    @Test
+    void filterBySchema_noExemptPrefix_redactsAugmentProperties() {
+        // Default options — no exempt prefix
+        jsonSchemaFilterUtils.options = JsonSchemaFilterUtils.Options.builder().build();
+
+        String schema = "{\n" +
+            "  \"type\": \"object\",\n" +
+            "  \"properties\": {\n" +
+            "    \"name\": { \"type\": \"string\" }\n" +
+            "  }\n" +
+            "}";
+
+        String json = "{\n" +
+            "  \"name\": \"hello\",\n" +
+            "  \"+name:textDigest\": { \"length\": 5 }\n" +
+            "}";
+
+        String filtered = jsonSchemaFilterUtils.filterJsonBySchema(json,
+            schemaReader.readValue(schema), schemaReader.readValue(schema));
+
+        // Without prefix exemption, the "+" property should be redacted
+        assertTrue(filtered.contains("\"name\""));
+        assertFalse(filtered.contains("+name:textDigest"));
+    }
+
+    @SneakyThrows
+    @Test
+    void filterBySchema_exemptPrefix_passesNestedAugmentProperties() {
+        jsonSchemaFilterUtils.options = JsonSchemaFilterUtils.Options.builder()
+            .exemptPropertyPrefix("+")
+            .build();
+
+        // Schema with a nested object
+        String schema = "{\n" +
+            "  \"type\": \"object\",\n" +
+            "  \"properties\": {\n" +
+            "    \"body\": {\n" +
+            "      \"type\": \"object\",\n" +
+            "      \"properties\": {\n" +
+            "        \"content\": { \"type\": \"string\" }\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }\n" +
+            "}";
+
+        // Input has augment property inside nested object
+        String json = "{\n" +
+            "  \"body\": {\n" +
+            "    \"content\": \"Hello world\",\n" +
+            "    \"+content:textDigest\": { \"length\": 11, \"word_count\": 2 }\n" +
+            "  }\n" +
+            "}";
+
+        String filtered = jsonSchemaFilterUtils.filterJsonBySchema(json,
+            schemaReader.readValue(schema), schemaReader.readValue(schema));
+
+        assertTrue(filtered.contains("\"content\""));
+        assertTrue(filtered.contains("+content:textDigest"));
+        assertTrue(filtered.contains("\"length\""));
+    }
+
+    @SneakyThrows
+    @Test
+    void filterBySchema_exemptPrefix_customPrefix() {
+        // Use a custom prefix instead of "+"
+        jsonSchemaFilterUtils.options = JsonSchemaFilterUtils.Options.builder()
+            .exemptPropertyPrefix("__augment_")
+            .build();
+
+        String schema = "{\n" +
+            "  \"type\": \"object\",\n" +
+            "  \"properties\": {\n" +
+            "    \"name\": { \"type\": \"string\" }\n" +
+            "  }\n" +
+            "}";
+
+        String json = "{\n" +
+            "  \"name\": \"hello\",\n" +
+            "  \"__augment_digest\": { \"length\": 5 },\n" +
+            "  \"+name:textDigest\": { \"length\": 5 }\n" +
+            "}";
+
+        String filtered = jsonSchemaFilterUtils.filterJsonBySchema(json,
+            schemaReader.readValue(schema), schemaReader.readValue(schema));
+
+        // Custom prefix passes, "+" prefix does NOT pass (different prefix configured)
+        assertTrue(filtered.contains("__augment_digest"));
+        assertFalse(filtered.contains("+name:textDigest"));
+    }
+
 }

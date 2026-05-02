@@ -396,6 +396,12 @@ public abstract class Transform {
         }
     }
 
+    /**
+     * @deprecated Use {@link com.avaulta.gateway.rules.augments.Augment.TextDigest} instead.
+     * This transform replaces the source field value with the digest output; the augment variant
+     * adds a sibling property and preserves the original value for downstream transforms.
+     */
+    @Deprecated
     @SuperBuilder(toBuilder = true)
     @NoArgsConstructor //for Jackson
     @Getter

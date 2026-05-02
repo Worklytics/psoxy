@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import com.avaulta.gateway.rules.augments.Augment;
 import com.avaulta.gateway.rules.transforms.Transform;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -21,7 +22,7 @@ import lombok.Singular;
 import lombok.With;
 
 @JsonPropertyOrder({"pathRegex", "pathTemplate", "allowedMethods", "allowedQueryParams", "allowedRequestHeaders",
-    "transforms"})
+    "augments", "transforms"})
 @Builder(toBuilder = true)
 @With
 @AllArgsConstructor // for builder
@@ -205,6 +206,15 @@ public class Endpoint {
         return Optional.ofNullable(responseSchema);
     }
 
+    /**
+     * Augments to compute and inject as synthetic sibling properties, run before transforms.
+     * @see <a href="file:///docs/development/augments.md">Augments Design Doc</a>
+     */
+    @Setter
+    @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+    @Singular
+    List<Augment> augments;
+
     @Setter
     @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
     @Singular
@@ -216,12 +226,14 @@ public class Endpoint {
      * 2) Explicit instantiation of @Singular fields required to avoid Lombok warnings about ignored default values.
      */
     public Endpoint() {
+        this.augments = new ArrayList<>();
         this.transforms = new ArrayList<>();
     }
 
     @Override
     public Endpoint clone() {
-        return this.toBuilder()
+        var builder = this.toBuilder()
+            .clearAugments()
             .clearTransforms()
             .transforms(
                 this.transforms.stream().map(Transform::clone).collect(Collectors.toList()))
@@ -229,7 +241,12 @@ public class Endpoint {
                 this.getAllowedQueryParamsOptional().map(ArrayList::new).orElse(null))
             .pathTemplate(this.pathTemplate)
             .allowedMethods(this.allowedMethods)
-            .allowedRequestHeadersToForward(this.allowedRequestHeadersToForward)
-            .build();
+            .allowedRequestHeadersToForward(this.allowedRequestHeadersToForward);
+
+        if (this.augments != null) {
+            builder.augments(new ArrayList<>(this.augments));
+        }
+
+        return builder.build();
     }
 }
