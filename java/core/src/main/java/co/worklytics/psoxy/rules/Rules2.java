@@ -76,7 +76,6 @@ public class Rules2 implements RESTRules {
         if (definitions == null || definitions instanceof TreeMap) {
             return definitions;
         }
-}
         // should not happen: definitions should be set as TreeMap via setDefinitions() or builder
         log.warning("definitions field is not a TreeMap; allocating reactively. "
                 + "Check that all assignment paths wrap definitions in a TreeMap.");
