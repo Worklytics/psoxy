@@ -1,6 +1,3 @@
-locals {
-  msft_connector_app_object_id = try(var.msft_365_connector_settings["msft_connector_app_object_id"], var.msft_connector_app_object_id)
-}
 terraform {
   required_version = "~> 1.7"
 }
@@ -34,7 +31,7 @@ module "worklytics_connector_specs" {
 }
 
 locals {
-  provision_entraid_apps  = local.msft_connector_app_object_id == null
+  provision_entraid_apps  = var.msft_connector_app_object_id == null
   connectors_needing_apps = { for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors : k => v if local.provision_entraid_apps }
 }
 
@@ -67,9 +64,9 @@ module "msft_connection" {
 # if an existing app object id is provided, use it as a shared app for ALL MSFT connectors
 # (requires that it has the superset of permissions required by all connectors)
 data "azuread_application" "existing_connector_app" {
-  count = local.msft_connector_app_object_id == null ? 0 : 1
+  count = var.msft_connector_app_object_id == null ? 0 : 1
 
-  object_id = local.msft_connector_app_object_id
+  object_id = var.msft_connector_app_object_id
 }
 
 

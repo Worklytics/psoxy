@@ -70,13 +70,13 @@ variable "msft_teams_example_online_meeting_join_url" {
 
 variable "msft_owners_email" {
   type        = set(string)
-  description = "[DEPRECATED - use map instead] (Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user. Ignored if `existing_app_object_id` provided."
+  description = "(Only if config includes MSFT connectors). Optionally, set of emails to apply as owners on AAD apps apart from current logged user. Ignored if `existing_app_object_id` provided."
   default     = []
 }
 
 variable "msft_connector_app_object_id" {
   type        = string
-  description = "[DEPRECATED - use map instead] BETA; if provided, the app corresponding to this object id will be used instead of creating new ones per source. User must ensure that roles/scopes are appropriate for the connector"
+  description = "BETA; if provided, the app corresponding to this object id will be used instead of creating new ones per source. User must ensure that roles/scopes are appropriate for the connector"
   default     = null
 }
 
