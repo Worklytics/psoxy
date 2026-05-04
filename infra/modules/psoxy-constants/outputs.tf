@@ -57,7 +57,7 @@ output "required_gcp_apis_to_provision_google_workspace_source" {
 
 output "required_azuread_roles_to_provision_msft_365_source" {
   value       = local.required_azuread_roles_to_provision_msft_365_source
-  description = "The Azure AD roles required to provision OAuth Client(s) needed to use Microsoft 365 as a data source via Psoxy"
+  description = "The Microsoft Entra ID roles required to provision OAuth Client(s) needed to use Microsoft 365 as a data source via Psoxy"
 }
 
 output "aws_least_privileged_policy" {

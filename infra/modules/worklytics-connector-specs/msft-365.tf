@@ -1,6 +1,6 @@
 locals {
   # Microsoft 365 sources; add/remove as you wish
-  # See https://docs.microsoft.com/en-us/graph/permissions-reference for all the permissions available in AAD Graph API
+  # See https://learn.microsoft.com/en-us/graph/permissions-reference for all the permissions available in Microsoft Graph API
 
   # these are the same for all the Microsoft 365 connectors
   msft_365_environment_variables = {

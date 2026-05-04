@@ -29,7 +29,7 @@
       }
     }
   ],
-  "toDateTime":"2019-01-21T00:00:00-08:00",
   "fromDateTime":"2019-01-20T00:00:00-08:00",
+  "toDateTime":"2019-01-21T00:00:00-08:00",
   "timeZone":"US/Pacific"
 }

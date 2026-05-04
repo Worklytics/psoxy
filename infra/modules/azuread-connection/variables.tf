@@ -1,6 +1,6 @@
 variable "tenant_id" {
   type        = string
-  description = "ID of the Azure AD tenant in which to provision the connector"
+  description = "ID of the Microsoft Entra ID tenant in which to provision the connector"
 }
 
 variable "display_name" {
