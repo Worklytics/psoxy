@@ -12,6 +12,7 @@ Changes to be including in future/planned release notes will be added here.
 - performance: optimized `redactExceptPhrases` rule to use non-reluctant matchers.
 
 ## [0.6.0](https://github.com/Worklytics/psoxy/releases/tag/v0.6.0)
+- **DEPRECATION**: Top-level connector specific Terraform variables (e.g., `salesforce_domain`, `gong_instance_subdomain`, `github_enterprise_server_host`) have been deprecated. These should now be passed through the new `connector_settings` map variable.
 - `gcp`: Dedicated `proxy_builder_sa` service account is now provisioned and used for Cloud Build operations when provisioning Cloud Functions, eliminating project-level IAM dependencies on the default Compute Engine service account.
 - `zoom`: Default rules for Zoom have been updated, removing fields and endpoints not required.
 - `pseudonymizeRegexMatches`: apply the pseudonymization to any match found in the field instead of the first one.

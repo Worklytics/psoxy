@@ -31,7 +31,7 @@ See the [official Gong OAuth documentation](https://help.gong.io/docs/create-an-
 
 ### Required Configuration
 
-1. **Terraform Variables**: Set `gong_instance_subdomain` in your `terraform.tfvars` file (e.g., if your Gong URL is `acme.gong.io`, set `gong_instance_subdomain = "acme"`).
+1. **Terraform Variables**: Set `gong_instance_subdomain` in your `connector_settings` in your `terraform.tfvars` file (e.g., if your Gong URL is `acme.gong.io`, set `connector_settings = { gong_instance_subdomain = "acme" }`).
 When doing the setup of the connector you should double check this value with the one provided by Gong to ensure the API endpoint will match the one of your Gong instance.
 
 2. **Secret Manager Parameters**:

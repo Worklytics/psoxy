@@ -1,3 +1,7 @@
+locals {
+  provision_gcp_sa_keys    = try(var.google_workspace_connector_settings["google_workspace_provision_keys"], var.provision_gcp_sa_keys)
+  gcp_sa_key_rotation_days = try(var.google_workspace_connector_settings["google_workspace_key_rotation_days"], var.gcp_sa_key_rotation_days)
+}
 terraform {
   required_version = "~> 1.7"
 }
@@ -17,6 +21,8 @@ locals {
 
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
+
+  google_workspace_connector_settings = var.google_workspace_connector_settings
 
   base_dir                       = var.base_dir
   enabled_connectors             = var.enabled_connectors
@@ -48,18 +54,18 @@ locals {
   }
 
   todos = [for id, connection in module.google_workspace_connection :
-    var.provision_gcp_sa_keys ? connection.todo : "${local.key_creation_todos[id]}\n${connection.todo}"
+    local.provision_gcp_sa_keys ? connection.todo : "${local.key_creation_todos[id]}\n${connection.todo}"
   ]
 
   current_todo_step = try(max(values(module.google_workspace_connection)[*].next_todo_step...), var.todo_step)
-  next_todo_step    = var.provision_gcp_sa_keys ? local.current_todo_step : local.current_todo_step + 1
+  next_todo_step    = local.provision_gcp_sa_keys ? local.current_todo_step : local.current_todo_step + 1
 
-  service_accounts_tf_managed_keys = var.provision_gcp_sa_keys ? {
+  service_accounts_tf_managed_keys = local.provision_gcp_sa_keys ? {
     for k, v in module.worklytics_connector_specs.enabled_google_workspace_connectors :
     k => module.google_workspace_connection[k].service_account_id
   } : {}
 
-  service_accounts_user_managed_keys = var.provision_gcp_sa_keys ? {} : {
+  service_accounts_user_managed_keys = local.provision_gcp_sa_keys ? {} : {
     for k, v in module.worklytics_connector_specs.enabled_google_workspace_connectors :
     k => module.google_workspace_connection[k].service_account_id
   }
@@ -78,7 +84,7 @@ module "google_workspace_connection_auth" {
   source = "../../modules/gcp-sa-auth-key"
 
   service_account_id     = each.value
-  rotation_days          = var.gcp_sa_key_rotation_days
+  rotation_days          = local.gcp_sa_key_rotation_days
   tf_gcp_principal_email = var.tf_gcp_principal_email
 }
 
@@ -97,7 +103,7 @@ locals {
             value               = try(module.google_workspace_connection_auth[k].key_value, "fill me")
             writable            = false
             sensitive           = true
-            value_managed_by_tf = var.provision_gcp_sa_keys
+            value_managed_by_tf = local.provision_gcp_sa_keys
             description         = "The API key for the GCP Service Account that is the OAuth Client for accessing the Google Workspace APIs used by the ${k} connector."
           }
         ]
