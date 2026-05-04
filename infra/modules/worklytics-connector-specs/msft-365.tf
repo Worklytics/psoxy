@@ -32,7 +32,7 @@ locals {
     enable_side_output : false
     example_api_calls : [
       "/v1.0/users",
-      "/v1.0/users/${var.example_msft_user_guid}",
+      "/v1.0/users/${local.example_msft_user_guid}",
       "/v1.0/groups",
       "/v1.0/groups/{GROUP_ID}/members"
     ]
@@ -67,9 +67,9 @@ locals {
       enable_side_output : false
       example_api_calls : [
         "/v1.0/users",
-        "/v1.0/users/${var.example_msft_user_guid}/events",
-        "/v1.0/users/${var.example_msft_user_guid}/calendarView?startDateTime=${timeadd(var.example_api_calls_sample_date, "-4320h")}&endDateTime=${var.example_api_calls_sample_date}",
-        "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
+        "/v1.0/users/${local.example_msft_user_guid}/events",
+        "/v1.0/users/${local.example_msft_user_guid}/calendarView?startDateTime=${timeadd(var.example_api_calls_sample_date, "-4320h")}&endDateTime=${var.example_api_calls_sample_date}",
+        "/v1.0/users/${local.example_msft_user_guid}/mailboxSettings",
         "/v1.0/groups",
         "/v1.0/groups/{GROUP_ID}/members"
       ]
@@ -94,8 +94,8 @@ locals {
       enable_side_output : false
       example_api_calls : [
         "/v1.0/users",
-        "/v1.0/users/${var.example_msft_user_guid}/mailboxSettings",
-        "/v1.0/users/${var.example_msft_user_guid}/mailFolders/SentItems/messages",
+        "/v1.0/users/${local.example_msft_user_guid}/mailboxSettings",
+        "/v1.0/users/${local.example_msft_user_guid}/mailFolders/SentItems/messages",
         "/v1.0/groups",
         "/v1.0/groups/{GROUP_ID}/members"
       ]
@@ -123,17 +123,17 @@ locals {
       enable_side_output : false
       example_api_calls : [
         "/v1.0/teams",
-        "/v1.0/teams/${var.msft_teams_example_team_guid}/allChannels",
-        "/v1.0/users/${var.example_msft_user_guid}/chats",
-        "/v1.0/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages",
-        "/v1.0/teams/${var.msft_teams_example_team_guid}/channels/${var.msft_teams_example_channel_guid}/messages/delta",
-        "/v1.0/chats/${var.msft_teams_example_chat_guid}/messages",
-        "/v1.0/communications/calls/${var.msft_teams_example_call_guid}",
+        "/v1.0/teams/${local.msft_teams_example_team_guid}/allChannels",
+        "/v1.0/users/${local.example_msft_user_guid}/chats",
+        "/v1.0/teams/${local.msft_teams_example_team_guid}/channels/${local.msft_teams_example_channel_guid}/messages",
+        "/v1.0/teams/${local.msft_teams_example_team_guid}/channels/${local.msft_teams_example_channel_guid}/messages/delta",
+        "/v1.0/chats/${local.msft_teams_example_chat_guid}/messages",
+        "/v1.0/communications/calls/${local.msft_teams_example_call_guid}",
         "/v1.0/communications/callRecords",
-        "/v1.0/communications/callRecords/${var.msft_teams_example_call_record_guid}",
+        "/v1.0/communications/callRecords/${local.msft_teams_example_call_record_guid}",
         "/v1.0/communications/callRecords/getDirectRoutingCalls(fromDateTime=${urlencode(timeadd(var.example_api_calls_sample_date, "-2160h"))},toDateTime=${urlencode(var.example_api_calls_sample_date)})",
         "/v1.0/communications/callRecords/getPstnCalls(fromDateTime=${urlencode(timeadd(var.example_api_calls_sample_date, "-2160h"))},toDateTime=${urlencode(var.example_api_calls_sample_date)})",
-        "/v1.0/users/${var.example_msft_user_guid}/onlineMeetings?\\$filter=JoinWebUrl eq '${var.msft_teams_example_online_meeting_join_url}'"
+        "/v1.0/users/${local.example_msft_user_guid}/onlineMeetings?\\$filter=JoinWebUrl eq '${local.msft_teams_example_online_meeting_join_url}'"
       ]
       external_todo : <<EOT
 To enable the connector, you need to allow permissions on the application created for reading OnlineMeetings. You will need Powershell for this.
@@ -185,7 +185,7 @@ EOT
       enable_side_output : false
       example_api_calls : [
         "/v1.0/users",
-        "/beta/copilot/users/${var.example_msft_user_guid}/interactionHistory/getAllEnterpriseInteractions"
+        "/beta/copilot/users/${local.example_msft_user_guid}/interactionHistory/getAllEnterpriseInteractions"
       ]
     }
   }
