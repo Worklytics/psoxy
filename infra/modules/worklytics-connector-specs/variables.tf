@@ -29,13 +29,13 @@ variable "confluence_example_group_id" {
 
 variable "google_workspace_example_user" {
   type        = string
-  description = "user to impersonate for Google Workspace API calls (null for none)"
+  description = "[DEPRECATED - use map instead] user to impersonate for Google Workspace API calls (null for none)"
   default     = null
 }
 
 variable "google_workspace_example_admin" {
   type        = string
-  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
+  description = "[DEPRECATED - use map instead] user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
   default     = null # will failover to user
 }
 
@@ -59,43 +59,43 @@ variable "msft_tenant_id" {
 
 variable "example_msft_user_guid" {
   type        = string
-  description = "example MSFT user guid (uuid) for test API calls (OPTIONAL)"
+  description = "[DEPRECATED - use map instead] example MSFT user guid (uuid) for test API calls (OPTIONAL)"
   default     = "{EXAMPLE_MSFT_USER_GUID}"
 }
 
 variable "msft_teams_example_team_guid" {
   type        = string
-  description = "example of MSFT Id (GUID) of a Teams Team for test API calls (OPTIONAL)"
+  description = "[DEPRECATED - use map instead] example of MSFT Id (GUID) of a Teams Team for test API calls (OPTIONAL)"
   default     = "{EXAMPLE_MSFT_TEAMS_TEAM_GUID}"
 }
 
 variable "msft_teams_example_channel_guid" {
   type        = string
-  description = "example of MSFT Id (GUID) of a Teams Channel for test API calls (OPTIONAL)"
+  description = "[DEPRECATED - use map instead] example of MSFT Id (GUID) of a Teams Channel for test API calls (OPTIONAL)"
   default     = "{EXAMPLE_MSFT_TEAMS_CHANNEL_GUID}"
 }
 
 variable "msft_teams_example_chat_guid" {
   type        = string
-  description = "example of MSFT Id (GUID) of a Teams Chat for test API calls (OPTIONAL)"
+  description = "[DEPRECATED - use map instead] example of MSFT Id (GUID) of a Teams Chat for test API calls (OPTIONAL)"
   default     = "{EXAMPLE_MSFT_TEAMS_CHAT_GUID}"
 }
 
 variable "msft_teams_example_call_guid" {
   type        = string
-  description = "example of MSFT Id (GUID) of a Teams Call for test API calls (OPTIONAL)"
+  description = "[DEPRECATED - use map instead] example of MSFT Id (GUID) of a Teams Call for test API calls (OPTIONAL)"
   default     = "{EXAMPLE_MSFT_TEAMS_CALL_GUID}"
 }
 
 variable "msft_teams_example_call_record_guid" {
   type        = string
-  description = "example of MSFT Id (GUID) of a Teams Call Record for test API calls (OPTIONAL)"
+  description = "[DEPRECATED - use map instead] example of MSFT Id (GUID) of a Teams Call Record for test API calls (OPTIONAL)"
   default     = "{EXAMPLE_MSFT_TEAMS_CALL_RECORD_GUID}"
 }
 
 variable "msft_teams_example_online_meeting_join_url" {
   type        = string
-  description = "example of an URL to join into an OnlineMeeting for test API calls (OPTIONAL)"
+  description = "[DEPRECATED - use map instead] example of an URL to join into an OnlineMeeting for test API calls (OPTIONAL)"
   default     = "{EXAMPLE_MSFT_TEAMS_ONLINE_MEETING_URL}"
 }
 
@@ -225,4 +225,18 @@ variable "connector_settings" {
   type        = map(string)
   default     = {}
   description = "Connector-specific settings to pass down to connector configurations."
+}
+
+
+variable "msft_365_connector_settings" {
+  type        = map(any)
+  description = "Map of configuration settings specifically for MSFT 365 connectors (e.g. test GUIDs, custom paths). Note that provider-controlling parameters (like msft_tenant_id or existing app IDs) remain top-level variables."
+  default     = {}
+}
+
+
+variable "google_workspace_connector_settings" {
+  type        = map(any)
+  description = "Map of configuration settings specifically for Google Workspace connectors (e.g. example users). Note that provider-controlling parameters (like GCP project IDs or impersonation SAs) remain top-level variables."
+  default     = {}
 }

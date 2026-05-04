@@ -1,3 +1,15 @@
+locals {
+  example_msft_user_guid                     = try(var.msft_365_connector_settings["example_msft_user_guid"], var.example_msft_user_guid)
+  msft_teams_example_team_guid               = try(var.msft_365_connector_settings["msft_teams_example_team_guid"], var.msft_teams_example_team_guid)
+  msft_teams_example_channel_guid            = try(var.msft_365_connector_settings["msft_teams_example_channel_guid"], var.msft_teams_example_channel_guid)
+  msft_teams_example_chat_guid               = try(var.msft_365_connector_settings["msft_teams_example_chat_guid"], var.msft_teams_example_chat_guid)
+  msft_teams_example_call_guid               = try(var.msft_365_connector_settings["msft_teams_example_call_guid"], var.msft_teams_example_call_guid)
+  msft_teams_example_call_record_guid        = try(var.msft_365_connector_settings["msft_teams_example_call_record_guid"], var.msft_teams_example_call_record_guid)
+  msft_teams_example_online_meeting_join_url = try(var.msft_365_connector_settings["msft_teams_example_online_meeting_join_url"], var.msft_teams_example_online_meeting_join_url)
+
+  google_workspace_example_user  = try(var.google_workspace_connector_settings["google_workspace_example_user"], var.google_workspace_example_user)
+  google_workspace_example_admin = try(var.google_workspace_connector_settings["google_workspace_example_admin"], var.google_workspace_example_admin)
+}
 
 # TODO: arguably it does make sense to have these in yaml, and read them from there; bc YAML gives
 # more interoperability than in a .tf file
