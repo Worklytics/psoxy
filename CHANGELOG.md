@@ -12,6 +12,7 @@ Changes to be including in future/planned release notes will be added here.
 - performance: optimized `redactExceptPhrases` rule to use non-reluctant matchers.
 
 ## [0.6.0](https://github.com/Worklytics/psoxy/releases/tag/v0.6.0)
+- **AWS / GCP**: Upgraded deployment runtime environments to Java 25, while maintaining Java 21 byte-code and language-level compatibility.
 - `gcp`: Dedicated `proxy_builder_sa` service account is now provisioned and used for Cloud Build operations when provisioning Cloud Functions, eliminating project-level IAM dependencies on the default Compute Engine service account.
 - `zoom`: Default rules for Zoom have been updated, removing fields and endpoints not required.
 - `pseudonymizeRegexMatches`: apply the pseudonymization to any match found in the field instead of the first one.

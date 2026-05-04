@@ -277,7 +277,7 @@ resource "google_cloudfunctions2_function" "function" {
   location = var.region
 
   build_config {
-    runtime           = "java21"
+    runtime           = "java25"
     docker_repository = var.artifact_repository_id
     entry_point       = "co.worklytics.psoxy.GcpWebhookCollectorRoute"
     service_account   = var.builder_sa_id
