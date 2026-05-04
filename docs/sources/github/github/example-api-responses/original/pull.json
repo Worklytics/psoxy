@@ -316,7 +316,7 @@
         "pull": true
       },
       "allow_rebase_merge": true,
-      "temp_clone_token": "ABTLWHOULUVAXGTRYU7OC2876QJ2O",
+      "temp_clone_token": "REDACTED",
       "allow_squash_merge": true,
       "allow_merge_commit": true,
       "allow_forking": true,
@@ -458,7 +458,7 @@
         "pull": true
       },
       "allow_rebase_merge": true,
-      "temp_clone_token": "ABTLWHOULUVAXGTRYU7OC2876QJ2O",
+      "temp_clone_token": "REDACTED",
       "allow_squash_merge": true,
       "allow_merge_commit": true,
       "forks": 123,
