@@ -1,0 +1,26 @@
+## Prerequisites
+Atlassian Organization Admin API through Psoxy uses an API token for authentication.
+See [Atlassian Organization Admin API - Authentication](https://developer.atlassian.com/cloud/admin/organization/rest/intro/#auth) for details.
+
+Required scopes for the API token:
+- `read:directories:admin`: for retrieving [directory users](https://developer.atlassian.com/cloud/admin/organization/rest/api-group-users/#api-admin-v2-orgs-orgid-directories-directoryid-users-get)
+- `read:events:admin`: for retrieving [audit events](https://developer.atlassian.com/cloud/admin/organization/rest/api-group-events/#api-admin-v1-orgs-orgid-events-get) and [audit events stream](https://developer.atlassian.com/cloud/admin/organization/rest/api-group-events/#api-admin-v1-orgs-orgid-events-stream-get)
+
+## Setup Instructions
+
+1. Go to [Atlassian Admin](https://admin.atlassian.com/) and navigate to your organization.
+2. In the organization settings, go to "API keys" section.
+3. Create a new API key with the following scopes:
+   - `read:directories:admin`
+   - `read:events:admin`
+4. Copy the generated API key immediately as it will only be shown once.
+5. Set the API key as the `ACCESS_TOKEN` in AWS System Manager Parameter Store / GCP Cloud Secrets:
+   - `${path_to_instance_parameters}_ACCESS_TOKEN` with the API key value.
+6. Find your Organization ID:
+   - Organization ID: In the Atlassian Admin console URL (e.g., `https://admin.atlassian.com/o/{org-id}/overview`)
+7. Add this value to your `terraform.tfvars` file:
+   - `atlassian_organization_id = "your-org-id"`
+
+**IMPORTANT**: API keys expire periodically. You must renew your API key before expiration and update the
+`${path_to_instance_parameters}_ACCESS_TOKEN` secret to ensure the connector continues to work.
+Set a reminder to check and renew the key before it expires.

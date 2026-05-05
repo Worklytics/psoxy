@@ -274,7 +274,17 @@ variable "custom_api_connectors" {
   }))
 
   description = "map of custom API connectors to provision"
-  default     = {}
+  default = {
+    # "custom-api" = {
+    #   source_kind          = "my-custom-api"
+    #   source_auth_strategy = "bearer"
+    #   target_host          = "api.example.com"
+    #   example_api_calls    = ["/v1/users"]
+    #   secured_variables = [
+    #     { name = "API_KEY" }
+    #   ]
+    # }
+  }
 }
 
 variable "custom_api_connector_rules" {
@@ -459,18 +469,6 @@ variable "lookup_table_builders" {
   }
 }
 
-variable "todos_as_outputs" {
-  type        = bool
-  description = "whether to render TODOs as outputs (former useful if you're using Terraform Cloud/Enterprise, or somewhere else where the filesystem is not readily accessible to you)"
-  default     = false
-}
-
-variable "todos_as_local_files" {
-  type        = bool
-  description = "whether to render TODOs as flat files"
-  default     = true
-}
-
 variable "allowed_data_access_ip_blocks" {
   description = <<-EOT
     IPs or CIDR blocks allowed to make data access requests at the application layer.
@@ -500,3 +498,23 @@ variable "allowed_webhook_ip_blocks" {
     error_message = "allowed_webhook_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
   }
 }
+  
+variable "connector_settings" {
+  type        = map(string)
+  default     = {}
+  description = "Connector-specific settings."
+}
+  
+variable "todos_as_outputs" {
+  type        = bool
+  description = "whether to render TODOs as outputs (former useful if you're using Terraform Cloud/Enterprise, or somewhere else where the filesystem is not readily accessible to you)"
+  default     = false
+}
+
+variable "todos_as_local_files" {
+  type        = bool
+  description = "whether to render TODOs as flat files"
+  default     = true
+}
+
+

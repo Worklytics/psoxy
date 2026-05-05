@@ -1,0 +1,62 @@
+## Prerequisites
+
+GitLab for Self-Managed / Dedicated through Psoxy uses an **Admin Access token** for authentication.
+
+The following scope is required:
+- `read_api`: for reading API resources (groups, projects, issues, merge requests, users, etc.)
+
+## Endpoints Used
+
+| Endpoint                                                                       |
+|--------------------------------------------------------------------------------|
+| `/api/v4/groups`                                                               |
+| `/api/v4/version`                                                              |
+| `/api/v4/groups/{id}/members/all`                                              |
+| `/api/v4/merge_requests/{id}`                                                  |
+| `/api/v4/users`                                                                |
+| `/api/v4/users/{id}/emails`                                                    |
+| `/api/v4/projects`                                                             |
+| `/api/v4/projects/{id}/audit_events`                                           |
+| `/api/v4/projects/{id}/issues/{issueIid}/notes`                                |
+| `/api/v4/projects/{id}/issues/{issueIid}/resource_state_events`                |
+| `/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/commits`               |
+| `/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/notes`                 |
+| `/api/v4/projects/{id}/merge_requests/{mergeRequestIid}/resource_state_events` |
+| `/api/v4/projects/{id}/repository/branches`                                    |
+| `/api/v4/projects/{id}/repository/commits`                                     |
+| `/api/v4/projects/{id}/repository/commits/{sha}`                               |
+| `/api/v4/projects/{id}/repository/commits/{sha}/discussions`                   |
+| `/api/v4/projects/{projectId}/issues`                                          |
+| `/api/v4/projects/{projectId}/merge_requests`                                  |
+
+## Setup Instructions
+
+### Creating a dedicated user as service account
+
+1. We recommend to create a [dedicated service account](https://docs.gitlab.com/user/profile/account/create_accounts/#create-a-user-in-the-admin-area) and generate a Personal Access Token for that account with the required permissions.
+2. As an administrator, go to [${gitlab_url}/admin/users/new](https://${gitlab_url}/admin/users/new)
+3. Ensure that the `User type` is marked as `Administrator`
+
+### Creating a Personal Access Token for the service account
+1. Go to the user settings of the [service account](${gitlab_url}/admin/users) you just created
+2. Go to `Impersonation Tokens`
+3. Click "Add new token" and configure:
+   - **Token name**: A descriptive name (e.g., "Worklytics Psoxy Connector")
+   - **Expiration date**: Set an appropriate expiration (or leave blank for no expiration if allowed)
+   - **Scopes**: Select `read_api`
+4. **Important**: Copy the token value immediately - it won't be shown again!
+
+## Configure Psoxy
+
+Set the following variable in AWS System Manager parameters store / GCP Cloud Secrets:
+
+- `${path_to_instance_parameters}ACCESS_TOKEN`: The access token value you copied
+
+## Token Expiration
+
+GitLab access tokens may have expiration dates. It is your responsibility to:
+1. Monitor token expiration
+2. Generate a new token before the current one expires
+3. Update the secret in your cloud provider's secret manager
+
+**Note**: Some GitLab instances allow tokens without expiration dates. Check with your GitLab administrator.

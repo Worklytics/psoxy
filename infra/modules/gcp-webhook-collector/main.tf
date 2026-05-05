@@ -113,14 +113,7 @@ resource "google_kms_crypto_key_iam_member" "allow_function_to_access_public_key
 
 # END AUTH KEYS
 
-module "rules_parameter" {
-  source = "../gcp-sm-rules"
-
-  project_id        = var.project_id
-  instance_sa_email = var.service_account_email
-  file_path         = var.rules_file
-  prefix            = local.path_to_instance_config_parameters
-}
+# (rules_parameter module removed)
 
 
 resource "random_string" "bucket_name_random_sequence" {
@@ -203,6 +196,7 @@ locals {
     BATCH_SIZE                       = local.batch_size
     BATCH_INVOCATION_TIMEOUT_SECONDS = local.batch_invocation_timeout_seconds
     WEBHOOK_BATCH_OUTPUT             = "gs://${module.sanitized_webhook_output.bucket_name}/${var.output_path_prefix}"
+    RULES                            = var.rules_file != null ? base64gzip(file(var.rules_file)) : null
     }
     : k => v if v != null
   }
@@ -283,7 +277,7 @@ resource "google_cloudfunctions2_function" "function" {
   location = var.region
 
   build_config {
-    runtime           = "java21"
+    runtime           = "java25"
     docker_repository = var.artifact_repository_id
     entry_point       = "co.worklytics.psoxy.GcpWebhookCollectorRoute"
     service_account   = var.builder_sa_id

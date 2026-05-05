@@ -157,8 +157,11 @@ public class FunctionRuntimeModule {
     @SneakyThrows
     @Provides @Singleton WebhookSanitizer webhookSanitizer(WebhookSanitizerImplFactory webhookSanitizerFactory,
                                                            ConfigService configService,
-                                                           @Named("ForYAML") ObjectMapper objectMapper) {
-        return webhookSanitizerFactory.create(objectMapper.readerFor(WebhookCollectionRules.class).readValue(configService.getConfigPropertyOrError(ProxyConfigProperty.RULES)));
+                                                           @Named("ForYAML") ObjectMapper objectMapper,
+                                                           co.worklytics.psoxy.rules.RulesUtils rulesUtils) {
+        String rulesStr = configService.getConfigPropertyOrError(ProxyConfigProperty.RULES);
+        String yamlEncodedRules = rulesUtils.decodeToYaml(rulesStr);
+        return webhookSanitizerFactory.create(objectMapper.readerFor(WebhookCollectionRules.class).readValue(yamlEncodedRules));
     }
 
     @Provides @Singleton
