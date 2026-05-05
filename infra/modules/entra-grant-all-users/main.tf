@@ -40,7 +40,7 @@ output "todo" {
 }
 
 output "filename" {
-  value = null
+  value       = null
   description = "[DEPRECATED - local_file resources moved to root module. TODO: remove in 0.7]"
 }
 

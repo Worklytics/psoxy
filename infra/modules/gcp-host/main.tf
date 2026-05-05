@@ -521,19 +521,19 @@ locals {
 echo "Testing API Connectors ..."
 
 %{for instance_id, connector in local.api_instances~}
-%{if try(connector.test_script_content, null) != null}./test-${trimprefix(instance_id, var.environment_id_prefix)}.sh%{endif}
+%{if try(connector.test_script_content, null) != null}./test-${trimprefix(instance_id, local.environment_id_prefix)}.sh%{endif}
 %{endfor}
 
 echo "Testing Bulk Connectors ..."
 
 %{for instance_id, connector in local.bulk_instances~}
-%{if try(connector.test_script_content, null) != null}./test-${trimprefix(instance_id, var.environment_id_prefix)}.sh%{endif}
+%{if try(connector.test_script_content, null) != null}./test-${trimprefix(instance_id, local.environment_id_prefix)}.sh%{endif}
 %{endfor}
 
 echo "Testing Webhook Collectors ..."
 
 %{for instance_id, connector in local.webhook_collector_instances~}
-%{if try(connector.test_script_content, null) != null}./test-${trimprefix(instance_id, var.environment_id_prefix)}.sh%{endif}
+%{if try(connector.test_script_content, null) != null}./test-${trimprefix(instance_id, local.environment_id_prefix)}.sh%{endif}
 %{endfor}
 EOF
 }

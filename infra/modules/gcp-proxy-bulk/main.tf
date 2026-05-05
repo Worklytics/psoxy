@@ -351,7 +351,7 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = null
+  value       = null
   description = "[DEPRECATED - local_file resources moved to root module. TODO: remove in 0.7]"
 }
 
@@ -378,32 +378,30 @@ output "function_config" {
 locals {
   test_script_content = <<EOT
 #!/bin/bash
-FILE_PATH=${1:-${try(local.example_files_csv, "")}}
-BLUE='\e[0;34m'
-NC='\e[0m'
+FILE_PATH=$${1:-${try(local.example_files_csv, "")}}
 
-printf "Quick test of ${BLUE}${local.function_name}${NC} ...\n"
+printf "Quick test of ${local.function_name} ...\n"
 
 # Process multiple files separated by comma
-IFS=',' read -ra FILES <<< "$FILE_PATH"
-for FILE in "${FILES[@]}"; do
+IFS=',' read -ra FILES <<< "$$FILE_PATH"
+for FILE in "$${FILES[@]}"; do
   # trim whitespace
-  FILE=$(echo "$FILE" | xargs)
-  if [ -z "$FILE" ]; then continue; fi
+  FILE=$$(echo "$$FILE" | xargs)
+  if [ -z "$$FILE" ]; then continue; fi
   
-  printf "Testing file: $FILE\n"
-  node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$FILE" -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
+  printf "Testing file: $$FILE\n"
+  node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$$FILE" -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
 
-  if gzip -t "$FILE" 2>/dev/null; then
+  if gzip -t "$$FILE" 2>/dev/null; then
     printf "test file was compressed, so not testing compression as a separate case\n"
   else
     printf "testing with compressed input file ... \n"
     # extract the file name from the path
-    TEST_FILE_NAME=/tmp/$(basename "$FILE").gz
+    TEST_FILE_NAME=/tmp/$$(basename "$$FILE").gz
     
-    gzip -c "$FILE" > "$TEST_FILE_NAME"
-    node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$TEST_FILE_NAME" -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
-    rm "$TEST_FILE_NAME"
+    gzip -c "$$FILE" > "$$TEST_FILE_NAME"
+    node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$$TEST_FILE_NAME" -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
+    rm "$$TEST_FILE_NAME"
   fi
 done
 EOT

@@ -27,5 +27,5 @@ output "next_todo_step" {
 
 output "todo_content" {
   description = "Structured todo content aggregated from all source token external todo sub-modules. List of stages; each stage is a list of {name, content, file_permission} objects."
-  value = flatten([for m in values(module.source_token_external_todo) : m.todo_content])
+  value       = flatten([for m in values(module.source_token_external_todo) : m.todo_content])
 }

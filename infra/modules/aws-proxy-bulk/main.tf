@@ -397,20 +397,18 @@ locals {
   test_script = <<EOT
 #!/bin/bash
 FILE_PATH=$${1:-${try(local.example_files_csv, "")}}
-BLUE='\e[0;34m'
-NC='\e[0m'
 
-printf "Quick test of $${BLUE}${var.instance_id}$${NC} ...\n"
+printf "Quick test of ${var.instance_id} ...\n"
 
 # Process multiple files separated by comma
-IFS=',' read -ra FILES <<< "$FILE_PATH"
+IFS=',' read -ra FILES <<< "$$FILE_PATH"
 for FILE in "$${FILES[@]}"; do
   # trim whitespace
-  FILE=$(echo "$FILE" | xargs)
-  if [ -z "$FILE" ]; then continue; fi
+  FILE=$$(echo "$$FILE" | xargs)
+  if [ -z "$$FILE" ]; then continue; fi
   
-  printf "Testing file: $FILE\n"
-  node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$FILE" -d "AWS" -i "${aws_s3_bucket.input.bucket}" -o "${aws_s3_bucket.sanitized.bucket}" ${local.role_option_for_tests} --region "${var.aws_region}"
+  printf "Testing file: $$FILE\n"
+  node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$$FILE" -d "AWS" -i "${aws_s3_bucket.input.bucket}" -o "${aws_s3_bucket.sanitized.bucket}" ${local.role_option_for_tests} --region "${var.aws_region}"
 done
 EOT
 }
@@ -467,7 +465,7 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = null
+  value       = null
   description = "[DEPRECATED - local_file resources moved to root module. TODO: remove in 0.7]"
 }
 

@@ -110,19 +110,19 @@ locals {
   todo_content_by_connector = { for k, v in module.msft_365_grants :
     k => try(module.worklytics_connector_specs.enabled_msft_365_connectors[k].external_token_todo, null) == null ? v.todo_content : [[
       {
-        name    = try(v.todo_content[0][0].name, "setup ${k}")
+        name = try(v.todo_content[0][0].name, "setup ${k}")
         content = <<EOT
 ${try(v.todo_content[0][0].content, v.todo)}
 ## Setup
 Then, please follow next instructions to complete the setup:
 
 ${replace(module.worklytics_connector_specs.enabled_msft_365_connectors[k].external_token_todo, "%%entraid.client_id%%",
-try(module.msft_connection[k].connector.client_id, data.azuread_application.existing_connector_app[0].client_id))}
+      try(module.msft_connection[k].connector.client_id, data.azuread_application.existing_connector_app[0].client_id))}
 EOT
-        file_permission = null
-      }
-    ]]
-  }
+      file_permission = null
+    }
+]]
+}
 }
 
 locals {
