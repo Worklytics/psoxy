@@ -14,6 +14,28 @@ custom_api_connector_rules = {
 }
 ```
 
+## Custom API Connectors
+
+In addition to custom rules for supported sources, you can configure entirely new, custom API connectors by adding an entry to the `custom_api_connectors` map in your environment's configuration. This is useful for integrating with data sources that are not natively supported by Psoxy out of the box.
+
+Example:
+
+```hcl
+custom_api_connectors = {
+  "my-custom-api" = {
+    source_kind          = "my-custom-api"
+    source_auth_strategy = "bearer"
+    target_host          = "api.example.com"
+    example_api_calls    = ["/v1/users"]
+    secured_variables    = [
+      { name = "API_KEY" }
+    ]
+  }
+}
+```
+
+The key in the map (e.g., `"my-custom-api"`) will become the connector ID. You can then pair this with `custom_api_connector_rules` to define the allowed endpoints and sanitization rules for your new connector.
+
 ## API Connector Rules Syntax
 
 `<ruleset> ::= "endpoints:" <endpoint-list>`

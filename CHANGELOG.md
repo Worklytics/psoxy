@@ -12,13 +12,14 @@ Changes to be including in future/planned release notes will be added here.
 - performance: optimized `redactExceptPhrases` rule to use non-reluctant matchers.
 
 ## [0.6.0](https://github.com/Worklytics/psoxy/releases/tag/v0.6.0)
-- **AWS / GCP**: Upgraded deployment runtime environments to Java 25, while maintaining Java 21 byte-code and language-level compatibility.
+- `aws`/`gcp`: Upgraded deployment runtime environments to Java 25, while maintaining Java 21 byte-code and language-level compatibility.
+- DEPRECATION: Top-level connector specific Terraform variables (e.g., `salesforce_domain`, `gong_instance_subdomain`, `github_enterprise_server_host`) have been deprecated. These should now be passed through the new `connector_settings` map variable.
 - `gcp`: Dedicated `proxy_builder_sa` service account is now provisioned and used for Cloud Build operations when provisioning Cloud Functions, eliminating project-level IAM dependencies on the default Compute Engine service account.
 - `zoom`: Default rules for Zoom have been updated, removing fields and endpoints not required.
 - `pseudonymizeRegexMatches`: apply the pseudonymization to any match found in the field instead of the first one.
-- `Atlassian Organization API`: added new connector for fetching audit events from Atlassian Organization API, which provides access to audit events from users and tools like Rovo.
-- `GitLab`: added support for GitLab (gitlab.com) and Self-Managed/Dedicated instances
-- `Gong Metrics`: fixed how endpoint and auth is used. Rules updated with pagination fixes.
+- Atlassian Organization API: added new connector for fetching audit events from Atlassian Organization API, which provides access to audit events from users and tools like Rovo.
+- GitLab: added support for GitLab (gitlab.com) and Self-Managed/Dedicated instances
+- Gong Metrics: fixed how endpoint and auth is used. Rules updated with pagination fixes.
 
 ## [0.5.18](https://github.com/Worklytics/psoxy/releases/tag/v0.5.18)
 - `aws`: updated IAM policy for invoking lambda functions, to reflect AWS perm changes; anyone deploying NEW api connectors on AWS will have to use this version or later, or backport similar change. (See https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html)

@@ -34,6 +34,7 @@ module "worklytics_connectors" {
 
   base_dir                                 = var.psoxy_base_dir
   enabled_connectors                       = var.enabled_connectors
+  connector_settings                       = var.connector_settings
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
   confluence_example_cloud_id              = var.confluence_example_cloud_id
   confluence_example_group_id              = var.confluence_example_group_id
