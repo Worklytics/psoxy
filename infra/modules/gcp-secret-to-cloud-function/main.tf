@@ -15,17 +15,14 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
 # TODO: remove deprecated variables/outputs in 0.7
 
 locals {
-  todo_content = <<EOT
-Run the following command from functions deployment directory (containing bundled JAR or pom.xml)
-to finish exposing  `${local.slugified_secret_name}` to `${var.function_name}`:
-
-```shell
-gcloud beta functions deploy ${var.function_name} \\
-    --project=${var.project_id} \\
-    --runtime=${var.runtime} \\
-    --update-secrets 'SERVICE_ACCOUNT_KEY=${var.secret_name}:${var.secret_version_number}'
-```
-EOT
+  todo_content = templatefile("${path.module}/templates/todo.md.tpl", {
+    slugified_secret_name = local.slugified_secret_name
+    function_name         = var.function_name
+    project_id            = var.project_id
+    runtime               = var.runtime
+    secret_name           = var.secret_name
+    secret_version_number = var.secret_version_number
+  })
 }
 
 output "todo_content" {
