@@ -512,37 +512,61 @@ locals {
   all_instances = merge(local.api_instances, local.bulk_instances, local.webhook_collector_instances)
 }
 
-# script to test ALL connectors
-resource "local_file" "test_all_script" {
-  count = var.todos_as_local_files ? 1 : 0
+# NOTE: local_file resource was moved to root module. todos_as_local_files is a no-op here.
+# TODO: remove deprecated variables/outputs in 0.7
 
-  filename        = "test-all.sh"
-  file_permission = "755"
-  content         = <<EOF
+locals {
+  test_all_script_content = <<EOF
 #!/bin/bash
 
 echo "Testing API Connectors ..."
 
-%{for test_script in values(module.api_connector)[*].test_script~}
-%{if test_script != null}./${test_script}%{endif}
+%{for instance_id, connector in local.api_instances~}
+%{if try(connector.test_script_content, null) != null}./test-${instance_id}.sh%{endif}
 %{endfor}
 
 %{if length(values(module.bulk_connector)) > 0~}
 echo "Testing Bulk Connectors ..."
 %{endif~}
-%{for test_script in values(module.bulk_connector)[*].test_script~}
-%{if test_script != null}./${test_script}%{endif}
+%{for instance_id, connector in local.bulk_instances~}
+%{if try(connector.test_script_content, null) != null}./test-${trimprefix(instance_id, var.environment_name)}.sh%{endif}
 %{endfor}
 
 %{if local.enable_webhook_testing && local.has_enabled_webhook_collectors}
 echo "Testing Webhook Collectors ..."
 %{endif~}
-%{for test_script in values(module.webhook_collectors)[*].test_script~}
-%{if test_script != null}./${test_script}%{endif}
+%{for instance_id, connector in local.webhook_collector_instances~}
+%{if try(connector.test_script_content, null) != null}./test-${trimprefix(instance_id, var.environment_name)}.sh%{endif}
 %{endfor}
 EOF
 }
 
 output "artifacts_bucket_name" {
   value = module.psoxy.artifacts_bucket_name
+}
+
+output "todo_content" {
+  description = "Structured todo content aggregated from all sub-modules (api connectors, bulk connectors, webhook collectors). Each stage is a list of {name, content, file_permission} objects. Note: connector authorization todos are handled at a higher level (eg, examples-dev)."
+  value = concat(
+    # API connector todos
+    flatten([
+      for k, m in module.api_connector : try(m.todo_content, [])
+    ]),
+    # Bulk connector todos
+    flatten([
+      for k, m in module.bulk_connector : try(m.todo_content, [])
+    ]),
+    # Webhook connector todos
+    flatten([
+      for k, m in module.webhook_collectors : try(m.todo_content, [])
+    ]),
+    # Final stage: test-all script
+    [[
+      {
+        name            = "test-all.sh"
+        content         = local.test_all_script_content
+        file_permission = "755"
+      }
+    ]]
+  )
 }

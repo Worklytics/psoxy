@@ -401,12 +401,8 @@ Contact support@worklytics.co for assistance modifying the rules as needed.
 EOT
 }
 
-resource "local_file" "todo" {
-  count = var.todos_as_local_files ? 1 : 0
-
-  filename = "TODO ${var.todo_step} - test ${var.instance_id}.md"
-  content  = local.todo_content
-}
+# NOTE: local_file resources were moved to root module. todos_as_local_files/todo_step are no-ops here.
+# TODO: remove deprecated variables/outputs in 0.7
 
 locals {
   test_script = templatefile("${path.module}/test_script.tftpl", {
@@ -418,14 +414,6 @@ locals {
     example_api_post_requests = [for r in local.all_example_api_requests : r if r.method == "POST" && r.body != null], # body being null will blow up the templating
     enable_async_processing   = var.enable_async_processing,
   })
-}
-
-resource "local_file" "test_script" {
-  count = var.todos_as_local_files ? 1 : 0
-
-  filename        = "test-${var.instance_id}.sh"
-  file_permission = "755"
-  content         = local.test_script
 }
 
 output "endpoint_url" {
@@ -460,7 +448,8 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = try(local_file.test_script[0].filename, null)
+  value = null
+  description = "[DEPRECATED - local_file resources moved to root module. TODO: remove in 0.7]"
 }
 
 output "test_script_content" {
@@ -483,11 +472,13 @@ output "side_output_sanitized_bucket_id" {
 }
 
 output "todo" {
-  value = local.todo_content
+  value       = local.todo_content
+  description = "[DEPRECATED - use todo_content output instead. TODO: remove in 0.7]"
 }
 
 output "next_todo_step" {
-  value = var.todo_step + 1
+  value       = var.todo_step + 1
+  description = "[DEPRECATED - todo ordering now handled at root module level via todo_content stage indices. TODO: remove in 0.7]"
 }
 
 output "async_api_request_queue_url" {
@@ -508,4 +499,20 @@ output "async_api_request_dlq_url" {
 output "async_api_request_dlq_arn" {
   value       = var.enable_async_processing ? aws_sqs_queue.async_api_request_dlq[0].arn : null
   description = "ARN of the SQS dead letter queue for failed async API requests"
+}
+
+output "todo_content" {
+  description = "Structured todo content to be written to local files by root module. List of stages; each stage is a list of {name, content, file_permission} objects. name is used as filename (with .md suffix if file_permission is null, used as-is otherwise). file_permission non-null means treat as executable script."
+  value = [[
+    {
+      name            = "test ${var.instance_id}"
+      content         = local.todo_content
+      file_permission = null
+    },
+    {
+      name            = "test-${var.instance_id}.sh"
+      content         = local.test_script
+      file_permission = "755"
+    }
+  ]]
 }

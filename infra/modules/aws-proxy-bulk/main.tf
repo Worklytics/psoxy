@@ -393,20 +393,6 @@ for a detailed description of all the different options.
 EOT
 }
 
-resource "local_file" "todo_setup" {
-  count = (var.todos_as_local_files && local.need_setup) ? 1 : 0
-
-  filename = "TODO ${var.todo_step} - setup ${local.local_file_id}.md"
-  content  = local.setup_todo_content
-}
-
-resource "local_file" "todo_test" {
-  count = var.todos_as_local_files ? 1 : 0
-
-  filename = "TODO ${local.test_todo_step} - test ${var.instance_id}.md"
-  content  = local.test_todo_content
-}
-
 locals {
   test_script = <<EOT
 #!/bin/bash
@@ -429,13 +415,8 @@ done
 EOT
 }
 
-resource "local_file" "test_script" {
-  count = var.todos_as_local_files ? 1 : 0
-
-  filename        = "test-${local.local_file_id}.sh"
-  file_permission = "755"
-  content         = local.test_script
-}
+# NOTE: local_file resources were moved to root module. todos_as_local_files/todo_step are no-ops here.
+# TODO: remove deprecated variables/outputs in 0.7
 
 # to facilitate composition of ingestion pipeline
 output "input_bucket" {
@@ -486,7 +467,8 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = try(local_file.test_script[0].filename, null)
+  value = null
+  description = "[DEPRECATED - local_file resources moved to root module. TODO: remove in 0.7]"
 }
 
 output "test_script_content" {
@@ -494,14 +476,39 @@ output "test_script_content" {
 }
 
 output "todo" {
-  value = local.todo_brief
+  value       = local.todo_brief
+  description = "[DEPRECATED - use todo_content output instead. TODO: remove in 0.7]"
 }
 
 output "todo_setup" {
-  value = local.setup_todo_content
+  value       = local.setup_todo_content
+  description = "[DEPRECATED - use todo_content output instead. TODO: remove in 0.7]"
 }
 
 output "next_todo_step" {
-  value = var.todo_step + 1
+  value       = var.todo_step + 1
+  description = "[DEPRECATED - todo ordering now handled at root module level via todo_content stage indices. TODO: remove in 0.7]"
 }
 
+output "todo_content" {
+  description = "Structured todo content to be written to local files by root module. List of stages; each stage is a list of {name, content, file_permission} objects."
+  value = concat(
+    local.need_setup ? [[{
+      name            = "setup ${local.local_file_id}"
+      content         = local.setup_todo_content
+      file_permission = null
+    }]] : [],
+    [[
+      {
+        name            = "test ${var.instance_id}"
+        content         = local.test_todo_content
+        file_permission = null
+      },
+      {
+        name            = "test-${local.local_file_id}.sh"
+        content         = local.test_script
+        file_permission = "755"
+      }
+    ]]
+  )
+}

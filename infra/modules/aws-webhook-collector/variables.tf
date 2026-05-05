@@ -239,7 +239,7 @@ variable "test_caller_role_arn" {
 
 variable "todos_as_local_files" {
   type        = bool
-  description = "whether to render TODOs as flat files"
+  description = "[DEPRECATED - local_file resources moved to root module; this has no effect within the module. TODO: remove in 0.7] whether to render TODOs as flat files"
   default     = true
 }
 

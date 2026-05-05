@@ -390,13 +390,8 @@ locals {
   })
 }
 
-resource "local_file" "test_script" {
-  count = var.todos_as_local_files ? 1 : 0
-
-  filename        = "test-${var.instance_id}.sh"
-  file_permission = "755"
-  content         = local.test_script
-}
+# NOTE: local_file resources were moved to root module. todos_as_local_files/todo_step are no-ops here.
+# TODO: remove deprecated variables/outputs in 0.7
 
 output "endpoint_url" {
   value = "${local.proxy_endpoint_url}/"
@@ -430,7 +425,8 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = try(local_file.test_script[0].filename, null)
+  value = null
+  description = "[DEPRECATED - local_file resources moved to root module. TODO: remove in 0.7]"
 }
 
 output "test_script_content" {
@@ -457,7 +453,24 @@ output "test_examples" {
 }
 
 output "todo" {
-  value = local.todo_content
+  value       = local.todo_content
+  description = "[DEPRECATED - use todo_content output instead. TODO: remove in 0.7]"
+}
+
+output "todo_content" {
+  description = "Structured todo content to be written to local files by root module. List of stages; each stage is a list of {name, content, file_permission} objects."
+  value = [[
+    {
+      name            = "test ${var.instance_id}"
+      content         = local.todo_content
+      file_permission = null
+    },
+    {
+      name            = "test-${var.instance_id}.sh"
+      content         = local.test_script
+      file_permission = "755"
+    }
+  ]]
 }
 
 output "provisioned_concurrency" {

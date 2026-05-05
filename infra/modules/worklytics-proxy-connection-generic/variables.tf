@@ -34,7 +34,7 @@ variable "display_name" {
 
 variable "todos_as_local_files" {
   type        = bool
-  description = "whether to render TODOs as flat files"
+  description = "[DEPRECATED - local_file resources moved to root module; this has no effect within the module. TODO: remove in 0.7] whether to render TODOs as flat files"
   default     = true
 }
 
@@ -58,7 +58,7 @@ variable "settings_to_provide" {
 
 variable "todo_step" {
   type        = number
-  description = "of all todos, where does this one logically fall in sequence"
+  description = "[DEPRECATED - todo ordering now handled at root module level; this has no effect within the module. TODO: remove in 0.7] of all todos, where does this one logically fall in sequence"
   default     = 3
 }
 

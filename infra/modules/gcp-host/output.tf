@@ -68,4 +68,5 @@ output "next_todo_step" {
     values(module.bulk_connector)[*].next_todo_step,
     [var.todo_step]
   )...)
+  description = "[DEPRECATED - todo ordering now handled at root module level via todo_content stage indices. TODO: remove in 0.7]"
 }

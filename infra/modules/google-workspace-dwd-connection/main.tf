@@ -128,13 +128,8 @@ ${local.google_workspace_admin_account_required ? local.google_workspace_service
 EOT
 }
 
-# enable domain-wide-delegation via Google Workspace Admin console
-resource "local_file" "todo_auth_google_workspace" {
-  count = var.todos_as_local_files ? 1 : 0
-
-  filename = "TODO ${var.todo_step} - set up ${local.instance_id}.md"
-  content  = local.todo_content
-}
+# NOTE: local_file resource was moved to root module. todos_as_local_files/todo_step are no-ops here.
+# TODO: remove deprecated variables/outputs in 0.7
 
 
 # NOTE: there are several options for how to authenticate a service as the OAuth client created

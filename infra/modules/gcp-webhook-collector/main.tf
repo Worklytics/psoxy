@@ -480,12 +480,11 @@ Contact support@worklytics.co for assistance modifying the rules as needed.
 EOT
 }
 
-resource "local_file" "test_script" {
-  count = var.todos_as_local_files ? 1 : 0
+# NOTE: local_file resources were moved to root module. todos_as_local_files/todo_step are no-ops here.
+# TODO: remove deprecated variables/outputs in 0.7
 
-  filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
-  file_permission = "755"
-  content = templatefile("${path.module}/test_script.tftpl", {
+locals {
+  test_script_content = templatefile("${path.module}/test_script.tftpl", {
     collector_endpoint_url = local.proxy_endpoint_url,
     function_name          = var.instance_id,
     command_cli_call       = local.command_cli_call,
@@ -496,13 +495,6 @@ resource "local_file" "test_script" {
     scheduler_job_name     = google_cloud_scheduler_job.trigger_batch_processing.id
     bucket_name            = module.sanitized_webhook_output.bucket_name
   })
-}
-
-resource "local_file" "test_todo" {
-  count = var.todos_as_local_files ? 1 : 0
-
-  filename = "TODO ${var.todo_step} - test ${google_cloudfunctions2_function.function.name}.md"
-  content  = local.todo_content
 }
 
 output "instance_id" {
@@ -527,7 +519,8 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = try(local_file.test_script[0].filename, null)
+  value = null
+  description = "[DEPRECATED - local_file resources moved to root module. TODO: remove in 0.7]"
 }
 
 output "output_sanitized_bucket_id" {
@@ -561,5 +554,26 @@ output "test_examples" {
 }
 
 output "todo" {
-  value = local.todo_content
+  value       = local.todo_content
+  description = "[DEPRECATED - use todo_content output instead. TODO: remove in 0.7]"
+}
+
+output "test_script_content" {
+  value = local.test_script_content
+}
+
+output "todo_content" {
+  description = "Structured todo content to be written to local files by root module. List of stages; each stage is a list of {name, content, file_permission} objects."
+  value = [[
+    {
+      name            = "test ${google_cloudfunctions2_function.function.name}"
+      content         = local.todo_content
+      file_permission = null
+    },
+    {
+      name            = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
+      content         = local.test_script_content
+      file_permission = "755"
+    }
+  ]]
 }

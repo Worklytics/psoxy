@@ -103,26 +103,26 @@ module "msft_365_grant_to_shared" {
 }
 
 
-# NOTE: this OVERWRITES the todo_file created by the entra-grant-all-users module, if there's an
-# external_token_todo to append to that file
+# NOTE: local_file resource was moved to root module. todos_as_local_files/todo_step are no-ops here.
+# TODO: remove deprecated variables/outputs in 0.7
 locals {
-  todos_to_populate = { for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors :
-    k => v if try(v.external_token_todo != null, false) && var.todos_as_local_files
-  }
-}
-
-resource "local_file" "todo-with-external-todo" {
-  for_each = local.todos_to_populate
-
-  filename = module.msft_365_grants[each.key].filename
-  content = <<EOT
-${module.msft_365_grants[each.key].todo}
+  # merged content: grant todo + external_token_todo (if applicable)
+  todo_content_by_connector = { for k, v in module.msft_365_grants :
+    k => try(module.worklytics_connector_specs.enabled_msft_365_connectors[k].external_token_todo, null) == null ? v.todo_content : [[
+      {
+        name    = try(v.todo_content[0][0].name, "setup ${k}")
+        content = <<EOT
+${try(v.todo_content[0][0].content, v.todo)}
 ## Setup
 Then, please follow next instructions to complete the setup:
 
-${replace(each.value.external_token_todo, "%%entraid.client_id%%",
-try(module.msft_connection[each.key].connector.client_id, data.azuread_application.existing_connector_app[0].client_id))}
+${replace(module.worklytics_connector_specs.enabled_msft_365_connectors[k].external_token_todo, "%%entraid.client_id%%",
+try(module.msft_connection[k].connector.client_id, data.azuread_application.existing_connector_app[0].client_id))}
 EOT
+        file_permission = null
+      }
+    ]]
+  }
 }
 
 locals {

@@ -39,9 +39,11 @@ resource "google_secret_manager_secret_iam_member" "grant_secretVersionAdder_on_
   role      = "roles/secretmanager.secretVersionAdder"
 }
 
-resource "local_file" "todo" {
-  filename = "TODO - create key for ${var.service_account_id}.md"
-  content  = <<EOT
+# NOTE: local_file resource was moved to root module.
+# TODO: remove deprecated variables/outputs in 0.7
+
+locals {
+  todo_content = <<EOT
 Create a key for ${var.service_account_id} and upload it to Secret Manager. You can do this from the
 GCP console, or using the `gcloud` tool as described below:
 
@@ -62,4 +64,15 @@ Last, don't forget to destroy your local copy!
 rm key.json
 ```
 EOT
+}
+
+output "todo_content" {
+  description = "Structured todo content to be written to local files by root module. List of stages; each stage is a list of {name, content, file_permission} objects."
+  value = [[
+    {
+      name            = "create key for ${var.service_account_id}"
+      content         = local.todo_content
+      file_permission = null
+    }
+  ]]
 }
