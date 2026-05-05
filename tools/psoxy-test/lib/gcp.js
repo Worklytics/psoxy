@@ -23,11 +23,13 @@ const GCP_CLOUD_FUNCTION_GEN1_DOMAIN='cloudfunctions.net';
 const GCP_CLOUD_FUNCTION_GEN2_DOMAIN='run.app';
 
 function isCloudFunctionGen1(url) {
-  return url?.hostname.endsWith(GCP_CLOUD_FUNCTION_GEN1_DOMAIN);
+  const h = url?.hostname;
+  return h === GCP_CLOUD_FUNCTION_GEN1_DOMAIN || h?.endsWith('.' + GCP_CLOUD_FUNCTION_GEN1_DOMAIN);
 }
 
 function isCloudFunctionGen2(url) {
-  return url?.hostname.endsWith(GCP_CLOUD_FUNCTION_GEN2_DOMAIN);
+  const h = url?.hostname;
+  return h === GCP_CLOUD_FUNCTION_GEN2_DOMAIN || h?.endsWith('.' + GCP_CLOUD_FUNCTION_GEN2_DOMAIN);
 }
 
 /**

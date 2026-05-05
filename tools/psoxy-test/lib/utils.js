@@ -662,8 +662,9 @@ async function pollAsyncResponse(locationUrl, options = {}) {
     keyOrFile = match[2];
   } else {
     url = new URL(locationUrl);
-    isS3 = url.hostname.includes('s3.amazonaws.com') || url.hostname.includes('s3.');
-    isGCS = url.hostname.includes('storage.googleapis.com');
+    isS3 = url.hostname === 's3.amazonaws.com' || url.hostname.endsWith('.s3.amazonaws.com')
+        || url.hostname === 's3.on.aws' || url.hostname.endsWith('.s3.on.aws');
+    isGCS = url.hostname === 'storage.googleapis.com' || url.hostname.endsWith('.storage.googleapis.com');
     if (isS3) {
       // https://bucket.s3.region.amazonaws.com/key
       bucketName = url.hostname.split('.')[0];
