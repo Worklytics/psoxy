@@ -218,6 +218,10 @@ resource "google_cloudfunctions2_function" "function" {
     available_memory      = "${var.available_memory_mb}M"
     ingress_settings      = "ALLOW_ALL"
 
+    max_instance_request_concurrency = var.instance_concurrency
+    available_cpu                    = var.instance_concurrency > 1 ? "1" : null
+    max_instance_count               = var.max_instance_count
+
     vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector
     vpc_connector_egress_settings = var.vpc_config == null ? null : "ALL_TRAFFIC"
 
@@ -469,3 +473,7 @@ output "next_todo_step" {
   value = var.todo_step + 1
 }
 
+output "function_config" {
+  description = "INTERNAL USE ONLY - Cloud Function configuration for CI/testing purposes. Users should NOT rely on this output's presence, structure, or schema as it may change without notice."
+  value       = google_cloudfunctions2_function.function
+}
