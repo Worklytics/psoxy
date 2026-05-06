@@ -185,10 +185,20 @@ data "google_service_account" "function" {
 
 # to provision Cloud Function, TF must be able to act as the service account that the function will
 # run as
-resource "google_service_account_iam_member" "act_as" {
+# NOTE: named 'tf_runner_act_as' rather than 'act_as' to avoid replacement-cycle on upgrades where
+# tf_runner_iam_principal changes (eg 0.5.x -> 0.6.x); separate create+destroy is cycle-free.
+resource "google_service_account_iam_member" "tf_runner_act_as" {
   member             = var.tf_runner_iam_principal
   role               = "roles/iam.serviceAccountUser"
   service_account_id = data.google_service_account.function.id
+}
+
+# migration: remove old resource address from state (destroyed in GCP)
+removed {
+  from = google_service_account_iam_member.act_as
+  lifecycle {
+    destroy = true
+  }
 }
 
 
@@ -218,6 +228,10 @@ resource "google_cloudfunctions2_function" "function" {
     available_memory      = "${var.available_memory_mb}M"
     ingress_settings      = "ALLOW_ALL"
 
+    max_instance_request_concurrency = var.instance_concurrency
+    available_cpu                    = var.instance_concurrency > 1 ? "1" : null
+    max_instance_count               = var.max_instance_count
+
     vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector
     vpc_connector_egress_settings = var.vpc_config == null ? null : "ALL_TRAFFIC"
 
@@ -246,7 +260,7 @@ resource "google_cloudfunctions2_function" "function" {
 
   depends_on = [
     google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret,
-    google_service_account_iam_member.act_as,
+    google_service_account_iam_member.tf_runner_act_as,
   ]
 }
 
@@ -469,3 +483,7 @@ output "next_todo_step" {
   value = var.todo_step + 1
 }
 
+output "function_config" {
+  description = "INTERNAL USE ONLY - Cloud Function configuration for CI/testing purposes. Users should NOT rely on this output's presence, structure, or schema as it may change without notice."
+  value       = google_cloudfunctions2_function.function
+}
