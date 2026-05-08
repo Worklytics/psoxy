@@ -22,7 +22,7 @@ public class ProxyConstants {
     /**
      * Version of the Java source code.  Used to identify the version of the proxy.
      */
-    public static final String JAVA_SOURCE_CODE_VERSION = "v0.6.0";
+    public static final String JAVA_SOURCE_CODE_VERSION = "rc-v0.6.1";
 
     /**
      * a random UUID used to salt the hash of the salt.  Purpose of this is to invalidate any non-purpose built rainbow table solution.
