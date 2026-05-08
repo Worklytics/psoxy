@@ -1,9 +1,10 @@
 import test from 'ava';
 import { createRequire } from 'module';
-import { inferSchema } from '../lib/schema.js';
+import { inferSchema, describeRequired } from '../lib/schema.js';
 
 const require = createRequire(import.meta.url);
 const copilotFixture          = require('./fixtures/copilot-interactions.json');
+const asanaFixture            = require('./fixtures/asana-workspaces.json');
 const calendarFixture         = require('./fixtures/calendar-events.json');
 const copilotExpectedSchema   = require('./fixtures/copilot-interactions.schema.json');
 const calendarExpectedSchema  = require('./fixtures/calendar-events.schema.json');
@@ -243,6 +244,124 @@ test('inferSchema: calendar — extendedProperties: empty object merged with pop
   t.truthy(ext.properties.private);
   t.deepEqual(ext.properties.private.properties.importedId, { type: 'string' });
   t.deepEqual(ext.properties.private.properties.source,     { type: 'string' });
+});
+
+// ── describeRequired ─────────────────────────────────────────────────────────
+//
+// describeRequired() converts raw `required` string arrays into proper JSON
+// Schema type descriptions so every value in the output is consistently typed.
+//
+// Before: { required: ["id", "name"] }
+// After:  { required: { type: "array", items: { type: "string" } } }
+
+const REQUIRED_TYPE = { type: 'array', items: { type: 'string' } };
+
+test('describeRequired: required array is replaced with type description', (t) => {
+  const schema = {
+    type: 'object',
+    properties: {
+      id:   { type: 'integer' },
+      name: { type: 'string'  },
+    },
+    required: ['id', 'name'],
+  };
+
+  const result = describeRequired(schema);
+
+  t.deepEqual(result.required, REQUIRED_TYPE);
+  // properties are preserved untouched
+  t.deepEqual(result.properties.id,   { type: 'integer' });
+  t.deepEqual(result.properties.name, { type: 'string'  });
+});
+
+test('describeRequired: object with no required array is unchanged', (t) => {
+  const schema = {
+    type: 'object',
+    properties: { a: { type: 'string' }, b: { type: 'number' } },
+  };
+
+  const result = describeRequired(schema);
+
+  t.is(result.required, undefined);
+  t.deepEqual(result.properties.a, { type: 'string' });
+  t.deepEqual(result.properties.b, { type: 'number' });
+});
+
+test('describeRequired: recursively processes nested objects', (t) => {
+  const schema = {
+    type: 'object',
+    properties: {
+      user: {
+        type: 'object',
+        properties: {
+          id:    { type: 'string' },
+          email: { type: 'string', format: 'email' },
+        },
+        required: ['id', 'email'],
+      },
+    },
+    required: ['user'],
+  };
+
+  const result = describeRequired(schema);
+
+  t.deepEqual(result.required,                        REQUIRED_TYPE);
+  t.deepEqual(result.properties.user.required,        REQUIRED_TYPE);
+  t.deepEqual(result.properties.user.properties.id,   { type: 'string' });
+  t.deepEqual(result.properties.user.properties.email,{ type: 'string', format: 'email' });
+});
+
+test('describeRequired: recursively processes array items', (t) => {
+  const schema = {
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        gid:  { type: 'string' },
+        name: { type: 'string' },
+      },
+      required: ['gid', 'name'],
+    },
+  };
+
+  const result = describeRequired(schema);
+
+  t.deepEqual(result.items.required, REQUIRED_TYPE);
+  t.deepEqual(result.items.properties.gid,  { type: 'string' });
+  t.deepEqual(result.items.properties.name, { type: 'string' });
+});
+
+test('describeRequired: items:false (empty array) is left untouched', (t) => {
+  const schema = { type: 'array', items: false };
+  t.deepEqual(describeRequired(schema), { type: 'array', items: false });
+});
+
+test('describeRequired: asana workspaces — required arrays replaced with type descriptions', (t) => {
+  const result = describeRequired(inferSchema(asanaFixture));
+
+  // top-level required converted
+  t.deepEqual(result.required, REQUIRED_TYPE);
+
+  // array items required converted
+  const item = result.properties.data.items;
+  t.deepEqual(item.required, REQUIRED_TYPE);
+
+  // property schemas still present
+  t.truthy(item.properties.gid);
+  t.truthy(item.properties.resource_type);
+  t.truthy(item.properties.name);
+});
+
+test('describeRequired: calendar — no raw required arrays remain anywhere in output', (t) => {
+  const check = (node, path = '') => {
+    if (!node || typeof node !== 'object') return;
+    if (Array.isArray(node)) { node.forEach((v, i) => check(v, `${path}[${i}]`)); return; }
+    if ('required' in node) {
+      t.false(Array.isArray(node.required), `found raw required[] at ${path}`);
+    }
+    for (const [k, v] of Object.entries(node)) check(v, `${path}.${k}`);
+  };
+  check(describeRequired(inferSchema(calendarFixture)));
 });
 
 // ── Golden-file tests: full schema match ──────────────────────────────────────

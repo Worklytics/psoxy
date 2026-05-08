@@ -2,7 +2,7 @@
 import chalk from 'chalk';
 import { Command } from 'commander';
 import { createRequire } from 'module';
-import { fetchEndpoint, inferSchema } from './lib/schema.js';
+import { fetchEndpoint, inferSchema, describeRequired } from './lib/schema.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('./package.json');
@@ -72,7 +72,7 @@ Example calls:
       }
 
       log.info(`Schema for ${options.endpoint}:`);
-      console.log(JSON.stringify(inferSchema(parsed), null, 2));
+      console.log(JSON.stringify(describeRequired(inferSchema(parsed)), null, 2));
     } else {
       log.error(`HTTP ${result.status}: ${result.statusMessage || 'Unknown error'}`);
       if (result.body) {
