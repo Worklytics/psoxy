@@ -1,0 +1,23 @@
+{
+  "data": [
+    {
+      "gid": "12345678",
+      "resource_type": "workspace",
+      "name": "Acme Corp",
+      "is_organization": true,
+      "email_domains": ["acme.com", "acme.org"]
+    },
+    {
+      "gid": "99999999",
+      "resource_type": "workspace",
+      "name": "Personal Projects",
+      "is_organization": false,
+      "email_domains": []
+    },
+    {
+      "gid": "11111111",
+      "resource_type": "workspace",
+      "name": "Contractor Space"
+    }
+  ]
+}

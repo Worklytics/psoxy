@@ -8,6 +8,7 @@ const asanaFixture            = require('./fixtures/asana-workspaces.json');
 const calendarFixture         = require('./fixtures/calendar-events.json');
 const copilotExpectedSchema   = require('./fixtures/copilot-interactions.schema.json');
 const calendarExpectedSchema  = require('./fixtures/calendar-events.schema.json');
+const asanaExpectedSchema     = require('./fixtures/asana-workspaces.schema.json');
 
 // ── primitives ────────────────────────────────────────────────────────────────
 
@@ -376,4 +377,8 @@ test('inferSchema: copilot — full schema matches golden file', (t) => {
 
 test('inferSchema: calendar — full schema matches golden file', (t) => {
   t.deepEqual(inferSchema(calendarFixture), calendarExpectedSchema);
+});
+
+test('inferSchema: asana workspaces — full schema matches golden file', (t) => {
+  t.deepEqual(inferSchema(asanaFixture), asanaExpectedSchema);
 });
