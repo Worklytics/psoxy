@@ -24,6 +24,7 @@ const log = {
     .requiredOption('-e, --endpoint <url>', 'Endpoint URL to call')
     .requiredOption('-a, --auth <token>', 'Bearer token for authentication')
     .option('--raw', 'Print raw response body instead of inferred schema', false)
+    .option('--skip-headers', 'Exclude response headers from output', false)
     .option('-v, --verbose', 'Verbose output', false)
     .configureOutput({
       outputError: (str, write) => write(chalk.bold.red(str)),
@@ -72,7 +73,10 @@ Example calls:
       }
 
       log.info(`Schema for ${options.endpoint}:`);
-      console.log(JSON.stringify(describeRequired(inferSchema(parsed)), null, 2));
+      const output = options.skipHeaders
+        ? { schema: describeRequired(inferSchema(parsed)) }
+        : { headers: result.headers, schema: describeRequired(inferSchema(parsed)) };
+      console.log(JSON.stringify(output, null, 2));
     } else {
       log.error(`HTTP ${result.status}: ${result.statusMessage || 'Unknown error'}`);
       if (result.body) {
