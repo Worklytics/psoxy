@@ -1,0 +1,86 @@
+{
+  "@odata.context": "https://graph.microsoft.com/beta/$metadata#Collection(microsoft.graph.aiInteraction)",
+  "@odata.count": 2,
+  "@odata.nextLink": "https://graph.microsoft.com/beta/copilot/users/4db02e4b/interactionHistory?$skiptoken=abc123",
+  "value": [
+    {
+      "id": "1732148357313",
+      "sessionId": "19:YzBP1kUdkNjFt@thread.v2",
+      "requestId": "f128b7a9-657e-b420-201e-5602114a29f4",
+      "appClass": "IPM.SkypeTeams.Message.Copilot.BizChat",
+      "interactionType": "aiResponse",
+      "conversationType": "bizchat",
+      "etag": "1732148357313",
+      "createdDateTime": "2024-11-21T00:19:17.313Z",
+      "locale": "en-us",
+      "contexts": [],
+      "from": {
+        "@odata.type": "#microsoft.graph.chatMessageFromIdentitySet",
+        "device": null,
+        "user": null,
+        "application": {
+          "@odata.type": "#microsoft.graph.teamworkApplicationIdentity",
+          "id": "fb8d773d-7ef8-4ec0-a117-179f88add510",
+          "displayName": "Microsoft 365 Chat",
+          "applicationIdentityType": "bot"
+        }
+      },
+      "body": {
+        "contentType": "html",
+        "content": "<attachment id=\"4062fb240a03490b98ccd7c86bb2bcbf\"></attachment>"
+      },
+      "attachments": [
+        {
+          "attachmentId": "4062fb240a03490b98ccd7c86bb2bcbf",
+          "contentType": "application/vnd.microsoft.card.adaptive",
+          "contentUrl": null,
+          "content": "{\"type\":\"AdaptiveCard\",\"version\":\"1.0\"}",
+          "name": null
+        }
+      ],
+      "links": [
+        {
+          "linkUrl": "https://teams.microsoft.com/l/meeting/details?eventId=AAMkADcy",
+          "displayName": "test meeting - export api",
+          "linkType": "Meeting"
+        },
+        {
+          "linkUrl": "https://sharepoint.example.com/Documents/OnCall-Handbook.pdf",
+          "displayName": "OnCall Handbook.pdf",
+          "linkType": "File"
+        }
+      ],
+      "mentions": []
+    },
+    {
+      "id": "1732148300000",
+      "sessionId": "19:YzBP1kUdkNjFt@thread.v2",
+      "requestId": "a123b456-0000-0000-0000-000000000001",
+      "appClass": "IPM.SkypeTeams.Message.Copilot.BizChat",
+      "interactionType": "humanMessage",
+      "conversationType": "bizchat",
+      "etag": "1732148300000",
+      "createdDateTime": "2024-11-21T00:18:20.000Z",
+      "locale": "en-us",
+      "contexts": [],
+      "from": {
+        "@odata.type": "#microsoft.graph.chatMessageFromIdentitySet",
+        "device": null,
+        "user": {
+          "@odata.type": "#microsoft.graph.teamworkUserIdentity",
+          "id": "4db02e4b-d144-400e-b194-53253a34c5be",
+          "displayName": "Alice Example",
+          "userIdentityType": "aadUser"
+        },
+        "application": null
+      },
+      "body": {
+        "contentType": "text",
+        "content": "What were my important emails last week?"
+      },
+      "attachments": [],
+      "links": [],
+      "mentions": []
+    }
+  ]
+}
