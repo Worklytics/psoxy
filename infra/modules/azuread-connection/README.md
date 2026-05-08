@@ -1,6 +1,10 @@
 # azuread-connection
 
-This module registers an Azure AD Application in a Microsoft 365 tenant.
+This module registers a Microsoft Entra ID Application in a Microsoft 365 tenant.
+
+> **NOTE:** This module is named `azuread-*` because it uses the HashiCorp [`azuread` Terraform
+> provider](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs). The provider
+> retains its original name as a convention; we follow that convention in this module name.
 
 ## Troubleshooting
 

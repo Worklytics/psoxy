@@ -1,24 +1,5 @@
 package co.worklytics.psoxy.gateway.impl;
 
-import co.worklytics.psoxy.ControlHeader;
-import co.worklytics.psoxy.HashUtils;
-import co.worklytics.psoxy.HealthCheckResult;
-import co.worklytics.psoxy.gateway.*;
-import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
-import co.worklytics.psoxy.rules.RulesUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import dagger.Lazy;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.extern.java.Log;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.entity.ContentType;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -27,6 +8,31 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.ContentType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import co.worklytics.psoxy.ControlHeader;
+import co.worklytics.psoxy.HashUtils;
+import co.worklytics.psoxy.HealthCheckResult;
+import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.ProxyConstants;
+import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.SourceAuthStrategy;
+import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
+import co.worklytics.psoxy.rules.RulesUtils;
+import dagger.Lazy;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.extern.java.Log;
+
 
 /**
  * Request handler that performs health check duties
@@ -34,20 +40,6 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(onConstructor_ = @Inject)
 @Log
 public class HealthCheckRequestHandler {
-
-    public static final String JAVA_SOURCE_CODE_VERSION = "v0.5.18";
-
-    /**
-     * a random UUID used to salt the hash of the salt.  Purpose of this is to invalidate any non-purpose built rainbow table solution.
-     *   (Eg, if we just directly hashed the salt, a general rainbow table of hashes could be used to determine the salt value)
-     *
-     *  That said, if salt is 20+ random characters, there is no *general* rainbow table of that length in existence and one is impossible to
-     *  build, as storing it requires ~10e25 petabytes - which is about 10e20 more storage than humanity actually has. So this additional
-     *  protection isn't so necessary, but whatever.
-     *
-     *  do NOT change this value. if you do, we won't be able to detect that proxy-side salts of changed.
-     */
-    private static final String SALT_FOR_SALT = "f33c366c-ae91-4819-b221-f9794ebb8145";
 
     @Inject
     EnvVarsConfigService envVarsConfigService;
@@ -63,8 +55,11 @@ public class HealthCheckRequestHandler {
     RulesUtils rulesUtils;
     @Inject
     HashUtils hashUtils;
+    @Inject
+    ProxyConstants proxyConstants;
 
-    String piiSaltHash;
+    volatile String piiSaltHash;
+    private final Object $piiSaltHashLock = new Object[0];
 
     public Optional<HttpEventResponse> handleIfHealthCheck(HttpEventRequest request) {
         if (isHealthCheckRequest(request)) {
@@ -115,7 +110,8 @@ public class HealthCheckRequestHandler {
         }
 
         HealthCheckResult.HealthCheckResultBuilder healthCheckResult = HealthCheckResult.builder()
-                .javaSourceCodeVersion(JAVA_SOURCE_CODE_VERSION)
+                .javaSourceCodeVersion(ProxyConstants.JAVA_SOURCE_CODE_VERSION)
+                .userAgent(proxyConstants.getUserAgent())
                 .configuredSource(config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
                 .configuredHost(config.getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST).orElse(null))
                 .nonDefaultSalt(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
@@ -179,6 +175,14 @@ public class HealthCheckRequestHandler {
         try {
             rulesUtils.getRulesFromConfig(config, envVarsConfigService)
                     .ifPresent(rules -> healthCheckResult.rules(rulesUtils.asYaml(rules)));
+        } catch (co.worklytics.psoxy.rules.InvalidRulesException e) {
+            logInDev("Failed to add rules to health check: " + e.getMessage(), e);
+            healthCheckResult.warningMessage("RULES configuration error: " + e.getErrorCause().name());
+            try {
+                config.getConfigPropertyAsOptional(ProxyConfigProperty.RULES)
+                        .ifPresent(healthCheckResult::rules);
+            } catch (Throwable ignored) {
+            }
         } catch (Throwable e) {
             logInDev("Failed to add rules to health check", e);
         }
@@ -186,8 +190,9 @@ public class HealthCheckRequestHandler {
         // if SALT configured, as a hash of it to the health check, to enable detection of changes
         // (if salt changes, client needs to know; as all subsequent pseudonyms produced by proxy instance from that point
         // will be inconsistent with the prior ones)
-        config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
-                .ifPresent(salt -> healthCheckResult.saltSha256Hash(hashUtils.hash(salt, SALT_FOR_SALT)));
+        Optional.of(piiSaltHash())
+            .filter(StringUtils::isNotBlank)
+            .ifPresent(healthCheckResult::saltSha256Hash);
 
         try {
             sourceAuthStrategy.get().validateConfigValues().forEach(healthCheckResult::warningMessage);
@@ -218,8 +223,12 @@ public class HealthCheckRequestHandler {
      */
     public String piiSaltHash() {
         if (piiSaltHash == null) {
-            piiSaltHash = config.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
-                .map(salt -> hashUtils.hash(salt, SALT_FOR_SALT)).orElse("");
+            synchronized ($piiSaltHashLock) {
+                if (piiSaltHash == null) {
+                    piiSaltHash = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
+                        .map(salt -> hashUtils.hash(salt, ProxyConstants.SALT_FOR_SALT)).orElse("");
+                }
+            }
         }
         return piiSaltHash;
     }

@@ -25,4 +25,6 @@
 # Log files
 *.log
 
-
+# local maven cache
+.m2/
+.azure/

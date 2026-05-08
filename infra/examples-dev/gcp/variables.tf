@@ -33,7 +33,7 @@ variable "config_parameter_prefix" {
 
 variable "default_labels" {
   type        = map(string)
-  description = "Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
+  description = "Labels to apply to all GCP resources created by this configuration. Passed to the Google provider's native `default_labels`."
   default     = {}
 
   validation {
@@ -114,6 +114,11 @@ variable "general_environment_variables" {
   validation {
     condition     = !contains(keys(var.general_environment_variables), "IS_DEVELOPMENT_MODE")
     error_message = "Cannot pass IS_DEVELOPMENT_MODE as a general environment variable; add connector id to `non_production_connectors` instead."
+  }
+
+  validation {
+    condition     = !contains(keys(var.general_environment_variables), "PSEUDONYMIZE_APP_IDS")
+    error_message = "Use 'pseudonymize_app_ids' to set value of PSEUDONYMIZE_APP_IDS environment variable for all sources, rather than passing it as a general environment variable."
   }
 
   validation {
@@ -272,7 +277,17 @@ variable "custom_api_connectors" {
   }))
 
   description = "map of custom API connectors to provision"
-  default     = {}
+  default = {
+    # "custom-api" = {
+    #   source_kind          = "my-custom-api"
+    #   source_auth_strategy = "bearer"
+    #   target_host          = "api.example.com"
+    #   example_api_calls    = ["/v1/users"]
+    #   secured_variables = [
+    #     { name = "API_KEY" }
+    #   ]
+    # }
+  }
 }
 
 variable "custom_api_connector_rules" {
@@ -330,6 +345,7 @@ variable "custom_bulk_connectors" {
     rules_file          = optional(string)
     settings_to_provide = optional(map(string), {})
     example_file        = optional(string)
+    example_files       = optional(list(string), [])
   }))
   description = "specs of custom bulk connectors to create"
 
@@ -455,4 +471,22 @@ variable "provision_project_level_iam" {
   description = "Whether to provision project-level IAM bindings required for Psoxy operation. Set to false if you prefer to manage these IAM bindings outside of Terraform."
   type        = bool
   default     = true
+}
+
+variable "version_sanitized_buckets" {
+  description = "Whether to enable versioning for all -sanitized buckets. Provided because some security standards want ALL buckets to enable versioning; from our perspective, it is not needed as these buckets are not storing primary data."
+  type        = bool
+  default     = false
+}
+
+variable "bucket_access_logs_destination" {
+  description = "The name of the GCS bucket to route access logs to for all buckets managed by this module"
+  type        = string
+  default     = null
+}
+
+variable "connector_settings" {
+  type        = map(string)
+  default     = {}
+  description = "Connector-specific settings."
 }

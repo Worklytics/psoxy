@@ -562,6 +562,14 @@ async function signJwtWithGCPKMS(claims, keyId) {
 }
 
 /**
+ * Known compound extensions where the "real" extension precedes a compression
+ * extension (e.g. `.ndjson.gz`, `.csv.gz`).  We treat the entire compound
+ * extension as one unit so the suffix is inserted before it:
+ *   `events0.ndjson.gz` + timestamp  →  `events0-<timestamp>.ndjson.gz`
+ */
+const COMPOUND_EXTENSIONS = ['.ndjson.gz', '.csv.gz', '.json.gz', '.tsv.gz', '.parquet.gz'];
+
+/**
  * Append suffix to filename (before extension)
  * @param {string} filename
  * @param {string} suffix
@@ -570,7 +578,21 @@ async function signJwtWithGCPKMS(claims, keyId) {
 function addFilenameSuffix(filename, suffix) {
   let result = '';
   if (!_.isEmpty(filename)) {
-    const { name, ext } = path.parse(filename);
+    // Strip any leading directory components – we only manipulate the basename
+    const base = path.basename(filename);
+
+    // Check for compound extensions first (e.g. .ndjson.gz)
+    const lowerBase = base.toLowerCase();
+    const compound = COMPOUND_EXTENSIONS.find(ext => lowerBase.endsWith(ext));
+
+    let name, ext;
+    if (compound) {
+      ext = base.slice(base.length - compound.length); // preserve original casing
+      name = base.slice(0, base.length - compound.length);
+    } else {
+      ({ name, ext } = path.parse(base));
+    }
+
     result = `${name}-${suffix}${ext}`;
   }
   return result;
@@ -607,11 +629,24 @@ async function isGzipped(file) {
  * Poll for async response at the given URL (S3 or GCS)
  * Checks every 10 seconds for up to 120 seconds
  *
+ * Supported URL formats:
+ *   s3://bucket/key                                              (S3 native scheme)
+ *   gs://bucket/file                                             (GCS native scheme)
+ *   https://s3.<region>.amazonaws.com/bucket/key                 (path-style)
+ *   https://bucket.s3.<region>.amazonaws.com/key                 (virtual-hosted)
+ *   https://bucket.s3.dualstack.<region>.amazonaws.com/key       (dual-stack)
+ *   https://bucket.<vpce-id>.s3.<region>.vpce.amazonaws.com/key  (VPC interface endpoint)
+ *   https://bucket.s3.<region>.on.aws/key                        (PrivateLink)
+ *   https://custom.endpoint.example.com/bucket/key               (custom, requires options.s3Endpoint=true)
+ *
  * @param {string} locationUrl - S3 or GCS URL to poll
  * @param {Object} options - Options for authentication and polling
  * @param {string} options.role - AWS role ARN (for S3)
  * @param {string} options.region - AWS region (for S3)
  * @param {string} options.token - GCP token (for GCS)
+ * @param {boolean} options.s3Endpoint - Force URL to be treated as a custom S3-compatible endpoint
+ *   (e.g. VPC PrivateLink with custom DNS, MinIO, LocalStack).  When true, bucket and key are
+ *   extracted from the URL path (path-style: /bucket/key).
  * @param {boolean} options.verbose - Verbose logging
  * @returns {Promise<string>} - Unzipped content as string
  */
@@ -640,12 +675,39 @@ async function pollAsyncResponse(locationUrl, options = {}) {
     keyOrFile = match[2];
   } else {
     url = new URL(locationUrl);
-    isS3 = url.hostname.includes('s3.amazonaws.com') || url.hostname.includes('s3.');
-    isGCS = url.hostname.includes('storage.googleapis.com');
+
+    if (options.s3Endpoint) {
+      // Caller declared this is a custom S3-compatible endpoint (VPC PrivateLink with custom DNS,
+      // MinIO, LocalStack, etc.) that won't match any standard AWS hostname pattern.
+      // Treat as path-style: https://endpoint.example.com/bucket/key
+      isS3 = true;
+    } else {
+      // Match ALL standard AWS S3 hostname shapes:
+      //   s3.amazonaws.com                             (global path-style)
+      //   s3.<region>.amazonaws.com                    (regional path-style)
+      //   <bucket>.s3.amazonaws.com                    (virtual-hosted global)
+      //   <bucket>.s3.<region>.amazonaws.com           (virtual-hosted regional)
+      //   <bucket>.s3.dualstack.<region>.amazonaws.com (dual-stack)
+      //   <bucket>.<vpce>.s3.<region>.vpce.amazonaws.com (VPC interface endpoint)
+      //   …any *.amazonaws.com hostname containing an 's3' dot-separated segment
+      // Anchored at the end of the string so *.amazonaws.com.evil.com never matches.
+      isS3 = /(?:^|\.)s3(?:\.|$).*\.amazonaws\.com$/.test(url.hostname)
+          || url.hostname === 's3.on.aws' || url.hostname.endsWith('.s3.on.aws');
+      isGCS = url.hostname === 'storage.googleapis.com' || url.hostname.endsWith('.storage.googleapis.com');
+    }
+
     if (isS3) {
-      // https://bucket.s3.region.amazonaws.com/key
-      bucketName = url.hostname.split('.')[0];
-      keyOrFile = url.pathname.substring(1);
+      // Determine URL shape so we can extract bucket and key correctly.
+      // Virtual-hosted: <bucket>.s3[…].amazonaws.com/key  → first hostname segment is bucket
+      // Path-style / custom endpoint: <host>/bucket/key   → first path segment is bucket
+      const firstSegment = url.hostname.split('.')[0];
+      const isPathStyle = firstSegment === 's3' || options.s3Endpoint;
+      bucketName = isPathStyle
+        ? url.pathname.split('/')[1]              // path-style: /bucket/key
+        : firstSegment;                           // virtual-hosted: bucket.s3[…].amazonaws.com
+      keyOrFile = isPathStyle
+        ? url.pathname.split('/').slice(2).join('/')  // path-style
+        : url.pathname.substring(1);                  // virtual-hosted
     } else if (isGCS) {
       // https://storage.googleapis.com/bucket/file
       const pathParts = url.pathname.split('/');
@@ -815,7 +877,7 @@ async function pollAsyncResponse(locationUrl, options = {}) {
  * Compare actual content items against expected content.
  * 
  * @param {Array} items - Array of actual items found in the file
- * @param {string} expectedContent - Expected JSON string
+ * @param {string|object|Array} expectedContent - Expected JSON string or parsed object/array
  * @param {Object} logger - Logger instance
  * @returns {boolean}
  */
@@ -826,11 +888,15 @@ function compareContent(items, expectedContent, logger) {
     }
 
     let expectedJson;
-    try {
-      expectedJson = JSON.parse(expectedContent);
-    } catch (e) {
-      logger.error(`Failed to parse expected content: ${e.message}`);
-      throw new Error('Invalid JSON in expected content (check --body argument)');
+    if (typeof expectedContent === 'object') {
+        expectedJson = expectedContent;
+    } else {
+        try {
+            expectedJson = JSON.parse(expectedContent);
+        } catch (e) {
+            logger.error(`Failed to parse expected content: ${e.message}`);
+            throw new Error('Invalid JSON in expected content (check --body argument)');
+        }
     }
 
     const found = items.some(item => {

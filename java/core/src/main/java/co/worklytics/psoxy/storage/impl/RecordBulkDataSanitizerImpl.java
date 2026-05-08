@@ -1,10 +1,15 @@
 package co.worklytics.psoxy.storage.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.LinkedHashMap;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +27,8 @@ import com.jayway.jsonpath.JsonPathException;
 import com.jayway.jsonpath.MapFunction;
 import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Pseudonymizer;
+import co.worklytics.psoxy.gateway.BulkModeConfig;
+import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
@@ -45,6 +52,9 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
     @Inject
     ObjectMapper objectMapper;
 
+    @Inject
+    BulkModeConfig bulkModeConfig;
+
     RecordRules rules;
 
     @AssistedInject
@@ -55,18 +65,18 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
 
     @Override
-    public void sanitize(@NonNull co.worklytics.psoxy.gateway.StorageEventRequest request,
-                         @NonNull Reader reader,
-                         @NonNull Writer writer,
+    public void sanitize(@NonNull StorageEventRequest request,
+                         @NonNull InputStream in,
+                         @NonNull OutputStream out,
                          @NonNull Pseudonymizer pseudonymizer) throws IOException {
 
         List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms =
             rules.getTransforms().stream()
-                .map(transform -> Triple.of(
-                    JsonPath.compile(transform.getPath()),
+                .flatMap(transform -> transform.getPaths().stream().map(path -> Triple.of(
+                    JsonPath.compile(path),
                     transform,
                     getMapFunction(transform, pseudonymizer, encoder)
-                ))
+                )))
                 .collect(Collectors.toList());
 
         RecordRules.Format format = rules.getFormat();
@@ -80,20 +90,27 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
                 format = RecordRules.Format.JSON_ARRAY;
             } else if (StringUtils.containsIgnoreCase(contentType, "text/csv")) {
                 format = RecordRules.Format.CSV;
+            } else if (StringUtils.containsIgnoreCase(contentType, "parquet") || StringUtils.containsIgnoreCase(contentType, "application/vnd.apache.parquet")) {
+                 format = RecordRules.Format.PARQUET;
             } else {
                 format = RecordRules.Format.NDJSON;
             }
         }
 
-        try (RecordReader recordReader = createReader(format, reader);
-             RecordWriter recordWriter = createWriter(format, writer)) {
+        RecordRules.Format outputFormat = bulkModeConfig.getOutputFormat()
+            .orElse(format);
+
+        try (InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
+        RecordReader recordReader = createReader(format, reader, in);
+        OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
+             RecordWriter recordWriter = createWriter(outputFormat, writer, out)) {
             
             recordWriter.beginRecordSet();
             
-            Object record;
+            Map<String, Object> record;
             while ((record = recordReader.readRecord()) != null) {
                 try {
-                    Object sanitized = applyTransforms(record, compiledTransforms);
+                    Map<String, Object> sanitized = applyTransforms(record, compiledTransforms);
                     recordWriter.writeRecord(sanitized);
                 } catch (UnmatchedPseudonymization e) {
                     log.warning("Skipped record due to UnmatchedPseudonymization: " + e.getPath());
@@ -104,24 +121,28 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
         }
     }
 
-    RecordReader createReader(RecordRules.Format format, Reader reader) {
+    RecordReader createReader(RecordRules.Format format, Reader reader, InputStream in) throws IOException {
         switch (format) {
             case CSV:
                 return new CsvRecordReader(reader);
             case JSON_ARRAY:
                 return new JsonArrayRecordReader(reader, objectMapper, jsonConfiguration);
+            case PARQUET:
+                return new ParquetRecordReader(in);
             case NDJSON:
             default:
                 return new NdjsonRecordReader(reader, jsonConfiguration);
         }
     }
 
-    RecordWriter createWriter(RecordRules.Format format, Writer writer) {
+    RecordWriter createWriter(RecordRules.Format format, Writer writer, OutputStream out) throws IOException {
         switch (format) {
             case CSV:
                 return new CsvRecordWriter(writer);
             case JSON_ARRAY:
                 return new JsonArrayRecordWriter(writer, objectMapper, jsonConfiguration);
+            case PARQUET:
+                return new ParquetRecordWriter(out);
             case NDJSON:
             default:
                 return new NdjsonRecordWriter(writer, jsonConfiguration);
@@ -137,13 +158,25 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
      * @return the transformed document
      * @throws UnmatchedPseudonymization if a pseudonymization transform should be applied, but nothing matches the path
      */
-    LinkedHashMap<String, Object> applyTransforms(Object document, List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
+    Map<String, Object> applyTransforms(Map<String, Object> document, List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
             throws UnmatchedPseudonymization {
         for (Triple<JsonPath, RecordTransform, MapFunction> compiledTransform : compiledTransforms) {
             if (compiledTransform.getMiddle() instanceof RecordTransform.Pseudonymize) {
-                Object matches = compiledTransform.getLeft().read(document);
+                Object matches = null;
+                try {
+                    matches = compiledTransform.getLeft().read(document, jsonConfiguration);
+                } catch (JsonPathException e) {
+                    // Optional paths might not exist; suppress exception and treat as no match
+                    continue;
+                }
+                
+   
                 if (matches == null) {
-                    throw new UnmatchedPseudonymization(compiledTransform.getMiddle().getPath());
+                    // If a path evaluates to null or empty but we were expecting to pseudonymize, 
+                    // we skip adding it or processing it. Note: If the path is entirely missing,
+                    // we do not throw UnmatchedPseudonymization anymore because array-based transforms 
+                    // contain multiple optional paths.
+                    continue;
                 }
             }
 
@@ -154,8 +187,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             }
         }
 
-        //abusing implementation detail of the JSONPath library
-        return (LinkedHashMap<String, Object>) document;
+        return document;
     }
 
     private MapFunction getMapFunction(RecordTransform transform,

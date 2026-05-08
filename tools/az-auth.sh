@@ -2,12 +2,17 @@
 
 # Copyright 2025 Worklytics, Co.
 
+# Sandbox Azure CLI auth to the current directory to prevent conflicts with other Azure tenants
+export AZURE_CONFIG_DIR="${PWD}/.azure"
+
 COLORSCHEME_SH="$(dirname "$0")/set-term-colorscheme.sh"
 if [ -f "$COLORSCHEME_SH" ]; then
     source "$COLORSCHEME_SH"
 else
     ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
 fi
+
+printf "Sandboxing Azure CLI authentication state to ${INFO}${AZURE_CONFIG_DIR}${NC}\n"
 
 if ! az -v &> /dev/null ; then
   printf "${ERR}Azure CLI not available.${NC}\n"
@@ -32,10 +37,14 @@ if [ -f "terraform.tfvars" ] && [ -z "$TENANT_ID" ]; then
   fi
 fi
 
-CURRENT_TENANT_ID=$(az account show --query tenantId -o tsv)
+CURRENT_TENANT_ID=$(az account show --query tenantId -o tsv 2>/dev/null)
 
 if [ "$CURRENT_TENANT_ID" != "$TENANT_ID" ]; then
-    printf "Current tenant is ${INFO}${CURRENT_TENANT_ID}${NC}.\r\n"
+    if [ -z "$CURRENT_TENANT_ID" ]; then
+        printf "No current active Azure session.\n"
+    else
+        printf "Current tenant is ${INFO}${CURRENT_TENANT_ID}${NC}.\r\n"
+    fi
     printf "Azure (Microsoft 365) tenant will be forced to ${SUCCESS}${TENANT_ID}${NC}, parsed from your ${INFO}terraform.tfvars${NC}. If you pick user from different tenant, auth will fail.\r\n"
     TENANT_ID_CLAUSE="--tenant ${TENANT_ID}"
     az login --allow-no-subscriptions $TENANT_ID_CLAUSE

@@ -116,6 +116,14 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     SIDE_OUTPUT_ORIGINAL,
 
     /**
+     * **BETA**
+     * if provided, fully overrides the default User-Agent string set on outbound HTTP requests
+     * to source APIs.  If omitted, the default is computed from proxy brand name, version, and
+     * java version.
+     */
+    USER_AGENT,
+
+    /**
      * **ALPHA**
      * if provided, a target side output to write sanitized data to
      *

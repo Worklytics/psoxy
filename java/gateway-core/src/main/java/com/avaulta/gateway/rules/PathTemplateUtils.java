@@ -26,13 +26,41 @@ public class PathTemplateUtils {
     private static final String PARAM_VALUE_CAPTURING_PATTERN = "(?<$1>[^/]+)";
 
 
+    /**
+     * regex to match optional path parameters, eg `{foo?}`
+     *
+     * must be processed BEFORE special character escaping, because `?` is in the
+     * {@link #SPECIAL_CHAR_CLASS} and would be escaped otherwise.
+     */
+    private static final Pattern OPTIONAL_PARAM_PATTERN =
+        Pattern.compile("\\{([A-Za-z][A-Za-z0-9]*)\\?\\}");
+
+    // placeholder that survives special char escaping (only uses alphanumerics + underscores)
+    private static final String OPTIONAL_PLACEHOLDER_PREFIX = "__OPT_";
+    private static final String OPTIONAL_PLACEHOLDER_SUFFIX = "__";
+
+    // regex to find our placeholders after escaping and replace with actual capturing patterns
+    private static final String OPTIONAL_PLACEHOLDER_REGEX =
+        OPTIONAL_PLACEHOLDER_PREFIX + "([A-Za-z][A-Za-z0-9]*)" + OPTIONAL_PLACEHOLDER_SUFFIX;
+
+    private static final String OPTIONAL_PARAM_VALUE_CAPTURING_PATTERN = "(?<$1>[^/]*)";
+
+
     public String asRegex(String pathTemplate) {
         //NOTE: java capturing groups names limited to A-Z, a-z and 0-9, and must start with a letter
 
+        // Step 1: replace {param?} with safe placeholders BEFORE special char escaping,
+        //         because `?` is in the special char class
+        String withPlaceholders = OPTIONAL_PARAM_PATTERN.matcher(pathTemplate)
+            .replaceAll(OPTIONAL_PLACEHOLDER_PREFIX + "$1" + OPTIONAL_PLACEHOLDER_SUFFIX);
+
         return "^"
-            + pathTemplate.replaceAll(SPECIAL_CHAR_CLASS, "\\\\$0")
+            + withPlaceholders
+                .replaceAll(SPECIAL_CHAR_CLASS, "\\\\$0")
                 // turn `/{foo}/` into `/(?<foo>[^/]+)/`
                 .replaceAll(REGEX_ALPHANUMERIC_PATH_PARAM, PARAM_VALUE_CAPTURING_PATTERN)
+                // turn placeholders into optional capturing groups: `(?<foo>[^/]*)`
+                .replaceAll(OPTIONAL_PLACEHOLDER_REGEX, OPTIONAL_PARAM_VALUE_CAPTURING_PATTERN)
             + "$";
     }
 

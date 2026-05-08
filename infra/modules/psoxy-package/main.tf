@@ -35,7 +35,12 @@ locals {
 output "deployment_package_hash" {
   # when `terraform console` used in directory, this output is evaluated before the build script has
   # run so the file doesn't exist yet
-  value = try(filebase64sha256(local.path_to_deployment_jar), "unknown")
+  value = coalesce(
+    var.deployment_bundle_hash,
+    try(data.external.deployment_package[0].result.deployment_package_hash, null),
+    try(filebase64sha256(local.path_to_deployment_jar), null),
+    "unknown"
+  )
 }
 
 output "path_to_deployment_jar" {

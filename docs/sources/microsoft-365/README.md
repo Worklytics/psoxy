@@ -18,7 +18,7 @@ Steps (1) and (2) are handled by the `terraform` examples. To perform them, the 
 `terraform` must be authenticated with [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/) as
 a Microsoft Entra ID user with, at minimum, the following role in your Microsoft 365 tenant:
 
-- [Cloud Application Administrator](https://learn.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#cloud-application-administrator)
+- [Cloud Application Administrator](https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#cloud-application-administrator)
   to create/update/delete Entra ID applications and its settings during Terraform apply command.
 
 Please note that this role is the least-privileged role sufficient for this task (creating a Microsoft Entra ID
@@ -41,6 +41,17 @@ your Microsoft 365 tenant:
 Again, this is the least-privileged role sufficient for this task, per Microsoft's documentation.
 See
 [Least privileged roles by task in Microsoft Entra ID](https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/delegate-by-task#enterprise-applications).
+
+### Multi-Tenant Environments (Sandboxing Azure CLI Auth)
+
+If you use your machine to authenticate against multiple Azure tenants (e.g., one tenant for internal corporate use and another for customer-facing infrastructure), you may experience authentication conflicts when running Terraform. 
+
+To prevent `terraform` and `az login` from overriding your global Azure CLI profile (stored in `~/.azure`), you can sandbox the authentication state to your current working directory. The provided wrapper scripts (`az-auth.sh`, `apply`, and `init`) automatically support this behavior.
+
+To enable sandboxing:
+1. Run our authentication wrapper: `./tools/az-auth.sh <tenant-id>` (or from an example dir: `./az-auth`). This script explicitly sets `AZURE_CONFIG_DIR="${PWD}/.azure"` and logs you in, storing the session locally.
+2. The `apply` and `init` wrapper scripts will automatically detect the local `.azure` directory and use it for Terraform's AzureAD provider.
+3. **Note:** If you choose to run `terraform` commands manually instead of using the wrapper scripts, you must first run `export AZURE_CONFIG_DIR="${PWD}/.azure"` in your shell.
 
 ## Security
 
@@ -201,7 +212,7 @@ If you see an error like this:
 }
 ```
 
-Please ensure that admin consent has been granted to the application in the Azure AD console.
+Please ensure that admin consent has been granted to the application in the Microsoft Entra admin center.
 If there is a new error after doing the admin like this:
 
 ```json

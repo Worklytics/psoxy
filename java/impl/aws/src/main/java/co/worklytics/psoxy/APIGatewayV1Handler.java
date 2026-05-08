@@ -9,6 +9,9 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.newrelic.opentracing.LambdaTracer;
+import com.newrelic.opentracing.aws.LambdaTracing;
+import io.opentracing.util.GlobalTracer;
 import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.aws.request.APIGatewayV1ProxyEventRequestAdapter;
@@ -44,11 +47,26 @@ public class APIGatewayV1Handler implements
         awsContainer = DaggerAwsContainer.create();
         requestHandler = awsContainer.apiDataRequestHandler();
         responseCompressionHandler = new ResponseCompressionHandler();
+
+        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            awsContainer.loggingConfiguration().validateNewRelicHandler(APIGatewayV1Handler.class);
+            GlobalTracer.registerIfAbsent(LambdaTracer.INSTANCE);
+        }
+
         Security.addProvider(new BouncyCastleProvider());
     }
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent invocationEvent,
+            Context context) {
+        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
+            return LambdaTracing.instrument(invocationEvent, context, this::actualHandleRequest);
+        } else {
+            return actualHandleRequest(invocationEvent, context);
+        }
+    }
+
+    public APIGatewayProxyResponseEvent actualHandleRequest(APIGatewayProxyRequestEvent invocationEvent,
             Context context) {
 
         HttpEventResponse response;

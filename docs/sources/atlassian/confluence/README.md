@@ -134,8 +134,8 @@ curl --request POST --url 'https://auth.atlassian.com/oauth/token' --header 'Con
      }
    ]
    ```
-Add the `id` value from that JSON response as the value of the `confluence_example_cloud_id` variable in the
-`terraform.tfvars` file of your Terraform configuration. This will generate all the test URLs with
+Add the `id` value from that JSON response as the value of the `confluence_example_cloud_id` variable in your `connector_settings` in the
+`terraform.tfvars` file of your Terraform configuration (e.g. `connector_settings = { confluence_example_cloud_id = "..." }`). This will generate all the test URLs with
 a proper value.
 
 NOTE: A "token family" includes the initial access/refresh tokens generated above as well as all subsequent access/refresh tokens that Jira returns to any future token refresh requests. By default, Jira enforces a maximum lifetime of 1 year for each **token family**. So you MUST repeat steps 5-9 at least annually or your proxy instance will stop working when the token family expires.

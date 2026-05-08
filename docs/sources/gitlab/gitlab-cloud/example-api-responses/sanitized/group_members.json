@@ -1,0 +1,33 @@
+[
+  {
+    "id":"t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc",
+    "username":"t~b5FZEVw0ZKo-RjPX3gquzMw4GGwuJSiZC9k8rmS00ZQ",
+    "state":"active",
+    "created_at":"2012-09-22T14:13:35Z",
+    "created_by":{
+      "id":"t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI",
+      "username":"t~yRqPQ2YSKKKHMN2SxqOEYGjKj1qXIdSC3ULilXyfstI",
+      "state":"active"
+    },
+    "expires_at":"2012-10-22",
+    "group_saml_identity":null,
+    "is_using_seat":true
+  },
+  {
+    "id":"t~-hN_i1M1DeMAicDVp6LhFgW9lH7r3_LbOpTlXYWpXVI",
+    "username":"t~yRqPQ2YSKKKHMN2SxqOEYGjKj1qXIdSC3ULilXyfstI",
+    "state":"active",
+    "created_at":"2012-09-22T14:13:35Z",
+    "created_by":{
+      "id":"t~0zPKqEd-CtbCLB1ZSwX6Zo7uAWUvkpfHGzv9-cuYwZc",
+      "username":"t~b5FZEVw0ZKo-RjPX3gquzMw4GGwuJSiZC9k8rmS00ZQ",
+      "state":"active"
+    },
+    "expires_at":"2012-10-22",
+    "email":"t~qUgEvTk5RoKRf7UzpTE_v38yLCp9NzffMw5LPAa3WYU@example.com",
+    "group_saml_identity":{
+      "extern_uid":"t~AcF_iJl0iQstw7f9wmv8j-3f6pQbiMviQzjZsGj00A4",
+      "provider":"group_saml"
+    }
+  }
+]

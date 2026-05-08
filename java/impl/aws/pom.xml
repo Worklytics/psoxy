@@ -19,6 +19,7 @@
         <!-- dependencies local to module; if you want to re-use across more modules, move up to root pom -->
         <dependency.aws-lambda-core.version>1.2.3</dependency.aws-lambda-core.version>
         <dependency.aws-lambda-java-events.version>3.11.5</dependency.aws-lambda-java-events.version>
+        <dependency.newrelic-lambda.version>2.2.3</dependency.newrelic-lambda.version>
     </properties>
 
 
@@ -145,6 +146,24 @@
             <artifactId>kms</artifactId>
         </dependency>
 
+        <!-- New Relic Tracing -->
+        <!-- see https://docs.newrelic.com/docs/serverless-function-monitoring/aws-lambda-monitoring/enable-lambda-monitoring/enable-serverless-monitoring-aws-lambda-legacy/ -->
+        <dependency>
+            <groupId>com.newrelic.opentracing</groupId>
+            <artifactId>java-aws-lambda</artifactId>
+            <version>2.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.newrelic.opentracing</groupId>
+            <artifactId>newrelic-java-lambda</artifactId>
+            <version>${dependency.newrelic-lambda.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentracing</groupId>
+            <artifactId>opentracing-util</artifactId>
+            <version>0.33.0</version>
+        </dependency>
+
         <!-- Test dependencies -->
         <!-- JUnit Jupiter API for writing tests -->
         <dependency>
@@ -191,9 +210,7 @@
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>co.worklytics.psoxy.Handler</mainClass>
-                                </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"/>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer"/>

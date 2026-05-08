@@ -1,11 +1,13 @@
 terraform {
-  required_version = ">= 1.3, < 2.0"
+  required_version = "~> 1.7"
 }
 
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
+  base_dir                                 = var.base_dir
   enabled_connectors                       = var.enabled_connectors
+  connector_settings                       = var.connector_settings
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
   confluence_example_cloud_id              = var.confluence_example_cloud_id
   confluence_example_group_id              = var.confluence_example_group_id
@@ -14,6 +16,7 @@ module "worklytics_connector_specs" {
   salesforce_domain                        = var.salesforce_domain
   example_jira_issue_id                    = var.example_jira_issue_id
   jira_example_issue_id                    = var.jira_example_issue_id
+  atlassian_organization_id                = var.atlassian_organization_id
   github_api_host                          = var.github_api_host
   github_enterprise_server_host            = var.github_enterprise_server_host
   github_enterprise_server_version         = var.github_enterprise_server_version
@@ -21,6 +24,9 @@ module "worklytics_connector_specs" {
   github_copilot_installation_id           = var.github_copilot_installation_id
   github_organization                      = var.github_organization
   github_example_repository                = var.github_example_repository
+  gitlab_url                               = var.gitlab_url
+  gitlab_example_group_id                  = var.gitlab_example_group_id
+  gitlab_example_project_id                = var.gitlab_example_project_id
   gong_instance_subdomain                  = var.gong_instance_subdomain
   glean_instance_subdomain                 = var.glean_instance_subdomain
   salesforce_example_account_id            = var.salesforce_example_account_id

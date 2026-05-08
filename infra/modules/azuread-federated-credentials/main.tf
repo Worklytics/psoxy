@@ -1,9 +1,12 @@
-# provisions infra for a federated credential on a Microsoft Data Source connector (in Azure AD)
+# provisions infra for a federated credential on a Microsoft Data Source connector (in Microsoft Entra ID)
+#
+# NOTE: this module is named 'azuread-*' because it uses the HashiCorp 'azuread' Terraform provider;
+# the provider itself retains its original name as a convention and to avoid breaking changes for
+# provider users, so we follow that convention in this module name.
 
 terraform {
   required_providers {
     azuread = {
-      version = ">= 2.44.0, < 4.0.0"
     }
   }
 }

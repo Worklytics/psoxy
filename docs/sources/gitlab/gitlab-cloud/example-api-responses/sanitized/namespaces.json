@@ -1,0 +1,25 @@
+[
+  {
+    "id":1,
+    "name":"user1",
+    "path":"user1",
+    "kind":"user",
+    "plan":"ultimate",
+    "end_date":null
+  },
+  {
+    "id":2,
+    "name":"group1",
+    "path":"group1",
+    "kind":"group",
+    "plan":"ultimate",
+    "end_date":null
+  },
+  {
+    "id":3,
+    "name":"bar",
+    "path":"bar",
+    "kind":"group",
+    "end_date":null
+  }
+]

@@ -22,6 +22,10 @@ public class HealthCheckResult {
 
     String javaSourceCodeVersion;
 
+    /**
+     * the User-Agent string being used on outbound requests to source APIs
+     */
+    String userAgent;
 
     //q: terraform module version?? (eg, have terraform deployment set its version number as ENV
     // variable, and then psoxy can read it and report it here)
@@ -48,6 +52,7 @@ public class HealthCheckResult {
     /**
      * from config, if any. (if null, the computed logically)
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String pseudonymImplementation;
 
     String sourceAuthStrategy;

@@ -1,12 +1,15 @@
-# generate certificate for Azure AD application locally and deploy it to Azure AD
+# generate certificate for Microsoft Entra ID application locally and deploy it to Microsoft Entra ID
 # NOTE: certificate will only be temporarily written to your local file system, but out of abundance
 # of caution should:
 #  - run this only in an environment that is approved from key generation in your organization
 #  - use a secure location for your Terraform state (eg, not local file systme of your laptop)
+#
+# NOTE: this module is named 'azuread-*' because it uses the HashiCorp 'azuread' Terraform provider;
+# the provider itself retains its original name as a convention and to avoid breaking changes for
+# provider users, so we follow that convention in this module name.
 terraform {
   required_providers {
     azuread = {
-      version = ">= 2.44, < 4.0"
     }
   }
 }
@@ -47,18 +50,4 @@ output "private_key" {
   value     = base64decode(data.external.certificate.result.key_pkcs8)
   sensitive = true
 }
-
-# for 3-legged OAuth flows, which believe aren't needed in this case as we have no OIDC/sign-on
-# flow for psoxy use-cases
-#resource "azuread_application_password" "oauth-client-secret" {
-#  application_object_id = var.application_id # oauthClientId
-#
-#  rotate_when_changed = {
-#    rotation = time_rotating.rotation.id
-#  }
-#}
-
-#output "oauth_client_secret" {
-#  value = azuread_application_password.oauth-client-secret.value
-#}
 

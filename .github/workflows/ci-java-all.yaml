@@ -13,34 +13,24 @@ on:
       - 'main'
       - 'rc-*'
 
-jobs:
-  # Java 17 - supported until 30 Sept 2026; same as our default build as of Apr 2023
-  ci_java17:
-    uses: ./.github/workflows/build-java.yaml
-    with:
-      java-version: '17'
-      maven-version: '3.6.3' # just for interests sake
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+jobs:
   # Java 21 - released 19 Sept 2023, supported until Sept 2028 (LTS)
   ci_java21:
     uses: ./.github/workflows/build-java.yaml
     with:
       java-version: '21'
 
-  # Java 23 - released 17 Sept 2024, supported until March 2025
-  ci_java23:
+  # Java 25 - released 17 Oct 2025, supported until Apr 2026
+  ci_java25:
     uses: ./.github/workflows/build-java.yaml
     with:
-      java-version: '23'
+      java-version: '25'
 
- # Java 24 - released 18 March 2025, supported until Sept 2025
- ci_java24:
-   uses: ./.github/workflows/build-java.yaml
-   with:
-     java-version: '24'
-
- # Java 25 - released 17 Oct 2025, supported until Apr 2026
- ci_java25:
-   uses: ./.github/workflows/build-java.yaml
-   with:
-     java-version: '25'
+  # Java 26 - released March 2026
+  ci_java26:
+    uses: ./.github/workflows/build-java.yaml
+    with:
+      java-version: '26'

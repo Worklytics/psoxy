@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.3, < 2.0"
+  required_version = "~> 1.7"
 }
 
 locals {
@@ -7,15 +7,17 @@ locals {
   environment_id_display_name_qualifier = length(var.environment_id) > 0 ? " ${var.environment_id} " : ""
 }
 
-# beginning of current month - used for example API calls to provide recent but fairly stable dates
-# this will only change monthly, preventing churning while keeping examples relevant
-resource "time_static" "month_start" {
-  rfc3339 = formatdate("YYYY-MM-01'T'00:00:00Z", timestamp())
+# a timestamp used to seed example test API calls, so that they're likely to return interesting data, but the terraform test scripts don't churn too much
+resource "time_rotating" "example_timestamp" {
+  rotation_days = 365
 }
 
 module "worklytics_connector_specs" {
   source = "../../modules/worklytics-connector-specs"
 
+  msft_365_connector_settings = var.msft_365_connector_settings
+
+  base_dir                                   = var.base_dir
   enabled_connectors                         = var.enabled_connectors
   msft_tenant_id                             = var.msft_tenant_id
   example_msft_user_guid                     = var.example_msft_user_guid
@@ -25,7 +27,7 @@ module "worklytics_connector_specs" {
   msft_teams_example_call_guid               = var.msft_teams_example_call_guid
   msft_teams_example_call_record_guid        = var.msft_teams_example_call_record_guid
   msft_teams_example_online_meeting_join_url = var.msft_teams_example_online_meeting_join_url
-  example_api_calls_sample_date              = time_static.month_start.id
+  example_api_calls_sample_date              = time_rotating.example_timestamp.id
 }
 
 locals {
@@ -68,13 +70,13 @@ data "azuread_application" "existing_connector_app" {
 }
 
 
-# grant required permissions to connectors via Azure AD
+# grant required permissions to connectors via Microsoft Entra ID
 # (requires terraform configuration being applied by an Azure User with privileges to do this; it
 #  usually requires a 'Global Administrator' for your tenant)
 module "msft_365_grants" {
   for_each = local.connectors_needing_apps
 
-  source = "../../modules/azuread-grant-all-users"
+  source = "../../modules/entra-grant-all-users"
 
   psoxy_instance_id        = each.key
   application_id           = module.msft_connection[each.key].connector.client_id
@@ -88,7 +90,7 @@ module "msft_365_grants" {
 module "msft_365_grant_to_shared" {
   count = local.provision_entraid_apps ? 0 : 1
 
-  source = "../../modules/azuread-grant-all-users"
+  source = "../../modules/entra-grant-all-users"
 
   psoxy_instance_id        = "msft-365"
   application_id           = data.azuread_application.existing_connector_app[0].client_id
@@ -101,7 +103,7 @@ module "msft_365_grant_to_shared" {
 }
 
 
-# NOTE: this OVERWRITES the todo_file created by the azuread-grant-all-users module, if there's an
+# NOTE: this OVERWRITES the todo_file created by the entra-grant-all-users module, if there's an
 # external_token_todo to append to that file
 locals {
   todos_to_populate = { for k, v in module.worklytics_connector_specs.enabled_msft_365_connectors :

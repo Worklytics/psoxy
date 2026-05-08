@@ -34,10 +34,10 @@ test('Get logs link based on cloud function URL', (t) => {
 
   t.is(undefined, gcp.getLogsURL('foo'));
 
-  t.is('https://console.cloud.google.com/run/detail/us-central1/psoxy-function/logs?project=psoxy-project',
+  t.is('https://console.cloud.google.com/run/detail/us-central1/psoxy-function/observability/logs?project=psoxy-project',
     gcp.getLogsURL('https://us-central1-psoxy-project.cloudfunctions.net/psoxy-function'))
 
-  t.is('https://console.cloud.google.com/run/detail/us-central1/psoxy-dev-gcal/logs',
+  t.is('https://console.cloud.google.com/run/detail/us-central1/psoxy-dev-gcal/observability/logs',
     gcp.getLogsURL('https://psoxy-dev-gcal-boff2f476q-uc.a.run.app'))
 
   t.is('https://console.cloud.google.com', gcp.getLogsURL('https://foo76q-ux.a.run.app/'));

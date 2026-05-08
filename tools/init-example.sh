@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Use a local Azure CLI config directory if present to avoid conflicts with other Azure tenants
+if [ -d "${PWD}/.azure" ]; then
+    export AZURE_CONFIG_DIR="${PWD}/.azure"
+fi
 # Psoxy init script - lite version
 #
 # Usage:
@@ -57,12 +61,41 @@ if [[ -z "$EXPLICIT_REPO_CLONE_DIR" ]]; then
     exit 1
   fi
 else
-  # append trailing slash if not present
-  if [[ "${EXPLICIT_REPO_CLONE_DIR}" != */ ]]; then
-      EXPLICIT_REPO_CLONE_DIR="${EXPLICIT_REPO_CLONE_DIR}/"
+  # Walk up from the given path to find the repo root (identified by tools/init-example-full.sh)
+  CANDIDATE="$EXPLICIT_REPO_CLONE_DIR"
+  # strip trailing slash for consistent dirname handling
+  CANDIDATE="${CANDIDATE%/}"
+  # normalize to an absolute path so dirname traversal always makes progress toward /
+  if [[ -d "$CANDIDATE" ]]; then
+    CANDIDATE="$(cd "$CANDIDATE" 2>/dev/null && pwd -P)"
+  else
+    CANDIDATE_PARENT="$(dirname "$CANDIDATE")"
+    CANDIDATE_BASENAME="$(basename "$CANDIDATE")"
+    CANDIDATE="$(cd "$CANDIDATE_PARENT" 2>/dev/null && printf "%s/%s" "$(pwd -P)" "$CANDIDATE_BASENAME")"
   fi
 
-  REPO_CLONE_BASE_DIR="$EXPLICIT_REPO_CLONE_DIR"
+  FOUND_REPO_ROOT=""
+  while [[ -n "$CANDIDATE" ]] && [[ "$CANDIDATE" != "/" ]]; do
+    if [[ -f "${CANDIDATE}/tools/init-example-full.sh" ]]; then
+      FOUND_REPO_ROOT="$CANDIDATE"
+      break
+    fi
+    NEXT_CANDIDATE="$(dirname "$CANDIDATE")"
+    if [[ "$NEXT_CANDIDATE" == "$CANDIDATE" ]]; then
+      break
+    fi
+    CANDIDATE="$NEXT_CANDIDATE"
+  done
+
+  if [[ -z "$FOUND_REPO_ROOT" ]]; then
+    printf "${ERR}Could not find repo root (tools/init-example-full.sh) at or above: ${EXPLICIT_REPO_CLONE_DIR}${NC}\n"
+    printf "Pass the path to the root of a clone of https://github.com/Worklytics/psoxy as the first argument.\n"
+    printf " eg ${CODE}./init ~/code/psoxy${NC}\n"
+    exit 1
+  fi
+
+  # append trailing slash
+  REPO_CLONE_BASE_DIR="${FOUND_REPO_ROOT}/"
 fi
 
 # pass control to the full init script.

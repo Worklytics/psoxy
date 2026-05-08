@@ -14,6 +14,28 @@ custom_api_connector_rules = {
 }
 ```
 
+## Custom API Connectors
+
+In addition to custom rules for supported sources, you can configure entirely new, custom API connectors by adding an entry to the `custom_api_connectors` map in your environment's configuration. This is useful for integrating with data sources that are not natively supported by Psoxy out of the box.
+
+Example:
+
+```hcl
+custom_api_connectors = {
+  "my-custom-api" = {
+    source_kind          = "my-custom-api"
+    source_auth_strategy = "bearer"
+    target_host          = "api.example.com"
+    example_api_calls    = ["/v1/users"]
+    secured_variables    = [
+      { name = "API_KEY" }
+    ]
+  }
+}
+```
+
+The key in the map (e.g., `"my-custom-api"`) will become the connector ID. You can then pair this with `custom_api_connector_rules` to define the allowed endpoints and sanitization rules for your new connector.
+
 ## API Connector Rules Syntax
 
 `<ruleset> ::= "endpoints:" <endpoint-list>`
@@ -91,7 +113,7 @@ Each transform is specified by a transform type and a list of [JSON paths](https
 
 Supported Transform Types:
 
-`<transform-type> ::= "!<pseudonymizeEmailHeader>" | "!<pseudonymize>" | "!<redact>" | "!<redactRegexMatches>" | "!<tokenize>" | "<!filterTokenByRegex>" | "!<redactExceptSubstringsMatchingRegexes>"`
+`<transform-type> ::= "!<pseudonymizeEmailHeader>" | "!<pseudonymize>" | "!<redact>" | "!<redactRegexMatches>" | "!<tokenize>" | "<!filterTokenByRegex>" | "!<redactExceptSubstringsMatchingRegexes>" | "!<textDigest>"`
 
 NOTE: these are implementations of `com.avaulta.gateway.rules.transforms.Transform` class in the Psoxy codebase.
 
@@ -136,6 +158,14 @@ Eg, the following redacts all headers that have a name value other than those ex
 #### Tokenize
 
 `!<tokenize>` - replaces matching values it with a reversible token, which proxy can reverse to the original value using `ENCRYPTION_KEY` secret stored in the proxy in subsequent requests.
+
+#### Text Digest
+
+`!<textDigest>` - replaces the matching string value with a JSON object containing metadata about the text: `length` and `word_count`. The original text content is completely removed.
+
+Options:
+
+- `keywords` (BETA - behavior subject to change) - an optional list of keyword strings to search for within the text. If provided, the original text is tokenized into words and a frequency count is generated. The resulting JSON object will include a `keywords` property, containing a map of the configured keywords that were found in the text along with their occurrence counts.
 
 Use case are values that _may_ be sensitive, but are opaque. For example, page tokens in Microsoft Graph API do not have a defined structure, but in practice contain PII.
 

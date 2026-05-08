@@ -21,6 +21,32 @@ If you DO intend to use Google Workspace as a data source, you must install and 
 
 ## General Tips
 
+### Debugging Custom Rules
+
+If you are inspecting your deployed configuration (e.g. looking at environment variables in the AWS or GCP console) and expecting to see plain YAML, you may instead see a seemingly unintelligible string. This is because Psoxy's Terraform modules automatically base64-encode and gzip your custom rules to bypass cloud provider constraints on the size or contents of environment variables.
+
+You can decode this payload back to plain YAML using CLI tools. The exact command depends on your operating system:
+
+**macOS:**
+```sh
+# Example: decoding a base64-gzipped rules payload copied to your clipboard
+pbpaste | base64 -D | gunzip
+
+# Or if stored in a shell variable
+echo "$RULES" | base64 -D | gunzip
+```
+
+**Linux:**
+```sh
+# Example: decoding a base64-gzipped rules payload from your clipboard (requires xclip)
+xclip -selection clipboard -o | base64 -d | gunzip
+
+# Or if stored in a shell variable
+echo "$RULES" | base64 -d | gunzip
+```
+
+Psoxy natively understands both plain YAML and this base64-gzipped format.
+
 ### Verify Pre-Requisites
 
 Our example templates include a script to check for the prerequisites for running Psoxy. You can run this prior to `./init` to get feedback/suggestions on what prerequisites you may be missing and how to install them.
@@ -92,12 +118,12 @@ terraform import module.psoxy-msft-connector\[\"outlook-cal\"\].aws_lambda_funct
 
 Errors such as the following on `terraform plan`?
 ```shell
-Module module.psoxy (from git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.4.51) does not support Terraform version 1.8.1. To proceed, either choose another supported Terraform version or update
+Module module.psoxy (from git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.4.51) does not support Terraform version 1.6.0. To proceed, either choose another supported Terraform version or update
 │ this version constraint. Version constraints are normally set for good reason, so updating the constraint may lead to other errors or unexpected behavior.
 ```
 
-The solution is to downgrade your Terraform version to one that's supported by our modules (>= 1.3.x, <= 1.7.x as of March 2024).
+The solution is to upgrade your Terraform version to one that's supported by our modules (>= 1.7.x).
 
 _If you're running Terraform in cloud/CI environment,_ including Terraform Cloud, GitHub Actions, etc, you can likely explicitly set the desired Terraform version in your workspace settings / terraform setup action.
 
-_If you're running Terraform on your laptop or in a VM,_ use your package manager to downgrade or something like [`tfenv`](https://github.com/tfutils/tfenv) to concurrently use distinct Terraform versions on the machine. (set version <= 1.7.x in `.terraform-version` file in the root of your Terraform configuration for the proxy).
+_If you're running Terraform on your laptop or in a VM,_ use your package manager to upgrade or something like [`tfenv`](https://github.com/tfutils/tfenv) to concurrently use distinct Terraform versions on the machine. (set version >= 1.7.x in `.terraform-version` file in the root of your Terraform configuration for the proxy).

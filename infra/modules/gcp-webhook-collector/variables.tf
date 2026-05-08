@@ -25,11 +25,6 @@ variable "environment_id_prefix" {
   default     = "psoxy-"
 }
 
-variable "default_labels" {
-  type        = map(string)
-  description = "*Alpha* in v0.4, only respected for new resources. Labels to apply to all resources created by this configuration. Intended to be analogous to AWS providers `default_tags`."
-  default     = {}
-}
 
 variable "instance_id" {
   type        = string
@@ -80,7 +75,7 @@ variable "path_to_repo_root" {
 
 variable "environment_variables" {
   type        = map(string)
-  description = "Non-sensitive values to add to functions environment variables; NOTE: will override anything in `path_to_config`"
+  description = "Non-sensitive values to add to functions environment variables"
   default     = {}
 }
 
@@ -106,6 +101,17 @@ variable "available_memory_mb" {
   type        = number
   description = "Memory (in MB), available to the function. Default value is 1024. Possible values include 128, 256, 512, 1024, etc."
   default     = 1024
+}
+
+variable "instance_concurrency" {
+  type        = number
+  description = "Max concurrent requests per instance. Default 5 is suitable for I/O-bound proxy workloads."
+  default     = 5
+
+  validation {
+    condition     = var.instance_concurrency >= 1 && var.instance_concurrency <= 1000
+    error_message = "instance_concurrency must be between 1 and 1000."
+  }
 }
 
 variable "gcp_principals_authorized_to_test" {
@@ -273,4 +279,21 @@ variable "vpc_config" {
     )
     error_message = "If vpc_config.serverless_connector is provided, it must match the format: projects/{project}/locations/{location}/connectors/{connector}"
   }
+}
+
+variable "enable_versioning" {
+  type        = bool
+  description = "Enable object versioning for the webhook output buckets"
+  default     = false
+}
+
+variable "bucket_access_logs_destination" {
+  description = "The name of the GCS bucket to route access logs to for all buckets managed by this module"
+  type        = string
+  default     = null
+}
+
+variable "builder_sa_id" {
+  description = "The fully-qualified ID of the custom builder service account used to build the Cloud Function."
+  type        = string
 }

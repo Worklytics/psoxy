@@ -98,9 +98,15 @@ columnsToDuplicate:
 
 ### Record-Oriented Formats (RecordRules)
 
-_As of Oct 2023, this is a **beta** feature_
-
 `RecordRules` parses files as records, presuming the specified format. It performs transforms in order on each record to sanitize your data, and serializes the result back to the specified format.
+
+Supported Formats:
+- `NDJSON` (default) - Newline Delimited JSON
+- `CSV` - Comma Separated Values
+- `JSON_ARRAY` (**beta**) - A JSON array of objects. Entire file must be a single valid JSON array.
+- `PARQUET` (**beta**) - [Apache Parquet](https://parquet.apache.org/) column-oriented file format.
+
+Formats are specified by including a `format` property in the `RecordRules` yaml. If `format` is omitted, `NDJSON` is presumed. Specify `AUTO` to infer the format from the `Content-Type` metadata of the file, if available.
 
 eg.
 
@@ -131,9 +137,24 @@ You can process multiple file formats through a single proxy instance using `Mul
 
 These rules are structured with a field `fileRules`, which is a map from parameterized path template within the "input" bucket to one of the above rule types (`RecordRules`,`ColumnarRules`) to be applied to files matching that path template.
 
+#### Path Template Syntax
+
+Path templates follow [OpenAPI 3.0 Path Templating](https://swagger.io/specification/) conventions.
+Variable segments are enclosed in curly braces and matched against the file's object key (path).
+
+- **`{param}`** — matches one or more characters (excluding `/`). The parameter is **required**.
+- **`{param?}`** — matches zero or more characters (excluding `/`). The parameter is **optional**,
+  allowing it to match even when absent from the path. This is useful for optional suffixes like
+  compression extensions (`.gz`).
+
+For example, `/{exportId}/events{shard}.ndjson{suffix?}` will match all of:
+- `export1/events0.ndjson`
+- `export1/events0-1234567890.ndjson`
+- `export1/events0-1234567890.ndjson.gz`
+
 ```yaml
 fileRules:
-  /export/{week}/index_{shard}.ndjson:
+  /export/{week}/index_{shard}.ndjson{suffix?}:
     format: "NDJSON"
     transforms:
       - redact: "$.foo"
