@@ -7,20 +7,21 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  # even numbers are LTS; odd go to ~3m maintenance after next major version
-  # 18 released 2022-04-19 - maintained until June 2025
-  # 20 maintained until June 2026
-  # 22 is latest LTS as of Oct 2024; maintained until 2027
-  # 24 released May 2025; current until Nov 2025; active until Nov 2026; maintained until May 2027
-  # 25 should be latest as of Oct 2025; current until Apr 2026, maintained until June 2026
-  NODE_VERSIONS: '["18", "20", "22", "24", "latest"]'
+
+# Node version matrix notes:
+# even numbers are LTS; odd go to ~3m maintenance after next major version
+# 18 released 2022-04-19 - maintained until June 2025
+# 20 maintained until June 2026
+# 22 is latest LTS as of Oct 2024; maintained until 2027
+# 24 released May 2025; current until Nov 2025; active until Nov 2026; maintained until May 2027
+# 25 should be latest as of Oct 2025; current until Apr 2026, maintained until June 2026
 
 jobs:
   ci_tools:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: ${{ fromJSON(env.NODE_VERSIONS) }}
+        node-version: ["18", "20", "22", "24", "latest"]
     steps:
     - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
@@ -40,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: ${{ fromJSON(env.NODE_VERSIONS) }}
+        node-version: ["18", "20", "22", "24", "latest"]
     steps:
     - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
