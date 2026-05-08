@@ -8,18 +8,20 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+# Node version matrix notes:
+# even numbers are LTS; odd go to ~3m maintenance after next major version
+# 18 released 2022-04-19 - maintained until June 2025
+# 20 maintained until June 2026
+# 22 is latest LTS as of Oct 2024; maintained until 2027
+# 24 released May 2025; current until Nov 2025; active until Nov 2026; maintained until May 2027
+# 25 should be latest as of Oct 2025; current until Apr 2026, maintained until June 2026
+
 jobs:
   ci_tools:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # even numbers are LTS; odd go to ~3m maintenance after next major version
-        # 18 released 2022-04-19 - maintained until June 2025
-        # 20 maintained until June 2026
-        # 22 is latest LTS as of Oct 2024; maintained until 2027
-        # 24 released May 2025; current until Nov 2025; active until Nov 2026; maintained until May 2027
-        # 25 should be latest as of Oct 2025; current until Apr 2026, maintained until June 2026
-        node-version: [ 18, 20, 22, 24, latest]
+        node-version: ["20", "22", "24", "latest"]
     steps:
     - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
@@ -31,6 +33,26 @@ jobs:
     - name: Install dependencies
       working-directory: ./tools/psoxy-test
       run: npm i
-    - name: Run test
+    - name: Run tests
       working-directory: ./tools/psoxy-test
+      run: npm test
+
+  ci_schema_tool:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ["20", "22", "24", "latest"]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: ./tools/schema-tool
+    - name: Install dependencies
+      working-directory: ./tools/schema-tool
+      run: npm i
+    - name: Run tests
+      working-directory: ./tools/schema-tool
       run: npm test

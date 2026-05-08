@@ -1,0 +1,222 @@
+{
+  "type": "object",
+  "properties": {
+    "@odata.context": {
+      "type": "string",
+      "format": "uri"
+    },
+    "@odata.count": {
+      "type": "integer"
+    },
+    "@odata.nextLink": {
+      "type": "string",
+      "format": "uri"
+    },
+    "value": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "appClass": {
+            "type": "string"
+          },
+          "interactionType": {
+            "type": "string"
+          },
+          "conversationType": {
+            "type": "string"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "createdDateTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "contexts": {
+            "type": "array",
+            "items": false
+          },
+          "from": {
+            "type": "object",
+            "properties": {
+              "@odata.type": {
+                "type": "string"
+              },
+              "device": {
+                "type": "null"
+              },
+              "user": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "@odata.type": {
+                    "type": "string"
+                  },
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "displayName": {
+                    "type": "string"
+                  },
+                  "userIdentityType": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "@odata.type",
+                  "id",
+                  "displayName",
+                  "userIdentityType"
+                ]
+              },
+              "application": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "@odata.type": {
+                    "type": "string"
+                  },
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "displayName": {
+                    "type": "string"
+                  },
+                  "applicationIdentityType": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "@odata.type",
+                  "id",
+                  "displayName",
+                  "applicationIdentityType"
+                ]
+              }
+            },
+            "required": [
+              "@odata.type",
+              "device",
+              "user",
+              "application"
+            ]
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "contentType": {
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "contentType",
+              "content"
+            ]
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "attachmentId": {
+                  "type": "string"
+                },
+                "contentType": {
+                  "type": "string"
+                },
+                "contentUrl": {
+                  "type": "null"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "null"
+                }
+              },
+              "required": [
+                "attachmentId",
+                "contentType",
+                "contentUrl",
+                "content",
+                "name"
+              ]
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "linkUrl": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "displayName": {
+                  "type": "string"
+                },
+                "linkType": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "linkUrl",
+                "displayName",
+                "linkType"
+              ]
+            }
+          },
+          "mentions": {
+            "type": "array",
+            "items": false
+          }
+        },
+        "required": [
+          "id",
+          "sessionId",
+          "requestId",
+          "appClass",
+          "interactionType",
+          "conversationType",
+          "etag",
+          "createdDateTime",
+          "locale",
+          "contexts",
+          "from",
+          "body",
+          "attachments",
+          "links",
+          "mentions"
+        ]
+      }
+    }
+  },
+  "required": [
+    "@odata.context",
+    "@odata.count",
+    "@odata.nextLink",
+    "value"
+  ]
+}
