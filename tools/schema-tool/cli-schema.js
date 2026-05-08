@@ -3,10 +3,16 @@ import chalk from 'chalk';
 import { Command } from 'commander';
 import { createRequire } from 'module';
 import { fetchEndpoint, inferSchema } from './lib/schema.js';
-import getLogger from './lib/logger.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('./package.json');
+
+const log = {
+  info:    (msg) => console.error(chalk.bold.blue(msg)),
+  success: (msg) => console.error(chalk.bold.green(msg)),
+  error:   (msg) => console.error(chalk.bold.red(msg)),
+  verbose: (msg, opts) => opts?.verbose && console.error(msg),
+};
 
 (async function () {
   const program = new Command();
@@ -34,13 +40,12 @@ Example calls:
 
   program.parse(process.argv);
   const options = program.opts();
-  const logger = getLogger(options.verbose);
 
   let url;
   try {
     url = new URL(options.endpoint);
   } catch {
-    logger.error(`"${options.endpoint}" is not a valid URL`);
+    log.error(`"${options.endpoint}" is not a valid URL`);
     process.exitCode = 1;
     return;
   }
@@ -48,8 +53,8 @@ Example calls:
   try {
     const result = await fetchEndpoint(url, options.auth);
 
-    logger.verbose(`Response status: ${result.status} ${result.statusMessage}`);
-    logger.verbose(`Response headers:\n${JSON.stringify(result.headers, null, 2)}`);
+    log.verbose(`Response status: ${result.status} ${result.statusMessage}`, options);
+    log.verbose(`Response headers:\n${JSON.stringify(result.headers, null, 2)}`, options);
 
     if (result.status >= 200 && result.status < 300) {
       if (options.raw) {
@@ -61,28 +66,26 @@ Example calls:
       try {
         parsed = JSON.parse(result.body);
       } catch (err) {
-        logger.error(`Response is not valid JSON: ${err.message}`);
+        log.error(`Response is not valid JSON: ${err.message}`);
         process.exitCode = 1;
         return;
       }
 
-      const schema = inferSchema(parsed);
-      logger.info(`Schema for ${options.endpoint}:`);
-      console.log(JSON.stringify(schema, null, 2));
+      log.info(`Schema for ${options.endpoint}:`);
+      console.log(JSON.stringify(inferSchema(parsed), null, 2));
     } else {
-      logger.error(`HTTP ${result.status}: ${result.statusMessage || 'Unknown error'}`);
+      log.error(`HTTP ${result.status}: ${result.statusMessage || 'Unknown error'}`);
       if (result.body) {
         try {
-          const errorBody = JSON.parse(result.body);
-          logger.error('Error details:', { additional: errorBody });
+          console.error(JSON.stringify(JSON.parse(result.body), null, 2));
         } catch {
-          logger.error(result.body);
+          console.error(result.body);
         }
       }
       process.exitCode = 1;
     }
   } catch (err) {
-    logger.error(`Request failed: ${err.message}`);
+    log.error(`Request failed: ${err.message}`);
     process.exitCode = 1;
   }
 })();
