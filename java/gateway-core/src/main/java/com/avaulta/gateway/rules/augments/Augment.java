@@ -59,6 +59,17 @@ public abstract class Augment {
     JsonSchemaFilter outputSchema;
 
     /**
+     * If provided, the source value is treated as a JSON string and parsed, and this JSONPath
+     * is evaluated against it to extract the actual value(s) to augment.
+     *
+     * <p>Note: This is the augment equivalent of the {@code jsonPathToProcessWhenEscaped} option
+     * that exists for some transforms. Its presence implicitly enables escaped JSON decoding.
+     */
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    @Builder.Default
+    String innerJsonPath = null;
+
+    /**
      * Returns the augment function name, used in the synthetic property name
      * {@code +{sourceProperty}:{augmentFunction}}.
      */

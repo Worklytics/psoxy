@@ -177,7 +177,27 @@ public class AugmentProcessor {
             + AUGMENT_SEPARATOR + augment.getFunctionName();
 
         try {
-            Object augmentValue = augment.compute(sourceValue);
+            Object augmentValue = null;
+            if (augment.getInnerJsonPath() != null && !augment.getInnerJsonPath().isEmpty() && sourceValue instanceof String jsonStr && !jsonStr.isEmpty()) {
+                Object parsed = JsonPath.parse(jsonStr).read(augment.getInnerJsonPath());
+                if (parsed instanceof List<?> list) {
+                    List<Object> results = new java.util.ArrayList<>();
+                    for (Object item : list) {
+                        Object computed = augment.compute(item);
+                        if (computed != null) {
+                            results.add(computed);
+                        }
+                    }
+                    if (!results.isEmpty()) {
+                        augmentValue = results;
+                    }
+                } else if (parsed != null) {
+                    augmentValue = augment.compute(parsed);
+                }
+            } else {
+                augmentValue = augment.compute(sourceValue);
+            }
+
             if (augmentValue == null) {
                 return;
             }
