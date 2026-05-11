@@ -47,6 +47,7 @@ retained for backward compatibility through 0.6.x but will be removed in 0.6.1.
 - `aws`/`gcp`: Upgraded deployment runtime environments to Java 25, while maintaining Java 21 byte-code and language-level compatibility.
 - DEPRECATION: Top-level connector specific Terraform variables (e.g., `salesforce_domain`, `gong_instance_subdomain`, `github_enterprise_server_host`) have been deprecated. These should now be passed through the new `connector_settings` map variable.
 - `gcp`: Dedicated `proxy_builder_sa` service account is now provisioned and used for Cloud Build operations when provisioning Cloud Functions, eliminating project-level IAM dependencies on the default Compute Engine service account.
+- `gcp`: When upgrading from 0.5.x, you will see the `google_service_account_iam_member.act_as` IAM binding destroyed and a new `google_service_account_iam_member.tf_runner_act_as` created for each connector. This is an automatic, no-op rename handled by a `removed` block — no manual `terraform state rm` is required.
 - `zoom`: Default rules for Zoom have been updated, removing fields and endpoints not required.
 - `pseudonymizeRegexMatches`: apply the pseudonymization to any match found in the field instead of the first one.
 - Atlassian Organization API: added new connector for fetching audit events from Atlassian Organization API, which provides access to audit events from users and tools like Rovo.

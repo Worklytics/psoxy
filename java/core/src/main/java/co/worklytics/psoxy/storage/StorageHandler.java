@@ -496,18 +496,27 @@ public class StorageHandler {
         if (request.getDecompressInput()) {
             // wrap in BufferedInputStream so we can peek at the first bytes
             BufferedInputStream buffered = new BufferedInputStream(raw, bufferSize);
-            buffered.mark(2);
-            int b0 = buffered.read();
-            int b1 = buffered.read();
-            buffered.reset();
+            // toClose tracks the intermediate stream; nulled out once ownership transfers to caller
+            BufferedInputStream toClose = buffered;
+            try {
+                buffered.mark(2);
+                int b0 = buffered.read();
+                int b1 = buffered.read();
+                buffered.reset();
 
-            // gzip magic number: 0x1f 0x8b
-            if (b0 == GZIP_MAGIC_BYTE_1 && b1 == GZIP_MAGIC_BYTE_2) {
-                decompressed = new GZIPInputStream(buffered, bufferSize);
-            } else {
-                log.warning("Decompression requested but stream does not start with gzip magic bytes; "
-                    + "cloud provider may have already decompressed. Proceeding without decompression.");
-                decompressed = buffered;
+                // gzip magic number: 0x1f 0x8b
+                if (b0 == GZIP_MAGIC_BYTE_1 && b1 == GZIP_MAGIC_BYTE_2) {
+                    decompressed = new GZIPInputStream(buffered, bufferSize);
+                } else {
+                    log.warning("Decompression requested but stream does not start with gzip magic bytes; "
+                        + "cloud provider may have already decompressed. Proceeding without decompression.");
+                    decompressed = buffered;
+                }
+                toClose = null; // ownership transferred to decompressed / returned stream
+            } finally {
+                if (toClose != null) {
+                    toClose.close();
+                }
             }
         } else {
             decompressed = raw;

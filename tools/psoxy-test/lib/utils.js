@@ -629,11 +629,24 @@ async function isGzipped(file) {
  * Poll for async response at the given URL (S3 or GCS)
  * Checks every 10 seconds for up to 120 seconds
  *
+ * Supported URL formats:
+ *   s3://bucket/key                                              (S3 native scheme)
+ *   gs://bucket/file                                             (GCS native scheme)
+ *   https://s3.<region>.amazonaws.com/bucket/key                 (path-style)
+ *   https://bucket.s3.<region>.amazonaws.com/key                 (virtual-hosted)
+ *   https://bucket.s3.dualstack.<region>.amazonaws.com/key       (dual-stack)
+ *   https://bucket.<vpce-id>.s3.<region>.vpce.amazonaws.com/key  (VPC interface endpoint)
+ *   https://bucket.s3.<region>.on.aws/key                        (PrivateLink)
+ *   https://custom.endpoint.example.com/bucket/key               (custom, requires options.s3Endpoint=true)
+ *
  * @param {string} locationUrl - S3 or GCS URL to poll
  * @param {Object} options - Options for authentication and polling
  * @param {string} options.role - AWS role ARN (for S3)
  * @param {string} options.region - AWS region (for S3)
  * @param {string} options.token - GCP token (for GCS)
+ * @param {boolean} options.s3Endpoint - Force URL to be treated as a custom S3-compatible endpoint
+ *   (e.g. VPC PrivateLink with custom DNS, MinIO, LocalStack).  When true, bucket and key are
+ *   extracted from the URL path (path-style: /bucket/key).
  * @param {boolean} options.verbose - Verbose logging
  * @returns {Promise<string>} - Unzipped content as string
  */
@@ -662,12 +675,39 @@ async function pollAsyncResponse(locationUrl, options = {}) {
     keyOrFile = match[2];
   } else {
     url = new URL(locationUrl);
-    isS3 = url.hostname.includes('s3.amazonaws.com') || url.hostname.includes('s3.');
-    isGCS = url.hostname.includes('storage.googleapis.com');
+
+    if (options.s3Endpoint) {
+      // Caller declared this is a custom S3-compatible endpoint (VPC PrivateLink with custom DNS,
+      // MinIO, LocalStack, etc.) that won't match any standard AWS hostname pattern.
+      // Treat as path-style: https://endpoint.example.com/bucket/key
+      isS3 = true;
+    } else {
+      // Match ALL standard AWS S3 hostname shapes:
+      //   s3.amazonaws.com                             (global path-style)
+      //   s3.<region>.amazonaws.com                    (regional path-style)
+      //   <bucket>.s3.amazonaws.com                    (virtual-hosted global)
+      //   <bucket>.s3.<region>.amazonaws.com           (virtual-hosted regional)
+      //   <bucket>.s3.dualstack.<region>.amazonaws.com (dual-stack)
+      //   <bucket>.<vpce>.s3.<region>.vpce.amazonaws.com (VPC interface endpoint)
+      //   …any *.amazonaws.com hostname containing an 's3' dot-separated segment
+      // Anchored at the end of the string so *.amazonaws.com.evil.com never matches.
+      isS3 = /(?:^|\.)s3(?:\.|$).*\.amazonaws\.com$/.test(url.hostname)
+          || url.hostname === 's3.on.aws' || url.hostname.endsWith('.s3.on.aws');
+      isGCS = url.hostname === 'storage.googleapis.com' || url.hostname.endsWith('.storage.googleapis.com');
+    }
+
     if (isS3) {
-      // https://bucket.s3.region.amazonaws.com/key
-      bucketName = url.hostname.split('.')[0];
-      keyOrFile = url.pathname.substring(1);
+      // Determine URL shape so we can extract bucket and key correctly.
+      // Virtual-hosted: <bucket>.s3[…].amazonaws.com/key  → first hostname segment is bucket
+      // Path-style / custom endpoint: <host>/bucket/key   → first path segment is bucket
+      const firstSegment = url.hostname.split('.')[0];
+      const isPathStyle = firstSegment === 's3' || options.s3Endpoint;
+      bucketName = isPathStyle
+        ? url.pathname.split('/')[1]              // path-style: /bucket/key
+        : firstSegment;                           // virtual-hosted: bucket.s3[…].amazonaws.com
+      keyOrFile = isPathStyle
+        ? url.pathname.split('/').slice(2).join('/')  // path-style
+        : url.pathname.substring(1);                  // virtual-hosted
     } else if (isGCS) {
       // https://storage.googleapis.com/bucket/file
       const pathParts = url.pathname.split('/');
