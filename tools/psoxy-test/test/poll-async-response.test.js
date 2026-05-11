@@ -12,16 +12,26 @@ test('pollAsyncResponse - unsupported URL throws error', async (t) => {
 });
 
 test('pollAsyncResponse - S3 URL parsing', async (t) => {
+  // Regional virtual-hosted-style URL: bucket.s3.region.amazonaws.com
   const s3Url = 'https://test-bucket.s3.us-east-1.amazonaws.com/test-key.json';
   const url = new URL(s3Url);
-  
-  // Test URL parsing logic
-  const isS3 = url.hostname.includes('s3.amazonaws.com') || url.hostname.includes('s3.');
-  t.true(isS3);
-  
+
+  // Mirror the detection regex from utils.js: any *.amazonaws.com hostname with an 's3' segment
+  const S3_RE = /(?:^|\.)s3(?:\.|$).*\.amazonaws\.com$/;
+  t.true(S3_RE.test(url.hostname), 'regional virtual-hosted endpoint should be detected as S3');
+
+  // Dual-stack regional
+  const dualStackUrl = new URL('https://test-bucket.s3.dualstack.us-east-1.amazonaws.com/test-key.json');
+  t.true(S3_RE.test(dualStackUrl.hostname), 'dual-stack endpoint should be detected as S3');
+
+  // VPC interface endpoint
+  const vpceUrl = new URL('https://test-bucket.vpce-abc123.s3.us-east-1.vpce.amazonaws.com/test-key.json');
+  t.true(S3_RE.test(vpceUrl.hostname), 'VPC interface endpoint should be detected as S3');
+
+  // Bucket name is the first hostname segment for virtual-hosted-style
   const bucketName = url.hostname.split('.')[0];
   t.is(bucketName, 'test-bucket');
-  
+
   const key = url.pathname.substring(1);
   t.is(key, 'test-key.json');
 });

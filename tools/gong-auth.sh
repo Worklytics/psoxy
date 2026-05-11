@@ -97,7 +97,6 @@ printf "${GREEN}Use the following values in the secret manager chosen for your h
 
 printf "${YELLOW}${PREFIX}GONG_METRICS_CLIENT_ID${NC}: ${CLIENT_ID}\n"
 printf "${YELLOW}${PREFIX}GONG_METRICS_CLIENT_SECRET${NC}: ${CLIENT_SECRET}\n"
-printf "${YELLOW}${PREFIX}GONG_METRICS_ACCESS_TOKEN${NC}: ${ACCESS_TOKEN}\n"
 printf "${YELLOW}${PREFIX}GONG_METRICS_REFRESH_TOKEN${NC}: ${REFRESH_TOKEN}\n"
 
 printf "\n${GREEN}Additional information:${NC}\n"

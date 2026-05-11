@@ -83,12 +83,12 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     // - https://github.com/json-path/JsonPath/issues/187 (earlier issue fixing stuff that wasn't
     // thread-safe)
 
-    Map<Endpoint, Pattern> compiledAllowedEndpoints;
+    volatile Map<Endpoint, Pattern> compiledAllowedEndpoints;
 
     private final Object $writeLock = new Object[0];
     Map<Transform, List<JsonPath>> compiledTransforms = new ConcurrentHashMap<>();
 
-    JsonSchemaFilter rootDefinitions;
+    volatile JsonSchemaFilter rootDefinitions;
 
     String targetHostPath;
 

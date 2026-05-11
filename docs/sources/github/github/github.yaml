@@ -934,6 +934,7 @@ endpoints:
           - "$..homepage"
           - "$..commit_title"
           - "$..commit_message"
+          - "$..temp_clone_token"
       - !<redact>
         jsonPaths:
           - "$..['owner','user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
@@ -1052,6 +1053,7 @@ endpoints:
           - "$..homepage"
           - "$..commit_title"
           - "$..commit_message"
+          - "$..temp_clone_token"
       - !<redact>
         jsonPaths:
           - "$..['owner','user','closed_by','enabled_by','actor','assignee','creator','merged_by'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
