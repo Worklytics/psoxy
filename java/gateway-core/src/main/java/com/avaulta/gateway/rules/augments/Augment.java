@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -164,7 +165,7 @@ public abstract class Augment {
                 keys = new HashSet<>();
                 if (keywords != null) {
                     for (String k : keywords) {
-                        if (StringUtils.isNotBlank(k) {
+                        if (StringUtils.isNotBlank(k)) {
                            keys.add(k.toLowerCase());
                         }
                     }

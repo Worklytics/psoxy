@@ -280,7 +280,11 @@ public class JsonSchemaFilterUtils {
                         // contains "+" properties (conflict check), so any "+" here is ours.
                         if (options.getExemptPropertyPrefix() != null
                                 && key.startsWith(options.getExemptPropertyPrefix())) {
-                            filtered.put(key, objectMapper.treeToValue(value, Object.class));
+                            try {
+                                filtered.put(key, objectMapper.treeToValue(value, Object.class));
+                            } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                                throw new RuntimeException("Failed to convert exempt property value", e);
+                            }
                             continue;
                         }
 
