@@ -40,8 +40,8 @@ printf "${INFO}Downloading Apache OpenNLP models to %s...${NC}\n" "$DEST_DIR"
 
 for MODEL in "${MODELS[@]}"; do
     TARGET_PATH="$DEST_DIR/$MODEL"
-    if [ -f "$TARGET_PATH" ]; then
-        printf "${WARN}Skipping %s (already exists)${NC}\n" "$MODEL"
+    if [ -s "$TARGET_PATH" ]; then
+        printf "${WARN}Skipping %s (already exists and not empty)${NC}\n" "$MODEL"
         continue
     fi
     
@@ -60,7 +60,7 @@ done
 LEMMATIZER_URL="https://raw.githubusercontent.com/richardwilly98/elasticsearch-opennlp-auto-tagging/master/src/main/resources/models/en-lemmatizer.dict"
 LEMMATIZER_TARGET="$DEST_DIR/en-lemmatizer.dict"
 
-if [ ! -f "$LEMMATIZER_TARGET" ]; then
+if [ ! -s "$LEMMATIZER_TARGET" ]; then
     printf "${INFO}Fetching en-lemmatizer.dict...${NC}\n"
     if curl -L -f -s -o "$LEMMATIZER_TARGET" "$LEMMATIZER_URL"; then
         printf "${SUCCESS}Successfully downloaded en-lemmatizer.dict${NC}\n"
@@ -70,7 +70,7 @@ if [ ! -f "$LEMMATIZER_TARGET" ]; then
         exit 1
     fi
 else
-    printf "${WARN}Skipping en-lemmatizer.dict (already exists)${NC}\n"
+    printf "${WARN}Skipping en-lemmatizer.dict (already exists and not empty)${NC}\n"
 fi
 
 printf "${SUCCESS}All required OpenNLP models downloaded successfully.${NC}\n"
