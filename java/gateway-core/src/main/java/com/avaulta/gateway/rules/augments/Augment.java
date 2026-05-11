@@ -27,6 +27,7 @@ import java.util.TreeMap;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Augment.TextDigest.class, name = "textDigest"),
+    @JsonSubTypes.Type(value = Augment.SentenceMetadata.class, name = "sentenceMetadata"),
 })
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor
@@ -174,6 +175,34 @@ public abstract class Augment {
                 searchKeys = keys;
             }
             return keys;
+        }
+    }
+
+    /**
+     * Performs NLP analysis on text fields, extracting sentence structure, POS, and derived signals.
+     */
+    @SuperBuilder(toBuilder = true)
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    public static class SentenceMetadata extends Augment {
+
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        @Builder.Default
+        Map<String, List<String>> taxonomy = new TreeMap<>();
+
+        @Override
+        public String getFunctionName() {
+            return "sentenceMetadata";
+        }
+
+        @Override
+        public Object compute(Object input) {
+            if (!(input instanceof String text) || text.isEmpty()) {
+                return null;
+            }
+            return SentenceMetadataProcessor.process(text, taxonomy);
         }
     }
 }
