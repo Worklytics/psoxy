@@ -15,7 +15,7 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
 # TODO: remove deprecated variables/outputs in 0.7
 
 locals {
-  todo_content = templatefile("${path.module}/templates/todo.md.tpl", {
+  todo_content = templatefile("${path.module}/templates/todo.md.tftpl", {
     slugified_secret_name = local.slugified_secret_name
     function_name         = var.function_name
     project_id            = var.project_id
