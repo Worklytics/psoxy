@@ -164,7 +164,9 @@ public abstract class Augment {
                 keys = new HashSet<>();
                 if (keywords != null) {
                     for (String k : keywords) {
-                        keys.add(k.toLowerCase());
+                        if (StringUtils.isNotBlank(k) {
+                           keys.add(k.toLowerCase());
+                        }
                     }
                 }
                 keys = Set.copyOf(keys); // immutable snapshot
