@@ -27,7 +27,7 @@ variable "google_workspace_sa_to_impersonate" {
 
 variable "google_workspace_terraform_principal_email" {
   type        = string
-  description = "Email of GCP principal that will be used to provision GCP resources via impersonation. Leave 'null' to use application default for you environment."
+  description = "Email of the principal (human user or service account) actively running Terraform. Used internally to grant this runner identity access to newly provisioned resources (like buckets/secrets). This is your 'true identity', distinct from `google_workspace_sa_to_impersonate` which is the identity Terraform assumes to create resources."
   default     = null
 
   validation {
@@ -38,25 +38,25 @@ variable "google_workspace_terraform_principal_email" {
 
 variable "google_workspace_example_user" {
   type        = string
-  description = "user to impersonate for Google Workspace API calls (null for none)"
+  description = "[DEPRECATED - use map instead] user to impersonate for Google Workspace API calls (null for none)"
   default     = null
 }
 
 variable "google_workspace_example_admin" {
   type        = string
-  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
+  description = "[DEPRECATED - use map instead] user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
   default     = null # will failover to user
 }
 
 variable "google_workspace_provision_keys" {
   type        = bool
-  description = "whether to provision key for each Google Workspace connector's GCP Service Account (OAuth Client). If false, you must create the key manually and provide it."
+  description = "[DEPRECATED - use map instead] whether to provision key for each Google Workspace connector's GCP Service Account (OAuth Client). If false, you must create the key manually and provide it."
   default     = true
 }
 
 variable "google_workspace_key_rotation_days" {
   type        = number
-  description = "rotation period for the GCP Service Account keys, in days; not applicable if provision_gcp_sa_keys is false"
+  description = "[DEPRECATED - use map instead] rotation period for the GCP Service Account keys, in days; not applicable if provision_gcp_sa_keys is false"
   default     = 60
 
   validation {
@@ -75,4 +75,11 @@ locals {
     (!local.validate_google_workspace_gcp_project_id
       ? local.validate_google_workspace_gcp_project_id_message
   : ""))
+}
+
+
+variable "google_workspace_connector_settings" {
+  type        = map(any)
+  description = "Map of configuration settings specifically for Google Workspace connectors (e.g. example users). Note that provider-controlling parameters (like GCP project IDs or impersonation SAs) remain top-level variables."
+  default     = {}
 }

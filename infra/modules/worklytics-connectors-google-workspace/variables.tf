@@ -38,13 +38,13 @@ variable "tf_gcp_principal_email" {
 
 variable "google_workspace_example_user" {
   type        = string
-  description = "user to impersonate for Google Workspace API calls (null for none)"
+  description = "[DEPRECATED - use map instead] user to impersonate for Google Workspace API calls (null for none)"
   default     = null
 }
 
 variable "google_workspace_example_admin" {
   type        = string
-  description = "user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
+  description = "[DEPRECATED - use map instead] user to impersonate for Google Workspace API calls (null for value of `google_workspace_example_user`)"
   default     = null # will failover to user
 }
 
@@ -75,4 +75,11 @@ variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"
   default     = 1
+}
+
+
+variable "google_workspace_connector_settings" {
+  type        = map(any)
+  description = "Map of configuration settings specifically for Google Workspace connectors (e.g. example users). Note that provider-controlling parameters (like GCP project IDs or impersonation SAs) remain top-level variables."
+  default     = {}
 }

@@ -1,19 +1,20 @@
 {
+  "requestId":"4al018gzaztcr8nbukw",
+  "records":{
+    "totalRecords":263,
+    "currentPageSize":100,
+    "currentPageNumber":0,
+    "cursor":"eyJhbGciOiJIUzI1NiJ9.eyJjYWxsSWQiM1M30.6qKwpOcvnuweTZmFRzYdtjs_YwJphJU4QIwWFM"
+  },
   "users":[
     {
-      "id":"t~LhVpFt7_p63lwbVyZDnmhUKKWCOW2SAej5Yz0PYUlas",
-      "emailAddress":"t~mZuL9Z-keb7sg2QivvmgUXsokOZjjCdhb-2QqgMaMfA@example.com",
-      "active":true
-    },
-    {
-      "id":"t~qgNYCQ678JU6EuwGcME7eAscp-gMPyLU7dAVqA79gNI",
-      "emailAddress":"t~CqRESK-fVN5QB06CFy0X-YLBVYf8Ucp7LiOynW6AyXI@example.com",
-      "active":true
+      "id":"p~KqekpfstwHW5GZM6uPAA0PVE0umgTlSO2jX6Rhks-vt3jCLNDF_FNWmRcOvXQ2Ml",
+      "emailAddress":"t~xyl6xf3-TjNvcDLMUx1BAhuK6uz4wHkFkMz5gpjXfRc@test.com",
+      "active":true,
+      "emailAliases":[
+        "t~F3FIimdx0xkwgl4WecSouElla4NtadvOPouc672jZa4@test.com"
+      ],
+      "trustedEmailAddress":"t~xyl6xf3-TjNvcDLMUx1BAhuK6uz4wHkFkMz5gpjXfRc@test.com"
     }
-  ],
-  "records":{
-    "cursor":"next_page_cursor_123",
-    "totalRecords":100,
-    "currentPageSize":2
-  }
+  ]
 }

@@ -53,7 +53,7 @@ resource "aws_lambda_function" "instance" {
   function_name                  = local.function_name
   role                           = aws_iam_role.iam_for_lambda.arn
   architectures                  = ["arm64"] # 20% cheaper per ms exec time than x86_64
-  runtime                        = "java21"
+  runtime                        = "java25"
   filename                       = local.bundle_from_s3 ? null : var.path_to_function_zip
   s3_bucket                      = local.s3_bucket # null if local file
   s3_key                         = local.s3_key    # null if local file

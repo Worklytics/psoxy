@@ -21,9 +21,10 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.6.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.6.1"
 
   enabled_connectors                       = var.enabled_connectors
+  connector_settings                       = var.connector_settings
   base_dir                                 = var.psoxy_base_dir
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
   confluence_example_cloud_id              = var.confluence_example_cloud_id
@@ -31,6 +32,7 @@ module "worklytics_connectors" {
   jira_cloud_id                            = var.jira_cloud_id
   jira_server_url                          = var.jira_server_url
   jira_example_issue_id                    = var.jira_example_issue_id
+  atlassian_organization_id                = var.atlassian_organization_id
   salesforce_domain                        = var.salesforce_domain
   github_api_host                          = var.github_api_host
   github_enterprise_server_host            = var.github_enterprise_server_host
@@ -111,7 +113,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.6.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=rc-v0.6.1"
 
   environment_name                     = var.environment_name
   aws_account_id                       = var.aws_account_id
@@ -186,7 +188,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-proxy-connection-aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-aws?ref=v0.6.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-aws?ref=rc-v0.6.1"
 
   proxy_instance_id    = each.key
   worklytics_host      = var.worklytics_host

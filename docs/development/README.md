@@ -13,6 +13,7 @@ This directory contains documentation for developers working on or with Psoxy.
 - [Security Scanning](security-scanning.md) - Security scanning tools and processes
 - [Webhook Collectors](webhook-collectors.md) - Webhook collector development
 - [Compression](compression.md) - Data compression handling
+- [GCP Parameter Manager](gcp-parameter-manager.md) - Why GCP Parameter Manager is not used for configuration
 
 ## Alpha Features
 

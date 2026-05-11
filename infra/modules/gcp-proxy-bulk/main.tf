@@ -162,10 +162,20 @@ resource "google_cloud_run_service_iam_member" "grant_sa_invoker" {
 
 # to provision Cloud Function, TF must be able to act as the service account that the function will
 # run as
-resource "google_service_account_iam_member" "act_as" {
+# NOTE: named 'tf_runner_act_as' rather than 'act_as' to avoid replacement-cycle on upgrades where
+# tf_runner_iam_principal changes (eg 0.5.x -> 0.6.x); separate create+destroy is cycle-free.
+resource "google_service_account_iam_member" "tf_runner_act_as" {
   member             = var.tf_runner_iam_principal
   role               = "roles/iam.serviceAccountUser"
   service_account_id = google_service_account.service_account.id
+}
+
+# migration: remove old resource address from state (destroyed in GCP)
+removed {
+  from = google_service_account_iam_member.act_as
+  lifecycle {
+    destroy = true
+  }
 }
 
 resource "google_cloudfunctions2_function" "function" {
@@ -175,7 +185,7 @@ resource "google_cloudfunctions2_function" "function" {
   location    = var.region
 
   build_config {
-    runtime         = "java21"
+    runtime         = "java25"
     entry_point     = "co.worklytics.psoxy.GCSFileEvent"
     service_account = var.builder_sa_id
 
@@ -241,7 +251,7 @@ resource "google_cloudfunctions2_function" "function" {
   # can't provision function until various IAM grants complete
   depends_on = [
     google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret,
-    google_service_account_iam_member.act_as,
+    google_service_account_iam_member.tf_runner_act_as,
     google_project_iam_member.grant_sa_event_receiver
   ]
 }

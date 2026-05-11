@@ -7,6 +7,7 @@ module "worklytics_connector_specs" {
 
   base_dir                                 = var.base_dir
   enabled_connectors                       = var.enabled_connectors
+  connector_settings                       = var.connector_settings
   chat_gpt_enterprise_example_workspace_id = var.chat_gpt_enterprise_example_workspace_id
   confluence_example_cloud_id              = var.confluence_example_cloud_id
   confluence_example_group_id              = var.confluence_example_group_id
@@ -15,6 +16,7 @@ module "worklytics_connector_specs" {
   salesforce_domain                        = var.salesforce_domain
   example_jira_issue_id                    = var.example_jira_issue_id
   jira_example_issue_id                    = var.jira_example_issue_id
+  atlassian_organization_id                = var.atlassian_organization_id
   github_api_host                          = var.github_api_host
   github_enterprise_server_host            = var.github_enterprise_server_host
   github_enterprise_server_version         = var.github_enterprise_server_version

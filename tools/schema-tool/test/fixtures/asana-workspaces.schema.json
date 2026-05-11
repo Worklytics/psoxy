@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "gid": {
+            "type": "string",
+            "format": "date"
+          },
+          "resource_type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "is_organization": {
+            "type": "boolean"
+          },
+          "email_domains": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "hostname"
+            }
+          }
+        },
+        "required": [
+          "gid",
+          "resource_type",
+          "name"
+        ]
+      }
+    }
+  },
+  "required": [
+    "data"
+  ]
+}

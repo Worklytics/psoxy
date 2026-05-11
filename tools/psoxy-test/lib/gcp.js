@@ -2,6 +2,8 @@
 import { Logging } from '@google-cloud/logging';
 import { CloudSchedulerClient } from '@google-cloud/scheduler';
 import { Storage } from '@google-cloud/storage';
+import fs from 'fs';
+import path from 'path';
 import _ from 'lodash';
 import getLogger from './logger.js';
 import {
@@ -21,11 +23,13 @@ const GCP_CLOUD_FUNCTION_GEN1_DOMAIN='cloudfunctions.net';
 const GCP_CLOUD_FUNCTION_GEN2_DOMAIN='run.app';
 
 function isCloudFunctionGen1(url) {
-  return url?.hostname.endsWith(GCP_CLOUD_FUNCTION_GEN1_DOMAIN);
+  const h = url?.hostname;
+  return h === GCP_CLOUD_FUNCTION_GEN1_DOMAIN || (h && h.endsWith('.' + GCP_CLOUD_FUNCTION_GEN1_DOMAIN));
 }
 
 function isCloudFunctionGen2(url) {
-  return url?.hostname.endsWith(GCP_CLOUD_FUNCTION_GEN2_DOMAIN);
+  const h = url?.hostname;
+  return h === GCP_CLOUD_FUNCTION_GEN2_DOMAIN || (h && h.endsWith('.' + GCP_CLOUD_FUNCTION_GEN2_DOMAIN));
 }
 
 /**
@@ -186,10 +190,33 @@ function getLogsURL(cloudFunctionURL = '') {
 
   let googleConsoleURL = 'https://console.cloud.google.com';
   if (!_.isEmpty(region) && !_.isEmpty(functionName)) {
-    googleConsoleURL += `/run/detail/${region}/${functionName}/logs`;
+    googleConsoleURL += `/run/detail/${region}/${functionName}/observability/logs`;
     // TODO
     //  should pass `projectId` somehow and append to the resulting URL as query param `project`
     //  in gen 2 use-case
+    if (_.isEmpty(projectId)) {
+      try {
+        if (fs.existsSync('terraform.tfvars')) {
+          const tfvars = fs.readFileSync('terraform.tfvars', 'utf8');
+          const match = tfvars.match(/gcp_project_id\s*=\s*["']([^"']+)["']/);
+          if (match) {
+            projectId = match[1].trim();
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    if (_.isEmpty(projectId)) {
+      try {
+        const out = executeCommand('gcloud config get-value project 2>/dev/null');
+        if (out) {
+          projectId = out.trim();
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
     if (!_.isEmpty(projectId)) {
       googleConsoleURL += `?project=${projectId}`;
     }

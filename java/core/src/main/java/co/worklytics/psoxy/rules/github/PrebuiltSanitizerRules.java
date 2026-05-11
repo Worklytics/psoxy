@@ -448,6 +448,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..homepage")
                     .jsonPath("$..commit_title")
                     .jsonPath("$..commit_message")
+                    .jsonPath("$..temp_clone_token")
                     .build())
             .transforms(generateUserTransformations("..", Arrays.asList(
                     // Owner can be a user or an organization user
@@ -473,6 +474,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..homepage")
                     .jsonPath("$..commit_title")
                     .jsonPath("$..commit_message")
+                    .jsonPath("$..temp_clone_token")
                     .build())
             .transforms(generateUserTransformations("..", Arrays.asList(
                     // Owner can be a user or an organization user

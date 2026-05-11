@@ -37,7 +37,9 @@ of the [Psoxy repository](https://github.com/Worklytics/psoxy).
 
 1. **Instance Subdomain**: Configure your Glean instance subdomain in your Terraform variables:
    ```terraform
-   glean_instance_subdomain = "acme"  # replace with your actual instance subdomain
+   connector_settings = {
+     glean_instance_subdomain = "acme"  # replace with your actual instance subdomain
+   }
    ```
 
 2. **API Token**: Follow the authentication instructions above to create a Glean-issued token with the required scopes (`INSIGHTS_READ`, `PEOPLE_READ`)

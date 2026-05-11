@@ -1,0 +1,40 @@
+{
+  "data": [
+    {
+      "accountId": "12345678-1234-1234-1234-123456789012",
+      "accountType": "atlassian",
+      "status": "active",
+      "accountStatus": "active",
+      "membershipStatus": "active",
+      "addedToOrg": "2024-01-01T00:00:00.000Z",
+      "name": "John Doe",
+      "nickname": "Jonny",
+      "email": "email@example.com",
+      "emailVerified": true,
+      "claimStatus": "unmanaged",
+      "platformRoles": [
+        "atlassian/org-admin"
+      ],
+      "picture": "https://picture.example.com/picture.png",
+      "avatar": "https://avatar.example.com/avatar.png",
+      "managementSource": "invited",
+      "mfaEnabled": true,
+      "jobTitle": "Senior Business Analyst",
+      "department": "Human Resources",
+      "organization": "Talent",
+      "location": "New York",
+      "timeZone": "America/New_York",
+      "counts": {
+        "resources": 10
+      },
+      "links": {
+        "self": "ECg53CukK1twBo0LK1u9nw"
+      }
+    }
+  ],
+  "links": {
+    "self": "ObSbZxpM1f1fzia2_GnuJw",
+    "prev": "LIZFEbzCT2pCCkQhPIUgIQ",
+    "next": "kloHX1ZQVasDAkx_P48NYQ"
+  }
+}

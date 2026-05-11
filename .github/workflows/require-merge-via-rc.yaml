@@ -4,6 +4,9 @@ on:
   pull_request:
     types: [opened, edited, synchronize]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   check-branch-name:
     runs-on: ubuntu-latest
