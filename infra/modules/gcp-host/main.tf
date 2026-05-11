@@ -515,27 +515,21 @@ locals {
 # TODO: remove deprecated variables/outputs in 0.7
 
 locals {
-  test_all_script_content = <<EOF
-#!/bin/bash
-
-echo "Testing API Connectors ..."
-
-%{for instance_id, connector in local.api_instances~}
-%{if try(connector.test_script_content, null) != null}./test-${trimprefix(instance_id, local.environment_id_prefix)}.sh%{endif}
-%{endfor}
-
-echo "Testing Bulk Connectors ..."
-
-%{for instance_id, connector in local.bulk_instances~}
-%{if try(connector.test_script_content, null) != null}./test-${trimprefix(instance_id, local.environment_id_prefix)}.sh%{endif}
-%{endfor}
-
-echo "Testing Webhook Collectors ..."
-
-%{for instance_id, connector in local.webhook_collector_instances~}
-%{if try(connector.test_script_content, null) != null}./test-${trimprefix(instance_id, local.environment_id_prefix)}.sh%{endif}
-%{endfor}
-EOF
+  test_all_script_content = templatefile("${path.module}/templates/test-all.sh.tftpl", {
+    environment_id_prefix = local.environment_id_prefix
+    api_instances = {
+      for k, v in local.api_instances :
+      k => { has_test_script = try(v.test_script_content, null) != null }
+    }
+    bulk_instances = {
+      for k, v in local.bulk_instances :
+      k => { has_test_script = try(v.test_script_content, null) != null }
+    }
+    webhook_collector_instances = {
+      for k, v in local.webhook_collector_instances :
+      k => { has_test_script = try(v.test_script_content, null) != null }
+    }
+  })
 }
 
 output "secrets_to_provision" {

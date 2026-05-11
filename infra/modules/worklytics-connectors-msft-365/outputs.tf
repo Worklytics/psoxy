@@ -36,5 +36,10 @@ output "api_clients" {
 
 output "todo_content" {
   description = "Structured todo content aggregated from all Microsoft 365 grant sub-modules (with external token todos merged in). List of stages; each stage is a list of {name, content, file_permission} objects."
-  value       = flatten([for k, v in local.todo_content_by_connector : v])
+  value = flatten(concat(
+    # per-connector todos when provisioning individual apps (provision_entraid_apps = true)
+    [for k, v in local.todo_content_by_connector : v],
+    # shared-app todo when using a pre-existing app (msft_connector_app_object_id is set)
+    [for m in module.msft_365_grant_to_shared : m.todo_content],
+  ))
 }
