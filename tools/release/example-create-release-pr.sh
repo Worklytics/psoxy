@@ -104,10 +104,21 @@ cd "$EXAMPLE_TEMPLATE_REPO"
 # check if any open prs in github
 if gh pr list --state open | grep -q . ; then
   REPO_NAME=$(gh repo view --json nameWithOwner -q .nameWithOwner)
-  printf "${ERR}There are open PRs in the ${INFO}${REPO_NAME}${NC}. Please close them before continuing.${NC}\n"
+  printf "${WARN}Warning: There are open PRs in ${INFO}${REPO_NAME}${NC}${WARN}. Consider closing them before continuing.${NC}\n"
   gh pr list --web
-  cd -
-  exit 1
+  read -p "Proceed anyway? (y/N) " -n 1 -r
+  REPLY=${REPLY:-N}
+  echo    # Move to a new line
+  case "$REPLY" in
+    [yY][eE][sS]|[yY])
+      printf "Proceeding with open PRs.\n"
+      ;;
+    *)
+      printf "Aborted.\n"
+      cd -
+      exit 1
+      ;;
+  esac
 fi
 
 CURRENT_BRANCH=$(git branch --show-current)
