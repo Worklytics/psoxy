@@ -430,20 +430,8 @@ variable "max_instances_per_api_connector" {
   }
 }
 
-variable "remote_resource_bucket" {
-  type        = string
-  description = "**beta** Name of the bucket from which to load remote resources (rules, NLP models, etc.)."
-  default     = null
-}
-
-variable "remote_resource_instance_path" {
-  type        = string
-  description = "**beta** Path prefix within remote_resource_bucket for instance-specific resources. Used to scope IAM grants."
-  default     = null
-}
-
-variable "remote_resource_shared_path" {
-  type        = string
-  description = "**beta** Path prefix within remote_resource_bucket for shared resources (NLP models, etc.). Used to scope IAM grants."
-  default     = null
+variable "enable_remote_resources" {
+  type        = bool
+  description = "**beta** Whether to enable remote resource loading from the artifacts GCS bucket (rules, NLP models, etc.). When true, sets REMOTE_RESOURCE_BUCKET env var and grants roles/storage.objectViewer to each Cloud Function. Default will change to `true` in next major version."
+  default     = false # will change to true in 0.7.x
 }
