@@ -1,14 +1,21 @@
 import test from 'ava';
 import { createRequire } from 'module';
-import { inferSchema, describeRequired } from '../lib/schema.js';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { join, dirname } from 'path';
+import { inferSchema, describeRequired, parseBody } from '../lib/schema.js';
 
 const require = createRequire(import.meta.url);
+const fixturesDir = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
+
 const copilotFixture          = require('./fixtures/copilot-interactions.json');
 const asanaFixture            = require('./fixtures/asana-workspaces.json');
 const calendarFixture         = require('./fixtures/calendar-events.json');
+const auditLogBody            = readFileSync(join(fixturesDir, 'audit-log.jsonl'), 'utf8');
 const copilotExpectedSchema   = require('./fixtures/copilot-interactions.schema.json');
 const calendarExpectedSchema  = require('./fixtures/calendar-events.schema.json');
 const asanaExpectedSchema     = require('./fixtures/asana-workspaces.schema.json');
+const auditLogExpectedSchema  = require('./fixtures/audit-log.schema.json');
 
 // ── primitives ────────────────────────────────────────────────────────────────
 
@@ -365,11 +372,110 @@ test('describeRequired: calendar — no raw required arrays remain anywhere in o
   check(describeRequired(inferSchema(calendarFixture)));
 });
 
+// ── parseBody ─────────────────────────────────────────────────────────────────
+
+test('parseBody: single JSON object', (t) => {
+  t.deepEqual(parseBody('{"id":1,"name":"Alice"}'), { id: 1, name: 'Alice' });
+});
+
+test('parseBody: single JSON array', (t) => {
+  t.deepEqual(parseBody('[1,2,3]'), [1, 2, 3]);
+});
+
+test('parseBody: JSONL — returns array of parsed objects', (t) => {
+  const jsonl = '{"id":1,"name":"Alice"}\n{"id":2,"name":"Bob"}\n{"id":3,"name":"Carol"}';
+  t.deepEqual(parseBody(jsonl), [
+    { id: 1, name: 'Alice' },
+    { id: 2, name: 'Bob' },
+    { id: 3, name: 'Carol' },
+  ]);
+});
+
+test('parseBody: JSONL — trailing newline is ignored', (t) => {
+  const jsonl = '{"id":1}\n{"id":2}\n';
+  t.deepEqual(parseBody(jsonl), [{ id: 1 }, { id: 2 }]);
+});
+
+test('parseBody: JSONL — single line (no newline) parses as regular JSON', (t) => {
+  t.deepEqual(parseBody('{"id":1}'), { id: 1 });
+});
+
+test('parseBody: invalid content throws SyntaxError', (t) => {
+  t.throws(() => parseBody('not json at all'), { instanceOf: SyntaxError });
+});
+
+test('parseBody: JSONL with one invalid line throws SyntaxError', (t) => {
+  t.throws(() => parseBody('{"id":1}\nbad line\n{"id":3}'), { instanceOf: SyntaxError });
+});
+
+test('parseBody: inferSchema works on JSONL-parsed result', (t) => {
+  const jsonl = '{"id":1,"name":"Alice"}\n{"id":2,"name":"Bob"}';
+  const schema = inferSchema(parseBody(jsonl));
+  t.is(schema.type, 'array');
+  t.deepEqual(schema.items.properties.id,   { type: 'integer' });
+  t.deepEqual(schema.items.properties.name, { type: 'string' });
+});
+
 // ── Golden-file tests: full schema match ──────────────────────────────────────
 //
 // Compare the complete inferred schema against a committed golden file.
 // To regenerate: node -e "import('@jsonhero/schema-infer').then(m => ...)" or run
 // the generation script at the top of this file.
+
+// ── Audit log (JSONL fixture) ─────────────────────────────────────────────────
+//
+// Exercises: JSONL → array inference, ipv4 format detection, nullable+optional
+// details object, optional failure_reason and resource sub-fields.
+
+test('inferSchema: audit log — JSONL parsed as array', (t) => {
+  const schema = inferSchema(parseBody(auditLogBody));
+  t.is(schema.type, 'array');
+  t.is(schema.items.type, 'object');
+});
+
+test('inferSchema: audit log — required top-level fields', (t) => {
+  const { required } = inferSchema(parseBody(auditLogBody)).items;
+  t.true(required.includes('id'));
+  t.true(required.includes('timestamp'));
+  t.true(required.includes('action'));
+  t.true(required.includes('actor'));
+  t.true(required.includes('resource'));
+  t.true(required.includes('success'));
+});
+
+test('inferSchema: audit log — timestamp detected as date-time', (t) => {
+  const { items } = inferSchema(parseBody(auditLogBody));
+  t.deepEqual(items.properties.timestamp, { type: 'string', format: 'date-time' });
+});
+
+test('inferSchema: audit log — actor email and ip formats detected', (t) => {
+  const actorProps = inferSchema(parseBody(auditLogBody)).items.properties.actor.properties;
+  t.deepEqual(actorProps.email, { type: 'string', format: 'email' });
+  t.deepEqual(actorProps.ip,    { type: 'string', format: 'ipv4' });
+});
+
+test('inferSchema: audit log — resource.url detected as uri, name and url optional', (t) => {
+  const resourceSchema = inferSchema(parseBody(auditLogBody)).items.properties.resource;
+  t.deepEqual(resourceSchema.properties.url, { type: 'string', format: 'uri' });
+  t.false(resourceSchema.required.includes('name'));
+  t.false(resourceSchema.required.includes('url'));
+});
+
+test('inferSchema: audit log — details is nullable object and optional', (t) => {
+  const { items } = inferSchema(parseBody(auditLogBody));
+  t.deepEqual(items.properties.details.type.sort(), ['null', 'object']);
+  t.false(items.required.includes('details'));
+});
+
+test('inferSchema: audit log — failure_reason is optional (present in one row only)', (t) => {
+  const { items } = inferSchema(parseBody(auditLogBody));
+  t.deepEqual(items.properties.failure_reason, { type: 'string' });
+  t.false(items.required.includes('failure_reason'));
+});
+
+test('inferSchema: audit log — full schema matches golden file', (t) => {
+  t.deepEqual(inferSchema(parseBody(auditLogBody)), auditLogExpectedSchema);
+});
 
 test('inferSchema: copilot — full schema matches golden file', (t) => {
   t.deepEqual(inferSchema(copilotFixture), copilotExpectedSchema);

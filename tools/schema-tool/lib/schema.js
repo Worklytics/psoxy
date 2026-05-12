@@ -51,6 +51,25 @@ export function describeRequired(schema) {
 }
 
 /**
+ * Parse a response body that is either a single JSON value or JSONL
+ * (one JSON value per line). JSONL is tried only when standard JSON.parse
+ * fails, so a normal JSON array is never misidentified as JSONL.
+ *
+ * @param {string} body
+ * @returns {*} parsed value — an array when the input is JSONL
+ * @throws {SyntaxError} when the body is neither valid JSON nor valid JSONL
+ */
+export function parseBody(body) {
+  try {
+    return JSON.parse(body);
+  } catch {
+    const lines = body.split('\n').filter(l => l.trim() !== '');
+    if (lines.length === 0) throw new SyntaxError('Empty response body');
+    return lines.map(line => JSON.parse(line));
+  }
+}
+
+/**
  * Fetch a URL with a Bearer token.
  *
  * @param {URL} url
