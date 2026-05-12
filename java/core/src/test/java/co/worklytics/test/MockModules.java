@@ -222,5 +222,14 @@ public class MockModules {
             return mock(AsyncApiDataRequestHandler.class);
         }
     }
+
+    @Module
+    public interface ForResourceService {
+        @Provides
+        @Singleton
+        static ResourceService resourceService() {
+            return new co.worklytics.psoxy.gateway.impl.NoOpResourceService();
+        }
+    }
 }
 

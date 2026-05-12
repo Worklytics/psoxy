@@ -20,11 +20,14 @@ import co.worklytics.psoxy.gateway.LoggingConfiguration;
 import co.worklytics.psoxy.gateway.ProcessedDataStage;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConstants;
+import co.worklytics.psoxy.gateway.ResourceService;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
+import co.worklytics.psoxy.gateway.impl.CompositeResourceService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.impl.LocalFileResourceService;
 import co.worklytics.psoxy.gateway.impl.WebhookSanitizer;
 import co.worklytics.psoxy.gateway.impl.output.NoOutput;
 import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
@@ -120,6 +123,25 @@ public class FunctionRuntimeModule {
         return CompositeConfigService.builder()
             .preferred(envVarsConfigService)
             .fallback(nativeConfigService)
+            .build();
+    }
+
+    /**
+     * Provides the instance-scoped ResourceService, composing local FS with the
+     * platform-specific remote ResourceService (S3/GCS), using failover semantics.
+     *
+     * <p>Failover order: local filesystem ({@link ResourceService#DEFAULT_LOCAL_RESOURCE_PATH})
+     * → remote cloud storage → no-op</p>
+     *
+     * <p>The local FS path is always checked first (no env var needed). It can be populated
+     * via deployment layers, Lambda layers, init scripts, etc.</p>
+     */
+    @Provides @Singleton
+    static ResourceService instanceResourceService(@Named("Remote") ResourceService remoteResourceService) {
+        // always layer local FS on top of remote — local is a fast path / override
+        return CompositeResourceService.builder()
+            .preferred(new LocalFileResourceService(ResourceService.DEFAULT_LOCAL_RESOURCE_PATH))
+            .fallback(remoteResourceService)
             .build();
     }
 
