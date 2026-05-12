@@ -2,8 +2,11 @@ package co.worklytics.psoxy.gateway;
 
 import java.util.Optional;
 
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.Value;
 
 /**
@@ -60,35 +63,35 @@ public class RemoteResourceConfig {
      * <p>This centralizes all the config resolution logic so platform modules (AWS/GCP) don't
      * need to duplicate it.</p>
      *
-     * @param configService source of config property values (typically {@code EnvVarsConfigService})
+     * @param envVarsConfigService env vars config service (these properties are env-var-only)
      * @param defaultInstancePath platform-specific default for instance resource path (e.g., derived
      *                            from function name / namespace), used only if neither
      *                            {@code INSTANCE_RESOURCE_PATH} nor {@code PATH_TO_INSTANCE_CONFIG} is set
      */
-    public static RemoteResourceConfig fromConfigService(ConfigService configService,
+    public static RemoteResourceConfig fromConfigService(EnvVarsConfigService envVarsConfigService,
                                                           String defaultInstancePath) {
         RemoteResourceConfigBuilder builder = RemoteResourceConfig.builder();
 
-        configService.getConfigPropertyAsOptional(ConfigProperty.REMOTE_RESOURCE_BUCKET)
+        envVarsConfigService.getConfigPropertyAsOptional(ConfigProperty.REMOTE_RESOURCE_BUCKET)
             .ifPresent(builder::bucket);
 
         // instance path: explicit > PATH_TO_INSTANCE_CONFIG > platform default
         builder.instanceResourcePath(
-            configService.getConfigPropertyAsOptional(ConfigProperty.INSTANCE_RESOURCE_PATH)
-                .orElseGet(() -> configService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
+            envVarsConfigService.getConfigPropertyAsOptional(ConfigProperty.INSTANCE_RESOURCE_PATH)
+                .orElseGet(() -> envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_INSTANCE_CONFIG)
                     .orElse(defaultInstancePath)));
 
         // shared path: explicit > PATH_TO_SHARED_CONFIG
         builder.sharedResourcePath(
-            configService.getConfigPropertyAsOptional(ConfigProperty.SHARED_RESOURCE_PATH)
-                .orElseGet(() -> configService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
+            envVarsConfigService.getConfigPropertyAsOptional(ConfigProperty.SHARED_RESOURCE_PATH)
+                .orElseGet(() -> envVarsConfigService.getConfigPropertyAsOptional(ProxyConfigProperty.PATH_TO_SHARED_CONFIG)
                     .orElse(null)));
 
         return builder.build();
     }
 
     @AllArgsConstructor
-    @lombok.Getter
+    @Getter
     public enum ConfigProperty implements ConfigService.ConfigProperty {
 
         /**

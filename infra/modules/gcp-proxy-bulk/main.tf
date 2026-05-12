@@ -14,6 +14,8 @@ locals {
   sa_name             = length(local.default_sa_name) < local.SA_NAME_MIN_LENGTH ? "psoxy-${local.default_sa_name}" : local.default_sa_name
   function_name       = "${var.environment_id_prefix}${local.instance_id}"
   command_npm_install = "npm --prefix ${var.psoxy_base_dir}tools/psoxy-test install"
+
+  path_to_instance_config_parameters = "${coalesce(var.config_parameter_prefix, "")}${replace(upper(local.instance_id), "-", "_")}_"
 }
 
 data "google_project" "project" {
@@ -113,6 +115,23 @@ resource "google_storage_bucket_iam_member" "grant_sa_read_on_processed_bucket" 
   bucket = module.output_bucket.bucket_name
   member = "serviceAccount:${var.worklytics_sa_emails[count.index]}"
   role   = "roles/storage.objectViewer"
+}
+
+# Grant read access to the remote resource bucket (for rules, NLP models, etc.)
+resource "google_storage_bucket_iam_member" "grant_sa_reader_on_remote_resource_bucket" {
+  count = var.remote_resource_bucket != null ? 1 : 0
+
+  bucket = var.remote_resource_bucket
+  member = "serviceAccount:${google_service_account.service_account.email}"
+  role   = "roles/storage.objectViewer"
+
+  condition {
+    title = "scope_to_resource_paths"
+    expression = join(" || ", compact([
+      var.remote_resource_instance_path != null ? "resource.name.startsWith(\"projects/_/buckets/${var.remote_resource_bucket}/objects/${var.remote_resource_instance_path}\")" : null,
+      var.remote_resource_shared_path != null ? "resource.name.startsWith(\"projects/_/buckets/${var.remote_resource_bucket}/objects/${var.remote_resource_shared_path}\")" : null,
+    ]))
+  }
 }
 
 resource "google_storage_bucket_iam_member" "grant_testers_admin_on_import_bucket" {
@@ -216,7 +235,8 @@ resource "google_cloudfunctions2_function" "function" {
       }),
       var.environment_variables,
       var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
-      var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${replace(upper(var.instance_id), "-", "_")}_" },
+      var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = local.path_to_instance_config_parameters },
+      var.remote_resource_bucket != null ? { REMOTE_RESOURCE_BUCKET = var.remote_resource_bucket } : {},
     )
 
     dynamic "secret_environment_variables" {

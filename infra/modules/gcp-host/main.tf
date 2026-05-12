@@ -234,6 +234,10 @@ module "api_connector" {
     var.general_environment_variables,
   )
 
+  remote_resource_bucket        = var.remote_resource_bucket
+  remote_resource_instance_path = var.remote_resource_bucket != null ? "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = var.remote_resource_bucket != null ? local.config_parameter_prefix : null
+
   secret_bindings = merge(
     local.secrets_bound_as_env_vars[each.key],
     module.psoxy.secrets,
@@ -321,6 +325,10 @@ module "webhook_collector" {
     var.general_environment_variables,
   )
 
+  remote_resource_bucket        = var.remote_resource_bucket
+  remote_resource_instance_path = var.remote_resource_bucket != null ? "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = var.remote_resource_bucket != null ? local.config_parameter_prefix : null
+
   secret_bindings = module.psoxy.secrets
 
   depends_on = [
@@ -384,6 +392,10 @@ module "bulk_connector" {
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
   )
+
+  remote_resource_bucket        = var.remote_resource_bucket
+  remote_resource_instance_path = var.remote_resource_bucket != null ? "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = var.remote_resource_bucket != null ? local.config_parameter_prefix : null
 
   depends_on = [
     module.psoxy # some of the set-up IAM grants done there, but not EXPLICITLY passed out as outputs and into above as inputs, are required; so make this explicit
