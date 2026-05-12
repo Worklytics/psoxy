@@ -2,7 +2,7 @@
 import chalk from 'chalk';
 import { Command } from 'commander';
 import { createRequire } from 'module';
-import { fetchEndpoint, inferSchema, describeRequired, parseBody } from './lib/schema.js';
+import { fetchEndpoint, inferSchema, removeRequired, parseBody } from './lib/schema.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('./package.json');
@@ -74,8 +74,8 @@ Example calls:
 
       log.info(`Schema for ${options.endpoint}:`);
       const output = options.skipHeaders
-        ? { schema: describeRequired(inferSchema(parsed)) }
-        : { headers: result.headers, schema: describeRequired(inferSchema(parsed)) };
+        ? { schema: removeRequired(inferSchema(parsed)) }
+        : { headers: result.headers, schema: removeRequired(inferSchema(parsed)) };
       console.log(JSON.stringify(output, null, 2));
     } else {
       log.error(`HTTP ${result.status}: ${result.statusMessage || 'Unknown error'}`);

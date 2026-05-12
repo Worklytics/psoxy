@@ -17,34 +17,27 @@ export function inferSchema(value) {
 }
 
 /**
- * Recursively convert `required` arrays in a JSON Schema into proper type
- * descriptions: `["a","b"]` → `{ type: "array", items: { type: "string" } }`.
- *
- * @jsonhero/schema-infer produces valid JSON Schema 2020-12, where `required`
- * is an array of raw property-name strings. This function normalises those
- * arrays so every value in the schema is itself described as a JSON Schema
- * type, making the output consistent.
+ * Recursively strip `required` arrays from a JSON Schema.
+ * The inferred `required` list reflects only what appeared in the sample
+ * payload, not the true API contract, so including it in output is misleading.
  *
  * @param {Object} schema - JSON Schema object
  * @returns {Object}
  */
-export function describeRequired(schema) {
+export function removeRequired(schema) {
   if (!schema || typeof schema !== 'object' || Array.isArray(schema)) return schema;
 
   const result = { ...schema };
-
-  if (Array.isArray(result.required)) {
-    result.required = { type: 'array', items: { type: 'string' } };
-  }
+  delete result.required;
 
   if (result.properties) {
     result.properties = Object.fromEntries(
-      Object.entries(result.properties).map(([key, propSchema]) => [key, describeRequired(propSchema)])
+      Object.entries(result.properties).map(([key, propSchema]) => [key, removeRequired(propSchema)])
     );
   }
 
   if (result.items && typeof result.items === 'object' && result.items !== false) {
-    result.items = describeRequired(result.items);
+    result.items = removeRequired(result.items);
   }
 
   return result;

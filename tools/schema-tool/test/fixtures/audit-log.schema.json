@@ -59,14 +59,8 @@
       "success": {
         "type": "boolean"
       },
-      "failure_reason": {
-        "type": "string"
-      },
       "details": {
-        "type": [
-          "object",
-          "null"
-        ],
+        "type": "object",
         "properties": {
           "user_agent": {
             "type": "string"
@@ -93,6 +87,9 @@
             "type": "integer"
           }
         }
+      },
+      "failure_reason": {
+        "type": "string"
       }
     },
     "required": [
