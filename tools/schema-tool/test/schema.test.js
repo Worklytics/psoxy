@@ -283,6 +283,17 @@ test('removeRequired: object with no required array is unchanged', (t) => {
   t.deepEqual(result.properties.b, { type: 'number' });
 });
 
+test('removeRequired: strips required[] from object schema without properties (e.g. additionalProperties)', (t) => {
+  const schema = {
+    type: 'object',
+    additionalProperties: { type: 'string' },
+    required: ['key1', 'key2'],
+  };
+  const result = removeRequired(schema);
+  t.is(result.required, undefined);
+  t.deepEqual(result.additionalProperties, { type: 'string' });
+});
+
 test('removeRequired: recursively strips from nested objects', (t) => {
   const schema = {
     type: 'object',
