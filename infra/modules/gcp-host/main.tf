@@ -216,6 +216,9 @@ module "api_connector" {
   bucket_access_logs_destination        = var.bucket_access_logs_destination
   builder_sa_id                         = module.psoxy.builder_sa_id
   allowed_data_access_ip_blocks         = var.allowed_data_access_ip_blocks
+  instance_concurrency                  = var.api_connector_instance_concurrency
+  max_instance_count                    = var.max_instances_per_api_connector
+
 
   environment_variables = merge(
     {

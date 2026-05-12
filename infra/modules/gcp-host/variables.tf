@@ -437,3 +437,25 @@ variable "allowed_webhook_ip_blocks" {
     error_message = "allowed_webhook_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
   }
 }
+
+variable "api_connector_instance_concurrency" {
+  type        = number
+  description = "Max concurrent requests per Cloud Run instance for API connectors. Default 5 is suitable for I/O-bound proxy workloads."
+  default     = 5
+
+  validation {
+    condition     = var.api_connector_instance_concurrency >= 1 && floor(var.api_connector_instance_concurrency) == var.api_connector_instance_concurrency
+    error_message = "api_connector_instance_concurrency must be a whole number greater than or equal to 1."
+  }
+}
+
+variable "max_instances_per_api_connector" {
+  type        = number
+  description = "Max number of Cloud Run instances per API connector. With instance_concurrency=5 and max_instances=20, global capacity is 100 concurrent requests per connector."
+  default     = 20
+
+  validation {
+    condition     = var.max_instances_per_api_connector >= 1
+    error_message = "The max_instances_per_api_connector value must be greater than or equal to 1."
+  }
+}

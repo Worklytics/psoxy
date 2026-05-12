@@ -162,7 +162,7 @@ public class ApiDataRequestHandler {
      * @see <a href="https://flaviocopes.com/http-response-headers/"></a>
      * @see <a href="https://developer.mozilla.org/en-US/docs/Glossary/Response_header"></a>
      */
-    public static Set<String> DEFAULT_RESPONSE_HEADERS_TO_PASS_THROUGH = normalizeHeaders(Set.of(
+    public static final Set<String> DEFAULT_RESPONSE_HEADERS_TO_PASS_THROUGH = normalizeHeaders(Set.of(
             HttpHeaders.CONTENT_TYPE,
             HttpHeaders.CACHE_CONTROL,
             HttpHeaders.ETAG,
@@ -172,7 +172,7 @@ public class ApiDataRequestHandler {
             HttpHeaders.RETRY_AFTER
     ));
 
-    public static Set<String> HTTP_METHODS_WHICH_DONT_SUPPORT_BODY = Set.of(
+    public static final Set<String> HTTP_METHODS_WHICH_DONT_SUPPORT_BODY = Set.of(
         HttpHead.METHOD_NAME,
         HttpGet.METHOD_NAME
     );

@@ -263,10 +263,20 @@ data "google_service_account" "function" {
 
 # to provision Cloud Function, TF must be able to act as the service account that the function will
 # run as
-resource "google_service_account_iam_member" "act_as" {
+# NOTE: named 'tf_runner_act_as' rather than 'act_as' to avoid replacement-cycle on upgrades where
+# tf_runner_iam_principal changes (eg 0.5.x -> 0.6.x); separate create+destroy is cycle-free.
+resource "google_service_account_iam_member" "tf_runner_act_as" {
   member             = var.tf_runner_iam_principal
   role               = "roles/iam.serviceAccountUser"
   service_account_id = data.google_service_account.function.id
+}
+
+# migration: remove old resource address from state (destroyed in GCP)
+removed {
+  from = google_service_account_iam_member.act_as
+  lifecycle {
+    destroy = true
+  }
 }
 
 resource "google_cloudfunctions2_function" "function" {
@@ -296,8 +306,8 @@ resource "google_cloudfunctions2_function" "function" {
     ingress_settings      = "ALLOW_ALL"
     timeout_seconds       = local.function_exec_timeout_seconds
 
-    # TODO: setting this > 1 gives error: │ Error: Error updating function: googleapi: Error 400: Could not update Cloud Run service projects/psoxy-dev-erik/locations/us-central1/services/psoxy-dev-erik-llm-portal. spec.template.spec.containers.resources.limits.cpu: Invalid value specified for cpu. Total cpu < 1 is not supported with concurrency > 1.
-    # max_instance_request_concurrency = 5 # q: make configurable? default is 1
+    max_instance_request_concurrency = var.instance_concurrency
+    available_cpu                    = var.instance_concurrency > 1 ? "1" : null
 
     vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector
     vpc_connector_egress_settings = var.vpc_config == null ? null : "ALL_TRAFFIC"
@@ -330,7 +340,7 @@ resource "google_cloudfunctions2_function" "function" {
 
   depends_on = [
     google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret,
-    google_service_account_iam_member.act_as
+    google_service_account_iam_member.tf_runner_act_as
   ]
 }
 
