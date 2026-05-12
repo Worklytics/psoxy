@@ -28,9 +28,13 @@ export function removeRequired(schema) {
   if (!schema || typeof schema !== 'object' || Array.isArray(schema)) return schema;
 
   const result = { ...schema };
-  delete result.required;
 
   if (result.properties) {
+    // Only strip `required` when it is the JSON Schema keyword (array of
+    // property names on an object schema node). A `required` field that is
+    // a data property lives inside `properties`, not alongside it, so it
+    // is untouched by the delete below.
+    delete result.required;
     result.properties = Object.fromEntries(
       Object.entries(result.properties).map(([key, propSchema]) => [key, removeRequired(propSchema)])
     );

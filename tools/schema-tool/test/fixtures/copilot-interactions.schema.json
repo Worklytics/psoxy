@@ -77,13 +77,7 @@
                   "userIdentityType": {
                     "type": "string"
                   }
-                },
-                "required": [
-                  "@odata.type",
-                  "id",
-                  "displayName",
-                  "userIdentityType"
-                ]
+                }
               },
               "application": {
                 "type": [
@@ -104,21 +98,9 @@
                   "applicationIdentityType": {
                     "type": "string"
                   }
-                },
-                "required": [
-                  "@odata.type",
-                  "id",
-                  "displayName",
-                  "applicationIdentityType"
-                ]
+                }
               }
-            },
-            "required": [
-              "@odata.type",
-              "device",
-              "user",
-              "application"
-            ]
+            }
           },
           "body": {
             "type": "object",
@@ -129,11 +111,7 @@
               "content": {
                 "type": "string"
               }
-            },
-            "required": [
-              "contentType",
-              "content"
-            ]
+            }
           },
           "attachments": {
             "type": "array",
@@ -155,14 +133,7 @@
                 "name": {
                   "type": "null"
                 }
-              },
-              "required": [
-                "attachmentId",
-                "contentType",
-                "contentUrl",
-                "content",
-                "name"
-              ]
+              }
             }
           },
           "links": {
@@ -180,43 +151,15 @@
                 "linkType": {
                   "type": "string"
                 }
-              },
-              "required": [
-                "linkUrl",
-                "displayName",
-                "linkType"
-              ]
+              }
             }
           },
           "mentions": {
             "type": "array",
             "items": false
           }
-        },
-        "required": [
-          "id",
-          "sessionId",
-          "requestId",
-          "appClass",
-          "interactionType",
-          "conversationType",
-          "etag",
-          "createdDateTime",
-          "locale",
-          "contexts",
-          "from",
-          "body",
-          "attachments",
-          "links",
-          "mentions"
-        ]
+        }
       }
     }
-  },
-  "required": [
-    "@odata.context",
-    "@odata.count",
-    "@odata.nextLink",
-    "value"
-  ]
+  }
 }

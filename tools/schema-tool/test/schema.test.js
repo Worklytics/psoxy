@@ -321,24 +321,45 @@ test('removeRequired: items:false (empty array) is left untouched', (t) => {
   t.deepEqual(removeRequired({ type: 'array', items: false }), { type: 'array', items: false });
 });
 
-test('removeRequired: no required keys remain anywhere in asana output', (t) => {
+test('removeRequired: a data field named "required" inside properties is preserved', (t) => {
+  // The payload has a field called "required" (e.g. a boolean flag on a form field).
+  // Only the JSON Schema keyword required[] should be stripped, not this.
+  const schema = inferSchema({ name: 'email', required: true, label: 'Email address' });
+  const result = removeRequired(schema);
+  t.deepEqual(result.properties.required, { type: 'boolean' });
+  t.deepEqual(result.properties.name,     { type: 'string'  });
+  t.is(result.required, undefined);
+});
+
+test('removeRequired: asana — "required" data field preserved as boolean property', (t) => {
+  const result = removeRequired(inferSchema(asanaFixture));
+  t.deepEqual(result.properties.data.items.properties.required, { type: 'boolean' });
+});
+
+test('removeRequired: no inferred required[] arrays remain anywhere in asana output', (t) => {
   const check = (node, path = '') => {
     if (!node || typeof node !== 'object') return;
     if (Array.isArray(node)) { node.forEach((v, i) => check(v, `${path}[${i}]`)); return; }
-    t.false('required' in node, `found required at ${path}`);
+    // required as a data property is fine; only the JSON Schema keyword (array) must be gone
+    if ('required' in node) {
+      t.false(Array.isArray(node.required), `found required[] at ${path}`);
+    }
     for (const [k, v] of Object.entries(node)) check(v, `${path}.${k}`);
   };
   check(removeRequired(inferSchema(asanaFixture)));
 });
 
-test('removeRequired: no required keys remain anywhere in calendar output', (t) => {
+test('removeRequired: no inferred required[] arrays remain anywhere in calendar output', (t) => {
   const check = (node, path = '') => {
     if (!node || typeof node !== 'object') return;
     if (Array.isArray(node)) { node.forEach((v, i) => check(v, `${path}[${i}]`)); return; }
-    t.false('required' in node, `found required at ${path}`);
+    if ('required' in node) {
+      t.false(Array.isArray(node.required), `found required[] at ${path}`);
+    }
     for (const [k, v] of Object.entries(node)) check(v, `${path}.${k}`);
   };
   check(removeRequired(inferSchema(calendarFixture)));
+  t.pass();
 });
 
 // ── parseBody ─────────────────────────────────────────────────────────────────
@@ -433,6 +454,11 @@ test('inferSchema: audit log — resource.url detected as uri; name and url opti
   t.false(resourceSchema.required.includes('url'));
 });
 
+test('inferSchema: audit log — resource "required" data field preserved as boolean', (t) => {
+  const resourceProps = inferSchema(parseBody(auditLogBody)).items.properties.resource.properties;
+  t.deepEqual(resourceProps.required, { type: 'boolean' });
+});
+
 test('inferSchema: audit log — details absent in some rows → optional object, not nullable', (t) => {
   const { items } = inferSchema(parseBody(auditLogBody));
   // type is plain "object" (never null in the fixture — just omitted)
@@ -455,18 +481,18 @@ test('inferSchema: audit log — details sub-fields merged across rows that have
   t.truthy(detailsProps.geo);
 });
 
-test('inferSchema: audit log — full schema matches golden file', (t) => {
-  t.deepEqual(inferSchema(parseBody(auditLogBody)), auditLogExpectedSchema);
+test('schema: audit log — full output matches golden file', (t) => {
+  t.deepEqual(removeRequired(inferSchema(parseBody(auditLogBody))), auditLogExpectedSchema);
 });
 
-test('inferSchema: copilot — full schema matches golden file', (t) => {
-  t.deepEqual(inferSchema(copilotFixture), copilotExpectedSchema);
+test('schema: copilot — full output matches golden file', (t) => {
+  t.deepEqual(removeRequired(inferSchema(copilotFixture)), copilotExpectedSchema);
 });
 
-test('inferSchema: calendar — full schema matches golden file', (t) => {
-  t.deepEqual(inferSchema(calendarFixture), calendarExpectedSchema);
+test('schema: calendar — full output matches golden file', (t) => {
+  t.deepEqual(removeRequired(inferSchema(calendarFixture)), calendarExpectedSchema);
 });
 
-test('inferSchema: asana workspaces — full schema matches golden file', (t) => {
-  t.deepEqual(inferSchema(asanaFixture), asanaExpectedSchema);
+test('schema: asana workspaces — full output matches golden file', (t) => {
+  t.deepEqual(removeRequired(inferSchema(asanaFixture)), asanaExpectedSchema);
 });

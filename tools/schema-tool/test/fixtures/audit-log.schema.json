@@ -27,12 +27,7 @@
             "type": "string",
             "format": "ipv4"
           }
-        },
-        "required": [
-          "id",
-          "email",
-          "ip"
-        ]
+        }
       },
       "resource": {
         "type": "object",
@@ -43,6 +38,9 @@
           "id": {
             "type": "string"
           },
+          "required": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -50,11 +48,7 @@
             "type": "string",
             "format": "uri"
           }
-        },
-        "required": [
-          "type",
-          "id"
-        ]
+        }
       },
       "success": {
         "type": "boolean"
@@ -74,11 +68,7 @@
               "city": {
                 "type": "string"
               }
-            },
-            "required": [
-              "country",
-              "city"
-            ]
+            }
           },
           "branch": {
             "type": "string"
@@ -91,14 +81,6 @@
       "failure_reason": {
         "type": "string"
       }
-    },
-    "required": [
-      "id",
-      "timestamp",
-      "action",
-      "actor",
-      "resource",
-      "success"
-    ]
+    }
   }
 }
