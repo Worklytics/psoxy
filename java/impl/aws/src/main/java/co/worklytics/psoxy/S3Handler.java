@@ -96,7 +96,8 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         if (sourceMetadata.contentType() != null
                 && !EXPECTED_CONTENT_TYPES.contains(sourceMetadata.contentType().toLowerCase())) {
             // our code presumes a CSV, which is utf-8 encoded atm (or something like ascii, which is a subset of utf-8)
-            log.warning(String.format("S3 file content type for %s/%s is %s ; this is not known to be compatible with UTF-8-encoded CSVs, so may not work as expected", importBucket, sourceKey, sourceMetadata.contentEncoding()));
+            log.warning(String.format("S3 file content type for %s/%s is %s (content encoding: %s); this is not known to be compatible with UTF-8-encoded CSVs, so may not work as expected",
+                importBucket, sourceKey, sourceMetadata.contentType(), sourceMetadata.contentEncoding()));
         }
 
 
