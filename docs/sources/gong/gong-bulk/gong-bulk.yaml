@@ -1,0 +1,13 @@
+fileRules:
+  /USERS{suffix?}.csv{compression?}:
+    columnsToPseudonymize:
+      - "EMAIL_ADDRESS"
+      - "USER_ID"
+      - "MANAGER_ID"
+    columnsToRedact:
+      - "FIRST_NAME"
+      - "LAST_NAME"
+      - "TITLE"
+  /USER_CONVERSATION_GONG_ACTIVITIES{suffix?}.csv{compression?}:
+    columnsToPseudonymize:
+      - "USER_ID"
