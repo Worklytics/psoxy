@@ -100,8 +100,13 @@ variable "available_memory_mb" {
 
 variable "timeout_seconds" {
   type        = number
-  description = "Timeout (in seconds) for the function. Default value is 1800 (30 minutes)."
-  default     = 1800
+  description = "Timeout (in seconds) for the function. GCP Cloud Functions v2 with an event trigger are hard-capped at 540s; HTTP-triggered functions allow up to 3600s. Bulk connectors use event triggers, so the effective maximum is 540."
+  default     = 540
+
+  validation {
+    condition     = var.timeout_seconds <= 540
+    error_message = "GCP Cloud Functions v2 with an event trigger cannot exceed 540 seconds."
+  }
 }
 
 variable "example_file" {
