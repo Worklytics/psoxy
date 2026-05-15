@@ -286,6 +286,10 @@ resource "google_project_iam_custom_role" "bucket_write" {
   ]
 }
 
+# on v0.5.x this was "${local.environment_id_role_prefix}PsoxyInstanceSecretHandler"
+# v0.6.x upgrades
+# - causes a lot of changes, all role grants to on writable secrets
+# - can't just import the old one because the name is different
 resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
   project     = var.project_id
   role_id     = "${local.environment_id_role_prefix}secretVersionManager"
