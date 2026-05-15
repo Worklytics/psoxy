@@ -1,5 +1,5 @@
 fileRules:
-  /USERS{suffix?}.csv{compression?}:
+  /{date}/{table}/{file}.csv{compression?}:
     columnsToPseudonymize:
       - "EMAIL_ADDRESS"
       - "USER_ID"
@@ -8,6 +8,3 @@ fileRules:
       - "FIRST_NAME"
       - "LAST_NAME"
       - "TITLE"
-  /USER_CONVERSATION_GONG_ACTIVITIES{suffix?}.csv{compression?}:
-    columnsToPseudonymize:
-      - "USER_ID"
