@@ -8,3 +8,4 @@ fileRules:
       - "FIRST_NAME"
       - "LAST_NAME"
       - "TITLE"
+      - "NOTES"
