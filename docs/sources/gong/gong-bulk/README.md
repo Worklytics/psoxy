@@ -39,7 +39,7 @@ Per-user profile and configuration snapshot:
 | ETL_MODIFIED_DATETIME | Timestamp | The date and time the data was changed |
 | ROW_ID | String | The row identifier |
 
-See [gong-bulk.yaml](gong-bulk-rules.yaml) for pseudonymization and redaction rules.
+See [gong-bulk-rules.yaml](gong-bulk-rules.yaml) for pseudonymization and redaction rules.
 
 ### USER_CONVERSATION_GONG_ACTIVITIES
 
@@ -54,7 +54,7 @@ Per-user conversation activity records:
 | ETL_MODIFIED_DATETIME | Timestamp | The date and time the data was modified |
 | ROW_ID | String | The row identifier |
 
-See [gong-bulk.yaml](gong-bulk-rules.yaml) for pseudonymization and redaction rules.
+See [gong-bulk-rules.yaml](gong-bulk-rules.yaml) for pseudonymization and redaction rules.
 
 ### FORECAST_SUBMISSIONS_HISTORY
 
@@ -78,11 +78,11 @@ See [gong-bulk.yaml](gong-bulk-rules.yaml) for pseudonymization and redaction ru
 | ETL_MODIFIED_DATETIME | Timestamp | The date and time the data was modified |
 | ROW_ID | String | The row identifier |
 
-See [gong-bulk.yaml](gong-bulk-rules.yaml) for pseudonymization and redaction rules.
+See [gong-bulk-rules.yaml](gong-bulk-rules.yaml) for pseudonymization and redaction rules.
 
 ## Instructions to Connect
 
-1. Copy [gong-bulk.yaml](gong-bulk-rules.yaml) to your Terraform working directory as `gong-bulk-rules.yaml`.
+1. Copy [gong-bulk-rules.yaml](gong-bulk-rules.yaml) to your Terraform working directory as `gong-bulk-rules.yaml`.
 2. Add `gong-bulk` to your `custom_bulk_connectors` in `terraform.tfvars` then run `terraform apply`.
 3. Review your Terraform output; find the `-input` bucket name for your connector.
 4. Export the `USERS`, `USER_CONVERSATION_GONG_ACTIVITIES`, and `FORECAST_SUBMISSIONS_HISTORY` tables from Gong (see [Gong documentation](https://help.gong.io/docs/forecast-and-gong-user-tables)).
