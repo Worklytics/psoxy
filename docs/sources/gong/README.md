@@ -12,7 +12,7 @@ Connector for Gong user activity metrics and user data.
 
 ### Gong Bulk
 
-Connector for Gong bulk export data (USERS and USER_CONVERSATION_GONG_ACTIVITIES tables).
+Connector for Gong exported data from [forecast and Gong user tables](https://help.gong.io/docs/forecast-and-gong-user-tables).
 
 **[See Gong Bulk Documentation](gong-bulk/README.md)**
 
