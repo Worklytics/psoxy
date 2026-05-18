@@ -20,3 +20,5 @@ fileRules:
       - "COMMENT"
       - "ANSWER_TEXT"
       - "MENTIONS"
+      - "FORECAST_CATEGORY_NAME"
+      - "LINE_OF_BUSINESS"
