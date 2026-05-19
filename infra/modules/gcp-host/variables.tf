@@ -271,6 +271,7 @@ variable "bulk_connectors" {
     instructions_template = optional(string)
     settings_to_provide   = optional(map(string), {})
     available_memory_mb   = optional(number)
+    timeout_seconds       = optional(number)
   }))
 
   description = "map of connector id  => bulk connectors to provision"
