@@ -189,7 +189,7 @@ See also: [Bulk File Sanitization](configuration/bulk-file-sanitization.md)
 | Badge                    | [sources/badge](sources/badge/README.md) |
 | HRIS                     | [sources/hris](sources/hris/README.md) |
 | Generic Work Data        | [sources/workdata-generic](sources/workdata-generic/README.md) |
-| Gong Bulk (**alpha**) | [sources/gong/gong-bulk](sources/gong/gong-bulk/README.md) |
+| Gong Bulk (**alpha**)    | [sources/gong/gong-bulk](sources/gong/gong-bulk/README.md) |
 | Miro AI Bulk (**alpha**) | [sources/miro/miro-ai-bulk](sources/miro/miro-ai-bulk/README.md) |
 | Survey                   | [sources/survey](sources/survey/README.md) |
 
