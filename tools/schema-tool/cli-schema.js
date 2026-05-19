@@ -2,7 +2,7 @@
 import chalk from 'chalk';
 import { Command } from 'commander';
 import { createRequire } from 'module';
-import { fetchEndpoint, inferSchema, describeRequired } from './lib/schema.js';
+import { fetchEndpoint, inferSchema, removeRequired, parseBody } from './lib/schema.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('./package.json');
@@ -65,17 +65,17 @@ Example calls:
 
       let parsed;
       try {
-        parsed = JSON.parse(result.body);
+        parsed = parseBody(result.body);
       } catch (err) {
-        log.error(`Response is not valid JSON: ${err.message}`);
+        log.error(`Response is not valid JSON or JSONL: ${err.message}`);
         process.exitCode = 1;
         return;
       }
 
       log.info(`Schema for ${options.endpoint}:`);
       const output = options.skipHeaders
-        ? { schema: describeRequired(inferSchema(parsed)) }
-        : { headers: result.headers, schema: describeRequired(inferSchema(parsed)) };
+        ? { schema: removeRequired(inferSchema(parsed)) }
+        : { headers: result.headers, schema: removeRequired(inferSchema(parsed)) };
       console.log(JSON.stringify(output, null, 2));
     } else {
       log.error(`HTTP ${result.status}: ${result.statusMessage || 'Unknown error'}`);

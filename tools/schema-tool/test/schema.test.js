@@ -1,14 +1,21 @@
 import test from 'ava';
 import { createRequire } from 'module';
-import { inferSchema, describeRequired } from '../lib/schema.js';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { join, dirname } from 'path';
+import { inferSchema, removeRequired, parseBody } from '../lib/schema.js';
 
 const require = createRequire(import.meta.url);
+const fixturesDir = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
+
 const copilotFixture          = require('./fixtures/copilot-interactions.json');
 const asanaFixture            = require('./fixtures/asana-workspaces.json');
 const calendarFixture         = require('./fixtures/calendar-events.json');
+const auditLogBody            = readFileSync(join(fixturesDir, 'audit-log.jsonl'), 'utf8');
 const copilotExpectedSchema   = require('./fixtures/copilot-interactions.schema.json');
 const calendarExpectedSchema  = require('./fixtures/calendar-events.schema.json');
 const asanaExpectedSchema     = require('./fixtures/asana-workspaces.schema.json');
+const auditLogExpectedSchema  = require('./fixtures/audit-log.schema.json');
 
 // ── primitives ────────────────────────────────────────────────────────────────
 
@@ -247,122 +254,167 @@ test('inferSchema: calendar — extendedProperties: empty object merged with pop
   t.deepEqual(ext.properties.private.properties.source,     { type: 'string' });
 });
 
-// ── describeRequired ─────────────────────────────────────────────────────────
+// ── removeRequired ────────────────────────────────────────────────────────────
 //
-// describeRequired() converts raw `required` string arrays into proper JSON
-// Schema type descriptions so every value in the output is consistently typed.
-//
-// Before: { required: ["id", "name"] }
-// After:  { required: { type: "array", items: { type: "string" } } }
+// The inferred `required` list reflects only what appeared in the sample
+// payload — not the true API contract. removeRequired() strips it entirely
+// so the output doesn't make claims we can't verify.
 
-const REQUIRED_TYPE = { type: 'array', items: { type: 'string' } };
-
-test('describeRequired: required array is replaced with type description', (t) => {
+test('removeRequired: strips required from object schema', (t) => {
   const schema = {
     type: 'object',
-    properties: {
-      id:   { type: 'integer' },
-      name: { type: 'string'  },
-    },
+    properties: { id: { type: 'integer' }, name: { type: 'string' } },
     required: ['id', 'name'],
   };
-
-  const result = describeRequired(schema);
-
-  t.deepEqual(result.required, REQUIRED_TYPE);
-  // properties are preserved untouched
+  const result = removeRequired(schema);
+  t.is(result.required, undefined);
   t.deepEqual(result.properties.id,   { type: 'integer' });
   t.deepEqual(result.properties.name, { type: 'string'  });
 });
 
-test('describeRequired: object with no required array is unchanged', (t) => {
+test('removeRequired: object with no required array is unchanged', (t) => {
   const schema = {
     type: 'object',
     properties: { a: { type: 'string' }, b: { type: 'number' } },
   };
-
-  const result = describeRequired(schema);
-
+  const result = removeRequired(schema);
   t.is(result.required, undefined);
   t.deepEqual(result.properties.a, { type: 'string' });
   t.deepEqual(result.properties.b, { type: 'number' });
 });
 
-test('describeRequired: recursively processes nested objects', (t) => {
+test('removeRequired: strips required[] from object schema without properties (e.g. additionalProperties)', (t) => {
+  const schema = {
+    type: 'object',
+    additionalProperties: { type: 'string' },
+    required: ['key1', 'key2'],
+  };
+  const result = removeRequired(schema);
+  t.is(result.required, undefined);
+  t.deepEqual(result.additionalProperties, { type: 'string' });
+});
+
+test('removeRequired: recursively strips from nested objects', (t) => {
   const schema = {
     type: 'object',
     properties: {
       user: {
         type: 'object',
-        properties: {
-          id:    { type: 'string' },
-          email: { type: 'string', format: 'email' },
-        },
+        properties: { id: { type: 'string' }, email: { type: 'string', format: 'email' } },
         required: ['id', 'email'],
       },
     },
     required: ['user'],
   };
-
-  const result = describeRequired(schema);
-
-  t.deepEqual(result.required,                        REQUIRED_TYPE);
-  t.deepEqual(result.properties.user.required,        REQUIRED_TYPE);
-  t.deepEqual(result.properties.user.properties.id,   { type: 'string' });
-  t.deepEqual(result.properties.user.properties.email,{ type: 'string', format: 'email' });
+  const result = removeRequired(schema);
+  t.is(result.required, undefined);
+  t.is(result.properties.user.required, undefined);
+  t.deepEqual(result.properties.user.properties.id,    { type: 'string' });
+  t.deepEqual(result.properties.user.properties.email, { type: 'string', format: 'email' });
 });
 
-test('describeRequired: recursively processes array items', (t) => {
+test('removeRequired: recursively strips from array items', (t) => {
   const schema = {
     type: 'array',
     items: {
       type: 'object',
-      properties: {
-        gid:  { type: 'string' },
-        name: { type: 'string' },
-      },
+      properties: { gid: { type: 'string' }, name: { type: 'string' } },
       required: ['gid', 'name'],
     },
   };
-
-  const result = describeRequired(schema);
-
-  t.deepEqual(result.items.required, REQUIRED_TYPE);
+  const result = removeRequired(schema);
+  t.is(result.items.required, undefined);
   t.deepEqual(result.items.properties.gid,  { type: 'string' });
   t.deepEqual(result.items.properties.name, { type: 'string' });
 });
 
-test('describeRequired: items:false (empty array) is left untouched', (t) => {
-  const schema = { type: 'array', items: false };
-  t.deepEqual(describeRequired(schema), { type: 'array', items: false });
+test('removeRequired: items:false (empty array) is left untouched', (t) => {
+  t.deepEqual(removeRequired({ type: 'array', items: false }), { type: 'array', items: false });
 });
 
-test('describeRequired: asana workspaces — required arrays replaced with type descriptions', (t) => {
-  const result = describeRequired(inferSchema(asanaFixture));
-
-  // top-level required converted
-  t.deepEqual(result.required, REQUIRED_TYPE);
-
-  // array items required converted
-  const item = result.properties.data.items;
-  t.deepEqual(item.required, REQUIRED_TYPE);
-
-  // property schemas still present
-  t.truthy(item.properties.gid);
-  t.truthy(item.properties.resource_type);
-  t.truthy(item.properties.name);
+test('removeRequired: a data field named "required" inside properties is preserved', (t) => {
+  // The payload has a field called "required" (e.g. a boolean flag on a form field).
+  // Only the JSON Schema keyword required[] should be stripped, not this.
+  const schema = inferSchema({ name: 'email', required: true, label: 'Email address' });
+  const result = removeRequired(schema);
+  t.deepEqual(result.properties.required, { type: 'boolean' });
+  t.deepEqual(result.properties.name,     { type: 'string'  });
+  t.is(result.required, undefined);
 });
 
-test('describeRequired: calendar — no raw required arrays remain anywhere in output', (t) => {
+test('removeRequired: asana — "required" data field preserved as boolean property', (t) => {
+  const result = removeRequired(inferSchema(asanaFixture));
+  t.deepEqual(result.properties.data.items.properties.required, { type: 'boolean' });
+});
+
+test('removeRequired: no inferred required[] arrays remain anywhere in asana output', (t) => {
+  const check = (node, path = '') => {
+    if (!node || typeof node !== 'object') return;
+    if (Array.isArray(node)) { node.forEach((v, i) => check(v, `${path}[${i}]`)); return; }
+    // required as a data property is fine; only the JSON Schema keyword (array) must be gone
+    if ('required' in node) {
+      t.false(Array.isArray(node.required), `found required[] at ${path}`);
+    }
+    for (const [k, v] of Object.entries(node)) check(v, `${path}.${k}`);
+  };
+  check(removeRequired(inferSchema(asanaFixture)));
+});
+
+test('removeRequired: no inferred required[] arrays remain anywhere in calendar output', (t) => {
   const check = (node, path = '') => {
     if (!node || typeof node !== 'object') return;
     if (Array.isArray(node)) { node.forEach((v, i) => check(v, `${path}[${i}]`)); return; }
     if ('required' in node) {
-      t.false(Array.isArray(node.required), `found raw required[] at ${path}`);
+      t.false(Array.isArray(node.required), `found required[] at ${path}`);
     }
     for (const [k, v] of Object.entries(node)) check(v, `${path}.${k}`);
   };
-  check(describeRequired(inferSchema(calendarFixture)));
+  check(removeRequired(inferSchema(calendarFixture)));
+  t.pass();
+});
+
+// ── parseBody ─────────────────────────────────────────────────────────────────
+
+test('parseBody: single JSON object', (t) => {
+  t.deepEqual(parseBody('{"id":1,"name":"Alice"}'), { id: 1, name: 'Alice' });
+});
+
+test('parseBody: single JSON array', (t) => {
+  t.deepEqual(parseBody('[1,2,3]'), [1, 2, 3]);
+});
+
+test('parseBody: JSONL — returns array of parsed objects', (t) => {
+  const jsonl = '{"id":1,"name":"Alice"}\n{"id":2,"name":"Bob"}\n{"id":3,"name":"Carol"}';
+  t.deepEqual(parseBody(jsonl), [
+    { id: 1, name: 'Alice' },
+    { id: 2, name: 'Bob' },
+    { id: 3, name: 'Carol' },
+  ]);
+});
+
+test('parseBody: JSONL — trailing newline is ignored', (t) => {
+  const jsonl = '{"id":1}\n{"id":2}\n';
+  t.deepEqual(parseBody(jsonl), [{ id: 1 }, { id: 2 }]);
+});
+
+test('parseBody: JSONL — single line (no newline) parses as regular JSON', (t) => {
+  t.deepEqual(parseBody('{"id":1}'), { id: 1 });
+});
+
+test('parseBody: invalid content throws SyntaxError', (t) => {
+  t.throws(() => parseBody('not json at all'), { instanceOf: SyntaxError });
+});
+
+test('parseBody: JSONL with one invalid line throws SyntaxError', (t) => {
+  t.throws(() => parseBody('{"id":1}\nbad line\n{"id":3}'), { instanceOf: SyntaxError });
+});
+
+test('parseBody: inferSchema works on JSONL-parsed result', (t) => {
+  const jsonl = '{"id":1,"name":"Alice"}\n{"id":2,"name":"Bob"}';
+  const schema = inferSchema(parseBody(jsonl));
+  t.is(schema.type, 'array');
+  t.deepEqual(schema.items.properties.id,   { type: 'integer' });
+  t.deepEqual(schema.items.properties.name, { type: 'string' });
 });
 
 // ── Golden-file tests: full schema match ──────────────────────────────────────
@@ -371,14 +423,87 @@ test('describeRequired: calendar — no raw required arrays remain anywhere in o
 // To regenerate: node -e "import('@jsonhero/schema-infer').then(m => ...)" or run
 // the generation script at the top of this file.
 
-test('inferSchema: copilot — full schema matches golden file', (t) => {
-  t.deepEqual(inferSchema(copilotFixture), copilotExpectedSchema);
+// ── Audit log (JSONL fixture) ─────────────────────────────────────────────────
+//
+// Exercises: JSONL → array, ipv4/email/date-time/uri format detection, fields
+// absent from some rows (not null — API simply omits them) → optional in schema.
+//
+// Row breakdown:
+//   1  login success  — details{user_agent,geo}, no resource.name/url
+//   2  repo push      — details{branch,commits}, resource.name+url
+//   3  login failure  — failure_reason, NO details key at all
+//   4  repo clone     — resource.name+url, NO details key, NO failure_reason
+
+test('inferSchema: audit log — JSONL parsed as array', (t) => {
+  const schema = inferSchema(parseBody(auditLogBody));
+  t.is(schema.type, 'array');
+  t.is(schema.items.type, 'object');
 });
 
-test('inferSchema: calendar — full schema matches golden file', (t) => {
-  t.deepEqual(inferSchema(calendarFixture), calendarExpectedSchema);
+test('inferSchema: audit log — fields present in every row are required', (t) => {
+  const { required } = inferSchema(parseBody(auditLogBody)).items;
+  for (const field of ['id', 'timestamp', 'action', 'actor', 'resource', 'success']) {
+    t.true(required.includes(field), `expected ${field} to be required`);
+  }
 });
 
-test('inferSchema: asana workspaces — full schema matches golden file', (t) => {
-  t.deepEqual(inferSchema(asanaFixture), asanaExpectedSchema);
+test('inferSchema: audit log — timestamp detected as date-time', (t) => {
+  const { items } = inferSchema(parseBody(auditLogBody));
+  t.deepEqual(items.properties.timestamp, { type: 'string', format: 'date-time' });
+});
+
+test('inferSchema: audit log — actor email and ip formats detected', (t) => {
+  const actorProps = inferSchema(parseBody(auditLogBody)).items.properties.actor.properties;
+  t.deepEqual(actorProps.email, { type: 'string', format: 'email' });
+  t.deepEqual(actorProps.ip,    { type: 'string', format: 'ipv4' });
+});
+
+test('inferSchema: audit log — resource.url detected as uri; name and url optional (absent in some rows)', (t) => {
+  const resourceSchema = inferSchema(parseBody(auditLogBody)).items.properties.resource;
+  t.deepEqual(resourceSchema.properties.url, { type: 'string', format: 'uri' });
+  t.false(resourceSchema.required.includes('name'));
+  t.false(resourceSchema.required.includes('url'));
+});
+
+test('inferSchema: audit log — resource "required" data field preserved as boolean', (t) => {
+  const resourceProps = inferSchema(parseBody(auditLogBody)).items.properties.resource.properties;
+  t.deepEqual(resourceProps.required, { type: 'boolean' });
+});
+
+test('inferSchema: audit log — details absent in some rows → optional object, not nullable', (t) => {
+  const { items } = inferSchema(parseBody(auditLogBody));
+  // type is plain "object" (never null in the fixture — just omitted)
+  t.is(items.properties.details.type, 'object');
+  t.false(items.required.includes('details'));
+});
+
+test('inferSchema: audit log — failure_reason absent in most rows → optional', (t) => {
+  const { items } = inferSchema(parseBody(auditLogBody));
+  t.deepEqual(items.properties.failure_reason, { type: 'string' });
+  t.false(items.required.includes('failure_reason'));
+});
+
+test('inferSchema: audit log — details sub-fields merged across rows that have it', (t) => {
+  // row 1 contributes user_agent+geo; row 2 contributes branch+commits
+  const detailsProps = inferSchema(parseBody(auditLogBody)).items.properties.details.properties;
+  t.deepEqual(detailsProps.user_agent, { type: 'string' });
+  t.deepEqual(detailsProps.branch,     { type: 'string' });
+  t.deepEqual(detailsProps.commits,    { type: 'integer' });
+  t.truthy(detailsProps.geo);
+});
+
+test('schema: audit log — full output matches golden file', (t) => {
+  t.deepEqual(removeRequired(inferSchema(parseBody(auditLogBody))), auditLogExpectedSchema);
+});
+
+test('schema: copilot — full output matches golden file', (t) => {
+  t.deepEqual(removeRequired(inferSchema(copilotFixture)), copilotExpectedSchema);
+});
+
+test('schema: calendar — full output matches golden file', (t) => {
+  t.deepEqual(removeRequired(inferSchema(calendarFixture)), calendarExpectedSchema);
+});
+
+test('schema: asana workspaces — full output matches golden file', (t) => {
+  t.deepEqual(removeRequired(inferSchema(asanaFixture)), asanaExpectedSchema);
 });
