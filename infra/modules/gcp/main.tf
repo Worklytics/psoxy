@@ -116,7 +116,7 @@ resource "random_password" "pseudonym_salt" {
 resource "google_secret_manager_secret_version" "initial_version" {
   secret      = google_secret_manager_secret.pseudonym_salt.id
   secret_data = sensitive(random_password.pseudonym_salt.result)
-  # if accidental versioning happens is best to just disable, default behavior is DELETE
+  # if accidental versioning happens it is best to just disable, default behavior is DELETE
   # customer can manually DELETE later on if needed
   deletion_policy = "DISABLE"
 
@@ -288,7 +288,7 @@ resource "google_project_iam_custom_role" "bucket_write" {
 
 # on v0.5.x this was "${local.environment_id_role_prefix}PsoxyInstanceSecretHandler"
 # v0.6.x upgrades
-# - causes a lot of changes, all role grants to on writable secrets
+# - causes a lot of changes, all role grants on writable secrets
 # - can't just import the old one because the name is different
 resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
   project     = var.project_id
