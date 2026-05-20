@@ -12,8 +12,15 @@ Changes to be including in future/planned release notes will be added here.
 - performance: optimized `redactExceptPhrases` rule to use non-reluctant matchers.
 
 ## [0.6.0](https://github.com/Worklytics/psoxy/releases/tag/v0.6.0)
-- `aws`/`gcp`: Upgraded deployment runtime environments to Java 25, while maintaining Java 21 byte-code and language-level compatibility.
+
+**BREAKING / UPGRADE NOTES:**
+- `aws`: Minimum `hashicorp/aws` provider version is now `~> 6.0`. When upgrading, users must update their root `provider "aws"` blocks to reference this version or later, and run `terraform init -upgrade` to apply.
+- `gcp`: Minimum `hashicorp/google` provider version is now `~> 7.0`. When upgrading, users must update their root `provider "google"` blocks to reference this version or later, and run `terraform init -upgrade` to apply.
+- `azuread`: Recommended upgrade of target `hashicorp/azuread` provider to `~> 3.0` (or later). When upgrading, users are recommended to update their root `provider "azuread"` blocks and run `terraform init -upgrade` to apply.
 - DEPRECATION: Top-level connector specific Terraform variables (e.g., `salesforce_domain`, `gong_instance_subdomain`, `github_enterprise_server_host`) have been deprecated. These should now be passed through the new `connector_settings` map variable.
+
+**OTHER CHANGES:**
+- `aws`/`gcp`: Upgraded deployment runtime environments to Java 25, while maintaining Java 21 byte-code and language-level compatibility.
 - `gcp`: Dedicated `proxy_builder_sa` service account is now provisioned and used for Cloud Build operations when provisioning Cloud Functions, eliminating project-level IAM dependencies on the default Compute Engine service account.
 - `gcp`: When upgrading from 0.5.x, you will see the `google_service_account_iam_member.act_as` IAM binding destroyed and a new `google_service_account_iam_member.tf_runner_act_as` created for each connector. This is an automatic, no-op rename handled by a `removed` block — no manual `terraform state rm` is required.
 - `zoom`: Default rules for Zoom have been updated, removing fields and endpoints not required.
