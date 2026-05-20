@@ -14,9 +14,9 @@ Changes to be including in future/planned release notes will be added here.
 ## [0.6.0](https://github.com/Worklytics/psoxy/releases/tag/v0.6.0)
 
 **BREAKING / UPGRADE NOTES:**
-- `aws`: Minimum `hashicorp/aws` provider version is now `~> 6.0`. When upgrading, users must update their root `provider "aws"` blocks to reference this version or later, and run `terraform init -upgrade` to apply.
-- `gcp`: Minimum `hashicorp/google` provider version is now `~> 7.0`. When upgrading, users must update their root `provider "google"` blocks to reference this version or later, and run `terraform init -upgrade` to apply.
-- `azuread`: Recommended upgrade of target `hashicorp/azuread` provider to `~> 3.0` (or later). When upgrading, users are recommended to update their root `provider "azuread"` blocks and run `terraform init -upgrade` to apply.
+- `aws`: Minimum `hashicorp/aws` provider version is now `~> 6.0`. When upgrading, users must update the version constraint under `terraform { required_providers { ... } }` for `hashicorp/aws` to this version or later, and run `terraform init -upgrade` to apply.
+- `gcp`: Minimum `hashicorp/google` provider version is now `~> 7.0`. When upgrading, users must update the version constraint under `terraform { required_providers { ... } }` for `hashicorp/google` to this version or later, and run `terraform init -upgrade` to apply.
+- `azuread`: Recommended upgrade of target `hashicorp/azuread` provider to `~> 3.0` (or later). When upgrading, users are recommended to update the version constraint under `terraform { required_providers { ... } }` for `hashicorp/azuread` and run `terraform init -upgrade` to apply.
 - DEPRECATION: Top-level connector specific Terraform variables (e.g., `salesforce_domain`, `gong_instance_subdomain`, `github_enterprise_server_host`) have been deprecated. These should now be passed through the new `connector_settings` map variable.
 
 **OTHER CHANGES:**
