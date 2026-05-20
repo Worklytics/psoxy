@@ -55,6 +55,7 @@
     * [Webhook Collectors](development/alpha-features/webhook-collectors.md)
 * [Data Sources](sources/README.md)
   * [Anthropic](sources/anthropic/README.md)
+    * [Claude **BETA**](sources/anthropic/claude/README.md)
     * [Claude Code **BETA**](sources/anthropic/claude-code/README.md)
   * [Asana](sources/asana/README.md)
   * [Atlassian](sources/atlassian/README.md)
