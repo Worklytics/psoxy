@@ -628,6 +628,7 @@ endpoints:
           - "$..description"
           - "$..body"
           - "$..title"
+          - "$..temp_clone_token"
       - !<pseudonymize>
         jsonPaths:
           - "$..author.email"
