@@ -37,7 +37,7 @@ jobs:
     # - RC branches (rc-*): Release candidates, requires write access (includes PR merges)
     # - workflow_dispatch: Manual trigger, requires write access (checked in step below)
     permissions:
-      contents: read
+      contents: write
       id-token: write
 
     steps:
@@ -96,8 +96,81 @@ jobs:
           
           ./tools/release/lib/publish-aws-bundle.sh --non-interactive $RC_OPTION | tee publish-output.log
           
-          # Extract artifact URIs from output and save to file for summary step
+          # Extract artifact URIs and SHA256 from output and save to file for summary step
           grep "^ARTIFACT_URI_" publish-output.log > artifact-uris.txt || true
+          grep "^ARTIFACT_SHA256=" publish-output.log > artifact-sha.txt || true
+
+      - name: Amend GitHub Release with Artifact References
+        if: startsWith(github.ref, 'refs/tags/v') && hashFiles('artifact-uris.txt') != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          
+          # Construct AWS markdown block
+          AWS_BLOCK=""
+          while IFS='=' read -r key url; do
+            region=$(echo "$key" | sed 's/^ARTIFACT_URI_//')
+            filename="${url##*/}"
+            bucket="${BUCKET_PREFIX}-${region}"
+            s3_uri="s3://${bucket}/${filename}"
+            
+            AWS_BLOCK="${AWS_BLOCK}* **${region}:**"$'\n'
+            AWS_BLOCK="${AWS_BLOCK}  * **S3 URI:** \`${s3_uri}\`"$'\n'
+            AWS_BLOCK="${AWS_BLOCK}  * **HTTP URL:** [$url]($url)"$'\n'
+          done < artifact-uris.txt
+          
+          # Read SHA256 hash
+          AWS_SHA256=$(cut -d'=' -f2 < artifact-sha.txt || echo "")
+          
+          IDENTIFIER="<!-- aws-artifacts-info -->"
+          
+          # Construct the block to append
+          BLOCK=$(cat <<EOF
+          
+          $IDENTIFIER
+          ## AWS Deployment Bundles
+          * **SHA256 Hash:** \`$AWS_SHA256\`
+          $AWS_BLOCK
+          $IDENTIFIER
+          EOF
+          )
+          
+          # Retry loop to handle potential concurrent edits with GCP workflow
+          for i in {1..5}; do
+            echo "Fetching latest release body..."
+            current_body=$(gh release view "$TAG_NAME" --json body -q '.body')
+            
+            # Check if AWS info already exists
+            if [[ "$current_body" == *"$IDENTIFIER"* ]]; then
+              echo "Release already contains AWS artifact references. Replacing block..."
+              new_body=$(IDENTIFIER="$IDENTIFIER" python3 -c '
+import sys, os
+identifier = os.environ["IDENTIFIER"]
+body = sys.stdin.read()
+parts = body.split(identifier)
+if len(parts) >= 3:
+    sys.stdout.write(parts[0] + parts[2])
+else:
+    sys.stdout.write(body)
+' <<< "$current_body")
+            else
+              new_body="$current_body"
+            fi
+            
+            # Append new block
+            new_body=$(printf "%s\n%s" "$new_body" "$BLOCK")
+            
+            echo "Updating release body on GitHub..."
+            if gh release edit "$TAG_NAME" --notes "$new_body"; then
+              echo "✅ Successfully updated release body!"
+              break
+            fi
+            
+            sleep_time=$((RANDOM % 5 + 2))
+            echo "Failed to update release, retrying in $sleep_time seconds..."
+            sleep $sleep_time
+          done
 
       - name: Summary
         if: success()

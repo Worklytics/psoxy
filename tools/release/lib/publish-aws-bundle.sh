@@ -206,6 +206,16 @@ if [ ! -f "$JAR_PATH" ]; then
     exit 1
 fi
 
+# Calculate SHA256 of JAR
+if command -v sha256sum &> /dev/null; then
+    SHA256_HASH=$(sha256sum "$JAR_PATH" | cut -d' ' -f1)
+elif command -v shasum &> /dev/null; then
+    SHA256_HASH=$(shasum -a 256 "$JAR_PATH" | cut -d' ' -f1)
+else
+    SHA256_HASH=$(openssl dgst -sha256 "$JAR_PATH" | cut -d' ' -f2)
+fi
+echo -e "${INFO}JAR SHA256: ${SUCCESS}${SHA256_HASH}${NC}"
+
 # Construct deployment artifact name
 # RC builds should have artifact name like: psoxy-aws-0.5.15-rc.jar
 # Use explicit boolean check
@@ -336,7 +346,7 @@ publish_to_region() {
     fi
 
     # Build metadata string
-    local metadata="version=${VERSION},build-date=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    local metadata="version=${VERSION},build-date=$(date -u +%Y-%m-%dT%H:%M:%SZ),sha256=${SHA256_HASH}"
     
     # Add gh_ref metadata if available (from GitHub Actions)
     if [ -n "${GH_REF:-}" ]; then
@@ -352,6 +362,10 @@ publish_to_region() {
         echo -e "${SUCCESS}✓ Successfully published to ${region}${NC}"
         
         # Verify metadata was set
+        local sha_object_metadata=$(aws s3api head-object --bucket "$bucket_name" --key "$DEPLOYMENT_ARTIFACT" --region "$region" --query 'Metadata.sha256' --output text 2>/dev/null || echo "")
+        if [ -n "$sha_object_metadata" ] && [ "$sha_object_metadata" != "None" ]; then
+            echo -e "${SUCCESS}✓ Metadata verified: sha256=${sha_object_metadata}${NC}"
+        fi
         if [ -n "${GH_REF:-}" ]; then
             local object_metadata=$(aws s3api head-object --bucket "$bucket_name" --key "$DEPLOYMENT_ARTIFACT" --region "$region" --query 'Metadata.gh_ref' --output text 2>/dev/null || echo "")
             if [ -n "$object_metadata" ] && [ "$object_metadata" != "None" ]; then
@@ -413,6 +427,7 @@ publish() {
             # Output artifact URI in standardized format for GitHub Actions summary
             echo "ARTIFACT_URI_${region}=${artifact_url}"
         done
+        echo "ARTIFACT_SHA256=${SHA256_HASH}"
     else
         echo -e "${WARN}⚠ Some regions failed to publish${NC}"
         exit 1
