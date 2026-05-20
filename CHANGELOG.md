@@ -11,6 +11,9 @@ Changes to be including in future/planned release notes will be added here.
 - `chatgpt-enterprise`: added `write` and `email` keyword tracking to prompt/title texts via `textDigest`.
 - performance: optimized `redactExceptPhrases` rule to use non-reluctant matchers.
 
+## [0.6.1](https://github.com/Worklytics/psoxy/releases/tag/v0.6.1)
+- `Gong Bulk`: adding documentation about supporting Gong Bulk data imports through Psoxy.
+
 ## [0.6.0](https://github.com/Worklytics/psoxy/releases/tag/v0.6.0)
 
 **BREAKING / UPGRADE NOTES:**
