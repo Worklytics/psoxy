@@ -3,6 +3,7 @@ package co.worklytics.psoxy.aws;
 import co.worklytics.psoxy.gateway.auth.PublicKeyRef;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStore;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
+import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient.PublicKeyVersionId;
 import software.amazon.awssdk.services.kms.model.KmsInvalidStateException;
 
 import com.google.common.cache.CacheBuilder;
