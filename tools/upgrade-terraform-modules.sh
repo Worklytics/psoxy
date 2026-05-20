@@ -57,9 +57,19 @@ find . -type f -name "*.bck" -delete
 terraform init
 
 # Run check-prereqs.sh script and give user feedback
-if [ -f "$(dirname "$0")/check-prereqs.sh" ]; then
+PREREQS_SCRIPT=""
+if [ -d ".terraform" ]; then
+  PREREQS_SCRIPT=$(find .terraform/modules -name "check-prereqs.sh" 2>/dev/null | head -n 1)
+fi
+if [ -z "$PREREQS_SCRIPT" ] || [ ! -f "$PREREQS_SCRIPT" ]; then
+  if [ -f "$(dirname "$0")/check-prereqs.sh" ]; then
+    PREREQS_SCRIPT="$(dirname "$0")/check-prereqs.sh"
+  fi
+fi
+
+if [ -n "$PREREQS_SCRIPT" ] && [ -f "$PREREQS_SCRIPT" ]; then
   printf "\nRunning environment prerequisites check...\n"
-  bash "$(dirname "$0")/check-prereqs.sh"
+  bash "$PREREQS_SCRIPT"
 fi
 
 printf "Terraform module versions upgraded to ${SUCCESS}${NEXT_RELEASE}${NC}.\n"
