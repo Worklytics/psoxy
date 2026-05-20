@@ -1,5 +1,12 @@
 terraform {
   required_version = "~> 1.7" # should work with 1.7, but we don't automate testing against that version anymore
+
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.0"
+    }
+  }
 }
 
 # constants
