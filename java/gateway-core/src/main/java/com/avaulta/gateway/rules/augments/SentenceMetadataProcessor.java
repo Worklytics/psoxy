@@ -8,7 +8,6 @@ import opennlp.tools.postag.POSTaggerME;
 import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.sentdetect.SentenceModel;
 import opennlp.tools.tokenize.SimpleTokenizer;
-import opennlp.tools.util.Span;
 
 import java.io.InputStream;
 import java.util.*;
