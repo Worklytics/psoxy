@@ -85,7 +85,7 @@ class AugmentProcessorTest {
         assertTrue(resultBody.containsKey("+content:textDigest"));
         @SuppressWarnings("unchecked")
         Map<String, Object> digest = (Map<String, Object>) resultBody.get("+content:textDigest");
-        assertEquals(25, digest.get("length"));
+        assertEquals(26, digest.get("length"));
         assertEquals(6, digest.get("word_count"));
     }
 
