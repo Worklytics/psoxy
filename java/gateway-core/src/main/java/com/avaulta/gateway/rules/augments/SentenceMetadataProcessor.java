@@ -70,7 +70,7 @@ public class SentenceMetadataProcessor {
     public static Map<String, Object> process(String text, Map<String, List<String>> taxonomy) {
         initializeModels();
         if (sentenceDetector == null) {
-            return Collections.emptyMap();
+            return null;
         }
 
         Map<String, Object> result = new TreeMap<>();
