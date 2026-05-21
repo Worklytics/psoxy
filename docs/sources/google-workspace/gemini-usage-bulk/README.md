@@ -56,7 +56,6 @@ custom_bulk_connector_rules = {
     }
 }
 ```
-```
 
 ![gemini-usage-admin-console.png](gemini-usage-admin-console.png)
 

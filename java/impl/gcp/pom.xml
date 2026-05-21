@@ -232,6 +232,7 @@
                         <include>**/*Tests.java</include>
                         <include>**/*Test.java</include>
                     </includes>
+                    <argLine>-javaagent:"${settings.localRepository}/org/mockito/mockito-core/${dependency.mockito-junit-jupiter.version}/mockito-core-${dependency.mockito-junit-jupiter.version}.jar"</argLine>
                     <systemProperties>
                         <property>
                             <name>java.util.logging.config.file</name>
