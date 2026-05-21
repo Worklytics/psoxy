@@ -106,7 +106,6 @@ public class SentenceMetadataProcessor {
 
             String[] tags = posTagger.tag(tokens);
             String[] chunks = chunker.chunk(tokens, tags);
-            String[] lemmas = lemmatizer.lemmatize(tokens, tags);
 
             Map<String, Object> sObj = new TreeMap<>();
             sObj.put("index", i);
