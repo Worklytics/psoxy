@@ -20,7 +20,7 @@ The `+sentenceMetadata` block is structured with a `sentences` array containing 
     "sentences": [
       {
         "index": 0,
-        "type": "imperative", // (imperative/declarative/interrogative/exclamatory)
+        "type": "imperative", // (imperative/declarative/interrogative)
         "verbs": [
           {
             "verb": "write", // surface form
