@@ -1,5 +1,7 @@
 package com.avaulta.gateway.tokens;
 
+import lombok.Getter;
+
 import java.util.function.Function;
 
 /**
@@ -41,11 +43,32 @@ public interface ReversibleTokenizationStrategy {
 
     /**
      * Indicates that the token could not be reversed, likely because invalid
-     *
      */
     class InvalidTokenException extends RuntimeException {
-        public InvalidTokenException(String message, Throwable cause) {
-            super(message, cause);
+
+        @Getter
+        public enum ErrorCode {
+            ALGORITHM_PARAMETER_ERROR("ITE01", "Failed to decrypt token; some algorithm parameter, such as iv, is wrong"),
+            BAD_PADDING("ITE02", "Failed to decrypt token; token appears to be corrupted or invalid, due to mismatch between token's padding and the padding expected by the cipher mode"),
+            ILLEGAL_BLOCK_SIZE("ITE003", "Failed to decrypt token; token appears to be corrupted or invalid, as block size seems to differ from expected"),
+            DECRYPTION_FAILED("ITE004", "Failed to decrypt token; most likely because encryption key has been rotated");
+
+            private final String code;
+            private final String message;
+
+            ErrorCode(String code, String message) {
+                this.code = code;
+                this.message = message;
+            }
+
+        }
+
+        @Getter
+        private final ErrorCode errorCode;
+
+        public InvalidTokenException(ErrorCode errorCode, Throwable cause) {
+            super("[" + errorCode.getCode() + "] " + errorCode.getMessage(), cause);
+            this.errorCode = errorCode;
         }
     }
 }
