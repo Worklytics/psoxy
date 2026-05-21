@@ -30,7 +30,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.BulkModeConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -111,10 +111,10 @@ public class PsoxyModule {
 
     @Provides
     @Singleton
-    static SourceAuthStrategy sourceAuthStrategy(ConfigService configService,
+    static SourceAuthStrategy sourceAuthStrategy(ApiModeConfig apiModeConfig,
             Set<SourceAuthStrategy> sourceAuthStrategies) {
-        String identifier = configService
-                .getConfigPropertyOrError(ApiModeConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
+        String identifier = apiModeConfig.getSourceAuthStrategyIdentifier()
+                .orElseThrow(() -> new Error("SOURCE_AUTH_STRATEGY_IDENTIFIER not configured"));
         return sourceAuthStrategies
                 .stream()
                 .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))

@@ -4,6 +4,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
 import com.avaulta.gateway.pseudonyms.Pseudonym;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
@@ -32,6 +33,7 @@ class PseudonymizedIdentityTest {
     @Singleton
     @Component(modules = {
             PsoxyModule.class,
+        TestModules.ForApiModeConfig.class,
             MockModules.ForConfigService.class,
             MockModules.ForSecretStore.class,
             MockModules.ForRules.class,

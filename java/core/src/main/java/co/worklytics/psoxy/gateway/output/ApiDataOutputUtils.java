@@ -69,6 +69,7 @@ public class ApiDataOutputUtils {
     }
 
     ConfigService config;
+    ApiModeConfig apiModeConfig;
     Provider<UUID> uuidProvider;
     Base64.Encoder base64encoder;
 
@@ -87,7 +88,7 @@ public class ApiDataOutputUtils {
     public ApiDataRequestHandler.ProcessingContext fillOutputContext(ApiDataRequestHandler.ProcessingContext processingContext) {
         ApiDataRequestHandler.ProcessingContext.ProcessingContextBuilder builder = processingContext.toBuilder()
             .asyncOutputLocation(
-                config.getConfigPropertyAsOptional(ApiModeConfigProperty.ASYNC_OUTPUT_DESTINATION)
+                apiModeConfig.getAsyncOutputDestination()
                 .map(s -> s + "/" + this.buildSanitizedOutputKey(processingContext))
                 .orElse(null));
 

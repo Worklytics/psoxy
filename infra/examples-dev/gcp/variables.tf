@@ -461,6 +461,36 @@ variable "todos_as_local_files" {
   default     = true
 }
 
+variable "allowed_data_access_ip_blocks" {
+  description = <<-EOT
+    IPs or CIDR blocks allowed to make data access requests at the application layer.
+    Use null (default) for no restriction in configuration (all IPs allowed). If set, the list must contain at least one value.
+  EOT
+  type        = list(string)
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.allowed_data_access_ip_blocks == null || try(length(var.allowed_data_access_ip_blocks) > 0, false)
+    error_message = "allowed_data_access_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
+  }
+}
+
+variable "allowed_webhook_ip_blocks" {
+  description = <<-EOT
+    IPs or CIDR blocks allowed to send webhooks at the application layer.
+    Use null (default) for no restriction in configuration (all IPs allowed). If set, the list must contain at least one value.
+  EOT
+  type        = list(string)
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.allowed_webhook_ip_blocks == null || try(length(var.allowed_webhook_ip_blocks) > 0, false)
+    error_message = "allowed_webhook_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
+  }
+}
+
 variable "bucket_force_destroy" {
   type        = bool
   description = "set the `force_destroy` flag on each google_storage_bucket provisioned by this configuration"

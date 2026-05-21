@@ -142,6 +142,8 @@ module "psoxy" {
   secrets_store_implementation         = var.secrets_store_implementation
   bulk_sanitized_expiration_days       = var.bulk_sanitized_expiration_days
   bulk_input_expiration_days           = var.bulk_input_expiration_days
+  allowed_data_access_ip_blocks        = var.allowed_data_access_ip_blocks
+  allowed_webhook_ip_blocks            = var.allowed_webhook_ip_blocks
   api_connectors                       = local.api_connectors
   bulk_connectors                      = local.bulk_connectors
   webhook_collectors = { for k, v in var.webhook_collectors : k => merge(

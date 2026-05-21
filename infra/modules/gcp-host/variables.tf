@@ -409,6 +409,36 @@ variable "builder_sa_email" {
   default     = null
 }
 
+variable "allowed_data_access_ip_blocks" {
+  description = <<-EOT
+    IPs or CIDR blocks allowed to make data access requests at the application layer.
+    Use null (default) for no restriction in configuration (all IPs allowed). If set, the list must contain at least one value.
+  EOT
+  type        = list(string)
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.allowed_data_access_ip_blocks == null || try(length(var.allowed_data_access_ip_blocks) > 0, false)
+    error_message = "allowed_data_access_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
+  }
+}
+
+variable "allowed_webhook_ip_blocks" {
+  description = <<-EOT
+    IPs or CIDR blocks allowed to send webhooks at the application layer.
+    Use null (default) for no restriction in configuration (all IPs allowed). If set, the list must contain at least one value.
+  EOT
+  type        = list(string)
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.allowed_webhook_ip_blocks == null || try(length(var.allowed_webhook_ip_blocks) > 0, false)
+    error_message = "allowed_webhook_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
+  }
+}
+
 variable "api_connector_instance_concurrency" {
   type        = number
   description = "Max concurrent requests per Cloud Run instance for API connectors. Default 5 is suitable for I/O-bound proxy workloads."

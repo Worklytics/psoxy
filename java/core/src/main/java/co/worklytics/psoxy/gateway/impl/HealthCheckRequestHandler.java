@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
@@ -18,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.HashUtils;
 import co.worklytics.psoxy.HealthCheckResult;
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
@@ -57,6 +59,8 @@ public class HealthCheckRequestHandler {
     HashUtils hashUtils;
     @Inject
     ProxyConstants proxyConstants;
+    @Inject
+    ApiModeConfig apiModeConfig;
 
     volatile String piiSaltHash;
     private final Object $piiSaltHashLock = new Object[0];
@@ -96,11 +100,11 @@ public class HealthCheckRequestHandler {
         } catch (Throwable e) {
             // will fail if sourceAuthStrategy is not set up properly
             logInDev(e.getMessage(), e);
-            missing = Collections.emptySet();
+            missing = new HashSet<>();
         }
 
         try {
-            Optional<String> targetHost = config.getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST);
+            Optional<String> targetHost = apiModeConfig.getTargetHost();
 
             if (targetHost.isEmpty() || StringUtils.isBlank(targetHost.get())) {
                 missing.add(ApiModeConfigProperty.TARGET_HOST.name());
@@ -113,7 +117,7 @@ public class HealthCheckRequestHandler {
                 .javaSourceCodeVersion(ProxyConstants.JAVA_SOURCE_CODE_VERSION)
                 .userAgent(proxyConstants.getUserAgent())
                 .configuredSource(config.getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE).orElse(null))
-                .configuredHost(config.getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST).orElse(null))
+                .configuredHost(apiModeConfig.getTargetHost().orElse(null))
                 .nonDefaultSalt(secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT).isPresent())
                 .pseudonymImplementation(config.getConfigPropertyAsOptional(ProxyConfigProperty.PSEUDONYM_IMPLEMENTATION).orElse(null))
                 .missingConfigProperties(missing)
@@ -152,7 +156,7 @@ public class HealthCheckRequestHandler {
         }
 
         try {
-            config.getConfigPropertyAsOptional(ApiModeConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER)
+            apiModeConfig.getSourceAuthStrategyIdentifier()
                     .ifPresent(healthCheckResult::sourceAuthStrategy);
         } catch (Throwable e) {
             logInDev("Failed to add sourceAuthStrategy to health check", e);

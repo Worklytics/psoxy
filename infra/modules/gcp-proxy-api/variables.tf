@@ -252,6 +252,21 @@ variable "builder_sa_id" {
   type        = string
 }
 
+variable "allowed_data_access_ip_blocks" {
+  description = <<-EOT
+    IPs or CIDR blocks allowed to make data access requests at the application layer.
+    Use null (default) for no restriction in configuration (all IPs allowed). If set, the list must contain at least one value.
+  EOT
+  type        = list(string)
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.allowed_data_access_ip_blocks == null || try(length(var.allowed_data_access_ip_blocks) > 0, false)
+    error_message = "allowed_data_access_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
+  }
+}
+
 variable "remote_resource_bucket" {
   type        = string
   description = "**beta** Name of the GCS bucket from which to load remote resources (rules, NLP models, etc.)."

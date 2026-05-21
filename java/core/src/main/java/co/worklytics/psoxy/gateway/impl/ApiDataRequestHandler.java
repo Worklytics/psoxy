@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -63,11 +64,12 @@ import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.PseudonymizerImplFactory;
 import co.worklytics.psoxy.RESTApiSanitizer;
 import co.worklytics.psoxy.RESTApiSanitizerFactory;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
@@ -147,6 +149,10 @@ public class ApiDataRequestHandler {
     Provider<UUID> uuidProvider;
     @Inject
     ProxyConstants proxyConstants;
+    @Inject
+    ApiModeConfig apiModeConfig;
+    @Inject
+    NetworkSecurityUtils networkSecurityUtils;
 
     /**
      * Basic headers to pass: content, caching, retries. Can be expanded by connection later.
@@ -229,6 +235,16 @@ public class ApiDataRequestHandler {
                 healthCheckRequestHandler.handleIfHealthCheck(requestToProxy);
         if (healthCheckResponse.isPresent()) {
             return healthCheckResponse.get();
+        }
+
+        // IP lockdown enforcement
+        if (!networkSecurityUtils.isDataAccessIpAllowed(requestToProxy.getClientIp().orElse(null))) {
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_FORBIDDEN)
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                            ErrorCauses.UNAUTHORIZED_IP_ADDRESS.name())
+                    .body("Client IP is not authorized to access this proxy instance.")
+                    .build();
         }
 
 
@@ -757,7 +773,8 @@ public class ApiDataRequestHandler {
         // Construct URL directly concatenating instead of URIBuilder as it may re-encode.
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("https");
-        uriBuilder.setHost(config.getConfigPropertyOrError(ApiModeConfigProperty.TARGET_HOST));
+        uriBuilder.setHost(apiModeConfig.getTargetHost()
+                .orElseThrow(() -> new NoSuchElementException("TARGET_HOST")));
         URL hostURL = uriBuilder.build().toURL();
         String hostPlusPath = StringUtils.stripEnd(hostURL.toString(), "/") + "/"
                 + StringUtils.stripStart(request.getPath(), "/");
