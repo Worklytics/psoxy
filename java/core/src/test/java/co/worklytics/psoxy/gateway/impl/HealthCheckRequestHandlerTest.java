@@ -3,7 +3,7 @@ package co.worklytics.psoxy.gateway.impl;
 import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.HealthCheckResult;
 import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -35,6 +35,7 @@ public class HealthCheckRequestHandlerTest {
             MockModules.ForRules.class,
             MockModules.ForSourceAuthStrategySet.class,
             TestModules.ForProxyConstants.class,
+            TestModules.ForApiModeConfig.class,
 
     })
     public interface Container {
@@ -65,8 +66,7 @@ public class HealthCheckRequestHandlerTest {
         when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
                 .thenReturn(Optional.of(""));
 
-        when(handler.config.getConfigPropertyAsOptional(eq(ApiModeConfigProperty.TARGET_HOST)))
-                .thenReturn(Optional.of("host"));
+        handler.apiModeConfig = ApiModeConfig.builder().targetHost("host").build();
 
         Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
 
@@ -88,8 +88,7 @@ public class HealthCheckRequestHandlerTest {
         when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
                 .thenReturn(Optional.of(""));
 
-        when(handler.config.getConfigPropertyAsOptional(eq(ApiModeConfigProperty.TARGET_HOST)))
-                .thenReturn(Optional.empty());
+        handler.apiModeConfig = ApiModeConfig.builder().build();
 
         Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
 
@@ -104,8 +103,7 @@ public class HealthCheckRequestHandlerTest {
         when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
                 .thenReturn(Optional.of(""));
 
-        when(handler.config.getConfigPropertyAsOptional(eq(ApiModeConfigProperty.TARGET_HOST)))
-                .thenReturn(Optional.of(""));
+        handler.apiModeConfig = ApiModeConfig.builder().targetHost("").build();
 
         Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
 

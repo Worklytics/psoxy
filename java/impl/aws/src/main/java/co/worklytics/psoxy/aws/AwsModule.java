@@ -209,8 +209,14 @@ public interface AwsModule {
 
 
     @Provides
+    @Singleton
+    static AwsEnvironment.AwsApiModeConfig awsApiModeConfig(ConfigService configService) {
+        return AwsEnvironment.AwsApiModeConfig.fromConfigService(configService);
+    }
+
+    @Provides
     static AsyncApiDataRequestHandler providesAsyncApiDataRequestHandler(
-        ConfigService configService,
+        AwsEnvironment.AwsApiModeConfig awsApiModeConfig,
         ApiDataRequestViaSQSFactory apiDataRequestViaSQSFactory
     ) {
 
@@ -221,7 +227,8 @@ public interface AwsModule {
         //Error:  /home/runner/work/psoxy/psoxy/java/impl/aws/src/main/java/co/worklytics/psoxy/aws/AwsModule.java:[241,93] Dagger does not support injecting @AssistedInject type, co.worklytics.psoxy.aws.ApiDataRequestViaSQS. Did you mean to inject its assisted factory type instead?
 
         // also tried @Provides that's equivalent to the Binds (instance as arg, return it as the value for the interface) - but same issue
-        return apiDataRequestViaSQSFactory.create(configService.getConfigPropertyOrError(AwsEnvironment.AwsConfigProperty.ASYNC_API_REQUEST_QUEUE_URL));
+        return apiDataRequestViaSQSFactory.create(awsApiModeConfig.getAsyncApiRequestQueueUrl()
+            .orElseThrow(() -> new IllegalStateException("ASYNC_API_REQUEST_QUEUE_URL not configured")));
 
     }
 

@@ -280,3 +280,9 @@ variable "todo_step" {
   default     = 2
 }
 
+variable "timeout_seconds" {
+  type        = number
+  description = "The timeout (in seconds) for the Lambda function. AWS Lambda allows up to 900 seconds (15 minutes)."
+  default     = 180
+}
+

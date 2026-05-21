@@ -57,6 +57,8 @@ public class MockModules {
         @Provides @Singleton
         static ConfigService configService() {
             ConfigService mock = provideMock(ConfigService.class);
+            when(mock.getConfigPropertyAsOptional(ApiModeConfig.ApiModeConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER))
+                .thenReturn(Optional.of("mock-auth-strategy"));
             return mock;
         }
     }
@@ -115,7 +117,9 @@ public class MockModules {
     public interface ForSourceAuthStrategySet {
         @Provides @IntoSet
         static SourceAuthStrategy sourceStratey() {
-            return mock(SourceAuthStrategy.class);
+            SourceAuthStrategy mock = mock(SourceAuthStrategy.class);
+            when(mock.getConfigIdentifier()).thenReturn("mock-auth-strategy");
+            return mock;
         }
     }
 

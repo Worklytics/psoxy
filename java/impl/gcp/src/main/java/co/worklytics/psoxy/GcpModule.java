@@ -143,8 +143,8 @@ public interface GcpModule {
 
     @Provides
     @Singleton
-    static GcpEnvironment.ApiModeConfig apiModeConfig(ConfigService configService) {
-        return GcpEnvironment.ApiModeConfig.fromConfigService(configService);
+    static GcpEnvironment.GcpApiModeConfig gcpApiModeConfig(ConfigService configService) {
+        return GcpEnvironment.GcpApiModeConfig.fromConfigService(configService);
     }
 
     @Provides
@@ -162,7 +162,7 @@ public interface GcpModule {
 
     @Provides @Singleton
     static AsyncApiDataRequestHandler apiDataRequestViaPubSub(ApiDataRequestViaPubSubFactory factory,
-                                                              GcpEnvironment.ApiModeConfig config) {
+                                                              GcpEnvironment.GcpApiModeConfig config) {
         return factory.create(config.getAsyncPubSubQueue().orElseThrow(() -> new IllegalStateException("PubSub topic not configured")));
     }
 

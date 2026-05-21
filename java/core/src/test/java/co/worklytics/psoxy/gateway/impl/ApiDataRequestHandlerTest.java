@@ -7,7 +7,7 @@ import co.worklytics.psoxy.PseudonymizerImplFactory;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.RESTApiSanitizer;
 import co.worklytics.psoxy.RESTApiSanitizerFactory;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -80,6 +80,7 @@ class ApiDataRequestHandlerTest {
         MockModules.ForSideOutputs.class,
         MockModules.ForAsyncApiDataRequestHandler.class,
         TestModules.ForWebhookCollectorModeConfig.class,
+        TestModules.ForApiModeConfig.class,
         TestModules.ForFixedUUID.class,
         TestModules.ForFixedClock.class,
         TestModules.ForProxyConstants.class,})
@@ -662,8 +663,7 @@ class ApiDataRequestHandlerTest {
             .thenReturn(Optional.of("salt"));
         when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
             .thenReturn(source);
-        when(handler.config.getConfigPropertyOrError(ApiModeConfigProperty.TARGET_HOST))
-            .thenReturn(host);
+        handler.apiModeConfig = ApiModeConfig.builder().targetHost(host).build();
 
         reversibleTokenizationStrategy =
             AESReversibleTokenizationStrategy.builder()
