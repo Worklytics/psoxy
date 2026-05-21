@@ -14,7 +14,7 @@ import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.base.Preconditions;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.ResourceService;
+import com.avaulta.gateway.resources.ResourceService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.RESTRules;

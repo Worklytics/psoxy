@@ -13,14 +13,13 @@ import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.RemoteResourceConfig;
-import co.worklytics.psoxy.gateway.ResourceService;
+import com.avaulta.gateway.resources.ResourceService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.CachingConfigServiceDecorator;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.NoOpResourceService;
-import co.worklytics.psoxy.gateway.impl.RemoteResourceServiceFactory;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.gateway.output.OutputFactory;
 import dagger.Binds;
@@ -203,8 +202,10 @@ public interface AwsModule {
             envVarsConfigService,
             asAwsCompliantNamespace(hostEnvironment.getInstanceId()));
 
-        return RemoteResourceServiceFactory.sharedRemote(config,
-            (bucket, pathPrefix) -> new S3ResourceService(s3Client, bucket, pathPrefix));
+        return config.getBucket()
+            .flatMap(bucket -> config.getSharedResourcePath()
+                .map(path -> (ResourceService) new S3ResourceService(s3Client, bucket, path)))
+            .orElse(new NoOpResourceService());
     }
 
     @Provides

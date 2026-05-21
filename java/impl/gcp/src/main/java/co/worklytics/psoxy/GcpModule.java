@@ -17,14 +17,13 @@ import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.RemoteResourceConfig;
-import co.worklytics.psoxy.gateway.ResourceService;
+import com.avaulta.gateway.resources.ResourceService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.CachingConfigServiceDecorator;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.gateway.impl.NoOpResourceService;
-import co.worklytics.psoxy.gateway.impl.RemoteResourceServiceFactory;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.gateway.output.OutputFactory;
 import co.worklytics.psoxy.gcp.GcpKmsPublicKeyStoreClient;
@@ -113,8 +112,10 @@ public interface GcpModule {
             asSecretManagerNamespace(
                 Optional.ofNullable(hostEnvironment.getInstanceId()).orElse("")));
 
-        return RemoteResourceServiceFactory.sharedRemote(config,
-            (bucket, pathPrefix) -> new GcsResourceService(storage, bucket, pathPrefix));
+        return config.getBucket()
+            .flatMap(bucket -> config.getSharedResourcePath()
+                .map(path -> (ResourceService) new GcsResourceService(storage, bucket, path)))
+            .orElse(new NoOpResourceService());
     }
 
     /**

@@ -5,7 +5,7 @@ import static org.mockito.Mockito.*;
 
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.ResourceService;
+import com.avaulta.gateway.resources.ResourceService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;

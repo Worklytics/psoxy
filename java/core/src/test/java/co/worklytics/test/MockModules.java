@@ -2,11 +2,13 @@ package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
+import co.worklytics.psoxy.gateway.impl.NoOpResourceService;
 import co.worklytics.psoxy.gateway.impl.output.NoOutput;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
 import co.worklytics.psoxy.gateway.output.OutputFactory;
 import co.worklytics.psoxy.gateway.output.OutputLocation;
+import com.avaulta.gateway.resources.ResourceService;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.avaulta.gateway.rules.BulkDataRules;
@@ -228,14 +230,14 @@ public class MockModules {
         @Provides
         @Singleton
         static ResourceService resourceService() {
-            return new co.worklytics.psoxy.gateway.impl.NoOpResourceService();
+            return new NoOpResourceService();
         }
 
         @Provides
         @Singleton
         @Named("SharedRemote")
         static ResourceService sharedRemoteResourceService() {
-            return new co.worklytics.psoxy.gateway.impl.NoOpResourceService();
+            return new NoOpResourceService();
         }
     }
 }
