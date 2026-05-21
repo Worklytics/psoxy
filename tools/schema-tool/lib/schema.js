@@ -17,37 +17,53 @@ export function inferSchema(value) {
 }
 
 /**
- * Recursively convert `required` arrays in a JSON Schema into proper type
- * descriptions: `["a","b"]` → `{ type: "array", items: { type: "string" } }`.
- *
- * @jsonhero/schema-infer produces valid JSON Schema 2020-12, where `required`
- * is an array of raw property-name strings. This function normalises those
- * arrays so every value in the schema is itself described as a JSON Schema
- * type, making the output consistent.
+ * Recursively strip `required` arrays from a JSON Schema.
+ * The inferred `required` list reflects only what appeared in the sample
+ * payload, not the true API contract, so including it in output is misleading.
  *
  * @param {Object} schema - JSON Schema object
  * @returns {Object}
  */
-export function describeRequired(schema) {
+export function removeRequired(schema) {
   if (!schema || typeof schema !== 'object' || Array.isArray(schema)) return schema;
 
   const result = { ...schema };
 
-  if (Array.isArray(result.required)) {
-    result.required = { type: 'array', items: { type: 'string' } };
-  }
+  // Strip `required` only when it is the JSON Schema keyword (always an array).
+  // A data field named `required` lives inside `properties` as a sub-schema
+  // and is never an array, so it passes through untouched.
+  if (Array.isArray(result.required)) delete result.required;
 
   if (result.properties) {
     result.properties = Object.fromEntries(
-      Object.entries(result.properties).map(([key, propSchema]) => [key, describeRequired(propSchema)])
+      Object.entries(result.properties).map(([key, propSchema]) => [key, removeRequired(propSchema)])
     );
   }
 
   if (result.items && typeof result.items === 'object' && result.items !== false) {
-    result.items = describeRequired(result.items);
+    result.items = removeRequired(result.items);
   }
 
   return result;
+}
+
+/**
+ * Parse a response body that is either a single JSON value or JSONL
+ * (one JSON value per line). JSONL is tried only when standard JSON.parse
+ * fails, so a normal JSON array is never misidentified as JSONL.
+ *
+ * @param {string} body
+ * @returns {*} parsed value — an array when the input is JSONL
+ * @throws {SyntaxError} when the body is neither valid JSON nor valid JSONL
+ */
+export function parseBody(body) {
+  try {
+    return JSON.parse(body);
+  } catch {
+    const lines = body.split('\n').filter(l => l.trim() !== '');
+    if (lines.length === 0) throw new SyntaxError('Empty response body');
+    return lines.map(line => JSON.parse(line));
+  }
 }
 
 /**

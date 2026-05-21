@@ -5,14 +5,16 @@
       "resource_type": "workspace",
       "name": "Acme Corp",
       "is_organization": true,
-      "email_domains": ["acme.com", "acme.org"]
+      "email_domains": ["acme.com", "acme.org"],
+      "required": true
     },
     {
       "gid": "99999999",
       "resource_type": "workspace",
       "name": "Personal Projects",
       "is_organization": false,
-      "email_domains": []
+      "email_domains": [],
+      "required": false
     },
     {
       "gid": "11111111",

@@ -100,8 +100,13 @@ variable "available_memory_mb" {
 
 variable "timeout_seconds" {
   type        = number
-  description = "Timeout (in seconds) for the function. Default value is 1800 (30 minutes)."
-  default     = 1800
+  description = "Timeout (in seconds) for the function. GCP Cloud Functions v2 with an event trigger are hard-capped at 540s; HTTP-triggered functions allow up to 3600s. Bulk connectors use event triggers, so the effective maximum is 540."
+  default     = 540
+
+  validation {
+    condition     = var.timeout_seconds <= 540
+    error_message = "GCP Cloud Functions v2 with an event trigger cannot exceed 540 seconds."
+  }
 }
 
 variable "example_file" {
@@ -202,4 +207,22 @@ variable "bucket_access_logs_destination" {
 variable "builder_sa_id" {
   description = "The fully-qualified ID of the custom builder service account used to build the Cloud Function."
   type        = string
+}
+
+variable "remote_resource_bucket" {
+  type        = string
+  description = "**beta** Name of the bucket from which to load remote resources (rules, NLP models, etc.)."
+  default     = null
+}
+
+variable "remote_resource_instance_path" {
+  type        = string
+  description = "**beta** Path prefix within remote_resource_bucket for instance-specific resources. Used to scope IAM grants."
+  default     = null
+}
+
+variable "remote_resource_shared_path" {
+  type        = string
+  description = "**beta** Path prefix within remote_resource_bucket for shared resources (NLP models, etc.). Used to scope IAM grants."
+  default     = null
 }

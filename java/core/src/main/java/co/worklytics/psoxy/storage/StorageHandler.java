@@ -490,15 +490,14 @@ public class StorageHandler {
      * @throws IOException
      */
     private InputStream readInputStream(StorageEventRequest request, int bufferSize, Supplier<InputStream> inputStreamSupplier) throws IOException {
-        InputStream raw = inputStreamSupplier.get();
+        InputStream prepared = inputStreamSupplier.get();
 
-        InputStream decompressed;
-        if (request.getDecompressInput()) {
-            // wrap in BufferedInputStream so we can peek at the first bytes
-            BufferedInputStream buffered = new BufferedInputStream(raw, bufferSize);
-            // toClose tracks the intermediate stream; nulled out once ownership transfers to caller
-            BufferedInputStream toClose = buffered;
-            try {
+        try {
+            if (request.getDecompressInput()) {
+                // wrap in BufferedInputStream so we can peek at the first bytes
+                BufferedInputStream buffered = new BufferedInputStream(prepared, bufferSize);
+                prepared = buffered;
+
                 buffered.mark(2);
                 int b0 = buffered.read();
                 int b1 = buffered.read();
@@ -506,27 +505,20 @@ public class StorageHandler {
 
                 // gzip magic number: 0x1f 0x8b
                 if (b0 == GZIP_MAGIC_BYTE_1 && b1 == GZIP_MAGIC_BYTE_2) {
-                    decompressed = new GZIPInputStream(buffered, bufferSize);
+                    prepared = new GZIPInputStream(buffered, bufferSize);
                 } else {
                     log.warning("Decompression requested but stream does not start with gzip magic bytes; "
                         + "cloud provider may have already decompressed. Proceeding without decompression.");
-                    decompressed = buffered;
-                }
-                toClose = null; // ownership transferred to decompressed / returned stream
-            } finally {
-                if (toClose != null) {
-                    toClose.close();
                 }
             }
-        } else {
-            decompressed = raw;
+
+            // BOMInputStream is a wrapper around InputStream, which strips byte order mark (BOM) if present
+            // this in effect results in a transformation; an input file with a BOM will be read as a stream without BOM, and output will be written without it
+            return BOMInputStream.builder().setInputStream(prepared).get();
+        } catch (IOException | RuntimeException e) {
+            prepared.close();
+            throw e;
         }
-
-        // BOMInputStream is a wrapper around InputStream, which strips byte order mark (BOM) if present
-
-        // this in effect results in a transformation; an input file with a BOM will be read as a stream without BOM, and output will be written without it
-
-        return BOMInputStream.builder().setInputStream(decompressed).get();
     }
 
     /**

@@ -265,3 +265,21 @@ variable "keep_warm_instances" {
     error_message = "If keep_warm_instances is set, it must be at least 1."
   }
 }
+
+variable "remote_resource_bucket" {
+  type        = string
+  description = "**beta** Name of the bucket from which to load remote resources (rules, NLP models, etc.)."
+  default     = null
+}
+
+variable "remote_resource_instance_path" {
+  type        = string
+  description = "**beta** Path prefix within remote_resource_bucket for instance-specific resources. Used to scope IAM grants."
+  default     = null
+}
+
+variable "remote_resource_shared_path" {
+  type        = string
+  description = "**beta** Path prefix within remote_resource_bucket for shared resources (NLP models, etc.). Used to scope IAM grants."
+  default     = null
+}

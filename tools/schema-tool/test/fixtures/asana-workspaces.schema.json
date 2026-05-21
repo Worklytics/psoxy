@@ -25,17 +25,12 @@
               "type": "string",
               "format": "hostname"
             }
+          },
+          "required": {
+            "type": "boolean"
           }
-        },
-        "required": [
-          "gid",
-          "resource_type",
-          "name"
-        ]
+        }
       }
     }
-  },
-  "required": [
-    "data"
-  ]
+  }
 }

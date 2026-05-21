@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gcp;
 import co.worklytics.psoxy.gateway.auth.PublicKeyRef;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStore;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
+import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient.PublicKeyVersionId;
 import com.google.cloud.kms.v1.CryptoKeyVersion;
 import com.google.cloud.kms.v1.CryptoKeyVersionName;
 import com.google.cloud.kms.v1.KeyManagementServiceClient;
