@@ -15,9 +15,4 @@ public class NoOpResourceService implements ResourceService {
     public Optional<InputStream> getResource(String objectPath) {
         return Optional.empty();
     }
-
-    @Override
-    public boolean exists(String objectPath) {
-        return false;
-    }
 }

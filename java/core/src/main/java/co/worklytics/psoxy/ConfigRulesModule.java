@@ -30,7 +30,7 @@ public class ConfigRulesModule {
      * Well-known resource path for rules loaded from InstanceResourceService (local FS or remote
      * cloud storage).
      */
-    public static final String RULES_RESOURCE_PATH = "rules.yaml";
+    public static final String RULES_RESOURCE_PATH = "RULES";
 
     @Provides @Singleton
     static RESTRules restRules(RuleSet ruleSet) {

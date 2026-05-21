@@ -30,25 +30,4 @@ public interface ResourceService {
      *         Caller MUST close the returned InputStream.
      */
     Optional<InputStream> getResource(String objectPath);
-
-    /**
-     * Check whether a resource exists at the given path without opening a stream.
-     *
-     * <p>Default implementation attempts to open and immediately close the resource.
-     * Implementations should override for efficiency where possible.</p>
-     *
-     * @param objectPath path to the resource
-     * @return true if the resource exists
-     */
-    default boolean exists(String objectPath) {
-        Optional<InputStream> resource = getResource(objectPath);
-        resource.ifPresent(is -> {
-            try {
-                is.close();
-            } catch (Exception e) {
-                // swallow
-            }
-        });
-        return resource.isPresent();
-    }
 }

@@ -33,9 +33,4 @@ public class CompositeResourceService implements ResourceService {
         }
         return fallback.getResource(objectPath);
     }
-
-    @Override
-    public boolean exists(String objectPath) {
-        return preferred.exists(objectPath) || fallback.exists(objectPath);
-    }
 }

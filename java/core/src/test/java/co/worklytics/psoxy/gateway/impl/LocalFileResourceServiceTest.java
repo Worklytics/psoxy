@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gateway.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -57,50 +58,33 @@ public class LocalFileResourceServiceTest {
         }
     }
 
-    @Test
-    void testExists_ValidPath() {
-        assertTrue(service.exists("test-resource.txt"));
-        assertTrue(service.exists("subdir/sub-resource.txt"));
-        assertFalse(service.exists("non-existent.txt"));
-    }
 
     @Test
     void testGetResource_AbsolutePathsRejected() {
         // Try accessing an absolute path (even if it's the testFile path)
-        Optional<InputStream> isOpt = service.getResource(testFile.toAbsolutePath().toString());
-        assertFalse(isOpt.isPresent());
+        assertThrows(IllegalArgumentException.class, () -> service.getResource(testFile.toAbsolutePath().toString()));
 
         // Test with a generic Unix absolute path
-        assertFalse(service.getResource("/etc/passwd").isPresent());
+        assertThrows(IllegalArgumentException.class, () -> service.getResource("/etc/passwd"));
     }
 
-    @Test
-    void testExists_AbsolutePathsRejected() {
-        assertFalse(service.exists(testFile.toAbsolutePath().toString()));
-        assertFalse(service.exists("/etc/passwd"));
-    }
 
     @Test
     void testGetResource_PathTraversalRejected() {
         // Attempt traversal out of base dir
-        assertFalse(service.getResource("../passwd").isPresent());
-        assertFalse(service.getResource("subdir/../../passwd").isPresent());
-        assertFalse(service.getResource("subdir/..").isPresent());
+        assertThrows(IllegalArgumentException.class, () -> service.getResource("../passwd"));
+        assertThrows(IllegalArgumentException.class, () -> service.getResource("subdir/../../passwd"));
+        assertThrows(IllegalArgumentException.class, () -> service.getResource("subdir/.."));
     }
 
-    @Test
-    void testExists_PathTraversalRejected() {
-        assertFalse(service.exists("../passwd"));
-        assertFalse(service.exists("subdir/../../passwd"));
-    }
 
     @Test
     void testGetResource_WeirdPathsRejected() {
-        assertFalse(service.getResource(null).isPresent());
-        assertFalse(service.getResource("").isPresent());
-        assertFalse(service.getResource("   ").isPresent());
-        assertFalse(service.getResource("test\0resource.txt").isPresent());
-        assertFalse(service.getResource("./test-resource.txt").isPresent());
-        assertFalse(service.getResource("subdir/../test-resource.txt").isPresent());
+        assertThrows(IllegalArgumentException.class, () -> service.getResource(null));
+        assertThrows(IllegalArgumentException.class, () -> service.getResource(""));
+        assertThrows(IllegalArgumentException.class, () -> service.getResource("   "));
+        assertThrows(IllegalArgumentException.class, () -> service.getResource("test\0resource.txt"));
+        assertThrows(IllegalArgumentException.class, () -> service.getResource("./test-resource.txt"));
+        assertThrows(IllegalArgumentException.class, () -> service.getResource("subdir/../test-resource.txt"));
     }
 }

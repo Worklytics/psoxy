@@ -31,11 +31,7 @@ public class LocalFileResourceService implements ResourceService {
 
     @Override
     public Optional<InputStream> getResource(String objectPath) {
-        Optional<Path> resolvedOpt = resolveSafePath(objectPath);
-        if (resolvedOpt.isEmpty()) {
-            return Optional.empty();
-        }
-        Path resolved = resolvedOpt.get();
+        Path resolved = resolveSafePath(objectPath);
         if (!Files.exists(resolved) || !Files.isRegularFile(resolved)) {
             log.log(Level.FINE, "Local resource not found: {0}", resolved);
             return Optional.empty();
@@ -50,43 +46,31 @@ public class LocalFileResourceService implements ResourceService {
         }
     }
 
-    @Override
-    public boolean exists(String objectPath) {
-        return resolveSafePath(objectPath)
-                .map(resolved -> Files.exists(resolved) && Files.isRegularFile(resolved))
-                .orElse(false);
-    }
-
-    private Optional<Path> resolveSafePath(String objectPath) {
+    private Path resolveSafePath(String objectPath) {
         if (objectPath == null || objectPath.trim().isEmpty()) {
-            log.log(Level.WARNING, "Rejected null or empty objectPath");
-            return Optional.empty();
+            throw new IllegalArgumentException("Object path must not be null or empty");
         }
 
         if (objectPath.indexOf('\0') != -1) {
-            log.log(Level.WARNING, "Rejected objectPath containing null byte");
-            return Optional.empty();
+            throw new IllegalArgumentException("Object path must not contain null bytes");
         }
 
         // Reject absolute paths
         if (objectPath.startsWith("/") || objectPath.startsWith("\\")) {
-            log.log(Level.WARNING, "Rejected objectPath starting with separator: {0}", objectPath);
-            return Optional.empty();
+            throw new IllegalArgumentException("Object path must not start with a separator: " + objectPath);
         }
 
         // Reject traversal or current-directory segments
         for (String segment : objectPath.split("[/\\\\]")) {
             if (".".equals(segment) || "..".equals(segment)) {
-                log.log(Level.WARNING, "Rejected objectPath containing '.' or '..' segment: {0}", objectPath);
-                return Optional.empty();
+                throw new IllegalArgumentException("Object path must not contain '.' or '..' segments: " + objectPath);
             }
         }
 
         try {
             Path objPath = Paths.get(objectPath);
             if (objPath.isAbsolute()) {
-                log.log(Level.WARNING, "Rejected absolute objectPath: {0}", objectPath);
-                return Optional.empty();
+                throw new IllegalArgumentException("Object path must not be absolute: " + objectPath);
             }
 
             Path base = Paths.get(basePath).toAbsolutePath().normalize();
@@ -94,15 +78,14 @@ public class LocalFileResourceService implements ResourceService {
 
             // Ensure the resolved path starts with base path
             if (!resolved.startsWith(base)) {
-                log.log(Level.WARNING, "Path traversal attempt detected. Object path: {0} resolved outside base path: {1}",
-                        new Object[]{objectPath, base});
-                return Optional.empty();
+                throw new IllegalArgumentException("Path traversal attempt detected. Object path resolved outside base path: " + objectPath);
             }
 
-            return Optional.of(resolved);
+            return resolved;
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
-            log.log(Level.WARNING, "Failed to resolve path for objectPath: " + objectPath, e);
-            return Optional.empty();
+            throw new IllegalArgumentException("Failed to resolve path for objectPath: " + objectPath, e);
         }
     }
 }

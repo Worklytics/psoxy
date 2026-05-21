@@ -57,21 +57,6 @@ public class GcsResourceService implements ResourceService {
             }
             log.log(Level.WARNING, "Error fetching GCS resource: gs://" + bucketName + "/" + key, e);
             throw e;
-        }
-    }
-
-    @Override
-    public boolean exists(String objectPath) {
-        String key = resolveKey(objectPath);
-        BlobId blobId = BlobId.of(bucketName, key);
-        try {
-            return storage.get(blobId) != null;
-        } catch (StorageException e) {
-            if (e.getCode() == 404) {
-                return false;
-            }
-            throw e;
-        }
     }
 
     private String resolveKey(String objectPath) {

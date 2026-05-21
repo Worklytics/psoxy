@@ -52,12 +52,6 @@ public class S3ResourceService implements ResourceService {
         }
     }
 
-    @Override
-    public boolean exists(String objectPath) {
-        String key = resolveKey(objectPath);
-        return s3Client.doesObjectExist(bucketName, key);
-    }
-
     private String resolveKey(String objectPath) {
         if (pathPrefix.isEmpty()) {
             return objectPath;
