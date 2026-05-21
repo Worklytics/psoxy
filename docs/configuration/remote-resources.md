@@ -28,10 +28,13 @@ mounted locally.
 
 ## Terraform Configuration
 
-By default, the Terraform modules in this repository will **automatically** configure the
-`REMOTE_RESOURCE_BUCKET` for you if you pass the `remote_resource_bucket` variable to your host
-module. In most deployments, the existing **artifacts bucket** (used for deployment bundles) is a
-natural choice for this purpose.
+By default, the host modules in this repository (`aws-host` and `gcp-host`) will configure the
+`REMOTE_RESOURCE_BUCKET` for you if you set the `enable_remote_resources` variable to `true`. This
+automatically wires the **artifacts bucket** (used for deployment bundles) as the remote resource bucket.
+
+> [!IMPORTANT]
+> - If you configure an existing bucket (e.g., by providing `artifacts_bucket_name`), the bucket must already exist.
+> - The Terraform runner (the credentials running the `terraform` command) must have sufficient IAM permissions on that bucket to apply permissions (since it will grant read access to the proxy's service account or Lambda execution role).
 
 ### AWS (`aws-host`)
 
@@ -41,13 +44,13 @@ module "psoxy" {
 
   # ... existing configuration ...
 
-  # Set to the artifacts bucket or any S3 bucket accessible to your lambdas
-  remote_resource_bucket = module.psoxy.artifacts_bucket_name
+  # Enable remote resource loading from the artifacts S3 bucket
+  enable_remote_resources = true
 }
 ```
 
 This will:
-- Set `REMOTE_RESOURCE_BUCKET` on every Lambda function
+- Set `REMOTE_RESOURCE_BUCKET` on every Lambda function to the artifacts bucket name
 - Grant `s3:GetObject` permission on `arn:aws:s3:::{bucket}/*` to each Lambda's execution role
 
 ### GCP (`gcp-host`)
@@ -58,13 +61,13 @@ module "psoxy" {
 
   # ... existing configuration ...
 
-  # Set to the artifacts bucket or any GCS bucket accessible to your functions
-  remote_resource_bucket = module.psoxy.artifacts_bucket_name
+  # Enable remote resource loading from the artifacts GCS bucket
+  enable_remote_resources = true
 }
 ```
 
 This will:
-- Set `REMOTE_RESOURCE_BUCKET` on every Cloud Function
+- Set `REMOTE_RESOURCE_BUCKET` on every Cloud Function to the artifacts bucket name
 - Grant `roles/storage.objectViewer` on the bucket to each function's service account
 
 ## Environment Variables
