@@ -37,11 +37,19 @@ public class SentenceMetadataProcessor {
         if (sentenceDetector == null) {
             synchronized (lock) {
                 if (sentenceDetector == null) {
-                    try {
-                        sentenceDetector = new SentenceDetectorME(new SentenceModel(loadStream("/opennlp/en-sent.bin")));
-                        posTagger = new POSTaggerME(new POSModel(loadStream("/opennlp/en-pos-maxent.bin")));
-                        chunker = new ChunkerME(new ChunkerModel(loadStream("/opennlp/en-chunker.bin")));
-                        lemmatizer = new DictionaryLemmatizer(loadStream("/opennlp/en-lemmatizer.dict"));
+                    try (InputStream sentenceModelStream = loadStream("/opennlp/en-sent.bin");
+                         InputStream posModelStream = loadStream("/opennlp/en-pos-maxent.bin");
+                         InputStream chunkerModelStream = loadStream("/opennlp/en-chunker.bin");
+                         InputStream lemmatizerStream = loadStream("/opennlp/en-lemmatizer.dict")) {
+                        SentenceDetectorME localSentenceDetector = new SentenceDetectorME(new SentenceModel(sentenceModelStream));
+                        POSTaggerME localPosTagger = new POSTaggerME(new POSModel(posModelStream));
+                        ChunkerME localChunker = new ChunkerME(new ChunkerModel(chunkerModelStream));
+                        DictionaryLemmatizer localLemmatizer = new DictionaryLemmatizer(lemmatizerStream);
+
+                        sentenceDetector = localSentenceDetector;
+                        posTagger = localPosTagger;
+                        chunker = localChunker;
+                        lemmatizer = localLemmatizer;
                     } catch (Exception e) {
                         // For PoC, ignore if models are missing, we will handle nulls
                         System.err.println("Warning: NLP models not found. NLP Augment will return empty data. " + e.getMessage());
