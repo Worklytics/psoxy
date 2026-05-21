@@ -49,17 +49,13 @@ node cli-schema.js -e https://app.asana.com/api/1.0/workspaces -a $TOKEN
             "gid":           { "type": "string" },
             "resource_type": { "type": "string" },
             "name":          { "type": "string" }
-          },
-          "required": { "type": "array", "items": { "type": "string" } }
+          }
         }
       }
-    },
-    "required": { "type": "array", "items": { "type": "string" } }
+    }
   }
 }
 ```
-
-The `required` field is itself described as a typed schema (an array of strings) rather than expanded inline, keeping the output consistent — every value is a JSON Schema type.
 
 Use `--skip-headers` to omit the headers section when only the schema is needed:
 
@@ -73,10 +69,19 @@ Use `--raw` to print the unparsed response body, bypassing schema inference:
 node cli-schema.js -e https://app.asana.com/api/1.0/workspaces -a $TOKEN --raw
 ```
 
+## JSONL support
+
+Endpoints that return newline-delimited JSON (one JSON value per line) are detected automatically. When standard JSON parsing fails, the tool falls back to JSONL mode: each non-empty line is parsed individually and the resulting array of values is used for inference.
+
+```shell
+node cli-schema.js -e https://api.example.com/v1/audit-log -a $TOKEN --skip-headers
+```
+
+The inferred schema will have `"type": "array"` at the top level, with `items` describing the shape of a single log line.
+
 ## Notes
 
-- Schema inference uses [`@jsonhero/schema-infer`] (JSON Schema 2020-12). It detects common string formats such as `date-time`, `date`, `uuid`, `email`, `uri`, and `hostname`.
-- Fields present in only some array items are marked as optional (absent from `required`).
+- Schema inference uses [`@jsonhero/schema-infer`] (JSON Schema 2020-12). It detects common string formats such as `date-time`, `date`, `uuid`, `email`, `uri`, `ipv4`, and `hostname`.
 - Fields that are `null` in some items and a concrete type in others produce a union type (e.g. `"type": ["string", "null"]`).
 - Non-2xx responses print the status and body to stderr and exit with code 1.
 

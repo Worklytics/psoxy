@@ -184,6 +184,7 @@
                 <configuration>
                     <!-- rerun failing tests twice more -->
                     <rerunFailingTestsCount>2</rerunFailingTestsCount>
+                    <argLine>-javaagent:"${settings.localRepository}/org/mockito/mockito-core/${dependency.mockito-junit-jupiter.version}/mockito-core-${dependency.mockito-junit-jupiter.version}.jar"</argLine>
                     <systemProperties>
                         <property>
                             <name>java.util.logging.config.file</name>

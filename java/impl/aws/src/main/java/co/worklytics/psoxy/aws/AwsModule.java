@@ -3,10 +3,7 @@ package co.worklytics.psoxy.aws;
 import java.time.Duration;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import software.amazon.awssdk.services.s3.S3Client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
@@ -90,8 +87,6 @@ public interface AwsModule {
     @Provides
     @Singleton
     static CognitoIdentityClient cognitoClient(AwsEnvironment awsEnvironment) {
-        AWSCredentials credentials = DefaultAWSCredentialsProviderChain.getInstance().getCredentials();
-
         return CognitoIdentityClient.builder()
                 .region(Region.of(awsEnvironment.getRegion()))
                 .build();
@@ -181,8 +176,8 @@ public interface AwsModule {
     }
 
     @Provides
-    static AmazonS3 getStorageClient() {
-        return AmazonS3ClientBuilder.defaultClient();
+    static S3Client getStorageClient() {
+        return S3Client.create();
     }
 
     @Provides @Singleton @Named("Remote")
