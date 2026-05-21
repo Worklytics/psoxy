@@ -39,6 +39,10 @@ public class S3ResourceService implements ResourceService {
     public Optional<InputStream> getResource(String objectPath) {
         String key = resolveKey(objectPath);
         try {
+            if (!s3Client.doesObjectExist(bucketName, key)) {
+                log.log(Level.FINE, "S3 resource not found: s3://{0}/{1}", new Object[]{bucketName, key});
+                return Optional.empty();
+            }
             S3Object s3Object = s3Client.getObject(new GetObjectRequest(bucketName, key));
             log.log(Level.INFO, "Loaded resource from S3: s3://{0}/{1}", new Object[]{bucketName, key});
             return Optional.of(s3Object.getObjectContent());

@@ -1,6 +1,7 @@
 package co.worklytics.psoxy;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
@@ -97,12 +98,13 @@ public class ConfigRulesModule {
      */
     static Optional<RuleSet> getRulesFromResource(Logger log, RulesUtils rulesUtils, ResourceService resourceService) {
         try {
-            if (resourceService.exists(RULES_RESOURCE_PATH)) {
+            Optional<InputStream> rulesStream = resourceService.getResource(RULES_RESOURCE_PATH);
+            if (rulesStream.isEmpty()) {
                 return Optional.empty();
             }
 
             try (InputStream is = rulesStream.get()) {
-                String yamlContent = new String(is.readAllBytes());
+                String yamlContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
                 return Optional.of(rulesUtils.parse(yamlContent));
             }
         } catch (Exception e) {

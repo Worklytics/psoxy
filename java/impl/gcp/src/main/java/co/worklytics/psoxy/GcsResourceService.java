@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 
 import com.google.cloud.ReadChannel;
+import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageException;
@@ -42,12 +43,13 @@ public class GcsResourceService implements ResourceService {
         BlobId blobId = BlobId.of(bucketName, key);
 
         try {
-            if (storage.get(blobId) == null) {
+            Blob blob = storage.get(blobId);
+            if (blob == null) {
                 log.log(Level.FINE, "GCS resource not found: gs://{0}/{1}", new Object[]{bucketName, key});
                 return Optional.empty();
             }
 
-            ReadChannel readChannel = storage.reader(blobId);
+            ReadChannel readChannel = blob.reader();
             log.log(Level.INFO, "Loaded resource from GCS: gs://{0}/{1}", new Object[]{bucketName, key});
             return Optional.of(Channels.newInputStream(readChannel));
         } catch (StorageException e) {
@@ -57,6 +59,7 @@ public class GcsResourceService implements ResourceService {
             }
             log.log(Level.WARNING, "Error fetching GCS resource: gs://" + bucketName + "/" + key, e);
             throw e;
+        }
     }
 
     private String resolveKey(String objectPath) {

@@ -300,10 +300,13 @@ locals {
       "s3:GetObject",
     ]
     Effect = "Allow"
-    Resource = compact([
-      var.remote_resource_instance_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_instance_path}*" : null,
-      var.remote_resource_shared_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_shared_path}*" : null,
-    ])
+    Resource = coalescelist(
+      compact([
+        var.remote_resource_instance_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_instance_path}*" : null,
+        var.remote_resource_shared_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_shared_path}*" : null,
+      ]),
+      ["arn:aws:s3:::${var.remote_resource_bucket}/*"]
+    )
   }] : []
 
   aws_kms_public_key_statements = length(var.aws_kms_public_keys) > 0 ? [{
