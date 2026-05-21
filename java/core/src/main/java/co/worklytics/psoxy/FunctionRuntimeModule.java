@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import com.avaulta.gateway.rules.WebhookCollectionRules;
+import co.worklytics.psoxy.impl.OpenNlpRuntimeSupport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -34,6 +35,7 @@ import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
 import co.worklytics.psoxy.gateway.output.Output;
+import co.worklytics.psoxy.impl.OpenNlpRuntimeSupport;
 import co.worklytics.psoxy.impl.WebhookSanitizerImplFactory;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
@@ -137,12 +139,15 @@ public class FunctionRuntimeModule {
      * via deployment layers, Lambda layers, init scripts, etc.</p>
      */
     @Provides @Singleton
-    static ResourceService instanceResourceService(@Named("Remote") ResourceService remoteResourceService) {
+    static ResourceService instanceResourceService(@Named("Remote") ResourceService remoteResourceService,
+                                                   @Named("SharedRemote") ResourceService sharedRemoteResourceService) {
         // always layer local FS on top of remote — local is a fast path / override
-        return CompositeResourceService.builder()
+        ResourceService instanceResourceService = CompositeResourceService.builder()
             .preferred(new LocalFileResourceService(ResourceService.DEFAULT_LOCAL_RESOURCE_PATH))
             .fallback(remoteResourceService)
             .build();
+        OpenNlpRuntimeSupport.install(instanceResourceService, sharedRemoteResourceService);
+        return instanceResourceService;
     }
 
     @Provides @Singleton @Named("async")

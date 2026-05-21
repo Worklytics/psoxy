@@ -17,7 +17,7 @@ else
     NC='\033[0m'
 fi
 
-BASE_URL="http://opennlp.sourceforge.net/models-1.5"
+BASE_URL="https://opennlp.sourceforge.net/models-1.5"
 DEST_DIR="java/gateway-core/src/main/resources/opennlp"
 
 # The core English models required for the pipeline
@@ -56,21 +56,6 @@ for MODEL in "${MODELS[@]}"; do
     fi
 done
 
-# The lemmatizer dictionary is not hosted on the standard 1.5 SF mirror, fetching from a reliable GitHub mirror
-LEMMATIZER_URL="https://raw.githubusercontent.com/richardwilly98/elasticsearch-opennlp-auto-tagging/master/src/main/resources/models/en-lemmatizer.dict"
-LEMMATIZER_TARGET="$DEST_DIR/en-lemmatizer.dict"
-
-if [ ! -s "$LEMMATIZER_TARGET" ]; then
-    printf "${INFO}Fetching en-lemmatizer.dict...${NC}\n"
-    if curl -L -f -s -o "$LEMMATIZER_TARGET" "$LEMMATIZER_URL"; then
-        printf "${SUCCESS}Successfully downloaded en-lemmatizer.dict${NC}\n"
-    else
-        printf "${ERR}Failed to download en-lemmatizer.dict${NC}\n"
-        rm -f "$LEMMATIZER_TARGET"
-        exit 1
-    fi
-else
-    printf "${WARN}Skipping en-lemmatizer.dict (already exists and not empty)${NC}\n"
-fi
+# The lemmatizer dictionary is not used by the current pipeline; omitted from required models.
 
 printf "${SUCCESS}All required OpenNLP models downloaded successfully.${NC}\n"

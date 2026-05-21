@@ -82,16 +82,16 @@ The `+sentenceMetadata` block is structured with a `sentences` array containing 
 ```
 
 ## NLP Pipeline
-The NLP processing will rely exclusively on Apache OpenNLP. We will use pretrained English models: `en-sent.bin`, `en-pos-maxent.bin`, `en-lemmatizer.bin`, `en-ner-*.bin`, and `en-chunker.bin`. No sentiment analysis will be performed.
+The NLP processing will rely exclusively on Apache OpenNLP. We use pretrained English models: `en-sent.bin`, `en-pos-maxent.bin`, and `en-chunker.bin`. No sentiment analysis will be performed.
 
 ### Performance, Size, and Deployment Strategy
 - **Library Choice**: Apache OpenNLP is chosen over alternatives like Stanford CoreNLP due to its smaller footprint. The OpenNLP core library is very lightweight (~1.5 MB), and the combined pre-trained models require approximately 15-20 MB. This keeps the total deployment package size well within AWS Lambda and GCP Cloud Function unzipped limits (which CoreNLP's ~500 MB footprint would exceed).
 - **Memory Consumption**: When loaded, the models will consume roughly 50-150 MB of heap memory.
-- **Lazy Loading Strategy**: To prevent unnecessary memory consumption and ensure zero impact on proxies that do not utilize the `SentenceMetadata` augment, the implementation must load models *lazily*. The models should only be read into memory the first time the augment is instantiated or invoked at runtime. If the augment is unused, memory overhead is 0 MB.
+- **Lazy Loading Strategy**: To prevent unnecessary memory consumption and ensure zero impact on proxies that do not utilize the `SentenceMetadata` augment, the implementation must load models *lazily*. The models should only be read into memory the first time the augment is invoked at runtime. If the augment is unused, memory overhead is 0 MB.
 - **Deployment & Embedding**: 
-  - For local development, testing, and CI, the `.bin` models can be loaded directly from the local file system (e.g. `src/main/resources/opennlp/`).
+  - For local development, testing, and CI, the `.bin` models can be loaded from the classpath (e.g. `src/main/resources/opennlp/`) after running `tools/fetch-opennlp-models.sh`.
   - For cloud deployments, Terraform modules should expose an `embed_nlp` flag. When set to `false` (the recommended default), the binary models are excluded from the deployment zip bundle to save space.
-  - **Remote Loading Architecture**: When models are not embedded, the proxy will load them on demand at runtime from an S3 or GCS bucket using the configuration service. By resolving artifact URIs (e.g. `gs://bucket/models/en-sent.bin`), the JVM can stream the binaries directly into memory via `InputStream`. This avoids disk space limits, minimizes deployment sizes, and only incurs a download penalty for deployments actively using NLP features.
+  - **Remote Loading Architecture**: When models are not embedded, the proxy loads them on demand at runtime via `ResourceService`. Models are resolved at `opennlp/{model}.bin` under the instance resource path (local filesystem at `/var/psoxy/resources`, then instance remote prefix) with failover to the shared resource path (`SHARED_RESOURCE_PATH` in the remote bucket). The JVM streams binaries directly into memory via `InputStream`.
   - *Note on Future Extensibility*: This architecture—allowing heavy machine learning artifacts to be embedded or loaded remotely via GCS/S3—will serve as the foundational pattern for future local LLM integrations, allowing model weights to be fetched on demand or delegated to external cloud services (Vertex AI, Amazon Bedrock).
 ## Noun Taxonomy Design
 Nouns are only emitted if matched against a configurable taxonomy of safe semantic classes (e.g. `CONTENT_TYPE`, `CODE_ARTIFACT`, `TASK_NOUN`, `FORMAT`, `MEDIUM`). The taxonomy must be externally configurable via a JSON or YAML config file, and not hardcoded. Proper nouns (NNP) are always suppressed. Unmatched common nouns are suppressed and counted.

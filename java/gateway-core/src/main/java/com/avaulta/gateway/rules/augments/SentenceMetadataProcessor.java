@@ -1,8 +1,8 @@
 package com.avaulta.gateway.rules.augments;
 
+import com.avaulta.gateway.resources.BinaryResourceProvider;
 import opennlp.tools.chunker.ChunkerME;
 import opennlp.tools.chunker.ChunkerModel;
-import opennlp.tools.lemmatizer.DictionaryLemmatizer;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
 import opennlp.tools.sentdetect.SentenceDetectorME;
@@ -18,11 +18,14 @@ import java.util.*;
  */
 public class SentenceMetadataProcessor {
 
+    static final String MODEL_PATH_PREFIX = "opennlp/";
+
     private static volatile SentenceDetectorME sentenceDetector;
     private static volatile POSTaggerME posTagger;
     private static volatile ChunkerME chunker;
-    private static volatile DictionaryLemmatizer lemmatizer;
-    
+
+    private static volatile BinaryResourceProvider resourceProvider;
+
     private static final Object lock = new Object();
 
     // Closed-class lists for signal derivation
@@ -30,28 +33,44 @@ public class SentenceMetadataProcessor {
     private static final Set<String> CONSTRAINT_WORDS = Set.of("must", "only", "never", "always", "don't", "avoid", "require", "cannot");
 
     /**
-     * Initializes models lazily from classpath or remote streams.
-     * For this PoC, loads from classpath resources.
+     * Configure an external resource provider for model loading (local FS, S3, GCS, etc.).
+     * If unset, only classpath resources are checked.
+     */
+    public static void configureResourceProvider(BinaryResourceProvider provider) {
+        resourceProvider = provider;
+    }
+
+    /**
+     * Reset cached models and provider. For unit tests only.
+     */
+    static void resetForTests() {
+        synchronized (lock) {
+            sentenceDetector = null;
+            posTagger = null;
+            chunker = null;
+            resourceProvider = null;
+        }
+    }
+
+    /**
+     * Initializes models lazily from the configured resource provider or classpath.
      */
     private static void initializeModels() {
         if (sentenceDetector == null) {
             synchronized (lock) {
                 if (sentenceDetector == null) {
-                    try (InputStream sentenceModelStream = loadStream("/opennlp/en-sent.bin");
-                         InputStream posModelStream = loadStream("/opennlp/en-pos-maxent.bin");
-                         InputStream chunkerModelStream = loadStream("/opennlp/en-chunker.bin");
-                         InputStream lemmatizerStream = loadStream("/opennlp/en-lemmatizer.dict")) {
+                    try (InputStream sentenceModelStream = loadStream("en-sent.bin");
+                         InputStream posModelStream = loadStream("en-pos-maxent.bin");
+                         InputStream chunkerModelStream = loadStream("en-chunker.bin")) {
                         SentenceDetectorME localSentenceDetector = new SentenceDetectorME(new SentenceModel(sentenceModelStream));
                         POSTaggerME localPosTagger = new POSTaggerME(new POSModel(posModelStream));
                         ChunkerME localChunker = new ChunkerME(new ChunkerModel(chunkerModelStream));
-                        DictionaryLemmatizer localLemmatizer = new DictionaryLemmatizer(lemmatizerStream);
 
                         sentenceDetector = localSentenceDetector;
                         posTagger = localPosTagger;
                         chunker = localChunker;
-                        lemmatizer = localLemmatizer;
                     } catch (Exception e) {
-                        // For PoC, ignore if models are missing, we will handle nulls
+                        // For PoC, ignore if models are missing; process() will return null
                         System.err.println("Warning: NLP models not found. NLP Augment will return empty data. " + e.getMessage());
                     }
                 }
@@ -59,12 +78,20 @@ public class SentenceMetadataProcessor {
         }
     }
 
-    private static InputStream loadStream(String path) {
-        InputStream is = SentenceMetadataProcessor.class.getResourceAsStream(path);
-        if (is == null) {
-            throw new RuntimeException("Model file not found in classpath: " + path);
+    private static InputStream loadStream(String modelFileName) {
+        String relativePath = MODEL_PATH_PREFIX + modelFileName;
+
+        BinaryResourceProvider provider = resourceProvider;
+        if (provider != null) {
+            return provider.open(relativePath)
+                .orElseThrow(() -> new RuntimeException("Model file not found via resource provider: " + relativePath));
         }
-        return is;
+
+        InputStream fromClasspath = SentenceMetadataProcessor.class.getResourceAsStream("/" + relativePath);
+        if (fromClasspath == null) {
+            throw new RuntimeException("Model file not found: " + relativePath);
+        }
+        return fromClasspath;
     }
 
     public static Map<String, Object> process(String text, Map<String, List<String>> taxonomy) {
@@ -200,7 +227,7 @@ public class SentenceMetadataProcessor {
             sObj.put("verbs", verbsList);
             sObj.put("nouns", nounsList);
             sObj.put("modifiers", modifiersList);
-            
+
             Map<String, Object> structure = new TreeMap<>();
             structure.put("voice", isPassive ? "passive" : "active");
             structure.put("vp_count", vpCount);
@@ -228,7 +255,7 @@ public class SentenceMetadataProcessor {
         docSummary.put("token_count", totalTokens);
         docSummary.put("sentence_types", sentenceTypes);
         docSummary.put("noun_categories", new ArrayList<>(allNounCategories));
-        
+
         Map<String, Integer> sumSuppressed = new TreeMap<>();
         sumSuppressed.put("common_nouns", totalSuppressedCommon);
         sumSuppressed.put("proper_nouns", totalSuppressedProper);

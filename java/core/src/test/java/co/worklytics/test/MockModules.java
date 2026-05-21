@@ -230,6 +230,13 @@ public class MockModules {
         static ResourceService resourceService() {
             return new co.worklytics.psoxy.gateway.impl.NoOpResourceService();
         }
+
+        @Provides
+        @Singleton
+        @Named("SharedRemote")
+        static ResourceService sharedRemoteResourceService() {
+            return new co.worklytics.psoxy.gateway.impl.NoOpResourceService();
+        }
     }
 }
 
