@@ -125,12 +125,15 @@ resource "google_storage_bucket_iam_member" "grant_sa_reader_on_remote_resource_
   member = "serviceAccount:${google_service_account.service_account.email}"
   role   = "roles/storage.objectViewer"
 
-  condition {
-    title = "scope_to_resource_paths"
-    expression = join(" || ", compact([
-      var.remote_resource_instance_path != null ? "resource.name.startsWith(\"projects/_/buckets/${var.remote_resource_bucket}/objects/${var.remote_resource_instance_path}\")" : null,
-      var.remote_resource_shared_path != null ? "resource.name.startsWith(\"projects/_/buckets/${var.remote_resource_bucket}/objects/${var.remote_resource_shared_path}\")" : null,
-    ]))
+  dynamic "condition" {
+    for_each = (var.remote_resource_instance_path != null || var.remote_resource_shared_path != null) ? [1] : []
+    content {
+      title = "scope_to_resource_paths"
+      expression = join(" || ", compact([
+        var.remote_resource_instance_path != null ? "resource.name.startsWith(\"projects/_/buckets/${var.remote_resource_bucket}/objects/${var.remote_resource_instance_path}\")" : null,
+        var.remote_resource_shared_path != null ? "resource.name.startsWith(\"projects/_/buckets/${var.remote_resource_bucket}/objects/${var.remote_resource_shared_path}\")" : null,
+      ]))
+    }
   }
 }
 
