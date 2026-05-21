@@ -29,8 +29,7 @@ class AugmentProcessorTest {
             .options(Option.SUPPRESS_EXCEPTIONS)
             .build();
 
-        augmentProcessor = new AugmentProcessor();
-        augmentProcessor.jsonConfiguration = jsonConfiguration;
+        augmentProcessor = new AugmentProcessor(jsonConfiguration);
     }
 
     @Test
@@ -219,7 +218,10 @@ class AugmentProcessorTest {
     void applyAugments_computeException_skipsGracefully() {
         // Create an augment that always throws
         Augment failingAugment = new Augment() {
-            { this.jsonPaths = List.of("$.body.content"); }
+            @Override
+            public List<String> getJsonPaths() {
+                return List.of("$.body.content");
+            }
             @Override
             public String getFunctionName() {
                 return "failing";

@@ -34,8 +34,12 @@ public class AugmentProcessor {
     /** Separator between source property name and augment function name. */
     public static final String AUGMENT_SEPARATOR = ":";
 
+    final Configuration jsonConfiguration;
+
     @Inject
-    Configuration jsonConfiguration;
+    public AugmentProcessor(Configuration jsonConfiguration) {
+        this.jsonConfiguration = jsonConfiguration;
+    }
 
     /**
      * Cache of pre-compiled JsonPaths, keyed by Augment identity.
