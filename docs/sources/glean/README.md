@@ -1,5 +1,7 @@
 # Glean **beta**
 
+**Connector ID:** `glean`
+
 This connector provides access to Glean's REST API for retrieving user insights and entity listings from your Glean workspace. It enables you to analyze usage patterns and understand how your organization is engaging with Glean's search and AI capabilities.
 
 ## Authentication

@@ -1,5 +1,7 @@
 # Google Meet&trade;
 
+**Connector ID:** `google-meet`
+
 Please review the [Google Workspace&trade; README](../README.md) for general information applicable to
 all Google Workspace connectors.
 

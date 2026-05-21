@@ -2,6 +2,8 @@
 
 ## Claude Code **BETA**
 
+**Connector ID:** `claude-code`
+
 Examples data:
 - [Example Rules](claude-code.yaml)
 - Example Data:

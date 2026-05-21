@@ -1,5 +1,7 @@
 # Gong Metrics
 
+**Connector ID:** `gong-metrics`
+
 Connector for Gong user activity metrics and user data.
 
 ### Examples

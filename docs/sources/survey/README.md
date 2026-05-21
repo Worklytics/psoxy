@@ -1,5 +1,7 @@
 # Survey
 
+**Connector ID:** `survey` or `qualtrics`
+
 ## Examples
 
 - Example Data : 

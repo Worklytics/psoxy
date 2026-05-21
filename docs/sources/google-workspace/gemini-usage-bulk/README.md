@@ -1,5 +1,7 @@
 # Gemini&trade; Usage
 
+**Connector ID:** `gemini-usage`
+
 Worklytics&trade; supports the import of Gemini&trade; Usage reports to analyze AI adoption in your organization.
 
 As of Feb 2025, these reports must be downloaded periodically by a sufficiently privileged user from the Google Workspace&trade; Admin Console.

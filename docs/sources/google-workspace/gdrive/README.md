@@ -1,5 +1,7 @@
 # Google Drive&trade;
 
+**Connector ID:** `gdrive`
+
 Please review the [Google Workspace&trade; README](../README.md) for general information applicable to
 all Google Workspace connectors.
 

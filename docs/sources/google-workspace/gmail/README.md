@@ -1,5 +1,7 @@
 # Gmail&trade;
 
+**Connector ID:** `gmail`
+
 Please review the [Google Workspace&trade; README](../README.md) for general information applicable to
 all Google Workspace connectors.
 

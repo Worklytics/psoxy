@@ -1,5 +1,7 @@
 # Confluence Cloud
 
+**Connector ID:** `confluence-cloud`
+
 NOTE: These instructions are derived from [worklytics-connector-specs](../../../../infra/modules/worklytics-connector-specs/main.tf); refer to that for definitive information.
 
 ## Examples

@@ -1,5 +1,7 @@
 # GitLab Managed for Self-Managed / Dedicated through Psoxy
 
+**Connector ID:** `gitlab-managed`
+
 ## Examples
 
 - [Example Rules](gitlab-managed.yaml)

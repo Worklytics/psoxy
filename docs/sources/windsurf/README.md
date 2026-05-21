@@ -1,5 +1,7 @@
 # Windsurf
 
+**Connector ID:** `windsurf`
+
 **ALPHA**; may change in backwards incompatible ways. We are NOT committed to supporting it, or making it available to all customers.
 
 

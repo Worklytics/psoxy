@@ -1,5 +1,7 @@
 # Dropbox Business
 
+**Connector ID:** `dropbox-business`
+
 **DEPRECATED**; ***we are not actively supporting this connector as of Aug 2025.***
 
 

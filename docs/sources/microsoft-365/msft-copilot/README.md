@@ -1,5 +1,7 @@
 # Microsoft Copilot (alpha)
 
+**Connector ID:** `msft-copilot`
+
 Connect Microsoft 365 Copilot data to Worklytics, enabling communication analysis and general
 collaboration
 insights based on collaboration via Microsoft 365 Copilot interaction. Includes user enumeration to

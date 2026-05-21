@@ -1,5 +1,7 @@
 # Outlook Mail
 
+**Connector ID:** `outlook-mail`
+
 Connect Outlook Mail data to Worklytics, enabling communication analysis and general collaboration
 insights based on collaboration via Outlook Mail. Includes user enumeration to support fetching
 mailboxes from each account; and group enumeration to expand emails via mailing list (groups).

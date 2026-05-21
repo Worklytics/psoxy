@@ -1,5 +1,7 @@
 # GitLab.com
 
+**Connector ID:** `gitlab-cloud`
+
 ## Examples
 
 - [Example Rules](gitlab-cloud.yaml)

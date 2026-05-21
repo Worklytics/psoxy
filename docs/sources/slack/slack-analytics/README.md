@@ -1,5 +1,7 @@
 # Slack Analytics
 
+**Connector ID:** `slack-analytics`
+
 ## Examples
 
 - [Example Rules](slack-analytics.yaml)

@@ -1,5 +1,7 @@
 # Atlassian Audit Event / Rovo through Organization API
 
+**Connector ID:** `atlassian-organization`
+
 This connector provides access to Atlassian Audit Event for audit logs and directory information, including Atlassian Rovo usage
 
 ## Overview

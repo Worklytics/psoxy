@@ -2,6 +2,8 @@
 
 **BETA**
 
+**Connector ID:** `cursor`
+
 
 Our Cursor data connector uses the Admin API to import data about Team Members (accounts),  Daily Usage (metrics), and Usage Events (work events) to Worklytics.
 

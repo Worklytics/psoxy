@@ -1,5 +1,7 @@
 # ChatGPT
 
+**Connector ID:** `chatgpt-enterprise`
+
 ## ChatGPT Enterprise via Compliance API **ALPHA** 
 
 This API allows ChatGPT Enterprise administrators to observe and remove data from their ChatGPT Enterprise workspaces. It is intended for compliance, security, and data privacy use.  The get endpoints provide time-indexed access to ChatGPT Enterprise data.

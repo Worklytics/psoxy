@@ -1,5 +1,7 @@
 # Google Chat&trade;
 
+**Connector ID:** `google-chat`
+
 Please review the [Google Workspace&trade; README](../README.md) for general information applicable to
 all Google Workspace connectors.
 

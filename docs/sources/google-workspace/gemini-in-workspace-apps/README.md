@@ -1,5 +1,8 @@
 # Gemini in Workspace Apps
 **beta**
+
+**Connector ID:** `gemini-in-workspace-apps`
+
 Please review the [Google Workspace&trade; README](../README.md) for general information applicable to
 all Google Workspace connectors.
 

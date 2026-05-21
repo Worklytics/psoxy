@@ -1,5 +1,7 @@
 # Asana
 
+**Connector ID:** `asana`
+
 ## Examples
 
 - [Example Rules](asana.yaml)
