@@ -2,6 +2,8 @@
 
 **Connector ID:** `survey` or `qualtrics`
 
+**Availability:** GA for `survey`; Beta for `qualtrics`
+
 ## Examples
 
 - Example Data : 

@@ -2,6 +2,8 @@
 
 **Connector ID:** `metrics`
 
+**Availability:** Beta
+
  - [Example data](metrics-example.csv)
  - [Example sanitized data](metrics-example-sanitized.csv)
  - [Example rules](metrics.yaml)

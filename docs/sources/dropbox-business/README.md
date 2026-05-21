@@ -2,8 +2,7 @@
 
 **Connector ID:** `dropbox-business`
 
-**DEPRECATED**; ***we are not actively supporting this connector as of Aug 2025.***
-
+**Availability:** Deprecated — we are not actively supporting this connector as of Aug 2025.
 
 The Dropbox Business connector through Psoxy requires a Dropbox Application created in Dropbox Console. The application does not need to be public, but it must have the following scopes to support all operations for the connector:
 

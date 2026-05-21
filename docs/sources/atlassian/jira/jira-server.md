@@ -1,12 +1,11 @@
-# Jira Server / Data Center (deprecated)
+# Jira Server / Data Center
 
 **Connector ID:** `jira-server`
 
+**Availability:** Deprecated
+
 As of May 2023, Atlassian has announced they will stop supporting Jira Server on Feb 15, 2024. Our
 Jira Server connector is intended to be compatible with Jira Data Center as well.
-
-NOTE: as of Nov 2023, organizations are making production use of this connector; we've left it as
-alpha due to impending obsolescence of Jira Server.
 
 ## Setup Instructions
 

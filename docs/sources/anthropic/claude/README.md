@@ -1,8 +1,8 @@
 # Claude
 
-**BETA**
-
 **Connector ID:** `claude`
+
+**Availability:** Beta
 
 Our Claude data connector uses the [Compliance API](https://platform.claude.com/docs/en/claude-api/compliance) to import data about Users (accounts), Chats (work events), and Activities (audit logs) to Worklytics. This API is intended for compliance, security, and data privacy use.
 

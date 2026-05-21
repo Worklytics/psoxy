@@ -2,6 +2,8 @@
 
 **Connector ID:** `gitlab-cloud`
 
+**Availability:** Beta
+
 ## Examples
 
 - [Example Rules](gitlab-cloud.yaml)

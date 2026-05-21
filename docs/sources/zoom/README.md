@@ -2,6 +2,8 @@
 
 **Connector ID:** `zoom`
 
+**Availability:** GA
+
 ## Prerequisites
 
 As of July 2023, pulling historical data (last 6 months) and all scheduled and instant meetings

@@ -2,6 +2,8 @@
 
 **Connector ID:** `gitlab-managed`
 
+**Availability:** Beta
+
 ## Examples
 
 - [Example Rules](gitlab-managed.yaml)

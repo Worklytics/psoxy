@@ -1,8 +1,8 @@
-# Anthropic
-
-## Claude Code **BETA**
+# Claude Code
 
 **Connector ID:** `claude-code`
+
+**Availability:** Beta
 
 Examples data:
 - [Example Rules](claude-code.yaml)

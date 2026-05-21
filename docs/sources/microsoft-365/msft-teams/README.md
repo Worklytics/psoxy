@@ -2,6 +2,8 @@
 
 **Connector ID:** `msft-teams`
 
+**Availability:** GA
+
 Connect Microsoft Teams data to Worklytics, enabling communication analysis and general collaboration insights based on collaboration via Microsoft Teams. Includes user enumeration to support fetching mailboxes from each account; and group enumeration to expand emails via mailing list (groups).
 
 Please review the [Microsoft 365 README](../README.md) for general information applicable to all Microsoft 365 connectors.
