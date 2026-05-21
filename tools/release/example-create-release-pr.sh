@@ -101,13 +101,27 @@ fi
 
 cd "$EXAMPLE_TEMPLATE_REPO"
 
+# capture any pre-existing open PR numbers so we can offer to rebase them later
+PRE_EXISTING_OPEN_PRS=$(gh pr list --state open --json number -q '.[].number')
+
 # check if any open prs in github
-if gh pr list --state open | grep -q . ; then
+if [ -n "$PRE_EXISTING_OPEN_PRS" ]; then
   REPO_NAME=$(gh repo view --json nameWithOwner -q .nameWithOwner)
-  printf "${ERR}There are open PRs in the ${INFO}${REPO_NAME}${NC}. Please close them before continuing.${NC}\n"
+  printf "${WARN}Warning: There are open PRs in ${INFO}${REPO_NAME}${NC}${WARN}. Consider closing them before continuing.${NC}\n"
   gh pr list --web
-  cd -
-  exit 1
+  read -p "Proceed anyway? (y/N) " -n 1 -r
+  REPLY=${REPLY:-N}
+  echo    # Move to a new line
+  case "$REPLY" in
+    [yY][eE][sS]|[yY])
+      printf "Proceeding with open PRs.\n"
+      ;;
+    *)
+      printf "Aborted.\n"
+      cd -
+      exit 1
+      ;;
+  esac
 fi
 
 CURRENT_BRANCH=$(git branch --show-current)
@@ -186,6 +200,31 @@ if command -v gh &> /dev/null; then
   gh pr comment "$PR_NUMBER" --body-file "$COMMENT_BODY_FILE"
   rm "$COMMENT_BODY_FILE"
   gh pr view $PR_URL --web
+
+  # offer to rebase any pre-existing open PRs onto the new rc branch
+  if [ -n "$PRE_EXISTING_OPEN_PRS" ]; then
+    RC_BRANCH="rc-${RELEASE_TAG}"
+    printf "\n${WARN}The following pre-existing open PRs were found before this release PR was created:${NC}\n"
+    echo "$PRE_EXISTING_OPEN_PRS" | while read -r pr_num; do
+      gh pr view "$pr_num" --json number,title,headRefName -q '  #\(.number) \(.headRefName) - \(.title)'
+    done
+    printf "\nUpdate their base branch to ${INFO}${RC_BRANCH}${NC} so they merge into the release PR rather than main?\n"
+    read -p "(Y/n) " -n 1 -r
+    REPLY=${REPLY:-Y}
+    echo    # Move to a new line
+    case "$REPLY" in
+      [yY][eE][sS]|[yY])
+        echo "$PRE_EXISTING_OPEN_PRS" | while read -r pr_num; do
+          printf "  Rebasing PR ${INFO}#${pr_num}${NC} onto ${INFO}${RC_BRANCH}${NC} ...\n"
+          gh pr edit "$pr_num" --base "$RC_BRANCH"
+        done
+        printf "${SUCCESS}Done. Pre-existing PRs now target ${RC_BRANCH}.${NC}\n"
+        ;;
+      *)
+        printf "Skipped rebasing pre-existing PRs.\n"
+        ;;
+    esac
+  fi
 fi
 
 # return us to main, so don't have to do this manually before next release

@@ -32,11 +32,7 @@
           "minutes": {
             "type": "integer"
           }
-        },
-        "required": [
-          "method",
-          "minutes"
-        ]
+        }
       }
     },
     "nextPageToken": {
@@ -86,10 +82,7 @@
               "displayName": {
                 "type": "string"
               }
-            },
-            "required": [
-              "email"
-            ]
+            }
           },
           "organizer": {
             "type": "object",
@@ -104,10 +97,7 @@
               "displayName": {
                 "type": "string"
               }
-            },
-            "required": [
-              "email"
-            ]
+            }
           },
           "start": {
             "type": "object",
@@ -158,17 +148,10 @@
                     "minutes": {
                       "type": "integer"
                     }
-                  },
-                  "required": [
-                    "method",
-                    "minutes"
-                  ]
+                  }
                 }
               }
-            },
-            "required": [
-              "useDefault"
-            ]
+            }
           },
           "iCalUID": {
             "type": "string",
@@ -212,11 +195,7 @@
                     "type": "string",
                     "format": "uri"
                   }
-                },
-                "required": [
-                  "name",
-                  "iconUri"
-                ]
+                }
               },
               "entryPoints": {
                 "type": "array",
@@ -233,20 +212,10 @@
                     "label": {
                       "type": "string"
                     }
-                  },
-                  "required": [
-                    "entryPointType",
-                    "uri",
-                    "label"
-                  ]
+                  }
                 }
               }
-            },
-            "required": [
-              "conferenceId",
-              "conferenceSolution",
-              "entryPoints"
-            ]
+            }
           },
           "attendeesOmitted": {
             "type": "boolean"
@@ -263,11 +232,7 @@
                   "source": {
                     "type": "string"
                   }
-                },
-                "required": [
-                  "importedId",
-                  "source"
-                ]
+                }
               }
             }
           },
@@ -286,47 +251,14 @@
                 "self": {
                   "type": "boolean"
                 }
-              },
-              "required": [
-                "email",
-                "responseStatus"
-              ]
+              }
             }
           },
           "guestsCanSeeOtherGuests": {
             "type": "boolean"
           }
-        },
-        "required": [
-          "kind",
-          "etag",
-          "id",
-          "status",
-          "summary",
-          "created",
-          "updated",
-          "location",
-          "creator",
-          "organizer",
-          "start",
-          "end",
-          "reminders",
-          "iCalUID",
-          "sequence",
-          "eventType"
-        ]
+        }
       }
     }
-  },
-  "required": [
-    "kind",
-    "etag",
-    "summary",
-    "updated",
-    "timeZone",
-    "accessRole",
-    "defaultReminders",
-    "nextPageToken",
-    "items"
-  ]
+  }
 }

@@ -11,9 +11,30 @@ Changes to be including in future/planned release notes will be added here.
 - `chatgpt-enterprise`: added `write` and `email` keyword tracking to prompt/title texts via `textDigest`.
 - performance: optimized `redactExceptPhrases` rule to use non-reluctant matchers.
 
+
+## [0.6.1](https://github.com/Worklytics/psoxy/releases/tag/v0.6.1)
+- **beta** Remote Resources: added infrastructure support for loading rules, NLP models, and LLM
+  weights from a remote cloud storage bucket (S3/GCS). Gated behind `enable_remote_resources`
+  variable on `aws-host`/`gcp-host` modules, which defaults to `false`. **Existing users upgrading
+  will see NO changes in `terraform plan`**; the new variable must be explicitly set to `true` to
+  opt in. IAM grants follow PoLP — scoped to specific object path prefixes, not the full bucket.
+  Default will change to `true` in 0.7.x. See [docs/configuration/remote-resources.md](docs/configuration/remote-resources.md).
+  - `aws`: when enabled, each Lambda receives `s3:GetObject` scoped to instance-specific and shared
+    path prefixes within the artifacts bucket.
+  - `gcp`: when enabled, each Cloud Function's service account receives `roles/storage.objectViewer`
+    with IAM Conditions scoping access to instance-specific and shared path prefixes.
+- `Gong Bulk`: adding documentation about supporting Gong Bulk data imports through Psoxy.
+
 ## [0.6.0](https://github.com/Worklytics/psoxy/releases/tag/v0.6.0)
-- `aws`/`gcp`: Upgraded deployment runtime environments to Java 25, while maintaining Java 21 byte-code and language-level compatibility.
+
+**BREAKING / UPGRADE NOTES:**
+- `aws`: Minimum `hashicorp/aws` provider version is now `~> 6.0`. When upgrading, users must update the version constraint under `terraform { required_providers { ... } }` for `hashicorp/aws` to this version or later, and run `terraform init -upgrade` to apply.
+- `gcp`: Minimum `hashicorp/google` provider version is now `~> 7.0`. When upgrading, users must update the version constraint under `terraform { required_providers { ... } }` for `hashicorp/google` to this version or later, and run `terraform init -upgrade` to apply.
+- `azuread`: Recommended upgrade of target `hashicorp/azuread` provider to `~> 3.0` (or later). When upgrading, users are recommended to update the version constraint under `terraform { required_providers { ... } }` for `hashicorp/azuread` and run `terraform init -upgrade` to apply.
 - DEPRECATION: Top-level connector specific Terraform variables (e.g., `salesforce_domain`, `gong_instance_subdomain`, `github_enterprise_server_host`) have been deprecated. These should now be passed through the new `connector_settings` map variable.
+
+**OTHER CHANGES:**
+- `aws`/`gcp`: Upgraded deployment runtime environments to Java 25, while maintaining Java 21 byte-code and language-level compatibility.
 - `gcp`: Dedicated `proxy_builder_sa` service account is now provisioned and used for Cloud Build operations when provisioning Cloud Functions, eliminating project-level IAM dependencies on the default Compute Engine service account.
 - `gcp`: When upgrading from 0.5.x, you will see the `google_service_account_iam_member.act_as` IAM binding destroyed and a new `google_service_account_iam_member.tf_runner_act_as` created for each connector. This is an automatic, no-op rename handled by a `removed` block — no manual `terraform state rm` is required.
 - `zoom`: Default rules for Zoom have been updated, removing fields and endpoints not required.

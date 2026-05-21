@@ -66,6 +66,7 @@ public class SlackDiscoveryBulkTests {
         Container.ForConfigService.class,
         MockModules.ForSecretStore.class,
         MockModules.ForHostEnvironment.class,
+        MockModules.ForResourceService.class,
         TestModules.ForProxyConstants.class,
     })
     public interface Container {
