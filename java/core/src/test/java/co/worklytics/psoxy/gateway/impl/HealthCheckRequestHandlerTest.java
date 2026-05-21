@@ -35,7 +35,6 @@ public class HealthCheckRequestHandlerTest {
             MockModules.ForRules.class,
             MockModules.ForSourceAuthStrategySet.class,
             TestModules.ForProxyConstants.class,
-            TestModules.ForApiModeConfig.class,
 
     })
     public interface Container {

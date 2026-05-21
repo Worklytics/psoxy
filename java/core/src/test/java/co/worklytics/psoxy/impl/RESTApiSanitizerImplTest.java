@@ -102,17 +102,12 @@ class RESTApiSanitizerImplTest {
         static ConfigService configService() {
             ConfigService mock = MockModules.provideMock(ConfigService.class);
             when(mock.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE))).thenReturn("gmail");
+            when(mock.getConfigPropertyAsOptional(eq(ApiModeConfig.ApiModeConfigProperty.TARGET_HOST)))
+                    .thenReturn(Optional.of("gmail.googleapis.com"));
+            when(mock.getConfigPropertyAsOptional(eq(ApiModeConfig.ApiModeConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER)))
+                    .thenReturn(Optional.of("mock-auth-strategy"));
 
             return mock;
-        }
-
-        @Provides
-        @Singleton
-        static ApiModeConfig apiModeConfig() {
-            return ApiModeConfig.builder()
-                    .targetHost("gmail.googleapis.com")
-                    .sourceAuthStrategyIdentifier("mock-auth-strategy")
-                    .build();
         }
     }
 

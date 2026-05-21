@@ -31,6 +31,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
@@ -117,9 +118,11 @@ public class MockModules {
     public interface ForSourceAuthStrategySet {
         @Provides @IntoSet
         static SourceAuthStrategy sourceStratey() {
-            SourceAuthStrategy mock = mock(SourceAuthStrategy.class);
-            when(mock.getConfigIdentifier()).thenReturn("mock-auth-strategy");
-            return mock;
+            SourceAuthStrategy strategy = provideMock(SourceAuthStrategy.class);
+            when(strategy.getConfigIdentifier()).thenReturn("mock-auth-strategy");
+            when(strategy.getRequiredConfigProperties()).thenReturn(java.util.Collections.emptySet());
+            when(strategy.getAllConfigProperties()).thenReturn(java.util.Collections.emptySet());
+            return strategy;
         }
     }
 

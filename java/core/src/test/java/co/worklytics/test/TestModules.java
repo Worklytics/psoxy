@@ -1,6 +1,5 @@
 package co.worklytics.test;
 
-import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.SecretStore;
@@ -85,17 +84,6 @@ public class TestModules {
         @Singleton
         static WebhookCollectorModeConfig webhookCollectorModeConfig() {
             return WebhookCollectorModeConfig.builder().build();
-        }
-    }
-
-    @Module
-    public interface ForApiModeConfig {
-        @Provides
-        @Singleton
-        static ApiModeConfig apiModeConfig() {
-            return ApiModeConfig.builder()
-                    .sourceAuthStrategyIdentifier("mock-auth-strategy")
-                    .build();
         }
     }
 

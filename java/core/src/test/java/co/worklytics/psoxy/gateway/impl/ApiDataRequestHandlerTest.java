@@ -80,7 +80,6 @@ class ApiDataRequestHandlerTest {
         MockModules.ForSideOutputs.class,
         MockModules.ForAsyncApiDataRequestHandler.class,
         TestModules.ForWebhookCollectorModeConfig.class,
-        TestModules.ForApiModeConfig.class,
         TestModules.ForFixedUUID.class,
         TestModules.ForFixedClock.class,
         TestModules.ForProxyConstants.class,})
@@ -188,8 +187,7 @@ class ApiDataRequestHandlerTest {
                 return this;
             }
         };
-        when(handler.config.getConfigPropertyOrError(eq(ApiModeConfigProperty.TARGET_HOST)))
-            .thenReturn("proxyhost.com");
+        handler.apiModeConfig = ApiModeConfig.builder().targetHost("proxyhost.com").build();
 
         URL url = new URL(handler.reverseTokenizedUrlComponents(
             handler.parseRequestedTarget(request)));
