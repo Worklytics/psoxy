@@ -227,6 +227,10 @@ module "psoxy_lambda" {
       NEW_RELIC_LAMBDA_HANDLER = "co.worklytics.psoxy.${local.event_handler_implementation}"
     } : {},
   )
+
+  remote_resource_bucket        = var.remote_resource_bucket
+  remote_resource_instance_path = var.remote_resource_instance_path
+  remote_resource_shared_path   = var.remote_resource_shared_path
 }
 
 # if async processing is enabled, trigger the lambda from the SQS queue

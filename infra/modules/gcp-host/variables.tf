@@ -460,3 +460,9 @@ variable "max_instances_per_api_connector" {
     error_message = "The max_instances_per_api_connector value must be greater than or equal to 1."
   }
 }
+
+variable "enable_remote_resources" {
+  type        = bool
+  description = "**beta** Whether to enable remote resource loading from the artifacts GCS bucket (rules, NLP models, etc.). When true, sets REMOTE_RESOURCE_BUCKET env var and grants roles/storage.objectViewer to each Cloud Function. Default will change to `true` in next major version."
+  default     = false # will change to true in 0.7.x
+}

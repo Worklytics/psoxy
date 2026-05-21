@@ -267,3 +267,20 @@ variable "allowed_data_access_ip_blocks" {
   }
 }
 
+variable "remote_resource_bucket" {
+  type        = string
+  description = "**beta** Name of the GCS bucket from which to load remote resources (rules, NLP models, etc.)."
+  default     = null
+}
+
+variable "remote_resource_instance_path" {
+  type        = string
+  description = "**beta** Path prefix within remote_resource_bucket for instance-specific resources. Used to scope IAM grants."
+  default     = null
+}
+
+variable "remote_resource_shared_path" {
+  type        = string
+  description = "**beta** Path prefix within remote_resource_bucket for shared resources (NLP models, etc.). Used to scope IAM grants."
+  default     = null
+}

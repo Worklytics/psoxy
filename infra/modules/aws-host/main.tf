@@ -268,6 +268,10 @@ module "api_connector" {
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
   )
+
+  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = var.enable_remote_resources ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = var.enable_remote_resources && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
 }
 
 
@@ -352,6 +356,10 @@ module "bulk_connector" {
     } : {},
     var.general_environment_variables
   )
+
+  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = var.enable_remote_resources ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = var.enable_remote_resources && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
 }
 
 
@@ -401,6 +409,10 @@ module "webhook_collectors" {
     },
     var.general_environment_variables,
   )
+
+  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = var.enable_remote_resources ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = var.enable_remote_resources && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
 }
 
 # Policy to allow test caller to invoke webhook collector urls and sign webhook requests

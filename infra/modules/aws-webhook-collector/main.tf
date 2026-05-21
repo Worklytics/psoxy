@@ -122,6 +122,10 @@ module "gate_instance" {
       NEW_RELIC_LAMBDA_HANDLER = var.handler_class
     } : {}
   )
+
+  remote_resource_bucket        = var.remote_resource_bucket
+  remote_resource_instance_path = var.remote_resource_instance_path
+  remote_resource_shared_path   = var.remote_resource_shared_path
 }
 
 

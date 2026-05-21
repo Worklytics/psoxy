@@ -12,11 +12,14 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.RemoteResourceConfig;
+import co.worklytics.psoxy.gateway.ResourceService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.CachingConfigServiceDecorator;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.impl.NoOpResourceService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.gateway.output.OutputFactory;
 import dagger.Binds;
@@ -175,6 +178,20 @@ public interface AwsModule {
     @Provides
     static S3Client getStorageClient() {
         return S3Client.create();
+    }
+
+    @Provides @Singleton @Named("Remote")
+    static ResourceService remoteResourceService(EnvVarsConfigService envVarsConfigService,
+                                                  HostEnvironment hostEnvironment,
+                                                  S3Client s3Client) {
+        RemoteResourceConfig config = RemoteResourceConfig.fromConfigService(
+            envVarsConfigService,
+            asAwsCompliantNamespace(hostEnvironment.getInstanceId()));
+
+        return config.getBucket()
+            .map(bucket -> (ResourceService) new S3ResourceService(
+                s3Client, bucket, config.getInstanceResourcePath().orElse("")))
+            .orElse(new NoOpResourceService());
     }
 
     @Provides

@@ -11,7 +11,18 @@ Changes to be including in future/planned release notes will be added here.
 - `chatgpt-enterprise`: added `write` and `email` keyword tracking to prompt/title texts via `textDigest`.
 - performance: optimized `redactExceptPhrases` rule to use non-reluctant matchers.
 
+
 ## [0.6.1](https://github.com/Worklytics/psoxy/releases/tag/v0.6.1)
+- **beta** Remote Resources: added infrastructure support for loading rules, NLP models, and LLM
+  weights from a remote cloud storage bucket (S3/GCS). Gated behind `enable_remote_resources`
+  variable on `aws-host`/`gcp-host` modules, which defaults to `false`. **Existing users upgrading
+  will see NO changes in `terraform plan`**; the new variable must be explicitly set to `true` to
+  opt in. IAM grants follow PoLP — scoped to specific object path prefixes, not the full bucket.
+  Default will change to `true` in 0.7.x. See [docs/configuration/remote-resources.md](docs/configuration/remote-resources.md).
+  - `aws`: when enabled, each Lambda receives `s3:GetObject` scoped to instance-specific and shared
+    path prefixes within the artifacts bucket.
+  - `gcp`: when enabled, each Cloud Function's service account receives `roles/storage.objectViewer`
+    with IAM Conditions scoping access to instance-specific and shared path prefixes.
 - `Gong Bulk`: adding documentation about supporting Gong Bulk data imports through Psoxy.
 
 ## [0.6.0](https://github.com/Worklytics/psoxy/releases/tag/v0.6.0)

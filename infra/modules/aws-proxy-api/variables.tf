@@ -280,7 +280,6 @@ variable "todo_step" {
   default     = 2
 }
 
-
 variable "allowed_data_access_ip_blocks" {
   description = <<-EOT
     IPs or CIDR blocks allowed to make data access requests at the application layer.
@@ -294,4 +293,22 @@ variable "allowed_data_access_ip_blocks" {
     condition     = var.allowed_data_access_ip_blocks == null || try(length(var.allowed_data_access_ip_blocks) > 0, false)
     error_message = "allowed_data_access_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
   }
+}
+
+variable "remote_resource_bucket" {
+  type        = string
+  description = "**beta** Name of the S3 bucket from which to load remote resources (rules, NLP models, etc.)."
+  default     = null
+}
+
+variable "remote_resource_instance_path" {
+  type        = string
+  description = "**beta** Path prefix within remote_resource_bucket for instance-specific resources. Used to scope IAM grants."
+  default     = null
+}
+
+variable "remote_resource_shared_path" {
+  type        = string
+  description = "**beta** Path prefix within remote_resource_bucket for shared resources (NLP models, etc.). Used to scope IAM grants."
+  default     = null
 }
