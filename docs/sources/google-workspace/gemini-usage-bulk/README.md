@@ -2,7 +2,7 @@
 
 **Connector ID:** `gemini-usage`
 
-**Availability:** Alpha
+**Availability:** Deprecated
 
 Worklytics&trade; supports the import of Gemini&trade; Usage reports to analyze AI adoption in your organization.
 
