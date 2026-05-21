@@ -199,7 +199,7 @@
                 <executions>
                     <execution>
                         <id>fetch-opennlp-models</id>
-                        <phase>generate-test-resources</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>

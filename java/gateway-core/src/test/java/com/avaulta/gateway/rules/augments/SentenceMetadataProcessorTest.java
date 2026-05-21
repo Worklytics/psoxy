@@ -1,8 +1,6 @@
 package com.avaulta.gateway.rules.augments;
 
-import com.avaulta.gateway.resources.ResourceService;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -20,6 +18,11 @@ class SentenceMetadataProcessorTest {
     private static final Set<String> DEFAULT_HEDGE = Set.copyOf(Augment.SentenceMetadata.DEFAULT_HEDGE_WORDS);
     private static final Set<String> DEFAULT_CONSTRAINT = Set.copyOf(Augment.SentenceMetadata.DEFAULT_CONSTRAINT_WORDS);
 
+    private static final String MODELS_MISSING_MESSAGE =
+        "OpenNLP models not on classpath (expected at /opennlp/en-sent.bin). "
+            + "Run 'mvn test' in java/gateway-core to download them automatically, "
+            + "or run tools/fetch-opennlp-models.sh manually.";
+
     @AfterEach
     void tearDown() {
         SentenceMetadataProcessor.resetForTests();
@@ -27,11 +30,7 @@ class SentenceMetadataProcessorTest {
 
     @Test
     void testProcessWithModels() {
-        Assumptions.assumeTrue(
-                SentenceMetadataProcessorTest.class.getResourceAsStream("/opennlp/en-sent.bin") != null,
-                "OpenNLP models not present in classpath. Run tools/fetch-opennlp-models.sh first."
-        );
-
+        assertModelsAvailable();
         configureClasspathResourceService();
 
         Map<String, List<String>> taxonomy = new TreeMap<>();
@@ -78,11 +77,7 @@ class SentenceMetadataProcessorTest {
 
     @Test
     void testEmptyText() {
-        Assumptions.assumeTrue(
-                SentenceMetadataProcessorTest.class.getResourceAsStream("/opennlp/en-sent.bin") != null,
-                "OpenNLP models not present in classpath. Run tools/fetch-opennlp-models.sh first."
-        );
-
+        assertModelsAvailable();
         configureClasspathResourceService();
 
         SentenceMetadataResult result = SentenceMetadataProcessor.process(
@@ -96,6 +91,12 @@ class SentenceMetadataProcessorTest {
         SentenceMetadataProcessor.configureResourceService(path -> Optional.empty());
         assertNull(SentenceMetadataProcessor.process(
             "Hello world.", Map.of(), DEFAULT_HEDGE, DEFAULT_CONSTRAINT));
+    }
+
+    private static void assertModelsAvailable() {
+        assertNotNull(
+            SentenceMetadataProcessorTest.class.getResourceAsStream("/opennlp/en-sent.bin"),
+            MODELS_MISSING_MESSAGE);
     }
 
     private static void configureClasspathResourceService() {
