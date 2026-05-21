@@ -81,10 +81,12 @@ This will:
 ## IAM Permissions
 
 The Terraform modules automatically grant minimal read permissions following the Principle of
-Least Privilege:
+Least Privilege. Access is limited to the configured resource path prefixes within the bucket:
 
-- **AWS**: `s3:GetObject` on `arn:aws:s3:::{bucket}/*`
-- **GCP**: `roles/storage.objectViewer` on the bucket
+- **AWS**: `s3:GetObject` only for objects under `{INSTANCE_RESOURCE_PATH}/` and
+  `{SHARED_RESOURCE_PATH}/`
+- **GCP**: object read access only for objects under `{INSTANCE_RESOURCE_PATH}/` and
+  `{SHARED_RESOURCE_PATH}/`, enforced with IAM Conditions
 
 No write, delete, or list permissions are granted.
 
