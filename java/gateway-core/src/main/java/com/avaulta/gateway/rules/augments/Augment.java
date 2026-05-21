@@ -2,6 +2,7 @@ package com.avaulta.gateway.rules.augments;
 
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.*;
@@ -74,6 +75,7 @@ public abstract class Augment {
      * Returns the augment function name, used in the synthetic property name
      * {@code +{sourceProperty}:{augmentFunction}}.
      */
+    @JsonIgnore
     public abstract String getFunctionName();
 
     /**
@@ -107,6 +109,7 @@ public abstract class Augment {
         @Builder.Default
         List<String> keywords = new ArrayList<>();
 
+        @JsonIgnore
         @Override
         public String getFunctionName() {
             return "textDigest";

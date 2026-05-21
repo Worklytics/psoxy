@@ -26,13 +26,15 @@
       },
       "body":{
         "contentType":"text",
-        "content":"{\"length\":236,\"word_count\":27}"
+        "+content:textDigest":{
+          "length":236,
+          "word_count":27
+        }
       },
       "attachments":[
         {
           "attachmentId":"p~O9kgcu_Q1AwZu6SIZ2NwebWeTNLJTtUSWagJUcUIFo-5JNXjKnHCjidm59hZ_P6ugkYu0BSmo7P2mMG4ddYx_JTKdbSk4-IganhvH8iaTORWOiTnnFHkuOWXxuGCNtYiwtTSviIXMmZXz7ypCywaXg",
-          "contentType":"reference",
-          "content":null
+          "contentType":"reference"
         }
       ],
       "links":[ ],

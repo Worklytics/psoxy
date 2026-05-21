@@ -22,13 +22,19 @@
       },
       "body":{
         "contentType":"html",
-        "content":"{\"length\":63,\"word_count\":2}"
+        "+content:textDigest":{
+          "length":63,
+          "word_count":2
+        }
       },
       "attachments":[
         {
           "attachmentId":"4062fb240a03490b98ccd7c86bb2bcbf",
           "contentType":"application/vnd.microsoft.card.adaptive",
-          "content":"{\"type\":\"AdaptiveCard\",\"version\":\"1.0\",\"body\":[{\"type\":\"TextBlock\",\"text\":\"{\\\"length\\\":980,\\\"word_count\\\":154}\",\"wrap\":true},{\"type\":\"TextBlock\",\"id\":\"MessageTextField\",\"text\":\"{\\\"length\\\":980,\\\"word_count\\\":154}\",\"wrap\":true}]}"
+          "+content:textDigest":{
+            "length":3836,
+            "word_count":321
+          }
         }
       ],
       "links":[
@@ -84,7 +90,10 @@
       },
       "body":{
         "contentType":"text",
-        "content":"{\"length\":49,\"word_count\":10}"
+        "+content:textDigest":{
+          "length":49,
+          "word_count":10
+        }
       },
       "attachments":[ ],
       "links":[ ],
