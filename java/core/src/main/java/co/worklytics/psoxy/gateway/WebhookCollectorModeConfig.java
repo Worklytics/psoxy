@@ -1,8 +1,11 @@
 package co.worklytics.psoxy.gateway;
 
 import com.google.common.base.Splitter;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -42,10 +45,10 @@ public class WebhookCollectorModeConfig {
 
         configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ALLOWED_WEBHOOK_IP_BLOCKS)
             .ifPresent(csv -> {
-                List<String> ipBlocks = StringUtils.isNotBlank(csv)
-                    ? Splitter.on(',').trimResults().omitEmptyStrings().splitToList(csv)
-                    : List.of();
-                builder.allowedWebhookIpBlocks(Optional.of(List.copyOf(ipBlocks)));
+                Set<String> ipBlocks = StringUtils.isNotBlank(csv)
+                    ? new LinkedHashSet<>(Splitter.on(',').trimResults().omitEmptyStrings().splitToList(csv))
+                    : Collections.emptySet();
+                builder.allowedWebhookIpBlocks(Optional.of(Collections.unmodifiableSet(ipBlocks)));
             });
 
         return builder.build();
@@ -126,7 +129,7 @@ public class WebhookCollectorModeConfig {
      */
     @NonNull
     @Builder.Default
-    Optional<List<String>> allowedWebhookIpBlocks = Optional.empty();
+    Optional<Set<String>> allowedWebhookIpBlocks = Optional.empty();
 
     /**
      * Get accepted auth keys as optional

@@ -25,6 +25,7 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
 import dagger.Component;
 import dagger.Module;
@@ -56,6 +57,7 @@ class RESTApiSanitizerImplConcurrencyTest {
                 PsoxyModule.class,
                 ForConfigService.class,
                 MockModules.ForSecretStore.class,
+                TestModules.ForApiModeConfig.class,
             })
     public interface Container {
         void inject(RESTApiSanitizerImplConcurrencyTest test);

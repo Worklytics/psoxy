@@ -66,20 +66,12 @@ public class ApiModeConfig {
 
         return ApiModeConfig.builder()
                 .allowedDataAccessIpBlocks(list)
-                .targetHost(trimToNull(configService.getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST).orElse(null)))
+                .targetHost(StringUtils.trimToNull(configService.getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST).orElse(null)))
                 .tlsVersion(tlsRaw)
-                .sourceAuthStrategyIdentifier(trimToNull(
+                .sourceAuthStrategyIdentifier(StringUtils.trimToNull(
                         configService.getConfigPropertyAsOptional(ApiModeConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER).orElse(null)))
-                .asyncOutputDestination(trimToNull(
+                .asyncOutputDestination(StringUtils.trimToNull(
                         configService.getConfigPropertyAsOptional(ApiModeConfigProperty.ASYNC_OUTPUT_DESTINATION).orElse(null)))
                 .build();
-    }
-
-    private static String trimToNull(String s) {
-        if (s == null) {
-            return null;
-        }
-        String t = s.trim();
-        return t.isEmpty() ? null : t;
     }
 }

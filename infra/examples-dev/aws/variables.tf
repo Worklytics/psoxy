@@ -498,13 +498,13 @@ variable "allowed_webhook_ip_blocks" {
     error_message = "allowed_webhook_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
   }
 }
-  
+
 variable "connector_settings" {
   type        = map(string)
   default     = {}
   description = "Connector-specific settings."
 }
-  
+
 variable "todos_as_outputs" {
   type        = bool
   description = "whether to render TODOs as outputs (former useful if you're using Terraform Cloud/Enterprise, or somewhere else where the filesystem is not readily accessible to you)"

@@ -45,6 +45,7 @@ class ApiDataRequestHandlerConcurrencyTest {
         MockModules.ForSideOutputs.class,
         MockModules.ForAsyncApiDataRequestHandler.class,
         TestModules.ForWebhookCollectorModeConfig.class,
+        TestModules.ForApiModeConfig.class,
         TestModules.ForFixedUUID.class,
         TestModules.ForFixedClock.class,
         TestModules.ForProxyConstants.class,
