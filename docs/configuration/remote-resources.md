@@ -18,9 +18,9 @@ resolved using a path prefix that mirrors the existing `PATH_TO_INSTANCE_CONFIG`
 2. **Shared resources** — loaded from `{SHARED_RESOURCE_PATH}/` within the bucket. This path is
    for assets shared across all connectors (e.g., NLP models, LLM weights).
 
-The resource service acts as a **fallover** after local environment and config service lookups.
+The resource service acts as a **failover** after local environment and config service lookups.
 For example, if the `RULES` config property is not found in environment variables or the config/parameter store,
-psoxy will check for a `rules.yaml` object at `{INSTANCE_RESOURCE_PATH}/rules.yaml` in the remote bucket.
+psoxy will check for a `RULES` object at `{INSTANCE_RESOURCE_PATH}/RULES` in the remote bucket.
 
 A hardcoded local filesystem path (`/var/psoxy/resources`) is also checked before the remote
 bucket, providing a fast-path for containerized or VM-based deployments where resources can be
@@ -51,7 +51,7 @@ module "psoxy" {
 
 This will:
 - Set `REMOTE_RESOURCE_BUCKET` on every Lambda function to the artifacts bucket name
-- Grant `s3:GetObject` permission on `arn:aws:s3:::{bucket}/*` to each Lambda's execution role
+- Grant `s3:GetObject` permission on the configured path prefixes in the bucket to each Lambda's execution role
 
 ### GCP (`gcp-host`)
 
@@ -68,7 +68,7 @@ module "psoxy" {
 
 This will:
 - Set `REMOTE_RESOURCE_BUCKET` on every Cloud Function to the artifacts bucket name
-- Grant `roles/storage.objectViewer` on the bucket to each function's service account
+- Grant `roles/storage.objectViewer` on the bucket, scoped to the configured path prefixes using IAM conditions, to each function's service account
 
 ## Environment Variables
 
@@ -93,7 +93,7 @@ No write, delete, or list permissions are granted.
 ## Use Cases
 
 ### Custom Rules
-Upload a YAML rules file to `{INSTANCE_RESOURCE_PATH}/rules.yaml` in the bucket. Psoxy will load it
+Upload a rules file to `{INSTANCE_RESOURCE_PATH}/RULES` in the bucket. Psoxy will load it
 if no `RULES` config property (env var, parameter store entry, etc.) is found.
 
 ### NLP Models (alpha)
@@ -108,12 +108,12 @@ on-the-fly inference within the proxy.
 
 ### AWS
 ```bash
-aws s3 cp my-rules.yaml s3://{REMOTE_RESOURCE_BUCKET}/{INSTANCE_RESOURCE_PATH}/rules.yaml
+aws s3 cp my-rules.yaml s3://{REMOTE_RESOURCE_BUCKET}/{INSTANCE_RESOURCE_PATH}/RULES
 ```
 
 ### GCP
 ```bash
-gsutil cp my-rules.yaml gs://{REMOTE_RESOURCE_BUCKET}/{INSTANCE_RESOURCE_PATH}/rules.yaml
+gsutil cp my-rules.yaml gs://{REMOTE_RESOURCE_BUCKET}/{INSTANCE_RESOURCE_PATH}/RULES
 ```
 
 ## Troubleshooting

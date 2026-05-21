@@ -9,6 +9,7 @@ import co.worklytics.psoxy.gateway.ResourceService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.RulesUtils;
+import co.worklytics.test.MockModules;
 import com.avaulta.gateway.rules.RuleSet;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -28,15 +29,15 @@ class ConfigRulesModuleTest {
     @BeforeEach
     void setUp() {
         logger = Logger.getLogger(ConfigRulesModuleTest.class.getName());
-        rulesUtils = mock(RulesUtils.class);
-        config = mock(ConfigService.class);
-        envVarsConfigService = mock(EnvVarsConfigService.class);
-        resourceService = mock(ResourceService.class);
+        rulesUtils = MockModules.provideMock(RulesUtils.class);
+        config = MockModules.provideMock(ConfigService.class);
+        envVarsConfigService = MockModules.provideMock(EnvVarsConfigService.class);
+        resourceService = MockModules.provideMock(ResourceService.class);
     }
 
     @Test
     void rules_loadedFromEnvConfig() {
-        RuleSet mockRuleSet = mock(RuleSet.class);
+        RuleSet mockRuleSet = MockModules.provideMock(RuleSet.class);
         when(rulesUtils.getRulesFromConfig(config, envVarsConfigService)).thenReturn(Optional.of(mockRuleSet));
 
         RuleSet resolved = ConfigRulesModule.rules(logger, rulesUtils, config, envVarsConfigService, resourceService);
@@ -48,7 +49,7 @@ class ConfigRulesModuleTest {
 
     @Test
     void rules_loadedFromResource() throws Exception {
-        RuleSet mockRuleSet = mock(RuleSet.class);
+        RuleSet mockRuleSet = MockModules.provideMock(RuleSet.class);
         when(rulesUtils.getRulesFromConfig(config, envVarsConfigService)).thenReturn(Optional.empty());
 
         byte[] yamlBytes = "dummy yaml".getBytes();

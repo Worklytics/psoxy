@@ -4,10 +4,10 @@ import java.io.InputStream;
 import java.util.Optional;
 import java.util.logging.Level;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import co.worklytics.psoxy.gateway.ResourceService;
 import lombok.NonNull;
@@ -24,7 +24,7 @@ import lombok.extern.java.Log;
 public class S3ResourceService implements ResourceService {
 
     @NonNull
-    final AmazonS3 s3Client;
+    final S3Client s3Client;
 
     @NonNull
     final String bucketName;
@@ -37,17 +37,19 @@ public class S3ResourceService implements ResourceService {
 
     @Override
     public Optional<InputStream> getResource(String objectPath) {
+        ResourceService.validatePath(objectPath);
         String key = resolveKey(objectPath);
         try {
-            if (!s3Client.doesObjectExist(bucketName, key)) {
-                log.log(Level.FINE, "S3 resource not found: s3://{0}/{1}", new Object[]{bucketName, key});
-                return Optional.empty();
-            }
-            S3Object s3Object = s3Client.getObject(new GetObjectRequest(bucketName, key));
-            log.log(Level.INFO, "Loaded resource from S3: s3://{0}/{1}", new Object[]{bucketName, key});
-            return Optional.of(s3Object.getObjectContent());
-        } catch (AmazonS3Exception e) {
-            if (e.getStatusCode() == 404 || "NoSuchKey".equals(e.getErrorCode())) {
+            GetObjectRequest request = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+            return Optional.of(s3Client.getObject(request));
+        } catch (NoSuchKeyException e) {
+            log.log(Level.FINE, "S3 resource not found: s3://{0}/{1}", new Object[]{bucketName, key});
+            return Optional.empty();
+        } catch (S3Exception e) {
+            if (e.statusCode() == 404) {
                 log.log(Level.FINE, "S3 resource not found: s3://{0}/{1}", new Object[]{bucketName, key});
                 return Optional.empty();
             }

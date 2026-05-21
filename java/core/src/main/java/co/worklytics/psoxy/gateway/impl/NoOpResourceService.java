@@ -13,6 +13,7 @@ public class NoOpResourceService implements ResourceService {
 
     @Override
     public Optional<InputStream> getResource(String objectPath) {
+        ResourceService.validatePath(objectPath);
         return Optional.empty();
     }
 }

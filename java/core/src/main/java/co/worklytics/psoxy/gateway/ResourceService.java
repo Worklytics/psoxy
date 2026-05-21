@@ -30,4 +30,32 @@ public interface ResourceService {
      *         Caller MUST close the returned InputStream.
      */
     Optional<InputStream> getResource(String objectPath);
+
+    /**
+     * Validates that the object path is safe (not null/empty, no null bytes, not absolute, no path traversal).
+     *
+     * @param objectPath the path to validate
+     * @throws IllegalArgumentException if the path is invalid
+     */
+    static void validatePath(String objectPath) {
+        if (objectPath == null || objectPath.trim().isEmpty()) {
+            throw new IllegalArgumentException("Object path must not be null or empty");
+        }
+
+        if (objectPath.indexOf('\0') != -1) {
+            throw new IllegalArgumentException("Object path must not contain null bytes");
+        }
+
+        // Reject absolute paths
+        if (objectPath.startsWith("/") || objectPath.startsWith("\\")) {
+            throw new IllegalArgumentException("Object path must not start with a separator: " + objectPath);
+        }
+
+        // Reject traversal or current-directory segments
+        for (String segment : objectPath.split("[/\\\\]")) {
+            if (".".equals(segment) || "..".equals(segment)) {
+                throw new IllegalArgumentException("Object path must not contain '.' or '..' segments: " + objectPath);
+            }
+        }
+    }
 }

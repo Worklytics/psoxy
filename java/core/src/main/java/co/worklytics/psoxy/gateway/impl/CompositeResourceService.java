@@ -27,6 +27,7 @@ public class CompositeResourceService implements ResourceService {
 
     @Override
     public Optional<InputStream> getResource(String objectPath) {
+        ResourceService.validatePath(objectPath);
         Optional<InputStream> result = preferred.getResource(objectPath);
         if (result.isPresent()) {
             return result;

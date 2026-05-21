@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.gateway.impl;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,6 +32,7 @@ public class LocalFileResourceService implements ResourceService {
 
     @Override
     public Optional<InputStream> getResource(String objectPath) {
+        ResourceService.validatePath(objectPath);
         Path resolved = resolveSafePath(objectPath);
         if (!Files.exists(resolved) || !Files.isRegularFile(resolved)) {
             log.log(Level.FINE, "Local resource not found: {0}", resolved);
@@ -40,32 +42,14 @@ public class LocalFileResourceService implements ResourceService {
         try {
             log.log(Level.INFO, "Loading resource from local filesystem: {0}", resolved);
             return Optional.of(new FileInputStream(resolved.toFile()));
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.log(Level.WARNING, "Failed to open local resource: " + resolved, e);
             return Optional.empty();
         }
     }
 
     private Path resolveSafePath(String objectPath) {
-        if (objectPath == null || objectPath.trim().isEmpty()) {
-            throw new IllegalArgumentException("Object path must not be null or empty");
-        }
-
-        if (objectPath.indexOf('\0') != -1) {
-            throw new IllegalArgumentException("Object path must not contain null bytes");
-        }
-
-        // Reject absolute paths
-        if (objectPath.startsWith("/") || objectPath.startsWith("\\")) {
-            throw new IllegalArgumentException("Object path must not start with a separator: " + objectPath);
-        }
-
-        // Reject traversal or current-directory segments
-        for (String segment : objectPath.split("[/\\\\]")) {
-            if (".".equals(segment) || "..".equals(segment)) {
-                throw new IllegalArgumentException("Object path must not contain '.' or '..' segments: " + objectPath);
-            }
-        }
+        ResourceService.validatePath(objectPath);
 
         try {
             Path objPath = Paths.get(objectPath);

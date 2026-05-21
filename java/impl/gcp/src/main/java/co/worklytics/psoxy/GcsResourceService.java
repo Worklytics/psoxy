@@ -39,6 +39,7 @@ public class GcsResourceService implements ResourceService {
 
     @Override
     public Optional<InputStream> getResource(String objectPath) {
+        ResourceService.validatePath(objectPath);
         String key = resolveKey(objectPath);
         BlobId blobId = BlobId.of(bucketName, key);
 

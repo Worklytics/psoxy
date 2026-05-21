@@ -183,7 +183,7 @@ public interface AwsModule {
     @Provides @Singleton @Named("Remote")
     static ResourceService remoteResourceService(EnvVarsConfigService envVarsConfigService,
                                                   HostEnvironment hostEnvironment,
-                                                  AmazonS3 s3Client) {
+                                                  S3Client s3Client) {
         RemoteResourceConfig config = RemoteResourceConfig.fromConfigService(
             envVarsConfigService,
             asAwsCompliantNamespace(hostEnvironment.getInstanceId()));
