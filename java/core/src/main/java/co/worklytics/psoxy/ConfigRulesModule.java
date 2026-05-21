@@ -97,8 +97,7 @@ public class ConfigRulesModule {
      */
     static Optional<RuleSet> getRulesFromResource(Logger log, RulesUtils rulesUtils, ResourceService resourceService) {
         try {
-            Optional<InputStream> rulesStream = resourceService.getResource(RULES_RESOURCE_PATH);
-            if (rulesStream.isEmpty()) {
+            if (resourceService.exists(RULES_RESOURCE_PATH)) {
                 return Optional.empty();
             }
 
