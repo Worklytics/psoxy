@@ -26,13 +26,15 @@
       },
       "body":{
         "contentType":"text",
-        "content":"{\"length\":236,\"word_count\":27}"
+        "+content:textDigest":{
+          "length":236,
+          "word_count":27
+        }
       },
       "attachments":[
         {
           "attachmentId":"19:meeting_YjQ4NThlNzUtMjEyNC00MjFlLTk0ODMtZTc2M2Q5MDVlNTE4@thread.v2",
-          "contentType":"reference",
-          "content":null
+          "contentType":"reference"
         }
       ],
       "links":[ ],
