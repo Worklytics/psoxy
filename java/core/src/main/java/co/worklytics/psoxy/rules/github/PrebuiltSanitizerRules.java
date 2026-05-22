@@ -263,9 +263,11 @@ public class PrebuiltSanitizerRules {
                     .build())
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..actor")
+                    .jsonPath("$..actor_id")
                     .jsonPath("$..user")
                     .jsonPath("$..user_id")
                     .jsonPath("$..started_by")
+                    .jsonPath("$..started_by_id")
                     .build())
             .build();
 
@@ -288,9 +290,11 @@ public class PrebuiltSanitizerRules {
                     .build())
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..actor")
+                    .jsonPath("$..actor_id")
                     .jsonPath("$..user")
                     .jsonPath("$..user_id")
                     .jsonPath("$..started_by")
+                    .jsonPath("$..started_by_id")
                     .build())
             .build();
 

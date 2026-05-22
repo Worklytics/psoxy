@@ -523,9 +523,11 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..actor"
+          - "$..actor_id"
           - "$..user"
           - "$..user_id"
           - "$..started_by"
+          - "$..started_by_id"
         encoding: "URL_SAFE_TOKEN"
     queryParamSchemas:
       phrase:
@@ -563,9 +565,11 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..actor"
+          - "$..actor_id"
           - "$..user"
           - "$..user_id"
           - "$..started_by"
+          - "$..started_by_id"
         encoding: "URL_SAFE_TOKEN"
     queryParamSchemas:
       phrase:
