@@ -138,6 +138,27 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
      * in the bulk mode cases.
      */
     SOURCE,
+
+    /** BETA: generative backend for genMetadata augment (`local`, `bedrock`, `vertex`). */
+    PSOXY_GEN_BACKEND,
+
+    /** BETA: logical model id for local GGUF (path `{SHARED_RESOURCE_PATH}/llm/{id}.gguf`). */
+    PSOXY_GEN_MODEL,
+
+    /** BETA: per genMetadata inference timeout in seconds. */
+    PSOXY_GEN_TIMEOUT_SECONDS,
+
+    /** BETA: max source characters passed into genMetadata prompts. */
+    PSOXY_GEN_MAX_INPUT_CHARS,
+
+    /** BETA: max tokens to generate per genMetadata inference. */
+    PSOXY_GEN_MAX_TOKENS,
+
+    /**
+     * BETA: set when Terraform {@code enable_gen_metadata} is used; documents that deployment
+     * is sized for local generative augments.
+     */
+    ENABLE_GEN_METADATA,
     ;
 
 

@@ -190,6 +190,8 @@ variable "api_connectors" {
     oauth_scopes_needed     = optional(list(string), [])
     environment_variables   = optional(map(string), {})
     enable_async_processing = optional(bool, false)
+    enable_gen_metadata     = optional(bool, false)
+    memory_size_mb          = optional(number)
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
       method       = optional(string, "GET")
@@ -429,6 +431,12 @@ variable "artifacts_bucket_name" {
   default     = null
 }
 
+
+variable "enable_gen_metadata" {
+  type        = bool
+  description = "BETA: when true, sets ENABLE_GEN_METADATA on all API connectors and floors memory at 4096 MB unless a higher memory_size_mb is set per connector. Implies enable_remote_resources for GGUF model weights."
+  default     = false
+}
 
 variable "enable_remote_resources" {
   type        = bool

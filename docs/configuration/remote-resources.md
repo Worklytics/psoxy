@@ -100,9 +100,23 @@ if no `RULES` config property (env var, parameter store entry, etc.) is found.
 Upload OpenNLP model files (e.g., `en-sent.bin`) to `{SHARED_RESOURCE_PATH}/` in the bucket.
 Psoxy augments can lazy-load these at runtime without inflating the deployment package.
 
-### LLM Weights (future)
-Smaller language models that fit in memory can be placed in the shared resource path for
-on-the-fly inference within the proxy.
+### LLM Weights (genMetadata BETA)
+Upload GGUF model files for the **genMetadata** augment to `{SHARED_RESOURCE_PATH}/llm/` in the bucket.
+The logical model id is set via `PSOXY_GEN_MODEL` (default `llama-3.2-1b-instruct`), resolved to
+`{SHARED_RESOURCE_PATH}/llm/{PSOXY_GEN_MODEL}.gguf`. Prefer Terraform **`enable_gen_metadata`**
+on the host module (or per `api_connectors` entry), which floors memory at 4096 MB, sets
+`ENABLE_GEN_METADATA`, and turns on remote resource loading. See
+[gen-metadata-augment.md](../development/gen-metadata-augment.md).
+
+```bash
+# AWS example
+aws s3 cp llama-3.2-1b-instruct.Q4_K_M.gguf \
+  s3://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/llm/llama-3.2-1b-instruct.gguf
+
+# GCP example
+gsutil cp llama-3.2-1b-instruct.Q4_K_M.gguf \
+  gs://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/llm/llama-3.2-1b-instruct.gguf
+```
 
 ## Uploading Resources
 

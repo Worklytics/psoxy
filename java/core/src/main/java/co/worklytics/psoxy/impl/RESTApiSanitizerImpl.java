@@ -51,6 +51,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.RESTApiSanitizer;
+import co.worklytics.psoxy.ProcessedDataMetadataFields;
 import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.rules.RESTRules;
@@ -135,6 +136,13 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     @Inject
     AugmentProcessor augmentProcessor;
 
+    private final ThreadLocal<List<String>> lastAugmentWarnings = new ThreadLocal<>();
+
+    @Override
+    public List<String> getLastSanitizationWarnings() {
+        List<String> warnings = lastAugmentWarnings.get();
+        return warnings == null ? List.of() : warnings;
+    }
 
     @Override
     public boolean isAllowed(@NonNull String httpMethod, @NonNull URL url) {
@@ -286,7 +294,10 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
         // 1. Augments: add synthetic sibling properties before any filtering/transforms
         if (ObjectUtils.isNotEmpty(endpoint.getAugments())) {
-            augmentProcessor.applyAugments(endpoint.getAugments(), jsonResponse);
+            lastAugmentWarnings.set(
+                augmentProcessor.applyAugments(endpoint.getAugments(), jsonResponse));
+        } else {
+            lastAugmentWarnings.set(List.of());
         }
 
         // 2. Response schema filter (allow-list); auto-passes "+" properties when augments ran

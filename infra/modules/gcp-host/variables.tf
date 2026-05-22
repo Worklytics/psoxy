@@ -193,6 +193,8 @@ variable "api_connectors" {
     oauth_scopes_needed     = optional(list(string), [])
     environment_variables   = optional(map(string), {})
     enable_async_processing = optional(bool, false)
+    enable_gen_metadata     = optional(bool, false)
+    available_memory_mb     = optional(number)
     example_api_calls       = optional(list(string), [])
     example_api_requests = optional(list(object({
       method       = optional(string, "GET")
@@ -429,6 +431,12 @@ variable "max_instances_per_api_connector" {
     condition     = var.max_instances_per_api_connector >= 1
     error_message = "The max_instances_per_api_connector value must be greater than or equal to 1."
   }
+}
+
+variable "enable_gen_metadata" {
+  type        = bool
+  description = "BETA: when true, sets ENABLE_GEN_METADATA on all API connectors and floors available_memory_mb at 4096 unless a higher value is set per connector. Implies enable_remote_resources for GGUF model weights."
+  default     = false
 }
 
 variable "enable_remote_resources" {

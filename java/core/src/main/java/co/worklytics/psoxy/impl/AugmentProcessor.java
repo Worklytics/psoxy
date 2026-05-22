@@ -1,13 +1,19 @@
 package co.worklytics.psoxy.impl;
 
+import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.avaulta.gateway.rules.augments.Augment;
+import com.avaulta.gateway.rules.augments.GenMetadataAugmentException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.PathNotFoundException;
+import co.worklytics.psoxy.Warning;
 import lombok.extern.java.Log;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,8 +23,8 @@ import java.util.logging.Level;
  * Applies augments to a JSON document, adding synthetic sibling properties
  * named {@code +{sourceProperty}:{augmentFunction}} alongside source fields.
  *
- * <p>Processing is intentionally non-fatal: any augment failure (exception, timeout,
- * schema validation) results in the augment property being omitted with a warning logged.
+ * <p>Processing is intentionally non-fatal: {@link AugmentProcessingException} and other failures
+ * omit the augment property and add {@code X-Psoxy-Warning} codes via the returned list.
  *
  * <p>NOTE: this class must be thread-safe. A single instance may be shared across
  * concurrent requests. Compiled JsonPaths are cached in a ConcurrentHashMap.
@@ -35,51 +41,52 @@ public class AugmentProcessor {
     public static final String AUGMENT_SEPARATOR = ":";
 
     final Configuration jsonConfiguration;
+    final JsonSchemaValidationUtils jsonSchemaValidationUtils;
+    final ObjectMapper objectMapper;
 
     @Inject
-    public AugmentProcessor(Configuration jsonConfiguration) {
+    public AugmentProcessor(Configuration jsonConfiguration,
+                            JsonSchemaValidationUtils jsonSchemaValidationUtils,
+                            ObjectMapper objectMapper) {
         this.jsonConfiguration = jsonConfiguration;
+        this.jsonSchemaValidationUtils = jsonSchemaValidationUtils;
+        this.objectMapper = objectMapper;
     }
 
-    /**
-     * Cache of pre-compiled JsonPaths, keyed by Augment identity.
-     * Avoids recompiling paths on every request (same pattern as
-     * {@code RESTApiSanitizerImpl.compiledTransforms}).
-     */
     private final Map<Augment, List<JsonPath>> compiledAugmentPaths = new ConcurrentHashMap<>();
 
     /**
-     * Apply a list of augments to a parsed JSON document.
-     *
-     * @param augments the augment rules to apply
-     * @param document the Jayway JSONPath document (will be mutated in place)
+     * @return warning header codes to add to the response (may be empty)
      */
-    public void applyAugments(List<Augment> augments, Object document) {
+    public List<String> applyAugments(List<Augment> augments, Object document) {
         if (augments == null || augments.isEmpty()) {
-            return;
+            return List.of();
         }
 
-        // Conflict check: if any existing property starts with "+", skip all augments
+        List<String> warnings = new ArrayList<>();
+
         if (hasConflictingProperties(document)) {
             log.warning("Response contains properties starting with '" + AUGMENT_PROPERTY_PREFIX
                 + "'; skipping all augment processing to avoid conflicts.");
-            return;
+            warnings.add(Warning.AUGMENT_CONFLICT_SKIPPED.asHttpHeaderCode());
+            return List.copyOf(warnings);
         }
 
         for (Augment augment : augments) {
             try {
                 applyAugment(augment, document);
+            } catch (AugmentProcessingException e) {
+                log.log(Level.WARNING, e.getMessage(), e);
+                warnings.add(e.getWarningCode());
             } catch (Exception e) {
                 log.log(Level.WARNING,
                     "Augment '" + augment.getFunctionName() + "' failed; skipping.", e);
             }
         }
+        return List.copyOf(warnings);
     }
 
-    /**
-     * Apply a single augment to the document using its pre-compiled paths.
-     */
-    private void applyAugment(Augment augment, Object document) {
+    private void applyAugment(Augment augment, Object document) throws AugmentProcessingException {
         List<JsonPath> paths = compiledAugmentPaths.computeIfAbsent(augment,
             a -> a.getJsonPaths().stream()
                 .map(JsonPath::compile)
@@ -90,28 +97,16 @@ public class AugmentProcessor {
                 applyAugmentAtPath(augment, document, compiledPath);
             } catch (PathNotFoundException e) {
                 // expected if path doesn't match this particular document — no-op
-            } catch (Exception e) {
-                log.log(Level.WARNING,
-                    "Augment '" + augment.getFunctionName() + "' failed at path '"
-                        + compiledPath.getPath() + "'; skipping.", e);
             }
         }
     }
 
-    /**
-     * Apply an augment to all values matching a single compiled JSON path.
-     *
-     * <p>Uses {@code AS_PATH_LIST} to resolve the path expression to concrete paths
-     * (no wildcards), then derives the parent of each concrete path to insert the
-     * sibling augment property.
-     */
     @SuppressWarnings("unchecked")
-    private void applyAugmentAtPath(Augment augment, Object document, JsonPath compiledPath) {
+    private void applyAugmentAtPath(Augment augment, Object document, JsonPath compiledPath)
+            throws AugmentProcessingException {
 
-        // Build a configuration that returns resolved path strings instead of values
         Configuration pathListConfig = jsonConfiguration.setOptions(Option.AS_PATH_LIST);
 
-        // Resolve to concrete paths like ["$['value'][0]['body']['content']", ...]
         List<String> resolvedPaths;
         try {
             resolvedPaths = compiledPath.read(document, pathListConfig);
@@ -124,25 +119,14 @@ public class AugmentProcessor {
         }
 
         for (String concretePath : resolvedPaths) {
-            try {
-                applyAugmentAtConcretePath(augment, document, concretePath);
-            } catch (Exception e) {
-                log.log(Level.WARNING,
-                    "Augment '" + augment.getFunctionName() + "' failed at concrete path '"
-                        + concretePath + "'; skipping.", e);
-            }
+            applyAugmentAtConcretePath(augment, document, concretePath);
         }
     }
 
-    /**
-     * Apply an augment at a single concrete (fully-resolved) JSON path.
-     *
-     * <p>Reads the source value, computes the augment, and inserts the result as a
-     * sibling property in the parent object.
-     */
     @SuppressWarnings("unchecked")
-    private void applyAugmentAtConcretePath(Augment augment, Object document, String concretePath) {
-        // Derive the leaf field name and parent path from the concrete path
+    private void applyAugmentAtConcretePath(Augment augment, Object document, String concretePath)
+            throws AugmentProcessingException {
+
         String leafFieldName = extractLeafFieldNameFromConcrete(concretePath);
         String parentPath = extractParentFromConcrete(concretePath);
 
@@ -151,7 +135,6 @@ public class AugmentProcessor {
             return;
         }
 
-        // Read the parent object
         Object parent;
         try {
             parent = JsonPath.compile(parentPath).read(document, jsonConfiguration);
@@ -168,7 +151,6 @@ public class AugmentProcessor {
             return;
         }
 
-        // Read the source value
         Object sourceValue;
         try {
             sourceValue = JsonPath.compile(concretePath).read(document, jsonConfiguration);
@@ -176,58 +158,88 @@ public class AugmentProcessor {
             return;
         }
 
-        // Compute and insert
         String augmentPropertyName = AUGMENT_PROPERTY_PREFIX + leafFieldName
             + AUGMENT_SEPARATOR + augment.getFunctionName();
 
-        try {
-            Object augmentValue = null;
-            if (augment.getInnerJsonPath() != null && !augment.getInnerJsonPath().isEmpty() && sourceValue instanceof String jsonStr && !jsonStr.isEmpty()) {
-                Object parsed = JsonPath.parse(jsonStr).read(augment.getInnerJsonPath());
-                if (parsed instanceof List<?> list) {
-                    List<Object> results = new java.util.ArrayList<>();
-                    for (Object item : list) {
-                        Object computed = augment.compute(item);
-                        if (computed != null) {
-                            results.add(computed);
-                        }
+        Object augmentValue = computeAugmentValue(augment, sourceValue);
+
+        if (augmentValue == null) {
+            if (augment instanceof Augment.GenMetadata) {
+                throw new AugmentProcessingException(Warning.AUGMENT_GEN_UNAVAILABLE,
+                    "genMetadata returned no value for property '" + augmentPropertyName + "'");
+            }
+            return;
+        }
+
+        if (!validateOutputSchema(augment, augmentValue)) {
+            throw new AugmentProcessingException(Warning.AUGMENT_OUTPUT_SCHEMA_MISMATCH,
+                "Augment '" + augment.getFunctionName()
+                    + "' output failed schema validation for property '" + augmentPropertyName
+                    + "'");
+        }
+
+        ((Map<String, Object>) parent).put(augmentPropertyName, augmentValue);
+    }
+
+    private Object computeAugmentValue(Augment augment, Object sourceValue)
+            throws AugmentProcessingException {
+        if (augment.getInnerJsonPath() != null && !augment.getInnerJsonPath().isEmpty()
+                && sourceValue instanceof String jsonStr && !jsonStr.isEmpty()) {
+            Object parsed = JsonPath.parse(jsonStr).read(augment.getInnerJsonPath());
+            if (parsed instanceof List<?> list) {
+                List<Object> results = new ArrayList<>();
+                for (Object item : list) {
+                    Object computed = invokeCompute(augment, item);
+                    if (computed != null) {
+                        results.add(computed);
                     }
-                    if (!results.isEmpty()) {
-                        augmentValue = results;
-                    }
-                } else if (parsed != null) {
-                    augmentValue = augment.compute(parsed);
                 }
-            } else {
-                augmentValue = augment.compute(sourceValue);
+                return results.isEmpty() ? null : results;
             }
+            return parsed != null ? invokeCompute(augment, parsed) : null;
+        }
+        return invokeCompute(augment, sourceValue);
+    }
 
-            if (augmentValue == null) {
-                return;
-            }
-
-            // TODO: validate against outputSchema if present (predicate check)
-            // For PoC, outputSchema validation is deferred
-
-            ((Map<String, Object>) parent).put(augmentPropertyName, augmentValue);
-        } catch (Exception e) {
-            log.log(Level.WARNING,
-                "Augment '" + augment.getFunctionName() + "' compute failed for property '"
-                    + augmentPropertyName + "'; omitting.", e);
+    private Object invokeCompute(Augment augment, Object input) throws AugmentProcessingException {
+        try {
+            return augment.compute(input);
+        } catch (GenMetadataAugmentException e) {
+            throw toAugmentProcessingException(e);
         }
     }
 
-    /**
-     * Check if the document contains any properties starting with the augment prefix.
-     * Scans the top-level and one level of nesting (covers typical API response shapes).
-     */
+    private static AugmentProcessingException toAugmentProcessingException(
+            GenMetadataAugmentException e) {
+        Warning warning = switch (e.getCode()) {
+            case UNAVAILABLE -> Warning.AUGMENT_GEN_UNAVAILABLE;
+            case INFERENCE_FAILED -> Warning.AUGMENT_GEN_INFERENCE_FAILED;
+        };
+        return e.getCause() != null
+            ? new AugmentProcessingException(warning, e.getMessage(), e.getCause())
+            : new AugmentProcessingException(warning, e.getMessage());
+    }
+
+    private boolean validateOutputSchema(Augment augment, Object augmentValue) {
+        JsonSchemaFilter outputSchema = augment.getOutputSchema();
+        if (outputSchema == null) {
+            return true;
+        }
+        try {
+            String json = objectMapper.writeValueAsString(augmentValue);
+            return jsonSchemaValidationUtils.validateJsonBySchema(json, outputSchema);
+        } catch (Exception e) {
+            log.log(Level.WARNING, "Failed to validate augment output schema", e);
+            return false;
+        }
+    }
+
     boolean hasConflictingProperties(Object document) {
         if (document instanceof Map<?, ?> map) {
             for (Object key : map.keySet()) {
                 if (key instanceof String s && s.startsWith(AUGMENT_PROPERTY_PREFIX)) {
                     return true;
                 }
-                // Check one level deeper (e.g., $.value[*] arrays contain objects)
                 Object val = map.get(key);
                 if (val instanceof Map<?, ?> nested) {
                     if (hasAugmentPrefixKeys(nested)) {
@@ -260,13 +272,7 @@ public class AugmentProcessor {
         return false;
     }
 
-    /**
-     * Extract the leaf field name from a concrete (resolved) JSON path.
-     * Concrete paths use bracket notation: {@code $['body']['content']} → {@code "content"}.
-     */
     static String extractLeafFieldNameFromConcrete(String concretePath) {
-        // Concrete paths from Jayway use bracket notation: $['body']['content']
-        // Find the last ['...'] segment
         int lastBracket = concretePath.lastIndexOf("['");
         if (lastBracket >= 0) {
             int end = concretePath.indexOf("']", lastBracket);
@@ -277,16 +283,11 @@ public class AugmentProcessor {
         return null;
     }
 
-    /**
-     * Extract the parent path from a concrete (resolved) JSON path.
-     * {@code $['body']['content']} → {@code $['body']}.
-     */
     static String extractParentFromConcrete(String concretePath) {
         int lastBracket = concretePath.lastIndexOf("['");
         if (lastBracket > 0) {
             return concretePath.substring(0, lastBracket);
         }
-        // If no bracket found, try numeric index: $['value'][0]
         int lastNumBracket = concretePath.lastIndexOf("[");
         if (lastNumBracket > 0) {
             return concretePath.substring(0, lastNumBracket);
@@ -294,7 +295,6 @@ public class AugmentProcessor {
         return null;
     }
 
-    // keep legacy helpers for tests that use them directly
     static String extractLeafFieldName(String jsonPath) {
         String cleaned = jsonPath.replaceAll("\\[\\*]$", "");
         int lastDot = cleaned.lastIndexOf('.');

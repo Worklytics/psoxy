@@ -45,6 +45,25 @@ public class JsonSchemaValidationUtils {
                     .maximumSize(100)
                     .build(CacheLoader.from(this::getJsonSchema));
 
+    private final LoadingCache<JsonSchemaFilter, JsonSchema> jsonSchemaFilterCache =
+            CacheBuilder.newBuilder()
+                    .maximumSize(100)
+                    .build(CacheLoader.from(this::getJsonSchemaFromFilter));
+
+    @SneakyThrows
+    public boolean validateJsonBySchema(String jsonString, JsonSchemaFilter schema) {
+        if (schema == null) {
+            return true;
+        }
+        JsonNode deserialized = objectMapper.readTree(jsonString);
+        JsonSchema jsonSchema = jsonSchemaFilterCache.get(schema);
+        Set<ValidationMessage> validationMessages = jsonSchema.validate(deserialized);
+        if (!validationMessages.isEmpty()) {
+            log.warning("Validation failed for augment output: " + validationMessages);
+        }
+        return validationMessages.isEmpty();
+    }
+
     @SneakyThrows
     public boolean validateJsonBySchema(String jsonString,
             com.avaulta.gateway.rules.JsonSchema schema) {
@@ -150,6 +169,11 @@ public class JsonSchemaValidationUtils {
         // - or,`type:string` if there's a `pattern` or `format` field, etc.
 
         JsonNode schemaNode = objectMapper.valueToTree(rewritePseudonymToPattern(schema));
+        return jsonSchemaFactory.getSchema(schemaNode);
+    }
+
+    private JsonSchema getJsonSchemaFromFilter(JsonSchemaFilter schema) {
+        JsonNode schemaNode = objectMapper.valueToTree(schema);
         return jsonSchemaFactory.getSchema(schemaNode);
     }
 

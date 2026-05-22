@@ -162,6 +162,13 @@
             <version>10.5</version>
         </dependency>
 
+        <!-- BETA genMetadata: JNI bindings to llama.cpp (GGUF). No maintained Java SDK from model vendors. -->
+        <dependency>
+            <groupId>de.kherud</groupId>
+            <artifactId>llama</artifactId>
+            <version>${dependency.java-llama.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>

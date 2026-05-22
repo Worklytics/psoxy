@@ -38,7 +38,12 @@ import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import com.avaulta.gateway.resources.ResourceService;
+import com.avaulta.gateway.rules.augments.GenMetadataBackend;
+import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
 import co.worklytics.psoxy.impl.AugmentProcessor;
+import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
+import co.worklytics.psoxy.impl.gen.LlamaCppLocalBackend;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
@@ -380,5 +385,26 @@ public class PsoxyModule {
     @Provides
     Base64.Encoder provideBase64Encoder() {
         return Base64.getEncoder();
+    }
+
+    /**
+     * Wires genMetadata backend and configures {@link GenMetadataProcessor} (static facade).
+     * {@link ResourceService} for model weights is provided by {@code FunctionRuntimeModule}.
+     */
+    @Provides
+    @Singleton
+    static GenMetadataBackend genMetadataBackend(
+            ConfigService configService,
+            ObjectMapper objectMapper,
+            @Named("ForGenMetadata") ResourceService genMetadataResourceService) {
+        GenMetadataConfig config = GenMetadataConfig.from(configService);
+        GenMetadataBackend backend;
+        if (GenMetadataConfig.BACKEND_LOCAL.equals(config.getBackend())) {
+            backend = new LlamaCppLocalBackend(config, genMetadataResourceService, objectMapper);
+        } else {
+            backend = (taskPrompt, outputSchema, inputData) -> null;
+        }
+        GenMetadataProcessor.configure(backend, objectMapper, config.getMaxInputChars());
+        return backend;
     }
 }

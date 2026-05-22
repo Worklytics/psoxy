@@ -153,6 +153,19 @@ public class FunctionRuntimeModule {
         return instanceResourceService;
     }
 
+    @Provides @Singleton @Named("ForGenMetadata")
+    static ResourceService genMetadataResourceService(@Named("Remote") ResourceService remoteResourceService,
+                                                      @Named("SharedRemote") ResourceService sharedRemoteResourceService) {
+        ResourceService instanceResourceService = CompositeResourceService.builder()
+            .preferred(new LocalFileResourceService(ResourceService.DEFAULT_LOCAL_RESOURCE_PATH))
+            .fallback(remoteResourceService)
+            .build();
+        return CompositeResourceService.builder()
+            .preferred(instanceResourceService)
+            .fallback(sharedRemoteResourceService)
+            .build();
+    }
+
     @Provides @Singleton @Named("async")
     static ApiSanitizedDataOutput apiSanitizedDataOutput(OutputUtils outputUtils) {
         return outputUtils.asyncOutput();

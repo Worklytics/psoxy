@@ -178,7 +178,7 @@ public abstract class Augment {
 
 ### `outputSchema` — Output Validation
 
-Each augment rule carries an optional `outputSchema` property of type `JsonSchemaFilter`. This schema is applied as a **predicate** (not a filter) to the value produced by the augment's `compute()` method:
+Each augment rule may carry an `outputSchema` property of type `JsonSchemaFilter`. This schema is applied as a **predicate** (not a filter) to the value produced by the augment's `compute()` method. **`genMetadata` requires `outputSchema`.** Validation is implemented in `AugmentProcessor` (v0.6.x BETA); failures emit `X-Psoxy-Warning: augment-output-schema-mismatch`.
 
 | Outcome | Action |
 |---|---|

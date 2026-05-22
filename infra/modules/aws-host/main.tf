@@ -250,7 +250,10 @@ module "api_connector" {
   side_output_original                  = try(local.custom_original_side_outputs[each.key], null)
   side_output_sanitized                 = try(local.sanitized_side_outputs[each.key], null)
   enable_async_processing               = each.value.enable_async_processing
-  memory_size_mb                        = each.value.enable_async_processing ? 1024 : 512 # default is 512; double it for async case, to give additional margin
+  memory_size_mb = max(
+    (each.value.enable_gen_metadata || var.enable_gen_metadata) ? coalesce(each.value.memory_size_mb, 4096) : (each.value.enable_async_processing ? 1024 : 512),
+    (each.value.enable_gen_metadata || var.enable_gen_metadata) ? 4096 : 0,
+  )
 
   todos_as_local_files = var.todos_as_local_files
   todo_step            = var.todo_step
@@ -264,13 +267,14 @@ module "api_connector" {
       )
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     },
+    (each.value.enable_gen_metadata || var.enable_gen_metadata) ? { ENABLE_GEN_METADATA = "true" } : {},
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
   )
 
-  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
-  remote_resource_shared_path   = var.enable_remote_resources && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
+  remote_resource_bucket        = (var.enable_remote_resources || var.enable_gen_metadata || each.value.enable_gen_metadata) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = (var.enable_remote_resources || var.enable_gen_metadata || each.value.enable_gen_metadata) ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = (var.enable_remote_resources || var.enable_gen_metadata || each.value.enable_gen_metadata) && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
 }
 
 

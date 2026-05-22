@@ -217,7 +217,10 @@ module "api_connector" {
   builder_sa_id                         = module.psoxy.builder_sa_id
   instance_concurrency                  = var.api_connector_instance_concurrency
   max_instance_count                    = var.max_instances_per_api_connector
-
+  available_memory_mb = max(
+    (each.value.enable_gen_metadata || var.enable_gen_metadata) ? coalesce(each.value.available_memory_mb, 4096) : 1024,
+    (each.value.enable_gen_metadata || var.enable_gen_metadata) ? 4096 : 0,
+  )
 
   environment_variables = merge(
     {
@@ -230,13 +233,14 @@ module "api_connector" {
       RULES                  = local.api_connector_rules[each.key] != null ? base64gzip(local.api_connector_rules[each.key]) : null
       EMAIL_CANONICALIZATION = var.email_canonicalization
     },
+    (each.value.enable_gen_metadata || var.enable_gen_metadata) ? { ENABLE_GEN_METADATA = "true" } : {},
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
   )
 
-  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_" : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.config_parameter_prefix : null
+  remote_resource_bucket        = (var.enable_remote_resources || var.enable_gen_metadata || each.value.enable_gen_metadata) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = (var.enable_remote_resources || var.enable_gen_metadata || each.value.enable_gen_metadata) ? "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = (var.enable_remote_resources || var.enable_gen_metadata || each.value.enable_gen_metadata) ? local.config_parameter_prefix : null
 
   secret_bindings = merge(
     local.secrets_bound_as_env_vars[each.key],
