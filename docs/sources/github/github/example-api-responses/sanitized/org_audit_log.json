@@ -34,7 +34,7 @@
     "_document_id":"wNeUMoUP4j8RgRjpMg6YaQ",
     "action":"pull_request.merge",
     "actor":"t~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbM",
-    "actor_id":13968776,
+    "actor_id":"t~S3Nh4slc2XnLp5Qy1CD-pQew9-j0cePbX3U7-DE56Co",
     "actor_location":{
       "country_code":"ES"
     },
@@ -66,7 +66,7 @@
     "data":{
       "public_repo":true,
       "started_by":"t~IAUEqSLLtP3EjjkzslH-S1ULJZRLQnH9hT54jiI1gbM",
-      "started_by_id":42,
+      "started_by_id":"t~znQ9uPAsipaRVgakqmpOA0f-KZDE8pvKpaeCR50hj5Y",
       "category_type":"Resource Management"
     }
   }
