@@ -50,7 +50,7 @@ public class ApiModeConfig {
                 .map(StringUtils::trimToNull)
                 .ifPresent(builder::asyncOutputDestination);
         configService.getConfigPropertyAsOptional(ApiModeConfigProperty.REQUEST_TIMEOUT_SECONDS)
-                .map(ApiModeConfig::parseRequestTimeoutSeconds)
+                .map(value -> ConfigService.parseIntValue(ApiModeConfigProperty.REQUEST_TIMEOUT_SECONDS, value))
                 .ifPresent(builder::requestTimeoutSeconds);
 
         String tlsRaw = configService.getConfigPropertyAsOptional(ApiModeConfigProperty.TLS_VERSION)
@@ -61,16 +61,6 @@ public class ApiModeConfig {
         builder.tlsVersion(tlsRaw);
 
         return builder.build();
-    }
-
-    private static int parseRequestTimeoutSeconds(String value) {
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(
-                    "Invalid value for " + ApiModeConfigProperty.REQUEST_TIMEOUT_SECONDS.name()
-                            + ": '" + value + "'", e);
-        }
     }
 
     /**
