@@ -39,7 +39,6 @@ public class AwsEnvironment implements HostEnvironment {
         Optional<String> asyncApiRequestQueueUrl;
 
         enum AwsApiModeConfigProperty implements ConfigService.ConfigProperty {
-
             ASYNC_API_REQUEST_QUEUE_URL,
         }
 
