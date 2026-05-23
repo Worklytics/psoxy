@@ -1,5 +1,9 @@
 # Miro Audit Log - Miro AI
 
+**Connector ID:** `miro-ai-bulk`
+
+**Availability:** Alpha
+
 Psoxy can pseudonymize Miro AI from [Miro Audit Log CSV](https://help.miro.com/hc/en-us/articles/360017571434-Audit-logs#h_01J7EY4E0F67EFTRQ7BT688HW0) data for ingestion into Worklytics.
 
 See [https://docs.worklytics.co/knowledge-base/connectors/bulk-data/miro-ai-bulk](https://docs.worklytics.co/knowledge-base/connectors/bulk-data/miro-ai-bulk)

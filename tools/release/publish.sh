@@ -39,7 +39,20 @@ set -e
 git fetch origin
 
 if git rev-parse "$RELEASE" >/dev/null 2>&1; then
-  printf "Tag ${SUCCESS}$RELEASE${NC} already exists.\n"
+  printf "${WARN}Tag ${RELEASE} already exists.${NC}\n"
+  printf "Continue anyway?\n"
+  read -p "(y/N) " -n 1 -r
+  REPLY=${REPLY:-N}
+  echo    # Move to a new line
+  case "$REPLY" in
+    [yY][eE][sS]|[yY])
+      printf "Continuing with existing tag ${SUCCESS}$RELEASE${NC} ...\n"
+      ;;
+    *)
+      printf "Exiting.\n"
+      exit 0
+      ;;
+  esac
 else
   git checkout main
 
@@ -51,6 +64,26 @@ else
     printf "${ERR}Current branch is not main. Please checkout main branch and try again.${NC}\n"
     exit 1
   fi
+
+  # verify a recent release merge from an rc- branch exists
+  if ! git log --since="48 hours ago" --merges --oneline | grep -qi "rc-"; then
+    printf "${WARN}No recent merge from an 'rc-' branch into main found within the last 48 hours.${NC}\n"
+    printf "Please ensure the release candidate (rc-) PR has been merged before publishing.\n"
+    printf "Continue anyway?\n"
+    read -p "(y/N) " -n 1 -r
+    REPLY=${REPLY:-N}
+    echo    # Move to a new line
+    case "$REPLY" in
+      [yY][eE][sS]|[yY])
+        printf "Proceeding despite missing recent rc- merge...\n"
+        ;;
+      *)
+        printf "Exiting.\n"
+        exit 1
+        ;;
+    esac
+  fi
+
   printf "Tagging ${SUCCESS}$RELEASE${NC} ...\n"
   git tag $RELEASE
 fi

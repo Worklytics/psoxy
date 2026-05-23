@@ -16,11 +16,14 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.RemoteResourceConfig;
+import co.worklytics.psoxy.gateway.ResourceService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.CachingConfigServiceDecorator;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.impl.NoOpResourceService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.gateway.output.OutputFactory;
 import co.worklytics.psoxy.gcp.GcpKmsPublicKeyStoreClient;
@@ -85,6 +88,21 @@ public interface GcpModule {
         return StorageOptions.getDefaultInstance().getService();
     }
 
+    @Provides @Singleton @Named("Remote")
+    static ResourceService remoteResourceService(EnvVarsConfigService envVarsConfigService,
+                                                  HostEnvironment hostEnvironment,
+                                                  Storage storage) {
+        RemoteResourceConfig config = RemoteResourceConfig.fromConfigService(
+            envVarsConfigService,
+            asSecretManagerNamespace(
+                Optional.ofNullable(hostEnvironment.getInstanceId()).orElse("")));
+
+        return config.getBucket()
+            .map(bucket -> (ResourceService) new GcsResourceService(
+                storage, bucket, config.getInstanceResourcePath().orElse("")))
+            .orElse(new NoOpResourceService());
+    }
+
     /**
      * in GCP cloud function, we should be able to configure everything via env vars; either
      * directly or by binding them to secrets at function deployment:
@@ -143,8 +161,8 @@ public interface GcpModule {
 
     @Provides
     @Singleton
-    static GcpEnvironment.ApiModeConfig apiModeConfig(ConfigService configService) {
-        return GcpEnvironment.ApiModeConfig.fromConfigService(configService);
+    static GcpEnvironment.GcpApiModeConfig gcpApiModeConfig(ConfigService configService) {
+        return GcpEnvironment.GcpApiModeConfig.fromConfigService(configService);
     }
 
     @Provides
@@ -162,7 +180,7 @@ public interface GcpModule {
 
     @Provides @Singleton
     static AsyncApiDataRequestHandler apiDataRequestViaPubSub(ApiDataRequestViaPubSubFactory factory,
-                                                              GcpEnvironment.ApiModeConfig config) {
+                                                              GcpEnvironment.GcpApiModeConfig config) {
         return factory.create(config.getAsyncPubSubQueue().orElseThrow(() -> new IllegalStateException("PubSub topic not configured")));
     }
 

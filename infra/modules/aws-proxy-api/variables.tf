@@ -165,6 +165,11 @@ variable "environment_variables" {
   type        = map(string)
   description = "Non-sensitive values to add to functions environment variables"
   default     = {}
+
+  validation {
+    condition     = !contains(keys(var.environment_variables), "REQUEST_TIMEOUT_SECONDS")
+    error_message = "REQUEST_TIMEOUT_SECONDS cannot be set via environment_variables; use timeout_seconds instead."
+  }
 }
 
 variable "new_relic_account_id" {
@@ -280,3 +285,41 @@ variable "todo_step" {
   default     = 2
 }
 
+variable "timeout_seconds" {
+  type        = number
+  description = "The timeout (in seconds) for the Lambda function. AWS Lambda allows up to 900 seconds (15 minutes)."
+  default     = 180
+}
+
+variable "allowed_data_access_ip_blocks" {
+  description = <<-EOT
+    IPs or CIDR blocks allowed to make data access requests at the application layer.
+    Use null (default) for no restriction in configuration (all IPs allowed). If set, the list must contain at least one value.
+  EOT
+  type        = list(string)
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.allowed_data_access_ip_blocks == null || try(length(var.allowed_data_access_ip_blocks) > 0, false)
+    error_message = "allowed_data_access_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
+  }
+}
+
+variable "remote_resource_bucket" {
+  type        = string
+  description = "**beta** Name of the S3 bucket from which to load remote resources (rules, NLP models, etc.)."
+  default     = null
+}
+
+variable "remote_resource_instance_path" {
+  type        = string
+  description = "**beta** Path prefix within remote_resource_bucket for instance-specific resources. Used to scope IAM grants."
+  default     = null
+}
+
+variable "remote_resource_shared_path" {
+  type        = string
+  description = "**beta** Path prefix within remote_resource_bucket for shared resources (NLP models, etc.). Used to scope IAM grants."
+  default     = null
+}

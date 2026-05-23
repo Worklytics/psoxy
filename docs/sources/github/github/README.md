@@ -1,6 +1,8 @@
 # GitHub
 
-Availability: **GA**
+**Connector ID:** `github`
+
+**Availability:** GA
 
 ## Authentication workflow
 

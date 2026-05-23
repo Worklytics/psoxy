@@ -3,14 +3,15 @@ endpoints:
   - pathTemplate: "/v1/compliance/activities"
     allowedQueryParams:
       - "after_id"
+      - "before_id"
       - "limit"
       - "organization_ids[]"
       - "actor_ids[]"
+      - "activity_types[]"
       - "created_at.gte"
       - "created_at.gt"
       - "created_at.lte"
       - "created_at.lt"
-      - "before_id"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -89,33 +90,7 @@ endpoints:
         jsonPaths:
           - "$.chat_messages[*].content[*].text"
     responseSchema:
-      type: "object"
-      properties:
-        chat_messages:
-          type: "array"
-          items:
-            $ref: "#/definitions/Message"
-        created_at:
-          type: "string"
-          format: "date-time"
-        deleted_at:
-          type: "string"
-          format: "date-time"
-        id:
-          type: "string"
-        organization_id:
-          type: "string"
-        organization_uuid:
-          type: "string"
-        project_id:
-          type: "string"
-        sourceId:
-          type: "string"
-        updated_at:
-          type: "string"
-          format: "date-time"
-        user:
-          $ref: "#/definitions/User"
+      $ref: "#/definitions/Chat"
   - pathTemplate: "/v1/compliance/organizations"
     allowedQueryParams:
       - "page"
@@ -215,6 +190,13 @@ definitions:
         type: "string"
       user_id:
         type: "string"
+  Artifact:
+    type: "object"
+    properties:
+      artifact_type:
+        type: "string"
+      id:
+        type: "string"
   Chat:
     type: "object"
     properties:
@@ -229,6 +211,8 @@ definitions:
         type: "string"
         format: "date-time"
       id:
+        type: "string"
+      model:
         type: "string"
       organization_id:
         type: "string"
@@ -265,6 +249,10 @@ definitions:
   Message:
     type: "object"
     properties:
+      artifacts:
+        type: "array"
+        items:
+          $ref: "#/definitions/Artifact"
       content:
         type: "array"
         items:
@@ -276,6 +264,12 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/File"
+      generated_files:
+        type: "array"
+        items:
+          $ref: "#/definitions/File"
+      id:
+        type: "string"
       role:
         type: "string"
   Organization:

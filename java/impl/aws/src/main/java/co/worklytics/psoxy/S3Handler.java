@@ -16,20 +16,18 @@ import javax.inject.Inject;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3Object;
-import com.newrelic.opentracing.LambdaTracer;
-import com.newrelic.opentracing.aws.LambdaTracing;
-import io.opentracing.util.GlobalTracer;
-import co.worklytics.psoxy.aws.AwsContainer;
 import co.worklytics.psoxy.aws.DaggerAwsContainer;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
 import co.worklytics.psoxy.gateway.StorageEventResponse;
 import co.worklytics.psoxy.storage.StorageHandler;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Log
 public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestHandler<S3Event, String> {
@@ -38,7 +36,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     StorageHandler storageHandler;
 
     @Inject
-    AmazonS3 s3Client;
+    S3Client s3Client;
 
 
     List<String> EXPECTED_CONTENT_TYPES = Arrays.asList(
@@ -54,20 +52,7 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     @Override
     public String handleRequest(S3Event s3Event, Context context) {
 
-        AwsContainer awsContainer = DaggerAwsContainer.create();
-        awsContainer.injectS3Handler(this);
-
-        if (awsContainer.loggingConfiguration().isNewRelicEnabled()) {
-            awsContainer.loggingConfiguration().validateNewRelicHandler(S3Handler.class);
-            GlobalTracer.registerIfAbsent(LambdaTracer.INSTANCE);
-            return LambdaTracing.instrument(s3Event, context, this::actualHandleRequest);
-        } else {
-            return actualHandleRequest(s3Event, context);
-        }
-    }
-
-    @SneakyThrows
-    public String actualHandleRequest(S3Event s3Event, Context context) {
+        DaggerAwsContainer.create().injectS3Handler(this);
 
         S3EventNotification.S3EventNotificationRecord record = s3Event.getRecords().get(0);
 
@@ -89,12 +74,15 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
     StorageEventResponse process(String importBucket, String sourceKey, StorageHandler.ObjectTransform transform) {
         StorageEventResponse storageEventResponse;
 
-        ObjectMetadata sourceMetadata = s3Client.getObjectMetadata(importBucket, sourceKey);
+        HeadObjectResponse sourceMetadata = s3Client.headObject(HeadObjectRequest.builder()
+            .bucket(importBucket)
+            .key(sourceKey)
+            .build());
 
 
         //avoid potential npe should objectMetadata be null (if that can even happen?)
         Map<String, String> userMetadata = Optional.ofNullable(sourceMetadata)
-            .map(ObjectMetadata::getUserMetadata).orElse(Collections.emptyMap());
+            .map(HeadObjectResponse::metadata).orElse(Collections.emptyMap());
 
         if (storageHandler.hasBeenSanitized(userMetadata)) {
             //possible if proxy directly (or indirectly via some other pipeline) is writing back
@@ -104,15 +92,16 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
         }
 
         // check content type here
-        if (sourceMetadata.getContentType() != null
-                && !EXPECTED_CONTENT_TYPES.contains(sourceMetadata.getContentType().toLowerCase())) {
+        if (sourceMetadata.contentType() != null
+                && !EXPECTED_CONTENT_TYPES.contains(sourceMetadata.contentType().toLowerCase())) {
             // our code presumes a CSV, which is utf-8 encoded atm (or something like ascii, which is a subset of utf-8)
-            log.warning(String.format("S3 file content type for %s/%s is %s ; this is not known to be compatible with UTF-8-encoded CSVs, so may not work as expected", importBucket, sourceKey, sourceMetadata.getContentEncoding()));
+            log.warning(String.format("S3 file content type for %s/%s is %s (content encoding: %s); this is not known to be compatible with UTF-8-encoded CSVs, so may not work as expected",
+                importBucket, sourceKey, sourceMetadata.contentType(), sourceMetadata.contentEncoding()));
         }
 
 
         StorageEventRequest request =
-            storageHandler.buildRequest(importBucket, sourceKey, transform, sourceMetadata.getContentEncoding(), sourceMetadata.getContentType());
+            storageHandler.buildRequest(importBucket, sourceKey, transform, sourceMetadata.contentEncoding(), sourceMetadata.contentType());
 
         // AWS lambdas have a shared ephemeral storage (shared across invocations) of 512MB
         // This can be upped to 10GB, but this should be enough as long as we're not processing
@@ -124,8 +113,10 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
 
             storageEventResponse = storageHandler.handle(request, transform, () -> {
-                S3Object sourceObject = s3Client.getObject(new GetObjectRequest(importBucket, sourceKey));
-                return sourceObject.getObjectContent();
+                return s3Client.getObject(GetObjectRequest.builder()
+                    .bucket(importBucket)
+                    .key(sourceKey)
+                    .build());
             }, () -> outputStream);
 
             log.info(String.format("Successfully pseudonymized %s/%s to buffer", importBucket, sourceKey));
@@ -133,27 +124,27 @@ public class S3Handler implements com.amazonaws.services.lambda.runtime.RequestH
 
         try (InputStream fileInputStream = new FileInputStream(tmpFile);
             BufferedInputStream processedStream = new BufferedInputStream(fileInputStream, storageHandler.getBufferSize())) {
-            ObjectMetadata destinationMetadata = new ObjectMetadata();
-            destinationMetadata.setContentLength(tmpFile.length());
+
+            Map<String, String> destinationUserMetadata = storageHandler.buildObjectMetadata(importBucket, sourceKey, transform);
+
+            PutObjectRequest.Builder putBuilder = PutObjectRequest.builder()
+                .bucket(storageEventResponse.getDestinationBucketName())
+                .key(storageEventResponse.getDestinationObjectPath())
+                .contentLength(tmpFile.length())
+                .metadata(destinationUserMetadata);
 
             // set headers iff they're non-null on source object
-            Optional.ofNullable(sourceMetadata.getContentType())
-                .ifPresent(destinationMetadata::setContentType);
+            Optional.ofNullable(sourceMetadata.contentType())
+                .ifPresent(putBuilder::contentType);
 
             if (request.getCompressOutput()) {
-                destinationMetadata.setContentEncoding(StorageHandler.CONTENT_ENCODING_GZIP);
+                putBuilder.contentEncoding(StorageHandler.CONTENT_ENCODING_GZIP);
             } else {
-                Optional.ofNullable(sourceMetadata.getContentEncoding())
-                    .ifPresent(destinationMetadata::setContentEncoding);
+                Optional.ofNullable(sourceMetadata.contentEncoding())
+                    .ifPresent(putBuilder::contentEncoding);
             }
 
-            destinationMetadata.setUserMetadata(storageHandler.buildObjectMetadata(importBucket, sourceKey, transform));
-
-
-            s3Client.putObject(storageEventResponse.getDestinationBucketName(),
-                storageEventResponse.getDestinationObjectPath(),
-                processedStream,
-                destinationMetadata);
+            s3Client.putObject(putBuilder.build(), RequestBody.fromInputStream(processedStream, tmpFile.length()));
 
             log.info(String.format("Successfully uploaded to %s/%s",
                 storageEventResponse.getDestinationBucketName(),
