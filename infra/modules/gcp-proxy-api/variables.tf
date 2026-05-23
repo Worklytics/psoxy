@@ -128,6 +128,11 @@ variable "environment_variables" {
   type        = map(string)
   description = "Non-sensitive values to add to functions environment variables"
   default     = {}
+
+  validation {
+    condition     = !contains(keys(var.environment_variables), "REQUEST_TIMEOUT_SECONDS")
+    error_message = "REQUEST_TIMEOUT_SECONDS cannot be set via environment_variables; use timeout_seconds instead."
+  }
 }
 
 variable "source_kind" {
@@ -250,6 +255,12 @@ variable "bucket_access_logs_destination" {
 variable "builder_sa_id" {
   description = "The fully-qualified ID of the custom builder service account used to build the Cloud Function."
   type        = string
+}
+
+variable "timeout_seconds" {
+  type        = number
+  description = "The timeout (in seconds) for the Cloud Run function. GCP Cloud Functions v2 allow up to 3600 seconds (1 hour)."
+  default     = 180
 }
 
 variable "allowed_data_access_ip_blocks" {

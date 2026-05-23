@@ -3,7 +3,6 @@ package co.worklytics.psoxy.gateway.impl;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -20,7 +19,6 @@ import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.HashUtils;
 import co.worklytics.psoxy.HealthCheckResult;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
@@ -44,6 +42,8 @@ import lombok.extern.java.Log;
 public class HealthCheckRequestHandler {
 
     @Inject
+    ApiModeConfig apiModeConfig;
+    @Inject
     EnvVarsConfigService envVarsConfigService;
     @Inject
     ConfigService config;
@@ -59,8 +59,6 @@ public class HealthCheckRequestHandler {
     HashUtils hashUtils;
     @Inject
     ProxyConstants proxyConstants;
-    @Inject
-    ApiModeConfig apiModeConfig;
 
     volatile String piiSaltHash;
     private final Object $piiSaltHashLock = new Object[0];
@@ -87,16 +85,15 @@ public class HealthCheckRequestHandler {
 
     private HttpEventResponse handle(HttpEventRequest request) {
 
-        Set<String> missing;
-
+        Set<String> missing = new HashSet<>();
 
         try {
-            missing =
+            missing.addAll(
                 sourceAuthStrategy.get().getRequiredConfigProperties().stream()
                     .filter(configProperty -> config.getConfigPropertyAsOptional(configProperty).isEmpty())
                     .filter(configProperty -> secretStore.getConfigPropertyAsOptional(configProperty).isEmpty())
                     .map(ConfigService.ConfigProperty::name)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toSet()));
         } catch (Throwable e) {
             // will fail if sourceAuthStrategy is not set up properly
             logInDev(e.getMessage(), e);
@@ -107,7 +104,7 @@ public class HealthCheckRequestHandler {
             Optional<String> targetHost = apiModeConfig.getTargetHost();
 
             if (targetHost.isEmpty() || StringUtils.isBlank(targetHost.get())) {
-                missing.add(ApiModeConfigProperty.TARGET_HOST.name());
+                missing.add(ApiModeConfig.ApiModeConfigProperty.TARGET_HOST.name());
             }
         } catch (Throwable ignored) {
             logInDev("Failed to add TARGET_HOST info to health check", ignored);

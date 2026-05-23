@@ -436,7 +436,9 @@ public class StorageHandler {
 
 
     public int getBufferSize() {
-        return config.getConfigPropertyAsOptional(BulkModeConfigProperty.BUFFER_SIZE).map(Integer::parseInt).orElse(DEFAULT_BUFFER_SIZE);
+        return config.getConfigPropertyAsOptional(BulkModeConfigProperty.BUFFER_SIZE)
+                .map(value -> ConfigService.parseIntValue(BulkModeConfigProperty.BUFFER_SIZE, value))
+                .orElse(DEFAULT_BUFFER_SIZE);
     }
 
     /**

@@ -254,6 +254,7 @@ module "api_connector" {
 
   todos_as_local_files          = var.todos_as_local_files
   todo_step                     = var.todo_step
+  timeout_seconds               = coalesce(try(each.value.timeout_seconds, null), 180)
   allowed_data_access_ip_blocks = var.allowed_data_access_ip_blocks
 
   environment_variables = merge(

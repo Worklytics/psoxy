@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -98,10 +99,8 @@ import co.worklytics.psoxy.gateway.ProxyConstants;
 @Log
 public class ApiDataRequestHandler {
 
-    // we have ~540 total in Cloud Function connection, so can have generous values here
-    private static final int SOURCE_API_REQUEST_CONNECT_TIMEOUT_MS = 30_000; // 30 seconds
-    private static final int SOURCE_API_REQUEST_READ_TIMEOUT_MS = 300_000; // 5 minutes
-
+    @Inject
+    ApiModeConfig apiModeConfig;
     @Inject
     EnvVarsConfigService envVarsConfigService;
     @Inject
@@ -149,8 +148,6 @@ public class ApiDataRequestHandler {
     Provider<UUID> uuidProvider;
     @Inject
     ProxyConstants proxyConstants;
-    @Inject
-    ApiModeConfig apiModeConfig;
     @Inject
     NetworkSecurityUtils networkSecurityUtils;
 
@@ -381,15 +378,15 @@ public class ApiDataRequestHandler {
             // setup request
             requestToSourceApi
                     .setThrowExceptionOnExecuteError(false)
-                    .setConnectTimeout(SOURCE_API_REQUEST_CONNECT_TIMEOUT_MS)
-                    .setReadTimeout(SOURCE_API_REQUEST_READ_TIMEOUT_MS);
+                    .setConnectTimeout(apiModeConfig.getSourceApiConnectTimeoutMs())
+                    .setReadTimeout(apiModeConfig.getSourceApiReadTimeoutMs());
 
-        } catch (java.net.SocketTimeoutException e) {
-            return buildNetworkTimeoutErrorResponse(builder, e);
+        } catch (SocketTimeoutException e) {
+            return buildConnectTimeoutErrorResponse(builder, e);
         } catch (IOException e) {
             // Check if the root cause is a SocketTimeoutException
             if (isSocketTimeoutException(e)) {
-                return buildNetworkTimeoutErrorResponse(builder, e);
+                return buildConnectTimeoutErrorResponse(builder, e);
             }
             
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
@@ -481,6 +478,18 @@ public class ApiDataRequestHandler {
                     ErrorCauses.CONNECTION_TO_SOURCE.name());
             builder.body("Error connecting to source API: " + e.getMessage());
             log.log(Level.SEVERE, "Error connecting to source API: " + e.getMessage(), e);
+            return builder.build();
+        } catch (SocketTimeoutException e) {
+            return buildSourceApiTimeoutErrorResponse(builder, e);
+        } catch (IOException e) {
+            if (isSocketTimeoutException(e)) {
+                return buildSourceApiTimeoutErrorResponse(builder, e);
+            }
+            builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                    ErrorCauses.CONNECTION_TO_SOURCE.name());
+            builder.body("Error communicating with source API: " + e.getMessage());
+            log.log(Level.SEVERE, "Error communicating with source API", e);
             return builder.build();
         }
 
@@ -773,8 +782,7 @@ public class ApiDataRequestHandler {
         // Construct URL directly concatenating instead of URIBuilder as it may re-encode.
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("https");
-        uriBuilder.setHost(apiModeConfig.getTargetHost()
-                .orElseThrow(() -> new NoSuchElementException("TARGET_HOST")));
+        uriBuilder.setHost(apiModeConfig.getTargetHostOrError());
         URL hostURL = uriBuilder.build().toURL();
         String hostPlusPath = StringUtils.stripEnd(hostURL.toString(), "/") + "/"
                 + StringUtils.stripStart(request.getPath(), "/");
@@ -1040,27 +1048,48 @@ public class ApiDataRequestHandler {
         }
     }
 
-    /**
-     * Check if an exception or any of its causes is a SocketTimeoutException
-     */
     private boolean isSocketTimeoutException(Throwable throwable) {
+        return findSocketTimeoutException(throwable) != null;
+    }
+
+    private SocketTimeoutException findSocketTimeoutException(Throwable throwable) {
         Throwable cause = throwable;
         while (cause != null) {
-            if (cause instanceof java.net.SocketTimeoutException) {
-                return true;
+            if (cause instanceof SocketTimeoutException socketTimeoutException) {
+                return socketTimeoutException;
             }
             cause = cause.getCause();
         }
-        return false;
+        return null;
+    }
+
+    private boolean isConnectSocketTimeout(SocketTimeoutException e) {
+        String message = e.getMessage();
+        return message != null && message.toLowerCase().contains("connect");
+    }
+
+    private HttpEventResponse buildSourceApiTimeoutErrorResponse(
+            HttpEventResponse.HttpEventResponseBuilder builder, Throwable e) {
+        SocketTimeoutException socketTimeoutException = findSocketTimeoutException(e);
+        if (socketTimeoutException != null && isConnectSocketTimeout(socketTimeoutException)) {
+            builder.statusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
+            builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                    ErrorCauses.CONNECTION_TO_SOURCE.name());
+            builder.body("Error connecting to source API: " + socketTimeoutException.getMessage());
+            log.log(Level.SEVERE, "Error connecting to source API: "
+                    + socketTimeoutException.getMessage(), e);
+            return builder.build();
+        }
+        return buildSourceApiReadTimeoutErrorResponse(builder, e);
     }
 
     /**
-     * Build error response for network timeout issues
+     * Build error response for network timeout issues during connection setup.
      * Cannot distinguish between:
      * 1) Network egress blocked from proxy (VPC/serverless connector misconfiguration)
      * 2) Target API being unreachable/slow (their infrastructure issue)
      */
-    private HttpEventResponse buildNetworkTimeoutErrorResponse(
+    private HttpEventResponse buildConnectTimeoutErrorResponse(
             HttpEventResponse.HttpEventResponseBuilder builder, Throwable e) {
         
         builder.statusCode(HttpStatus.SC_BAD_GATEWAY);
@@ -1077,6 +1106,27 @@ public class ApiDataRequestHandler {
                 "1) Proxy network egress blocked - check VPC connector configuration, firewall rules, Cloud NAT; " +
                 "2) Target API unreachable or slow - check API status, DNS resolution");
         
+        return builder.build();
+    }
+
+    private HttpEventResponse buildSourceApiReadTimeoutErrorResponse(
+            HttpEventResponse.HttpEventResponseBuilder builder, Throwable e) {
+        int readTimeoutSeconds = apiModeConfig.getSourceApiReadTimeoutMs() / 1000;
+
+        builder.statusCode(HttpStatus.SC_GATEWAY_TIMEOUT);
+        builder.body(String.format(
+                "Source API read timeout: no response received within %d seconds. "
+                        + "The upstream API may be slow or unresponsive. "
+                        + "Consider using async processing for long-running requests, or increasing REQUEST_TIMEOUT_SECONDS for this connector"
+                        + " (or timeout_seconds in Terraform-based deployments).",
+                readTimeoutSeconds));
+        builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                ErrorCauses.SOURCE_API_READ_TIMEOUT.name());
+
+        log.log(Level.SEVERE, String.format(
+                "SocketTimeoutException: timed out waiting for source API response after %d seconds",
+                readTimeoutSeconds), e);
+
         return builder.build();
     }
 

@@ -218,6 +218,7 @@ module "api_connector" {
   allowed_data_access_ip_blocks         = var.allowed_data_access_ip_blocks
   instance_concurrency                  = var.api_connector_instance_concurrency
   max_instance_count                    = var.max_instances_per_api_connector
+  timeout_seconds                       = coalesce(try(each.value.timeout_seconds, null), 180)
 
 
   environment_variables = merge(

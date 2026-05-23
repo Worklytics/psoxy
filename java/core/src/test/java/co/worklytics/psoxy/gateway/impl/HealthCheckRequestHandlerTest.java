@@ -4,7 +4,6 @@ import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.HealthCheckResult;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;

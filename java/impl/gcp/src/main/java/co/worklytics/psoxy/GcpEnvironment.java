@@ -106,8 +106,16 @@ public class GcpEnvironment implements HostEnvironment {
             return GcpWebhookCollectorModeConfig.builder()
                 .serviceUrl(configService.getConfigPropertyOrError(GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.SERVICE_URL))
                 .batchMergeSubscription(configService.getConfigPropertyOrError(GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_MERGE_SUBSCRIPTION))
-                .batchSize(configService.getConfigPropertyAsOptional(GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_SIZE).map(Integer::parseInt).orElse(100))
-                .batchInvocationTimeoutSeconds(configService.getConfigPropertyAsOptional(GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_INVOCATION_TIMEOUT_SECONDS).map(Integer::parseInt).orElse(60))
+                .batchSize(configService.getConfigPropertyAsOptional(GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_SIZE)
+                        .map(value -> ConfigService.parseIntValue(
+                                GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_SIZE, value))
+                        .orElse(100))
+                .batchInvocationTimeoutSeconds(configService.getConfigPropertyAsOptional(
+                                GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_INVOCATION_TIMEOUT_SECONDS)
+                        .map(value -> ConfigService.parseIntValue(
+                                GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_INVOCATION_TIMEOUT_SECONDS,
+                                value))
+                        .orElse(60))
                 .build();
         }
     }

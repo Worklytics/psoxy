@@ -114,12 +114,13 @@ public class PsoxyModule {
     static SourceAuthStrategy sourceAuthStrategy(ApiModeConfig apiModeConfig,
             Set<SourceAuthStrategy> sourceAuthStrategies) {
         String identifier = apiModeConfig.getSourceAuthStrategyIdentifier()
-                .orElseThrow(() -> new Error("SOURCE_AUTH_STRATEGY_IDENTIFIER not configured"));
+                .orElseThrow(() -> new IllegalStateException(
+                        "No SOURCE_AUTH_STRATEGY_IDENTIFIER configured"));
         return sourceAuthStrategies
                 .stream()
                 .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))
                 .findFirst()
-                .orElseThrow(() -> new Error(
+                .orElseThrow(() -> new IllegalStateException(
                         "No SourceAuthStrategy impl matching configured identifier: "
                                 + identifier));
     }

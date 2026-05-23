@@ -15,7 +15,6 @@ import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.http.HttpTransportFactory;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LoggingConfiguration;
 import co.worklytics.psoxy.gateway.ProcessedDataStage;
@@ -96,7 +95,7 @@ public class FunctionRuntimeModule {
     @Provides @Singleton
     HttpTransportFactory providesHttpTransportFactory(ApiModeConfig apiModeConfig) {
         final String sslContextProtocol = apiModeConfig.getTlsVersion();
-        if (Arrays.stream(ApiModeConfigProperty.TlsVersions.ALL).noneMatch(s -> sslContextProtocol.equals(s))) {
+        if (Arrays.stream(ApiModeConfig.TlsVersions.ALL).noneMatch(s -> sslContextProtocol.equals(s))) {
             throw new IllegalArgumentException("Invalid TLS version: " + sslContextProtocol);
         }
 

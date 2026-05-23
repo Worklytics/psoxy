@@ -165,6 +165,11 @@ variable "environment_variables" {
   type        = map(string)
   description = "Non-sensitive values to add to functions environment variables"
   default     = {}
+
+  validation {
+    condition     = !contains(keys(var.environment_variables), "REQUEST_TIMEOUT_SECONDS")
+    error_message = "REQUEST_TIMEOUT_SECONDS cannot be set via environment_variables; use timeout_seconds instead."
+  }
 }
 
 variable "new_relic_account_id" {
@@ -278,6 +283,12 @@ variable "todo_step" {
   type        = number
   description = "of all todos, where does this one logically fall in sequence"
   default     = 2
+}
+
+variable "timeout_seconds" {
+  type        = number
+  description = "The timeout (in seconds) for the Lambda function. AWS Lambda allows up to 900 seconds (15 minutes)."
+  default     = 180
 }
 
 variable "allowed_data_access_ip_blocks" {

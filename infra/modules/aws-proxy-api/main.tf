@@ -190,7 +190,7 @@ module "psoxy_lambda" {
   function_env_kms_key_arn             = var.function_env_kms_key_arn
   logs_kms_key_arn                     = var.logs_kms_key_arn
   memory_size_mb                       = var.memory_size_mb
-  timeout_seconds                      = 55
+  timeout_seconds                      = var.timeout_seconds
   reserved_concurrent_executions       = var.reserved_concurrent_executions
   source_kind                          = var.source_kind
   function_parameters                  = var.function_parameters
@@ -215,6 +215,9 @@ module "psoxy_lambda" {
   environment_variables = merge(
     var.environment_variables,
     local.required_env_vars,
+    {
+      REQUEST_TIMEOUT_SECONDS = tostring(var.timeout_seconds)
+    },
     var.allowed_data_access_ip_blocks != null ? {
       ALLOWED_DATA_ACCESS_IP_BLOCKS = join(",", var.allowed_data_access_ip_blocks)
     } : {},

@@ -246,6 +246,7 @@ resource "google_cloudfunctions2_function" "function" {
   service_config {
     service_account_email = var.service_account_email
     available_memory      = "${var.available_memory_mb}M"
+    timeout_seconds       = var.timeout_seconds
     ingress_settings      = "ALLOW_ALL"
 
     max_instance_request_concurrency = var.instance_concurrency
@@ -258,6 +259,9 @@ resource "google_cloudfunctions2_function" "function" {
     environment_variables = merge(
       # { LOG_EXECUTION_ID = "true" }, # NOTE that the google provider > 5.x seems to magically add this here, seemingly bc that's the defalt behavior of the version gcloud cli / API its using
       local.required_env_vars,
+      {
+        REQUEST_TIMEOUT_SECONDS = tostring(var.timeout_seconds)
+      },
       var.environment_variables,
       var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
       var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = "${var.config_parameter_prefix}${replace(upper(var.instance_id), "-", "_")}_" },

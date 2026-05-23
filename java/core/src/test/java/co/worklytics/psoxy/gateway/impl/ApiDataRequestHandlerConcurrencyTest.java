@@ -69,7 +69,7 @@ class ApiDataRequestHandlerConcurrencyTest {
             .thenReturn(Optional.of("salt"));
         when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
             .thenReturn("gmail");
-        when(apiModeConfig.getTargetHost()).thenReturn(Optional.of("gmail.googleapis.com"));
+        handler.apiModeConfig = ApiModeConfig.builder().targetHost("gmail.googleapis.com").build();
 
         // Get access to the private loadSanitizerRules() method which contains the DCL
         loadSanitizerRulesMethod = ApiDataRequestHandler.class.getDeclaredMethod("loadSanitizerRules");

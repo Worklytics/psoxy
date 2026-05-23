@@ -191,7 +191,7 @@ class ApiDataRequestHandlerTest {
                 return this;
             }
         };
-        when(apiModeConfig.getTargetHost()).thenReturn(Optional.of("proxyhost.com"));
+        handler.apiModeConfig = ApiModeConfig.builder().targetHost("proxyhost.com").build();
 
         URL url = new URL(handler.reverseTokenizedUrlComponents(
             handler.parseRequestedTarget(request)));
@@ -665,7 +665,7 @@ class ApiDataRequestHandlerTest {
             .thenReturn(Optional.of("salt"));
         when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
             .thenReturn(source);
-        when(apiModeConfig.getTargetHost()).thenReturn(Optional.of(host));
+        handler.apiModeConfig = ApiModeConfig.builder().targetHost(host).build();
 
         reversibleTokenizationStrategy =
             AESReversibleTokenizationStrategy.builder()

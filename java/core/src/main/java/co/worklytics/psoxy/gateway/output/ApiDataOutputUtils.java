@@ -68,8 +68,8 @@ public class ApiDataOutputUtils {
         ;
     }
 
-    ConfigService config;
     ApiModeConfig apiModeConfig;
+    ConfigService config;
     Provider<UUID> uuidProvider;
     Base64.Encoder base64encoder;
 

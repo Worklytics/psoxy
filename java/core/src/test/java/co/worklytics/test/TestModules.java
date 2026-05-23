@@ -1,7 +1,6 @@
 package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.ApiModeConfig;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.SecretStore;
@@ -96,7 +95,7 @@ public class TestModules {
         @Singleton
         static ApiModeConfig apiModeConfig() {
             ApiModeConfig m = MockModules.provideMock(ApiModeConfig.class);
-            when(m.getTlsVersion()).thenReturn(ApiModeConfigProperty.TlsVersions.TLSv1_3);
+            when(m.getTlsVersion()).thenReturn(ApiModeConfig.TlsVersions.TLSv1_3);
             when(m.getTargetHost()).thenReturn(Optional.empty());
             when(m.getSourceAuthStrategyIdentifier()).thenReturn(Optional.of("test-source-auth"));
             when(m.getAsyncOutputDestination()).thenReturn(Optional.empty());
