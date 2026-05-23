@@ -1,8 +1,6 @@
 # GitHub Copilot
 
-**Connector ID:** `github-copilot`
-
-**Availability:** Alpha
+Availability: **ALPHA**
 
 ## Authentication workflow
 
