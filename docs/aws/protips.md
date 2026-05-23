@@ -134,8 +134,9 @@ Do **not** rely on setting `bulk_input_expiration_days` or `bulk_sanitized_expir
 If you need fully custom lifecycle rules on these buckets, use a version of the module that does not create lifecycle configuration for them, or update/fork the module to make that behavior conditional before adding your own `aws_s3_bucket_lifecycle_configuration` resources.
 
 #### 2. Exclude the Artifacts Bucket
-> [!WARNING]
-> Do **NOT** apply object expiration or auto-deletion lifecycle rules to the **artifacts bucket** (e.g. `aws_s3_bucket.artifacts`). This bucket stores the Psoxy deployment JAR/ZIP. If the JAR is deleted, the next Terraform plan/apply will fail or force a full rebuild and re-upload.
+{% hint style="warning" %}
+Do **NOT** apply object expiration or auto-deletion lifecycle rules to the **artifacts bucket** (e.g. `aws_s3_bucket.artifacts`). This bucket stores the Psoxy deployment JAR/ZIP. If the JAR is deleted, the next Terraform plan/apply will fail or force a full rebuild and re-upload.
+{% endhint %}
 
 #### Example Configuration
 
