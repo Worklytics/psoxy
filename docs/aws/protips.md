@@ -127,7 +127,11 @@ S3 bucket lifecycle configurations are provisioned inside the Worklytics modules
 If you need to define custom or additional lifecycle rules for all buckets (e.g., to abort incomplete multipart uploads or transition old objects), you can provision your own `aws_s3_bucket_lifecycle_configuration` resources.
 
 #### 1. Avoid Conflicts with Module-Level Rules
-Set the module-level expiration settings (`bulk_input_expiration_days` and `bulk_sanitized_expiration_days`) to `0` in your terraform variables to disable the default expiration configurations created by the modules.
+The Worklytics modules currently manage S3 lifecycle configuration for these buckets. Because AWS allows only one `aws_s3_bucket_lifecycle_configuration` per bucket, you cannot safely add a separate lifecycle configuration resource for the same bucket unless the module is changed to stop managing lifecycle rules for it.
+
+Do **not** rely on setting `bulk_input_expiration_days` or `bulk_sanitized_expiration_days` to `0` as a way to disable the module-managed lifecycle configuration. That is not a currently supported mechanism.
+
+If you need fully custom lifecycle rules on these buckets, use a version of the module that does not create lifecycle configuration for them, or update/fork the module to make that behavior conditional before adding your own `aws_s3_bucket_lifecycle_configuration` resources.
 
 #### 2. Exclude the Artifacts Bucket
 > [!WARNING]
