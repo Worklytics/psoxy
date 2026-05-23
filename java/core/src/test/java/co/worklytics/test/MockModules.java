@@ -114,8 +114,10 @@ public class MockModules {
     @Module
     public interface ForSourceAuthStrategySet {
         @Provides @IntoSet
-        static SourceAuthStrategy sourceStratey() {
-            return mock(SourceAuthStrategy.class);
+        static SourceAuthStrategy sourceStrategy() {
+            SourceAuthStrategy strategy = provideMock(SourceAuthStrategy.class);
+            when(strategy.getConfigIdentifier()).thenReturn("test-source-auth");
+            return strategy;
         }
     }
 
@@ -220,6 +222,15 @@ public class MockModules {
         @Singleton
         static AsyncApiDataRequestHandler asyncApiDataRequestHandler() {
             return mock(AsyncApiDataRequestHandler.class);
+        }
+    }
+
+    @Module
+    public interface ForResourceService {
+        @Provides
+        @Singleton
+        static ResourceService resourceService() {
+            return new co.worklytics.psoxy.gateway.impl.NoOpResourceService();
         }
     }
 }

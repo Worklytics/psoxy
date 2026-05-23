@@ -125,6 +125,8 @@ module "psoxy" {
   email_canonicalization          = var.email_canonicalization
   bulk_input_expiration_days      = var.bulk_input_expiration_days
   bulk_sanitized_expiration_days  = var.bulk_sanitized_expiration_days
+  allowed_data_access_ip_blocks   = var.allowed_data_access_ip_blocks
+  allowed_webhook_ip_blocks       = var.allowed_webhook_ip_blocks
   custom_bulk_connector_rules     = var.custom_bulk_connector_rules
   custom_bulk_connector_arguments = var.custom_bulk_connector_arguments
   lookup_tables                   = var.lookup_tables
@@ -136,6 +138,7 @@ module "psoxy" {
   tf_gcp_principal_email          = var.gcp_terraform_sa_account_email
   provision_project_level_iam     = var.provision_project_level_iam
   bucket_access_logs_destination  = var.bucket_access_logs_destination
+  enable_remote_resources         = true
 }
 
 locals {

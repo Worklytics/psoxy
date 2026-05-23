@@ -26,6 +26,7 @@ import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.auth.JwtAuthorizedResource;
 import co.worklytics.psoxy.gateway.auth.PublicKeyRef;
@@ -57,6 +58,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
     private final WebhookSanitizer webhookSanitizer;
     private final ConfigService configService;
     private final WebhookCollectorModeConfig webhookCollectorModeConfig;
+    private final NetworkSecurityUtils networkSecurityUtils;
     private final Set<PublicKeyStoreClient> publicKeyStoreClients;
     private final Clock clock;
 
@@ -65,12 +67,14 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
                                  @Named("forWebhooks") Output output,
                                  ConfigService configService,
                                  WebhookCollectorModeConfig webhookCollectorModeConfig,
+                                 NetworkSecurityUtils networkSecurityUtils,
                                  Set<PublicKeyStoreClient> publicKeyStoreClients,
                                  Clock clock) {
         this.webhookSanitizer = webhookSanitizerProvider.get(); // avoids trying to instantiate WebhookSanitizerImpl when we don't need one
         this.output = output;
         this.configService = configService;
         this.webhookCollectorModeConfig = webhookCollectorModeConfig;
+        this.networkSecurityUtils = networkSecurityUtils;
         this.publicKeyStoreClients = publicKeyStoreClients;
         this.clock = clock;
     }
@@ -120,6 +124,16 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
                 .header("Access-Control-Allow-Origin", webhookCollectorModeConfig.getAllowOrigins()) // q: configurable? what's the use-case to restrict this? if auth is based on Authorization header, no way for a malicious site to obtain and forge that, right?
                 .header("Access-Control-Allow-Methods", "POST, OPTIONS") // TODO: make this configurable
                 .header("Access-Control-Allow-Headers", "*")  // TODO: make this explicit?
+                .build();
+        }
+
+        // IP lockdown enforcement
+        if (!networkSecurityUtils.isWebhookIpAllowed(request.getClientIp().orElse(null))) {
+            return HttpEventResponse.builder()
+                .statusCode(HttpStatus.SC_FORBIDDEN)
+                .header(co.worklytics.psoxy.ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                        co.worklytics.psoxy.ErrorCauses.UNAUTHORIZED_IP_ADDRESS.name())
+                .body("Client IP is not authorized to send webhooks to this proxy instance.")
                 .build();
         }
 

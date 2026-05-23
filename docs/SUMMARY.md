@@ -44,6 +44,7 @@
   * [Side Outputs](configuration/side-outputs.md)
   * [TLS Version](configuration/tls.md)
   * [New Relic Monitoring](configuration/new-relic-monitoring.md)
+  * [Remote Resources **BETA**](configuration/remote-resources.md)
 * [Development](development/README.md)
   * [Approaches for Example / Module design](development/terraform-architecture.md)
   * [Create a private fork](development/private-fork.md)

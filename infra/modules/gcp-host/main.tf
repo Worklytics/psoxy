@@ -215,6 +215,7 @@ module "api_connector" {
   enable_versioning                     = var.version_sanitized_buckets
   bucket_access_logs_destination        = var.bucket_access_logs_destination
   builder_sa_id                         = module.psoxy.builder_sa_id
+  allowed_data_access_ip_blocks         = var.allowed_data_access_ip_blocks
   instance_concurrency                  = var.api_connector_instance_concurrency
   max_instance_count                    = var.max_instances_per_api_connector
 
@@ -233,6 +234,10 @@ module "api_connector" {
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
   )
+
+  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = var.enable_remote_resources ? "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = var.enable_remote_resources ? local.config_parameter_prefix : null
 
   secret_bindings = merge(
     local.secrets_bound_as_env_vars[each.key],
@@ -310,6 +315,7 @@ module "webhook_collector" {
   output_path_prefix                 = each.value.output_path_prefix
   example_identity                   = try(each.value.example_identity, null)
   example_payload                    = try(each.value.example_payload, null)
+  allowed_webhook_ip_blocks          = var.allowed_webhook_ip_blocks
 
   environment_variables = merge(
     {
@@ -320,6 +326,10 @@ module "webhook_collector" {
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
   )
+
+  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = var.enable_remote_resources ? "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = var.enable_remote_resources ? local.config_parameter_prefix : null
 
   secret_bindings = module.psoxy.secrets
 
@@ -384,6 +394,10 @@ module "bulk_connector" {
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
   )
+
+  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = var.enable_remote_resources ? "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = var.enable_remote_resources ? local.config_parameter_prefix : null
 
   depends_on = [
     module.psoxy # some of the set-up IAM grants done there, but not EXPLICITLY passed out as outputs and into above as inputs, are required; so make this explicit

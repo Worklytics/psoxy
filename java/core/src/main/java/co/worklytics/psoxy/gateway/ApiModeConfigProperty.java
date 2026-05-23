@@ -29,6 +29,11 @@ public enum ApiModeConfigProperty implements ConfigService.ConfigProperty {
      * target 'Host' to forward requests to, in HTTP sense
      */
     TARGET_HOST,
+
+    /**
+     * CSV of IPs or CIDR blocks allowed for API data access (application-layer allowlist).
+     */
+    ALLOWED_DATA_ACCESS_IP_BLOCKS,
     ;
 
 
