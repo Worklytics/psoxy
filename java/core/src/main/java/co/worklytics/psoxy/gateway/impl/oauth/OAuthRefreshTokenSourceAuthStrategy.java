@@ -169,7 +169,7 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
      */
     @Setter
     @Getter
-    private AccessToken cachedToken = null;
+    private volatile AccessToken cachedToken = null;
 
 
     @Override
@@ -439,7 +439,13 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          * @return
          */
         private Optional<AccessToken> checkIfAlreadyRefreshed() {
-            AccessToken freshToken = sourceAuthStrategy.getSharedAccessTokenIfSupported().orElse(null);
+            AccessToken freshToken = sourceAuthStrategy.getCachedToken();
+            if (!sourceAuthStrategy.shouldRefresh(freshToken, clock.instant())) {
+                DevLogUtils.info(envVarsConfigService, log, "Token already refreshed " + freshToken.getExpirationTime());
+                return Optional.of(freshToken);
+            }
+
+            freshToken = sourceAuthStrategy.getSharedAccessTokenIfSupported().orElse(null);
             if (sourceAuthStrategy.shouldRefresh(freshToken, clock.instant())) {
                 return Optional.empty();
             } else if (freshToken != null) {

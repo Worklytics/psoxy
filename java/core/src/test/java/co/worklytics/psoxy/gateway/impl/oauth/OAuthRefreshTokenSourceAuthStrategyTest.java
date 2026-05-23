@@ -2,6 +2,7 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,10 +33,10 @@ import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.SourceAuthModule;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.SecretStore;
+import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
 import co.worklytics.test.MockModules;
-import co.worklytics.test.TestModules;
 import dagger.Component;
 import lombok.SneakyThrows;
 
@@ -50,7 +51,6 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
-        TestModules.ForApiModeConfig.class,
         SourceAuthModule.class,
         MockModules.ForConfigService.class,
         MockModules.ForRandomNumberGenerator.class,
@@ -202,6 +202,30 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         assertTrue(accessToken.isPresent());
         assertEquals("my-token", accessToken.get().getTokenValue());
         assertEquals(1639526410000L, accessToken.get().getExpirationTime().getTime());
+    }
+
+    @SneakyThrows
+    @Test
+    public void refreshAccessTokenReturnsFreshCachedTokenWithoutExchange() {
+        Instant now = Instant.parse("2025-01-01T00:00:00Z");
+
+        OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
+        strategy.config = MockModules.provideMock(ConfigService.class);
+        strategy.randomNumberGenerator = this.randomNumberGenerator;
+        AccessToken cachedToken =
+            new AccessToken("cached-token", Date.from(now.plus(1, ChronoUnit.HOURS)));
+        strategy.setCachedToken(cachedToken);
+
+        when(strategy.config.getConfigPropertyAsOptional(OAuthRefreshTokenSourceAuthStrategy.ConfigProperty.USE_SHARED_TOKEN))
+            .thenReturn(Optional.of("false"));
+
+        OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl tokenRefreshHandler =
+            new OAuthRefreshTokenSourceAuthStrategy.TokenRefreshHandlerImpl();
+        tokenRefreshHandler.envVarsConfigService = MockModules.provideMock(EnvVarsConfigService.class);
+        tokenRefreshHandler.sourceAuthStrategy = strategy;
+        tokenRefreshHandler.clock = Clock.fixed(now, ZoneOffset.UTC);
+
+        assertSame(cachedToken, tokenRefreshHandler.refreshAccessToken());
     }
 
     @SneakyThrows
