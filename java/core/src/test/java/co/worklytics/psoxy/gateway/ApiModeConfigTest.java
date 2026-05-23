@@ -80,4 +80,11 @@ class ApiModeConfigTest {
 
         assertEquals("Invalid value for REQUEST_TIMEOUT_SECONDS: 'not-a-number'", ex.getMessage());
     }
+
+    @Test
+    void getSourceApiReadTimeoutMs_cappedAtOverallRequestBudget() {
+        ApiModeConfig config = ApiModeConfig.builder().requestTimeoutSeconds(45).build();
+
+        assertEquals(45_000, config.getSourceApiReadTimeoutMs());
+    }
 }

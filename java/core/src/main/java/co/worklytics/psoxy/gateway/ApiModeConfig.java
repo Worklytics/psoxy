@@ -137,8 +137,10 @@ public class ApiModeConfig {
      * read timeout for outbound requests to the source API, in milliseconds
      */
     public int getSourceApiReadTimeoutMs() {
-        int readTimeoutMs = (requestTimeoutSeconds - REQUEST_TIMEOUT_HEADROOM_SECONDS) * 1000;
-        return Math.max(MIN_SOURCE_API_READ_TIMEOUT_MS, readTimeoutMs);
+        int requestTimeoutMs = requestTimeoutSeconds * 1000;
+        int readTimeoutMs = Math.max(MIN_SOURCE_API_READ_TIMEOUT_MS,
+                (requestTimeoutSeconds - REQUEST_TIMEOUT_HEADROOM_SECONDS) * 1000);
+        return Math.min(readTimeoutMs, requestTimeoutMs);
     }
 
     /**
