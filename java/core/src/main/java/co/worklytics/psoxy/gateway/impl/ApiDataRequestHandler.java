@@ -1082,7 +1082,8 @@ public class ApiDataRequestHandler {
         builder.body(String.format(
                 "Source API read timeout: no response received within %d seconds. "
                         + "The upstream API may be slow or unresponsive. "
-                        + "Consider using async processing for long-running requests, or increasing timeout_seconds for this connector.",
+                        + "Consider using async processing for long-running requests, or increasing REQUEST_TIMEOUT_SECONDS for this connector"
+                        + " (or timeout_seconds in Terraform-based deployments).",
                 readTimeoutSeconds));
         builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
                 ErrorCauses.SOURCE_API_READ_TIMEOUT.name());
