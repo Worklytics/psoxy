@@ -54,6 +54,7 @@ import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.Rules2;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
 import dagger.Component;
 import dagger.Module;
@@ -80,6 +81,8 @@ class RESTApiSanitizerImplTest {
     @Inject
     ConfigService config;
     @Inject
+    ApiModeConfig apiModeConfig;
+    @Inject
     SecretStore secretStore;
 
 
@@ -87,6 +90,7 @@ class RESTApiSanitizerImplTest {
     @Component(
             modules = {
                 PsoxyModule.class,
+                TestModules.ForApiModeConfig.class,
                 ForConfigService.class,
                 MockModules.ForSecretStore.class,
             // TestModules.ForSecretStore.class,
@@ -102,10 +106,6 @@ class RESTApiSanitizerImplTest {
         static ConfigService configService() {
             ConfigService mock = MockModules.provideMock(ConfigService.class);
             when(mock.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE))).thenReturn("gmail");
-            when(mock.getConfigPropertyAsOptional(eq(ApiModeConfig.ApiModeConfigProperty.TARGET_HOST)))
-                    .thenReturn(Optional.of("gmail.googleapis.com"));
-            when(mock.getConfigPropertyAsOptional(eq(ApiModeConfig.ApiModeConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER)))
-                    .thenReturn(Optional.of("mock-auth-strategy"));
 
             return mock;
         }
@@ -115,6 +115,8 @@ class RESTApiSanitizerImplTest {
     public void setup() {
         Container container = DaggerRESTApiSanitizerImplTest_Container.create();
         container.inject(this);
+
+        when(apiModeConfig.getTargetHost()).thenReturn(Optional.of("gmail.googleapis.com"));
 
         Pseudonymizer pseudonymizer = pseudonymizerImplFactory
                 .create(Pseudonymizer.ConfigurationOptions.builder().build());

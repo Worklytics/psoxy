@@ -97,6 +97,7 @@ public class HealthCheckRequestHandler {
         } catch (Throwable e) {
             // will fail if sourceAuthStrategy is not set up properly
             logInDev(e.getMessage(), e);
+            missing = new HashSet<>();
         }
 
         try {

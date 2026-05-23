@@ -12,8 +12,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.RESTApiSanitizer;
-import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ApiModeConfig;
+import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import dagger.Component;
@@ -34,6 +34,9 @@ class ApiDataRequestHandlerConcurrencyTest {
     @Inject
     ApiDataRequestHandler handler;
 
+    @Inject
+    ApiModeConfig apiModeConfig;
+
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
@@ -45,6 +48,7 @@ class ApiDataRequestHandlerConcurrencyTest {
         MockModules.ForSideOutputs.class,
         MockModules.ForAsyncApiDataRequestHandler.class,
         TestModules.ForWebhookCollectorModeConfig.class,
+        TestModules.ForApiModeConfig.class,
         TestModules.ForFixedUUID.class,
         TestModules.ForFixedClock.class,
         TestModules.ForProxyConstants.class,

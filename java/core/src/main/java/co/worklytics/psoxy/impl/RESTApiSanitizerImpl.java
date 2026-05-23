@@ -349,8 +349,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         if (targetHostPath == null) {
             synchronized ($writeLock) {
                 if (targetHostPath == null) {
-                    targetHostPath = apiModeConfig
-                            .getTargetHost()
+                    targetHostPath = apiModeConfig.getTargetHost()
                             .map(s -> {
                                 try {
                                     if (!s.startsWith("https://")) {

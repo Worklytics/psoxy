@@ -87,6 +87,11 @@ public enum ErrorCauses {
     UNKNOWN,
 
     INVALID_REQUEST,
+
+    /**
+     * Client IP is not allowed by application-level lockdown rules.
+     */
+    UNAUTHORIZED_IP_ADDRESS,
     
     /**
      * Rules YAML is invalid or malformed

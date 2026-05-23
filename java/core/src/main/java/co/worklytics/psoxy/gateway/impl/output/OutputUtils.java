@@ -79,8 +79,7 @@ public class OutputUtils {
     // generic cast of Output is safe
     @SuppressWarnings("unchecked")
     public ApiSanitizedDataOutput asyncOutput() {
-        Output asyncOutput = apiModeConfig
-                .getAsyncOutputDestination()
+        Output asyncOutput = apiModeConfig.getAsyncOutputDestination()
                 .map(OutputLocationImpl::of).map(this::createOutputForLocation)
                 .map(output -> (Output) CompressedOutputWrapper.wrap((Output) output))
                 .orElseGet(noSideProvider::get);

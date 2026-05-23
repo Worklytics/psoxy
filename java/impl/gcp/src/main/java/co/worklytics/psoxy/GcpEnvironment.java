@@ -22,6 +22,9 @@ public class GcpEnvironment implements HostEnvironment {
         ;
     }
 
+    /**
+     * GCP-specific URLs/topics for the API data connector (distinct from core {@link co.worklytics.psoxy.gateway.ApiModeConfig}).
+     */
     @Builder
     @Value
     static class GcpApiModeConfig {

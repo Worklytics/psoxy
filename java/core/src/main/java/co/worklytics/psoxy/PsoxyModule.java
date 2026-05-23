@@ -191,12 +191,6 @@ public class PsoxyModule {
         return BulkModeConfig.fromConfigService(configService);
     }
 
-    @Provides
-    @Singleton
-    static ApiModeConfig apiModeConfig(ConfigService configService) {
-        return ApiModeConfig.fromConfigService(configService);
-    }
-
 
     @Provides
     @Singleton

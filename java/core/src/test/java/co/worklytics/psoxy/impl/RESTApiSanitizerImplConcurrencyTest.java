@@ -20,11 +20,11 @@ import co.worklytics.psoxy.PseudonymizerImplFactory;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.RESTApiSanitizerFactory;
-import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
 import co.worklytics.test.TestUtils;
 import dagger.Component;
 import dagger.Module;
@@ -56,6 +56,7 @@ class RESTApiSanitizerImplConcurrencyTest {
                 PsoxyModule.class,
                 ForConfigService.class,
                 MockModules.ForSecretStore.class,
+                TestModules.ForApiModeConfig.class,
             })
     public interface Container {
         void inject(RESTApiSanitizerImplConcurrencyTest test);
@@ -68,10 +69,6 @@ class RESTApiSanitizerImplConcurrencyTest {
         static ConfigService configService() {
             ConfigService mock = MockModules.provideMock(ConfigService.class);
             when(mock.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE))).thenReturn("gmail");
-            when(mock.getConfigPropertyAsOptional(eq(ApiModeConfig.ApiModeConfigProperty.TARGET_HOST)))
-                    .thenReturn(Optional.of("gmail.googleapis.com"));
-            when(mock.getConfigPropertyAsOptional(eq(ApiModeConfig.ApiModeConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER)))
-                    .thenReturn(Optional.of("mock-auth-strategy"));
             return mock;
         }
     }

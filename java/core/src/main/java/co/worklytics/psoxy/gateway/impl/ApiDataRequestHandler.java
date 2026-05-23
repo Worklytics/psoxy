@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -69,6 +70,7 @@ import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
@@ -146,6 +148,8 @@ public class ApiDataRequestHandler {
     Provider<UUID> uuidProvider;
     @Inject
     ProxyConstants proxyConstants;
+    @Inject
+    NetworkSecurityUtils networkSecurityUtils;
 
     /**
      * Basic headers to pass: content, caching, retries. Can be expanded by connection later.
@@ -228,6 +232,16 @@ public class ApiDataRequestHandler {
                 healthCheckRequestHandler.handleIfHealthCheck(requestToProxy);
         if (healthCheckResponse.isPresent()) {
             return healthCheckResponse.get();
+        }
+
+        // IP lockdown enforcement
+        if (!networkSecurityUtils.isDataAccessIpAllowed(requestToProxy.getClientIp().orElse(null))) {
+            return HttpEventResponse.builder()
+                    .statusCode(HttpStatus.SC_FORBIDDEN)
+                    .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                            ErrorCauses.UNAUTHORIZED_IP_ADDRESS.name())
+                    .body("Client IP is not authorized to access this proxy instance.")
+                    .build();
         }
 
 
@@ -466,10 +480,10 @@ public class ApiDataRequestHandler {
             log.log(Level.SEVERE, "Error connecting to source API: " + e.getMessage(), e);
             return builder.build();
         } catch (SocketTimeoutException e) {
-            return buildSourceApiReadTimeoutErrorResponse(builder, e);
+            return buildSourceApiTimeoutErrorResponse(builder, e);
         } catch (IOException e) {
             if (isSocketTimeoutException(e)) {
-                return buildSourceApiReadTimeoutErrorResponse(builder, e);
+                return buildSourceApiTimeoutErrorResponse(builder, e);
             }
             builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
@@ -1034,18 +1048,39 @@ public class ApiDataRequestHandler {
         }
     }
 
-    /**
-     * Check if an exception or any of its causes is a SocketTimeoutException
-     */
     private boolean isSocketTimeoutException(Throwable throwable) {
+        return findSocketTimeoutException(throwable) != null;
+    }
+
+    private SocketTimeoutException findSocketTimeoutException(Throwable throwable) {
         Throwable cause = throwable;
         while (cause != null) {
-            if (cause instanceof SocketTimeoutException) {
-                return true;
+            if (cause instanceof SocketTimeoutException socketTimeoutException) {
+                return socketTimeoutException;
             }
             cause = cause.getCause();
         }
-        return false;
+        return null;
+    }
+
+    private boolean isConnectSocketTimeout(SocketTimeoutException e) {
+        String message = e.getMessage();
+        return message != null && message.toLowerCase().contains("connect");
+    }
+
+    private HttpEventResponse buildSourceApiTimeoutErrorResponse(
+            HttpEventResponse.HttpEventResponseBuilder builder, Throwable e) {
+        SocketTimeoutException socketTimeoutException = findSocketTimeoutException(e);
+        if (socketTimeoutException != null && isConnectSocketTimeout(socketTimeoutException)) {
+            builder.statusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
+            builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                    ErrorCauses.CONNECTION_TO_SOURCE.name());
+            builder.body("Error connecting to source API: " + socketTimeoutException.getMessage());
+            log.log(Level.SEVERE, "Error connecting to source API: "
+                    + socketTimeoutException.getMessage(), e);
+            return builder.build();
+        }
+        return buildSourceApiReadTimeoutErrorResponse(builder, e);
     }
 
     /**

@@ -252,9 +252,10 @@ module "api_connector" {
   enable_async_processing               = each.value.enable_async_processing
   memory_size_mb                        = each.value.enable_async_processing ? 1024 : 512 # default is 512; double it for async case, to give additional margin
 
-  todos_as_local_files = var.todos_as_local_files
-  todo_step            = var.todo_step
-  timeout_seconds      = coalesce(try(each.value.timeout_seconds, null), 180)
+  todos_as_local_files          = var.todos_as_local_files
+  todo_step                     = var.todo_step
+  timeout_seconds               = coalesce(try(each.value.timeout_seconds, null), 180)
+  allowed_data_access_ip_blocks = var.allowed_data_access_ip_blocks
 
   environment_variables = merge(
     {
@@ -268,6 +269,10 @@ module "api_connector" {
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
   )
+
+  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = var.enable_remote_resources ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = var.enable_remote_resources && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
 }
 
 
@@ -352,6 +357,10 @@ module "bulk_connector" {
     } : {},
     var.general_environment_variables
   )
+
+  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = var.enable_remote_resources ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = var.enable_remote_resources && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
 }
 
 
@@ -390,7 +399,8 @@ module "webhook_collectors" {
   example_payload                      = try(each.value.example_payload, null)
   example_identity                     = try(each.value.example_identity, null)
 
-  todos_as_local_files = var.todos_as_local_files
+  todos_as_local_files      = var.todos_as_local_files
+  allowed_webhook_ip_blocks = var.allowed_webhook_ip_blocks
 
   environment_variables = merge(
     {
@@ -400,6 +410,10 @@ module "webhook_collectors" {
     },
     var.general_environment_variables,
   )
+
+  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = var.enable_remote_resources ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = var.enable_remote_resources && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
 }
 
 # Policy to allow test caller to invoke webhook collector urls and sign webhook requests

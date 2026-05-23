@@ -80,6 +80,7 @@ class ApiDataRequestHandlerTest {
         MockModules.ForSideOutputs.class,
         MockModules.ForAsyncApiDataRequestHandler.class,
         TestModules.ForWebhookCollectorModeConfig.class,
+        TestModules.ForApiModeConfig.class,
         TestModules.ForFixedUUID.class,
         TestModules.ForFixedClock.class,
         TestModules.ForProxyConstants.class,})
@@ -89,6 +90,9 @@ class ApiDataRequestHandlerTest {
 
     @Inject
     ApiDataRequestHandler handler;
+
+    @Inject
+    ApiModeConfig apiModeConfig;
 
     @Inject
     dagger.Lazy<RESTRules> rules;

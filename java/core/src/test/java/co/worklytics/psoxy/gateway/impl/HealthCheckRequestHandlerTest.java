@@ -30,6 +30,7 @@ public class HealthCheckRequestHandlerTest {
     @Singleton
     @Component(modules = {
             PsoxyModule.class,
+            TestModules.ForApiModeConfig.class,
             MockModules.ForConfigService.class,
             MockModules.ForSecretStore.class,
             MockModules.ForRules.class,
@@ -58,6 +59,9 @@ public class HealthCheckRequestHandlerTest {
     @Inject
     HealthCheckRequestHandler handler;
 
+    @Inject
+    ApiModeConfig apiModeConfig;
+
     HttpEventRequest request;
 
     @Test
@@ -65,7 +69,8 @@ public class HealthCheckRequestHandlerTest {
         when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
                 .thenReturn(Optional.of(""));
 
-        handler.apiModeConfig = ApiModeConfig.builder().targetHost("host").build();
+        when(apiModeConfig.getTargetHost())
+                .thenReturn(Optional.of("host"));
 
         Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
 
@@ -87,7 +92,8 @@ public class HealthCheckRequestHandlerTest {
         when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
                 .thenReturn(Optional.of(""));
 
-        handler.apiModeConfig = ApiModeConfig.builder().build();
+        when(apiModeConfig.getTargetHost())
+                .thenReturn(Optional.empty());
 
         Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
 
@@ -102,7 +108,8 @@ public class HealthCheckRequestHandlerTest {
         when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
                 .thenReturn(Optional.of(""));
 
-        handler.apiModeConfig = ApiModeConfig.builder().targetHost("").build();
+        when(apiModeConfig.getTargetHost())
+                .thenReturn(Optional.of(""));
 
         Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
 

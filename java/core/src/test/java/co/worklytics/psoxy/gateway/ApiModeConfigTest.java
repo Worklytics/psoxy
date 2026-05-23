@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ApiModeConfigTest {
 
@@ -55,5 +56,28 @@ class ApiModeConfigTest {
         assertEquals("s3://bucket/async", config.getAsyncOutputDestination().orElseThrow());
         assertEquals(240, config.getRequestTimeoutSeconds());
         assertEquals(210_000, config.getSourceApiReadTimeoutMs());
+    }
+
+    @Test
+    void fromConfigService_rejectsInvalidRequestTimeoutSeconds() {
+        ConfigService configService = new ConfigService() {
+            @Override
+            public String getConfigPropertyOrError(ConfigProperty property) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Optional<String> getConfigPropertyAsOptional(ConfigProperty property) {
+                if (property == ApiModeConfig.ApiModeConfigProperty.REQUEST_TIMEOUT_SECONDS) {
+                    return Optional.of("not-a-number");
+                }
+                return Optional.empty();
+            }
+        };
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> ApiModeConfig.fromConfigService(configService));
+
+        assertEquals("Invalid value for REQUEST_TIMEOUT_SECONDS: 'not-a-number'", ex.getMessage());
     }
 }

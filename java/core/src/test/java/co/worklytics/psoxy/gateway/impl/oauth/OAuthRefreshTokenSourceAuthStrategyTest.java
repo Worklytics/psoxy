@@ -35,6 +35,7 @@ import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import co.worklytics.psoxy.utils.RandomNumberGeneratorImpl;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
 import dagger.Component;
 import lombok.SneakyThrows;
 
@@ -49,6 +50,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        TestModules.ForApiModeConfig.class,
         SourceAuthModule.class,
         MockModules.ForConfigService.class,
         MockModules.ForRandomNumberGenerator.class,
