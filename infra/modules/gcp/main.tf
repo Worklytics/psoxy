@@ -349,6 +349,29 @@ resource "google_storage_bucket_iam_member" "grant_proxy_builder_object_viewer_o
   member = "serviceAccount:${local.builder_sa_email}"
 }
 
+# Custom build SAs must read GCF-internal staging buckets (gcf-v2-sources-*, etc.), not just our artifacts bucket.
+# See: https://cloud.google.com/functions/docs/securing/build-custom-sa
+resource "google_project_iam_member" "grant_builder_sa_gcf_source_buckets_object_viewer" {
+  count = var.provision_project_level_iam ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/storage.objectViewer"
+  member  = "serviceAccount:${local.builder_sa_email}"
+
+  condition {
+    title       = "Cloud Functions build source buckets"
+    description = "Read access to GCF-internal staging buckets used during Cloud Functions builds"
+    expression  = <<-EXPR
+      resource.type == "storage.googleapis.com/Object" &&
+      (
+        resource.name.startsWith("projects/_/buckets/gcf-v2-sources-") ||
+        resource.name.startsWith("projects/_/buckets/gcf-v2-uploads-") ||
+        resource.name.startsWith("projects/_/buckets/run-sources-")
+      )
+    EXPR
+  }
+}
+
 # Grant Cloud Build builder role to the custom builder service account
 # Required for Cloud Functions Gen2 deployment to build the function
 # See: https://cloud.google.com/functions/docs/troubleshooting#build-service-account
@@ -357,6 +380,22 @@ resource "google_project_iam_member" "grant_builder_sa_cloudbuild_builder" {
 
   project = var.project_id
   role    = "roles/cloudbuild.builds.builder"
+  member  = "serviceAccount:${local.builder_sa_email}"
+}
+
+resource "google_project_iam_member" "grant_builder_sa_logging_log_writer" {
+  count = var.provision_project_level_iam ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${local.builder_sa_email}"
+}
+
+resource "google_project_iam_member" "grant_builder_sa_artifactregistry_writer" {
+  count = var.provision_project_level_iam ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/artifactregistry.writer"
   member  = "serviceAccount:${local.builder_sa_email}"
 }
 
