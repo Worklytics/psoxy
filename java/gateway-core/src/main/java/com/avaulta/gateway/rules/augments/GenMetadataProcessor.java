@@ -26,7 +26,9 @@ public class GenMetadataProcessor {
 
     public static void configure(GenMetadataBackend genMetadataBackend, ObjectMapper mapper,
                                    int maxInputCharsLimit) {
-        backend = genMetadataBackend != null ? genMetadataBackend : new UnavailableGenMetadataBackend();
+ if (genMetadataBackend != null) {
+  backend = genMetadataBackend;
+ }
         if (mapper != null) {
             objectMapper = mapper;
         }
