@@ -93,127 +93,22 @@ public class SentenceMetadataProcessor {
         for (int i = 0; i < sentences.length; i++) {
             String sentence = sentences[i];
             String[] tokens = SimpleTokenizer.INSTANCE.tokenize(sentence);
-            totalTokens += tokens.length;
-
             String[] tags = posTagger.tag(tokens);
             String[] chunks = chunker.chunk(tokens, tags);
 
-            List<Verb> verbsList = new ArrayList<>();
-            List<Noun> nounsList = new ArrayList<>();
-            List<String> modifiersList = new ArrayList<>();
+            SentenceAnalysis analysis = analyzeSentence(
+                i, tokens, tags, chunks, wordToCategory, hedgeWords, constraintWords);
 
-            int vpCount = 0;
-            int npCount = 0;
-            boolean isQuestion = false;
-            boolean isImperative = false;
-            boolean sHedged = false;
-            boolean sConstraint = false;
-            boolean sNegated = false;
-            boolean isPassive = false;
-            int suppressedCommon = 0;
-            int suppressedProper = 0;
-
-            for (int j = 0; j < tokens.length; j++) {
-                String token = tokens[j].toLowerCase();
-                String tag = tags[j];
-                String chunk = chunks[j];
-
-                if (token.equals("?")) {
-                    isQuestion = true;
-                }
-                if (hedgeWords.contains(token)) {
-                    sHedged = true;
-                }
-                if (constraintWords.contains(token)) {
-                    sConstraint = true;
-                }
-                if (token.equals("not") || token.equals("n't")) {
-                    sNegated = true;
-                }
-
-                if (chunk.startsWith("B-VP")) {
-                    vpCount++;
-                }
-                if (chunk.startsWith("B-NP")) {
-                    npCount++;
-                }
-
-                if (j == 0 && tag.startsWith("VB")) {
-                    isImperative = true;
-                }
-
-                if (tag.equals("VBN") && chunk.contains("VP")) {
-                    isPassive = true;
-                }
-
-                if (tag.startsWith("VB")) {
-                    verbsList.add(Verb.builder()
-                        .verb(tokens[j])
-                        .pos(tag)
-                        .modal(tag.equals("MD"))
-                        .auxiliary(token.equals("be") || token.equals("is") || token.equals("are")
-                            || token.equals("have") || token.equals("has"))
-                        .negated(j > 0 && (tokens[j - 1].equalsIgnoreCase("not")
-                            || tokens[j - 1].equalsIgnoreCase("n't")))
-                        .build());
-                }
-
-                if (tag.startsWith("JJ") || tag.startsWith("RB")) {
-                    modifiersList.add(tokens[j]);
-                }
-
-                if (tag.startsWith("NN")) {
-                    if (tag.startsWith("NNP")) {
-                        suppressedProper++;
-                    } else {
-                        String category = wordToCategory.get(token);
-                        if (category != null) {
-                            nounsList.add(Noun.builder()
-                                .noun(tokens[j])
-                                .category(category)
-                                .npHead(j == tokens.length - 1 || !chunks[j + 1].equals("I-NP"))
-                                .npPosition(vpCount > 0 ? "object" : "subject")
-                                .build());
-                            allNounCategories.add(category);
-                        } else {
-                            suppressedCommon++;
-                        }
-                    }
-                }
-            }
-
-            String sType = isQuestion ? "interrogative" : (isImperative ? "imperative" : "declarative");
-            sentenceTypes.merge(sType, 1, Integer::sum);
-
-            anyHedged |= sHedged;
-            anyConstraint |= sConstraint;
-            anyQuestion |= isQuestion;
-            anyNegated |= sNegated;
-            totalSuppressedCommon += suppressedCommon;
-            totalSuppressedProper += suppressedProper;
-
-            sentencesOutput.add(Sentence.builder()
-                .index(i)
-                .type(sType)
-                .verbs(verbsList)
-                .nouns(nounsList)
-                .modifiers(modifiersList)
-                .structure(Structure.builder()
-                    .voice(isPassive ? "passive" : "active")
-                    .vpCount(vpCount)
-                    .npCount(npCount)
-                    .build())
-                .signals(Signals.builder()
-                    .hedged(sHedged)
-                    .constraint(sConstraint)
-                    .question(isQuestion)
-                    .negated(sNegated)
-                    .build())
-                .suppressed(SuppressedCounts.builder()
-                    .commonNouns(suppressedCommon)
-                    .properNouns(suppressedProper)
-                    .build())
-                .build());
+            totalTokens += analysis.tokenCount();
+            totalSuppressedCommon += analysis.suppressedCommon();
+            totalSuppressedProper += analysis.suppressedProper();
+            anyHedged |= analysis.hedged();
+            anyConstraint |= analysis.constraint();
+            anyQuestion |= analysis.question();
+            anyNegated |= analysis.negated();
+            sentenceTypes.merge(analysis.sentenceType(), 1, Integer::sum);
+            analysis.nounCategories().forEach(allNounCategories::add);
+            sentencesOutput.add(analysis.sentence());
         }
 
         DocSummary docSummary = DocSummary.builder()
@@ -250,6 +145,152 @@ public class SentenceMetadataProcessor {
         return wordToCategory;
     }
 
+    /**
+     * Derive sentence metadata from pre-tokenized NLP output. Package-visible for deterministic
+     * unit tests without loading OpenNLP model binaries.
+     */
+    static SentenceAnalysis analyzeSentence(int index,
+                                            String[] tokens,
+                                            String[] tags,
+                                            String[] chunks,
+                                            Map<String, String> wordToCategory,
+                                            Set<String> hedgeWords,
+                                            Set<String> constraintWords) {
+        List<Verb> verbsList = new ArrayList<>();
+        List<Noun> nounsList = new ArrayList<>();
+        List<String> modifiersList = new ArrayList<>();
+        Set<String> nounCategories = new HashSet<>();
+
+        int vpCount = 0;
+        int npCount = 0;
+        boolean isQuestion = false;
+        boolean isImperative = false;
+        boolean sHedged = false;
+        boolean sConstraint = false;
+        boolean sNegated = false;
+        boolean isPassive = false;
+        int suppressedCommon = 0;
+        int suppressedProper = 0;
+
+        for (int j = 0; j < tokens.length; j++) {
+            String token = tokens[j].toLowerCase();
+            String tag = tags[j];
+            String chunk = chunks[j];
+
+            if (token.equals("?")) {
+                isQuestion = true;
+            }
+            if (hedgeWords.contains(token)) {
+                sHedged = true;
+            }
+            if (constraintWords.contains(token)) {
+                sConstraint = true;
+            }
+            if (token.equals("not") || token.equals("n't")) {
+                sNegated = true;
+            }
+
+            if (chunk.startsWith("B-VP")) {
+                vpCount++;
+            }
+            if (chunk.startsWith("B-NP")) {
+                npCount++;
+            }
+
+            if (j == 0 && tag.startsWith("VB")) {
+                isImperative = true;
+            }
+
+            if (tag.equals("VBN") && chunk.contains("VP")) {
+                isPassive = true;
+            }
+
+            if (tag.startsWith("VB")) {
+                verbsList.add(Verb.builder()
+                    .verb(tokens[j])
+                    .pos(tag)
+                    .modal(tag.equals("MD"))
+                    .auxiliary(token.equals("be") || token.equals("is") || token.equals("are")
+                        || token.equals("have") || token.equals("has"))
+                    .negated(j > 0 && (tokens[j - 1].equalsIgnoreCase("not")
+                        || tokens[j - 1].equalsIgnoreCase("n't")))
+                    .build());
+            }
+
+            if (tag.startsWith("JJ") || tag.startsWith("RB")) {
+                modifiersList.add(tokens[j]);
+            }
+
+            if (tag.startsWith("NN")) {
+                if (tag.startsWith("NNP")) {
+                    suppressedProper++;
+                } else {
+                    String category = wordToCategory.get(token);
+                    if (category != null) {
+                        nounsList.add(Noun.builder()
+                            .noun(tokens[j])
+                            .category(category)
+                            .npHead(j == tokens.length - 1 || !chunks[j + 1].equals("I-NP"))
+                            .npPosition(vpCount > 0 ? "object" : "subject")
+                            .build());
+                        nounCategories.add(category);
+                    } else {
+                        suppressedCommon++;
+                    }
+                }
+            }
+        }
+
+        String sentenceType = isQuestion ? "interrogative" : (isImperative ? "imperative" : "declarative");
+
+        Sentence sentence = Sentence.builder()
+            .index(index)
+            .type(sentenceType)
+            .verbs(verbsList)
+            .nouns(nounsList)
+            .modifiers(modifiersList)
+            .structure(Structure.builder()
+                .voice(isPassive ? "passive" : "active")
+                .vpCount(vpCount)
+                .npCount(npCount)
+                .build())
+            .signals(Signals.builder()
+                .hedged(sHedged)
+                .constraint(sConstraint)
+                .question(isQuestion)
+                .negated(sNegated)
+                .build())
+            .suppressed(SuppressedCounts.builder()
+                .commonNouns(suppressedCommon)
+                .properNouns(suppressedProper)
+                .build())
+            .build();
+
+        return new SentenceAnalysis(
+            sentence,
+            sentenceType,
+            tokens.length,
+            suppressedCommon,
+            suppressedProper,
+            sHedged,
+            sConstraint,
+            isQuestion,
+            sNegated,
+            Set.copyOf(nounCategories));
+    }
+
+    record SentenceAnalysis(Sentence sentence,
+                            String sentenceType,
+                            int tokenCount,
+                            int suppressedCommon,
+                            int suppressedProper,
+                            boolean hedged,
+                            boolean constraint,
+                            boolean question,
+                            boolean negated,
+                            Set<String> nounCategories) {
+    }
+
     private static void initializeModels() {
         if (sentenceDetector != null) {
             return;
@@ -266,9 +307,12 @@ public class SentenceMetadataProcessor {
             try (InputStream sentenceModelStream = loadModel(service, "en-sent.bin");
                  InputStream posModelStream = loadModel(service, "en-pos-maxent.bin");
                  InputStream chunkerModelStream = loadModel(service, "en-chunker.bin")) {
-                sentenceDetector = new SentenceDetectorME(new SentenceModel(sentenceModelStream));
-                posTagger = new POSTaggerME(new POSModel(posModelStream));
-                chunker = new ChunkerME(new ChunkerModel(chunkerModelStream));
+                SentenceDetectorME detector = new SentenceDetectorME(new SentenceModel(sentenceModelStream));
+                POSTaggerME tagger = new POSTaggerME(new POSModel(posModelStream));
+                ChunkerME chunkerModel = new ChunkerME(new ChunkerModel(chunkerModelStream));
+                sentenceDetector = detector;
+                posTagger = tagger;
+                chunker = chunkerModel;
             } catch (Exception e) {
                 log.log(Level.INFO, "OpenNLP models not available; sentenceMetadata augment unavailable", e);
             }
