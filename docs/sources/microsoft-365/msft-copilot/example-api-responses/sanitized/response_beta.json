@@ -31,16 +31,16 @@
         {
           "attachmentId":"4062fb240a03490b98ccd7c86bb2bcbf",
           "contentType":"application/vnd.microsoft.card.adaptive",
-          "+content:textDigest":[
-            {
+          "+content:textDigest":{
+            "body[0].text":{
               "length":2572,
               "word_count":154
             },
-            {
+            "body[1].text":{
               "length":980,
               "word_count":154
             }
-          ]
+          }
         }
       ],
       "links":[

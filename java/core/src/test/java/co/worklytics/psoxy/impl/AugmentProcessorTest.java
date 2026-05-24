@@ -290,15 +290,33 @@ class AugmentProcessorTest {
         @SuppressWarnings("unchecked")
         Map<String, Object> resultAttachment = (Map<String, Object>)
             ((List<?>) document.get("attachments")).get(0);
-        assertTrue(resultAttachment.containsKey("+content:textDigest"));
+        assertFalse(resultAttachment.containsKey("+content.body[0].text:textDigest"));
         @SuppressWarnings("unchecked")
-        List<Map<String, Object>> digests = (List<Map<String, Object>>)
-            resultAttachment.get("+content:textDigest");
-        assertEquals(2, digests.size());
-        assertEquals(11, digests.get(0).get("length"));
-        assertEquals(2, digests.get(0).get("word_count"));
-        assertEquals(12, digests.get(1).get("length"));
-        assertEquals(2, digests.get(1).get("word_count"));
+        Map<String, Object> innerAugments = (Map<String, Object>) resultAttachment.get("+content:textDigest");
+        assertNotNull(innerAugments);
+        assertEquals(2, innerAugments.size());
+        @SuppressWarnings("unchecked")
+        Map<String, Object> digest0 = (Map<String, Object>) innerAugments.get("body[0].text");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> digest1 = (Map<String, Object>) innerAugments.get("body[1].text");
+        assertNotNull(digest0);
+        assertNotNull(digest1);
+        assertEquals(11, digest0.get("length"));
+        assertEquals(2, digest0.get("word_count"));
+        assertEquals(12, digest1.get("length"));
+        assertEquals(2, digest1.get("word_count"));
+    }
+
+    @Test
+    void toInnerPathSuffix_bracketNotation() {
+        assertEquals("body[0].text",
+            AugmentProcessor.toInnerPathSuffix("$['body'][0]['text']"));
+    }
+
+    @Test
+    void buildAugmentPropertyName() {
+        assertEquals("+content:textDigest",
+            AugmentProcessor.buildAugmentPropertyName("content", "textDigest"));
     }
 
     @Test
