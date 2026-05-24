@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.http.HttpTransportFactory;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LoggingConfiguration;
 import co.worklytics.psoxy.gateway.ProcessedDataStage;
@@ -94,11 +94,9 @@ public class FunctionRuntimeModule {
 
     // q: should we just replace this with a Provider<HttpTransport>, rather than having more coupling to google-http-client classes?
     @Provides @Singleton
-    HttpTransportFactory providesHttpTransportFactory(EnvVarsConfigService envVarsConfigService) {
-        final String sslContextProtocol =
-            envVarsConfigService.getConfigPropertyAsOptional(ApiModeConfigProperty.TLS_VERSION)
-                .orElse(ApiModeConfigProperty.TlsVersions.TLSv1_3);
-        if (Arrays.stream(ApiModeConfigProperty.TlsVersions.ALL).noneMatch(s -> sslContextProtocol.equals(s))) {
+    HttpTransportFactory providesHttpTransportFactory(ApiModeConfig apiModeConfig) {
+        final String sslContextProtocol = apiModeConfig.getTlsVersion();
+        if (Arrays.stream(ApiModeConfig.TlsVersions.ALL).noneMatch(s -> sslContextProtocol.equals(s))) {
             throw new IllegalArgumentException("Invalid TLS version: " + sslContextProtocol);
         }
 
@@ -211,6 +209,11 @@ public class FunctionRuntimeModule {
     @Provides @Singleton
     static WebhookCollectorModeConfig webhookCollectorModeConfig(ConfigService configService) {
         return WebhookCollectorModeConfig.fromConfigService(configService);
+    }
+
+    @Provides @Singleton
+    static ApiModeConfig apiModeConfig(ConfigService configService) {
+        return ApiModeConfig.fromConfigService(configService);
     }
 
     @Provides @Singleton

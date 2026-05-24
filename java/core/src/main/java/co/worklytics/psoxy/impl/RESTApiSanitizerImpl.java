@@ -51,9 +51,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.RESTApiSanitizer;
-import co.worklytics.psoxy.ProcessedDataMetadataFields;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
-import co.worklytics.psoxy.gateway.ConfigService;
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.URLUtils;
 import co.worklytics.psoxy.utils.email.EmailAddressParser;
@@ -117,7 +115,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
     @Inject
     PathTemplateUtils pathTemplateUtils;
     @Inject
-    ConfigService configService;
+    ApiModeConfig apiModeConfig;
     @Inject
     SanitizerUtils sanitizerUtils;
     @Inject
@@ -374,8 +372,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
         if (targetHostPath == null) {
             synchronized ($writeLock) {
                 if (targetHostPath == null) {
-                    targetHostPath = configService
-                            .getConfigPropertyAsOptional(ApiModeConfigProperty.TARGET_HOST)
+                    targetHostPath = apiModeConfig.getTargetHost()
                             .map(s -> {
                                 try {
                                     if (!s.startsWith("https://")) {

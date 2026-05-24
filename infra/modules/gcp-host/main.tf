@@ -1,5 +1,12 @@
 terraform {
   required_version = "~> 1.7" # should work with 1.7, but we don't automate testing against that version anymore
+
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.0"
+    }
+  }
 }
 
 # constants
@@ -215,12 +222,15 @@ module "api_connector" {
   enable_versioning                     = var.version_sanitized_buckets
   bucket_access_logs_destination        = var.bucket_access_logs_destination
   builder_sa_id                         = module.psoxy.builder_sa_id
+  allowed_data_access_ip_blocks         = var.allowed_data_access_ip_blocks
   instance_concurrency                  = var.api_connector_instance_concurrency
   max_instance_count                    = var.max_instances_per_api_connector
   available_memory_mb = max(
     (each.value.enable_gen_metadata || var.enable_gen_metadata) ? coalesce(each.value.available_memory_mb, 4096) : 1024,
     (each.value.enable_gen_metadata || var.enable_gen_metadata) ? 4096 : 0
   )
+  timeout_seconds                       = coalesce(try(each.value.timeout_seconds, null), 180)
+
 
   environment_variables = merge(
     {
@@ -318,6 +328,7 @@ module "webhook_collector" {
   output_path_prefix                 = each.value.output_path_prefix
   example_identity                   = try(each.value.example_identity, null)
   example_payload                    = try(each.value.example_payload, null)
+  allowed_webhook_ip_blocks          = var.allowed_webhook_ip_blocks
 
   environment_variables = merge(
     {

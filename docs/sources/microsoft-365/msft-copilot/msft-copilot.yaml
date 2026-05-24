@@ -7,6 +7,7 @@ endpoints:
       - !<textDigest>
         jsonPaths:
           - "$..attachments[*].content"
+        innerJsonPath: "$..text"
       - !<textDigest>
         jsonPaths:
           - "$..body.content"

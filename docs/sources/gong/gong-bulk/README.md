@@ -1,5 +1,9 @@
 # Gong Bulk
 
+**Connector ID:** `gong-bulk`
+
+**Availability:** Alpha
+
 Psoxy can pseudonymize Gong bulk export data for ingestion into Worklytics.
 
 See [https://docs.worklytics.co/knowledge-base/connectors/bulk-data/gong-bulk](https://docs.worklytics.co/knowledge-base/connectors/bulk-data/gong-bulk)

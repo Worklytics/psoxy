@@ -61,6 +61,12 @@
         </dependency>
 
         <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>${dependency.commons-net.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>blue.strategic.parquet</groupId>
             <artifactId>parquet-floor</artifactId>
             <version>1.64</version>

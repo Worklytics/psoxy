@@ -3,7 +3,11 @@ package co.worklytics.psoxy.aws;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 
+import java.util.Optional;
 import java.util.Set;
+
+import lombok.Builder;
+import lombok.Value;
 
 
 public class AwsEnvironment implements HostEnvironment {
@@ -25,10 +29,28 @@ public class AwsEnvironment implements HostEnvironment {
         return System.getenv(RuntimeEnvironmentVariables.AWS_REGION.name());
     }
 
+    @Builder
+    @Value
+    static class AwsApiModeConfig {
+
+        /**
+         * SQS queue URL to which async API data requests should be sent, if any
+         */
+        Optional<String> asyncApiRequestQueueUrl;
+
+        enum AwsApiModeConfigProperty implements ConfigService.ConfigProperty {
+            ASYNC_API_REQUEST_QUEUE_URL,
+        }
+
+        static AwsApiModeConfig fromConfigService(ConfigService configService) {
+            return AwsApiModeConfig.builder()
+                .asyncApiRequestQueueUrl(configService.getConfigPropertyAsOptional(AwsApiModeConfigProperty.ASYNC_API_REQUEST_QUEUE_URL))
+                .build();
+        }
+    }
 
     enum AwsConfigProperty implements ConfigService.ConfigProperty {
         SECRETS_STORE,
-        ASYNC_API_REQUEST_QUEUE_URL,
         ;
     }
 

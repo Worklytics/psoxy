@@ -3,6 +3,8 @@ terraform {
 
   required_providers {
     aws = {
+      source  = "hashicorp/aws"
+      version = ">= 5.0"
     }
   }
 }
@@ -255,8 +257,10 @@ module "api_connector" {
     (each.value.enable_gen_metadata || var.enable_gen_metadata) ? 4096 : 0
   )
 
-  todos_as_local_files = var.todos_as_local_files
-  todo_step            = var.todo_step
+  todos_as_local_files          = var.todos_as_local_files
+  todo_step                     = var.todo_step
+  timeout_seconds               = coalesce(try(each.value.timeout_seconds, null), 180)
+  allowed_data_access_ip_blocks = var.allowed_data_access_ip_blocks
 
   environment_variables = merge(
     {
@@ -401,7 +405,8 @@ module "webhook_collectors" {
   example_payload                      = try(each.value.example_payload, null)
   example_identity                     = try(each.value.example_identity, null)
 
-  todos_as_local_files = var.todos_as_local_files
+  todos_as_local_files      = var.todos_as_local_files
+  allowed_webhook_ip_blocks = var.allowed_webhook_ip_blocks
 
   environment_variables = merge(
     {

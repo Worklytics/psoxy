@@ -1,5 +1,9 @@
 # Outlook Calendar
 
+**Connector ID:** `outlook-cal`
+
+**Availability:** GA
+
 Connect Outlook Calendar data to Worklytics, enabling meeting analysis and general collaboration
 insights based on collaboration via Outlook Calendar. Includes user enumeration to support fetching
 calendars from each account; and group enumeration to expand attendance/invitations to meetings

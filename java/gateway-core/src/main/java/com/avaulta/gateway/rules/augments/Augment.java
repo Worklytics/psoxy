@@ -252,7 +252,7 @@ public abstract class Augment {
     @NoArgsConstructor
     @AllArgsConstructor
     @Getter
-    @EqualsAndHashCode(callSuper = true, onParam_ = @Override)
+    @EqualsAndHashCode(callSuper = true)
     public static class GenMetadata extends Augment {
 
         /**
