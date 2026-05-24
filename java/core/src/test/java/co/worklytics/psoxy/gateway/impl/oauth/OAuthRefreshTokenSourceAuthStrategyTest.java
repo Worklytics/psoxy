@@ -204,9 +204,13 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
         assertEquals(1639526410000L, accessToken.get().getExpirationTime().getTime());
     }
 
+    /**
+     * Non-shared-token connectors ({@code USE_SHARED_TOKEN=false}) rely on in-memory cache for
+     * same-instance dedupe; the cross-instance lock does not apply.
+     */
     @SneakyThrows
     @Test
-    public void refreshAccessTokenReturnsFreshCachedTokenWithoutExchange() {
+    public void refreshAccessTokenReusesInMemoryCacheWithoutExchange() {
         Instant now = Instant.parse("2025-01-01T00:00:00Z");
 
         OAuthRefreshTokenSourceAuthStrategy strategy = new OAuthRefreshTokenSourceAuthStrategy();
