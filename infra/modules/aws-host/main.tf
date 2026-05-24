@@ -252,7 +252,7 @@ module "api_connector" {
   enable_async_processing               = each.value.enable_async_processing
   memory_size_mb = max(
     (each.value.enable_gen_metadata || var.enable_gen_metadata) ? coalesce(each.value.memory_size_mb, 4096) : (each.value.enable_async_processing ? 1024 : 512),
-    (each.value.enable_gen_metadata || var.enable_gen_metadata) ? 4096 : 0,
+    (each.value.enable_gen_metadata || var.enable_gen_metadata) ? 4096 : 0
   )
 
   todos_as_local_files = var.todos_as_local_files
