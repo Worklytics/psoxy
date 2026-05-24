@@ -4,6 +4,7 @@ import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.SourceAuthModule;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
 import com.google.api.client.http.HttpHeaders;
 import dagger.Component;
 import lombok.SneakyThrows;
@@ -30,6 +31,7 @@ class RefreshTokenRequestViaQueryParameterBuilderTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        TestModules.ForApiModeConfig.class,
         SourceAuthModule.class,
         MockModules.ForConfigService.class,
         MockModules.ForSecretStore.class

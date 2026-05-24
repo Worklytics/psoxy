@@ -1,5 +1,9 @@
 # Salesforce
 
+**Connector ID:** `salesforce`
+
+**Availability:** GA
+
 ## Examples
 
 - [Example Rules](salesforce.yaml)

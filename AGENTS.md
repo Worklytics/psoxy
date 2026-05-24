@@ -75,3 +75,17 @@ When writing or modifying markdown files (`.md`) in this repository:
 1. **No Hard-Wrapping**: Do not hard-wrap prose at 80 columns (or any fixed width). Write each paragraph as a single long line and let the editor soft-wrap. Hard-wrapped prose creates noisy diffs when sentences are edited.
 2. **Tables and Code Blocks**: These are inherently fixed-width; format them for readability as needed.
 3. **Headings**: Use ATX-style headings (`#`, `##`, etc.).
+
+## Documentation Conventions
+
+### Connector Documentation
+When writing or modifying documentation for data sources under `docs/sources/`, you must always explicitly include the Connector ID directly under the main header (H1/H2).
+
+**Example Format**:
+```markdown
+# Asana
+
+**Connector ID:** `asana`
+```
+
+

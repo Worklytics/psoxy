@@ -1,4 +1,13 @@
 
+terraform {
+  required_providers {
+    local = {
+      source  = "hashicorp/local"
+      version = ">= 2.0"
+    }
+  }
+}
+
 locals {
   # for backwards compatibility < 0.4.6
   instance_id = coalesce(var.proxy_instance_id, var.display_name)

@@ -214,6 +214,7 @@ variable "api_connectors" {
     settings_to_provide = optional(map(string), {})
     rules_file          = optional(string, null)
     rules_raw           = optional(string, null)
+    timeout_seconds     = optional(number)
   }))
 
   description = "map of API connectors to provision"
@@ -407,6 +408,36 @@ variable "builder_sa_email" {
   description = "An optional custom builder service account. If not provided, this module will create one."
   type        = string
   default     = null
+}
+
+variable "allowed_data_access_ip_blocks" {
+  description = <<-EOT
+    IPs or CIDR blocks allowed to make data access requests at the application layer.
+    Use null (default) for no restriction in configuration (all IPs allowed). If set, the list must contain at least one value.
+  EOT
+  type        = list(string)
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.allowed_data_access_ip_blocks == null || try(length(var.allowed_data_access_ip_blocks) > 0, false)
+    error_message = "allowed_data_access_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
+  }
+}
+
+variable "allowed_webhook_ip_blocks" {
+  description = <<-EOT
+    IPs or CIDR blocks allowed to send webhooks at the application layer.
+    Use null (default) for no restriction in configuration (all IPs allowed). If set, the list must contain at least one value.
+  EOT
+  type        = list(string)
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.allowed_webhook_ip_blocks == null || try(length(var.allowed_webhook_ip_blocks) > 0, false)
+    error_message = "allowed_webhook_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
+  }
 }
 
 variable "api_connector_instance_concurrency" {
