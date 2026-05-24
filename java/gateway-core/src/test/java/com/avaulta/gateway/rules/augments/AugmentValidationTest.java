@@ -2,6 +2,7 @@ package com.avaulta.gateway.rules.augments;
 
 import com.avaulta.gateway.rules.Endpoint;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
+import com.avaulta.gateway.rules.RecordRules;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -36,5 +37,16 @@ class AugmentValidationTest {
 
         assertDoesNotThrow(() -> AugmentValidation.validateEndpoints(List.of(
             Endpoint.builder().augment(valid).pathTemplate("/test").build())));
+    }
+
+    @Test
+    void validateRecordRules_genMetadataRequiresPromptAndSchema() {
+        Augment.GenMetadata invalid = Augment.GenMetadata.builder()
+            .jsonPath("$.content")
+            .build();
+
+        assertThrows(IllegalArgumentException.class,
+            () -> AugmentValidation.validateRecordRules(
+                RecordRules.builder().augment(invalid).build()));
     }
 }

@@ -29,6 +29,7 @@ import co.worklytics.psoxy.PseudonymizedIdentity;
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.gateway.BulkModeConfig;
 import co.worklytics.psoxy.gateway.StorageEventRequest;
+import co.worklytics.psoxy.impl.AugmentProcessor;
 import co.worklytics.psoxy.storage.BulkDataSanitizer;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
@@ -37,6 +38,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.extern.java.Log;
+import org.apache.commons.lang3.ObjectUtils;
 
 @Log
 public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
@@ -54,6 +56,9 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
 
     @Inject
     BulkModeConfig bulkModeConfig;
+
+    @Inject
+    AugmentProcessor augmentProcessor;
 
     RecordRules rules;
 
@@ -110,7 +115,7 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
             Map<String, Object> record;
             while ((record = recordReader.readRecord()) != null) {
                 try {
-                    Map<String, Object> sanitized = applyTransforms(record, compiledTransforms);
+                    Map<String, Object> sanitized = sanitizeRecord(record, compiledTransforms);
                     recordWriter.writeRecord(sanitized);
                 } catch (UnmatchedPseudonymization e) {
                     log.warning("Skipped record due to UnmatchedPseudonymization: " + e.getPath());
@@ -149,6 +154,18 @@ public class RecordBulkDataSanitizerImpl implements BulkDataSanitizer {
         }
     }
 
+
+    /**
+     * Apply augments then transforms to a single record.
+     */
+    Map<String, Object> sanitizeRecord(Map<String, Object> document,
+                                       List<Triple<JsonPath, RecordTransform, MapFunction>> compiledTransforms)
+            throws UnmatchedPseudonymization {
+        if (ObjectUtils.isNotEmpty(rules.getAugments())) {
+            augmentProcessor.applyAugments(rules.getAugments(), document);
+        }
+        return applyTransforms(document, compiledTransforms);
+    }
 
     /**
      * Apply the compiled transforms to the document

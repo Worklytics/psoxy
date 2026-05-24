@@ -291,6 +291,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
      *
      * if endpoint allows for ndjson, we expect this to be just a single JSON object at a time, and
      * you call this once per row in the response
+     *
+     * TODO: return a result type (document + warnings) instead of mutating {@code augmentWarnings}
+     * for NDJSON aggregation; a {@code Pair} or small record would invert control here.
      */
     private Object sanitize(Endpoint endpoint, Object jsonResponse, List<String> augmentWarnings) {
 

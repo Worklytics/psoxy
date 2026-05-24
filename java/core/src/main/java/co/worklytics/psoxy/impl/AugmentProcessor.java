@@ -96,10 +96,7 @@ public class AugmentProcessor {
 
         for (Augment augment : augments) {
             try {
-                applyAugment(augment, document, warnings);
-            } catch (AugmentProcessingException e) {
-                log.log(Level.WARNING, e.getMessage(), e);
-                warnings.add(e.getWarningCode());
+                warnings.addAll(applyAugment(augment, document));
             } catch (Exception e) {
                 log.log(Level.WARNING,
                     "Augment '" + augment.getFunctionName() + "' failed; skipping.", e);
@@ -108,8 +105,8 @@ public class AugmentProcessor {
         return List.copyOf(warnings);
     }
 
-    private void applyAugment(Augment augment, Object document, List<String> warnings)
-            throws AugmentProcessingException {
+    private List<String> applyAugment(Augment augment, Object document) {
+        List<String> warnings = new ArrayList<>();
         List<JsonPath> paths = compiledAugmentPaths.computeIfAbsent(augment,
             a -> a.getJsonPaths().stream()
                 .map(JsonPath::compile)
@@ -117,25 +114,26 @@ public class AugmentProcessor {
 
         for (JsonPath compiledPath : paths) {
             try {
-                applyAugmentAtPath(augment, document, compiledPath, warnings);
+                warnings.addAll(applyAugmentAtPath(augment, document, compiledPath));
             } catch (PathNotFoundException e) {
                 // expected if path doesn't match this particular document — no-op
             }
         }
+        return warnings;
     }
 
     @SuppressWarnings("unchecked")
-    private void applyAugmentAtPath(Augment augment, Object document, JsonPath compiledPath,
-                                    List<String> warnings) throws AugmentProcessingException {
+    private List<String> applyAugmentAtPath(Augment augment, Object document, JsonPath compiledPath) {
+        List<String> warnings = new ArrayList<>();
         List<String> resolvedPaths;
         try {
             resolvedPaths = compiledPath.read(document, pathListConfiguration);
         } catch (PathNotFoundException e) {
-            return;
+            return warnings;
         }
 
         if (resolvedPaths == null || resolvedPaths.isEmpty()) {
-            return;
+            return warnings;
         }
 
         for (String concretePath : resolvedPaths) {
@@ -146,6 +144,7 @@ public class AugmentProcessor {
                 warnings.add(e.getWarningCode());
             }
         }
+        return warnings;
     }
 
     @SuppressWarnings("unchecked")

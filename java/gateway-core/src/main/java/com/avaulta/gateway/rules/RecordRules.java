@@ -1,8 +1,11 @@
 package com.avaulta.gateway.rules;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import com.avaulta.gateway.rules.augments.Augment;
 import com.avaulta.gateway.rules.transforms.RecordTransform;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -57,12 +60,22 @@ public class RecordRules implements BulkDataRules {
     List<RecordTransform> transforms;
 
     /**
+     * Augments to compute and inject as synthetic sibling properties, run before transforms.
+     *
+     * @see <a href="file:///docs/development/augments.md">Augments Design Doc</a>
+     */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @Singular
+    List<Augment> augments;
+
+    /**
      * No-args constructor.
      * 1) Needed for Jackson deserialization.
      * 2) Explicit instantiation of @Singular fields required to avoid Lombok warnings about ignored default values.
      */
     public RecordRules() {
         this.transforms = Collections.emptyList();
+        this.augments = new ArrayList<>();
     }
 
     //setter to ensure we get a List, even when coming through jackson
@@ -71,6 +84,14 @@ public class RecordRules implements BulkDataRules {
             this.transforms = Collections.emptyList();
         } else {
             this.transforms = transforms;
+        }
+    }
+
+    public void setAugments(List<Augment> augments) {
+        if (augments == null) {
+            this.augments = Collections.emptyList();
+        } else {
+            this.augments = augments;
         }
     }
 

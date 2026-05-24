@@ -143,6 +143,31 @@ class RecordBulkDataSanitizerImplTest {
     }
 
 
+    @SneakyThrows
+    @Test
+    void augmentsAppliedBeforeRedact() {
+        this.setUpWithRules("---\n" +
+            "format: \"NDJSON\"\n" +
+            "augments:\n" +
+            "- !<textDigest>\n" +
+            "  jsonPaths:\n" +
+            "  - \"$.content\"\n" +
+            "transforms:\n" +
+            "- redact: \"content\"\n");
+
+        String input = "{\"content\":\"hello world test\"}\n";
+
+        storageHandler.handle(BulkDataTestUtils.request("export/file.ndjson"),
+            BulkDataTestUtils.transform(rules),
+            () -> new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)),
+            outputStreamSupplier);
+
+        String output = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        assertTrue(output.contains("\"+content:textDigest\""));
+        assertTrue(output.contains("\"word_count\""));
+        assertTrue(output.contains("\"content\":null"));
+    }
+
     @Test
     void noTransforms() throws IOException {
         this.setUpWithRules("---\n" +

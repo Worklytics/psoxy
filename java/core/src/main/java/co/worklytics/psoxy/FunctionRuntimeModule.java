@@ -11,6 +11,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import com.avaulta.gateway.resources.ResourceService;
 import com.avaulta.gateway.rules.WebhookCollectionRules;
+import com.avaulta.gateway.rules.augments.AugmentValidation;
 import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.HttpRequestFactory;
@@ -203,7 +204,10 @@ public class FunctionRuntimeModule {
                                                            co.worklytics.psoxy.rules.RulesUtils rulesUtils) {
         String rulesStr = configService.getConfigPropertyOrError(ProxyConfigProperty.RULES);
         String yamlEncodedRules = rulesUtils.decodeToYaml(rulesStr);
-        return webhookSanitizerFactory.create(objectMapper.readerFor(WebhookCollectionRules.class).readValue(yamlEncodedRules));
+        WebhookCollectionRules rules =
+            objectMapper.readerFor(WebhookCollectionRules.class).readValue(yamlEncodedRules);
+        AugmentValidation.validateWebhookEndpoints(rules.getEndpoints());
+        return webhookSanitizerFactory.create(rules);
     }
 
     @Provides @Singleton
