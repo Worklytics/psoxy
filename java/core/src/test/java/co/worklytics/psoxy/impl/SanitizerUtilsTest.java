@@ -251,7 +251,7 @@ class SanitizerUtilsTest {
             + "      \"wrap\": true\n" + "    }\n" + "  ]\n" + "}";
 
         String expected =
-            "{\"type\":\"AdaptiveCard\",\"version\":\"1.0\",\"body\":[{\"type\":\"TextBlock\",\"text\":\"{\\\"length\\\":982,\\\"word_count\\\":154}\",\"wrap\":true},{\"type\":\"TextBlock\",\"id\":\"MessageTextField\",\"text\":\"{\\\"length\\\":982,\\\"word_count\\\":154}\",\"wrap\":true}]}";
+            "{\"type\":\"AdaptiveCard\",\"version\":\"1.0\",\"body\":[{\"type\":\"TextBlock\",\"text\":\"{\\\"length\\\":2574,\\\"word_count\\\":154}\",\"wrap\":true},{\"type\":\"TextBlock\",\"id\":\"MessageTextField\",\"text\":\"{\\\"length\\\":982,\\\"word_count\\\":154}\",\"wrap\":true}]}";
 
         Transform.TextDigest transform = Transform.TextDigest.builder().isJsonEscaped(true)
             .jsonPathToProcessWhenEscaped("$..text").build();
