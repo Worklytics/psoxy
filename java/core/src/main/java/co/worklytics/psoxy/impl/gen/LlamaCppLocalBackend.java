@@ -26,6 +26,18 @@ public class LlamaCppLocalBackend implements GenMetadataBackend {
 
     private static final String LLM_RESOURCE_PREFIX = "llm/";
 
+    private static final String PROMPT_TEMPLATE = """
+        You are a data-processing component in a privacy proxy.
+        Task: %s
+
+        Respond with exactly one JSON value (no markdown, no prose).
+        The JSON MUST validate against this JSON Schema:
+        %s
+
+        Input data to process:
+        %s
+        """;
+
     enum LoadState {
         ABSENT, LOADING, READY, FAILED
     }
@@ -115,38 +127,27 @@ public class LlamaCppLocalBackend implements GenMetadataBackend {
         } catch (Exception e) {
             schemaJson = "{}";
         }
-        return """
-            You are a data-processing component in a privacy proxy.
-            Task: %s
-
-            Respond with exactly one JSON value (no markdown, no prose).
-            The JSON MUST validate against this JSON Schema:
-            %s
-
-            Input data to process:
-            %s
-            """.formatted(taskPrompt.trim(), schemaJson, inputData);
+        return PROMPT_TEMPLATE.formatted(taskPrompt.trim(), schemaJson, inputData);
     }
 
     ModelHandle resolveModel() {
         String modelKey = config.getModelId();
         ModelHandle existing = models.get(modelKey);
         if (existing != null) {
-            if (existing.state == LoadState.READY) {
-                return existing;
-            }
-            if (existing.state == LoadState.FAILED) {
-                return existing;
-            }
-            if (existing.state == LoadState.LOADING) {
-                return waitForLoad(modelKey);
-            }
+            return switch (existing.state) {
+                case READY, FAILED -> existing;
+                case LOADING -> waitForLoad(modelKey);
+                case ABSENT -> loadModel(modelKey);
+            };
         }
+        return loadModel(modelKey);
+    }
 
+    private ModelHandle loadModel(String modelKey) {
         ReentrantLock loadLock = loadLocks.computeIfAbsent(modelKey, k -> new ReentrantLock());
         loadLock.lock();
         try {
-            existing = models.get(modelKey);
+            ModelHandle existing = models.get(modelKey);
             if (existing != null) {
                 if (existing.state == LoadState.LOADING) {
                     return waitForLoad(modelKey);

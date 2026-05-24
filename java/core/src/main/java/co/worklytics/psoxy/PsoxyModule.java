@@ -41,6 +41,7 @@ import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import com.avaulta.gateway.resources.ResourceService;
 import com.avaulta.gateway.rules.augments.GenMetadataBackend;
 import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
+import com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend;
 import co.worklytics.psoxy.impl.AugmentProcessor;
 import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
 import co.worklytics.psoxy.impl.gen.LlamaCppLocalBackend;
@@ -403,7 +404,7 @@ public class PsoxyModule {
         if (GenMetadataConfig.BACKEND_LOCAL.equalsIgnoreCase(config.getBackend())) {
             backend = new LlamaCppLocalBackend(config, genMetadataResourceService, objectMapper);
         } else {
-            backend = (taskPrompt, outputSchema, inputData) -> null;
+            backend = new UnavailableGenMetadataBackend();
         }
         GenMetadataProcessor.configure(backend, objectMapper, config.getMaxInputChars());
         return backend;

@@ -40,6 +40,8 @@ locals {
 
   # proxy caller role requires direct lambda access if API Gateway v2 is not used and there are API connectors
   caller_requires_direct_lambda_access = !local.use_api_gateway_v2 && length(module.api_connector) > 0
+
+  should_enable_remote_resources = var.enable_remote_resources || var.enable_gen_metadata
 }
 
 module "psoxy" {
@@ -276,9 +278,9 @@ module "api_connector" {
     var.general_environment_variables,
   )
 
-  remote_resource_bucket        = (var.enable_remote_resources || var.enable_gen_metadata || each.value.enable_gen_metadata) ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = (var.enable_remote_resources || var.enable_gen_metadata || each.value.enable_gen_metadata) ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
-  remote_resource_shared_path   = (var.enable_remote_resources || var.enable_gen_metadata || each.value.enable_gen_metadata) && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
+  remote_resource_bucket        = (local.should_enable_remote_resources || each.value.enable_gen_metadata) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = (local.should_enable_remote_resources || each.value.enable_gen_metadata) ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = (local.should_enable_remote_resources || each.value.enable_gen_metadata) && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
 }
 
 

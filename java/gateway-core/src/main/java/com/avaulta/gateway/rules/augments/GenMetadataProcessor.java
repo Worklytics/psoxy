@@ -2,7 +2,6 @@ package com.avaulta.gateway.rules.augments;
 
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
@@ -13,7 +12,6 @@ import java.util.logging.Logger;
 /**
  * Facade for {@link Augment.GenMetadata} — delegates to a configured {@link GenMetadataBackend}.
  */
-@UtilityClass
 public class GenMetadataProcessor {
 
     private static final Logger log = Logger.getLogger(GenMetadataProcessor.class.getName());
@@ -24,11 +22,14 @@ public class GenMetadataProcessor {
     private static volatile ObjectMapper objectMapper = new ObjectMapper();
     private static volatile int maxInputChars = DEFAULT_MAX_INPUT_CHARS;
 
+    private GenMetadataProcessor() {
+    }
+
     public static void configure(GenMetadataBackend genMetadataBackend, ObjectMapper mapper,
-                                   int maxInputCharsLimit) {
- if (genMetadataBackend != null) {
-  backend = genMetadataBackend;
- }
+                                 int maxInputCharsLimit) {
+        if (genMetadataBackend != null) {
+            backend = genMetadataBackend;
+        }
         if (mapper != null) {
             objectMapper = mapper;
         }
@@ -52,7 +53,7 @@ public class GenMetadataProcessor {
         }
         try {
             Object raw = backend.generate(taskPrompt, outputSchema, inputJson);
-            Object parsed = parseModelJson(raw);
+            Map<?, ?> parsed = parseModelJson(raw);
             if (parsed == null) {
                 throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.INFERENCE_FAILED,
                     "genMetadata backend returned unparseable output");
@@ -86,7 +87,7 @@ public class GenMetadataProcessor {
         }
     }
 
-    static Object parseModelJson(Object raw) {
+    static Map<?, ?> parseModelJson(Object raw) {
         if (raw == null) {
             return null;
         }
@@ -107,7 +108,7 @@ public class GenMetadataProcessor {
                 return null;
             }
         }
-        return raw;
+        return null;
     }
 
     static String extractJsonObject(String response) {
@@ -115,13 +116,6 @@ public class GenMetadataProcessor {
             return null;
         }
         String trimmed = response.trim();
-        if (trimmed.startsWith("```")) {
-            int start = trimmed.indexOf('{');
-            int end = trimmed.lastIndexOf('}');
-            if (start >= 0 && end > start) {
-                return trimmed.substring(start, end + 1);
-            }
-        }
         int start = trimmed.indexOf('{');
         int end = trimmed.lastIndexOf('}');
         if (start >= 0 && end > start) {
@@ -151,12 +145,5 @@ public class GenMetadataProcessor {
         backend = new UnavailableGenMetadataBackend();
         objectMapper = new ObjectMapper();
         maxInputChars = DEFAULT_MAX_INPUT_CHARS;
-    }
-
-    private static final class UnavailableGenMetadataBackend implements GenMetadataBackend {
-        @Override
-        public Object generate(String taskPrompt, JsonSchemaFilter outputSchema, String inputData) {
-            return null;
-        }
     }
 }

@@ -35,6 +35,8 @@ locals {
       try(local.api_connector_rules_raw[k], null) != null ? local.api_connector_rules_raw[k] : null
     )
   }
+
+  should_enable_remote_resources = var.enable_remote_resources || var.enable_gen_metadata
 }
 
 # TODO: probably pull all the way to the top level bc 1) proper tf style, 2) simplifies customization if it doesn't work for a particular environment
@@ -248,9 +250,9 @@ module "api_connector" {
     var.general_environment_variables,
   )
 
-  remote_resource_bucket        = (var.enable_remote_resources || var.enable_gen_metadata || each.value.enable_gen_metadata) ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = (var.enable_remote_resources || var.enable_gen_metadata || each.value.enable_gen_metadata) ? "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_" : null
-  remote_resource_shared_path   = (var.enable_remote_resources || var.enable_gen_metadata || each.value.enable_gen_metadata) ? local.config_parameter_prefix : null
+  remote_resource_bucket        = (local.should_enable_remote_resources || each.value.enable_gen_metadata) ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = (local.should_enable_remote_resources || each.value.enable_gen_metadata) ? "${local.config_parameter_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = (local.should_enable_remote_resources || each.value.enable_gen_metadata) ? local.config_parameter_prefix : null
 
   secret_bindings = merge(
     local.secrets_bound_as_env_vars[each.key],

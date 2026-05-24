@@ -96,7 +96,7 @@ public class AugmentProcessor {
 
         for (Augment augment : augments) {
             try {
-                applyAugment(augment, document);
+                applyAugment(augment, document, warnings);
             } catch (AugmentProcessingException e) {
                 log.log(Level.WARNING, e.getMessage(), e);
                 warnings.add(e.getWarningCode());
@@ -108,7 +108,8 @@ public class AugmentProcessor {
         return List.copyOf(warnings);
     }
 
-    private void applyAugment(Augment augment, Object document) throws AugmentProcessingException {
+    private void applyAugment(Augment augment, Object document, List<String> warnings)
+            throws AugmentProcessingException {
         List<JsonPath> paths = compiledAugmentPaths.computeIfAbsent(augment,
             a -> a.getJsonPaths().stream()
                 .map(JsonPath::compile)
@@ -116,7 +117,7 @@ public class AugmentProcessor {
 
         for (JsonPath compiledPath : paths) {
             try {
-                applyAugmentAtPath(augment, document, compiledPath);
+                applyAugmentAtPath(augment, document, compiledPath, warnings);
             } catch (PathNotFoundException e) {
                 // expected if path doesn't match this particular document — no-op
             }
@@ -124,8 +125,8 @@ public class AugmentProcessor {
     }
 
     @SuppressWarnings("unchecked")
-    private void applyAugmentAtPath(Augment augment, Object document, JsonPath compiledPath)
-            throws AugmentProcessingException {
+    private void applyAugmentAtPath(Augment augment, Object document, JsonPath compiledPath,
+                                    List<String> warnings) throws AugmentProcessingException {
         List<String> resolvedPaths;
         try {
             resolvedPaths = compiledPath.read(document, pathListConfiguration);
@@ -138,7 +139,12 @@ public class AugmentProcessor {
         }
 
         for (String concretePath : resolvedPaths) {
-            applyAugmentAtConcretePath(augment, document, concretePath);
+            try {
+                applyAugmentAtConcretePath(augment, document, concretePath);
+            } catch (AugmentProcessingException e) {
+                log.log(Level.WARNING, e.getMessage(), e);
+                warnings.add(e.getWarningCode());
+            }
         }
     }
 
