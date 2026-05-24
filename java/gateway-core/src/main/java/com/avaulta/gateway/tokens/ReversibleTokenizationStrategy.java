@@ -42,7 +42,7 @@ public interface ReversibleTokenizationStrategy {
 
 
     /**
-     * Indicates that the token could not be reversed, likely because invalid
+     * Indicates that the token could not be reversed, likely because it is invalid.
      */
     class InvalidTokenException extends RuntimeException {
 
