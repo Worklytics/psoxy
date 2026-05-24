@@ -254,6 +254,54 @@ class AugmentProcessorTest {
     }
 
     @Test
+    void hasConflictingProperties_deeplyNested() {
+        Map<String, Object> deep = new LinkedHashMap<>();
+        deep.put("+existing", "conflict");
+        Map<String, Object> level2 = new LinkedHashMap<>();
+        level2.put("nested", deep);
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("value", List.of(level2));
+        assertTrue(augmentProcessor.hasConflictingProperties(document));
+    }
+
+    @SneakyThrows
+    @Test
+    void applyAugments_innerJsonPath_extractsFromEscapedJson() {
+        String adaptiveCard = """
+            {
+              "body": [
+                {"type": "TextBlock", "text": "Hello world"},
+                {"type": "TextBlock", "text": "Second block"}
+              ]
+            }
+            """;
+        Map<String, Object> attachment = new LinkedHashMap<>();
+        attachment.put("content", adaptiveCard);
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("attachments", List.of(attachment));
+
+        Augment.TextDigest augment = Augment.TextDigest.builder()
+            .jsonPath("$.attachments[*].content")
+            .innerJsonPath("$..text")
+            .build();
+
+        augmentProcessor.applyAugments(List.of(augment), document);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> resultAttachment = (Map<String, Object>)
+            ((List<?>) document.get("attachments")).get(0);
+        assertTrue(resultAttachment.containsKey("+content:textDigest"));
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> digests = (List<Map<String, Object>>)
+            resultAttachment.get("+content:textDigest");
+        assertEquals(2, digests.size());
+        assertEquals(11, digests.get(0).get("length"));
+        assertEquals(2, digests.get(0).get("word_count"));
+        assertEquals(12, digests.get(1).get("length"));
+        assertEquals(2, digests.get(1).get("word_count"));
+    }
+
+    @Test
     void hasConflictingProperties_topLevel() {
         Map<String, Object> document = new LinkedHashMap<>();
         document.put("+augmented", "conflict");
