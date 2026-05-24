@@ -399,7 +399,7 @@ public class PsoxyModule {
             @Named("ForGenMetadata") ResourceService genMetadataResourceService) {
         GenMetadataConfig config = GenMetadataConfig.from(configService);
         GenMetadataBackend backend;
-        if (GenMetadataConfig.BACKEND_LOCAL.equals(config.getBackend())) {
+        if (GenMetadataConfig.BACKEND_LOCAL.equalsIgnoreCase(config.getBackend())) {
             backend = new LlamaCppLocalBackend(config, genMetadataResourceService, objectMapper);
         } else {
             backend = (taskPrompt, outputSchema, inputData) -> null;
