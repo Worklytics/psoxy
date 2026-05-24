@@ -119,6 +119,7 @@ public class BatchMergeHandler {
             }
         } catch (Output.WriteFailure e) {
             log.log(Level.SEVERE, "Failed to write batched webhooks to output", e);
+            throw new RuntimeException("Failed to write batched webhooks to output", e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

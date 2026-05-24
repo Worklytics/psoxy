@@ -11,7 +11,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 import com.google.common.annotations.VisibleForTesting;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.ProcessedDataStage;
@@ -41,6 +41,8 @@ public class OutputUtils {
 
     @Inject
     ConfigService configService;
+    @Inject
+    ApiModeConfig apiModeConfig;
     @Inject
     WebhookCollectorModeConfig webhookCollectorModeConfig;
     @Inject
@@ -77,8 +79,7 @@ public class OutputUtils {
     // generic cast of Output is safe
     @SuppressWarnings("unchecked")
     public ApiSanitizedDataOutput asyncOutput() {
-        Output asyncOutput = configService
-                .getConfigPropertyAsOptional(ApiModeConfigProperty.ASYNC_OUTPUT_DESTINATION)
+        Output asyncOutput = apiModeConfig.getAsyncOutputDestination()
                 .map(OutputLocationImpl::of).map(this::createOutputForLocation)
                 .map(output -> (Output) CompressedOutputWrapper.wrap((Output) output))
                 .orElseGet(noSideProvider::get);

@@ -40,12 +40,28 @@ Inspired by OData's `@`-annotation pattern (where metadata about a property `Foo
 +{sourceProperty}:{augmentFunction}
 ```
 
+When `innerJsonPath` is set and matches nested JSON inside a string field, all inner matches are
+grouped under a single augment property, keyed by normalized inner path suffix:
+
+```jsonc
+{
+  "content": "{ ... escaped AdaptiveCard JSON ... }",
+  "+content:textDigest": {
+    "body[0].text": { "length": 2572, "word_count": 154 },
+    "body[1].text": { "length": 980,  "word_count": 154 }
+  }
+}
+```
+
 | Token | Meaning |
 |---|---|
 | `+` | Prefix identifying the property as proxy-generated (augmented). |
 | `{sourceProperty}` | The name of the field the augment reads from. |
 | `:` | Separator. |
 | `{augmentFunction}` | The name of the augment function (e.g. `textDigest`). |
+
+Inner map keys use `{innerPathSuffix}` — the normalized concrete path within parsed inner JSON
+(e.g. `body[0].text`).
 
 **Example.** For a response containing `body.content`, the augment property produced by the `textDigest` function would be:
 
@@ -103,6 +119,7 @@ endpoints:
       - !<textDigest>
         jsonPaths:
           - "$..attachments[*].content"
+        innerJsonPath: "$..text"
         keywords:
           - "summarize"
           - "write"
@@ -351,4 +368,4 @@ The consumer now sees:
 | Pre- vs. post-transform | **Pre-transform default.** | Augments need original field values. `preAugmentTransforms` and/or `postAugments` can be added as separate endpoint rule lists later if use-cases arise. |
 | PII in augment inputs | **Deferred.** Not addressed in PoC. | Most current augments (textDigest) operate on content fields and don't need PII stripped first. When a use-case arises (e.g. classifier on a field with inline PII), add `preAugmentTransforms` to rules. |
 | Response schema + augments | **Auto-pass `+` properties.** | Since `+` in raw data disables augments (conflict check), any `+` properties post-augment are guaranteed proxy-generated and safe to pass through the schema filter without explicit declaration. |
-| `isJsonEscaped` / `jsonPathToProcessWhenEscaped` | **Omitted from PoC.** | YAGNI — the existing `Transform.TextDigest` supports this for Copilot AdaptiveCard payloads (JSON-in-JSON), but the augment PoC doesn't need it. Can be added later if a clear use-case emerges for computing augments from sub-components of escaped JSON values. |
+| `isJsonEscaped` / `jsonPathToProcessWhenEscaped` | **Ported as `innerJsonPath`.** | When the source value is a JSON string (e.g. Copilot AdaptiveCard `attachment.content`), `innerJsonPath` extracts nested values to augment. Its presence implicitly enables escaped JSON decoding, mirroring the transform option. |

@@ -1,7 +1,7 @@
 # Anthropic
 
-## Claude **BETA**
+## Claude
 - [Claude](claude/README.md)
 
-## Claude Code **BETA**
+## Claude Code
 - [Claude Code](claude-code/README.md)

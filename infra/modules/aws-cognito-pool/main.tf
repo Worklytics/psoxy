@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 5.0"
+    }
+  }
+}
+
 resource "aws_cognito_identity_pool" "main" {
   identity_pool_name               = var.name
   developer_provider_name          = var.developer_provider_name

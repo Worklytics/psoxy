@@ -10,12 +10,14 @@ import lombok.extern.java.Log;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 /**
  * Applies augments to a JSON document, adding synthetic sibling properties
- * named {@code +{sourceProperty}:{augmentFunction}} alongside source fields.
+ * named {@code +{sourceProperty}:{augmentFunction}}. When {@code innerJsonPath} is used, multiple
+ * inner matches are grouped under that property as an object keyed by inner path suffix.
  *
  * <p>Processing is intentionally non-fatal: any augment failure (exception, timeout,
  * schema validation) results in the augment property being omitted with a warning logged.
@@ -34,11 +36,22 @@ public class AugmentProcessor {
     /** Separator between source property name and augment function name. */
     public static final String AUGMENT_SEPARATOR = ":";
 
+    /** Default config: reads return matched values (used for parent/source lookups). */
     final Configuration jsonConfiguration;
+
+    /**
+     * Same underlying provider as {@link #jsonConfiguration}, but with {@link Option#AS_PATH_LIST}:
+     * reads return concrete path strings (e.g. {@code $['value'][0]['body']['content']}) instead
+     * of values. Needed to expand wildcard rule paths like {@code $..attachments[*].content} into
+     * per-match locations where we insert sibling {@code +field:augment} properties.
+     * Cached here to avoid rebuilding on every augment-path evaluation.
+     */
+    final Configuration pathListConfiguration;
 
     @Inject
     public AugmentProcessor(Configuration jsonConfiguration) {
         this.jsonConfiguration = jsonConfiguration;
+        this.pathListConfiguration = jsonConfiguration.setOptions(Option.AS_PATH_LIST);
     }
 
     /**
@@ -47,6 +60,11 @@ public class AugmentProcessor {
      * {@code RESTApiSanitizerImpl.compiledTransforms}).
      */
     private final Map<Augment, List<JsonPath>> compiledAugmentPaths = new ConcurrentHashMap<>();
+
+    /**
+     * Cache of pre-compiled concrete/parent JsonPaths resolved at runtime.
+     */
+    private final Map<String, JsonPath> compiledPathCache = new ConcurrentHashMap<>();
 
     /**
      * Apply a list of augments to a parsed JSON document.
@@ -107,14 +125,9 @@ public class AugmentProcessor {
      */
     @SuppressWarnings("unchecked")
     private void applyAugmentAtPath(Augment augment, Object document, JsonPath compiledPath) {
-
-        // Build a configuration that returns resolved path strings instead of values
-        Configuration pathListConfig = jsonConfiguration.setOptions(Option.AS_PATH_LIST);
-
-        // Resolve to concrete paths like ["$['value'][0]['body']['content']", ...]
         List<String> resolvedPaths;
         try {
-            resolvedPaths = compiledPath.read(document, pathListConfig);
+            resolvedPaths = compiledPath.read(document, pathListConfiguration);
         } catch (PathNotFoundException e) {
             return;
         }
@@ -142,7 +155,6 @@ public class AugmentProcessor {
      */
     @SuppressWarnings("unchecked")
     private void applyAugmentAtConcretePath(Augment augment, Object document, String concretePath) {
-        // Derive the leaf field name and parent path from the concrete path
         String leafFieldName = extractLeafFieldNameFromConcrete(concretePath);
         String parentPath = extractParentFromConcrete(concretePath);
 
@@ -151,10 +163,9 @@ public class AugmentProcessor {
             return;
         }
 
-        // Read the parent object
         Object parent;
         try {
-            parent = JsonPath.compile(parentPath).read(document, jsonConfiguration);
+            parent = getCompiledPath(parentPath).read(document, jsonConfiguration);
         } catch (PathNotFoundException e) {
             log.warning("Parent path '" + parentPath + "' not found for concrete path '"
                 + concretePath + "'; this should not happen — indicates a bug.");
@@ -168,40 +179,22 @@ public class AugmentProcessor {
             return;
         }
 
-        // Read the source value
         Object sourceValue;
         try {
-            sourceValue = JsonPath.compile(concretePath).read(document, jsonConfiguration);
+            sourceValue = getCompiledPath(concretePath).read(document, jsonConfiguration);
         } catch (PathNotFoundException e) {
             return;
         }
 
-        // Compute and insert
-        String augmentPropertyName = AUGMENT_PROPERTY_PREFIX + leafFieldName
-            + AUGMENT_SEPARATOR + augment.getFunctionName();
+        String augmentPropertyName = buildAugmentPropertyName(leafFieldName, augment.getFunctionName());
 
         try {
-            Object augmentValue = null;
-            if (augment.getInnerJsonPath() != null && !augment.getInnerJsonPath().isEmpty() && sourceValue instanceof String jsonStr && !jsonStr.isEmpty()) {
-                Object parsed = JsonPath.parse(jsonStr).read(augment.getInnerJsonPath());
-                if (parsed instanceof List<?> list) {
-                    List<Object> results = new java.util.ArrayList<>();
-                    for (Object item : list) {
-                        Object computed = augment.compute(item);
-                        if (computed != null) {
-                            results.add(computed);
-                        }
-                    }
-                    if (!results.isEmpty()) {
-                        augmentValue = results;
-                    }
-                } else if (parsed != null) {
-                    augmentValue = augment.compute(parsed);
-                }
-            } else {
-                augmentValue = augment.compute(sourceValue);
+            if (hasInnerJsonPath(augment) && sourceValue instanceof String jsonStr && !jsonStr.isEmpty()) {
+                applyInnerJsonPathAugments(augment, (Map<String, Object>) parent, leafFieldName, jsonStr);
+                return;
             }
 
+            Object augmentValue = augment.compute(sourceValue);
             if (augmentValue == null) {
                 return;
             }
@@ -217,33 +210,93 @@ public class AugmentProcessor {
         }
     }
 
+    private boolean hasInnerJsonPath(Augment augment) {
+        return augment.getInnerJsonPath() != null && !augment.getInnerJsonPath().isEmpty();
+    }
+
+    /**
+     * When {@link Augment#getInnerJsonPath()} is set, resolve each concrete inner path and group
+     * results under {@code +{outerLeaf}:{fn}} keyed by inner path suffix.
+     */
+    @SuppressWarnings("unchecked")
+    private void applyInnerJsonPathAugments(Augment augment, Map<String, Object> parent,
+                                            String leafFieldName, String jsonStr) {
+        JsonPath innerCompiled = getCompiledPath(augment.getInnerJsonPath());
+        Object innerDocument = JsonPath.parse(jsonStr).json();
+
+        List<String> innerConcretePaths;
+        try {
+            innerConcretePaths = innerCompiled.read(innerDocument, pathListConfiguration);
+        } catch (PathNotFoundException e) {
+            return;
+        }
+        if (innerConcretePaths == null || innerConcretePaths.isEmpty()) {
+            return;
+        }
+
+        Map<String, Object> innerAugments = new TreeMap<>();
+
+        for (String innerConcretePath : innerConcretePaths) {
+            try {
+                Object innerValue = getCompiledPath(innerConcretePath).read(innerDocument, jsonConfiguration);
+                Object augmentValue = augment.compute(innerValue);
+                if (augmentValue == null) {
+                    continue;
+                }
+
+                String innerKey = toInnerPathSuffix(innerConcretePath);
+                // TODO: validate against outputSchema if present (predicate check)
+                innerAugments.put(innerKey, augmentValue);
+            } catch (Exception e) {
+                log.log(Level.WARNING,
+                    "Augment '" + augment.getFunctionName() + "' failed at inner path '"
+                        + innerConcretePath + "'; skipping.", e);
+            }
+        }
+
+        if (!innerAugments.isEmpty()) {
+            parent.put(buildAugmentPropertyName(leafFieldName, augment.getFunctionName()), innerAugments);
+        }
+    }
+
+    /**
+     * Build augment property name: {@code +content:textDigest}.
+     */
+    static String buildAugmentPropertyName(String leafFieldName, String functionName) {
+        return AUGMENT_PROPERTY_PREFIX + leafFieldName + AUGMENT_SEPARATOR + functionName;
+    }
+
+    /**
+     * Normalize a Jayway concrete inner path to a dot/bracket suffix.
+     * {@code $['body'][0]['text']} → {@code body[0].text}.
+     */
+    static String toInnerPathSuffix(String concreteInnerPath) {
+        if (concreteInnerPath == null || concreteInnerPath.isEmpty()) {
+            return "";
+        }
+        String path = concreteInnerPath.startsWith("$")
+            ? concreteInnerPath.substring(1)
+            : concreteInnerPath;
+        path = path.replaceAll("\\['([^']+)'\\]", ".$1");
+        if (path.startsWith(".")) {
+            path = path.substring(1);
+        }
+        return path;
+    }
+
+    private JsonPath getCompiledPath(String path) {
+        return compiledPathCache.computeIfAbsent(path, JsonPath::compile);
+    }
+
     /**
      * Check if the document contains any properties starting with the augment prefix.
-     * Scans the top-level and one level of nesting (covers typical API response shapes).
      */
     boolean hasConflictingProperties(Object document) {
         if (document instanceof Map<?, ?> map) {
-            for (Object key : map.keySet()) {
-                if (key instanceof String s && s.startsWith(AUGMENT_PROPERTY_PREFIX)) {
-                    return true;
-                }
-                // Check one level deeper (e.g., $.value[*] arrays contain objects)
-                Object val = map.get(key);
-                if (val instanceof Map<?, ?> nested) {
-                    if (hasAugmentPrefixKeys(nested)) {
-                        return true;
-                    }
-                } else if (val instanceof List<?> list) {
-                    for (Object item : list) {
-                        if (item instanceof Map<?, ?> nested && hasAugmentPrefixKeys(nested)) {
-                            return true;
-                        }
-                    }
-                }
-            }
+            return hasConflictingPropertiesInMap(map);
         } else if (document instanceof List<?> list) {
             for (Object item : list) {
-                if (item instanceof Map<?, ?> map && hasAugmentPrefixKeys(map)) {
+                if (hasConflictingProperties(item)) {
                     return true;
                 }
             }
@@ -251,9 +304,12 @@ public class AugmentProcessor {
         return false;
     }
 
-    private boolean hasAugmentPrefixKeys(Map<?, ?> map) {
-        for (Object key : map.keySet()) {
-            if (key instanceof String s && s.startsWith(AUGMENT_PROPERTY_PREFIX)) {
+    private boolean hasConflictingPropertiesInMap(Map<?, ?> map) {
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            if (entry.getKey() instanceof String s && s.startsWith(AUGMENT_PROPERTY_PREFIX)) {
+                return true;
+            }
+            if (hasConflictingProperties(entry.getValue())) {
                 return true;
             }
         }
@@ -265,8 +321,6 @@ public class AugmentProcessor {
      * Concrete paths use bracket notation: {@code $['body']['content']} → {@code "content"}.
      */
     static String extractLeafFieldNameFromConcrete(String concretePath) {
-        // Concrete paths from Jayway use bracket notation: $['body']['content']
-        // Find the last ['...'] segment
         int lastBracket = concretePath.lastIndexOf("['");
         if (lastBracket >= 0) {
             int end = concretePath.indexOf("']", lastBracket);
@@ -286,7 +340,6 @@ public class AugmentProcessor {
         if (lastBracket > 0) {
             return concretePath.substring(0, lastBracket);
         }
-        // If no bracket found, try numeric index: $['value'][0]
         int lastNumBracket = concretePath.lastIndexOf("[");
         if (lastNumBracket > 0) {
             return concretePath.substring(0, lastNumBracket);

@@ -1,5 +1,6 @@
 package co.worklytics.psoxy;
 
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -32,6 +33,11 @@ public class CmdLineModule {
     @Provides @Singleton
     ConfigService configService(CommandLineConfigServiceFactory factory) {
         return factory.create(args);
+    }
+
+    @Provides @Singleton
+    static ApiModeConfig apiModeConfig(ConfigService configService) {
+        return ApiModeConfig.fromConfigService(configService);
     }
 
     @Provides @Singleton

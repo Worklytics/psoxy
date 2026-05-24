@@ -22,9 +22,12 @@ public class GcpEnvironment implements HostEnvironment {
         ;
     }
 
+    /**
+     * GCP-specific URLs/topics for the API data connector (distinct from core {@link co.worklytics.psoxy.gateway.ApiModeConfig}).
+     */
     @Builder
     @Value
-    static class ApiModeConfig {
+    static class GcpApiModeConfig {
 
         /**
          * the URL of the service, e.g. "https://my-service-12345.a.run.app", if known/applicable
@@ -39,20 +42,20 @@ public class GcpEnvironment implements HostEnvironment {
         Optional<String> asyncPubSubQueue;
 
         @VisibleForTesting
-        enum ApiModeConfigProperty implements co.worklytics.psoxy.gateway.ConfigService.ConfigProperty {
+        enum GcpApiModeConfigProperty implements co.worklytics.psoxy.gateway.ConfigService.ConfigProperty {
 
             ASYNC_PUB_SUB_QUEUE,
             SERVICE_URL,
         }
 
-        static ApiModeConfig fromConfigService(ConfigService configService) {
+        static GcpApiModeConfig fromConfigService(ConfigService configService) {
             if (!(configService instanceof CompositeConfigService)) {
                 throw new IllegalStateException("configService must be a CompositeConfigService");
             }
 
-            return ApiModeConfig.builder()
-                .serviceUrl(configService.getConfigPropertyAsOptional(ApiModeConfig.ApiModeConfigProperty.SERVICE_URL))
-                .asyncPubSubQueue(configService.getConfigPropertyAsOptional(ApiModeConfig.ApiModeConfigProperty.ASYNC_PUB_SUB_QUEUE))
+            return GcpApiModeConfig.builder()
+                .serviceUrl(configService.getConfigPropertyAsOptional(GcpApiModeConfigProperty.SERVICE_URL))
+                .asyncPubSubQueue(configService.getConfigPropertyAsOptional(GcpApiModeConfigProperty.ASYNC_PUB_SUB_QUEUE))
                 .build();
         }
     }
@@ -103,8 +106,16 @@ public class GcpEnvironment implements HostEnvironment {
             return GcpWebhookCollectorModeConfig.builder()
                 .serviceUrl(configService.getConfigPropertyOrError(GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.SERVICE_URL))
                 .batchMergeSubscription(configService.getConfigPropertyOrError(GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_MERGE_SUBSCRIPTION))
-                .batchSize(configService.getConfigPropertyAsOptional(GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_SIZE).map(Integer::parseInt).orElse(100))
-                .batchInvocationTimeoutSeconds(configService.getConfigPropertyAsOptional(GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_INVOCATION_TIMEOUT_SECONDS).map(Integer::parseInt).orElse(60))
+                .batchSize(configService.getConfigPropertyAsOptional(GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_SIZE)
+                        .map(value -> ConfigService.parseIntValue(
+                                GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_SIZE, value))
+                        .orElse(100))
+                .batchInvocationTimeoutSeconds(configService.getConfigPropertyAsOptional(
+                                GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_INVOCATION_TIMEOUT_SECONDS)
+                        .map(value -> ConfigService.parseIntValue(
+                                GcpWebhookCollectorModeConfig.GcpWebhookCollectorModeConfigProperty.BATCH_INVOCATION_TIMEOUT_SECONDS,
+                                value))
+                        .orElse(60))
                 .build();
         }
     }

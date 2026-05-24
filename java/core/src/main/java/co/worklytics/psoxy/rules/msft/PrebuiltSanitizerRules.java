@@ -713,6 +713,7 @@ public class PrebuiltSanitizerRules {
 
     static final Augment.TextDigest MS_COPILOT_AUGMENT_ATTACHMENT = Augment.TextDigest.builder()
         .jsonPath("$..attachments[*].content")
+        .innerJsonPath("$..text")
         .build();
 
     static final Augment.TextDigest MS_COPILOT_AUGMENT_BODY = Augment.TextDigest.builder()

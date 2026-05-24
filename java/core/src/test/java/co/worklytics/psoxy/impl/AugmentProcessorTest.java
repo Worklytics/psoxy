@@ -254,6 +254,72 @@ class AugmentProcessorTest {
     }
 
     @Test
+    void hasConflictingProperties_deeplyNested() {
+        Map<String, Object> deep = new LinkedHashMap<>();
+        deep.put("+existing", "conflict");
+        Map<String, Object> level2 = new LinkedHashMap<>();
+        level2.put("nested", deep);
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("value", List.of(level2));
+        assertTrue(augmentProcessor.hasConflictingProperties(document));
+    }
+
+    @SneakyThrows
+    @Test
+    void applyAugments_innerJsonPath_extractsFromEscapedJson() {
+        String adaptiveCard = """
+            {
+              "body": [
+                {"type": "TextBlock", "text": "Hello world"},
+                {"type": "TextBlock", "text": "Second block"}
+              ]
+            }
+            """;
+        Map<String, Object> attachment = new LinkedHashMap<>();
+        attachment.put("content", adaptiveCard);
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("attachments", List.of(attachment));
+
+        Augment.TextDigest augment = Augment.TextDigest.builder()
+            .jsonPath("$.attachments[*].content")
+            .innerJsonPath("$..text")
+            .build();
+
+        augmentProcessor.applyAugments(List.of(augment), document);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> resultAttachment = (Map<String, Object>)
+            ((List<?>) document.get("attachments")).get(0);
+        assertFalse(resultAttachment.containsKey("+content.body[0].text:textDigest"));
+        @SuppressWarnings("unchecked")
+        Map<String, Object> innerAugments = (Map<String, Object>) resultAttachment.get("+content:textDigest");
+        assertNotNull(innerAugments);
+        assertEquals(2, innerAugments.size());
+        @SuppressWarnings("unchecked")
+        Map<String, Object> digest0 = (Map<String, Object>) innerAugments.get("body[0].text");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> digest1 = (Map<String, Object>) innerAugments.get("body[1].text");
+        assertNotNull(digest0);
+        assertNotNull(digest1);
+        assertEquals(11, digest0.get("length"));
+        assertEquals(2, digest0.get("word_count"));
+        assertEquals(12, digest1.get("length"));
+        assertEquals(2, digest1.get("word_count"));
+    }
+
+    @Test
+    void toInnerPathSuffix_bracketNotation() {
+        assertEquals("body[0].text",
+            AugmentProcessor.toInnerPathSuffix("$['body'][0]['text']"));
+    }
+
+    @Test
+    void buildAugmentPropertyName() {
+        assertEquals("+content:textDigest",
+            AugmentProcessor.buildAugmentPropertyName("content", "textDigest"));
+    }
+
+    @Test
     void hasConflictingProperties_topLevel() {
         Map<String, Object> document = new LinkedHashMap<>();
         document.put("+augmented", "conflict");

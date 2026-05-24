@@ -215,6 +215,16 @@ fi
 echo -e "${SUCCESS}✓ Created ZIP file: ${ZIP_PATH}${NC}"
 cd - > /dev/null
 
+# Calculate SHA256 of ZIP
+if command -v sha256sum &> /dev/null; then
+    SHA256_HASH=$(sha256sum "$ZIP_PATH" | cut -d' ' -f1)
+elif command -v shasum &> /dev/null; then
+    SHA256_HASH=$(shasum -a 256 "$ZIP_PATH" | cut -d' ' -f1)
+else
+    SHA256_HASH=$(openssl dgst -sha256 "$ZIP_PATH" | cut -d' ' -f2)
+fi
+echo -e "${INFO}ZIP SHA256: ${SUCCESS}${SHA256_HASH}${NC}"
+
 echo -e "${INFO}Publishing Psoxy GCP ZIP version ${SUCCESS}${VERSION}${INFO} to GCS bucket...${NC}"
 echo -e "${INFO}JAR file: ${SUCCESS}${JAR_PATH}${NC}"
 echo -e "${INFO}ZIP file: ${SUCCESS}${ZIP_PATH}${NC}"
@@ -270,19 +280,23 @@ publish_to_gcs() {
     fi
 
     # Upload with metadata
-    # Add gh_ref metadata if available (from GitHub Actions)
-    # Note: -h flag must come BEFORE cp command
+    # Add sha256 and gh_ref metadata if available
+    local metadata_args=(-h "x-goog-meta-sha256:${SHA256_HASH}")
     if [ -n "${GH_REF:-}" ]; then
         echo -e "${INFO}Adding metadata: gh_ref=${GH_REF}${NC}"
-        gsutil -h "x-goog-meta-gh_ref:${GH_REF}" cp "$ZIP_PATH" "$gcs_path"
-    else
-        gsutil cp "$ZIP_PATH" "$gcs_path"
+        metadata_args+=(-h "x-goog-meta-gh_ref:${GH_REF}")
     fi
+
+    gsutil "${metadata_args[@]}" cp "$ZIP_PATH" "$gcs_path"
 
     if [ $? -eq 0 ]; then
         echo -e "${SUCCESS}✓ Successfully uploaded to GCS${NC}"
         
         # Verify metadata was set
+        local sha_metadata=$(gsutil stat "$gcs_path" 2>/dev/null | grep "x-goog-meta-sha256" || echo "")
+        if [ -n "$sha_metadata" ]; then
+            echo -e "${SUCCESS}✓ Metadata verified: ${sha_metadata}${NC}"
+        fi
         if [ -n "${GH_REF:-}" ]; then
             local metadata=$(gsutil stat "$gcs_path" 2>/dev/null | grep "x-goog-meta-gh_ref" || echo "")
             if [ -n "$metadata" ]; then
@@ -393,6 +407,7 @@ main() {
         
         # Output artifact URI in standardized format for GitHub Actions summary
         echo "ARTIFACT_URI=gs://${BUCKET_NAME}/${ZIP_FILENAME}"
+        echo "ARTIFACT_SHA256=${SHA256_HASH}"
     else
         echo -e "${ERR}✗ Failed to publish to GCS${NC}"
         exit 1

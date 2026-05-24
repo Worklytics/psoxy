@@ -1,16 +1,24 @@
 package co.worklytics.psoxy.gateway;
 
+import com.google.common.base.Splitter;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Value;
+import lombok.extern.java.Log;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * POJO collecting all configuration values for webhook collector mode
  */
+@Log
 @Value
 @Builder
 public class WebhookCollectorModeConfig {
@@ -34,7 +42,15 @@ public class WebhookCollectorModeConfig {
             .ifPresent(builder::webhookOutput);
         configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.WEBHOOK_BATCH_OUTPUT)
             .ifPresent(builder::webhookBatchOutput);
-        
+
+        configService.getConfigPropertyAsOptional(WebhookCollectorModeConfigProperty.ALLOWED_WEBHOOK_IP_BLOCKS)
+            .ifPresent(csv -> {
+                Set<String> ipBlocks = StringUtils.isNotBlank(csv)
+                    ? new LinkedHashSet<>(Splitter.on(',').trimResults().omitEmptyStrings().splitToList(csv))
+                    : Collections.emptySet();
+                builder.allowedWebhookIpBlocks(Optional.of(Collections.unmodifiableSet(ipBlocks)));
+            });
+
         return builder.build();
     }
 
@@ -106,6 +122,14 @@ public class WebhookCollectorModeConfig {
      * should be something URI-like, with the 'type' of the Output able to be inferred from the URI scheme.
      */
     String webhookBatchOutput;
+
+    /**
+     * When absent, no IP filter is applied (any client IP is allowed).
+     * When present, only client IPs matching these entries (exact IPv4 or CIDR) are allowed.
+     */
+    @NonNull
+    @Builder.Default
+    Optional<Set<String>> allowedWebhookIpBlocks = Optional.empty();
 
     /**
      * Get accepted auth keys as optional
@@ -210,6 +234,11 @@ public class WebhookCollectorModeConfig {
          * should be something URI-like, with the 'type' of the Output able to be inferred from the URI scheme.
          */
         WEBHOOK_BATCH_OUTPUT,
+
+        /**
+         * A CSV of IPs or CIDR blocks allowed to send webhooks.
+         */
+        ALLOWED_WEBHOOK_IP_BLOCKS,
 
         ;
 
