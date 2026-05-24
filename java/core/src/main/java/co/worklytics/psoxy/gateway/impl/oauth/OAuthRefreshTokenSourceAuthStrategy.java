@@ -444,18 +444,17 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
          * @return a non-expired token to reuse, or empty if a refresh exchange is required
          */
         private Optional<AccessToken> findReusableAccessToken() {
-            AccessToken freshToken = sourceAuthStrategy.getCachedToken();
-            if (!sourceAuthStrategy.shouldRefresh(freshToken, clock.instant())) {
-                DevLogUtils.info(envVarsConfigService, log, "Token already refreshed " + freshToken.getExpirationTime());
-                return Optional.of(freshToken);
+            AccessToken cachedToken = sourceAuthStrategy.getCachedToken();
+            if (!sourceAuthStrategy.shouldRefresh(cachedToken, clock.instant())) {
+                return Optional.of(cachedToken);
             }
 
-            freshToken = sourceAuthStrategy.getSharedAccessTokenIfSupported().orElse(null);
-            if (sourceAuthStrategy.shouldRefresh(freshToken, clock.instant())) {
+            AccessToken sharedToken =
+                sourceAuthStrategy.getSharedAccessTokenIfSupported().orElse(null);
+            if (sourceAuthStrategy.shouldRefresh(sharedToken, clock.instant())) {
                 return Optional.empty();
-            } else if (freshToken != null) {
-                DevLogUtils.info(envVarsConfigService, log, "Token already refreshed " + freshToken.getExpirationTime());
-                return Optional.of(freshToken);
+            } else if (sharedToken != null) {
+                return Optional.of(sharedToken);
             }
             return Optional.empty();
         }
@@ -490,7 +489,9 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     storeRefreshTokenIfRotated(tokenResponse);
 
                 } else {
-                    DevLogUtils.info(envVarsConfigService, log, "Token already refreshed");
+                    DevLogUtils.info(envVarsConfigService, log,
+                        "Reusing access token, expires: %s",
+                        reusableToken.get().getExpirationTime());
                     token = reusableToken.get();
                 }
 
