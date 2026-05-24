@@ -219,7 +219,7 @@ module "api_connector" {
   max_instance_count                    = var.max_instances_per_api_connector
   available_memory_mb = max(
     (each.value.enable_gen_metadata || var.enable_gen_metadata) ? coalesce(each.value.available_memory_mb, 4096) : 1024,
-    (each.value.enable_gen_metadata || var.enable_gen_metadata) ? 4096 : 0,
+    (each.value.enable_gen_metadata || var.enable_gen_metadata) ? 4096 : 0
   )
 
   environment_variables = merge(
