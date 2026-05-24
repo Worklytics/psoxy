@@ -29,6 +29,28 @@ class SentenceMetadataProcessorTest {
     }
 
     @Test
+    void analyzeSentence_derivesSignalsAndTaxonomyWithoutModels() {
+        Map<String, String> taxonomy = Map.of("email", "MEDIUM");
+
+        SentenceMetadataProcessor.SentenceAnalysis analysis = SentenceMetadataProcessor.analyzeSentence(
+            0,
+            new String[] {"Could", "you", "avoid", "sending", "an", "email", "?"},
+            new String[] {"MD", "PRP", "VB", "VBG", "DT", "NN", "."},
+            new String[] {"B-VP", "I-VP", "I-VP", "I-VP", "B-NP", "I-NP", "O"},
+            taxonomy,
+            DEFAULT_HEDGE,
+            DEFAULT_CONSTRAINT);
+
+        assertEquals("interrogative", analysis.sentence().getType());
+        assertTrue(analysis.sentence().getSignals().isQuestion());
+        assertTrue(analysis.sentence().getSignals().isConstraint());
+        assertEquals(1, analysis.sentence().getNouns().size());
+        assertEquals("email", analysis.sentence().getNouns().get(0).getNoun());
+        assertEquals("MEDIUM", analysis.sentence().getNouns().get(0).getCategory());
+        assertTrue(analysis.nounCategories().contains("MEDIUM"));
+    }
+
+    @Test
     void testProcessWithModels() {
         assertModelsAvailable();
         configureClasspathResourceService();
