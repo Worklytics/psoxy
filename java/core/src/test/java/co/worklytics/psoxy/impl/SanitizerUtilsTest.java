@@ -264,6 +264,22 @@ class SanitizerUtilsTest {
     }
 
     @SneakyThrows
+    @Test
+    void textDigest_with_escaping_digestsEachMatchIndependently() {
+        String input = "{\"body\":[{\"text\":\"short\"},{\"text\":\"two words\"}]}";
+        String expected =
+            "{\"body\":[{\"text\":\"{\\\"length\\\":5,\\\"word_count\\\":1}\"},{\"text\":\"{\\\"length\\\":9,\\\"word_count\\\":2}\"}]}";
+
+        Transform.TextDigest transform = Transform.TextDigest.builder().isJsonEscaped(true)
+            .jsonPathToProcessWhenEscaped("$..text").build();
+        MapFunction textDigestFunction = sanitizerUtils.getTextDigest(transform);
+
+        String resultJson = (String) textDigestFunction.map(input, jsonConfiguration);
+
+        assertEquals(expected, resultJson);
+    }
+
+    @SneakyThrows
     @ValueSource(strings = {"alice@worklytics.co, bob@worklytics.co",
         "\"Alice Example\" <alice@worklytics.co>, \"Bob Example\" <bob@worklytics.co>",
         "Alice.Example@worklytics.co,Bob@worklytics.co",
