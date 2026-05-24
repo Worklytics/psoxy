@@ -249,7 +249,7 @@ resource "google_storage_bucket_object" "function" {
   content_type   = "application/zip"
   bucket         = google_storage_bucket.artifacts[0].name
   source         = local.bundle_path
-  detect_md5hash = true
+  source_md5hash = base64encode(hexdecode(filemd5(local.bundle_path)))
 }
 
 locals {
