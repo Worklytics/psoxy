@@ -137,6 +137,7 @@
                 <version>${plugin.surefire.version}</version>
                 <configuration>
                     <useModulePath>false</useModulePath>
+                    <argLine>-javaagent:"${settings.localRepository}/org/mockito/mockito-core/${dependency.mockito-junit-jupiter.version}/mockito-core-${dependency.mockito-junit-jupiter.version}.jar"</argLine>
                 </configuration>
             </plugin>
             <plugin>

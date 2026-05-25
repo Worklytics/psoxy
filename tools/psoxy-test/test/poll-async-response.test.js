@@ -41,7 +41,7 @@ test('pollAsyncResponse - GCS URL parsing', async (t) => {
   const url = new URL(gcsUrl);
   
   // Test URL parsing logic
-  const isGCS = url.hostname === 'storage.googleapis.com';
+  const isGCS = url.hostname === 'storage.googleapis.com' || url.hostname.endsWith('.storage.googleapis.com');
   t.true(isGCS);
   
   const pathParts = url.pathname.split('/');

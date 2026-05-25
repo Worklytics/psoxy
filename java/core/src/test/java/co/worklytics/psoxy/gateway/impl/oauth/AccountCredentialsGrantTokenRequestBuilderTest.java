@@ -3,6 +3,7 @@ package co.worklytics.psoxy.gateway.impl.oauth;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.SourceAuthModule;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
 import com.google.api.client.http.HttpHeaders;
 import dagger.Component;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,7 @@ class AccountCredentialsGrantTokenRequestBuilderTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        TestModules.ForApiModeConfig.class,
         SourceAuthModule.class,
         MockModules.ForConfigService.class,
         MockModules.ForSecretStore.class,

@@ -137,6 +137,7 @@ jobs:
           )
           
           # Retry loop to handle potential concurrent edits with GCP workflow
+          release_updated=false
           for i in {1..5}; do
             echo "Fetching latest release body..."
             current_body=$(gh release view "$TAG_NAME" --json body -q '.body')
@@ -164,6 +165,7 @@ else:
             echo "Updating release body on GitHub..."
             if gh release edit "$TAG_NAME" --notes "$new_body"; then
               echo "✅ Successfully updated release body!"
+              release_updated=true
               break
             fi
             
@@ -171,6 +173,10 @@ else:
             echo "Failed to update release, retrying in $sleep_time seconds..."
             sleep $sleep_time
           done
+
+          if [ "$release_updated" != true ]; then
+            echo "::warning::Failed to update GitHub release notes with AWS artifact references after 5 attempts. The bundle was published successfully; update the release notes manually if needed."
+          fi
 
       - name: Summary
         if: success()

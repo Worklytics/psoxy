@@ -1,5 +1,9 @@
 # Entra ID
 
+**Connector ID:** `msft-entra-id` (formerly `azure-ad`)
+
+**Availability:** GA
+
 Connect to Directory data in Microsoft 365. This allows enumeration of all users, groups, and group
 members in your organization, to provide additional segmentation, timezone/workday information, etc.
 
