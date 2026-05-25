@@ -6,6 +6,9 @@ in each release's notes.
 Changes to be including in future/planned release notes will be added here.
 
 ## Next
+- `gcp`: fix Terraform compatibility when upgrading to v0.6.x with an older `hashicorp/google` provider lock file; require provider `~> 7.0` in modules and use `detect_md5hash` for deployment bundle change detection.
+- `aws`: add explicit `filter {}` to S3 bucket lifecycle rules for compatibility with `hashicorp/aws` provider 6.x.
+- `aws`: require `hashicorp/aws` provider `~> 6.0` in AWS host and component modules (was `>= 5.0` or unconstrained).
 - `gcp`: custom rules previously stored as secrets will now be configured as environment variables on the Cloud Run function, as gen 2 supports sufficiently large environment variables to accommodate this.
 - `gcp`: grant `proxy-builder-sa` the additional Cloud Build IAM roles required for Gen2 function builds (read access to `gcf-v2-sources-*` staging buckets, Cloud Logging, Artifact Registry).
 - `textDigest` rule now accepts an optional list of `keywords` to tally the occurrence of specific keywords in the text.
