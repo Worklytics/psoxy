@@ -6,6 +6,7 @@ import co.worklytics.psoxy.PseudonymizerImplFactory;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.test.MockModules;
+import co.worklytics.test.TestModules;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.rules.transforms.Transform;
@@ -44,6 +45,7 @@ class SanitizerUtilsTest {
     @Component(
         modules = {
             PsoxyModule.class,
+        TestModules.ForApiModeConfig.class,
             RESTApiSanitizerImplTest.ForConfigService.class,
             MockModules.ForSecretStore.class,
             // TestModules.ForSecretStore.class,

@@ -79,6 +79,18 @@ public interface ConfigService {
     Optional<String> getConfigPropertyAsOptional(ConfigProperty property);
 
 
+    /**
+     * Parse a config property value as an integer, with clear misconfiguration errors.
+     */
+    static int parseIntValue(ConfigProperty property, String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                    "Invalid value for " + property.name() + ": '" + value + "'", e);
+        }
+    }
+
     default Optional<ConfigValueWithMetadata> getConfigPropertyWithMetadata(ConfigProperty configProperty) {
         return getConfigPropertyAsOptional(configProperty)
             .map(value -> ConfigValueWithMetadata.builder().value(value).build());

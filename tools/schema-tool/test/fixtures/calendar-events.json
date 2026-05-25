@@ -1,0 +1,123 @@
+{
+  "kind": "calendar#events",
+  "etag": "\"p32cen2vjtn1f60g\"",
+  "summary": "alice@example.com",
+  "updated": "2024-01-15T10:00:00.000Z",
+  "timeZone": "America/New_York",
+  "accessRole": "owner",
+  "defaultReminders": [
+    { "method": "popup", "minutes": 10 }
+  ],
+  "nextPageToken": "CigKGmpuYXRicmIzaTM3OXE0Nmd1Y21nYmtqbjVr",
+  "items": [
+    {
+      "kind": "calendar#event",
+      "etag": "\"2857604998126000\"",
+      "id": "event001abc",
+      "status": "confirmed",
+      "summary": "Team Standup",
+      "created": "2024-01-01T09:00:00.000Z",
+      "updated": "2024-01-01T09:05:00.000Z",
+      "location": "Conference Room A",
+      "hangoutLink": null,
+      "conferenceData": null,
+      "attendeesOmitted": false,
+      "extendedProperties": {},
+      "creator": {
+        "email": "alice@example.com",
+        "displayName": "Alice Example"
+      },
+      "organizer": {
+        "email": "alice@example.com",
+        "displayName": "Alice Example"
+      },
+      "start": { "dateTime": "2024-01-15T09:00:00-05:00" },
+      "end":   { "dateTime": "2024-01-15T09:30:00-05:00" },
+      "attendees": [
+        { "email": "alice@example.com", "self": true,  "responseStatus": "accepted" },
+        { "email": "bob@example.com",                  "responseStatus": "accepted" }
+      ],
+      "guestsCanSeeOtherGuests": false,
+      "reminders": { "useDefault": true },
+      "iCalUID": "event001abc@google.com",
+      "sequence": 0,
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2861669907916000\"",
+      "id": "event002def",
+      "status": "confirmed",
+      "summary": "All Hands — January",
+      "description": "Monthly company all-hands meeting. Agenda in the invite.",
+      "created": "2024-01-05T12:00:00.000Z",
+      "updated": "2024-01-10T08:00:00.000Z",
+      "location": null,
+      "hangoutLink": "https://meet.google.com/abc-def-ghi",
+      "conferenceData": {
+        "conferenceId": "abc-def-ghi",
+        "conferenceSolution": {
+          "name": "Google Meet",
+          "iconUri": "https://fonts.gstatic.com/s/i/productlogos/meet_2020q4/v6/web-512dp/logo_meet_2020q4_color_2x_web_512dp.png"
+        },
+        "entryPoints": [
+          {
+            "entryPointType": "video",
+            "uri": "https://meet.google.com/abc-def-ghi",
+            "label": "meet.google.com/abc-def-ghi"
+          }
+        ]
+      },
+      "attendeesOmitted": false,
+      "extendedProperties": {
+        "private": { "importedId": "ext-001", "source": "outlook" }
+      },
+      "creator": {
+        "email": "ceo@example.com",
+        "displayName": "CEO"
+      },
+      "organizer": {
+        "email": "ceo@example.com",
+        "displayName": "CEO",
+        "self": false
+      },
+      "start": { "dateTime": "2024-01-15T14:00:00-05:00", "timeZone": "America/New_York" },
+      "end":   { "dateTime": "2024-01-15T15:00:00-05:00", "timeZone": "America/New_York" },
+      "attendees": [
+        { "email": "alice@example.com", "self": true,  "responseStatus": "tentative" },
+        { "email": "ceo@example.com",                  "responseStatus": "accepted"  }
+      ],
+      "guestsCanSeeOtherGuests": true,
+      "reminders": {
+        "useDefault": false,
+        "overrides": [{ "method": "email", "minutes": 60 }]
+      },
+      "recurringEventId": "recurring_base_event_id",
+      "iCalUID": "event002def@google.com",
+      "sequence": 1,
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"2900000000000000\"",
+      "id": "event003ghi",
+      "status": "cancelled",
+      "summary": "Cancelled: 1:1 with Manager",
+      "created": "2024-01-03T11:00:00.000Z",
+      "updated": "2024-01-12T07:00:00.000Z",
+      "location": "",
+      "creator": {
+        "email": "manager@example.com"
+      },
+      "organizer": {
+        "email": "manager@example.com"
+      },
+      "start": { "date": "2024-01-16" },
+      "end":   { "date": "2024-01-16" },
+      "reminders": { "useDefault": true },
+      "iCalUID": "event003ghi@google.com",
+      "sequence": 0,
+      "eventType": "default"
+    }
+  ]
+}

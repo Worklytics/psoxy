@@ -1,7 +1,10 @@
 # Windsurf
 
-**ALPHA**; may change in backwards incompatible ways. We are NOT committed to supporting it, or making it available to all customers.
+**Connector ID:** `windsurf`
 
+**Availability:** Alpha
+
+May change in backwards incompatible ways. We are NOT committed to supporting it, or making it available to all customers.
 
 Our Windsurf data connector uses the Analytics API to import data about Users (accounts) and aggregate usage data  (metrics) to Worklytics. As of July 2025, this API requires an Enterprise SaaS subscription.
 

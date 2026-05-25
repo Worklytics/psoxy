@@ -155,7 +155,6 @@ locals {
       ? local.validate_gitlab_managed_url_message
   : ""))
 
-
   validate_glean_instance_subdomain         = (try(var.connector_settings["glean_instance_subdomain"], var.glean_instance_subdomain) == null || try(var.connector_settings["glean_instance_subdomain"], var.glean_instance_subdomain) == "") && contains(var.enabled_connectors, "glean")
   validate_glean_instance_subdomain_message = "The glean_instance_subdomain var should be populated if Glean connector is enabled."
   validate_glean_instance_subdomain_check = regex(

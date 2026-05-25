@@ -39,6 +39,52 @@ if [[ $(git log "${expected_branch}..origin/${expected_branch}" --oneline) ]]; t
     exit 1
 fi
 
+printf "\nChecking node dependencies for tools...\n"
+CHANGES_DETECTED=false
+CHANGED_DIRS=""
+
+for pkg in $(find tools -name "package.json" -not -path "*/node_modules/*"); do
+    dir=$(dirname "$pkg")
+    printf "Running npm audit fix in ${INFO}${dir}${NC}...\n"
+    (cd "$dir" && npm audit fix > /dev/null 2>&1)
+    
+    # Check if any files were changed in this directory
+    if ! git diff --quiet "$dir"; then
+        CHANGES_DETECTED=true
+        CHANGED_DIRS="$CHANGED_DIRS $dir"
+    fi
+done
+
+if [ "$CHANGES_DETECTED" = true ]; then
+    printf "${WARN}Warning: 'npm audit fix' modified dependencies in the following directories:${NC}\n"
+    for dir in $CHANGED_DIRS; do
+        printf "  - ${INFO}${dir}${NC}\n"
+    done
+    printf "It's recommended to update and test these dependencies before releasing.\n"
+    read -p "Do you want to continue with PR creation anyway? (y/N) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        printf "\nAborting PR creation.\n"
+        printf "Reverting the dependency changes...\n"
+        for dir in $CHANGED_DIRS; do
+            git checkout -- "$dir/package.json" "$dir/package-lock.json" 2>/dev/null || true
+        done
+        printf "\nSuggestion: Create a new branch, update dependencies, and test them before proceeding:\n"
+        printf "  ${INFO}git checkout -b update-node-deps${NC}\n"
+        printf "  ${INFO}# Run npm audit fix in the affected directories${NC}\n"
+        printf "  ${INFO}# Test the changes, commit, and open a PR${NC}\n"
+        exit 1
+    else
+        printf "\nContinuing, but reverting dependency changes so they are not accidentally included...\n"
+        for dir in $CHANGED_DIRS; do
+            git checkout -- "$dir/package.json" "$dir/package-lock.json" 2>/dev/null || true
+        done
+    fi
+else
+    printf "${SUCCESS}Node dependencies are up-to-date.${NC}\n"
+fi
+printf "\n"
+
 touch rc_to_main.md
 echo "$RELEASE back to main" >> rc_to_main.md
 cat tools/release/test_plan.md >> rc_to_main.md

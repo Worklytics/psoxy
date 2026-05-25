@@ -3,10 +3,7 @@ package co.worklytics.psoxy.aws;
 import java.time.Duration;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import software.amazon.awssdk.services.s3.S3Client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
@@ -15,11 +12,14 @@ import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.RemoteResourceConfig;
+import co.worklytics.psoxy.gateway.ResourceService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.CachingConfigServiceDecorator;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.impl.NoOpResourceService;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.gateway.output.OutputFactory;
 import dagger.Binds;
@@ -87,8 +87,6 @@ public interface AwsModule {
     @Provides
     @Singleton
     static CognitoIdentityClient cognitoClient(AwsEnvironment awsEnvironment) {
-        AWSCredentials credentials = DefaultAWSCredentialsProviderChain.getInstance().getCredentials();
-
         return CognitoIdentityClient.builder()
                 .region(Region.of(awsEnvironment.getRegion()))
                 .build();
@@ -178,8 +176,22 @@ public interface AwsModule {
     }
 
     @Provides
-    static AmazonS3 getStorageClient() {
-        return AmazonS3ClientBuilder.defaultClient();
+    static S3Client getStorageClient() {
+        return S3Client.create();
+    }
+
+    @Provides @Singleton @Named("Remote")
+    static ResourceService remoteResourceService(EnvVarsConfigService envVarsConfigService,
+                                                  HostEnvironment hostEnvironment,
+                                                  S3Client s3Client) {
+        RemoteResourceConfig config = RemoteResourceConfig.fromConfigService(
+            envVarsConfigService,
+            asAwsCompliantNamespace(hostEnvironment.getInstanceId()));
+
+        return config.getBucket()
+            .map(bucket -> (ResourceService) new S3ResourceService(
+                s3Client, bucket, config.getInstanceResourcePath().orElse("")))
+            .orElse(new NoOpResourceService());
     }
 
     @Provides
@@ -214,8 +226,14 @@ public interface AwsModule {
 
 
     @Provides
+    @Singleton
+    static AwsEnvironment.AwsApiModeConfig awsApiModeConfig(ConfigService configService) {
+        return AwsEnvironment.AwsApiModeConfig.fromConfigService(configService);
+    }
+
+    @Provides
     static AsyncApiDataRequestHandler providesAsyncApiDataRequestHandler(
-        ConfigService configService,
+        AwsEnvironment.AwsApiModeConfig awsApiModeConfig,
         ApiDataRequestViaSQSFactory apiDataRequestViaSQSFactory
     ) {
 
@@ -226,7 +244,8 @@ public interface AwsModule {
         //Error:  /home/runner/work/psoxy/psoxy/java/impl/aws/src/main/java/co/worklytics/psoxy/aws/AwsModule.java:[241,93] Dagger does not support injecting @AssistedInject type, co.worklytics.psoxy.aws.ApiDataRequestViaSQS. Did you mean to inject its assisted factory type instead?
 
         // also tried @Provides that's equivalent to the Binds (instance as arg, return it as the value for the interface) - but same issue
-        return apiDataRequestViaSQSFactory.create(configService.getConfigPropertyOrError(AwsEnvironment.AwsConfigProperty.ASYNC_API_REQUEST_QUEUE_URL));
+        return apiDataRequestViaSQSFactory.create(awsApiModeConfig.getAsyncApiRequestQueueUrl()
+            .orElseThrow(() -> new IllegalStateException("ASYNC_API_REQUEST_QUEUE_URL not configured")));
 
     }
 

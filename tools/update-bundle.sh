@@ -112,10 +112,25 @@ if [ ! -z "$BUCKET_PATH" ]; then
     BUCKET_PATH="$prefix$BUCKET_PATH"
   fi
 
-  printf "Copying deployment bundle from ${INFO}${DEPLOYMENT_BUNDLE}${NC} to ${INFO}${BUCKET_PATH}${NC} ...\n"
-  "${copy_cmd[@]}" "${DEPLOYMENT_BUNDLE}" "${BUCKET_PATH}${DEPLOYMENT_BUNDLE}"
+  # Calculate SHA256 of the bundle
+  if command -v sha256sum &> /dev/null; then
+      SHA256_HASH=$(sha256sum "$DEPLOYMENT_BUNDLE" | cut -d' ' -f1)
+  elif command -v shasum &> /dev/null; then
+      SHA256_HASH=$(shasum -a 256 "$DEPLOYMENT_BUNDLE" | cut -d' ' -f1)
+  else
+      SHA256_HASH=$(openssl dgst -sha256 "$DEPLOYMENT_BUNDLE" | cut -d' ' -f2)
+  fi
 
-  if [[ $? -ne 0 ]]; then
+  printf "Copying deployment bundle from ${INFO}${DEPLOYMENT_BUNDLE}${NC} to ${INFO}${BUCKET_PATH}${NC} ...\n"
+  
+  local upload_status=0
+  if [ "$HOST_PLATFORM" == "gcp" ]; then
+    gsutil -h "x-goog-meta-sha256:${SHA256_HASH}" cp "${DEPLOYMENT_BUNDLE}" "${BUCKET_PATH}${DEPLOYMENT_BUNDLE}" || upload_status=$?
+  elif [ "$HOST_PLATFORM" == "aws" ]; then
+    aws s3 cp "${DEPLOYMENT_BUNDLE}" "${BUCKET_PATH}${DEPLOYMENT_BUNDLE}" --metadata "sha256=${SHA256_HASH}" || upload_status=$?
+  fi
+
+  if [[ $upload_status -ne 0 ]]; then
     printf "${ERR}Error: Failed to upload deployment bundle to ${BUCKET_PATH}${DEPLOYMENT_BUNDLE}${NC}\n"
     exit 1
   fi

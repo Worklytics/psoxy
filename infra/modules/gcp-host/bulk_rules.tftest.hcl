@@ -193,3 +193,26 @@ run "fallback_behavior" {
     condition     = contains(keys(run.decode_fallback.decoded), "columnsToPseudonymizeIfPresent")
   }
 }
+
+run "setup_rules_file" {
+  command = plan
+
+  variables {
+    bulk_connectors = {
+      "workdata-generic" = {
+        source_kind = "workdata-generic"
+        rules_file  = "docs/sources/workdata-generic/workdata-generic.yaml"
+      }
+    }
+    custom_bulk_connector_rules = {}
+  }
+}
+
+run "rules_file_relative_to_psoxy_base_dir" {
+  command = plan
+
+  assert {
+    error_message = "RULES should be loaded from rules_file relative to psoxy_base_dir"
+    condition     = can(run.setup_rules_file.bulk_connector["workdata-generic"].function_config.service_config[0].environment_variables.RULES)
+  }
+}

@@ -73,6 +73,10 @@ module "psoxy_lambda" {
       NEW_RELIC_LAMBDA_HANDLER = "co.worklytics.psoxy.S3Handler"
     } : {}
   )
+
+  remote_resource_bucket        = var.remote_resource_bucket
+  remote_resource_instance_path = var.remote_resource_instance_path
+  remote_resource_shared_path   = var.remote_resource_shared_path
 }
 
 resource "aws_s3_bucket" "input" {

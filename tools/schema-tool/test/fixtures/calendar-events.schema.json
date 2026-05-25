@@ -1,0 +1,264 @@
+{
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string"
+    },
+    "etag": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string",
+      "format": "email"
+    },
+    "updated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "timeZone": {
+      "type": "string"
+    },
+    "accessRole": {
+      "type": "string"
+    },
+    "defaultReminders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string"
+          },
+          "minutes": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "nextPageToken": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "location": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "creator": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string",
+                "format": "email"
+              },
+              "displayName": {
+                "type": "string"
+              }
+            }
+          },
+          "organizer": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string",
+                "format": "email"
+              },
+              "self": {
+                "type": "boolean"
+              },
+              "displayName": {
+                "type": "string"
+              }
+            }
+          },
+          "start": {
+            "type": "object",
+            "properties": {
+              "timeZone": {
+                "type": "string"
+              },
+              "dateTime": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "date": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          },
+          "end": {
+            "type": "object",
+            "properties": {
+              "timeZone": {
+                "type": "string"
+              },
+              "dateTime": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "date": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          },
+          "reminders": {
+            "type": "object",
+            "properties": {
+              "useDefault": {
+                "type": "boolean"
+              },
+              "overrides": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "method": {
+                      "type": "string"
+                    },
+                    "minutes": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "iCalUID": {
+            "type": "string",
+            "format": "email"
+          },
+          "sequence": {
+            "type": "integer"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "recurringEventId": {
+            "type": "string"
+          },
+          "hangoutLink": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri"
+          },
+          "conferenceData": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "conferenceId": {
+                "type": "string"
+              },
+              "conferenceSolution": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "iconUri": {
+                    "type": "string",
+                    "format": "uri"
+                  }
+                }
+              },
+              "entryPoints": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "entryPointType": {
+                      "type": "string"
+                    },
+                    "uri": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "label": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "attendeesOmitted": {
+            "type": "boolean"
+          },
+          "extendedProperties": {
+            "type": "object",
+            "properties": {
+              "private": {
+                "type": "object",
+                "properties": {
+                  "importedId": {
+                    "type": "string"
+                  },
+                  "source": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "attendees": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "responseStatus": {
+                  "type": "string"
+                },
+                "self": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "guestsCanSeeOtherGuests": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}
