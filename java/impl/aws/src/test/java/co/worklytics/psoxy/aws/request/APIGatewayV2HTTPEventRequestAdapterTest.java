@@ -33,7 +33,7 @@ class APIGatewayV2HTTPEventRequestAdapterTest {
         assertTrue(requestAdapter.getMultiValueHeader("multi-header").isPresent());
         assertEquals("value1,value2", String.join(",", requestAdapter.getMultiValueHeader("multi-header").get()));
 
-        assertEquals("73.19.103.123", requestAdapter.getClientIp().get());
+        assertEquals("123.123.123.123", requestAdapter.getClientIp().get());
 
         assertEquals("GET", requestAdapter.getHttpMethod());
 
