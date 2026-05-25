@@ -779,10 +779,9 @@ public class ApiDataRequestHandler {
     String parseRequestedTarget(HttpEventRequest request) {
         // contents may come encoded. It should respect url as it comes.
         // Construct URL directly concatenating instead of URIBuilder as it may re-encode.
-        URIBuilder uriBuilder = new URIBuilder();
-        uriBuilder.setScheme("https");
-        uriBuilder.setHost(apiModeConfig.getTargetHostOrError());
-        URL hostURL = uriBuilder.build().toURL();
+        String targetHost = apiModeConfig.getTargetHostOrError();
+        String targetBase = targetHost.startsWith("https://") ? targetHost : "https://" + targetHost;
+        URL hostURL = new URL(targetBase);
         String hostPlusPath = StringUtils.stripEnd(hostURL.toString(), "/") + "/"
                 + StringUtils.stripStart(request.getPath(), "/");
         String targetURLString = hostPlusPath;
