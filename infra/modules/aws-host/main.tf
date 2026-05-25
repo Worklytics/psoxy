@@ -32,11 +32,37 @@ locals {
 
   api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
 
-  # rules_file paths in connector specs are relative to psoxy_base_dir (repo root), not the caller's cwd
-  api_connector_rules_file_paths = {
-    for k, path in local.api_connector_rules_files : k => (
-      startswith(path, "/") ? path : "${coalesce(var.psoxy_base_dir, "")}${path}"
+  # rules_file paths may be absolute, relative to the Terraform root module (deployment dir), or
+  # relative to psoxy_base_dir (paths into the psoxy repo, eg docs/sources/...)
+  _rules_file_references = distinct(concat(
+    values(local.api_connector_rules_files),
+    [for k, v in var.bulk_connectors : v.rules_file if try(v.rules_file, null) != null],
+    [for k, v in var.webhook_collectors : v.rules_file if try(v.rules_file, null) != null],
+  ))
+
+  _resolved_rules_file_paths = {
+    for rules_path in local._rules_file_references : rules_path => (
+      startswith(rules_path, "/") ? rules_path : (
+        fileexists("${path.root}/${rules_path}") ? "${path.root}/${rules_path}" : (
+          fileexists("${coalesce(var.psoxy_base_dir, "")}${rules_path}") ? "${coalesce(var.psoxy_base_dir, "")}${rules_path}" :
+          "${path.root}/${rules_path}"
+        )
+      )
     )
+  }
+
+  api_connector_rules_file_paths = {
+    for k, rules_path in local.api_connector_rules_files : k => local._resolved_rules_file_paths[rules_path]
+  }
+
+  bulk_connector_rules_file_paths = {
+    for k, v in var.bulk_connectors : k => local._resolved_rules_file_paths[v.rules_file]
+    if try(v.rules_file, null) != null
+  }
+
+  webhook_collector_rules_file_paths = {
+    for k, v in var.webhook_collectors : k => local._resolved_rules_file_paths[v.rules_file]
+    if try(v.rules_file, null) != null
   }
 
   # API connectors with rules_raw that don't have file-based overrides
@@ -330,10 +356,7 @@ module "bulk_connector" {
   )
   rules_file = (
     # rules_file only applies when custom_bulk_connector_rules and rules_raw don't take precedence
-    try(var.custom_bulk_connector_rules[each.key], null) == null && try(each.value.rules_raw, null) == null && try(each.value.rules_file, null) != null ? (
-      startswith(each.value.rules_file, "/") ? each.value.rules_file : "${coalesce(var.psoxy_base_dir, "")}${each.value.rules_file}"
-    ) :
-    null
+    try(var.custom_bulk_connector_rules[each.key], null) == null && try(each.value.rules_raw, null) == null ? try(local.bulk_connector_rules_file_paths[each.key], null) : null
   )
   secrets_store_implementation         = var.secrets_store_implementation
   global_parameter_arns                = try(module.global_secrets_ssm[0].secret_arns, [])
@@ -402,9 +425,7 @@ module "webhook_collectors" {
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   test_caller_role_arn                 = module.psoxy.webhook_test_caller_role_arn
-  rules_file = try(each.value.rules_file, null) != null ? (
-    startswith(each.value.rules_file, "/") ? each.value.rules_file : "${coalesce(var.psoxy_base_dir, "")}${each.value.rules_file}"
-  ) : null
+  rules_file                   = try(local.webhook_collector_rules_file_paths[each.key], null)
   webhook_auth_public_keys = each.value.auth_public_keys
   provision_auth_key       = each.value.provision_auth_key
   output_path_prefix       = each.value.output_path_prefix

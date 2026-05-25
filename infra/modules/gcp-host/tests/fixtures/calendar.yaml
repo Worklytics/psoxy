@@ -1,0 +1,2 @@
+endpoints:
+  - pathRegex: /calendar/v3/calendars/primary/events
