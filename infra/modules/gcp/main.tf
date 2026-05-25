@@ -116,11 +116,17 @@ resource "random_password" "pseudonym_salt" {
 resource "google_secret_manager_secret_version" "initial_version" {
   secret      = google_secret_manager_secret.pseudonym_salt.id
   secret_data = sensitive(random_password.pseudonym_salt.result)
+  # If accidental versioning happens, disable the old version instead of deleting it.
+  # Deleting/rotating this salt would make future pseudonyms inconsistent with history.
+  deletion_policy = "DISABLE"
 
   # if customer changes value outside TF, don't overwrite
   lifecycle {
     ignore_changes = [
-      secret_data
+      secret_data,
+      # Forward compatibility with Google provider 7.x write-only secret data fields.
+      secret_data_wo,
+      secret_data_wo_version
     ]
   }
 }
@@ -162,12 +168,17 @@ resource "random_password" "pseudonym_encryption_key" {
 resource "google_secret_manager_secret_version" "pseudonym_encryption_key_initial_version" {
   secret      = google_secret_manager_secret.pseudonymization_key.id
   secret_data = sensitive(random_password.pseudonym_encryption_key.result)
-
+  # If accidental versioning happens, disable the old version instead of deleting it.
+  # Losing this key would break access to any values encrypted with it.
+  deletion_policy = "DISABLE"
 
   # if customer changes value outside TF, don't overwrite
   lifecycle {
     ignore_changes = [
-      secret_data
+      secret_data,
+      # Forward compatibility with Google provider 7.x write-only secret data fields.
+      secret_data_wo,
+      secret_data_wo_version
     ]
   }
 }
