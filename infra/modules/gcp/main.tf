@@ -124,6 +124,8 @@ resource "google_secret_manager_secret_version" "initial_version" {
   lifecycle {
     ignore_changes = [
       secret_data,
+      secret_data_wo,
+      secret_data_wo_version,
     ]
   }
 }
