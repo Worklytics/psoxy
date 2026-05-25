@@ -44,7 +44,7 @@ import lombok.extern.java.Log;
 public class GcpApiDataRequestHandler {
 
     final GcpEnvironment gcpEnvironment;
-    final Lazy<GcpEnvironment.ApiModeConfig> apiModeConfig; // lazy to avoid circular dependency issues
+    final Lazy<GcpEnvironment.GcpApiModeConfig> gcpApiModeConfig; // lazy to avoid circular dependency issues
     final ApiDataRequestHandler requestHandler;
     final EnvVarsConfigService envVarsConfigService;
     final GoogleIdTokenVerifierFactory googleIdTokenVerifierFactory;
@@ -58,14 +58,14 @@ public class GcpApiDataRequestHandler {
     @Inject
     public GcpApiDataRequestHandler(
         GcpEnvironment gcpEnvironment,
-        Lazy<GcpEnvironment.ApiModeConfig> apiModeConfig,
+        Lazy<GcpEnvironment.GcpApiModeConfig> gcpApiModeConfig,
         ApiDataRequestHandler requestHandler,
         EnvVarsConfigService envVarsConfigService,
         GoogleIdTokenVerifierFactory googleIdTokenVerifierFactory,
         ObjectMapper objectMapper) {
         this.requestHandler = requestHandler;
         this.gcpEnvironment = gcpEnvironment;
-        this.apiModeConfig = apiModeConfig;
+        this.gcpApiModeConfig = gcpApiModeConfig;
         this.envVarsConfigService = envVarsConfigService;
         this.googleIdTokenVerifierFactory = googleIdTokenVerifierFactory;
         this.objectMapper = objectMapper;
@@ -74,7 +74,7 @@ public class GcpApiDataRequestHandler {
     @SneakyThrows
     public void service(HttpRequest request, HttpResponse response) {
 
-        boolean pubsubTriggerConfigured = apiModeConfig.get().getAsyncPubSubQueue().isPresent();
+        boolean pubsubTriggerConfigured = gcpApiModeConfig.get().getAsyncPubSubQueue().isPresent();
 
         // if a pubsub trigger is configured, check if request is invocation via PubSub
         // as of 2025-08-19, User-Agent appears as 'APIs-Google; (+https://developers.google.com/webmasters/APIs-Google.html)'
@@ -163,7 +163,7 @@ public class GcpApiDataRequestHandler {
             throw new GcpWebhookCollectionHandler.AuthorizationException("Unauthorized : no authorization header included");
         }
         GoogleIdTokenVerifier internalServiceVerifier = 
-            apiModeConfig.get().getServiceUrl()
+            gcpApiModeConfig.get().getServiceUrl()
                 .map(googleIdTokenVerifierFactory::getVerifierForAudience)
                 .orElseThrow(() -> new IllegalStateException("Service URL not configured"));
 
