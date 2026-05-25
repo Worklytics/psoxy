@@ -42,6 +42,18 @@ class APIGatewayV2HTTPEventRequestAdapterTest {
 
     @SneakyThrows
     @Test
+    public void getClientIp_prefersAwsSourceIpOverForwardedHeader() {
+        APIGatewayV2HTTPEvent apiGatewayV2HTTPEvent = objectMapper.readerFor(APIGatewayV2HTTPEvent.class)
+            .readValue(TestUtils.getData("lambda-proxy-events/generic-request.json"));
+        apiGatewayV2HTTPEvent.getHeaders().put("x-forwarded-for", "203.0.113.10");
+
+        APIGatewayV2HTTPEventRequestAdapter requestAdapter = new APIGatewayV2HTTPEventRequestAdapter(apiGatewayV2HTTPEvent);
+
+        assertEquals("123.123.123.123", requestAdapter.getClientIp().get());
+    }
+
+    @SneakyThrows
+    @Test
     public void parse_apigatewayv2() {
 
         APIGatewayV2HTTPEvent apiGatewayV2HTTPEvent = objectMapper.readerFor(APIGatewayV2HTTPEvent.class)
