@@ -168,7 +168,7 @@ public class SanitizerUtils {
                     jsonContext.map(transform.getJsonPathToProcessWhenEscaped(), (text, configuration) -> {
                         if (!(text instanceof String textToDigest)) {
                             if (text != null) {
-                                log.warning("value matched by " + transform + " not of type String");
+                                log.warning("value matched by " + transform.getClass().getSimpleName() + " not of type String");
                             }
                             return null;
                         }
