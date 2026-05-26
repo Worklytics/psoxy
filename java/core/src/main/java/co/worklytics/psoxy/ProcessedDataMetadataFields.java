@@ -25,11 +25,6 @@ public enum ProcessedDataMetadataFields {
     ERROR("Error"),
 
     /**
-     * a specific error code while processing the request, complements ERROR (optional)
-     */
-    ERROR_CODE("Error-Code"),
-
-    /**
      * a warning code while processing the request
      */
     WARNING("Warning"),

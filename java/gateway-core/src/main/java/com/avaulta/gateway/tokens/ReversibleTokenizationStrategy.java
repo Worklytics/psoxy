@@ -48,16 +48,14 @@ public interface ReversibleTokenizationStrategy {
 
         @Getter
         public enum ErrorCode {
-            ALGORITHM_PARAMETER_ERROR("ITE001", "Failed to decrypt token; some algorithm parameter, such as iv, is wrong"),
-            BAD_PADDING("ITE002", "Failed to decrypt token; token appears to be corrupted or invalid, due to mismatch between token's padding and the padding expected by the cipher mode"),
-            ILLEGAL_BLOCK_SIZE("ITE003", "Failed to decrypt token; token appears to be corrupted or invalid, as block size seems to differ from expected"),
-            DECRYPTION_FAILED("ITE004", "Failed to decrypt token; most likely because encryption key has been rotated");
+            ALGORITHM_PARAMETER_ERROR("Failed to decrypt token; some algorithm parameter, such as iv, is wrong"),
+            BAD_PADDING("Failed to decrypt token; token appears to be corrupted or invalid, due to mismatch between token's padding and the padding expected by the cipher mode"),
+            ILLEGAL_BLOCK_SIZE("Failed to decrypt token; token appears to be corrupted or invalid, as block size seems to differ from expected"),
+            DECRYPTION_FAILED("Failed to decrypt token; most likely because encryption key has been rotated");
 
-            private final String code;
             private final String message;
 
-            ErrorCode(String code, String message) {
-                this.code = code;
+            ErrorCode(String message) {
                 this.message = message;
             }
 
@@ -67,7 +65,7 @@ public interface ReversibleTokenizationStrategy {
         private final ErrorCode errorCode;
 
         public InvalidTokenException(ErrorCode errorCode, Throwable cause) {
-            super("[" + errorCode.getCode() + "] " + errorCode.getMessage(), cause);
+            super(errorCode.name() + ": " + errorCode.getMessage(), cause);
             this.errorCode = errorCode;
         }
     }

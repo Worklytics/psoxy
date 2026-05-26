@@ -236,11 +236,9 @@ public class ApiDataRequestHandler {
             // InvalidTokenException extends RuntimeException
             if (e instanceof ReversibleTokenizationStrategy.InvalidTokenException ite) {
                 return HttpEventResponse.builder()
-                    // should this be a 500? Maybe 422 Unprocessable Content?
-                    .statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR)
+                    .statusCode(HttpStatus.SC_UNPROCESSABLE_ENTITY)
                     .header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
-                        ErrorCauses.FAILED_TO_BUILD_URL.name())
-                    .header(ProcessedDataMetadataFields.ERROR_CODE.getHttpHeader(), ite.getErrorCode().getCode())
+                        ite.getErrorCode().name())
                     .build();
             }
 
@@ -397,11 +395,9 @@ public class ApiDataRequestHandler {
             log.log(Level.WARNING, e.getMessage(), e);
             return builder.build();
         } catch (ReversibleTokenizationStrategy.InvalidTokenException e) {
-            // should this be 422 Unprocessable Content, rather than conflict?
-            builder.statusCode(HttpStatus.SC_CONFLICT);
+            builder.statusCode(HttpStatus.SC_UNPROCESSABLE_ENTITY);
             builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
-                ErrorCauses.TOKENIZED_REQUEST_PARAMETER_INVALID.name());
-            builder.header(ProcessedDataMetadataFields.ERROR_CODE.getHttpHeader(), e.getErrorCode().getCode());
+                e.getErrorCode().name());
 
             log.log(Level.WARNING, e.getMessage(), e);
             return builder.build();
