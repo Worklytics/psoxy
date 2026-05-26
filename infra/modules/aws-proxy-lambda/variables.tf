@@ -256,3 +256,20 @@ variable "lambda_role_iam_statements" {
   default     = []
 }
 
+variable "remote_resource_bucket" {
+  type        = string
+  description = "**beta** Name of the S3 bucket from which to load remote resources (rules, NLP models, etc.). If set, the REMOTE_RESOURCE_BUCKET env var is populated and the lambda receives s3:GetObject permission on the bucket."
+  default     = null
+}
+
+variable "remote_resource_instance_path" {
+  type        = string
+  description = "**beta** Path prefix within remote_resource_bucket for instance-specific resources. Used to scope IAM grants."
+  default     = null
+}
+
+variable "remote_resource_shared_path" {
+  type        = string
+  description = "**beta** Path prefix within remote_resource_bucket for shared resources (NLP models, etc.). Used to scope IAM grants."
+  default     = null
+}

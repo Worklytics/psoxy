@@ -51,15 +51,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!-- AWS java SDK v1 bom -->
-            <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bom -->
-            <dependency>
-                <groupId>com.amazonaws</groupId>
-                <artifactId>aws-java-sdk-bom</artifactId>
-                <version>1.12.701</version> <!-- Apr 13, 2024 -->
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -110,14 +102,9 @@
             <!-- q: why won't bom give this? -->
             <version>${dependency.aws-lambda-java-events.version}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3 -->
         <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-s3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-sts</artifactId>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
         </dependency>
 
         <!-- from BOM - https://mvnrepository.com/artifact/software.amazon.awssdk/bom -->
@@ -241,6 +228,7 @@
                         <include>**/*Tests.java</include>
                         <include>**/*Test.java</include>
                     </includes>
+                    <argLine>-javaagent:"${settings.localRepository}/org/mockito/mockito-core/${dependency.mockito-junit-jupiter.version}/mockito-core-${dependency.mockito-junit-jupiter.version}.jar"</argLine>
                     <systemProperties>
                         <property>
                             <name>java.util.logging.config.file</name>

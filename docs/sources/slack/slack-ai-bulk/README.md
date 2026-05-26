@@ -1,5 +1,9 @@
 # Slack AI Snapshot
 
+**Connector ID:** `slack-ai-snapshot`
+
+**Availability:** Beta
+
 Psoxy can pseudonymize Slack AI Snapshot data for ingestion into Worklytics.
 
 See [https://docs.worklytics.co/knowledge-base/connectors/bulk-data/slack-ai-snapshot](https://docs.worklytics.co/knowledge-base/connectors/bulk-data/slack-ai-snapshot)

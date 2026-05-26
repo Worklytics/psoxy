@@ -162,14 +162,14 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
     RandomNumberGenerator randomNumberGenerator;
 
     /**
-     * -- SETTER --
-     *  Sets the local copy of the token, assumes valid until expiration.
+     * In-memory access token shared across concurrent requests on this instance.
      *
-     * @param token
+     * <p>Volatile for visibility on unsynchronized reads in {@link #getCredentials}; writes
+     * occur from {@code getCredentials} and from the synchronized refresh handler.
      */
     @Setter
     @Getter
-    private AccessToken cachedToken = null;
+    private volatile AccessToken cachedToken = null;
 
 
     @Override
@@ -434,17 +434,27 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
         }
 
         /**
-         * On shared-token scenarios, check if the token has been refreshed on another instance
-         * before attempting to refresh it locally.
-         * @return
+         * Return a still-valid access token if one was already obtained by another thread or
+         * instance, avoiding a refresh-token exchange.
+         *
+         * <p>Checks the in-memory cache first (same-instance refreshes), then the shared token
+         * store when {@link OAuthRefreshTokenSourceAuthStrategy#useSharedToken()} is true
+         * (cross-instance refreshes).
+         *
+         * @return a non-expired token to reuse, or empty if a refresh exchange is required
          */
-        private Optional<AccessToken> checkIfAlreadyRefreshed() {
-            AccessToken freshToken = sourceAuthStrategy.getSharedAccessTokenIfSupported().orElse(null);
-            if (sourceAuthStrategy.shouldRefresh(freshToken, clock.instant())) {
+        private Optional<AccessToken> findReusableAccessToken() {
+            AccessToken cachedToken = sourceAuthStrategy.getCachedToken();
+            if (!sourceAuthStrategy.shouldRefresh(cachedToken, clock.instant())) {
+                return Optional.of(cachedToken);
+            }
+
+            AccessToken sharedToken =
+                sourceAuthStrategy.getSharedAccessTokenIfSupported().orElse(null);
+            if (sourceAuthStrategy.shouldRefresh(sharedToken, clock.instant())) {
                 return Optional.empty();
-            } else if (freshToken != null) {
-                DevLogUtils.info(envVarsConfigService, log, "Token already refreshed " + freshToken.getExpirationTime());
-                return Optional.of(freshToken);
+            } else if (sharedToken != null) {
+                return Optional.of(sharedToken);
             }
             return Optional.empty();
         }
@@ -463,8 +473,8 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
             AccessToken token;
             if (acquired) {
                 DevLogUtils.info(envVarsConfigService, log, "Acquired lock to refresh token");
-                Optional<AccessToken> refreshedToken = checkIfAlreadyRefreshed();
-                if (refreshedToken.isEmpty()) {
+                Optional<AccessToken> reusableToken = findReusableAccessToken();
+                if (reusableToken.isEmpty()) {
                     // token still expired, refresh with lock acquired
                     DevLogUtils.info(envVarsConfigService, log, "Token refresh in progress");
 
@@ -479,8 +489,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                     storeRefreshTokenIfRotated(tokenResponse);
 
                 } else {
-                    DevLogUtils.info(envVarsConfigService, log, "Token already refreshed");
-                    token = refreshedToken.get();
+                    DevLogUtils.info(envVarsConfigService, log,
+                        "Reusing access token, expires: %s",
+                        reusableToken.get().getExpirationTime());
+                    token = reusableToken.get();
                 }
 
                 sourceAuthStrategy.setCachedToken(token);
@@ -494,11 +506,10 @@ public class OAuthRefreshTokenSourceAuthStrategy implements SourceAuthStrategy {
                 }
             } else {
                 // re-try recursively, w/ linear backoff
-                // this exec path should only happen when different instances (VMs) are attempting
-                // to refresh. 2+ threads of same VM can never hit this as the whole recursive call
-                // is synchronized (see #refreshAccessToken). So on same VM, this will block until
-                // A) acquires lock and refreshes
-                // B) checks already refreshed token and exits
+                // this path is for cross-instance lock contention only. Same-instance threads
+                // serialize on synchronized #refreshAccessToken; the second thread should reuse
+                // the first thread's token via findReusableAccessToken (in-memory cache, then
+                // shared token store).
                 Uninterruptibles.sleepUninterruptibly(WAIT_AFTER_FAILED_LOCK_ATTEMPTS
                         .plusMillis(randomNumberGenerator.nextInt(250)).multipliedBy(attempt + 1));
 

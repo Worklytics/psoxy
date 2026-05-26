@@ -1,5 +1,9 @@
 # Google Calendar&trade;
 
+**Connector ID:** `gcal`
+
+**Availability:** GA
+
 Please review the [Google Workspace&trade; README](../README.md) for general information applicable to
 all Google Workspace&trade connectors.
 

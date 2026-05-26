@@ -116,15 +116,15 @@ resource "random_password" "pseudonym_salt" {
 resource "google_secret_manager_secret_version" "initial_version" {
   secret      = google_secret_manager_secret.pseudonym_salt.id
   secret_data = sensitive(random_password.pseudonym_salt.result)
-  # If accidental versioning happens, disable the old version instead of deleting it.
-  # Deleting/rotating this salt would make future pseudonyms inconsistent with history.
+  # if accidental versioning happens it is best to just disable, default behavior is DELETE
+  # customer can manually DELETE later on if needed
   deletion_policy = "DISABLE"
 
   # if customer changes value outside TF, don't overwrite
   lifecycle {
     ignore_changes = [
       secret_data,
-      # Forward compatibility with Google provider 7.x write-only secret data fields.
+      # forward compatibility fix with provider on 7.x
       secret_data_wo,
       secret_data_wo_version
     ]
@@ -168,15 +168,15 @@ resource "random_password" "pseudonym_encryption_key" {
 resource "google_secret_manager_secret_version" "pseudonym_encryption_key_initial_version" {
   secret      = google_secret_manager_secret.pseudonymization_key.id
   secret_data = sensitive(random_password.pseudonym_encryption_key.result)
-  # If accidental versioning happens, disable the old version instead of deleting it.
-  # Losing this key would break access to any values encrypted with it.
+  # if accidental versioning happens is best to just disable, default behavior is DELETE
+  # customer can manually DELETE later on if needed
   deletion_policy = "DISABLE"
 
   # if customer changes value outside TF, don't overwrite
   lifecycle {
     ignore_changes = [
       secret_data,
-      # Forward compatibility with Google provider 7.x write-only secret data fields.
+      # forward compatibility fix with provider on 7.x
       secret_data_wo,
       secret_data_wo_version
     ]
@@ -249,7 +249,7 @@ resource "google_storage_bucket_object" "function" {
   content_type   = "application/zip"
   bucket         = google_storage_bucket.artifacts[0].name
   source         = local.bundle_path
-  detect_md5hash = true
+  source_md5hash = filemd5(local.bundle_path)
 }
 
 locals {
@@ -286,6 +286,10 @@ resource "google_project_iam_custom_role" "bucket_write" {
   ]
 }
 
+# on v0.5.x this was "${local.environment_id_role_prefix}PsoxyInstanceSecretHandler"
+# v0.6.x upgrades
+# - causes a lot of changes, all role grants on writable secrets
+# - can't just import the old one because the name is different
 resource "google_project_iam_custom_role" "psoxy_instance_secret_role" {
   project     = var.project_id
   role_id     = "${local.environment_id_role_prefix}secretVersionManager"
@@ -345,6 +349,29 @@ resource "google_storage_bucket_iam_member" "grant_proxy_builder_object_viewer_o
   member = "serviceAccount:${local.builder_sa_email}"
 }
 
+# Custom build SAs must read GCF-internal staging buckets (gcf-v2-sources-*, etc.), not just our artifacts bucket.
+# See: https://cloud.google.com/functions/docs/securing/build-custom-sa
+resource "google_project_iam_member" "grant_builder_sa_gcf_source_buckets_object_viewer" {
+  count = var.provision_project_level_iam ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/storage.objectViewer"
+  member  = "serviceAccount:${local.builder_sa_email}"
+
+  condition {
+    title       = "Cloud Functions build source buckets"
+    description = "Read access to GCF-internal staging buckets used during Cloud Functions builds"
+    expression  = <<-EXPR
+      resource.type == "storage.googleapis.com/Object" &&
+      (
+        resource.name.startsWith("projects/_/buckets/gcf-v2-sources-") ||
+        resource.name.startsWith("projects/_/buckets/gcf-v2-uploads-") ||
+        resource.name.startsWith("projects/_/buckets/run-sources-")
+      )
+    EXPR
+  }
+}
+
 # Grant Cloud Build builder role to the custom builder service account
 # Required for Cloud Functions Gen2 deployment to build the function
 # See: https://cloud.google.com/functions/docs/troubleshooting#build-service-account
@@ -353,6 +380,22 @@ resource "google_project_iam_member" "grant_builder_sa_cloudbuild_builder" {
 
   project = var.project_id
   role    = "roles/cloudbuild.builds.builder"
+  member  = "serviceAccount:${local.builder_sa_email}"
+}
+
+resource "google_project_iam_member" "grant_builder_sa_logging_log_writer" {
+  count = var.provision_project_level_iam ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${local.builder_sa_email}"
+}
+
+resource "google_project_iam_member" "grant_builder_sa_artifactregistry_writer" {
+  count = var.provision_project_level_iam ? 1 : 0
+
+  project = var.project_id
+  role    = "roles/artifactregistry.writer"
   member  = "serviceAccount:${local.builder_sa_email}"
 }
 

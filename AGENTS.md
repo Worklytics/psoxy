@@ -66,3 +66,17 @@ When modifying Java files, follow these guidelines:
 2. **Prefer Fluid Builders**: We generally prefer using fluid-builder patterns, leveraging Lombok's `@Builder` annotation for object construction instead of constructors with many parameters.
 3. **Stylistic Changes**: Agents should avoid making stylistic changes (e.g., reformatting code, optimizing all imports, or resolving linting issues irrelevant to the functional change) to the repository unless explicitly directed by the user. 
 4. **Separate Commits**: When explicitly directed to make stylistic changes or broad refactoring, these should be separated into distinct commits from functional changes to simplify review.
+
+## Documentation Conventions
+
+### Connector Documentation
+When writing or modifying documentation for data sources under `docs/sources/`, you must always explicitly include the Connector ID directly under the main header (H1/H2).
+
+**Example Format**:
+```markdown
+# Asana
+
+**Connector ID:** `asana`
+```
+
+

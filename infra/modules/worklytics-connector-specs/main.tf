@@ -1279,7 +1279,7 @@ EOT
     }
     "gemini-usage" = {
       source_kind               = "gemini"
-      availability              = "alpha"
+      availability              = "deprecated"
       enable_by_default         = false
       worklytics_connector_id   = "bulk-import-psoxy",
       worklytics_connector_name = "Bulk Data Import via Psoxy"

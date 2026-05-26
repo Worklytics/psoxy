@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>0.6.0</revision>
+        <revision>0.6.1</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.lombok.version>1.18.42</dependency.lombok.version>
         <dependency.dagger.version>2.40.5</dependency.dagger.version>
@@ -19,6 +19,7 @@
         <dependency.apache-commons-csv.version>1.14.1</dependency.apache-commons-csv.version>
         <dependency.guava.version>33.4.7-jre</dependency.guava.version>
         <dependency.commons-io.version>2.18.0</dependency.commons-io.version>
+        <dependency.commons-net.version>3.11.1</dependency.commons-net.version>
         <dependency.apache-httpcore.version>5.3.1</dependency.apache-httpcore.version>
         <dependency.google-cloud-bom.version>26.71.0</dependency.google-cloud-bom.version>
         <dependency.google-http-client.version>1.45.1</dependency.google-http-client.version>

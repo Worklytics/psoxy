@@ -379,6 +379,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..signature")
                     .jsonPath("$..payload")
                     .jsonPath("$..dismissalMessage")
+                    .jsonPath("$..temp_clone_token")
                     .build())
             .transforms(generateUserTransformations("..", Arrays.asList(
                     // Owner can be a user or an organization user
@@ -409,6 +410,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..signature")
                     .jsonPath("$..payload")
                     .jsonPath("$..dismissalMessage")
+                    .jsonPath("$..temp_clone_token")
                     .build())
             .transforms(generateUserTransformations("..", Arrays.asList(
                     // Owner can be a user or an organization user
@@ -551,6 +553,7 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..description")
                     .jsonPath("$..body")
                     .jsonPath("$..title")
+                    .jsonPath("$..temp_clone_token")
                     .build())
             .transform(Transform.Pseudonymize.builder()
                     .jsonPath("$..author.email")

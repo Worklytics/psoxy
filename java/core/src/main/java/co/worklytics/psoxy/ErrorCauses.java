@@ -52,6 +52,11 @@ public enum ErrorCauses {
     NETWORK_EGRESS_BLOCKED,
 
     /**
+     * timed out waiting for a response from the source API after the connection was established
+     */
+    SOURCE_API_READ_TIMEOUT,
+
+    /**
      * tokenized request parameter is invalid. most likely too stale.
      *
      * clients should re-try with a fresh token(s), which may involve re-fetching from the endpoint from which they originally got the tokenized parameter value
@@ -82,6 +87,11 @@ public enum ErrorCauses {
     UNKNOWN,
 
     INVALID_REQUEST,
+
+    /**
+     * Client IP is not allowed by application-level lockdown rules.
+     */
+    UNAUTHORIZED_IP_ADDRESS,
     
     /**
      * Rules YAML is invalid or malformed

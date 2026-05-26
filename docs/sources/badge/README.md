@@ -1,5 +1,9 @@
 # Badge Swipe Data
 
+**Connector ID:** `badge`
+
+**Availability:** GA
+
 Psoxy can pseudonymize badge swipe data for ingestion into Worklytics.
 
 See [https://docs.worklytics.co/knowledge-base/connectors/bulk-data/badge](https://docs.worklytics.co/knowledge-base/connectors/bulk-data/badge)
