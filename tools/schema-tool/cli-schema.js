@@ -57,10 +57,10 @@ async function readInputContent(pathOrDashOrJson) {
   program
     .name('cli-schema.js')
     .version(version)
-    .description('Infer the JSON schema of an HTTP API endpoint response')
+    .description('Infer the JSON schema of an HTTP API endpoint response or local JSON/JSONL content')
     .option('-e, --endpoint <url>', 'Endpoint URL to fetch (mutually exclusive with --input)')
     .option('-a, --auth <token>', 'Bearer token for authentication (required with --endpoint)')
-    .option('-i, --input <path>', 'Read JSON/JSONL from a file instead of fetching a URL (use - for stdin)')
+    .option('-i, --input <file|json|->', 'JSON/JSONL source: a file path, an inline JSON string, or - for stdin (mutually exclusive with --endpoint)')
     .option('--raw', 'Print raw response body / file content instead of inferring a schema', false)
     .option('--skip-headers', 'Exclude response headers from output (endpoint mode only)', false)
     .option('-v, --verbose', 'Verbose output', false)

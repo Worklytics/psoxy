@@ -181,7 +181,7 @@ The inferred schema will have `"type": "array"` at the top level, with `items` d
 
 ## Error handling
 
-Non-2xx responses always print the HTTP status, all response headers, and the response body to stderr, then exit with code 1. This is particularly useful for:
+Non-2xx responses always print the HTTP status and all response headers to stderr, followed by the response body when one is present, then exit with code 1. This is particularly useful for:
 
 - **3xx redirects** — the `Location` header and a hint to re-run with the redirect URL are shown.
 - **401 Unauthorized** — the `WWW-Authenticate` header is shown.

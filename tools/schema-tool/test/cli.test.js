@@ -12,15 +12,14 @@ import { writeFile, mkdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { promisify } from 'node:util';
-
-const execFileAsync = promisify(execFile);
 
 const CLI = fileURLToPath(new URL('../cli-schema.js', import.meta.url));
 
 /**
  * Run the CLI with the given args. Returns { stdout, stderr, exitCode }.
  * Never rejects — exit code 1 is a normal failure case we want to assert on.
+ * Spawn errors (e.g. node not found) resolve with exitCode 1 and the error
+ * message in stderr so tests fail deterministically rather than hanging.
  */
 async function runCli(args, { stdin } = {}) {
   return new Promise((resolve) => {
@@ -36,6 +35,7 @@ async function runCli(args, { stdin } = {}) {
       child.stdin.end();
     }
 
+    child.on('error', (err) => resolve({ stdout, stderr: stderr + err.message, exitCode: 1 }));
     child.on('close', (code) => resolve({ stdout, stderr, exitCode: code ?? 0 }));
   });
 }
