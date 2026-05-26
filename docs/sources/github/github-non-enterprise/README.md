@@ -1,8 +1,6 @@
 # GitHub Free/Pro/Teams
 
-**Connector ID:** `github-non-enterprise`
-
-**Availability:** GA
+Availability: **GA**
 
 ## Authentication workflow
 
