@@ -253,7 +253,7 @@ class SanitizerUtilsTest {
             + "      \"wrap\": true\n" + "    }\n" + "  ]\n" + "}";
 
         String expected =
-            "{\"type\":\"AdaptiveCard\",\"version\":\"1.0\",\"body\":[{\"type\":\"TextBlock\",\"text\":\"{\\\"length\\\":982,\\\"word_count\\\":154}\",\"wrap\":true},{\"type\":\"TextBlock\",\"id\":\"MessageTextField\",\"text\":\"{\\\"length\\\":982,\\\"word_count\\\":154}\",\"wrap\":true}]}";
+            "{\"type\":\"AdaptiveCard\",\"version\":\"1.0\",\"body\":[{\"type\":\"TextBlock\",\"text\":\"{\\\"length\\\":2574,\\\"word_count\\\":154}\",\"wrap\":true},{\"type\":\"TextBlock\",\"id\":\"MessageTextField\",\"text\":\"{\\\"length\\\":982,\\\"word_count\\\":154}\",\"wrap\":true}]}";
 
         Transform.TextDigest transform = Transform.TextDigest.builder().isJsonEscaped(true)
             .jsonPathToProcessWhenEscaped("$..text").build();
@@ -261,6 +261,22 @@ class SanitizerUtilsTest {
 
         String resultJson =
             (String) textDigestFunction.map(input, jsonConfiguration);
+
+        assertEquals(expected, resultJson);
+    }
+
+    @SneakyThrows
+    @Test
+    void textDigest_with_escaping_digestsEachMatchIndependently() {
+        String input = "{\"body\":[{\"text\":\"short\"},{\"text\":\"two words\"}]}";
+        String expected =
+            "{\"body\":[{\"text\":\"{\\\"length\\\":5,\\\"word_count\\\":1}\"},{\"text\":\"{\\\"length\\\":9,\\\"word_count\\\":2}\"}]}";
+
+        Transform.TextDigest transform = Transform.TextDigest.builder().isJsonEscaped(true)
+            .jsonPathToProcessWhenEscaped("$..text").build();
+        MapFunction textDigestFunction = sanitizerUtils.getTextDigest(transform);
+
+        String resultJson = (String) textDigestFunction.map(input, jsonConfiguration);
 
         assertEquals(expected, resultJson);
     }

@@ -52,7 +52,6 @@
   * [Java Annotation Proccessing](development/intellij.md)
   * [Releases](development/releases.md)
   * [Alpha Features](development/alpha-features/README.md)
-    * [AWS Secrets Manager Support](development/alpha-features/aws-secrets-manager.md)
     * [Webhook Collectors](development/alpha-features/webhook-collectors.md)
 * [Data Sources](sources/README.md)
   * [Anthropic](sources/anthropic/README.md)
