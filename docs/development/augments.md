@@ -42,19 +42,12 @@ Inspired by OData's `@`-annotation pattern (where metadata about a property `Foo
 
 When `innerJsonPath` is set and matches nested JSON inside a string field, each inner match is
 augmented in place within the parsed embedded JSON (mirroring the legacy `textDigest` transform
-with `isJsonEscaped`), then the modified structure is stored as the augment property value:
+with `isJsonEscaped`), then the modified structure is re-serialized as a string:
 
 ```jsonc
 {
   "content": "{ ... escaped AdaptiveCard JSON ... }",
-  "+content:textDigest": {
-    "type": "AdaptiveCard",
-    "version": "1.0",
-    "body": [
-      { "type": "TextBlock", "text": "{\"length\":2572,\"word_count\":154}", "wrap": true },
-      { "type": "TextBlock", "id": "MessageTextField", "text": "{\"length\":980,\"word_count\":154}", "wrap": true }
-    ]
-  }
+  "+content:textDigest": "{\"type\":\"AdaptiveCard\",\"version\":\"1.0\",\"body\":[{\"type\":\"TextBlock\",\"text\":\"{\\\"length\\\":2572,\\\"word_count\\\":154}\",\"wrap\":true},...]}"
 }
 ```
 
@@ -66,7 +59,7 @@ with `isJsonEscaped`), then the modified structure is stored as the augment prop
 | `{augmentFunction}` | The name of the augment function (e.g. `textDigest`). |
 
 For embedded JSON, inner matched fields (e.g. `text`) are replaced with serialized augment output
-while preserving the surrounding structure.
+and the whole embedded JSON is re-serialized as a string value.
 
 **Example.** For a response containing `body.content`, the augment property produced by the `textDigest` function would be:
 

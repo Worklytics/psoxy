@@ -218,8 +218,9 @@ public class AugmentProcessor {
 
     /**
      * When {@link Augment#getInnerJsonPath()} is set, resolve each concrete inner path, replace
-     * matched inner field values with serialized augment output, then store the modified embedded
-     * JSON structure under {@code +{outerLeaf}:{fn}}.
+ * matched inner field values with serialized augment output, then store the modified embedded
+ * JSON re-serialized as a string under {@code +{outerLeaf}:{fn}} (mirroring
+ * {@code Transform.TextDigest} with {@code isJsonEscaped}).
      */
     private void applyInnerJsonPathAugments(Augment augment, Map<String, Object> parent,
                                             String leafFieldName, String jsonStr) {
@@ -260,7 +261,7 @@ public class AugmentProcessor {
 
         if (anyApplied) {
             parent.put(buildAugmentPropertyName(leafFieldName, augment.getFunctionName()),
-                innerContext.json());
+                innerContext.jsonString());
         }
     }
 
