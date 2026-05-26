@@ -69,7 +69,7 @@ encoding problems.
 
 ## Notes
 
-- Some connectors, in particular Zoom and Jira, rotate tokens frequently and may generate many
+- Some connectors, in particular Zoom and Atlassian (Jira, Confluence), rotate tokens frequently and may generate many
   versions of secrets. AWS typically bills per secret rather than per version, with only one version
   staged as 'current', but you should monitor usage and review the pricing model of your AWS
   contract.
