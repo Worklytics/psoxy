@@ -291,20 +291,10 @@ class AugmentProcessorTest {
         Map<String, Object> resultAttachment = (Map<String, Object>)
             ((List<?>) document.get("attachments")).get(0);
         assertFalse(resultAttachment.containsKey("+content.body[0].text:textDigest"));
-        @SuppressWarnings("unchecked")
-        Map<String, Object> innerAugments = (Map<String, Object>) resultAttachment.get("+content:textDigest");
+        String innerAugments = (String) resultAttachment.get("+content:textDigest");
         assertNotNull(innerAugments);
-        assertEquals(2, innerAugments.size());
-        @SuppressWarnings("unchecked")
-        Map<String, Object> digest0 = (Map<String, Object>) innerAugments.get("body[0].text");
-        @SuppressWarnings("unchecked")
-        Map<String, Object> digest1 = (Map<String, Object>) innerAugments.get("body[1].text");
-        assertNotNull(digest0);
-        assertNotNull(digest1);
-        assertEquals(11, digest0.get("length"));
-        assertEquals(2, digest0.get("word_count"));
-        assertEquals(12, digest1.get("length"));
-        assertEquals(2, digest1.get("word_count"));
+        assertTrue(innerAugments.contains("\"text\":\"{\\\"length\\\":11,\\\"word_count\\\":2}\""));
+        assertTrue(innerAugments.contains("\"text\":\"{\\\"length\\\":12,\\\"word_count\\\":2}\""));
     }
 
     @Test
