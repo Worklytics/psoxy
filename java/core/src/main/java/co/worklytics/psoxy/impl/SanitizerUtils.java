@@ -159,7 +159,8 @@ public class SanitizerUtils {
         return (s, jsonConfiguration) -> {
             if (!(s instanceof String toTokenize)) {
                 if (s != null) {
-                    log.warning("value matched by " + transform + " not of type String");
+                    log.warning("value matched by " + transform.getClass().getSimpleName()
+                            + " not of type String");
                 }
                 return null;
             } else {

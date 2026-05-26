@@ -212,6 +212,29 @@ class ApiDataRequestHandlerTest {
         assertEquals("https://mycompany.com/gitlab/api/v4/groups?page=1", url.toString());
     }
 
+    @SneakyThrows
+    @Test
+    void parseTargetUrlPreservesExplicitHttpsBasePath() {
+        setup("gitlab-managed", "https://mycompany.com/gitlab");
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getPath()).thenReturn("/api/v4/groups");
+        when(request.getQuery()).thenReturn(Optional.empty());
+
+        URL url = new URL(handler.parseRequestedTarget(request));
+
+        assertEquals("https://mycompany.com/gitlab/api/v4/groups", url.toString());
+    }
+
+    @Test
+    void parseTargetUrlRejectsHttpTargetHost() {
+        setup("gitlab-managed", "http://mycompany.com/gitlab");
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getPath()).thenReturn("/api/v4/groups");
+        when(request.getQuery()).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> handler.parseRequestedTarget(request));
+    }
+
     @Test
     void parseOptionsFromRequest() {
         setup("gmail", "google.apis.com");

@@ -35,6 +35,7 @@ import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.net.WWWFormCodec;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.utils.URIBuilder;
 import com.avaulta.gateway.pseudonyms.PseudonymImplementation;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
 import com.avaulta.gateway.tokens.ReversibleTokenizationStrategy;
@@ -777,11 +778,16 @@ public class ApiDataRequestHandler {
 
     @SneakyThrows
     String parseRequestedTarget(HttpEventRequest request) {
-        // contents may come encoded. It should respect url as it comes.
-        // Construct URL directly concatenating instead of URIBuilder as it may re-encode.
         String targetHost = apiModeConfig.getTargetHostOrError();
+        if (targetHost.startsWith("http://")) {
+            throw new IllegalArgumentException(
+                    "TARGET_HOST must use https; http:// is not supported");
+        }
         String targetBase = targetHost.startsWith("https://") ? targetHost : "https://" + targetHost;
-        URL hostURL = new URL(targetBase);
+
+        // URIBuilder parses scheme/host/port/path from configured target; concatenate request path
+        // directly to avoid re-encoding already-encoded path segments in the request.
+        URL hostURL = new URIBuilder(targetBase).build().toURL();
         String hostPlusPath = StringUtils.stripEnd(hostURL.toString(), "/") + "/"
                 + StringUtils.stripStart(request.getPath(), "/");
         String targetURLString = hostPlusPath;
