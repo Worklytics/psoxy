@@ -1,0 +1,31 @@
+{
+  "name": "schema-tool",
+  "version": "0.1.0",
+  "private": "true",
+  "type": "module",
+  "description": "Infer JSON schema from an HTTP API endpoint response",
+  "main": "cli-schema.js",
+  "scripts": {
+    "test": "ava"
+  },
+  "dependencies": {
+    "@jsonhero/schema-infer": "^0.1.5",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.1"
+  },
+  "devDependencies": {
+    "ava": "^6.4.1",
+    "testdouble": "^3.20.2"
+  },
+  "ava": {
+    "files": [
+      "test/schema.test.js",
+      "test/fetch.test.js"
+    ]
+  },
+  "overrides": {
+    "@tootallnate/once": "^3.0.1",
+    "brace-expansion": "^2.0.3",
+    "fast-xml-parser": "^5.7.0"
+  }
+}
