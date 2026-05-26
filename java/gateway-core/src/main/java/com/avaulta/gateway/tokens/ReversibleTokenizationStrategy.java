@@ -48,8 +48,8 @@ public interface ReversibleTokenizationStrategy {
 
         @Getter
         public enum ErrorCode {
-            ALGORITHM_PARAMETER_ERROR("ITE01", "Failed to decrypt token; some algorithm parameter, such as iv, is wrong"),
-            BAD_PADDING("ITE02", "Failed to decrypt token; token appears to be corrupted or invalid, due to mismatch between token's padding and the padding expected by the cipher mode"),
+            ALGORITHM_PARAMETER_ERROR("ITE001", "Failed to decrypt token; some algorithm parameter, such as iv, is wrong"),
+            BAD_PADDING("ITE002", "Failed to decrypt token; token appears to be corrupted or invalid, due to mismatch between token's padding and the padding expected by the cipher mode"),
             ILLEGAL_BLOCK_SIZE("ITE003", "Failed to decrypt token; token appears to be corrupted or invalid, as block size seems to differ from expected"),
             DECRYPTION_FAILED("ITE004", "Failed to decrypt token; most likely because encryption key has been rotated");
 
