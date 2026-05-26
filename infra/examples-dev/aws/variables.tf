@@ -471,8 +471,7 @@ variable "lookup_table_builders" {
 
 variable "allowed_data_access_ip_blocks" {
   description = <<-EOT
-    IPs or CIDR blocks allowed to make data access requests at the application layer.
-    Use null (default) for no restriction in configuration (all IPs allowed). If set, the list must contain at least one value.
+    IPs or CIDR blocks allowed to make data access requests. On AWS, enforces at IAM (assume-role aws:SourceIp) and in the proxy. Use null (default) for no restriction. If set, the list must contain at least one value. See docs/configuration/ip-allowlisting.md.
   EOT
   type        = list(string)
   nullable    = true
@@ -486,8 +485,7 @@ variable "allowed_data_access_ip_blocks" {
 
 variable "allowed_webhook_ip_blocks" {
   description = <<-EOT
-    IPs or CIDR blocks allowed to send webhooks at the application layer.
-    Use null (default) for no restriction in configuration (all IPs allowed). If set, the list must contain at least one value.
+    IPs or CIDR blocks allowed to send webhooks. On AWS, enforces at IAM (webhook-test-caller aws:SourceIp) and in the proxy. Use null (default) for no restriction. If set, the list must contain at least one value. See docs/configuration/ip-allowlisting.md.
   EOT
   type        = list(string)
   nullable    = true

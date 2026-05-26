@@ -293,8 +293,7 @@ variable "timeout_seconds" {
 
 variable "allowed_data_access_ip_blocks" {
   description = <<-EOT
-    IPs or CIDR blocks allowed to make data access requests at the application layer.
-    Use null (default) for no restriction in configuration (all IPs allowed). If set, the list must contain at least one value.
+    IPs or CIDR blocks for ALLOWED_DATA_ACCESS_IP_BLOCKS on this Lambda. IAM-level aws:SourceIp is configured in the AWS core module when the host passes the same list. Use null (default) for no app-layer restriction. See docs/configuration/ip-allowlisting.md.
   EOT
   type        = list(string)
   nullable    = true

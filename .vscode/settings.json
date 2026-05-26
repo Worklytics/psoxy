@@ -7,6 +7,5 @@
     "editor.formatOnPaste": false,
     "editor.formatOnType": false,
     "java.format.enabled": true,
-    "java.format.onType.enabled": false,
-    "java.autobuild.enabled": false
+    "java.format.onType.enabled": false
 }

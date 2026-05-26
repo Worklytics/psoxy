@@ -6,19 +6,19 @@ Yes, Psoxy supports filtering bulk (flat) files or API responses to remove PII o
 
 ## Can Worklytics Pseudonymizing Proxy invocation be locked to a set of known IP addresses?
 
-Yes, but this is an add-on feature to your Worklytics subscription that must be enabled for your Worklytics tenant. Please contact [sales@worklytics.co](mailto:sales@worklytics.co) to access this feature.
+Yes, via the `allowed_data_access_ip_blocks` and `allowed_webhook_ip_blocks` Terraform variables. Fixed egress IPs from Worklytics may require a subscription add-on — contact [sales@worklytics.co](mailto:sales@worklytics.co).
 
-Note that all requests from your Worklytics tenant to your Pseudonymizing Proxy instances are authenticated via identity federation (OIDC) and authorized by your Cloud providers IAM policies, so IP-based restrictions are only a marginal, redundant control in addition to this.
+**AWS:** Terraform applies **infrastructure-level** restrictions (`aws:SourceIp` on caller role assume-role policies) **and** **application-level** checks inside the proxy on each request.
 
-This is functionally equivalent to how access is authenticated and authorized to within and between any public cloud infrastructure. Eg, access to your S3 buckets is authorized via a policy you specify in AWS IAM.
+**GCP:** The shipped Terraform modules apply **application-level** restrictions only (environment variables consumed by the proxy). Cloud Run IAM does not support source-IP conditions on invoker bindings; use [Cloud Armor](https://cloud.google.com/run/docs/securing/cloud-armor) separately if you need network ingress filtering outside the proxy.
 
-Remember that Psoxy is, in effect, a drop-in replacement for a data sources API; in general, these APIs, such as for Google Workspace, Slack, Zoom, and Microsoft 365, are already accessible from anywhere on the internet without IP restriction. Psoxy exposes only a more restricted view of the source API - a subset of its endpoints, http methods (read-only), and fields - with field values that contain PII redacted or pseudonymized.
+See [Client IP Allowlisting](configuration/ip-allowlisting.md) for configuration and platform differences.
 
-See [AWS Authentication and Authorization](aws/authentication-authorization.md) for more details.
+All requests from your Worklytics tenant are still authenticated via identity federation (OIDC) and authorized by IAM, so IP allowlisting is defense-in-depth, not a substitute for authentication.
 
-See [GCP Authentication and Authorization](gcp/authentication-authorization.md) for more details.
+Remember that Psoxy is, in effect, a drop-in replacement for a data sources API; in general, these APIs are already reachable from the public internet without IP restriction. Psoxy exposes a more restricted view — read-oriented endpoints and fields with PII redacted or pseudonymized.
 
-And always remember: an IP is **not** an authenticated identity for a client, and should not be relied upon as an authentication mechanism. IPs can be spoofed. It is an extra control on top of the core access control policy.
+An IP is **not** an authenticated identity; it is an extra control on top of IAM and proxy rules.
 
 ## Can Psoxy instances be deployed behind an AWS API Gateway?
 

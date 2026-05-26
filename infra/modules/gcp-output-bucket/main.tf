@@ -48,6 +48,8 @@ resource "google_storage_bucket_iam_member" "accessors" {
   bucket = google_storage_bucket.bucket.name
   member = each.value
   role   = "roles/storage.objectViewer"
+
+  # GCS IAM bindings do not support source-IP conditions on objectViewer; rely on proxy/app controls.
 }
 
 output "bucket_name" {
