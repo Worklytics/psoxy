@@ -69,20 +69,36 @@ export function parseBody(body) {
 /**
  * Fetch a URL with a Bearer token.
  *
+ * Query parameters are explicitly forwarded via `path: url.pathname + url.search`
+ * to avoid a Node.js quirk where passing a URL string + a separate options object
+ * can cause the search string to be dropped when the two are merged internally.
+ *
  * @param {URL} url
  * @param {string} token
  * @returns {Promise<{status: number, statusMessage: string, headers: Object, body: string}>}
  */
 export function fetchEndpoint(url, token) {
   const transport = url.protocol === 'https:' ? https : http;
+
+  // Build an explicit options object so that url.search (query string) is never
+  // silently dropped. url.search is '' when there are no params and '?...' otherwise.
+  const requestOptions = {
+    hostname: url.hostname,
+    path: url.pathname + url.search,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json',
+    },
+    timeout: REQUEST_TIMEOUT_MS,
+  };
+  // Only set port when the URL explicitly specifies one; otherwise let the
+  // transport module use its default (80 for http, 443 for https).
+  if (url.port) {
+    requestOptions.port = parseInt(url.port, 10);
+  }
+
   return new Promise((resolve, reject) => {
-    const req = transport.get(url.toString(), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
-      timeout: REQUEST_TIMEOUT_MS,
-    }, (res) => {
+    const req = transport.get(requestOptions, (res) => {
       let body = '';
       res.on('data', (chunk) => (body += chunk));
       res.on('end', () =>
