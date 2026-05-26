@@ -2,6 +2,7 @@ package co.worklytics.psoxy.impl;
 
 import com.avaulta.gateway.rules.augments.Augment;
 import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.PathNotFoundException;
@@ -10,14 +11,15 @@ import lombok.extern.java.Log;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 /**
  * Applies augments to a JSON document, adding synthetic sibling properties
- * named {@code +{sourceProperty}:{augmentFunction}}. When {@code innerJsonPath} is used, multiple
- * inner matches are grouped under that property as an object keyed by inner path suffix.
+ * named {@code +{sourceProperty}:{augmentFunction}}. When {@code innerJsonPath} is used, each
+ * inner match is augmented in place within the parsed embedded JSON, then the modified structure
+ * is stored as the augment property value (mirroring {@code Transform.TextDigest} with
+ * {@code isJsonEscaped}).
  *
  * <p>Processing is intentionally non-fatal: any augment failure (exception, timeout,
  * schema validation) results in the augment property being omitted with a warning logged.
@@ -215,18 +217,19 @@ public class AugmentProcessor {
     }
 
     /**
-     * When {@link Augment#getInnerJsonPath()} is set, resolve each concrete inner path and group
-     * results under {@code +{outerLeaf}:{fn}} keyed by inner path suffix.
+     * When {@link Augment#getInnerJsonPath()} is set, resolve each concrete inner path, replace
+     * matched inner field values with serialized augment output, then store the modified embedded
+     * JSON structure under {@code +{outerLeaf}:{fn}}.
      */
-    @SuppressWarnings("unchecked")
     private void applyInnerJsonPathAugments(Augment augment, Map<String, Object> parent,
                                             String leafFieldName, String jsonStr) {
-        JsonPath innerCompiled = getCompiledPath(augment.getInnerJsonPath());
-        Object innerDocument = JsonPath.parse(jsonStr).json();
+        DocumentContext innerContext = JsonPath.parse(jsonStr);
+        Object innerDocument = innerContext.json();
 
         List<String> innerConcretePaths;
         try {
-            innerConcretePaths = innerCompiled.read(innerDocument, pathListConfiguration);
+            innerConcretePaths = getCompiledPath(augment.getInnerJsonPath())
+                .read(innerDocument, pathListConfiguration);
         } catch (PathNotFoundException e) {
             return;
         }
@@ -234,19 +237,20 @@ public class AugmentProcessor {
             return;
         }
 
-        Map<String, Object> innerAugments = new TreeMap<>();
+        boolean anyApplied = false;
 
         for (String innerConcretePath : innerConcretePaths) {
             try {
-                Object innerValue = getCompiledPath(innerConcretePath).read(innerDocument, jsonConfiguration);
+                Object innerValue = innerContext.read(innerConcretePath);
                 Object augmentValue = augment.compute(innerValue);
                 if (augmentValue == null) {
                     continue;
                 }
 
-                String innerKey = toInnerPathSuffix(innerConcretePath);
                 // TODO: validate against outputSchema if present (predicate check)
-                innerAugments.put(innerKey, augmentValue);
+                String serializedAugment = jsonConfiguration.jsonProvider().toJson(augmentValue);
+                innerContext.set(innerConcretePath, serializedAugment);
+                anyApplied = true;
             } catch (Exception e) {
                 log.log(Level.WARNING,
                     "Augment '" + augment.getFunctionName() + "' failed at inner path '"
@@ -254,8 +258,9 @@ public class AugmentProcessor {
             }
         }
 
-        if (!innerAugments.isEmpty()) {
-            parent.put(buildAugmentPropertyName(leafFieldName, augment.getFunctionName()), innerAugments);
+        if (anyApplied) {
+            parent.put(buildAugmentPropertyName(leafFieldName, augment.getFunctionName()),
+                innerContext.json());
         }
     }
 

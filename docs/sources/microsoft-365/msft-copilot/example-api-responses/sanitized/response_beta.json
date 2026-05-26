@@ -32,14 +32,21 @@
           "attachmentId":"4062fb240a03490b98ccd7c86bb2bcbf",
           "contentType":"application/vnd.microsoft.card.adaptive",
           "+content:textDigest":{
-            "body[0].text":{
-              "length":2572,
-              "word_count":154
-            },
-            "body[1].text":{
-              "length":980,
-              "word_count":154
-            }
+            "type":"AdaptiveCard",
+            "version":"1.0",
+            "body":[
+              {
+                "type":"TextBlock",
+                "text":"{\"length\":2572,\"word_count\":154}",
+                "wrap":true
+              },
+              {
+                "type":"TextBlock",
+                "id":"MessageTextField",
+                "text":"{\"length\":980,\"word_count\":154}",
+                "wrap":true
+              }
+            ]
           }
         }
       ],
