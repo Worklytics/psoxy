@@ -214,6 +214,7 @@ variable "api_connectors" {
     settings_to_provide = optional(map(string), {})
     rules_file          = optional(string, null)
     rules_raw           = optional(string, null)
+    timeout_seconds     = optional(number)
   }))
 
   description = "map of API connectors to provision"
@@ -271,6 +272,7 @@ variable "bulk_connectors" {
     instructions_template = optional(string)
     settings_to_provide   = optional(map(string), {})
     available_memory_mb   = optional(number)
+    timeout_seconds       = optional(number)
   }))
 
   description = "map of connector id  => bulk connectors to provision"
@@ -409,15 +411,33 @@ variable "builder_sa_email" {
 }
 
 variable "allowed_data_access_ip_blocks" {
-  description = "List of IPs or CIDR blocks allowed to make data access requests."
+  description = <<-EOT
+    IPs or CIDR blocks allowed to make data access requests at the application layer.
+    Use null (default) for no restriction in configuration (all IPs allowed). If set, the list must contain at least one value.
+  EOT
   type        = list(string)
-  default     = []
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.allowed_data_access_ip_blocks == null || try(length(var.allowed_data_access_ip_blocks) > 0, false)
+    error_message = "allowed_data_access_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
+  }
 }
 
 variable "allowed_webhook_ip_blocks" {
-  description = "List of IPs or CIDR blocks allowed to send webhooks."
+  description = <<-EOT
+    IPs or CIDR blocks allowed to send webhooks at the application layer.
+    Use null (default) for no restriction in configuration (all IPs allowed). If set, the list must contain at least one value.
+  EOT
   type        = list(string)
-  default     = []
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.allowed_webhook_ip_blocks == null || try(length(var.allowed_webhook_ip_blocks) > 0, false)
+    error_message = "allowed_webhook_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
+  }
 }
 
 variable "api_connector_instance_concurrency" {
@@ -440,4 +460,10 @@ variable "max_instances_per_api_connector" {
     condition     = var.max_instances_per_api_connector >= 1
     error_message = "The max_instances_per_api_connector value must be greater than or equal to 1."
   }
+}
+
+variable "enable_remote_resources" {
+  type        = bool
+  description = "**beta** Whether to enable remote resource loading from the artifacts GCS bucket (rules, NLP models, etc.). When true, sets REMOTE_RESOURCE_BUCKET env var and grants roles/storage.objectViewer to each Cloud Function. Default will change to `true` in next major version."
+  default     = false # will change to true in 0.7.x
 }

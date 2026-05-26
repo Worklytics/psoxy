@@ -1,6 +1,6 @@
 package co.worklytics.test;
 
-import co.worklytics.psoxy.gateway.InstanceSecurityConfiguration;
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConstants;
 import co.worklytics.psoxy.gateway.SecretStore;
@@ -90,14 +90,17 @@ public class TestModules {
     }
 
     @Module
-    public interface ForInstanceSecurityConfiguration {
-
+    public interface ForApiModeConfig {
         @Provides
         @Singleton
-        static InstanceSecurityConfiguration instanceSecurityConfiguration() {
-            return InstanceSecurityConfiguration.builder()
-                .allowedDataAccessIpBlocks(Collections.emptyList())
-                .build();
+        static ApiModeConfig apiModeConfig() {
+            ApiModeConfig m = MockModules.provideMock(ApiModeConfig.class);
+            when(m.getTlsVersion()).thenReturn(ApiModeConfig.TlsVersions.TLSv1_3);
+            when(m.getTargetHost()).thenReturn(Optional.empty());
+            when(m.getSourceAuthStrategyIdentifier()).thenReturn(Optional.of("test-source-auth"));
+            when(m.getAsyncOutputDestination()).thenReturn(Optional.empty());
+            when(m.getAllowedDataAccessIpBlocks()).thenReturn(Collections.emptyList());
+            return m;
         }
     }
 

@@ -3,6 +3,8 @@ terraform {
 
   required_providers {
     aws = {
+      source  = "hashicorp/aws"
+      version = ">= 5.0"
     }
   }
 }
@@ -30,6 +32,13 @@ locals {
 
   api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
 
+  # rules_file paths in connector specs are relative to psoxy_base_dir (repo root), not the caller's cwd
+  api_connector_rules_file_paths = {
+    for k, path in local.api_connector_rules_files : k => (
+      startswith(path, "/") ? path : "${coalesce(var.psoxy_base_dir, "")}${path}"
+    )
+  }
+
   # API connectors with rules_raw that don't have file-based overrides
   api_connector_rules_raw = {
     for k, v in var.api_connectors : k => v.rules_raw
@@ -51,8 +60,6 @@ module "psoxy" {
   deployment_bundle                  = var.deployment_bundle
   deployment_bundle_hash             = var.deployment_bundle_hash
   force_bundle                       = var.force_bundle
-  allowed_data_access_ip_blocks      = var.allowed_data_access_ip_blocks
-  allowed_webhook_ip_blocks          = var.allowed_webhook_ip_blocks
   install_test_tool                  = var.install_test_tool
   deployment_id                      = module.env_id.id
   api_function_name_prefix           = "${lower(module.env_id.id)}-"
@@ -256,13 +263,14 @@ module "api_connector" {
 
   todos_as_local_files          = var.todos_as_local_files
   todo_step                     = var.todo_step
+  timeout_seconds               = coalesce(try(each.value.timeout_seconds, null), 180)
   allowed_data_access_ip_blocks = var.allowed_data_access_ip_blocks
 
   environment_variables = merge(
     {
       PSEUDONYMIZE_APP_IDS   = tostring(var.pseudonymize_app_ids)
       EMAIL_CANONICALIZATION = var.email_canonicalization
-      CUSTOM_RULES_SHA = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : (
+      CUSTOM_RULES_SHA = try(local.api_connector_rules_file_paths[each.key], null) != null ? filesha1(local.api_connector_rules_file_paths[each.key]) : (
         try(local.api_connector_rules_raw[each.key], null) != null ? sha1(local.api_connector_rules_raw[each.key]) : null
       )
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
@@ -270,6 +278,10 @@ module "api_connector" {
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
   )
+
+  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = var.enable_remote_resources ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = var.enable_remote_resources && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
 }
 
 
@@ -280,7 +292,7 @@ module "custom_api_connector_rules" {
   for_each = local.api_connector_rules_files
 
   prefix    = "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_"
-  file_path = each.value
+  file_path = local.api_connector_rules_file_paths[each.key]
 }
 
 # Rules provisioned from rules_raw (content string, not file path)
@@ -318,7 +330,9 @@ module "bulk_connector" {
   )
   rules_file = (
     # rules_file only applies when custom_bulk_connector_rules and rules_raw don't take precedence
-    try(var.custom_bulk_connector_rules[each.key], null) == null && try(each.value.rules_raw, null) == null ? each.value.rules_file :
+    try(var.custom_bulk_connector_rules[each.key], null) == null && try(each.value.rules_raw, null) == null && try(each.value.rules_file, null) != null ? (
+      startswith(each.value.rules_file, "/") ? each.value.rules_file : "${coalesce(var.psoxy_base_dir, "")}${each.value.rules_file}"
+    ) :
     null
   )
   secrets_store_implementation         = var.secrets_store_implementation
@@ -354,6 +368,10 @@ module "bulk_connector" {
     } : {},
     var.general_environment_variables
   )
+
+  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = var.enable_remote_resources ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = var.enable_remote_resources && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
 }
 
 
@@ -384,13 +402,15 @@ module "webhook_collectors" {
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   test_caller_role_arn                 = module.psoxy.webhook_test_caller_role_arn
-  rules_file                           = each.value.rules_file
-  webhook_auth_public_keys             = each.value.auth_public_keys
-  provision_auth_key                   = each.value.provision_auth_key
-  output_path_prefix                   = each.value.output_path_prefix
-  keep_warm_instances                  = try(each.value.keep_warm_instances, null)
-  example_payload                      = try(each.value.example_payload, null)
-  example_identity                     = try(each.value.example_identity, null)
+  rules_file = try(each.value.rules_file, null) != null ? (
+    startswith(each.value.rules_file, "/") ? each.value.rules_file : "${coalesce(var.psoxy_base_dir, "")}${each.value.rules_file}"
+  ) : null
+  webhook_auth_public_keys = each.value.auth_public_keys
+  provision_auth_key       = each.value.provision_auth_key
+  output_path_prefix       = each.value.output_path_prefix
+  keep_warm_instances      = try(each.value.keep_warm_instances, null)
+  example_payload          = try(each.value.example_payload, null)
+  example_identity         = try(each.value.example_identity, null)
 
   todos_as_local_files      = var.todos_as_local_files
   allowed_webhook_ip_blocks = var.allowed_webhook_ip_blocks
@@ -403,6 +423,10 @@ module "webhook_collectors" {
     },
     var.general_environment_variables,
   )
+
+  remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
+  remote_resource_instance_path = var.enable_remote_resources ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
+  remote_resource_shared_path   = var.enable_remote_resources && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
 }
 
 # Policy to allow test caller to invoke webhook collector urls and sign webhook requests

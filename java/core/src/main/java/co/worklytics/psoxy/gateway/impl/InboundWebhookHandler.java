@@ -24,9 +24,9 @@ import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
-import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.auth.JwtAuthorizedResource;
 import co.worklytics.psoxy.gateway.auth.PublicKeyRef;
@@ -58,6 +58,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
     private final WebhookSanitizer webhookSanitizer;
     private final ConfigService configService;
     private final WebhookCollectorModeConfig webhookCollectorModeConfig;
+    private final NetworkSecurityUtils networkSecurityUtils;
     private final Set<PublicKeyStoreClient> publicKeyStoreClients;
     private final Clock clock;
 
@@ -66,12 +67,14 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
                                  @Named("forWebhooks") Output output,
                                  ConfigService configService,
                                  WebhookCollectorModeConfig webhookCollectorModeConfig,
+                                 NetworkSecurityUtils networkSecurityUtils,
                                  Set<PublicKeyStoreClient> publicKeyStoreClients,
                                  Clock clock) {
         this.webhookSanitizer = webhookSanitizerProvider.get(); // avoids trying to instantiate WebhookSanitizerImpl when we don't need one
         this.output = output;
         this.configService = configService;
         this.webhookCollectorModeConfig = webhookCollectorModeConfig;
+        this.networkSecurityUtils = networkSecurityUtils;
         this.publicKeyStoreClients = publicKeyStoreClients;
         this.clock = clock;
     }
@@ -125,7 +128,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
         }
 
         // IP lockdown enforcement
-        if (!NetworkSecurityUtils.isAllowed(request.getClientIp().orElse(null), webhookCollectorModeConfig.getAllowedWebhookIpBlocks())) {
+        if (!networkSecurityUtils.isWebhookIpAllowed(request.getClientIp().orElse(null))) {
             return HttpEventResponse.builder()
                 .statusCode(HttpStatus.SC_FORBIDDEN)
                 .header(co.worklytics.psoxy.ProcessedDataMetadataFields.ERROR.getHttpHeader(),

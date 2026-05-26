@@ -4,12 +4,16 @@ locals {
 }
 terraform {
   required_version = "~> 1.7"
-}
 
-terraform {
   required_providers {
     # for the API connections to Google Workspace
     google = {
+      source  = "hashicorp/google"
+      version = ">= 5.0"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = ">= 2.0"
     }
   }
 }

@@ -70,11 +70,12 @@ would fail without a valid client certificate. mTLS also satisfies compliance fr
 mandate transport-layer client authentication.
 
 ```
-┌──────────────────────────────┐   public internet   ┌──────────────────────────────────┐
-│   Client Service             │   (mTLS encrypted)  │   Customer Psoxy (Producer)      │
+┌──────────────────────────────┐                     ┌──────────────────────────────────┐
+│   Client Service             │   public internet   │   Customer Psoxy (Producer)      │
+│                              │   (mTLS encrypted)  │                                  │
 │                              │                     │                                  │
-│  presents client cert ──────►├─────────────────────►│  External ALB (verifies client   │
-│  verifies server cert ◄──────┤◄─────────────────────│   cert via TrustConfig)          │
+│  presents client cert ──────►├────────────────────►│  External ALB (verifies client   │
+│  verifies server cert ◄──────┤◄───────────────────┤   cert via TrustConfig)          │
 │                              │                     │      ↓                           │
 │                              │                     │  Serverless NEG → Cloud Function │
 └──────────────────────────────┘                     └──────────────────────────────────┘
@@ -90,20 +91,21 @@ internal network. Authentication and authorization remain unchanged (IAM-based) 
 network-layer enhancement only.
 
 ```
-┌──────────────────────────────────┐       PSC        ┌──────────────────────────────────┐
-│   Client Service (Consumer)      │  ◄────────────►  │   Customer Psoxy (Producer)      │
-│   e.g. Worklytics                │   private link   │                                  │
-│                                  │                  │                                  │
-│  ┌────────────────────────────┐  │                  │  ┌────────────────────────────┐  │
-│  │ PSC Endpoint (REST)        │──┼──────────────────┼─►│ ILB → Serverless NEG       │  │
-│  │ 10.x.y.z                  │  │                  │  │  → Cloud Functions (REST)  │  │
-│  └────────────────────────────┘  │                  │  └────────────────────────────┘  │
-│                                  │                  │                                  │
-│  ┌────────────────────────────┐  │                  │  ┌────────────────────────────┐  │
-│  │ PSC Endpoint (GCS APIs)    │──┼──────────────────┼─►│ GCS Buckets (sanitized)    │  │
-│  │ 10.x.y.w (googleapis)     │  │                  │  │  via private Google APIs   │  │
-│  └────────────────────────────┘  │                  │  └────────────────────────────┘  │
-└──────────────────────────────────┘                  └──────────────────────────────────┘
+┌──────────────────────────────────┐                     ┌──────────────────────────────────┐
+│   Client Service (Consumer)      │         PSC         │   Customer Psoxy (Producer)      │
+│   e.g. Worklytics                │  ◄──────────────►   │                                  │
+│                                  │    private link     │                                  │
+│                                  │                     │                                  │
+│  ┌────────────────────────────┐  │                     │  ┌────────────────────────────┐  │
+│  │ PSC Endpoint (REST)        │──┼─────────────────────┼─►│ ILB → Serverless NEG       │  │
+│  │ 10.x.y.z                   │  │                     │  │  → Cloud Functions (REST)  │  │
+│  └────────────────────────────┘  │                     │  └────────────────────────────┘  │
+│                                  │                     │                                  │
+│  ┌────────────────────────────┐  │                     │  ┌────────────────────────────┐  │
+│  │ PSC Endpoint (GCS APIs)    │──┼─────────────────────┼─►│ GCS Buckets (sanitized)    │  │
+│  │ 10.x.y.w (googleapis)      │  │                     │  │  via private Google APIs   │  │
+│  └────────────────────────────┘  │                     │  └────────────────────────────┘  │
+└──────────────────────────────────┘                     └──────────────────────────────────┘
 ```
 
 See [Private Service Connect — Detail](#private-service-connect--detail) for full architecture.

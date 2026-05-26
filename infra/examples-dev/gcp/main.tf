@@ -30,7 +30,7 @@ locals {
 # call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.6.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.6.1"
 
   base_dir                                 = var.psoxy_base_dir
   enabled_connectors                       = var.enabled_connectors
@@ -96,7 +96,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.6.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.6.1"
 
   gcp_project_id                    = var.gcp_project_id
   environment_name                  = var.environment_name
@@ -138,6 +138,7 @@ module "psoxy" {
   tf_gcp_principal_email          = var.gcp_terraform_sa_account_email
   provision_project_level_iam     = var.provision_project_level_iam
   bucket_access_logs_destination  = var.bucket_access_logs_destination
+  enable_remote_resources         = true
 }
 
 locals {
@@ -159,7 +160,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-proxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-generic?ref=v0.6.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-generic?ref=v0.6.1"
 
   host_platform_id     = local.host_platform_id
   proxy_instance_id    = each.key

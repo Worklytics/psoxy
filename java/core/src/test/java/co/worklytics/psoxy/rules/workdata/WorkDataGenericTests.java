@@ -58,10 +58,12 @@ public class WorkDataGenericTests {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        TestModules.ForApiModeConfig.class,
         ConfigRulesModule.class,
         Container.ForConfigService.class,
         MockModules.ForSecretStore.class,
         MockModules.ForHostEnvironment.class,
+        MockModules.ForResourceService.class,
         TestModules.ForProxyConstants.class,
     })
     public interface Container {

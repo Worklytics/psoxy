@@ -12,8 +12,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.RESTApiSanitizer;
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.test.MockModules;
 import co.worklytics.test.TestModules;
 import dagger.Component;
@@ -34,6 +34,9 @@ class ApiDataRequestHandlerConcurrencyTest {
     @Inject
     ApiDataRequestHandler handler;
 
+    @Inject
+    ApiModeConfig apiModeConfig;
+
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
@@ -45,10 +48,10 @@ class ApiDataRequestHandlerConcurrencyTest {
         MockModules.ForSideOutputs.class,
         MockModules.ForAsyncApiDataRequestHandler.class,
         TestModules.ForWebhookCollectorModeConfig.class,
+        TestModules.ForApiModeConfig.class,
         TestModules.ForFixedUUID.class,
         TestModules.ForFixedClock.class,
         TestModules.ForProxyConstants.class,
-        TestModules.ForInstanceSecurityConfiguration.class,
     })
     public interface Container {
         void inject(ApiDataRequestHandlerConcurrencyTest test);
@@ -66,8 +69,7 @@ class ApiDataRequestHandlerConcurrencyTest {
             .thenReturn(Optional.of("salt"));
         when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
             .thenReturn("gmail");
-        when(handler.config.getConfigPropertyOrError(ApiModeConfigProperty.TARGET_HOST))
-            .thenReturn("gmail.googleapis.com");
+        handler.apiModeConfig = ApiModeConfig.builder().targetHost("gmail.googleapis.com").build();
 
         // Get access to the private loadSanitizerRules() method which contains the DCL
         loadSanitizerRulesMethod = ApiDataRequestHandler.class.getDeclaredMethod("loadSanitizerRules");

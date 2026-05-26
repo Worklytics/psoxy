@@ -21,7 +21,7 @@ terraform {
 # general cases
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.6.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.6.1"
 
   enabled_connectors                       = var.enabled_connectors
   connector_settings                       = var.connector_settings
@@ -113,7 +113,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/aws-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.6.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/aws-host?ref=v0.6.1"
 
   environment_name                     = var.environment_name
   aws_account_id                       = var.aws_account_id
@@ -158,6 +158,7 @@ module "psoxy" {
   custom_side_outputs                  = var.custom_side_outputs
   todo_step                            = local.max_auth_todo_step
   todos_as_local_files                 = var.todos_as_local_files
+  enable_remote_resources              = true
 
 
   #  vpc_config = {
@@ -190,7 +191,7 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-proxy-connection-aws"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-aws?ref=v0.6.0"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-aws?ref=v0.6.1"
 
   proxy_instance_id    = each.key
   worklytics_host      = var.worklytics_host
