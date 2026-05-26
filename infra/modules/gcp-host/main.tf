@@ -4,7 +4,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 5.0"
+      version = ">= 7.0"
     }
   }
 }
@@ -21,19 +21,38 @@ locals {
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
 
-  # rules_file paths in connector specs are relative to psoxy_base_dir (repo root), not the caller's cwd
+  # rules_file paths may be absolute, relative to the Terraform root module (deployment dir), or
+  # relative to psoxy_base_dir (paths into the psoxy repo, eg docs/sources/...)
   api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
 
-  api_connector_rules_file_paths = {
-    for k, path in local.api_connector_rules_files : k => (
-      startswith(path, "/") ? path : "${var.psoxy_base_dir}${path}"
+  _rules_file_references = distinct(concat(
+    values(local.api_connector_rules_files),
+    [for k, v in var.bulk_connectors : v.rules_file if try(v.rules_file, null) != null],
+    [for k, v in var.webhook_collectors : v.rules_file if try(v.rules_file, null) != null],
+  ))
+
+  _resolved_rules_file_paths = {
+    for rules_path in local._rules_file_references : rules_path => (
+      startswith(rules_path, "/") ? rules_path : (
+        fileexists("${path.root}/${rules_path}") ? "${path.root}/${rules_path}" : (
+          fileexists("${var.psoxy_base_dir}${rules_path}") ? "${var.psoxy_base_dir}${rules_path}" :
+          "${path.root}/${rules_path}"
+        )
+      )
     )
   }
 
+  api_connector_rules_file_paths = {
+    for k, rules_path in local.api_connector_rules_files : k => local._resolved_rules_file_paths[rules_path]
+  }
+
   bulk_connector_rules_file_paths = {
-    for k, v in var.bulk_connectors : k => (
-      startswith(v.rules_file, "/") ? v.rules_file : "${var.psoxy_base_dir}${v.rules_file}"
-    )
+    for k, v in var.bulk_connectors : k => local._resolved_rules_file_paths[v.rules_file]
+    if try(v.rules_file, null) != null
+  }
+
+  webhook_collector_rules_file_paths = {
+    for k, v in var.webhook_collectors : k => local._resolved_rules_file_paths[v.rules_file]
     if try(v.rules_file, null) != null
   }
 
@@ -331,9 +350,7 @@ module "webhook_collector" {
   key_ring_id                       = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
   oidc_token_verifier_role_id       = module.psoxy.oidc_token_verifier_role_id
   provision_auth_key                = each.value.provision_auth_key
-  rules_file = try(each.value.rules_file, null) != null ? (
-    startswith(each.value.rules_file, "/") ? each.value.rules_file : "${var.psoxy_base_dir}${each.value.rules_file}"
-  ) : null
+  rules_file = try(local.webhook_collector_rules_file_paths[each.key], null)
   webhook_batch_invoker_sa_email     = module.psoxy.webhook_batch_invoker_sa_email
   batch_processing_frequency_minutes = try(each.value.batch_processing_frequency_minutes, 5)
   output_path_prefix                 = each.value.output_path_prefix

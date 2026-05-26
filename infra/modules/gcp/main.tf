@@ -124,9 +124,8 @@ resource "google_secret_manager_secret_version" "initial_version" {
   lifecycle {
     ignore_changes = [
       secret_data,
-      # forward compatibility fix with provider on 7.x
       secret_data_wo,
-      secret_data_wo_version
+      secret_data_wo_version,
     ]
   }
 }
@@ -176,9 +175,6 @@ resource "google_secret_manager_secret_version" "pseudonym_encryption_key_initia
   lifecycle {
     ignore_changes = [
       secret_data,
-      # forward compatibility fix with provider on 7.x
-      secret_data_wo,
-      secret_data_wo_version
     ]
   }
 }
@@ -249,7 +245,7 @@ resource "google_storage_bucket_object" "function" {
   content_type   = "application/zip"
   bucket         = google_storage_bucket.artifacts[0].name
   source         = local.bundle_path
-  source_md5hash = filemd5(local.bundle_path)
+  detect_md5hash = filemd5(local.bundle_path)
 }
 
 locals {
