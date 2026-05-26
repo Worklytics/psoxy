@@ -57,7 +57,7 @@ public class NetworkSecurityUtils {
                         return true;
                     }
                 }
-            } catch (ExecutionException | IllegalArgumentException e) {
+            } catch (ExecutionException | com.google.common.util.concurrent.UncheckedExecutionException | IllegalArgumentException e) {
                 log.warning("Invalid IP or CIDR block configured in allowlist: " + block);
             }
         }

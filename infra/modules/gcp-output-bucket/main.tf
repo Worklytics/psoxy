@@ -49,14 +49,7 @@ resource "google_storage_bucket_iam_member" "accessors" {
   member = each.value
   role   = "roles/storage.objectViewer"
 
-  dynamic "condition" {
-    for_each = length(var.allowed_accessor_ip_blocks) > 0 ? [1] : []
-    content {
-      title       = "ip-restriction"
-      description = "Lock bucket access strictly to the provided IPs"
-      expression  = join(" || ", [for ip in var.allowed_accessor_ip_blocks : "inIpRange(request.origin.ip, '${ip}')"])
-    }
-  }
+  # GCS IAM bindings do not support source-IP conditions on objectViewer; rely on proxy/app controls.
 }
 
 output "bucket_name" {

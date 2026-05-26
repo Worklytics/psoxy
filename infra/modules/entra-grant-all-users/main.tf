@@ -1,6 +1,6 @@
-# makes grant on behalf of ALL users in your Azure AD directory
+# makes grant on behalf of ALL users in your Microsoft Entra ID tenant
 #  - there is no way to do another org unit / group via Terraform; if that's the configure you
-#   desire, you'll have to do that via Azure AD console OR cli
+#   desire, you'll have to do that via Microsoft Entra admin center or CLI
 
 # TODO: if grant can be made fully through API, do it here; until then, TODO file is best option
 
@@ -16,11 +16,11 @@ locals {
   todo_content = <<EOT
 # Authorize ${var.application_name}
 
-Visit the following page in the Azure AD console and grant the required application permissions:
+Visit the following page in the Microsoft Entra admin center and grant the required application permissions:
 
-https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/CallAnAPI/appId/${var.application_id}/isMSAApp/
+https://entra.microsoft.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/ApiPermissions/appId/${var.application_id}/isMSAApp~/false
 
-If you are not a sufficiently privileged Azure AD Administrator (likely Application or Global
+If you are not a sufficiently privileged Microsoft Entra ID Administrator (likely Application or Global
 Administrator), you may need assistance from an appropriately privileged member of your IT team.
 
 The required grants are:

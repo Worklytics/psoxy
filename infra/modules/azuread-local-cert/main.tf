@@ -1,8 +1,12 @@
-# generate certificate for Azure AD application locally and deploy it to Azure AD
+# generate certificate for Microsoft Entra ID application locally and deploy it to Microsoft Entra ID
 # NOTE: certificate will only be temporarily written to your local file system, but out of abundance
 # of caution should:
 #  - run this only in an environment that is approved from key generation in your organization
 #  - use a secure location for your Terraform state (eg, not local file systme of your laptop)
+#
+# NOTE: this module is named 'azuread-*' because it uses the HashiCorp 'azuread' Terraform provider;
+# the provider itself retains its original name as a convention and to avoid breaking changes for
+# provider users, so we follow that convention in this module name.
 terraform {
   required_providers {
     azuread = {

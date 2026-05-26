@@ -82,7 +82,8 @@ class ApiDataRequestHandlerTest {
         TestModules.ForWebhookCollectorModeConfig.class,
         TestModules.ForFixedUUID.class,
         TestModules.ForFixedClock.class,
-        TestModules.ForProxyConstants.class,})
+        TestModules.ForProxyConstants.class,
+        TestModules.ForInstanceSecurityConfiguration.class,})
     public interface Container {
         void inject(ApiDataRequestHandlerTest test);
     }

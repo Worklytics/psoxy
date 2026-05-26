@@ -113,14 +113,7 @@ resource "google_kms_crypto_key_iam_member" "allow_function_to_access_public_key
 
 # END AUTH KEYS
 
-module "rules_parameter" {
-  source = "../gcp-sm-rules"
-
-  project_id        = var.project_id
-  instance_sa_email = var.service_account_email
-  file_path         = var.rules_file
-  prefix            = local.path_to_instance_config_parameters
-}
+# (rules_parameter module removed)
 
 
 resource "random_string" "bucket_name_random_sequence" {
@@ -205,6 +198,7 @@ locals {
     BATCH_SIZE                       = local.batch_size
     BATCH_INVOCATION_TIMEOUT_SECONDS = local.batch_invocation_timeout_seconds
     WEBHOOK_BATCH_OUTPUT             = "gs://${module.sanitized_webhook_output.bucket_name}/${var.output_path_prefix}"
+    RULES                            = var.rules_file != null ? base64gzip(file(var.rules_file)) : null
     }
     : k => v if v != null
   }
@@ -271,10 +265,20 @@ data "google_service_account" "function" {
 
 # to provision Cloud Function, TF must be able to act as the service account that the function will
 # run as
-resource "google_service_account_iam_member" "act_as" {
+# NOTE: named 'tf_runner_act_as' rather than 'act_as' to avoid replacement-cycle on upgrades where
+# tf_runner_iam_principal changes (eg 0.5.x -> 0.6.x); separate create+destroy is cycle-free.
+resource "google_service_account_iam_member" "tf_runner_act_as" {
   member             = var.tf_runner_iam_principal
   role               = "roles/iam.serviceAccountUser"
   service_account_id = data.google_service_account.function.id
+}
+
+# migration: remove old resource address from state (destroyed in GCP)
+removed {
+  from = google_service_account_iam_member.act_as
+  lifecycle {
+    destroy = true
+  }
 }
 
 resource "google_cloudfunctions2_function" "function" {
@@ -285,7 +289,7 @@ resource "google_cloudfunctions2_function" "function" {
   location = var.region
 
   build_config {
-    runtime           = "java21"
+    runtime           = "java25"
     docker_repository = var.artifact_repository_id
     entry_point       = "co.worklytics.psoxy.GcpWebhookCollectorRoute"
     service_account   = var.builder_sa_id
@@ -304,8 +308,8 @@ resource "google_cloudfunctions2_function" "function" {
     ingress_settings      = "ALLOW_ALL"
     timeout_seconds       = local.function_exec_timeout_seconds
 
-    # TODO: setting this > 1 gives error: │ Error: Error updating function: googleapi: Error 400: Could not update Cloud Run service projects/psoxy-dev-erik/locations/us-central1/services/psoxy-dev-erik-llm-portal. spec.template.spec.containers.resources.limits.cpu: Invalid value specified for cpu. Total cpu < 1 is not supported with concurrency > 1.
-    # max_instance_request_concurrency = 5 # q: make configurable? default is 1
+    max_instance_request_concurrency = var.instance_concurrency
+    available_cpu                    = var.instance_concurrency > 1 ? "1" : null
 
     vpc_connector                 = var.vpc_config == null ? null : var.vpc_config.serverless_connector
     vpc_connector_egress_settings = var.vpc_config == null ? null : "ALL_TRAFFIC"
@@ -338,7 +342,7 @@ resource "google_cloudfunctions2_function" "function" {
 
   depends_on = [
     google_secret_manager_secret_iam_member.grant_sa_accessor_on_secret,
-    google_service_account_iam_member.act_as
+    google_service_account_iam_member.tf_runner_act_as
   ]
 }
 
@@ -354,14 +358,8 @@ resource "google_cloud_run_service_iam_binding" "invokers" {
   # (eg var.webhook_batch_invoker_sa_email)
   members = ["allUsers"]
 
-  dynamic "condition" {
-    for_each = length(var.allowed_webhook_ip_blocks) > 0 ? [1] : []
-    content {
-      title       = "ip-restriction"
-      description = "Lock webhook collector invoke permissions strictly to the provided IPs"
-      expression  = join(" || ", [for ip in var.allowed_webhook_ip_blocks : "inIpRange(request.origin.ip, '${ip}')"])
-    }
-  }
+  # Cloud Run IAM conditions only support request.host and request.path — not source IP.
+  # Webhook IP allowlisting is enforced in the proxy (ALLOWED_WEBHOOK_IP_BLOCKS).
 }
 
 # Pub/Sub topic for individual webhook messages

@@ -24,6 +24,7 @@ import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
+import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
@@ -124,7 +125,7 @@ public class InboundWebhookHandler implements JwtAuthorizedResource {
         }
 
         // IP lockdown enforcement
-        if (!webhookCollectorModeConfig.isAllowed(request.getClientIp().orElse(null))) {
+        if (!NetworkSecurityUtils.isAllowed(request.getClientIp().orElse(null), webhookCollectorModeConfig.getAllowedWebhookIpBlocks())) {
             return HttpEventResponse.builder()
                 .statusCode(HttpStatus.SC_FORBIDDEN)
                 .header(co.worklytics.psoxy.ProcessedDataMetadataFields.ERROR.getHttpHeader(),

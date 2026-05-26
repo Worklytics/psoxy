@@ -67,6 +67,8 @@ import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
 import co.worklytics.psoxy.gateway.AsyncApiDataRequestHandler;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.InstanceSecurityConfiguration;
+import co.worklytics.psoxy.gateway.NetworkSecurityUtils;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.gateway.SecretStore;
@@ -148,7 +150,7 @@ public class ApiDataRequestHandler {
     @Inject
     ProxyConstants proxyConstants;
     @Inject
-    co.worklytics.psoxy.gateway.InstanceSecurityConfiguration instanceSecurityConfiguration;
+    InstanceSecurityConfiguration instanceSecurityConfiguration;
 
     /**
      * Basic headers to pass: content, caching, retries. Can be expanded by connection later.
@@ -158,7 +160,7 @@ public class ApiDataRequestHandler {
      * @see <a href="https://flaviocopes.com/http-response-headers/"></a>
      * @see <a href="https://developer.mozilla.org/en-US/docs/Glossary/Response_header"></a>
      */
-    public static Set<String> DEFAULT_RESPONSE_HEADERS_TO_PASS_THROUGH = normalizeHeaders(Set.of(
+    public static final Set<String> DEFAULT_RESPONSE_HEADERS_TO_PASS_THROUGH = normalizeHeaders(Set.of(
             HttpHeaders.CONTENT_TYPE,
             HttpHeaders.CACHE_CONTROL,
             HttpHeaders.ETAG,
@@ -168,7 +170,7 @@ public class ApiDataRequestHandler {
             HttpHeaders.RETRY_AFTER
     ));
 
-    public static Set<String> HTTP_METHODS_WHICH_DONT_SUPPORT_BODY = Set.of(
+    public static final Set<String> HTTP_METHODS_WHICH_DONT_SUPPORT_BODY = Set.of(
         HttpHead.METHOD_NAME,
         HttpGet.METHOD_NAME
     );

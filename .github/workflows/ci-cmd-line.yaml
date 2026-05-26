@@ -13,6 +13,9 @@ on:
       - 'rc-*'
       - 's177-recover-cmd-line' # otherwise updates to this not actually run until merged!!
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   bundle:
     runs-on: ubuntu-latest

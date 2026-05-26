@@ -1,6 +1,6 @@
 variable "application_id" {
   type        = string
-  description = "The resource ID (Object ID) of the Azure Active Directory Application to assign the federated credential"
+  description = "The resource ID (Object ID) of the Microsoft Entra ID Application to assign the federated credential"
 }
 # NOTE: naming of above variable aligns to argument name on azuread_application_federated_identity_credential
 # see: https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application_federated_identity_credential
@@ -23,9 +23,9 @@ variable "issuer" {
 
 variable "audience" {
   type = string
-  # This is the recommended value from MSFT, as it is what AAD expects to be in the "aud"
+  # This is the recommended value from MSFT, as it is what Microsoft Entra ID expects to be in the "aud"
   # property token value
-  # See https://learn.microsoft.com/en-us/azure/active-directory/develop/workload-identity-federation-create-trust?pivots=identity-wif-apps-methods-azp#important-considerations-and-restrictions
+  # See https://learn.microsoft.com/en-us/entra/workload-id/workload-identity-federation-create-trust?pivots=identity-wif-apps-methods-azp#important-considerations-and-restrictions
   default = "api://AzureADTokenExchange"
 }
 

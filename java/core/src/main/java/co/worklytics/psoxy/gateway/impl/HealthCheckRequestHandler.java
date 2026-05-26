@@ -58,7 +58,8 @@ public class HealthCheckRequestHandler {
     @Inject
     ProxyConstants proxyConstants;
 
-    String piiSaltHash;
+    volatile String piiSaltHash;
+    private final Object $piiSaltHashLock = new Object[0];
 
     public Optional<HttpEventResponse> handleIfHealthCheck(HttpEventRequest request) {
         if (isHealthCheckRequest(request)) {
@@ -222,8 +223,12 @@ public class HealthCheckRequestHandler {
      */
     public String piiSaltHash() {
         if (piiSaltHash == null) {
-            piiSaltHash = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
-                .map(salt -> hashUtils.hash(salt, ProxyConstants.SALT_FOR_SALT)).orElse("");
+            synchronized ($piiSaltHashLock) {
+                if (piiSaltHash == null) {
+                    piiSaltHash = secretStore.getConfigPropertyAsOptional(ProxyConfigProperty.PSOXY_SALT)
+                        .map(salt -> hashUtils.hash(salt, ProxyConstants.SALT_FOR_SALT)).orElse("");
+                }
+            }
         }
         return piiSaltHash;
     }

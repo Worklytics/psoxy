@@ -27,3 +27,4 @@
 
 # local maven cache
 .m2/
+.azure/

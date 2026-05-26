@@ -6,6 +6,7 @@ import { createRequire } from 'module';
 import { callDataSourceEndpoints } from './data-sources/runner.js';
 import aws from './lib/aws.js';
 import gcp from './lib/gcp.js';
+import { runConcurrencyTest } from './lib/concurrency.js';
 import getLogger from './lib/logger.js';
 import psoxyTestCall from './psoxy-test-call.js';
 
@@ -43,6 +44,7 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
     .option('-b, --body <body>', 'Body to send in request (it expects a JSON string)')
     .option('--verify-collection <bucket>', 'Verify that the posted data appears in the specified bucket (GCS/S3)')
     .option('--scheduler-job <name>', 'GCP: Cloud Scheduler job name to trigger batch processing')
+    .option('--concurrency <n>', 'Fire N concurrent copies of the request (max 5) to test instance concurrency', parseInt)
     .addOption(new Option('-d, --data-source <name>',
       'Data source to test all available endpoints').choices([
         //TODO: pull this list from terraform console or something??
@@ -89,6 +91,8 @@ const AWS_ACCESS_DENIED_EXCEPTION_REGEXP = new RegExp(/(?<arn>arn:aws:iam::\d+:\
     const startTime = Date.now();
     if (options.dataSource) {
       result = await callDataSourceEndpoints(options);
+    } else if (options.concurrency && options.concurrency > 1) {
+      result = await runConcurrencyTest(options, psoxyTestCall, logger);
     } else {
       result = await psoxyTestCall(options);
     }

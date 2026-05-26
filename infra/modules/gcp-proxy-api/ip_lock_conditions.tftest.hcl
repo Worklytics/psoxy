@@ -27,11 +27,11 @@ mock_provider "google" {
   }
 }
 
-run "validate_cloud_run_invokers_condition" {
+run "validate_cloud_run_invokers_no_ip_condition" {
   command = plan
 
   assert {
-    error_message = "IAM condition for run.invoker should enforce the IP address constraints."
-    condition     = length(google_cloud_run_service_iam_binding.invokers.condition) > 0 && strcontains(google_cloud_run_service_iam_binding.invokers.condition[0].expression, "192.168.0.0/24")
+    error_message = "Cloud Run invoker must not use IAM IP conditions (unsupported); IP lock is app-level via ALLOWED_DATA_ACCESS_IP_BLOCKS."
+    condition     = length(google_cloud_run_service_iam_binding.invokers.condition) == 0
   }
 }
