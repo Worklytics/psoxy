@@ -35,7 +35,7 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
-    "ava": "^8.0.1",
+    "ava": "^6.4.1",
     "testdouble": "^3.20.2"
   },
   "ava": {
