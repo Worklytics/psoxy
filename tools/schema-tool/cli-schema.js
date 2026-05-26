@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import chalk from 'chalk';
 import { Command } from 'commander';
+import { readFile } from 'fs/promises';
 import { createRequire } from 'module';
 import { fetchEndpoint, inferSchema, removeRequired, parseBody } from './lib/schema.js';
 
@@ -15,6 +16,41 @@ const log = {
   verbose: (msg, opts) => opts?.verbose && console.error(msg),
 };
 
+/** Read all data from stdin as a UTF-8 string. */
+function readStdin() {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('data', (chunk) => (data += chunk));
+    process.stdin.on('end', () => resolve(data));
+    process.stdin.on('error', reject);
+  });
+}
+
+/**
+ * Resolve the value of --input to a string of JSON/JSONL content.
+ *
+ * Resolution order:
+ *   1. '-'        → read from stdin
+ *   2. file path  → read the file (any readable path)
+ *   3. otherwise  → treat the value itself as inline JSON/JSONL content
+ *
+ * This means you can pass either a file path or a raw JSON string directly
+ * without any extra quoting or flags.
+ */
+async function readInputContent(pathOrDashOrJson) {
+  if (pathOrDashOrJson === '-') return readStdin();
+  try {
+    return await readFile(pathOrDashOrJson, 'utf8');
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      // Not a file path — treat the value itself as inline content.
+      return pathOrDashOrJson;
+    }
+    throw err;
+  }
+}
+
 (async function () {
   const program = new Command();
 
@@ -22,10 +58,11 @@ const log = {
     .name('cli-schema.js')
     .version(version)
     .description('Infer the JSON schema of an HTTP API endpoint response')
-    .requiredOption('-e, --endpoint <url>', 'Endpoint URL to call')
-    .requiredOption('-a, --auth <token>', 'Bearer token for authentication')
-    .option('--raw', 'Print raw response body instead of inferred schema', false)
-    .option('--skip-headers', 'Exclude response headers from output', false)
+    .option('-e, --endpoint <url>', 'Endpoint URL to fetch (mutually exclusive with --input)')
+    .option('-a, --auth <token>', 'Bearer token for authentication (required with --endpoint)')
+    .option('-i, --input <path>', 'Read JSON/JSONL from a file instead of fetching a URL (use - for stdin)')
+    .option('--raw', 'Print raw response body / file content instead of inferring a schema', false)
+    .option('--skip-headers', 'Exclude response headers from output (endpoint mode only)', false)
     .option('-v, --verbose', 'Verbose output', false)
     .configureOutput({
       outputError: (str, write) => write(chalk.bold.red(str)),
@@ -35,13 +72,71 @@ const log = {
     'after',
     `
 Example calls:
-  node cli-schema.js -e https://api.example.com/v1/users -a my-bearer-token
+  node cli-schema.js -e "https://api.example.com/v1/users" -a my-bearer-token
   node cli-schema.js --endpoint "https://api.example.com/v1/items?limit=10" --auth my-token --raw
+  node cli-schema.js --input response.json
+  node cli-schema.js --input response.jsonl
+  cat response.json | node cli-schema.js --input -
     `
   );
 
   program.parse(process.argv);
   const options = program.opts();
+
+  // ── Validate flag combinations ───────────────────────────────────────────
+
+  if (options.input && options.endpoint) {
+    log.error('--input and --endpoint are mutually exclusive');
+    process.exitCode = 1;
+    return;
+  }
+
+  if (!options.input && !options.endpoint) {
+    log.error('Either --endpoint (-e) or --input (-i) is required');
+    process.exitCode = 1;
+    return;
+  }
+
+  if (options.endpoint && !options.auth) {
+    log.error('--auth (-a) is required when using --endpoint');
+    process.exitCode = 1;
+    return;
+  }
+
+  // ── Input mode (no HTTP request) ─────────────────────────────────────────
+
+  if (options.input) {
+    let content;
+    try {
+      content = await readInputContent(options.input);
+    } catch (err) {
+      log.error(`Could not read input: ${err.message}`);
+      process.exitCode = 1;
+      return;
+    }
+
+    if (options.raw) {
+      // Pass-through: just print the raw content unchanged.
+      console.log(content);
+      return;
+    }
+
+    let parsed;
+    try {
+      parsed = parseBody(content);
+    } catch (err) {
+      log.error(`Content is not valid JSON or JSONL: ${err.message}`);
+      process.exitCode = 1;
+      return;
+    }
+
+    const label = options.input === '-' ? 'stdin' : options.input;
+    log.info(`Schema for ${label}:`);
+    console.log(JSON.stringify({ schema: removeRequired(inferSchema(parsed)) }, null, 2));
+    return;
+  }
+
+  // ── Endpoint mode (HTTP request) ─────────────────────────────────────────
 
   let url;
   try {
