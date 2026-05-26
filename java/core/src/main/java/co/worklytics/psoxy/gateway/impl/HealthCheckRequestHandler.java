@@ -105,6 +105,10 @@ public class HealthCheckRequestHandler {
 
             if (targetHost.isEmpty() || StringUtils.isBlank(targetHost.get())) {
                 missing.add(ApiModeConfig.ApiModeConfigProperty.TARGET_HOST.name());
+            } else if (targetHost.get().startsWith("http://")) {
+                log.warning("TARGET_HOST must use https; http:// is not supported: "
+                        + targetHost.get());
+                missing.add(ApiModeConfig.ApiModeConfigProperty.TARGET_HOST.name());
             }
         } catch (Throwable ignored) {
             logInDev("Failed to add TARGET_HOST info to health check", ignored);
