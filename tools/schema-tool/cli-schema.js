@@ -10,6 +10,7 @@ const { version } = require('./package.json');
 const log = {
   info:    (msg) => console.error(chalk.bold.blue(msg)),
   success: (msg) => console.error(chalk.bold.green(msg)),
+  warn:    (msg) => console.error(chalk.bold.yellow(msg)),
   error:   (msg) => console.error(chalk.bold.red(msg)),
   verbose: (msg, opts) => opts?.verbose && console.error(msg),
 };
@@ -79,7 +80,24 @@ Example calls:
       console.log(JSON.stringify(output, null, 2));
     } else {
       log.error(`HTTP ${result.status}: ${result.statusMessage || 'Unknown error'}`);
+
+      // Redirects (3xx) never carry a parseable schema — show the Location so
+      // the caller knows where to go instead.
+      if (result.status >= 300 && result.status < 400) {
+        const location = result.headers['location'];
+        if (location) {
+          log.warn(`Redirect location: ${location}`);
+        }
+        log.warn('This tool does not follow redirects. Re-run with the redirect URL.');
+      }
+
+      // Always print response headers for non-2xx so callers can diagnose the
+      // failure (e.g. WWW-Authenticate on 401, Retry-After on 429, Location on 3xx).
+      console.error('Response headers:');
+      console.error(JSON.stringify(result.headers, null, 2));
+
       if (result.body) {
+        console.error('Response body:');
         try {
           console.error(JSON.stringify(JSON.parse(result.body), null, 2));
         } catch {
