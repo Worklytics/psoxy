@@ -36,7 +36,7 @@ public class JsonSchemaFilterUtils {
     public static class Options implements Serializable {
 
         @Serial
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 2L;
 
         /**
          * whether to log each individual redaction made
@@ -51,6 +51,17 @@ public class JsonSchemaFilterUtils {
         @NonNull
         @Builder.Default
         Boolean logSummarizedRedactions = true;
+
+        /**
+         * If set, properties whose name starts with this prefix are passed through
+         * the schema filter without being redacted, regardless of whether the schema
+         * declares them. Used by the augment system to exempt proxy-generated
+         * synthetic properties (e.g. {@code +content:textDigest}).
+         *
+         * <p>Set to {@code null} to disable prefix-based exemption.
+         */
+        @Builder.Default
+        String exemptPropertyPrefix = null;
     }
 
     /**
@@ -263,6 +274,20 @@ public class JsonSchemaFilterUtils {
 
                         String key = entry.getKey();
                         JsonNode value = entry.getValue();
+
+                        // Auto-pass exempt properties (e.g. proxy-generated augments).
+                        // Safe because augment processing is disabled when raw response
+                        // contains "+" properties (conflict check), so any "+" here is ours.
+                        if (options.getExemptPropertyPrefix() != null
+                                && key.startsWith(options.getExemptPropertyPrefix())) {
+                            try {
+                                filtered.put(key, objectMapper.treeToValue(value, Object.class));
+                            } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                                throw new RuntimeException("Failed to convert exempt property value", e);
+                            }
+                            continue;
+                        }
+
                         JsonSchemaFilter propertySchema =
                                 schema.getProperties() == null ? null
                                         : schema.getProperties().get(key);
@@ -366,6 +391,8 @@ public class JsonSchemaFilterUtils {
             throw new IllegalArgumentException("Not a simple type: " + node);
         }
     }
+
+
 
     /**
      * For building if-else-then conditions in json schema

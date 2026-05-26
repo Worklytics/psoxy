@@ -3,19 +3,19 @@ endpoints:
   - pathTemplate: "/beta/copilot/users/{id}/interactionHistory/getAllEnterpriseInteractions"
     allowedQueryParams:
       - "$filter"
+    augments:
+      - !<textDigest>
+        jsonPaths:
+          - "$..attachments[*].content"
+        innerJsonPath: "$..text"
+      - !<textDigest>
+        jsonPaths:
+          - "$..body.content"
     transforms:
       - !<pseudonymize>
         jsonPaths:
           - "$..emailAddress"
         encoding: "URL_SAFE_TOKEN"
-      - !<textDigest>
-        jsonPaths:
-          - "$..attachments[*].content"
-        isJsonEscaped: true
-        jsonPathToProcessWhenEscaped: "$..text"
-      - !<textDigest>
-        jsonPaths:
-          - "$..body.content"
       - !<redact>
         jsonPaths:
           - "$..displayName"
@@ -25,6 +25,10 @@ endpoints:
           - "$..mentions[*].mentionText"
           - "$..contexts[*].contextReference"
           - "$..links[?(@.linkType == 'File')].linkUrl"
+      - !<redact>
+        jsonPaths:
+          - "$..body.content"
+          - "$..attachments[*].content"
       - !<redact>
         jsonPaths:
           - "$..['@odata.context']"

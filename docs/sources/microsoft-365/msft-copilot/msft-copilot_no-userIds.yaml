@@ -2,6 +2,14 @@
 endpoints:
   - pathRegex: "^/beta/copilot/users/(/p~[a-zA-Z0-9_-]+?)?[^/]*/interactionHistory/getAllEnterpriseInteractions(\\\
     ?.*)?"
+    augments:
+      - !<textDigest>
+        jsonPaths:
+          - "$..attachments[*].content"
+        innerJsonPath: "$..text"
+      - !<textDigest>
+        jsonPaths:
+          - "$..body.content"
     transforms:
       - !<pseudonymize>
         jsonPaths:
@@ -20,14 +28,10 @@ endpoints:
           - "$..from..[?(@.applicationIdentityType != \"bot\")].id"
           - "$..mentions[*][?(@.applicationIdentityType != \"bot\")].id"
         encoding: "URL_SAFE_TOKEN"
-      - !<textDigest>
-        jsonPaths:
-          - "$..attachments[*].content"
-        isJsonEscaped: true
-        jsonPathToProcessWhenEscaped: "$..text"
-      - !<textDigest>
+      - !<redact>
         jsonPaths:
           - "$..body.content"
+          - "$..attachments[*].content"
       - !<redact>
         jsonPaths:
           - "$..displayName"

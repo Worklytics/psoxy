@@ -38,6 +38,7 @@ import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.impl.AugmentProcessor;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
@@ -335,6 +336,7 @@ public class PsoxyModule {
         JsonSchemaFilterUtils.Options.OptionsBuilder options =
                 JsonSchemaFilterUtils.Options.builder();
         options.logRedactions(envVarsConfigService.isDevelopment());
+        options.exemptPropertyPrefix(AugmentProcessor.AUGMENT_PROPERTY_PREFIX);
 
         return new JsonSchemaFilterUtils(objectMapper, options.build());
     }

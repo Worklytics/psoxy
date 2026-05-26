@@ -63,6 +63,8 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 
+// TODO: this class is doing more than just "sanitizing" now — it also performs enrichment
+//  (augments) and schema filtering. Consider renaming or factoring into a pipeline abstraction.
 @Log
 public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
@@ -128,6 +130,9 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
 
     @Inject
     ObjectMapper objectMapper;
+
+    @Inject
+    AugmentProcessor augmentProcessor;
 
 
     @Override
@@ -277,6 +282,13 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
      * you call this once per row in the response
      */
     private Object sanitize(Endpoint endpoint, Object jsonResponse) {
+
+        // 1. Augments: add synthetic sibling properties before any filtering/transforms
+        if (ObjectUtils.isNotEmpty(endpoint.getAugments())) {
+            augmentProcessor.applyAugments(endpoint.getAugments(), jsonResponse);
+        }
+
+        // 2. Response schema filter (allow-list); auto-passes "+" properties when augments ran
         Object document = endpoint.getResponseSchemaOptional().map(schema -> {
             // q: this read
             try {
@@ -290,6 +302,7 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
             }
         }).orElse(jsonResponse);
 
+        // 3. Transforms: redact, pseudonymize, tokenize, etc.
         if (ObjectUtils.isNotEmpty(endpoint.getTransforms())) {
             for (Transform transform : endpoint.getTransforms()) {
                 sanitizerUtils.applyTransform(getPseudonymizer(), transform, document,
