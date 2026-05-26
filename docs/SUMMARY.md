@@ -42,6 +42,7 @@
   * [Email Handling](configuration/email-handling.md)
   * [JSON Filter](configuration/json-filter.md)
   * [Side Outputs](configuration/side-outputs.md)
+  * [Client IP Allowlisting](configuration/ip-allowlisting.md)
   * [TLS Version](configuration/tls.md)
   * [New Relic Monitoring](configuration/new-relic-monitoring.md)
   * [Remote Resources **BETA**](configuration/remote-resources.md)

@@ -43,4 +43,10 @@ This assumption policy will have a statement similar to the following, where the
 
 Colloquially, this allows a web identity federated from `accounts.google.com` where Google has asserted the claim that `aud` == `12345678901234567890123456789` to assume the role.
 
-Then you use this AWS IAM role as the principal in AWS IAM policies you define to authorize to invoke your proxy instances via their function URLs (API connectors) or to read from their sanitized output buckets (bulk data connectors)
+Then you use this AWS IAM role as the principal in AWS IAM policies you define to authorize to invoke your proxy instances via their function URLs (API connectors) or to read from their sanitized output buckets (bulk data connectors).
+
+## Client IP allowlisting (infrastructure-level)
+
+When `allowed_data_access_ip_blocks` or `allowed_webhook_ip_blocks` is set in Terraform, the AWS core module adds `aws:SourceIp` conditions to the **assume-role** policies for the deployment's caller roles. Principals cannot assume those roles unless the request originates from an allowed IP or CIDR. This is **infrastructure-level** enforcement, in addition to per-request checks inside the proxy.
+
+See [Client IP Allowlisting](../configuration/ip-allowlisting.md).
