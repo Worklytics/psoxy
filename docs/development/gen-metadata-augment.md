@@ -6,7 +6,7 @@
 
 ## Overview
 
-The **genMetadata** augment generates structured JSON metadata alongside a source field using a pluggable generative backend. The augment name is implementation-agnostic (local GGUF today; Bedrock/Vertex planned).
+The **genMetadata** augment generates structured JSON metadata alongside a source field using a pluggable generative backend. All backends share a [LangChain4j](https://github.com/langchain4j/langchain4j) `ChatModel` integration inside `psoxy-core`. **Local** inference uses embedded [Jlama](https://github.com/tjake/Jlama) (pure Java). **Bedrock** and **Vertex** cloud backends are planned.
 
 Output appears as a sibling property: `+{sourceProperty}:genMetadata`.
 
@@ -26,28 +26,50 @@ Read via `ConfigService` / `ProxyConfigProperty`:
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `PSOXY_GEN_BACKEND` | `local` | `local` (BETA), `bedrock`, `vertex` (future) |
-| `PSOXY_GEN_MODEL` | `llama-3.2-1b-instruct` | Logical model id → `{SHARED_RESOURCE_PATH}/llm/{id}.gguf` |
-| `PSOXY_GEN_TIMEOUT_SECONDS` | `15` | Per-inference timeout |
+| `PSOXY_GEN_BACKEND` | `local` | `local` (Jlama), `bedrock` and `vertex` (future) |
+| `PSOXY_GEN_MODEL` | `tjake/Llama-3.2-1B-Instruct-JQ4` | Jlama HuggingFace id (`owner/name`) or logical id for a cached local archive |
+| `PSOXY_GEN_TIMEOUT_SECONDS` | `15` | Per-inference and model-load timeout |
 | `PSOXY_GEN_MAX_INPUT_CHARS` | `4096` | Truncate source text before prompting |
 | `PSOXY_GEN_MAX_TOKENS` | `256` | Max tokens to generate per inference |
 | `ENABLE_GEN_METADATA` | unset | Set to `true` when Terraform `enable_gen_metadata` is used |
+
+When `enable_gen_metadata` is used, Terraform **appends** Jlama JVM flags to any existing `JAVA_TOOL_OPTIONS` from `general_environment_variables` or per-connector `environment_variables` (`--add-modules=jdk.incubator.vector --enable-preview --enable-native-access=ALL-UNNAMED`).
 
 ## Infrastructure
 
 Use Terraform **`enable_gen_metadata`** (host module) or per-connector `enable_gen_metadata` on `api_connectors`:
 
 - Sets `ENABLE_GEN_METADATA=true` on the function
+- Sets `JAVA_TOOL_OPTIONS` for Jlama on the JVM
 - Floors memory at **4096 MB** unless the connector already sets a higher `memory_size_mb`
-- Enables remote resource loading for GGUF weights (same as `enable_remote_resources`)
+- Enables remote resource loading for model archives (same as `enable_remote_resources`)
 
 You do not need a separate runtime failure if memory is too low — operators should enable the flag when rules use `genMetadata`. Without the flag, augments still run but return `augment-gen-unavailable` if the model cannot load.
 
-Manual setup (without the flag): `enable_remote_resources = true`, `memory_size_mb = 4096`, upload GGUF to `{SHARED_RESOURCE_PATH}/llm/`.
+Manual setup (without the flag): `enable_remote_resources = true`, `memory_size_mb = 4096`, upload a model archive (see below).
 
-## Java / llama.cpp dependency
+## Java / LangChain4j
 
-BETA uses [java-llama.cpp](https://github.com/kherud/java-llama.cpp) (`de.kherud:llama`), JNI bindings to [llama.cpp](https://github.com/ggml-org/llama.cpp). Meta and Google do not ship maintained Java inference SDKs for on-device GGUF; Apache does not provide a generative equivalent. Alternatives (ONNX Runtime GenAI, DJL) are heavier for Lambda-sized deployments. The dependency is scoped to `psoxy-core` only.
+BETA uses **LangChain4j** with the **Jlama** provider for local embedded inference (`langchain4j` **1.15.0**, `langchain4j-jlama` **1.15.0-beta25**, `jlama-native` in `psoxy-core`). Maven Central does not publish a non-beta `langchain4j-jlama` artifact for the 1.x `ChatModel` API (older **0.36.2** uses a different API). The beta suffix is LangChain4j’s release channel for this integration module, not a separate fork. This avoids JNI bindings to llama.cpp that can take down the JVM on native faults. The same `ChatModel` abstraction will back **Bedrock** (`langchain4j-bedrock`, AWS bundle only) and **Vertex** (`langchain4j-vertex-ai-gemini`, GCP bundle only) when implemented.
+
+Jlama loads models in **SafeTensors** layout (HuggingFace-style directory with `config.json`), not single-file GGUF.
+
+### Local model deployment
+
+1. **HuggingFace id (dev / first run):** set `PSOXY_GEN_MODEL` to a Jlama-compatible id such as `tjake/Llama-3.2-1B-Instruct-JQ4`. Jlama may download weights on first use (requires outbound network from the function).
+2. **Production (recommended):** zip a SafeTensors model directory and upload to `{SHARED_RESOURCE_PATH}/llm/{cache-dir-name}.zip`, where `{cache-dir-name}` is `PSOXY_GEN_MODEL` with `/` replaced by `__` (e.g. `tjake__Llama-3.2-1B-Instruct-JQ4.zip` for `tjake/Llama-3.2-1B-Instruct-JQ4`). The runtime extracts the archive into a temp cache before loading.
+
+**Example `PSOXY_GEN_MODEL` values** (Jlama / HuggingFace; prefer small instruct models on the 4096 MB floor):
+
+| `PSOXY_GEN_MODEL` | Notes |
+|-------------------|-------|
+| `tjake/Llama-3.2-1B-Instruct-JQ4` | Default; pre-quantized Jlama build |
+| `tjake/Llama-3.2-3B-Instruct-JQ4` | Higher quality; verify memory |
+| `tjake/Qwen2.5-1.5B-Instruct-JQ4` | Strong small instruct |
+| `tjake/Phi-3.5-mini-instruct-JQ4` | Compact |
+| `tjake/gemma-2-2b-it-JQ4` | Google small instruct |
+
+See [tjake on Hugging Face](https://huggingface.co/tjake) for other pre-quantized `-JQ4` builds. Logical ids without `/` (e.g. `llama-3.2-1b-instruct`) work when the matching `llm/llama-3.2-1b-instruct.zip` archive is present.
 
 ## MS Copilot PoC: prompt classification
 
@@ -59,12 +81,34 @@ Non-fatal: failures throw `AugmentProcessingException` (caught in `AugmentProces
 
 | Code | Meaning |
 |------|---------|
-| `augment-gen-unavailable` | Model missing / not loaded |
+| `augment-gen-unavailable` | Model missing / not loaded / unsupported backend |
 | `augment-gen-inference-failed` | Inference or JSON parse failed |
 | `augment-output-schema-mismatch` | Output failed `outputSchema` predicate |
 | `augment-conflict-skipped` | Upstream `+` properties present |
 
-## Open issues
+## Roadmap
 
-- **Bedrock / Vertex backends** — same `GenMetadataBackend` SPI; env-driven for BETA.
-- **Rule-level `backend` or `quality`** — deferred; env-only for BETA.
+### Cloud backends (`PSOXY_GEN_BACKEND=bedrock` | `vertex`) — planned
+
+Implement via LangChain4j in `psoxy-core`, behind the existing `GenMetadataBackend` SPI:
+
+| Backend | Module | Bundle | Credentials |
+|---------|--------|--------|-------------|
+| `bedrock` | `langchain4j-bedrock` | **AWS** Lambda / `psoxy-aws` only | Lambda execution role |
+| `vertex` | `langchain4j-vertex-ai-gemini` | **GCP** Cloud Functions / `psoxy-gcp` only | Function service account |
+
+`PSOXY_GEN_MODEL` becomes the cloud model id. Use native JSON schema (`ResponseFormat`) where supported; no `llm/` remote weights. Wrong backend on the wrong platform should fail clearly. IAM for Bedrock / Vertex AI will ship with `enable_gen_metadata` extensions.
+
+### Alternative local engine: java-llama.cpp (`de.kherud`) — conditional
+
+[java-llama.cpp](https://github.com/kherud/java-llama.cpp) (GGUF via JNI) is **not** in use. Revisit only if **both** are true:
+
+1. Embedded local models prove valuable enough vs cloud inference, and
+2. Jlama performance is a significant bottleneck for production workloads.
+
+Rationale for deferring: JNI/native faults in llama.cpp can crash the JVM; LangChain4j + Jlama keeps inference in managed Java with a single `ChatModel` surface for local and cloud.
+
+### Deferred
+
+- **Rule-level `backend`, `model`, or `quality`** — env-only for BETA.
+- **ONNX Runtime GenAI, DJL, Ollama sidecars** — out of scope for in-process serverless.

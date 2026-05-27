@@ -142,7 +142,7 @@ public enum ProxyConfigProperty implements ConfigService.ConfigProperty {
     /** BETA: generative backend for genMetadata augment (`local`, `bedrock`, `vertex`). */
     PSOXY_GEN_BACKEND,
 
-    /** BETA: logical model id for local GGUF (path `{SHARED_RESOURCE_PATH}/llm/{id}.gguf`). */
+    /** BETA: Jlama HuggingFace model id or logical id for `{SHARED_RESOURCE_PATH}/llm/{id}.zip`. */
     PSOXY_GEN_MODEL,
 
     /** BETA: per genMetadata inference timeout in seconds. */

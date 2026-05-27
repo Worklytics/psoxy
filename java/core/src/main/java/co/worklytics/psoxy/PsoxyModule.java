@@ -44,7 +44,7 @@ import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
 import com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend;
 import co.worklytics.psoxy.impl.AugmentProcessor;
 import co.worklytics.psoxy.impl.gen.GenMetadataConfig;
-import co.worklytics.psoxy.impl.gen.LlamaCppLocalBackend;
+import co.worklytics.psoxy.impl.gen.LangChain4jGenMetadataBackend;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
@@ -401,7 +401,7 @@ public class PsoxyModule {
             @Named("ForGenMetadata") ResourceService genMetadataResourceService) {
         GenMetadataConfig config = GenMetadataConfig.from(configService);
         if (GenMetadataConfig.BACKEND_LOCAL.equalsIgnoreCase(config.getBackend())) {
-            return new LlamaCppLocalBackend(config, genMetadataResourceService, objectMapper);
+            return new LangChain4jGenMetadataBackend(config, genMetadataResourceService, objectMapper);
         }
         return new UnavailableGenMetadataBackend();
     }

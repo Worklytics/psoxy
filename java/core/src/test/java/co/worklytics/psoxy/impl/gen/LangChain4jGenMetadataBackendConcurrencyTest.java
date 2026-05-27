@@ -14,16 +14,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Verifies single-flight model load behavior (without requiring a real GGUF file).
+ * Verifies single-flight model load behavior (without requiring a real model file).
  */
-class LlamaCppLocalBackendConcurrencyTest {
+class LangChain4jGenMetadataBackendConcurrencyTest {
 
     @Test
     void resolveModel_singleFlightOnConcurrentMiss() throws InterruptedException {
         AtomicInteger loadAttempts = new AtomicInteger();
         ResourceService resourceService = objectPath -> {
             loadAttempts.incrementAndGet();
-            // simulate slow load
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -37,10 +36,11 @@ class LlamaCppLocalBackendConcurrencyTest {
             .modelId("test-model")
             .timeoutSeconds(5)
             .maxInputChars(1024)
+            .maxTokens(64)
             .build();
 
-        LlamaCppLocalBackend backend = new LlamaCppLocalBackend(config, resourceService,
-            new ObjectMapper());
+        LangChain4jGenMetadataBackend backend = new LangChain4jGenMetadataBackend(config,
+            resourceService, new ObjectMapper());
 
         int threads = 8;
         ExecutorService pool = Executors.newFixedThreadPool(threads);
@@ -64,7 +64,6 @@ class LlamaCppLocalBackendConcurrencyTest {
         assertTrue(done.await(10, TimeUnit.SECONDS));
         pool.shutdown();
 
-        // Only one thread should have attempted resource load before FAILED state cached
         assertEquals(1, loadAttempts.get());
     }
 }

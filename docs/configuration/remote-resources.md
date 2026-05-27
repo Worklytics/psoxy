@@ -100,22 +100,18 @@ if no `RULES` config property (env var, parameter store entry, etc.) is found.
 Upload OpenNLP model files (e.g., `en-sent.bin`) to `{SHARED_RESOURCE_PATH}/` in the bucket.
 Psoxy augments can lazy-load these at runtime without inflating the deployment package.
 
-### LLM Weights (genMetadata BETA)
-Upload GGUF model files for the **genMetadata** augment to `{SHARED_RESOURCE_PATH}/llm/` in the bucket.
-The logical model id is set via `PSOXY_GEN_MODEL` (default `llama-3.2-1b-instruct`), resolved to
-`{SHARED_RESOURCE_PATH}/llm/{PSOXY_GEN_MODEL}.gguf`. Prefer Terraform **`enable_gen_metadata`**
-on the host module (or per `api_connectors` entry), which floors memory at 4096 MB, sets
-`ENABLE_GEN_METADATA`, and turns on remote resource loading. See
-[gen-metadata-augment.md](../development/gen-metadata-augment.md).
+### LLM model archives (genMetadata BETA)
+Upload a **zip** of a Jlama SafeTensors model directory (must include `config.json`) for the **genMetadata** augment to `{SHARED_RESOURCE_PATH}/llm/` in the bucket. The archive name is derived from `PSOXY_GEN_MODEL` (default `tjake/Llama-3.2-1B-Instruct-JQ4`): slashes become `__`, with a `.zip` suffix — e.g. `llm/tjake__Llama-3.2-1B-Instruct-JQ4.zip`. Prefer Terraform **`enable_gen_metadata`** on the host module (or per `api_connectors` entry), which floors memory at 4096 MB, sets `ENABLE_GEN_METADATA` and `JAVA_TOOL_OPTIONS` for Jlama, and turns on remote resource loading. See [gen-metadata-augment.md](../development/gen-metadata-augment.md) for HuggingFace ids, cloud backends, and ops detail (cloud inference does not use `llm/` archives).
 
 ```bash
-# AWS example
-aws s3 cp llama-3.2-1b-instruct.Q4_K_M.gguf \
-  s3://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/llm/llama-3.2-1b-instruct.gguf
+# Example: zip a local SafeTensors model directory, then upload (AWS)
+cd /path/to/model-dir && zip -r ../tjake__Llama-3.2-1B-Instruct-JQ4.zip .
+aws s3 cp ../tjake__Llama-3.2-1B-Instruct-JQ4.zip \
+  s3://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/llm/tjake__Llama-3.2-1B-Instruct-JQ4.zip
 
-# GCP example
-gsutil cp llama-3.2-1b-instruct.Q4_K_M.gguf \
-  gs://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/llm/llama-3.2-1b-instruct.gguf
+# GCP
+gsutil cp ../tjake__Llama-3.2-1B-Instruct-JQ4.zip \
+  gs://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/llm/tjake__Llama-3.2-1B-Instruct-JQ4.zip
 ```
 
 ## Uploading Resources

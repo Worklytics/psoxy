@@ -28,7 +28,9 @@
         <dependency.mockito-junit-jupiter.version>5.18.0</dependency.mockito-junit-jupiter.version>
         <dependency.json-path.version>2.9.0</dependency.json-path.version>
         <dependency.opennlp.version>2.3.2</dependency.opennlp.version>
-        <dependency.java-llama.version>4.1.0</dependency.java-llama.version>
+        <!-- langchain4j-jlama has no non-beta release on Central for the 1.x ChatModel API; 0.36.x is pre-1.0 API. -->
+        <dependency.langchain4j.version>1.15.0</dependency.langchain4j.version>
+        <dependency.langchain4j-jlama.version>1.15.0-beta25</dependency.langchain4j-jlama.version>
         <dependency.bouncycastle.version>1.82</dependency.bouncycastle.version>
         <plugin.surefire.version>3.5.3</plugin.surefire.version>
         <maven.deploy.skip>true</maven.deploy.skip>

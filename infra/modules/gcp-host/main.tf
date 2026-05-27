@@ -70,6 +70,9 @@ locals {
   }
 
   should_enable_remote_resources = var.enable_remote_resources || var.enable_gen_metadata
+
+  # Appended to JAVA_TOOL_OPTIONS when enable_gen_metadata (Jlama / Vector API). See gen-metadata-augment.md.
+  jlama_java_tool_options = "--add-modules=jdk.incubator.vector --enable-preview --enable-native-access=ALL-UNNAMED"
 }
 
 # TODO: probably pull all the way to the top level bc 1) proper tf style, 2) simplifies customization if it doesn't work for a particular environment
@@ -278,9 +281,12 @@ module "api_connector" {
       RULES                  = local.api_connector_rules[each.key] != null ? base64gzip(local.api_connector_rules[each.key]) : null
       EMAIL_CANONICALIZATION = var.email_canonicalization
     },
-    (each.value.enable_gen_metadata || var.enable_gen_metadata) ? { ENABLE_GEN_METADATA = "true" } : {},
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    (each.value.enable_gen_metadata || var.enable_gen_metadata) ? {
+      ENABLE_GEN_METADATA = "true"
+      JAVA_TOOL_OPTIONS = trimspace("${lookup(merge(try(each.value.environment_variables, {}), var.general_environment_variables), "JAVA_TOOL_OPTIONS", "")} ${local.jlama_java_tool_options}")
+    } : {},
   )
 
   remote_resource_bucket        = (local.should_enable_remote_resources || each.value.enable_gen_metadata) ? module.psoxy.artifacts_bucket_name : null

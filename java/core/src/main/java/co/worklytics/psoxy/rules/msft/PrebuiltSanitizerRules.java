@@ -722,7 +722,7 @@ public class PrebuiltSanitizerRules {
 
     /**
      * BETA genMetadata PoC — prompt classification into fixed categories. Not enabled on the
-     * default endpoint until deployment provides GGUF weights, {@code enable_remote_resources},
+     * default endpoint until deployment provides a Jlama model archive, {@code enable_remote_resources},
      * and {@code memory_size_mb >= 4096}. See {@code docs/development/gen-metadata-augment.md}.
      */
     static final Augment.GenMetadata MS_COPILOT_GEN_METADATA_AUGMENT = Augment.GenMetadata.builder()

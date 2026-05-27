@@ -75,6 +75,9 @@ locals {
   caller_requires_direct_lambda_access = !local.use_api_gateway_v2 && length(module.api_connector) > 0
 
   should_enable_remote_resources = var.enable_remote_resources || var.enable_gen_metadata
+
+  # Appended to JAVA_TOOL_OPTIONS when enable_gen_metadata (Jlama / Vector API). See gen-metadata-augment.md.
+  jlama_java_tool_options = "--add-modules=jdk.incubator.vector --enable-preview --enable-native-access=ALL-UNNAMED"
 }
 
 module "psoxy" {
@@ -306,9 +309,12 @@ module "api_connector" {
       )
       IS_DEVELOPMENT_MODE = contains(var.non_production_connectors, each.key)
     },
-    (each.value.enable_gen_metadata || var.enable_gen_metadata) ? { ENABLE_GEN_METADATA = "true" } : {},
     try(each.value.environment_variables, {}),
     var.general_environment_variables,
+    (each.value.enable_gen_metadata || var.enable_gen_metadata) ? {
+      ENABLE_GEN_METADATA = "true"
+      JAVA_TOOL_OPTIONS = trimspace("${lookup(merge(try(each.value.environment_variables, {}), var.general_environment_variables), "JAVA_TOOL_OPTIONS", "")} ${local.jlama_java_tool_options}")
+    } : {},
   )
 
   remote_resource_bucket        = (local.should_enable_remote_resources || each.value.enable_gen_metadata) ? module.psoxy.artifacts_bucket_name : null

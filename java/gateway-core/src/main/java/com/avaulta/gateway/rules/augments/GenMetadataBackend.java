@@ -4,7 +4,8 @@ import com.avaulta.gateway.rules.JsonSchemaFilter;
 
 /**
  * Pluggable backend for {@link Augment.GenMetadata} inference.
- * Implementations may use local GGUF models, Bedrock, Vertex, etc.
+ * Implementations use LangChain4j {@code ChatModel} adapters (Jlama for local embedded models;
+ * Bedrock and Vertex planned for cloud).
  */
 public interface GenMetadataBackend {
 

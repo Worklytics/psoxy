@@ -239,7 +239,7 @@ public abstract class Augment {
     }
 
     /**
-     * BETA: Generates structured metadata via a pluggable generative backend (local GGUF in BETA).
+     * BETA: Generates structured metadata via LangChain4j (Jlama local; Bedrock/Vertex planned).
      * Requires {@link #outputSchema} and {@link #prompt}; model/backend selection is deployment config.
      */
     @SuperBuilder(toBuilder = true)

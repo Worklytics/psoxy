@@ -16,7 +16,14 @@ import java.util.Optional;
 public class GenMetadataConfig {
 
     public static final String BACKEND_LOCAL = "local";
-    public static final String DEFAULT_MODEL = "llama-3.2-1b-instruct";
+    public static final String BACKEND_BEDROCK = "bedrock";
+    public static final String BACKEND_VERTEX = "vertex";
+
+    /**
+     * Default Jlama model (HuggingFace {@code owner/name}); pre-quantized builds from
+     * <a href="https://huggingface.co/tjake">tjake</a> on Hugging Face.
+     */
+    public static final String DEFAULT_MODEL = "tjake/Llama-3.2-1B-Instruct-JQ4";
 
     String backend;
     String modelId;
@@ -61,7 +68,18 @@ public class GenMetadataConfig {
         }
     }
 
-    public String localModelObjectPath() {
-        return "llm/" + modelId + ".gguf";
+    /**
+     * Optional zip archive in remote resources containing a Jlama SafeTensors model directory
+     * ({@code config.json} at the root of the archive or in a single top-level folder).
+     */
+    public String localModelArchivePath() {
+        return "llm/" + localModelCacheDirName() + ".zip";
+    }
+
+    /**
+     * Directory name under the Jlama model cache for this {@link #modelId}.
+     */
+    public String localModelCacheDirName() {
+        return modelId.replace("/", "__");
     }
 }

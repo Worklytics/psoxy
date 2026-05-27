@@ -469,7 +469,7 @@ variable "artifacts_bucket_name" {
 
 variable "enable_gen_metadata" {
   type        = bool
-  description = "BETA: when true, sets ENABLE_GEN_METADATA on all API connectors and floors memory at 4096 MB unless a higher memory_size_mb is set per connector. Implies enable_remote_resources for GGUF model weights."
+  description = "BETA: when true, sets ENABLE_GEN_METADATA and JAVA_TOOL_OPTIONS for Jlama on all API connectors and floors memory at 4096 MB unless a higher memory_size_mb is set per connector. Implies enable_remote_resources for local model archives."
   default     = false
 }
 

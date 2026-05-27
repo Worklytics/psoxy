@@ -464,7 +464,7 @@ variable "max_instances_per_api_connector" {
 
 variable "enable_gen_metadata" {
   type        = bool
-  description = "BETA: when true, sets ENABLE_GEN_METADATA on all API connectors and floors available_memory_mb at 4096 unless a higher value is set per connector. Implies enable_remote_resources for GGUF model weights."
+  description = "BETA: when true, sets ENABLE_GEN_METADATA and JAVA_TOOL_OPTIONS for Jlama on all API connectors and floors available_memory_mb at 4096 unless a higher value is set per connector. Implies enable_remote_resources for local model archives."
   default     = false
 }
 

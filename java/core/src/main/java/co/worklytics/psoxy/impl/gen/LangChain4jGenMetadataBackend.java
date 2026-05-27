@@ -4,14 +4,17 @@ import com.avaulta.gateway.resources.ResourceService;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.augments.GenMetadataBackend;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.kherud.llama.InferenceParameters;
-import de.kherud.llama.LlamaModel;
-import de.kherud.llama.ModelParameters;
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.extern.java.Log;
-import java.io.InputStream;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -19,24 +22,14 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
 /**
- * Local GGUF inference via java-llama.cpp with single-flight model loading and per-model inference locks.
+ * genMetadata inference via LangChain4j {@link ChatModel} (Jlama for local embedded models).
+ *
+ * <p>Thread-safety: per-{@link GenMetadataConfig#getModelId()} {@link #loadLocks} give single-flight
+ * model load and zip extraction; {@link #inferenceLocks} serialize {@link ChatModel} use (Jlama is not
+ * safe for concurrent inference on one instance). {@link ObjectMapper} is shared read-only.
  */
 @Log
-public class LlamaCppLocalBackend implements GenMetadataBackend {
-
-    private static final String LLM_RESOURCE_PREFIX = "llm/";
-
-    private static final String PROMPT_TEMPLATE = """
-        You are a data-processing component in a privacy proxy.
-        Task: %s
-
-        Respond with exactly one JSON value (no markdown, no prose).
-        The JSON MUST validate against this JSON Schema:
-        %s
-
-        Input data to process:
-        %s
-        """;
+public class LangChain4jGenMetadataBackend implements GenMetadataBackend {
 
     enum LoadState {
         ABSENT, LOADING, READY, FAILED
@@ -44,54 +37,64 @@ public class LlamaCppLocalBackend implements GenMetadataBackend {
 
     static final class ModelHandle {
         final LoadState state;
-        final LlamaModel model;
-        final Path modelPath;
+        final ChatModel chatModel;
         final Exception failure;
 
-        ModelHandle(LoadState state, LlamaModel model, Path modelPath, Exception failure) {
+        ModelHandle(LoadState state, ChatModel chatModel, Exception failure) {
             this.state = state;
-            this.model = model;
-            this.modelPath = modelPath;
+            this.chatModel = chatModel;
             this.failure = failure;
         }
 
         static ModelHandle loading() {
-            return new ModelHandle(LoadState.LOADING, null, null, null);
+            return new ModelHandle(LoadState.LOADING, null, null);
         }
 
-        static ModelHandle ready(LlamaModel model, Path path) {
-            return new ModelHandle(LoadState.READY, model, path, null);
+        static ModelHandle ready(ChatModel chatModel) {
+            return new ModelHandle(LoadState.READY, chatModel, null);
         }
 
         static ModelHandle failed(Exception e) {
-            return new ModelHandle(LoadState.FAILED, null, null, e);
+            return new ModelHandle(LoadState.FAILED, null, e);
         }
     }
 
     private final GenMetadataConfig config;
     private final ResourceService resourceService;
     private final ObjectMapper objectMapper;
+    /**
+     * Writable Jlama cache (extracted zips, HF downloads). Not the same as {@link ResourceService},
+     * which only supplies read-only model archives from remote storage.
+     */
+    @Getter(AccessLevel.PACKAGE)
+    private final Path modelCacheDir;
 
     private final ConcurrentHashMap<String, ModelHandle> models = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ReentrantLock> loadLocks = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ReentrantLock> inferenceLocks = new ConcurrentHashMap<>();
 
-    public LlamaCppLocalBackend(GenMetadataConfig config, ResourceService resourceService,
-                                ObjectMapper objectMapper) {
+    public LangChain4jGenMetadataBackend(GenMetadataConfig config, ResourceService resourceService,
+                                         ObjectMapper objectMapper) {
         this.config = config;
         this.resourceService = resourceService;
         this.objectMapper = objectMapper;
+        try {
+            this.modelCacheDir = Files.createTempDirectory("psoxy-jlama-cache");
+            this.modelCacheDir.toFile().deleteOnExit();
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to create genMetadata model cache directory", e);
+        }
     }
 
     @Override
     public Object generate(String taskPrompt, JsonSchemaFilter outputSchema, String inputData) {
         ModelHandle handle = resolveModel();
-        if (handle.state != LoadState.READY || handle.model == null) {
+        if (handle.state != LoadState.READY || handle.chatModel == null) {
             return null;
         }
 
-        String prompt = buildPrompt(taskPrompt, outputSchema, inputData);
-        int tokenCap = config.getMaxTokens();
+        List<ChatMessage> messages =
+            GenMetadataPromptBuilder.toMessages(taskPrompt, outputSchema, inputData, objectMapper);
 
         ReentrantLock inferenceLock =
             inferenceLocks.computeIfAbsent(config.getModelId(), k -> new ReentrantLock());
@@ -102,11 +105,13 @@ public class LlamaCppLocalBackend implements GenMetadataBackend {
                 log.warning("genMetadata inference lock timeout for model " + config.getModelId());
                 return null;
             }
-            InferenceParameters params = new InferenceParameters(prompt)
-                .setTemperature(0f)
-                .setTopP(1f)
-                .setNPredict(tokenCap);
-            return handle.model.complete(params);
+            ChatResponse response = handle.chatModel.chat(ChatRequest.builder()
+                .messages(messages)
+                .build());
+            if (response == null || response.aiMessage() == null) {
+                return null;
+            }
+            return response.aiMessage().text();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return null;
@@ -118,16 +123,6 @@ public class LlamaCppLocalBackend implements GenMetadataBackend {
                 inferenceLock.unlock();
             }
         }
-    }
-
-    String buildPrompt(String taskPrompt, JsonSchemaFilter outputSchema, String inputData) {
-        String schemaJson;
-        try {
-            schemaJson = objectMapper.writeValueAsString(outputSchema);
-        } catch (Exception e) {
-            schemaJson = "{}";
-        }
-        return PROMPT_TEMPLATE.formatted(taskPrompt.trim(), schemaJson, inputData);
     }
 
     ModelHandle resolveModel() {
@@ -156,17 +151,16 @@ public class LlamaCppLocalBackend implements GenMetadataBackend {
             }
             models.put(modelKey, ModelHandle.loading());
             try {
-                Path modelPath = materializeModel(config.localModelObjectPath());
-                ModelParameters modelParams = new ModelParameters().setModel(modelPath.toString());
-                LlamaModel model = new LlamaModel(modelParams);
-                ModelHandle ready = ModelHandle.ready(model, modelPath);
+                ChatModel chatModel =
+                    GenMetadataChatModelFactory.buildLocal(config, modelCacheDir, resourceService);
+                ModelHandle ready = ModelHandle.ready(chatModel);
                 models.put(modelKey, ready);
-                log.info("Loaded genMetadata local model: " + modelKey);
+                log.info("Loaded genMetadata LangChain4j model: " + modelKey);
                 return ready;
             } catch (Exception e) {
                 log.log(Level.WARNING,
-                    "Failed to load genMetadata model '" + modelKey + "' from "
-                        + config.localModelObjectPath(), e);
+                    "Failed to load genMetadata model '" + modelKey + "' (archive path: "
+                        + config.localModelArchivePath() + ")", e);
                 ModelHandle failed = ModelHandle.failed(e);
                 models.put(modelKey, failed);
                 return failed;
@@ -196,37 +190,4 @@ public class LlamaCppLocalBackend implements GenMetadataBackend {
             new IllegalStateException("model load timeout")));
     }
 
-    Path materializeModel(String objectPath) throws Exception {
-        return resourceService.getResource(objectPath)
-            .map(stream -> {
-                try {
-                    Path temp = Files.createTempFile("psoxy-gen-", ".gguf");
-                    temp.toFile().deleteOnExit();
-                    try (InputStream in = stream) {
-                        Files.copy(in, temp, StandardCopyOption.REPLACE_EXISTING);
-                    }
-                    return temp;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            })
-            .orElseThrow(() -> new IllegalStateException(
-                "genMetadata model not found at resource path: " + objectPath
-                    + " (also checked " + ResourceService.DEFAULT_LOCAL_RESOURCE_PATH + "/"
-                    + objectPath + ")"));
-    }
-
-    /** Release native resources. For tests. */
-    void close() {
-        for (Map.Entry<String, ModelHandle> entry : models.entrySet()) {
-            if (entry.getValue().model != null) {
-                try {
-                    entry.getValue().model.close();
-                } catch (Exception e) {
-                    log.log(Level.FINE, "Error closing model " + entry.getKey(), e);
-                }
-            }
-        }
-        models.clear();
-    }
 }
