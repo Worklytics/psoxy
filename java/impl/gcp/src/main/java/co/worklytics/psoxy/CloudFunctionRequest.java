@@ -97,9 +97,8 @@ public class CloudFunctionRequest implements HttpEventRequest {
 
     @Override
     public Optional<String> getClientIp() {
-        return Optional.ofNullable(getCaseInsensitiveHeaders().get(HttpEventRequest.HTTP_HEADER_X_FORWARDED_FOR.toLowerCase()))
-            .flatMap(values -> values.stream()
-                .flatMap(value -> Splitter.on(',').trimResults().omitEmptyStrings().splitToList(value).stream())
+        return getHeader(HttpEventRequest.HTTP_HEADER_X_FORWARDED_FOR)
+            .flatMap(value -> Splitter.on(',').trimResults().omitEmptyStrings().splitToList(value).stream()
                 .reduce((previous, current) -> current));
     }
 

@@ -96,8 +96,8 @@ module "psoxy" {
   enable_webhook_testing             = local.enable_webhook_testing
   webhook_allow_origins              = distinct(flatten([for v in var.webhook_collectors : v.allow_origins]))
   artifacts_bucket_name              = var.artifacts_bucket_name
-  allowed_data_access_ip_blocks      = coalesce(var.allowed_data_access_ip_blocks, [])
-  allowed_webhook_ip_blocks          = coalesce(var.allowed_webhook_ip_blocks, [])
+  allowed_data_access_ip_blocks      = var.allowed_data_access_ip_blocks
+  allowed_webhook_ip_blocks          = var.allowed_webhook_ip_blocks
 }
 
 resource "aws_iam_policy" "execution_lambda_to_caller" {

@@ -1,9 +1,5 @@
 package co.worklytics.psoxy;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.logging.Logger;
@@ -27,12 +23,6 @@ import dagger.Provides;
 public class ConfigRulesModule {
 
     public static final String NO_APP_IDS_SUFFIX = "_no-app-ids";
-
-    /**
-     * Well-known resource path for rules loaded from InstanceResourceService (local FS or remote
-     * cloud storage).
-     */
-    public static final String RULES_RESOURCE_PATH = "RULES";
 
     @Provides @Singleton
     static RESTRules restRules(RuleSet ruleSet) {
@@ -88,27 +78,10 @@ public class ConfigRulesModule {
         };
 
         return loadAndLog.apply(rulesUtils.getRulesFromConfig(config, envVarsConfigService), "Rules: loaded from environment config (RULES variable parsed as base64-encoded YAML)")
-            .or( () -> loadAndLog.apply(getRulesFromResource(rulesUtils, resourceService), "Rules: loaded from instance resource (" + RULES_RESOURCE_PATH + ")"))
+            .or( () -> loadAndLog.apply(rulesUtils.getRulesFromResource(resourceService), "Rules: loaded from instance resource (" + RulesUtils.RULES_RESOURCE_PATH + ")"))
             .or( () -> loadAndLog.apply(getDefaults(log, config), "Rules: fallback to prebuilt rules"))
                 .orElseThrow( () -> new RuntimeException("No rules found"));
 
-    }
-
-    /**
-     * Attempt to load rules from the InstanceResourceService (local FS or remote S3/GCS bucket).
-     */
-    static Optional<RuleSet> getRulesFromResource(RulesUtils rulesUtils, ResourceService resourceService) {
-        Optional<InputStream> rulesStream = resourceService.getResource(RULES_RESOURCE_PATH);
-        if (rulesStream.isEmpty()) {
-            return Optional.empty();
-        }
-
-        try (InputStream is = rulesStream.get()) {
-            String yamlContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-            return Optional.of(rulesUtils.parse(yamlContent));
-        } catch (IOException e) {
-            throw new UncheckedIOException("Failed to read rules from resource service", e);
-        }
     }
 
     //NOTE: not compile error due to type-erasure, but DEFAULTS are all RESTRules

@@ -99,6 +99,8 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
 
     @Override
     public Optional<String> getClientIp() {
+        // Prefer API Gateway's identity.sourceIp (derived from the TCP connection) over
+        // X-Forwarded-For, which callers can spoof when not set by a trusted proxy.
         return Optional.ofNullable(event.getRequestContext().getIdentity())
             .map(APIGatewayProxyRequestEvent.RequestIdentity::getSourceIp)
             .filter(StringUtils::isNotBlank)
