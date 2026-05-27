@@ -147,7 +147,7 @@ Use the following command to test a Psoxy "bulk" instance deployed to GCP:
 node cli-file-upload.js -d GCP -i input-bucket-name -o output-bucket-name -f /path/to/file.csv
 ```
 
-In this case, `-i` and `-o` options represent [Google Cloud Storage] buckets.
+In this case, `-i` and `-o` options represent [Google Cloud Storage] buckets. Bulk testing uses the [gcloud storage] CLI for uploads and downloads (requires [Google Cloud SDK] to be installed and authenticated).
 
 The testing script will rename the files you upload by appending a timestamp value as suffix:
 `my-test-file.csv` will appear as `my-test-file-{timestamp}.csv` in both the input and output
@@ -166,6 +166,7 @@ available options (keep sanitized file in the output bucket, save it to disk, et
 [Zoom]: https://zoom.us
 [Zoom API endpoint]: https://marketplace.zoom.us/docs/api-reference/zoom-api/methods/#operation/users
 [Google Cloud SDK]: https://cloud.google.com/sdk/gcloud/reference/auth/print-identity-token
+[gcloud storage]: https://cloud.google.com/storage/docs/discover-object-storage-gcloud
 [authorize gcloud first]: https://cloud.google.com/sdk/gcloud/reference/auth/login
 [S3]: https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html
 [Google Cloud Storage]: https://cloud.google.com/storage
