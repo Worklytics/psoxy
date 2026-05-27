@@ -66,3 +66,26 @@ When modifying Java files, follow these guidelines:
 2. **Prefer Fluid Builders**: We generally prefer using fluid-builder patterns, leveraging Lombok's `@Builder` annotation for object construction instead of constructors with many parameters.
 3. **Stylistic Changes**: Agents should avoid making stylistic changes (e.g., reformatting code, optimizing all imports, or resolving linting issues irrelevant to the functional change) to the repository unless explicitly directed by the user. 
 4. **Separate Commits**: When explicitly directed to make stylistic changes or broad refactoring, these should be separated into distinct commits from functional changes to simplify review.
+5. **Concurrency**: The proxy may handle concurrent requests. Any new code introducing shared mutable state, lazy initialization, or caches must be thread-safe. Use `volatile`, `synchronized`, `ConcurrentHashMap`, or immutable snapshots (`Set.copyOf`, `List.copyOf`) as appropriate. Document thread-safety assumptions in javadoc.
+
+## Markdown Conventions
+
+When writing or modifying markdown files (`.md`) in this repository:
+
+1. **No Hard-Wrapping**: Do not hard-wrap prose at 80 columns (or any fixed width). Write each paragraph as a single long line and let the editor soft-wrap. Hard-wrapped prose creates noisy diffs when sentences are edited.
+2. **Tables and Code Blocks**: These are inherently fixed-width; format them for readability as needed.
+3. **Headings**: Use ATX-style headings (`#`, `##`, etc.).
+
+## Documentation Conventions
+
+### Connector Documentation
+When writing or modifying documentation for data sources under `docs/sources/`, you must always explicitly include the Connector ID directly under the main header (H1/H2).
+
+**Example Format**:
+```markdown
+# Asana
+
+**Connector ID:** `asana`
+```
+
+

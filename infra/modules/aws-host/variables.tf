@@ -211,6 +211,7 @@ variable "api_connectors" {
     settings_to_provide = optional(map(string), {})
     rules_file          = optional(string, null)
     rules_raw           = optional(string, null)
+    timeout_seconds     = optional(number)
   }))
 
   description = "map of API connectors to provision"
@@ -220,6 +221,40 @@ variable "non_production_connectors" {
   type        = list(string)
   description = "connector ids in this list will be in development mode (not for production use"
   default     = []
+}
+
+variable "api_connector_rules" {
+  description = "DEPRECATED -> custom_api_connector_rules. map of specific connector id -> JSON representation of Rules to be provided in environment variable proxy instance handling it"
+  type        = any
+  default     = {}
+}
+
+variable "allowed_data_access_ip_blocks" {
+  description = <<-EOT
+    IPs or CIDR blocks allowed to make data access requests. On AWS, enforces at IAM (assume-role aws:SourceIp) and in the proxy (ALLOWED_DATA_ACCESS_IP_BLOCKS). On GCP, application layer only. Use null (default) for no restriction. If set, the list must contain at least one value. See docs/configuration/ip-allowlisting.md.
+  EOT
+  type        = list(string)
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.allowed_data_access_ip_blocks == null || try(length(var.allowed_data_access_ip_blocks) > 0, false)
+    error_message = "allowed_data_access_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
+  }
+}
+
+variable "allowed_webhook_ip_blocks" {
+  description = <<-EOT
+    IPs or CIDR blocks allowed to send webhooks. On AWS, enforces at IAM (webhook-test-caller aws:SourceIp) and in the proxy (ALLOWED_WEBHOOK_IP_BLOCKS). On GCP, application layer only. Use null (default) for no restriction. If set, the list must contain at least one value. See docs/configuration/ip-allowlisting.md.
+  EOT
+  type        = list(string)
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.allowed_webhook_ip_blocks == null || try(length(var.allowed_webhook_ip_blocks) > 0, false)
+    error_message = "allowed_webhook_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
+  }
 }
 
 variable "custom_api_connector_rules" {
@@ -429,3 +464,9 @@ variable "artifacts_bucket_name" {
   default     = null
 }
 
+
+variable "enable_remote_resources" {
+  type        = bool
+  description = "**beta** Whether to enable remote resource loading from the artifacts S3 bucket (rules, NLP models, etc.). When true, sets REMOTE_RESOURCE_BUCKET env var and grants s3:GetObject to each Lambda. Default will change to `true` in next major version."
+  default     = false # will change to true in 0.7.x
+}

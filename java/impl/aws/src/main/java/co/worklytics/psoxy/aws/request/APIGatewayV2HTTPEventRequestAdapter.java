@@ -134,7 +134,11 @@ public class APIGatewayV2HTTPEventRequestAdapter implements HttpEventRequest {
 
     @Override
     public Optional<String> getClientIp() {
-       return Optional.ofNullable(this.getCaseInsensitiveHeaders().get(HTTP_HEADER_X_FORWARDED_FOR.toLowerCase()));
+       return Optional.ofNullable(event.getRequestContext())
+           .map(context -> context.getHttp())
+           .map(http -> http.getSourceIp())
+           .filter(StringUtils::isNotBlank)
+           .or(() -> Optional.ofNullable(this.getCaseInsensitiveHeaders().get(HTTP_HEADER_X_FORWARDED_FOR.toLowerCase())));
     }
 
     @Override

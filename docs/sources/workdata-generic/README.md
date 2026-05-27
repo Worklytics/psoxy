@@ -1,5 +1,9 @@
 # Workdata Generic Connector
 
+**Connector ID:** `workdata-generic`
+
+**Availability:** Beta
+
 This connection type allows exporting pseudonymized metadata from generic workloads or custom self-hosted applications using standard JSON payloads (NDJSON format). Since this is an off-the-shelf bulk import connection, data must be pushed into an S3/GCS bucket that Psoxy will process.
 
 To enable this connector in one of our examples, add `workdata-generic` to `enabled_connectors` in your `terraform.tfvars` file.

@@ -469,6 +469,40 @@ variable "lookup_table_builders" {
   }
 }
 
+variable "allowed_data_access_ip_blocks" {
+  description = <<-EOT
+    IPs or CIDR blocks allowed to make data access requests. On AWS, enforces at IAM (assume-role aws:SourceIp) and in the proxy. Use null (default) for no restriction. If set, the list must contain at least one value. See docs/configuration/ip-allowlisting.md.
+  EOT
+  type        = list(string)
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.allowed_data_access_ip_blocks == null || try(length(var.allowed_data_access_ip_blocks) > 0, false)
+    error_message = "allowed_data_access_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
+  }
+}
+
+variable "allowed_webhook_ip_blocks" {
+  description = <<-EOT
+    IPs or CIDR blocks allowed to send webhooks. On AWS, enforces at IAM (webhook-test-caller aws:SourceIp) and in the proxy. Use null (default) for no restriction. If set, the list must contain at least one value. See docs/configuration/ip-allowlisting.md.
+  EOT
+  type        = list(string)
+  nullable    = true
+  default     = null
+
+  validation {
+    condition     = var.allowed_webhook_ip_blocks == null || try(length(var.allowed_webhook_ip_blocks) > 0, false)
+    error_message = "allowed_webhook_ip_blocks must be null (allow all) or a non-empty list; an empty list is invalid."
+  }
+}
+
+variable "connector_settings" {
+  type        = map(string)
+  default     = {}
+  description = "Connector-specific settings."
+}
+
 variable "todos_as_outputs" {
   type        = bool
   description = "whether to render TODOs as outputs (former useful if you're using Terraform Cloud/Enterprise, or somewhere else where the filesystem is not readily accessible to you)"
@@ -481,8 +515,4 @@ variable "todos_as_local_files" {
   default     = true
 }
 
-variable "connector_settings" {
-  type        = map(string)
-  default     = {}
-  description = "Connector-specific settings."
-}
+

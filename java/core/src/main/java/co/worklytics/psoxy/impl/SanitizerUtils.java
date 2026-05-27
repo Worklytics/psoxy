@@ -159,17 +159,22 @@ public class SanitizerUtils {
         return (s, jsonConfiguration) -> {
             if (!(s instanceof String toTokenize)) {
                 if (s != null) {
-                    log.warning("value matched by " + transform + " not of type String");
+                    log.warning("value matched by " + transform.getClass().getSimpleName()
+                            + " not of type String");
                 }
                 return null;
             } else {
                 if (transform.getIsJsonEscaped() && StringUtils.isNotBlank(transform.getJsonPathToProcessWhenEscaped())) {
                     DocumentContext jsonContext = JsonPath.parse(toTokenize);
-                    List<String> texts = jsonContext.read(transform.getJsonPathToProcessWhenEscaped());
-
-                    for (String text : texts) {
-                        jsonContext.set(transform.getJsonPathToProcessWhenEscaped(), jsonConfiguration.jsonProvider().toJson(transform.generate(text)));
-                    }
+                    jsonContext.map(transform.getJsonPathToProcessWhenEscaped(), (text, configuration) -> {
+                        if (!(text instanceof String textToDigest)) {
+                            if (text != null) {
+                                log.warning("value matched by " + transform.getClass().getSimpleName() + " not of type String");
+                            }
+                            return null;
+                        }
+                        return configuration.jsonProvider().toJson(transform.generate(textToDigest));
+                    });
 
                     return jsonContext.jsonString();
                 } else {

@@ -5,17 +5,19 @@ import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
 import co.worklytics.psoxy.gateway.output.Output;
 import co.worklytics.psoxy.gateway.output.OutputLocation;
 import co.worklytics.psoxy.gateway.ProcessedContent;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import lombok.extern.java.Log;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.io.ByteArrayInputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -29,7 +31,7 @@ public class S3Output implements Output {
     final String pathPrefix;
 
     @Inject
-    Provider<AmazonS3> s3ClientProvider;
+    Provider<S3Client> s3ClientProvider;
 
     @AssistedInject
     public S3Output(@Assisted OutputLocation location) {
@@ -53,25 +55,25 @@ public class S3Output implements Output {
         }
 
         try {
-            AmazonS3 s3Client = s3ClientProvider.get();
+            S3Client s3Client = s3ClientProvider.get();
 
-            ObjectMetadata metadata = new ObjectMetadata();
-
-            // s3 client blows up if these are filled with 'null' values, so only set if present
-            Optional.ofNullable(content.getContentEncoding()).ifPresent(metadata::setContentEncoding);
-            Optional.ofNullable(content.getContentType()).ifPresent(metadata::setContentType);
-
-            metadata.setContentLength(content.getContent().length);  //explicit length avoids S3 complaint about buffering ...
-
+            Map<String, String> userMetadata = new HashMap<>();
 
             content.getMetadata().entrySet().stream()
                 .filter(entry -> entry.getValue() != null) // avoid null values
-                .forEach(entry -> metadata.addUserMetadata(entry.getKey(), entry.getValue()));
+                .forEach(entry -> userMetadata.put(entry.getKey(), entry.getValue()));
 
-            s3Client.putObject(bucket,
-                pathPrefix + key,
-                new ByteArrayInputStream(content.getContent()),
-                metadata);
+            PutObjectRequest.Builder putBuilder = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(pathPrefix + key)
+                .contentLength((long) content.getContent().length)
+                .metadata(userMetadata);
+
+            // s3 client blows up if these are filled with 'null' values, so only set if present
+            Optional.ofNullable(content.getContentEncoding()).ifPresent(putBuilder::contentEncoding);
+            Optional.ofNullable(content.getContentType()).ifPresent(putBuilder::contentType);
+
+            s3Client.putObject(putBuilder.build(), RequestBody.fromBytes(content.getContent()));
         } catch (Exception e) {
             throw new WriteFailure("Failed to write to S3 output", e);
         }

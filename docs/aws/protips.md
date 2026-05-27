@@ -118,7 +118,58 @@ Analogous approaches can be used to configure versioning, replication, etc;
 - [`aws_s3_bucket_versioning`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning)
 - [`aws_s3_bucket_replication`](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_replication)
 
-Note that encryption, lifecycle, public_access_block are set by the Workltyics-provided modules, so you may have conflicts issues if you also try to set those outside.
+Note that encryption and public_access_block are set by the Worklytics-provided modules, so you may have conflict issues if you also try to set those outside.
+
+### Lifecycle Configurations
+
+S3 bucket lifecycle configurations are provisioned inside the Worklytics modules by default. However, AWS only allows one lifecycle configuration resource to be applied to a bucket at a time.
+
+If you need to define custom or additional lifecycle rules for all buckets (e.g., to abort incomplete multipart uploads or transition old objects), you can provision your own `aws_s3_bucket_lifecycle_configuration` resources.
+
+#### 1. Avoid Conflicts with Module-Level Rules
+The Worklytics modules currently manage S3 lifecycle configuration for these buckets. Because AWS allows only one `aws_s3_bucket_lifecycle_configuration` per bucket, you cannot safely add a separate lifecycle configuration resource for the same bucket unless the module is changed to stop managing lifecycle rules for it.
+
+Do **not** rely on setting `bulk_input_expiration_days` or `bulk_sanitized_expiration_days` to `0` as a way to disable the module-managed lifecycle configuration. That is not a currently supported mechanism.
+
+If you need fully custom lifecycle rules on these buckets, use a version of the module that does not create lifecycle configuration for them, or update/fork the module to make that behavior conditional before adding your own `aws_s3_bucket_lifecycle_configuration` resources.
+
+#### 2. Exclude the Artifacts Bucket
+{% hint style="warning" %}
+Do **NOT** apply object expiration or auto-deletion lifecycle rules to the **artifacts bucket** (e.g. `aws_s3_bucket.artifacts`). This bucket stores the Psoxy deployment JAR/ZIP. If the JAR is deleted, the next Terraform plan/apply will fail or force a full rebuild and re-upload.
+{% endhint %}
+
+#### Example Configuration
+
+You can gather the relevant data buckets (which are exported as outputs from the module/host) and apply standard lifecycle rules to them (such as aborting incomplete multipart uploads after 7 days) as shown below:
+
+```hcl
+locals {
+  # Gather data buckets created by the modules, excluding the deployment artifacts bucket
+  buckets_to_secure = merge(
+    { for k, v in module.psoxy.bulk_connector_instances : "${k}_input" => v.input_bucket },
+    { for k, v in module.psoxy.bulk_connector_instances : "${k}_sanitized" => v.sanitized_bucket },
+    module.psoxy.lookup_output_buckets,
+  )
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "data_buckets" {
+  for_each = local.buckets_to_secure
+
+  bucket = each.value
+
+  rule {
+    id     = "abort-incomplete-multipart-uploads"
+    status = "Enabled"
+
+    filter {}
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+}
+```
+
 
 ## Lambda Execution Role
 *beta* - released from v0.4.50; YMMV, and may be subject to change.

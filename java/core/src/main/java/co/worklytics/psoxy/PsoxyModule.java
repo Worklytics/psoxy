@@ -30,7 +30,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.BulkModeConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -38,6 +38,7 @@ import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.SourceAuthStrategy;
 import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.impl.AugmentProcessor;
 import co.worklytics.psoxy.gateway.impl.oauth.OAuthRefreshTokenSourceAuthStrategy;
 import co.worklytics.psoxy.storage.BulkDataSanitizerFactory;
 import co.worklytics.psoxy.storage.impl.BulkDataSanitizerFactoryImpl;
@@ -111,15 +112,16 @@ public class PsoxyModule {
 
     @Provides
     @Singleton
-    static SourceAuthStrategy sourceAuthStrategy(ConfigService configService,
+    static SourceAuthStrategy sourceAuthStrategy(ApiModeConfig apiModeConfig,
             Set<SourceAuthStrategy> sourceAuthStrategies) {
-        String identifier = configService
-                .getConfigPropertyOrError(ApiModeConfigProperty.SOURCE_AUTH_STRATEGY_IDENTIFIER);
+        String identifier = apiModeConfig.getSourceAuthStrategyIdentifier()
+                .orElseThrow(() -> new IllegalStateException(
+                        "No SOURCE_AUTH_STRATEGY_IDENTIFIER configured"));
         return sourceAuthStrategies
                 .stream()
                 .filter(impl -> Objects.equals(identifier, impl.getConfigIdentifier()))
                 .findFirst()
-                .orElseThrow(() -> new Error(
+                .orElseThrow(() -> new IllegalStateException(
                         "No SourceAuthStrategy impl matching configured identifier: "
                                 + identifier));
     }
@@ -334,6 +336,7 @@ public class PsoxyModule {
         JsonSchemaFilterUtils.Options.OptionsBuilder options =
                 JsonSchemaFilterUtils.Options.builder();
         options.logRedactions(envVarsConfigService.isDevelopment());
+        options.exemptPropertyPrefix(AugmentProcessor.AUGMENT_PROPERTY_PREFIX);
 
         return new JsonSchemaFilterUtils(objectMapper, options.build());
     }

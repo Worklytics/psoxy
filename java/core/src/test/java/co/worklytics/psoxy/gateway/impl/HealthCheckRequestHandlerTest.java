@@ -3,7 +3,7 @@ package co.worklytics.psoxy.gateway.impl;
 import co.worklytics.psoxy.ControlHeader;
 import co.worklytics.psoxy.HealthCheckResult;
 import co.worklytics.psoxy.PsoxyModule;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -30,6 +30,7 @@ public class HealthCheckRequestHandlerTest {
     @Singleton
     @Component(modules = {
             PsoxyModule.class,
+            TestModules.ForApiModeConfig.class,
             MockModules.ForConfigService.class,
             MockModules.ForSecretStore.class,
             MockModules.ForRules.class,
@@ -58,6 +59,9 @@ public class HealthCheckRequestHandlerTest {
     @Inject
     HealthCheckRequestHandler handler;
 
+    @Inject
+    ApiModeConfig apiModeConfig;
+
     HttpEventRequest request;
 
     @Test
@@ -65,7 +69,7 @@ public class HealthCheckRequestHandlerTest {
         when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
                 .thenReturn(Optional.of(""));
 
-        when(handler.config.getConfigPropertyAsOptional(eq(ApiModeConfigProperty.TARGET_HOST)))
+        when(apiModeConfig.getTargetHost())
                 .thenReturn(Optional.of("host"));
 
         Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
@@ -88,7 +92,7 @@ public class HealthCheckRequestHandlerTest {
         when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
                 .thenReturn(Optional.of(""));
 
-        when(handler.config.getConfigPropertyAsOptional(eq(ApiModeConfigProperty.TARGET_HOST)))
+        when(apiModeConfig.getTargetHost())
                 .thenReturn(Optional.empty());
 
         Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
@@ -104,8 +108,24 @@ public class HealthCheckRequestHandlerTest {
         when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
                 .thenReturn(Optional.of(""));
 
-        when(handler.config.getConfigPropertyAsOptional(eq(ApiModeConfigProperty.TARGET_HOST)))
+        when(apiModeConfig.getTargetHost())
                 .thenReturn(Optional.of(""));
+
+        Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
+
+        assertTrue(response.isPresent());
+
+        assertEquals(HttpStatus.SC_PRECONDITION_FAILED, response.get().getStatusCode());
+    }
+
+    @Test
+    void handleIfHealthCheck_should_return_invalid_response_when_target_host_uses_http() {
+
+        when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
+                .thenReturn(Optional.of(""));
+
+        when(apiModeConfig.getTargetHost())
+                .thenReturn(Optional.of("http://mycompany.com/gitlab"));
 
         Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
 

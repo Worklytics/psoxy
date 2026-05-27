@@ -73,6 +73,10 @@ module "psoxy_lambda" {
       NEW_RELIC_LAMBDA_HANDLER = "co.worklytics.psoxy.S3Handler"
     } : {}
   )
+
+  remote_resource_bucket        = var.remote_resource_bucket
+  remote_resource_instance_path = var.remote_resource_instance_path
+  remote_resource_shared_path   = var.remote_resource_shared_path
 }
 
 resource "aws_s3_bucket" "input" {
@@ -105,6 +109,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "expire_input_files" {
   rule {
     id     = "expire"
     status = "Enabled"
+
+    filter {}
+
     expiration {
       days = var.input_expiration_days
     }
@@ -139,6 +146,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "expire_sanitized_files" {
   rule {
     id     = "expire"
     status = "Enabled"
+
+    filter {}
+
     expiration {
       days = var.sanitized_expiration_days
     }

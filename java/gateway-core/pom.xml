@@ -98,6 +98,12 @@
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
             <version>5.4.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -127,6 +133,14 @@
             <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- json-schema-validator requires slf4j-api; nop binding silences provider warnings in tests -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>2.0.17</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -137,6 +151,13 @@
                 <version>${plugin.surefire.version}</version>
                 <configuration>
                     <useModulePath>false</useModulePath>
+                    <argLine>-javaagent:"${settings.localRepository}/org/mockito/mockito-core/${dependency.mockito-junit-jupiter.version}/mockito-core-${dependency.mockito-junit-jupiter.version}.jar"</argLine>
+                    <systemProperties>
+                        <property>
+                            <name>java.util.logging.config.file</name>
+                            <value>test-execution-logging.properties</value>
+                        </property>
+                    </systemProperties>
                 </configuration>
             </plugin>
             <plugin>

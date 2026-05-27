@@ -3,6 +3,8 @@
 terraform {
   required_providers {
     aws = {
+      source  = "hashicorp/aws"
+      version = ">= 6.0"
     }
   }
 }
@@ -190,7 +192,7 @@ module "psoxy_lambda" {
   function_env_kms_key_arn             = var.function_env_kms_key_arn
   logs_kms_key_arn                     = var.logs_kms_key_arn
   memory_size_mb                       = var.memory_size_mb
-  timeout_seconds                      = 55
+  timeout_seconds                      = var.timeout_seconds
   reserved_concurrent_executions       = var.reserved_concurrent_executions
   source_kind                          = var.source_kind
   function_parameters                  = var.function_parameters
@@ -215,6 +217,12 @@ module "psoxy_lambda" {
   environment_variables = merge(
     var.environment_variables,
     local.required_env_vars,
+    {
+      REQUEST_TIMEOUT_SECONDS = tostring(var.timeout_seconds)
+    },
+    var.allowed_data_access_ip_blocks != null ? {
+      ALLOWED_DATA_ACCESS_IP_BLOCKS = join(",", var.allowed_data_access_ip_blocks)
+    } : {},
     var.enable_async_processing ? {
       ASYNC_OUTPUT_DESTINATION    = "s3://${module.async_output[0].bucket_id}",
       ASYNC_API_REQUEST_QUEUE_URL = aws_sqs_queue.async_api_request_queue[0].url
@@ -224,6 +232,10 @@ module "psoxy_lambda" {
       NEW_RELIC_LAMBDA_HANDLER = "co.worklytics.psoxy.${local.event_handler_implementation}"
     } : {},
   )
+
+  remote_resource_bucket        = var.remote_resource_bucket
+  remote_resource_instance_path = var.remote_resource_instance_path
+  remote_resource_shared_path   = var.remote_resource_shared_path
 }
 
 # if async processing is enabled, trigger the lambda from the SQS queue

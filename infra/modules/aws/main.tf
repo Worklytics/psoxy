@@ -3,7 +3,8 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
+      version = ">= 6.0"
     }
   }
 }
@@ -14,13 +15,19 @@ locals {
 
   aws_caller_statements = [
     for arn in var.caller_aws_arns :
-    {
+    merge({
       Action : "sts:AssumeRole"
       Effect : "Allow"
       Principal : {
         "AWS" : arn
       }
-    }
+      }, length(var.allowed_data_access_ip_blocks) > 0 ? {
+      Condition : {
+        "ForAnyValue:IpAddress" : {
+          "aws:SourceIp" : var.allowed_data_access_ip_blocks
+        }
+      }
+    } : {})
   ]
 
   gcp_service_account_caller_statements = [
@@ -31,12 +38,33 @@ locals {
       Principal : {
         "Federated" : "accounts.google.com"
       },
-      Condition : {
+      Condition : merge({
         "StringEquals" : {
           "accounts.google.com:aud" : id
         }
-      }
+        }, length(var.allowed_data_access_ip_blocks) > 0 ? {
+        "ForAnyValue:IpAddress" : {
+          "aws:SourceIp" : var.allowed_data_access_ip_blocks
+        }
+      } : {})
     }
+  ]
+
+  webhook_aws_caller_statements = [
+    for arn in var.caller_aws_arns :
+    merge({
+      Action : "sts:AssumeRole"
+      Effect : "Allow"
+      Principal : {
+        "AWS" : arn
+      }
+      }, length(var.allowed_webhook_ip_blocks) > 0 ? {
+      Condition : {
+        "ForAnyValue:IpAddress" : {
+          "aws:SourceIp" : var.allowed_webhook_ip_blocks
+        }
+      }
+    } : {})
   ]
 }
 
@@ -86,7 +114,7 @@ resource "aws_iam_role" "webhook-test-caller" {
     "Version" : "2012-10-17",
     "Statement" : concat(
       [],
-      local.aws_caller_statements
+      local.webhook_aws_caller_statements
     )
   })
 

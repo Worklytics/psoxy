@@ -5,6 +5,7 @@ import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.rules.generics.Calendar;
 import com.avaulta.gateway.rules.Endpoint;
 import co.worklytics.psoxy.rules.Rules2;
+import com.avaulta.gateway.rules.augments.Augment;
 import com.avaulta.gateway.rules.transforms.Transform;
 import co.worklytics.psoxy.rules.zoom.ZoomTransforms;
 import com.avaulta.gateway.pseudonyms.PseudonymEncoder;
@@ -710,23 +711,28 @@ public class PrebuiltSanitizerRules {
         .jsonPath("$..emailAddress")
         .build();
 
-    static final Transform.TextDigest MS_COPILOT_TEXT_DIGEST_ATTACHMENT = Transform.TextDigest.builder()
+    static final Augment.TextDigest MS_COPILOT_AUGMENT_ATTACHMENT = Augment.TextDigest.builder()
         .jsonPath("$..attachments[*].content")
-        .isJsonEscaped(true)
-        .jsonPathToProcessWhenEscaped("$..text")
+        .innerJsonPath("$..text")
         .build();
 
-    static final Transform.TextDigest MS_COPILOT_TEXT_DIGEST_BODY = Transform.TextDigest.builder()
+    static final Augment.TextDigest MS_COPILOT_AUGMENT_BODY = Augment.TextDigest.builder()
         .jsonPath("$..body.content")
+        .build();
+
+    static final Transform.Redact MS_COPILOT_CONTENT_REDACT = Transform.Redact.builder()
+        .jsonPath("$..body.content")
+        .jsonPath("$..attachments[*].content")
         .build();
 
     static final Endpoint MS_COPILOT_INTERACTIONS = Endpoint.builder()
         .pathTemplate(MS_COPILOT_INTERACTIONS_PATH)
         .allowedQueryParams(List.of("$filter"))
+        .augment(MS_COPILOT_AUGMENT_ATTACHMENT)
+        .augment(MS_COPILOT_AUGMENT_BODY)
         .transform(MS_COPILOT_PSEUDONYMIZE)
-        .transform(MS_COPILOT_TEXT_DIGEST_ATTACHMENT)
-        .transform(MS_COPILOT_TEXT_DIGEST_BODY)
         .transform(MS_COPILOT_INTERACTIONS_REDACT)
+        .transform(MS_COPILOT_CONTENT_REDACT)
         .transform(REDACT_ODATA_CONTEXT)
         .transform(REDACT_ODATA_COUNT)
         .transform(REDACT_ODATA_TYPE)
@@ -757,14 +763,14 @@ public class PrebuiltSanitizerRules {
                     .jsonPath("$..from..[?(@.applicationIdentityType != \"bot\")].id")
                     .jsonPath("$..mentions[*][?(@.applicationIdentityType != \"bot\")].id")
                     .build(),
-                MS_COPILOT_TEXT_DIGEST_ATTACHMENT,
-                MS_COPILOT_TEXT_DIGEST_BODY,
+                MS_COPILOT_CONTENT_REDACT,
                 MS_COPILOT_INTERACTIONS_REDACT
                     .toBuilder()
                     .jsonPaths(REDACT_ODATA_CONTEXT.getJsonPaths())
                     .jsonPaths(REDACT_ODATA_COUNT.getJsonPaths())
                     .jsonPaths(REDACT_ODATA_TYPE.getJsonPaths())
                     .build()))
+            .augments(Arrays.asList(MS_COPILOT_AUGMENT_ATTACHMENT, MS_COPILOT_AUGMENT_BODY))
             .build())
         .build()
         .withAdditionalEndpoints(ENTRA_ID_USERS_NO_APP_IDS)

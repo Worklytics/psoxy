@@ -14,17 +14,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.http.HttpTransportFactory;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.LoggingConfiguration;
 import co.worklytics.psoxy.gateway.ProcessedDataStage;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConstants;
+import co.worklytics.psoxy.gateway.ResourceService;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.CompositeConfigService;
+import co.worklytics.psoxy.gateway.impl.CompositeResourceService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
+import co.worklytics.psoxy.gateway.impl.LocalFileResourceService;
 import co.worklytics.psoxy.gateway.impl.WebhookSanitizer;
 import co.worklytics.psoxy.gateway.impl.output.NoOutput;
 import co.worklytics.psoxy.gateway.impl.output.OutputUtils;
@@ -90,11 +93,9 @@ public class FunctionRuntimeModule {
 
     // q: should we just replace this with a Provider<HttpTransport>, rather than having more coupling to google-http-client classes?
     @Provides @Singleton
-    HttpTransportFactory providesHttpTransportFactory(EnvVarsConfigService envVarsConfigService) {
-        final String sslContextProtocol =
-            envVarsConfigService.getConfigPropertyAsOptional(ApiModeConfigProperty.TLS_VERSION)
-                .orElse(ApiModeConfigProperty.TlsVersions.TLSv1_3);
-        if (Arrays.stream(ApiModeConfigProperty.TlsVersions.ALL).noneMatch(s -> sslContextProtocol.equals(s))) {
+    HttpTransportFactory providesHttpTransportFactory(ApiModeConfig apiModeConfig) {
+        final String sslContextProtocol = apiModeConfig.getTlsVersion();
+        if (Arrays.stream(ApiModeConfig.TlsVersions.ALL).noneMatch(s -> sslContextProtocol.equals(s))) {
             throw new IllegalArgumentException("Invalid TLS version: " + sslContextProtocol);
         }
 
@@ -120,6 +121,25 @@ public class FunctionRuntimeModule {
         return CompositeConfigService.builder()
             .preferred(envVarsConfigService)
             .fallback(nativeConfigService)
+            .build();
+    }
+
+    /**
+     * Provides the instance-scoped ResourceService, composing local FS with the
+     * platform-specific remote ResourceService (S3/GCS), using failover semantics.
+     *
+     * <p>Failover order: local filesystem ({@link ResourceService#DEFAULT_LOCAL_RESOURCE_PATH})
+     * → remote cloud storage → no-op</p>
+     *
+     * <p>The local FS path is always checked first (no env var needed). It can be populated
+     * via deployment layers, Lambda layers, init scripts, etc.</p>
+     */
+    @Provides @Singleton
+    static ResourceService instanceResourceService(@Named("Remote") ResourceService remoteResourceService) {
+        // always layer local FS on top of remote — local is a fast path / override
+        return CompositeResourceService.builder()
+            .preferred(new LocalFileResourceService(ResourceService.DEFAULT_LOCAL_RESOURCE_PATH))
+            .fallback(remoteResourceService)
             .build();
     }
 
@@ -168,6 +188,11 @@ public class FunctionRuntimeModule {
     @Provides @Singleton
     static WebhookCollectorModeConfig webhookCollectorModeConfig(ConfigService configService) {
         return WebhookCollectorModeConfig.fromConfigService(configService);
+    }
+
+    @Provides @Singleton
+    static ApiModeConfig apiModeConfig(ConfigService configService) {
+        return ApiModeConfig.fromConfigService(configService);
     }
 
     @Provides @Singleton

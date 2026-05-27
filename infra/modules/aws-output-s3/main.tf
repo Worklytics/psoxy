@@ -56,6 +56,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "ttl" {
   rule {
     id     = "expire-after-${var.lifecycle_ttl_days}-days"
     status = "Enabled"
+
+    filter {}
+
     expiration {
       days = var.lifecycle_ttl_days
     }

@@ -150,6 +150,7 @@ module "sanitized_webhook_output" {
     var.gcp_principals_authorized_to_test,
     [for email in var.invoker_sa_emails : "serviceAccount:${email}"]
   )
+  allowed_accessor_ip_blocks = var.allowed_webhook_ip_blocks
 }
 
 
@@ -166,6 +167,7 @@ module "side_output_bucket" {
   bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence.result}-"
   bucket_name_suffix             = "side-output"
   sanitizer_accessor_principals  = each.value.allowed_readers
+  allowed_accessor_ip_blocks     = var.allowed_webhook_ip_blocks
 }
 
 # TODO: will this work cross-project ?? concern would be that `bucket_write_role_id` is likely a project-level role
@@ -175,6 +177,26 @@ resource "google_storage_bucket_iam_member" "grant_sa_accessor_on_side_output_bu
   bucket = replace(each.value.bucket, "gs://", "")
   member = "serviceAccount:${var.service_account_email}"
   role   = var.bucket_write_role_id
+}
+
+# Grant read access to the remote resource bucket (for rules, NLP models, etc.)
+resource "google_storage_bucket_iam_member" "grant_sa_reader_on_remote_resource_bucket" {
+  count = var.remote_resource_bucket != null ? 1 : 0
+
+  bucket = var.remote_resource_bucket
+  member = "serviceAccount:${var.service_account_email}"
+  role   = "roles/storage.objectViewer"
+
+  dynamic "condition" {
+    for_each = (var.remote_resource_instance_path != null || var.remote_resource_shared_path != null) ? [1] : []
+    content {
+      title = "scope_to_resource_paths"
+      expression = join(" || ", compact([
+        var.remote_resource_instance_path != null ? "resource.name.startsWith(\"projects/_/buckets/${var.remote_resource_bucket}/objects/${var.remote_resource_instance_path}\")" : null,
+        var.remote_resource_shared_path != null ? "resource.name.startsWith(\"projects/_/buckets/${var.remote_resource_bucket}/objects/${var.remote_resource_shared_path}\")" : null,
+      ]))
+    }
+  }
 }
 
 locals {
@@ -321,7 +343,9 @@ resource "google_cloudfunctions2_function" "function" {
         PATH_TO_SHARED_CONFIG   = coalesce(var.config_parameter_prefix, ""),
         PATH_TO_INSTANCE_CONFIG = local.path_to_instance_config_parameters
       },
+      var.allowed_webhook_ip_blocks != null ? { ALLOWED_WEBHOOK_IP_BLOCKS = join(",", var.allowed_webhook_ip_blocks) } : {},
       local.side_output_env_vars,
+      var.remote_resource_bucket != null ? { REMOTE_RESOURCE_BUCKET = var.remote_resource_bucket } : {},
     )
 
     dynamic "secret_environment_variables" {
@@ -355,6 +379,8 @@ resource "google_cloud_run_service_iam_binding" "invokers" {
   # (eg var.webhook_batch_invoker_sa_email)
   members = ["allUsers"]
 
+  # Cloud Run IAM conditions only support request.host and request.path — not source IP.
+  # Webhook IP allowlisting is enforced in the proxy (ALLOWED_WEBHOOK_IP_BLOCKS).
 }
 
 # Pub/Sub topic for individual webhook messages

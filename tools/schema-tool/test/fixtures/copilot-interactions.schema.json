@@ -1,0 +1,165 @@
+{
+  "type": "object",
+  "properties": {
+    "@odata.context": {
+      "type": "string",
+      "format": "uri"
+    },
+    "@odata.count": {
+      "type": "integer"
+    },
+    "@odata.nextLink": {
+      "type": "string",
+      "format": "uri"
+    },
+    "value": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "appClass": {
+            "type": "string"
+          },
+          "interactionType": {
+            "type": "string"
+          },
+          "conversationType": {
+            "type": "string"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "createdDateTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "contexts": {
+            "type": "array",
+            "items": false
+          },
+          "from": {
+            "type": "object",
+            "properties": {
+              "@odata.type": {
+                "type": "string"
+              },
+              "device": {
+                "type": "null"
+              },
+              "user": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "@odata.type": {
+                    "type": "string"
+                  },
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "displayName": {
+                    "type": "string"
+                  },
+                  "userIdentityType": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "properties": {
+                  "@odata.type": {
+                    "type": "string"
+                  },
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "displayName": {
+                    "type": "string"
+                  },
+                  "applicationIdentityType": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "body": {
+            "type": "object",
+            "properties": {
+              "contentType": {
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              }
+            }
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "attachmentId": {
+                  "type": "string"
+                },
+                "contentType": {
+                  "type": "string"
+                },
+                "contentUrl": {
+                  "type": "null"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "linkUrl": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "displayName": {
+                  "type": "string"
+                },
+                "linkType": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "mentions": {
+            "type": "array",
+            "items": false
+          }
+        }
+      }
+    }
+  }
+}

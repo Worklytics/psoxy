@@ -54,7 +54,23 @@ find . -type f -name "*.tf" -exec sed -i.bck "${PATTERN}" {} +
 # delete the sed backup files
 find . -type f -name "*.bck" -delete
 
-terraform init
+terraform init -upgrade
+
+# Run check-prereqs.sh script and give user feedback
+PREREQS_SCRIPT=""
+if [ -d ".terraform" ]; then
+  PREREQS_SCRIPT=$(find .terraform/modules -name "check-prereqs.sh" 2>/dev/null | head -n 1)
+fi
+if [ -z "$PREREQS_SCRIPT" ] || [ ! -f "$PREREQS_SCRIPT" ]; then
+  if [ -f "$(dirname "$0")/check-prereqs.sh" ]; then
+    PREREQS_SCRIPT="$(dirname "$0")/check-prereqs.sh"
+  fi
+fi
+
+if [ -n "$PREREQS_SCRIPT" ] && [ -f "$PREREQS_SCRIPT" ]; then
+  printf "\nRunning environment prerequisites check...\n"
+  bash "$PREREQS_SCRIPT"
+fi
 
 printf "Terraform module versions upgraded to ${SUCCESS}${NEXT_RELEASE}${NC}.\n"
 printf "To revert: ${INFO}$0 ${CURRENT_RELEASE}${NC}\n"
@@ -177,18 +193,24 @@ if grep -q '^[[:space:]]*deployment_bundle[[:space:]]*=' terraform.tfvars; then
 fi
 
 # parse NEXT_RELEASE as something of the form `rc-v0.5.6` or `v0.5.6`, as MAJOR.MINOR.PATCH
-NEXT_MAJOR=$(echo $NEXT_RELEASE | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\1/')
-NEXT_MINOR=$(echo $NEXT_RELEASE | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\2/')
-NEXT_PATCH=$(echo $NEXT_RELEASE | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\3/')
+# strip optional 'rc-' and 'v' prefixes
+NEXT_RELEASE_CLEAN=$(echo "$NEXT_RELEASE" | sed 's/^rc-//' | sed 's/^v//')
+NEXT_MAJOR=$(echo "$NEXT_RELEASE_CLEAN" | sed 's/^\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\1/')
+NEXT_MINOR=$(echo "$NEXT_RELEASE_CLEAN" | sed 's/^\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\2/')
+NEXT_PATCH=$(echo "$NEXT_RELEASE_CLEAN" | sed 's/^\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\3/')
 
 # parse CURRENT_RELEASE as something of the form `rc-v0.5.6` or `v0.5.6`, as MAJOR.MINOR.PATCH
-CURRENT_MAJOR=$(echo $CURRENT_RELEASE | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\1/')
-CURRENT_MINOR=$(echo $CURRENT_RELEASE | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\2/')
-CURRENT_PATCH=$(echo $CURRENT_RELEASE | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\3/')
+# strip optional 'rc-' and 'v' prefixes
+CURRENT_RELEASE_CLEAN=$(echo "$CURRENT_RELEASE" | sed 's/^rc-//' | sed 's/^v//')
+CURRENT_MAJOR=$(echo "$CURRENT_RELEASE_CLEAN" | sed 's/^\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\1/')
+CURRENT_MINOR=$(echo "$CURRENT_RELEASE_CLEAN" | sed 's/^\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\2/')
+CURRENT_PATCH=$(echo "$CURRENT_RELEASE_CLEAN" | sed 's/^\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\3/')
 
-if [ $NEXT_MINOR -gt $CURRENT_MINOR ]; then
-  printf "Next release version *may* include a provider bump. It is recommended to run ${INFO} terraform init --upgrade${NC} to get the latest versions of all terraform providers that are compatible with your configuration.\n"
-  printf "You may first wish to run ${INFO}terraform providers${NC} to review the various provider version constraints, and consider revising them in top-level ${INFO}main.tf${NC} or wherever they're specified.\n"
+if [[ "$NEXT_MINOR" =~ ^[0-9]+$ ]] && [[ "$CURRENT_MINOR" =~ ^[0-9]+$ ]]; then
+  if [ "$NEXT_MINOR" -gt "$CURRENT_MINOR" ]; then
+    printf "Next release version *may* include a provider bump. It is recommended to run ${INFO} terraform init --upgrade${NC} to get the latest versions of all terraform providers that are compatible with your configuration.\n"
+    printf "You may first wish to run ${INFO}terraform providers${NC} to review the various provider version constraints, and consider revising them in top-level ${INFO}main.tf${NC} or wherever they're specified.\n"
+  fi
 fi
 
 printf "\n${WARN}NOTE:${NC} No changes have yet been made to your infrastructure.\n"

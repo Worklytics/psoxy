@@ -3,6 +3,8 @@
 terraform {
   required_providers {
     aws = {
+      source  = "hashicorp/aws"
+      version = ">= 6.0"
     }
   }
 }
@@ -95,6 +97,7 @@ resource "aws_lambda_function" "instance" {
       # only set env vars for config paths if non-default values
       length(var.path_to_shared_ssm_parameters) > 0 ? { PATH_TO_SHARED_CONFIG = var.path_to_shared_ssm_parameters } : {},
       local.is_instance_ssm_prefix_default ? {} : { PATH_TO_INSTANCE_CONFIG = var.path_to_instance_ssm_parameters },
+      var.remote_resource_bucket != null ? { REMOTE_RESOURCE_BUCKET = var.remote_resource_bucket } : {},
     )
   }
 
@@ -293,6 +296,21 @@ locals {
     ]
   }] : []
 
+  remote_resource_bucket_statements = var.remote_resource_bucket != null ? [{
+    Sid = "ReadRemoteResourceBucket"
+    Action = [
+      "s3:GetObject",
+    ]
+    Effect = "Allow"
+    Resource = coalescelist(
+      compact([
+        var.remote_resource_instance_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_instance_path}*" : null,
+        var.remote_resource_shared_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_shared_path}*" : null,
+      ]),
+      ["arn:aws:s3:::${var.remote_resource_bucket}/*"]
+    )
+  }] : []
+
   aws_kms_public_key_statements = length(var.aws_kms_public_keys) > 0 ? [{
     Sid = "AllowAWSKMSPublicKeyUse"
     Action = [
@@ -311,6 +329,7 @@ locals {
     local.sqs_consume_statements,
     local.sqs_send_statements,
     local.s3_write_statements,
+    local.remote_resource_bucket_statements,
     local.aws_kms_public_key_statements,
     flatten(values(module.side_output_iam_statements)[*].iam_statements),
     var.lambda_role_iam_statements,

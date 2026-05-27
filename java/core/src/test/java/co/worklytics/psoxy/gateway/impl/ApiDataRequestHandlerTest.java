@@ -7,7 +7,7 @@ import co.worklytics.psoxy.PseudonymizerImplFactory;
 import co.worklytics.psoxy.PsoxyModule;
 import co.worklytics.psoxy.RESTApiSanitizer;
 import co.worklytics.psoxy.RESTApiSanitizerFactory;
-import co.worklytics.psoxy.gateway.ApiModeConfigProperty;
+import co.worklytics.psoxy.gateway.ApiModeConfig;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import co.worklytics.psoxy.gateway.HttpEventResponse;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
@@ -80,6 +80,7 @@ class ApiDataRequestHandlerTest {
         MockModules.ForSideOutputs.class,
         MockModules.ForAsyncApiDataRequestHandler.class,
         TestModules.ForWebhookCollectorModeConfig.class,
+        TestModules.ForApiModeConfig.class,
         TestModules.ForFixedUUID.class,
         TestModules.ForFixedClock.class,
         TestModules.ForProxyConstants.class,})
@@ -89,6 +90,9 @@ class ApiDataRequestHandlerTest {
 
     @Inject
     ApiDataRequestHandler handler;
+
+    @Inject
+    ApiModeConfig apiModeConfig;
 
     @Inject
     dagger.Lazy<RESTRules> rules;
@@ -187,13 +191,48 @@ class ApiDataRequestHandlerTest {
                 return this;
             }
         };
-        when(handler.config.getConfigPropertyOrError(eq(ApiModeConfigProperty.TARGET_HOST)))
-            .thenReturn("proxyhost.com");
+        handler.apiModeConfig = ApiModeConfig.builder().targetHost("proxyhost.com").build();
 
         URL url = new URL(handler.reverseTokenizedUrlComponents(
             handler.parseRequestedTarget(request)));
 
         assertEquals(expectedProxyCallUrl, url.toString(), "URLs should match");
+    }
+
+    @SneakyThrows
+    @Test
+    void parseTargetUrlPreservesConfiguredBasePath() {
+        setup("gitlab-managed", "mycompany.com/gitlab");
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getPath()).thenReturn("/api/v4/groups");
+        when(request.getQuery()).thenReturn(Optional.of("page=1"));
+
+        URL url = new URL(handler.parseRequestedTarget(request));
+
+        assertEquals("https://mycompany.com/gitlab/api/v4/groups?page=1", url.toString());
+    }
+
+    @SneakyThrows
+    @Test
+    void parseTargetUrlPreservesExplicitHttpsBasePath() {
+        setup("gitlab-managed", "https://mycompany.com/gitlab");
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getPath()).thenReturn("/api/v4/groups");
+        when(request.getQuery()).thenReturn(Optional.empty());
+
+        URL url = new URL(handler.parseRequestedTarget(request));
+
+        assertEquals("https://mycompany.com/gitlab/api/v4/groups", url.toString());
+    }
+
+    @Test
+    void parseTargetUrlRejectsHttpTargetHost() {
+        setup("gitlab-managed", "http://mycompany.com/gitlab");
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getPath()).thenReturn("/api/v4/groups");
+        when(request.getQuery()).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> handler.parseRequestedTarget(request));
     }
 
     @Test
@@ -662,8 +701,7 @@ class ApiDataRequestHandlerTest {
             .thenReturn(Optional.of("salt"));
         when(handler.config.getConfigPropertyOrError(eq(ProxyConfigProperty.SOURCE)))
             .thenReturn(source);
-        when(handler.config.getConfigPropertyOrError(ApiModeConfigProperty.TARGET_HOST))
-            .thenReturn(host);
+        handler.apiModeConfig = ApiModeConfig.builder().targetHost(host).build();
 
         reversibleTokenizationStrategy =
             AESReversibleTokenizationStrategy.builder()

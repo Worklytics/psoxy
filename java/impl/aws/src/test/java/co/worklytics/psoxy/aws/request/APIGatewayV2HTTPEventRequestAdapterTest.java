@@ -33,11 +33,23 @@ class APIGatewayV2HTTPEventRequestAdapterTest {
         assertTrue(requestAdapter.getMultiValueHeader("multi-header").isPresent());
         assertEquals("value1,value2", String.join(",", requestAdapter.getMultiValueHeader("multi-header").get()));
 
-        assertEquals("73.19.103.123", requestAdapter.getClientIp().get());
+        assertEquals("123.123.123.123", requestAdapter.getClientIp().get());
 
         assertEquals("GET", requestAdapter.getHttpMethod());
 
         assertTrue(requestAdapter.isHttps().get());
+    }
+
+    @SneakyThrows
+    @Test
+    public void getClientIp_prefersAwsSourceIpOverForwardedHeader() {
+        APIGatewayV2HTTPEvent apiGatewayV2HTTPEvent = objectMapper.readerFor(APIGatewayV2HTTPEvent.class)
+            .readValue(TestUtils.getData("lambda-proxy-events/generic-request.json"));
+        apiGatewayV2HTTPEvent.getHeaders().put("x-forwarded-for", "203.0.113.10");
+
+        APIGatewayV2HTTPEventRequestAdapter requestAdapter = new APIGatewayV2HTTPEventRequestAdapter(apiGatewayV2HTTPEvent);
+
+        assertEquals("123.123.123.123", requestAdapter.getClientIp().get());
     }
 
     @SneakyThrows
