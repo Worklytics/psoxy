@@ -1,6 +1,8 @@
 package co.worklytics.psoxy.impl;
 
+import com.avaulta.gateway.resources.ResourceService;
 import com.avaulta.gateway.rules.augments.Augment;
+import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
@@ -13,6 +15,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,7 +32,8 @@ class AugmentProcessorTest {
             .options(Option.SUPPRESS_EXCEPTIONS)
             .build();
 
-        augmentProcessor = new AugmentProcessor(jsonConfiguration);
+        ResourceService noModels = path -> Optional.empty();
+        augmentProcessor = new AugmentProcessor(jsonConfiguration, new SentenceMetadataProcessor(noModels));
     }
 
     @Test

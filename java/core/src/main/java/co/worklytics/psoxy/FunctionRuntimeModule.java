@@ -136,19 +136,30 @@ public class FunctionRuntimeModule {
      * via deployment layers, Lambda layers, init scripts, etc.</p>
      */
     @Provides @Singleton
-    static ResourceService instanceResourceService(@Named("Remote") ResourceService remoteResourceService,
-                                                   @Named("SharedRemote") ResourceService sharedRemoteResourceService) {
+    static ResourceService instanceResourceService(@Named("Remote") ResourceService remoteResourceService) {
         // always layer local FS on top of remote — local is a fast path / override
-        ResourceService instanceResourceService = CompositeResourceService.builder()
+        return CompositeResourceService.builder()
             .preferred(new LocalFileResourceService(ResourceService.DEFAULT_LOCAL_RESOURCE_PATH))
             .fallback(remoteResourceService)
             .build();
-        ResourceService openNlpResourceService = CompositeResourceService.builder()
+    }
+
+    /**
+     * Resource resolution for OpenNLP models: instance-local (FS / instance bucket) first,
+     * then shared remote bucket (e.g. org-wide model artifacts).
+     */
+    @Provides @Singleton @Named("OpenNlp")
+    static ResourceService openNlpResourceService(ResourceService instanceResourceService,
+                                                  @Named("SharedRemote") ResourceService sharedRemoteResourceService) {
+        return CompositeResourceService.builder()
             .preferred(instanceResourceService)
             .fallback(sharedRemoteResourceService)
             .build();
-        SentenceMetadataProcessor.configureResourceService(openNlpResourceService);
-        return instanceResourceService;
+    }
+
+    @Provides @Singleton
+    static SentenceMetadataProcessor sentenceMetadataProcessor(@Named("OpenNlp") ResourceService openNlpResourceService) {
+        return new SentenceMetadataProcessor(openNlpResourceService);
     }
 
     @Provides @Singleton @Named("async")

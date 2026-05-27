@@ -54,6 +54,7 @@ class RESTApiSanitizerImplConcurrencyTest {
     @Component(
             modules = {
                 PsoxyModule.class,
+        MockModules.ForOpenNlp.class,
                 ForConfigService.class,
                 MockModules.ForSecretStore.class,
                 TestModules.ForApiModeConfig.class,

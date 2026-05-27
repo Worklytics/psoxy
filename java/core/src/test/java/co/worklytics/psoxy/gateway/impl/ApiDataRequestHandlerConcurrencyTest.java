@@ -40,6 +40,7 @@ class ApiDataRequestHandlerConcurrencyTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        MockModules.ForOpenNlp.class,
         MockModules.ForConfigService.class,
         MockModules.ForSecretStore.class,
         MockModules.ForRules.class,
