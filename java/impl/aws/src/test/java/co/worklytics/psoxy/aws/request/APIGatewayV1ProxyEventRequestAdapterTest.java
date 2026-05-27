@@ -3,6 +3,7 @@ package co.worklytics.psoxy.aws.request;
 import co.worklytics.test.TestUtils;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
@@ -63,5 +64,25 @@ public class APIGatewayV1ProxyEventRequestAdapterTest {
             APIGatewayV1ProxyEventRequestAdapter.of(apiGatewayEvent);
 
         assertEquals("/v2/report/meetings/NUXghb123TCj0bP6nPVe%252Fsg253D253D/participants", requestAdapter.getPath());
+    }
+
+    @Test
+    public void getClientIp_prefersSourceIpOverSpoofableHeader() {
+        APIGatewayProxyRequestEvent.RequestIdentity identity =
+            new APIGatewayProxyRequestEvent.RequestIdentity();
+        identity.setSourceIp("198.51.100.7");
+
+        APIGatewayProxyRequestEvent.ProxyRequestContext context =
+            new APIGatewayProxyRequestEvent.ProxyRequestContext();
+        context.setIdentity(identity);
+
+        APIGatewayProxyRequestEvent apiGatewayEvent = new APIGatewayProxyRequestEvent()
+            .withRequestContext(context)
+            .withHeaders(Map.of("x-forwarded-for", "203.0.113.10"));
+
+        APIGatewayV1ProxyEventRequestAdapter requestAdapter =
+            APIGatewayV1ProxyEventRequestAdapter.of(apiGatewayEvent);
+
+        assertEquals("198.51.100.7", requestAdapter.getClientIp().get());
     }
 }

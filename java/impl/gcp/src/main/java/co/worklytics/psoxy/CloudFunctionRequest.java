@@ -2,6 +2,7 @@ package co.worklytics.psoxy;
 
 import co.worklytics.psoxy.gateway.HttpEventRequest;
 import com.google.cloud.functions.HttpRequest;
+import com.google.common.base.Splitter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -96,8 +97,10 @@ public class CloudFunctionRequest implements HttpEventRequest {
 
     @Override
     public Optional<String> getClientIp() {
-        return Optional.ofNullable(request.getHeaders().get(HttpEventRequest.HTTP_HEADER_X_FORWARDED_FOR))
-            .map(values -> values.get(0));
+        return Optional.ofNullable(getCaseInsensitiveHeaders().get(HttpEventRequest.HTTP_HEADER_X_FORWARDED_FOR.toLowerCase()))
+            .flatMap(values -> values.stream()
+                .flatMap(value -> Splitter.on(',').trimResults().omitEmptyStrings().splitToList(value).stream())
+                .reduce((previous, current) -> current));
     }
 
     @Override
