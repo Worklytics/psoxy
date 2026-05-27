@@ -1,6 +1,6 @@
 package com.avaulta.gateway.rules.augments;
 
-import org.junit.jupiter.api.AfterEach;
+import com.avaulta.gateway.resources.ResourceService;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -23,16 +23,11 @@ class SentenceMetadataProcessorTest {
             + "Run 'mvn test' in java/gateway-core to download them automatically, "
             + "or run tools/fetch-opennlp-models.sh manually.";
 
-    @AfterEach
-    void tearDown() {
-        SentenceMetadataProcessor.resetForTests();
-    }
-
     @Test
     void analyzeSentence_derivesSignalsAndTaxonomyWithoutModels() {
         Map<String, String> taxonomy = Map.of("email", "MEDIUM");
 
-        SentenceMetadataProcessor.SentenceAnalysis analysis = SentenceMetadataProcessor.analyzeSentence(
+        SentenceAnalysis analysis = SentenceMetadataProcessor.analyzeSentence(
             0,
             new String[] {"Could", "you", "avoid", "sending", "an", "email", "?"},
             new String[] {"MD", "PRP", "VB", "VBG", "DT", "NN", "."},
@@ -53,7 +48,7 @@ class SentenceMetadataProcessorTest {
     @Test
     void testProcessWithModels() {
         assertModelsAvailable();
-        configureClasspathResourceService();
+        SentenceMetadataProcessor processor = processorWithClasspathModels();
 
         Map<String, List<String>> taxonomy = new TreeMap<>();
         taxonomy.put("CODE_ARTIFACT", List.of("code", "script", "function", "api"));
@@ -61,7 +56,7 @@ class SentenceMetadataProcessorTest {
 
         String text = "Please write a python script! Could you avoid sending an email?";
 
-        SentenceMetadataResult result = SentenceMetadataProcessor.process(
+        SentenceMetadataResult result = processor.process(
             text, taxonomy, DEFAULT_HEDGE, DEFAULT_CONSTRAINT);
 
         assertNotNull(result);
@@ -86,23 +81,23 @@ class SentenceMetadataProcessorTest {
     @Test
     void testProcessWithInvalidModelBytes() {
         byte[] stubModel = "stub-model".getBytes(StandardCharsets.UTF_8);
-        SentenceMetadataProcessor.configureResourceService(path -> {
+        SentenceMetadataProcessor processor = new SentenceMetadataProcessor(path -> {
             if (path.startsWith("opennlp/")) {
                 return Optional.of(new ByteArrayInputStream(stubModel));
             }
             return Optional.empty();
         });
 
-        assertNull(SentenceMetadataProcessor.process(
+        assertNull(processor.process(
             "Hello world.", Map.of(), DEFAULT_HEDGE, DEFAULT_CONSTRAINT));
     }
 
     @Test
     void testEmptyText() {
         assertModelsAvailable();
-        configureClasspathResourceService();
+        SentenceMetadataProcessor processor = processorWithClasspathModels();
 
-        SentenceMetadataResult result = SentenceMetadataProcessor.process(
+        SentenceMetadataResult result = processor.process(
             "", Map.of(), DEFAULT_HEDGE, DEFAULT_CONSTRAINT);
         assertNotNull(result);
         assertEquals(0, result.getDocSummary().getSentenceCount());
@@ -110,8 +105,8 @@ class SentenceMetadataProcessorTest {
 
     @Test
     void testWithoutModelsReturnsNull() {
-        SentenceMetadataProcessor.configureResourceService(path -> Optional.empty());
-        assertNull(SentenceMetadataProcessor.process(
+        SentenceMetadataProcessor processor = new SentenceMetadataProcessor(path -> Optional.empty());
+        assertNull(processor.process(
             "Hello world.", Map.of(), DEFAULT_HEDGE, DEFAULT_CONSTRAINT));
     }
 
@@ -121,8 +116,9 @@ class SentenceMetadataProcessorTest {
             MODELS_MISSING_MESSAGE);
     }
 
-    private static void configureClasspathResourceService() {
-        SentenceMetadataProcessor.configureResourceService(
-            path -> Optional.ofNullable(SentenceMetadataProcessorTest.class.getResourceAsStream("/" + path)));
+    private static SentenceMetadataProcessor processorWithClasspathModels() {
+        ResourceService resourceService =
+            path -> Optional.ofNullable(SentenceMetadataProcessorTest.class.getResourceAsStream("/" + path));
+        return new SentenceMetadataProcessor(resourceService);
     }
 }

@@ -37,13 +37,14 @@ Both paths travel over the public internet with TLS encryption and IAM authn/aut
 
 #### Enhancing Public Internet Options with IP Allowlisting
 
-For public-internet connectivity (TLS and mTLS), customers can further restrict Cloud Function
-ingress to only accept requests from **known, fixed IP addresses** of the client service.
+For public-internet connectivity (TLS and mTLS), customers can restrict which client IPs may use the proxy in two ways:
+
+1. **Application-level (Terraform `allowed_data_access_ip_blocks` / `allowed_webhook_ip_blocks`)** — enforced inside the Cloud Function on each request. This is what the shipped Psoxy GCP modules configure. See [Client IP Allowlisting](../configuration/ip-allowlisting.md).
+
+2. **Network ingress (Cloud Armor)** — optional, separate from the variables above. When the client service dials out from known static egress IPs, you can attach [Cloud Run ingress with Cloud Armor](https://cloud.google.com/run/docs/securing/cloud-armor) in front of a load balancer to block disallowed IPs before traffic reaches Cloud Run:
 
 Some client services (including Worklytics, as a paid feature) support dialing out from a
-determined set of static egress IPs. When this is available, customers can configure
-[Cloud Run ingress with Cloud Armor](https://cloud.google.com/run/docs/securing/cloud-armor) to
-restrict access to only those IPs, adding a network-layer control even without PSC or VPC:
+determined set of static egress IPs. Cloud Armor adds a network-layer control even without PSC or VPC:
 
 | Security Layer | TLS (current) | TLS + IP allowlist | mTLS + IP allowlist | PSC |
 |---|---|---|---|---|

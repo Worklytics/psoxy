@@ -18,30 +18,28 @@ public class GenMetadataProcessor {
 
     private static final int DEFAULT_MAX_INPUT_CHARS = 4096;
 
-    private static volatile GenMetadataBackend backend = new UnavailableGenMetadataBackend();
-    private static volatile ObjectMapper objectMapper = new ObjectMapper();
-    private static volatile int maxInputChars = DEFAULT_MAX_INPUT_CHARS;
+    private final GenMetadataBackend backend;
+    private final ObjectMapper objectMapper;
+    private final int maxInputChars;
 
-    private GenMetadataProcessor() {
+    public GenMetadataProcessor(GenMetadataBackend backend, ObjectMapper objectMapper, int maxInputChars) {
+        this.backend = backend != null ? backend : new UnavailableGenMetadataBackend();
+        this.objectMapper = objectMapper != null ? objectMapper : new ObjectMapper();
+        this.maxInputChars = maxInputChars > 0 ? maxInputChars : DEFAULT_MAX_INPUT_CHARS;
     }
 
-    public static void configure(GenMetadataBackend genMetadataBackend, ObjectMapper mapper,
-                                 int maxInputCharsLimit) {
-        if (genMetadataBackend != null) {
-            backend = genMetadataBackend;
-        }
-        if (mapper != null) {
-            objectMapper = mapper;
-        }
-        maxInputChars = maxInputCharsLimit > 0 ? maxInputCharsLimit : DEFAULT_MAX_INPUT_CHARS;
+    public GenMetadataProcessor(GenMetadataBackend backend, ObjectMapper objectMapper) {
+        this(backend, objectMapper, DEFAULT_MAX_INPUT_CHARS);
     }
 
     /**
-     * @return parsed object suitable for augment output
-     * @throws RuntimeException wrapping {@link co.worklytics.psoxy.impl.AugmentProcessingException}
-     *         when backend is in core module — use Augment.compute contract via GenMetadataAugmentException
+     * Compute genMetadata output for a single augment invocation.
      */
-    public static Object process(String taskPrompt, JsonSchemaFilter outputSchema, Object input) {
+    public Object compute(Augment.GenMetadata augment, Object input) {
+        return process(augment.getPrompt(), augment.getOutputSchema(), input);
+    }
+
+    public Object process(String taskPrompt, JsonSchemaFilter outputSchema, Object input) {
         if (StringUtils.isBlank(taskPrompt) || outputSchema == null) {
             throw new GenMetadataAugmentException(GenMetadataAugmentException.Code.UNAVAILABLE,
                 "genMetadata missing prompt or outputSchema");
@@ -68,7 +66,7 @@ public class GenMetadataProcessor {
         }
     }
 
-    static String serializeInput(Object input) {
+    String serializeInput(Object input) {
         if (input == null) {
             return null;
         }
@@ -87,7 +85,7 @@ public class GenMetadataProcessor {
         }
     }
 
-    static Map<?, ?> parseModelJson(Object raw) {
+    Map<?, ?> parseModelJson(Object raw) {
         if (raw == null) {
             return null;
         }
@@ -124,7 +122,7 @@ public class GenMetadataProcessor {
         return trimmed.startsWith("{") ? trimmed : null;
     }
 
-    private static TreeMap<String, Object> toSortedMap(Map<?, ?> raw) {
+    private TreeMap<String, Object> toSortedMap(Map<?, ?> raw) {
         TreeMap<String, Object> sorted = new TreeMap<>();
         raw.forEach((k, v) -> {
             if (k != null) {
@@ -134,16 +132,10 @@ public class GenMetadataProcessor {
         return sorted;
     }
 
-    private static String truncate(String text) {
+    private String truncate(String text) {
         if (text.length() <= maxInputChars) {
             return text;
         }
         return text.substring(0, maxInputChars);
-    }
-
-    public static void resetForTests() {
-        backend = new UnavailableGenMetadataBackend();
-        objectMapper = new ObjectMapper();
-        maxInputChars = DEFAULT_MAX_INPUT_CHARS;
     }
 }

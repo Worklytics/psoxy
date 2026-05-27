@@ -8,7 +8,6 @@ import com.avaulta.gateway.rules.augments.SentenceMetadataResult.Signals;
 import com.avaulta.gateway.rules.augments.SentenceMetadataResult.Structure;
 import com.avaulta.gateway.rules.augments.SentenceMetadataResult.SuppressedCounts;
 import com.avaulta.gateway.rules.augments.SentenceMetadataResult.Verb;
-import lombok.experimental.UtilityClass;
 import opennlp.tools.chunker.ChunkerME;
 import opennlp.tools.chunker.ChunkerModel;
 import opennlp.tools.postag.POSModel;
@@ -29,48 +28,47 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * ALPHA: Proof of concept NLP Processor.
- * Lazily loads OpenNLP models and performs sentence structure extraction.
+ * ALPHA: Proof of concept NLP processor for the {@code sentenceMetadata} augment.
+ * Lazily loads OpenNLP models from a {@link ResourceService} and performs sentence structure extraction.
+ *
+ * <p>Thread-safe for concurrent requests: model fields are published only after full initialization.
  */
-@UtilityClass
 public class SentenceMetadataProcessor {
 
     private static final Logger log = Logger.getLogger(SentenceMetadataProcessor.class.getName());
 
     static final String MODEL_PATH_PREFIX = "opennlp/";
 
-    private static volatile SentenceDetectorME sentenceDetector;
-    private static volatile POSTaggerME posTagger;
-    private static volatile ChunkerME chunker;
+    private final ResourceService resourceService;
 
-    private static volatile ResourceService resourceService;
+    private volatile SentenceDetectorME sentenceDetector;
+    private volatile POSTaggerME posTagger;
+    private volatile ChunkerME chunker;
 
-    private static final Object lock = new Object();
+    private final Object lock = new Object();
 
-    /**
-     * Configure resource loading for OpenNLP models. Must be set before first use in production;
-     * {@link ResourceService} implementations handle local vs remote resolution.
-     */
-    public static void configureResourceService(ResourceService service) {
-        resourceService = service;
+    public SentenceMetadataProcessor(ResourceService resourceService) {
+        this.resourceService = resourceService;
     }
 
     /**
-     * Reset cached models and provider. For unit tests only.
+     * Compute sentence metadata for a single augment invocation.
      */
-    static void resetForTests() {
-        synchronized (lock) {
-            sentenceDetector = null;
-            posTagger = null;
-            chunker = null;
-            resourceService = null;
+    public SentenceMetadataResult compute(Augment.SentenceMetadata augment, Object input) {
+        if (!(input instanceof String text) || text.isEmpty()) {
+            return null;
         }
+        return process(
+            text,
+            augment.getTaxonomy(),
+            Augment.SentenceMetadata.signalWords(augment.getHedgeWords(), Augment.SentenceMetadata.DEFAULT_HEDGE_WORDS),
+            Augment.SentenceMetadata.signalWords(augment.getConstraintWords(), Augment.SentenceMetadata.DEFAULT_CONSTRAINT_WORDS));
     }
 
-    public static SentenceMetadataResult process(String text,
-                                                 Map<String, List<String>> taxonomy,
-                                                 Set<String> hedgeWords,
-                                                 Set<String> constraintWords) {
+    public SentenceMetadataResult process(String text,
+                                          Map<String, List<String>> taxonomy,
+                                          Set<String> hedgeWords,
+                                          Set<String> constraintWords) {
         initializeModels();
         if (sentenceDetector == null) {
             return null;
@@ -132,7 +130,7 @@ public class SentenceMetadataProcessor {
             .build();
     }
 
-    private static Map<String, String> invertTaxonomy(Map<String, List<String>> taxonomy) {
+    private Map<String, String> invertTaxonomy(Map<String, List<String>> taxonomy) {
         Map<String, String> wordToCategory = new HashMap<>();
         if (taxonomy != null) {
             for (Map.Entry<String, List<String>> entry : taxonomy.entrySet()) {
@@ -279,19 +277,7 @@ public class SentenceMetadataProcessor {
             Set.copyOf(nounCategories));
     }
 
-    record SentenceAnalysis(Sentence sentence,
-                            String sentenceType,
-                            int tokenCount,
-                            int suppressedCommon,
-                            int suppressedProper,
-                            boolean hedged,
-                            boolean constraint,
-                            boolean question,
-                            boolean negated,
-                            Set<String> nounCategories) {
-    }
-
-    private static void initializeModels() {
+    private void initializeModels() {
         if (sentenceDetector != null) {
             return;
         }
@@ -299,14 +285,9 @@ public class SentenceMetadataProcessor {
             if (sentenceDetector != null) {
                 return;
             }
-            ResourceService service = resourceService;
-            if (service == null) {
-                log.log(Level.INFO, "OpenNLP resource service not configured; sentenceMetadata augment unavailable");
-                return;
-            }
-            try (InputStream sentenceModelStream = loadModel(service, "en-sent.bin");
-                 InputStream posModelStream = loadModel(service, "en-pos-maxent.bin");
-                 InputStream chunkerModelStream = loadModel(service, "en-chunker.bin")) {
+            try (InputStream sentenceModelStream = loadModel("en-sent.bin");
+                 InputStream posModelStream = loadModel("en-pos-maxent.bin");
+                 InputStream chunkerModelStream = loadModel("en-chunker.bin")) {
                 SentenceDetectorME detector = new SentenceDetectorME(new SentenceModel(sentenceModelStream));
                 POSTaggerME tagger = new POSTaggerME(new POSModel(posModelStream));
                 ChunkerME chunkerModel = new ChunkerME(new ChunkerModel(chunkerModelStream));
@@ -319,9 +300,9 @@ public class SentenceMetadataProcessor {
         }
     }
 
-    private static InputStream loadModel(ResourceService service, String modelFileName) {
+    private InputStream loadModel(String modelFileName) {
         String objectPath = MODEL_PATH_PREFIX + modelFileName;
-        return service.getResource(objectPath)
+        return resourceService.getResource(objectPath)
             .orElseThrow(() -> new IllegalStateException("OpenNLP model not found: " + objectPath));
     }
 }

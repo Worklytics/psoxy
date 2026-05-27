@@ -150,6 +150,7 @@ module "sanitized_webhook_output" {
     var.gcp_principals_authorized_to_test,
     [for email in var.invoker_sa_emails : "serviceAccount:${email}"]
   )
+  allowed_accessor_ip_blocks = var.allowed_webhook_ip_blocks
 }
 
 
@@ -166,6 +167,7 @@ module "side_output_bucket" {
   bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence.result}-"
   bucket_name_suffix             = "side-output"
   sanitizer_accessor_principals  = each.value.allowed_readers
+  allowed_accessor_ip_blocks     = var.allowed_webhook_ip_blocks
 }
 
 # TODO: will this work cross-project ?? concern would be that `bucket_write_role_id` is likely a project-level role
@@ -377,6 +379,8 @@ resource "google_cloud_run_service_iam_binding" "invokers" {
   # (eg var.webhook_batch_invoker_sa_email)
   members = ["allUsers"]
 
+  # Cloud Run IAM conditions only support request.host and request.path — not source IP.
+  # Webhook IP allowlisting is enforced in the proxy (ALLOWED_WEBHOOK_IP_BLOCKS).
 }
 
 # Pub/Sub topic for individual webhook messages

@@ -414,8 +414,7 @@ variable "builder_sa_email" {
 
 variable "allowed_data_access_ip_blocks" {
   description = <<-EOT
-    IPs or CIDR blocks allowed to make data access requests at the application layer.
-    Use null (default) for no restriction in configuration (all IPs allowed). If set, the list must contain at least one value.
+    IPs or CIDR blocks allowed to make data access requests at the application layer (ALLOWED_DATA_ACCESS_IP_BLOCKS). GCP does not support source-IP IAM on Cloud Run invoker in these modules; see docs/configuration/ip-allowlisting.md. Use null (default) for no restriction. If set, the list must contain at least one value.
   EOT
   type        = list(string)
   nullable    = true
@@ -429,8 +428,7 @@ variable "allowed_data_access_ip_blocks" {
 
 variable "allowed_webhook_ip_blocks" {
   description = <<-EOT
-    IPs or CIDR blocks allowed to send webhooks at the application layer.
-    Use null (default) for no restriction in configuration (all IPs allowed). If set, the list must contain at least one value.
+    IPs or CIDR blocks allowed to send webhooks at the application layer (ALLOWED_WEBHOOK_IP_BLOCKS). GCP does not support source-IP IAM on Cloud Run invoker in these modules; see docs/configuration/ip-allowlisting.md. Use null (default) for no restriction. If set, the list must contain at least one value.
   EOT
   type        = list(string)
   nullable    = true

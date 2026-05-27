@@ -390,8 +390,8 @@ public class PsoxyModule {
     }
 
     /**
-     * Wires genMetadata backend and configures {@link GenMetadataProcessor} (static facade).
-     * {@link ResourceService} for model weights is provided by {@code FunctionRuntimeModule}.
+     * Wires genMetadata backend. Model weights are resolved via {@code @Named("ForGenMetadata")}
+     * {@link ResourceService} from {@code FunctionRuntimeModule}.
      */
     @Provides
     @Singleton
@@ -400,13 +400,18 @@ public class PsoxyModule {
             ObjectMapper objectMapper,
             @Named("ForGenMetadata") ResourceService genMetadataResourceService) {
         GenMetadataConfig config = GenMetadataConfig.from(configService);
-        GenMetadataBackend backend;
         if (GenMetadataConfig.BACKEND_LOCAL.equalsIgnoreCase(config.getBackend())) {
-            backend = new LlamaCppLocalBackend(config, genMetadataResourceService, objectMapper);
-        } else {
-            backend = new UnavailableGenMetadataBackend();
+            return new LlamaCppLocalBackend(config, genMetadataResourceService, objectMapper);
         }
-        GenMetadataProcessor.configure(backend, objectMapper, config.getMaxInputChars());
-        return backend;
+        return new UnavailableGenMetadataBackend();
+    }
+
+    @Provides
+    @Singleton
+    static GenMetadataProcessor genMetadataProcessor(GenMetadataBackend genMetadataBackend,
+                                                     ObjectMapper objectMapper,
+                                                     ConfigService configService) {
+        GenMetadataConfig config = GenMetadataConfig.from(configService);
+        return new GenMetadataProcessor(genMetadataBackend, objectMapper, config.getMaxInputChars());
     }
 }

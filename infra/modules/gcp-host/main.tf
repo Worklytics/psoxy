@@ -4,7 +4,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 5.0"
+      version = ">= 7.0"
     }
   }
 }
@@ -21,7 +21,40 @@ locals {
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
 
+  # rules_file paths may be absolute, relative to the Terraform root module (deployment dir), or
+  # relative to psoxy_base_dir (paths into the psoxy repo, eg docs/sources/...)
   api_connector_rules_files = merge(var.custom_api_connector_rules, { for k, v in var.api_connectors : k => v.rules_file if v.rules_file != null })
+
+  _rules_file_references = distinct(concat(
+    values(local.api_connector_rules_files),
+    [for k, v in var.bulk_connectors : v.rules_file if try(v.rules_file, null) != null],
+    [for k, v in var.webhook_collectors : v.rules_file if try(v.rules_file, null) != null],
+  ))
+
+  _resolved_rules_file_paths = {
+    for rules_path in local._rules_file_references : rules_path => (
+      startswith(rules_path, "/") ? rules_path : (
+        fileexists("${path.root}/${rules_path}") ? "${path.root}/${rules_path}" : (
+          fileexists("${var.psoxy_base_dir}${rules_path}") ? "${var.psoxy_base_dir}${rules_path}" :
+          "${path.root}/${rules_path}"
+        )
+      )
+    )
+  }
+
+  api_connector_rules_file_paths = {
+    for k, rules_path in local.api_connector_rules_files : k => local._resolved_rules_file_paths[rules_path]
+  }
+
+  bulk_connector_rules_file_paths = {
+    for k, v in var.bulk_connectors : k => local._resolved_rules_file_paths[v.rules_file]
+    if try(v.rules_file, null) != null
+  }
+
+  webhook_collector_rules_file_paths = {
+    for k, v in var.webhook_collectors : k => local._resolved_rules_file_paths[v.rules_file]
+    if try(v.rules_file, null) != null
+  }
 
   # API connectors with rules_raw that don't have file-based overrides
   api_connector_rules_raw = {
@@ -31,7 +64,7 @@ locals {
 
   api_connector_rules = {
     for k, v in var.api_connectors :
-    k => try(local.api_connector_rules_files[k], null) != null ? file(local.api_connector_rules_files[k]) : (
+    k => try(local.api_connector_rules_file_paths[k], null) != null ? file(local.api_connector_rules_file_paths[k]) : (
       try(local.api_connector_rules_raw[k], null) != null ? local.api_connector_rules_raw[k] : null
     )
   }
@@ -239,7 +272,7 @@ module "api_connector" {
       BUNDLE_FILENAME      = module.psoxy.filename
       IS_DEVELOPMENT_MODE  = contains(var.non_production_connectors, each.key)
       PSEUDONYMIZE_APP_IDS = tostring(var.pseudonymize_app_ids)
-      CUSTOM_RULES_SHA = try(local.api_connector_rules_files[each.key], null) != null ? filesha1(local.api_connector_rules_files[each.key]) : (
+      CUSTOM_RULES_SHA = try(local.api_connector_rules_file_paths[each.key], null) != null ? filesha1(local.api_connector_rules_file_paths[each.key]) : (
         try(local.api_connector_rules_raw[each.key], null) != null ? sha1(local.api_connector_rules_raw[each.key]) : null
       )
       RULES                  = local.api_connector_rules[each.key] != null ? base64gzip(local.api_connector_rules[each.key]) : null
@@ -300,31 +333,31 @@ module "webhook_collector" {
 
   source = "../../modules/gcp-webhook-collector"
 
-  project_id                         = var.gcp_project_id
-  region                             = var.gcp_region
-  environment_id_prefix              = local.environment_id_prefix
-  instance_id                        = each.key
-  service_account_email              = google_service_account.webhook_collector[each.key].email
-  artifacts_bucket_name              = module.psoxy.artifacts_bucket_name
-  deployment_bundle_object_name      = module.psoxy.deployment_bundle_object_name
-  artifact_repository_id             = module.psoxy.artifact_repository
-  path_to_repo_root                  = var.psoxy_base_dir
-  config_parameter_prefix            = local.config_parameter_prefix
-  invoker_sa_emails                  = var.worklytics_sa_emails
-  vpc_config                         = module.psoxy.vpc_config
-  gcp_principals_authorized_to_test  = var.gcp_principals_authorized_to_test
-  bucket_write_role_id               = module.psoxy.bucket_write_role_id
-  side_output_original               = try(local.custom_original_side_outputs[each.key], null)
-  side_output_sanitized              = try(local.sanitized_side_outputs[each.key], null)
-  todos_as_local_files               = var.todos_as_local_files
-  tf_runner_iam_principal            = module.tf_runner.iam_principal
-  enable_versioning                  = var.version_sanitized_buckets
-  bucket_access_logs_destination     = var.bucket_access_logs_destination
-  builder_sa_id                      = module.psoxy.builder_sa_id
-  key_ring_id                        = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
-  oidc_token_verifier_role_id        = module.psoxy.oidc_token_verifier_role_id
-  provision_auth_key                 = each.value.provision_auth_key
-  rules_file                         = each.value.rules_file
+  project_id                        = var.gcp_project_id
+  region                            = var.gcp_region
+  environment_id_prefix             = local.environment_id_prefix
+  instance_id                       = each.key
+  service_account_email             = google_service_account.webhook_collector[each.key].email
+  artifacts_bucket_name             = module.psoxy.artifacts_bucket_name
+  deployment_bundle_object_name     = module.psoxy.deployment_bundle_object_name
+  artifact_repository_id            = module.psoxy.artifact_repository
+  path_to_repo_root                 = var.psoxy_base_dir
+  config_parameter_prefix           = local.config_parameter_prefix
+  invoker_sa_emails                 = var.worklytics_sa_emails
+  vpc_config                        = module.psoxy.vpc_config
+  gcp_principals_authorized_to_test = var.gcp_principals_authorized_to_test
+  bucket_write_role_id              = module.psoxy.bucket_write_role_id
+  side_output_original              = try(local.custom_original_side_outputs[each.key], null)
+  side_output_sanitized             = try(local.sanitized_side_outputs[each.key], null)
+  todos_as_local_files              = var.todos_as_local_files
+  tf_runner_iam_principal           = module.tf_runner.iam_principal
+  enable_versioning                 = var.version_sanitized_buckets
+  bucket_access_logs_destination    = var.bucket_access_logs_destination
+  builder_sa_id                     = module.psoxy.builder_sa_id
+  key_ring_id                       = local.key_ring_needed ? google_kms_key_ring.proxy_key_ring[0].id : var.kms_key_ring
+  oidc_token_verifier_role_id       = module.psoxy.oidc_token_verifier_role_id
+  provision_auth_key                = each.value.provision_auth_key
+  rules_file = try(local.webhook_collector_rules_file_paths[each.key], null)
   webhook_batch_invoker_sa_email     = module.psoxy.webhook_batch_invoker_sa_email
   batch_processing_frequency_minutes = try(each.value.batch_processing_frequency_minutes, 5)
   output_path_prefix                 = each.value.output_path_prefix
@@ -398,7 +431,7 @@ module "bulk_connector" {
       RULES = (
         try(var.custom_bulk_connector_rules[each.key], null) != null ? base64gzip(yamlencode(var.custom_bulk_connector_rules[each.key])) :
         try(each.value.rules_raw, null) != null ? base64gzip(each.value.rules_raw) :
-        each.value.rules_file != null ? base64gzip(file(each.value.rules_file)) :
+        each.value.rules_file != null ? base64gzip(file(local.bulk_connector_rules_file_paths[each.key])) :
         try(each.value.rules, null) != null ? base64gzip(yamlencode(each.value.rules)) :
         null
       )

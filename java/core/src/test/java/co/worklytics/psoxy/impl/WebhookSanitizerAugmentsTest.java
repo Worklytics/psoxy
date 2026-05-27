@@ -62,8 +62,13 @@ class WebhookSanitizerAugmentsTest {
         sanitizer.emailAddressParser = mock(EmailAddressParser.class);
         sanitizer.sanitizerUtils = sanitizerUtils;
         sanitizer.jsonConfiguration = jsonConfiguration;
+        com.fasterxml.jackson.databind.ObjectMapper om = objectMapper;
         sanitizer.augmentProcessor = new AugmentProcessor(jsonConfiguration,
-            new JsonSchemaValidationUtils(objectMapper), objectMapper);
+            new JsonSchemaValidationUtils(om),
+            om,
+            new com.avaulta.gateway.rules.augments.SentenceMetadataProcessor(path -> java.util.Optional.empty()),
+            new com.avaulta.gateway.rules.augments.GenMetadataProcessor(
+                new com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend(), om));
     }
 
     @Test

@@ -2,7 +2,6 @@ package com.avaulta.gateway.rules.augments;
 
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -13,11 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class GenMetadataProcessorTest {
 
-    @AfterEach
-    void tearDown() {
-        GenMetadataProcessor.resetForTests();
-    }
-
     @Test
     void process_delegatesToBackend() {
         JsonSchemaFilter schema = JsonSchemaFilter.builder()
@@ -25,21 +19,26 @@ class GenMetadataProcessorTest {
             .properties(Map.of("category", JsonSchemaFilter.builder().type("string").build()))
             .build();
 
-        GenMetadataProcessor.configure((taskPrompt, outputSchema, inputData) -> {
-            TreeMap<String, Object> result = new TreeMap<>();
-            result.put("category", "Excluded");
-            return result;
-        }, new ObjectMapper(), 4096);
+        GenMetadataProcessor processor = new GenMetadataProcessor(
+            (taskPrompt, outputSchema, inputData) -> {
+                TreeMap<String, Object> result = new TreeMap<>();
+                result.put("category", "Excluded");
+                return result;
+            },
+            new ObjectMapper(),
+            4096);
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> out = (Map<String, Object>) GenMetadataProcessor.process(
+        Map<String, Object> out = (Map<String, Object>) processor.process(
             "Classify the prompt", schema, "hello");
         assertEquals("Excluded", out.get("category"));
     }
 
     @Test
     void parseModelJson_extractsFromMarkdownFences() {
-        Object out = GenMetadataProcessor.parseModelJson("""
+        GenMetadataProcessor processor = new GenMetadataProcessor(
+            new UnavailableGenMetadataBackend(), new ObjectMapper());
+        Object out = processor.parseModelJson("""
             ```json
             {"category": "Email Drafting"}
             ```
@@ -51,8 +50,9 @@ class GenMetadataProcessorTest {
 
     @Test
     void process_throwsWhenPromptMissing() {
+        GenMetadataProcessor processor = new GenMetadataProcessor(
+            new UnavailableGenMetadataBackend(), new ObjectMapper());
         assertThrows(GenMetadataAugmentException.class,
-            () -> GenMetadataProcessor.process(null, JsonSchemaFilter.builder().type("object").build(),
-                "x"));
+            () -> processor.process(null, JsonSchemaFilter.builder().type("object").build(), "x"));
     }
 }

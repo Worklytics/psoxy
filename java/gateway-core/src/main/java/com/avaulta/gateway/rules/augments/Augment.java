@@ -222,17 +222,11 @@ public abstract class Augment {
 
         @Override
         public Object compute(Object input) {
-            if (!(input instanceof String text) || text.isEmpty()) {
-                return null;
-            }
-            return SentenceMetadataProcessor.process(
-                text,
-                taxonomy,
-                signalWords(hedgeWords, DEFAULT_HEDGE_WORDS),
-                signalWords(constraintWords, DEFAULT_CONSTRAINT_WORDS));
+            // Computed at runtime by AugmentProcessor via injected SentenceMetadataProcessor.
+            return null;
         }
 
-        private static Set<String> signalWords(List<String> configured, List<String> defaults) {
+        static Set<String> signalWords(List<String> configured, List<String> defaults) {
             Set<String> result = new HashSet<>();
             defaults.forEach(word -> result.add(word.toLowerCase()));
             if (configured != null) {
@@ -269,7 +263,8 @@ public abstract class Augment {
 
         @Override
         public Object compute(Object input) {
-            return GenMetadataProcessor.process(prompt, getOutputSchema(), input);
+            // Computed at runtime by AugmentProcessor via injected GenMetadataProcessor.
+            return null;
         }
     }
 }

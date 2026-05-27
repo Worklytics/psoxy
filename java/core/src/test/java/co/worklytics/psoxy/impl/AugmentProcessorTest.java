@@ -1,9 +1,13 @@
 package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.Warning;
+import com.avaulta.gateway.resources.ResourceService;
 import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.avaulta.gateway.rules.augments.Augment;
+import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
+import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
+import com.avaulta.gateway.rules.augments.UnavailableGenMetadataBackend;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.Option;
@@ -17,6 +21,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,8 +40,14 @@ class AugmentProcessorTest {
             .options(Option.SUPPRESS_EXCEPTIONS)
             .build();
 
+        ResourceService noModels = path -> Optional.empty();
+        GenMetadataProcessor genMetadataProcessor =
+            new GenMetadataProcessor(new UnavailableGenMetadataBackend(), objectMapper);
         augmentProcessor = new AugmentProcessor(jsonConfiguration,
-            new JsonSchemaValidationUtils(objectMapper), objectMapper);
+            new JsonSchemaValidationUtils(objectMapper),
+            objectMapper,
+            new SentenceMetadataProcessor(noModels),
+            genMetadataProcessor);
     }
 
     @Test

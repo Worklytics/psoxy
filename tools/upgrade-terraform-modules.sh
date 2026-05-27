@@ -54,7 +54,7 @@ find . -type f -name "*.tf" -exec sed -i.bck "${PATTERN}" {} +
 # delete the sed backup files
 find . -type f -name "*.bck" -delete
 
-terraform init
+terraform init -upgrade
 
 # Run check-prereqs.sh script and give user feedback
 PREREQS_SCRIPT=""

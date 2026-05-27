@@ -30,6 +30,7 @@ public class HealthCheckRequestHandlerTest {
     @Singleton
     @Component(modules = {
             PsoxyModule.class,
+        MockModules.ForOpenNlp.class,
             TestModules.ForApiModeConfig.class,
             MockModules.ForConfigService.class,
             MockModules.ForSecretStore.class,
@@ -110,6 +111,22 @@ public class HealthCheckRequestHandlerTest {
 
         when(apiModeConfig.getTargetHost())
                 .thenReturn(Optional.of(""));
+
+        Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
+
+        assertTrue(response.isPresent());
+
+        assertEquals(HttpStatus.SC_PRECONDITION_FAILED, response.get().getStatusCode());
+    }
+
+    @Test
+    void handleIfHealthCheck_should_return_invalid_response_when_target_host_uses_http() {
+
+        when(request.getHeader(ControlHeader.HEALTH_CHECK.getHttpHeader()))
+                .thenReturn(Optional.of(""));
+
+        when(apiModeConfig.getTargetHost())
+                .thenReturn(Optional.of("http://mycompany.com/gitlab"));
 
         Optional<HttpEventResponse> response = handler.handleIfHealthCheck(request);
 

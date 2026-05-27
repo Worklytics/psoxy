@@ -109,6 +109,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "expire_input_files" {
   rule {
     id     = "expire"
     status = "Enabled"
+
+    filter {}
+
     expiration {
       days = var.input_expiration_days
     }
@@ -143,6 +146,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "expire_sanitized_files" {
   rule {
     id     = "expire"
     status = "Enabled"
+
+    filter {}
+
     expiration {
       days = var.sanitized_expiration_days
     }

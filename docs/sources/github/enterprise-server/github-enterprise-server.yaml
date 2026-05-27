@@ -495,9 +495,11 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..actor"
+          - "$..actor_id"
           - "$..user"
           - "$..user_id"
           - "$..started_by"
+          - "$..started_by_id"
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/api/{enterpriseServerVersion}/organizations/{installationId}/audit-log"
     allowedQueryParams:
@@ -526,9 +528,11 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..actor"
+          - "$..actor_id"
           - "$..user"
           - "$..user_id"
           - "$..started_by"
+          - "$..started_by_id"
         encoding: "URL_SAFE_TOKEN"
   - pathTemplate: "/api/{enterpriseServerVersion}/orgs/{org}/repos"
     allowedQueryParams:
@@ -628,7 +632,6 @@ endpoints:
           - "$..description"
           - "$..body"
           - "$..title"
-          - "$..temp_clone_token"
       - !<pseudonymize>
         jsonPaths:
           - "$..author.email"
@@ -818,7 +821,6 @@ endpoints:
           - "$..signature"
           - "$..payload"
           - "$..dismissalMessage"
-          - "$..temp_clone_token"
       - !<redact>
         jsonPaths:
           - "$..['author','committer','review_requester','owner','user','requested_reviewer','closed_by','assigner','actor','assignee','creator'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"
@@ -848,7 +850,6 @@ endpoints:
           - "$..signature"
           - "$..payload"
           - "$..dismissalMessage"
-          - "$..temp_clone_token"
       - !<redact>
         jsonPaths:
           - "$..['author','committer','review_requester','owner','user','requested_reviewer','closed_by','assigner','actor','assignee','creator'].['avatar_url','gravatar_id','url','html_url','followers_url','following_url','gists_url','starred_url','subscriptions_url','organizations_url','repos_url','events_url','received_events_url','name','company','location','bio','twitter_username']"

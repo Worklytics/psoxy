@@ -4,6 +4,8 @@ import com.avaulta.gateway.rules.JsonSchemaFilter;
 import com.avaulta.gateway.rules.JsonSchemaValidationUtils;
 import com.avaulta.gateway.rules.augments.Augment;
 import com.avaulta.gateway.rules.augments.GenMetadataAugmentException;
+import com.avaulta.gateway.rules.augments.GenMetadataProcessor;
+import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
@@ -56,14 +58,21 @@ public class AugmentProcessor {
      */
     final Configuration pathListConfiguration;
 
+    final SentenceMetadataProcessor sentenceMetadataProcessor;
+    final GenMetadataProcessor genMetadataProcessor;
+
     @Inject
     public AugmentProcessor(Configuration jsonConfiguration,
                             JsonSchemaValidationUtils jsonSchemaValidationUtils,
-                            ObjectMapper objectMapper) {
+                            ObjectMapper objectMapper,
+                            SentenceMetadataProcessor sentenceMetadataProcessor,
+                            GenMetadataProcessor genMetadataProcessor) {
         this.jsonConfiguration = jsonConfiguration;
         this.jsonSchemaValidationUtils = jsonSchemaValidationUtils;
         this.objectMapper = objectMapper;
         this.pathListConfiguration = jsonConfiguration.setOptions(Option.AS_PATH_LIST);
+        this.sentenceMetadataProcessor = sentenceMetadataProcessor;
+        this.genMetadataProcessor = genMetadataProcessor;
     }
 
     private final Map<Augment, List<JsonPath>> compiledAugmentPaths = new ConcurrentHashMap<>();
@@ -117,6 +126,10 @@ public class AugmentProcessor {
                 warnings.addAll(applyAugmentAtPath(augment, document, compiledPath));
             } catch (PathNotFoundException e) {
                 // expected if path doesn't match this particular document — no-op
+            } catch (Exception e) {
+                log.log(Level.WARNING,
+                    "Augment '" + augment.getFunctionName() + "' failed at path '"
+                        + compiledPath.getPath() + "'; skipping.", e);
             }
         }
         return warnings;
@@ -142,6 +155,10 @@ public class AugmentProcessor {
             } catch (AugmentProcessingException e) {
                 log.log(Level.WARNING, e.getMessage(), e);
                 warnings.add(e.getWarningCode());
+            } catch (Exception e) {
+                log.log(Level.WARNING,
+                    "Augment '" + augment.getFunctionName() + "' failed at concrete path '"
+                        + concretePath + "'; skipping.", e);
             }
         }
         return warnings;
@@ -210,6 +227,12 @@ public class AugmentProcessor {
 
     private Object invokeCompute(Augment augment, Object input) throws AugmentProcessingException {
         try {
+            if (augment instanceof Augment.SentenceMetadata sentenceMetadata) {
+                return sentenceMetadataProcessor.compute(sentenceMetadata, input);
+            }
+            if (augment instanceof Augment.GenMetadata genMetadata) {
+                return genMetadataProcessor.compute(genMetadata, input);
+            }
             return augment.compute(input);
         } catch (GenMetadataAugmentException e) {
             throw toAugmentProcessingException(e);

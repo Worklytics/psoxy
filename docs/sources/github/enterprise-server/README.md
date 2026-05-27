@@ -1,8 +1,6 @@
 # GitHub Enterprise Server
 
-**Connector ID:** `github-enterprise-server`
-
-**Availability:** GA
+Availability: **GA**
 
 ## Authentication workflow
 

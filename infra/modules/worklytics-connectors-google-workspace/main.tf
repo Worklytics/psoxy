@@ -9,7 +9,7 @@ terraform {
     # for the API connections to Google Workspace
     google = {
       source  = "hashicorp/google"
-      version = ">= 5.0"
+      version = ">= 7.0"
     }
     local = {
       source  = "hashicorp/local"

@@ -146,4 +146,21 @@ variable "artifacts_bucket_name" {
   default     = null
 }
 
+variable "allowed_data_access_ip_blocks" {
+  description = <<-EOT
+    IPs or CIDR blocks allowed to make data access requests. When non-empty, adds infrastructure-level aws:SourceIp conditions on api-caller role assume-role policies (see docs/configuration/ip-allowlisting.md). Application-layer enforcement is configured separately on proxy Lambdas via the host module.
+  EOT
+  type        = list(string)
+  default     = []
+}
+
+variable "allowed_webhook_ip_blocks" {
+  description = <<-EOT
+    IPs or CIDR blocks allowed to send webhooks. When non-empty, adds infrastructure-level aws:SourceIp conditions on webhook-test-caller role assume-role policies (see docs/configuration/ip-allowlisting.md).
+  EOT
+  type        = list(string)
+  default     = []
+}
+
+
 
