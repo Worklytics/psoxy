@@ -83,12 +83,10 @@ if [ ! -z "$BUCKET_PATH" ]; then
 
   if [ "$HOST_PLATFORM" == "gcp" ]; then
     prefix="gs://"
-    copy_cmd=("gsutil" "cp")
-    gsutil_version=$(gsutil version 2>&1)
+    copy_cmd=("gcloud" "storage" "cp")
 
-    # If the previous command was not successful (gsutil is not installed)
-    if [[ $? -ne 0 ]]; then
-        printf "${ERR}Error: gsutil is not installed, but it is required to upload bundle. Please install gsutil and re-run this script - or run it without the <bucket-path> argument.${NC}\n"
+    if ! command -v gcloud &> /dev/null; then
+        printf "${ERR}Error: gcloud is not installed, but it is required to upload bundle. Please install the Google Cloud SDK and re-run this script - or run it without the <bucket-path> argument.${NC}\n"
         exit 1
     fi
   elif [ "$HOST_PLATFORM" == "aws" ]; then
@@ -97,7 +95,7 @@ if [ ! -z "$BUCKET_PATH" ]; then
 
     s3_version=$(aws --version 2>&1)
 
-    # If the previous command was not successful (gsutil is not installed)
+    # If the previous command was not successful (AWS CLI is not installed)
     if [[ $? -ne 0 ]]; then
       printf "${ERR}Error: s3 is not installed, but it is required to upload bundle. Please install s3 (included in AWS CLI tools) and re-run this script - or run it without the <bucket-path> argument.${NC}\n"
       exit 1
@@ -125,7 +123,8 @@ if [ ! -z "$BUCKET_PATH" ]; then
   
   local upload_status=0
   if [ "$HOST_PLATFORM" == "gcp" ]; then
-    gsutil -h "x-goog-meta-sha256:${SHA256_HASH}" cp "${DEPLOYMENT_BUNDLE}" "${BUCKET_PATH}${DEPLOYMENT_BUNDLE}" || upload_status=$?
+    gcloud storage cp "${DEPLOYMENT_BUNDLE}" "${BUCKET_PATH}${DEPLOYMENT_BUNDLE}" \
+      --update-custom-metadata="sha256=${SHA256_HASH}" || upload_status=$?
   elif [ "$HOST_PLATFORM" == "aws" ]; then
     aws s3 cp "${DEPLOYMENT_BUNDLE}" "${BUCKET_PATH}${DEPLOYMENT_BUNDLE}" --metadata "sha256=${SHA256_HASH}" || upload_status=$?
   fi
