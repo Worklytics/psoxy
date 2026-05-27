@@ -6,6 +6,7 @@ import dev.langchain4j.model.jlama.JlamaChatModel;
 import lombok.experimental.UtilityClass;
 import lombok.extern.java.Log;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -65,13 +66,17 @@ class GenMetadataChatModelFactory {
     }
 
     private static void unzip(InputStream zipStream, Path targetDir) throws Exception {
+        Path normalizedTarget = targetDir.toAbsolutePath().normalize();
         try (ZipInputStream zis = new ZipInputStream(zipStream)) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
+                Path out = normalizedTarget.resolve(entry.getName()).normalize();
+                if (!out.startsWith(normalizedTarget)) {
+                    throw new IOException("Zip entry escapes target directory: " + entry.getName());
+                }
                 if (entry.isDirectory()) {
-                    Files.createDirectories(targetDir.resolve(entry.getName()));
+                    Files.createDirectories(out);
                 } else {
-                    Path out = targetDir.resolve(entry.getName());
                     Files.createDirectories(out.getParent());
                     Files.copy(zis, out);
                 }

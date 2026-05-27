@@ -2,6 +2,7 @@ package co.worklytics.psoxy.impl;
 
 import co.worklytics.psoxy.Pseudonymizer;
 import co.worklytics.psoxy.gateway.HttpEventRequest;
+import co.worklytics.psoxy.gateway.HttpEventRequestDto;
 import co.worklytics.psoxy.gateway.ProcessedContent;
 import co.worklytics.psoxy.utils.email.EmailAddressParser;
 import com.avaulta.gateway.pseudonyms.impl.UrlSafeTokenPseudonymEncoder;
@@ -20,7 +21,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -74,10 +76,10 @@ class WebhookSanitizerAugmentsTest {
     @Test
     void sanitize_appliesAugmentsBeforeTransforms() {
         String json = "{\"content\":\"hello world test\"}";
-        HttpEventRequest request = mock(HttpEventRequest.class);
-        org.mockito.Mockito.when(request.getHeader("Content-Type"))
-            .thenReturn(Optional.of("application/json"));
-        org.mockito.Mockito.when(request.getBody()).thenReturn(json.getBytes(StandardCharsets.UTF_8));
+        HttpEventRequest request = HttpEventRequestDto.builder()
+            .headers(Map.of("Content-Type", List.of("application/json")))
+            .body(json.getBytes(StandardCharsets.UTF_8))
+            .build();
 
         ProcessedContent result = sanitizer.sanitize(request);
         String output = new String(result.getContent(), StandardCharsets.UTF_8);

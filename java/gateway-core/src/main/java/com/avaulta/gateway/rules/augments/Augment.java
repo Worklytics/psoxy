@@ -266,5 +266,10 @@ public abstract class Augment {
             // Computed at runtime by AugmentProcessor via injected GenMetadataProcessor.
             return null;
         }
+
+        @Override
+        protected boolean canEqual(Object other) {
+            return other instanceof GenMetadata;
+        }
     }
 }
