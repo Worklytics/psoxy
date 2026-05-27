@@ -1,6 +1,7 @@
 package co.worklytics.psoxy.impl;
 
 import com.avaulta.gateway.rules.augments.Augment;
+import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -50,10 +51,14 @@ public class AugmentProcessor {
      */
     final Configuration pathListConfiguration;
 
+    final SentenceMetadataProcessor sentenceMetadataProcessor;
+
     @Inject
-    public AugmentProcessor(Configuration jsonConfiguration) {
+    public AugmentProcessor(Configuration jsonConfiguration,
+                            SentenceMetadataProcessor sentenceMetadataProcessor) {
         this.jsonConfiguration = jsonConfiguration;
         this.pathListConfiguration = jsonConfiguration.setOptions(Option.AS_PATH_LIST);
+        this.sentenceMetadataProcessor = sentenceMetadataProcessor;
     }
 
     /**
@@ -196,7 +201,7 @@ public class AugmentProcessor {
                 return;
             }
 
-            Object augmentValue = augment.compute(sourceValue);
+            Object augmentValue = computeAugmentValue(augment, sourceValue);
             if (augmentValue == null) {
                 return;
             }
@@ -243,7 +248,7 @@ public class AugmentProcessor {
         for (String innerConcretePath : innerConcretePaths) {
             try {
                 Object innerValue = innerContext.read(innerConcretePath);
-                Object augmentValue = augment.compute(innerValue);
+                Object augmentValue = computeAugmentValue(augment, innerValue);
                 if (augmentValue == null) {
                     continue;
                 }
@@ -263,6 +268,13 @@ public class AugmentProcessor {
             parent.put(buildAugmentPropertyName(leafFieldName, augment.getFunctionName()),
                 innerContext.jsonString());
         }
+    }
+
+    private Object computeAugmentValue(Augment augment, Object sourceValue) {
+        if (augment instanceof Augment.SentenceMetadata sentenceMetadata) {
+            return sentenceMetadataProcessor.compute(sentenceMetadata, sourceValue);
+        }
+        return augment.compute(sourceValue);
     }
 
     /**

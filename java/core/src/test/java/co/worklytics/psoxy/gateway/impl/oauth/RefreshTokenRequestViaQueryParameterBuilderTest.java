@@ -31,6 +31,7 @@ class RefreshTokenRequestViaQueryParameterBuilderTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        MockModules.ForOpenNlp.class,
         TestModules.ForApiModeConfig.class,
         SourceAuthModule.class,
         MockModules.ForConfigService.class,

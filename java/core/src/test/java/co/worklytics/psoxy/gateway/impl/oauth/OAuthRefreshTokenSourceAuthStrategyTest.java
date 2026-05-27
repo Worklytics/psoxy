@@ -51,6 +51,7 @@ class OAuthRefreshTokenSourceAuthStrategyTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        MockModules.ForOpenNlp.class,
         SourceAuthModule.class,
         MockModules.ForConfigService.class,
         MockModules.ForRandomNumberGenerator.class,
