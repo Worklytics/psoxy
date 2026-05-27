@@ -165,12 +165,101 @@ printf "\n"
 
 # Check Azure CLI installation
 AZCLI_REASON="Required if deploying to Azure or using Microsoft 365 data sources."
+AZ_ENTRA_ADMIN_ROLES_REASON="Microsoft 365 / Entra connectors require the authenticated principal to have Global Administrator or Application Administrator directory roles."
+AZ_ENTRA_ROLES_DOC="https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/view-assignments"
 if ! az --version &> /dev/null ; then
   printf "${ERR}Azure CLI is not installed.${NC} ${AZCLI_REASON} See https://docs.microsoft.com/en-us/cli/azure/install-azure-cli\n"
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${CODE}brew install azure-cli${NC}\n"; fi
+  printf "\t- ${WARN}If you intend to use Microsoft 365 connectors, your Azure principal will still need ${CODE}Global Administrator${NC} or ${CODE}Application Administrator${NC} Entra directory roles. See ${AZ_ENTRA_ROLES_DOC}\n"
 else
   # how can pipe to sed or something to strip extra whitespace out?
   printf "Azure CLI version ${CODE}`az --version --only-show-errors | head -n 1`${NC} is installed.\n"
   printf "\t- make sure ${CODE}az account show${NC} is the user/tenant you expect. If not, ${CODE}az login --allow-no-subscription${NC} to authenticate. $AZCLI_REASON\n"
+
+  if az account show &> /dev/null; then
+    AZ_TENANT_ID=$(az account show --query tenantId -o tsv 2>/dev/null)
+    AZ_USER_NAME=$(az account show --query user.name -o tsv 2>/dev/null)
+    if [[ -n "$AZ_USER_NAME" ]]; then
+      printf "\t- signed in as ${CODE}${AZ_USER_NAME}${NC}"
+      if [[ -n "$AZ_TENANT_ID" ]]; then
+        printf " (tenant ${CODE}${AZ_TENANT_ID}${NC})"
+      fi
+      printf ".\n"
+    fi
+
+    POWERSHELL_CMD=""
+    if command -v pwsh &> /dev/null; then
+      POWERSHELL_CMD="pwsh"
+    elif command -v powershell &> /dev/null; then
+      POWERSHELL_CMD="powershell"
+    fi
+
+    if [[ -n "$POWERSHELL_CMD" ]]; then
+      AZ_ROLE_CHECK=$("$POWERSHELL_CMD" -NoProfile -NonInteractive -Command '
+$ErrorActionPreference = "Stop"
+try {
+  $token = az account get-access-token --resource-type ms-graph --query accessToken -o tsv 2>$null
+  if (-not $token) { Write-Output "ERROR:Could not obtain Microsoft Graph access token from Azure CLI"; exit 1 }
+  $headers = @{ Authorization = "Bearer $token" }
+  $uri = "https://graph.microsoft.com/v1.0/me/transitiveMemberOf/microsoft.graph.directoryRole"
+  $roleNames = @()
+  $response = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
+  $roleNames += @($response.value | ForEach-Object { $_.displayName })
+  while ($response."@odata.nextLink") {
+    $response = Invoke-RestMethod -Uri $response."@odata.nextLink" -Headers $headers -Method Get
+    $roleNames += @($response.value | ForEach-Object { $_.displayName })
+  }
+  $required = @("Global Administrator", "Application Administrator")
+  $hasRequired = $false
+  foreach ($requiredRole in $required) {
+    if ($roleNames -contains $requiredRole) { $hasRequired = $true; break }
+  }
+  if ($hasRequired) {
+    Write-Output "OK"
+  } else {
+    Write-Output "MISSING"
+    if ($roleNames.Count -gt 0) {
+      Write-Output ($roleNames -join ", ")
+    } else {
+      Write-Output "(none detected)"
+    }
+  }
+} catch {
+  Write-Output "ERROR:$($_.Exception.Message)"
+  exit 1
+}
+' 2>/dev/null)
+      AZ_ROLE_STATUS=$(echo "$AZ_ROLE_CHECK" | head -n 1)
+      case "$AZ_ROLE_STATUS" in
+        OK)
+          printf "\t- ${SUCCESS}Entra directory roles: signed-in principal has Global Administrator or Application Administrator.${NC}\n"
+          ;;
+        MISSING)
+          AZ_ROLE_LIST=$(echo "$AZ_ROLE_CHECK" | sed -n '2p')
+          printf "\t- ${WARN}Entra directory roles: signed-in principal does not appear to have Global Administrator or Application Administrator.${NC}\n"
+          printf "\t  ${AZ_ENTRA_ADMIN_ROLES_REASON}\n"
+          if [[ -n "$AZ_ROLE_LIST" ]]; then
+            printf "\t  Directory roles detected for this principal: ${CODE}${AZ_ROLE_LIST}${NC}.\n"
+          fi
+          printf "\t  See ${AZ_ENTRA_ROLES_DOC}\n"
+          ;;
+        ERROR:*)
+          printf "\t- ${WARN}Could not verify Entra directory roles (${AZ_ROLE_STATUS#ERROR:}).${NC}\n"
+          printf "\t  ${AZ_ENTRA_ADMIN_ROLES_REASON} Verify assignments in the Microsoft Entra admin center. See ${AZ_ENTRA_ROLES_DOC}\n"
+          ;;
+        *)
+          printf "\t- ${WARN}Could not verify Entra directory roles (unexpected result).${NC}\n"
+          printf "\t  ${AZ_ENTRA_ADMIN_ROLES_REASON} Verify assignments in the Microsoft Entra admin center. See ${AZ_ENTRA_ROLES_DOC}\n"
+          ;;
+      esac
+    else
+      printf "\t- ${WARN}PowerShell is not installed; cannot automatically verify Entra directory roles.${NC}\n"
+      printf "\t  ${AZ_ENTRA_ADMIN_ROLES_REASON}\n"
+      printf "\t  Verify role assignments in the Microsoft Entra admin center (see ${AZ_ENTRA_ROLES_DOC}), or install PowerShell (${CODE}pwsh${NC} on macOS/Linux) and re-run this script.\n"
+    fi
+  else
+    printf "\t- ${WARN}Azure CLI is not authenticated.${NC} Run ${CODE}az login --allow-no-subscriptions${NC} to authenticate.\n"
+    printf "\t  Once authenticated, re-run this script to verify Entra directory role requirements (${CODE}Global Administrator${NC} or ${CODE}Application Administrator${NC}).\n"
+  fi
 fi
 
