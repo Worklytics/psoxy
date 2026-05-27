@@ -98,6 +98,14 @@ verify_bundles_jar_from_artifact() {
   esac
 }
 
+verify_bundles_platform_label() {
+  case "$1" in
+    aws) printf 'AWS' ;;
+    gcp) printf 'GCP' ;;
+    *) printf '%s' "$1" ;;
+  esac
+}
+
 verify_bundles_scan_jar_for_compilation_errors() {
   local jar_path="$1"
   local label="$2"
@@ -133,6 +141,8 @@ verify_bundles_scan_jar_for_compilation_errors() {
 verify_bundles_check_jar_structure() {
   local jar_path="$1"
   local platform="$2"
+  local platform_label
+  platform_label="$(verify_bundles_platform_label "$platform")"
   local missing=()
 
   case "$platform" in
@@ -153,7 +163,7 @@ verify_bundles_check_jar_structure() {
   fi
 
   if [ "${#missing[@]}" -gt 0 ]; then
-    echo -e "${ERR}✗ ${platform} jar missing expected bundle contents:${NC}"
+    echo -e "${ERR}✗ ${platform_label} JAR missing expected bundle contents:${NC}"
     local entry
     for entry in "${missing[@]}"; do
       echo -e "  ${ERR}${entry}${NC}"
@@ -161,13 +171,15 @@ verify_bundles_check_jar_structure() {
     return 1
   fi
 
-  echo -e "${SUCCESS}✓ ${platform} jar contains Dagger container and license artifacts${NC}"
+  echo -e "${SUCCESS}✓ ${platform_label} JAR contains Dagger container and license artifacts${NC}"
   return 0
 }
 
 verify_bundles_check_entrypoint_classes() {
   local jar_path="$1"
   local platform="$2"
+  local platform_label
+  platform_label="$(verify_bundles_platform_label "$platform")"
   local entrypoints=()
 
   case "$platform" in
@@ -194,23 +206,25 @@ verify_bundles_check_entrypoint_classes() {
   done
 
   if [ "${#missing[@]}" -gt 0 ]; then
-    echo -e "${ERR}✗ ${platform} bundle missing expected entrypoint class(es):${NC}"
+    echo -e "${ERR}✗ ${platform_label} bundle missing expected entrypoint class(es):${NC}"
     for entrypoint in "${missing[@]}"; do
       echo -e "  ${ERR}${entrypoint}${NC}"
     done
     return 1
   fi
 
-  echo -e "${SUCCESS}✓ ${platform} bundle contains expected entrypoint classes${NC}"
+  echo -e "${SUCCESS}✓ ${platform_label} bundle contains expected entrypoint classes${NC}"
   return 0
 }
 
 verify_bundles_verify_jar() {
   local jar_path="$1"
   local platform="$2"
+  local platform_label
+  platform_label="$(verify_bundles_platform_label "$platform")"
   local ok=true
 
-  verify_bundles_scan_jar_for_compilation_errors "$jar_path" "${platform} jar" || ok=false
+  verify_bundles_scan_jar_for_compilation_errors "$jar_path" "${platform_label} JAR" || ok=false
   verify_bundles_check_entrypoint_classes "$jar_path" "$platform" || ok=false
   verify_bundles_check_jar_structure "$jar_path" "$platform" || ok=false
 
