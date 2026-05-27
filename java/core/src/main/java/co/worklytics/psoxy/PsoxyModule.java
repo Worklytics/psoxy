@@ -391,7 +391,7 @@ public class PsoxyModule {
 
     /**
      * Wires genMetadata backend. Model weights are resolved via {@code @Named("ForGenMetadata")}
-     * {@link ResourceService} from {@code FunctionRuntimeModule}.
+     * {@link ResourceService} from {@code ResourceServiceBindingsModule}.
      */
     @Provides
     @Singleton
