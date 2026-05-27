@@ -425,13 +425,13 @@ module "webhook_collectors" {
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   test_caller_role_arn                 = module.psoxy.webhook_test_caller_role_arn
-  rules_file                   = try(local.webhook_collector_rules_file_paths[each.key], null)
-  webhook_auth_public_keys = each.value.auth_public_keys
-  provision_auth_key       = each.value.provision_auth_key
-  output_path_prefix       = each.value.output_path_prefix
-  keep_warm_instances      = try(each.value.keep_warm_instances, null)
-  example_payload          = try(each.value.example_payload, null)
-  example_identity         = try(each.value.example_identity, null)
+  rules_file                           = try(local.webhook_collector_rules_file_paths[each.key], null)
+  webhook_auth_public_keys             = each.value.auth_public_keys
+  provision_auth_key                   = each.value.provision_auth_key
+  output_path_prefix                   = each.value.output_path_prefix
+  keep_warm_instances                  = try(each.value.keep_warm_instances, null)
+  example_payload                      = try(each.value.example_payload, null)
+  example_identity                     = try(each.value.example_identity, null)
 
   todos_as_local_files      = var.todos_as_local_files
   allowed_webhook_ip_blocks = var.allowed_webhook_ip_blocks
