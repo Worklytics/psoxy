@@ -170,16 +170,72 @@ fi
 set -e
 
 cd "$EXAMPLE_TEMPLATE_REPO"
+
+${PATH_TO_REPO}tools/release/example-copy.sh $dev_example_path $EXAMPLE_TEMPLATE_REPO $PATH_TO_REPO
+
+# Preview copy changes on main before creating rc branch. Abort via reset --hard; no branch to delete.
+INCLUDE_ALL_IN_RELEASE=true
+while [ -n "$(git status --porcelain)" ]; do
+  change_count=$(git status --porcelain | wc -l | tr -d ' ')
+  printf "${WARN}Warning: ${change_count} uncommitted change(s) in the example repo after copy:${NC}\n\n"
+  git status
+  printf "\n"
+  if git diff --quiet && git diff --cached --quiet; then
+    printf "${INFO}Untracked files (not included by ${CODE}git commit -a${NC}${INFO}):${NC}\n"
+    git ls-files -o --exclude-standard | sed 's/^/  /'
+  else
+    git diff --stat
+    git diff --cached --stat
+    printf "\n"
+    git diff
+    git diff --cached
+  fi
+  printf "\nInclude these changes in the release commit?\n"
+  read -p "(Y/n) " -n 1 -r
+  REPLY=${REPLY:-Y}
+  echo    # Move to a new line
+  case "$REPLY" in
+    [yY][eE][sS]|[yY])
+      INCLUDE_ALL_IN_RELEASE=true
+      break
+      ;;
+    *)
+      printf "Proceed without including these changes?\n"
+      read -p "(y/N) " -n 1 -r
+      REPLY=${REPLY:-N}
+      echo    # Move to a new line
+      case "$REPLY" in
+        [yY][eE][sS]|[yY])
+          printf "${WARN}Proceeding; only tracked modifications will be committed (${CODE}git commit -a${NC}${WARN}).${NC}\n"
+          INCLUDE_ALL_IN_RELEASE=false
+          break
+          ;;
+        *)
+          printf "Aborting.\n"
+          git reset --hard
+          cd -
+          exit 1
+          ;;
+      esac
+      ;;
+  esac
+done
+
 git checkout -b "rc-${RELEASE_TAG}"
 
 if [ $? -ne 0 ]; then
   printf "${ERR}Failed to create branch rc-${RELEASE_TAG}. does it already exist?${NC}\n"
+  git reset --hard
   exit 1
 fi
 
-${PATH_TO_REPO}tools/release/example-copy.sh $dev_example_path $EXAMPLE_TEMPLATE_REPO $PATH_TO_REPO
+if [ "$INCLUDE_ALL_IN_RELEASE" = true ]; then
+  git add -A
+  git commit -m "Update example to ${RELEASE_TAG}"
+else
+  git commit -a -m "Update example to ${RELEASE_TAG}"
+fi
 
-git commit -a -m "Update example to ${RELEASE_TAG}"
 git push origin
 
 if command -v gh &> /dev/null; then
