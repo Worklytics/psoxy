@@ -1,10 +1,11 @@
 package co.worklytics.psoxy;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Singleton;
 import com.avaulta.gateway.rules.BulkDataRules;
@@ -87,7 +88,7 @@ public class ConfigRulesModule {
         };
 
         return loadAndLog.apply(rulesUtils.getRulesFromConfig(config, envVarsConfigService), "Rules: loaded from environment config (RULES variable parsed as base64-encoded YAML)")
-            .or( () -> loadAndLog.apply(getRulesFromResource(log, rulesUtils, resourceService), "Rules: loaded from instance resource (" + RULES_RESOURCE_PATH + ")"))
+            .or( () -> loadAndLog.apply(getRulesFromResource(rulesUtils, resourceService), "Rules: loaded from instance resource (" + RULES_RESOURCE_PATH + ")"))
             .or( () -> loadAndLog.apply(getDefaults(log, config), "Rules: fallback to prebuilt rules"))
                 .orElseThrow( () -> new RuntimeException("No rules found"));
 
@@ -96,20 +97,17 @@ public class ConfigRulesModule {
     /**
      * Attempt to load rules from the InstanceResourceService (local FS or remote S3/GCS bucket).
      */
-    static Optional<RuleSet> getRulesFromResource(Logger log, RulesUtils rulesUtils, ResourceService resourceService) {
-        try {
-            Optional<InputStream> rulesStream = resourceService.getResource(RULES_RESOURCE_PATH);
-            if (rulesStream.isEmpty()) {
-                return Optional.empty();
-            }
-
-            try (InputStream is = rulesStream.get()) {
-                String yamlContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-                return Optional.of(rulesUtils.parse(yamlContent));
-            }
-        } catch (Exception e) {
-            log.log(Level.WARNING, "Failed to load rules from resource service", e);
+    static Optional<RuleSet> getRulesFromResource(RulesUtils rulesUtils, ResourceService resourceService) {
+        Optional<InputStream> rulesStream = resourceService.getResource(RULES_RESOURCE_PATH);
+        if (rulesStream.isEmpty()) {
             return Optional.empty();
+        }
+
+        try (InputStream is = rulesStream.get()) {
+            String yamlContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            return Optional.of(rulesUtils.parse(yamlContent));
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to read rules from resource service", e);
         }
     }
 

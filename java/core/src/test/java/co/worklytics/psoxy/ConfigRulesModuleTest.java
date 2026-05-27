@@ -81,11 +81,24 @@ class ConfigRulesModuleTest {
     }
 
     @Test
-    void getRulesFromResource_returnsEmptyOnResourceServiceException() {
+    void getRulesFromResource_throwsOnResourceServiceException() {
         when(resourceService.getResource(ConfigRulesModule.RULES_RESOURCE_PATH)).thenThrow(new RuntimeException("Service failed"));
 
-        Optional<RuleSet> resolved = ConfigRulesModule.getRulesFromResource(logger, rulesUtils, resourceService);
+        assertThrows(RuntimeException.class,
+            () -> ConfigRulesModule.getRulesFromResource(rulesUtils, resourceService));
+    }
 
-        assertTrue(resolved.isEmpty());
+    @Test
+    void rules_doesNotFallbackToDefaultsWhenResourceRulesAreInvalid() {
+        when(rulesUtils.getRulesFromConfig(config, envVarsConfigService)).thenReturn(Optional.empty());
+
+        byte[] yamlBytes = "bad yaml".getBytes();
+        InputStream inputStream = new ByteArrayInputStream(yamlBytes);
+        when(resourceService.getResource(ConfigRulesModule.RULES_RESOURCE_PATH)).thenReturn(Optional.of(inputStream));
+        when(rulesUtils.parse("bad yaml")).thenThrow(new RuntimeException("Invalid resource rules"));
+
+        assertThrows(RuntimeException.class,
+            () -> ConfigRulesModule.rules(logger, rulesUtils, config, envVarsConfigService, resourceService));
+        verify(config, never()).getConfigPropertyAsOptional(ProxyConfigProperty.SOURCE);
     }
 }
