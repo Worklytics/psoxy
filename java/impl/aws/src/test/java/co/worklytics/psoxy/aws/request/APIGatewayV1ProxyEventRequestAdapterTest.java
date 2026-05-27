@@ -67,7 +67,7 @@ public class APIGatewayV1ProxyEventRequestAdapterTest {
     }
 
     @Test
-    public void getClientIp_prefersSourceIpOverSpoofableHeader() {
+    public void getClientIp_prefersForwardedHeaderOverSourceIp() {
         APIGatewayProxyRequestEvent.RequestIdentity identity =
             new APIGatewayProxyRequestEvent.RequestIdentity();
         identity.setSourceIp("198.51.100.7");
@@ -83,6 +83,6 @@ public class APIGatewayV1ProxyEventRequestAdapterTest {
         APIGatewayV1ProxyEventRequestAdapter requestAdapter =
             APIGatewayV1ProxyEventRequestAdapter.of(apiGatewayEvent);
 
-        assertEquals("198.51.100.7", requestAdapter.getClientIp().get());
+        assertEquals("203.0.113.10", requestAdapter.getClientIp().get());
     }
 }

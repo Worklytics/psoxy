@@ -41,10 +41,10 @@ import lombok.extern.java.Log;
 public class RulesUtils {
 
     /**
-     * Well-known resource path for rules loaded from InstanceResourceService (local FS or remote
-     * cloud storage).
+     * Relative object path for rules loaded from InstanceResourceService (local FS or remote
+     * cloud storage). Distinct from the {@link ProxyConfigProperty#RULES} config property name.
      */
-    public static final String RULES_RESOURCE_PATH = "RULES";
+    public static final String RULES_RESOURCE_PATH = "rules.yaml";
 
     @Inject @Named("ForYAML")
     ObjectMapper yamlMapper;
