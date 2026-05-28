@@ -174,7 +174,7 @@ if ! az --version &> /dev/null ; then
 else
   # how can pipe to sed or something to strip extra whitespace out?
   printf "Azure CLI version ${CODE}`az --version --only-show-errors | head -n 1`${NC} is installed.\n"
-  printf "\t- make sure ${CODE}az account show${NC} is the user/tenant you expect. If not, ${CODE}az login --allow-no-subscription${NC} to authenticate. $AZCLI_REASON\n"
+  printf "\t- make sure ${CODE}az account show${NC} is the user/tenant you expect. If not, ${CODE}az login --allow-no-subscriptions${NC} to authenticate. $AZCLI_REASON\n"
 
   if az account show &> /dev/null; then
     AZ_TENANT_ID=$(az account show --query tenantId -o tsv 2>/dev/null)
