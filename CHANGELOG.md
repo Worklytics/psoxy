@@ -14,7 +14,7 @@ Changes to be including in future/planned release notes will be added here.
 - `textDigest` rule now accepts an optional list of `keywords` to tally the occurrence of specific keywords in the text.
 - `chatgpt-enterprise`: added `write` and `email` keyword tracking to prompt/title texts via `textDigest`.
 - performance: optimized `redactExceptPhrases` rule to use non-reluctant matchers.
-- supporting fetching redirection location in async mode for APIs that use 3xx responses to indicate async processing (e.g., Slack Analytics).
+- support fetching redirect locations in async mode for APIs that use 3xx responses to indicate async processing (e.g., Slack Analytics).
 
 
 ## [0.6.1](https://github.com/Worklytics/psoxy/releases/tag/v0.6.1)

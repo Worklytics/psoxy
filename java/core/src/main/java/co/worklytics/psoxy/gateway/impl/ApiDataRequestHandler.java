@@ -499,19 +499,31 @@ public class ApiDataRequestHandler {
 
         // In async mode, treat a 3xx response with a Location header as success by fetching content
         // from the Location URL (e.g., source returns 307 pointing to a pre-signed file download).
+        // Only applies to safe methods (GET/HEAD) — 307/308 with POST would require replaying the body.
         if (processingContext.getAsync()
                 && isRedirectFamily(sourceApiResponse.getStatusCode())
-                && sourceApiResponse.getHeaders().getLocation() != null) {
+                && sourceApiResponse.getHeaders().getLocation() != null
+                && isSafeMethod(requestToSourceApi.getRequestMethod())) {
             String locationUrl = sourceApiResponse.getHeaders().getLocation();
+            GenericUrl locationGenericUrl = new GenericUrl(locationUrl);
+            if (!"https".equalsIgnoreCase(locationGenericUrl.getScheme())) {
+                builder.statusCode(HttpStatus.SC_BAD_GATEWAY);
+                builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                        ErrorCauses.API_ERROR.name());
+                builder.body("Async redirect Location is not HTTPS; refusing to follow");
+                log.log(Level.WARNING, "Async redirect to non-HTTPS Location refused: {0}", locationUrl);
+                return builder.build();
+            }
             log.info("Async request received " + sourceApiResponse.getStatusCode()
                     + " redirect; fetching content from Location header");
             sourceApiResponse.disconnect();
             try {
                 com.google.api.client.http.HttpRequest locationRequest = httpTransportFactory.create()
                         .createRequestFactory()
-                        .buildGetRequest(new GenericUrl(locationUrl));
+                        .buildGetRequest(locationGenericUrl);
                 locationRequest
                         .setThrowExceptionOnExecuteError(false)
+                        .setFollowRedirects(false)
                         .setConnectTimeout(apiModeConfig.getSourceApiConnectTimeoutMs())
                         .setReadTimeout(apiModeConfig.getSourceApiReadTimeoutMs());
                 sourceApiResponse = locationRequest.execute();
@@ -809,6 +821,10 @@ public class ApiDataRequestHandler {
 
     boolean isRedirectFamily(int statusCode) {
         return statusCode >= 300 && statusCode < 400;
+    }
+
+    boolean isSafeMethod(String method) {
+        return "GET".equalsIgnoreCase(method) || "HEAD".equalsIgnoreCase(method);
     }
 
     @SneakyThrows
