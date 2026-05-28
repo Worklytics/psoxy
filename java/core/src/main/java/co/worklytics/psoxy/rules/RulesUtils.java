@@ -2,6 +2,9 @@ package co.worklytics.psoxy.rules;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -19,13 +22,13 @@ import com.avaulta.gateway.rules.RecordRules;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteStreams;
 import co.worklytics.psoxy.ErrorCauses;
 import co.worklytics.psoxy.gateway.BulkModeConfigProperty;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
+import co.worklytics.psoxy.gateway.ResourceService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.storage.StorageHandler;
 import lombok.NoArgsConstructor;
@@ -36,6 +39,12 @@ import lombok.extern.java.Log;
 @Log
 @NoArgsConstructor(onConstructor_ = @Inject)
 public class RulesUtils {
+
+    /**
+     * Relative object path for rules loaded from InstanceResourceService (local FS or remote
+     * cloud storage). Distinct from the {@link ProxyConfigProperty#RULES} config property name.
+     */
+    public static final String RULES_RESOURCE_PATH = "rules.yaml";
 
     @Inject @Named("ForYAML")
     ObjectMapper yamlMapper;
@@ -127,7 +136,23 @@ public class RulesUtils {
     );
 
 
-    @VisibleForTesting
+    /**
+     * Attempt to load rules from the InstanceResourceService (local FS or remote S3/GCS bucket).
+     */
+    public Optional<com.avaulta.gateway.rules.RuleSet> getRulesFromResource(ResourceService resourceService) {
+        Optional<InputStream> rulesStream = resourceService.getResource(RULES_RESOURCE_PATH);
+        if (rulesStream.isEmpty()) {
+            return Optional.empty();
+        }
+
+        try (InputStream is = rulesStream.get()) {
+            String yamlContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            return Optional.of(parse(yamlContent));
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to read rules from resource service", e);
+        }
+    }
+
     public com.avaulta.gateway.rules.RuleSet parse(@NonNull String yamlString) {
         for (Class<?> impl : rulesImplementations) {
             try {
