@@ -229,13 +229,13 @@ try {
   exit 1
 }
 ' 2>/dev/null)
-      AZ_ROLE_STATUS=$(echo "$AZ_ROLE_CHECK" | head -n 1)
+      AZ_ROLE_STATUS=$(echo "$AZ_ROLE_CHECK" | head -n 1 | tr -d '\r')
       case "$AZ_ROLE_STATUS" in
         OK)
           printf "\t- ${SUCCESS}Entra directory roles: signed-in principal has Global Administrator or Application Administrator.${NC}\n"
           ;;
         MISSING)
-          AZ_ROLE_LIST=$(echo "$AZ_ROLE_CHECK" | sed -n '2p')
+          AZ_ROLE_LIST=$(echo "$AZ_ROLE_CHECK" | sed -n '2p' | tr -d '\r')
           printf "\t- ${WARN}Entra directory roles: signed-in principal does not appear to have Global Administrator or Application Administrator.${NC}\n"
           printf "\t  ${AZ_ENTRA_ADMIN_ROLES_REASON}\n"
           if [[ -n "$AZ_ROLE_LIST" ]]; then
