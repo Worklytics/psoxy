@@ -139,5 +139,10 @@ if [ -f "${TF_CONFIG_ROOT}/backend.tf" ]; then
 fi
 
 printf "\n${SUCCESS}Initialization complete.${NC}"
-printf "If you wish to remove files created by this initialization, run ${CODE}./reset-example${NC}.\n"
-printf "That script can back up ${CODE}terraform.tfvars${NC} and other local IaC files to ${CODE}.psoxy-iac-backup/${NC}; restore them after re-init with ${CODE}./reset-example --recover${NC}.\n"
+if [ -x "${TF_CONFIG_ROOT}/reset-example" ]; then
+  RESET_EXAMPLE_CMD="./reset-example"
+else
+  RESET_EXAMPLE_CMD="${REPO_CLONE_BASE_DIR}tools/reset-example.sh"
+fi
+printf "If you wish to remove files created by this initialization, run ${CODE}${RESET_EXAMPLE_CMD}${NC}.\n"
+printf "That script can back up ${CODE}terraform.tfvars${NC} and other local IaC files to ${CODE}.psoxy-iac-backup/${NC}; restore them after re-init with ${CODE}${RESET_EXAMPLE_CMD} --recover${NC}.\n"
