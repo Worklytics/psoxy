@@ -379,7 +379,10 @@ public class ApiDataRequestHandler {
             requestToSourceApi
                     .setThrowExceptionOnExecuteError(false)
                     .setConnectTimeout(apiModeConfig.getSourceApiConnectTimeoutMs())
-                    .setReadTimeout(apiModeConfig.getSourceApiReadTimeoutMs());
+                    .setReadTimeout(apiModeConfig.getSourceApiReadTimeoutMs())
+                    // disable automatic redirect following in async mode so that our redirect
+                    // handling block can intercept 3xx responses and fetch from Location manually
+                    .setFollowRedirects(!processingContext.getAsync());
 
         } catch (SocketTimeoutException e) {
             return buildConnectTimeoutErrorResponse(builder, e);
@@ -466,7 +469,7 @@ public class ApiDataRequestHandler {
         }
 
 
-        final com.google.api.client.http.HttpResponse sourceApiResponse;
+        com.google.api.client.http.HttpResponse sourceApiResponse;
         try {
             // q: add exception handlers for IOExceptions / HTTP error responses, so those retries
             // happen in proxy rather than on Worklytics-side?
@@ -493,6 +496,34 @@ public class ApiDataRequestHandler {
             return builder.build();
         }
 
+
+        // In async mode, treat a 3xx response with a Location header as success by fetching content
+        // from the Location URL (e.g., source returns 307 pointing to a pre-signed file download).
+        if (processingContext.getAsync()
+                && isRedirectFamily(sourceApiResponse.getStatusCode())
+                && sourceApiResponse.getHeaders().getLocation() != null) {
+            String locationUrl = sourceApiResponse.getHeaders().getLocation();
+            log.info("Async request received " + sourceApiResponse.getStatusCode()
+                    + " redirect; fetching content from Location header");
+            sourceApiResponse.disconnect();
+            try {
+                com.google.api.client.http.HttpRequest locationRequest = httpTransportFactory.create()
+                        .createRequestFactory()
+                        .buildGetRequest(new GenericUrl(locationUrl));
+                locationRequest
+                        .setThrowExceptionOnExecuteError(false)
+                        .setConnectTimeout(apiModeConfig.getSourceApiConnectTimeoutMs())
+                        .setReadTimeout(apiModeConfig.getSourceApiReadTimeoutMs());
+                sourceApiResponse = locationRequest.execute();
+            } catch (IOException e) {
+                builder.statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+                builder.header(ProcessedDataMetadataFields.ERROR.getHttpHeader(),
+                        ErrorCauses.CONNECTION_TO_SOURCE.name());
+                builder.body("Error fetching content from redirect location: " + e.getMessage());
+                log.log(Level.SEVERE, "Error fetching content from redirect location", e);
+                return builder.build();
+            }
+        }
 
         String proxyResponseContent = "";
         try {
@@ -774,6 +805,10 @@ public class ApiDataRequestHandler {
 
     boolean isSuccessFamily(int statusCode) {
         return statusCode >= 200 && statusCode < 300;
+    }
+
+    boolean isRedirectFamily(int statusCode) {
+        return statusCode >= 300 && statusCode < 400;
     }
 
     @SneakyThrows
