@@ -24,8 +24,13 @@ fi
 #   - within example directory, such as `infra/examples-dev/aws`:
 #     ../../../tools/init-example.sh ~/code/psoxy
 #
-#   to repeat:
+#   to repeat init from scratch (prompts to back up terraform.tfvars, etc. first):
 #     ../../../tools/reset-example.sh
+#     ../../../tools/init-example.sh ~/code/psoxy
+#     ../../../tools/reset-example.sh --recover
+#
+#   backup only (no reset):
+#     ../../../tools/reset-example.sh --backup
 
 # colors
 # Source centralized color scheme

@@ -140,3 +140,4 @@ fi
 
 printf "\n${SUCCESS}Initialization complete.${NC}"
 printf "If you wish to remove files created by this initialization, run ${CODE}${REPO_CLONE_BASE_DIR}tools/reset-example.sh${NC}.\n"
+printf "That script can back up ${CODE}terraform.tfvars${NC} and other local IaC files to ${CODE}.psoxy-iac-backup/${NC}; restore them after re-init with ${CODE}reset-example.sh --recover${NC}.\n"
