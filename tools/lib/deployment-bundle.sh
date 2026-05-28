@@ -206,6 +206,112 @@ deployment_bundle_target_artifact_label() {
   fi
 }
 
+deployment_bundle_set_or_append() {
+  local tfvars_file="$1"
+  local bundle_path="$2"
+
+  if grep -qE '^[[:space:]]*deployment_bundle' "$tfvars_file" 2>/dev/null; then
+    deployment_bundle_set_value "$tfvars_file" "$bundle_path"
+  else
+    printf '\n# Prebuilt deployment bundle published by Worklytics (see deployment_bundle in variables.tf)\n' >> "$tfvars_file"
+    printf 'deployment_bundle = "%s"\n\n' "$bundle_path" >> "$tfvars_file"
+  fi
+}
+
+deployment_bundle_resolve_public_path() {
+  local platform="$1"
+  local version="$2"
+  local aws_region="${3:-us-east-1}"
+  local bundle_path=""
+
+  bundle_path="$(deployment_bundle_public_path "$platform" "$version" "false" "$aws_region")"
+  if deployment_bundle_public_exists "$bundle_path"; then
+    printf '%s' "$bundle_path"
+    return 0
+  fi
+
+  bundle_path="$(deployment_bundle_public_path "$platform" "$version" "true" "$aws_region")"
+  if deployment_bundle_public_exists "$bundle_path"; then
+    printf '%s' "$bundle_path"
+    return 0
+  fi
+
+  return 1
+}
+
+deployment_bundle_print_tfvars_notice() {
+  local tfvars_file="$1"
+
+  printf "\n"
+  printf "Added ${CODE}deployment_bundle${NC} to ${CODE}%s${NC}.\n" "$(basename "$tfvars_file")"
+  printf "If you use ${CODE}./upgrade-terraform-modules${NC} when upgrading Psoxy versions, this reference should be updated automatically.\n"
+  printf "If you upgrade Terraform modules without that tooling, you must keep ${CODE}deployment_bundle${NC} aligned with a bundle version compatible with your module ref.\n\n"
+}
+
+# Offer to use a published bundle during example init (init-tfvars.sh).
+# Returns 0 if no bundle was set, 1 if deployment_bundle was written to tfvars.
+deployment_bundle_offer_at_init() {
+  local tfvars_file="$1"
+  local psoxy_base_dir="$2"
+  local host_platform="$3"
+
+  local version
+  version="$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' "${psoxy_base_dir}java/pom.xml")"
+  if [ -z "$version" ]; then
+    return 0
+  fi
+
+  local platform_label
+  platform_label="$(deployment_bundle_platform_label_from_host "$host_platform")"
+
+  printf "\n"
+  printf "Psoxy can deploy using a ${SUCCESS}published prebuilt bundle${NC} (recommended) or by ${INFO}building the Java deployment bundle from source${NC} on this machine.\n"
+  printf "Prebuilt bundles avoid requiring Java and Maven locally; your cloud platform's runtime JRE is still used when the proxy runs.\n\n"
+
+  read -p "Use a published prebuilt deployment bundle? [Y/n] " response
+  if [[ -n "$response" && ! "$response" =~ ^[Yy]$ ]]; then
+    printf "\nYou chose to build from source. Java and Maven are required unless you build the bundle separately with ${CODE}./build.sh${NC} or ${CODE}./update-bundle${NC}.\n\n"
+    return 0
+  fi
+
+  local aws_region="us-east-1"
+  if [ "$host_platform" = "aws" ]; then
+    aws_region="$(deployment_bundle_get_aws_region "" "$tfvars_file")"
+  fi
+
+  local bundle_path=""
+  if ! bundle_path="$(deployment_bundle_resolve_public_path "$host_platform" "$version" "$aws_region")"; then
+    printf "${WARN}Warning:${NC} No published ${platform_label} bundle was found for version ${CODE}${version}${NC}."
+    if [ "$host_platform" = "aws" ]; then
+      printf " (checked S3 bucket for region ${CODE}${aws_region}${NC})\n"
+    else
+      printf "\n"
+    fi
+    printf "Build from source with Java/Maven, or wait until the bundle is published for this version.\n\n"
+    return 0
+  fi
+
+  printf "\nPublished ${platform_label} bundle for version ${SUCCESS}${version}${NC}:\n"
+  printf "  ${SUCCESS}${bundle_path}${NC}\n"
+  if [ "$host_platform" = "aws" ]; then
+    printf "  (selected for ${CODE}aws_region${NC}=${aws_region})\n"
+  fi
+  printf "\n"
+
+  deployment_bundle_set_or_append "$tfvars_file" "$bundle_path"
+  printf "Set ${CODE}deployment_bundle${NC} to ${SUCCESS}${bundle_path}${NC}\n"
+  deployment_bundle_print_tfvars_notice "$tfvars_file"
+  return 1
+}
+
+deployment_bundle_platform_label_from_host() {
+  case "$1" in
+    aws) printf 'AWS' ;;
+    gcp) printf 'GCP' ;;
+    *) printf '%s' "$1" ;;
+  esac
+}
+
 deployment_bundle_maybe_upgrade() {
   local next_release="$1"
   local tfvars_files=()
