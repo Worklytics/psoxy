@@ -25,6 +25,7 @@ else
 fi
 
 BACKUP_ROOT=".psoxy-iac-backup"
+LEGACY_BACKUP_ROOT=".psoxy-example-backup"
 BACKUP_CHOICE="" # unset = prompt (default yes); true/false = explicit
 MODE="reset"
 RECOVER_ID=""
@@ -174,57 +175,78 @@ reset_example_maybe_backup() {
 }
 
 reset_example_list_backups() {
-  if [ ! -d "$BACKUP_ROOT" ]; then
-    printf "${INFO}No backups found under ${CODE}${BACKUP_ROOT}/${NC}\n"
+  local found=false
+  local root
+
+  for root in "$BACKUP_ROOT" "$LEGACY_BACKUP_ROOT"; do
+    if [ ! -d "$root" ]; then
+      continue
+    fi
+    found=true
+    printf "${INFO}Available backups in ${CODE}${root}/${NC}:\n"
+    local entry latest_target=""
+    if [ -L "${root}/latest" ]; then
+      latest_target="$(readlink "${root}/latest")"
+    fi
+
+    while IFS= read -r entry; do
+      [ -z "$entry" ] && continue
+      [ "$entry" = "latest" ] && continue
+      if [ -f "${root}/${entry}/.backup-meta" ]; then
+        # shellcheck source=/dev/null
+        source "${root}/${entry}/.backup-meta"
+        if [ "$entry" = "$latest_target" ]; then
+          printf "  ${SUCCESS}${entry}${NC} (${file_count} files) ${INFO}[latest]${NC}\n"
+        else
+          printf "  ${entry} (${file_count} files)\n"
+        fi
+      else
+        printf "  ${entry}\n"
+      fi
+    done < <(find "$root" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort -r)
+    printf "\n"
+  done
+
+  if [ "$found" = "false" ]; then
+    printf "${INFO}No backups found under ${CODE}${BACKUP_ROOT}/${NC}"
+    if [ -d "$LEGACY_BACKUP_ROOT" ]; then
+      printf " or ${CODE}${LEGACY_BACKUP_ROOT}/${NC}"
+    fi
+    printf ".\n"
     return 0
   fi
 
-  printf "${INFO}Available backups in ${CODE}${BACKUP_ROOT}/${NC}:\n"
-  local entry latest_target=""
-  if [ -L "${BACKUP_ROOT}/latest" ]; then
-    latest_target="$(readlink "${BACKUP_ROOT}/latest")"
-  fi
-
-  while IFS= read -r entry; do
-    [ -z "$entry" ] && continue
-    [ "$entry" = "latest" ] && continue
-    if [ -f "${BACKUP_ROOT}/${entry}/.backup-meta" ]; then
-      # shellcheck source=/dev/null
-      source "${BACKUP_ROOT}/${entry}/.backup-meta"
-      if [ "$entry" = "$latest_target" ]; then
-        printf "  ${SUCCESS}${entry}${NC} (${file_count} files) ${INFO}[latest]${NC}\n"
-      else
-        printf "  ${entry} (${file_count} files)\n"
-      fi
-    else
-      printf "  ${entry}\n"
-    fi
-  done < <(find "$BACKUP_ROOT" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort -r)
-
-  printf "\nRestore latest with: ${CODE}$(basename "$0") --recover${NC}\n"
+  printf "Restore latest with: ${CODE}$(basename "$0") --recover${NC}\n"
 }
 
 reset_example_resolve_backup_dir() {
   local backup_id="${1:-latest}"
-  local backup_dir=""
+  local root backup_dir=""
 
-  if [ "$backup_id" = "latest" ]; then
-    if [ -L "${BACKUP_ROOT}/latest" ]; then
-      backup_dir="${BACKUP_ROOT}/$(readlink "${BACKUP_ROOT}/latest")"
-    elif [ -d "${BACKUP_ROOT}/latest" ]; then
-      backup_dir="${BACKUP_ROOT}/latest"
+  for root in "$BACKUP_ROOT" "$LEGACY_BACKUP_ROOT"; do
+    [ -d "$root" ] || continue
+
+    if [ "$backup_id" = "latest" ]; then
+      if [ -L "${root}/latest" ]; then
+        backup_dir="${root}/$(readlink "${root}/latest")"
+        break
+      elif [ -d "${root}/latest" ]; then
+        backup_dir="${root}/latest"
+        break
+      fi
+    elif [ -d "${root}/${backup_id}" ]; then
+      backup_dir="${root}/${backup_id}"
+      break
     fi
-  else
-    backup_dir="${BACKUP_ROOT}/${backup_id}"
-  fi
+  done
 
   if [ -z "$backup_dir" ] || [ ! -d "$backup_dir" ]; then
-    printf "${ERR}Error: backup not found"
+    printf "${ERR}Error: backup not found" >&2
     if [ -n "$backup_id" ]; then
-      printf " (${backup_id})"
+      printf " (${backup_id})" >&2
     fi
-    printf ".${NC}\n"
-    printf "Run ${CODE}$(basename "$0") --list-backups${NC} to see available backups.\n"
+    printf ".${NC}\n" >&2
+    printf "Run ${CODE}$(basename "$0") --list-backups${NC} to see available backups.\n" >&2
     return 1
   fi
 
@@ -238,7 +260,7 @@ reset_example_recover_backup() {
   backup_dir="$(reset_example_resolve_backup_dir "$backup_id")" || return 1
 
   if [ ! -f "${backup_dir}/.backup-manifest" ]; then
-    printf "${ERR}Error: backup manifest missing in ${backup_dir}${NC}\n"
+    printf "${ERR}Error: backup manifest missing in ${backup_dir}${NC}\n" >&2
     return 1
   fi
 
@@ -250,7 +272,19 @@ reset_example_recover_backup() {
     printf "  files:   ${file_count}\n\n"
   fi
 
-  printf "${WARN}This will overwrite matching files in the current directory.${NC}\n"
+  printf "${WARN}The following files will be written in the current directory:${NC}\n"
+  while IFS= read -r file; do
+    [ -z "$file" ] && continue
+    if [ ! -f "${backup_dir}/${file}" ]; then
+      printf "  ${WARN}${file}${NC} (missing from backup; will skip)\n"
+    elif [ -f "$file" ]; then
+      printf "  ${CODE}${file}${NC} ${WARN}(overwrite existing)${NC}\n"
+    else
+      printf "  ${CODE}${file}${NC} (create)\n"
+    fi
+  done < "${backup_dir}/.backup-manifest"
+  printf "\n"
+
   read -r -p "Continue? (y/N): " response
   if [[ ! "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
     printf "Recovery cancelled.\n"

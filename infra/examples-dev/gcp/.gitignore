@@ -11,8 +11,3 @@ terraform.tfstate**
 # stuff our tf modules / init scripts produce, that shouldn't be under version control
 build.sh
 upgrade-terraform-modules.sh
-reset-example
-
-# local IaC backups (tools/reset-example.sh)
-.psoxy-iac-backup
-.psoxy-example-backup

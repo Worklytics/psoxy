@@ -27,7 +27,7 @@
 */update-bundle
 */upgrade-terraform-modules
 */upgrade-terraform-modules.sh
+*/reset-example
 
 # local IaC backups created by tools/reset-example.sh
 */.psoxy-iac-backup
-*/.psoxy-example-backup
