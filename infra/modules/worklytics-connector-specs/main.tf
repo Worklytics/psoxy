@@ -124,7 +124,7 @@ EOT
         "Workspace Id" = local.chat_gpt_enterprise_example_workspace_id
       }
       reserved_concurrent_executions : null
-      enable_async_processing : false
+      enable_async_processing : true
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
