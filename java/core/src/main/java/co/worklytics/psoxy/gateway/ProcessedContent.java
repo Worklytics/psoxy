@@ -60,7 +60,7 @@ public class ProcessedContent implements Serializable {
      */
     public String getContentAsString() {
         if (getContent() == null) {
-            return "";
+            return null;
         } else {
             return new String(getContent(), contentCharset);
         }
