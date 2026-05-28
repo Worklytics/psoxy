@@ -1380,6 +1380,28 @@ EOT
         "docs/sources/workdata-generic/example-bulk/original/accounts0.ndjson"
       ]
     }
+    "slack-ai-analytics-bulk" = {
+      source_kind               = "slack-ai"
+      availability              = "alpha"
+      enable_by_default         = false
+      worklytics_connector_id   = "slack-ai-analytics-bulk-psoxy"
+      worklytics_connector_name = "Slack AI Analytics - Bulk via Psoxy"
+      rules = {
+        columnsToPseudonymize = [
+          "USER_EMAIL",
+        ]
+        columnsToPseudonymizeIfPresent = [
+          "USER_ID",
+          "USER_NAME",
+        ]
+        columnsToRedact = [
+          "PRIMARY_OWNER_EMAIL",
+          "PRIMARY_OWNER_EMAIL_DOMAIN",
+          "FULL_NAME",
+        ]
+      }
+      example_file = "docs/sources/slack/slack-ai-bulk/slack-ai-analytics-sample.csv"
+    }
   }
 
   oauth_long_access_connectors_backwards = { for k, v in local.oauth_long_access_connectors :
