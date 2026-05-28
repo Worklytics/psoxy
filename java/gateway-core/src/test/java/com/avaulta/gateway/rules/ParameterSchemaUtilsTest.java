@@ -73,6 +73,20 @@ class ParameterSchemaUtilsTest {
 
     }
 
+    @Test
+    public void validation_integer_combinesWithOtherConstraints() {
+        ParameterSchema parameterSchema = ParameterSchema.builder()
+            .type(ParameterSchema.ValueType.INTEGER.getEncoding())
+            .enumValues(Arrays.asList("1", "2"))
+            .pattern("[12]")
+            .build();
+
+        assertTrue(parameterSchemaUtils.validate(parameterSchema, "1"));
+        assertTrue(parameterSchemaUtils.validate(parameterSchema, "2"));
+        assertFalse(parameterSchemaUtils.validate(parameterSchema, "3"));
+        assertFalse(parameterSchemaUtils.validate(parameterSchema, "not-a-number"));
+    }
+
 
     @Test
     public void validate_all() {

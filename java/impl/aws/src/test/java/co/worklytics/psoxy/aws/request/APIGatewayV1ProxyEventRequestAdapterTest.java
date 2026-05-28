@@ -64,4 +64,21 @@ public class APIGatewayV1ProxyEventRequestAdapterTest {
 
         assertEquals("/v2/report/meetings/NUXghb123TCj0bP6nPVe%252Fsg253D253D/participants", requestAdapter.getPath());
     }
+
+    @SneakyThrows
+    @Test
+    public void getClientIp_prefersAwsSourceIpOverForwardedHeader() {
+        APIGatewayProxyRequestEvent apiGatewayEvent = objectMapper.readerFor(APIGatewayProxyRequestEvent.class)
+            .readValue(TestUtils.getData("lambda-proxy-events/api-gateway-v1-example_interesting.json"));
+        APIGatewayProxyRequestEvent.RequestIdentity identity =
+            new APIGatewayProxyRequestEvent.RequestIdentity();
+        identity.setSourceIp("198.51.100.20");
+        apiGatewayEvent.getRequestContext().setIdentity(identity);
+        apiGatewayEvent.getHeaders().put("x-forwarded-for", "203.0.113.10");
+
+        APIGatewayV1ProxyEventRequestAdapter requestAdapter =
+            APIGatewayV1ProxyEventRequestAdapter.of(apiGatewayEvent);
+
+        assertEquals("198.51.100.20", requestAdapter.getClientIp().get());
+    }
 }

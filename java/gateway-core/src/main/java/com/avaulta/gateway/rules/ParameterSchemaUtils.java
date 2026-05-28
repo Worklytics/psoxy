@@ -34,7 +34,9 @@ public class ParameterSchemaUtils {
         if (value != null) {
             if (schema.getType() != null) {
                 if (schema.getType().equals(ParameterSchema.ValueType.INTEGER.getEncoding())) {
-                    return Pattern.compile("\\d+").matcher(StringUtils.trimToEmpty(value)).matches();
+                    if (!Pattern.compile("\\d+").matcher(StringUtils.trimToEmpty(value)).matches()) {
+                        return false;
+                    }
                 } else if (schema.getType().equals(ParameterSchema.ValueType.NUMBER.getEncoding())) {
                     try {
                         Double.parseDouble(value);
