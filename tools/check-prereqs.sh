@@ -187,84 +187,49 @@ else
       printf ".\n"
     fi
 
-    POWERSHELL_CMD=""
-    if command -v pwsh &> /dev/null; then
-      POWERSHELL_CMD="pwsh"
-    elif command -v powershell &> /dev/null; then
-      POWERSHELL_CMD="powershell"
+    AZ_GRAPH_ROLES_URL="https://graph.microsoft.com/v1.0/me/transitiveMemberOf/microsoft.graph.directoryRole"
+    AZ_SKIP_ROLE_CHECK=false
+    AZ_PRINCIPAL_TYPE=$(az account show --query user.type -o tsv 2>/dev/null)
+    if [[ "$AZ_PRINCIPAL_TYPE" == "servicePrincipal" ]]; then
+      AZ_SP_APP_ID=$(az account show --query user.name -o tsv 2>/dev/null)
+      AZ_SP_OBJECT_ID=$(az ad sp show --id "$AZ_SP_APP_ID" --query id -o tsv 2>/dev/null)
+      if [[ -z "$AZ_SP_OBJECT_ID" ]]; then
+        AZ_SKIP_ROLE_CHECK=true
+        printf "\t- ${WARN}Could not resolve service principal object ID for Entra directory role check.${NC}\n"
+        printf "\t  ${AZ_ENTRA_ADMIN_ROLES_REASON} Verify assignments in the Microsoft Entra admin center. See ${AZ_ENTRA_ROLES_DOC}\n"
+      else
+        AZ_GRAPH_ROLES_URL="https://graph.microsoft.com/v1.0/servicePrincipals/${AZ_SP_OBJECT_ID}/transitiveMemberOf/microsoft.graph.directoryRole"
+      fi
     fi
 
-    if [[ -n "$POWERSHELL_CMD" ]]; then
-      AZ_ROLE_CHECK=$("$POWERSHELL_CMD" -NoProfile -NonInteractive -Command '
-$ErrorActionPreference = "Stop"
-try {
-  $token = az account get-access-token --resource-type ms-graph --query accessToken -o tsv 2>$null
-  if (-not $token) { Write-Output "ERROR:Could not obtain Microsoft Graph access token from Azure CLI"; exit 1 }
-  $headers = @{ Authorization = "Bearer $token" }
-  $principalType = az account show --query user.type -o tsv 2>$null
-  $principalName = az account show --query user.name -o tsv 2>$null
-  if ($principalType -eq "servicePrincipal") {
-    if (-not $principalName) { Write-Output "ERROR:Could not determine Azure service principal name from Azure CLI"; exit 1 }
-    $spObjectId = az ad sp show --id $principalName --query id -o tsv 2>$null
-    if (-not $spObjectId) { Write-Output "ERROR:Could not resolve Azure service principal object ID for Graph role validation"; exit 1 }
-    $uri = "https://graph.microsoft.com/v1.0/servicePrincipals/$spObjectId/transitiveMemberOf/microsoft.graph.directoryRole"
-  } else {
-    $uri = "https://graph.microsoft.com/v1.0/me/transitiveMemberOf/microsoft.graph.directoryRole"
-  }
-  $roleNames = @()
-  $response = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
-  $roleNames += @($response.value | ForEach-Object { $_.displayName })
-  while ($response."@odata.nextLink") {
-    $response = Invoke-RestMethod -Uri $response."@odata.nextLink" -Headers $headers -Method Get
-    $roleNames += @($response.value | ForEach-Object { $_.displayName })
-  }
-  $required = @("Global Administrator", "Application Administrator")
-  $hasRequired = $false
-  foreach ($requiredRole in $required) {
-    if ($roleNames -contains $requiredRole) { $hasRequired = $true; break }
-  }
-  if ($hasRequired) {
-    Write-Output "OK"
-  } else {
-    Write-Output "MISSING"
-    if ($roleNames.Count -gt 0) {
-      Write-Output ($roleNames -join ", ")
-    } else {
-      Write-Output "(none detected)"
-    }
-  }
-} catch {
-  Write-Output "ERROR:$($_.Exception.Message)"
-  exit 1
-}
-' 2>/dev/null)
-      AZ_ROLE_STATUS=$(echo "$AZ_ROLE_CHECK" | head -n 1 | tr -d '\r')
-      case "$AZ_ROLE_STATUS" in
-        OK)
+    if [[ "$AZ_SKIP_ROLE_CHECK" != "true" ]]; then
+      AZ_ROLE_NAMES=$(az rest --method GET --url "$AZ_GRAPH_ROLES_URL" --query "value[].displayName" -o tsv 2>/dev/null)
+      AZ_REST_EXIT=$?
+      if [[ $AZ_REST_EXIT -ne 0 ]]; then
+        printf "\t- ${WARN}Could not verify Entra directory roles (Microsoft Graph request failed).${NC}\n"
+        printf "\t  ${AZ_ENTRA_ADMIN_ROLES_REASON} Verify assignments in the Microsoft Entra admin center. See ${AZ_ENTRA_ROLES_DOC}\n"
+      else
+        AZ_HAS_REQUIRED_ROLE=false
+        while IFS= read -r AZ_ROLE_NAME; do
+          if [[ "$AZ_ROLE_NAME" == "Global Administrator" || "$AZ_ROLE_NAME" == "Application Administrator" ]]; then
+            AZ_HAS_REQUIRED_ROLE=true
+            break
+          fi
+        done <<< "$AZ_ROLE_NAMES"
+
+        if $AZ_HAS_REQUIRED_ROLE; then
           printf "\t- ${SUCCESS}Entra directory roles: signed-in principal has Global Administrator or Application Administrator.${NC}\n"
-          ;;
-        MISSING)
-          AZ_ROLE_LIST=$(echo "$AZ_ROLE_CHECK" | sed -n '2p' | tr -d '\r')
+        else
+          AZ_ROLE_LIST="${AZ_ROLE_NAMES//$'\n'/, }"
+          if [[ -z "$AZ_ROLE_LIST" ]]; then
+            AZ_ROLE_LIST="(none detected)"
+          fi
           printf "\t- ${WARN}Entra directory roles: signed-in principal does not appear to have Global Administrator or Application Administrator.${NC}\n"
           printf "\t  ${AZ_ENTRA_ADMIN_ROLES_REASON}\n"
-          if [[ -n "$AZ_ROLE_LIST" ]]; then
-            printf "\t  Directory roles detected for this principal: ${CODE}${AZ_ROLE_LIST}${NC}.\n"
-          fi
+          printf "\t  Directory roles detected for this principal: ${CODE}${AZ_ROLE_LIST}${NC}.\n"
           printf "\t  See ${AZ_ENTRA_ROLES_DOC}\n"
-          ;;
-        ERROR:*)
-          printf "\t- ${WARN}Could not verify Entra directory roles (${AZ_ROLE_STATUS#ERROR:}).${NC}\n"
-          printf "\t  ${AZ_ENTRA_ADMIN_ROLES_REASON} Verify assignments in the Microsoft Entra admin center. See ${AZ_ENTRA_ROLES_DOC}\n"
-          ;;
-        *)
-          printf "\t- ${WARN}Could not verify Entra directory roles (unexpected result).${NC}\n"
-          printf "\t  ${AZ_ENTRA_ADMIN_ROLES_REASON} Verify assignments in the Microsoft Entra admin center. See ${AZ_ENTRA_ROLES_DOC}\n"
-          ;;
-      esac
-    else
-      printf "\t- ${WARN}PowerShell is not installed; cannot automatically verify Entra directory roles.${NC}\n"
-      printf "\t  ${AZ_ENTRA_ADMIN_ROLES_REASON}\n"
-      printf "\t  Verify role assignments in the Microsoft Entra admin center (see ${AZ_ENTRA_ROLES_DOC}), or install PowerShell (${CODE}pwsh${NC} on macOS/Linux) and re-run this script.\n"
+        fi
+      fi
     fi
   else
     printf "\t- ${WARN}Azure CLI is not authenticated.${NC} Run ${CODE}az login --allow-no-subscriptions${NC} to authenticate.\n"
