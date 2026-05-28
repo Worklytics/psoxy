@@ -21,7 +21,7 @@ Do not select the owner's personal organization.
 
 - [Example Rules](chatgpt-enterprise.yaml)
 - Example Data : [original/sample_log_message.json](example-api-responses/original/sample_log_message.json) |
-  [sanitized/conversations.json](example-api-responses/sanitized/sample_log_message.json)
+  [sanitized/sample_log_message.json](example-api-responses/sanitized/sample_log_message.json)
 
 See more examples in the `docs/sources/chatgpt-enterprise/example-api-responses` folder
 of the [Psoxy repository](https://github.com/Worklytics/psoxy).
