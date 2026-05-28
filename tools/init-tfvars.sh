@@ -169,8 +169,6 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
 else
   if [[ "$HOST_PLATFORM" == "aws" ]]; then
     printf "${ERR}HOST_PLATFORM set as 'aws', but no aws provider in Terraform configuration${NC}\n"
-  else
-    printf "No AWS provider found in top-level of Terraform configuration. AWS CLI not required.\n"
   fi
 fi
 
@@ -193,24 +191,29 @@ remove_google_workspace() {
 }
 
 INCLUDE_GWS="false"
+CONFIRMED_GCP_PROJECT_ID=""
 GOOGLE_PROVIDER_COUNT=$(terraform providers 2>/dev/null | grep "${TOP_LEVEL_PROVIDER_PATTERN}/google" | wc -l || echo "0")
 if test $GOOGLE_PROVIDER_COUNT -ne 0; then
   if gcloud --version &> /dev/null ; then
 
-    # project
     GCP_PROJECT_ID=$(gcloud config get project 2>/dev/null || echo "")
 
     if [[ "$HOST_PLATFORM" == "gcp" ]]; then
       [[ -f variables.tf ]] && grep -q '^variable "gcp_project_id"' variables.tf
       if [[ $? -eq 0 ]]; then
-        printf "# GCP project in which required infrastructure will be provisioned\n" >> $TFVARS_FILE
+        printf "\n${INFO}GCP project for Psoxy infrastructure${NC}\n"
+        printf "Proxy resources (Cloud Functions, secrets, storage, etc.) will be provisioned into a GCP project.\n"
         if [ -n "$GCP_PROJECT_ID" ]; then
-          printf "gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
-          printf "\tgcp_project_id=${CODE}\"${GCP_PROJECT_ID}\"${NC}\n"
+          printf "Detected from ${CODE}gcloud config get project${NC}: ${CODE}${GCP_PROJECT_ID}${NC}\n"
+          CONFIRMED_GCP_PROJECT_ID="$(prompt_confirm_variable_setting "gcp_project_id" "$GCP_PROJECT_ID")"
         else
-          printf "gcp_project_id=\"{{FILL_YOUR_VALUE}}\"\n\n" >> $TFVARS_FILE
-          printf "${ERR}Could not determine GCP project ID from gcloud config. You MUST fill ${CODE}gcp_project_id${NC} in your terraform.tfvars file yourself.${NC}\n"
+          printf "${WARN}Could not detect a GCP project from gcloud config.${NC}\n"
+          printf "Enter ${CODE}gcp_project_id${NC} (project for Psoxy infrastructure): "
+          read -r CONFIRMED_GCP_PROJECT_ID
         fi
+        printf "# GCP project in which Psoxy proxy infrastructure will be provisioned\n" >> $TFVARS_FILE
+        printf "gcp_project_id=\"${CONFIRMED_GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
+        printf "  ${SUCCESS}gcp_project_id${NC}=${CODE}\"${CONFIRMED_GCP_PROJECT_ID}\"${NC}\n"
       fi
 
       # tenant SA emails
@@ -225,23 +228,33 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
       fi
     fi
 
-    prompt_user_Yn "Do you want to use ${CODE}Google Workspace${NC} as a data source? (requires ${CODE}gcloud${NC} to be installed and authenticated in the environment from which this terraform configuration will be applied) "
+    printf "\n${INFO}Google Workspace connectors${NC} (Calendar, Directory, Gmail, etc.) are optional.\n"
+    printf "Enabling them requires ${CODE}gcloud${NC} authenticated in the environment where you run ${CODE}terraform apply${NC}.\n"
+    prompt_user_Yn "Connect to Google Workspace data sources via API?"
 
     if [[ $? -eq 1 ]]; then
       INCLUDE_GWS="true"
-      # init google workspace variables if file exists OR the variables are in the main variables.tf file
-      # (google_workspace_gcp_project_id not in all legacy examples)
       [[ -f google-workspace-variables.tf ]] || grep -q '^variable "google_workspace_gcp_project_id"' variables.tf
       if [[ $? -eq 0 ]]; then
+        default_gws_project="${CONFIRMED_GCP_PROJECT_ID:-$GCP_PROJECT_ID}"
+        printf "\n${INFO}GCP project for Google Workspace OAuth clients${NC}\n"
+        printf "Google Workspace API connectors provision OAuth clients in a GCP project.\n"
+        if [ -n "$default_gws_project" ]; then
+          if [ -n "$CONFIRMED_GCP_PROJECT_ID" ] && [ "$default_gws_project" = "$CONFIRMED_GCP_PROJECT_ID" ]; then
+            printf "Defaulting to your Psoxy infrastructure project (${CODE}${default_gws_project}${NC}). Enter a different project ID if OAuth clients should live elsewhere.\n"
+          else
+            printf "Detected from ${CODE}gcloud config get project${NC}: ${CODE}${default_gws_project}${NC}\n"
+          fi
+          GWS_PROJECT_ID="$(prompt_confirm_variable_setting "google_workspace_gcp_project_id" "$default_gws_project")"
+        else
+          printf "${WARN}Could not detect a default GCP project.${NC}\n"
+          printf "Enter ${CODE}google_workspace_gcp_project_id${NC} (project for Google Workspace OAuth clients): "
+          read -r GWS_PROJECT_ID
+        fi
         printf "# GCP project in which OAuth clients for Google Workspace connectors will be provisioned\n" >> $TFVARS_FILE
         printf "#  - if you're not connecting to Google Workspace data sources via their APIs, you can omit this value\n" >> $TFVARS_FILE
-        if [ -n "$GCP_PROJECT_ID" ]; then
-          printf "google_workspace_gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
-          printf "\tgoogle_workspace_gcp_project_id=${CODE}\"${GCP_PROJECT_ID}\"${NC}\n"
-        else
-          printf "# google_workspace_gcp_project_id=\"{{FILL_YOUR_VALUE}}\"\n\n" >> $TFVARS_FILE
-          printf "${WARN}Could not determine GCP project ID. You MUST fill ${CODE}google_workspace_gcp_project_id${NC} in your terraform.tfvars file yourself.${NC}\n"
-        fi
+        printf "google_workspace_gcp_project_id=\"${GWS_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
+        printf "  ${SUCCESS}google_workspace_gcp_project_id${NC}=${CODE}\"${GWS_PROJECT_ID}\"${NC}\n"
       fi
 
       # init google workspace variables if file exists OR the variables are in the main variables.tf file

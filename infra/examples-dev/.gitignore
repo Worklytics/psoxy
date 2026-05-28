@@ -30,3 +30,4 @@
 
 # local IaC backups created by tools/reset-example.sh
 */.psoxy-iac-backup
+*/.psoxy-example-backup
