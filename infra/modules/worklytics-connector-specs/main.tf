@@ -1392,7 +1392,7 @@ EOT
         ]
         columnsToPseudonymizeIfPresent = [
           "USER_ID",
-          "USER_NAME",
+          "USERNAME",
         ]
         columnsToRedact = [
           "PRIMARY_OWNER_EMAIL",
