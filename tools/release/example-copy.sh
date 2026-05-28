@@ -66,9 +66,6 @@ if [ -f ${EXAMPLE_TO_COPY_FROM}/preflight.sh ]; then
   chmod +x ${EXAMPLE_TEMPLATE_REPO}preflight
 fi
 
-cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/reset-example.sh ${EXAMPLE_TEMPLATE_REPO}reset-example
-chmod +x ${EXAMPLE_TEMPLATE_REPO}reset-example
-
 cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/available-connectors.sh ${EXAMPLE_TEMPLATE_REPO}available-connectors
 chmod +x ${EXAMPLE_TEMPLATE_REPO}available-connectors
 

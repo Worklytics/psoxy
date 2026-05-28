@@ -343,6 +343,33 @@ reset_example_do_reset() {
   printf "\n${SUCCESS}Reset complete.${NC}\n"
 }
 
+reset_example_run_reset() {
+  local backed_up=false
+  if reset_example_maybe_backup; then
+    backed_up=true
+  fi
+
+  printf "This will ${ERR}delete${NC} local Terraform state, variable files, and init artifacts,\n"
+  printf "restoring tracked configuration files from git.\n"
+  if [ "$backed_up" != "true" ] && [ "$BACKUP_CHOICE" != "true" ]; then
+    printf "If you have ${ERR}NOT${NC} committed local changes, they will be ${ERR}lost${NC}.\n"
+  fi
+  read -r -p "Continue with reset? (y/N): " response
+  if [[ ! "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    printf "Reset cancelled."
+    if [ "$backed_up" = "true" ]; then
+      printf " Backup was already saved under ${CODE}${BACKUP_ROOT}/${NC}."
+    fi
+    printf "\n"
+    exit 0
+  fi
+
+  reset_example_do_reset
+  if [ "$backed_up" = "true" ]; then
+    printf "Re-run ${CODE}./init${NC} if needed, then restore your settings with ${CODE}$(basename "$0") --recover${NC}\n"
+  fi
+}
+
 case "$MODE" in
   backup)
     BACKUP_CHOICE="true"
@@ -355,29 +382,6 @@ case "$MODE" in
     reset_example_recover_backup "${RECOVER_ID:-latest}"
     ;;
   reset)
-    backed_up=false
-    if reset_example_maybe_backup; then
-      backed_up=true
-    fi
-
-    printf "This will ${ERR}delete${NC} local Terraform state, variable files, and init artifacts,\n"
-    printf "restoring tracked configuration files from git.\n"
-    if [ "$backed_up" != "true" ] && [ "$BACKUP_CHOICE" != "true" ]; then
-      printf "If you have ${ERR}NOT${NC} committed local changes, they will be ${ERR}lost${NC}.\n"
-    fi
-    read -r -p "Continue with reset? (y/N): " response
-    if [[ ! "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
-      printf "Reset cancelled."
-      if [ "$backed_up" = "true" ]; then
-        printf " Backup was already saved under ${CODE}${BACKUP_ROOT}/${NC}."
-      fi
-      printf "\n"
-      exit 0
-    fi
-
-    reset_example_do_reset
-    if [ "$backed_up" = "true" ]; then
-      printf "Re-run ${CODE}./init${NC} if needed, then restore your settings with ${CODE}$(basename "$0") --recover${NC}\n"
-    fi
+    reset_example_run_reset
     ;;
 esac

@@ -25,12 +25,12 @@ fi
 #     ../../../tools/init-example.sh ~/code/psoxy
 #
 #   to repeat init from scratch (prompts to back up terraform.tfvars, etc. first):
-#     ../../../tools/reset-example.sh
-#     ../../../tools/init-example.sh ~/code/psoxy
-#     ../../../tools/reset-example.sh --recover
+#     ./reset-example              # dev examples only (symlink to tools/reset-example.sh)
+#     ./init ~/code/psoxy
+#     ./reset-example --recover
 #
 #   backup only (no reset):
-#     ../../../tools/reset-example.sh --backup
+#     ./reset-example --backup
 
 # colors
 # Source centralized color scheme
