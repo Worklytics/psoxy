@@ -201,7 +201,16 @@ try {
   $token = az account get-access-token --resource-type ms-graph --query accessToken -o tsv 2>$null
   if (-not $token) { Write-Output "ERROR:Could not obtain Microsoft Graph access token from Azure CLI"; exit 1 }
   $headers = @{ Authorization = "Bearer $token" }
-  $uri = "https://graph.microsoft.com/v1.0/me/transitiveMemberOf/microsoft.graph.directoryRole"
+  $principalType = az account show --query user.type -o tsv 2>$null
+  $principalName = az account show --query user.name -o tsv 2>$null
+  if ($principalType -eq "servicePrincipal") {
+    if (-not $principalName) { Write-Output "ERROR:Could not determine Azure service principal name from Azure CLI"; exit 1 }
+    $spObjectId = az ad sp show --id $principalName --query id -o tsv 2>$null
+    if (-not $spObjectId) { Write-Output "ERROR:Could not resolve Azure service principal object ID for Graph role validation"; exit 1 }
+    $uri = "https://graph.microsoft.com/v1.0/servicePrincipals/$spObjectId/transitiveMemberOf/microsoft.graph.directoryRole"
+  } else {
+    $uri = "https://graph.microsoft.com/v1.0/me/transitiveMemberOf/microsoft.graph.directoryRole"
+  }
   $roleNames = @()
   $response = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
   $roleNames += @($response.value | ForEach-Object { $_.displayName })
