@@ -170,7 +170,7 @@ AZ_ENTRA_ROLES_DOC="https://learn.microsoft.com/en-us/entra/identity/role-based-
 if ! az --version &> /dev/null ; then
   printf "${ERR}Azure CLI is not installed.${NC} ${AZCLI_REASON} See https://docs.microsoft.com/en-us/cli/azure/install-azure-cli\n"
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${CODE}brew install azure-cli${NC}\n"; fi
-  printf "\t- ${WARN}If you intend to use Microsoft 365 connectors, your Azure principal will still need ${CODE}Global Administrator${NC} or ${CODE}Application Administrator${NC} Entra directory roles. See ${AZ_ENTRA_ROLES_DOC}\n"
+  printf "\t- ${WARN}If you intend to use Microsoft 365 connectors, your Azure principal will still need ${CODE}Global Administrator${NC} or ${CODE}Application Administrator${NC} Entra directory roles. See ${AZ_ENTRA_ROLES_DOC}${NC}\n"
 else
   # how can pipe to sed or something to strip extra whitespace out?
   printf "Azure CLI version ${CODE}`az --version --only-show-errors | head -n 1`${NC} is installed.\n"
