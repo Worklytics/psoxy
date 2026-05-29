@@ -452,8 +452,8 @@ check_and_offer_published_bundle() {
       bundle_exists=true
     fi
   elif [ "$HOST_PLATFORM" = "gcp" ]; then
-    if ! command -v gsutil &> /dev/null; then
-      return 0  # gsutil not installed, skip check
+    if ! command -v gcloud &> /dev/null; then
+      return 0  # gcloud not installed, skip check
     fi
 
     local bucket_name="psoxy-public-artifacts"
@@ -461,7 +461,7 @@ check_and_offer_published_bundle() {
     local gcs_path="gs://${bucket_name}/${zip_name}"
 
     # Check if bundle exists in GCS
-    if gsutil ls "$gcs_path" >/dev/null 2>&1; then
+    if gcloud storage ls "$gcs_path" >/dev/null 2>&1; then
       bundle_path="$gcs_path"
       bundle_exists=true
     fi

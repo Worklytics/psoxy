@@ -142,12 +142,12 @@ if grep -q '^[[:space:]]*deployment_bundle[[:space:]]*=' terraform.tfvars; then
                     printf "${INFO}Note:${NC} AWS CLI not available. Cannot check for updated bundle in public S3 bucket.\n\n"
                 fi
             elif [ "$PLATFORM" = "gcp" ]; then
-                if command -v gsutil &> /dev/null; then
+                if command -v gcloud &> /dev/null; then
                     BUCKET_NAME="psoxy-public-artifacts"
                     NEW_BUNDLE_PATH="gs://${BUCKET_NAME}/psoxy-gcp-${NEXT_VERSION}.zip"
                     
                     # Check if new bundle exists
-                    if gsutil ls "$NEW_BUNDLE_PATH" >/dev/null 2>&1; then
+                    if gcloud storage ls "$NEW_BUNDLE_PATH" >/dev/null 2>&1; then
                         # Update bundle reference
                         sed -i.bck "s|^\([[:space:]]*deployment_bundle[[:space:]]*=\).*|\1 \"${NEW_BUNDLE_PATH}\"|" terraform.tfvars
                         rm -f terraform.tfvars.bck 2>/dev/null
@@ -159,7 +159,7 @@ if grep -q '^[[:space:]]*deployment_bundle[[:space:]]*=' terraform.tfvars; then
                         printf "Bundle reference was not updated. You may need to build it locally or wait for it to be published.\n\n"
                     fi
                 else
-                    printf "${INFO}Note:${NC} gsutil not available. Cannot check for updated bundle in public GCS bucket.\n\n"
+                    printf "${INFO}Note:${NC} gcloud not available. Cannot check for updated bundle in public GCS bucket.\n\n"
                 fi
             fi
             

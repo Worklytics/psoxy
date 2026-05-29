@@ -98,7 +98,7 @@ else
 fi
 
 ## GCS buckets
-buckets=$(gsutil ls -p $PROJECT_ID | grep "^gs://${ENV_PREFIX}")
+buckets=$(gcloud storage buckets list --project="$PROJECT_ID" --format='value(name)' | grep "^${ENV_PREFIX}" | sed 's|^|gs://|')
 
 if [ -z "$buckets" ]; then
   printf "No GCS buckets found with the prefix ${INFO}%s${NC}\n" "$ENV_PREFIX"
@@ -114,7 +114,8 @@ else
     # Delete the buckets
     for bucket in $buckets; do
         printf "Deleting bucket: ${INFO}%s${NC}\n" "$bucket"
-        gsutil rm -r "$bucket"
+        gcloud storage rm --recursive "${bucket}/**" >/dev/null 2>&1 || true
+        gcloud storage buckets delete "$bucket" --quiet
     done
 
     printf "${SUCCESS}All GCS buckets with prefix %s have been deleted.${NC}\n" "$ENV_PREFIX"
