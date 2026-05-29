@@ -97,7 +97,7 @@ if [ ! -z "$BUCKET_PATH" ]; then
 
     # If the previous command was not successful (AWS CLI is not installed)
     if [[ $? -ne 0 ]]; then
-      printf "${ERR}Error: s3 is not installed, but it is required to upload bundle. Please install s3 (included in AWS CLI tools) and re-run this script - or run it without the <bucket-path> argument.${NC}\n"
+      printf "${ERR}Error: AWS CLI is not installed, but it is required to upload bundle. Please install the AWS CLI and re-run this script - or run it without the <bucket-path> argument.${NC}\n"
       exit 1
     fi
   else
