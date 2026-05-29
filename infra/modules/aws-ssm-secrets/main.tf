@@ -11,20 +11,21 @@ locals {
   path_prefix              = local.non_empty_path && local.non_fully_qualified_path ? "/${var.path}" : var.path
   PLACEHOLDER_VALUE        = "fill me"
 
-  externally_managed_secrets = { for k, spec in var.secrets : k => spec if !(spec.value_managed_by_tf) }
-  terraform_managed_secrets  = { for k, spec in var.secrets : k => spec if spec.value_managed_by_tf }
+  secret_keys                    = nonsensitive(toset(keys(var.secrets)))
+  externally_managed_secret_keys = toset([for k in local.secret_keys : k if !nonsensitive(var.secrets[k].value_managed_by_tf)])
+  terraform_managed_secret_keys  = toset([for k in local.secret_keys : k if nonsensitive(var.secrets[k].value_managed_by_tf)])
 }
 
 # see: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter
 resource "aws_ssm_parameter" "secret" {
-  for_each = local.terraform_managed_secrets
+  for_each = local.terraform_managed_secret_keys
 
   name = "${local.path_prefix}${each.key}"
   # Due https://github.com/hashicorp/terraform-provider-aws/issues/31267
   # all are added as secureString
   type        = "SecureString"
-  description = each.value.description
-  value       = sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE))
+  description = var.secrets[each.key].description
+  value       = sensitive(coalesce(var.secrets[each.key].value, local.PLACEHOLDER_VALUE))
   key_id      = coalesce(var.kms_key_id, "alias/aws/ssm")
 
   lifecycle {
@@ -37,14 +38,14 @@ resource "aws_ssm_parameter" "secret" {
 }
 
 resource "aws_ssm_parameter" "secret_with_externally_managed_value" {
-  for_each = local.externally_managed_secrets
+  for_each = local.externally_managed_secret_keys
 
   name = "${local.path_prefix}${each.key}"
   # Due https://github.com/hashicorp/terraform-provider-aws/issues/31267
   # all are added as secureString
   type        = "SecureString"
-  description = each.value.description
-  value       = sensitive(coalesce(each.value.value, local.PLACEHOLDER_VALUE))
+  description = var.secrets[each.key].description
+  value       = sensitive(coalesce(var.secrets[each.key].value, local.PLACEHOLDER_VALUE))
   key_id      = coalesce(var.kms_key_id, "alias/aws/ssm")
 
   lifecycle {
@@ -61,14 +62,14 @@ resource "aws_ssm_parameter" "secret_with_externally_managed_value" {
 # q: is to ALSO pass in some notion of access? except very different per implementation
 output "secret_ids" {
   value = merge(
-    { for k, v in local.terraform_managed_secrets : k => aws_ssm_parameter.secret[k].id },
-    { for k, v in local.externally_managed_secrets : k => aws_ssm_parameter.secret_with_externally_managed_value[k].id }
+    { for k in local.terraform_managed_secret_keys : k => aws_ssm_parameter.secret[k].id },
+    { for k in local.externally_managed_secret_keys : k => aws_ssm_parameter.secret_with_externally_managed_value[k].id }
   )
 }
 
 output "secret_arns" {
   value = concat(
-    [for k, v in local.terraform_managed_secrets : aws_ssm_parameter.secret[k].arn],
-    [for k, v in local.externally_managed_secrets : aws_ssm_parameter.secret_with_externally_managed_value[k].arn]
+    [for k in local.terraform_managed_secret_keys : aws_ssm_parameter.secret[k].arn],
+    [for k in local.externally_managed_secret_keys : aws_ssm_parameter.secret_with_externally_managed_value[k].arn]
   )
 }
