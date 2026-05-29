@@ -24,8 +24,13 @@ fi
 #   - within example directory, such as `infra/examples-dev/aws`:
 #     ../../../tools/init-example.sh ~/code/psoxy
 #
-#   to repeat:
-#     ../../../tools/reset-example.sh
+#   to repeat init from scratch (prompts to back up terraform.tfvars, etc. first):
+#     ./reset-example              # dev examples only (symlink to tools/reset-example.sh)
+#     ./init ~/code/psoxy
+#     ./reset-example --recover
+#
+#   backup only (no reset):
+#     ./reset-example --backup
 
 # colors (optional here: copied examples don't bundle this file until after terraform init)
 COLORSCHEME_SH="$(dirname "$0")/set-term-colorscheme.sh"
