@@ -66,8 +66,9 @@ public class APIGatewayV1ProxyEventRequestAdapterTest {
         assertEquals("/v2/report/meetings/NUXghb123TCj0bP6nPVe%252Fsg253D253D/participants", requestAdapter.getPath());
     }
 
+    @SneakyThrows
     @Test
-    public void getClientIp_prefersForwardedHeaderOverSourceIp() {
+    public void getClientIp_prefersSourceIpOverForwardedHeader() {
         APIGatewayProxyRequestEvent.RequestIdentity identity =
             new APIGatewayProxyRequestEvent.RequestIdentity();
         identity.setSourceIp("198.51.100.7");
@@ -83,6 +84,6 @@ public class APIGatewayV1ProxyEventRequestAdapterTest {
         APIGatewayV1ProxyEventRequestAdapter requestAdapter =
             APIGatewayV1ProxyEventRequestAdapter.of(apiGatewayEvent);
 
-        assertEquals("203.0.113.10", requestAdapter.getClientIp().get());
+        assertEquals("198.51.100.7", requestAdapter.getClientIp().get());
     }
 }
