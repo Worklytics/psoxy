@@ -706,7 +706,10 @@ EOT
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
-        "/api/admin.analytics.getFile?type=member&date=${urlencode(formatdate("YYYY-MM-DD", var.example_api_calls_sample_date))}"
+        "/api/admin.analytics.getFile?type=member&date=${urlencode(formatdate("YYYY-MM-DD", var.example_api_calls_sample_date))}",
+        "/api/admin.analytics.getFile?type=public_channel&metadata_only=true",
+        "/api/admin.analytics.messages.metadata?channel={CHANNEL_ID}&limit=100",
+        "/api/admin.analytics.messages.activity?channel={CHANNEL_ID}&limit=50",
       ]
       instructions_template = "${path.module}/docs/slack/analytics/instructions.tftpl"
       external_token_todo : templatefile("${path.module}/docs/slack/analytics/instructions.tftpl", {
@@ -715,11 +718,11 @@ EOT
     }
     slack-discovery-api = {
       source_kind : "slack"
-      availability : "ga",
+      availability : "deprecated",
       enable_by_default : false,
       worklytics_connector_id : "slack-discovery-api-psoxy",
       worklytics_connector_name : "Slack via Psoxy",
-      display_name : "Slack via Discovery API"
+      display_name : "(Deprecated, use Slack Analytics instead) Slack via Discovery API"
       target_host : "www.slack.com"
       source_auth_strategy : "oauth2_access_token"
       oauth_scopes_needed : [

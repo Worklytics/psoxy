@@ -2,7 +2,7 @@
 
 **Connector ID:** `slack-discovery-api`
 
-**Availability:** GA
+**Availability:** Deprecated — use [`slack-analytics`](../slack-analytics/README.md) instead. Slack's Admin Analytics API provides the same organizational data (members, channels, message metadata, and engagement metrics) without requiring the Discovery API's `discovery:read` scope, and returns metadata-only message data so the proxy does not need to redact message content.
 
 {% hint style="info" %}
 NOTE: While access to your Slack data via the Discovery API has required a sufficiently high level Slack subscription, as of May 2025 Slack is by default imposing highly restrictive rate limits on new Discovery API clients. If you did not create your Discovery API client before May 2025, you may need to contact your Slack account representative to ensure your organization can use this method to obtain a copy of your Slack data.
