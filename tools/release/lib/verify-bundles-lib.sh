@@ -33,12 +33,13 @@ verify_bundles_normalize_tag() {
 verify_bundles_version_from_tag() {
   local tag
   tag="$(verify_bundles_normalize_tag "$1")"
-  if [[ ! "$tag" =~ ^v([0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.+-]+)?)$ ]]; then
+  if [[ ! "$tag" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
     echo -e "${ERR}Error: Unsupported release tag format: ${tag}${NC}" >&2
-    echo -e "${WARN}Expected tags like v0.6.1 or v0.6.2-rc1${NC}" >&2
+    echo -e "${WARN}Expected tags like v0.6.1 (use --rc to verify RC bundles for that version)${NC}" >&2
     return 1
   fi
   printf '%s' "${BASH_REMATCH[1]}"
+}
 }
 
 verify_bundles_artifact_names() {
