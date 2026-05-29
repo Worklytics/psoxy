@@ -121,7 +121,7 @@ if [ ! -z "$BUCKET_PATH" ]; then
 
   printf "Copying deployment bundle from ${INFO}${DEPLOYMENT_BUNDLE}${NC} to ${INFO}${BUCKET_PATH}${NC} ...\n"
   
-  local upload_status=0
+  upload_status=0
   if [ "$HOST_PLATFORM" == "gcp" ]; then
     gcloud storage cp "${DEPLOYMENT_BUNDLE}" "${BUCKET_PATH}${DEPLOYMENT_BUNDLE}" \
       --update-custom-metadata="sha256=${SHA256_HASH}" || upload_status=$?
