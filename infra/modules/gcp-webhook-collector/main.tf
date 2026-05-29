@@ -135,6 +135,15 @@ resource "random_string" "bucket_name_random_sequence" {
   }
 }
 
+locals {
+  # gcp-output-bucket allows bucket_name_prefix up to 40 chars
+  bucket_name_environment_id_prefix = substr(var.environment_id_prefix, 0, 30)
+  bucket_name_prefix_random_suffix   = "-${random_string.bucket_name_random_sequence.result}-"
+  bucket_name_instance_id_max_length = 40 - length(local.bucket_name_environment_id_prefix) - length(local.bucket_name_prefix_random_suffix)
+  bucket_name_instance_id            = trim(substr(var.instance_id, 0, max(0, local.bucket_name_instance_id_max_length)), "-")
+  bucket_name_prefix                 = "${local.bucket_name_environment_id_prefix}${local.bucket_name_instance_id}${local.bucket_name_prefix_random_suffix}"
+}
+
 # bucket to which sanitized webhooks will be written
 module "sanitized_webhook_output" {
   source = "../gcp-output-bucket"
@@ -144,7 +153,7 @@ module "sanitized_webhook_output" {
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
-  bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence.result}-"
+  bucket_name_prefix             = local.bucket_name_prefix
   bucket_name_suffix             = "sanitized"
   sanitizer_accessor_principals = concat(
     var.gcp_principals_authorized_to_test,
@@ -164,7 +173,7 @@ module "side_output_bucket" {
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
-  bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence.result}-"
+  bucket_name_prefix             = local.bucket_name_prefix
   bucket_name_suffix             = "side-output"
   sanitizer_accessor_principals  = each.value.allowed_readers
   allowed_accessor_ip_blocks     = var.allowed_webhook_ip_blocks

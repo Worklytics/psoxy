@@ -27,6 +27,13 @@ locals {
   bucket_provisioning_required = var.enable_async_processing || length(local.side_outputs_to_provision) > 0
 
   path_to_instance_config_parameters = "${coalesce(var.config_parameter_prefix, "")}${replace(upper(var.instance_id), "-", "_")}_"
+
+  # gcp-output-bucket allows bucket_name_prefix up to 40 chars
+  bucket_name_environment_id_prefix = substr(var.environment_id_prefix, 0, 30)
+  bucket_name_prefix_random_suffix   = "-${random_string.bucket_name_random_sequence[0].result}-"
+  bucket_name_instance_id_max_length = 40 - length(local.bucket_name_environment_id_prefix) - length(local.bucket_name_prefix_random_suffix)
+  bucket_name_instance_id            = trim(substr(var.instance_id, 0, max(0, local.bucket_name_instance_id_max_length)), "-")
+  bucket_name_prefix                 = local.bucket_provisioning_required ? "${local.bucket_name_environment_id_prefix}${local.bucket_name_instance_id}${local.bucket_name_prefix_random_suffix}" : null
 }
 
 resource "random_string" "bucket_name_random_sequence" {
@@ -58,7 +65,7 @@ module "async_output" {
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
-  bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence[0].result}-"
+  bucket_name_prefix             = local.bucket_name_prefix
   bucket_name_suffix             = "async-output"
   sanitizer_accessor_principals = concat(
     var.gcp_principals_authorized_to_test,
@@ -143,7 +150,7 @@ module "side_output_bucket" {
   project_id                     = var.project_id
   bucket_write_role_id           = var.bucket_write_role_id
   function_service_account_email = var.service_account_email
-  bucket_name_prefix             = "${var.environment_id_prefix}${var.instance_id}-${random_string.bucket_name_random_sequence[0].result}-"
+  bucket_name_prefix             = local.bucket_name_prefix
   bucket_name_suffix             = "side-output"
   sanitizer_accessor_principals  = each.value.allowed_readers
   enable_versioning              = var.enable_versioning

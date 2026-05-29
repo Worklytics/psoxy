@@ -42,7 +42,12 @@ resource "random_string" "bucket_id_part" {
 }
 
 locals {
-  bucket_prefix = "${local.function_name}-${random_string.bucket_id_part.id}"
+  # gcp-output-bucket allows bucket_name_prefix up to 40 chars
+  bucket_name_environment_id_prefix = substr(var.environment_id_prefix, 0, 30)
+  bucket_name_prefix_random_suffix   = "-${random_string.bucket_id_part.id}"
+  bucket_name_instance_id_max_length = 40 - length(local.bucket_name_environment_id_prefix) - length(local.bucket_name_prefix_random_suffix)
+  bucket_name_instance_id            = trim(substr(local.instance_id, 0, max(0, local.bucket_name_instance_id_max_length)), "-")
+  bucket_prefix                      = "${local.bucket_name_environment_id_prefix}${local.bucket_name_instance_id}${local.bucket_name_prefix_random_suffix}"
 }
 
 # data input to function
