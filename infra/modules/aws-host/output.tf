@@ -42,6 +42,7 @@ output "lookup_output_buckets" {
 output "pseudonym_salt" {
   description = "Value used to salt pseudonyms (SHA-256) hashes. If migrate to new deployment, you should copy this value."
   value       = module.psoxy.pseudonym_salt
+  sensitive   = true
 }
 
 output "api_gateway_v2" {
