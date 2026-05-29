@@ -86,10 +86,25 @@ class S3ResourceServiceTest {
     }
 
     @Test
-    void getResource_otherS3Exception_rethrows() {
+    void getResource_accessDenied_treatedAsUnavailable() {
         S3Exception exception = (S3Exception) S3Exception.builder()
             .statusCode(403)
             .message("Access Denied")
+            .build();
+        when(client.getObject(any(GetObjectRequest.class)))
+            .thenThrow(exception);
+
+        S3ResourceService service = new S3ResourceService(client, "my-bucket", "my-prefix");
+        Optional<InputStream> resultOpt = service.getResource("my-key");
+
+        assertTrue(resultOpt.isEmpty());
+    }
+
+    @Test
+    void getResource_otherS3Exception_rethrows() {
+        S3Exception exception = (S3Exception) S3Exception.builder()
+            .statusCode(500)
+            .message("Internal Error")
             .build();
         when(client.getObject(any(GetObjectRequest.class)))
             .thenThrow(exception);

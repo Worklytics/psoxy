@@ -266,6 +266,8 @@ resource "google_cloudfunctions2_function" "function" {
       local.side_output_env_vars,
       var.enable_async_processing ? { ASYNC_OUTPUT_DESTINATION = "gs://${module.async_output[0].bucket_name}" } : {},
       var.remote_resource_bucket != null ? { REMOTE_RESOURCE_BUCKET = var.remote_resource_bucket } : {},
+      var.remote_resource_instance_path != null ? { INSTANCE_RESOURCE_PATH = var.remote_resource_instance_path } : {},
+      var.remote_resource_shared_path != null ? { SHARED_RESOURCE_PATH = var.remote_resource_shared_path } : {},
     )
 
     dynamic "secret_environment_variables" {

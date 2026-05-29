@@ -83,12 +83,12 @@ This will:
 The Terraform modules automatically grant minimal read permissions following the Principle of
 Least Privilege. Access is limited to the configured resource path prefixes within the bucket:
 
-- **AWS**: `s3:GetObject` only for objects under `{INSTANCE_RESOURCE_PATH}/` and
-  `{SHARED_RESOURCE_PATH}/`
-- **GCP**: object read access only for objects under `{INSTANCE_RESOURCE_PATH}/` and
-  `{SHARED_RESOURCE_PATH}/`, enforced with IAM Conditions
+- **AWS**: `s3:GetObject` only for objects under `{INSTANCE_RESOURCE_PATH}/` and `{SHARED_RESOURCE_PATH}/`
+- **GCP**: object read access only for objects under `{INSTANCE_RESOURCE_PATH}/` and `{SHARED_RESOURCE_PATH}/`, enforced with IAM Conditions
 
-No write, delete, or list permissions are granted.
+No write, delete, or list permissions are granted. When an object is missing or inaccessible, S3 may return 403 (citing `s3:ListBucket`) rather than 404 if the caller lacks bucket list permission; psoxy treats that as unavailable (non-fatal) and continues its resource lookup chain (e.g. falling back to prebuilt rules).
+
+Instance resource paths mirror the SSM / Secret Manager hierarchy but omit the trailing `_` used to separate parameter names (e.g. `GCAL_SOURCE`). For connector `gcal`, objects live at `{prefix}GCAL/rules.yaml`, not `{prefix}GCAL_/rules.yaml`.
 
 ## Use Cases
 

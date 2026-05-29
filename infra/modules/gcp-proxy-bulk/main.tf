@@ -240,6 +240,8 @@ resource "google_cloudfunctions2_function" "function" {
       var.config_parameter_prefix == null ? {} : { PATH_TO_SHARED_CONFIG = var.config_parameter_prefix },
       var.config_parameter_prefix == null ? {} : { PATH_TO_INSTANCE_CONFIG = local.path_to_instance_config_parameters },
       var.remote_resource_bucket != null ? { REMOTE_RESOURCE_BUCKET = var.remote_resource_bucket } : {},
+      var.remote_resource_instance_path != null ? { INSTANCE_RESOURCE_PATH = var.remote_resource_instance_path } : {},
+      var.remote_resource_shared_path != null ? { SHARED_RESOURCE_PATH = var.remote_resource_shared_path } : {},
     )
 
     dynamic "secret_environment_variables" {

@@ -98,6 +98,8 @@ resource "aws_lambda_function" "instance" {
       length(var.path_to_shared_ssm_parameters) > 0 ? { PATH_TO_SHARED_CONFIG = var.path_to_shared_ssm_parameters } : {},
       local.is_instance_ssm_prefix_default ? {} : { PATH_TO_INSTANCE_CONFIG = var.path_to_instance_ssm_parameters },
       var.remote_resource_bucket != null ? { REMOTE_RESOURCE_BUCKET = var.remote_resource_bucket } : {},
+      var.remote_resource_instance_path != null ? { INSTANCE_RESOURCE_PATH = var.remote_resource_instance_path } : {},
+      var.remote_resource_shared_path != null ? { SHARED_RESOURCE_PATH = var.remote_resource_shared_path } : {},
     )
   }
 
@@ -304,8 +306,8 @@ locals {
     Effect = "Allow"
     Resource = coalescelist(
       compact([
-        var.remote_resource_instance_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_instance_path}*" : null,
-        var.remote_resource_shared_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_shared_path}*" : null,
+        var.remote_resource_instance_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_instance_path}/*" : null,
+        var.remote_resource_shared_path != null ? "arn:aws:s3:::${var.remote_resource_bucket}/${var.remote_resource_shared_path}/*" : null,
       ]),
       ["arn:aws:s3:::${var.remote_resource_bucket}/*"]
     )

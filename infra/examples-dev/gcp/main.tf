@@ -190,7 +190,7 @@ module "connection_in_worklytics" {
         try(each.value.output_sanitized_bucket_id, null)
       )
     }, {}),
-  try(each.value.settings_to_provide, {}),
+    try(each.value.settings_to_provide, {}),
   try(local.all_connectors[each.key].settings_to_provide, {}))
 }
 
