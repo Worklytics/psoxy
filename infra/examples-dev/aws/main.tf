@@ -283,6 +283,14 @@ output "todos_3" {
   value       = var.todos_as_outputs ? join("\n", values(module.connection_in_worklytics)[*].todo) : null
 }
 
+output "todos_4" {
+  description = "Remote resource uploads (OpenNLP, genMetadata LLM) after deploy, in markdown format."
+  value = var.todos_as_outputs ? join("\n\n", compact([
+    module.psoxy.remote_resource_opennlp_todo,
+    module.psoxy.remote_resource_gen_metadata_todo,
+  ])) : null
+}
+
 resource "local_file" "todo_4_upload_opennlp_models" {
   count = var.todos_as_local_files && module.psoxy.remote_resource_opennlp_todo != null ? 1 : 0
 
