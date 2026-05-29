@@ -423,6 +423,7 @@ locals {
 FILE_PATH=$${1:-${try(local.example_files_csv, "")}}
 BLUE='\e[0;34m'
 NC='\e[0m'
+FAILED=0
 
 printf "Quick test of $${BLUE}${var.instance_id}$${NC} ...\n"
 
@@ -432,10 +433,21 @@ for FILE in "$${FILES[@]}"; do
   # trim whitespace
   FILE=$(echo "$FILE" | xargs)
   if [ -z "$FILE" ]; then continue; fi
+
+  if [ ! -f "$FILE" ]; then
+    printf "error: file not found: %s\n" "$FILE" >&2
+    FAILED=1
+    continue
+  fi
   
   printf "Testing file: $FILE\n"
   node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$FILE" -d "AWS" -i "${aws_s3_bucket.input.bucket}" -o "${aws_s3_bucket.sanitized.bucket}" ${local.role_option_for_tests} --region "${var.aws_region}"
+  if [ $? -ne 0 ]; then
+    FAILED=1
+  fi
 done
+
+exit $FAILED
 EOT
 }
 
