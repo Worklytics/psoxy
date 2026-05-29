@@ -17,26 +17,19 @@ if [ ! -f "java/pom.xml" ]; then
 fi
 
 CHECKOUT_ROOT=$(pwd)
-
-# If not running in CI, use a local Maven repository to avoid polluting the global cache.
-# Treat CI as "not in CI" when CI is unset, empty, or explicitly set to "false".
-CI_VALUE="${CI:-}"
-if [ -z "$CI_VALUE" ] || [ "${CI_VALUE,,}" = "false" ]; then
-    mkdir -p "${CHECKOUT_ROOT}/.m2/repository"
-    if [ -n "${MAVEN_OPTS:-}" ]; then
-        export MAVEN_OPTS="${MAVEN_OPTS} -Dmaven.repo.local=${CHECKOUT_ROOT}/.m2/repository"
-    else
-        export MAVEN_OPTS="-Dmaven.repo.local=${CHECKOUT_ROOT}/.m2/repository"
-    fi
-    printf "${INFO}Running locally (not in CI). Using local maven repository at ${CHECKOUT_ROOT}/.m2/repository${NC}\n"
-fi
+PSOXY_CHECKOUT_ROOT="${CHECKOUT_ROOT}"
+# shellcheck source=../lib/maven-local-repo.sh
+source "${CHECKOUT_ROOT}/tools/lib/maven-local-repo.sh"
+export PSOXY_SKIP_OPENNLP=1
 
 printf "Generating Software Bill of Materials (SBOM) for AWS and GCP implementations...\n\n"
 
 # Build AWS module with verify phase to generate SBOM
 printf "${INFO}Building AWS module and generating SBOM...${NC}\n"
 ${CHECKOUT_ROOT}/tools/build.sh -q aws "${CHECKOUT_ROOT}/java/"
-mvn -f "${CHECKOUT_ROOT}/java/impl/aws/pom.xml" clean verify -DskipTests -Dmaven.deploy.skip=false
+mvn ${PSOXY_MAVEN_LOCAL_REPO:+-Dmaven.repo.local="$PSOXY_MAVEN_LOCAL_REPO"} \
+    -DskipOpenNlpModelDownload=true \
+    -f "${CHECKOUT_ROOT}/java/impl/aws/pom.xml" clean verify -DskipTests -Dmaven.deploy.skip=false
 if [ $? -ne 0 ]; then
   printf "${ERR}Failed to build AWS module. Exiting.${NC}\n"
   exit 1
@@ -57,7 +50,9 @@ printf "AWS SBOM copied to ${INFO}docs/aws/sbom.json${NC}\n\n"
 # Build GCP module with verify phase to generate SBOM
 printf "${INFO}Building GCP module and generating SBOM...${NC}\n"
 ${CHECKOUT_ROOT}/tools/build.sh -q gcp "${CHECKOUT_ROOT}/java/"
-mvn -f "${CHECKOUT_ROOT}/java/impl/gcp/pom.xml" clean verify -DskipTests -Dmaven.deploy.skip=false
+mvn ${PSOXY_MAVEN_LOCAL_REPO:+-Dmaven.repo.local="$PSOXY_MAVEN_LOCAL_REPO"} \
+    -DskipOpenNlpModelDownload=true \
+    -f "${CHECKOUT_ROOT}/java/impl/gcp/pom.xml" clean verify -DskipTests -Dmaven.deploy.skip=false
 if [ $? -ne 0 ]; then
   printf "${ERR}Failed to build GCP module. Exiting.${NC}\n"
   exit 1

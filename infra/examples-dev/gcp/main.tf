@@ -30,7 +30,7 @@ locals {
 # call this 'generic_source_connectors'?
 module "worklytics_connectors" {
   source = "../../modules/worklytics-connectors"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=rc-v0.6.2"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-connectors?ref=v0.6.2"
 
   base_dir                                 = var.psoxy_base_dir
   enabled_connectors                       = var.enabled_connectors
@@ -72,9 +72,17 @@ locals {
     {}
   )
 
+  custom_bulk_connectors_with_defaults = {
+    for k, v in var.custom_bulk_connectors : k => merge({
+      display_name              = coalesce(try(v.display_name, null), replace(k, "-", " "))
+      worklytics_connector_id   = coalesce(try(v.worklytics_connector_id, null), "bulk-import-psoxy")
+      worklytics_connector_name = coalesce(try(v.worklytics_connector_name, null), "${coalesce(try(v.display_name, null), replace(k, "-", " "))} via Psoxy")
+    }, v)
+  }
+
   bulk_connectors = merge(
     module.worklytics_connectors.enabled_bulk_connectors,
-    var.custom_bulk_connectors,
+    local.custom_bulk_connectors_with_defaults,
   )
 
 
@@ -96,7 +104,7 @@ locals {
 
 module "psoxy" {
   source = "../../modules/gcp-host"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=rc-v0.6.2"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/gcp-host?ref=v0.6.2"
 
   gcp_project_id                    = var.gcp_project_id
   environment_name                  = var.environment_name
@@ -160,13 +168,13 @@ module "connection_in_worklytics" {
   for_each = local.all_instances
 
   source = "../../modules/worklytics-proxy-connection-generic"
-  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-generic?ref=rc-v0.6.2"
+  # source = "git::https://github.com/worklytics/psoxy//infra/modules/worklytics-proxy-connection-generic?ref=v0.6.2"
 
   host_platform_id     = local.host_platform_id
   proxy_instance_id    = each.key
   worklytics_host      = var.worklytics_host
-  connector_id         = try(local.all_connectors[each.key].worklytics_connector_id, "")
-  display_name         = try(local.all_connectors[each.key].worklytics_connector_name, "${local.all_connectors[each.key].display_name} via Psoxy")
+  connector_id         = try(local.all_connectors[each.key].worklytics_connector_id, "bulk-import-psoxy", "")
+  display_name         = try(local.all_connectors[each.key].worklytics_connector_name, "${try(local.all_connectors[each.key].display_name, replace(each.key, "-", " "))} via Psoxy", "${replace(each.key, "-", " ")} via Psoxy")
   todo_step            = module.psoxy.next_todo_step
   todos_as_local_files = var.todos_as_local_files
 
@@ -182,7 +190,8 @@ module "connection_in_worklytics" {
         try(each.value.output_sanitized_bucket_id, null)
       )
     }, {}),
-  try(each.value.settings_to_provide, {}))
+  try(each.value.settings_to_provide, {}),
+  try(local.all_connectors[each.key].settings_to_provide, {}))
 }
 
 output "path_to_deployment_jar" {

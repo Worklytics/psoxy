@@ -14,8 +14,12 @@ for arg in "$@"; do
   fi
 done
 
-# Source centralized color scheme
-source "$(dirname "$0")/set-term-colorscheme.sh"
+COLORSCHEME_SH="$(dirname "$0")/set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+  source "$COLORSCHEME_SH"
+else
+  ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
 
 if ! git --version &> /dev/null ; then
   printf "${ERR}Git not installed.${NC} Not entirely sure how you got here without it, but to install see https://git-scm.com/book/en/v2/Getting-Started-Installing-Git\n"
@@ -165,12 +169,75 @@ printf "\n"
 
 # Check Azure CLI installation
 AZCLI_REASON="Required if deploying to Azure or using Microsoft 365 data sources."
+AZ_ENTRA_ADMIN_ROLES_REASON="Microsoft 365 / Entra connectors require the authenticated principal to have Global Administrator or Application Administrator directory roles."
+AZ_ENTRA_ROLES_DOC="https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/view-assignments"
 if ! az --version &> /dev/null ; then
   printf "${ERR}Azure CLI is not installed.${NC} ${AZCLI_REASON} See https://docs.microsoft.com/en-us/cli/azure/install-azure-cli\n"
   if $HOMEBREW_AVAILABLE; then printf " or, as you have Homebrew available, run ${CODE}brew install azure-cli${NC}\n"; fi
+  printf "\t- ${WARN}If you intend to use Microsoft 365 connectors, your Azure principal will still need ${CODE}Global Administrator${NC} or ${CODE}Application Administrator${NC} Entra directory roles. See ${AZ_ENTRA_ROLES_DOC}${NC}\n"
 else
   # how can pipe to sed or something to strip extra whitespace out?
   printf "Azure CLI version ${CODE}`az --version --only-show-errors | head -n 1`${NC} is installed.\n"
-  printf "\t- make sure ${CODE}az account show${NC} is the user/tenant you expect. If not, ${CODE}az login --allow-no-subscription${NC} to authenticate. $AZCLI_REASON\n"
+  printf "\t- make sure ${CODE}az account show${NC} is the user/tenant you expect. If not, ${CODE}az login --allow-no-subscriptions${NC} to authenticate. $AZCLI_REASON\n"
+
+  if az account show &> /dev/null; then
+    AZ_TENANT_ID=$(az account show --query tenantId -o tsv 2>/dev/null)
+    AZ_USER_NAME=$(az account show --query user.name -o tsv 2>/dev/null)
+    if [[ -n "$AZ_USER_NAME" ]]; then
+      printf "\t- signed in as ${CODE}${AZ_USER_NAME}${NC}"
+      if [[ -n "$AZ_TENANT_ID" ]]; then
+        printf " (tenant ${CODE}${AZ_TENANT_ID}${NC})"
+      fi
+      printf ".\n"
+    fi
+
+    AZ_GRAPH_ROLES_URL="https://graph.microsoft.com/v1.0/me/transitiveMemberOf/microsoft.graph.directoryRole"
+    AZ_SKIP_ROLE_CHECK=false
+    AZ_PRINCIPAL_TYPE=$(az account show --query user.type -o tsv 2>/dev/null)
+    if [[ "$AZ_PRINCIPAL_TYPE" == "servicePrincipal" ]]; then
+      AZ_SP_APP_ID=$(az account show --query user.name -o tsv 2>/dev/null)
+      AZ_SP_OBJECT_ID=$(az ad sp show --id "$AZ_SP_APP_ID" --query id -o tsv 2>/dev/null)
+      if [[ -z "$AZ_SP_OBJECT_ID" ]]; then
+        AZ_SKIP_ROLE_CHECK=true
+        printf "\t- ${WARN}Could not resolve service principal object ID for Entra directory role check.${NC}\n"
+        printf "\t  ${AZ_ENTRA_ADMIN_ROLES_REASON} Verify assignments in the Microsoft Entra admin center. See ${AZ_ENTRA_ROLES_DOC}\n"
+      else
+        AZ_GRAPH_ROLES_URL="https://graph.microsoft.com/v1.0/servicePrincipals/${AZ_SP_OBJECT_ID}/transitiveMemberOf/microsoft.graph.directoryRole"
+      fi
+    fi
+
+    if [[ "$AZ_SKIP_ROLE_CHECK" != "true" ]]; then
+      AZ_ROLE_NAMES=$(az rest --method GET --url "$AZ_GRAPH_ROLES_URL" --query "value[].displayName" -o tsv 2>/dev/null)
+      AZ_REST_EXIT=$?
+      if [[ $AZ_REST_EXIT -ne 0 ]]; then
+        printf "\t- ${WARN}Could not verify Entra directory roles (Microsoft Graph request failed).${NC}\n"
+        printf "\t  ${AZ_ENTRA_ADMIN_ROLES_REASON} Verify assignments in the Microsoft Entra admin center. See ${AZ_ENTRA_ROLES_DOC}\n"
+      else
+        AZ_HAS_REQUIRED_ROLE=false
+        while IFS= read -r AZ_ROLE_NAME; do
+          if [[ "$AZ_ROLE_NAME" == "Global Administrator" || "$AZ_ROLE_NAME" == "Application Administrator" ]]; then
+            AZ_HAS_REQUIRED_ROLE=true
+            break
+          fi
+        done <<< "$AZ_ROLE_NAMES"
+
+        if $AZ_HAS_REQUIRED_ROLE; then
+          printf "\t- ${SUCCESS}Entra directory roles: signed-in principal has Global Administrator or Application Administrator.${NC}\n"
+        else
+          AZ_ROLE_LIST="${AZ_ROLE_NAMES//$'\n'/, }"
+          if [[ -z "$AZ_ROLE_LIST" ]]; then
+            AZ_ROLE_LIST="(none detected)"
+          fi
+          printf "\t- ${WARN}Entra directory roles: signed-in principal does not appear to have Global Administrator or Application Administrator.${NC}\n"
+          printf "\t  ${AZ_ENTRA_ADMIN_ROLES_REASON}\n"
+          printf "\t  Directory roles detected for this principal: ${CODE}${AZ_ROLE_LIST}${NC}.\n"
+          printf "\t  See ${AZ_ENTRA_ROLES_DOC}\n"
+        fi
+      fi
+    fi
+  else
+    printf "\t- ${WARN}Azure CLI is not authenticated.${NC} Run ${CODE}az login --allow-no-subscriptions${NC} to authenticate.\n"
+    printf "\t  Once authenticated, re-run this script to verify Entra directory role requirements (${CODE}Global Administrator${NC} or ${CODE}Application Administrator${NC}).\n"
+  fi
 fi
 

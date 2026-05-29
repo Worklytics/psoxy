@@ -46,6 +46,7 @@ To add a source, add its Connector ID to the `enabled_connectors` list in your `
 | `qualtrics`                | [Qualtrics](survey/README.md)                                               | Bulk | BETA         |
 | `salesforce`               | [Salesforce](salesforce/README.md)                                          | API  | GA           |
 | `slack-analytics`          | [Slack Analytics](slack/slack-analytics/README.md)                           | API  | ALPHA        |
+| `slack-ai-analytics-bulk`  | [Slack AI Analytics Bulk](slack/slack-ai-bulk/README.md)                    | Bulk | ALPHA        |
 | `slack-discovery-api`      | [Slack via Discovery API](slack/slack-discovery-api/README.md)              | API  | GA           |
 | `survey`                   | [Survey](survey/README.md)                                                  | Bulk | GA           |
 | `windsurf`                 | [Windsurf](windsurf/README.md)                                              | API  | ALPHA        |
@@ -58,7 +59,6 @@ The following additional bulk connectors are documented but configured via `cust
 |----------------------|----------------------------------------------------------------------|------|--------------|
 | `gong-bulk`          | [Gong Bulk](gong/gong-bulk/README.md)                                | Bulk | ALPHA        |
 | `miro-ai-bulk`       | [Miro AI Bulk](miro/miro-ai-bulk/README.md)                          | Bulk | ALPHA        |
-| `slack-ai-snapshot`  | [Slack AI Snapshot](slack/slack-ai-bulk/README.md)                   | Bulk | BETA         |
 | `slack-discovery-bulk` | [Slack Bulk Exports](slack/slack-discovery-bulk/README.md)         | Bulk | GA           |
 | `zoom-ai-metrics`    | [Zoom AI Metrics Snapshot](zoom/README.md#zoom-ai-metric-snapshot-bulk) | Bulk | ALPHA     |
 

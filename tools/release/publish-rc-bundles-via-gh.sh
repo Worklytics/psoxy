@@ -17,9 +17,9 @@ else
     ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
 fi
 
-# Workflow names
-AWS_WORKFLOW="Publish AWS Bundle"
-GCP_WORKFLOW="Publish GCP Bundle"
+# Workflow file names (gh registers these by path when the workflow YAML is valid)
+AWS_WORKFLOW="publish-aws-bundle.yaml"
+GCP_WORKFLOW="publish-gcp-bundle.yaml"
 
 # Check if gh CLI is installed
 if ! command -v gh &> /dev/null; then

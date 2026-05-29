@@ -114,7 +114,7 @@ public class ApiDataOutputUtils {
                                                           HttpResponse sourceApiResponse) throws IOException {
         ProcessedContent.ProcessedContentBuilder builder = ProcessedContent.builder()
             .contentType(sourceApiResponse.getContentType())
-            .contentCharset(sourceApiResponse.getContentCharset());
+            .contentCharset(Objects.requireNonNullElse(sourceApiResponse.getContentCharset(), StandardCharsets.UTF_8));
 
         // sourceApiResponse will not have content for 'HEAD' requests (or potentially even GET, in some cases - 204 No Content, 304 Not Modified, etc.)
         if (sourceApiResponse.getContent() != null) {

@@ -102,7 +102,7 @@
     * [Miro AI Bulk](sources/miro/miro-ai-bulk/README.md)
   * [Salesforce](sources/salesforce/README.md)
   * [Slack](sources/slack/README.md)
-    * [Slack AI Snapshot](sources/slack/slack-ai-bulk/README.md)
+    * [Slack AI Analytics Bulk](sources/slack/slack-ai-bulk/README.md)
     * [Slack Analytics](sources/slack/slack-analytics/README.md)
     * [Slack Bulk Exports](sources/slack/slack-discovery-bulk/README.md)
     * [Slack via Discovery API](sources/slack/slack-discovery-api/README.md)
