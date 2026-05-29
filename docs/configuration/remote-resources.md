@@ -20,7 +20,7 @@ resolved using a path prefix that mirrors the existing `PATH_TO_INSTANCE_CONFIG`
 
 The resource service acts as a **failover** after local environment and config service lookups.
 For example, if the `RULES` config property is not found in environment variables or the config/parameter store,
-psoxy will check for a `RULES` object at `{INSTANCE_RESOURCE_PATH}/RULES` in the remote bucket.
+psoxy will check for a `rules.yaml` object at `{INSTANCE_RESOURCE_PATH}/rules.yaml` in the remote bucket.
 
 A hardcoded local filesystem path (`/var/psoxy/resources`) is also checked before the remote
 bucket, providing a fast-path for containerized or VM-based deployments where resources can be
@@ -93,7 +93,7 @@ No write, delete, or list permissions are granted.
 ## Use Cases
 
 ### Custom Rules
-Upload a rules file to `{INSTANCE_RESOURCE_PATH}/RULES` in the bucket. Psoxy will load it
+Upload a rules file to `{INSTANCE_RESOURCE_PATH}/rules.yaml` in the bucket. Psoxy will load it
 if no `RULES` config property (env var, parameter store entry, etc.) is found.
 
 ### NLP Models (alpha)
@@ -108,12 +108,12 @@ on-the-fly inference within the proxy.
 
 ### AWS
 ```bash
-aws s3 cp my-rules.yaml s3://{REMOTE_RESOURCE_BUCKET}/{INSTANCE_RESOURCE_PATH}/RULES
+aws s3 cp my-rules.yaml s3://{REMOTE_RESOURCE_BUCKET}/{INSTANCE_RESOURCE_PATH}/rules.yaml
 ```
 
 ### GCP
 ```bash
-gsutil cp my-rules.yaml gs://{REMOTE_RESOURCE_BUCKET}/{INSTANCE_RESOURCE_PATH}/RULES
+gsutil cp my-rules.yaml gs://{REMOTE_RESOURCE_BUCKET}/{INSTANCE_RESOURCE_PATH}/rules.yaml
 ```
 
 ## Troubleshooting

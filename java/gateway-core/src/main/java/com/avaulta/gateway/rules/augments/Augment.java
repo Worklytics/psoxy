@@ -28,6 +28,7 @@ import java.util.TreeMap;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "method")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Augment.TextDigest.class, name = "textDigest"),
+    @JsonSubTypes.Type(value = Augment.SentenceMetadata.class, name = "sentenceMetadata"),
 })
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor
@@ -177,6 +178,62 @@ public abstract class Augment {
                 searchKeys = keys;
             }
             return keys;
+        }
+    }
+
+    /**
+     * Performs NLP analysis on text fields, extracting sentence structure, POS, and derived signals.
+     */
+    @SuperBuilder(toBuilder = true)
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    public static class SentenceMetadata extends Augment {
+
+        static final List<String> DEFAULT_HEDGE_WORDS =
+            List.of("maybe", "perhaps", "kind", "sort", "probably", "somewhat", "possibly");
+        static final List<String> DEFAULT_CONSTRAINT_WORDS =
+            List.of("must", "only", "never", "always", "don't", "avoid", "require", "cannot");
+
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        @Builder.Default
+        Map<String, List<String>> taxonomy = new TreeMap<>();
+
+        /**
+         * Additional hedge signal words (merged with {@link #DEFAULT_HEDGE_WORDS}).
+         */
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        @Builder.Default
+        List<String> hedgeWords = new ArrayList<>();
+
+        /**
+         * Additional constraint signal words (merged with {@link #DEFAULT_CONSTRAINT_WORDS}).
+         */
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        @Builder.Default
+        List<String> constraintWords = new ArrayList<>();
+
+        @Override
+        public String getFunctionName() {
+            return "sentenceMetadata";
+        }
+
+        @Override
+        public Object compute(Object input) {
+            // Computed at runtime by AugmentProcessor via injected SentenceMetadataProcessor.
+            return null;
+        }
+
+        static Set<String> signalWords(List<String> configured, List<String> defaults) {
+            Set<String> result = new HashSet<>();
+            defaults.forEach(word -> result.add(word.toLowerCase()));
+            if (configured != null) {
+                configured.stream()
+                    .filter(StringUtils::isNotBlank)
+                    .forEach(word -> result.add(word.toLowerCase()));
+            }
+            return Set.copyOf(result);
         }
     }
 }

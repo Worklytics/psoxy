@@ -58,6 +58,7 @@ public class WorkDataGenericTests {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        MockModules.ForOpenNlp.class,
         TestModules.ForApiModeConfig.class,
         ConfigRulesModule.class,
         Container.ForConfigService.class,

@@ -1,10 +1,7 @@
 package co.worklytics.psoxy;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Singleton;
 import com.avaulta.gateway.rules.BulkDataRules;
@@ -14,7 +11,7 @@ import com.avaulta.gateway.rules.RuleSet;
 import com.google.common.base.Preconditions;
 import co.worklytics.psoxy.gateway.ConfigService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
-import co.worklytics.psoxy.gateway.ResourceService;
+import com.avaulta.gateway.resources.ResourceService;
 import co.worklytics.psoxy.gateway.impl.EnvVarsConfigService;
 import co.worklytics.psoxy.rules.PrebuiltSanitizerRules;
 import co.worklytics.psoxy.rules.RESTRules;
@@ -26,12 +23,6 @@ import dagger.Provides;
 public class ConfigRulesModule {
 
     public static final String NO_APP_IDS_SUFFIX = "_no-app-ids";
-
-    /**
-     * Well-known resource path for rules loaded from InstanceResourceService (local FS or remote
-     * cloud storage).
-     */
-    public static final String RULES_RESOURCE_PATH = "RULES";
 
     @Provides @Singleton
     static RESTRules restRules(RuleSet ruleSet) {
@@ -87,30 +78,10 @@ public class ConfigRulesModule {
         };
 
         return loadAndLog.apply(rulesUtils.getRulesFromConfig(config, envVarsConfigService), "Rules: loaded from environment config (RULES variable parsed as base64-encoded YAML)")
-            .or( () -> loadAndLog.apply(getRulesFromResource(log, rulesUtils, resourceService), "Rules: loaded from instance resource (" + RULES_RESOURCE_PATH + ")"))
+            .or( () -> loadAndLog.apply(rulesUtils.getRulesFromResource(resourceService), "Rules: loaded from instance resource (" + RulesUtils.RULES_RESOURCE_PATH + ")"))
             .or( () -> loadAndLog.apply(getDefaults(log, config), "Rules: fallback to prebuilt rules"))
                 .orElseThrow( () -> new RuntimeException("No rules found"));
 
-    }
-
-    /**
-     * Attempt to load rules from the InstanceResourceService (local FS or remote S3/GCS bucket).
-     */
-    static Optional<RuleSet> getRulesFromResource(Logger log, RulesUtils rulesUtils, ResourceService resourceService) {
-        try {
-            Optional<InputStream> rulesStream = resourceService.getResource(RULES_RESOURCE_PATH);
-            if (rulesStream.isEmpty()) {
-                return Optional.empty();
-            }
-
-            try (InputStream is = rulesStream.get()) {
-                String yamlContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-                return Optional.of(rulesUtils.parse(yamlContent));
-            }
-        } catch (Exception e) {
-            log.log(Level.WARNING, "Failed to load rules from resource service", e);
-            return Optional.empty();
-        }
     }
 
     //NOTE: not compile error due to type-erasure, but DEFAULTS are all RESTRules

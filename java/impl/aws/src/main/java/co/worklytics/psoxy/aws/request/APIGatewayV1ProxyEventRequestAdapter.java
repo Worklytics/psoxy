@@ -103,7 +103,7 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
             .map(context -> context.getIdentity())
             .map(APIGatewayProxyRequestEvent.RequestIdentity::getSourceIp)
             .filter(StringUtils::isNotBlank)
-            .or(() -> Optional.ofNullable(getCaseInsensitiveHeaders().get(HTTP_HEADER_X_FORWARDED_FOR.toLowerCase())));
+            .or(() -> Optional.ofNullable(getHeader(HTTP_HEADER_X_FORWARDED_FOR))));
     }
 
     @Override
