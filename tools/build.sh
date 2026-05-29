@@ -61,6 +61,9 @@ fi
 PARENT_POM="${JAVA_SOURCE_ROOT}pom.xml"
 
 PSOXY_CHECKOUT_ROOT=$(dirname "${JAVA_SOURCE_ROOT%/}")
+if [ -n "$DISTRIBUTION_PROFILE" ]; then
+    export PSOXY_SKIP_OPENNLP=1
+fi
 # shellcheck source=lib/maven-local-repo.sh
 source "$(dirname "$0")/lib/maven-local-repo.sh"
 
