@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class APIGatewayV1ProxyEventRequestAdapterTest {
@@ -63,5 +65,20 @@ public class APIGatewayV1ProxyEventRequestAdapterTest {
             APIGatewayV1ProxyEventRequestAdapter.of(apiGatewayEvent);
 
         assertEquals("/v2/report/meetings/NUXghb123TCj0bP6nPVe%252Fsg253D253D/participants", requestAdapter.getPath());
+    }
+
+    @SneakyThrows
+    @Test
+    public void getClientIp_prefersAwsSourceIpOverForwardedHeader() {
+        APIGatewayProxyRequestEvent apiGatewayEvent = objectMapper.readerFor(APIGatewayProxyRequestEvent.class)
+            .readValue(TestUtils.getData("lambda-proxy-events/api-gateway-v1-example_interesting.json"));
+        apiGatewayEvent.getRequestContext().getIdentity().setSourceIp("198.51.100.25");
+        apiGatewayEvent.setHeaders(new HashMap<>(apiGatewayEvent.getHeaders()));
+        apiGatewayEvent.getHeaders().put("X-Forwarded-For", "203.0.113.10");
+
+        APIGatewayV1ProxyEventRequestAdapter requestAdapter =
+            APIGatewayV1ProxyEventRequestAdapter.of(apiGatewayEvent);
+
+        assertEquals("198.51.100.25", requestAdapter.getClientIp().get());
     }
 }
