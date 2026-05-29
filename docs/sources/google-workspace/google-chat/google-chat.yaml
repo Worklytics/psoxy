@@ -5,6 +5,7 @@ endpoints:
       - !<pseudonymize>
         jsonPaths:
           - "$..email"
+          - "$..userEmail"
           - "$.items[*].events[*].parameters[?(@.name in ['actor'])].value"
         encoding: "URL_SAFE_TOKEN"
       - !<hashIp>
