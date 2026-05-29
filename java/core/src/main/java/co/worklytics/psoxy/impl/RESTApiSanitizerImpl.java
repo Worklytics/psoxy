@@ -403,14 +403,22 @@ public class RESTApiSanitizerImpl implements RESTApiSanitizer {
                     boolean allParamsValid =
                             entry.getKey().getPathParameterSchemasOptional()
                                     .map(schemas -> schemas.entrySet().stream()
-                                            .allMatch(paramSchema -> parameterSchemaUtils.validate(
-                                                    paramSchema.getValue(),
-                                                    matcher.group(paramSchema.getKey()))))
+                                            .allMatch(paramSchema -> {
+                                                String pathParameterValue;
+                                                try {
+                                                    pathParameterValue = matcher.group(paramSchema.getKey());
+                                                } catch (IllegalArgumentException e) {
+                                                    log.log(Level.WARNING,
+                                                            "Path parameter schema key not found in path template: "
+                                                                    + paramSchema.getKey());
+                                                    return false;
+                                                }
+                                                return parameterSchemaUtils.validate(
+                                                        paramSchema.getValue(),
+                                                        pathParameterValue);
+                                            }))
                                     .orElse(true);
 
-                    // q: need to catch possible IllegalArgumentException if path parameter defined
-                    // in `pathParameterSchemas`
-                    // not in the path template??
                     return allParamsValid
                             && allowedQueryParams(entry.getKey(), URLUtils.parseQueryParams(url));
                 }
