@@ -84,18 +84,23 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-for cmd in gh aws curl jar unzip strings; do
+for cmd in gh curl jar unzip strings; do
   verify_bundles_require_cmd "$cmd"
 done
+if [ "$CHECK_AWS" = "true" ]; then
+  verify_bundles_require_cmd "aws"
+fi
 if ! command -v sha256sum >/dev/null 2>&1 && ! command -v shasum >/dev/null 2>&1 && ! command -v openssl >/dev/null 2>&1; then
   echo -e "${ERR}Error: one of sha256sum, shasum, or openssl is required.${NC}"
   exit 1
 fi
 
-if ! aws sts get-caller-identity >/dev/null 2>&1; then
-  echo -e "${ERR}Error: AWS CLI is not configured/authenticated.${NC}"
-  echo -e "${WARN}AWS bundle verification requires credentials with s3:GetObject and s3:HeadObject on psoxy-public-artifacts-* buckets.${NC}"
-  exit 1
+if [ "$CHECK_AWS" = "true" ]; then
+  if ! aws sts get-caller-identity >/dev/null 2>&1; then
+    echo -e "${ERR}Error: AWS CLI is not configured/authenticated.${NC}"
+    echo -e "${WARN}AWS bundle verification requires credentials with s3:GetObject and s3:HeadObject on psoxy-public-artifacts-* buckets.${NC}"
+    exit 1
+  fi
 fi
 
 RELEASE_TAG="$(verify_bundles_resolve_release_tag "$REQUESTED_RELEASE")"
