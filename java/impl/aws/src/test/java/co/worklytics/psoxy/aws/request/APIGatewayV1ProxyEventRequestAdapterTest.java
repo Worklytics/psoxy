@@ -2,6 +2,7 @@ package co.worklytics.psoxy.aws.request;
 
 import co.worklytics.test.TestUtils;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent.RequestIdentity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -72,7 +73,9 @@ public class APIGatewayV1ProxyEventRequestAdapterTest {
     public void getClientIp_prefersAwsSourceIpOverForwardedHeader() {
         APIGatewayProxyRequestEvent apiGatewayEvent = objectMapper.readerFor(APIGatewayProxyRequestEvent.class)
             .readValue(TestUtils.getData("lambda-proxy-events/api-gateway-v1-example_interesting.json"));
-        apiGatewayEvent.getRequestContext().getIdentity().setSourceIp("198.51.100.25");
+        RequestIdentity identity = new RequestIdentity();
+        identity.setSourceIp("198.51.100.25");
+        apiGatewayEvent.getRequestContext().setIdentity(identity);
         apiGatewayEvent.setHeaders(new HashMap<>(apiGatewayEvent.getHeaders()));
         apiGatewayEvent.getHeaders().put("X-Forwarded-For", "203.0.113.10");
 
