@@ -64,10 +64,11 @@ public class GcsResourceService implements ResourceService {
     }
 
     private String resolveKey(String objectPath) {
-        if (pathPrefix.isEmpty()) {
+        String prefix = ResourceService.normalizeObjectKeyPrefix(pathPrefix);
+        if (prefix.isEmpty()) {
             return objectPath;
         }
-        String prefix = pathPrefix.endsWith("/") ? pathPrefix : pathPrefix + "/";
-        return prefix + objectPath;
+        String withSlash = prefix.endsWith("/") ? prefix : prefix + "/";
+        return withSlash + objectPath;
     }
 }

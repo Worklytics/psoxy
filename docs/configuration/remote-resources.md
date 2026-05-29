@@ -88,7 +88,7 @@ Least Privilege. Access is limited to the configured resource path prefixes with
 
 No write, delete, or list permissions are granted. When an object is missing or inaccessible, S3 may return 403 (citing `s3:ListBucket`) rather than 404 if the caller lacks bucket list permission; psoxy treats that as unavailable (non-fatal) and continues its resource lookup chain (e.g. falling back to prebuilt rules).
 
-Instance resource paths mirror the SSM / Secret Manager hierarchy but omit the trailing `_` used to separate parameter names (e.g. `GCAL_SOURCE`). For connector `gcal`, objects live at `{prefix}GCAL/rules.yaml`, not `{prefix}GCAL_/rules.yaml`.
+Remote resource paths use `/` as a hierarchy separator within the bucket (e.g. `psoxy-dev-erik/GCAL/rules.yaml` for shared prefix `psoxy-dev-erik/` and connector `gcal`). They are distinct from secret / parameter prefixes, which use a trailing `_` to separate names (e.g. `psoxy-dev-erik_GCAL_SOURCE`). When `INSTANCE_RESOURCE_PATH` / `SHARED_RESOURCE_PATH` are not set, psoxy falls back to the config paths and normalizes trailing `_` to `/` and strips any leading `/`.
 
 ## Use Cases
 

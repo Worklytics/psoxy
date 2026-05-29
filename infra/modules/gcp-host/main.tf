@@ -20,9 +20,11 @@ locals {
   config_parameter_prefix               = var.config_parameter_prefix == "" ? local.default_config_parameter_prefix : var.config_parameter_prefix
   environment_id_prefix                 = "${var.environment_name}${length(var.environment_name) > 0 ? "-" : ""}"
   environment_id_display_name_qualifier = length(var.environment_name) > 0 ? " ${var.environment_name} " : ""
-  # S3/GCS object prefixes mirror SSM hierarchy but omit the trailing '_' used to separate param names.
+  # GCS object prefixes use '/' hierarchy. Secret IDs use config_parameter_prefix with a trailing
+  # '_' (e.g. psoxy-dev-erik_GCAL_SOURCE); bucket keys are psoxy-dev-erik/GCAL/rules.yaml.
+  shared_resource_path = "${trimsuffix(trimprefix(local.config_parameter_prefix, "/"), "_")}/"
   connector_instance_resource_path = { for k, v in merge(var.api_connectors, var.bulk_connectors, var.webhook_collectors) :
-    k => "${local.config_parameter_prefix}${replace(upper(k), "-", "_")}"
+    k => "${local.shared_resource_path}${replace(upper(k), "-", "_")}/"
   }
 
   # rules_file paths may be absolute, relative to the Terraform root module (deployment dir), or
@@ -282,7 +284,7 @@ module "api_connector" {
 
   remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
   remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.config_parameter_prefix : null
+  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
 
   secret_bindings = merge(
     local.secrets_bound_as_env_vars[each.key],
@@ -374,7 +376,7 @@ module "webhook_collector" {
 
   remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
   remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.config_parameter_prefix : null
+  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
 
   secret_bindings = module.psoxy.secrets
 
@@ -442,7 +444,7 @@ module "bulk_connector" {
 
   remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
   remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
-  remote_resource_shared_path   = var.enable_remote_resources ? local.config_parameter_prefix : null
+  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
 
   depends_on = [
     module.psoxy # some of the set-up IAM grants done there, but not EXPLICITLY passed out as outputs and into above as inputs, are required; so make this explicit
