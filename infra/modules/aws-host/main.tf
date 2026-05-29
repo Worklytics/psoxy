@@ -176,7 +176,7 @@ locals {
 
   # S3 object prefixes use '/' hierarchy (see gcp-host for rationale).
   resource_path_root = trimsuffix(trimprefix(coalesce(
-    nullif(local.path_to_shared_secrets, ""),
+    local.path_to_shared_secrets != "" ? local.path_to_shared_secrets : null,
     trimsuffix(local.instance_ssm_prefix, "_")
   ), "/"), "_")
   shared_resource_path = "${local.resource_path_root}/"
