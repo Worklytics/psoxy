@@ -55,13 +55,15 @@ module "worklytics_connectors" {
 # the naming convention of `{source-identifier}.tf`, eg `msft-365.tf`
 # lines below merge results of those files back into single maps of sources
 locals {
-  api_connectors = merge(
-    module.worklytics_connectors.enabled_api_connectors,
-    module.worklytics_connectors_google_workspace.enabled_api_connectors,
-    local.msft_api_connectors_with_auth,
-    var.custom_api_connectors,
-    {}
-  )
+  api_connectors = {
+    for k, v in merge(
+      module.worklytics_connectors.enabled_api_connectors,
+      module.worklytics_connectors_google_workspace.enabled_api_connectors,
+      local.msft_api_connectors_with_auth,
+      var.custom_api_connectors,
+      {}
+    ) : k => merge(v, { enable_remote_resources = true })
+  }
 
   custom_bulk_connectors_with_defaults = {
     for k, v in var.custom_bulk_connectors : k => merge({
@@ -71,10 +73,12 @@ locals {
     }, v)
   }
 
-  bulk_connectors = merge(
-    module.worklytics_connectors.enabled_bulk_connectors,
-    local.custom_bulk_connectors_with_defaults,
-  )
+  bulk_connectors = {
+    for k, v in merge(
+      module.worklytics_connectors.enabled_bulk_connectors,
+      local.custom_bulk_connectors_with_defaults,
+    ) : k => merge(v, { enable_remote_resources = true })
+  }
 
   source_authorization_todos = concat(
     module.worklytics_connectors.todos,
@@ -157,7 +161,8 @@ module "psoxy" {
   webhook_collectors = { for k, v in var.webhook_collectors : k => merge(
     v,
     {
-      example_payload = try(file(v.example_payload_file), null)
+      example_payload         = try(file(v.example_payload_file), null)
+      enable_remote_resources = true
     }
   ) }
   provision_bucket_public_access_block = var.provision_bucket_public_access_block
@@ -166,8 +171,6 @@ module "psoxy" {
   custom_side_outputs                  = var.custom_side_outputs
   todo_step                            = local.max_auth_todo_step
   todos_as_local_files                 = var.todos_as_local_files
-  enable_remote_resources              = true
-
 
   #  vpc_config = {
   #    vpc_id             = aws_default_vpc.default.id

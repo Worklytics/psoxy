@@ -6,8 +6,8 @@ locals {
 }
 
 output "remote_resource_opennlp_todo" {
-  description = "TODO (markdown) for uploading OpenNLP models when enable_remote_resources is true."
-  value = var.enable_remote_resources ? trimspace(<<-EOT
+  description = "TODO (markdown) for uploading OpenNLP models when any connector has enable_remote_resources."
+  value = local.needs_opennlp_model_upload ? trimspace(<<-EOT
 	## Upload OpenNLP models (sentenceMetadata augment)
 
 	OpenNLP binaries are not bundled in deployment JARs. If your rules use `sentenceMetadata` augments, upload the runtime models to your artifacts / remote-resources bucket.

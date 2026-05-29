@@ -31,22 +31,22 @@ Read via `ConfigService` / `ProxyConfigProperty`:
 | `PSOXY_GEN_TIMEOUT_SECONDS` | `15` | Per-inference and model-load timeout |
 | `PSOXY_GEN_MAX_INPUT_CHARS` | `4096` | Truncate source text before prompting |
 | `PSOXY_GEN_MAX_TOKENS` | `256` | Max tokens to generate per inference |
-| `ENABLE_GEN_METADATA` | unset | Set to `true` when Terraform `enable_gen_metadata` is used |
+| `ENABLE_GEN_METADATA` | unset | Set to `true` when that connector has Terraform `enable_gen_metadata = true` |
 
-When `enable_gen_metadata` is used, Terraform **appends** Jlama JVM flags to any existing `JAVA_TOOL_OPTIONS` from `general_environment_variables` or per-connector `environment_variables` (`--add-modules=jdk.incubator.vector --enable-preview --enable-native-access=ALL-UNNAMED`).
+When `enable_gen_metadata` is set on an API connector, Terraform **appends** Jlama JVM flags to any existing `JAVA_TOOL_OPTIONS` from `general_environment_variables` or that connector's `environment_variables` (`--add-modules=jdk.incubator.vector --enable-preview --enable-native-access=ALL-UNNAMED`).
 
 ## Infrastructure
 
-Use Terraform **`enable_gen_metadata`** (host module) or per-connector `enable_gen_metadata` on `api_connectors`:
+Set **`enable_gen_metadata = true`** on individual `api_connectors` entries (API connectors only):
 
-- Sets `ENABLE_GEN_METADATA=true` on the function
-- Sets `JAVA_TOOL_OPTIONS` for Jlama on the JVM
-- Floors memory at **4096 MB** unless the connector already sets a higher `memory_size_mb`
-- Enables remote resource loading for model archives (same as `enable_remote_resources`)
+- Sets `ENABLE_GEN_METADATA=true` on that function
+- Sets `JAVA_TOOL_OPTIONS` for Jlama on that function's JVM
+- Floors memory at **4096 MB** on that connector unless a higher `memory_size_mb` / `available_memory_mb` is set
+- Enables remote resource loading for that connector (for `llm/*.zip` model archives)
 
-You do not need a separate runtime failure if memory is too low — operators should enable the flag when rules use `genMetadata`. Without the flag, augments still run but return `augment-gen-unavailable` if the model cannot load.
+You do not need a separate runtime failure if memory is too low — enable the flag on connectors whose rules use `genMetadata`. Without the flag, augments still run but return `augment-gen-unavailable` if the model cannot load.
 
-Manual setup (without the flag): `enable_remote_resources = true`, `memory_size_mb = 4096`, upload a model archive (see below).
+Manual setup (without Terraform flags): set env vars yourself, `memory_size_mb = 4096`, enable remote bucket access, and upload a model archive (see below).
 
 ## Java / LangChain4j
 
@@ -97,7 +97,7 @@ Implement via LangChain4j in `psoxy-core`, behind the existing `GenMetadataBacke
 | `bedrock` | `langchain4j-bedrock` | **AWS** Lambda / `psoxy-aws` only | Lambda execution role |
 | `vertex` | `langchain4j-vertex-ai-gemini` | **GCP** Cloud Functions / `psoxy-gcp` only | Function service account |
 
-`PSOXY_GEN_MODEL` becomes the cloud model id. Use native JSON schema (`ResponseFormat`) where supported; no `llm/` remote weights. Wrong backend on the wrong platform should fail clearly. IAM for Bedrock / Vertex AI will ship with `enable_gen_metadata` extensions.
+`PSOXY_GEN_MODEL` becomes the cloud model id. Use native JSON schema (`ResponseFormat`) where supported; no `llm/` remote weights. Wrong backend on the wrong platform should fail clearly. IAM for Bedrock / Vertex AI will ship with per-connector `enable_gen_metadata` extensions.
 
 ### Alternative local engine: java-llama.cpp (`de.kherud`) — conditional
 

@@ -64,13 +64,15 @@ module "worklytics_connectors" {
 # the naming convention of `{source-identifier}.tf`, eg `msft-365.tf`
 # lines below merge results of those files back into single maps of sources
 locals {
-  api_connectors = merge(
-    module.worklytics_connectors.enabled_api_connectors,
-    module.worklytics_connectors_google_workspace.enabled_api_connectors,
-    local.msft_api_connectors_with_auth,
-    var.custom_api_connectors,
-    {}
-  )
+  api_connectors = {
+    for k, v in merge(
+      module.worklytics_connectors.enabled_api_connectors,
+      module.worklytics_connectors_google_workspace.enabled_api_connectors,
+      local.msft_api_connectors_with_auth,
+      var.custom_api_connectors,
+      {}
+    ) : k => merge(v, { enable_remote_resources = true })
+  }
 
   custom_bulk_connectors_with_defaults = {
     for k, v in var.custom_bulk_connectors : k => merge({
@@ -80,10 +82,12 @@ locals {
     }, v)
   }
 
-  bulk_connectors = merge(
-    module.worklytics_connectors.enabled_bulk_connectors,
-    local.custom_bulk_connectors_with_defaults,
-  )
+  bulk_connectors = {
+    for k, v in merge(
+      module.worklytics_connectors.enabled_bulk_connectors,
+      local.custom_bulk_connectors_with_defaults,
+    ) : k => merge(v, { enable_remote_resources = true })
+  }
 
 
   source_authorization_todos = concat(
@@ -123,7 +127,8 @@ module "psoxy" {
   webhook_collectors = { for k, v in var.webhook_collectors : k => merge(
     v,
     {
-      example_payload = try(file(v.example_payload_file), null)
+      example_payload         = try(file(v.example_payload_file), null)
+      enable_remote_resources = true
     }
   ) }
   non_production_connectors       = var.non_production_connectors
@@ -146,7 +151,6 @@ module "psoxy" {
   tf_gcp_principal_email          = var.gcp_terraform_sa_account_email
   provision_project_level_iam     = var.provision_project_level_iam
   bucket_access_logs_destination  = var.bucket_access_logs_destination
-  enable_remote_resources         = true
 }
 
 locals {
