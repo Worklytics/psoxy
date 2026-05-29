@@ -83,7 +83,6 @@ if [ ! -z "$BUCKET_PATH" ]; then
 
   if [ "$HOST_PLATFORM" == "gcp" ]; then
     prefix="gs://"
-    copy_cmd=("gcloud" "storage" "cp")
 
     if ! command -v gcloud &> /dev/null; then
         printf "${ERR}Error: gcloud is not installed, but it is required to upload bundle. Please install the Google Cloud SDK and re-run this script - or run it without the <bucket-path> argument.${NC}\n"
@@ -91,7 +90,6 @@ if [ ! -z "$BUCKET_PATH" ]; then
     fi
   elif [ "$HOST_PLATFORM" == "aws" ]; then
     prefix="s3://"
-    copy_cmd=("aws" "s3" "cp")
 
     s3_version=$(aws --version 2>&1)
 
