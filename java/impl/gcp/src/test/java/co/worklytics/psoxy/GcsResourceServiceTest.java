@@ -71,6 +71,17 @@ class GcsResourceServiceTest {
     }
 
     @Test
+    void getResource_normalizesSecretStylePrefix() {
+        when(storage.get(BlobId.of("my-bucket", "psoxy-dev-erik/rules.yaml"))).thenReturn(null);
+
+        GcsResourceService prefixedService = new GcsResourceService(storage, "my-bucket", "/psoxy-dev-erik_");
+        Optional<InputStream> resultOpt = prefixedService.getResource("rules.yaml");
+
+        assertTrue(resultOpt.isEmpty());
+        verify(storage).get(BlobId.of("my-bucket", "psoxy-dev-erik/rules.yaml"));
+    }
+
+    @Test
     void getResource_otherStorageException_rethrows() {
         StorageException exception = new StorageException(403, "Access Denied");
         when(storage.get(BlobId.of("my-bucket", "my-prefix/my-key"))).thenThrow(exception);

@@ -100,6 +100,7 @@ public class PrebuiltSanitizerRules {
                 .pathTemplate("/admin/reports/v1/activity/users/all/applications/chat")
                     .transform(Transform.Pseudonymize.builder()
                             .jsonPath("$..email")
+                            .jsonPath("$..userEmail")
                             .jsonPath("$.items[*].events[*].parameters[?(@.name in ['actor'])].value")
                             .build())
                     .transform(HashIp.builder()
