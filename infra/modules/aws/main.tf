@@ -344,6 +344,7 @@ output "secrets" {
       value_managed_by_tf = true
     }
   }
+  sensitive = true
 }
 
 output "api_caller_role_arn" {
