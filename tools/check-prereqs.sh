@@ -14,8 +14,12 @@ for arg in "$@"; do
   fi
 done
 
-# Source centralized color scheme
-source "$(dirname "$0")/set-term-colorscheme.sh"
+COLORSCHEME_SH="$(dirname "$0")/set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+  source "$COLORSCHEME_SH"
+else
+  ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
 
 if ! git --version &> /dev/null ; then
   printf "${ERR}Git not installed.${NC} Not entirely sure how you got here without it, but to install see https://git-scm.com/book/en/v2/Getting-Started-Installing-Git\n"

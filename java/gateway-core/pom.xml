@@ -204,6 +204,7 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
+                            <skip>${skipOpenNlpModelDownload}</skip>
                             <executable>${project.basedir}/../../tools/fetch-opennlp-models.sh</executable>
                         </configuration>
                     </execution>
