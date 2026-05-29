@@ -11,7 +11,7 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageException;
 
-import co.worklytics.psoxy.gateway.ResourceService;
+import com.avaulta.gateway.resources.ResourceService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;

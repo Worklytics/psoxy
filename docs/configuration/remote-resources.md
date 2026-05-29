@@ -20,7 +20,7 @@ resolved using a path prefix that mirrors the existing `PATH_TO_INSTANCE_CONFIG`
 
 The resource service acts as a **failover** after local environment and config service lookups.
 For example, if the `RULES` config property is not found in environment variables or the config/parameter store,
-psoxy will check for a `RULES` object at `{INSTANCE_RESOURCE_PATH}/RULES` in the remote bucket.
+psoxy will check for a `rules.yaml` object at `{INSTANCE_RESOURCE_PATH}/rules.yaml` in the remote bucket.
 
 A hardcoded local filesystem path (`/var/psoxy/resources`) is also checked before the remote
 bucket, providing a fast-path for containerized or VM-based deployments where resources can be
@@ -93,12 +93,42 @@ No write, delete, or list permissions are granted.
 ## Use Cases
 
 ### Custom Rules
-Upload a rules file to `{INSTANCE_RESOURCE_PATH}/RULES` in the bucket. Psoxy will load it
+Upload a rules file to `{INSTANCE_RESOURCE_PATH}/rules.yaml` in the bucket. Psoxy will load it
 if no `RULES` config property (env var, parameter store entry, etc.) is found.
 
 ### NLP Models (alpha)
-Upload OpenNLP model files (e.g., `en-sent.bin`) to `{SHARED_RESOURCE_PATH}/` in the bucket.
-Psoxy augments can lazy-load these at runtime without inflating the deployment package.
+OpenNLP model files (`en-sent.bin`, `en-pos-maxent.bin`, `en-chunker.bin`) are **not** bundled in
+deployment JARs. If your connector rules use `sentenceMetadata` augments, you must upload these
+models to the remote resources bucket yourself (requires `enable_remote_resources = true`).
+
+Place them under `{SHARED_RESOURCE_PATH}/opennlp/` (e.g.
+`{SHARED_RESOURCE_PATH}/opennlp/en-sent.bin`). `{SHARED_RESOURCE_PATH}` defaults to
+`PATH_TO_SHARED_CONFIG` / your Terraform `config_parameter_prefix` (GCP) or shared secrets path
+(AWS).
+
+**Helper script** (download locally, then upload to your artifacts / remote-resources bucket):
+
+```bash
+# AWS — PREFIX is your SHARED_RESOURCE_PATH within the bucket (trailing slash optional)
+./tools/fetch-opennlp-models.sh s3://REMOTE_RESOURCE_BUCKET/PREFIX/
+
+# GCP
+./tools/fetch-opennlp-models.sh gs://REMOTE_RESOURCE_BUCKET/PREFIX/
+```
+
+With no argument, the script only downloads models into
+`java/gateway-core/src/main/resources/opennlp/` for local development and tests.
+
+**Manual upload:**
+
+```bash
+aws s3 cp en-sent.bin s3://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/opennlp/en-sent.bin
+# ... repeat for en-pos-maxent.bin, en-chunker.bin
+```
+
+```bash
+gsutil cp en-sent.bin gs://{REMOTE_RESOURCE_BUCKET}/{SHARED_RESOURCE_PATH}/opennlp/en-sent.bin
+```
 
 ### LLM Weights (future)
 Smaller language models that fit in memory can be placed in the shared resource path for
@@ -108,12 +138,12 @@ on-the-fly inference within the proxy.
 
 ### AWS
 ```bash
-aws s3 cp my-rules.yaml s3://{REMOTE_RESOURCE_BUCKET}/{INSTANCE_RESOURCE_PATH}/RULES
+aws s3 cp my-rules.yaml s3://{REMOTE_RESOURCE_BUCKET}/{INSTANCE_RESOURCE_PATH}/rules.yaml
 ```
 
 ### GCP
 ```bash
-gcloud storage cp my-rules.yaml gs://{REMOTE_RESOURCE_BUCKET}/{INSTANCE_RESOURCE_PATH}/RULES
+gcloud storage cp my-rules.yaml gs://{REMOTE_RESOURCE_BUCKET}/{INSTANCE_RESOURCE_PATH}/rules.yaml
 ```
 
 ## Troubleshooting

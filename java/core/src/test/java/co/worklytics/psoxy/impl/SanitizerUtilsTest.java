@@ -45,6 +45,7 @@ class SanitizerUtilsTest {
     @Component(
         modules = {
             PsoxyModule.class,
+        MockModules.ForOpenNlp.class,
         TestModules.ForApiModeConfig.class,
             RESTApiSanitizerImplTest.ForConfigService.class,
             MockModules.ForSecretStore.class,

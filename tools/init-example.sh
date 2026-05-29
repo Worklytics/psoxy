@@ -27,9 +27,13 @@ fi
 #   to repeat:
 #     ../../../tools/reset-example.sh
 
-# colors
-# Source centralized color scheme
-source "$(dirname "$0")/set-term-colorscheme.sh"
+# colors (optional here: copied examples don't bundle this file until after terraform init)
+COLORSCHEME_SH="$(dirname "$0")/set-term-colorscheme.sh"
+if [ -f "$COLORSCHEME_SH" ]; then
+  source "$COLORSCHEME_SH"
+else
+  ERR='\033[0;31m'; SUCCESS='\033[0;32m'; WARN='\033[1;33m'; INFO='\033[0;34m'; CODE='\033[0;36m'; NC='\033[0m'
+fi
 
 EXPLICIT_REPO_CLONE_DIR=$1
 

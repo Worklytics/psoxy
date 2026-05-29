@@ -55,6 +55,7 @@ class StorageHandlerTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        MockModules.ForOpenNlp.class,
         TestModules.ForApiModeConfig.class,
         ForRules.class,
         MockModules.ForConfigService.class,

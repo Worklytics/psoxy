@@ -110,6 +110,38 @@ class ApiDataOutputUtilsTest {
         assertNotNull(metadata.get("REQUEST_BODY"));
     }
 
+    @Test
+    void responseAsRawProcessedContent_nullCharsetDoesNotThrow() throws Exception {
+        HttpRequest mockRequest = mock(HttpRequest.class);
+        when(mockRequest.getUrl()).thenReturn(new com.google.api.client.http.GenericUrl("https://api.example.com/v1/resource"));
+        when(mockRequest.getRequestMethod()).thenReturn("GET");
+        HttpResponse mockResponse = mock(HttpResponse.class);
+        when(mockResponse.getContentType()).thenReturn("application/json");
+        when(mockResponse.getContentCharset()).thenReturn(null); // error responses often omit charset
+        byte[] contentBytes = "{\"error\":\"Forbidden\"}".getBytes(StandardCharsets.UTF_8);
+        when(mockResponse.getContent()).thenReturn(new ByteArrayInputStream(contentBytes));
+
+        ProcessedContent processed = utils.responseAsRawProcessedContent(mockRequest, mockResponse);
+
+        assertDoesNotThrow(processed::getContentAsString);
+        assertEquals("{\"error\":\"Forbidden\"}", processed.getContentAsString());
+    }
+
+    @Test
+    void responseAsRawProcessedContent_nullContentDoesNotThrow() throws Exception {
+        HttpRequest mockRequest = mock(HttpRequest.class);
+        when(mockRequest.getUrl()).thenReturn(new com.google.api.client.http.GenericUrl("https://api.example.com/v1/resource"));
+        when(mockRequest.getRequestMethod()).thenReturn("GET");
+        HttpResponse mockResponse = mock(HttpResponse.class);
+        when(mockResponse.getContentType()).thenReturn(null);
+        when(mockResponse.getContentCharset()).thenReturn(null);
+        when(mockResponse.getContent()).thenReturn(null); // HEAD / 204 / 304 — no body
+
+        ProcessedContent processed = utils.responseAsRawProcessedContent(mockRequest, mockResponse);
+
+        assertNull(processed.getContentAsString());
+    }
+
     @ValueSource(
         strings = {
             "Authorization",

@@ -130,7 +130,7 @@ resource "google_pubsub_topic_iam_member" "function_publisher" {
 resource "google_service_account_iam_member" "pubsub_oidc_minter" {
   count = var.enable_async_processing ? 1 : 0
 
-  service_account_id = data.google_service_account.function.id
+  service_account_id = "projects/${var.project_id}/serviceAccounts/${var.service_account_email}"
   member             = "serviceAccount:${local.pubsub_service_identity}"
   role               = "roles/iam.serviceAccountOpenIdTokenCreator"
 }
@@ -200,11 +200,6 @@ locals {
   }
 }
 
-data "google_service_account" "function" {
-  account_id = var.service_account_email
-}
-
-
 # to provision Cloud Function, TF must be able to act as the service account that the function will
 # run as
 # NOTE: named 'tf_runner_act_as' rather than 'act_as' to avoid replacement-cycle on upgrades where
@@ -212,7 +207,7 @@ data "google_service_account" "function" {
 resource "google_service_account_iam_member" "tf_runner_act_as" {
   member             = var.tf_runner_iam_principal
   role               = "roles/iam.serviceAccountUser"
-  service_account_id = data.google_service_account.function.id
+  service_account_id = "projects/${var.project_id}/serviceAccounts/${var.service_account_email}"
 }
 
 # migration: remove old resource address from state (destroyed in GCP)

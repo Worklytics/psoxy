@@ -96,6 +96,8 @@ module "psoxy" {
   enable_webhook_testing             = local.enable_webhook_testing
   webhook_allow_origins              = distinct(flatten([for v in var.webhook_collectors : v.allow_origins]))
   artifacts_bucket_name              = var.artifacts_bucket_name
+  allowed_data_access_ip_blocks      = var.allowed_data_access_ip_blocks
+  allowed_webhook_ip_blocks          = var.allowed_webhook_ip_blocks
 }
 
 resource "aws_iam_policy" "execution_lambda_to_caller" {
@@ -307,7 +309,7 @@ module "api_connector" {
 
   remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
   remote_resource_instance_path = var.enable_remote_resources ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
-  remote_resource_shared_path   = var.enable_remote_resources && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
+  remote_resource_shared_path   = var.enable_remote_resources ? local.path_to_shared_secrets : null
 }
 
 
@@ -394,7 +396,7 @@ module "bulk_connector" {
 
   remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
   remote_resource_instance_path = var.enable_remote_resources ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
-  remote_resource_shared_path   = var.enable_remote_resources && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
+  remote_resource_shared_path   = var.enable_remote_resources ? local.path_to_shared_secrets : null
 }
 
 
@@ -447,7 +449,7 @@ module "webhook_collectors" {
 
   remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
   remote_resource_instance_path = var.enable_remote_resources ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
-  remote_resource_shared_path   = var.enable_remote_resources && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
+  remote_resource_shared_path   = var.enable_remote_resources ? local.path_to_shared_secrets : null
 }
 
 # Policy to allow test caller to invoke webhook collector urls and sign webhook requests

@@ -124,7 +124,7 @@ EOT
         "Workspace Id" = local.chat_gpt_enterprise_example_workspace_id
       }
       reserved_concurrent_executions : null
-      enable_async_processing : false
+      enable_async_processing : true
       enable_side_output : false
       example_api_calls_user_to_impersonate : null
       example_api_calls : [
@@ -1379,6 +1379,28 @@ EOT
         "docs/sources/workdata-generic/example-bulk/original/items0.ndjson",
         "docs/sources/workdata-generic/example-bulk/original/accounts0.ndjson"
       ]
+    }
+    "slack-ai-analytics-bulk" = {
+      source_kind               = "slack-ai"
+      availability              = "alpha"
+      enable_by_default         = false
+      worklytics_connector_id   = "slack-ai-analytics-bulk-psoxy"
+      worklytics_connector_name = "Slack AI Analytics - Bulk via Psoxy"
+      rules = {
+        columnsToPseudonymize = [
+          "USER_EMAIL",
+        ]
+        columnsToPseudonymizeIfPresent = [
+          "USER_ID",
+          "USERNAME",
+        ]
+        columnsToRedact = [
+          "PRIMARY_OWNER_EMAIL",
+          "PRIMARY_OWNER_EMAIL_DOMAIN",
+          "FULL_NAME",
+        ]
+      }
+      example_file = "docs/sources/slack/slack-ai-bulk/slack-ai-analytics-sample.csv"
     }
   }
 

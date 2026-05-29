@@ -9,7 +9,9 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
+import com.avaulta.gateway.resources.ResourceService;
 import com.avaulta.gateway.rules.WebhookCollectionRules;
+import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -20,7 +22,6 @@ import co.worklytics.psoxy.gateway.LoggingConfiguration;
 import co.worklytics.psoxy.gateway.ProcessedDataStage;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.ProxyConstants;
-import co.worklytics.psoxy.gateway.ResourceService;
 import co.worklytics.psoxy.gateway.WebhookCollectorModeConfig;
 import co.worklytics.psoxy.gateway.auth.Base64KeyClient;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
@@ -141,6 +142,24 @@ public class FunctionRuntimeModule {
             .preferred(new LocalFileResourceService(ResourceService.DEFAULT_LOCAL_RESOURCE_PATH))
             .fallback(remoteResourceService)
             .build();
+    }
+
+    /**
+     * Resource resolution for OpenNLP models: instance-local (FS / instance bucket) first,
+     * then shared remote bucket (e.g. org-wide model artifacts).
+     */
+    @Provides @Singleton @Named("OpenNlp")
+    static ResourceService openNlpResourceService(ResourceService instanceResourceService,
+                                                  @Named("SharedRemote") ResourceService sharedRemoteResourceService) {
+        return CompositeResourceService.builder()
+            .preferred(instanceResourceService)
+            .fallback(sharedRemoteResourceService)
+            .build();
+    }
+
+    @Provides @Singleton
+    static SentenceMetadataProcessor sentenceMetadataProcessor(@Named("OpenNlp") ResourceService openNlpResourceService) {
+        return new SentenceMetadataProcessor(openNlpResourceService);
     }
 
     @Provides @Singleton @Named("async")

@@ -27,6 +27,7 @@ class GoogleCloudPlatformServiceAccountKeyAuthStrategyTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        MockModules.ForOpenNlp.class,
         TestModules.ForApiModeConfig.class,
         MockModules.ForConfigService.class,
         MockModules.ForHttpTransportFactory.class,
