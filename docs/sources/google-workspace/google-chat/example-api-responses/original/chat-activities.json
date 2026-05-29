@@ -52,6 +52,23 @@
             }
           ]
         }
+      ],
+      "resourceDetails": [
+        {
+          "id": "spaces/oo3_lAAAAAE/messages/xUUHCHBTbkk.xUUHCHBTbkk",
+          "type": "CHAT_MESSAGE",
+          "ownerDetails": {
+            "ownerType": "USER",
+            "ownerIdentity": [
+              {
+                "userIdentity": {
+                  "id": "2p2csry14rmfa3",
+                  "userEmail": "charlie@worklytics.co"
+                }
+              }
+            ]
+          }
+        }
       ]
     },
     {

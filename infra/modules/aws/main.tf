@@ -21,7 +21,7 @@ locals {
       Principal : {
         "AWS" : arn
       }
-      }, length(var.allowed_data_access_ip_blocks) > 0 ? {
+      }, var.allowed_data_access_ip_blocks != null ? {
       Condition : {
         "ForAnyValue:IpAddress" : {
           "aws:SourceIp" : var.allowed_data_access_ip_blocks
@@ -42,7 +42,7 @@ locals {
         "StringEquals" : {
           "accounts.google.com:aud" : id
         }
-        }, length(var.allowed_data_access_ip_blocks) > 0 ? {
+        }, var.allowed_data_access_ip_blocks != null ? {
         "ForAnyValue:IpAddress" : {
           "aws:SourceIp" : var.allowed_data_access_ip_blocks
         }
@@ -58,7 +58,7 @@ locals {
       Principal : {
         "AWS" : arn
       }
-      }, length(var.allowed_webhook_ip_blocks) > 0 ? {
+      }, var.allowed_webhook_ip_blocks != null ? {
       Condition : {
         "ForAnyValue:IpAddress" : {
           "aws:SourceIp" : var.allowed_webhook_ip_blocks

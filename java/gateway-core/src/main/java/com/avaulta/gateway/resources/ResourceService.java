@@ -1,4 +1,4 @@
-package co.worklytics.psoxy.gateway;
+package com.avaulta.gateway.resources;
 
 import java.io.InputStream;
 import java.util.Optional;
@@ -9,8 +9,6 @@ import java.util.Optional;
  * <p>Implementations may back onto local filesystem, S3, GCS, or composites thereof.
  * Return type is {@link InputStream} so callers can stream large resources without buffering
  * the entire payload in memory. Callers are responsible for closing the returned stream.</p>
- *
- * <p>Analogous to {@link ConfigService} but for binary/large payloads rather than string config values.</p>
  */
 public interface ResourceService {
 
@@ -25,7 +23,7 @@ public interface ResourceService {
     /**
      * Get a resource as an InputStream.
      *
-     * @param objectPath path to the resource (e.g., "rules.yaml", "models/en-sent.bin")
+     * @param objectPath path to the resource (e.g., "rules.yaml", "opennlp/en-sent.bin")
      * @return filled Optional containing an open InputStream if the resource exists; empty otherwise.
      *         Caller MUST close the returned InputStream.
      */
@@ -33,9 +31,6 @@ public interface ResourceService {
 
     /**
      * Validates that the object path is safe (not null/empty, no null bytes, not absolute, no path traversal).
-     *
-     * @param objectPath the path to validate
-     * @throws IllegalArgumentException if the path is invalid
      */
     static void validatePath(String objectPath) {
         if (objectPath == null || objectPath.trim().isEmpty()) {
@@ -46,16 +41,33 @@ public interface ResourceService {
             throw new IllegalArgumentException("Object path must not contain null bytes");
         }
 
-        // Reject absolute paths
         if (objectPath.startsWith("/") || objectPath.startsWith("\\")) {
             throw new IllegalArgumentException("Object path must not start with a separator: " + objectPath);
         }
 
-        // Reject traversal or current-directory segments
         for (String segment : objectPath.split("[/\\\\]")) {
             if (".".equals(segment) || "..".equals(segment)) {
                 throw new IllegalArgumentException("Object path must not contain '.' or '..' segments: " + objectPath);
             }
         }
+    }
+
+    /**
+     * Normalizes a bucket object key prefix from secret/config naming ({@code psoxy-dev-erik_}) to
+     * object-key hierarchy ({@code psoxy-dev-erik/}). Strips a leading {@code /}; converts a
+     * trailing {@code _} to {@code /}.
+     */
+    static String normalizeObjectKeyPrefix(String pathPrefix) {
+        if (pathPrefix == null || pathPrefix.isEmpty()) {
+            return "";
+        }
+        String normalized = pathPrefix.trim();
+        while (normalized.startsWith("/")) {
+            normalized = normalized.substring(1);
+        }
+        if (normalized.endsWith("_")) {
+            normalized = normalized.substring(0, normalized.length() - 1) + "/";
+        }
+        return normalized;
     }
 }

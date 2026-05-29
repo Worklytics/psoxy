@@ -11,7 +11,7 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageException;
 
-import co.worklytics.psoxy.gateway.ResourceService;
+import com.avaulta.gateway.resources.ResourceService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -64,10 +64,11 @@ public class GcsResourceService implements ResourceService {
     }
 
     private String resolveKey(String objectPath) {
-        if (pathPrefix.isEmpty()) {
+        String prefix = ResourceService.normalizeObjectKeyPrefix(pathPrefix);
+        if (prefix.isEmpty()) {
             return objectPath;
         }
-        String prefix = pathPrefix.endsWith("/") ? pathPrefix : pathPrefix + "/";
-        return prefix + objectPath;
+        String withSlash = prefix.endsWith("/") ? prefix : prefix + "/";
+        return withSlash + objectPath;
     }
 }

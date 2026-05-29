@@ -40,13 +40,13 @@ if [ ! -f $PATH_TO_DEPLOYMENT_JAR ] || [ ! -z "$FORCE_BUILD" ] ; then
 
   ln -sf ${LOG_FILE} "${TERRAFORM_CONFIG_PATH}/last-build.log"
 
-  mvn clean $OPTIONAL_TEST_SKIP -f "${JAVA_SOURCE_ROOT}/pom.xml" > ${LOG_FILE} 2>&1
+  mvn clean $OPTIONAL_TEST_SKIP -DskipOpenNlpModelDownload=true -f "${JAVA_SOURCE_ROOT}/pom.xml" > ${LOG_FILE} 2>&1
 
-  mvn package install $OPTIONAL_TEST_SKIP -f "${JAVA_SOURCE_ROOT}/gateway-core/pom.xml" > ${LOG_FILE} 2>&1
+  mvn package install $OPTIONAL_TEST_SKIP -DskipOpenNlpModelDownload=true -f "${JAVA_SOURCE_ROOT}/gateway-core/pom.xml" > ${LOG_FILE} 2>&1
 
-  mvn package install $OPTIONAL_TEST_SKIP -f "${JAVA_SOURCE_ROOT}/core/pom.xml" >> ${LOG_FILE} 2>&1
+  mvn package install $OPTIONAL_TEST_SKIP -DskipOpenNlpModelDownload=true -f "${JAVA_SOURCE_ROOT}/core/pom.xml" >> ${LOG_FILE} 2>&1
 
-  mvn package $OPTIONAL_TEST_SKIP -f "${JAVA_SOURCE_ROOT}/impl/${IMPLEMENTATION}/pom.xml" >> ${LOG_FILE} 2>&1
+  mvn package $OPTIONAL_TEST_SKIP -DskipOpenNlpModelDownload=true -f "${JAVA_SOURCE_ROOT}/impl/${IMPLEMENTATION}/pom.xml" >> ${LOG_FILE} 2>&1
 fi
 
 # compute the hash using openssl, ensuring no newlines

@@ -41,6 +41,7 @@ import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import dagger.Component;
 import lombok.SneakyThrows;
 import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -54,6 +55,7 @@ import javax.inject.Singleton;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.util.List;
@@ -72,6 +74,7 @@ class ApiDataRequestHandlerTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        MockModules.ForOpenNlp.class,
         MockModules.ForConfigService.class,
         MockModules.ForSecretStore.class,
         MockModules.ForRules.class,
@@ -817,5 +820,160 @@ class ApiDataRequestHandlerTest {
         Object actualHeader = headers.get(headerName);
         assertTrue(actualHeader instanceof List);
         assertEquals(List.of(originalValue1, originalValue2), actualHeader);
+    }
+
+    @Test
+    @SneakyThrows
+    void isRedirectFamily() {
+        setup("gmail", "google.apis.com");
+        assertFalse(handler.isRedirectFamily(200));
+        assertFalse(handler.isRedirectFamily(299));
+        assertTrue(handler.isRedirectFamily(300));
+        assertTrue(handler.isRedirectFamily(307));
+        assertTrue(handler.isRedirectFamily(399));
+        assertFalse(handler.isRedirectFamily(400));
+    }
+
+    @Test
+    @SneakyThrows
+    void handleShouldFollowRedirectManuallyInAsyncMode() {
+        setup("gmail", "google.apis.com");
+
+        ApiDataRequestHandler spy = spy(handler);
+
+        String locationUrl = "https://pre-signed.example.com/data.json";
+        String redirectedContent = "[{\"id\":\"user1\"}]";
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
+            .thenReturn(Optional.empty());
+        when(request.getHttpMethod()).thenReturn("GET");
+        when(request.getPath()).thenReturn("/admin/directory/v1/users");
+        when(request.getQuery()).thenReturn(Optional.empty());
+
+        // Source API returns 307 redirect with Location header
+        MockHttpTransport redirectTransport = new MockHttpTransport() {
+            @Override
+            public LowLevelHttpRequest buildRequest(String method, String url) throws IOException {
+                return new MockLowLevelHttpRequest() {
+                    @Override
+                    public LowLevelHttpResponse execute() throws IOException {
+                        MockLowLevelHttpResponse response = new MockLowLevelHttpResponse();
+                        response.setStatusCode(307);
+                        response.addHeader("location", locationUrl);
+                        response.setContent("");
+                        return response;
+                    }
+                };
+            }
+        };
+        doReturn(redirectTransport.createRequestFactory()).when(spy).getRequestFactory(any());
+
+        // Redirect location transport — records the URL it was asked to build a request for
+        List<String> fetchedFromUrls = new ArrayList<>();
+        MockHttpTransport contentTransport = new MockHttpTransport() {
+            @Override
+            public LowLevelHttpRequest buildRequest(String method, String url) throws IOException {
+                fetchedFromUrls.add(url);
+                return new MockLowLevelHttpRequest() {
+                    @Override
+                    public LowLevelHttpResponse execute() throws IOException {
+                        MockLowLevelHttpResponse response = new MockLowLevelHttpResponse();
+                        response.setStatusCode(200);
+                        response.setContentType(Json.MEDIA_TYPE);
+                        response.setContent(redirectedContent);
+                        return response;
+                    }
+                };
+            }
+        };
+        when(spy.httpTransportFactory.create()).thenReturn(contentTransport);
+
+        RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
+        when(sanitizer.isAllowed(anyString(), any(), anyString(), any())).thenReturn(true);
+        spy.sanitizer = sanitizer;
+
+        HttpEventResponse response = spy.handle(request,
+            ApiDataRequestHandler.ProcessingContext.builder()
+                .async(true)
+                .requestId("r")
+                .asyncOutputLocation("gs://bucket/output.json")
+                .requestReceivedAt(clock.instant())
+                .build());
+
+        // redirect Location URL was the one actually fetched
+        assertEquals(1, fetchedFromUrls.size());
+        assertEquals(locationUrl, fetchedFromUrls.get(0));
+
+        // response status comes from the redirect target (200), not the original 307
+        assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+
+        // sanitizer received the body from the redirect target, not the empty 307 response
+        ArgumentCaptor<String> sanitizedBodyCaptor = ArgumentCaptor.forClass(String.class);
+        verify(sanitizer).sanitize(eq("GET"), any(URL.class), sanitizedBodyCaptor.capture());
+        assertEquals(redirectedContent, sanitizedBodyCaptor.getValue());
+    }
+
+    @Test
+    @SneakyThrows
+    void handleShouldLetHttpClientFollowRedirectInSyncMode() {
+        setup("gmail", "google.apis.com");
+
+        ApiDataRequestHandler spy = spy(handler);
+
+        String locationUrl = "https://pre-signed.example.com/data.json";
+        String redirectedContent = "[{\"id\":\"user1\"}]";
+
+        HttpEventRequest request = MockModules.provideMock(HttpEventRequest.class);
+        when(request.getHeader(ControlHeader.PSEUDONYM_IMPLEMENTATION.getHttpHeader()))
+            .thenReturn(Optional.empty());
+        when(request.getHttpMethod()).thenReturn("GET");
+        when(request.getPath()).thenReturn("/admin/directory/v1/users");
+        when(request.getQuery()).thenReturn(Optional.empty());
+
+        // URL-aware transport: 307 for source API URL, 200 for the redirect target
+        MockHttpTransport sourceTransport = new MockHttpTransport() {
+            @Override
+            public LowLevelHttpRequest buildRequest(String method, String url) throws IOException {
+                return new MockLowLevelHttpRequest() {
+                    @Override
+                    public LowLevelHttpResponse execute() throws IOException {
+                        MockLowLevelHttpResponse response = new MockLowLevelHttpResponse();
+                        if (url.equals(locationUrl)) {
+                            response.setStatusCode(200);
+                            response.setContentType(Json.MEDIA_TYPE);
+                            response.setContent(redirectedContent);
+                        } else {
+                            response.setStatusCode(307);
+                            response.addHeader("location", locationUrl);
+                            response.setContent("");
+                        }
+                        return response;
+                    }
+                };
+            }
+        };
+        doReturn(sourceTransport.createRequestFactory()).when(spy).getRequestFactory(any());
+
+        RESTApiSanitizerImpl sanitizer = mock(RESTApiSanitizerImpl.class);
+        when(sanitizer.isAllowed(anyString(), any(), anyString(), any())).thenReturn(true);
+        spy.sanitizer = sanitizer;
+
+        HttpEventResponse response = spy.handle(request,
+            ApiDataRequestHandler.ProcessingContext.builder()
+                .async(false)
+                .requestId("r")
+                .requestReceivedAt(clock.instant())
+                .build());
+
+        // our manual redirect code must NOT run in sync mode
+        verify(spy.httpTransportFactory, never()).create();
+
+        // the HTTP client followed the redirect automatically; sanitizer got the redirect content
+        ArgumentCaptor<String> sanitizedBodyCaptor = ArgumentCaptor.forClass(String.class);
+        verify(sanitizer).sanitize(eq("GET"), any(URL.class), sanitizedBodyCaptor.capture());
+        assertEquals(redirectedContent, sanitizedBodyCaptor.getValue());
+
+        assertEquals(HttpStatus.SC_OK, response.getStatusCode());
     }
 }

@@ -28,3 +28,6 @@
 # local maven cache
 .m2/
 .azure/
+
+# OpenNLP models (downloaded by tools/fetch-opennlp-models.sh)
+/java/gateway-core/src/main/resources/opennlp/

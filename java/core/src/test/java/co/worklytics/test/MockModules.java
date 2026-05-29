@@ -2,11 +2,14 @@ package co.worklytics.test;
 
 import co.worklytics.psoxy.gateway.*;
 import co.worklytics.psoxy.gateway.impl.ApiDataRequestHandler;
+import co.worklytics.psoxy.gateway.impl.NoOpResourceService;
 import co.worklytics.psoxy.gateway.impl.output.NoOutput;
 import co.worklytics.psoxy.gateway.output.ApiDataSideOutput;
 import co.worklytics.psoxy.gateway.output.ApiSanitizedDataOutput;
 import co.worklytics.psoxy.gateway.output.OutputFactory;
 import co.worklytics.psoxy.gateway.output.OutputLocation;
+import com.avaulta.gateway.resources.ResourceService;
+import com.avaulta.gateway.rules.augments.SentenceMetadataProcessor;
 import co.worklytics.psoxy.rules.RESTRules;
 import co.worklytics.psoxy.utils.RandomNumberGenerator;
 import com.avaulta.gateway.rules.BulkDataRules;
@@ -231,11 +234,35 @@ public class MockModules {
     }
 
     @Module
+    public interface ForOpenNlp {
+        @Provides
+        @Singleton
+        @Named("OpenNlp")
+        static ResourceService openNlpResourceService() {
+            return new NoOpResourceService();
+        }
+
+        @Provides
+        @Singleton
+        static SentenceMetadataProcessor sentenceMetadataProcessor(
+            @Named("OpenNlp") ResourceService openNlpResourceService) {
+            return new SentenceMetadataProcessor(openNlpResourceService);
+        }
+    }
+
+    @Module
     public interface ForResourceService {
         @Provides
         @Singleton
         static ResourceService resourceService() {
-            return new co.worklytics.psoxy.gateway.impl.NoOpResourceService();
+            return new NoOpResourceService();
+        }
+
+        @Provides
+        @Singleton
+        @Named("SharedRemote")
+        static ResourceService sharedRemoteResourceService() {
+            return new NoOpResourceService();
         }
     }
 }

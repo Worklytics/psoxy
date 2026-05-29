@@ -86,10 +86,45 @@ class S3ResourceServiceTest {
     }
 
     @Test
-    void getResource_otherS3Exception_rethrows() {
+    void getResource_normalizesSecretStylePrefix() throws Exception {
+        byte[] content = "hello".getBytes(StandardCharsets.UTF_8);
+        GetObjectResponse response = GetObjectResponse.builder().contentLength((long) content.length).build();
+        ResponseInputStream<GetObjectResponse> responseInputStream = new ResponseInputStream<>(
+            response,
+            AbortableInputStream.create(new ByteArrayInputStream(content))
+        );
+        when(client.getObject(any(GetObjectRequest.class))).thenReturn(responseInputStream);
+
+        S3ResourceService service = new S3ResourceService(client, "my-bucket", "/psoxy-dev-erik_");
+        Optional<InputStream> resultOpt = service.getResource("rules.yaml");
+
+        assertTrue(resultOpt.isPresent());
+        verify(client).getObject(GetObjectRequest.builder()
+            .bucket("my-bucket")
+            .key("psoxy-dev-erik/rules.yaml")
+            .build());
+    }
+
+    @Test
+    void getResource_accessDenied_treatedAsUnavailable() {
         S3Exception exception = (S3Exception) S3Exception.builder()
             .statusCode(403)
             .message("Access Denied")
+            .build();
+        when(client.getObject(any(GetObjectRequest.class)))
+            .thenThrow(exception);
+
+        S3ResourceService service = new S3ResourceService(client, "my-bucket", "my-prefix");
+        Optional<InputStream> resultOpt = service.getResource("my-key");
+
+        assertTrue(resultOpt.isEmpty());
+    }
+
+    @Test
+    void getResource_otherS3Exception_rethrows() {
+        S3Exception exception = (S3Exception) S3Exception.builder()
+            .statusCode(500)
+            .message("Internal Error")
             .build();
         when(client.getObject(any(GetObjectRequest.class)))
             .thenThrow(exception);

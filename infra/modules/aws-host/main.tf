@@ -96,6 +96,8 @@ module "psoxy" {
   enable_webhook_testing             = local.enable_webhook_testing
   webhook_allow_origins              = distinct(flatten([for v in var.webhook_collectors : v.allow_origins]))
   artifacts_bucket_name              = var.artifacts_bucket_name
+  allowed_data_access_ip_blocks      = var.allowed_data_access_ip_blocks
+  allowed_webhook_ip_blocks          = var.allowed_webhook_ip_blocks
 }
 
 resource "aws_iam_policy" "execution_lambda_to_caller" {
@@ -171,6 +173,16 @@ resource "aws_iam_role_policy_attachment" "async_output_access_to_caller" {
 # secrets shared across all instances
 locals {
   path_to_shared_secrets = var.secrets_store_implementation == "aws_secrets_manager" ? var.aws_secrets_manager_path : var.aws_ssm_param_root_path
+
+  # S3 object prefixes use '/' hierarchy (see gcp-host for rationale).
+  resource_path_root = trimsuffix(trimprefix(coalesce(
+    local.path_to_shared_secrets != "" ? local.path_to_shared_secrets : null,
+    trimsuffix(local.instance_ssm_prefix, "_")
+  ), "/"), "_")
+  shared_resource_path = "${local.resource_path_root}/"
+  connector_instance_resource_path = { for k, v in merge(var.api_connectors, var.bulk_connectors, var.webhook_collectors) :
+    k => "${local.shared_resource_path}${replace(upper(k), "-", "_")}/"
+  }
 
   # convert custom_side_outputs to the format expected by the psoxy module
   custom_original_side_outputs = { for k, v in var.custom_side_outputs :
@@ -306,8 +318,8 @@ module "api_connector" {
   )
 
   remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
-  remote_resource_shared_path   = var.enable_remote_resources && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
+  remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
 }
 
 
@@ -393,8 +405,8 @@ module "bulk_connector" {
   )
 
   remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
-  remote_resource_shared_path   = var.enable_remote_resources && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
+  remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
 }
 
 
@@ -425,13 +437,13 @@ module "webhook_collectors" {
   aws_lambda_execution_role_policy_arn = var.aws_lambda_execution_role_policy_arn
   iam_roles_permissions_boundary       = var.iam_roles_permissions_boundary
   test_caller_role_arn                 = module.psoxy.webhook_test_caller_role_arn
-  rules_file                   = try(local.webhook_collector_rules_file_paths[each.key], null)
-  webhook_auth_public_keys = each.value.auth_public_keys
-  provision_auth_key       = each.value.provision_auth_key
-  output_path_prefix       = each.value.output_path_prefix
-  keep_warm_instances      = try(each.value.keep_warm_instances, null)
-  example_payload          = try(each.value.example_payload, null)
-  example_identity         = try(each.value.example_identity, null)
+  rules_file                           = try(local.webhook_collector_rules_file_paths[each.key], null)
+  webhook_auth_public_keys             = each.value.auth_public_keys
+  provision_auth_key                   = each.value.provision_auth_key
+  output_path_prefix                   = each.value.output_path_prefix
+  keep_warm_instances                  = try(each.value.keep_warm_instances, null)
+  example_payload                      = try(each.value.example_payload, null)
+  example_identity                     = try(each.value.example_identity, null)
 
   todos_as_local_files      = var.todos_as_local_files
   allowed_webhook_ip_blocks = var.allowed_webhook_ip_blocks
@@ -446,8 +458,8 @@ module "webhook_collectors" {
   )
 
   remote_resource_bucket        = var.enable_remote_resources ? module.psoxy.artifacts_bucket_name : null
-  remote_resource_instance_path = var.enable_remote_resources ? "${local.instance_ssm_prefix}${replace(upper(each.key), "-", "_")}_" : null
-  remote_resource_shared_path   = var.enable_remote_resources && length(local.path_to_shared_secrets) > 0 ? local.path_to_shared_secrets : null
+  remote_resource_instance_path = var.enable_remote_resources ? local.connector_instance_resource_path[each.key] : null
+  remote_resource_shared_path   = var.enable_remote_resources ? local.shared_resource_path : null
 }
 
 # Policy to allow test caller to invoke webhook collector urls and sign webhook requests

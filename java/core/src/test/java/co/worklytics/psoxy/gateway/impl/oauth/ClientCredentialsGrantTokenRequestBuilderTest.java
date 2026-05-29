@@ -110,6 +110,7 @@ class ClientCredentialsGrantTokenRequestBuilderTest {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        MockModules.ForOpenNlp.class,
         TestModules.ForApiModeConfig.class,
         SourceAuthModule.class,
         TestModules.ForFixedClock.class,

@@ -3,7 +3,7 @@ package co.worklytics.psoxy.gateway.impl;
 import java.io.InputStream;
 import java.util.Optional;
 
-import co.worklytics.psoxy.gateway.ResourceService;
+import com.avaulta.gateway.resources.ResourceService;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.NonNull;

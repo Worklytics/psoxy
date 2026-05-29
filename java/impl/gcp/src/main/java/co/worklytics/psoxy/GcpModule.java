@@ -17,7 +17,7 @@ import co.worklytics.psoxy.gateway.HostEnvironment;
 import co.worklytics.psoxy.gateway.LockService;
 import co.worklytics.psoxy.gateway.ProxyConfigProperty;
 import co.worklytics.psoxy.gateway.RemoteResourceConfig;
-import co.worklytics.psoxy.gateway.ResourceService;
+import com.avaulta.gateway.resources.ResourceService;
 import co.worklytics.psoxy.gateway.SecretStore;
 import co.worklytics.psoxy.gateway.auth.PublicKeyStoreClient;
 import co.worklytics.psoxy.gateway.impl.CachingConfigServiceDecorator;
@@ -100,6 +100,21 @@ public interface GcpModule {
         return config.getBucket()
             .map(bucket -> (ResourceService) new GcsResourceService(
                 storage, bucket, config.getInstanceResourcePath().orElse("")))
+            .orElse(new NoOpResourceService());
+    }
+
+    @Provides @Singleton @Named("SharedRemote")
+    static ResourceService sharedRemoteResourceService(EnvVarsConfigService envVarsConfigService,
+                                                       HostEnvironment hostEnvironment,
+                                                       Storage storage) {
+        RemoteResourceConfig config = RemoteResourceConfig.fromConfigService(
+            envVarsConfigService,
+            asSecretManagerNamespace(
+                Optional.ofNullable(hostEnvironment.getInstanceId()).orElse("")));
+
+        return config.getBucket()
+            .flatMap(bucket -> config.getSharedResourcePath()
+                .map(path -> (ResourceService) new GcsResourceService(storage, bucket, path)))
             .orElse(new NoOpResourceService());
     }
 

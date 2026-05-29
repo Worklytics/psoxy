@@ -235,7 +235,7 @@ echo ""
 check_artifact_exists() {
     local gcs_path="gs://${BUCKET_NAME}/${ZIP_FILENAME}"
     
-    if gsutil ls "$gcs_path" >/dev/null 2>&1; then
+    if gcloud storage ls "$gcs_path" >/dev/null 2>&1; then
         return 0  # Artifact exists
     else
         return 1  # Artifact does not exist
@@ -275,32 +275,33 @@ publish_to_gcs() {
     echo -e "Publishing ${INFO}${ZIP_PATH}${NC} to ${INFO}${gcs_path}${NC}"
 
     # Check if bucket exists
-    if ! gsutil ls "gs://${BUCKET_NAME}" >/dev/null 2>&1; then
+    if ! gcloud storage ls "gs://${BUCKET_NAME}" >/dev/null 2>&1; then
         echo -e "${WARN}Warning: Bucket ${BUCKET_NAME} does not exist${NC}"
     fi
 
     # Upload with metadata
-    # Add sha256 and gh_ref metadata if available
-    local metadata_args=(-h "x-goog-meta-sha256:${SHA256_HASH}")
+    local metadata_args=(--update-custom-metadata="sha256=${SHA256_HASH}")
     if [ -n "${GH_REF:-}" ]; then
         echo -e "${INFO}Adding metadata: gh_ref=${GH_REF}${NC}"
-        metadata_args+=(-h "x-goog-meta-gh_ref:${GH_REF}")
+        metadata_args+=(--update-custom-metadata="gh_ref=${GH_REF}")
     fi
 
-    gsutil "${metadata_args[@]}" cp "$ZIP_PATH" "$gcs_path"
+    gcloud storage cp "$ZIP_PATH" "$gcs_path" "${metadata_args[@]}"
 
     if [ $? -eq 0 ]; then
         echo -e "${SUCCESS}✓ Successfully uploaded to GCS${NC}"
         
         # Verify metadata was set
-        local sha_metadata=$(gsutil stat "$gcs_path" 2>/dev/null | grep "x-goog-meta-sha256" || echo "")
+        local sha_metadata
+        sha_metadata=$(gcloud storage objects describe "$gcs_path" --format='value(customMetadata.sha256)' 2>/dev/null || echo "")
         if [ -n "$sha_metadata" ]; then
-            echo -e "${SUCCESS}✓ Metadata verified: ${sha_metadata}${NC}"
+            echo -e "${SUCCESS}✓ Metadata verified: sha256=${sha_metadata}${NC}"
         fi
         if [ -n "${GH_REF:-}" ]; then
-            local metadata=$(gsutil stat "$gcs_path" 2>/dev/null | grep "x-goog-meta-gh_ref" || echo "")
-            if [ -n "$metadata" ]; then
-                echo -e "${SUCCESS}✓ Metadata verified: ${metadata}${NC}"
+            local gh_ref_metadata
+            gh_ref_metadata=$(gcloud storage objects describe "$gcs_path" --format='value(customMetadata.gh_ref)' 2>/dev/null || echo "")
+            if [ -n "$gh_ref_metadata" ]; then
+                echo -e "${SUCCESS}✓ Metadata verified: gh_ref=${gh_ref_metadata}${NC}"
             fi
         fi
     else
@@ -320,19 +321,18 @@ main() {
 
     # Check prerequisites
 
-    if ! command -v gsutil &> /dev/null; then
-        echo -e "${ERR}Error: gsutil is not installed${NC}"
+    if ! command -v gcloud &> /dev/null; then
+        echo -e "${ERR}Error: gcloud is not installed${NC}"
         echo -e "${WARN}Install Google Cloud SDK from: https://cloud.google.com/sdk/docs/install${NC}"
         exit 1
     fi
 
-    # Check gsutil version
-    GSUTIL_VERSION=$(gsutil version -l 2>/dev/null | grep "gsutil version" | cut -d' ' -f3)
-    if [ -z "$GSUTIL_VERSION" ]; then
-        echo -e "${ERR}Error: gsutil is installed but not working properly${NC}"
+    GCLOUD_VERSION=$(gcloud version --format='value(Google Cloud SDK)' 2>/dev/null | head -1)
+    if [ -z "$GCLOUD_VERSION" ]; then
+        echo -e "${ERR}Error: gcloud is installed but not working properly${NC}"
         exit 1
     fi
-    echo -e "${INFO}gsutil version: ${SUCCESS}${GSUTIL_VERSION}${NC}"
+    echo -e "${INFO}gcloud version: ${SUCCESS}${GCLOUD_VERSION}${NC}"
 
     # Check if authenticated
     # In CI (GitHub Actions), OIDC authentication sets GOOGLE_APPLICATION_CREDENTIALS
@@ -359,15 +359,15 @@ main() {
                 exit 1
             fi
             echo -e "${INFO}Credentials file: ${SUCCESS}$GOOGLE_APPLICATION_CREDENTIALS${NC}"
-            # Ensure gsutil uses Application Default Credentials
+            # Ensure gcloud uses Application Default Credentials
             export GOOGLE_APPLICATION_CREDENTIALS
         fi
-        # In CI, skip the gsutil ls check - let actual gsutil commands fail if auth doesn't work
-        echo -e "${INFO}Using Application Default Credentials for gsutil${NC}"
+        # In CI, skip the storage ls check - let actual gcloud commands fail if auth doesn't work
+        echo -e "${INFO}Using Application Default Credentials for gcloud storage${NC}"
     else
         # Local execution: check traditional authentication
-        if ! gsutil ls >/dev/null 2>&1; then
-            echo -e "${ERR}Error: gsutil is not authenticated${NC}"
+        if ! gcloud storage buckets list --limit=1 >/dev/null 2>&1; then
+            echo -e "${ERR}Error: gcloud is not authenticated${NC}"
             echo -e "${WARN}Run 'gcloud auth login' to authenticate${NC}"
             exit 1
         fi

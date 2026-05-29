@@ -26,6 +26,7 @@
     <properties>
         <!-- empty for default java builds  (1 7 as of v0.5.0 )-->
         <artifactSuffix></artifactSuffix>
+        <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
 
     <dependencies>
@@ -106,6 +107,13 @@
             </exclusions>
         </dependency>
 
+        <!-- Apache OpenNLP -->
+        <dependency>
+            <groupId>org.apache.opennlp</groupId>
+            <artifactId>opennlp-tools</artifactId>
+            <version>${dependency.opennlp.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
@@ -182,6 +190,24 @@
                         <goals>
                             <goal>clean</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>fetch-opennlp-models</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skipOpenNlpModelDownload}</skip>
+                            <executable>${project.basedir}/../../tools/fetch-opennlp-models.sh</executable>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

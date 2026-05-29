@@ -66,11 +66,29 @@ if [ -f ${EXAMPLE_TO_COPY_FROM}/preflight.sh ]; then
   chmod +x ${EXAMPLE_TEMPLATE_REPO}preflight
 fi
 
-cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/reset-example.sh ${EXAMPLE_TEMPLATE_REPO}reset-example
-chmod +x ${EXAMPLE_TEMPLATE_REPO}reset-example
-
 cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/available-connectors.sh ${EXAMPLE_TEMPLATE_REPO}available-connectors
 chmod +x ${EXAMPLE_TEMPLATE_REPO}available-connectors
 
 cp -f ${PATH_TO_MAIN_REPO_ROOT}tools/az-auth.sh ${EXAMPLE_TEMPLATE_REPO}az-auth
 chmod +x ${EXAMPLE_TEMPLATE_REPO}az-auth
+
+# Dev-only artifacts present in examples-dev (symlinks, local scripts, backups).
+# Never publish these to customer example repos — cp would follow symlinks and copy script contents.
+DEV_ONLY_ARTIFACTS=(
+  reset-example
+  build.sh
+  upgrade-terraform-modules.sh
+  .psoxy-iac-backup
+)
+
+for artifact in "${DEV_ONLY_ARTIFACTS[@]}"; do
+  if [ -e "${EXAMPLE_TEMPLATE_REPO}${artifact}" ] || [ -L "${EXAMPLE_TEMPLATE_REPO}${artifact}" ]; then
+    printf "${INFO}Removing dev-only artifact from example template: ${CODE}${artifact}${NC}\n"
+    rm -rf "${EXAMPLE_TEMPLATE_REPO}${artifact}"
+  fi
+done
+
+if [ -e "${EXAMPLE_TEMPLATE_REPO}reset-example" ] || [ -L "${EXAMPLE_TEMPLATE_REPO}reset-example" ]; then
+  printf "${ERR}Error: reset-example still present in ${EXAMPLE_TEMPLATE_REPO} after publish copy.${NC}\n"
+  exit 1
+fi

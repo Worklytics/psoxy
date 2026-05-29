@@ -99,12 +99,11 @@ public class APIGatewayV1ProxyEventRequestAdapter implements co.worklytics.psoxy
 
     @Override
     public Optional<String> getClientIp() {
-        // unclear that we every get anything here, but can try
-
-        String ip = Optional.ofNullable(event.getHeaders().get(HTTP_HEADER_X_FORWARDED_FOR.toLowerCase()))
-            .orElseGet(() -> Optional.ofNullable(event.getRequestContext().getIdentity()).map(APIGatewayProxyRequestEvent.RequestIdentity::getSourceIp).orElse(null));
-
-        return Optional.ofNullable(ip);
+        return Optional.ofNullable(event.getRequestContext())
+            .map(context -> context.getIdentity())
+            .map(APIGatewayProxyRequestEvent.RequestIdentity::getSourceIp)
+            .filter(StringUtils::isNotBlank)
+            .or(() -> getHeader(HTTP_HEADER_X_FORWARDED_FOR));
     }
 
     @Override

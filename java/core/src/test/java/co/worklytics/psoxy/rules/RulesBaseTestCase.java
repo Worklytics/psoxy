@@ -161,6 +161,7 @@ abstract public class RulesBaseTestCase {
     @Singleton
     @Component(modules = {
         PsoxyModule.class,
+        MockModules.ForOpenNlp.class,
         TestModules.ForApiModeConfig.class,
         MockModules.ForConfigService.class,
         MockModules.ForSecretStore.class,

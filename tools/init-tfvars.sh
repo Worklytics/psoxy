@@ -7,7 +7,7 @@ PSOXY_BASE_DIR=$2
 DEPLOYMENT_ENV=${3:-"local"}
 HOST_PLATFORM=${4:-"aws"}
 
-SCRIPT_VERSION="v0.6.1"
+SCRIPT_VERSION="v0.6.2"
 
 if [ -z "$PSOXY_BASE_DIR" ]; then
   printf "Usage: init-tfvars.sh <path-to-terraform.tfvars> <path-to-psoxy-base-directory> [DEPLOYMENT_ENV]\n"
@@ -17,6 +17,12 @@ fi
 # colors
 # Source centralized color scheme
 source "$(dirname "$0")/set-term-colorscheme.sh"
+
+DEPLOYMENT_BUNDLE_LIB="$(dirname "$0")/lib/deployment-bundle.sh"
+if [ -f "$DEPLOYMENT_BUNDLE_LIB" ]; then
+  # shellcheck source=lib/deployment-bundle.sh
+  source "$DEPLOYMENT_BUNDLE_LIB"
+fi
 
 # Validate DEPLOYMENT_ENV
 VALID_DEPLOYMENT_ENVS=("local" "terraform_cloud" "github_actions" "other_nonlocal")
@@ -163,8 +169,6 @@ if test $AWS_PROVIDER_COUNT -ne 0; then
 else
   if [[ "$HOST_PLATFORM" == "aws" ]]; then
     printf "${ERR}HOST_PLATFORM set as 'aws', but no aws provider in Terraform configuration${NC}\n"
-  else
-    printf "No AWS provider found in top-level of Terraform configuration. AWS CLI not required.\n"
   fi
 fi
 
@@ -187,24 +191,29 @@ remove_google_workspace() {
 }
 
 INCLUDE_GWS="false"
+CONFIRMED_GCP_PROJECT_ID=""
 GOOGLE_PROVIDER_COUNT=$(terraform providers 2>/dev/null | grep "${TOP_LEVEL_PROVIDER_PATTERN}/google" | wc -l || echo "0")
 if test $GOOGLE_PROVIDER_COUNT -ne 0; then
   if gcloud --version &> /dev/null ; then
 
-    # project
     GCP_PROJECT_ID=$(gcloud config get project 2>/dev/null || echo "")
 
     if [[ "$HOST_PLATFORM" == "gcp" ]]; then
       [[ -f variables.tf ]] && grep -q '^variable "gcp_project_id"' variables.tf
       if [[ $? -eq 0 ]]; then
-        printf "# GCP project in which required infrastructure will be provisioned\n" >> $TFVARS_FILE
+        printf "\n${INFO}GCP project for Psoxy infrastructure${NC}\n"
+        printf "Proxy resources (Cloud Functions, secrets, storage, etc.) will be provisioned into a GCP project.\n"
         if [ -n "$GCP_PROJECT_ID" ]; then
-          printf "gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
-          printf "\tgcp_project_id=${CODE}\"${GCP_PROJECT_ID}\"${NC}\n"
+          printf "Detected from ${CODE}gcloud config get project${NC}: ${CODE}${GCP_PROJECT_ID}${NC}\n"
+          CONFIRMED_GCP_PROJECT_ID="$(prompt_confirm_variable_setting "gcp_project_id" "$GCP_PROJECT_ID")"
         else
-          printf "gcp_project_id=\"{{FILL_YOUR_VALUE}}\"\n\n" >> $TFVARS_FILE
-          printf "${ERR}Could not determine GCP project ID from gcloud config. You MUST fill ${CODE}gcp_project_id${NC} in your terraform.tfvars file yourself.${NC}\n"
+          printf "${WARN}Could not detect a GCP project from gcloud config.${NC}\n"
+          printf "Enter ${CODE}gcp_project_id${NC} (project for Psoxy infrastructure): "
+          read -r CONFIRMED_GCP_PROJECT_ID
         fi
+        printf "# GCP project in which Psoxy proxy infrastructure will be provisioned\n" >> $TFVARS_FILE
+        printf "gcp_project_id=\"${CONFIRMED_GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
+        printf "  ${SUCCESS}gcp_project_id${NC}=${CODE}\"${CONFIRMED_GCP_PROJECT_ID}\"${NC}\n"
       fi
 
       # tenant SA emails
@@ -219,23 +228,33 @@ if test $GOOGLE_PROVIDER_COUNT -ne 0; then
       fi
     fi
 
-    prompt_user_Yn "Do you want to use ${CODE}Google Workspace${NC} as a data source? (requires ${CODE}gcloud${NC} to be installed and authenticated in the environment from which this terraform configuration will be applied) "
+    printf "\n${INFO}Google Workspace connectors${NC} (Calendar, Directory, Gmail, etc.) are optional.\n"
+    printf "Enabling them requires ${CODE}gcloud${NC} authenticated in the environment where you run ${CODE}terraform apply${NC}.\n"
+    prompt_user_Yn "Connect to Google Workspace data sources via API?"
 
     if [[ $? -eq 1 ]]; then
       INCLUDE_GWS="true"
-      # init google workspace variables if file exists OR the variables are in the main variables.tf file
-      # (google_workspace_gcp_project_id not in all legacy examples)
       [[ -f google-workspace-variables.tf ]] || grep -q '^variable "google_workspace_gcp_project_id"' variables.tf
       if [[ $? -eq 0 ]]; then
+        default_gws_project="${CONFIRMED_GCP_PROJECT_ID:-$GCP_PROJECT_ID}"
+        printf "\n${INFO}GCP project for Google Workspace OAuth clients${NC}\n"
+        printf "Google Workspace API connectors provision OAuth clients in a GCP project.\n"
+        if [ -n "$default_gws_project" ]; then
+          if [ -n "$CONFIRMED_GCP_PROJECT_ID" ] && [ "$default_gws_project" = "$CONFIRMED_GCP_PROJECT_ID" ]; then
+            printf "Defaulting to your Psoxy infrastructure project (${CODE}${default_gws_project}${NC}). Enter a different project ID if OAuth clients should live elsewhere.\n"
+          else
+            printf "Detected from ${CODE}gcloud config get project${NC}: ${CODE}${default_gws_project}${NC}\n"
+          fi
+          GWS_PROJECT_ID="$(prompt_confirm_variable_setting "google_workspace_gcp_project_id" "$default_gws_project")"
+        else
+          printf "${WARN}Could not detect a default GCP project.${NC}\n"
+          printf "Enter ${CODE}google_workspace_gcp_project_id${NC} (project for Google Workspace OAuth clients): "
+          read -r GWS_PROJECT_ID
+        fi
         printf "# GCP project in which OAuth clients for Google Workspace connectors will be provisioned\n" >> $TFVARS_FILE
         printf "#  - if you're not connecting to Google Workspace data sources via their APIs, you can omit this value\n" >> $TFVARS_FILE
-        if [ -n "$GCP_PROJECT_ID" ]; then
-          printf "google_workspace_gcp_project_id=\"${GCP_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
-          printf "\tgoogle_workspace_gcp_project_id=${CODE}\"${GCP_PROJECT_ID}\"${NC}\n"
-        else
-          printf "# google_workspace_gcp_project_id=\"{{FILL_YOUR_VALUE}}\"\n\n" >> $TFVARS_FILE
-          printf "${WARN}Could not determine GCP project ID. You MUST fill ${CODE}google_workspace_gcp_project_id${NC} in your terraform.tfvars file yourself.${NC}\n"
-        fi
+        printf "google_workspace_gcp_project_id=\"${GWS_PROJECT_ID}\"\n\n" >> $TFVARS_FILE
+        printf "  ${SUCCESS}google_workspace_gcp_project_id${NC}=${CODE}\"${GWS_PROJECT_ID}\"${NC}\n"
       fi
 
       # init google workspace variables if file exists OR the variables are in the main variables.tf file
@@ -415,84 +434,13 @@ if [ "$DEPLOYMENT_ENV" != "local" ]; then
   echo "todos_as_outputs = true" >> $TFVARS_FILE
 fi
 
-# Check for published bundles and offer to use them
-check_and_offer_published_bundle() {
-  local version=$(sed -n 's|[[:space:]]*<revision>\(.*\)</revision>|\1|p' "${PSOXY_BASE_DIR}java/pom.xml")
-  if [ -z "$version" ]; then
-    return 0  # Can't determine version, skip check
-  fi
-
-  local bundle_path=""
-  local bundle_exists=false
-
-  if [ "$HOST_PLATFORM" == "aws" ]; then
-    if ! command -v aws &> /dev/null; then
-      return 0  # AWS CLI not installed, skip check
-    fi
-
-    # Get AWS region from terraform.tfvars if set, otherwise from AWS config, or use default
-    local aws_region=""
-    if grep -q '^[[:space:]]*aws_region[[:space:]]*=' "$TFVARS_FILE" 2>/dev/null; then
-      aws_region=$(grep '^[[:space:]]*aws_region[[:space:]]*=' "$TFVARS_FILE" | sed 's/.*=[[:space:]]*"\([^"]*\)".*/\1/' | head -1)
-    fi
-    if [ -z "$aws_region" ]; then
-      aws_region=$(aws configure get region 2>/dev/null || echo "")
-    fi
-    if [ -z "$aws_region" ]; then
-      aws_region="us-east-1"  # Default region
-    fi
-
-    local bucket_name="psoxy-public-artifacts-${aws_region}"
-    local jar_name="psoxy-aws-${version}.jar"
-    local s3_path="s3://${bucket_name}/${jar_name}"
-
-    # Check if bundle exists in S3
-    if aws s3 ls "$s3_path" >/dev/null 2>&1; then
-      bundle_path="$s3_path"
-      bundle_exists=true
-    fi
-  elif [ "$HOST_PLATFORM" = "gcp" ]; then
-    if ! command -v gsutil &> /dev/null; then
-      return 0  # gsutil not installed, skip check
-    fi
-
-    local bucket_name="psoxy-public-artifacts"
-    local zip_name="psoxy-gcp-${version}.zip"
-    local gcs_path="gs://${bucket_name}/${zip_name}"
-
-    # Check if bundle exists in GCS
-    if gsutil ls "$gcs_path" >/dev/null 2>&1; then
-      bundle_path="$gcs_path"
-      bundle_exists=true
-    fi
-  fi
-
-  if [ "$bundle_exists" = true ]; then
-    printf "\n"
-    printf "Found published deployment bundle for version ${CODE}${version}${NC} at:\n"
-    printf "  ${SUCCESS}${bundle_path}${NC}\n"
-    prompt_user_Yn "Do you want to use this published bundle instead of building one locally?"
-    if [[ $? -eq 1 ]]; then
-      # User wants to use published bundle
-      if grep -q '^[[:space:]]*deployment_bundle' "$TFVARS_FILE" 2>/dev/null; then
-        sed -i.bck "/^[[:space:]]*deployment_bundle.*/c\\
-deployment_bundle = \"${bundle_path}\"" "$TFVARS_FILE"
-        rm -f "${TFVARS_FILE}.bck" 2>/dev/null
-      else
-        printf "deployment_bundle = \"${bundle_path}\"\n\n" >> $TFVARS_FILE
-      fi
-      printf "Set ${CODE}deployment_bundle${NC} to ${SUCCESS}${bundle_path}${NC}\n"
-      return 1  # Indicate bundle was set
-    fi
-  fi
-
-  return 0
-}
-
-# Check for published bundles (only if not terraform_cloud, as that needs local build)
+# Offer prebuilt deployment bundle or build-from-source (local/github_actions only)
 if [ "$DEPLOYMENT_ENV" != "terraform_cloud" ]; then
-  check_and_offer_published_bundle
-  bundle_was_set=$?
+  if type deployment_bundle_offer_at_init >/dev/null 2>&1; then
+    deployment_bundle_offer_at_init "$TFVARS_FILE" "$PSOXY_BASE_DIR" "$HOST_PLATFORM"
+  else
+    printf "${WARN}Warning:${NC} deployment bundle helper not found; skipping prebuilt bundle offer.\n\n"
+  fi
 fi
 
 if [ "$DEPLOYMENT_ENV" == "terraform_cloud" ]; then
