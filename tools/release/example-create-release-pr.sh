@@ -221,9 +221,7 @@ while [ -n "$(git status --porcelain)" ]; do
   esac
 done
 
-git checkout -b "rc-${RELEASE_TAG}"
-
-if [ $? -ne 0 ]; then
+if ! git checkout -b "rc-${RELEASE_TAG}"; then
   printf "${ERR}Failed to create branch rc-${RELEASE_TAG}. does it already exist?${NC}\n"
   git reset --hard
   exit 1
