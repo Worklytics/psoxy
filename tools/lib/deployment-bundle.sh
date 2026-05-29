@@ -210,7 +210,7 @@ deployment_bundle_set_or_append() {
   local tfvars_file="$1"
   local bundle_path="$2"
 
-  if grep -qE '^[[:space:]]*deployment_bundle' "$tfvars_file" 2>/dev/null; then
+  if grep -qE '^[[:space:]]*deployment_bundle[[:space:]]*=' "$tfvars_file" 2>/dev/null; then
     deployment_bundle_set_value "$tfvars_file" "$bundle_path"
   else
     printf '\n# Prebuilt deployment bundle published by Worklytics (see deployment_bundle in variables.tf)\n' >> "$tfvars_file"
