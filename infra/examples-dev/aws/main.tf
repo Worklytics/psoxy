@@ -283,6 +283,55 @@ output "todos_3" {
   value       = var.todos_as_outputs ? join("\n", values(module.connection_in_worklytics)[*].todo) : null
 }
 
+locals {
+  # Aggregate all todo_content stages from all sub-modules
+  all_todo_stages = concat(
+    # Source authorization todos (connector setup, DWD, M365 grants, etc.)
+    try(module.worklytics_connectors.todo_content, []),
+    try(module.worklytics_connectors_google_workspace.todo_content, []),
+    try(module.worklytics_connectors_msft_365.todo_content, []),
+    # Psoxy host todos (API connector tests, bulk tests, webhook tests, test-all)
+    try(module.psoxy.todo_content, []),
+    # Worklytics connection todos
+    flatten([
+      for k, m in module.connection_in_worklytics : try(m.todo_content, [])
+    ]),
+  )
+
+  # Flatten stages into a single ordered list, tracking the stage index
+  # Each item gets a stage number based on its position in the outer list
+  todo_items_with_stage = flatten([
+    for stage_idx, stage in local.all_todo_stages : [
+      for item in stage : merge(item, { stage = stage_idx + 1 })
+    ]
+  ])
+}
+
+# Write todo markdown files
+resource "local_file" "todos" {
+  for_each = var.todos_as_local_files ? {
+    for item in local.todo_items_with_stage :
+    "${item.stage}-${item.name}" => item
+    if item.file_permission == null
+  } : {}
+
+  filename = "TODO ${each.value.stage} - ${each.value.name}.md"
+  content  = each.value.content
+}
+
+# Write executable script files (test scripts, etc.)
+resource "local_file" "scripts" {
+  for_each = var.todos_as_local_files ? {
+    for item in local.todo_items_with_stage :
+    "${item.stage}-${item.name}" => item
+    if item.file_permission != null
+  } : {}
+
+  filename        = each.value.name
+  file_permission = each.value.file_permission
+  content         = each.value.content
+}
+
 # although should be sensitive such that Terraform won't echo it to command line or expose it, leave
 # commented out in example until needed
 # if you uncomment it, you will then be able to obtain the value through `terraform output --raw pseudonym_salt`

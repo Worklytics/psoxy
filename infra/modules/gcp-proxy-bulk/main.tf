@@ -348,59 +348,8 @@ for a detailed description of all the different options.
 EOT
 }
 
-resource "local_file" "todo_setup" {
-  count = (var.todos_as_local_files && local.need_setup) ? 1 : 0
-
-  filename = "TODO ${var.todo_step} - setup ${local.local_file_id}.md"
-  content  = local.setup_todo_content
-}
-
-
-resource "local_file" "todo_test_gcp_psoxy_bulk" {
-  count = var.todos_as_local_files ? 1 : 0
-
-  filename = "TODO ${local.test_todo_step} - test ${local.function_name}.md"
-  content  = local.test_todo_content
-}
-
-resource "local_file" "test_script" {
-  count = var.todos_as_local_files ? 1 : 0
-
-  filename        = "test-${local.local_file_id}.sh"
-  file_permission = "755"
-  content         = <<EOT
-#!/bin/bash
-FILE_PATH=$${1:-${try(local.example_files_csv, "")}}
-BLUE='\e[0;34m'
-NC='\e[0m'
-
-printf "Quick test of $${BLUE}${local.function_name}$${NC} ...\n"
-
-# Process multiple files separated by comma
-IFS=',' read -ra FILES <<< "$FILE_PATH"
-for FILE in "$${FILES[@]}"; do
-  # trim whitespace
-  FILE=$(echo "$FILE" | xargs)
-  if [ -z "$FILE" ]; then continue; fi
-  
-  printf "Testing file: $FILE\n"
-  node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$FILE" -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
-
-  if gzip -t "$FILE" 2>/dev/null; then
-    printf "test file was compressed, so not testing compression as a separate case\n"
-  else
-    printf "testing with compressed input file ... \n"
-    # extract the file name from the path
-    TEST_FILE_NAME=/tmp/$(basename "$FILE").gz
-    
-    gzip -c "$FILE" > "$TEST_FILE_NAME"
-    node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$TEST_FILE_NAME" -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
-    rm "$TEST_FILE_NAME"
-  fi
-done
-EOT
-
-}
+# NOTE: local_file resources were moved to root module. todos_as_local_files/todo_step are no-ops here.
+# TODO: remove deprecated variables/outputs in 0.7
 
 output "instance_id" {
   value = local.instance_id
@@ -442,22 +391,85 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = try(local_file.test_script[0].filename, null)
+  value       = null
+  description = "[DEPRECATED - local_file resources moved to root module. TODO: remove in 0.7]"
 }
 
 output "todo" {
-  value = local.todo_brief
+  value       = local.todo_brief
+  description = "[DEPRECATED - use todo_content output instead. TODO: remove in 0.7]"
 }
 
 output "todo_setup" {
-  value = local.setup_todo_content
+  value       = local.setup_todo_content
+  description = "[DEPRECATED - use todo_content output instead. TODO: remove in 0.7]"
 }
 
 output "next_todo_step" {
-  value = var.todo_step + 1
+  value       = var.todo_step + 1
+  description = "[DEPRECATED - todo ordering now handled at root module level via todo_content stage indices. TODO: remove in 0.7]"
 }
 
 output "function_config" {
   description = "INTERNAL USE ONLY - Cloud Function configuration for CI/testing purposes. Users should NOT rely on this output's presence, structure, or schema as it may change without notice."
   value       = google_cloudfunctions2_function.function
+}
+
+locals {
+  test_script_content = <<EOT
+#!/bin/bash
+FILE_PATH=$${1:-${try(local.example_files_csv, "")}}
+
+printf "Quick test of ${local.function_name} ...\n"
+
+# Process multiple files separated by comma
+IFS=',' read -ra FILES <<< "$$FILE_PATH"
+for FILE in "$${FILES[@]}"; do
+  # trim whitespace
+  FILE=$$(echo "$$FILE" | xargs)
+  if [ -z "$$FILE" ]; then continue; fi
+  
+  printf "Testing file: $$FILE\n"
+  node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$$FILE" -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
+
+  if gzip -t "$$FILE" 2>/dev/null; then
+    printf "test file was compressed, so not testing compression as a separate case\n"
+  else
+    printf "testing with compressed input file ... \n"
+    # extract the file name from the path
+    TEST_FILE_NAME=/tmp/$$(basename "$$FILE").gz
+    
+    gzip -c "$$FILE" > "$$TEST_FILE_NAME"
+    node ${var.psoxy_base_dir}tools/psoxy-test/cli-file-upload.js -f "$$TEST_FILE_NAME" -d GCP -i ${google_storage_bucket.input_bucket.name} -o ${module.output_bucket.bucket_name}
+    rm "$$TEST_FILE_NAME"
+  fi
+done
+EOT
+}
+
+output "test_script_content" {
+  value = local.test_script_content
+}
+
+output "todo_content" {
+  description = "Structured todo content to be written to local files by root module. List of stages; each stage is a list of {name, content, file_permission} objects."
+  value = concat(
+    local.need_setup ? [[{
+      name            = "setup ${local.local_file_id}"
+      content         = local.setup_todo_content
+      file_permission = null
+    }]] : [],
+    [[
+      {
+        name            = "test ${local.function_name}"
+        content         = local.test_todo_content
+        file_permission = null
+      },
+      {
+        name            = "test-${local.local_file_id}.sh"
+        content         = local.test_script_content
+        file_permission = "755"
+      }
+    ]]
+  )
 }

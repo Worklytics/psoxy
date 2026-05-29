@@ -30,6 +30,38 @@ Changes to be including in future/planned release notes will be added here.
     with IAM Conditions scoping access to instance-specific and shared path prefixes.
 - `Gong Bulk`: adding documentation about supporting Gong Bulk data imports through Psoxy.
 
+## [0.6.1] - planned
+
+### Terraform Module Deprecation Removals
+
+The following deprecated Terraform inputs/outputs will be **removed** in this release. If you use any
+of these, you should migrate to the indicated replacement before upgrading to 0.6.1.
+
+#### Variables (no longer have any effect — safe to remove from your config)
+
+| Variable | Affected modules | Replacement |
+|---|---|---|
+| `todos_as_local_files` | `aws-host`, `gcp-host`, all proxy/connector modules | Set `todos_as_local_files` on your root `aws`/`gcp` example instead; `local_file` generation is now centralized there |
+| `todo_step` | all proxy/connector modules | No replacement needed; stage ordering is now inferred automatically from module aggregation order |
+
+#### Outputs (no longer carry meaningful values — safe to stop referencing)
+
+| Output | Affected modules | Replacement |
+|---|---|---|
+| `todo` / `todos` | all proxy/connector/aggregator modules | Use `todo_content` (structured `list(list(object({name, content, file_permission})))`) |
+| `next_todo_step` | all proxy/connector/aggregator modules | No replacement needed; removed from module interface |
+| `test_script` | `aws-proxy-api`, `gcp-proxy-api`, `aws-proxy-bulk`, `gcp-proxy-bulk`, `aws-webhook-collector`, `gcp-webhook-collector` | Test scripts are now included as items within `todo_content` (with `file_permission = "755"`) and written by the root module |
+| `todo_setup` | `aws-proxy-bulk`, `gcp-proxy-bulk` | Use `todo_content` |
+
+#### Background
+
+As of 0.6.0, all `local_file` resource generation has been moved out of sub-modules and centralized
+in the root example modules (`examples-dev/aws`, `examples-dev/gcp`). Sub-modules now expose a
+structured `todo_content` output that root modules aggregate and use to write both markdown TODO
+files (`TODO N - {name}.md`) and executable test scripts. The legacy variables/outputs above were
+retained for backward compatibility through 0.6.x but will be removed in 0.6.1.
+
+
 ## [0.6.0](https://github.com/Worklytics/psoxy/releases/tag/v0.6.0)
 
 **BREAKING / UPGRADE NOTES:**

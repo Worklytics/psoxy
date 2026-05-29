@@ -22,9 +22,16 @@ module "generic" {
 }
 
 output "todo" {
-  value = module.generic.todo
+  value       = module.generic.todo
+  description = "[DEPRECATED - use todo_content output instead. TODO: remove in 0.7]"
 }
 
 output "next_todo_step" {
-  value = module.generic.next_todo_step
+  value       = module.generic.next_todo_step
+  description = "[DEPRECATED - todo ordering now handled at root module level via todo_content stage indices. TODO: remove in 0.7]"
+}
+
+output "todo_content" {
+  description = "Structured todo content to be written to local files by root module. List of stages; each stage is a list of {name, content, file_permission} objects."
+  value       = module.generic.todo_content
 }

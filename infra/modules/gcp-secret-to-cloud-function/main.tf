@@ -11,18 +11,27 @@ resource "google_secret_manager_secret_iam_member" "grant_sa_accessor_on_secret"
   secret_id = var.secret_name
 }
 
-# terraform
-resource "local_file" "todo" {
-  filename = "TODO ${var.function_name} - link ${local.slugified_secret_name}.md"
-  content  = <<EOT
-Run the following command from functions deployment directory (containing bundled JAR or pom.xml)
-to finish exposing  `${local.slugified_secret_name}` to `${var.function_name}`:
+# NOTE: local_file resource was moved to root module.
+# TODO: remove deprecated variables/outputs in 0.7
 
-```shell
-gcloud beta functions deploy ${var.function_name} \
-    --project=${var.project_id} \
-    --runtime=${var.runtime} \
-    --update-secrets 'SERVICE_ACCOUNT_KEY=${var.secret_name}:${var.secret_version_number}'
-```
-EOT
+locals {
+  todo_content = templatefile("${path.module}/templates/todo.md.tftpl", {
+    slugified_secret_name = local.slugified_secret_name
+    function_name         = var.function_name
+    project_id            = var.project_id
+    runtime               = var.runtime
+    secret_name           = var.secret_name
+    secret_version_number = var.secret_version_number
+  })
+}
+
+output "todo_content" {
+  description = "Structured todo content to be written to local files by root module. List of stages; each stage is a list of {name, content, file_permission} objects."
+  value = [[
+    {
+      name            = "link ${local.slugified_secret_name} to ${var.function_name}"
+      content         = local.todo_content
+      file_permission = null
+    }
+  ]]
 }

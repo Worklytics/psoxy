@@ -75,12 +75,9 @@ locals {
   }
 }
 
-resource "local_file" "todo_gcp_sa_key_creation" {
-  for_each = var.todos_as_local_files ? local.service_accounts_user_managed_keys : {}
 
-  filename = "TODO ${local.current_todo_step} - Create Key for ${each.key}.md"
-  content  = local.key_creation_todos[each.key]
-}
+# NOTE: local_file resource was moved to root module. todos_as_local_files/todo_step are no-ops here.
+# TODO: remove deprecated variables/outputs in 0.7
 
 module "google_workspace_connection_auth" {
   for_each = local.service_accounts_tf_managed_keys

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+echo "Testing API Connectors ..."
+
+%{ for instance_id, connector in api_instances ~}
+%{ if connector.has_test_script }./test-${instance_id}.sh%{ endif }
+%{ endfor }
+
+%{ if length(bulk_instances) > 0 ~}
+echo "Testing Bulk Connectors ..."
+%{ endif ~}
+%{ for instance_id, connector in bulk_instances ~}
+%{ if connector.has_test_script }./test-${trimprefix(instance_id, environment_name)}.sh%{ endif }
+%{ endfor }
+
+%{ if enable_webhook_testing && has_enabled_webhook_collectors }
+echo "Testing Webhook Collectors ..."
+%{ endif ~}
+%{ for instance_id, connector in webhook_collector_instances ~}
+%{ if connector.has_test_script }./test-${instance_id}.sh%{ endif }
+%{ endfor }

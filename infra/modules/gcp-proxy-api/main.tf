@@ -442,28 +442,8 @@ Contact support@worklytics.co for assistance modifying the rules as needed.
 EOT
 }
 
-resource "local_file" "test_script" {
-  count = var.todos_as_local_files ? 1 : 0
-
-  filename        = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
-  file_permission = "755"
-  content = templatefile("${path.module}/test_script.tftpl", {
-    proxy_endpoint_url        = local.proxy_endpoint_url,
-    function_name             = var.instance_id,
-    impersonation_param       = local.impersonation_param,
-    command_cli_call          = local.command_cli_call,
-    example_api_get_requests  = [for r in local.all_example_api_requests : r if r.method == "GET"],
-    example_api_post_requests = [for r in local.all_example_api_requests : r if r.method == "POST" && r.body != null], # body being null will blow up the templating
-    enable_async_processing   = var.enable_async_processing
-  })
-}
-
-resource "local_file" "review" {
-  count = var.todos_as_local_files ? 1 : 0
-
-  filename = "TODO ${var.todo_step} - test ${google_cloudfunctions2_function.function.name}.md"
-  content  = local.todo_content
-}
+# NOTE: local_file resources were moved to root module. todos_as_local_files/todo_step are no-ops here.
+# TODO: remove deprecated variables/outputs in 0.7
 
 output "instance_id" {
   value = var.instance_id
@@ -487,7 +467,8 @@ output "proxy_kind" {
 }
 
 output "test_script" {
-  value = try(local_file.test_script[0].filename, null)
+  value       = null
+  description = "[DEPRECATED - local_file resources moved to root module. TODO: remove in 0.7]"
 }
 
 output "async_output_bucket_id" {
@@ -511,14 +492,48 @@ output "async_output_bucket_name" {
 }
 
 output "todo" {
-  value = local.todo_content
+  value       = local.todo_content
+  description = "[DEPRECATED - use todo_content output instead. TODO: remove in 0.7]"
 }
 
 output "next_todo_step" {
-  value = var.todo_step + 1
+  value       = var.todo_step + 1
+  description = "[DEPRECATED - todo ordering now handled at root module level via todo_content stage indices. TODO: remove in 0.7]"
 }
 
 output "function_config" {
   description = "INTERNAL USE ONLY - Cloud Function configuration for CI/testing purposes. Users should NOT rely on this output's presence, structure, or schema as it may change without notice."
   value       = google_cloudfunctions2_function.function
+}
+
+locals {
+  test_script_content = templatefile("${path.module}/test_script.tftpl", {
+    proxy_endpoint_url        = local.proxy_endpoint_url,
+    function_name             = var.instance_id,
+    impersonation_param       = local.impersonation_param,
+    command_cli_call          = local.command_cli_call,
+    example_api_get_requests  = [for r in local.all_example_api_requests : r if r.method == "GET"],
+    example_api_post_requests = [for r in local.all_example_api_requests : r if r.method == "POST" && r.body != null],
+    enable_async_processing   = var.enable_async_processing
+  })
+}
+
+output "test_script_content" {
+  value = local.test_script_content
+}
+
+output "todo_content" {
+  description = "Structured todo content to be written to local files by root module. List of stages; each stage is a list of {name, content, file_permission} objects."
+  value = [[
+    {
+      name            = "test ${google_cloudfunctions2_function.function.name}"
+      content         = local.todo_content
+      file_permission = null
+    },
+    {
+      name            = "test-${trimprefix(var.instance_id, var.environment_id_prefix)}.sh"
+      content         = local.test_script_content
+      file_permission = "755"
+    }
+  ]]
 }

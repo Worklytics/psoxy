@@ -16,17 +16,26 @@ ${join("\n", var.additional_steps)}
 EOT
 }
 
-resource "local_file" "source_connection_instructions" {
-  count = var.todos_as_local_files ? 1 : 0
-
-  filename = "TODO ${var.todo_step} - setup ${var.source_id}.md"
-  content  = local.todo_content
-}
+# NOTE: local_file resource was moved to root module. todos_as_local_files/todo_step are no-ops here.
+# TODO: remove deprecated variables/outputs in 0.7
 
 output "next_todo_step" {
-  value = var.todo_step + 1
+  value       = var.todo_step + 1
+  description = "[DEPRECATED - todo ordering now handled at root module level via todo_content stage indices. TODO: remove in 0.7]"
 }
 
 output "todo" {
-  value = local.todo_content
+  value       = local.todo_content
+  description = "[DEPRECATED - use todo_content output instead. TODO: remove in 0.7]"
+}
+
+output "todo_content" {
+  description = "Structured todo content to be written to local files by root module. List of stages; each stage is a list of {name, content, file_permission} objects."
+  value = [[
+    {
+      name            = "setup ${var.source_id}"
+      content         = local.todo_content
+      file_permission = null
+    }
+  ]]
 }

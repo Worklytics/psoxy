@@ -132,5 +132,6 @@ output "instance_id" {
 }
 
 output "next_todo_step" {
-  value = var.todo_step + 1
+  value       = var.todo_step + 1
+  description = "[DEPRECATED - todo ordering now handled at root module level via todo_content stage indices. TODO: remove in 0.7]"
 }
