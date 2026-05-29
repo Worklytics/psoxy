@@ -1,0 +1,51 @@
+{
+  "event_id": "evt_20260520_abc123def456",
+  "type": "CONVERSATION_MESSAGE",
+  "principal": {
+    "id": "workspace_abc123",
+    "type": "CHATGPT_WORKSPACE"
+  },
+  "actor": {
+    "type": "ACCOUNT_USER",
+    "user_id": "user-abc123def456",
+    "user_email": "alice@example.com"
+  },
+  "timestamp": "2026-05-20T12:47:09.501218Z",
+  "message": {
+    "id": "msg_xyz789abc123",
+    "parent_id": null,
+    "created_at": "2026-05-20T12:47:09.501218Z",
+    "author": {
+      "type": "user",
+      "client_type": "unknown"
+    },
+    "content": {
+      "type": "user_instructions",
+      "value": "Can you summarize the Q2 financial results for the EMEA region?"
+    },
+    "files": [
+      {
+        "id": "file-abc123def456",
+        "object": "compliance.workspace.conversation.message.file",
+        "name": "q2-financials.pdf",
+        "created_at": 1716203229.501218,
+        "download_url": "https://api.chatgpt.com/files/file-abc123def456/download"
+      }
+    ],
+    "annotations": [
+      {
+        "id": "ann_001",
+        "parent_message_id": "msg_xyz789abc123",
+        "type": "citation",
+        "quote_text": "Q2 financial results"
+      }
+    ]
+  },
+  "conversation": {
+    "id": "conv_def456ghi789",
+    "title": "Q2 Financial Analysis",
+    "created_at": "2026-05-20T12:47:09.501218Z",
+    "is_pinned": false,
+    "is_temporary_chat": false
+  }
+}
