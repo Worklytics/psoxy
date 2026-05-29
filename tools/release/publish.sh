@@ -68,7 +68,7 @@ else
   # verify a recent release merge from an rc- branch exists
   # rc-to-main.sh sets merge subject to "release $RELEASE from PR #..." (no "rc-" in message);
   # also accept default GitHub merge messages that include the rc- branch name
-  if [ -z "$(git log --since="48 hours ago" --merges --oneline -i --grep="release ${RELEASE}" --grep="rc-")" ]; then
+  if [ -z "$(git log --since="48 hours ago" --merges --oneline -i --fixed-strings --grep="release ${RELEASE}" --grep="rc-")" ]; then
     printf "${WARN}No recent merge from an 'rc-' branch into main found within the last 48 hours.${NC}\n"
     printf "Please ensure the release candidate (rc-) PR has been merged before publishing.\n"
     printf "Continue anyway?\n"
